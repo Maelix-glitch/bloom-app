@@ -63,18 +63,18 @@ export interface MoodEntry {
   stress: number; // 1-10
   emotions: EmotionKey[];
   tags: string[];
-  note?: string;
+  note?: string | undefined;
   /** Contextual signals — all optional, correlations respect missing values. */
-  sleep?: number; // hours
-  sleepQuality?: number; // 1-10
-  exercise?: number; // minutes
-  steps?: number;
-  productivity?: number; // 1-10
-  study?: number; // minutes
-  screenTime?: number; // hours
-  social?: number; // 1-10
-  weather?: Weather;
-  workload?: number; // 1-10
+  sleep?: number | undefined; // hours
+  sleepQuality?: number | undefined; // 1-10
+  exercise?: number | undefined; // minutes
+  steps?: number | undefined;
+  productivity?: number | undefined; // 1-10
+  study?: number | undefined; // minutes
+  screenTime?: number | undefined; // hours
+  social?: number | undefined; // 1-10
+  weather?: Weather | undefined;
+  workload?: number | undefined; // 1-10
 }
 
 export type RangeKey = "today" | "7d" | "30d" | "90d" | "1y" | "custom";
@@ -95,13 +95,13 @@ export interface DayAggregate {
   stress: number;
   entries: MoodEntry[];
   emotions: EmotionKey[];
-  sleep?: number;
-  exercise?: number;
-  screenTime?: number;
-  productivity?: number;
-  steps?: number;
-  social?: number;
-  study?: number;
+  sleep?: number | undefined;
+  exercise?: number | undefined;
+  screenTime?: number | undefined;
+  productivity?: number | undefined;
+  steps?: number | undefined;
+  social?: number | undefined;
+  study?: number | undefined;
 }
 
 export type Evidence = "insufficient" | "low" | "moderate" | "strong";
@@ -124,7 +124,7 @@ export interface DetectedPattern {
   n: number;
   evidence: Evidence;
   metrics: { label: string; value: string }[];
-  delta?: string;
+  delta?: string | undefined;
   accent: "violet" | "sky" | "amber" | "sage" | "rose";
 }
 

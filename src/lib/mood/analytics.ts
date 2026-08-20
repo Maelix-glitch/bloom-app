@@ -69,7 +69,7 @@ export function calculateMoodTrend(days: DayAggregate[]) {
   const mx = mean(xs);
   const my = mean(ys);
   const denom = xs.reduce((a, x) => a + (x - mx) ** 2, 0) || 1;
-  const slope = xs.reduce((a, x, i) => a + (x - mx) * (ys[i] - my), 0) / denom;
+  const slope = xs.reduce((a, x, i) => a + (x - mx) * ((ys[i] ?? 0) - my), 0) / denom;
   const perWeek = round(slope * 7, 2);
   const direction = perWeek > 0.15 ? "improving" : perWeek < -0.15 ? "declining" : "stable";
   return { slope, direction, perWeek } as const;
@@ -79,7 +79,7 @@ export function calculateMoodTrend(days: DayAggregate[]) {
 export function calculateVolatility(days: DayAggregate[]) {
   const moods = days.map((d) => d.mood);
   const deltas: number[] = [];
-  for (let i = 1; i < moods.length; i++) deltas.push(Math.abs(moods[i] - moods[i - 1]));
+  for (let i = 1; i < moods.length; i++) deltas.push(Math.abs((moods[i] ?? 0) - (moods[i - 1] ?? 0)));
   const avgDelta = round(mean(deltas), 2);
   const largest = deltas.length ? round(Math.max(...deltas), 2) : 0;
   const smallest = deltas.length ? round(Math.min(...deltas), 2) : 0;
@@ -91,7 +91,7 @@ export function calculateVolatility(days: DayAggregate[]) {
 export function calculateEmotionDistribution(entries: MoodEntry[]) {
   const total = entries.length || 1;
   const map = new Map<EmotionKey, { count: number; moods: number[]; recent: number[]; older: number[] }>();
-  const mid = entries.length ? entries[Math.floor(entries.length / 2)].timestamp : "";
+  const mid = entries.length ? (entries[Math.floor(entries.length / 2)]?.timestamp ?? "") : "";
   for (const e of entries) {
     for (const k of e.emotions) {
       const cur = map.get(k) ?? { count: 0, moods: [], recent: [], older: [] };
@@ -251,7 +251,7 @@ export const MOOD_BUCKETS = [
 ] as const;
 
 export function bucketOf(mood: number) {
-  return MOOD_BUCKETS.find((b) => mood >= b.min) ?? MOOD_BUCKETS[MOOD_BUCKETS.length - 1];
+  return MOOD_BUCKETS.find((b) => mood >= b.min) ?? MOOD_BUCKETS[4];
 }
 
 export function calculateDistribution(days: DayAggregate[], prev: DayAggregate[]) {
@@ -350,18 +350,18 @@ export function detectPatterns(days: DayAggregate[]): DetectedPattern[] {
       .map(([wd, v]) => ({ wd, m: mean(v), n: v.length }))
       .sort((a, b) => b.m - a.m);
     if (ranked.length >= 3) {
-      const best = ranked[0];
-      const worst = ranked[ranked.length - 1];
+      const best = ranked[0]!;
+      const worst = ranked[ranked.length - 1]!;
       const names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       push({
         id: "weekday",
         title: "Weekday rhythm",
-        statement: `${names[best.wd]}s have been your strongest day and ${names[worst.wd]}s your weakest in this period.`,
+        statement: `${names[best.wd]!}s have been your strongest day and ${names[worst.wd]!}s your weakest in this period.`,
         n: days.length,
         evidence: evidenceFor(days.length, Math.min(0.8, Math.abs(best.m - worst.m) / 2)),
         metrics: [
-          { label: names[best.wd], value: round(best.m, 1).toFixed(1) },
-          { label: names[worst.wd], value: round(worst.m, 1).toFixed(1) },
+          { label: names[best.wd]!, value: round(best.m, 1).toFixed(1) },
+          { label: names[worst.wd]!, value: round(worst.m, 1).toFixed(1) },
         ],
         delta: `+${round(best.m - worst.m, 1).toFixed(1)}`,
         accent: "violet",
@@ -481,8 +481,8 @@ export function generateInsights(
 
   const heat = buildHeatmap(entries).filter((c) => c.count >= 2 && c.mood !== null);
   if (heat.length >= 4) {
-    const best = [...heat].sort((a, b) => (b.mood ?? 0) - (a.mood ?? 0))[0];
-    const worst = [...heat].sort((a, b) => (a.mood ?? 0) - (b.mood ?? 0))[0];
+    const best = [...heat].sort((a, b) => (b.mood ?? 0) - (a.mood ?? 0))[0]!;
+    const worst = [...heat].sort((a, b) => (a.mood ?? 0) - (b.mood ?? 0))[0]!;
     const bandLabel = (k: string) => TIME_BANDS.find((b) => b.key === k);
     out.push({
       id: "timing",
