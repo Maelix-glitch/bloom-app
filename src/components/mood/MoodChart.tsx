@@ -75,43 +75,49 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
     const chart = chartRef.current;
     if (!chart || !ready) return;
 
-    const series = SERIES.filter((s) => active.includes(s.key)).map((s) => ({
-      name: s.label,
-      type: "line",
-      smooth: 0.32,
-      symbol: "circle",
-      symbolSize: 0,
-      showSymbol: false,
-      connectNulls: true,
-      lineStyle: {
-        width: s.key === "mood" ? 2.4 : 1.4,
-        color: s.color,
-        type: s.dashed ? "dashed" : "solid",
-        shadowBlur: s.key === "mood" ? 18 : 0,
-        shadowColor: s.color,
-      },
-      emphasis: { focus: "series", lineStyle: { width: s.key === "mood" ? 3 : 2 } },
-      areaStyle:
-        s.key === "mood"
-          ? {
-              opacity: 0.18,
-              color: {
-                type: "linear",
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
-                colorStops: [
-                  { offset: 0, color: "color-mix(in oklab, var(--violet) 55%, transparent)" },
-                  { offset: 1, color: "transparent" },
-                ],
-              },
-            }
-          : undefined,
-      data: model[s.key],
-      animationDuration: 900,
-      animationEasing: "cubicOut",
-    }));
+    const series = SERIES.filter((s) => active.includes(s.key)).map((s) => {
+      const line = resolveCssColor(s.color);
+      return {
+        name: s.label,
+        type: "line",
+        smooth: 0.32,
+        symbol: "circle",
+        symbolSize: 0,
+        showSymbol: false,
+        connectNulls: true,
+        lineStyle: {
+          width: s.key === "mood" ? 2.4 : 1.4,
+          color: line,
+          type: s.dashed ? "dashed" : "solid",
+          shadowBlur: s.key === "mood" ? 18 : 0,
+          shadowColor: line,
+        },
+        emphasis: { focus: "series", lineStyle: { width: s.key === "mood" ? 3 : 2 } },
+        areaStyle:
+          s.key === "mood"
+            ? {
+                opacity: 0.18,
+                color: {
+                  type: "linear",
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  colorStops: [
+                    {
+                      offset: 0,
+                      color: resolveCssColor("color-mix(in oklab, var(--violet) 55%, transparent)"),
+                    },
+                    { offset: 1, color: "rgba(0,0,0,0)" },
+                  ],
+                },
+              }
+            : undefined,
+        data: model[s.key],
+        animationDuration: 900,
+        animationEasing: "cubicOut",
+      };
+    });
 
     chart.setOption(
       {
