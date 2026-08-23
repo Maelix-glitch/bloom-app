@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 
 import { movingAverage } from "@/lib/mood/analytics";
+import { resolveCssColor } from "@/lib/mood/cssColor";
 import type { DayAggregate } from "@/lib/mood/types";
 import { Panel, SectionHead, Insufficient } from "./primitives";
 import { cn } from "@/lib/utils";
