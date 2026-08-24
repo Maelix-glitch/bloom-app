@@ -24,13 +24,16 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="eyebrow mb-3 flex items-center gap-2">
-            <span className="animate-sheen inline-block size-1.5 rounded-full bg-violet" />
+            <span className="relative flex size-1.5">
+              <span className="animate-ping-soft absolute inline-flex size-full rounded-full bg-violet" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-violet" />
+            </span>
             Mood intelligence · {dayjs().format("dddd, MMMM D YYYY")}
           </p>
           <h1 className="display text-[34px] leading-[1.05] sm:text-[52px]">
             Your inner weather,
             <br />
-            <span className="bg-gradient-to-r from-violet via-sky to-amber bg-clip-text text-transparent">
+            <span className="animate-gradient-pan bg-gradient-to-r from-violet via-sky to-amber bg-[length:220%_auto] bg-clip-text text-transparent">
               measured precisely.
             </span>
           </h1>
@@ -45,9 +48,14 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             type="button"
             onClick={onCompose}
             className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[13px] font-medium text-background transition-transform duration-500 hover:scale-[1.02]"
-            style={{ background: "var(--grad-violet)", boxShadow: "var(--glow-violet)" }}
+            style={{ background: "var(--grad-violet)", backgroundSize: "200% 200%", boxShadow: "var(--glow-violet)" }}
           >
-            <Plus className="size-4" />
+            <span
+              aria-hidden
+              className="animate-sweep absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+              style={{ transform: "translateX(-170%) skewX(-14deg)" }}
+            />
+            <Plus className="size-4 transition-transform duration-500 group-hover:rotate-90" />
             Log an entry
           </button>
           <div className="flex flex-wrap gap-1.5">

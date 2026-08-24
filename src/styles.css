@@ -56,6 +56,13 @@
   --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-drift: drift 26s ease-in-out infinite;
   --animate-sheen: sheen 3.5s ease-in-out infinite;
+  --animate-aurora: aurora 90s linear infinite;
+  --animate-mote: mote 18s linear infinite;
+  --animate-sweep: sweep 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-gradient-pan: gradient-pan 9s ease-in-out infinite;
+  --animate-ping-soft: ping-soft 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-breathe: breathe 7s ease-in-out infinite;
+  --animate-scan: scan 5.5s linear infinite;
 }
 
 :root {
@@ -119,6 +126,96 @@
   }
   50% {
     opacity: 0.9;
+  }
+}
+
+/* Full slow rotation — used by the conic aurora beam. */
+@keyframes aurora {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Motes rise from the lower viewport, sway sideways, fade out. */
+@keyframes mote {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.5);
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--mote-peak, 0.45);
+  }
+  80% {
+    opacity: var(--mote-peak, 0.45);
+  }
+  100% {
+    transform: translate3d(var(--mote-x, 30px), -95vh, 0) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Idle sheen: long rest, one slow pass of light, rest again. */
+@keyframes sweep {
+  0%,
+  58% {
+    transform: translateX(-170%) skewX(-14deg);
+  }
+  92%,
+  100% {
+    transform: translateX(170%) skewX(-14deg);
+  }
+}
+
+/* Living gradient text — the highlight slowly travels. */
+@keyframes gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Sonar ring around the live indicator. */
+@keyframes ping-soft {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  75%,
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Panel glows slowly inhale / exhale. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Thin scanline travelling down a surface. */
+@keyframes scan {
+  0% {
+    top: -12%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: 112%;
+    opacity: 0;
   }
 }
 
@@ -205,6 +302,23 @@
     transparent
   );
   height: 1px;
+}
+
+/* One wide band of light that crosses a panel on a slow idle cycle. */
+@utility sheen-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in oklab, var(--foreground) 5%, transparent) 50%,
+    transparent
+  );
+  transform: translateX(-170%) skewX(-14deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
