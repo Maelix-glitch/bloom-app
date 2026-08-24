@@ -20,29 +20,40 @@ export const accentVar: Record<Accent, string> = {
   rose: "var(--rose)",
 };
 
+/**
+ * Staggers the idle sheen across panels. A module counter is safe here:
+ * server and client render the same tree in the same order.
+ */
+let panelOrdinal = 0;
+
 export function Panel({
   className,
   children,
   glow,
+  sheen = true,
   ...rest
-}: React.HTMLAttributes<HTMLDivElement> & { glow?: Accent }) {
+}: React.HTMLAttributes<HTMLDivElement> & { glow?: Accent; sheen?: boolean }) {
+  const sheenDelay = useRef(((panelOrdinal++ % 8) * 1.15).toFixed(2)).current;
   return (
     <div
       {...rest}
       className={cn(
         "panel relative overflow-hidden transition-[border-color,box-shadow,transform] duration-500",
-        "hover:border-border-strong",
+        "hover:-translate-y-[2px] hover:border-border-strong",
         className,
       )}
     >
       {glow ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-32 opacity-70"
+          className="animate-breathe pointer-events-none absolute inset-x-0 top-0 h-32"
           style={{
             background: `radial-gradient(120% 100% at 50% 0%, color-mix(in oklab, ${accentVar[glow]} 16%, transparent), transparent 70%)`,
           }}
         />
+      ) : null}
+      {sheen ? (
+        <div aria-hidden className="sheen-band animate-sweep" style={{ animationDelay: `${sheenDelay}s` }} />
       ) : null}
       <div className="relative">{children}</div>
     </div>
@@ -138,7 +149,7 @@ export function EvidencePill({ evidence, n }: { evidence: Evidence; n?: number }
         evidenceStyles[evidence],
       )}
     >
-      <span className="size-1 rounded-full bg-current" />
+      <span className="animate-sheen size-1 rounded-full bg-current" />
       {evidence === "insufficient" ? "insufficient" : evidence}
       {typeof n === "number" ? <span className="text-faint">· {n} obs</span> : null}
     </span>
@@ -185,6 +196,10 @@ export function Insufficient({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Rises in when scrolled into view (IntersectionObserver), not just on mount —
+ * sections below the fold now animate as you reach them.
+ */
 export function Reveal({
   delay = 0,
   className,
@@ -194,10 +209,34 @@ export function Reveal({
   className?: string;
   children: ReactNode;
 }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || shown) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setShown(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -6% 0px", threshold: 0.04 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shown]);
+
   return (
     <div
-      className={cn("animate-rise opacity-0", className)}
-      style={{ animationDelay: `${delay}ms`, animationFillMode: "forwards" }}
+      ref={ref}
+      className={cn(shown ? "animate-rise" : "opacity-0", className)}
+      style={shown ? { animationDelay: `${delay}ms`, animationFillMode: "forwards" } : undefined}
     >
       {children}
     </div>
