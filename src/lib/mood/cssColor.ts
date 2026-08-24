@@ -76,7 +76,8 @@ function displayP3ToSrgb(r: number, g: number, b: number): Vec3 {
 function splitFn(input: string): { name: string; parts: string[]; alpha: string | null } | null {
   const m = /^([a-z0-9-]+)\((.*)\)$/i.exec(input.trim());
   if (!m) return null;
-  let body = m[2].trim();
+  const fnName = m[1] ?? "";
+  let body = (m[2] ?? "").trim();
   let alpha: string | null = null;
   const slash = body.split("/");
   if (slash.length > 1) {
