@@ -81,11 +81,11 @@ function splitFn(input: string): { name: string; parts: string[]; alpha: string 
   let alpha: string | null = null;
   const slash = body.split("/");
   if (slash.length > 1) {
-    alpha = slash[1].trim();
-    body = slash[0].trim();
+    alpha = (slash[1] ?? "").trim();
+    body = (slash[0] ?? "").trim();
   }
   const parts = body.includes(",") ? body.split(",").map((s) => s.trim()) : body.split(/\s+/);
-  return { name: m[1].toLowerCase(), parts, alpha };
+  return { name: fnName.toLowerCase(), parts, alpha };
 }
 
 /** Numeric component; `pctScale` maps 100% onto the space's reference range. */
