@@ -1,135 +1,152 @@
-import type { MoodEntry } from "./types";
+import { supabase } from "@/lib/supabase";
+import type { EmotionKey, MoodEntry } from "./types";
 
-/**
- * Persistence layer: IndexedDB primary, localStorage mirror as fallback
- * (private-mode Safari, blocked IDB, SSR-hydration races).
- */
+type MoodRow = {
+  id: string;
+  profile_id: string;
+  mood_label: string | null;
+  mood_intensity: number | null;
+  energy: number | null;
+  stress: number | null;
+  note: string | null;
+  tags: string[] | null;
+  logged_at: string | null;
+  date: string | null;
+};
 
-const DB_NAME = "bloom-mood";
-const DB_VERSION = 1;
-const STORE = "entries";
-const LS_KEY = "bloom.mood.entries.v1";
+const normaliseScore = (value: number | null) => {
+  const score = Number(value ?? 5);
 
-let dbPromise: Promise<IDBDatabase | null> | null = null;
+  // Supports earlier Bloom values such as 65 = 6.5 / 10.
+  const normalised = score > 10 ? score / 10 : score;
 
-function openDB(): Promise<IDBDatabase | null> {
-  if (typeof indexedDB === "undefined") return Promise.resolve(null);
-  if (dbPromise) return dbPromise;
-  dbPromise = new Promise((resolve) => {
-    try {
-      const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          const store = db.createObjectStore(STORE, { keyPath: "id" });
-          store.createIndex("timestamp", "timestamp");
-        }
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => resolve(null);
-      req.onblocked = () => resolve(null);
-    } catch {
-      resolve(null);
-    }
-  });
-  return dbPromise;
-}
+  return Math.max(1, Math.min(10, normalised));
+};
 
-function readLocal(): MoodEntry[] {
-  if (typeof localStorage === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    return raw ? (JSON.parse(raw) as MoodEntry[]) : [];
-  } catch {
-    return [];
-  }
-}
+const cleanEmotion = (value: string): EmotionKey | null => {
+  const allowed = new Set<EmotionKey>([
+    "happy",
+    "calm",
+    "excited",
+    "focused",
+    "motivated",
+    "confident",
+    "grateful",
+    "neutral",
+    "tired",
+    "anxious",
+    "sad",
+    "angry",
+    "frustrated",
+    "overwhelmed",
+    "lonely",
+  ]);
 
-function writeLocal(entries: MoodEntry[]) {
-  if (typeof localStorage === "undefined") return;
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(entries));
-  } catch {
-    /* quota — ignore, IDB remains source of truth */
-  }
-}
+  const key = value.trim().toLowerCase() as EmotionKey;
 
-function tx<T>(db: IDBDatabase, mode: IDBTransactionMode, run: (s: IDBObjectStore) => IDBRequest<T>) {
-  return new Promise<T | null>((resolve) => {
-    try {
-      const t = db.transaction(STORE, mode);
-      const req = run(t.objectStore(STORE));
-      req.onsuccess = () => resolve(req.result as T);
-      req.onerror = () => resolve(null);
-    } catch {
-      resolve(null);
-    }
-  });
-}
+  return allowed.has(key) ? key : null;
+};
 
-function sanitize(entry: MoodEntry): MoodEntry {
-  const clamp = (v: unknown, lo: number, hi: number, fallback: number) => {
-    const n = Number(v);
-    return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : fallback;
-  };
+function fromRow(row: MoodRow): MoodEntry {
+  const values = [row.mood_label ?? "", ...(row.tags ?? [])]
+    .map(cleanEmotion)
+    .filter((value): value is EmotionKey => Boolean(value));
+
   return {
-    ...entry,
-    mood: clamp(entry.mood, 1, 10, 5),
-    energy: clamp(entry.energy, 1, 10, 5),
-    stress: clamp(entry.stress, 1, 10, 5),
-    emotions: Array.isArray(entry.emotions) ? entry.emotions : [],
-    tags: Array.isArray(entry.tags) ? entry.tags : [],
-    timestamp: new Date(entry.timestamp).toISOString(),
+    id: row.id,
+    timestamp:
+      row.logged_at ??
+      `${row.date ?? new Date().toISOString().slice(0, 10)}T12:00:00.000Z`,
+    mood: normaliseScore(row.mood_intensity),
+    energy: row.energy == null ? 5 : normaliseScore(row.energy),
+    stress: row.stress == null ? 5 : normaliseScore(row.stress),
+    emotions: [...new Set<EmotionKey>(values.length ? values : ["neutral"])],
+    tags: row.tags ?? [],
+    note: row.note ?? undefined,
+  };
+}
+
+function toRow(profileId: string, entry: MoodEntry) {
+  const primaryEmotion = entry.emotions[0] ?? "neutral";
+
+  return {
+    profile_id: profileId,
+    mood_label: primaryEmotion,
+
+    // Store as 0–100 so it stays compatible with older Bloom Mood entries.
+    mood_intensity: Math.round(entry.mood * 10),
+
+    energy: Math.round(entry.energy),
+    stress: Math.round(entry.stress),
+
+    tags: [...new Set([...entry.tags, ...entry.emotions.slice(1)])],
+    note: entry.note?.trim() || null,
+    logged_at: entry.timestamp,
+    date: entry.timestamp.slice(0, 10),
   };
 }
 
 export const moodStorage = {
-  async all(): Promise<MoodEntry[]> {
-    const db = await openDB();
-    if (db) {
-      const rows = await tx<MoodEntry[]>(db, "readonly", (s) => s.getAll() as IDBRequest<MoodEntry[]>);
-      if (rows && rows.length) return rows.map(sanitize).sort(byTime);
-      const local = readLocal();
-      // Migrate any localStorage-only data into IDB once.
-      if (local.length) {
-        await Promise.all(local.map((e) => tx(db, "readwrite", (s) => s.put(sanitize(e)))));
-        return local.map(sanitize).sort(byTime);
-      }
-      return [];
-    }
-    return readLocal().map(sanitize).sort(byTime);
+  async all(profileId: string): Promise<MoodEntry[]> {
+    const { data, error } = await supabase
+      .from("mood_entries")
+      .select(
+        "id, profile_id, mood_label, mood_intensity, energy, stress, note, tags, logged_at, date",
+      )
+      .eq("profile_id", profileId)
+      .order("logged_at", { ascending: true });
+
+    if (error) throw error;
+
+    return (data as MoodRow[]).map(fromRow);
   },
 
-  async put(entry: MoodEntry): Promise<void> {
-    const clean = sanitize(entry);
-    const db = await openDB();
-    if (db) await tx(db, "readwrite", (s) => s.put(clean));
-    const local = readLocal().filter((e) => e.id !== clean.id);
-    writeLocal([...local, clean].sort(byTime));
-  },
+  async put(profileId: string, entry: MoodEntry): Promise<MoodEntry> {
+  const row = toRow(profileId, entry);
 
-  async putMany(entries: MoodEntry[]): Promise<void> {
-    const clean = entries.map(sanitize);
-    const db = await openDB();
-    if (db) await Promise.all(clean.map((e) => tx(db, "readwrite", (s) => s.put(e))));
-    const local = readLocal();
-    const ids = new Set(clean.map((e) => e.id));
-    writeLocal([...local.filter((e) => !ids.has(e.id)), ...clean].sort(byTime));
-  },
+  // Existing Supabase rows use UUIDs. New Lovable composer entries use a
+  // temporary local ID, so let PostgreSQL create the real UUID on insert.
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      entry.id,
+    );
 
-  async remove(id: string): Promise<void> {
-    const db = await openDB();
-    if (db) await tx(db, "readwrite", (s) => s.delete(id));
-    writeLocal(readLocal().filter((e) => e.id !== id));
-  },
+  if (isUuid) {
+    const { data, error } = await supabase
+      .from("mood_entries")
+      .update(row)
+      .eq("id", entry.id)
+      .eq("profile_id", profileId)
+      .select(
+        "id, profile_id, mood_label, mood_intensity, energy, stress, note, tags, logged_at, date",
+      )
+      .single();
 
-  async clear(): Promise<void> {
-    const db = await openDB();
-    if (db) await tx(db, "readwrite", (s) => s.clear());
-    writeLocal([]);
+    if (error) throw error;
+
+    return fromRow(data as MoodRow);
+  }
+
+  const { data, error } = await supabase
+    .from("mood_entries")
+    .insert(row)
+    .select(
+      "id, profile_id, mood_label, mood_intensity, energy, stress, note, tags, logged_at, date",
+    )
+    .single();
+
+  if (error) throw error;
+
+  return fromRow(data as MoodRow);
+},
+
+  async remove(profileId: string, id: string): Promise<void> {
+    const { error } = await supabase
+      .from("mood_entries")
+      .delete()
+      .eq("id", id)
+      .eq("profile_id", profileId);
+
+    if (error) throw error;
   },
 };
-
-function byTime(a: MoodEntry, b: MoodEntry) {
-  return a.timestamp.localeCompare(b.timestamp);
-}

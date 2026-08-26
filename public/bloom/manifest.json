@@ -1,0 +1,55 @@
+{
+  "name": "Bloom — Habits & Mood",
+  "short_name": "Bloom",
+  "description": "Track habits, mood, sleep, study and cycle — live progress rings",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#14151F",
+  "theme_color": "#14151F",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today",
+      "url": "index.html",
+      "description": "View today's habits and score"
+    },
+    {
+      "name": "Trackers",
+      "url": "trackers.html",
+      "description": "Log sleep, study, water"
+    },
+    {
+      "name": "Mood",
+      "url": "mood.html",
+      "description": "Log your mood"
+    }
+  ]
+}

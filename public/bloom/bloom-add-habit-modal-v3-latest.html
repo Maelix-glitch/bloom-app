@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Add Habit (v3, advanced)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!--
+  ============================================================================
+  BLOOM — ADD HABIT MODAL  v3
+  ============================================================================
+  SINGLE FILE. Drop it in, open it, it runs. No build step, no dependencies.
+
+  WHAT THIS IS
+    A fully wired "create a habit" dialog: multi-step, validated, accessible,
+    with live preview, colour themes, custom-day picker, goal targets,
+    reminders, tags, and a JSON payload emitted on submit.
+
+  ---------------------------------------------------------------------------
+  HOW IT WORKS (read this first, AI or human)
+  ---------------------------------------------------------------------------
+  1. STATE
+     Everything lives in one plain object: `state` (see JS section "STATE").
+     The DOM never holds truth. UI reads from `state`, writes go through
+     `set(patch)` which merges + calls `render()`.
+       set({ points: 20 })   ->  state updated  ->  render() repaints UI
+
+  2. RENDER
+     `render()` is idempotent: it syncs every control from `state`.
+     It never rebuilds inputs the user is typing in (only class/text sync),
+     so no focus loss.
+
+  3. STEPS
+     3 steps: 0 Basics, 1 Schedule, 2 Details. `state.step` drives which
+     <section data-step="n"> is visible + the progress bar + footer buttons.
+     `goStep(n)` validates before moving forward (see VALIDATION).
+
+  4. VALIDATION
+     `validate()` returns { field: "message" } for invalid fields of the
+     CURRENT step. Errors render under fields via [data-error-for].
+     Submit is blocked until all steps validate.
+
+  5. OUTPUT / WIRING TO YOUR APP
+     On "Create habit" the modal calls:  BloomAddHabit.onSubmit(payload)
+     Payload shape (stable contract — match your DB columns to this):
+       {
+         name:        string,            // required, 1..60
+         note:        string,            // optional
+         icon:        { type:"emoji"|"image", value:string },
+                                         // image value = data URL (swap for an
+                                         // uploaded file URL in your backend)
+         color:       "amber"|"sage"|"rose"|"sky"|"violet",
+         frequency:   "daily"|"weekly"|"custom",
+         days:        number[],          // 0=Sun..6=Sat, only when custom
+         timesPerWeek:number,            // only when weekly
+         goal:        { enabled:boolean, target:number, unit:string },
+         points:      number,            // 5..500 step 5
+         priority:    "low"|"medium"|"high",
+         reminder:    { enabled:boolean, time:"HH:MM" },
+         tags:        string[],
+         startDate:   "YYYY-MM-DD",
+         createdAt:   ISO string
+       }
+
+     Wire it like this from your app:
+       BloomAddHabit.open();                       // show modal (fresh state)
+       BloomAddHabit.open(existingHabit);          // edit mode / prefill
+       BloomAddHabit.close();
+       BloomAddHabit.onSubmit = async (habit) => { // YOUR persistence here
+         await fetch('/api/habits', {method:'POST', body: JSON.stringify(habit)});
+         BloomAddHabit.close();
+       };
+       BloomAddHabit.onCancel = () => {};
+
+     For React/Vue: delete the <script> and port `state` to useState/ref —
+     the class names and markup stay identical.
+
+  6. ACCESSIBILITY
+     role="dialog" aria-modal, focus trap, Esc to close, focus returned to the
+     trigger, aria-invalid + aria-describedby on errored fields,
+     aria-pressed on chips, prefers-reduced-motion respected.
+
+  7. THEMING
+     All colours are CSS custom properties in :root. The accent follows
+     `data-accent` on the modal element (amber/sage/rose/sky/violet) via the
+     `--accent*` vars — change one attribute, whole modal re-tints.
+  ============================================================================
+-->
+
+<style>
+  /* ---------- DESIGN TOKENS -------------------------------------------- */
+  :root{
+    --bg:#14151F; --surface:#1C1E2B; --surface-2:#23263A; --surface-3:#292C42;
+    --border:#2E3145; --border-hover:#3A3D56;
+    --text:#F0EFEA; --text-muted:#8B8CA3; --text-faint:#5A5D75;
+
+    --amber:#E8B75E;  --amber-dim:rgba(232,183,94,.14);
+    --sage:#7FA88F;   --sage-dim:rgba(127,168,143,.14);
+    --rose:#C98BA0;   --rose-dim:rgba(201,139,160,.14);
+    --sky:#7FA0C9;    --sky-dim:rgba(127,160,201,.14);
+    --violet:#A48BC9; --violet-dim:rgba(164,139,201,.14);
+    --danger:#E07A7A;
+
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+    --space-5:24px; --space-6:32px; --space-7:48px;
+    --radius:18px; --radius-sm:10px;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+
+    /* accent = live theme colour, overridden per data-accent below */
+    --accent:var(--amber); --accent-dim:var(--amber-dim);
+  }
+  /* accent switching: one attribute re-tints everything */
+  [data-accent="amber"] { --accent:var(--amber);  --accent-dim:var(--amber-dim); }
+  [data-accent="sage"]  { --accent:var(--sage);   --accent-dim:var(--sage-dim); }
+  [data-accent="rose"]  { --accent:var(--rose);   --accent-dim:var(--rose-dim); }
+  [data-accent="sky"]   { --accent:var(--sky);    --accent-dim:var(--sky-dim); }
+  [data-accent="violet"]{ --accent:var(--violet); --accent-dim:var(--violet-dim); }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:var(--space-5);
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+
+  .demo-trigger{
+    font-family:var(--font-body); font-size:14px; color:var(--text-faint);
+    background:none; border:1px dashed var(--border); border-radius:999px; padding:12px 20px; cursor:pointer;
+    transition:all .2s var(--ease);
+  }
+  .demo-trigger:hover{ color:var(--text); border-color:var(--amber); }
+
+  /* ---------- SHELL ----------------------------------------------------- */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(10,10,16,.66); backdrop-filter:blur(8px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:var(--space-5);
+  }
+  .backdrop.open{ display:flex; animation:fadeIn .28s var(--ease) both; }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+
+  .modal{
+    position:relative; width:100%; max-width:520px; max-height:90vh; display:flex; flex-direction:column;
+    background:linear-gradient(180deg,var(--surface),var(--surface-2));
+    border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 40px 90px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.03);
+    animation:modalIn .45s var(--ease) both; overflow:hidden;
+  }
+  @keyframes modalIn{ from{opacity:0; transform:translateY(20px) scale(.97)} to{opacity:1; transform:none} }
+  /* soft accent glow at the top edge, follows the theme */
+  .modal::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:150px; pointer-events:none;
+    background:radial-gradient(120% 100% at 50% 0%, var(--accent-dim), transparent 70%);
+    transition:background .4s ease;
+  }
+
+  /* ---------- HEADER + PROGRESS ---------------------------------------- */
+  .modal-head{ position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-4); padding:var(--space-6) var(--space-6) var(--space-4); }
+  .modal-eyebrow{ font-family:var(--font-mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .modal-title{ font-family:var(--font-display); font-weight:500; font-size:24px; letter-spacing:-.01em; }
+  .modal-close{
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+    color:var(--text-muted); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    transition:all .25s var(--ease); font-size:14px;
+  }
+  .modal-close:hover{ border-color:var(--rose); color:var(--text); transform:rotate(90deg); }
+
+  .steps{ position:relative; display:flex; gap:var(--space-2); padding:0 var(--space-6) var(--space-4); }
+  .step-pill{ flex:1; display:flex; flex-direction:column; gap:6px; background:none; border:none; cursor:pointer; text-align:left; padding:0; font-family:var(--font-body); }
+  .step-bar{ height:3px; border-radius:999px; background:var(--surface-3); overflow:hidden; }
+  .step-bar i{ display:block; height:100%; width:0; background:var(--accent); border-radius:999px; transition:width .45s var(--ease), background .3s ease; }
+  .step-pill.active .step-bar i, .step-pill.done .step-bar i{ width:100%; }
+  .step-name{ font-size:11px; font-family:var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); transition:color .25s ease; }
+  .step-pill.active .step-name{ color:var(--accent); }
+  .step-pill.done .step-name{ color:var(--text-muted); }
+
+  /* ---------- BODY ------------------------------------------------------ */
+  .modal-body{ position:relative; overflow-y:auto; padding:0 var(--space-6) var(--space-4); }
+  .modal-body::-webkit-scrollbar{ width:6px; }
+  .modal-body::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+
+  section[data-step]{ display:none; flex-direction:column; gap:var(--space-5); }
+  section[data-step].active{ display:flex; animation:panelIn .35s var(--ease) both; }
+  @keyframes panelIn{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+
+  .field-label{ font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:var(--space-2); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .field-hint{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); font-weight:400; }
+  .error-msg{ font-size:12px; color:var(--danger); margin-top:6px; display:none; }
+  .error-msg.show{ display:block; animation:panelIn .2s var(--ease) both; }
+
+  /* live preview card — shows the habit as it will appear in the app list */
+  .preview-card{
+    display:flex; align-items:center; gap:var(--space-3);
+    background:var(--surface-3); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:var(--space-3) var(--space-4);
+  }
+  .icon-preview{
+    width:52px; height:52px; border-radius:var(--radius-sm); background:var(--accent-dim);
+    display:flex; align-items:center; justify-content:center; font-size:25px; flex-shrink:0; overflow:hidden;
+    transition:background .3s ease, transform .25s var(--ease);
+  }
+  .icon-preview img{ width:100%; height:100%; object-fit:cover; }
+  .preview-meta{ min-width:0; flex:1; }
+  .preview-name{ font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .preview-sub{ font-size:12px; color:var(--text-faint); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .preview-points{ font-family:var(--font-mono); font-size:13px; color:var(--accent); flex-shrink:0; }
+
+  input[type="text"], input[type="time"], input[type="number"], input[type="date"], textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:13px 14px; color:var(--text); font-family:var(--font-body); font-size:15px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  textarea{ resize:vertical; min-height:72px; font-size:14px; }
+  input::placeholder, textarea::placeholder{ color:var(--text-faint); }
+  input:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  input[aria-invalid="true"]{ border-color:var(--danger); }
+
+  /* ---------- ICON PICKER ---------------------------------------------- */
+  .icon-tabs{ display:flex; gap:var(--space-2); margin-bottom:var(--space-3); }
+  .icon-tab{
+    font-size:12px; font-weight:600; color:var(--text-faint); background:var(--surface-2);
+    border:1px solid var(--border); border-radius:999px; padding:7px 14px; cursor:pointer;
+    font-family:var(--font-body); transition:all .2s var(--ease);
+  }
+  .icon-tab.active{ background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+  .icon-tab:hover:not(.active){ color:var(--text); border-color:var(--border-hover); }
+
+  .icon-panel{ display:none; }
+  .icon-panel.active{ display:block; animation:panelIn .3s var(--ease) both; }
+
+  .icon-search{ margin-bottom:var(--space-3); }
+  .icon-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:var(--space-2); max-height:168px; overflow-y:auto; padding-right:2px; }
+  .icon-grid::-webkit-scrollbar{ width:5px; }
+  .icon-grid::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+  .icon-opt{
+    aspect-ratio:1; border-radius:var(--radius-sm); background:var(--surface-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer;
+    transition:all .18s var(--ease);
+  }
+  .icon-opt:hover{ transform:translateY(-2px); border-color:var(--border-hover); }
+  .icon-opt.selected{ background:var(--accent-dim); border-color:var(--accent); transform:scale(1.06); }
+  .icon-empty{ font-size:12px; color:var(--text-faint); padding:var(--space-4) 0; text-align:center; }
+
+  .dropzone{
+    border:1.5px dashed var(--border); border-radius:var(--radius-sm); padding:var(--space-6) var(--space-4);
+    text-align:center; cursor:pointer; transition:all .25s var(--ease); position:relative;
+  }
+  .dropzone:hover, .dropzone.dragover{ border-color:var(--accent); background:var(--accent-dim); }
+  .dropzone input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .dropzone-icon{ font-size:22px; margin-bottom:var(--space-2); }
+  .dropzone-text{ font-size:13px; color:var(--text-muted); }
+  .dropzone-sub{ font-size:11px; color:var(--text-faint); margin-top:2px; }
+  .dropzone-preview{ display:flex; align-items:center; justify-content:center; gap:var(--space-3); }
+  .dropzone-preview img{ width:44px; height:44px; border-radius:var(--radius-sm); object-fit:cover; border:1px solid var(--border); }
+  .dropzone-remove{ font-size:12px; color:var(--rose); text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--font-body); }
+
+  /* ---------- COLOUR SWATCHES ------------------------------------------ */
+  .swatch-row{ display:flex; gap:var(--space-3); }
+  .swatch{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; padding:0; position:relative; transition:transform .2s var(--ease); }
+  .swatch:hover{ transform:scale(1.12); }
+  .swatch[aria-pressed="true"]{ border-color:var(--text); box-shadow:0 0 0 3px rgba(255,255,255,.08); }
+  .sw-amber{background:var(--amber)} .sw-sage{background:var(--sage)} .sw-rose{background:var(--rose)}
+  .sw-sky{background:var(--sky)} .sw-violet{background:var(--violet)}
+
+  /* ---------- CHIPS ----------------------------------------------------- */
+  .chip-row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
+  .chip{
+    padding:9px 16px; border-radius:999px; font-size:13px; font-weight:500; color:var(--text-muted);
+    background:var(--surface-2); border:1px solid var(--border); cursor:pointer; font-family:var(--font-body);
+    transition:all .2s var(--ease); display:flex; align-items:center; gap:6px;
+  }
+  .chip:hover{ border-color:var(--border-hover); color:var(--text); }
+  .chip[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600; }
+  .chip[data-priority="low"][aria-pressed="true"]{ background:var(--sage); border-color:var(--sage); color:var(--bg); }
+  .chip[data-priority="medium"][aria-pressed="true"]{ background:var(--amber); border-color:var(--amber); color:var(--bg); }
+  .chip[data-priority="high"][aria-pressed="true"]{ background:var(--rose); border-color:var(--rose); color:var(--bg); }
+  .priority-dot{ width:7px; height:7px; border-radius:50%; }
+  .priority-dot.low{background:var(--sage)} .priority-dot.medium{background:var(--amber)} .priority-dot.high{background:var(--rose)}
+
+  /* ---------- DAY PICKER (custom frequency) ---------------------------- */
+  .conditional{ max-height:0; overflow:hidden; opacity:0; transition:max-height .35s var(--ease), opacity .25s ease; }
+  .conditional.open{ max-height:220px; opacity:1; margin-top:var(--space-3); }
+  .day-row{ display:flex; gap:6px; }
+  .day{
+    flex:1; aspect-ratio:1; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
+    color:var(--text-muted); font-size:11px; font-weight:600; font-family:var(--font-body); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:all .18s var(--ease);
+  }
+  .day:hover{ border-color:var(--border-hover); color:var(--text); }
+  .day[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--bg); }
+
+  /* ---------- ROWS: points, goal, toggles ------------------------------ */
+  .row-box{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:var(--space-3) var(--space-4);
+  }
+  .row-title{ font-size:14px; font-weight:500; }
+  .row-sub{ font-size:12px; color:var(--text-faint); }
+  .stepper{ display:flex; align-items:center; gap:var(--space-3); }
+  .step-btn{
+    width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+    color:var(--text); font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:all .2s var(--ease);
+  }
+  .step-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); transform:scale(1.08); }
+  .step-btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .step-value{ font-family:var(--font-mono); font-size:18px; min-width:38px; text-align:center; color:var(--accent); }
+
+  .switch{ width:42px; height:24px; border-radius:999px; background:var(--surface-3); border:1px solid var(--border); position:relative; cursor:pointer; transition:background .25s ease, border-color .25s ease; flex-shrink:0; padding:0; }
+  .switch::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--text-faint); transition:transform .25s var(--ease), background .25s ease; }
+  .switch[aria-checked="true"]{ background:var(--accent-dim); border-color:var(--accent); }
+  .switch[aria-checked="true"]::after{ transform:translateX(18px); background:var(--accent); }
+
+  /* ---------- TAGS ------------------------------------------------------ */
+  .tag-input-wrap{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; }
+  .tag-input-wrap:focus-within{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  .tag{ display:flex; align-items:center; gap:6px; font-size:12px; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:4px 10px; }
+  .tag button{ background:none; border:none; color:inherit; cursor:pointer; font-size:12px; line-height:1; }
+  .tag-input-wrap input{ flex:1; min-width:110px; background:none; border:none; padding:6px 2px; box-shadow:none !important; }
+
+  /* ---------- FOOTER ---------------------------------------------------- */
+  .modal-foot{ display:flex; gap:var(--space-3); padding:var(--space-4) var(--space-6) var(--space-6); border-top:1px solid var(--border); background:var(--surface-2); }
+  .btn{ flex:1; padding:13px; border-radius:var(--radius-sm); font-family:var(--font-body); font-weight:600; font-size:14px; cursor:pointer; border:1px solid transparent; transition:all .25s var(--ease); }
+  .btn-secondary{ background:var(--surface-3); border-color:var(--border); color:var(--text-muted); }
+  .btn-secondary:hover{ color:var(--text); border-color:var(--border-hover); }
+  .btn-primary{ background:linear-gradient(135deg,var(--accent), color-mix(in oklab, var(--accent) 78%, #000)); color:#14151F; }
+  .btn-primary:hover:not(:disabled){ transform:translateY(-2px); box-shadow:0 12px 26px -12px var(--accent); }
+  .btn-primary:active{ transform:none; }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn.loading{ pointer-events:none; opacity:.7; }
+
+  /* ---------- SUCCESS OVERLAY ------------------------------------------ */
+  .success{
+    position:absolute; inset:0; background:linear-gradient(180deg,var(--surface),var(--surface-2));
+    display:none; flex-direction:column; align-items:center; justify-content:center; gap:var(--space-3); z-index:5; text-align:center; padding:var(--space-6);
+  }
+  .success.show{ display:flex; animation:fadeIn .3s var(--ease) both; }
+  .success-badge{ width:64px; height:64px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:28px; animation:pop .5s var(--ease) both; }
+  @keyframes pop{ from{transform:scale(.6); opacity:0} to{transform:scale(1); opacity:1} }
+  .success h3{ font-family:var(--font-display); font-weight:500; font-size:20px; }
+  .success p{ font-size:13px; color:var(--text-muted); }
+
+  button:focus-visible, input:focus-visible, textarea:focus-visible, .icon-opt:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+  @media (max-width:480px){
+    .modal{ max-height:94vh; }
+    .icon-grid{ grid-template-columns:repeat(6,1fr); }
+    .modal-head, .steps, .modal-body, .modal-foot{ padding-left:var(--space-4); padding-right:var(--space-4); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Demo trigger. In your app, call BloomAddHabit.open() from your own button. -->
+<button class="demo-trigger" id="demoTrigger">+ Add habit</button>
+
+<!-- ==========================================================================
+     MODAL MARKUP
+     Hook points for JS are data-* attributes and ids only — restyle freely.
+     ========================================================================== -->
+<div class="backdrop" id="backdrop">
+  <div class="modal" id="modal" data-accent="amber" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <!-- HEADER -->
+    <div class="modal-head">
+      <div>
+        <div class="modal-eyebrow" id="modalEyebrow">New habit</div>
+        <div class="modal-title" id="modalTitle">Add a habit</div>
+      </div>
+      <button class="modal-close" id="btnClose" aria-label="Close dialog">✕</button>
+    </div>
+
+    <!-- STEP PROGRESS: clicking a pill jumps back (never forward past validation) -->
+    <div class="steps" id="steps">
+      <button class="step-pill" data-goto="0"><span class="step-bar"><i></i></span><span class="step-name">1 · Basics</span></button>
+      <button class="step-pill" data-goto="1"><span class="step-bar"><i></i></span><span class="step-name">2 · Schedule</span></button>
+      <button class="step-pill" data-goto="2"><span class="step-bar"><i></i></span><span class="step-name">3 · Details</span></button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- ============ STEP 0 — BASICS ============ -->
+      <section data-step="0">
+        <!-- live preview of the habit row -->
+        <div class="preview-card">
+          <div class="icon-preview" id="iconPreview">⭐</div>
+          <div class="preview-meta">
+            <div class="preview-name" id="previewName">Untitled habit</div>
+            <div class="preview-sub" id="previewSub">Daily · Medium priority</div>
+          </div>
+          <div class="preview-points" id="previewPoints">+10</div>
+        </div>
+
+        <div>
+          <label class="field-label" for="nameInput">Name <span class="field-hint" id="nameCount">0/60</span></label>
+          <input type="text" id="nameInput" placeholder="e.g. Morning walk" maxlength="60"
+                 aria-describedby="err-name" autocomplete="off">
+          <div class="error-msg" id="err-name" data-error-for="name"></div>
+        </div>
+
+        <div>
+          <label class="field-label" for="noteInput">Why it matters <span class="field-hint">optional</span></label>
+          <textarea id="noteInput" maxlength="160" placeholder="A short reason — shown when you tap the habit."></textarea>
+        </div>
+
+        <div>
+          <label class="field-label">Icon</label>
+          <div class="icon-tabs">
+            <button class="icon-tab active" data-tab="preset">Choose icon</button>
+            <button class="icon-tab" data-tab="custom">Upload custom</button>
+          </div>
+
+          <div class="icon-panel active" id="panel-preset">
+            <input type="text" class="icon-search" id="iconSearch" placeholder="Search icons — try “water”, “run”…" autocomplete="off">
+            <div class="icon-grid" id="iconGrid"><!-- rendered from ICONS[] in JS --></div>
+          </div>
+
+          <div class="icon-panel" id="panel-custom">
+            <div class="dropzone" id="dropzone">
+              <input type="file" accept="image/png,image/jpeg,image/webp" id="fileInput">
+              <div id="dropzoneContent">
+                <div class="dropzone-icon">🖼️</div>
+                <div class="dropzone-text">Drop an image or click to upload</div>
+                <div class="dropzone-sub">PNG, JPG or WEBP up to 2MB — square works best</div>
+              </div>
+            </div>
+            <div class="error-msg" id="err-icon" data-error-for="icon"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Colour</label>
+          <div class="swatch-row" id="swatchRow">
+            <button class="swatch sw-amber"  data-color="amber"  aria-label="Amber"  aria-pressed="true"></button>
+            <button class="swatch sw-sage"   data-color="sage"   aria-label="Sage"   aria-pressed="false"></button>
+            <button class="swatch sw-rose"   data-color="rose"   aria-label="Rose"   aria-pressed="false"></button>
+            <button class="swatch sw-sky"    data-color="sky"    aria-label="Sky"    aria-pressed="false"></button>
+            <button class="swatch sw-violet" data-color="violet" aria-label="Violet" aria-pressed="false"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ STEP 1 — SCHEDULE ============ -->
+      <section data-step="1">
+        <div>
+          <label class="field-label">Frequency</label>
+          <div class="chip-row" id="freqRow">
+            <button class="chip" data-freq="daily"  aria-pressed="true">Daily</button>
+            <button class="chip" data-freq="weekly" aria-pressed="false">Weekly</button>
+            <button class="chip" data-freq="custom" aria-pressed="false">Custom days</button>
+          </div>
+
+          <!-- shown only when frequency = custom -->
+          <div class="conditional" id="daysWrap">
+            <div class="day-row" id="dayRow">
+              <button class="day" data-day="0" aria-pressed="false">S</button>
+              <button class="day" data-day="1" aria-pressed="true">M</button>
+              <button class="day" data-day="2" aria-pressed="true">T</button>
+              <button class="day" data-day="3" aria-pressed="true">W</button>
+              <button class="day" data-day="4" aria-pressed="true">T</button>
+              <button class="day" data-day="5" aria-pressed="true">F</button>
+              <button class="day" data-day="6" aria-pressed="false">S</button>
+            </div>
+            <div class="error-msg" id="err-days" data-error-for="days"></div>
+          </div>
+
+          <!-- shown only when frequency = weekly -->
+          <div class="conditional" id="weeklyWrap">
+            <div class="row-box">
+              <div>
+                <div class="row-title">Times per week</div>
+                <div class="row-sub">Any day counts toward the target</div>
+              </div>
+              <div class="stepper">
+                <button class="step-btn" data-step-times="-1" aria-label="Fewer times">–</button>
+                <span class="step-value" id="timesValue">3</span>
+                <button class="step-btn" data-step-times="1" aria-label="More times">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="row-box">
+            <div>
+              <div class="row-title">Measurable goal</div>
+              <div class="row-sub">Track an amount, not just done/not done</div>
+            </div>
+            <button class="switch" id="goalSwitch" role="switch" aria-checked="false" aria-label="Enable measurable goal"></button>
+          </div>
+          <div class="conditional" id="goalWrap">
+            <div class="row-box">
+              <div style="flex:1">
+                <label class="field-label" for="goalTarget">Target</label>
+                <input type="number" id="goalTarget" min="1" step="1" value="10">
+              </div>
+              <div style="flex:1">
+                <label class="field-label" for="goalUnit">Unit</label>
+                <input type="text" id="goalUnit" placeholder="glasses, pages, min" value="min">
+              </div>
+            </div>
+            <div class="error-msg" id="err-goal" data-error-for="goal"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="startDate">Start date</label>
+          <input type="date" id="startDate">
+        </div>
+      </section>
+
+      <!-- ============ STEP 2 — DETAILS ============ -->
+      <section data-step="2">
+        <div class="row-box">
+          <div>
+            <div class="row-title">Points</div>
+            <div class="row-sub">Earned each time you complete this</div>
+          </div>
+          <div class="stepper">
+            <button class="step-btn" data-step-points="-5" aria-label="Fewer points">–</button>
+            <span class="step-value" id="pointsValue">10</span>
+            <button class="step-btn" data-step-points="5" aria-label="More points">+</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Priority</label>
+          <div class="chip-row" id="priorityRow">
+            <button class="chip" data-priority="low"    aria-pressed="false"><span class="priority-dot low"></span>Low</button>
+            <button class="chip" data-priority="medium" aria-pressed="true"><span class="priority-dot medium"></span>Medium</button>
+            <button class="chip" data-priority="high"   aria-pressed="false"><span class="priority-dot high"></span>High</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="row-box">
+            <div>
+              <div class="row-title">Daily reminder</div>
+              <div class="row-sub">A gentle nudge at a set time</div>
+            </div>
+            <button class="switch" id="reminderSwitch" role="switch" aria-checked="false" aria-label="Enable reminder"></button>
+          </div>
+          <div class="conditional" id="reminderWrap">
+            <input type="time" id="reminderTime" value="08:00">
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="tagInput">Tags <span class="field-hint">enter or comma to add</span></label>
+          <div class="tag-input-wrap" id="tagWrap">
+            <!-- tag pills injected here -->
+            <input type="text" id="tagInput" placeholder="health, morning…" autocomplete="off">
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- FOOTER: buttons change label/behaviour per step -->
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="btnBack">Cancel</button>
+      <button class="btn btn-primary" id="btnNext">Continue</button>
+    </div>
+
+    <!-- SUCCESS state shown briefly after submit resolves -->
+    <div class="success" id="success">
+      <div class="success-badge" id="successIcon">⭐</div>
+      <h3 id="successTitle">Habit created</h3>
+      <p id="successSub">It’s on your board — first check-in starts today.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   BLOOM ADD-HABIT — LOGIC
+   Structure:  ICONS -> STATE -> helpers -> render() -> event wiring -> API
+   ==========================================================================*/
+
+/* --- ICON CATALOGUE ---------------------------------------------------------
+   Add/remove freely. `k` = search keywords. Grid is rendered from this array,
+   so the search box works automatically for anything you add. */
+const ICONS = [
+  {e:'⭐',k:'star favourite'},   {e:'🌱',k:'grow plant seed'},  {e:'📚',k:'read book study'},
+  {e:'💧',k:'water drink hydrate'},{e:'🧘',k:'meditate calm yoga'},{e:'🏃',k:'run exercise cardio'},
+  {e:'✍️',k:'write journal note'},{e:'🍎',k:'eat food fruit'},   {e:'😴',k:'sleep rest bed'},
+  {e:'🎯',k:'goal focus target'}, {e:'🎨',k:'art draw create'},  {e:'💪',k:'gym strength workout'},
+  {e:'🧹',k:'clean tidy chore'},  {e:'💊',k:'medicine pill health'},{e:'🚶',k:'walk steps outside'},
+  {e:'☀️',k:'morning sun wake'},  {e:'🌙',k:'night evening moon'},{e:'💰',k:'save money budget'},
+  {e:'📵',k:'no phone screen detox'},{e:'🧠',k:'learn brain think'},{e:'🎧',k:'music listen podcast'},
+  {e:'🧴',k:'skincare routine'},  {e:'🦷',k:'teeth brush dental'},{e:'📞',k:'call family friend'},
+  {e:'🌿',k:'nature outdoors green'},{e:'🍵',k:'tea drink calm'}, {e:'🚴',k:'bike cycle ride'},
+  {e:'🧺',k:'laundry chore home'}
+];
+
+/* --- STATE ------------------------------------------------------------------
+   THE single source of truth. Never read UI values off the DOM; read state. */
+const DEFAULT_STATE = () => ({
+  step:0, maxStepSeen:0,
+  name:'', note:'',
+  icon:{ type:'emoji', value:'⭐' },
+  color:'amber',
+  frequency:'daily', days:[1,2,3,4,5], timesPerWeek:3,
+  goal:{ enabled:false, target:10, unit:'min' },
+  points:10, priority:'medium',
+  reminder:{ enabled:false, time:'08:00' },
+  tags:[],
+  startDate:new Date().toISOString().slice(0,10),
+  errors:{}, submitting:false, iconQuery:''
+});
+let state = DEFAULT_STATE();
+
+/* `set(patch)` — the ONLY way to mutate. Merges then repaints. */
+function set(patch){ state = { ...state, ...patch }; render(); }
+
+const $  = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const el = {
+  backdrop:$('#backdrop'), modal:$('#modal'), body:$('.modal-body'),
+  name:$('#nameInput'), note:$('#noteInput'), nameCount:$('#nameCount'),
+  iconGrid:$('#iconGrid'), iconSearch:$('#iconSearch'), iconPreview:$('#iconPreview'),
+  previewName:$('#previewName'), previewSub:$('#previewSub'), previewPoints:$('#previewPoints'),
+  dropzone:$('#dropzone'), fileInput:$('#fileInput'), dropzoneContent:$('#dropzoneContent'),
+  daysWrap:$('#daysWrap'), weeklyWrap:$('#weeklyWrap'), timesValue:$('#timesValue'),
+  goalSwitch:$('#goalSwitch'), goalWrap:$('#goalWrap'), goalTarget:$('#goalTarget'), goalUnit:$('#goalUnit'),
+  startDate:$('#startDate'), pointsValue:$('#pointsValue'),
+  reminderSwitch:$('#reminderSwitch'), reminderWrap:$('#reminderWrap'), reminderTime:$('#reminderTime'),
+  tagWrap:$('#tagWrap'), tagInput:$('#tagInput'),
+  btnBack:$('#btnBack'), btnNext:$('#btnNext'), success:$('#success'),
+  successIcon:$('#successIcon'), successTitle:$('#successTitle'), successSub:$('#successSub'),
+  eyebrow:$('#modalEyebrow'), title:$('#modalTitle')
+};
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+
+/* --- VALIDATION -------------------------------------------------------------
+   Returns an errors map for the step passed in. Extend here for new rules. */
+function validate(step = state.step){
+  const e = {};
+  if(step === 0){
+    if(!state.name.trim())            e.name = 'Give your habit a name.';
+    else if(state.name.trim().length<2) e.name = 'A little longer, please.';
+  }
+  if(step === 1){
+    if(state.frequency === 'custom' && state.days.length === 0) e.days = 'Pick at least one day.';
+    if(state.goal.enabled){
+      if(!(state.goal.target > 0))   e.goal = 'Target must be greater than zero.';
+      else if(!state.goal.unit.trim()) e.goal = 'Add a unit (min, pages, glasses…).';
+    }
+  }
+  return e;
+}
+
+/* --- RENDER -----------------------------------------------------------------
+   Idempotent repaint. Safe to call as often as you like. */
+function render(){
+  const s = state;
+
+  /* theme + steps */
+  el.modal.setAttribute('data-accent', s.color);
+  $$('section[data-step]').forEach(sec => sec.classList.toggle('active', +sec.dataset.step === s.step));
+  $$('.step-pill').forEach(p=>{
+    const i = +p.dataset.goto;
+    p.classList.toggle('active', i === s.step);
+    p.classList.toggle('done',  i <  s.step);
+  });
+
+  /* live preview */
+  el.previewName.textContent = s.name.trim() || 'Untitled habit';
+  const freqText = s.frequency === 'daily' ? 'Daily'
+    : s.frequency === 'weekly' ? `${s.timesPerWeek}× / week`
+    : s.days.length ? s.days.slice().sort().map(d=>DAY_NAMES[d]).join(' · ') : 'No days yet';
+  el.previewSub.textContent = `${freqText} · ${cap(s.priority)} priority`;
+  el.previewPoints.textContent = `+${s.points}`;
+  el.iconPreview.innerHTML = s.icon.type === 'image'
+    ? `<img src="${s.icon.value}" alt="">` : s.icon.value;
+
+  /* step 0 */
+  if(el.name.value !== s.name) el.name.value = s.name;
+  if(el.note.value !== s.note) el.note.value = s.note;
+  el.nameCount.textContent = `${s.name.length}/60`;
+  el.name.setAttribute('aria-invalid', s.errors.name ? 'true':'false');
+  $$('.swatch').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.color === s.color)));
+  renderIconGrid();
+
+  /* step 1 */
+  $$('#freqRow .chip').forEach(c=> c.setAttribute('aria-pressed', String(c.dataset.freq === s.frequency)));
+  el.daysWrap.classList.toggle('open',   s.frequency === 'custom');
+  el.weeklyWrap.classList.toggle('open', s.frequency === 'weekly');
+  $$('.day').forEach(d=> d.setAttribute('aria-pressed', String(s.days.includes(+d.dataset.day))));
+  el.timesValue.textContent = s.timesPerWeek;
+  el.goalSwitch.setAttribute('aria-checked', String(s.goal.enabled));
+  el.goalWrap.classList.toggle('open', s.goal.enabled);
+  if(document.activeElement !== el.goalTarget) el.goalTarget.value = s.goal.target;
+  if(document.activeElement !== el.goalUnit)   el.goalUnit.value   = s.goal.unit;
+  if(el.startDate.value !== s.startDate) el.startDate.value = s.startDate;
+
+  /* step 2 */
+  el.pointsValue.textContent = s.points;
+  $$('#priorityRow .chip').forEach(c=> c.setAttribute('aria-pressed', String(c.dataset.priority === s.priority)));
+  el.reminderSwitch.setAttribute('aria-checked', String(s.reminder.enabled));
+  el.reminderWrap.classList.toggle('open', s.reminder.enabled);
+  el.reminderTime.value = s.reminder.time;
+  renderTags();
+
+  /* errors */
+  $$('[data-error-for]').forEach(node=>{
+    const msg = s.errors[node.dataset.errorFor];
+    node.textContent = msg || '';
+    node.classList.toggle('show', !!msg);
+  });
+
+  /* footer labels: last step submits, first step cancels */
+  el.btnBack.textContent = s.step === 0 ? 'Cancel' : 'Back';
+  el.btnNext.textContent = s.submitting ? 'Creating…' : (s.step === 2 ? 'Create habit' : 'Continue');
+  el.btnNext.disabled = s.submitting;
+  el.btnNext.classList.toggle('loading', s.submitting);
+}
+
+/* icon grid respects the search query */
+function renderIconGrid(){
+  const q = state.iconQuery.trim().toLowerCase();
+  const list = q ? ICONS.filter(i => i.k.includes(q)) : ICONS;
+  el.iconGrid.innerHTML = list.length
+    ? list.map(i=>`<button class="icon-opt${state.icon.type==='emoji'&&state.icon.value===i.e?' selected':''}" data-icon="${i.e}" aria-label="${i.k.split(' ')[0]}">${i.e}</button>`).join('')
+    : `<div class="icon-empty" style="grid-column:1/-1">No icons match “${q}”.</div>`;
+}
+
+function renderTags(){
+  el.tagWrap.querySelectorAll('.tag').forEach(t=>t.remove());
+  state.tags.forEach((t,i)=>{
+    const node = document.createElement('span');
+    node.className = 'tag';
+    node.innerHTML = `${t}<button type="button" data-remove-tag="${i}" aria-label="Remove ${t}">✕</button>`;
+    el.tagWrap.insertBefore(node, el.tagInput);
+  });
+}
+
+/* --- NAVIGATION -------------------------------------------------------------
+   Forward moves validate; backward moves are always allowed. */
+function goStep(next){
+  if(next > state.step){
+    const errors = validate(state.step);
+    if(Object.keys(errors).length){ set({ errors }); return false; }
+  }
+  set({ step:Math.max(0, Math.min(2,next)), errors:{}, maxStepSeen:Math.max(state.maxStepSeen,next) });
+  el.body.scrollTop = 0;
+  return true;
+}
+
+/* --- SUBMIT -----------------------------------------------------------------
+   Builds the payload contract documented at the top and hands it to
+   BloomAddHabit.onSubmit. Replace that callback with your API call. */
+function buildPayload(){
+  const s = state;
+  return {
+    name:s.name.trim(), note:s.note.trim(),
+    icon:{ ...s.icon }, color:s.color,
+    frequency:s.frequency,
+    days: s.frequency === 'custom' ? s.days.slice().sort() : [],
+    timesPerWeek: s.frequency === 'weekly' ? s.timesPerWeek : null,
+    goal: s.goal.enabled ? { enabled:true, target:Number(s.goal.target), unit:s.goal.unit.trim() }
+                         : { enabled:false, target:null, unit:null },
+    points:s.points, priority:s.priority,
+    reminder: s.reminder.enabled ? { enabled:true, time:s.reminder.time } : { enabled:false, time:null },
+    tags:s.tags.slice(), startDate:s.startDate,
+    createdAt:new Date().toISOString()
+  };
+}
+
+async function submit(){
+  /* validate every step, jump to the first one that fails */
+  for(let i=0;i<=2;i++){
+    const errs = validate(i);
+    if(Object.keys(errs).length){ set({ step:i, errors:errs }); return; }
+  }
+  set({ submitting:true, errors:{} });
+  const payload = buildPayload();
+  try{
+    await BloomAddHabit.onSubmit(payload);          // <-- YOUR persistence
+    el.successIcon.innerHTML = payload.icon.type === 'image'
+      ? `<img src="${payload.icon.value}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+      : payload.icon.value;
+    el.successTitle.textContent = `“${payload.name}” created`;
+    el.success.classList.add('show');
+    setTimeout(()=>{ BloomAddHabit.close(); }, 1400);
+  }catch(err){
+    console.error('[BloomAddHabit] submit failed', err);
+    set({ submitting:false, errors:{ name:'Could not save. Try again.' }, step:0 });
+  }
+}
+
+/* ============================ EVENT WIRING ================================ */
+
+/* text fields — controlled: DOM event -> state -> render */
+el.name.addEventListener('input', e => set({ name:e.target.value, errors:{ ...state.errors, name:undefined } }));
+el.note.addEventListener('input', e => set({ note:e.target.value }));
+el.iconSearch.addEventListener('input', e => set({ iconQuery:e.target.value }));
+el.goalTarget.addEventListener('input', e => set({ goal:{ ...state.goal, target:e.target.value } }));
+el.goalUnit.addEventListener('input',  e => set({ goal:{ ...state.goal, unit:e.target.value } }));
+el.startDate.addEventListener('change',e => set({ startDate:e.target.value }));
+el.reminderTime.addEventListener('change', e => set({ reminder:{ ...state.reminder, time:e.target.value } }));
+
+/* icon source tabs */
+$$('.icon-tab').forEach(tab=> tab.addEventListener('click', ()=>{
+  $$('.icon-tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active');
+  $$('.icon-panel').forEach(p=>p.classList.remove('active'));
+  $(`#panel-${tab.dataset.tab}`).classList.add('active');
+}));
+
+/* delegated clicks — one listener covers dynamic + static controls */
+el.modal.addEventListener('click', (ev)=>{
+  const t = ev.target.closest('[data-icon],[data-color],[data-freq],[data-day],[data-priority],[data-goto],[data-step-points],[data-step-times],[data-remove-tag]');
+  if(!t) return;
+
+  if(t.dataset.icon)      set({ icon:{ type:'emoji', value:t.dataset.icon } });
+  if(t.dataset.color)     set({ color:t.dataset.color });
+  if(t.dataset.freq)      set({ frequency:t.dataset.freq, errors:{} });
+  if(t.dataset.priority)  set({ priority:t.dataset.priority });
+  if(t.dataset.goto !== undefined) goStep(+t.dataset.goto);
+  if(t.dataset.stepPoints) set({ points:Math.max(5, Math.min(500, state.points + (+t.dataset.stepPoints))) });
+  if(t.dataset.stepTimes)  set({ timesPerWeek:Math.max(1, Math.min(7, state.timesPerWeek + (+t.dataset.stepTimes))) });
+  if(t.dataset.day !== undefined){
+    const d = +t.dataset.day;
+    const days = state.days.includes(d) ? state.days.filter(x=>x!==d) : [...state.days, d];
+    set({ days, errors:{} });
+  }
+  if(t.dataset.removeTag !== undefined){
+    set({ tags: state.tags.filter((_,i)=> i !== +t.dataset.removeTag) });
+  }
+});
+
+/* switches */
+el.goalSwitch.addEventListener('click', ()=> set({ goal:{ ...state.goal, enabled:!state.goal.enabled }, errors:{} }));
+el.reminderSwitch.addEventListener('click', ()=> set({ reminder:{ ...state.reminder, enabled:!state.reminder.enabled } }));
+
+/* tags: Enter or comma commits, Backspace on empty removes the last */
+el.tagInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' || e.key === ','){
+    e.preventDefault();
+    const v = el.tagInput.value.trim().replace(/,$/,'');
+    if(v && !state.tags.includes(v) && state.tags.length < 6){ el.tagInput.value=''; set({ tags:[...state.tags, v] }); }
+  } else if(e.key === 'Backspace' && !el.tagInput.value && state.tags.length){
+    set({ tags:state.tags.slice(0,-1) });
+  }
+});
+
+/* custom icon upload (click, drag & drop) — 2MB guard */
+function handleFile(file){
+  if(!file) return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)) return set({ errors:{ icon:'PNG, JPG or WEBP only.' } });
+  if(file.size > 2*1024*1024)                     return set({ errors:{ icon:'That image is over 2MB.' } });
+  const reader = new FileReader();
+  reader.onload = ev =>{
+    const url = ev.target.result;   // data URL. Upload to storage in production.
+    set({ icon:{ type:'image', value:url }, errors:{} });
+    el.dropzoneContent.innerHTML =
+      `<div class="dropzone-preview"><img src="${url}" alt="Custom icon">
+         <div><div class="dropzone-text">${file.name}</div>
+         <button class="dropzone-remove" type="button" id="removeIcon">Remove</button></div></div>`;
+    $('#removeIcon').addEventListener('click', (e)=>{ e.stopPropagation(); resetDropzone(); });
+  };
+  reader.readAsDataURL(file);
+}
+function resetDropzone(){
+  el.fileInput.value = '';
+  el.dropzoneContent.innerHTML =
+    `<div class="dropzone-icon">🖼️</div>
+     <div class="dropzone-text">Drop an image or click to upload</div>
+     <div class="dropzone-sub">PNG, JPG or WEBP up to 2MB — square works best</div>`;
+  set({ icon:{ type:'emoji', value:'⭐' } });
+}
+el.fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+['dragover','dragenter'].forEach(v=> el.dropzone.addEventListener(v, e=>{ e.preventDefault(); el.dropzone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(v=> el.dropzone.addEventListener(v, e=>{ e.preventDefault(); el.dropzone.classList.remove('dragover'); }));
+el.dropzone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+
+/* footer + close */
+el.btnNext.addEventListener('click', ()=> state.step === 2 ? submit() : goStep(state.step + 1));
+el.btnBack.addEventListener('click', ()=> state.step === 0 ? BloomAddHabit.cancel() : goStep(state.step - 1));
+$('#btnClose').addEventListener('click', ()=> BloomAddHabit.cancel());
+el.backdrop.addEventListener('mousedown', e=>{ if(e.target === el.backdrop) BloomAddHabit.cancel(); });
+
+/* keyboard: Esc closes, Cmd/Ctrl+Enter submits, Tab is trapped inside */
+document.addEventListener('keydown', (e)=>{
+  if(!el.backdrop.classList.contains('open')) return;
+  if(e.key === 'Escape'){ e.preventDefault(); BloomAddHabit.cancel(); }
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); submit(); }
+  if(e.key === 'Tab'){
+    const f = $$('#modal button, #modal input, #modal textarea').filter(n=>!n.disabled && n.offsetParent !== null);
+    if(!f.length) return;
+    const first = f[0], last = f[f.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+});
+
+/* ============================ PUBLIC API ==================================
+   This is the whole integration surface. Everything else is internal.        */
+let lastFocused = null;
+const BloomAddHabit = {
+  /* open(prefill?) — pass an existing habit object to edit instead of create */
+  open(prefill){
+    lastFocused = document.activeElement;
+    state = { ...DEFAULT_STATE(), ...(prefill || {}) };
+    el.success.classList.remove('show');
+    resetDropzoneSilently();
+    el.eyebrow.textContent = prefill ? 'Edit habit' : 'New habit';
+    el.title.textContent   = prefill ? 'Edit this habit' : 'Add a habit';
+    el.backdrop.classList.add('open');
+    render();
+    setTimeout(()=> el.name.focus(), 60);
+  },
+  close(){
+    el.backdrop.classList.remove('open');
+    el.success.classList.remove('show');
+    if(lastFocused) lastFocused.focus();
+  },
+  cancel(){ BloomAddHabit.onCancel(); BloomAddHabit.close(); },
+
+  /* OVERRIDE THESE TWO IN YOUR APP */
+  async onSubmit(habit){
+    // DEMO ONLY — replace with your API/database write.
+    console.log('[BloomAddHabit] payload →', habit);
+    await new Promise(r=> setTimeout(r, 700));   // simulated latency
+  },
+  onCancel(){ /* optional hook */ },
+
+  /* escape hatches */
+  getState:()=> ({ ...state }),
+  getPayload: buildPayload
+};
+function resetDropzoneSilently(){
+  el.fileInput.value = '';
+  el.dropzoneContent.innerHTML =
+    `<div class="dropzone-icon">🖼️</div>
+     <div class="dropzone-text">Drop an image or click to upload</div>
+     <div class="dropzone-sub">PNG, JPG or WEBP up to 2MB — square works best</div>`;
+}
+window.BloomAddHabit = BloomAddHabit;
+
+/* demo trigger */
+$('#demoTrigger').addEventListener('click', ()=> BloomAddHabit.open());
+render();
+</script>
+<script src="shared-bloom-header.js?v=2"></script></body>
+</html>

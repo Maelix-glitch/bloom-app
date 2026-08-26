@@ -330,3 +330,24 @@
     transition-duration: 0.001ms !important;
   }
 }
+.bloom-nav-link {
+  color: #63667a;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 450;
+  padding: 6px 11px;
+  border-radius: 7px;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.bloom-nav-link:hover {
+  color: #9b9cac;
+  background: #191a22;
+}
+
+.bloom-nav-link.bloom-nav-active {
+  color: #edebe4;
+  background: #1f212b;
+}

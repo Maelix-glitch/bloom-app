@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloom — Habits</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/habits.css" />
+  <style>
+  /* ========== BLOOM ADD HABIT MODAL V3 STYLES ========== */
+  .backdrop{
+    position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.5);
+    display:none; align-items:center; justify-content:center;
+    backdrop-filter:blur(2px);
+  }
+  .backdrop.open{ display:flex; animation:fadeIn .28s var(--ease) both; }
+
+  .modal{
+    position:relative; width:90%; max-width:640px; height:auto; max-height:90vh;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    display:flex; flex-direction:column; box-shadow:0 40px 80px -20px rgba(0,0,0,.7);
+    animation:modalIn .3s var(--ease) both;
+  }
+  @keyframes modalIn{ from{opacity:0; transform:translateY(20px) scale(.97)} to{opacity:1; transform:none} }
+  .modal::before{
+    content:''; position:absolute; inset:0 0 auto 0; height:1px;
+    background:linear-gradient(90deg, transparent, var(--accent), transparent);
+    border-radius:var(--radius) var(--radius) 0 0;
+  }
+
+  .modal-head{ position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-4); padding:var(--space-6) var(--space-6) var(--space-4); }
+  .modal-eyebrow{ font-family:var(--font-mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .modal-title{ font-family:var(--font-display); font-weight:500; font-size:24px; letter-spacing:-.01em; }
+  .modal-close{
+    background:none; border:1px solid var(--border); color:var(--text-faint);
+    width:36px; height:36px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s ease; flex-shrink:0;
+  }
+  .modal-close:hover{ border-color:var(--rose); color:var(--text); transform:rotate(90deg); }
+
+  .steps{ position:relative; display:flex; gap:var(--space-2); padding:0 var(--space-6) var(--space-4); }
+  .step-pill{ flex:1; display:flex; flex-direction:column; gap:6px; background:none; border:none; cursor:pointer; text-align:left; padding:0; font-family:var(--font-body); }
+  .step-bar{ height:3px; border-radius:999px; background:var(--surface-3); overflow:hidden; }
+  .step-bar i{ display:block; height:100%; width:0; background:var(--accent); border-radius:999px; transition:width .45s var(--ease), background .3s ease; }
+  .step-pill.active .step-bar i, .step-pill.done .step-bar i{ width:100%; }
+  .step-name{ font-size:11px; font-family:var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); transition:color .25s ease; }
+  .step-pill.active .step-name{ color:var(--accent); }
+  .step-pill.done .step-name{ color:var(--text-muted); }
+
+  .modal-body{ position:relative; overflow-y:auto; padding:0 var(--space-6) var(--space-4); }
+  .modal-body::-webkit-scrollbar{ width:6px; }
+  .modal-body::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+
+  section[data-step]{ display:none; flex-direction:column; gap:var(--space-5); }
+  section[data-step].active{ display:flex; animation:panelIn .35s var(--ease) both; }
+  @keyframes panelIn{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+
+  .field-label{ font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:var(--space-2); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .field-hint{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); font-weight:400; }
+  .error-msg{ font-size:12px; color:var(--danger); margin-top:6px; display:none; }
+  .error-msg.show{ display:block; animation:panelIn .2s var(--ease) both; }
+
+  .preview-card{
+    display:flex; align-items:center; gap:var(--space-4); background:var(--surface-2);
+    border:1px solid var(--border); border-radius:var(--radius-sm); padding:var(--space-4);
+  }
+  .icon-preview{
+    width:48px; height:48px; border-radius:var(--radius-sm);
+    background:var(--accent-dim); border:1px solid var(--accent);
+    display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;
+  }
+  .icon-preview img{ width:100%; height:100%; object-fit:cover; }
+  .preview-meta{ min-width:0; flex:1; }
+  .preview-name{ font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .preview-sub{ font-size:12px; color:var(--text-faint); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .preview-points{ font-family:var(--font-mono); font-size:13px; color:var(--accent); flex-shrink:0; }
+
+  input[type="text"], input[type="time"], input[type="number"], input[type="date"], textarea{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); padding:10px 12px; font-family:var(--font-body); font-size:14px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  textarea{ resize:vertical; min-height:72px; font-size:14px; }
+  input::placeholder, textarea::placeholder{ color:var(--text-faint); }
+  input:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  input[aria-invalid="true"]{ border-color:var(--danger); }
+
+  .icon-tabs{ display:flex; gap:var(--space-2); margin-bottom:var(--space-3); }
+  .icon-tab{
+    background:none; border:1px solid var(--border); color:var(--text-faint);
+    padding:8px 16px; border-radius:var(--radius-sm); cursor:pointer; font-size:13px;
+    font-weight:500; transition:all .2s ease;
+  }
+  .icon-tab.active{ background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+  .icon-tab:hover:not(.active){ color:var(--text); border-color:var(--border-hover); }
+
+  .icon-panel{ display:none; }
+  .icon-panel.active{ display:block; animation:panelIn .3s var(--ease) both; }
+
+  .icon-search{ margin-bottom:var(--space-3); }
+  .icon-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:var(--space-2); max-height:168px; overflow-y:auto; padding-right:2px; }
+  .icon-grid::-webkit-scrollbar{ width:5px; }
+  .icon-grid::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+  .icon-opt{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    font-size:20px; cursor:pointer; transition:all .2s ease; padding:0;
+  }
+  .icon-opt:hover{ transform:translateY(-2px); border-color:var(--border-hover); }
+  .icon-opt.selected{ background:var(--accent-dim); border-color:var(--accent); transform:scale(1.06); }
+  .icon-empty{ font-size:12px; color:var(--text-faint); padding:var(--space-4) 0; text-align:center; }
+
+  .dropzone{
+    border:2px dashed var(--border); border-radius:var(--radius-sm); padding:var(--space-5);
+    text-align:center; cursor:pointer; transition:all .2s ease; position:relative;
+  }
+  .dropzone:hover, .dropzone.dragover{ border-color:var(--accent); background:var(--accent-dim); }
+  .dropzone input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .dropzone-icon{ font-size:22px; margin-bottom:var(--space-2); }
+  .dropzone-text{ font-size:13px; color:var(--text-muted); }
+  .dropzone-sub{ font-size:11px; color:var(--text-faint); margin-top:2px; }
+  .dropzone-preview{ display:flex; align-items:center; justify-content:center; gap:var(--space-3); }
+  .dropzone-preview img{ width:44px; height:44px; border-radius:var(--radius-sm); object-fit:cover; border:1px solid var(--border); }
+  .dropzone-remove{ font-size:12px; color:var(--rose); text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--font-body); }
+
+  .swatch-row{ display:flex; gap:var(--space-3); }
+  .swatch{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; padding:0; position:relative; transition:transform .2s var(--ease); }
+  .swatch:hover{ transform:scale(1.12); }
+  .swatch[aria-pressed="true"]{ border-color:var(--text); box-shadow:0 0 0 3px rgba(255,255,255,.08); }
+  .sw-amber{background:var(--amber)} .sw-sage{background:var(--sage)} .sw-rose{background:var(--rose)}
+  .sw-sky{background:var(--sky)} .sw-violet{background:var(--violet)}
+
+  .chip-row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
+  .chip{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text-faint);
+    padding:8px 14px; border-radius:999px; font-size:13px; cursor:pointer;
+    font-weight:500; transition:all .2s ease;
+  }
+  .chip:hover{ border-color:var(--border-hover); color:var(--text); }
+  .chip[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600; }
+  .chip[data-priority="low"][aria-pressed="true"]{ background:var(--sage); border-color:var(--sage); color:var(--bg); }
+  .chip[data-priority="medium"][aria-pressed="true"]{ background:var(--amber); border-color:var(--amber); color:var(--bg); }
+  .chip[data-priority="high"][aria-pressed="true"]{ background:var(--rose); border-color:var(--rose); color:var(--bg); }
+  .priority-dot{ width:7px; height:7px; border-radius:50%; }
+  .priority-dot.low{background:var(--sage)} .priority-dot.medium{background:var(--amber)} .priority-dot.high{background:var(--rose)}
+
+  .conditional{ max-height:0; overflow:hidden; opacity:0; transition:max-height .35s var(--ease), opacity .25s ease; }
+  .conditional.open{ max-height:220px; opacity:1; margin-top:var(--space-3); }
+  .day-row{ display:flex; gap:6px; }
+  .day{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text-faint);
+    padding:8px 10px; border-radius:var(--radius-sm); font-size:12px; font-weight:500;
+    cursor:pointer; flex:1; text-align:center; transition:all .2s ease;
+  }
+  .day:hover{ border-color:var(--border-hover); color:var(--text); }
+  .day[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--bg); }
+
+  .row-box{
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:var(--space-4); display:flex;
+    align-items:center; justify-content:space-between;
+  }
+  .row-title{ font-size:14px; font-weight:500; }
+  .row-sub{ font-size:12px; color:var(--text-faint); }
+  .stepper{ display:flex; align-items:center; gap:var(--space-3); }
+  .step-btn{
+    background:none; border:1px solid var(--border); color:var(--text-faint);
+    width:32px; height:32px; border-radius:6px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:all .2s ease;
+  }
+  .step-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); transform:scale(1.08); }
+  .step-btn:disabled{ opacity:.35; cursor:not-allowed; }
+  .step-value{ font-family:var(--font-mono); font-size:18px; min-width:38px; text-align:center; color:var(--accent); }
+
+  .switch{ width:42px; height:24px; border-radius:999px; background:var(--surface-3); border:1px solid var(--border); position:relative; cursor:pointer; transition:background .25s ease, border-color .25s ease; flex-shrink:0; padding:0; }
+  .switch::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--text-faint); transition:transform .25s var(--ease), background .25s ease; }
+  .switch[aria-checked="true"]{ background:var(--accent-dim); border-color:var(--accent); }
+  .switch[aria-checked="true"]::after{ transform:translateX(18px); background:var(--accent); }
+
+  .tag-input-wrap{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; }
+  .tag-input-wrap:focus-within{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  .tag{ display:flex; align-items:center; gap:6px; font-size:12px; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:4px 10px; }
+  .tag button{ background:none; border:none; color:inherit; cursor:pointer; font-size:12px; line-height:1; }
+  .tag-input-wrap input{ flex:1; min-width:110px; background:none; border:none; padding:6px 2px; box-shadow:none !important; }
+
+  .modal-foot{ display:flex; gap:var(--space-3); padding:var(--space-4) var(--space-6) var(--space-6); border-top:1px solid var(--border); background:var(--surface-2); }
+  .btn{ flex:1; padding:13px; border-radius:var(--radius-sm); font-family:var(--font-body); font-weight:600; font-size:14px; cursor:pointer; border:1px solid transparent; transition:all .25s var(--ease); }
+  .btn-secondary{ background:var(--surface-3); border-color:var(--border); color:var(--text-muted); }
+  .btn-secondary:hover{ color:var(--text); border-color:var(--border-hover); }
+  .btn-primary{ background:linear-gradient(135deg,var(--accent), color-mix(in oklab, var(--accent) 78%, #000)); color:#14151F; }
+  .btn-primary:hover:not(:disabled){ transform:translateY(-2px); box-shadow:0 12px 26px -12px var(--accent); }
+  .btn-primary:active{ transform:none; }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn.loading{ pointer-events:none; opacity:.7; }
+
+  .success{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    flex-direction:column; gap:var(--space-5); text-align:center; z-index:2000;
+  }
+  .success.show{ display:flex; animation:fadeIn .3s var(--ease) both; }
+  .success-badge{ width:64px; height:64px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:28px; animation:pop .5s var(--ease) both; }
+  @keyframes pop{ from{transform:scale(.6); opacity:0} to{transform:scale(1); opacity:1} }
+  .success h3{ font-family:var(--font-display); font-weight:500; font-size:20px; }
+  .success p{ font-size:13px; color:var(--text-muted); }
+
+  @media (max-width:480px){
+    .modal{ width:95%; max-height:95vh; }
+    .icon-grid{ grid-template-columns:repeat(5,1fr); }
+    .swatch{ width:28px; height:28px; }
+  }
+  </style>
+</head>
+<body>
+  <div class="ambient">
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="container">
+    <div class="app-shell">
+      <header class="topbar reveal delay-1">
+        <div class="brand">
+          <div class="brand-mark">B</div>
+          <div class="brand-title">Bloom</div>
+        </div>
+        <div class="topbar-actions">
+          <div id="points-pill" class="points-pill">
+            <span class="points-icon">✦</span>
+            <span id="points-pill-value">0</span>
+          </div>
+          <button id="btn-logout" class="btn-secondary">Sign out</button>
+        </div>
+      </header>
+
+      <section class="dashboard-header reveal delay-2">
+        <p class="eyebrow">Today</p>
+        <h1>Good morning. Keep your rhythm steady.</h1>
+        <p class="meta">Welcome back, <span id="current-profile">Bloom User</span></p>
+      </section>
+
+      <section class="habit-section reveal delay-3">
+        <div class="section-top">
+          <h2>Habits</h2>
+          <span class="section-count mono">private</span>
+        </div>
+
+        <div id="habit-empty-state" class="habit-empty-state">
+          <div class="empty-icon">✦</div>
+          <h3>No habits yet</h3>
+          <p>Create your first habit to begin building your rhythm.</p>
+          <button id="btn-empty-add-habit" class="btn-primary">Add a habit</button>
+        </div>
+
+        <div id="habit-list" class="habit-list"></div>
+
+        <div id="add-habit-row" class="add-row reveal delay-4">
+          <div class="add-plus">+</div>
+          <span>Add a habit</span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="habit-modal" class="modal-backdrop" aria-hidden="true">
+    <!-- Bloom Add Habit Modal v3 -->
+    <div class="backdrop" id="backdrop">
+      <div class="modal" id="modal" data-accent="amber" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <!-- Header -->
+        <div class="modal-head">
+          <div>
+            <div class="modal-eyebrow" id="modalEyebrow">Create</div>
+            <div class="modal-title" id="modalTitle">Add a habit</div>
+          </div>
+          <button type="button" class="modal-close" id="btnClose" aria-label="Close">✕</button>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="steps">
+          <button type="button" class="step-pill active" data-step="0">
+            <div class="step-bar"><i></i></div>
+            <div class="step-name">Basics</div>
+          </button>
+          <button type="button" class="step-pill" data-step="1">
+            <div class="step-bar"><i></i></div>
+            <div class="step-name">Schedule</div>
+          </button>
+          <button type="button" class="step-pill" data-step="2">
+            <div class="step-bar"><i></i></div>
+            <div class="step-name">Details</div>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+          <!-- STEP 0: Basics -->
+          <section data-step="0" class="active">
+            <!-- Name -->
+            <div>
+              <label class="field-label">Habit name <span class="field-hint" id="nameCount">0/60</span></label>
+              <input type="text" id="nameInput" placeholder="e.g. Read, meditate, run..." maxlength="60" />
+              <div class="error-msg" data-error-for="name"></div>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="field-label">Why you're creating this <span class="field-hint">(optional)</span></label>
+              <textarea id="noteInput" placeholder="Your motivation, goal..."></textarea>
+            </div>
+
+            <!-- Icon Picker -->
+            <div>
+              <label class="field-label">Icon</label>
+              <div class="icon-tabs">
+                <button type="button" class="icon-tab active" data-tab="emoji">Emoji</button>
+                <button type="button" class="icon-tab" data-tab="upload">Upload</button>
+              </div>
+
+              <!-- Emoji Panel -->
+              <div class="icon-panel active" id="panel-emoji">
+                <input type="text" id="iconSearch" class="icon-search" placeholder="Search icons..." />
+                <div class="icon-grid" id="iconGrid"></div>
+                <div class="icon-empty" id="iconEmpty" style="display:none;">No icons match</div>
+              </div>
+
+              <!-- Upload Panel -->
+              <div class="icon-panel" id="panel-upload">
+                <div class="dropzone" id="dropzone">
+                  <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" />
+                  <div id="dropzoneContent">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Drag or click to upload</div>
+                    <div class="dropzone-sub">PNG, JPG, WEBP (up to 2MB)</div>
+                  </div>
+                </div>
+                <div class="error-msg" data-error-for="icon"></div>
+              </div>
+            </div>
+
+            <!-- Colour Theme -->
+            <div>
+              <label class="field-label">Theme</label>
+              <div class="swatch-row">
+                <button type="button" class="swatch sw-amber" data-color="amber" aria-label="Amber" aria-pressed="true"></button>
+                <button type="button" class="swatch sw-sage" data-color="sage" aria-label="Sage" aria-pressed="false"></button>
+                <button type="button" class="swatch sw-rose" data-color="rose" aria-label="Rose" aria-pressed="false"></button>
+                <button type="button" class="swatch sw-sky" data-color="sky" aria-label="Sky" aria-pressed="false"></button>
+                <button type="button" class="swatch sw-violet" data-color="violet" aria-label="Violet" aria-pressed="false"></button>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div>
+              <label class="field-label">Tags <span class="field-hint">(optional, max 6)</span></label>
+              <div class="tag-input-wrap" id="tagWrap">
+                <input type="text" id="tagInput" placeholder="Press Enter or comma to add..." />
+              </div>
+            </div>
+
+            <!-- Preview Card -->
+            <div class="preview-card">
+              <div class="icon-preview" id="iconPreview">⭐</div>
+              <div class="preview-meta">
+                <div class="preview-name" id="previewName">Untitled habit</div>
+                <div class="preview-sub" id="previewSub">Daily · Medium priority</div>
+              </div>
+              <div class="preview-points" id="previewPoints">+10</div>
+            </div>
+          </section>
+
+          <!-- STEP 1: Schedule -->
+          <section data-step="1">
+            <!-- Frequency Type -->
+            <div id="freqRow">
+              <label class="field-label">When do you want to do this?</label>
+              <div class="chip-row">
+                <button type="button" class="chip" data-freq="daily" aria-pressed="true">Daily</button>
+                <button type="button" class="chip" data-freq="weekly" aria-pressed="false">Specific days</button>
+                <button type="button" class="chip" data-freq="timesPerWeek" aria-pressed="false">Times per week</button>
+                <button type="button" class="chip" data-freq="custom" aria-pressed="false">Custom</button>
+              </div>
+              <div class="error-msg" data-error-for="frequency"></div>
+            </div>
+
+            <!-- Custom Days Picker -->
+            <div id="daysWrap" class="conditional">
+              <label class="field-label">Which days?</label>
+              <div class="day-row">
+                <button type="button" class="day" data-day="0" aria-pressed="false">Sun</button>
+                <button type="button" class="day" data-day="1" aria-pressed="true">Mon</button>
+                <button type="button" class="day" data-day="2" aria-pressed="true">Tue</button>
+                <button type="button" class="day" data-day="3" aria-pressed="true">Wed</button>
+                <button type="button" class="day" data-day="4" aria-pressed="true">Thu</button>
+                <button type="button" class="day" data-day="5" aria-pressed="true">Fri</button>
+                <button type="button" class="day" data-day="6" aria-pressed="false">Sat</button>
+              </div>
+            </div>
+
+            <!-- Times Per Week -->
+            <div id="weeklyWrap" class="conditional">
+              <div class="row-box">
+                <div>
+                  <div class="row-title">Times per week</div>
+                  <div class="row-sub">How often?</div>
+                </div>
+                <div class="stepper">
+                  <button type="button" class="step-btn" data-step-times="-1" aria-label="Decrease">−</button>
+                  <div class="step-value" id="timesValue">3</div>
+                  <button type="button" class="step-btn" data-step-times="+1" aria-label="Increase">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Goal (Measurable) -->
+            <div>
+              <div class="row-box">
+                <div class="row-title">Measurable target</div>
+                <button type="button" class="switch" id="goalSwitch" aria-checked="false" aria-label="Toggle measurable goal"></button>
+              </div>
+            </div>
+
+            <div id="goalWrap" class="conditional">
+              <label class="field-label">Goal details</label>
+              <div style="display:flex; gap:var(--space-3);">
+                <input type="number" id="goalTarget" placeholder="10" min="1" />
+                <input type="text" id="goalUnit" placeholder="minutes, glasses, pages..." />
+              </div>
+            </div>
+
+            <!-- Start Date -->
+            <div>
+              <label class="field-label">Start date</label>
+              <input type="date" id="startDate" />
+            </div>
+          </section>
+
+          <!-- STEP 2: Details -->
+          <section data-step="2">
+            <!-- Points -->
+            <div class="row-box">
+              <div>
+                <div class="row-title">Points per completion</div>
+                <div class="row-sub">How many points to earn?</div>
+              </div>
+              <div class="stepper">
+                <button type="button" class="step-btn" data-step-points="-5" aria-label="Decrease points">−</button>
+                <div class="step-value" id="pointsValue">10</div>
+                <button type="button" class="step-btn" data-step-points="+5" aria-label="Increase points">+</button>
+              </div>
+            </div>
+
+            <!-- Priority -->
+            <div id="priorityRow">
+              <label class="field-label">Priority</label>
+              <div class="chip-row">
+                <button type="button" class="chip" data-priority="low" aria-pressed="false"><span class="priority-dot low"></span> Low</button>
+                <button type="button" class="chip" data-priority="medium" aria-pressed="true"><span class="priority-dot medium"></span> Medium</button>
+                <button type="button" class="chip" data-priority="high" aria-pressed="false"><span class="priority-dot high"></span> High</button>
+              </div>
+            </div>
+
+            <!-- Reminder -->
+            <div>
+              <label class="field-label">Reminder</label>
+              <div class="row-box">
+                <div class="row-title">Send a daily reminder</div>
+                <button type="button" class="switch" id="reminderSwitch" aria-checked="false" aria-label="Toggle reminder"></button>
+              </div>
+            </div>
+
+            <div id="reminderWrap" class="conditional">
+              <label class="field-label">Reminder time</label>
+              <input type="time" id="reminderTime" value="08:00" />
+            </div>
+          </section>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-foot">
+          <button type="button" class="btn btn-secondary" id="btnBack">Back</button>
+          <button type="button" class="btn btn-primary" id="btnNext">Continue</button>
+        </div>
+      </div>
+
+      <!-- Success overlay (appears inside backdrop) -->
+      <div class="success" id="success">
+        <div class="success-badge" id="successIcon">✓</div>
+        <h3 id="successTitle">Habit created!</h3>
+        <p id="successSub">You're on your way to building a better routine.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+// ========== BLOOM ADD HABIT MODAL V3 ========== 
+/* --- ICON CATALOGUE ---------------------------------------------------------
+   Add/remove freely. `k` = search keywords. Grid is rendered from this array,
+   so the search box works automatically for anything you add. */
+const ICONS = [
+  {e:'⭐',k:'star favourite'},   {e:'🌱',k:'grow plant seed'},  {e:'📚',k:'read book study'},
+  {e:'💧',k:'water drink hydrate'},{e:'🧘',k:'meditate calm yoga'},{e:'🏃',k:'run exercise cardio'},
+  {e:'✍️',k:'write journal note'},{e:'🍎',k:'eat food fruit'},   {e:'😴',k:'sleep rest bed'},
+  {e:'🎯',k:'goal focus target'}, {e:'🎨',k:'art draw create'},  {e:'💪',k:'gym strength workout'},
+  {e:'🧹',k:'clean tidy chore'},  {e:'💊',k:'medicine pill health'},{e:'🚶',k:'walk steps outside'},
+  {e:'☀️',k:'morning sun wake'},  {e:'🌙',k:'night evening moon'},{e:'💰',k:'save money budget'},
+  {e:'📵',k:'no phone screen detox'},{e:'🧠',k:'learn brain think'},{e:'🎧',k:'music listen podcast'},
+  {e:'🧴',k:'skincare routine'},  {e:'🦷',k:'teeth brush dental'},{e:'📞',k:'call family friend'},
+  {e:'🌿',k:'nature outdoors green'},{e:'🍵',k:'tea drink calm'}, {e:'🚴',k:'bike cycle ride'},
+  {e:'🧺',k:'laundry chore home'}
+];
+
+/* --- STATE ------------------------------------------------------------------
+   THE single source of truth. Never read UI values off the DOM; read state. */
+const DEFAULT_STATE = () => ({
+  step:0, maxStepSeen:0,
+  name:'', note:'',
+  icon:{ type:'emoji', value:'⭐' },
+  color:'amber',
+  frequency:'daily', days:[1,2,3,4,5], timesPerWeek:3,
+  goal:{ enabled:false, target:10, unit:'min' },
+  points:10, priority:'medium',
+  reminder:{ enabled:false, time:'08:00' },
+  tags:[],
+  startDate:new Date().toISOString().slice(0,10),
+  errors:{}, submitting:false, iconQuery:''
+});
+let state = DEFAULT_STATE();
+
+/* `set(patch)` — the ONLY way to mutate. Merges then repaints. */
+function set(patch){ state = { ...state, ...patch }; render(); }
+
+const $  = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const el = {
+  backdrop:$('#backdrop'), modal:$('#modal'), body:$('.modal-body'),
+  name:$('#nameInput'), note:$('#noteInput'), nameCount:$('#nameCount'),
+  iconGrid:$('#iconGrid'), iconSearch:$('#iconSearch'), iconPreview:$('#iconPreview'),
+  previewName:$('#previewName'), previewSub:$('#previewSub'), previewPoints:$('#previewPoints'),
+  dropzone:$('#dropzone'), fileInput:$('#fileInput'), dropzoneContent:$('#dropzoneContent'),
+  daysWrap:$('#daysWrap'), weeklyWrap:$('#weeklyWrap'), timesValue:$('#timesValue'),
+  goalSwitch:$('#goalSwitch'), goalWrap:$('#goalWrap'), goalTarget:$('#goalTarget'), goalUnit:$('#goalUnit'),
+  startDate:$('#startDate'), pointsValue:$('#pointsValue'),
+  reminderSwitch:$('#reminderSwitch'), reminderWrap:$('#reminderWrap'), reminderTime:$('#reminderTime'),
+  tagWrap:$('#tagWrap'), tagInput:$('#tagInput'),
+  btnBack:$('#btnBack'), btnNext:$('#btnNext'), success:$('#success'),
+  successIcon:$('#successIcon'), successTitle:$('#successTitle'), successSub:$('#successSub'),
+  eyebrow:$('#modalEyebrow'), title:$('#modalTitle')
+};
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+
+/* --- VALIDATION */
+function validate(step = state.step){
+  const e = {};
+  if(step === 0){
+    if(!state.name.trim() || state.name.length < 2) e.name = 'Habit name is required (min 2 chars)';
+    if(!state.icon.value) e.icon = 'Please select an icon';
+  }
+  if(step === 1){
+    if(state.frequency === 'weekly' && !state.days.length) e.frequency = 'Please select at least one day';
+    if(state.frequency === 'timesPerWeek' && (state.timesPerWeek < 1 || state.timesPerWeek > 7)) e.frequency = 'Times per week must be 1–7';
+  }
+  return e;
+}
+
+/* --- RENDER */
+function render(){
+  const s = state;
+  el.modal.setAttribute('data-accent', s.color);
+  $$('section[data-step]').forEach(sec => sec.classList.toggle('active', +sec.dataset.step === s.step));
+  $$('.step-pill').forEach((p, i)=>{
+    p.classList.toggle('active', i === s.step);
+    p.classList.toggle('done',  i <  s.step);
+  });
+  el.previewName.textContent = s.name.trim() || 'Untitled habit';
+  const freqText = s.frequency === 'daily' ? 'Daily'
+    : s.frequency === 'timesPerWeek' ? s.timesPerWeek + 'x/week'
+    : s.days.length ? s.days.slice().sort().map(d=>DAY_NAMES[d]).join(' · ') : 'No days yet';
+  el.previewSub.textContent = `${freqText} · ${cap(s.priority)} priority`;
+  el.previewPoints.textContent = `+${s.points}`;
+  el.iconPreview.innerHTML = s.icon.type === 'image'
+    ? `<img src="${s.icon.value}" alt="habit icon" />`
+    : s.icon.value;
+  if(el.name.value !== s.name) el.name.value = s.name;
+  if(el.note.value !== s.note) el.note.value = s.note;
+  el.nameCount.textContent = `${s.name.length}/60`;
+  el.name.setAttribute('aria-invalid', s.errors.name ? 'true':'false');
+  $$('.swatch').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.color === s.color)));
+  renderIconGrid();
+  $$('#freqRow .chip').forEach(c=> c.setAttribute('aria-pressed', String(c.dataset.freq === s.frequency)));
+  el.daysWrap.classList.toggle('open',   s.frequency === 'weekly');
+  el.weeklyWrap.classList.toggle('open', s.frequency === 'timesPerWeek');
+  $$('.day').forEach(d=> d.setAttribute('aria-pressed', String(s.days.includes(+d.dataset.day))));
+  el.timesValue.textContent = s.timesPerWeek;
+  el.goalSwitch.setAttribute('aria-checked', String(s.goal.enabled));
+  el.goalWrap.classList.toggle('open', s.goal.enabled);
+  if(document.activeElement !== el.goalTarget) el.goalTarget.value = s.goal.target;
+  if(document.activeElement !== el.goalUnit)   el.goalUnit.value   = s.goal.unit;
+  if(el.startDate.value !== s.startDate) el.startDate.value = s.startDate;
+  el.pointsValue.textContent = s.points;
+  $$('#priorityRow .chip').forEach(c=> c.setAttribute('aria-pressed', String(c.dataset.priority === s.priority)));
+  el.reminderSwitch.setAttribute('aria-checked', String(s.reminder.enabled));
+  el.reminderWrap.classList.toggle('open', s.reminder.enabled);
+  el.reminderTime.value = s.reminder.time;
+  renderTags();
+  $$('[data-error-for]').forEach(node=>{
+    const msg = s.errors[node.dataset.errorFor];
+    node.textContent = msg || '';
+    node.classList.toggle('show', !!msg);
+  });
+  el.btnBack.textContent = s.step === 0 ? 'Cancel' : 'Back';
+  el.btnNext.textContent = s.submitting ? 'Creating…' : (s.step === 2 ? 'Create habit' : 'Continue');
+  el.btnNext.disabled = s.submitting;
+  el.btnNext.classList.toggle('loading', s.submitting);
+}
+function renderIconGrid(){
+  const q = state.iconQuery.trim().toLowerCase();
+  const list = q ? ICONS.filter(i => i.k.includes(q)) : ICONS;
+  el.iconGrid.innerHTML = list.length
+    ? list.map(i => `<button type="button" class="icon-opt ${state.icon.type === 'emoji' && state.icon.value === i.e ? 'selected' : ''}" data-icon="${i.e}" aria-label="${i.k}">${i.e}</button>`).join('')
+    : '';
+  $('#iconEmpty').style.display = list.length ? 'none' : 'block';
+}
+function renderTags(){
+  el.tagWrap.querySelectorAll('.tag').forEach(t=>t.remove());
+  state.tags.forEach((t,i)=>{
+    const node = document.createElement('div');
+    node.className = 'tag';
+    node.innerHTML = `${t} <button type="button" data-remove-tag="${i}">×</button>`;
+    el.tagWrap.insertBefore(node, el.tagInput);
+  });
+}
+function goStep(next){
+  if(next > state.step){
+    const errors = validate(state.step);
+    if(Object.keys(errors).length) return set({ errors });
+  }
+  set({ step:Math.max(0, Math.min(2,next)), errors:{}, maxStepSeen:Math.max(state.maxStepSeen,next) });
+  el.body.scrollTop = 0;
+  return true;
+}
+function buildPayload(){
+  const s = state;
+  return {
+    name: s.name,
+    icon: s.icon,
+    color: s.color,
+    note: s.note,
+    tags: s.tags,
+    frequency: s.frequency,
+    days: s.days,
+    timesPerWeek: s.timesPerWeek,
+    goal: s.goal,
+    points: s.points,
+    priority: s.priority,
+    reminder: s.reminder,
+    startDate: s.startDate
+  };
+}
+async function submit(){
+  for(let i=0;i<=2;i++){
+    const errors = validate(i);
+    if(Object.keys(errors).length) return set({ step:i, errors });
+  }
+  set({ submitting:true, errors:{} });
+  const payload = buildPayload();
+  try{
+    await BloomAddHabit.onSubmit(payload);
+    el.success.classList.add('show');
+    setTimeout(()=>{ BloomAddHabit.close(); }, 1400);
+  }catch(err){
+    set({ submitting:false });
+    console.error('Submission error:', err);
+  }
+}
+
+/* EVENT WIRING */
+el.name.addEventListener('input', e => set({ name:e.target.value, errors:{ ...state.errors, name:undefined } }));
+el.note.addEventListener('input', e => set({ note:e.target.value }));
+el.iconSearch.addEventListener('input', e => set({ iconQuery:e.target.value }));
+el.goalTarget.addEventListener('input', e => set({ goal:{ ...state.goal, target:e.target.value } }));
+el.goalUnit.addEventListener('input',  e => set({ goal:{ ...state.goal, unit:e.target.value } }));
+el.startDate.addEventListener('change',e => set({ startDate:e.target.value }));
+el.reminderTime.addEventListener('change', e => set({ reminder:{ ...state.reminder, time:e.target.value } }));
+$$('.icon-tab').forEach(tab=> tab.addEventListener('click', ()=>{
+  $$('.icon-tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active');
+  $$('.icon-panel').forEach(p=>p.classList.remove('active'));
+  $(`#panel-${tab.dataset.tab}`).classList.add('active');
+}));
+el.modal.addEventListener('click', (ev)=>{
+  const t = ev.target.closest('[data-icon],[data-color],[data-freq],[data-day],[data-priority],[data-goto],[data-step-points],[data-step-times],[data-remove-tag]');
+  if(!t) return;
+  if(t.dataset.icon)      set({ icon:{ type:'emoji', value:t.dataset.icon } });
+  if(t.dataset.color)     set({ color:t.dataset.color });
+  if(t.dataset.freq)      set({ frequency:t.dataset.freq, errors:{} });
+  if(t.dataset.priority)  set({ priority:t.dataset.priority });
+  if(t.dataset.goto !== undefined) goStep(+t.dataset.goto);
+  if(t.dataset.stepPoints) set({ points:Math.max(5, Math.min(500, state.points + (+t.dataset.stepPoints))) });
+  if(t.dataset.stepTimes)  set({ timesPerWeek:Math.max(1, Math.min(7, state.timesPerWeek + (+t.dataset.stepTimes))) });
+  if(t.dataset.day !== undefined){
+    const d = +t.dataset.day;
+    const days = state.days.includes(d) ? state.days.filter(x => x !== d) : [...state.days, d];
+    set({ days, errors:{} });
+  }
+  if(t.dataset.removeTag !== undefined){
+    const i = +t.dataset.removeTag;
+    set({ tags: state.tags.filter((_, idx) => idx !== i) });
+  }
+});
+el.goalSwitch.addEventListener('click', ()=> set({ goal:{ ...state.goal, enabled:!state.goal.enabled }, errors:{} }));
+el.reminderSwitch.addEventListener('click', ()=> set({ reminder:{ ...state.reminder, enabled:!state.reminder.enabled } }));
+el.tagInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' || e.key === ','){
+    e.preventDefault();
+    const v = el.tagInput.value.trim().toLowerCase();
+    if(v && !state.tags.includes(v) && state.tags.length < 6){ el.tagInput.value=''; set({ tags:[...state.tags, v] }); }
+  } else if(e.key === 'Backspace' && !el.tagInput.value && state.tags.length){
+    e.preventDefault();
+    set({ tags: state.tags.slice(0, -1) });
+  }
+});
+function handleFile(file){
+  if(!file) return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)) return set({ errors:{ icon:'PNG, JPG or WEBP only.' } });
+  if(file.size > 2*1024*1024)                     return set({ errors:{ icon:'That image is over 2MB.' } });
+  const reader = new FileReader();
+  reader.onload = ev =>{
+    set({ icon:{ type:'image', value:ev.target.result }, errors:{} });
+    el.dropzoneContent.innerHTML = `<div class="dropzone-preview"><img src="${ev.target.result}" alt="preview" /><button type="button" class="dropzone-remove" id="removeUpload">Remove</button></div>`;
+  };
+  reader.readAsDataURL(file);
+}
+function resetDropzone(){
+  el.fileInput.value = '';
+  el.dropzoneContent.innerHTML = '<div class="dropzone-icon">📁</div><div class="dropzone-text">Drag or click to upload</div><div class="dropzone-sub">PNG, JPG, WEBP (up to 2MB)</div>';
+  set({ icon:{ type:'emoji', value:'⭐' } });
+}
+el.fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+['dragover','dragenter'].forEach(v=> el.dropzone.addEventListener(v, e=>{ e.preventDefault(); el.dropzone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(v=> el.dropzone.addEventListener(v, e=>{ e.preventDefault(); el.dropzone.classList.remove('dragover'); }));
+el.dropzone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+document.addEventListener('click', e => { if(e.target.id === 'removeUpload') resetDropzone(); });
+el.btnNext.addEventListener('click', ()=> state.step === 2 ? submit() : goStep(state.step + 1));
+el.btnBack.addEventListener('click', ()=> state.step === 0 ? BloomAddHabit.cancel() : goStep(state.step - 1));
+$('#btnClose').addEventListener('click', ()=> BloomAddHabit.cancel());
+el.backdrop.addEventListener('mousedown', e=>{ if(e.target === el.backdrop) BloomAddHabit.cancel(); });
+document.addEventListener('keydown', (e)=>{
+  if(!el.backdrop.classList.contains('open')) return;
+  if(e.key === 'Escape'){ e.preventDefault(); BloomAddHabit.cancel(); }
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); submit(); }
+  if(e.key === 'Tab'){
+    const focusables = $$('button, input, textarea, [tabindex]').filter(el => !el.disabled && el.offsetParent);
+    const idx = focusables.indexOf(document.activeElement);
+    if(e.shiftKey) focusables[(idx - 1 + focusables.length) % focusables.length].focus();
+    else focusables[(idx + 1) % focusables.length].focus();
+    e.preventDefault();
+  }
+});
+
+let lastFocused = null;
+const BloomAddHabit = {
+  open(prefill){
+    state = { ...DEFAULT_STATE(), ...prefill };
+    if(prefill && prefill.tags) state.tags = prefill.tags;
+    lastFocused = document.activeElement;
+    el.backdrop.classList.add('open');
+    el.success.classList.remove('show');
+    render();
+    setTimeout(()=> el.name.focus(), 60);
+  },
+  close(){
+    el.backdrop.classList.remove('open');
+    state = DEFAULT_STATE();
+    render();
+    if(lastFocused) lastFocused.focus();
+  },
+  cancel(){ BloomAddHabit.onCancel(); BloomAddHabit.close(); },
+  async onSubmit(habit){
+    console.log('✓ Habit payload:', habit);
+    await new Promise(r=> setTimeout(r, 700));
+  },
+  onCancel(){ },
+  getState:()=> ({ ...state }),
+  getPayload: buildPayload
+};
+window.BloomAddHabit = BloomAddHabit;
+render();
+  </script>
+  <script src="js/auth.js"></script>
+  <script src="js/habits.js"></script>
+<script src="shared-bloom-header.js?v=2"></script></body>
+</html>

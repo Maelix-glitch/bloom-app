@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloom — Rewards</title>
+  <style>
+    :root { --bg:#14151F; --surface:#1C1E2B; --border:#2E3145; --text:#F0EFEA; --text-muted:#8B8CA3; --font-display:'Georgia',serif; --font-body:'Inter',sans-serif; }
+    * { box-sizing: border-box; }
+   body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 0 24px;  }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 36px; }
+    nav { display:flex; gap:24px; }
+    nav a { color: var(--text-muted); text-decoration:none; }
+    nav a.active { color: var(--text); }
+    .card { background: var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px; }
+    h1 { font-family: var(--font-display); font-size: clamp(30px, 5vw, 40px); margin-bottom: 12px; }
+    p { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div style="font-family: var(--font-display); font-size: 20px;">Bloom</div>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Today</a>
+        <a href="trackers.html">Trackers</a>
+        <a href="cycle.html">Cycle</a>
+        <a href="/">Mood</a>
+        <a href="rewards.html" class="active">Rewards</a>
+        <a href="coach.html">Coach</a>
+      </nav>
+    </header>
+    <div class="card">
+      <h1>Rewards</h1>
+      <p>Rewards page placeholder for the next step.</p>
+    </div>
+  </div>
+  <script src="shared-bloom-header.js?v=10"></script>
+</body>
+</html>

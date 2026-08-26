@@ -19,10 +19,13 @@ const SERIES: { key: SeriesKey; label: string; color: string; type: "line"; dash
 
 /** ECharts is loaded lazily on the client only — keeps SSR clean and TTI fast. */
 export function MoodChart({ days }: { days: DayAggregate[] }) {
-  const hostRef = useRef<HTMLDivElement | null>(null);
+  // A state-held node (not a plain ref) so the init effect re-runs when the
+  // chart host mounts later — e.g. after the first day of data arrives.
+  const [host, setHost] = useState<HTMLDivElement | null>(null);
   const chartRef = useRef<{ setOption: (o: unknown, b?: boolean) => void; resize: () => void; dispose: () => void } | null>(null);
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState<SeriesKey[]>(["mood", "avg7", "energy"]);
+
 
   const model = useMemo(() => {
     const dates = days.map((d) => d.date);
@@ -45,7 +48,7 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
 
   useEffect(() => {
     let disposed = false;
-    if (!hostRef.current) return;
+    if (!host) return;
     import("echarts/core").then(async (echarts) => {
       const [{ LineChart }, { GridComponent, TooltipComponent, AxisPointerComponent }, { CanvasRenderer }] =
         await Promise.all([
@@ -54,16 +57,18 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
           import("echarts/renderers"),
         ]);
       echarts.use([LineChart, GridComponent, TooltipComponent, AxisPointerComponent, CanvasRenderer]);
-      if (disposed || !hostRef.current) return;
-      chartRef.current = echarts.init(hostRef.current, undefined, { renderer: "canvas" }) as never;
+      if (disposed) return;
+      chartRef.current = echarts.init(host, undefined, { renderer: "canvas" }) as never;
       setReady(true);
     });
     return () => {
       disposed = true;
+      setReady(false);
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, []);
+  }, [host]);
+
 
   useEffect(() => {
     if (!ready) return;
@@ -223,7 +228,7 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
           </div>
         }
       />
-      <div ref={hostRef} className="h-[340px] w-full" role="img" aria-label="Mood trajectory chart" />
+      <div ref={setHost} className="h-[340px] w-full" role="img" aria-label="Mood trajectory chart" />
     </Panel>
   );
 }

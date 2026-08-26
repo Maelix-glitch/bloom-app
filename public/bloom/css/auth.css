@@ -1,0 +1,195 @@
+/* ============================================================================
+   BLOOM — Authentication Styles
+   Profile selection, magic link auth, and related UI
+   ============================================================================ */
+
+/* ============================================================================
+   AUTH SCREEN (Profile Selection)
+   ============================================================================ */
+
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.auth-header h1 {
+  background: linear-gradient(90deg, var(--amber), var(--sage));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================================
+   INTRO TEXT & SECTION LABELS
+   ============================================================================ */
+
+.auth-intro {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-5);
+  text-align: center;
+}
+
+.auth-method .eyebrow {
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================================
+   PROFILE SELECTION BUTTONS
+   ============================================================================ */
+
+.auth-profiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.btn-profile {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all 0.25s var(--ease);
+}
+
+.btn-profile.btn-primary {
+  background: var(--amber);
+  color: var(--bg);
+  box-shadow: 0 8px 20px -8px var(--amber-dim);
+}
+
+.btn-profile.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px var(--amber-dim);
+}
+
+/* ============================================================================
+   AUTH FORM (Email + Magic Link)
+   ============================================================================ */
+
+.auth-method {
+  margin-bottom: var(--space-6);
+}
+
+.auth-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color 0.25s var(--ease);
+}
+
+.auth-input::placeholder {
+  color: var(--text-faint);
+}
+
+.auth-input:focus {
+  border-color: var(--amber);
+  outline: none;
+}
+
+/* ============================================================================
+   STATE MESSAGES (Loading, Error, Success)
+   ============================================================================ */
+
+.auth-loading,
+.auth-error,
+.auth-success,
+.dashboard-error {
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  margin-bottom: var(--space-4);
+  animation: slideUp 0.3s var(--ease);
+}
+
+.auth-loading {
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+
+.auth-error,
+.dashboard-error {
+  background: rgba(201, 139, 160, 0.12);
+  color: var(--rose);
+}
+
+.auth-success {
+  background: var(--sage-dim);
+  color: var(--sage);
+}
+
+/* ============================================================================
+   AUTH FOOTER
+   ============================================================================ */
+
+.auth-footer {
+  margin-top: var(--space-7);
+}
+
+/* ============================================================================
+   APP SCREEN (After Auth)
+   ============================================================================ */
+
+.app-screen {
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-5);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+}
+
+.app-header h1 {
+  background: linear-gradient(90deg, var(--amber), var(--sage));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: var(--space-1);
+}
+
+.app-content {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .modal-content {
+    width: 95%;
+  }
+
+  .auth-profiles {
+    gap: var(--space-2);
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-header button {
+    width: 100%;
+  }
+}

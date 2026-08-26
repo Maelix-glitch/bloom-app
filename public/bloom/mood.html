@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Mood</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14151F; --surface:#1C1E2B; --surface-2:#23263A; --border:#2E3145; --border-hover:#3A3D56;
+    --text:#F0EFEA; --text-muted:#8B8CA3; --text-faint:#5A5D75;
+    --amber:#E8B75E; --amber-dim:rgba(232,183,94,0.14);
+    --sage:#7FA88F; --sage-dim:rgba(127,168,143,0.14);
+    --rose:#C98BA0; --rose-dim:rgba(201,139,160,0.14);
+    --sky:#7FA0C9; --sky-dim:rgba(127,160,201,0.14);
+    --violet:#9B8ED9; --violet-dim:rgba(155,142,217,0.14);
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px;
+    --radius:16px; --radius-sm:10px;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+    --ease: cubic-bezier(0.16,1,0.3,1);
+    --mood-a: var(--sky); --mood-b: var(--violet);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background: var(--bg); color: var(--text); font-family: var(--font-body); line-height:1.6; min-height:100vh; padding: var(--space-6) var(--space-5) var(--space-9); overflow-x:hidden; position:relative; }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+  .wrap{ max-width: 980px; margin:0 auto; }
+
+  .reveal{ opacity:0; transform:translateY(14px); animation: rise .7s var(--ease) forwards; }
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+  .d1{animation-delay:.02s}.d2{animation-delay:.1s}.d3{animation-delay:.2s}.d4{animation-delay:.32s}.d5{animation-delay:.44s}.d6{animation-delay:.56s}.d7{animation-delay:.68s}
+
+  header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-7); }
+  .mark{ display:flex; align-items:center; gap: var(--space-3); }
+  .mark-glyph{ width:28px; height:28px; }
+  .mark-glyph path{ stroke-dasharray:40; stroke-dashoffset:40; animation: draw 1s var(--ease) .3s forwards; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  .mark-name{ font-family: var(--font-display); font-size:20px; font-weight:500; }
+  nav{ display:flex; gap: var(--space-5); align-items:center; }
+  nav a{ position:relative; color: var(--text-muted); text-decoration:none; font-size:14px; font-weight:500; transition: color .25s ease; }
+  nav a::after{ content:''; position:absolute; left:0; right:0; bottom:-6px; height:1px; background: var(--violet); transform:scaleX(0); transform-origin:left; transition: transform .3s var(--ease); }
+  nav a.active{ color: var(--text); } nav a.active::after{ transform:scaleX(1); } nav a:hover{ color: var(--text); }
+  .avatar{ width:32px; height:32px; border-radius:50%; background: linear-gradient(135deg, var(--violet), var(--rose)); display:flex; align-items:center; justify-content:center; font-family: var(--font-display); font-size:13px; font-weight:600; color:#14151F; }
+
+  .eyebrow{ font-family: var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color: var(--text-faint); margin-bottom: var(--space-2); }
+  h1{ font-family: var(--font-display); font-weight:500; font-size: clamp(26px,4.2vw,34px); line-height:1.25; letter-spacing:-.01em; margin-bottom: var(--space-6); max-width:26ch; }
+  h1 em{ font-style:italic; font-weight:400; color: var(--violet); }
+
+  .orb-layout{ display:grid; grid-template-columns: 300px 1fr; gap: var(--space-6); margin-bottom: var(--space-8); }
+  .orb-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap: var(--space-4); position:relative; overflow:hidden; }
+  .orb-stage{ width:200px; height:200px; position:relative; display:flex; align-items:center; justify-content:center; }
+  .orb{ position:absolute; width:170px; height:170px; background: conic-gradient(from 120deg, var(--mood-a), var(--mood-b), var(--mood-a)); filter: blur(0.5px); animation: morph 9s ease-in-out infinite, spin 26s linear infinite; box-shadow: 0 0 60px -10px var(--mood-a); }
+  .orb-inner{ position:absolute; width:120px; height:120px; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25), transparent 60%), var(--surface); animation: morph 9s ease-in-out infinite reverse; opacity:0.9; }
+  @keyframes morph{ 0%,100%{ border-radius: 42% 58% 65% 35% / 45% 45% 55% 55%; } 25%{ border-radius: 58% 42% 35% 65% / 60% 40% 60% 40%; } 50%{ border-radius: 50% 50% 35% 65% / 40% 65% 35% 60%; } 75%{ border-radius: 65% 35% 58% 42% / 55% 45% 55% 45%; } }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .orb-particle{ position:absolute; border-radius:50%; background: var(--mood-a); opacity:0.5; animation: floatUp linear infinite; }
+  @keyframes floatUp{ 0%{ transform: translateY(20px) scale(0.6); opacity:0; } 20%{ opacity:.6; } 100%{ transform: translateY(-180px) scale(1.1); opacity:0; } }
+  .orb-label{ text-align:center; }
+  .orb-word{ font-family: var(--font-display); font-size:20px; font-weight:500; margin-bottom:2px; transition: color .5s ease; }
+  .orb-sub{ font-size:12px; color: var(--text-faint); }
+
+  .selector-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); display:flex; flex-direction:column; justify-content:center; }
+  .selector-title{ font-size:13px; color: var(--text-muted); margin-bottom: var(--space-4); }
+  .mood-swatches{ display:grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); margin-bottom: var(--space-5); }
+  .swatch{ aspect-ratio: 1; border-radius: var(--radius-sm); cursor:pointer; position:relative; overflow:hidden; border:1px solid var(--border); transition: transform .25s var(--ease), border-color .25s ease; display:flex; align-items:flex-end; padding: var(--space-2); }
+  .swatch:hover{ transform: translateY(-3px); }
+  .swatch.selected{ border-color: var(--text); transform: translateY(-3px) scale(1.02); }
+  .swatch-bg{ position:absolute; inset:0; opacity:0.85; }
+  .swatch-label{ position:relative; font-size:11px; font-weight:600; color: var(--text); text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+  .swatch[data-a="#C98BA0"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #C98BA0, #7A5568); }
+  .swatch[data-a="#9B8ED9"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #9B8ED9, #5B5482); }
+  .swatch[data-a="#7FA0C9"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #7FA0C9, #4A6684); }
+  .swatch[data-a="#7FA88F"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #7FA88F, #4C6459); }
+  .swatch[data-a="#E8B75E"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #E8B75E, #9A7638); }
+  .swatch[data-a="#D97F6B"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #D97F6B, #8C4E41); }
+  .swatch[data-a="#6B7A99"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #6B7A99, #3E4661); }
+  .swatch[data-a="#8B8CA3"] .swatch-bg{ background: radial-gradient(circle at 30% 30%, #8B8CA3, #4B4C5E); }
+
+  .intensity-row{ display:flex; align-items:center; gap: var(--space-3); }
+  .intensity-label{ font-size:12px; color: var(--text-faint); white-space:nowrap; }
+  .intensity-track{ flex:1; height:4px; background: var(--border); border-radius:4px; position:relative; cursor:pointer; }
+  .intensity-fill{ position:absolute; top:0; left:0; height:100%; border-radius:4px; background: linear-gradient(90deg, var(--mood-a), var(--mood-b)); width:65%; transition: background 1s ease; }
+  .intensity-handle{ position:absolute; top:50%; left:65%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background: var(--text); box-shadow: 0 0 0 4px rgba(240,239,234,0.15); }
+
+  .note-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-5); margin-bottom: var(--space-4); }
+  .note-card textarea{ width:100%; min-height:70px; background:transparent; border:none; color: var(--text); font-family: var(--font-body); font-size:14px; resize:none; line-height:1.6; }
+  .note-card textarea::placeholder{ color: var(--text-faint); }
+  .note-card textarea:focus{ outline:none; }
+  .note-tags{ display:flex; gap: var(--space-2); flex-wrap:wrap; margin-top: var(--space-3); align-items:center; }
+  .note-tag{ font-size:11px; color: var(--text-faint); background: var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:999px; cursor:pointer; transition: all .2s ease; }
+  .note-tag:hover{ border-color: var(--violet); color: var(--text); }
+  .note-tag.active{ background: var(--violet-dim); border-color: var(--violet); color: var(--violet); }
+  .tag-input{
+    display:none; width:120px; border-radius:999px; border:1px solid var(--border); background: var(--surface-2); color: var(--text); padding:6px 10px; font-size:11px;
+  }
+  .tag-input.visible{ display:block; }
+
+  .log-controls{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-8); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap: var(--space-4); }
+  .log-inline{ display:flex; align-items:center; gap: var(--space-3); flex-wrap:wrap; }
+  .log-inline label{ font-size:12px; color: var(--text-faint); }
+  .log-inline select, .log-inline button{ border-radius:10px; border:1px solid var(--border); background: var(--surface-2); color: var(--text); padding:8px 12px; font: inherit; }
+  .log-inline button{ background: linear-gradient(135deg, var(--violet), var(--sky)); color: #111; border:none; cursor:pointer; font-weight:700; }
+  .log-inline button:hover{ filter: brightness(1.04); }
+
+  .section-head{ display:flex; justify-content:space-between; align-items:baseline; margin: 0 0 var(--space-4); }
+  .section-head h2{ font-family: var(--font-display); font-weight:500; font-size:19px; }
+  .section-link{ font-size:13px; color: var(--text-faint); text-decoration:none; }
+
+  .week-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); margin-bottom: var(--space-4); }
+  .week-strip{ display:grid; grid-template-columns: repeat(7, 1fr); gap: var(--space-3); }
+  .week-day{ display:flex; flex-direction:column; align-items:center; gap: var(--space-2); }
+  .mini-orb{ width:40px; height:40px; position:relative; animation: morph 7s ease-in-out infinite; }
+  .week-dow{ font-family: var(--font-mono); font-size:10px; color: var(--text-faint); }
+  .week-day.today .week-dow{ color: var(--text); font-weight:600; }
+
+  .month-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); margin-bottom: var(--space-8); }
+  .month-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-4); }
+  .month-name{ font-family: var(--font-display); font-size:18px; }
+  .month-grid{ display:grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+  .month-dow{ text-align:center; font-family: var(--font-mono); font-size:10px; color: var(--text-faint); padding-bottom: 6px; }
+  .month-day{ aspect-ratio:1; border-radius: 8px; background: var(--surface-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; position:relative; color: var(--text-muted); font-size:12px; }
+  .month-day.empty{ background: transparent; border-style:dashed; opacity:.35; }
+  .month-day.today{ box-shadow: inset 0 0 0 1px var(--text); color: var(--text); }
+  .month-day.logged{ background: rgba(155,142,217,0.18); border-color: var(--violet); color: var(--text); }
+  .month-day.logged::after{ content:''; position:absolute; width:6px; height:6px; background: var(--violet); border-radius:50%; right:8px; top:8px; }
+  .month-day.mood-low{ background: rgba(201,139,160,0.16); border-color: rgba(201,139,160,0.7); }
+  .month-day.mood-good{ background: rgba(127,168,143,0.14); border-color: rgba(127,168,143,0.7); }
+  .month-day.mood-amber{ background: rgba(232,183,94,0.14); border-color: rgba(232,183,94,0.7); }
+  .month-day.mood-sky{ background: rgba(127,160,201,0.14); border-color: rgba(127,160,201,0.7); }
+
+  .insight-grid{ display:grid; grid-template-columns: 1.3fr 1fr; gap: var(--space-4); margin-bottom: var(--space-8); }
+  .insight-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); }
+  .insight-card h3{ font-family: var(--font-display); font-weight:500; font-size:16px; margin-bottom: var(--space-4); }
+  .flow-chart{ display:flex; align-items:flex-end; gap:5px; height:80px; margin-bottom: var(--space-3); }
+  .flow-seg{ flex:1; border-radius:3px 3px 0 0; transition: height .8s var(--ease); }
+  .insight-note{ font-size:13px; color: var(--text-muted); line-height:1.6; }
+  .correlation-list{ display:flex; flex-direction:column; gap: var(--space-3); }
+  .corr-row{ display:flex; align-items:center; justify-content:space-between; padding: var(--space-3); background: var(--surface-2); border-radius: var(--radius-sm); border:1px solid var(--border); transition: transform .25s var(--ease); }
+  .corr-row:hover{ transform: translateX(3px); }
+  .corr-name{ font-size:13px; color: var(--text-muted); display:flex; align-items:center; gap:8px; }
+  .corr-dot{ width:8px; height:8px; border-radius:50%; }
+  .corr-strength{ font-family: var(--font-mono); font-size:12px; }
+
+  @media (max-width: 780px){ .orb-layout{ grid-template-columns: 1fr; } .insight-grid{ grid-template-columns: 1fr; } nav{ display:none; } .mood-swatches{ grid-template-columns: repeat(4,1fr); } }
+  a,button,.swatch,.note-tag{ outline-offset:3px; }
+  a:focus-visible,button:focus-visible,.swatch:focus-visible{ outline:2px solid var(--violet); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="reveal d1">
+    <div class="mark">
+      <svg class="mark-glyph" viewBox="0 0 28 28" fill="none">
+        <path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round"/>
+        <defs><linearGradient id="g1" x1="4" y1="13" x2="24" y2="13" gradientUnits="userSpaceOnUse"><stop stop-color="#7FA88F"/><stop offset="1" stop-color="#E8B75E"/></linearGradient></defs>
+      </svg>
+      <span class="mark-name">Bloom</span>
+    </div>
+    <nav>
+      <a href="index.html">Today</a><a href="trackers.html">Trackers</a><a href="/" class="active">Mood</a><a href="rewards.html">Rewards</a><a href="coach.html">Coach</a>
+    </nav>
+    <div class="avatar">M</div>
+  </header>
+
+  <div class="eyebrow reveal d2">Mood</div>
+  <h1 class="reveal d2">What does your <em>inner weather</em> look like today?</h1>
+
+  <div class="orb-layout reveal d3">
+    <div class="orb-card">
+      <div class="orb-stage" id="orbStage">
+        <div class="orb" id="orb"></div>
+        <div class="orb-inner"></div>
+      </div>
+      <div class="orb-label">
+        <div class="orb-word" id="orbWord">Reflective</div>
+        <div class="orb-sub" id="orbSub">Logged 9:40 AM</div>
+      </div>
+    </div>
+
+    <div class="selector-card">
+      <div class="selector-title">Choose the tone closest to how you feel</div>
+      <div class="mood-swatches" id="swatches">
+        <div class="swatch" data-a="#C98BA0" data-b="#9B8ED9" data-word="Tender"><div class="swatch-bg"></div><span class="swatch-label">Tender</span></div>
+        <div class="swatch selected" data-a="#9B8ED9" data-b="#7FA0C9" data-word="Reflective"><div class="swatch-bg"></div><span class="swatch-label">Reflective</span></div>
+        <div class="swatch" data-a="#7FA0C9" data-b="#7FA88F" data-word="Calm"><div class="swatch-bg"></div><span class="swatch-label">Calm</span></div>
+        <div class="swatch" data-a="#7FA88F" data-b="#E8B75E" data-word="Content"><div class="swatch-bg"></div><span class="swatch-label">Content</span></div>
+        <div class="swatch" data-a="#E8B75E" data-b="#D97F6B" data-word="Bright"><div class="swatch-bg"></div><span class="swatch-label">Bright</span></div>
+        <div class="swatch" data-a="#D97F6B" data-b="#C98BA0" data-word="Restless"><div class="swatch-bg"></div><span class="swatch-label">Restless</span></div>
+        <div class="swatch" data-a="#6B7A99" data-b="#8B8CA3" data-word="Heavy"><div class="swatch-bg"></div><span class="swatch-label">Heavy</span></div>
+        <div class="swatch" data-a="#8B8CA3" data-b="#6B7A99" data-word="Numb"><div class="swatch-bg"></div><span class="swatch-label">Numb</span></div>
+      </div>
+      <div class="intensity-row">
+        <span class="intensity-label">Subtle</span>
+        <div class="intensity-track" id="intensityTrack">
+          <div class="intensity-fill" id="intensityFill"></div>
+          <div class="intensity-handle" id="intensityHandle"></div>
+        </div>
+        <span class="intensity-label">Intense</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-card reveal d4">
+    <textarea id="moodNote" placeholder="What's contributing to this feeling? (optional)"></textarea>
+    <div class="note-tags">
+      <div class="note-tag active">Work</div>
+      <div class="note-tag">Sleep</div>
+      <div class="note-tag">Relationship</div>
+      <div class="note-tag">Body</div>
+      <div class="note-tag">Weather</div>
+      <div class="note-tag">Social</div>
+      <div class="note-tag" id="addTagButton">+ Add tag</div>
+      <input id="tagInput" class="tag-input" type="text" maxlength="18" placeholder="new tag" aria-label="Add custom tag" />
+    </div>
+  </div>
+
+  <div class="log-controls reveal d4">
+    <div class="log-inline">
+      <label for="moodDate">Date</label>
+      <input id="moodDate" type="date" />
+    </div>
+    <div class="log-inline">
+      <label for="moodHour">Log time</label>
+      <select id="moodHour"></select>
+    </div>
+    <div class="log-inline">
+      <button id="saveMoodButton" type="button">Save mood entry</button>
+    </div>
+  </div>
+
+  <div class="section-head reveal d5"><h2>This week</h2><a href="#" id="toggleMonth" class="section-link">View month</a></div>
+  <div class="week-card reveal d5">
+    <div class="week-strip">
+      <div class="week-day"><div class="mini-orb" style="background:conic-gradient(from 90deg,#7FA0C9,#9B8ED9); border-radius:45% 55% 60% 40%/50% 50% 50% 50%;"></div><span class="week-dow">Fri</span></div>
+      <div class="week-day"><div class="mini-orb" style="background:conic-gradient(from 60deg,#E8B75E,#D97F6B); border-radius:55% 45% 40% 60%/40% 60% 40% 60%;"></div><span class="week-dow">Sat</span></div>
+      <div class="week-day"><div class="mini-orb" style="background:conic-gradient(from 120deg,#7FA88F,#E8B75E); border-radius:50% 50% 60% 40%/45% 55% 45% 55%;"></div><span class="week-dow">Sun</span></div>
+      <div class="week-day"><div class="mini-orb" style="background:conic-gradient(from 30deg,#8B8CA3,#6B7A99); border-radius:40% 60% 50% 50%/55% 45% 55% 45%;"></div><span class="week-dow">Mon</span></div>
+      <div class="week-day"><div class="mini-orb" style="background:conic-gradient(from 150deg,#C98BA0,#9B8ED9); border-radius:60% 40% 45% 55%/50% 50% 50% 50%;"></div><span class="week-dow">Tue</span></div>
+      <div class="week-day"><div class="mini-orb" style="background:conic-gradient(from 200deg,#7FA0C9,#7FA88F); border-radius:45% 55% 55% 45%/60% 40% 60% 40%;"></div><span class="week-dow">Wed</span></div>
+      <div class="week-day today"><div class="mini-orb" style="background:conic-gradient(from 120deg,#9B8ED9,#7FA0C9); border-radius:42% 58% 65% 35%/45% 45% 55% 55%;"></div><span class="week-dow">Thu</span></div>
+    </div>
+  </div>
+
+  <div id="monthCard" class="month-card reveal d6" style="display:none;">
+    <div class="month-header">
+      <div class="month-name" id="monthName">August 2026</div>
+      <div class="month-name" style="font-size:12px; color: var(--text-faint);">Mood history</div>
+    </div>
+    <div class="month-grid" id="monthGrid"></div>
+  </div>
+
+  <div class="insight-grid reveal d6">
+    <div class="insight-card">
+      <h3>Mood flow — last 14 days</h3>
+      <div class="flow-chart" id="flowChart"></div>
+      <p class="insight-note">Your tone has been trending toward calmer, more reflective states this week compared to last — evenings especially.</p>
+    </div>
+    <div class="insight-card">
+      <h3>What correlates</h3>
+      <div class="correlation-list">
+        <div class="corr-row"><span class="corr-name"><span class="corr-dot" style="background:var(--sky)"></span>Sleep quality</span><span class="corr-strength" style="color:var(--sage)">Strong</span></div>
+        <div class="corr-row"><span class="corr-name"><span class="corr-dot" style="background:var(--sage)"></span>Morning habits done</span><span class="corr-strength" style="color:var(--sage)">Strong</span></div>
+        <div class="corr-row"><span class="corr-name"><span class="corr-dot" style="background:var(--rose)"></span>Cycle phase</span><span class="corr-strength" style="color:var(--amber)">Moderate</span></div>
+        <div class="corr-row"><span class="corr-name"><span class="corr-dot" style="background:var(--text-faint)"></span>Study time</span><span class="corr-strength" style="color:var(--text-faint)">Weak</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const STORAGE_KEY = 'bloom_mood_state';
+  const SUPABASE_URL = 'https://zsqsfxmjphctknnumgsi.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_tZoeD9y0_faPskrhd2aNmQ_tLqHuNtJ';
+  
+  const root = document.documentElement;
+  const orbWord = document.getElementById('orbWord');
+  const stage = document.getElementById('orbStage');
+  const moodNote = document.getElementById('moodNote');
+  const saveMoodButton = document.getElementById('saveMoodButton');
+  const addTagButton = document.getElementById('addTagButton');
+  const tagInput = document.getElementById('tagInput');
+  const orbSub = document.getElementById('orbSub');
+  
+  let supabaseClient = null;
+  let currentUser = null;
+
+  function formatLoggedTime() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = String(minutes).padStart(2, '0');
+    return `Logged ${displayHours}:${displayMinutes} ${ampm}`;
+  }
+
+  function updateLoggedTime() {
+    if (orbSub) orbSub.textContent = formatLoggedTime();
+  }
+
+  async function initSupabase() {
+    try {
+      // Wait for Supabase SDK to load
+      let attempts = 0;
+      while (!window.supabase && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (!window.supabase) {
+        console.error('Supabase SDK failed to load');
+        return null;
+      }
+
+      console.log('Supabase SDK loaded, creating client...');
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      
+      if (error) {
+        console.error('Supabase session error:', error);
+        return null;
+      }
+      
+      currentUser = session?.user || null;
+      console.log('Supabase initialized. User:', currentUser ? currentUser.email : 'not logged in');
+      return currentUser;
+    } catch (error) {
+      console.error('Failed to initialize Supabase:', error);
+      return null;
+    }
+  }
+
+  async function saveMoodToSupabase(moodData) {
+    if (!supabaseClient) {
+      console.warn('Supabase not initialized');
+      return false;
+    }
+    if (!currentUser) {
+      console.warn('User not logged in - saving to localStorage only');
+      return false;
+    }
+
+    try {
+      console.log('Saving mood to Supabase:', moodData);
+      const { error } = await supabaseClient
+        .from('mood_entries')
+        .insert({
+          profile_id: currentUser.id,
+          mood_label: moodData.moodLabel || 'Reflective',
+          mood_intensity: Math.max(6, Math.min(100, Math.round(moodData.moodIntensity))),
+          note: moodData.note || '',
+          tags: Array.isArray(moodData.tags) ? moodData.tags : [],
+          logged_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Mood insert failed:', error);
+        return false;
+      }
+      console.log('✓ Mood saved to Supabase');
+      return true;
+    } catch (error) {
+      console.error('Mood save error:', error);
+      return false;
+    }
+  }
+
+  function getDefaultState() {
+    return {
+      moodLabel: 'Reflective',
+      moodIntensity: 65,
+      note: '',
+      tags: ['Work'],
+      entries: []
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return parsed ? { ...getDefaultState(), ...parsed } : getDefaultState();
+    } catch (error) {
+      return getDefaultState();
+    }
+  }
+
+  function saveState(nextState) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  }
+
+  function validateIntensity(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return 65;
+    return Math.max(6, Math.min(100, Math.round(parsed)));
+  }
+
+  function setMood(a, b, word, intensity = 65) {
+    root.style.setProperty('--mood-a', a);
+    root.style.setProperty('--mood-b', b);
+    orbWord.textContent = word;
+
+    const fill = document.getElementById('intensityFill');
+    const handle = document.getElementById('intensityHandle');
+    const safe = validateIntensity(intensity);
+    if (fill) fill.style.width = `${safe}%`;
+    if (handle) handle.style.left = `${safe}%`;
+    spawnParticles(a);
+  }
+
+  function spawnParticles(color) {
+    if (!stage) return;
+    for (let i = 0; i < 3; i += 1) {
+      const p = document.createElement('div');
+      p.className = 'orb-particle';
+      const size = 4 + Math.random() * 5;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = (40 + Math.random() * 120) + 'px';
+      p.style.bottom = '60px';
+      p.style.background = color;
+      p.style.animationDuration = (4 + Math.random() * 3) + 's';
+      stage.appendChild(p);
+      setTimeout(() => p.remove(), 7000);
+    }
+  }
+
+  function syncTagUI() {
+    const state = loadState();
+    document.querySelectorAll('.note-tag').forEach((tag) => {
+      const value = tag.textContent.trim();
+      if (value === '+ Add tag') return;
+      tag.classList.toggle('active', (state.tags || []).includes(value));
+    });
+  }
+
+  function persistSelection() {
+    const state = loadState();
+    const selected = document.querySelector('.swatch.selected');
+    const nextState = {
+      ...state,
+      moodLabel: selected ? selected.dataset.word : state.moodLabel || 'Reflective',
+      moodIntensity: validateIntensity(state.moodIntensity),
+      note: moodNote ? moodNote.value : state.note || '',
+      tags: [...document.querySelectorAll('.note-tag.active')]
+        .map((tag) => tag.textContent.trim())
+        .filter((tag) => tag && tag !== '+ Add tag')
+    };
+    saveState(nextState);
+    return nextState;
+  }
+
+  function attachSwatches() {
+    document.querySelectorAll('.swatch').forEach((el) => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.swatch').forEach((swatch) => swatch.classList.remove('selected'));
+        el.classList.add('selected');
+
+        const state = loadState();
+        const nextState = {
+          ...state,
+          moodLabel: el.dataset.word,
+          moodIntensity: validateIntensity(state.moodIntensity)
+        };
+        saveState(nextState);
+        setMood(el.dataset.a, el.dataset.b, el.dataset.word, nextState.moodIntensity);
+      });
+    });
+  }
+
+  function attachIntensity() {
+    const track = document.getElementById('intensityTrack');
+    const fill = document.getElementById('intensityFill');
+    const handle = document.getElementById('intensityHandle');
+    if (!track || !fill || !handle) return;
+
+    function applyIntensity(clientX) {
+      const rect = track.getBoundingClientRect();
+      let pct = ((clientX - rect.left) / rect.width) * 100;
+      pct = Math.min(100, Math.max(6, pct));
+      const state = loadState();
+      const next = validateIntensity(Math.round(pct));
+      fill.style.width = `${next}%`;
+      handle.style.left = `${next}%`;
+      const swatch = document.querySelector('.swatch.selected');
+      const nextState = { ...state, moodIntensity: next };
+      saveState(nextState);
+      if (swatch) {
+        setMood(swatch.dataset.a, swatch.dataset.b, swatch.dataset.word, next);
+      }
+    }
+
+    track.addEventListener('click', (event) => applyIntensity(event.clientX));
+    track.addEventListener('pointerdown', (event) => {
+      applyIntensity(event.clientX);
+      const move = (moveEvent) => applyIntensity(moveEvent.clientX);
+      const up = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    });
+  }
+
+  function attachTagControls() {
+    document.querySelectorAll('.note-tag').forEach((tag) => {
+      if (tag.textContent.trim() === '+ Add tag') {
+        tag.addEventListener('click', () => {
+          if (tagInput) {
+            tagInput.classList.toggle('visible');
+            if (tagInput.classList.contains('visible')) tagInput.focus();
+          }
+        });
+        return;
+      }
+
+      tag.addEventListener('click', () => {
+        tag.classList.toggle('active');
+        persistSelection();
+      });
+    });
+
+    if (!tagInput) return;
+    tagInput.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      const value = tagInput.value.trim();
+      if (!value) {
+        tagInput.classList.remove('visible');
+        tagInput.value = '';
+        return;
+      }
+
+      const state = loadState();
+      const tags = Array.isArray(state.tags) ? state.tags : [];
+      if (!tags.includes(value)) {
+        const nextState = { ...state, tags: [...tags, value] };
+        saveState(nextState);
+
+        const newTag = document.createElement('div');
+        newTag.className = 'note-tag active';
+        newTag.textContent = value;
+        newTag.addEventListener('click', () => {
+          newTag.classList.toggle('active');
+          persistSelection();
+        });
+        const parent = document.querySelector('.note-tags');
+        if (parent && addTagButton) parent.insertBefore(newTag, addTagButton);
+      }
+
+      tagInput.value = '';
+      tagInput.classList.remove('visible');
+      persistSelection();
+    });
+  }
+
+  function attachSave() {
+    if (moodNote) {
+      moodNote.addEventListener('input', () => {
+        persistSelection();
+      });
+    }
+
+    if (!saveMoodButton) return;
+    saveMoodButton.addEventListener('click', async () => {
+      const state = loadState();
+      const selected = document.querySelector('.swatch.selected');
+      const nextState = {
+        ...state,
+        moodLabel: selected ? selected.dataset.word : state.moodLabel || 'Reflective',
+        moodIntensity: validateIntensity(state.moodIntensity),
+        note: moodNote ? moodNote.value : state.note || '',
+        tags: [...document.querySelectorAll('.note-tag.active')]
+          .map((tag) => tag.textContent.trim())
+          .filter((tag) => tag && tag !== '+ Add tag'),
+        entries: [{
+          moodLabel: selected ? selected.dataset.word : state.moodLabel || 'Reflective',
+          moodIntensity: validateIntensity(state.moodIntensity),
+          note: moodNote ? moodNote.value : state.note || '',
+          tags: [...document.querySelectorAll('.note-tag.active')]
+            .map((tag) => tag.textContent.trim())
+            .filter((tag) => tag && tag !== '+ Add tag'),
+          savedAt: new Date().toISOString()
+        }, ...((Array.isArray(state.entries) ? state.entries : []) || [])].slice(0, 20)
+      };
+      saveState(nextState);
+      updateLoggedTime();
+      
+      // Save to Supabase if user is logged in
+      if (currentUser) {
+        await saveMoodToSupabase(nextState);
+      }
+      
+      saveMoodButton.textContent = 'Saved';
+      setTimeout(() => { saveMoodButton.textContent = 'Save mood entry'; }, 800);
+    });
+  }
+
+  function buildFlowChart() {
+    const flowData = [40, 55, 35, 60, 70, 50, 65, 80, 72, 60, 85, 90, 78, 92];
+    const flowColors = ['#8B8CA3', '#7FA0C9', '#9B8ED9', '#7FA0C9', '#7FA88F', '#E8B75E', '#7FA88F', '#7FA0C9', '#9B8ED9', '#7FA0C9', '#7FA88F', '#9B8ED9', '#7FA0C9', '#9B8ED9'];
+    const chart = document.getElementById('flowChart');
+    if (!chart) return;
+    flowData.forEach((height, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'flow-seg';
+      bar.style.height = height + '%';
+      bar.style.background = flowColors[i];
+      chart.appendChild(bar);
+    });
+  }
+
+  async function initMoodPage() {
+    await initSupabase();
+    
+    const state = loadState();
+    const swatch = document.querySelector(`.swatch[data-word="${state.moodLabel}"]`) || document.querySelector('.swatch.selected');
+    if (swatch) {
+      swatch.classList.add('selected');
+      setMood(swatch.dataset.a, swatch.dataset.b, swatch.dataset.word, state.moodIntensity);
+    }
+
+    if (moodNote) moodNote.value = state.note || '';
+    syncTagUI();
+    attachSwatches();
+    attachIntensity();
+    attachTagControls();
+    attachSave();
+    buildFlowChart();
+    setInterval(() => spawnParticles(getComputedStyle(root).getPropertyValue('--mood-a')), 1400);
+  }
+
+  initMoodPage();
+</script>

@@ -21,8 +21,8 @@ export const accentVar: Record<Accent, string> = {
 };
 
 /**
- * Staggers the idle sheen across panels. A module counter is safe here:
- * server and client render the same tree in the same order.
+ * Staggers the idle sheen across panels. Applied after hydration via a ref so
+ * SSR markup and the first client render stay byte-identical.
  */
 let panelOrdinal = 0;
 
@@ -33,7 +33,12 @@ export function Panel({
   sheen = true,
   ...rest
 }: React.HTMLAttributes<HTMLDivElement> & { glow?: Accent; sheen?: boolean }) {
-  const sheenDelay = useRef(((panelOrdinal++ % 8) * 1.15).toFixed(2)).current;
+  const sheenRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sheenRef.current;
+    if (el) el.style.animationDelay = `${((panelOrdinal++ % 8) * 1.15).toFixed(2)}s`;
+  }, []);
+
   return (
     <div
       {...rest}
@@ -53,7 +58,7 @@ export function Panel({
         />
       ) : null}
       {sheen ? (
-        <div aria-hidden className="sheen-band animate-sweep" style={{ animationDelay: `${sheenDelay}s` }} />
+        <div ref={sheenRef} aria-hidden className="sheen-band animate-sweep" />
       ) : null}
       <div className="relative">{children}</div>
     </div>

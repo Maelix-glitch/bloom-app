@@ -1,0 +1,31 @@
+{
+  "appId": "com.bloom.habits",
+  "appName": "Bloom",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#14151F",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#14151F"
+    }
+  },
+  "android": {
+    "backgroundColor": "#14151F"
+  },
+  "ios": {
+    "backgroundColor": "#14151F",
+    "contentInset": "always"
+  }
+}

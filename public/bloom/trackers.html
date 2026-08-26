@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bloom — Trackers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#14151F; --surface:#1C1E2B; --surface-2:#23263A; --border:#2E3145; --border-hover:#3A3D56;
+      --text:#F0EFEA; --text-muted:#8B8CA3; --text-faint:#5A5D75;
+      --amber:#E8B75E; --amber-dim:rgba(232,183,94,0.14);
+      --sage:#7FA88F; --sage-dim:rgba(127,168,143,0.14);
+      --rose:#C98BA0; --rose-dim:rgba(201,139,160,0.14);
+      --sky:#7FA0C9; --sky-dim:rgba(127,160,201,0.14);
+      --violet:#9B8ED9; --violet-dim:rgba(155,142,217,0.14);
+      --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px;
+      --radius:16px; --radius-sm:10px;
+      --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+      --ease: cubic-bezier(0.16,1,0.3,1);
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{ background: var(--bg); color: var(--text); font-family: var(--font-body); line-height:1.6; min-height:100vh; padding: var(--space-6) var(--space-5) var(--space-9); }
+    @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+    .wrap{ max-width: 1040px; margin:0 auto; }
+
+    .reveal{ opacity:0; transform:translateY(14px); animation: rise .7s var(--ease) forwards; }
+    @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+    .d1{animation-delay:.02s}.d2{animation-delay:.1s}.d3{animation-delay:.2s}.d4{animation-delay:.3s}.d5{animation-delay:.4s}.d6{animation-delay:.5s}
+
+    header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-7); }
+    .mark{ display:flex; align-items:center; gap: var(--space-3); }
+    .mark-glyph{ width:28px; height:28px; }
+    .mark-name{ font-family: var(--font-display); font-size:20px; font-weight:500; }
+    nav{ display:flex; gap: var(--space-5); align-items:center; }
+    nav a{ position:relative; color: var(--text-muted); text-decoration:none; font-size:14px; font-weight:500; }
+    nav a.active{ color: var(--text); }
+    .avatar{ width:32px; height:32px; border-radius:50%; background: linear-gradient(135deg, var(--sky), var(--sage)); display:flex; align-items:center; justify-content:center; font-family: var(--font-display); font-size:13px; font-weight:600; color:#14151F; }
+
+    .eyebrow{ font-family: var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color: var(--text-faint); margin-bottom: var(--space-2); }
+    h1{ font-family: var(--font-display); font-weight:500; font-size: clamp(26px,4.2vw,34px); margin-bottom: var(--space-6); }
+
+    .overview-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-8); }
+    .ov-card{
+      background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-sm);
+      padding: var(--space-4); cursor:pointer; transition: transform .3s var(--ease), border-color .3s ease;
+    }
+    .ov-card:hover{ transform: translateY(-3px); border-color: var(--border-hover); }
+    .ov-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-3); }
+    .ov-icon{ width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; }
+    .ov-trend{ font-family: var(--font-mono); font-size:11px; }
+    .ov-name{ font-size:12px; color: var(--text-muted); margin-bottom:2px; }
+    .ov-value{ font-family: var(--font-mono); font-size:19px; }
+    .ov-spark{ display:flex; align-items:flex-end; gap:2px; height:20px; margin-top: var(--space-3); }
+    .ov-spark span{ flex:1; border-radius:1px; }
+    .ov-card-action{ margin-top: var(--space-3); width:100%; padding: 8px 10px; border:1px solid var(--border); border-radius:999px; background: var(--surface-2); color: var(--text-muted); font-family: var(--font-body); font-size:12px; font-weight:600; cursor:pointer; transition: all .2s var(--ease); }
+    .ov-card-action:hover{ border-color: var(--sky); color: var(--text); transform: translateY(-1px); }
+    .ov-card-action[data-card="sleep"]:hover{ border-color: var(--sky); }
+    .ov-card-action[data-card="study"]:hover{ border-color: var(--sage); }
+
+    .tracker-modal-backdrop{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(10,10,16,0.62); backdrop-filter: blur(6px); z-index:20; padding: var(--space-5);
+    }
+    .tracker-modal-backdrop.active{ display:flex; }
+    .tracker-modal{
+      width:min(100%, 440px); background: linear-gradient(180deg, var(--surface), var(--surface-2)); border:1px solid var(--border); border-radius: var(--radius); box-shadow: 0 20px 50px rgba(0,0,0,0.45); overflow:hidden;
+    }
+    .tracker-modal-head{ display:flex; align-items:flex-start; justify-content:space-between; padding: var(--space-5) var(--space-5) var(--space-4); }
+    .tracker-modal-title{ font-family: var(--font-display); font-size:24px; font-weight:500; }
+    .tracker-modal-eyebrow{ font-family: var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color: var(--text-faint); margin-bottom: var(--space-1); }
+    .tracker-modal-close{ width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor:pointer; }
+    .tracker-modal-body{ padding: 0 var(--space-5) var(--space-5); display:flex; flex-direction:column; gap: var(--space-5); }
+    .field-row{ display:flex; align-items:flex-end; gap: var(--space-3); }
+    .field{ flex:1; }
+    .field-label{ display:block; font-size:12px; color: var(--text-muted); margin-bottom: var(--space-2); }
+    .tracker-input, .tracker-select{ width:100%; background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; color: var(--text); font-family: var(--font-mono); font-size:14px; }
+    .tracker-input:focus, .tracker-select:focus{ outline:none; border-color: var(--sky); box-shadow: 0 0 0 3px var(--sky-dim); }
+    .time-arrow{ color: var(--text-faint); margin-bottom: 10px; }
+    .duration-preview{ text-align:center; background: var(--sky-dim); border:1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-2); }
+    .duration-value{ font-family: var(--font-mono); font-size:24px; color: var(--sky); }
+    .duration-label{ font-size:11px; letter-spacing:.04em; text-transform:uppercase; color: var(--text-faint); }
+    .quality-row{ display:flex; gap: var(--space-2); }
+    .quality-opt{ flex:1; aspect-ratio:1; border:1px solid var(--border); background: var(--surface-2); border-radius: var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; transition: all .2s var(--ease); }
+    .quality-opt.selected{ background: var(--sky-dim); border-color: var(--sky); transform: scale(1.05); }
+    .tracker-muted{ font-size:12px; color: var(--text-faint); }
+    .tracker-modal-foot{ display:flex; gap: var(--space-3); }
+    .tracker-btn{ flex:1; border-radius: var(--radius-sm); border:1px solid transparent; padding: 12px 14px; font-weight:600; cursor:pointer; transition: all .2s var(--ease); }
+    .tracker-btn.secondary{ background: var(--surface-2); border-color: var(--border); color: var(--text-muted); }
+    .tracker-btn.primary{ background: linear-gradient(135deg, var(--sky), #5a7fa3); color:#14151F; }
+    .tracker-btn.primary.sage{ background: linear-gradient(135deg, var(--sage), #5f8a72); }
+    .tracker-btn:hover{ transform: translateY(-1px); }
+
+    .study-mode-tabs{ display:flex; background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm); padding:4px; gap:4px; }
+    .study-mode-tab{ flex:1; text-align:center; border-radius:8px; padding: 9px 8px; font-size:12px; color: var(--text-faint); cursor:pointer; }
+    .study-mode-tab.active{ background: var(--sage-dim); color: var(--sage); border:1px solid rgba(127,168,143,0.6); }
+    .study-timer-wrap{ display:flex; flex-direction:column; align-items:center; gap: var(--space-3); }
+    .study-timer-ring{ width:120px; height:120px; border-radius:50%; background: conic-gradient(var(--sage) 0%, var(--surface-2) 0); display:flex; align-items:center; justify-content:center; }
+    .study-timer-center{ width:72%; height:72%; border-radius:50%; background: var(--surface); display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size:22px; color: var(--sage); }
+    .study-controls{ display:flex; justify-content:center; gap: var(--space-3); }
+    .study-control-btn{ border-radius:999px; border:1px solid var(--border); padding: 10px 18px; background: var(--surface-2); color: var(--text); font-weight:600; cursor:pointer; }
+    .study-control-btn.start{ background: linear-gradient(135deg, var(--sage), #5f8a72); color: #14151F; border-color: transparent; }
+    .study-manual-panel{ display:none; flex-direction:column; gap: var(--space-4); }
+    .study-manual-panel.active{ display:flex; }
+    .subject-chips{ display:flex; flex-wrap:wrap; gap: var(--space-2); }
+    .subject-chip{ padding: 8px 12px; border-radius:999px; border:1px solid var(--border); background: var(--surface-2); color: var(--text-muted); font-size:12px; cursor:pointer; }
+    .subject-chip.selected{ background: var(--sage-dim); border-color: var(--sage); color: var(--sage); }
+
+    .section-head{ display:flex; justify-content:space-between; align-items:baseline; margin: 0 0 var(--space-4); }
+    .section-head h2{ font-family: var(--font-display); font-weight:500; font-size:19px; }
+    .section-sub{ font-size:12px; color: var(--text-faint); }
+
+    .sleep-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); margin-bottom: var(--space-6); display:grid; grid-template-columns: 1fr 200px; gap: var(--space-6); }
+    .sleep-chart{ display:flex; align-items:flex-end; gap: var(--space-3); height:120px; }
+    .sleep-bar-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; gap: var(--space-2); }
+    .sleep-bar{ width:100%; border-radius:5px 5px 0 0; background: linear-gradient(180deg, var(--sky), var(--sky-dim)); transition: height .8s var(--ease); position:relative; }
+    .sleep-bar.low{ background: linear-gradient(180deg, var(--rose), var(--rose-dim)); }
+    .sleep-dow{ font-family: var(--font-mono); font-size:10px; color: var(--text-faint); }
+    .sleep-side{ display:flex; flex-direction:column; gap: var(--space-4); justify-content:center; border-left:1px solid var(--border); padding-left: var(--space-5); }
+    .debt-label{ font-size:12px; color: var(--text-faint); }
+    .debt-value{ font-family: var(--font-mono); font-size:26px; color: var(--rose); }
+    .debt-note{ font-size:12px; color: var(--text-muted); line-height:1.5; }
+
+    .study-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-6); margin-bottom: var(--space-6); }
+    .heatmap{ display:grid; grid-template-columns: repeat(21, 1fr); gap:4px; margin: var(--space-4) 0; }
+    .heat-cell{ aspect-ratio:1; border-radius:3px; background: var(--surface-2); transition: transform .2s ease; cursor:pointer; }
+    .heat-cell:hover{ transform: scale(1.3); }
+    .heat-legend{ display:flex; align-items:center; gap: var(--space-2); font-size:11px; color: var(--text-faint); }
+    .heat-legend-swatch{ width:10px; height:10px; border-radius:2px; }
+
+    .small-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-8); }
+    .water-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-5); display:flex; align-items:center; gap: var(--space-5); }
+    .water-ring-wrap{ position:relative; width:84px; height:84px; flex-shrink:0; }
+    .water-ring-bg{ width:100%; height:100%; border-radius:50%; background: conic-gradient(var(--sky) 62%, var(--border) 0); }
+    .water-ring-center{ position:absolute; inset:8px; border-radius:50%; background: var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .water-ring-num{ font-family: var(--font-mono); font-size:16px; }
+    .water-ring-sub{ font-size:9px; color: var(--text-faint); }
+    .water-actions{ display:flex; gap: var(--space-2); }
+    .water-btn{ width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background: var(--surface-2); color: var(--text); cursor:pointer; transition: all .2s var(--ease); }
+    .water-btn:hover{ border-color: var(--sky); color: var(--sky); transform: scale(1.08); }
+
+    .energy-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding: var(--space-5); }
+    .energy-label{ font-size:12px; color: var(--text-muted); margin-bottom: var(--space-3); }
+    .energy-curve{ position:relative; height:60px; }
+    .energy-curve svg{ width:100%; height:100%; }
+
+    .insight-list{ display:flex; flex-direction:column; gap: var(--space-3); margin-bottom: var(--space-8); }
+    .insight-item{
+      display:flex; gap: var(--space-4); align-items:flex-start; background: var(--surface); border:1px solid var(--border);
+      border-radius: var(--radius-sm); padding: var(--space-4); transition: transform .25s var(--ease);
+    }
+    .insight-item:hover{ transform: translateX(3px); }
+    .insight-item[hidden]{ display:none; }
+    .insight-icon{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .insight-text{ font-size:13px; color: var(--text-muted); line-height:1.6; }
+    .insight-text strong{ color: var(--text); font-weight:600; }
+
+    .tracker-auth-message{ display:none; }
+    .tracker-auth-message[hidden]{ display:none; }
+    @media (max-width: 820px){
+      .overview-grid{ grid-template-columns: repeat(2,1fr); }
+      .sleep-card{ grid-template-columns: 1fr; }
+      .sleep-side{ border-left:none; border-top:1px solid var(--border); padding-left:0; padding-top: var(--space-4); }
+      .small-grid{ grid-template-columns: 1fr; }
+      nav{ display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="reveal d1">
+      <div class="mark">
+        <svg class="mark-glyph" viewBox="0 0 28 28" fill="none"><path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round"/><defs><linearGradient id="g1" x1="4" y1="13" x2="24" y2="13" gradientUnits="userSpaceOnUse"><stop stop-color="#7FA88F"/><stop offset="1" stop-color="#E8B75E"/></linearGradient></defs></svg>
+        <span class="mark-name">Bloom</span>
+      </div>
+      <nav><a href="index.html">Today</a><a href="trackers.html" class="active">Trackers</a><a href="cycle.html">Cycle</a><a href="/">Mood</a><a href="rewards.html">Rewards</a><a href="coach.html">Coach</a></nav>
+      <div class="avatar">M</div>
+    </header>
+
+    <div id="tracker-auth-message" class="tracker-auth-message" hidden>Sign in to load your personal tracker data.</div>
+
+    <div class="eyebrow reveal d2">Trackers</div>
+    <h1 class="reveal d2">Your patterns, not just your numbers.</h1>
+
+    <div id="overview-grid" class="overview-grid reveal d3"></div>
+
+    <div id="sleep-log-modal" class="tracker-modal-backdrop" aria-hidden="true">
+      <div class="tracker-modal" role="dialog" aria-modal="true" aria-labelledby="sleep-modal-title">
+        <div class="tracker-modal-head">
+          <div>
+            <div class="tracker-modal-eyebrow">Sleep</div>
+            <div class="tracker-modal-title" id="sleep-modal-title">Log last night</div>
+          </div>
+          <button type="button" class="tracker-modal-close" data-close-modal="sleep-log-modal" aria-label="Close sleep log modal">✕</button>
+        </div>
+        <div class="tracker-modal-body">
+          <form id="sleep-log-form">
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label" for="sleep-log-date">Date</label>
+                <input id="sleep-log-date" class="tracker-input" type="date" />
+              </div>
+            </div>
+            <div class="field-row" style="margin-top: var(--space-3);">
+              <div class="field">
+                <label class="field-label" for="bedTime">Went to bed</label>
+                <input id="bedTime" class="tracker-input" type="time" value="23:00" />
+              </div>
+              <div class="time-arrow">→</div>
+              <div class="field">
+                <label class="field-label" for="wakeTime">Woke up</label>
+                <input id="wakeTime" class="tracker-input" type="time" value="07:00" />
+              </div>
+            </div>
+            <div class="duration-preview" style="margin-top: var(--space-4);">
+              <div id="durationValue" class="duration-value">8h 00m</div>
+              <div class="duration-label">Total sleep</div>
+            </div>
+            <div style="margin-top: var(--space-4);">
+              <fieldset>
+                <legend class="field-label">How was the quality?</legend>
+                <div class="quality-row" role="group" aria-labelledby="quality-legend">
+                  <div class="quality-opt" data-quality="1" role="button" tabindex="0" aria-label="Poor sleep quality">😩</div>
+                  <div class="quality-opt" data-quality="2" role="button" tabindex="0" aria-label="Fair sleep quality">😕</div>
+                  <div class="quality-opt selected" data-quality="3" role="button" tabindex="0" aria-label="Okay sleep quality" aria-pressed="true">😐</div>
+                  <div class="quality-opt" data-quality="4" role="button" tabindex="0" aria-label="Good sleep quality">🙂</div>
+                  <div class="quality-opt" data-quality="5" role="button" tabindex="0" aria-label="Excellent sleep quality">😴</div>
+                </div>
+              </fieldset>
+            </div>
+            <div class="tracker-modal-foot" style="margin-top: var(--space-4);">
+              <button type="button" class="tracker-btn secondary" data-close-modal="sleep-log-modal">Cancel</button>
+              <button type="submit" class="tracker-btn primary">Save sleep</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="study-log-modal" class="tracker-modal-backdrop" aria-hidden="true">
+      <div class="tracker-modal" role="dialog" aria-modal="true" aria-labelledby="study-modal-title">
+        <div class="tracker-modal-head">
+          <div>
+            <div class="tracker-modal-eyebrow">Study</div>
+            <div class="tracker-modal-title" id="study-modal-title">Log a session</div>
+          </div>
+          <button type="button" class="tracker-modal-close" data-close-modal="study-log-modal" aria-label="Close study log modal">✕</button>
+        </div>
+        <div class="tracker-modal-body">
+          <form id="study-log-form">
+            <div class="study-mode-tabs" role="tablist" aria-label="Study entry mode">
+              <div class="study-mode-tab active" data-study-mode="timer" role="tab" aria-selected="true">Start timer</div>
+              <div class="study-mode-tab" data-study-mode="manual" role="tab" aria-selected="false">Enter manually</div>
+            </div>
+
+            <div id="study-timer-panel" class="study-timer-wrap" style="margin-top: var(--space-4);">
+              <div class="study-timer-ring">
+                <div class="study-timer-center" id="study-timer-value">00:00</div>
+              </div>
+              <div class="tracker-muted">Tap start when you begin studying</div>
+              <div class="study-controls">
+                <button type="button" class="study-control-btn start" id="study-start-btn">Start</button>
+              </div>
+            </div>
+
+            <div id="study-manual-panel" class="study-manual-panel" style="margin-top: var(--space-4);">
+              <div class="field">
+                <label class="field-label" for="study-minutes">Minutes studied</label>
+                <input id="study-minutes" class="tracker-input" type="number" min="1" max="600" placeholder="e.g. 45" />
+              </div>
+              <div>
+                <fieldset>
+                  <legend class="field-label">Subject</legend>
+                  <div class="subject-chips" role="group" aria-labelledby="subject-legend">
+                    <div class="subject-chip selected" data-subject="General" role="button" tabindex="0" aria-label="General subject" aria-pressed="true">General</div>
+                    <div class="subject-chip" data-subject="Math" role="button" tabindex="0" aria-label="Math subject">Math</div>
+                    <div class="subject-chip" data-subject="Language" role="button" tabindex="0" aria-label="Language subject">Language</div>
+                    <div class="subject-chip" data-subject="Reading" role="button" tabindex="0" aria-label="Reading subject">Reading</div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <div class="tracker-modal-foot" style="margin-top: var(--space-4);">
+              <button type="button" class="tracker-btn secondary" data-close-modal="study-log-modal">Cancel</button>
+              <button type="submit" class="tracker-btn primary sage">Save session</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head reveal d4"><h2>Sleep</h2><span class="section-sub">Last 7 nights</span></div>
+    <div class="sleep-card reveal d4">
+      <div>
+        <div id="sleep-chart" class="sleep-chart"></div>
+      </div>
+      <div class="sleep-side">
+        <div>
+          <div class="debt-label">Sleep debt this week</div>
+          <div id="sleep-debt-value" class="debt-value">0.0h</div>
+        </div>
+        <div id="sleep-debt-note" class="debt-note">Keep logging sleep to unlock a weekly trend.</div>
+      </div>
+    </div>
+
+    <div class="section-head reveal d5"><h2>Study</h2><span class="section-sub">Last 3 weeks · streak: 6 days</span></div>
+    <div class="study-card reveal d5">
+      <div id="heatmap" class="heatmap"></div>
+      <div class="heat-legend">
+        <span>Less</span>
+        <span class="heat-legend-swatch" style="background:rgba(127,168,143,0.1)"></span>
+        <span class="heat-legend-swatch" style="background:rgba(127,168,143,0.3)"></span>
+        <span class="heat-legend-swatch" style="background:rgba(127,168,143,0.55)"></span>
+        <span class="heat-legend-swatch" style="background:rgba(127,168,143,0.8)"></span>
+        <span class="heat-legend-swatch" style="background:rgba(127,168,143,1)"></span>
+        <span>More</span>
+      </div>
+    </div>
+
+    <div class="small-grid reveal d6">
+      <div class="water-card">
+        <div class="water-ring-wrap"><div class="water-ring-bg"></div><div class="water-ring-center"><span class="water-ring-num">0.0L</span><span class="water-ring-sub">of 2.2L</span></div></div>
+        <div>
+          <div class="ov-name" style="margin-bottom:10px;">Add water</div>
+          <div class="water-actions">
+            <button type="button" class="water-btn" aria-label="Add 250ml">+</button>
+            <button type="button" class="water-btn" style="font-size:11px;" aria-label="Add 250ml">250</button>
+            <button type="button" class="water-btn" style="font-size:11px;" aria-label="Add 500ml">500</button>
+          </div>
+        </div>
+      </div>
+      <div class="energy-card">
+        <div class="energy-label">Energy through the day</div>
+        <div class="energy-curve">
+          <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+            <path d="M0,45 C30,35 40,20 70,22 C100,24 110,40 140,30 C165,22 180,15 200,18" fill="none" stroke="#E8B75E" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head reveal d6"><h2>What we're noticing</h2></div>
+    <div class="insight-list reveal d6">
+      <div class="insight-item" data-insight-type="sleep_mood">
+        <div class="insight-icon" style="background:var(--sky-dim); color:var(--sky);">💤</div>
+        <div class="insight-text">Loading sleep pattern…</div>
+      </div>
+      <div class="insight-item" data-insight-type="habit_energy">
+        <div class="insight-icon" style="background:var(--sage-dim); color:var(--sage);">🌱</div>
+        <div class="insight-text">Loading habit energy pattern…</div>
+      </div>
+      <div class="insight-item" data-insight-type="study_window">
+        <div class="insight-icon" style="background:var(--amber-dim); color:var(--amber);">📚</div>
+        <div class="insight-text">Loading study window…</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/trackers.js"></script>
+<script src="shared-bloom-header.js?v=2"></script></body>
+</html>
+
