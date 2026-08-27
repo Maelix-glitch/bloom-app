@@ -1,0 +1,2205 @@
+/* Rewards-only stylesheet for chronos-feel. It is route-scoped and does not replace styles.css. */
+
+.rewards-delivery-page,
+.rewards-admin-page {
+  --background: oklch(0.16 0.04 278);
+  --surface: oklch(0.235 0.038 277);
+  --surface-2: oklch(0.29 0.045 282);
+  --surface-3: oklch(0.35 0.05 284);
+  --border: oklch(0.38 0.05 283);
+  --faint: oklch(0.62 0.035 285);
+  --muted-foreground: oklch(0.72 0.03 285);
+  --violet: oklch(0.72 0.12 297);
+  --sky: oklch(0.75 0.09 240);
+  --sage: oklch(0.73 0.09 155);
+  --rose: oklch(0.75 0.1 355);
+  --font-display: "Cormorant Garamond", "Fraunces", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --dim-violet: color-mix(in oklab, var(--violet) 14%, transparent);
+  --dim-sky: color-mix(in oklab, var(--sky) 14%, transparent);
+  --dim-amber: color-mix(in oklab, var(--gold) 14%, transparent);
+  --dim-sage: color-mix(in oklab, var(--sage) 14%, transparent);
+  --dim-rose: color-mix(in oklab, var(--rose) 14%, transparent);
+  --shadow-depth: 0 26px 60px -30px rgb(5 4 12 / 0.85);
+}
+
+/* Regular aliases for reward pages when the base app does not define Bloom Mood tokens. */
+.rewards-delivery-page .text-faint,
+.rewards-admin-page .text-faint {
+  color: var(--faint);
+}
+.rewards-delivery-page .text-sky,
+.rewards-admin-page .text-sky {
+  color: var(--sky);
+}
+.rewards-delivery-page .text-sage,
+.rewards-admin-page .text-sage {
+  color: var(--sage);
+}
+.rewards-delivery-page .text-rose,
+.rewards-admin-page .text-rose {
+  color: var(--rose);
+}
+.rewards-delivery-page .text-violet,
+.rewards-admin-page .text-violet {
+  color: var(--violet);
+}
+.rewards-delivery-page .text-amber,
+.rewards-admin-page .text-amber {
+  color: var(--gold);
+}
+.rewards-delivery-page .bg-surface,
+.rewards-admin-page .bg-surface {
+  background: var(--surface);
+}
+.rewards-delivery-page .bg-surface-2,
+.rewards-admin-page .bg-surface-2 {
+  background: var(--surface-2);
+}
+.rewards-delivery-page .border-border,
+.rewards-admin-page .border-border {
+  border-color: var(--border);
+}
+
+.rewards-header {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 24px;
+  border-bottom: 1px solid color-mix(in oklab, var(--gold) 16%, var(--border));
+  background: color-mix(in oklab, var(--background) 90%, transparent);
+  backdrop-filter: blur(18px);
+}
+.rewards-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.rewards-brand-mark {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  border-radius: 50%;
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 9%, transparent);
+}
+.rewards-brand-name {
+  color: var(--gold-soft);
+  font: 600 19px var(--font-display);
+  letter-spacing: 0.04em;
+}
+.rewards-brand-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+.rewards-brand-section {
+  color: var(--faint);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.rewards-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rewards-nav-link {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 250ms ease;
+}
+.rewards-nav-link:hover,
+.rewards-nav-active {
+  color: var(--foreground);
+}
+.rewards-admin-nav-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in oklab, var(--gold) 35%, var(--border));
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--gold-soft);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  font: 9px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+.rewards-admin-nav-button:hover {
+  border-color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}
+@media (max-width: 620px) {
+  .rewards-header {
+    padding: 0 15px;
+  }
+  .rewards-nav-link {
+    display: none;
+  }
+  .rewards-brand-section,
+  .rewards-brand-divider {
+    display: none;
+  }
+}
+/* Chronos reward migration: real reward art, XP economy, and claim sequence. */
+
+@keyframes chronos-crest-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg) scale(1.025);
+  }
+}
+
+@keyframes chronos-crest-glint {
+  0%,
+  28% {
+    transform: translateX(-170%) rotate(21deg);
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.72;
+  }
+  62%,
+  100% {
+    transform: translateX(190%) rotate(21deg);
+    opacity: 0;
+  }
+}
+
+@keyframes chronos-beam {
+  0%,
+  100% {
+    opacity: 0.16;
+    transform: rotate(-14deg) scaleY(0.78);
+  }
+  50% {
+    opacity: 0.6;
+    transform: rotate(-14deg) scaleY(1.08);
+  }
+}
+
+@keyframes chronos-charge {
+  0% {
+    transform: scale(0.78);
+    opacity: 0.25;
+  }
+  65% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0.18;
+  }
+}
+
+@keyframes chronos-claim-core {
+  0% {
+    transform: scale(0.58) rotateY(-22deg) rotateX(12deg);
+    opacity: 0.05;
+  }
+  55% {
+    transform: scale(1.12) rotateY(5deg) rotateX(-4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotateY(0) rotateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes chronos-claim-rays {
+  0% {
+    transform: scale(0.45) rotate(0deg);
+    opacity: 0;
+  }
+  42% {
+    opacity: 0.82;
+  }
+  100% {
+    transform: scale(1.2) rotate(32deg);
+    opacity: 0;
+  }
+}
+
+@keyframes chronos-claim-particle {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.4);
+    opacity: 0;
+  }
+  26% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(
+        calc((var(--particle-x, 0) - 50%) * 1.22),
+        calc((var(--particle-y, 0) - 50%) * 1.22),
+        0
+      )
+      scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes chronos-cinematic-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.reward-sound-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 12px;
+  color: var(--faint);
+  background: color-mix(in oklab, var(--surface-2) 60%, transparent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    border-color 300ms ease,
+    color 300ms ease,
+    background 300ms ease;
+}
+
+.reward-sound-button:hover,
+.reward-sound-button[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--sky) 42%, var(--border));
+  color: var(--sky);
+  background: var(--dim-sky);
+}
+
+.reward-chronos-hero {
+  background-image:
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--surface) 78%, transparent),
+      color-mix(in oklab, var(--background) 63%, transparent)
+    ),
+    var(--reward-aurora-image);
+  background-position: center;
+  background-size: cover;
+  background-blend-mode: normal, screen;
+}
+
+.reward-chronos-hero::before {
+  border-color: color-mix(in oklab, var(--sky) 20%, var(--border));
+}
+.reward-chronos-hero::after {
+  border-color: color-mix(in oklab, var(--violet) 18%, transparent);
+}
+.reward-chronos-crest-wrap {
+  position: relative;
+  z-index: 2;
+  width: min(74%, 310px);
+  aspect-ratio: 1;
+  animation: chronos-crest-float 7s ease-in-out infinite;
+  filter: drop-shadow(0 30px 22px rgb(3 2 10 / 0.76));
+}
+.reward-chronos-crest {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+}
+.reward-chronos-crest-light {
+  position: absolute;
+  top: 20%;
+  bottom: 18%;
+  left: 2%;
+  width: 15%;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.38), transparent);
+  filter: blur(6px);
+  transform: translateX(-190%) rotate(20deg);
+  animation: chronos-crest-glint 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.reward-chronos-hero .reward-hero-halo-one {
+  background: color-mix(in oklab, var(--sky) 18%, transparent);
+}
+.reward-chronos-hero .reward-hero-halo-two {
+  background: color-mix(in oklab, var(--amber) 23%, transparent);
+}
+
+.reward-quest-row {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  transition: opacity 300ms ease;
+}
+.reward-quest-row:first-child {
+  border-top: 0;
+}
+.reward-quest-row-done {
+  opacity: 0.65;
+}
+.reward-quest-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid currentColor;
+  border-radius: 11px;
+  background: color-mix(in oklab, currentColor 9%, transparent);
+}
+.reward-quest-track {
+  height: 3px;
+  overflow: hidden;
+  margin-top: 7px;
+  border-radius: 99px;
+  background: var(--surface-3);
+}
+.reward-quest-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 0 0 10px currentColor;
+  transition: width 700ms var(--ease-out-expo);
+}
+.reward-quest-action {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: var(--muted-foreground);
+  background: var(--surface-2);
+  transition:
+    transform 300ms var(--ease-out-expo),
+    color 300ms ease,
+    border-color 300ms ease,
+    background 300ms ease;
+}
+.reward-quest-action:hover:not(:disabled) {
+  transform: translateX(3px);
+  border-color: var(--violet);
+  color: var(--foreground);
+  background: var(--dim-violet);
+}
+.reward-quest-action-done {
+  border-color: color-mix(in oklab, var(--sage) 42%, var(--border));
+  color: var(--sage);
+  background: var(--dim-sage);
+}
+.reward-xp-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in oklab, var(--amber) 30%, var(--border));
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--amber);
+  background: var(--dim-amber);
+  font: 9px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.reward-xp-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--surface-3);
+}
+.reward-xp-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 0 0 10px currentColor;
+  transition: width 700ms var(--ease-out-expo);
+}
+
+.claim-cinematic {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--foreground);
+  background: #070711;
+  animation: chronos-cinematic-in 450ms ease-out both;
+  isolation: isolate;
+}
+.claim-cinematic-backdrop {
+  position: absolute;
+  inset: -20%;
+  z-index: -3;
+  background:
+    radial-gradient(
+      circle at 50% 49%,
+      color-mix(in oklab, var(--violet) 22%, transparent),
+      transparent 19%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      color-mix(in oklab, var(--sky) 16%, transparent),
+      transparent 49%
+    ),
+    linear-gradient(145deg, #070711, #141126 56%, #090d1c);
+}
+.claim-cinematic-backdrop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0.45;
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.035) 50%, transparent);
+  background-size: 50% 100%;
+}
+.claim-cinematic-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.34;
+  background-image:
+    linear-gradient(to right, rgb(174 153 241 / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(174 153 241 / 0.08) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(75% 80% at 50% 50%, black, transparent 88%);
+}
+.claim-cinematic-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.claim-cinematic-stars span {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  animation: chronos-claim-particle 2.1s cubic-bezier(0.17, 0.67, 0.24, 1) both;
+  animation-delay: var(--particle-delay, 0s);
+  box-shadow: 0 0 12px currentColor;
+}
+.claim-cinematic-copy {
+  position: absolute;
+  z-index: 6;
+  width: min(92%, 640px);
+  text-align: center;
+}
+.claim-cinematic-copy-top {
+  top: 8%;
+}
+.claim-cinematic-copy-top .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 13%, transparent);
+  border-radius: 999px;
+  background: rgb(21 20 38 / 0.65);
+  backdrop-filter: blur(12px);
+}
+.claim-signal-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 13px var(--amber);
+  animation: breathe 1.5s ease-in-out infinite;
+}
+.claim-cinematic-copy-bottom {
+  bottom: 9%;
+}
+.claim-cinematic-kicker {
+  color: var(--amber);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.claim-cinematic-title {
+  margin-top: 10px;
+  font-size: clamp(36px, 6vw, 70px);
+  line-height: 0.98;
+  background: linear-gradient(110deg, var(--amber), #fff1c9 30%, var(--violet) 67%, var(--sky));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 7s ease-in-out infinite;
+}
+.claim-cinematic-description {
+  max-width: 45ch;
+  margin: 13px auto 0;
+  color: color-mix(in oklab, var(--foreground) 62%, transparent);
+  font-size: 13px;
+}
+.claim-cinematic-reward {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 19px;
+  color: var(--muted-foreground);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.claim-cinematic-reward span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.claim-cinematic-reward span:first-child {
+  color: var(--amber);
+}
+.claim-cinematic-core {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  width: min(70vw, 520px);
+  aspect-ratio: 1;
+  place-items: center;
+}
+.claim-cinematic-radar {
+  position: absolute;
+  inset: 15%;
+  border: 1px solid color-mix(in oklab, var(--violet) 35%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--sky) 10%, transparent),
+    inset 0 0 50px color-mix(in oklab, var(--violet) 12%, transparent);
+  animation: chronos-charge 2.2s ease-in-out infinite;
+}
+.claim-cinematic-radar::before,
+.claim-cinematic-radar::after {
+  position: absolute;
+  inset: 15%;
+  border: 1px dashed color-mix(in oklab, var(--foreground) 16%, transparent);
+  border-radius: 50%;
+  content: "";
+}
+.claim-cinematic-radar::after {
+  inset: 31%;
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--amber) 22%, transparent);
+}
+.claim-cinematic-ring {
+  position: absolute;
+  border: 1px solid color-mix(in oklab, var(--foreground) 24%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.claim-cinematic-ring-one {
+  width: 76%;
+  height: 28%;
+  transform: rotate(-25deg);
+  animation: spin 12s linear infinite;
+}
+.claim-cinematic-ring-two {
+  width: 35%;
+  height: 86%;
+  border-color: color-mix(in oklab, var(--amber) 24%, transparent);
+  transform: rotate(35deg);
+  animation: spin-reverse 18s linear infinite;
+}
+.claim-cinematic-beam {
+  position: absolute;
+  inset: 3% 43%;
+  border-radius: 50%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklab, var(--sky) 20%, transparent),
+    transparent
+  );
+  filter: blur(14px);
+  animation: chronos-beam 3.1s ease-in-out infinite;
+}
+.claim-cinematic-crest-wrap {
+  position: relative;
+  width: 68%;
+  height: 68%;
+  transform-style: preserve-3d;
+}
+.claim-cinematic-crest {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 20px 25px rgb(0 0 0 / 0.78));
+  transition:
+    transform 900ms var(--ease-out-expo),
+    filter 900ms ease;
+}
+.claim-cinematic-crest-glow {
+  position: absolute;
+  inset: 19%;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--violet) 26%, transparent);
+  filter: blur(31px);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+.claim-cinematic-charging .claim-cinematic-crest {
+  opacity: 0.4;
+  filter: grayscale(0.25) saturate(0.7) brightness(0.76)
+    drop-shadow(0 0 18px color-mix(in oklab, var(--violet) 45%, transparent));
+  transform: scale(0.66) rotateY(-22deg) rotateX(13deg);
+  animation: chronos-charge 1.5s ease-in-out infinite;
+}
+.claim-cinematic-revealing .claim-cinematic-crest {
+  opacity: 1;
+  transform: scale(1.03) rotateY(4deg) rotateX(-3deg);
+  animation: chronos-claim-core 0.9s var(--ease-out-expo) both;
+}
+.claim-cinematic-landed .claim-cinematic-crest {
+  opacity: 1;
+  transform: scale(1) rotateY(0) rotateX(0);
+  filter: drop-shadow(0 0 34px color-mix(in oklab, var(--sky) 38%, transparent))
+    drop-shadow(0 24px 22px rgb(0 0 0 / 0.76));
+}
+.claim-cinematic-landed .claim-cinematic-ring-one {
+  border-color: color-mix(in oklab, var(--amber) 48%, transparent);
+  animation-duration: 7s;
+}
+.claim-cinematic-landed .claim-cinematic-ring-two {
+  border-color: color-mix(in oklab, var(--sky) 42%, transparent);
+  animation-duration: 11s;
+}
+.claim-cinematic-revealing .claim-cinematic-radar::after,
+.claim-cinematic-landed .claim-cinematic-radar::after {
+  animation: chronos-claim-rays 1.1s ease-out both;
+}
+.claim-cinematic-skip {
+  position: absolute;
+  z-index: 8;
+  right: 28px;
+  bottom: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: var(--muted-foreground);
+  background: rgb(29 28 43 / 0.72);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  transition:
+    color 250ms ease,
+    border-color 250ms ease;
+}
+.claim-cinematic-skip:hover {
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+
+@media (max-width: 700px) {
+  .reward-chronos-crest-wrap {
+    width: 80%;
+  }
+  .reward-xp-total {
+    margin-top: 4px;
+  }
+  .claim-cinematic-copy-top {
+    top: 5%;
+  }
+  .claim-cinematic-copy-bottom {
+    bottom: 8%;
+    padding: 0 18px;
+  }
+  .claim-cinematic-core {
+    width: min(98vw, 470px);
+  }
+  .claim-cinematic-skip {
+    right: 16px;
+    bottom: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-chronos-crest-wrap,
+  .reward-chronos-crest-light,
+  .claim-cinematic-radar,
+  .claim-cinematic-ring,
+  .claim-cinematic-beam,
+  .claim-cinematic-crest,
+  .claim-cinematic-crest-glow,
+  .claim-cinematic-stars span {
+    animation: none !important;
+  }
+}
+
+.reward-preview-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px dashed color-mix(in oklab, var(--amber) 36%, var(--border));
+  border-radius: 999px;
+  padding: 10px 12px;
+  color: var(--amber);
+  background: color-mix(in oklab, var(--amber) 7%, transparent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    transform 300ms var(--ease-out-expo),
+    border-color 300ms ease,
+    background 300ms ease;
+}
+
+.reward-preview-button:hover {
+  transform: translateY(-2px);
+  border-color: var(--amber);
+  background: var(--dim-amber);
+}
+
+/* --------------------------------------------------------------------------
+   Curated reward delivery UI
+   No reward content is created here; this layer only renders records returned
+   by the protected Rewards RPCs and provides the admin editor shell.
+   -------------------------------------------------------------------------- */
+
+.rewards-delivery-page,
+.rewards-admin-page {
+  --font-display: "Cormorant Garamond", "Fraunces", Georgia, serif;
+}
+
+.reward-page-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  animation: rise-in 0.7s var(--ease-out-expo) both;
+}
+
+.reward-page-header-actions,
+.reward-admin-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.reward-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid color-mix(in oklab, var(--gold) 24%, var(--border));
+  border-radius: 999px;
+  padding: 10px 13px;
+  color: var(--gold-soft);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition:
+    transform 300ms var(--ease-out-expo),
+    border-color 300ms ease,
+    background 300ms ease;
+}
+
+.reward-admin-link:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--gold) 52%, var(--border));
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}
+
+.reward-empty-state {
+  position: relative;
+  display: flex;
+  min-height: 585px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 52px;
+  padding: 70px 24px;
+  border: 1px solid color-mix(in oklab, var(--gold) 21%, var(--border));
+  border-radius: 24px;
+  text-align: center;
+  background:
+    radial-gradient(
+      circle at 50% 38%,
+      color-mix(in oklab, var(--gold) 11%, transparent),
+      transparent 23%
+    ),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--surface) 96%, var(--royal)),
+      color-mix(in oklab, var(--surface-2) 82%, var(--background))
+    );
+  box-shadow:
+    0 30px 80px -40px rgb(0 0 0 / 0.95),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
+  animation: rise-in 0.8s 0.1s var(--ease-out-expo) both;
+}
+
+.reward-empty-state::before,
+.reward-empty-state::after {
+  position: absolute;
+  content: "";
+  border: 1px solid color-mix(in oklab, var(--gold) 12%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.reward-empty-state::before {
+  inset: 11% 23%;
+  transform: rotate(-19deg) scaleY(0.56);
+}
+.reward-empty-state::after {
+  inset: 17% 31%;
+  transform: rotate(39deg) scaleY(0.68);
+  border-color: color-mix(in oklab, var(--violet) 13%, transparent);
+}
+.reward-empty-state-glow {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  width: 260px;
+  height: 210px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+  filter: blur(60px);
+  transform: translateX(-50%);
+  animation: breathe 6s ease-in-out infinite;
+}
+.reward-empty-state-orbit {
+  position: absolute;
+  border: 1px solid color-mix(in oklab, var(--gold) 23%, transparent);
+  border-radius: 50%;
+  opacity: 0.62;
+  pointer-events: none;
+}
+.reward-empty-state-orbit-one {
+  width: 260px;
+  height: 83px;
+  transform: rotate(-22deg);
+  animation: spin 22s linear infinite;
+}
+.reward-empty-state-orbit-two {
+  width: 175px;
+  height: 300px;
+  border-color: color-mix(in oklab, var(--violet) 23%, transparent);
+  transform: rotate(37deg);
+  animation: spin-reverse 29s linear infinite;
+}
+.reward-empty-state-seal {
+  position: relative;
+  z-index: 1;
+  width: 144px;
+  height: 144px;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 22px 20px rgb(0 0 0 / 0.68));
+  animation: float-slow 7s ease-in-out infinite;
+}
+.reward-empty-state-seal::after {
+  position: absolute;
+  inset: 25%;
+  content: "";
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gold) 22%, transparent);
+  filter: blur(25px);
+  z-index: -1;
+}
+.reward-empty-state-seal img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+}
+.reward-empty-state-seal > span {
+  position: absolute;
+  right: 3px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in oklab, var(--gold) 48%, var(--border));
+  border-radius: 50%;
+  color: var(--gold);
+  background: var(--surface-2);
+  box-shadow: 0 6px 15px rgb(0 0 0 / 0.5);
+}
+.reward-empty-state-rule {
+  position: relative;
+  width: min(260px, 70%);
+  height: 1px;
+  margin-top: 31px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--gold) 46%, transparent),
+    transparent
+  );
+}
+.reward-empty-state-rule span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 15px var(--gold);
+  transform: translate(-50%, -50%);
+}
+.reward-empty-state-foot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 34px;
+  color: var(--faint);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.reward-loading-state,
+.reward-error-state {
+  display: flex;
+  min-height: 430px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 34px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--surface) 76%, transparent);
+  text-align: center;
+}
+.reward-loading-orb {
+  position: relative;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--gold) 38%, var(--border));
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 9px color-mix(in oklab, var(--gold) 8%, transparent),
+    0 0 35px color-mix(in oklab, var(--gold) 23%, transparent);
+  animation: spin 5s linear infinite;
+}
+.reward-loading-orb::before {
+  position: absolute;
+  inset: 11px;
+  border: 1px dashed color-mix(in oklab, var(--violet) 42%, transparent);
+  border-radius: 50%;
+  content: "";
+  animation: spin-reverse 3.2s linear infinite;
+}
+.reward-loading-orb span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 16px var(--gold);
+}
+.reward-error-state {
+  padding: 48px 24px;
+}
+
+.reward-delivery-section {
+  margin-top: 54px;
+  animation: rise-in 0.75s var(--ease-out-expo) both;
+}
+.reward-delivery-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.reward-delivery-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid color-mix(in oklab, var(--gold) 27%, var(--border));
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: var(--gold-soft);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  font: 10px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.reward-delivery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.reward-delivery-reveal {
+  animation: rise-in 0.7s var(--ease-out-expo) both;
+}
+.reward-delivery-card {
+  position: relative;
+  display: flex;
+  min-height: 190px;
+  width: 100%;
+  align-items: center;
+  gap: 22px;
+  overflow: hidden;
+  padding: 23px;
+  border: 1px solid color-mix(in oklab, var(--reward-delivery-accent) 24%, var(--border));
+  border-radius: 18px;
+  color: var(--foreground);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--surface-2) 91%, var(--reward-delivery-accent)),
+    color-mix(in oklab, var(--surface) 94%, var(--background))
+  );
+  box-shadow:
+    0 26px 55px -34px rgb(0 0 0 / 0.95),
+    inset 0 1px 0 rgb(255 255 255 / 0.035);
+  transition:
+    transform 500ms var(--ease-out-expo),
+    border-color 350ms ease,
+    box-shadow 350ms ease;
+}
+.reward-delivery-card:hover {
+  transform: translateY(-5px) rotateX(1deg);
+  border-color: color-mix(in oklab, var(--reward-delivery-accent) 58%, var(--border));
+  box-shadow:
+    0 35px 65px -34px rgb(0 0 0 / 0.98),
+    0 0 0 1px color-mix(in oklab, var(--reward-delivery-accent) 16%, transparent);
+}
+.reward-delivery-card-media {
+  position: relative;
+  display: grid;
+  width: 116px;
+  height: 142px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--reward-delivery-accent) 25%, var(--border));
+  border-radius: 15px;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in oklab, var(--reward-delivery-accent) 13%, transparent),
+      transparent 70%
+    ),
+    color-mix(in oklab, var(--background) 75%, transparent);
+}
+.reward-delivery-card-media::after {
+  position: absolute;
+  inset: 10%;
+  border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  border-radius: 12px;
+  content: "";
+}
+.reward-delivery-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 92px;
+  height: 120px;
+  filter: drop-shadow(0 15px 12px rgb(0 0 0 / 0.6));
+  transition: transform 500ms var(--ease-out-expo);
+}
+.reward-delivery-card:hover .reward-delivery-image {
+  transform: translateY(-5px) scale(1.06) rotate(2deg);
+}
+.reward-delivery-image-large {
+  width: 220px;
+  height: 240px;
+}
+.reward-delivery-image-fallback {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--gold) 35%, var(--border));
+  border-radius: 50%;
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+}
+.reward-delivery-image-fallback-large {
+  width: 105px;
+  height: 105px;
+}
+.reward-delivery-card-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: start;
+}
+.reward-delivery-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  color: var(--faint);
+  font: 9px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.reward-delivery-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sage);
+}
+.reward-delivery-status span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+.reward-delivery-title {
+  display: block;
+  margin-top: 11px;
+  color: var(--gold-soft);
+  font: 500 26px/1.05 var(--font-display);
+  letter-spacing: -0.01em;
+}
+.reward-delivery-description {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 9px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.65;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.reward-delivery-card-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 15px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  transition: color 250ms ease;
+}
+.reward-delivery-card:hover .reward-delivery-card-footer {
+  color: var(--foreground);
+}
+.reward-delivery-card-shine {
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -52%;
+  width: 27%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.15), transparent);
+  transform: skewX(-16deg);
+  animation: reward-shimmer 7s ease-in-out infinite;
+  pointer-events: none;
+}
+.reward-delivery-card-line {
+  position: absolute;
+  top: 0;
+  right: 15%;
+  left: 15%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--reward-delivery-accent) 70%, transparent),
+    transparent
+  );
+}
+
+.reward-delivery-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 24px;
+  background: rgb(6 5 13 / 0.78);
+  backdrop-filter: blur(13px);
+  animation: fade-in-soft 0.25s ease-out both;
+}
+.reward-delivery-modal {
+  position: relative;
+  width: min(820px, 100%);
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--gold) 34%, var(--border));
+  border-radius: 23px;
+  padding: 31px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--surface-2) 96%, var(--royal)),
+    color-mix(in oklab, var(--surface) 96%, var(--background))
+  );
+  box-shadow: 0 34px 100px -30px rgb(0 0 0 / 0.96);
+  animation: modal-pop 0.45s var(--ease-out-expo) both;
+}
+.reward-delivery-modal::before {
+  position: absolute;
+  top: 0;
+  right: 15%;
+  left: 15%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--gold), var(--violet), transparent);
+}
+.reward-delivery-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--faint);
+  background: var(--surface-2);
+  transition:
+    color 250ms ease,
+    border-color 250ms ease,
+    transform 250ms ease;
+}
+.reward-delivery-modal-close:hover {
+  transform: rotate(8deg);
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+.reward-delivery-modal-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  align-items: center;
+  gap: 30px;
+}
+.reward-delivery-modal-art {
+  position: relative;
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+}
+.reward-delivery-modal-art-halo {
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gold) 18%, transparent);
+  filter: blur(30px);
+  animation: breathe 5s ease-in-out infinite;
+}
+.reward-delivery-message {
+  display: flex;
+  align-items: start;
+  gap: 9px;
+  border: 1px solid color-mix(in oklab, var(--violet) 28%, var(--border));
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--violet) 7%, transparent);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.reward-delivery-message svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--violet);
+}
+.reward-delivery-value {
+  border-left: 2px solid var(--gold);
+  padding-left: 11px;
+}
+.reward-delivery-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--faint);
+  font: 10px var(--font-mono);
+}
+.reward-delivery-dates span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.reward-delivery-modal-footer {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+  padding-top: 19px;
+}
+.reward-delivery-claimed-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sage);
+  font-size: 12px;
+}
+
+/* Admin-only surface */
+.reward-admin-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  animation: rise-in 0.7s var(--ease-out-expo) both;
+}
+.reward-admin-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 22px;
+  margin-top: 36px;
+}
+.reward-admin-editor,
+.reward-admin-recipients,
+.reward-admin-inventory {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--surface) 86%, transparent);
+  box-shadow: var(--shadow-depth);
+}
+.reward-admin-editor {
+  padding: 25px;
+}
+.reward-admin-recipients {
+  align-self: start;
+  padding: 25px;
+}
+.reward-admin-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--foreground);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.reward-admin-count {
+  margin-left: auto;
+  color: var(--sage);
+}
+.reward-admin-form {
+  display: grid;
+  gap: 17px;
+  margin-top: 24px;
+}
+.reward-admin-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+.reward-admin-field {
+  display: grid;
+  gap: 7px;
+}
+.reward-admin-field-label {
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+}
+.reward-admin-field-hint {
+  color: var(--faint);
+  font: 10px/1.4 var(--font-mono);
+}
+.reward-admin-field input,
+.reward-admin-field textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  outline: none;
+  color: var(--foreground);
+  background: var(--surface-2);
+  font-size: 12px;
+  transition:
+    border-color 250ms ease,
+    box-shadow 250ms ease;
+}
+.reward-admin-field textarea {
+  resize: vertical;
+}
+.reward-admin-field input::placeholder,
+.reward-admin-field textarea::placeholder {
+  color: var(--faint);
+}
+.reward-admin-field input:focus,
+.reward-admin-field textarea:focus {
+  border-color: color-mix(in oklab, var(--gold) 55%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 10%, transparent);
+}
+.reward-admin-editor-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 25px;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+.reward-admin-security-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--faint);
+  font: 10px var(--font-mono);
+}
+.reward-admin-user-list {
+  display: grid;
+  gap: 7px;
+  max-height: 440px;
+  overflow-y: auto;
+  margin-top: 21px;
+  padding-right: 4px;
+}
+.reward-admin-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 10px;
+  cursor: pointer;
+  background: color-mix(in oklab, var(--surface-2) 65%, transparent);
+  transition:
+    border-color 250ms ease,
+    background 250ms ease;
+}
+.reward-admin-user:hover,
+.reward-admin-user-selected {
+  border-color: color-mix(in oklab, var(--gold) 40%, var(--border));
+  background: color-mix(in oklab, var(--gold) 8%, var(--surface-2));
+}
+.reward-admin-user input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.reward-admin-user-check {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  color: transparent;
+  background: var(--surface);
+}
+.reward-admin-user-selected .reward-admin-user-check {
+  border-color: var(--gold);
+  color: var(--background);
+  background: var(--gold);
+}
+.reward-admin-user-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.reward-admin-user-copy span {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reward-admin-user-copy small {
+  overflow: hidden;
+  color: var(--faint);
+  font: 10px var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reward-admin-no-users {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 42px 15px;
+  color: var(--faint);
+  text-align: center;
+}
+.reward-admin-no-users p {
+  margin: 6px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.reward-admin-no-users span {
+  max-width: 28ch;
+  font: 10px/1.5 var(--font-mono);
+}
+.reward-admin-alert {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12px;
+}
+.reward-admin-alert button {
+  display: grid;
+  margin-left: auto;
+  color: var(--faint);
+}
+.reward-admin-alert-success {
+  border-color: color-mix(in oklab, var(--sage) 38%, var(--border));
+  color: var(--sage);
+  background: var(--dim-sage);
+}
+.reward-admin-alert-error {
+  border-color: color-mix(in oklab, var(--rose) 40%, var(--border));
+  color: var(--rose);
+  background: var(--dim-rose);
+}
+.reward-admin-inventory {
+  margin-top: 24px;
+  padding: 25px;
+}
+.reward-admin-inventory-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+}
+.reward-admin-table {
+  display: grid;
+  gap: 11px;
+  margin-top: 21px;
+}
+.reward-admin-record {
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 14px;
+  background: color-mix(in oklab, var(--surface-2) 52%, transparent);
+}
+.reward-admin-record-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.reward-admin-record-image,
+.reward-admin-record-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  object-fit: contain;
+  color: var(--gold);
+  background: var(--surface-3);
+}
+.reward-admin-record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+  margin-top: 7px;
+  color: var(--faint);
+  font: 9px var(--font-mono);
+}
+.reward-admin-record-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.reward-admin-record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+.reward-admin-record-actions .reward-secondary-button,
+.reward-admin-danger-button {
+  padding: 8px 10px;
+  font-size: 10px;
+}
+.reward-admin-danger-button {
+  border: 1px solid color-mix(in oklab, var(--rose) 34%, var(--border));
+  border-radius: 999px;
+  color: var(--rose);
+  background: color-mix(in oklab, var(--rose) 7%, transparent);
+}
+.reward-admin-danger-button:hover {
+  border-color: var(--rose);
+  background: color-mix(in oklab, var(--rose) 14%, transparent);
+}
+.reward-admin-state {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 7px;
+  font: 9px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.reward-admin-status-draft {
+  color: var(--faint);
+}
+.reward-admin-status-published {
+  color: var(--sky);
+  border-color: color-mix(in oklab, var(--sky) 33%, var(--border));
+  background: var(--dim-sky);
+}
+.reward-admin-status-claimed {
+  color: var(--sage);
+  border-color: color-mix(in oklab, var(--sage) 33%, var(--border));
+  background: var(--dim-sage);
+}
+.reward-admin-status-expired {
+  color: var(--amber);
+  border-color: color-mix(in oklab, var(--amber) 33%, var(--border));
+  background: var(--dim-amber);
+}
+.reward-admin-status-revoked {
+  color: var(--rose);
+  border-color: color-mix(in oklab, var(--rose) 33%, var(--border));
+  background: var(--dim-rose);
+}
+.reward-admin-deliveries {
+  display: grid;
+  gap: 7px;
+  margin: 13px 0 0 54px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.reward-admin-delivery {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+.reward-admin-delivery select {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 7px;
+  color: var(--foreground);
+  background: var(--surface-2);
+  font: 10px var(--font-mono);
+}
+.reward-admin-empty {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 57px 15px;
+  color: var(--faint);
+  text-align: center;
+}
+.reward-admin-empty p {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+}
+.reward-admin-empty span {
+  font: 10px var(--font-mono);
+}
+.reward-admin-denied {
+  display: flex;
+  min-height: 520px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  animation: rise-in 0.7s var(--ease-out-expo) both;
+}
+.reward-admin-denied-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--rose) 35%, var(--border));
+  border-radius: 18px;
+  color: var(--rose);
+  background: var(--dim-rose);
+  box-shadow: 0 0 0 9px color-mix(in oklab, var(--rose) 7%, transparent);
+}
+
+@media (max-width: 780px) {
+  .reward-page-header,
+  .reward-admin-header {
+    align-items: start;
+    flex-direction: column;
+  }
+  .reward-page-header-actions,
+  .reward-admin-header-actions {
+    justify-content: flex-start;
+  }
+  .reward-delivery-grid,
+  .reward-admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .reward-delivery-modal-layout {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    text-align: center;
+  }
+  .reward-delivery-modal-art {
+    min-height: 190px;
+  }
+  .reward-delivery-modal-art .reward-delivery-image-large {
+    width: 170px;
+    height: 190px;
+  }
+  .reward-delivery-message {
+    text-align: left;
+  }
+  .reward-delivery-dates {
+    justify-content: center;
+  }
+  .reward-admin-record-main {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .reward-admin-record-actions {
+    width: 100%;
+    margin-left: 54px;
+  }
+  .reward-admin-deliveries {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .reward-page-header h1 {
+    font-size: 44px;
+  }
+  .reward-empty-state {
+    min-height: 520px;
+    margin-top: 35px;
+    padding: 54px 18px;
+  }
+  .reward-empty-state::before {
+    inset: 13% 5%;
+  }
+  .reward-empty-state::after {
+    inset: 20% 16%;
+  }
+  .reward-delivery-card {
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+  .reward-delivery-card-media {
+    width: 76px;
+    height: 103px;
+  }
+  .reward-delivery-image {
+    width: 61px;
+    height: 89px;
+  }
+  .reward-delivery-title {
+    font-size: 22px;
+  }
+  .reward-delivery-description {
+    -webkit-line-clamp: 4;
+  }
+  .reward-delivery-modal {
+    padding: 23px 17px 18px;
+  }
+  .reward-admin-editor,
+  .reward-admin-recipients,
+  .reward-admin-inventory {
+    padding: 19px;
+  }
+  .reward-admin-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-empty-state,
+  .reward-delivery-section,
+  .reward-delivery-reveal,
+  .reward-loading-orb,
+  .reward-empty-state-seal,
+  .reward-empty-state-glow,
+  .reward-empty-state-orbit,
+  .reward-delivery-card,
+  .reward-delivery-image,
+  .reward-delivery-card-shine,
+  .reward-admin-header,
+  .reward-admin-denied {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.reward-admin-readonly {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reward-admin-medal-library {
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 13px;
+  background: color-mix(in oklab, var(--surface-2) 48%, transparent);
+}
+
+.reward-admin-medal-library-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reward-admin-medal-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.reward-admin-medal-option {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 86px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 4px;
+  color: var(--faint);
+  background: color-mix(in oklab, var(--background) 58%, transparent);
+  transition:
+    transform 280ms var(--ease-out-expo),
+    border-color 280ms ease,
+    background 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.reward-admin-medal-option img {
+  display: block;
+  width: 48px;
+  height: 62px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 5px rgb(0 0 0 / 0.55));
+  transition:
+    transform 280ms var(--ease-out-expo),
+    filter 280ms ease;
+}
+
+.reward-admin-medal-option span {
+  font: 8px var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.reward-admin-medal-option:hover,
+.reward-admin-medal-option-selected {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--gold) 60%, var(--border));
+  color: var(--gold-soft);
+  background: color-mix(in oklab, var(--gold) 10%, var(--surface-2));
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--gold) 12%, transparent),
+    0 11px 20px -15px rgb(0 0 0 / 0.9);
+}
+
+.reward-admin-medal-option:hover img,
+.reward-admin-medal-option-selected img {
+  transform: scale(1.08);
+  filter: drop-shadow(0 8px 7px rgb(0 0 0 / 0.66));
+}
+
+.reward-admin-medal-option-selected::before {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  content: "";
+  background: var(--gold);
+  box-shadow: 0 0 9px var(--gold);
+}
+
+.reward-admin-clear-medal {
+  flex: 0 0 auto;
+  border: 0;
+  color: var(--faint);
+  background: transparent;
+  font: 9px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.reward-admin-clear-medal:hover {
+  color: var(--gold);
+}
+
+@media (max-width: 560px) {
+  .reward-admin-medal-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .reward-admin-medal-option {
+    min-height: 78px;
+  }
+  .reward-admin-medal-option img {
+    width: 40px;
+    height: 54px;
+  }
+}
+
+@keyframes reward-shimmer {
+  0%,
+  48% {
+    transform: translateX(-170%) skewX(-16deg);
+  }
+  72%,
+  100% {
+    transform: translateX(240%) skewX(-16deg);
+  }
+}
+
+@keyframes reward-toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.rewards-starfield {
+  position: fixed;
+  inset: 58px 0 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.rewards-starfield span {
+  position: absolute;
+  left: var(--star-x);
+  top: var(--star-y);
+  width: var(--star-size);
+  height: var(--star-size);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 72%, var(--violet));
+  box-shadow: 0 0 12px color-mix(in oklab, var(--violet) 70%, transparent);
+  animation: reward-twinkle 4.8s ease-in-out infinite;
+  animation-delay: var(--star-delay);
+}
+
+@keyframes reward-twinkle {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.25);
+  }
+}
+
+.rewards-gradient-text {
+  background: linear-gradient(
+    110deg,
+    var(--gold),
+    var(--gold-soft) 30%,
+    var(--violet) 68%,
+    var(--sky)
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer-text 8s ease-in-out infinite;
+}
+
+.reward-live-dot {
+  position: relative;
+  display: inline-flex;
+  width: 7px;
+  height: 7px;
+  align-items: center;
+  justify-content: center;
+}
+.reward-live-dot::before,
+.reward-live-dot span {
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--gold);
+}
+.reward-live-dot::before {
+  content: "";
+  animation: reward-pulse-ring 2.4s ease-out infinite;
+}
+
+@keyframes reward-pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  75%,
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+.reward-primary-button,
+.reward-secondary-button,
+.reward-text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 12px;
+  text-decoration: none;
+  transition:
+    transform 350ms var(--ease-out-expo),
+    border-color 350ms ease,
+    background 350ms ease,
+    color 350ms ease,
+    box-shadow 350ms ease;
+}
+
+.reward-primary-button {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--violet) 55%, transparent);
+  border-radius: 999px;
+  padding: 11px 16px;
+  color: var(--primary-foreground);
+  background: linear-gradient(112deg, var(--violet), var(--sky));
+  box-shadow: 0 12px 28px -15px color-mix(in oklab, var(--violet) 80%, transparent);
+}
+.reward-primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -15px color-mix(in oklab, var(--violet) 86%, transparent);
+}
+.reward-primary-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+.reward-secondary-button {
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--surface-2) 72%, transparent);
+}
+.reward-secondary-button:hover {
+  transform: translateY(-2px);
+  border-color: var(--violet);
+  background: var(--surface-3);
+}
+.reward-text-button {
+  border: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+.reward-text-button:hover {
+  color: var(--foreground);
+  transform: translateX(2px);
+}
+
+.reward-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(390px, calc(100vw - 40px));
+  border: 1px solid color-mix(in oklab, var(--sage) 38%, var(--border));
+  border-radius: 13px;
+  padding: 11px 12px;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--surface-2) 94%, var(--sage));
+  box-shadow: 0 18px 45px -22px rgb(0 0 0 / 0.95);
+  font-size: 12px;
+  animation: reward-toast-in 400ms var(--ease-out-expo) both;
+}
+.reward-toast-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 8px;
+  color: var(--background);
+  background: var(--sage);
+}
+.reward-toast button {
+  display: grid;
+  place-items: center;
+  margin-left: 3px;
+  border: 0;
+  color: var(--faint);
+  background: transparent;
+}
+.reward-toast button:hover {
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rewards-starfield span,
+  .reward-live-dot::before,
+  .reward-delivery-card-shine,
+  .reward-toast {
+    animation: none !important;
+  }
+}
