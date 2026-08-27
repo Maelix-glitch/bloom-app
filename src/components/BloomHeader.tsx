@@ -1,4 +1,12 @@
+import { useLocation } from "@tanstack/react-router";
+
 export function BloomHeader() {
+  const { pathname } = useLocation();
+
+  const moodActive = pathname === "/";
+  const rewardsActive =
+    pathname === "/rewards" || pathname.startsWith("/admin/rewards");
+
   return (
     <header
       className="flex h-[54px] items-center justify-between border-b px-[22px]"
@@ -7,7 +15,7 @@ export function BloomHeader() {
         borderColor: "#23252F",
       }}
     >
-      {/* Brand */}
+      {/* Bloom brand */}
       <div className="flex items-center gap-3">
         <svg
           viewBox="0 0 28 28"
@@ -18,14 +26,14 @@ export function BloomHeader() {
         >
           <path
             d="M4 20c3-9 7-14 10-14s7 5 10 14"
-            stroke="url(#bloomMoodBrandGradient)"
+            stroke="url(#bloomBrandGradient)"
             strokeWidth="2.2"
             strokeLinecap="round"
           />
 
           <defs>
             <linearGradient
-              id="bloomMoodBrandGradient"
+              id="bloomBrandGradient"
               x1="4"
               y1="13"
               x2="24"
@@ -58,7 +66,7 @@ export function BloomHeader() {
         </span>
       </div>
 
-      {/* Shared Bloom navigation */}
+      {/* Navigation */}
       <nav className="flex items-center gap-[2px]" aria-label="Primary">
         <a href="/bloom/index.html" className="bloom-nav-link">
           Today
@@ -72,11 +80,23 @@ export function BloomHeader() {
           Cycle
         </a>
 
-        <a href="/" className="bloom-nav-link bloom-nav-active">
+        <a
+          href="/"
+          className={`bloom-nav-link${
+            moodActive ? " bloom-nav-active" : ""
+          }`}
+          aria-current={moodActive ? "page" : undefined}
+        >
           Mood
         </a>
 
-        <a href="/bloom/rewards.html" className="bloom-nav-link">
+        <a
+          href="/rewards"
+          className={`bloom-nav-link${
+            rewardsActive ? " bloom-nav-active" : ""
+          }`}
+          aria-current={rewardsActive ? "page" : undefined}
+        >
           Rewards
         </a>
 
@@ -85,7 +105,7 @@ export function BloomHeader() {
         </a>
       </nav>
 
-      {/* Temporary profile avatar */}
+      {/* Profile avatar */}
       <div
         className="grid h-[26px] w-[26px] place-items-center rounded-full border text-[10px]"
         style={{
