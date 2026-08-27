@@ -2203,3 +2203,53 @@
     animation: none !important;
   }
 }
+
+/* Keep the Rewards atmosphere above the page background but below content. */
+.rewards-delivery-page {
+  isolation: isolate;
+}
+.rewards-delivery-page > .pointer-events-none.fixed.inset-0.-z-10 {
+  z-index: 0 !important;
+}
+.rewards-delivery-page > header {
+  position: relative;
+  z-index: 20;
+}
+.rewards-delivery-page > main {
+  position: relative;
+  z-index: 10;
+}
+.rewards-delivery-page > .rewards-starfield {
+  z-index: 1;
+}
+
+/* Core reward palette used by the gradients, orbit lines, and empty-state seal. */
+.rewards-delivery-page,
+.rewards-admin-page {
+  --gold: oklch(0.85 0.14 88);
+  --gold-soft: oklch(0.93 0.09 95);
+  --royal: oklch(0.55 0.19 295);
+}
+
+/* Keep the Rewards atmosphere above the page background but below content. */
+.rewards-delivery-page {
+  isolation: isolate;
+}
+
+.rewards-delivery-page > .pointer-events-none.fixed.inset-0.-z-10 {
+  z-index: 0 !important;
+}
+
+.rewards-delivery-page > header {
+  position: relative;
+  z-index: 20;
+}
+
+.rewards-delivery-page > main {
+  position: relative;
+  z-index: 10;
+}
+
+.rewards-delivery-page > .rewards-starfield {
+  z-index: 1;
+}
