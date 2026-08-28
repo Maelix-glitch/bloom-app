@@ -38,7 +38,7 @@ export function HighlightRail({
         <span>
           <span className="block text-[13px] font-medium text-foreground">Create a highlight</span>
           <span className="block text-[12px] text-muted-foreground">
-            Keep something worth remembering.
+            Keep something worth remembering — choose the stories, name it, done.
           </span>
         </span>
       </button>
@@ -79,8 +79,16 @@ export function HighlightRail({
                   <Sparkles className="size-3 text-faint" strokeWidth={1.8} />
                 </span>
               </span>
-              <span className="w-full truncate text-center text-[12px] font-medium text-foreground">
-                {highlight.name}
+              <span className="w-full text-center leading-tight">
+                <span className="block truncate text-[12px] font-medium text-foreground">
+                  {highlight.name}
+                </span>
+                {highlight.stories.length > 0 ? (
+                  <span className="mono block text-[9.5px] tracking-[0.04em] text-faint">
+                    {highlight.stories.length}{" "}
+                    {highlight.stories.length === 1 ? "story" : "stories"}
+                  </span>
+                ) : null}
               </span>
             </button>
             <button

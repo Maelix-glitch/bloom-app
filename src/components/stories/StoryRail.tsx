@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
-import { formatRelativeDay } from "@/lib/profile/journey";
+import { formatRelativeDay, formatRemaining } from "@/lib/profile/journey";
 import type { Story } from "@/lib/profile/types";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 
@@ -39,18 +39,27 @@ export function StoryRail({
           type="button"
           onClick={onCreate}
           aria-label="Create a story"
-          className="group grid size-[62px] place-items-center rounded-full border border-dashed border-border-strong bg-surface-2/40 transition-all duration-300 hover:border-[color:var(--profile-accent-border)] hover:bg-surface-2"
+          className="group relative grid size-[64px] place-items-center rounded-full transition-transform duration-300 hover:scale-[1.03] active:scale-[0.99]"
+          style={{
+            background:
+              "radial-gradient(115% 105% at 50% -5%, color-mix(in oklab, var(--profile-accent, var(--violet)) 12%, var(--surface-2)), var(--surface) 64%)",
+            border:
+              "1px dashed color-mix(in oklab, var(--profile-accent, var(--violet)) 45%, var(--border))",
+          }}
         >
           <Plus
-            className="size-[18px] text-faint transition-colors group-hover:text-foreground"
-            strokeWidth={1.8}
+            className="size-[18px] text-muted-foreground transition-colors duration-300 group-hover:text-foreground"
+            strokeWidth={1.7}
             aria-hidden
           />
         </button>
         <div className="min-w-0">
           <p className="text-[13px] font-medium text-foreground">Your story</p>
-          <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+          <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
             Your moments will live here.
+            <span className="block text-[11.5px] text-faint">
+              Share something small when you feel like it.
+            </span>
           </p>
         </div>
       </div>
@@ -85,6 +94,7 @@ export function StoryRail({
                   : "Moment"
             }
             sub={formatRelativeDay(story.createdAt)}
+            hint={formatRemaining(story.expiresAt)}
             onClick={() => onOpen(i)}
             ring={seenIds.has(story.id) ? "story-seen" : "story-unseen"}
             accent={story.accent}
@@ -93,7 +103,7 @@ export function StoryRail({
               name={displayName}
               avatarPath={story.kind === "photo" ? story.mediaPath : avatarPath}
               accent={story.accent}
-              size={54}
+              size={58}
               ring="none"
             />
           </RailItem>
@@ -107,6 +117,7 @@ function RailItem({
   children,
   label,
   sub,
+  hint,
   onClick,
   ring,
   plus = false,
@@ -115,6 +126,7 @@ function RailItem({
   children: React.ReactNode;
   label: string;
   sub?: string;
+  hint?: string | null;
   onClick: () => void;
   ring?: "story-seen" | "story-unseen";
   plus?: boolean;
@@ -125,7 +137,7 @@ function RailItem({
       type="button"
       onClick={onClick}
       aria-label={plus ? `Create a story — ${label}` : `Open story: ${label}`}
-      className="group flex w-[70px] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 pb-1.5 pt-0.5 transition-colors hover:bg-surface-2/50"
+      className="group flex w-[74px] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 pb-1.5 pt-0.5 transition-colors hover:bg-surface-2/50"
     >
       <span className="relative">
         <span

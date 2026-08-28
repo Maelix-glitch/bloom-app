@@ -82,9 +82,9 @@ export function FeaturePrompt({
         onClick={onPick}
         className="mono rounded-full border border-border px-3.5 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
       >
-        {hasFeatured ? "Change moment" : "Feature a moment"}
+        Change moment
       </button>
-      {hasFeatured && onClear ? (
+      {onClear ? (
         <button
           type="button"
           onClick={onClear}

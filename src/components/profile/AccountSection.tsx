@@ -18,10 +18,7 @@ export function AccountSection({
   onOpenPrivacy: () => void;
 }) {
   return (
-    <section
-      aria-label="Account and privacy"
-      className="rounded-2xl border border-border bg-surface/35 p-5 sm:p-6"
-    >
+    <div className="rounded-2xl border border-border bg-surface/35 p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <dl className="grid grid-cols-1 gap-x-10 gap-y-3 sm:grid-cols-2">
           <div>
@@ -69,6 +66,6 @@ export function AccountSection({
         Account security — email changes, data, sign-out — lives with your Bloom settings, not here.
         This page is only who you are inside Bloom.
       </p>
-    </section>
+    </div>
   );
 }

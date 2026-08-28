@@ -6,7 +6,8 @@ import { toast, Toaster } from "sonner";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { BloomHeader } from "@/components/BloomHeader";
 import { Atmosphere } from "@/components/mood/Atmosphere";
-import { Panel, Reveal, SectionHead, accentVar } from "@/components/mood/primitives";
+import { Panel, Reveal, accentVar } from "@/components/mood/primitives";
+import { ProfileSection } from "@/components/profile/ProfileSection";
 import { cn } from "@/lib/utils";
 import { EMOTION_MAP } from "@/lib/mood/types";
 import { seenStories } from "@/lib/profile/drafts";
@@ -288,7 +289,7 @@ function ProfilePage() {
       <BloomHeader />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[1020px] px-5 pb-24 pt-10 sm:px-8 sm:pt-14">
+      <main className="relative mx-auto w-full max-w-[1020px] px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
         {authState === "checking" ? (
           <ProfileSkeleton />
         ) : !identity ? (
@@ -323,18 +324,16 @@ function ProfilePage() {
             ) : null}
 
             {authState === "signed-out" ? (
-              <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-border bg-surface/50 px-4 py-2.5 text-center text-[12.5px] text-muted-foreground">
-                <span>
-                  You're looking at a preview of your Bloom space — real empty state, nothing saved.
-                </span>
+              <p className="-mt-1 mb-2 text-center text-[12px] text-faint">
+                preview — nothing is saved until you{" "}
                 <button
                   type="button"
                   onClick={() => setSignInOpen(true)}
-                  className="text-foreground underline underline-offset-2 transition-colors hover:text-[var(--profile-accent)]"
+                  className="text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
                 >
-                  Sign in
+                  sign in
                 </button>
-              </div>
+              </p>
             ) : null}
 
             <Reveal>
@@ -359,23 +358,21 @@ function ProfilePage() {
             </Reveal>
 
             {/* Stories */}
-            <Reveal delay={60}>
-              <section aria-label="Stories" className="mt-14">
-                <SectionHead
-                  eyebrow="Moments"
-                  title="Stories"
-                  right={
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setArchiveOpen(true)}
-                        className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-                      >
-                        <Archive className="size-3" aria-hidden /> Archive
-                      </button>
-                    </div>
-                  }
-                />
+            <Reveal delay={40}>
+              <ProfileSection
+                label="moments"
+                title="Stories"
+                gap="default"
+                right={
+                  <button
+                    type="button"
+                    onClick={() => setArchiveOpen(true)}
+                    className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] tracking-[0.06em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+                  >
+                    <Archive className="size-3" aria-hidden /> Archive
+                  </button>
+                }
+              >
                 {storiesByAge ? (
                   <StoryRail
                     stories={storiesByAge.active}
@@ -403,17 +400,17 @@ function ProfilePage() {
                     </button>
                   </p>
                 ) : null}
-              </section>
+              </ProfileSection>
             </Reveal>
 
             {/* Highlights */}
-            <Reveal delay={60}>
-              <section aria-label="Highlights" className="mt-14">
-                <SectionHead
-                  eyebrow="Kept"
-                  title="Highlights"
-                  sub="The moments you decided to keep beyond 24 hours."
-                />
+            <Reveal delay={40}>
+              <ProfileSection
+                label="kept"
+                title="Highlights"
+                sub="The moments you decided to keep beyond 24 hours."
+                gap="default"
+              >
                 {highlightsBlock?.status === "ready" ? (
                   <HighlightRail
                     highlights={highlightsBlock.data}
@@ -439,18 +436,19 @@ function ProfilePage() {
                 ) : (
                   <RailSkeleton />
                 )}
-              </section>
+              </ProfileSection>
             </Reveal>
 
             {/* Featured */}
-            <Reveal delay={60}>
-              <section aria-label="Featured moment" className="mt-14">
-                <SectionHead
-                  eyebrow="You, chosen"
-                  title="Featured moment"
-                  right={
+            <Reveal delay={40}>
+              <ProfileSection
+                label="yours, chosen"
+                title="Featured moment"
+                gap="wide"
+                right={
+                  featuredContent ? (
                     <FeaturePrompt
-                      hasFeatured={Boolean(featuredContent)}
+                      hasFeatured
                       onPick={() => setFeaturedOpen(true)}
                       onClear={() =>
                         void space.actions
@@ -458,56 +456,56 @@ function ProfilePage() {
                           .then(() => toast("Removed from your profile."))
                       }
                     />
-                  }
-                />
+                  ) : null
+                }
+              >
                 {featuredContent ? (
                   <FeaturedCard content={featuredContent} accent={accent} />
                 ) : (
                   <button
                     type="button"
                     onClick={() => setFeaturedOpen(true)}
-                    className="group flex w-full items-center gap-4 rounded-2xl border border-dashed border-border px-5 py-5 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
+                    className="group flex w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-dashed border-border px-4 py-3 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
                   >
                     <Sparkles
-                      className="size-4 shrink-0 text-faint transition-colors group-hover:text-[var(--profile-accent)]"
+                      className="size-3.5 shrink-0 text-faint transition-colors group-hover:text-[var(--profile-accent)]"
                       aria-hidden
                     />
-                    <span>
-                      <span className="block text-[13.5px] font-medium">
-                        Feature something that represents you
-                      </span>
-                      <span className="block text-[12.5px] text-muted-foreground">
-                        A story, a reflection, a reward, a milestone — only one thing, chosen
-                        deliberately.
-                      </span>
+                    <span className="min-w-0 flex-1 text-[13px] text-muted-foreground">
+                      <span className="text-foreground">
+                        Choose something that represents this chapter.
+                      </span>{" "}
+                      A story, a reflection, a reward, a milestone — only one.
+                    </span>
+                    <span className="mono shrink-0 rounded-full border border-border px-2.5 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint transition-colors group-hover:text-foreground">
+                      Feature a moment
                     </span>
                   </button>
                 )}
-              </section>
+              </ProfileSection>
             </Reveal>
 
             {/* Journey */}
-            <Reveal delay={60}>
-              <section aria-label="Your Bloom journey" className="mt-14">
-                <SectionHead eyebrow="Quietly" title="Your Bloom journey" />
-                <Panel className="p-6 sm:p-8" sheen={false}>
+            <Reveal delay={40}>
+              <ProfileSection title="Your Bloom journey" gap="default">
+                <Panel className="p-6 sm:p-7" sheen={false}>
                   <JourneySection journey={journey} accent={accent} />
                 </Panel>
-              </section>
+              </ProfileSection>
             </Reveal>
 
             {/* Account */}
-            <Reveal delay={60}>
-              <section aria-label="Account" className="mt-14">
+            <Reveal delay={40}>
+              <ProfileSection label="the quiet part" title="Account & privacy" gap="wide">
                 <AccountSection
                   account={{ email: identity.email, memberSince: identity.memberSince }}
                   privacy={identity.privacy}
                   onOpenPrivacy={() => setPrivacyOpen(true)}
                 />
-              </section>
+              </ProfileSection>
             </Reveal>
 
-            <footer className="mt-16 border-t border-border pt-5">
+            <footer className="mt-12 border-t border-border pt-4">
               <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
                 Bloom · your records stay private unless you choose otherwise
               </p>

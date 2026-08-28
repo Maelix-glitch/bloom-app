@@ -46,7 +46,7 @@ export function ProfileHero({
   return (
     <section
       aria-label="Profile"
-      className="relative -mx-5 px-5 pt-10 pb-2 sm:mx-0 sm:px-0 sm:pt-14"
+      className="relative -mx-5 px-5 pt-8 pb-1 sm:mx-0 sm:px-0 sm:pt-10"
     >
       {/* menu */}
       <div className="absolute right-0 top-0 z-10 sm:top-2">
@@ -88,7 +88,7 @@ export function ProfileHero({
       </div>
 
       <div className="flex flex-col items-center text-center">
-        <p className="eyebrow mb-7 flex items-center gap-2">
+        <p className="eyebrow mb-6 flex items-center gap-2">
           <span
             aria-hidden
             className="inline-block size-1.5 rounded-full"
@@ -122,38 +122,37 @@ export function ProfileHero({
         </button>
 
         <h1
-          className="display max-w-[16ch] text-[29px] leading-[1.1] text-balance break-words sm:text-[34px]"
+          className="display max-w-[16ch] text-[30px] leading-[1.08] text-balance break-words sm:text-[37px]"
           style={{ letterSpacing: "-0.02em" }}
         >
           {identity.displayName}
         </h1>
 
         {identity.username ? (
-          <p className="mono mt-1.5 text-[12px] tracking-[0.02em] text-muted-foreground">
-            @{identity.username}
-          </p>
+          <p className="mono mt-2 text-[12px] tracking-[0.02em] text-faint">@{identity.username}</p>
         ) : (
           <button
             type="button"
             onClick={onEdit}
-            className="mono mt-1.5 rounded-full px-2 py-0.5 text-[11px] tracking-[0.02em] text-faint transition-colors hover:text-foreground"
+            aria-label="Choose your @username"
+            className="mono mt-2 rounded-full px-2 py-0.5 text-[11px] tracking-[0.02em] text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-[var(--profile-accent)]"
           >
-            claim your @username
+            Choose your @username
           </button>
         )}
 
         <p
           className={cn(
             "mt-3.5 max-w-[46ch] text-pretty leading-relaxed text-muted-foreground",
-            identity.bio ? "text-[14.5px]" : "text-[13.5px] italic text-faint",
+            identity.bio ? "text-[14.5px]" : "text-[13px] italic text-faint/80",
           )}
         >
           {identity.bio || "A little about you..."}
         </p>
 
         {completion.show ? (
-          <p className="mono mt-3 text-[10px] uppercase tracking-[0.08em] text-faint">
-            Your Bloom space is taking shape — {completion.done} of {completion.total}
+          <p className="mono mt-2.5 text-[10px] uppercase tracking-[0.08em] text-faint">
+            taking shape — {completion.done} of {completion.total}
           </p>
         ) : null}
 

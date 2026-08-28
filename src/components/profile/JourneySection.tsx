@@ -42,12 +42,12 @@ export function JourneySection({
 
   return (
     <div className="flex flex-col gap-9">
-      <p className="text-[12.5px] leading-relaxed text-muted-foreground">
-        Your Bloom record — kept privately, shown to no one unless you choose.
+      <p className="-mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
+        Kept privately, shown to no one unless you choose.
       </p>
 
       {/* stats: typographic, not card-y */}
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
         <Stat label="Days tracked" value={stats.daysTracked} accent={accent} />
         <Stat label="Check-ins" value={stats.checkIns} accent={accent} />
         <Stat label="Day streak" value={stats.streak} accent={accent} />
@@ -79,28 +79,45 @@ export function JourneySection({
           </p>
         )}
         {milestones.next && milestones.next.progress < milestones.next.of ? (
-          <div className="mt-4">
-            <div className="flex items-baseline justify-between">
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
-                Next · {milestones.next.label}
-              </p>
-              <p className="mono text-[10px] text-faint">
-                {milestones.next.progress}/{milestones.next.of}
-              </p>
-            </div>
-            <div
-              className="mt-1.5 h-[3px] overflow-hidden rounded-full bg-surface-3"
-              role="presentation"
-            >
-              <div
-                className="h-full rounded-full transition-[width] duration-700"
-                style={{
-                  width: `${Math.min(100, (milestones.next.progress / Math.max(1, milestones.next.of)) * 100)}%`,
-                  background: accentVar[accent],
-                  opacity: 0.75,
-                }}
-              />
-            </div>
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <p className="mono text-[10px] tracking-[0.06em] text-faint">
+              next · {milestones.next.label.toLowerCase()}
+            </p>
+            {milestones.next.of <= 10 ? (
+              <span className="flex items-center gap-[5px]" aria-hidden>
+                {Array.from({ length: milestones.next.of }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="size-[6px] rounded-full transition-colors duration-500"
+                    style={{
+                      background:
+                        i < milestones.next!.progress
+                          ? `color-mix(in oklab, ${accentVar[accent]} 85%, transparent)`
+                          : "var(--surface-3)",
+                    }}
+                  />
+                ))}
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <span className="mono text-[10.5px] text-faint">
+                  {milestones.next.progress}/{milestones.next.of}
+                </span>
+                <span
+                  className="h-[3px] w-16 overflow-hidden rounded-full bg-surface-3"
+                  aria-hidden
+                >
+                  <span
+                    className="block h-full rounded-full transition-[width] duration-700"
+                    style={{
+                      width: `${Math.min(100, (milestones.next.progress / Math.max(1, milestones.next.of)) * 100)}%`,
+                      background: accentVar[accent],
+                      opacity: 0.7,
+                    }}
+                  />
+                </span>
+              </span>
+            )}
           </div>
         ) : null}
       </section>
@@ -153,11 +170,11 @@ function Stat({ label, value, accent }: { label: string; value: number; accent: 
     <div>
       <dt className="eyebrow">{label}</dt>
       <dd
-        className="numeric mt-1.5 text-[26px] leading-none"
+        className={cn("numeric mt-1.5 text-[26px] leading-none", value === 0 && "text-faint")}
         style={{
           color:
             value > 0
-              ? `color-mix(in oklab, ${accentVar[accent]} 88%, var(--foreground))`
+              ? `color-mix(in oklab, ${accentVar[accent]} 55%, var(--foreground))`
               : undefined,
         }}
       >

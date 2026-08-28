@@ -218,6 +218,15 @@ export function computeCompleteness(
   return { done, total: checks.length, show: done > 0 && done < checks.length };
 }
 
+/** "6h left" — time before a story stops showing on the rail (real data). */
+export function formatRemaining(expiresAt: string, now: number = Date.now()): string | null {
+  const left = new Date(expiresAt).getTime() - now;
+  if (left <= 0) return null;
+  if (left < 60 * 60_000) return `${Math.max(1, Math.floor(left / 60_000))}m left`;
+  if (left < 6 * 3600_000) return `${Math.round(left / 3600_000)}h left`;
+  return null;
+}
+
 export function formatRelativeDay(iso: string, now: number = Date.now()): string {
   const t = new Date(iso).getTime();
   const diff = now - t;

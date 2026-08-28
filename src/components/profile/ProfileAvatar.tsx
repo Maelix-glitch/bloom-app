@@ -75,17 +75,18 @@ export function ProfileAvatar({
           aria-label={`${name}'s profile mark`}
           className="grid size-full place-items-center rounded-full"
           style={{
-            background: `radial-gradient(120% 110% at 50% 0%, color-mix(in oklab, ${varAccent} 16%, var(--surface-2)), var(--surface-2) 60%)`,
+            background: `radial-gradient(115% 105% at 50% -5%, color-mix(in oklab, ${varAccent} 15%, var(--surface-2)), var(--surface) 62%)`,
             border: "1px solid var(--border)",
-            boxShadow: "inset 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent)",
+            boxShadow:
+              "inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent), 0 10px 30px -18px rgba(0,0,0,0.8)",
           }}
         >
           <span
             className="display select-none leading-none"
             style={{
-              color: `color-mix(in oklab, ${varAccent} 80%, var(--foreground))`,
-              fontSize: size * 0.38,
-              letterSpacing: "-0.02em",
+              color: `color-mix(in oklab, ${varAccent} 72%, var(--foreground))`,
+              fontSize: size * 0.4,
+              letterSpacing: "-0.03em",
             }}
           >
             {initialsFor(name)}

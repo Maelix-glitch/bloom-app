@@ -239,7 +239,7 @@ export function StoryViewer({
             ref={frameRef}
             tabIndex={-1}
             data-story-frame=""
-            className="relative flex h-full w-full max-w-[460px] flex-col overflow-hidden outline-none sm:h-[min(92vh,860px)] sm:rounded-[20px] sm:border sm:border-border"
+            className="relative flex h-full w-full max-w-[460px] flex-col overflow-hidden outline-none transition-[transform,opacity] duration-200 data-[state=closed]:opacity-0 sm:h-[min(92vh,860px)] sm:rounded-[20px] sm:border sm:border-border"
             style={{
               background:
                 "radial-gradient(140% 90% at 50% 0%, oklch(0.24 0.024 280), oklch(0.155 0.018 279) 70%)",
