@@ -1,0 +1,10000 @@
+BLOOM CYCLE — 10,000-LINE ADVANCED REDESIGN + INTELLIGENCE MASTER PROMPT
+Use the supplied Bloom Cycle screenshots as the source reference for the current implementation.
+The screenshots show a dark Bloom interface containing a cycle-day hero, phase visualization, predictions, Advanced Log, historical analytics, recommendations, and a three-month calendar.
+Redesign this existing page into a much more advanced, visually polished, genuinely useful personal cycle intelligence experience.
+Do not make it a generic tracker.
+Do not make it a generic AI wrapper.
+Do not fabricate health data.
+Do not fabricate analytics.
+Do not fabricate prediction accuracy.
+Keep sensitive Cycle information private.
+Treat every prediction as an estimate and communicate uncertainty appropriately.
+Preserve existing working functionality unless a verified improvement is required.
+Implement this specification in the actual React application.
+Inspect the actual browser rendering before declaring completion.
+============================================================
+START OF MASTER SPECIFICATION
+============================================================
+## 01 — MISSION
+- Redesign the existing Bloom Cycle page into an intelligent personal cycle companion, not a generic period-tracking dashboard.
+- Use the supplied Cycle screenshots as the direct reference for the current implementation.
+- Preserve the working Bloom global navigation.
+- Preserve working Cycle logging behavior.
+- Preserve working prediction behavior unless the existing calculation is demonstrably incorrect.
+- Preserve existing authentication behavior.
+- Preserve existing privacy behavior and strengthen it where needed.
+- Do not replace useful information with decoration.
+- Do not solve every design problem by adding another card.
+- Do not make the page look like a generic SaaS analytics template.
+- Make the page feel like a consumer product that people want to return to.
+- Make the page useful for a new user with little data.
+- Make the page substantially richer for a user with multiple completed cycles.
+- Use real user data everywhere.
+- Never fabricate history.
+- Never fabricate measurements.
+- Never fabricate symptoms.
+- Never fabricate cycle dates.
+- Never fabricate prediction accuracy.
+- Never fabricate AI insights.
+- Never fabricate medical conclusions.
+- Treat predictions as estimates.
+- Treat uncertainty as a first-class part of the product.
+- Keep health information private by default.
+- Enforce privacy on the backend as well as the frontend.
+- Add a floating contextual AI assistant.
+- Make the AI assistant use the same real Cycle data as the page.
+- Do not make the AI assistant a generic chatbot pasted onto the page.
+- Make the AI assistant explain, compare, summarize, and personalize based on actual data.
+- Do not allow the AI to invent missing personal information.
+- Do not allow the AI to silently mutate Cycle records.
+- Require explicit confirmation for persistent changes.
+- Keep the Cycle page functional if AI is unavailable.
+- Make the final result visually polished at desktop, tablet, and mobile sizes.
+- Run the actual application after implementation.
+- Inspect the live browser rendering.
+- Iterate after visual inspection.
+- Run the project's existing build checks.
+- Run the project's existing type checks.
+- Run the project's existing lint checks.
+- Do not declare completion merely because the code compiles.
+## 02 — DESIGN NORTH STAR
+- Design the page as a personal intelligence surface.
+- Put what is happening now before historical analytics.
+- Put what is likely next before deep history.
+- Put explanation beside important predictions.
+- Make advanced detail available without forcing everyone to read it.
+- Use editorial typography for high-level meaning.
+- Use compact sans-serif typography for controls and metadata.
+- Use the existing dark Bloom aesthetic as the foundation.
+- Use soft tonal contrast rather than harsh black-and-white surfaces.
+- Use Bloom lavender, blue, pink, green, and warm gold as controlled semantic accents.
+- Do not use every accent color simultaneously without hierarchy.
+- Make the current cycle state the visual anchor.
+- Make the current cycle day easy to recognize.
+- Make the phase easy to recognize.
+- Make the next period estimate easy to recognize.
+- Make uncertainty easy to recognize.
+- Make actual logged data visually stronger than predictions.
+- Make predicted data visually softer.
+- Make charts explain something rather than merely decorate the page.
+- Make recommendations actionable but optional.
+- Make AI explanations contextual.
+- Make the page feel calm rather than clinical.
+- Make the page feel advanced without becoming complicated.
+- Make the page feel premium through precision.
+- Use generous whitespace without creating giant empty areas.
+- Use varied composition rather than repeating identical cards.
+- Use circular visuals where they communicate cycles naturally.
+- Use timelines where chronology matters.
+- Use grids where comparison matters.
+- Use editorial callouts where interpretation matters.
+## 03 — CURRENT SCREENSHOT AUDIT
+- Treat the first supplied screenshot as the current top-of-page reference.
+- Treat the second supplied screenshot as the current Advanced Log reference.
+- Treat the third supplied screenshot as the current prediction-card reference.
+- Treat the fourth supplied screenshot as the current analytics and chart reference.
+- Treat the fifth supplied screenshot as the current recommendation and calendar reference.
+- Identify that the current page relies heavily on repeated rounded cards.
+- Reduce the sense of a card grid by introducing stronger visual composition.
+- Identify that the current page contains large areas of unused dark space.
+- Use that space for meaningful hierarchy rather than filler.
+- Identify that the current cycle visualization is visually centered but mostly static.
+- Make the cycle visualization communicate more information.
+- Identify that prediction cards currently have very similar visual weight.
+- Create a clear primary event and secondary events.
+- Identify that Advanced Log is useful but visually form-heavy.
+- Group the form into understandable sections.
+- Identify that the current analytics metrics are repetitive.
+- Mix metrics with explanatory visualizations.
+- Identify that the current prediction accuracy can be misleading when cycle history is empty.
+- Never show a numerical accuracy claim without enough historical validation data.
+- Identify that the current basal-temperature panel becomes empty when no temperatures exist.
+- Turn unavailable data into a useful explanation instead of a giant empty chart.
+- Identify that the current recommendations are static-looking.
+- Connect recommendation generation to actual Cycle context.
+- Identify that the current calendar is functional but visually heavy.
+- Make it a planning and insight surface.
+- Keep the useful information from the current screenshots.
+- Recompose it into a more sophisticated product.
+- Do not simply reskin the existing cards.
+- Do not remove advanced capabilities merely to make the page simpler.
+## 04 — PAGE HIERARCHY
+- Create a clear top-to-bottom information hierarchy.
+- Place the Cycle hero first.
+- Place current-state visualization near the hero.
+- Place next-event intelligence immediately after or beside the current state.
+- Place a concise personal insight near the top.
+- Place Quick Log near the top.
+- Place Recent Cycles before deep analytics when history exists.
+- Place advanced trends after current-state information.
+- Place the calendar as a major planning section.
+- Place recommendations after enough context has been established.
+- Place Advanced Log in a focused area rather than making it dominate the page.
+- Place deeper analytics after the user understands the current state.
+- Place the floating AI assistant above the page as a contextual layer.
+- Keep Account or technical controls out of the main Cycle visual hierarchy.
+- Use optional in-page navigation only if the final page is long enough to justify it.
+- Do not create a second large navigation bar.
+- Keep section titles consistent.
+- Allow different section formats to create visual rhythm.
+- Do not give every section identical card treatment.
+- Do not give every metric equal visual weight.
+## 05 — HERO
+- Replace the plain current heading treatment with a stronger editorial hero.
+- Use a small eyebrow such as CYCLE · PERSONAL INSIGHT.
+- Use a large serif heading for the current cycle day.
+- Emphasize the current phase with Bloom's phase accent.
+- Use a concise supporting sentence below the heading.
+- Include the key basis for the current estimate.
+- Use personalized history when it exists.
+- Use a data-sufficiency message when history is limited.
+- Do not use technical language in the hero.
+- Do not display every statistic in the hero.
+- Show the next period date as a supporting future anchor.
+- Show ovulation or fertile-window estimates only when appropriate.
+- Use a clear Quick Log action.
+- Use a secondary View insights action only if it has a real destination.
+- Keep hero buttons compact.
+- Keep hero typography responsive.
+- Use CSS clamp for large headings where appropriate.
+- Prevent long phase names from overflowing.
+- Keep the hero visually centered when appropriate.
+- Keep hero content readable at narrow widths.
+- Use subtle background atmosphere only if it improves hierarchy.
+- Do not use animated particles.
+- Do not use animated star fields.
+- Do not use an endlessly moving gradient.
+- Do not let decorative effects compete with health information.
+- Reserve media and visualization dimensions to prevent layout shift.
+- Keep the hero beautiful with zero cycle history.
+- Keep the hero richer when cycle history exists.
+## 06 — CYCLE VISUALIZATION
+- Replace the current mostly decorative ring with an informative cycle visualization.
+- Use a radial timeline or segmented circular cycle model.
+- Represent menstrual phase.
+- Represent follicular phase.
+- Represent estimated ovulation.
+- Represent estimated fertile window when supported.
+- Represent luteal phase.
+- Represent the current day.
+- Represent future predicted days distinctly.
+- Represent observed days distinctly.
+- Keep the current marker visually dominant.
+- Keep the center focused on cycle day.
+- Show a concise phase label under the center number.
+- Allow hover or focus on phase segments.
+- Allow touch selection on phase segments.
+- Show date ranges for selected segments.
+- Do not require interaction to understand the current state.
+- Use consistent phase colors.
+- Use labels in addition to colors.
+- Use a subtle observed-versus-predicted legend.
+- Use softer styling for estimates.
+- Use stronger styling for actual logs.
+- Do not create false precision.
+- Do not show a precise ovulation point without supporting evidence or a clearly labeled estimate.
+- Do not continuously rotate the ring.
+- Animate only state transitions.
+- Respect reduced motion.
+- Provide an accessible text description.
+- Keep the visualization crisp at high-density displays.
+- Keep it responsive.
+## 07 — NEXT EVENT INTELLIGENCE
+- Replace the four visually identical prediction cards with a prioritized future-event system.
+- Make the nearest meaningful event the primary event.
+- Show the next predicted period when available.
+- Show estimated ovulation when supported.
+- Show fertile-window information when supported.
+- Show upcoming phase transition when useful.
+- Show PMS-related timing only when supported by the actual product calculation.
+- Do not show unsupported event types.
+- Sort events chronologically.
+- Use real dates.
+- Use calculated relative time.
+- Do not hard-code relative dates.
+- Use locale-aware date formatting.
+- Show prediction ranges where appropriate.
+- Show a small confidence or data-quality indicator where useful.
+- Do not call an estimate certain.
+- Do not call a calendar estimate clinically accurate.
+- Use event-specific icons.
+- Keep iconography consistent.
+- Make interactive events visibly interactive.
+- Do not make static events look clickable.
+- Use hover and focus feedback.
+- Keep the event rail compact.
+- Use a vertical layout on mobile if necessary.
+## 08 — QUICK LOG
+- Create a Quick Log action near the top of the Cycle page.
+- Open Quick Log as a focused sheet or inline panel.
+- Default the date to today.
+- Calculate cycle day automatically when possible.
+- Allow period flow input when supported.
+- Allow mood input when supported.
+- Allow energy input when supported.
+- Allow pain input when supported.
+- Allow symptom selection.
+- Allow a short note.
+- Keep optional fields optional.
+- Do not force users to fill the Advanced Log.
+- Save Quick Log through the same persistence layer as Advanced Log.
+- Update cycle state after a successful save.
+- Update predictions after a successful save.
+- Update charts after a successful save.
+- Update recommendation context after a successful save.
+- Update AI context after a successful save.
+- Do not require a full page refresh.
+- Show a small success confirmation.
+- Prevent duplicate submissions.
+- Preserve form values after a failed save.
+- Provide Retry after failure.
+- Do not expose technical errors.
+- Make the form keyboard accessible.
+- Make the form touch friendly.
+- Return focus after closing.
+## 09 — ADVANCED LOG
+- Keep Advanced Log available for detailed users.
+- Redesign it as a guided personal journal rather than a spreadsheet.
+- Group fields by purpose.
+- Group date and cycle information.
+- Group physical observations.
+- Group fertility-related observations.
+- Group mood and energy.
+- Group sleep.
+- Group symptoms.
+- Place notes last.
+- Use progressive disclosure for rarely used fields.
+- Do not show every advanced field at equal visual weight.
+- Use a compact desktop grid.
+- Stack fields on mobile.
+- Use segmented controls for small mutually exclusive sets.
+- Use selects for larger option sets.
+- Use numeric inputs for measured values.
+- Show units explicitly.
+- Validate numeric ranges.
+- Do not silently accept impossible values.
+- Keep field labels explicit.
+- Keep helper text short.
+- Do not turn every field into a tooltip.
+- Keep symptom chips selectable.
+- Make selected chips obvious.
+- Support keyboard selection.
+- Use a comfortable notes field.
+- Keep Save prominent.
+- Keep Export secondary.
+- Show saving state.
+- Prevent duplicate saves.
+## 10 — DATA QUALITY
+- Separate raw observations from derived calculations.
+- Mark derived values as calculated.
+- Do not overwrite raw observations with AI output.
+- Do not replace missing data with guessed values.
+- Do not treat missing logs as negative observations.
+- Do not treat missing temperature as normal temperature.
+- Do not treat missing symptoms as absence of symptoms.
+- Do not treat missing flow as no flow.
+- Keep original timestamps.
+- Keep user-local calendar dates for daily logs.
+- Handle timezone transitions correctly.
+- Do not shift daily records accidentally because of UTC conversion.
+- Validate future dates according to the product's existing rules.
+- Track whether a value is manually logged or imported when the data model supports source metadata.
+- Keep manual observations distinguishable from imported observations.
+- Do not silently overwrite manual observations with imported data.
+- Use a clear data-sufficiency concept.
+- Do not show a numerical confidence value without a meaningful calculation.
+- Do not show prediction accuracy with zero completed cycles.
+- Do not call a simple average AI.
+- Do not call a default assumption personalized.
+## 11 — PREDICTION ENGINE PRESENTATION
+- Use the existing prediction algorithm as the source of truth unless a verified correction is necessary.
+- Separate prediction computation from presentation.
+- Calculate personal cycle length from actual completed cycles.
+- Use historical variability where appropriate.
+- Show ranges when variability warrants a range.
+- Do not show narrow ranges for highly variable history.
+- Show data sufficiency.
+- Distinguish early estimates from stronger estimates.
+- Do not equate statistical confidence with medical certainty.
+- Do not infer pregnancy.
+- Do not infer infertility.
+- Do not infer hormonal conditions.
+- Do not infer disease.
+- Do not infer a medical diagnosis from cycle variation.
+- Use predictions for planning and self-awareness.
+- Show methodology in a focused explanation panel.
+- Explain which inputs affected the estimate.
+- Show how more data can change future estimates.
+- Do not expose internal model implementation.
+- Do not expose provider information.
+- Do not expose system prompts.
+- Do not call deterministic calculations AI.
+- Use AI for explanation and personalization rather than replacing reliable calculations.
+## 12 — PERSONAL BASELINE
+- Create a Personal Baseline surface when enough history exists.
+- Show typical cycle length.
+- Show recent range.
+- Show variability.
+- Show number of completed cycles used.
+- Show the historical date range used.
+- Explain that the baseline is based on the user's own history.
+- Do not call the baseline medically normal.
+- Do not compare the user with other users.
+- Do not use a universal 28-day assumption once personalized history exists.
+- Use a default assumption only when no history exists.
+- Label default assumptions clearly.
+- Allow the user to inspect methodology.
+- Keep baseline visuals compact.
+- Use a range band where appropriate.
+- Use personal history as the main comparison.
+- Do not label one deviation a problem.
+- Require enough observations before describing a pattern.
+## 13 — CYCLE HISTORY
+- Redesign Cycle Length History into an interactive personal-history visualization.
+- Show completed cycles in chronological order.
+- Show actual cycle lengths.
+- Show cycle start dates on detail.
+- Show average as a subtle reference.
+- Show median when enough data exists.
+- Show range when useful.
+- Show personal variability.
+- Use neutral bars by default.
+- Use accent treatment only when a bar needs contextual emphasis.
+- Do not call a cycle abnormal merely because it differs from the average.
+- Do not use universal ranges as the primary visual comparison.
+- Allow hover detail.
+- Allow keyboard focus.
+- Allow touch detail.
+- Provide a text summary.
+- Keep chart axes honest.
+- Do not truncate a zero baseline in a misleading bar chart.
+- Do not exaggerate tiny differences.
+- Animate only newly added or changed data.
+- Do not animate every historical bar on every render.
+- Keep chart performance stable with larger history.
+## 14 — VARIABILITY
+- Explain variability using the user's actual history.
+- Require enough completed cycles before making a strong trend statement.
+- Show recent range.
+- Show typical value.
+- Show whether the latest cycle is near the recent range.
+- Use neutral language.
+- Do not call variability healthy or unhealthy without a validated framework.
+- Do not make a medical claim from variability.
+- Use an expandable explanation.
+- Keep statistical terminology behind advanced detail.
+- Show sample size.
+- Do not infer a pattern from one unusual cycle.
+- Do not infer causation from variation.
+- Keep variability visually simple.
+- Use a range band when helpful.
+- Explain that the band represents the user's historical variation.
+- Do not present the band as a biological guarantee.
+## 15 — CALENDAR
+- Redesign the three-month calendar as a planning and intelligence surface.
+- Keep month navigation clear.
+- Use real calendar boundaries.
+- Handle leap years.
+- Handle year changes.
+- Handle any first weekday.
+- Use locale-aware weekday order when appropriate.
+- Show today clearly.
+- Show selected day clearly.
+- Show logged period days distinctly.
+- Show predicted period days softly.
+- Show estimated fertile days distinctly.
+- Show estimated ovulation with a focused marker.
+- Show PMS timing only when supported.
+- Use solid styling for logged observations.
+- Use softer or patterned styling for predictions.
+- Do not rely only on color.
+- Allow selecting a day.
+- Open a day detail panel on selection.
+- Allow editing a selected day.
+- Allow Quick Log for a selected day when supported.
+- Keep selected-day state separate from today's state.
+- Do not navigate away unnecessarily.
+- Keep month transitions smooth.
+- Keep the calendar responsive.
+- Use a single-month focus on mobile.
+- Do not make a tiny three-month calendar on a phone.
+- Keep calendar controls accessible.
+## 16 — CALENDAR DAY DETAIL
+- Show selected date.
+- Show whether the day has a log.
+- Show relevant period state.
+- Show relevant phase state.
+- Show relevant prediction state.
+- Show key observations.
+- Do not show every raw database field.
+- Show the most useful information first.
+- Provide Edit day.
+- Provide Log day when appropriate.
+- Keep predicted states clearly labeled.
+- Do not claim an estimated event definitely occurred.
+- Use a compact desktop popover.
+- Use a bottom sheet on mobile where appropriate.
+- Support Escape.
+- Restore focus.
+- Do not change the page scroll position unexpectedly.
+- Handle deleted records gracefully.
+- Handle missing data gracefully.
+## 17 — MOOD, ENERGY, SLEEP CONTEXT
+- Use Mood context only when actual Mood data exists.
+- Use Energy context only when actual Energy data exists.
+- Use Sleep context only when actual Sleep data exists.
+- Keep cross-feature context privacy-controlled.
+- Use personal baselines rather than population comparisons by default.
+- Show descriptive trends.
+- Do not infer causes.
+- Do not claim that the cycle caused a mood change.
+- Do not claim that a phase caused a symptom.
+- Require enough data before describing a recurring pattern.
+- Show sample size for advanced correlations.
+- Use a simple trend visualization.
+- Hide unsupported metrics.
+- Do not show empty charts for missing data.
+- Use a clear data-needed state.
+- Allow the AI assistant to explain patterns.
+## 18 — SYMPTOM PATTERNS
+- Create a Symptom Patterns section only when enough symptom history exists.
+- Allow selecting a symptom.
+- Show recurrence by cycle day when meaningful.
+- Show frequency from actual logged entries.
+- Show recent-cycle filtering.
+- Do not infer causation.
+- Do not diagnose.
+- Do not call a symptom phase-specific without sufficient evidence.
+- Do not treat missing logs as symptom-free days.
+- Show sample size.
+- Use accessible charts.
+- Provide a text summary.
+- Hide the section when the data is insufficient.
+- Use an encouraging but non-pressuring empty state.
+- Keep the section collapsible.
+## 19 — PERIOD EXPERIENCE
+- Create a Period Experience summary when actual period logs exist.
+- Show recent period duration.
+- Show flow categories if the product stores them.
+- Show historical variation when enough data exists.
+- Use a simple period-day timeline.
+- Do not infer blood volume from categorical flow.
+- Do not diagnose heavy bleeding.
+- Do not label a pattern medically normal or abnormal without validated guidance.
+- Use neutral language.
+- Use actual start and end dates.
+- Handle ongoing periods.
+- Handle corrected periods.
+- Do not fill missing period days automatically.
+- Keep the visualization responsive.
+## 20 — RECOMMENDATION ENGINE
+- Build deterministic recommendation candidates before generating AI wording.
+- Use current phase as one input.
+- Use recent cycle context as one input.
+- Use recent mood when permission exists.
+- Use energy when available.
+- Use sleep when available.
+- Use relevant logged symptoms when appropriate.
+- Use upcoming events.
+- Use user preferences when actually stored.
+- Do not infer sensitive traits.
+- Do not infer personality from sparse data.
+- Do not infer medical conditions.
+- Do not infer pregnancy.
+- Do not infer fertility status.
+- Do not prescribe medication.
+- Do not prescribe supplements.
+- Do not create treatment plans.
+- Keep recommendations optional.
+- Explain why a recommendation appears.
+- Use actual supporting data.
+- Suppress duplicate recommendations.
+- Suppress unsupported recommendations.
+- Do not regenerate randomly every render.
+- Do not create engagement bait.
+- Allow dismissing recommendations.
+- Refresh recommendations after meaningful data changes.
+## 21 — RECOMMENDATION VISUAL DESIGN
+- Replace four identical recommendation cards with a hierarchy.
+- Create one primary recommendation.
+- Create two or three secondary suggestions.
+- Use semantic category marks.
+- Use Bloom accents sparingly.
+- Use a small reason line.
+- Use a See why action when methodology is useful.
+- Use Ask Bloom for deeper explanation.
+- Do not make every recommendation look identical.
+- Do not use emoji as the primary information carrier.
+- Do not overuse gold.
+- Do not overuse pink.
+- Do not use large decorative illustrations for every recommendation.
+- Keep recommendation cards compact.
+- Keep recommendation loading independent from core Cycle rendering.
+- Keep the page useful if recommendations fail.
+## 22 — AI ASSISTANT: PRODUCT
+- Add a floating Bloom AI assistant to the Cycle page.
+- Use the existing Bloom Coach visual language as the foundation.
+- Make the launcher contextual to Cycle.
+- Use a distinctive Bloom intelligence icon.
+- Do not use a generic robot.
+- Do not use a giant neon AI button.
+- Keep the launcher compact.
+- Place it in a safe desktop corner.
+- Keep it above the page content without obscuring critical controls.
+- Use a compact desktop panel.
+- Use a bottom sheet or full-height sheet on mobile.
+- Prevent background scrolling when appropriate.
+- Support Escape.
+- Restore focus after closing.
+- Do not auto-open the assistant.
+- Do not use intrusive notifications.
+- Show a small unread indicator only for real assistant updates.
+- Keep the Cycle page functional when the assistant is closed.
+- Do not duplicate the entire Coach page inside the panel.
+## 23 — AI CONTEXT
+- Create a structured CycleContext for AI.
+- Include current date when needed.
+- Include current cycle day when available.
+- Include current phase.
+- Include completed cycle summaries.
+- Include recent cycle lengths.
+- Include personal baseline.
+- Include variability.
+- Include prediction ranges.
+- Include data sufficiency.
+- Include observed ovulation evidence only when actually logged.
+- Include recent mood summaries only when permitted.
+- Include recent energy summaries only when available.
+- Include recent sleep summaries only when available.
+- Include relevant symptom summaries only when available.
+- Include relevant notes only when the privacy model allows it.
+- Do not send unnecessary raw records.
+- Prefer summarized derived signals over huge histories.
+- Keep observed and calculated values separate.
+- Do not let the AI invent context.
+- Do not send unrelated account data.
+- Do not send another user's data.
+- Do not bypass privacy controls.
+## 24 — AI INTELLIGENCE
+- Ground Cycle answers in CycleContext.
+- Use deterministic application calculations for dates and statistics.
+- Do not ask the language model to perform fragile date arithmetic when the application can calculate it.
+- Provide structured tools for reading cycle summaries if the architecture supports tools.
+- Provide a selected-day lookup tool.
+- Provide a symptom-summary tool when permitted.
+- Provide a prediction-methodology tool.
+- Provide a recommendation-context tool.
+- Keep read tools scoped to the authenticated user.
+- Keep write tools disabled by default.
+- Require explicit confirmation for writes.
+- Validate all writes server-side.
+- Do not allow arbitrary database queries.
+- Do not allow arbitrary code execution.
+- Do not allow arbitrary external browsing from the user's private Cycle context.
+- Do not expose secrets.
+- Do not expose authentication tokens.
+- Do not expose system prompts.
+- Do not expose internal provider errors.
+- Use structured outputs when supported.
+- Validate structured outputs.
+- Use deterministic fallback responses.
+## 25 — AI CONVERSATION UX
+- Use a compact assistant header.
+- Identify that the assistant is operating in Cycle context.
+- Use a clean message layout.
+- Keep assistant messages readable.
+- Keep user messages visually distinct.
+- Do not use excessive chat bubbles.
+- Offer contextual quick prompts.
+- Use Explain my current phase.
+- Use Why did my estimate change?
+- Use Compare my recent cycles.
+- Use What changed this cycle?
+- Use What should I pay attention to?
+- Use What should I log today?
+- Use Show me patterns in my logs.
+- Only show prompts supported by available data.
+- Open the assistant with a useful contextual state.
+- Do not start with generic How can I help?
+- Use an input composer.
+- Support Enter to send.
+- Support Shift+Enter for multiline input.
+- Show stop generation when streaming is used.
+- Show Retry after failure.
+- Do not show raw model errors.
+- Do not force-scroll the user while reading older messages.
+- Auto-scroll only when the user is already near the bottom.
+## 26 — AI ANSWER STYLE
+- Answer concisely by default.
+- Expand when the user asks for detail.
+- Reference actual user data.
+- Explain uncertainty.
+- Use plain language.
+- Do not use dramatic medical language.
+- Do not overuse disclaimers.
+- Do not sound robotic.
+- Do not pretend to know missing information.
+- Use Based on your recent logs when appropriate.
+- Use Your recent cycles suggest when supported.
+- Use Not enough data yet when supported.
+- Do not say your body is doing something that the data cannot establish.
+- Do not imply that the AI can see hormones.
+- Do not imply that the AI can see internal biological processes.
+- Do not claim that the AI can diagnose.
+- Do not claim that the AI can predict pregnancy.
+- Do not claim that a fertile-window estimate guarantees fertility.
+- Do not claim that a fertile-window estimate can safely prevent pregnancy.
+- Keep serious health escalation language proportionate.
+- Encourage professional care when genuinely warranted without diagnosing.
+## 27 — AI PROACTIVE INSIGHTS
+- Allow a contextual insight inside the assistant when meaningful.
+- Do not interrupt the user with a modal.
+- Do not auto-open the assistant.
+- Use a small launcher indicator only when there is a real insight.
+- Do not fabricate insight notifications.
+- Use novelty to suppress repeated insights.
+- Use relevance to prioritize insights.
+- Use confidence to suppress weak observations.
+- Do not prioritize alarming content for engagement.
+- Allow dismissing an insight.
+- Do not repeat dismissed content immediately.
+- Use cooldowns for repeated insight categories.
+- Only reference real Cycle data.
+- Do not create urgency around ordinary variation.
+- Do not shame the user into logging.
+## 28 — AI METHODOLOGY
+- Add Explain this estimate to relevant predictions.
+- Open a focused methodology sheet.
+- Show the main inputs.
+- Show historical sample size.
+- Show whether the estimate is calendar-based.
+- Show whether observed evidence exists.
+- Show the prediction range.
+- Explain that new logs can change the estimate.
+- Use plain language.
+- Do not expose model weights.
+- Do not expose prompts.
+- Do not expose provider names unless intentionally part of the product.
+- Do not expose implementation details.
+- Keep methodology accessible.
+- Keep methodology dismissible.
+## 29 — AI SAFETY
+- Treat the assistant as an informational companion.
+- Never diagnose.
+- Never prescribe.
+- Never recommend changing medication.
+- Never recommend starting medication.
+- Never recommend stopping treatment.
+- Never claim a symptom proves a condition.
+- Never claim a late period proves pregnancy.
+- Never claim an ovulation estimate is guaranteed.
+- Never claim a fertile-window estimate is contraception.
+- Never invent medical history.
+- Never invent symptoms.
+- Never invent measurements.
+- Never invent cycle dates.
+- Never invent test results.
+- Never save guesses as raw health records.
+- Keep persistent changes user-controlled.
+- Enforce tool authorization.
+- Keep private data private.
+- Keep uncertainty visible.
+## 30 — AI FAILURE HANDLING
+- If AI is unavailable, keep the Cycle page fully functional.
+- If AI times out, show Retry.
+- If AI returns unusable content, show a friendly fallback.
+- If Cycle context cannot load, explain that contextual insights are temporarily unavailable.
+- Do not show provider errors.
+- Do not show HTTP status text.
+- Do not show stack traces.
+- Do not show raw JSON.
+- Do not show internal request IDs.
+- Do not show API endpoints.
+- Do not block Quick Log because AI failed.
+- Do not block predictions because AI failed.
+- Do not block calendar behavior because AI failed.
+- Keep deterministic insights available.
+- Prevent duplicate streams.
+- Cancel obsolete streams.
+- Clean up streaming connections.
+- Prevent stale AI responses from replacing newer responses.
+## 31 — AI CODE ARCHITECTURE
+- Keep provider-specific AI logic behind a service abstraction.
+- Keep prompt construction separate from UI.
+- Keep CycleContext construction separate from the model call.
+- Keep data retrieval separate from prompt construction.
+- Keep safety validation separate from presentation.
+- Use typed tool inputs.
+- Use typed tool outputs.
+- Validate tool arguments server-side.
+- Validate tool results.
+- Do not allow arbitrary SQL.
+- Do not allow arbitrary code execution.
+- Do not expose secrets.
+- Do not store unnecessary raw context.
+- Use structured outputs when useful.
+- Reject malformed structured outputs.
+- Provide deterministic fallback paths.
+- Write tests for tool authorization.
+- Write tests for missing context.
+- Write tests for stale context.
+- Write tests for AI failures.
+## 32 — ADVANCED ANALYTICS
+- Create a Cycle Intelligence section.
+- Use a stronger editorial section heading.
+- Explain that the section summarizes patterns from logged history.
+- Show average cycle length when enough data exists.
+- Show typical period duration when enough data exists.
+- Show cycle range.
+- Show variability.
+- Show completed cycle count.
+- Show logging completeness only if the metric is meaningful.
+- Show observed ovulation evidence count only when available.
+- Do not show prediction accuracy without enough validation data.
+- Replace unavailable accuracy with a data-sufficiency state.
+- Mix compact metrics with charts.
+- Use cycle-length trend visualization.
+- Use variability visualization.
+- Use phase distribution when meaningful.
+- Use symptom timing when enough data exists.
+- Use mood or energy patterns when enough data exists and permission exists.
+- Allow historical windows.
+- Support last three cycles.
+- Support last six cycles.
+- Support last twelve cycles when available.
+- Support all history as an optional advanced view.
+- Do not show empty charts.
+## 33 — PERSONAL INSIGHT CARD
+- Create a primary personal insight near the top of analytics.
+- Generate it from deterministic signals.
+- Use recent cycle change.
+- Use baseline comparison.
+- Use data completeness.
+- Use meaningful logged context.
+- Keep the insight short.
+- Show why it appears.
+- Allow the AI to explain it.
+- Do not make the insight medically authoritative.
+- Do not repeat the same insight every visit.
+- Suppress low-value insights.
+- Use calm language.
+- Do not use fear.
+- Do not use shame.
+- Do not use engagement bait.
+## 34 — PATTERN DISCOVERY
+- Create a Pattern Explorer when enough data exists.
+- Allow selecting a dimension.
+- Possible dimensions include cycle length, mood, energy, sleep, symptoms, and period duration.
+- Hide dimensions with insufficient data.
+- Show a clear sample size.
+- Use personal history.
+- Do not use population comparisons by default.
+- Do not infer causation.
+- Do not diagnose.
+- Use correlation language carefully.
+- Provide a methodology explanation.
+- Allow AI explanation.
+- Keep the chart simple.
+- Provide a textual summary.
+- Keep the section collapsible.
+## 35 — PHASE EXPERIENCE
+- Make each phase visually understandable.
+- Use menstrual phase styling consistently.
+- Use follicular phase styling consistently.
+- Use ovulation styling consistently.
+- Use luteal phase styling consistently.
+- Use phase-specific microcopy only when supported.
+- Do not present generic stereotypes as facts.
+- Do not say everyone feels the same in a phase.
+- Do not prescribe behavior based on phase.
+- Frame recommendations as optional.
+- Use personal logged data to personalize.
+- Allow AI to explain phase context.
+- Keep the phase description short.
+- Keep the current phase prominent.
+## 36 — RECOMMENDATION CONTENT QUALITY
+- Prefer practical suggestions.
+- Prefer low-risk planning ideas.
+- Prefer reflection prompts when mood context is relevant.
+- Prefer preparation ideas before predicted events.
+- Prefer tracking suggestions when data quality is weak.
+- Do not force nutrition advice.
+- Do not force exercise advice.
+- Do not prescribe supplements.
+- Do not prescribe medication.
+- Do not create medical treatment plans.
+- Do not use universal statements about how someone should feel.
+- Do not shame users for missing logs.
+- Do not reward excessive health tracking.
+- Do not make recommendations feel like tasks the user must complete.
+- Allow dismissing suggestions.
+## 37 — VISUAL RECOMMENDATION COMPOSITION
+- Use one dominant recommendation.
+- Use smaller supporting recommendations.
+- Use visual category marks.
+- Use a subtle reason line.
+- Use phase accents.
+- Use hover feedback.
+- Use focus feedback.
+- Keep cards from becoming visually identical.
+- Use open composition where appropriate.
+- Do not use a dense four-card wall.
+- Do not use huge icons.
+- Do not use excessive gradients.
+- Do not use giant pills.
+- Keep content readable.
+- Keep actions clear.
+## 38 — PERIOD AND FLOW DETAIL
+- Show actual period start.
+- Show actual period end when available.
+- Show duration.
+- Show logged flow categories when available.
+- Keep flow information observational.
+- Do not infer blood volume.
+- Do not diagnose.
+- Do not use alarmist colors.
+- Use a subtle period accent.
+- Allow opening period detail.
+- Allow correcting a period log.
+- Update cycle calculations after correction.
+- Update predictions after correction.
+- Update calendar after correction.
+- Update AI context after correction.
+## 39 — BASAL TEMPERATURE
+- Keep basal-temperature analysis available when actual temperature data exists.
+- Show measured temperatures only.
+- Do not fill missing values with invented values.
+- Do not draw a continuous line through missing values as if measurements existed.
+- Show a gap for missing observations.
+- Use a clear unit label.
+- Show measurement dates.
+- Allow selecting a point.
+- Show exact value on detail.
+- Explain the purpose of the visualization in plain language.
+- Do not claim ovulation solely from a single temperature.
+- Use observed evidence carefully.
+- Keep predictions separate from measurements.
+- Do not turn an empty chart into a giant blank panel.
+- Show a compact logging invitation when no temperature data exists.
+## 40 — OVULATION TESTS AND OBSERVATIONS
+- Show actual ovulation-test logs when they exist.
+- Keep test observations separate from predictions.
+- Show test date.
+- Show test result as actually logged.
+- Do not invent test results.
+- Do not infer a positive test from cycle day.
+- Do not claim ovulation occurred solely because a test was logged.
+- Use evidence language.
+- Keep observed data visually stronger than estimates.
+- Allow the AI to explain the difference between observation and prediction.
+## 41 — CERVICAL MUCUS
+- Show cervical-mucus observations only when the user has logged them.
+- Keep categorical observations intact.
+- Do not invent observations.
+- Do not infer a specific observation from phase.
+- Do not diagnose based on observations.
+- Use an accessible legend.
+- Keep the visualization optional.
+- Keep privacy protections strong.
+- Do not expose these observations on public profiles.
+## 42 — CYCLE DATA PRIVACY
+- Treat Cycle records as sensitive personal data.
+- Keep records private by default.
+- Do not expose cycle data on public profiles.
+- Do not include cycle data in public Story previews.
+- Do not include cycle data in shared profile metadata.
+- Do not include cycle data in Open Graph images.
+- Do not put sensitive values in URLs.
+- Do not expose private IDs publicly.
+- Enforce authorization server-side.
+- Do not trust client-provided user IDs.
+- Do not trust client-provided visibility flags.
+- Do not expose private records in public API responses.
+- Minimize AI context.
+- Keep AI conversations scoped to the authenticated user.
+## 43 — ERROR SYSTEM
+- Never render stack traces.
+- Never render raw database errors.
+- Never render raw provider errors.
+- Never render raw HTTP responses.
+- Never render API payloads.
+- Never render internal component names.
+- Never render port numbers.
+- Never render developer diagnostics.
+- Use friendly error messages.
+- Use Retry where useful.
+- Use Undo where safe.
+- Preserve valid state after failed mutations.
+- Keep section failures localized.
+- Do not crash the entire page because one chart failed.
+- Do not crash the entire page because AI failed.
+- Do not crash the entire page because an optional media asset failed.
+- Log technical information through developer tooling only.
+## 44 — LOADING SYSTEM
+- Use skeletons only when a wait is long enough to require them.
+- Reserve the final layout geometry.
+- Do not flash fake zero values while loading.
+- Do not flash empty states before data arrives.
+- Use subtle skeleton animation.
+- Respect reduced motion.
+- Match skeleton geometry to final content.
+- Use avatar skeletons with correct dimensions.
+- Use chart skeletons with correct dimensions.
+- Use calendar skeletons with correct dimensions.
+- Keep loading local to each section.
+- Show core Cycle state as early as possible.
+- Load advanced analytics progressively.
+- Load AI only when needed.
+- Do not block the whole page on AI.
+## 45 — EMPTY STATES
+- Design zero-data states intentionally.
+- Make zero cycles feel like a beginning.
+- Make zero logs feel normal.
+- Make zero charts feel purposeful.
+- Do not show fake charts.
+- Do not show fake accuracy.
+- Do not show fake predictions.
+- Do not show fake recommendations.
+- Use one clear next action.
+- Keep Quick Log prominent.
+- Explain that more history can improve personalization when true.
+- Do not shame users.
+- Do not use streak pressure.
+- Do not use fear.
+- Do not use giant dashed containers.
+- Do not fill the page with empty cards.
+- Use subtle icons when they help.
+- Keep zero statistics visually valid.
+## 46 — MOBILE
+- Treat mobile as a first-class design.
+- Do not simply shrink the desktop layout.
+- Recompose the hero.
+- Keep cycle day prominent.
+- Keep phase label readable.
+- Stack prediction events.
+- Use a single-month calendar focus.
+- Allow month navigation with comfortable controls.
+- Stack Advanced Log fields.
+- Keep Save accessible.
+- Use a bottom-sheet AI assistant.
+- Keep AI composer above the keyboard.
+- Respect safe-area insets.
+- Prevent horizontal scrolling.
+- Prevent text clipping.
+- Prevent button clipping.
+- Keep tap targets comfortable.
+- Do not rely on hover.
+- Do not hide important Cycle information merely to fit.
+## 47 — TABLET
+- Treat tablet as a distinct composition.
+- Collapse desktop two-column layouts when cramped.
+- Keep the cycle visualization readable.
+- Stack prediction content when necessary.
+- Keep chart labels readable.
+- Keep form fields comfortable.
+- Keep calendar controls usable.
+- Keep the AI panel inside the viewport.
+- Do not let the AI panel obscure Save.
+- Maintain visual rhythm.
+## 48 — DESKTOP
+- Use a centered maximum-width container.
+- Keep the page readable on wide screens.
+- Do not stretch long text excessively.
+- Use a strong two-column hero where appropriate.
+- Keep the cycle visualization prominent.
+- Keep predictive intelligence close to it.
+- Use varied section compositions.
+- Do not create giant empty margins.
+- Do not create giant empty cards.
+- Keep the calendar wide enough to be useful.
+- Keep advanced forms readable.
+- Keep AI launcher clear of content.
+## 49 — ACCESSIBILITY
+- Use semantic headings.
+- Use semantic buttons.
+- Use links for navigation.
+- Label icon-only controls.
+- Provide alt text for meaningful imagery.
+- Use empty alt text for decorative imagery.
+- Keep focus visible.
+- Support keyboard navigation.
+- Support Escape for overlays.
+- Restore focus after closing.
+- Trap focus inside modal dialogs when appropriate.
+- Do not trap focus in nonmodal panels.
+- Use aria-live only for meaningful dynamic feedback.
+- Associate errors with fields.
+- Do not rely on color alone.
+- Provide text summaries for charts.
+- Respect reduced motion.
+- Respect browser zoom.
+- Test at increased text size.
+## 50 — PERFORMANCE
+- Keep the first viewport fast.
+- Do not block core rendering on advanced analytics.
+- Do not block Cycle on AI.
+- Lazy-load below-the-fold charts where practical.
+- Lazy-load AI UI where practical.
+- Reserve image and chart dimensions.
+- Prevent layout shift.
+- Prevent duplicate fetches.
+- Prevent duplicate calculations.
+- Cache stable history where appropriate.
+- Invalidate relevant data after mutation.
+- Abort obsolete AI requests.
+- Clean up timers.
+- Clean up event listeners.
+- Clean up object URLs.
+- Keep memory use bounded.
+- Keep large histories efficient.
+## 51 — REACT ARCHITECTURE
+- Keep the Cycle page component focused on composition.
+- Separate cycle visualization into a reusable component.
+- Separate prediction events into a reusable component.
+- Separate Quick Log.
+- Separate Advanced Log.
+- Separate calendar.
+- Separate historical charts.
+- Separate recommendations.
+- Separate AI assistant.
+- Separate methodology panels.
+- Keep data-fetching logic out of large JSX blocks.
+- Keep calculations in reusable utilities or services.
+- Use existing TypeScript types.
+- Create narrow new types.
+- Do not use any as a shortcut.
+- Handle nullable values explicitly.
+- Use stable keys for lists.
+- Do not use array indexes as persistent identity.
+- Keep viewer state local.
+- Keep AI state local.
+- Keep form state local.
+## 52 — CSS ARCHITECTURE
+- Use CSS variables for Bloom tokens.
+- Use semantic color tokens.
+- Use spacing tokens.
+- Use typography tokens.
+- Use consistent radii.
+- Use consistent border treatment.
+- Use consistent elevation.
+- Use CSS grid for analytical layouts.
+- Use flexbox for compact rows.
+- Use aspect-ratio for media and visual tiles.
+- Use overflow-x:auto for appropriate rails.
+- Use min-width:0 for flexible content.
+- Use focus-visible.
+- Use prefers-reduced-motion.
+- Avoid unnecessary !important.
+- Remove obsolete styles after the redesign.
+- Keep selectors scoped and predictable.
+## 53 — COLOR SYSTEM
+- Define deep Bloom background.
+- Define primary surface.
+- Define raised surface.
+- Define border.
+- Define primary text.
+- Define muted text.
+- Define lavender intelligence accent.
+- Define blue cycle accent.
+- Define pink menstrual accent.
+- Define gold ovulation accent.
+- Define green positive-state accent.
+- Define prediction treatment.
+- Keep accents semantic.
+- Do not use arbitrary chart colors.
+- Do not use rainbow charts.
+- Keep contrast accessible.
+- Do not use pure white for every text level.
+- Do not use pure black for every background.
+- Use gradients sparingly.
+## 54 — TYPOGRAPHY
+- Use Bloom serif typography for major editorial headings.
+- Use sans typography for controls.
+- Use strong numerals for cycle day.
+- Use compact metadata.
+- Use small eyebrow labels sparingly.
+- Do not uppercase every label.
+- Keep body text readable.
+- Keep chart text readable.
+- Keep form labels readable.
+- Use a consistent type scale.
+- Use responsive typography.
+- Prevent heading overflow.
+- Keep phase names visually emphasized.
+- Keep prediction metadata subordinate.
+- Do not use monospaced text for ordinary content.
+## 55 — SPACING
+- Create a coherent spacing scale.
+- Use tight spacing inside controls.
+- Use medium spacing inside sections.
+- Use larger spacing between major sections.
+- Keep hero-to-content spacing deliberate.
+- Keep chart-to-title spacing consistent.
+- Keep calendar-to-section spacing consistent.
+- Do not create random one-off margins.
+- Use gap for repeated relationships.
+- Use max-width for readable text.
+- Use responsive padding.
+- Use clamp for major spacing where useful.
+- Test intermediate widths.
+## 56 — ICONOGRAPHY
+- Reuse the existing Bloom icon system.
+- Keep stroke weight consistent.
+- Use icons for semantic actions.
+- Do not decorate every heading.
+- Use calendar iconography for date actions.
+- Use trend iconography for analytics.
+- Use info iconography for methodology.
+- Use a distinctive Bloom AI symbol.
+- Do not use a generic robot.
+- Do not use sparkles everywhere.
+- Keep icon sizes consistent.
+- Align icons optically.
+- Provide accessible names.
+## 57 — MOTION
+- Use motion to communicate state changes.
+- Use short microinteraction durations.
+- Use opacity and transform for performant transitions.
+- Animate selected calendar states subtly.
+- Animate new chart data subtly.
+- Animate AI panel opening smoothly.
+- Animate Quick Log opening smoothly.
+- Do not animate the entire page.
+- Do not continuously rotate the cycle ring.
+- Do not continuously pulse the AI launcher.
+- Do not bounce buttons.
+- Do not flash warnings.
+- Respect reduced motion.
+- Do not delay interaction for animation.
+## 58 — DATA MODELS
+- Reuse existing Cycle data models where possible.
+- Keep raw cycle logs separate from derived predictions.
+- Keep prediction records distinguishable from observations.
+- Keep AI messages separate from Cycle records.
+- Keep Story or Profile data separate from Cycle records.
+- Use stable IDs.
+- Keep ownership fields server-controlled.
+- Keep visibility fields server-controlled.
+- Validate enum values.
+- Validate dates.
+- Validate numeric values.
+- Handle deleted records gracefully.
+- Handle partial records gracefully.
+- Keep data transformations centralized.
+## 59 — ROUTING AND DEEP LINKS
+- Preserve the existing Cycle route.
+- Make direct navigation to Cycle work.
+- Make refresh on Cycle work.
+- Keep route state stable.
+- If viewers use routes, preserve back navigation.
+- If viewers use overlays, restore focus correctly.
+- Do not create unnecessary routes.
+- Keep share links separate from private Cycle links.
+- Do not put sensitive data in query parameters.
+## 60 — SHARE BOUNDARIES
+- Do not expose Cycle data through public profile sharing.
+- Do not include Cycle data in public metadata.
+- Do not include Cycle data in share preview images.
+- Keep Cycle private by default.
+- Do not automatically publish Cycle events to Stories.
+- Do not automatically publish Cycle data to Moments.
+- Require intentional user action for any cross-feature sharing.
+- Keep AI context private.
+## 61 — CALCULATION TESTS
+- Write unit tests for cycle-day calculation.
+- Write unit tests for cycle length.
+- Write unit tests for completed-cycle detection.
+- Write unit tests for baseline calculation.
+- Write unit tests for variability.
+- Write unit tests for prediction range.
+- Write unit tests for insufficient history.
+- Write unit tests for missing data.
+- Write unit tests for timezone boundaries.
+- Write unit tests for year transitions.
+## 62 — CALENDAR TESTS
+- Test month beginning on Sunday.
+- Test month beginning on Monday.
+- Test leap-year February.
+- Test non-leap February.
+- Test December to January transition.
+- Test predicted events crossing months.
+- Test selected date behavior.
+- Test today marker behavior.
+- Test empty calendar state.
+- Test calendar refresh after a saved log.
+## 63 — QUICK LOG TESTS
+- Test opening Quick Log.
+- Test closing Quick Log.
+- Test saving valid data.
+- Test saving invalid data.
+- Test failed save.
+- Test retry.
+- Test duplicate submission prevention.
+- Test update after successful save.
+- Test focus restoration.
+- Test mobile sheet behavior.
+## 64 — ADVANCED LOG TESTS
+- Test each field type.
+- Test required-field validation.
+- Test numeric range validation.
+- Test multi-select symptoms.
+- Test notes.
+- Test save.
+- Test failed save.
+- Test export.
+- Test editing an existing entry.
+- Test mobile stacking.
+## 65 — AI TESTS
+- Test AI opening.
+- Test AI closing.
+- Test contextual prompt generation.
+- Test context loading.
+- Test missing context.
+- Test successful response.
+- Test streaming response.
+- Test cancellation.
+- Test timeout.
+- Test retry.
+## 66 — AI AUTHORIZATION TESTS
+- Test authenticated user can access own Cycle context.
+- Test user cannot access another user's Cycle context.
+- Test public profile cannot expose private Cycle context.
+- Test AI tool ownership checks.
+- Test AI write confirmation.
+- Test malformed tool arguments.
+- Test unauthorized mutation.
+- Test private data omission.
+- Test context minimization.
+- Test secret omission.
+## 67 — VISUAL REGRESSION TESTS
+- Capture the desktop hero after redesign.
+- Capture the desktop analytics after redesign.
+- Capture the calendar after redesign.
+- Capture the Advanced Log after redesign.
+- Capture the AI panel after redesign.
+- Capture the mobile hero after redesign.
+- Capture the mobile calendar after redesign.
+- Capture the mobile Advanced Log after redesign.
+- Capture the zero-data state.
+- Capture a populated state.
+## 68 — EDGE CASE: NO HISTORY
+- Show a beautiful first-use state.
+- Do not show fake cycle statistics.
+- Do not show fake accuracy.
+- Do not show fake trend charts.
+- Explain what data can improve future personalization.
+- Keep Quick Log visible.
+- Keep predictions appropriately cautious.
+- Keep AI contextual but honest about limited data.
+- Keep the calendar useful.
+- Keep the page visually complete.
+## 69 — EDGE CASE: ONE CYCLE
+- Use the one cycle as history without overstating certainty.
+- Do not describe a stable personal pattern.
+- Do not show a strong variability claim.
+- Do not show validated prediction accuracy.
+- Show what is known.
+- Show what is estimated.
+- Explain that more history can improve personalization.
+- Keep charts meaningful.
+- Keep AI cautious.
+- Keep recommendations contextual.
+## 70 — EDGE CASE: MANY CYCLES
+- Use all appropriate history efficiently.
+- Allow recent-window analysis.
+- Allow longer-window analysis.
+- Prevent charts from becoming unreadable.
+- Paginate or virtualize where necessary.
+- Keep prediction calculations performant.
+- Keep AI context summarized.
+- Do not send hundreds of raw records unnecessarily.
+- Keep calendar responsive.
+- Keep page scrolling smooth.
+- [CYCLE RING GEOMETRY · DETAIL 1] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 1] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 1] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 1] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 1] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 1] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 1] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 1] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 1] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 1] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 1] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 1] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 1] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 1] Use the existing application source of truth.
+- [AI RETRY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 1] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 1] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 1] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 1] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 1] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 1] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 1] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 1] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 1] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 1] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 1] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 1] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 1] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 1] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 1] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 1] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 1] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 1] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 1] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 1] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 1] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 1] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 1] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 1] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 1] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 1] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 1] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 1] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 1] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 1] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 1] Keep the element responsive.
+- [MOOD INPUT · DETAIL 1] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 1] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 1] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 1] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 1] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 1] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 1] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 1] Respect privacy and authorization.
+- [AI RETRY · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 1] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 1] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 1] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 1] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 1] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 1] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 1] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 1] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 1] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 1] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 1] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 1] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 1] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 1] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 1] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 1] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 1] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 1] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 1] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 1] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 1] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 1] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 1] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 1] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 1] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 1] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 1] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 1] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 1] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 1] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 1] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 1] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 1] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 1] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 1] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 1] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 1] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 1] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 1] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 1] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 1] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 1] Keep the element responsive.
+- [AI SAFETY · DETAIL 1] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 1] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 1] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 1] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 1] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 1] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 1] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 1] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 1] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 1] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 1] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 1] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 1] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 1] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 1] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 1] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 1] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 1] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the element responsive.
+- [PERFORMANCE · DETAIL 1] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 1] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 1] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 1] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 1] Handle partial data intentionally.
+- [BUILD QA · DETAIL 1] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 1] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 1] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 1] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 1] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 1] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 1] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 1] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 1] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 1] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 1] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 1] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 1] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 1] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 1] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 1] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 1] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 1] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 1] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 1] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 1] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 1] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 1] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 1] Preserve valid state after failure.
+- [REACT STATE · DETAIL 1] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 1] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 1] Keep the element responsive.
+- [CSS TOKENS · DETAIL 1] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 1] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 1] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 1] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 1] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 1] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 1] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 1] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 1] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 1] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 1] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 1] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 1] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 1] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 1] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 1] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 1] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 1] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 1] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 1] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 1] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 1] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 1] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 1] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 1] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 1] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 1] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 1] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 1] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 1] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 1] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 1] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 1] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 1] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 1] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 1] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 1] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 1] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 1] Handle empty data intentionally.
+- [REACT STATE · DETAIL 1] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 1] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 1] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 1] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 1] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 1] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 1] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 1] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 1] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 1] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 1] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 1] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 1] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 1] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 1] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 1] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 1] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 1] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 1] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 1] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 1] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 1] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 1] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 1] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 1] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 1] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 1] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 1] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 1] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 1] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 1] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 1] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 1] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 1] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 1] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 1] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 1] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 1] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 1] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 1] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 1] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 1] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 1] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 1] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 1] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 1] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 1] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 1] Respect reduced motion.
+- [UNIT TESTING · DETAIL 1] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 1] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 1] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 1] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 1] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 1] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 1] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 1] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 1] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 1] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 1] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 1] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 1] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 1] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 1] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 1] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 1] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 1] Handle partial data intentionally.
+- [AI RETRY · DETAIL 1] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 1] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 1] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 1] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 1] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 1] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 1] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 1] Prevent duplicate requests.
+- [REACT STATE · DETAIL 1] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 1] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 1] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 1] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 1] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 1] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 1] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 1] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 1] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 1] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 1] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 1] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 1] Do not fabricate missing information.
+- [BUILD QA · DETAIL 1] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 1] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 1] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 1] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 1] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 1] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 1] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 1] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 1] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 1] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 1] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 1] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 1] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 1] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 1] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 1] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 1] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 1] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 1] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 1] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 1] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 1] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 1] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 1] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 1] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 1] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 1] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 1] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 1] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 1] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 1] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 1] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 1] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 1] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 1] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 1] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 1] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 1] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 1] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 1] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 1] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 1] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 1] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 1] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 1] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 1] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 1] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 1] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 1] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 1] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 1] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 1] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 1] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 1] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 1] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 1] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 1] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 1] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 1] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 1] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 1] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 1] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 1] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 1] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 1] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 1] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 1] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 1] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 1] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 1] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 1] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 1] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 1] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 1] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 1] Respect reduced motion.
+- [BUILD QA · DETAIL 1] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 1] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 1] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 1] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 1] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 1] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 1] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 1] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 1] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 1] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 1] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 1] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 1] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 1] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 1] Keep the element responsive.
+- [AI CONTEXT · DETAIL 1] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 1] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 1] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 1] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 1] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 1] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 1] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 1] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 1] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 1] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 1] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 1] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 1] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 1] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 1] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 1] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 1] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 1] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 1] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 1] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 1] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 1] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 1] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 1] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 1] Use the existing application source of truth.
+- [BUILD QA · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 1] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 1] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 1] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 1] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 1] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 1] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 1] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 1] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 1] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 1] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 1] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 1] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 1] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 1] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 1] Do not fabricate missing information.
+- [AI RETRY · DETAIL 1] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 1] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 1] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 1] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 1] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 1] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 1] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 1] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 1] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 1] Keep the element responsive.
+- [REACT STATE · DETAIL 1] Respect reduced motion.
+- [DATA FETCHING · DETAIL 1] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 1] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 1] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 1] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 1] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 1] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 1] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 1] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 1] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 1] Respect privacy and authorization.
+- [BUILD QA · DETAIL 1] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 1] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 1] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 1] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 1] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 1] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the element responsive.
+- [PERIOD LOG · DETAIL 1] Respect reduced motion.
+- [FLOW INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 1] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 1] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 1] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 1] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 1] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 1] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 1] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 1] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 1] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 1] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 1] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 1] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 1] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 1] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 1] Keep the element responsive.
+- [LOADING STATE · DETAIL 1] Respect reduced motion.
+- [EMPTY STATE · DETAIL 1] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 1] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 1] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 1] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 1] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 1] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 1] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 1] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 1] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 1] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 1] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 1] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 1] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 1] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 1] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 1] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 1] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 1] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 1] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 1] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 1] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 1] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 1] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 1] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 1] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 1] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 1] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 1] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 1] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 1] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 1] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 1] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 1] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the element responsive.
+- [AI STREAMING · DETAIL 1] Respect reduced motion.
+- [AI RETRY · DETAIL 1] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 1] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 1] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 1] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 1] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 1] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 1] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 1] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 1] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 1] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 1] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 1] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 1] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 1] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 1] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 1] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 1] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 1] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 1] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 1] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 1] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 1] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 1] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 1] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 1] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 1] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 1] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 1] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 1] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 1] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 1] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 1] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 1] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 1] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 1] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 1] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 1] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 1] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 1] Use the existing application source of truth.
+- [AI RETRY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 1] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 1] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 1] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 1] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 1] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 1] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 1] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 1] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 1] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 1] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 1] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 1] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 1] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 1] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 1] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 1] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 1] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 1] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 1] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 1] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 1] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 1] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 1] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 1] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 1] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 1] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 1] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 1] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 1] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 1] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 1] Keep the element responsive.
+- [MOOD INPUT · DETAIL 1] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 1] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 1] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 1] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 1] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 1] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 1] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 1] Respect privacy and authorization.
+- [AI RETRY · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 1] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 1] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 1] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 1] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 1] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 1] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 1] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 1] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 1] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 1] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 1] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 1] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 1] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 1] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 1] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 1] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 1] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 1] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 1] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 1] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 1] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 1] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 1] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 1] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 1] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 1] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 1] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 1] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 1] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 1] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 1] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 1] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 1] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 1] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 1] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 1] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 1] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 1] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 1] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 1] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 1] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 1] Keep the element responsive.
+- [AI SAFETY · DETAIL 1] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 1] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 1] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 1] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 1] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 1] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 1] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 1] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 1] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 1] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 1] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 1] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 1] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 1] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 1] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 1] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 1] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 1] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the element responsive.
+- [PERFORMANCE · DETAIL 1] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 1] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 1] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 1] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 1] Handle partial data intentionally.
+- [BUILD QA · DETAIL 1] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 1] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 1] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 1] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 1] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 1] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 1] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 1] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 1] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 1] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 1] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 1] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 1] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 1] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 1] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 1] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 1] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 1] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 1] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 1] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 1] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 1] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 1] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 1] Preserve valid state after failure.
+- [REACT STATE · DETAIL 1] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 1] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 1] Keep the element responsive.
+- [CSS TOKENS · DETAIL 1] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 1] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 1] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 1] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 1] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 1] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 1] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 1] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 1] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 1] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 1] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 1] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 1] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 1] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 1] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 1] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 1] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 1] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 1] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 1] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 1] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 1] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 1] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 1] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 1] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 1] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 1] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 1] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 1] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 1] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 1] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 1] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 1] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 1] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 1] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 1] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 1] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 1] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 1] Handle empty data intentionally.
+- [REACT STATE · DETAIL 1] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 1] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 1] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 1] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 1] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 1] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 1] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 1] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 1] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 1] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 1] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 1] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 1] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 1] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 1] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 1] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 1] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 1] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 1] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 1] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 1] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 1] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 1] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 1] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 1] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 1] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 1] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 1] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 1] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 1] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 1] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 1] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 1] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 1] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 1] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 1] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 1] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 1] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 1] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 1] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 1] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 1] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 1] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 1] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 1] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 1] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 1] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 1] Respect reduced motion.
+- [UNIT TESTING · DETAIL 1] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 1] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 1] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 1] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 1] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 1] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 1] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 1] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 1] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 1] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 1] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 1] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 1] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 1] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 1] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 1] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 1] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 1] Handle partial data intentionally.
+- [AI RETRY · DETAIL 1] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 1] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 1] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 1] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 1] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 1] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 1] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 1] Prevent duplicate requests.
+- [REACT STATE · DETAIL 1] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 1] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 1] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 1] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 1] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 1] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 1] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 1] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 1] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 1] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 1] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 1] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 1] Do not fabricate missing information.
+- [BUILD QA · DETAIL 1] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 1] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 1] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 1] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 1] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 1] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 1] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 1] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 1] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 1] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 1] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 1] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 1] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 1] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 1] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 1] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 1] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 1] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 1] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 1] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 1] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 1] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 1] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 1] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 1] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 1] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 1] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 1] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 1] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 1] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 1] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 1] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 1] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 1] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 1] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 1] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 1] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 1] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 1] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 1] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 1] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 1] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 1] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 1] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 1] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 1] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 1] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 1] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 1] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 1] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 1] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 1] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 1] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 1] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 1] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 1] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 1] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 1] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 1] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 1] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 1] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 1] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 1] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 1] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 1] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 1] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 1] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 1] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 1] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 1] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 1] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 1] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 1] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 1] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 1] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 1] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 1] Respect reduced motion.
+- [BUILD QA · DETAIL 1] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 1] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 1] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 1] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 1] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 1] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 1] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 1] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 1] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 1] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 1] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 1] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 1] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 1] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 1] Keep the element responsive.
+- [AI CONTEXT · DETAIL 1] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 1] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 1] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 1] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 1] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 1] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 1] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 1] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 1] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 1] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 1] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 1] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 1] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 1] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 1] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 1] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 1] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 1] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 1] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 1] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 1] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 1] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 1] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 1] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 1] Use the existing application source of truth.
+- [BUILD QA · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 1] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 1] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 1] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 1] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 1] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 1] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 1] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 1] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 1] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 1] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 1] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 1] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 1] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 1] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 1] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 1] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 1] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 1] Do not fabricate missing information.
+- [AI RETRY · DETAIL 1] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 1] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 1] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 1] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 1] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 1] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 1] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 1] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 1] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 1] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 1] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 1] Keep the element responsive.
+- [REACT STATE · DETAIL 1] Respect reduced motion.
+- [DATA FETCHING · DETAIL 1] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 1] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 1] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 1] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 1] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 1] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 1] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 1] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 1] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 1] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 1] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 1] Respect privacy and authorization.
+- [BUILD QA · DETAIL 1] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 1] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 1] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 1] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 1] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 1] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 1] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the element responsive.
+- [PERIOD LOG · DETAIL 1] Respect reduced motion.
+- [FLOW INPUT · DETAIL 1] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 1] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 1] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 1] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 1] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 1] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 1] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 1] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 1] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 1] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 1] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 1] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 1] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 1] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 1] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 1] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 1] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 1] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 1] Keep the element responsive.
+- [LOADING STATE · DETAIL 1] Respect reduced motion.
+- [EMPTY STATE · DETAIL 1] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 1] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 1] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 1] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 1] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 1] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 1] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 1] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 1] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 1] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 1] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 1] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 1] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 1] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 1] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 1] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 1] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 1] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 1] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 1] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 1] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 1] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 1] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 1] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 1] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 1] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 1] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 1] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 1] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 1] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 1] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 1] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 1] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 1] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 1] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 1] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 1] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 1] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 1] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 1] Keep the element responsive.
+- [AI STREAMING · DETAIL 1] Respect reduced motion.
+- [AI RETRY · DETAIL 1] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 1] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 1] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 1] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 1] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 1] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 1] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 1] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 1] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 1] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 1] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 1] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 1] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 1] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 1] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 1] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 1] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 1] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 1] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 1] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 1] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 1] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 1] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 1] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 1] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 1] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 1] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 1] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 1] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 1] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 1] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 1] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 2] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 2] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 2] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 2] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 2] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 2] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 2] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 2] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 2] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 2] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 2] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 2] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 2] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 2] Use the existing application source of truth.
+- [AI RETRY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 2] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 2] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 2] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 2] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 2] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 2] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 2] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 2] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 2] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 2] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 2] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 2] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 2] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 2] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 2] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 2] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 2] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 2] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 2] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 2] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 2] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 2] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 2] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 2] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 2] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 2] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 2] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 2] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 2] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 2] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 2] Keep the element responsive.
+- [MOOD INPUT · DETAIL 2] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 2] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 2] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 2] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 2] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 2] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 2] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 2] Respect privacy and authorization.
+- [AI RETRY · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 2] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 2] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 2] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 2] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 2] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 2] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 2] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 2] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 2] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 2] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 2] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 2] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 2] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 2] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 2] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 2] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 2] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 2] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 2] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 2] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 2] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 2] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 2] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 2] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 2] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 2] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 2] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 2] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 2] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 2] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 2] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 2] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 2] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 2] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 2] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 2] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 2] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 2] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 2] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 2] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 2] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 2] Keep the element responsive.
+- [AI SAFETY · DETAIL 2] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 2] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 2] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 2] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 2] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 2] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 2] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 2] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 2] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 2] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 2] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 2] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 2] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 2] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 2] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 2] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 2] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 2] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the element responsive.
+- [PERFORMANCE · DETAIL 2] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 2] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 2] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 2] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 2] Handle partial data intentionally.
+- [BUILD QA · DETAIL 2] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 2] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 2] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 2] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 2] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 2] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 2] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 2] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 2] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 2] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 2] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 2] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 2] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 2] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 2] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 2] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 2] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 2] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 2] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 2] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 2] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 2] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 2] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 2] Preserve valid state after failure.
+- [REACT STATE · DETAIL 2] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 2] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 2] Keep the element responsive.
+- [CSS TOKENS · DETAIL 2] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 2] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 2] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 2] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 2] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 2] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 2] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 2] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 2] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 2] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 2] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 2] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 2] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 2] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 2] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 2] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 2] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 2] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 2] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 2] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 2] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 2] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 2] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 2] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 2] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 2] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 2] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 2] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 2] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 2] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 2] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 2] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 2] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 2] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 2] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 2] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 2] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 2] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 2] Handle empty data intentionally.
+- [REACT STATE · DETAIL 2] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 2] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 2] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 2] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 2] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 2] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 2] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 2] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 2] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 2] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 2] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 2] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 2] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 2] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 2] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 2] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 2] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 2] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 2] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 2] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 2] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 2] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 2] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 2] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 2] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 2] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 2] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 2] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 2] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 2] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 2] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 2] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 2] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 2] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 2] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 2] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 2] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 2] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 2] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 2] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 2] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 2] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 2] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 2] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 2] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 2] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 2] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 2] Respect reduced motion.
+- [UNIT TESTING · DETAIL 2] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 2] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 2] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 2] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 2] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 2] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 2] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 2] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 2] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 2] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 2] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 2] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 2] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 2] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 2] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 2] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 2] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 2] Handle partial data intentionally.
+- [AI RETRY · DETAIL 2] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 2] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 2] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 2] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 2] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 2] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 2] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 2] Prevent duplicate requests.
+- [REACT STATE · DETAIL 2] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 2] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 2] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 2] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 2] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 2] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 2] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 2] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 2] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 2] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 2] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 2] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 2] Do not fabricate missing information.
+- [BUILD QA · DETAIL 2] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 2] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 2] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 2] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 2] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 2] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 2] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 2] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 2] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 2] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 2] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 2] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 2] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 2] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 2] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 2] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 2] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 2] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 2] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 2] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 2] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 2] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 2] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 2] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 2] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 2] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 2] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 2] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 2] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 2] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 2] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 2] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 2] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 2] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 2] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 2] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 2] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 2] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 2] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 2] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 2] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 2] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 2] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 2] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 2] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 2] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 2] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 2] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 2] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 2] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 2] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 2] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 2] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 2] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 2] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 2] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 2] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 2] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 2] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 2] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 2] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 2] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 2] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 2] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 2] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 2] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 2] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 2] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 2] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 2] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 2] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 2] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 2] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 2] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 2] Respect reduced motion.
+- [BUILD QA · DETAIL 2] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 2] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 2] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 2] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 2] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 2] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 2] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 2] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 2] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 2] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 2] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 2] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 2] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 2] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 2] Keep the element responsive.
+- [AI CONTEXT · DETAIL 2] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 2] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 2] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 2] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 2] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 2] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 2] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 2] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 2] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 2] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 2] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 2] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 2] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 2] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 2] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 2] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 2] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 2] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 2] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 2] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 2] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 2] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 2] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 2] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 2] Use the existing application source of truth.
+- [BUILD QA · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 2] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 2] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 2] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 2] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 2] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 2] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 2] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 2] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 2] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 2] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 2] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 2] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 2] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 2] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 2] Do not fabricate missing information.
+- [AI RETRY · DETAIL 2] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 2] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 2] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 2] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 2] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 2] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 2] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 2] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 2] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 2] Keep the element responsive.
+- [REACT STATE · DETAIL 2] Respect reduced motion.
+- [DATA FETCHING · DETAIL 2] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 2] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 2] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 2] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 2] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 2] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 2] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 2] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 2] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 2] Respect privacy and authorization.
+- [BUILD QA · DETAIL 2] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 2] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 2] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 2] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 2] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 2] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the element responsive.
+- [PERIOD LOG · DETAIL 2] Respect reduced motion.
+- [FLOW INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 2] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 2] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 2] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 2] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 2] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 2] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 2] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 2] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 2] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 2] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 2] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 2] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 2] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 2] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 2] Keep the element responsive.
+- [LOADING STATE · DETAIL 2] Respect reduced motion.
+- [EMPTY STATE · DETAIL 2] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 2] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 2] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 2] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 2] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 2] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 2] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 2] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 2] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 2] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 2] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 2] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 2] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 2] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 2] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 2] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 2] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 2] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 2] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 2] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 2] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 2] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 2] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 2] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 2] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 2] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 2] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 2] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 2] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 2] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 2] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 2] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 2] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the element responsive.
+- [AI STREAMING · DETAIL 2] Respect reduced motion.
+- [AI RETRY · DETAIL 2] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 2] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 2] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 2] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 2] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 2] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 2] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 2] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 2] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 2] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 2] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 2] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 2] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 2] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 2] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 2] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 2] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 2] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 2] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 2] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 2] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 2] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 2] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 2] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 2] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 2] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 2] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 2] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 2] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 2] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 2] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 2] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 2] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 2] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 2] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 2] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 2] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 2] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 2] Use the existing application source of truth.
+- [AI RETRY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 2] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 2] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 2] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 2] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 2] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 2] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 2] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 2] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 2] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 2] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 2] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 2] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 2] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 2] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 2] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 2] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 2] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 2] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 2] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 2] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 2] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 2] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 2] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 2] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 2] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 2] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 2] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 2] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 2] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 2] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 2] Keep the element responsive.
+- [MOOD INPUT · DETAIL 2] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 2] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 2] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 2] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 2] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 2] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 2] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 2] Respect privacy and authorization.
+- [AI RETRY · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 2] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 2] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 2] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 2] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 2] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 2] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 2] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 2] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 2] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 2] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 2] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 2] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 2] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 2] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 2] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 2] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 2] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 2] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 2] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 2] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 2] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 2] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 2] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 2] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 2] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 2] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 2] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 2] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 2] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 2] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 2] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 2] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 2] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 2] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 2] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 2] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 2] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 2] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 2] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 2] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 2] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 2] Keep the element responsive.
+- [AI SAFETY · DETAIL 2] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 2] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 2] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 2] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 2] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 2] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 2] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 2] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 2] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 2] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 2] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 2] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 2] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 2] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 2] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 2] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 2] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 2] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the element responsive.
+- [PERFORMANCE · DETAIL 2] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 2] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 2] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 2] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 2] Handle partial data intentionally.
+- [BUILD QA · DETAIL 2] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 2] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 2] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 2] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 2] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 2] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 2] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 2] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 2] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 2] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 2] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 2] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 2] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 2] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 2] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 2] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 2] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 2] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 2] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 2] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 2] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 2] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 2] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 2] Preserve valid state after failure.
+- [REACT STATE · DETAIL 2] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 2] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 2] Keep the element responsive.
+- [CSS TOKENS · DETAIL 2] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 2] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 2] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 2] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 2] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 2] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 2] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 2] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 2] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 2] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 2] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 2] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 2] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 2] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 2] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 2] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 2] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 2] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 2] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 2] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 2] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 2] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 2] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 2] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 2] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 2] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 2] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 2] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 2] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 2] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 2] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 2] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 2] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 2] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 2] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 2] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 2] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 2] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 2] Handle empty data intentionally.
+- [REACT STATE · DETAIL 2] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 2] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 2] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 2] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 2] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 2] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 2] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 2] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 2] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 2] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 2] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 2] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 2] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 2] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 2] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 2] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 2] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 2] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 2] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 2] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 2] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 2] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 2] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 2] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 2] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 2] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 2] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 2] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 2] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 2] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 2] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 2] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 2] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 2] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 2] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 2] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 2] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 2] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 2] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 2] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 2] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 2] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 2] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 2] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 2] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 2] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 2] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 2] Respect reduced motion.
+- [UNIT TESTING · DETAIL 2] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 2] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 2] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 2] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 2] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 2] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 2] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 2] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 2] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 2] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 2] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 2] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 2] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 2] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 2] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 2] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 2] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 2] Handle partial data intentionally.
+- [AI RETRY · DETAIL 2] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 2] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 2] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 2] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 2] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 2] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 2] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 2] Prevent duplicate requests.
+- [REACT STATE · DETAIL 2] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 2] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 2] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 2] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 2] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 2] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 2] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 2] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 2] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 2] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 2] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 2] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 2] Do not fabricate missing information.
+- [BUILD QA · DETAIL 2] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 2] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 2] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 2] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 2] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 2] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 2] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 2] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 2] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 2] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 2] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 2] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 2] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 2] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 2] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 2] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 2] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 2] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 2] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 2] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 2] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 2] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 2] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 2] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 2] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 2] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 2] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 2] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 2] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 2] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 2] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 2] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 2] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 2] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 2] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 2] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 2] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 2] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 2] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 2] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 2] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 2] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 2] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 2] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 2] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 2] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 2] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 2] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 2] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 2] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 2] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 2] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 2] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 2] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 2] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 2] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 2] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 2] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 2] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 2] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 2] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 2] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 2] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 2] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 2] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 2] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 2] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 2] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 2] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 2] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 2] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 2] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 2] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 2] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 2] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 2] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 2] Respect reduced motion.
+- [BUILD QA · DETAIL 2] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 2] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 2] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 2] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 2] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 2] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 2] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 2] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 2] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 2] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 2] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 2] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 2] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 2] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 2] Keep the element responsive.
+- [AI CONTEXT · DETAIL 2] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 2] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 2] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 2] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 2] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 2] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 2] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 2] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 2] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 2] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 2] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 2] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 2] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 2] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 2] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 2] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 2] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 2] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 2] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 2] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 2] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 2] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 2] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 2] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 2] Use the existing application source of truth.
+- [BUILD QA · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 2] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 2] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 2] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 2] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 2] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 2] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 2] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 2] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 2] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 2] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 2] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 2] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 2] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 2] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 2] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 2] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 2] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 2] Do not fabricate missing information.
+- [AI RETRY · DETAIL 2] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 2] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 2] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 2] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 2] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 2] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 2] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 2] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 2] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 2] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 2] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 2] Keep the element responsive.
+- [REACT STATE · DETAIL 2] Respect reduced motion.
+- [DATA FETCHING · DETAIL 2] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 2] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 2] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 2] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 2] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 2] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 2] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 2] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 2] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 2] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 2] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 2] Respect privacy and authorization.
+- [BUILD QA · DETAIL 2] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 2] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 2] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 2] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 2] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 2] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 2] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the element responsive.
+- [PERIOD LOG · DETAIL 2] Respect reduced motion.
+- [FLOW INPUT · DETAIL 2] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 2] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 2] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 2] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 2] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 2] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 2] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 2] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 2] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 2] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 2] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 2] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 2] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 2] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 2] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 2] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 2] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 2] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 2] Keep the element responsive.
+- [LOADING STATE · DETAIL 2] Respect reduced motion.
+- [EMPTY STATE · DETAIL 2] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 2] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 2] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 2] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 2] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 2] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 2] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 2] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 2] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 2] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 2] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 2] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 2] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 2] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 2] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 2] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 2] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 2] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 2] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 2] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 2] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 2] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 2] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 2] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 2] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 2] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 2] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 2] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 2] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 2] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 2] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 2] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 2] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 2] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 2] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 2] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 2] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 2] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 2] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 2] Keep the element responsive.
+- [AI STREAMING · DETAIL 2] Respect reduced motion.
+- [AI RETRY · DETAIL 2] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 2] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 2] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 2] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 2] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 2] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 2] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 2] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 2] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 2] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 2] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 2] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 2] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 2] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 2] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 2] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 2] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 2] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 2] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 2] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 2] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 2] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 2] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 2] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 2] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 2] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 2] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 2] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 2] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 2] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 2] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 2] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 3] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 3] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 3] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 3] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 3] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 3] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 3] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 3] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 3] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 3] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 3] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 3] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 3] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 3] Use the existing application source of truth.
+- [AI RETRY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 3] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 3] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 3] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 3] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 3] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 3] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 3] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 3] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 3] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 3] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 3] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 3] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 3] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 3] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 3] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 3] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 3] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 3] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 3] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 3] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 3] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 3] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 3] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 3] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 3] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 3] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 3] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 3] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 3] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 3] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 3] Keep the element responsive.
+- [MOOD INPUT · DETAIL 3] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 3] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 3] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 3] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 3] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 3] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 3] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 3] Respect privacy and authorization.
+- [AI RETRY · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 3] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 3] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 3] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 3] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 3] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 3] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 3] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 3] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 3] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 3] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 3] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 3] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 3] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 3] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 3] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 3] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 3] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 3] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 3] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 3] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 3] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 3] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 3] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 3] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 3] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 3] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 3] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 3] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 3] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 3] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 3] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 3] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 3] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 3] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 3] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 3] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 3] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 3] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 3] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 3] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 3] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 3] Keep the element responsive.
+- [AI SAFETY · DETAIL 3] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 3] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 3] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 3] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 3] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 3] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 3] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 3] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 3] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 3] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 3] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 3] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 3] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 3] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 3] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 3] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 3] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 3] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the element responsive.
+- [PERFORMANCE · DETAIL 3] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 3] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 3] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 3] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 3] Handle partial data intentionally.
+- [BUILD QA · DETAIL 3] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 3] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 3] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 3] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 3] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 3] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 3] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 3] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 3] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 3] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 3] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 3] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 3] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 3] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 3] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 3] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 3] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 3] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 3] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 3] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 3] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 3] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 3] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 3] Preserve valid state after failure.
+- [REACT STATE · DETAIL 3] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 3] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 3] Keep the element responsive.
+- [CSS TOKENS · DETAIL 3] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 3] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 3] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 3] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 3] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 3] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 3] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 3] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 3] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 3] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 3] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 3] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 3] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 3] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 3] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 3] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 3] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 3] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 3] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 3] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 3] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 3] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 3] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 3] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 3] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 3] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 3] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 3] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 3] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 3] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 3] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 3] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 3] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 3] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 3] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 3] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 3] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 3] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 3] Handle empty data intentionally.
+- [REACT STATE · DETAIL 3] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 3] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 3] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 3] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 3] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 3] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 3] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 3] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 3] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 3] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 3] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 3] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 3] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 3] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 3] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 3] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 3] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 3] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 3] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 3] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 3] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 3] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 3] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 3] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 3] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 3] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 3] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 3] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 3] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 3] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 3] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 3] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 3] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 3] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 3] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 3] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 3] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 3] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 3] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 3] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 3] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 3] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 3] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 3] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 3] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 3] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 3] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 3] Respect reduced motion.
+- [UNIT TESTING · DETAIL 3] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 3] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 3] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 3] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 3] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 3] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 3] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 3] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 3] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 3] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 3] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 3] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 3] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 3] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 3] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 3] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 3] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 3] Handle partial data intentionally.
+- [AI RETRY · DETAIL 3] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 3] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 3] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 3] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 3] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 3] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 3] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 3] Prevent duplicate requests.
+- [REACT STATE · DETAIL 3] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 3] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 3] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 3] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 3] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 3] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 3] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 3] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 3] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 3] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 3] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 3] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 3] Do not fabricate missing information.
+- [BUILD QA · DETAIL 3] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 3] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 3] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 3] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 3] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 3] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 3] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 3] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 3] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 3] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 3] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 3] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 3] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 3] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 3] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 3] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 3] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 3] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 3] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 3] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 3] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 3] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 3] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 3] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 3] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 3] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 3] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 3] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 3] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 3] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 3] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 3] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 3] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 3] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 3] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 3] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 3] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 3] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 3] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 3] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 3] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 3] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 3] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 3] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 3] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 3] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 3] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 3] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 3] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 3] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 3] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 3] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 3] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 3] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 3] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 3] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 3] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 3] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 3] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 3] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 3] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 3] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 3] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 3] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 3] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 3] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 3] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 3] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 3] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 3] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 3] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 3] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 3] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 3] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 3] Respect reduced motion.
+- [BUILD QA · DETAIL 3] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 3] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 3] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 3] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 3] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 3] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 3] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 3] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 3] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 3] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 3] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 3] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 3] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 3] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 3] Keep the element responsive.
+- [AI CONTEXT · DETAIL 3] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 3] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 3] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 3] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 3] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 3] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 3] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 3] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 3] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 3] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 3] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 3] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 3] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 3] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 3] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 3] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 3] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 3] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 3] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 3] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 3] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 3] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 3] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 3] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 3] Use the existing application source of truth.
+- [BUILD QA · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 3] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 3] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 3] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 3] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 3] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 3] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 3] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 3] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 3] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 3] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 3] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 3] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 3] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 3] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 3] Do not fabricate missing information.
+- [AI RETRY · DETAIL 3] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 3] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 3] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 3] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 3] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 3] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 3] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 3] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 3] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 3] Keep the element responsive.
+- [REACT STATE · DETAIL 3] Respect reduced motion.
+- [DATA FETCHING · DETAIL 3] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 3] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 3] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 3] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 3] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 3] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 3] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 3] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 3] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 3] Respect privacy and authorization.
+- [BUILD QA · DETAIL 3] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 3] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 3] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 3] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 3] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 3] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the element responsive.
+- [PERIOD LOG · DETAIL 3] Respect reduced motion.
+- [FLOW INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 3] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 3] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 3] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 3] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 3] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 3] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 3] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 3] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 3] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 3] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 3] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 3] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 3] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 3] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 3] Keep the element responsive.
+- [LOADING STATE · DETAIL 3] Respect reduced motion.
+- [EMPTY STATE · DETAIL 3] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 3] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 3] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 3] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 3] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 3] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 3] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 3] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 3] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 3] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 3] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 3] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 3] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 3] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 3] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 3] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 3] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 3] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 3] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 3] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 3] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 3] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 3] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 3] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 3] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 3] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 3] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 3] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 3] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 3] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 3] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 3] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 3] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the element responsive.
+- [AI STREAMING · DETAIL 3] Respect reduced motion.
+- [AI RETRY · DETAIL 3] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 3] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 3] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 3] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 3] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 3] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 3] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 3] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 3] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 3] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 3] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 3] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 3] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 3] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 3] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 3] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 3] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 3] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 3] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 3] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 3] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 3] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 3] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 3] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 3] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 3] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 3] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 3] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 3] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 3] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 3] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 3] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 3] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 3] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 3] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 3] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 3] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 3] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 3] Use the existing application source of truth.
+- [AI RETRY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 3] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 3] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 3] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 3] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 3] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 3] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 3] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 3] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 3] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 3] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 3] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 3] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 3] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 3] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 3] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 3] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 3] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 3] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 3] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 3] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 3] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 3] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 3] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 3] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 3] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 3] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 3] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 3] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 3] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 3] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 3] Keep the element responsive.
+- [MOOD INPUT · DETAIL 3] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 3] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 3] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 3] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 3] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 3] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 3] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 3] Respect privacy and authorization.
+- [AI RETRY · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 3] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 3] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 3] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 3] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 3] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 3] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 3] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 3] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 3] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 3] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 3] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 3] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 3] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 3] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 3] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 3] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 3] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 3] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 3] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 3] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 3] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 3] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 3] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 3] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 3] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 3] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 3] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 3] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 3] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 3] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 3] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 3] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 3] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 3] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 3] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 3] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 3] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 3] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 3] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 3] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 3] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 3] Keep the element responsive.
+- [AI SAFETY · DETAIL 3] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 3] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 3] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 3] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 3] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 3] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 3] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 3] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 3] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 3] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 3] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 3] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 3] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 3] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 3] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 3] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 3] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 3] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the element responsive.
+- [PERFORMANCE · DETAIL 3] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 3] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 3] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 3] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 3] Handle partial data intentionally.
+- [BUILD QA · DETAIL 3] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 3] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 3] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 3] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 3] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 3] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 3] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 3] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 3] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 3] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 3] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 3] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 3] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 3] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 3] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 3] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 3] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 3] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 3] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 3] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 3] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 3] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 3] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 3] Preserve valid state after failure.
+- [REACT STATE · DETAIL 3] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 3] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 3] Keep the element responsive.
+- [CSS TOKENS · DETAIL 3] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 3] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 3] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 3] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 3] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 3] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 3] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 3] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 3] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 3] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 3] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 3] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 3] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 3] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 3] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 3] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 3] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 3] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 3] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 3] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 3] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 3] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 3] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 3] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 3] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 3] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 3] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 3] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 3] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 3] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 3] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 3] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 3] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 3] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 3] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 3] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 3] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 3] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 3] Handle empty data intentionally.
+- [REACT STATE · DETAIL 3] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 3] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 3] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 3] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 3] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 3] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 3] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 3] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 3] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 3] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 3] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 3] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 3] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 3] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 3] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 3] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 3] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 3] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 3] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 3] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 3] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 3] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 3] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 3] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 3] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 3] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 3] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 3] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 3] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 3] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 3] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 3] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 3] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 3] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 3] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 3] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 3] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 3] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 3] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 3] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 3] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 3] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 3] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 3] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 3] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 3] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 3] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 3] Respect reduced motion.
+- [UNIT TESTING · DETAIL 3] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 3] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 3] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 3] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 3] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 3] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 3] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 3] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 3] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 3] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 3] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 3] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 3] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 3] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 3] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 3] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 3] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 3] Handle partial data intentionally.
+- [AI RETRY · DETAIL 3] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 3] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 3] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 3] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 3] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 3] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 3] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 3] Prevent duplicate requests.
+- [REACT STATE · DETAIL 3] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 3] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 3] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 3] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 3] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 3] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 3] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 3] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 3] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 3] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 3] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 3] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 3] Do not fabricate missing information.
+- [BUILD QA · DETAIL 3] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 3] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 3] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 3] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 3] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 3] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 3] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 3] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 3] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 3] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 3] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 3] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 3] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 3] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 3] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 3] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 3] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 3] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 3] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 3] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 3] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 3] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 3] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 3] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 3] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 3] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 3] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 3] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 3] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 3] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 3] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 3] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 3] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 3] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 3] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 3] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 3] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 3] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 3] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 3] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 3] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 3] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 3] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 3] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 3] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 3] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 3] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 3] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 3] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 3] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 3] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 3] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 3] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 3] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 3] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 3] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 3] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 3] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 3] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 3] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 3] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 3] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 3] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 3] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 3] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 3] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 3] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 3] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 3] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 3] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 3] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 3] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 3] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 3] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 3] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 3] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 3] Respect reduced motion.
+- [BUILD QA · DETAIL 3] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 3] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 3] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 3] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 3] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 3] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 3] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 3] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 3] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 3] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 3] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 3] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 3] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 3] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 3] Keep the element responsive.
+- [AI CONTEXT · DETAIL 3] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 3] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 3] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 3] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 3] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 3] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 3] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 3] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 3] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 3] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 3] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 3] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 3] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 3] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 3] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 3] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 3] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 3] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 3] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 3] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 3] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 3] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 3] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 3] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 3] Use the existing application source of truth.
+- [BUILD QA · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 3] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 3] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 3] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 3] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 3] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 3] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 3] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 3] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 3] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 3] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 3] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 3] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 3] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 3] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 3] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 3] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 3] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 3] Do not fabricate missing information.
+- [AI RETRY · DETAIL 3] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 3] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 3] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 3] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 3] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 3] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 3] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 3] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 3] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 3] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 3] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 3] Keep the element responsive.
+- [REACT STATE · DETAIL 3] Respect reduced motion.
+- [DATA FETCHING · DETAIL 3] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 3] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 3] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 3] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 3] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 3] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 3] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 3] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 3] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 3] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 3] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 3] Respect privacy and authorization.
+- [BUILD QA · DETAIL 3] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 3] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 3] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 3] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 3] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 3] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 3] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the element responsive.
+- [PERIOD LOG · DETAIL 3] Respect reduced motion.
+- [FLOW INPUT · DETAIL 3] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 3] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 3] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 3] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 3] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 3] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 3] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 3] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 3] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 3] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 3] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 3] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 3] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 3] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 3] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 3] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 3] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 3] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 3] Keep the element responsive.
+- [LOADING STATE · DETAIL 3] Respect reduced motion.
+- [EMPTY STATE · DETAIL 3] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 3] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 3] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 3] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 3] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 3] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 3] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 3] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 3] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 3] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 3] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 3] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 3] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 3] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 3] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 3] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 3] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 3] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 3] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 3] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 3] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 3] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 3] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 3] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 3] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 3] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 3] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 3] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 3] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 3] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 3] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 3] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 3] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 3] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 3] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 3] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 3] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 3] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 3] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 3] Keep the element responsive.
+- [AI STREAMING · DETAIL 3] Respect reduced motion.
+- [AI RETRY · DETAIL 3] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 3] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 3] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 3] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 3] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 3] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 3] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 3] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 3] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 3] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 3] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 3] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 3] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 3] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 3] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 3] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 3] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 3] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 3] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 3] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 3] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 3] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 3] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 3] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 3] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 3] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 3] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 3] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 3] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 3] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 3] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 3] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 4] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 4] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 4] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 4] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 4] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 4] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 4] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 4] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 4] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 4] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 4] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 4] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 4] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 4] Use the existing application source of truth.
+- [AI RETRY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 4] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 4] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 4] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 4] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 4] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 4] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 4] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 4] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 4] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 4] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 4] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 4] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 4] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 4] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 4] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 4] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 4] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 4] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 4] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 4] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 4] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 4] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 4] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 4] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 4] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 4] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 4] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 4] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 4] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 4] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 4] Keep the element responsive.
+- [MOOD INPUT · DETAIL 4] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 4] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 4] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 4] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 4] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 4] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 4] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 4] Respect privacy and authorization.
+- [AI RETRY · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 4] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 4] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 4] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 4] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 4] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 4] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 4] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 4] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 4] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 4] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 4] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 4] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 4] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 4] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 4] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 4] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 4] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 4] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 4] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 4] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 4] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 4] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 4] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 4] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 4] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 4] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 4] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 4] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 4] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 4] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 4] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 4] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 4] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 4] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 4] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 4] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 4] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 4] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 4] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 4] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 4] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 4] Keep the element responsive.
+- [AI SAFETY · DETAIL 4] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 4] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 4] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 4] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 4] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 4] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 4] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 4] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 4] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 4] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 4] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 4] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 4] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 4] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 4] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 4] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 4] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 4] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the element responsive.
+- [PERFORMANCE · DETAIL 4] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 4] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 4] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 4] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 4] Handle partial data intentionally.
+- [BUILD QA · DETAIL 4] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 4] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 4] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 4] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 4] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 4] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 4] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 4] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 4] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 4] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 4] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 4] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 4] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 4] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 4] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 4] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 4] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 4] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 4] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 4] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 4] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 4] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 4] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 4] Preserve valid state after failure.
+- [REACT STATE · DETAIL 4] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 4] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 4] Keep the element responsive.
+- [CSS TOKENS · DETAIL 4] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 4] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 4] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 4] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 4] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 4] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 4] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 4] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 4] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 4] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 4] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 4] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 4] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 4] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 4] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 4] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 4] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 4] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 4] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 4] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 4] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 4] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 4] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 4] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 4] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 4] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 4] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 4] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 4] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 4] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 4] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 4] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 4] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 4] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 4] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 4] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 4] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 4] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 4] Handle empty data intentionally.
+- [REACT STATE · DETAIL 4] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 4] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 4] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 4] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 4] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 4] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 4] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 4] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 4] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 4] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 4] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 4] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 4] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 4] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 4] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 4] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 4] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 4] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 4] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 4] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 4] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 4] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 4] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 4] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 4] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 4] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 4] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 4] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 4] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 4] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 4] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 4] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 4] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 4] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 4] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 4] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 4] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 4] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 4] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 4] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 4] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 4] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 4] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 4] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 4] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 4] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 4] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 4] Respect reduced motion.
+- [UNIT TESTING · DETAIL 4] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 4] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 4] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 4] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 4] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 4] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 4] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 4] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 4] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 4] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 4] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 4] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 4] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 4] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 4] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 4] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 4] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 4] Handle partial data intentionally.
+- [AI RETRY · DETAIL 4] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 4] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 4] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 4] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 4] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 4] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 4] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 4] Prevent duplicate requests.
+- [REACT STATE · DETAIL 4] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 4] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 4] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 4] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 4] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 4] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 4] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 4] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 4] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 4] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 4] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 4] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 4] Do not fabricate missing information.
+- [BUILD QA · DETAIL 4] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 4] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 4] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 4] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 4] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 4] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 4] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 4] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 4] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 4] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 4] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 4] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 4] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 4] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 4] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 4] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 4] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 4] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 4] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 4] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 4] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 4] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 4] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 4] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 4] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 4] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 4] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 4] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 4] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 4] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 4] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 4] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 4] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 4] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 4] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 4] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 4] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 4] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 4] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 4] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 4] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 4] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 4] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 4] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 4] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 4] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 4] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 4] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 4] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 4] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 4] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 4] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 4] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 4] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 4] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 4] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 4] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 4] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 4] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 4] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 4] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 4] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 4] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 4] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 4] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 4] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 4] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 4] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 4] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 4] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 4] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 4] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 4] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 4] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 4] Respect reduced motion.
+- [BUILD QA · DETAIL 4] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 4] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 4] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 4] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 4] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 4] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 4] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 4] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 4] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 4] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 4] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 4] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 4] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 4] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 4] Keep the element responsive.
+- [AI CONTEXT · DETAIL 4] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 4] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 4] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 4] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 4] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 4] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 4] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 4] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 4] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 4] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 4] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 4] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 4] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 4] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 4] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 4] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 4] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 4] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 4] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 4] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 4] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 4] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 4] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 4] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 4] Use the existing application source of truth.
+- [BUILD QA · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 4] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 4] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 4] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 4] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 4] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 4] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 4] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 4] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 4] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 4] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 4] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 4] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 4] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 4] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 4] Do not fabricate missing information.
+- [AI RETRY · DETAIL 4] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 4] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 4] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 4] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 4] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 4] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 4] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 4] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 4] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 4] Keep the element responsive.
+- [REACT STATE · DETAIL 4] Respect reduced motion.
+- [DATA FETCHING · DETAIL 4] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 4] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 4] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 4] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 4] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 4] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 4] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 4] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 4] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 4] Respect privacy and authorization.
+- [BUILD QA · DETAIL 4] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 4] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 4] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 4] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 4] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 4] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the element responsive.
+- [PERIOD LOG · DETAIL 4] Respect reduced motion.
+- [FLOW INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 4] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 4] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 4] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 4] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 4] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 4] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 4] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 4] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 4] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 4] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 4] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 4] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 4] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 4] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 4] Keep the element responsive.
+- [LOADING STATE · DETAIL 4] Respect reduced motion.
+- [EMPTY STATE · DETAIL 4] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 4] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 4] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 4] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 4] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 4] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 4] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 4] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 4] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 4] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 4] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 4] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 4] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 4] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 4] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 4] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 4] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 4] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 4] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 4] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 4] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 4] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 4] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 4] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 4] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 4] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 4] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 4] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 4] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 4] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 4] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 4] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 4] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the element responsive.
+- [AI STREAMING · DETAIL 4] Respect reduced motion.
+- [AI RETRY · DETAIL 4] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 4] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 4] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 4] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 4] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 4] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 4] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 4] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 4] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 4] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 4] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 4] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 4] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 4] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 4] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 4] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 4] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 4] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 4] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 4] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 4] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 4] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 4] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 4] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 4] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 4] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 4] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 4] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 4] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 4] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 4] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 4] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 4] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 4] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 4] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 4] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 4] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 4] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 4] Use the existing application source of truth.
+- [AI RETRY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 4] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 4] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 4] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 4] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 4] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 4] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 4] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 4] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 4] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 4] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 4] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 4] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 4] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 4] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 4] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 4] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 4] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 4] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 4] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 4] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 4] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 4] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 4] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 4] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 4] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 4] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 4] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 4] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 4] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 4] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 4] Keep the element responsive.
+- [MOOD INPUT · DETAIL 4] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 4] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 4] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 4] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 4] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 4] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 4] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 4] Respect privacy and authorization.
+- [AI RETRY · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 4] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 4] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 4] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 4] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 4] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 4] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 4] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 4] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 4] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 4] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 4] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 4] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 4] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 4] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 4] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 4] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 4] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 4] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 4] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 4] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 4] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 4] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 4] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 4] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 4] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 4] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 4] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 4] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 4] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 4] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 4] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 4] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 4] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 4] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 4] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 4] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 4] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 4] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 4] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 4] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 4] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 4] Keep the element responsive.
+- [AI SAFETY · DETAIL 4] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 4] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 4] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 4] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 4] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 4] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 4] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 4] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 4] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 4] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 4] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 4] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 4] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 4] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 4] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 4] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 4] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 4] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the element responsive.
+- [PERFORMANCE · DETAIL 4] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 4] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 4] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 4] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 4] Handle partial data intentionally.
+- [BUILD QA · DETAIL 4] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 4] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 4] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 4] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 4] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 4] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 4] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 4] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 4] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 4] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 4] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 4] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 4] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 4] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 4] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 4] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 4] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 4] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 4] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 4] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 4] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 4] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 4] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 4] Preserve valid state after failure.
+- [REACT STATE · DETAIL 4] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 4] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 4] Keep the element responsive.
+- [CSS TOKENS · DETAIL 4] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 4] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 4] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 4] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 4] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 4] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 4] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 4] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 4] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 4] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 4] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 4] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 4] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 4] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 4] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 4] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 4] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 4] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 4] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 4] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 4] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 4] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 4] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 4] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 4] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 4] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 4] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 4] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 4] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 4] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 4] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 4] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 4] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 4] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 4] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 4] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 4] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 4] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 4] Handle empty data intentionally.
+- [REACT STATE · DETAIL 4] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 4] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 4] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 4] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 4] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 4] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 4] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 4] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 4] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 4] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 4] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 4] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 4] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 4] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 4] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 4] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 4] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 4] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 4] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 4] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 4] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 4] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 4] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 4] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 4] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 4] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 4] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 4] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 4] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 4] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 4] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 4] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 4] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 4] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 4] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 4] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 4] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 4] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 4] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 4] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 4] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 4] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 4] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 4] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 4] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 4] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 4] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 4] Respect reduced motion.
+- [UNIT TESTING · DETAIL 4] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 4] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 4] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 4] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 4] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 4] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 4] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 4] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 4] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 4] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 4] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 4] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 4] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 4] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 4] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 4] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 4] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 4] Handle partial data intentionally.
+- [AI RETRY · DETAIL 4] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 4] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 4] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 4] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 4] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 4] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 4] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 4] Prevent duplicate requests.
+- [REACT STATE · DETAIL 4] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 4] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 4] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 4] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 4] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 4] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 4] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 4] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 4] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 4] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 4] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 4] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 4] Do not fabricate missing information.
+- [BUILD QA · DETAIL 4] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 4] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 4] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 4] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 4] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 4] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 4] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 4] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 4] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 4] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 4] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 4] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 4] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 4] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 4] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 4] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 4] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 4] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 4] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 4] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 4] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 4] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 4] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 4] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 4] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 4] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 4] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 4] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 4] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 4] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 4] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 4] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 4] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 4] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 4] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 4] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 4] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 4] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 4] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 4] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 4] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 4] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 4] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 4] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 4] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 4] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 4] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 4] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 4] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 4] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 4] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 4] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 4] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 4] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 4] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 4] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 4] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 4] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 4] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 4] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 4] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 4] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 4] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 4] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 4] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 4] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 4] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 4] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 4] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 4] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 4] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 4] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 4] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 4] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 4] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 4] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 4] Respect reduced motion.
+- [BUILD QA · DETAIL 4] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 4] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 4] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 4] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 4] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 4] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 4] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 4] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 4] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 4] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 4] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 4] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 4] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 4] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 4] Keep the element responsive.
+- [AI CONTEXT · DETAIL 4] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 4] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 4] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 4] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 4] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 4] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 4] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 4] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 4] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 4] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 4] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 4] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 4] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 4] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 4] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 4] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 4] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 4] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 4] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 4] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 4] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 4] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 4] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 4] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 4] Use the existing application source of truth.
+- [BUILD QA · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 4] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 4] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 4] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 4] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 4] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 4] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 4] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 4] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 4] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 4] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 4] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 4] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 4] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 4] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 4] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 4] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 4] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 4] Do not fabricate missing information.
+- [AI RETRY · DETAIL 4] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 4] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 4] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 4] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 4] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 4] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 4] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 4] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 4] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 4] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 4] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 4] Keep the element responsive.
+- [REACT STATE · DETAIL 4] Respect reduced motion.
+- [DATA FETCHING · DETAIL 4] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 4] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 4] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 4] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 4] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 4] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 4] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 4] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 4] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 4] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 4] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 4] Respect privacy and authorization.
+- [BUILD QA · DETAIL 4] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 4] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 4] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 4] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 4] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 4] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 4] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the element responsive.
+- [PERIOD LOG · DETAIL 4] Respect reduced motion.
+- [FLOW INPUT · DETAIL 4] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 4] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 4] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 4] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 4] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 4] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 4] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 4] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 4] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 4] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 4] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 4] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 4] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 4] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 4] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 4] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 4] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 4] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 4] Keep the element responsive.
+- [LOADING STATE · DETAIL 4] Respect reduced motion.
+- [EMPTY STATE · DETAIL 4] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 4] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 4] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 4] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 4] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 4] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 4] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 4] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 4] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 4] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 4] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 4] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 4] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 4] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 4] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 4] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 4] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 4] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 4] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 4] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 4] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 4] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 4] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 4] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 4] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 4] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 4] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 4] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 4] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 4] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 4] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 4] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 4] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 4] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 4] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 4] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 4] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 4] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 4] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 4] Keep the element responsive.
+- [AI STREAMING · DETAIL 4] Respect reduced motion.
+- [AI RETRY · DETAIL 4] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 4] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 4] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 4] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 4] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 4] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 4] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 4] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 4] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 4] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 4] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 4] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 4] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 4] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 4] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 4] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 4] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 4] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 4] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 4] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 4] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 4] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 4] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 4] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 4] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 4] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 4] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 4] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 4] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 4] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 4] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 4] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 5] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 5] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 5] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 5] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 5] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 5] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 5] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 5] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 5] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 5] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 5] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 5] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 5] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 5] Use the existing application source of truth.
+- [AI RETRY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 5] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 5] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 5] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 5] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 5] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 5] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 5] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 5] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 5] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 5] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 5] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 5] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 5] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 5] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 5] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 5] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 5] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 5] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 5] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 5] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 5] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 5] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 5] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 5] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 5] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 5] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 5] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 5] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 5] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 5] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 5] Keep the element responsive.
+- [MOOD INPUT · DETAIL 5] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 5] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 5] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 5] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 5] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 5] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 5] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 5] Respect privacy and authorization.
+- [AI RETRY · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 5] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 5] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 5] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 5] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 5] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 5] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 5] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 5] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 5] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 5] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 5] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 5] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 5] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 5] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 5] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 5] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 5] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 5] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 5] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 5] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 5] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 5] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 5] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 5] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 5] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 5] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 5] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 5] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 5] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 5] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 5] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 5] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 5] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 5] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 5] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 5] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 5] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 5] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 5] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 5] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 5] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 5] Keep the element responsive.
+- [AI SAFETY · DETAIL 5] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 5] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 5] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 5] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 5] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 5] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 5] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 5] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 5] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 5] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 5] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 5] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 5] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 5] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 5] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 5] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 5] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 5] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the element responsive.
+- [PERFORMANCE · DETAIL 5] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 5] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 5] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 5] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 5] Handle partial data intentionally.
+- [BUILD QA · DETAIL 5] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 5] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 5] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 5] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 5] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 5] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 5] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 5] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 5] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 5] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 5] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 5] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 5] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 5] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 5] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 5] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 5] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 5] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 5] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 5] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 5] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 5] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 5] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 5] Preserve valid state after failure.
+- [REACT STATE · DETAIL 5] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 5] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 5] Keep the element responsive.
+- [CSS TOKENS · DETAIL 5] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 5] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 5] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 5] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 5] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 5] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 5] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 5] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 5] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 5] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 5] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 5] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 5] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 5] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 5] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 5] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 5] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 5] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 5] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 5] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 5] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 5] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 5] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 5] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 5] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 5] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 5] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 5] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 5] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 5] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 5] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 5] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 5] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 5] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 5] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 5] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 5] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 5] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 5] Handle empty data intentionally.
+- [REACT STATE · DETAIL 5] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 5] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 5] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 5] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 5] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 5] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 5] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 5] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 5] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 5] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 5] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 5] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 5] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 5] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 5] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 5] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 5] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 5] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 5] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 5] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 5] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 5] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 5] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 5] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 5] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 5] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 5] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 5] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 5] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 5] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 5] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 5] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 5] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 5] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 5] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 5] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 5] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 5] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 5] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 5] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 5] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 5] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 5] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 5] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 5] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 5] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 5] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 5] Respect reduced motion.
+- [UNIT TESTING · DETAIL 5] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 5] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 5] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 5] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 5] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 5] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 5] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 5] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 5] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 5] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 5] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 5] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 5] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 5] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 5] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 5] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 5] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 5] Handle partial data intentionally.
+- [AI RETRY · DETAIL 5] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 5] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 5] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 5] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 5] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 5] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 5] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 5] Prevent duplicate requests.
+- [REACT STATE · DETAIL 5] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 5] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 5] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 5] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 5] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 5] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 5] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 5] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 5] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 5] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 5] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 5] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 5] Do not fabricate missing information.
+- [BUILD QA · DETAIL 5] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 5] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 5] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 5] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 5] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 5] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 5] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 5] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 5] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 5] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 5] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 5] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 5] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 5] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 5] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 5] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 5] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 5] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 5] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 5] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 5] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 5] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 5] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 5] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 5] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 5] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 5] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 5] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 5] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 5] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 5] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 5] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 5] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 5] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 5] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 5] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 5] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 5] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 5] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 5] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 5] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 5] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 5] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 5] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 5] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 5] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 5] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 5] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 5] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 5] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 5] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 5] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 5] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 5] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 5] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 5] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 5] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 5] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 5] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 5] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 5] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 5] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 5] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 5] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 5] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 5] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 5] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 5] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 5] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 5] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 5] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 5] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 5] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 5] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 5] Respect reduced motion.
+- [BUILD QA · DETAIL 5] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 5] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 5] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 5] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 5] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 5] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 5] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 5] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 5] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 5] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 5] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 5] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 5] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 5] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 5] Keep the element responsive.
+- [AI CONTEXT · DETAIL 5] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 5] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 5] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 5] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 5] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 5] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 5] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 5] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 5] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 5] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 5] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 5] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 5] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 5] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 5] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 5] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 5] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 5] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 5] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 5] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 5] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 5] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 5] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 5] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 5] Use the existing application source of truth.
+- [BUILD QA · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 5] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 5] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 5] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 5] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 5] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 5] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 5] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 5] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 5] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 5] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 5] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 5] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 5] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 5] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 5] Do not fabricate missing information.
+- [AI RETRY · DETAIL 5] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 5] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 5] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 5] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 5] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 5] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 5] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 5] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 5] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 5] Keep the element responsive.
+- [REACT STATE · DETAIL 5] Respect reduced motion.
+- [DATA FETCHING · DETAIL 5] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 5] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 5] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 5] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 5] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 5] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 5] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 5] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 5] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 5] Respect privacy and authorization.
+- [BUILD QA · DETAIL 5] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 5] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 5] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 5] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 5] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 5] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the element responsive.
+- [PERIOD LOG · DETAIL 5] Respect reduced motion.
+- [FLOW INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 5] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 5] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 5] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 5] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 5] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 5] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 5] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 5] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 5] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 5] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 5] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 5] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 5] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 5] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 5] Keep the element responsive.
+- [LOADING STATE · DETAIL 5] Respect reduced motion.
+- [EMPTY STATE · DETAIL 5] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 5] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 5] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 5] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 5] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 5] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 5] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 5] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 5] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 5] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 5] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 5] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 5] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 5] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 5] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 5] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 5] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 5] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 5] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 5] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 5] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 5] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 5] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 5] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 5] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 5] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 5] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 5] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 5] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 5] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 5] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 5] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 5] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the element responsive.
+- [AI STREAMING · DETAIL 5] Respect reduced motion.
+- [AI RETRY · DETAIL 5] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 5] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 5] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 5] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 5] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 5] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 5] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 5] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 5] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 5] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 5] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 5] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 5] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 5] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 5] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 5] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 5] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 5] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 5] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 5] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 5] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 5] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 5] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 5] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 5] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 5] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 5] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 5] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 5] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 5] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 5] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 5] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 5] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 5] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 5] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 5] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 5] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 5] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 5] Use the existing application source of truth.
+- [AI RETRY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 5] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 5] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 5] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 5] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 5] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 5] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 5] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 5] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 5] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 5] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 5] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 5] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 5] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 5] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 5] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 5] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 5] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 5] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 5] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 5] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 5] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 5] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 5] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 5] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 5] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 5] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 5] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 5] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 5] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 5] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 5] Keep the element responsive.
+- [MOOD INPUT · DETAIL 5] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 5] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 5] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 5] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 5] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 5] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 5] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 5] Respect privacy and authorization.
+- [AI RETRY · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 5] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 5] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 5] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 5] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 5] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 5] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 5] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 5] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 5] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 5] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 5] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 5] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 5] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 5] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 5] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 5] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 5] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 5] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 5] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 5] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 5] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 5] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 5] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 5] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 5] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 5] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 5] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 5] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 5] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 5] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 5] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 5] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 5] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 5] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 5] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 5] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 5] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 5] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 5] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 5] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 5] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 5] Keep the element responsive.
+- [AI SAFETY · DETAIL 5] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 5] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 5] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 5] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 5] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 5] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 5] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 5] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 5] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 5] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 5] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 5] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 5] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 5] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 5] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 5] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 5] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 5] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the element responsive.
+- [PERFORMANCE · DETAIL 5] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 5] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 5] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 5] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 5] Handle partial data intentionally.
+- [BUILD QA · DETAIL 5] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 5] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 5] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 5] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 5] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 5] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 5] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 5] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 5] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 5] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 5] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 5] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 5] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 5] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 5] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 5] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 5] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 5] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 5] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 5] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 5] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 5] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 5] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 5] Preserve valid state after failure.
+- [REACT STATE · DETAIL 5] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 5] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 5] Keep the element responsive.
+- [CSS TOKENS · DETAIL 5] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 5] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 5] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 5] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 5] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 5] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 5] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 5] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 5] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 5] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 5] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 5] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 5] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 5] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 5] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 5] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 5] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 5] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 5] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 5] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 5] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 5] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 5] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 5] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 5] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 5] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 5] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 5] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 5] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 5] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 5] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 5] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 5] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 5] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 5] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 5] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 5] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 5] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 5] Handle empty data intentionally.
+- [REACT STATE · DETAIL 5] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 5] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 5] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 5] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 5] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 5] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 5] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 5] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 5] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 5] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 5] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 5] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 5] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 5] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 5] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 5] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 5] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 5] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 5] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 5] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 5] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 5] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 5] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 5] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 5] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 5] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 5] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 5] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 5] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 5] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 5] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 5] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 5] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 5] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 5] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 5] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 5] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 5] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 5] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 5] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 5] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 5] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 5] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 5] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 5] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 5] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 5] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 5] Respect reduced motion.
+- [UNIT TESTING · DETAIL 5] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 5] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 5] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 5] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 5] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 5] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 5] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 5] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 5] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 5] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 5] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 5] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 5] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 5] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 5] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 5] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 5] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 5] Handle partial data intentionally.
+- [AI RETRY · DETAIL 5] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 5] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 5] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 5] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 5] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 5] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 5] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 5] Prevent duplicate requests.
+- [REACT STATE · DETAIL 5] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 5] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 5] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 5] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 5] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 5] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 5] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 5] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 5] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 5] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 5] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 5] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 5] Do not fabricate missing information.
+- [BUILD QA · DETAIL 5] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 5] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 5] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 5] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 5] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 5] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 5] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 5] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 5] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 5] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 5] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 5] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 5] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 5] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 5] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 5] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 5] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 5] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 5] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 5] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 5] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 5] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 5] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 5] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 5] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 5] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 5] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 5] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 5] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 5] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 5] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 5] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 5] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 5] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 5] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 5] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 5] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 5] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 5] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 5] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 5] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 5] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 5] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 5] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 5] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 5] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 5] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 5] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 5] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 5] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 5] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 5] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 5] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 5] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 5] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 5] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 5] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 5] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 5] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 5] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 5] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 5] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 5] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 5] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 5] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 5] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 5] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 5] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 5] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 5] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 5] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 5] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 5] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 5] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 5] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 5] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 5] Respect reduced motion.
+- [BUILD QA · DETAIL 5] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 5] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 5] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 5] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 5] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 5] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 5] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 5] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 5] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 5] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 5] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 5] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 5] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 5] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 5] Keep the element responsive.
+- [AI CONTEXT · DETAIL 5] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 5] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 5] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 5] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 5] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 5] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 5] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 5] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 5] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 5] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 5] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 5] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 5] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 5] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 5] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 5] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 5] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 5] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 5] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 5] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 5] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 5] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 5] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 5] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 5] Use the existing application source of truth.
+- [BUILD QA · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 5] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 5] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 5] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 5] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 5] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 5] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 5] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 5] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 5] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 5] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 5] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 5] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 5] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 5] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 5] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 5] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 5] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 5] Do not fabricate missing information.
+- [AI RETRY · DETAIL 5] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 5] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 5] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 5] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 5] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 5] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 5] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 5] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 5] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 5] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 5] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 5] Keep the element responsive.
+- [REACT STATE · DETAIL 5] Respect reduced motion.
+- [DATA FETCHING · DETAIL 5] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 5] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 5] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 5] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 5] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 5] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 5] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 5] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 5] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 5] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 5] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 5] Respect privacy and authorization.
+- [BUILD QA · DETAIL 5] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 5] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 5] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 5] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 5] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 5] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 5] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the element responsive.
+- [PERIOD LOG · DETAIL 5] Respect reduced motion.
+- [FLOW INPUT · DETAIL 5] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 5] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 5] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 5] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 5] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 5] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 5] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 5] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 5] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 5] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 5] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 5] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 5] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 5] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 5] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 5] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 5] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 5] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 5] Keep the element responsive.
+- [LOADING STATE · DETAIL 5] Respect reduced motion.
+- [EMPTY STATE · DETAIL 5] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 5] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 5] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 5] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 5] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 5] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 5] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 5] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 5] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 5] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 5] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 5] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 5] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 5] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 5] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 5] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 5] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 5] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 5] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 5] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 5] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 5] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 5] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 5] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 5] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 5] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 5] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 5] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 5] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 5] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 5] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 5] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 5] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 5] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 5] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 5] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 5] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 5] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 5] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 5] Keep the element responsive.
+- [AI STREAMING · DETAIL 5] Respect reduced motion.
+- [AI RETRY · DETAIL 5] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 5] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 5] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 5] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 5] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 5] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 5] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 5] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 5] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 5] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 5] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 5] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 5] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 5] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 5] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 5] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 5] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 5] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 5] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 5] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 5] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 5] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 5] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 5] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 5] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 5] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 5] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 5] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 5] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 5] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 5] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 5] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 6] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 6] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 6] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 6] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 6] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 6] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 6] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 6] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 6] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 6] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 6] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 6] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Keep the layout stable during loading.
+- [CYCLE HISTORY CHART · DETAIL 6] Keep the element responsive.
+- [VARIABILITY CHART · DETAIL 6] Respect reduced motion.
+- [BASELINE VIEW · DETAIL 6] Verify the behavior in the real browser.
+- [TREND EXPLANATION · DETAIL 6] Add a focused test for this behavior.
+- [RECOMMENDATION RANKING · DETAIL 6] Handle empty data intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Handle partial data intentionally.
+- [AI LAUNCHER · DETAIL 6] Handle failed network requests intentionally.
+- [AI CONTEXT · DETAIL 6] Handle repeated interaction safely.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [AI STREAMING · DETAIL 6] Use the existing application source of truth.
+- [AI RETRY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [AI SAFETY · DETAIL 6] Do not fabricate missing information.
+- [AI METHODOLOGY · DETAIL 6] Keep observed values separate from derived values.
+- [AI QUICK PROMPTS · DETAIL 6] Keep predicted values visually softer than observed values.
+- [AI PERSONALIZATION · DETAIL 6] Use the Bloom visual token system.
+- [PRIVACY BOUNDARIES · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [ERROR BOUNDARY · DETAIL 6] Keep technical details in developer diagnostics.
+- [LOADING STATE · DETAIL 6] Respect privacy and authorization.
+- [EMPTY STATE · DETAIL 6] Keep the interaction keyboard accessible.
+- [DESKTOP LAYOUT · DETAIL 6] Keep the interaction touch accessible.
+- [TABLET LAYOUT · DETAIL 6] Prevent duplicate requests.
+- [MOBILE LAYOUT · DETAIL 6] Prevent stale asynchronous results.
+- [KEYBOARD NAVIGATION · DETAIL 6] Preserve valid state after failure.
+- [SCREEN READER OUTPUT · DETAIL 6] Update dependent UI after successful mutation.
+- [REDUCED MOTION · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [REACT STATE · DETAIL 6] Keep the layout stable during loading.
+- [DATA FETCHING · DETAIL 6] Keep the element responsive.
+- [CACHE INVALIDATION · DETAIL 6] Respect reduced motion.
+- [TYPE SAFETY · DETAIL 6] Verify the behavior in the real browser.
+- [CSS TOKENS · DETAIL 6] Add a focused test for this behavior.
+- [TYPOGRAPHY · DETAIL 6] Handle empty data intentionally.
+- [ICONOGRAPHY · DETAIL 6] Handle partial data intentionally.
+- [CHART ACCESSIBILITY · DETAIL 6] Handle failed network requests intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Handle repeated interaction safely.
+- [FORM ACCESSIBILITY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [SHARE BEHAVIOR · DETAIL 6] Use the existing application source of truth.
+- [ROUTE BEHAVIOR · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [PERFORMANCE · DETAIL 6] Do not fabricate missing information.
+- [MEMORY MANAGEMENT · DETAIL 6] Keep observed values separate from derived values.
+- [VISUAL REGRESSION · DETAIL 6] Keep predicted values visually softer than observed values.
+- [UNIT TESTING · DETAIL 6] Use the Bloom visual token system.
+- [INTEGRATION TESTING · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [BUILD QA · DETAIL 6] Keep technical details in developer diagnostics.
+- [CYCLE RING GEOMETRY · DETAIL 6] Respect privacy and authorization.
+- [PHASE LEGEND · DETAIL 6] Keep the interaction keyboard accessible.
+- [CURRENT-DAY MARKER · DETAIL 6] Keep the interaction touch accessible.
+- [PREDICTION RANGE · DETAIL 6] Prevent duplicate requests.
+- [DATA CONFIDENCE · DETAIL 6] Prevent stale asynchronous results.
+- [CALENDAR NAVIGATION · DETAIL 6] Preserve valid state after failure.
+- [CALENDAR DAY STATE · DETAIL 6] Update dependent UI after successful mutation.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [PERIOD LOG · DETAIL 6] Keep the layout stable during loading.
+- [FLOW INPUT · DETAIL 6] Keep the element responsive.
+- [MOOD INPUT · DETAIL 6] Respect reduced motion.
+- [ENERGY INPUT · DETAIL 6] Verify the behavior in the real browser.
+- [SLEEP INPUT · DETAIL 6] Add a focused test for this behavior.
+- [SYMPTOM INPUT · DETAIL 6] Handle empty data intentionally.
+- [TEMPERATURE INPUT · DETAIL 6] Handle partial data intentionally.
+- [OVULATION-TEST INPUT · DETAIL 6] Handle failed network requests intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Handle repeated interaction safely.
+- [CYCLE HISTORY CHART · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [VARIABILITY CHART · DETAIL 6] Use the existing application source of truth.
+- [BASELINE VIEW · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [TREND EXPLANATION · DETAIL 6] Do not fabricate missing information.
+- [RECOMMENDATION RANKING · DETAIL 6] Keep observed values separate from derived values.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Keep predicted values visually softer than observed values.
+- [AI LAUNCHER · DETAIL 6] Use the Bloom visual token system.
+- [AI CONTEXT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Keep technical details in developer diagnostics.
+- [AI STREAMING · DETAIL 6] Respect privacy and authorization.
+- [AI RETRY · DETAIL 6] Keep the interaction keyboard accessible.
+- [AI SAFETY · DETAIL 6] Keep the interaction touch accessible.
+- [AI METHODOLOGY · DETAIL 6] Prevent duplicate requests.
+- [AI QUICK PROMPTS · DETAIL 6] Prevent stale asynchronous results.
+- [AI PERSONALIZATION · DETAIL 6] Preserve valid state after failure.
+- [PRIVACY BOUNDARIES · DETAIL 6] Update dependent UI after successful mutation.
+- [ERROR BOUNDARY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [LOADING STATE · DETAIL 6] Keep the layout stable during loading.
+- [EMPTY STATE · DETAIL 6] Keep the element responsive.
+- [DESKTOP LAYOUT · DETAIL 6] Respect reduced motion.
+- [TABLET LAYOUT · DETAIL 6] Verify the behavior in the real browser.
+- [MOBILE LAYOUT · DETAIL 6] Add a focused test for this behavior.
+- [KEYBOARD NAVIGATION · DETAIL 6] Handle empty data intentionally.
+- [SCREEN READER OUTPUT · DETAIL 6] Handle partial data intentionally.
+- [REDUCED MOTION · DETAIL 6] Handle failed network requests intentionally.
+- [REACT STATE · DETAIL 6] Handle repeated interaction safely.
+- [DATA FETCHING · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CACHE INVALIDATION · DETAIL 6] Use the existing application source of truth.
+- [TYPE SAFETY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CSS TOKENS · DETAIL 6] Do not fabricate missing information.
+- [TYPOGRAPHY · DETAIL 6] Keep observed values separate from derived values.
+- [ICONOGRAPHY · DETAIL 6] Keep predicted values visually softer than observed values.
+- [CHART ACCESSIBILITY · DETAIL 6] Use the Bloom visual token system.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [FORM ACCESSIBILITY · DETAIL 6] Keep technical details in developer diagnostics.
+- [SHARE BEHAVIOR · DETAIL 6] Respect privacy and authorization.
+- [ROUTE BEHAVIOR · DETAIL 6] Keep the interaction keyboard accessible.
+- [PERFORMANCE · DETAIL 6] Keep the interaction touch accessible.
+- [MEMORY MANAGEMENT · DETAIL 6] Prevent duplicate requests.
+- [VISUAL REGRESSION · DETAIL 6] Prevent stale asynchronous results.
+- [UNIT TESTING · DETAIL 6] Preserve valid state after failure.
+- [INTEGRATION TESTING · DETAIL 6] Update dependent UI after successful mutation.
+- [BUILD QA · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CYCLE RING GEOMETRY · DETAIL 6] Keep the layout stable during loading.
+- [PHASE LEGEND · DETAIL 6] Keep the element responsive.
+- [CURRENT-DAY MARKER · DETAIL 6] Respect reduced motion.
+- [PREDICTION RANGE · DETAIL 6] Verify the behavior in the real browser.
+- [DATA CONFIDENCE · DETAIL 6] Add a focused test for this behavior.
+- [CALENDAR NAVIGATION · DETAIL 6] Handle empty data intentionally.
+- [CALENDAR DAY STATE · DETAIL 6] Handle partial data intentionally.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Handle failed network requests intentionally.
+- [PERIOD LOG · DETAIL 6] Handle repeated interaction safely.
+- [FLOW INPUT · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [MOOD INPUT · DETAIL 6] Use the existing application source of truth.
+- [ENERGY INPUT · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [SLEEP INPUT · DETAIL 6] Do not fabricate missing information.
+- [SYMPTOM INPUT · DETAIL 6] Keep observed values separate from derived values.
+- [TEMPERATURE INPUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [OVULATION-TEST INPUT · DETAIL 6] Use the Bloom visual token system.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [CYCLE HISTORY CHART · DETAIL 6] Keep technical details in developer diagnostics.
+- [VARIABILITY CHART · DETAIL 6] Respect privacy and authorization.
+- [BASELINE VIEW · DETAIL 6] Keep the interaction keyboard accessible.
+- [TREND EXPLANATION · DETAIL 6] Keep the interaction touch accessible.
+- [RECOMMENDATION RANKING · DETAIL 6] Prevent duplicate requests.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Prevent stale asynchronous results.
+- [AI LAUNCHER · DETAIL 6] Preserve valid state after failure.
+- [AI CONTEXT · DETAIL 6] Update dependent UI after successful mutation.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [AI STREAMING · DETAIL 6] Keep the layout stable during loading.
+- [AI RETRY · DETAIL 6] Keep the element responsive.
+- [AI SAFETY · DETAIL 6] Respect reduced motion.
+- [AI METHODOLOGY · DETAIL 6] Verify the behavior in the real browser.
+- [AI QUICK PROMPTS · DETAIL 6] Add a focused test for this behavior.
+- [AI PERSONALIZATION · DETAIL 6] Handle empty data intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 6] Handle partial data intentionally.
+- [ERROR BOUNDARY · DETAIL 6] Handle failed network requests intentionally.
+- [LOADING STATE · DETAIL 6] Handle repeated interaction safely.
+- [EMPTY STATE · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [DESKTOP LAYOUT · DETAIL 6] Use the existing application source of truth.
+- [TABLET LAYOUT · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [MOBILE LAYOUT · DETAIL 6] Do not fabricate missing information.
+- [KEYBOARD NAVIGATION · DETAIL 6] Keep observed values separate from derived values.
+- [SCREEN READER OUTPUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [REDUCED MOTION · DETAIL 6] Use the Bloom visual token system.
+- [REACT STATE · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [DATA FETCHING · DETAIL 6] Keep technical details in developer diagnostics.
+- [CACHE INVALIDATION · DETAIL 6] Respect privacy and authorization.
+- [TYPE SAFETY · DETAIL 6] Keep the interaction keyboard accessible.
+- [CSS TOKENS · DETAIL 6] Keep the interaction touch accessible.
+- [TYPOGRAPHY · DETAIL 6] Prevent duplicate requests.
+- [ICONOGRAPHY · DETAIL 6] Prevent stale asynchronous results.
+- [CHART ACCESSIBILITY · DETAIL 6] Preserve valid state after failure.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Update dependent UI after successful mutation.
+- [FORM ACCESSIBILITY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [SHARE BEHAVIOR · DETAIL 6] Keep the layout stable during loading.
+- [ROUTE BEHAVIOR · DETAIL 6] Keep the element responsive.
+- [PERFORMANCE · DETAIL 6] Respect reduced motion.
+- [MEMORY MANAGEMENT · DETAIL 6] Verify the behavior in the real browser.
+- [VISUAL REGRESSION · DETAIL 6] Add a focused test for this behavior.
+- [UNIT TESTING · DETAIL 6] Handle empty data intentionally.
+- [INTEGRATION TESTING · DETAIL 6] Handle partial data intentionally.
+- [BUILD QA · DETAIL 6] Handle failed network requests intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 6] Handle repeated interaction safely.
+- [PHASE LEGEND · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CURRENT-DAY MARKER · DETAIL 6] Use the existing application source of truth.
+- [PREDICTION RANGE · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [DATA CONFIDENCE · DETAIL 6] Do not fabricate missing information.
+- [CALENDAR NAVIGATION · DETAIL 6] Keep observed values separate from derived values.
+- [CALENDAR DAY STATE · DETAIL 6] Keep predicted values visually softer than observed values.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Use the Bloom visual token system.
+- [PERIOD LOG · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [FLOW INPUT · DETAIL 6] Keep technical details in developer diagnostics.
+- [MOOD INPUT · DETAIL 6] Respect privacy and authorization.
+- [ENERGY INPUT · DETAIL 6] Keep the interaction keyboard accessible.
+- [SLEEP INPUT · DETAIL 6] Keep the interaction touch accessible.
+- [SYMPTOM INPUT · DETAIL 6] Prevent duplicate requests.
+- [TEMPERATURE INPUT · DETAIL 6] Prevent stale asynchronous results.
+- [OVULATION-TEST INPUT · DETAIL 6] Preserve valid state after failure.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Update dependent UI after successful mutation.
+- [CYCLE HISTORY CHART · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [VARIABILITY CHART · DETAIL 6] Keep the layout stable during loading.
+- [BASELINE VIEW · DETAIL 6] Keep the element responsive.
+- [TREND EXPLANATION · DETAIL 6] Respect reduced motion.
+- [RECOMMENDATION RANKING · DETAIL 6] Verify the behavior in the real browser.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Add a focused test for this behavior.
+- [AI LAUNCHER · DETAIL 6] Handle empty data intentionally.
+- [AI CONTEXT · DETAIL 6] Handle partial data intentionally.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Handle failed network requests intentionally.
+- [AI STREAMING · DETAIL 6] Handle repeated interaction safely.
+- [AI RETRY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [AI SAFETY · DETAIL 6] Use the existing application source of truth.
+- [AI METHODOLOGY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [AI QUICK PROMPTS · DETAIL 6] Do not fabricate missing information.
+- [AI PERSONALIZATION · DETAIL 6] Keep observed values separate from derived values.
+- [PRIVACY BOUNDARIES · DETAIL 6] Keep predicted values visually softer than observed values.
+- [ERROR BOUNDARY · DETAIL 6] Use the Bloom visual token system.
+- [LOADING STATE · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [EMPTY STATE · DETAIL 6] Keep technical details in developer diagnostics.
+- [DESKTOP LAYOUT · DETAIL 6] Respect privacy and authorization.
+- [TABLET LAYOUT · DETAIL 6] Keep the interaction keyboard accessible.
+- [MOBILE LAYOUT · DETAIL 6] Keep the interaction touch accessible.
+- [KEYBOARD NAVIGATION · DETAIL 6] Prevent duplicate requests.
+- [SCREEN READER OUTPUT · DETAIL 6] Prevent stale asynchronous results.
+- [REDUCED MOTION · DETAIL 6] Preserve valid state after failure.
+- [REACT STATE · DETAIL 6] Update dependent UI after successful mutation.
+- [DATA FETCHING · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CACHE INVALIDATION · DETAIL 6] Keep the layout stable during loading.
+- [TYPE SAFETY · DETAIL 6] Keep the element responsive.
+- [CSS TOKENS · DETAIL 6] Respect reduced motion.
+- [TYPOGRAPHY · DETAIL 6] Verify the behavior in the real browser.
+- [ICONOGRAPHY · DETAIL 6] Add a focused test for this behavior.
+- [CHART ACCESSIBILITY · DETAIL 6] Handle empty data intentionally.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Handle partial data intentionally.
+- [FORM ACCESSIBILITY · DETAIL 6] Handle failed network requests intentionally.
+- [SHARE BEHAVIOR · DETAIL 6] Handle repeated interaction safely.
+- [ROUTE BEHAVIOR · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [PERFORMANCE · DETAIL 6] Use the existing application source of truth.
+- [MEMORY MANAGEMENT · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [VISUAL REGRESSION · DETAIL 6] Do not fabricate missing information.
+- [UNIT TESTING · DETAIL 6] Keep observed values separate from derived values.
+- [INTEGRATION TESTING · DETAIL 6] Keep predicted values visually softer than observed values.
+- [BUILD QA · DETAIL 6] Use the Bloom visual token system.
+- [CYCLE RING GEOMETRY · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [PHASE LEGEND · DETAIL 6] Keep technical details in developer diagnostics.
+- [CURRENT-DAY MARKER · DETAIL 6] Respect privacy and authorization.
+- [PREDICTION RANGE · DETAIL 6] Keep the interaction keyboard accessible.
+- [DATA CONFIDENCE · DETAIL 6] Keep the interaction touch accessible.
+- [CALENDAR NAVIGATION · DETAIL 6] Prevent duplicate requests.
+- [CALENDAR DAY STATE · DETAIL 6] Prevent stale asynchronous results.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Preserve valid state after failure.
+- [PERIOD LOG · DETAIL 6] Update dependent UI after successful mutation.
+- [FLOW INPUT · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [MOOD INPUT · DETAIL 6] Keep the layout stable during loading.
+- [ENERGY INPUT · DETAIL 6] Keep the element responsive.
+- [SLEEP INPUT · DETAIL 6] Respect reduced motion.
+- [SYMPTOM INPUT · DETAIL 6] Verify the behavior in the real browser.
+- [TEMPERATURE INPUT · DETAIL 6] Add a focused test for this behavior.
+- [OVULATION-TEST INPUT · DETAIL 6] Handle empty data intentionally.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Handle partial data intentionally.
+- [CYCLE HISTORY CHART · DETAIL 6] Handle failed network requests intentionally.
+- [VARIABILITY CHART · DETAIL 6] Handle repeated interaction safely.
+- [BASELINE VIEW · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [TREND EXPLANATION · DETAIL 6] Use the existing application source of truth.
+- [RECOMMENDATION RANKING · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Do not fabricate missing information.
+- [AI LAUNCHER · DETAIL 6] Keep observed values separate from derived values.
+- [AI CONTEXT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Use the Bloom visual token system.
+- [AI STREAMING · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [AI RETRY · DETAIL 6] Keep technical details in developer diagnostics.
+- [AI SAFETY · DETAIL 6] Respect privacy and authorization.
+- [AI METHODOLOGY · DETAIL 6] Keep the interaction keyboard accessible.
+- [AI QUICK PROMPTS · DETAIL 6] Keep the interaction touch accessible.
+- [AI PERSONALIZATION · DETAIL 6] Prevent duplicate requests.
+- [PRIVACY BOUNDARIES · DETAIL 6] Prevent stale asynchronous results.
+- [ERROR BOUNDARY · DETAIL 6] Preserve valid state after failure.
+- [LOADING STATE · DETAIL 6] Update dependent UI after successful mutation.
+- [EMPTY STATE · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [DESKTOP LAYOUT · DETAIL 6] Keep the layout stable during loading.
+- [TABLET LAYOUT · DETAIL 6] Keep the element responsive.
+- [MOBILE LAYOUT · DETAIL 6] Respect reduced motion.
+- [KEYBOARD NAVIGATION · DETAIL 6] Verify the behavior in the real browser.
+- [SCREEN READER OUTPUT · DETAIL 6] Add a focused test for this behavior.
+- [REDUCED MOTION · DETAIL 6] Handle empty data intentionally.
+- [REACT STATE · DETAIL 6] Handle partial data intentionally.
+- [DATA FETCHING · DETAIL 6] Handle failed network requests intentionally.
+- [CACHE INVALIDATION · DETAIL 6] Handle repeated interaction safely.
+- [TYPE SAFETY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CSS TOKENS · DETAIL 6] Use the existing application source of truth.
+- [TYPOGRAPHY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [ICONOGRAPHY · DETAIL 6] Do not fabricate missing information.
+- [CHART ACCESSIBILITY · DETAIL 6] Keep observed values separate from derived values.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Keep predicted values visually softer than observed values.
+- [FORM ACCESSIBILITY · DETAIL 6] Use the Bloom visual token system.
+- [SHARE BEHAVIOR · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [ROUTE BEHAVIOR · DETAIL 6] Keep technical details in developer diagnostics.
+- [PERFORMANCE · DETAIL 6] Respect privacy and authorization.
+- [MEMORY MANAGEMENT · DETAIL 6] Keep the interaction keyboard accessible.
+- [VISUAL REGRESSION · DETAIL 6] Keep the interaction touch accessible.
+- [UNIT TESTING · DETAIL 6] Prevent duplicate requests.
+- [INTEGRATION TESTING · DETAIL 6] Prevent stale asynchronous results.
+- [BUILD QA · DETAIL 6] Preserve valid state after failure.
+- [CYCLE RING GEOMETRY · DETAIL 6] Update dependent UI after successful mutation.
+- [PHASE LEGEND · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CURRENT-DAY MARKER · DETAIL 6] Keep the layout stable during loading.
+- [PREDICTION RANGE · DETAIL 6] Keep the element responsive.
+- [DATA CONFIDENCE · DETAIL 6] Respect reduced motion.
+- [CALENDAR NAVIGATION · DETAIL 6] Verify the behavior in the real browser.
+- [CALENDAR DAY STATE · DETAIL 6] Add a focused test for this behavior.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Handle empty data intentionally.
+- [PERIOD LOG · DETAIL 6] Handle partial data intentionally.
+- [FLOW INPUT · DETAIL 6] Handle failed network requests intentionally.
+- [MOOD INPUT · DETAIL 6] Handle repeated interaction safely.
+- [ENERGY INPUT · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [SLEEP INPUT · DETAIL 6] Use the existing application source of truth.
+- [SYMPTOM INPUT · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [TEMPERATURE INPUT · DETAIL 6] Do not fabricate missing information.
+- [OVULATION-TEST INPUT · DETAIL 6] Keep observed values separate from derived values.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [CYCLE HISTORY CHART · DETAIL 6] Use the Bloom visual token system.
+- [VARIABILITY CHART · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [BASELINE VIEW · DETAIL 6] Keep technical details in developer diagnostics.
+- [TREND EXPLANATION · DETAIL 6] Respect privacy and authorization.
+- [RECOMMENDATION RANKING · DETAIL 6] Keep the interaction keyboard accessible.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Keep the interaction touch accessible.
+- [AI LAUNCHER · DETAIL 6] Prevent duplicate requests.
+- [AI CONTEXT · DETAIL 6] Prevent stale asynchronous results.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Preserve valid state after failure.
+- [AI STREAMING · DETAIL 6] Update dependent UI after successful mutation.
+- [AI RETRY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [AI SAFETY · DETAIL 6] Keep the layout stable during loading.
+- [AI METHODOLOGY · DETAIL 6] Keep the element responsive.
+- [AI QUICK PROMPTS · DETAIL 6] Respect reduced motion.
+- [AI PERSONALIZATION · DETAIL 6] Verify the behavior in the real browser.
+- [PRIVACY BOUNDARIES · DETAIL 6] Add a focused test for this behavior.
+- [ERROR BOUNDARY · DETAIL 6] Handle empty data intentionally.
+- [LOADING STATE · DETAIL 6] Handle partial data intentionally.
+- [EMPTY STATE · DETAIL 6] Handle failed network requests intentionally.
+- [DESKTOP LAYOUT · DETAIL 6] Handle repeated interaction safely.
+- [TABLET LAYOUT · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [MOBILE LAYOUT · DETAIL 6] Use the existing application source of truth.
+- [KEYBOARD NAVIGATION · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [SCREEN READER OUTPUT · DETAIL 6] Do not fabricate missing information.
+- [REDUCED MOTION · DETAIL 6] Keep observed values separate from derived values.
+- [REACT STATE · DETAIL 6] Keep predicted values visually softer than observed values.
+- [DATA FETCHING · DETAIL 6] Use the Bloom visual token system.
+- [CACHE INVALIDATION · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [TYPE SAFETY · DETAIL 6] Keep technical details in developer diagnostics.
+- [CSS TOKENS · DETAIL 6] Respect privacy and authorization.
+- [TYPOGRAPHY · DETAIL 6] Keep the interaction keyboard accessible.
+- [ICONOGRAPHY · DETAIL 6] Keep the interaction touch accessible.
+- [CHART ACCESSIBILITY · DETAIL 6] Prevent duplicate requests.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Prevent stale asynchronous results.
+- [FORM ACCESSIBILITY · DETAIL 6] Preserve valid state after failure.
+- [SHARE BEHAVIOR · DETAIL 6] Update dependent UI after successful mutation.
+- [ROUTE BEHAVIOR · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [PERFORMANCE · DETAIL 6] Keep the layout stable during loading.
+- [MEMORY MANAGEMENT · DETAIL 6] Keep the element responsive.
+- [VISUAL REGRESSION · DETAIL 6] Respect reduced motion.
+- [UNIT TESTING · DETAIL 6] Verify the behavior in the real browser.
+- [INTEGRATION TESTING · DETAIL 6] Add a focused test for this behavior.
+- [BUILD QA · DETAIL 6] Handle empty data intentionally.
+- [CYCLE RING GEOMETRY · DETAIL 6] Handle partial data intentionally.
+- [PHASE LEGEND · DETAIL 6] Handle failed network requests intentionally.
+- [CURRENT-DAY MARKER · DETAIL 6] Handle repeated interaction safely.
+- [PREDICTION RANGE · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [DATA CONFIDENCE · DETAIL 6] Use the existing application source of truth.
+- [CALENDAR NAVIGATION · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR DAY STATE · DETAIL 6] Do not fabricate missing information.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep observed values separate from derived values.
+- [PERIOD LOG · DETAIL 6] Keep predicted values visually softer than observed values.
+- [FLOW INPUT · DETAIL 6] Use the Bloom visual token system.
+- [MOOD INPUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [ENERGY INPUT · DETAIL 6] Keep technical details in developer diagnostics.
+- [SLEEP INPUT · DETAIL 6] Respect privacy and authorization.
+- [SYMPTOM INPUT · DETAIL 6] Keep the interaction keyboard accessible.
+- [TEMPERATURE INPUT · DETAIL 6] Keep the interaction touch accessible.
+- [OVULATION-TEST INPUT · DETAIL 6] Prevent duplicate requests.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Prevent stale asynchronous results.
+- [CYCLE HISTORY CHART · DETAIL 6] Preserve valid state after failure.
+- [VARIABILITY CHART · DETAIL 6] Update dependent UI after successful mutation.
+- [BASELINE VIEW · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [TREND EXPLANATION · DETAIL 6] Keep the layout stable during loading.
+- [RECOMMENDATION RANKING · DETAIL 6] Keep the element responsive.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Respect reduced motion.
+- [AI LAUNCHER · DETAIL 6] Verify the behavior in the real browser.
+- [AI CONTEXT · DETAIL 6] Add a focused test for this behavior.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Handle empty data intentionally.
+- [AI STREAMING · DETAIL 6] Handle partial data intentionally.
+- [AI RETRY · DETAIL 6] Handle failed network requests intentionally.
+- [AI SAFETY · DETAIL 6] Handle repeated interaction safely.
+- [AI METHODOLOGY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [AI QUICK PROMPTS · DETAIL 6] Use the existing application source of truth.
+- [AI PERSONALIZATION · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [PRIVACY BOUNDARIES · DETAIL 6] Do not fabricate missing information.
+- [ERROR BOUNDARY · DETAIL 6] Keep observed values separate from derived values.
+- [LOADING STATE · DETAIL 6] Keep predicted values visually softer than observed values.
+- [EMPTY STATE · DETAIL 6] Use the Bloom visual token system.
+- [DESKTOP LAYOUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [TABLET LAYOUT · DETAIL 6] Keep technical details in developer diagnostics.
+- [MOBILE LAYOUT · DETAIL 6] Respect privacy and authorization.
+- [KEYBOARD NAVIGATION · DETAIL 6] Keep the interaction keyboard accessible.
+- [SCREEN READER OUTPUT · DETAIL 6] Keep the interaction touch accessible.
+- [REDUCED MOTION · DETAIL 6] Prevent duplicate requests.
+- [REACT STATE · DETAIL 6] Prevent stale asynchronous results.
+- [DATA FETCHING · DETAIL 6] Preserve valid state after failure.
+- [CACHE INVALIDATION · DETAIL 6] Update dependent UI after successful mutation.
+- [TYPE SAFETY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CSS TOKENS · DETAIL 6] Keep the layout stable during loading.
+- [TYPOGRAPHY · DETAIL 6] Keep the element responsive.
+- [ICONOGRAPHY · DETAIL 6] Respect reduced motion.
+- [CHART ACCESSIBILITY · DETAIL 6] Verify the behavior in the real browser.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Add a focused test for this behavior.
+- [FORM ACCESSIBILITY · DETAIL 6] Handle empty data intentionally.
+- [SHARE BEHAVIOR · DETAIL 6] Handle partial data intentionally.
+- [ROUTE BEHAVIOR · DETAIL 6] Handle failed network requests intentionally.
+- [PERFORMANCE · DETAIL 6] Handle repeated interaction safely.
+- [MEMORY MANAGEMENT · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [VISUAL REGRESSION · DETAIL 6] Use the existing application source of truth.
+- [UNIT TESTING · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [INTEGRATION TESTING · DETAIL 6] Do not fabricate missing information.
+- [BUILD QA · DETAIL 6] Keep observed values separate from derived values.
+- [CYCLE RING GEOMETRY · DETAIL 6] Keep predicted values visually softer than observed values.
+- [PHASE LEGEND · DETAIL 6] Use the Bloom visual token system.
+- [CURRENT-DAY MARKER · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [PREDICTION RANGE · DETAIL 6] Keep technical details in developer diagnostics.
+- [DATA CONFIDENCE · DETAIL 6] Respect privacy and authorization.
+- [CALENDAR NAVIGATION · DETAIL 6] Keep the interaction keyboard accessible.
+- [CALENDAR DAY STATE · DETAIL 6] Keep the interaction touch accessible.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Prevent duplicate requests.
+- [PERIOD LOG · DETAIL 6] Prevent stale asynchronous results.
+- [FLOW INPUT · DETAIL 6] Preserve valid state after failure.
+- [MOOD INPUT · DETAIL 6] Update dependent UI after successful mutation.
+- [ENERGY INPUT · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [SLEEP INPUT · DETAIL 6] Keep the layout stable during loading.
+- [SYMPTOM INPUT · DETAIL 6] Keep the element responsive.
+- [TEMPERATURE INPUT · DETAIL 6] Respect reduced motion.
+- [OVULATION-TEST INPUT · DETAIL 6] Verify the behavior in the real browser.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Add a focused test for this behavior.
+- [CYCLE HISTORY CHART · DETAIL 6] Handle empty data intentionally.
+- [VARIABILITY CHART · DETAIL 6] Handle partial data intentionally.
+- [BASELINE VIEW · DETAIL 6] Handle failed network requests intentionally.
+- [TREND EXPLANATION · DETAIL 6] Handle repeated interaction safely.
+- [RECOMMENDATION RANKING · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Use the existing application source of truth.
+- [AI LAUNCHER · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [AI CONTEXT · DETAIL 6] Do not fabricate missing information.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Keep observed values separate from derived values.
+- [AI STREAMING · DETAIL 6] Keep predicted values visually softer than observed values.
+- [AI RETRY · DETAIL 6] Use the Bloom visual token system.
+- [AI SAFETY · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [AI METHODOLOGY · DETAIL 6] Keep technical details in developer diagnostics.
+- [AI QUICK PROMPTS · DETAIL 6] Respect privacy and authorization.
+- [AI PERSONALIZATION · DETAIL 6] Keep the interaction keyboard accessible.
+- [PRIVACY BOUNDARIES · DETAIL 6] Keep the interaction touch accessible.
+- [ERROR BOUNDARY · DETAIL 6] Prevent duplicate requests.
+- [LOADING STATE · DETAIL 6] Prevent stale asynchronous results.
+- [EMPTY STATE · DETAIL 6] Preserve valid state after failure.
+- [DESKTOP LAYOUT · DETAIL 6] Update dependent UI after successful mutation.
+- [TABLET LAYOUT · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [MOBILE LAYOUT · DETAIL 6] Keep the layout stable during loading.
+- [KEYBOARD NAVIGATION · DETAIL 6] Keep the element responsive.
+- [SCREEN READER OUTPUT · DETAIL 6] Respect reduced motion.
+- [REDUCED MOTION · DETAIL 6] Verify the behavior in the real browser.
+- [REACT STATE · DETAIL 6] Add a focused test for this behavior.
+- [DATA FETCHING · DETAIL 6] Handle empty data intentionally.
+- [CACHE INVALIDATION · DETAIL 6] Handle partial data intentionally.
+- [TYPE SAFETY · DETAIL 6] Handle failed network requests intentionally.
+- [CSS TOKENS · DETAIL 6] Handle repeated interaction safely.
+- [TYPOGRAPHY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [ICONOGRAPHY · DETAIL 6] Use the existing application source of truth.
+- [CHART ACCESSIBILITY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Do not fabricate missing information.
+- [FORM ACCESSIBILITY · DETAIL 6] Keep observed values separate from derived values.
+- [SHARE BEHAVIOR · DETAIL 6] Keep predicted values visually softer than observed values.
+- [ROUTE BEHAVIOR · DETAIL 6] Use the Bloom visual token system.
+- [PERFORMANCE · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [MEMORY MANAGEMENT · DETAIL 6] Keep technical details in developer diagnostics.
+- [VISUAL REGRESSION · DETAIL 6] Respect privacy and authorization.
+- [UNIT TESTING · DETAIL 6] Keep the interaction keyboard accessible.
+- [INTEGRATION TESTING · DETAIL 6] Keep the interaction touch accessible.
+- [BUILD QA · DETAIL 6] Prevent duplicate requests.
+- [CYCLE RING GEOMETRY · DETAIL 6] Prevent stale asynchronous results.
+- [PHASE LEGEND · DETAIL 6] Preserve valid state after failure.
+- [CURRENT-DAY MARKER · DETAIL 6] Update dependent UI after successful mutation.
+- [PREDICTION RANGE · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [DATA CONFIDENCE · DETAIL 6] Keep the layout stable during loading.
+- [CALENDAR NAVIGATION · DETAIL 6] Keep the element responsive.
+- [CALENDAR DAY STATE · DETAIL 6] Respect reduced motion.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Verify the behavior in the real browser.
+- [PERIOD LOG · DETAIL 6] Add a focused test for this behavior.
+- [FLOW INPUT · DETAIL 6] Handle empty data intentionally.
+- [MOOD INPUT · DETAIL 6] Handle partial data intentionally.
+- [ENERGY INPUT · DETAIL 6] Handle failed network requests intentionally.
+- [SLEEP INPUT · DETAIL 6] Handle repeated interaction safely.
+- [SYMPTOM INPUT · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [TEMPERATURE INPUT · DETAIL 6] Use the existing application source of truth.
+- [OVULATION-TEST INPUT · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Do not fabricate missing information.
+- [CYCLE HISTORY CHART · DETAIL 6] Keep observed values separate from derived values.
+- [VARIABILITY CHART · DETAIL 6] Keep predicted values visually softer than observed values.
+- [BASELINE VIEW · DETAIL 6] Use the Bloom visual token system.
+- [TREND EXPLANATION · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [RECOMMENDATION RANKING · DETAIL 6] Keep technical details in developer diagnostics.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Respect privacy and authorization.
+- [AI LAUNCHER · DETAIL 6] Keep the interaction keyboard accessible.
+- [AI CONTEXT · DETAIL 6] Keep the interaction touch accessible.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Prevent duplicate requests.
+- [AI STREAMING · DETAIL 6] Prevent stale asynchronous results.
+- [AI RETRY · DETAIL 6] Preserve valid state after failure.
+- [AI SAFETY · DETAIL 6] Update dependent UI after successful mutation.
+- [AI METHODOLOGY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [AI QUICK PROMPTS · DETAIL 6] Keep the layout stable during loading.
+- [AI PERSONALIZATION · DETAIL 6] Keep the element responsive.
+- [PRIVACY BOUNDARIES · DETAIL 6] Respect reduced motion.
+- [ERROR BOUNDARY · DETAIL 6] Verify the behavior in the real browser.
+- [LOADING STATE · DETAIL 6] Add a focused test for this behavior.
+- [EMPTY STATE · DETAIL 6] Handle empty data intentionally.
+- [DESKTOP LAYOUT · DETAIL 6] Handle partial data intentionally.
+- [TABLET LAYOUT · DETAIL 6] Handle failed network requests intentionally.
+- [MOBILE LAYOUT · DETAIL 6] Handle repeated interaction safely.
+- [KEYBOARD NAVIGATION · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [SCREEN READER OUTPUT · DETAIL 6] Use the existing application source of truth.
+- [REDUCED MOTION · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [REACT STATE · DETAIL 6] Do not fabricate missing information.
+- [DATA FETCHING · DETAIL 6] Keep observed values separate from derived values.
+- [CACHE INVALIDATION · DETAIL 6] Keep predicted values visually softer than observed values.
+- [TYPE SAFETY · DETAIL 6] Use the Bloom visual token system.
+- [CSS TOKENS · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [TYPOGRAPHY · DETAIL 6] Keep technical details in developer diagnostics.
+- [ICONOGRAPHY · DETAIL 6] Respect privacy and authorization.
+- [CHART ACCESSIBILITY · DETAIL 6] Keep the interaction keyboard accessible.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Keep the interaction touch accessible.
+- [FORM ACCESSIBILITY · DETAIL 6] Prevent duplicate requests.
+- [SHARE BEHAVIOR · DETAIL 6] Prevent stale asynchronous results.
+- [ROUTE BEHAVIOR · DETAIL 6] Preserve valid state after failure.
+- [PERFORMANCE · DETAIL 6] Update dependent UI after successful mutation.
+- [MEMORY MANAGEMENT · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [VISUAL REGRESSION · DETAIL 6] Keep the layout stable during loading.
+- [UNIT TESTING · DETAIL 6] Keep the element responsive.
+- [INTEGRATION TESTING · DETAIL 6] Respect reduced motion.
+- [BUILD QA · DETAIL 6] Verify the behavior in the real browser.
+- [CYCLE RING GEOMETRY · DETAIL 6] Add a focused test for this behavior.
+- [PHASE LEGEND · DETAIL 6] Handle empty data intentionally.
+- [CURRENT-DAY MARKER · DETAIL 6] Handle partial data intentionally.
+- [PREDICTION RANGE · DETAIL 6] Handle failed network requests intentionally.
+- [DATA CONFIDENCE · DETAIL 6] Handle repeated interaction safely.
+- [CALENDAR NAVIGATION · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR DAY STATE · DETAIL 6] Use the existing application source of truth.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [PERIOD LOG · DETAIL 6] Do not fabricate missing information.
+- [FLOW INPUT · DETAIL 6] Keep observed values separate from derived values.
+- [MOOD INPUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [ENERGY INPUT · DETAIL 6] Use the Bloom visual token system.
+- [SLEEP INPUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [SYMPTOM INPUT · DETAIL 6] Keep technical details in developer diagnostics.
+- [TEMPERATURE INPUT · DETAIL 6] Respect privacy and authorization.
+- [OVULATION-TEST INPUT · DETAIL 6] Keep the interaction keyboard accessible.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Keep the interaction touch accessible.
+- [CYCLE HISTORY CHART · DETAIL 6] Prevent duplicate requests.
+- [VARIABILITY CHART · DETAIL 6] Prevent stale asynchronous results.
+- [BASELINE VIEW · DETAIL 6] Preserve valid state after failure.
+- [TREND EXPLANATION · DETAIL 6] Update dependent UI after successful mutation.
+- [RECOMMENDATION RANKING · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Keep the layout stable during loading.
+- [AI LAUNCHER · DETAIL 6] Keep the element responsive.
+- [AI CONTEXT · DETAIL 6] Respect reduced motion.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Verify the behavior in the real browser.
+- [AI STREAMING · DETAIL 6] Add a focused test for this behavior.
+- [AI RETRY · DETAIL 6] Handle empty data intentionally.
+- [AI SAFETY · DETAIL 6] Handle partial data intentionally.
+- [AI METHODOLOGY · DETAIL 6] Handle failed network requests intentionally.
+- [AI QUICK PROMPTS · DETAIL 6] Handle repeated interaction safely.
+- [AI PERSONALIZATION · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [PRIVACY BOUNDARIES · DETAIL 6] Use the existing application source of truth.
+- [ERROR BOUNDARY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [LOADING STATE · DETAIL 6] Do not fabricate missing information.
+- [EMPTY STATE · DETAIL 6] Keep observed values separate from derived values.
+- [DESKTOP LAYOUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [TABLET LAYOUT · DETAIL 6] Use the Bloom visual token system.
+- [MOBILE LAYOUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [KEYBOARD NAVIGATION · DETAIL 6] Keep technical details in developer diagnostics.
+- [SCREEN READER OUTPUT · DETAIL 6] Respect privacy and authorization.
+- [REDUCED MOTION · DETAIL 6] Keep the interaction keyboard accessible.
+- [REACT STATE · DETAIL 6] Keep the interaction touch accessible.
+- [DATA FETCHING · DETAIL 6] Prevent duplicate requests.
+- [CACHE INVALIDATION · DETAIL 6] Prevent stale asynchronous results.
+- [TYPE SAFETY · DETAIL 6] Preserve valid state after failure.
+- [CSS TOKENS · DETAIL 6] Update dependent UI after successful mutation.
+- [TYPOGRAPHY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [ICONOGRAPHY · DETAIL 6] Keep the layout stable during loading.
+- [CHART ACCESSIBILITY · DETAIL 6] Keep the element responsive.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Respect reduced motion.
+- [FORM ACCESSIBILITY · DETAIL 6] Verify the behavior in the real browser.
+- [SHARE BEHAVIOR · DETAIL 6] Add a focused test for this behavior.
+- [ROUTE BEHAVIOR · DETAIL 6] Handle empty data intentionally.
+- [PERFORMANCE · DETAIL 6] Handle partial data intentionally.
+- [MEMORY MANAGEMENT · DETAIL 6] Handle failed network requests intentionally.
+- [VISUAL REGRESSION · DETAIL 6] Handle repeated interaction safely.
+- [UNIT TESTING · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [INTEGRATION TESTING · DETAIL 6] Use the existing application source of truth.
+- [BUILD QA · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CYCLE RING GEOMETRY · DETAIL 6] Do not fabricate missing information.
+- [PHASE LEGEND · DETAIL 6] Keep observed values separate from derived values.
+- [CURRENT-DAY MARKER · DETAIL 6] Keep predicted values visually softer than observed values.
+- [PREDICTION RANGE · DETAIL 6] Use the Bloom visual token system.
+- [DATA CONFIDENCE · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [CALENDAR NAVIGATION · DETAIL 6] Keep technical details in developer diagnostics.
+- [CALENDAR DAY STATE · DETAIL 6] Respect privacy and authorization.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep the interaction keyboard accessible.
+- [PERIOD LOG · DETAIL 6] Keep the interaction touch accessible.
+- [FLOW INPUT · DETAIL 6] Prevent duplicate requests.
+- [MOOD INPUT · DETAIL 6] Prevent stale asynchronous results.
+- [ENERGY INPUT · DETAIL 6] Preserve valid state after failure.
+- [SLEEP INPUT · DETAIL 6] Update dependent UI after successful mutation.
+- [SYMPTOM INPUT · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [TEMPERATURE INPUT · DETAIL 6] Keep the layout stable during loading.
+- [OVULATION-TEST INPUT · DETAIL 6] Keep the element responsive.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Respect reduced motion.
+- [CYCLE HISTORY CHART · DETAIL 6] Verify the behavior in the real browser.
+- [VARIABILITY CHART · DETAIL 6] Add a focused test for this behavior.
+- [BASELINE VIEW · DETAIL 6] Handle empty data intentionally.
+- [TREND EXPLANATION · DETAIL 6] Handle partial data intentionally.
+- [RECOMMENDATION RANKING · DETAIL 6] Handle failed network requests intentionally.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Handle repeated interaction safely.
+- [AI LAUNCHER · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [AI CONTEXT · DETAIL 6] Use the existing application source of truth.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [AI STREAMING · DETAIL 6] Do not fabricate missing information.
+- [AI RETRY · DETAIL 6] Keep observed values separate from derived values.
+- [AI SAFETY · DETAIL 6] Keep predicted values visually softer than observed values.
+- [AI METHODOLOGY · DETAIL 6] Use the Bloom visual token system.
+- [AI QUICK PROMPTS · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [AI PERSONALIZATION · DETAIL 6] Keep technical details in developer diagnostics.
+- [PRIVACY BOUNDARIES · DETAIL 6] Respect privacy and authorization.
+- [ERROR BOUNDARY · DETAIL 6] Keep the interaction keyboard accessible.
+- [LOADING STATE · DETAIL 6] Keep the interaction touch accessible.
+- [EMPTY STATE · DETAIL 6] Prevent duplicate requests.
+- [DESKTOP LAYOUT · DETAIL 6] Prevent stale asynchronous results.
+- [TABLET LAYOUT · DETAIL 6] Preserve valid state after failure.
+- [MOBILE LAYOUT · DETAIL 6] Update dependent UI after successful mutation.
+- [KEYBOARD NAVIGATION · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [SCREEN READER OUTPUT · DETAIL 6] Keep the layout stable during loading.
+- [REDUCED MOTION · DETAIL 6] Keep the element responsive.
+- [REACT STATE · DETAIL 6] Respect reduced motion.
+- [DATA FETCHING · DETAIL 6] Verify the behavior in the real browser.
+- [CACHE INVALIDATION · DETAIL 6] Add a focused test for this behavior.
+- [TYPE SAFETY · DETAIL 6] Handle empty data intentionally.
+- [CSS TOKENS · DETAIL 6] Handle partial data intentionally.
+- [TYPOGRAPHY · DETAIL 6] Handle failed network requests intentionally.
+- [ICONOGRAPHY · DETAIL 6] Handle repeated interaction safely.
+- [CHART ACCESSIBILITY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Use the existing application source of truth.
+- [FORM ACCESSIBILITY · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [SHARE BEHAVIOR · DETAIL 6] Do not fabricate missing information.
+- [ROUTE BEHAVIOR · DETAIL 6] Keep observed values separate from derived values.
+- [PERFORMANCE · DETAIL 6] Keep predicted values visually softer than observed values.
+- [MEMORY MANAGEMENT · DETAIL 6] Use the Bloom visual token system.
+- [VISUAL REGRESSION · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [UNIT TESTING · DETAIL 6] Keep technical details in developer diagnostics.
+- [INTEGRATION TESTING · DETAIL 6] Respect privacy and authorization.
+- [BUILD QA · DETAIL 6] Keep the interaction keyboard accessible.
+- [CYCLE RING GEOMETRY · DETAIL 6] Keep the interaction touch accessible.
+- [PHASE LEGEND · DETAIL 6] Prevent duplicate requests.
+- [CURRENT-DAY MARKER · DETAIL 6] Prevent stale asynchronous results.
+- [PREDICTION RANGE · DETAIL 6] Preserve valid state after failure.
+- [DATA CONFIDENCE · DETAIL 6] Update dependent UI after successful mutation.
+- [CALENDAR NAVIGATION · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CALENDAR DAY STATE · DETAIL 6] Keep the layout stable during loading.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep the element responsive.
+- [PERIOD LOG · DETAIL 6] Respect reduced motion.
+- [FLOW INPUT · DETAIL 6] Verify the behavior in the real browser.
+- [MOOD INPUT · DETAIL 6] Add a focused test for this behavior.
+- [ENERGY INPUT · DETAIL 6] Handle empty data intentionally.
+- [SLEEP INPUT · DETAIL 6] Handle partial data intentionally.
+- [SYMPTOM INPUT · DETAIL 6] Handle failed network requests intentionally.
+- [TEMPERATURE INPUT · DETAIL 6] Handle repeated interaction safely.
+- [OVULATION-TEST INPUT · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Use the existing application source of truth.
+- [CYCLE HISTORY CHART · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [VARIABILITY CHART · DETAIL 6] Do not fabricate missing information.
+- [BASELINE VIEW · DETAIL 6] Keep observed values separate from derived values.
+- [TREND EXPLANATION · DETAIL 6] Keep predicted values visually softer than observed values.
+- [RECOMMENDATION RANKING · DETAIL 6] Use the Bloom visual token system.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [AI LAUNCHER · DETAIL 6] Keep technical details in developer diagnostics.
+- [AI CONTEXT · DETAIL 6] Respect privacy and authorization.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Keep the interaction keyboard accessible.
+- [AI STREAMING · DETAIL 6] Keep the interaction touch accessible.
+- [AI RETRY · DETAIL 6] Prevent duplicate requests.
+- [AI SAFETY · DETAIL 6] Prevent stale asynchronous results.
+- [AI METHODOLOGY · DETAIL 6] Preserve valid state after failure.
+- [AI QUICK PROMPTS · DETAIL 6] Update dependent UI after successful mutation.
+- [AI PERSONALIZATION · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [PRIVACY BOUNDARIES · DETAIL 6] Keep the layout stable during loading.
+- [ERROR BOUNDARY · DETAIL 6] Keep the element responsive.
+- [LOADING STATE · DETAIL 6] Respect reduced motion.
+- [EMPTY STATE · DETAIL 6] Verify the behavior in the real browser.
+- [DESKTOP LAYOUT · DETAIL 6] Add a focused test for this behavior.
+- [TABLET LAYOUT · DETAIL 6] Handle empty data intentionally.
+- [MOBILE LAYOUT · DETAIL 6] Handle partial data intentionally.
+- [KEYBOARD NAVIGATION · DETAIL 6] Handle failed network requests intentionally.
+- [SCREEN READER OUTPUT · DETAIL 6] Handle repeated interaction safely.
+- [REDUCED MOTION · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [REACT STATE · DETAIL 6] Use the existing application source of truth.
+- [DATA FETCHING · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CACHE INVALIDATION · DETAIL 6] Do not fabricate missing information.
+- [TYPE SAFETY · DETAIL 6] Keep observed values separate from derived values.
+- [CSS TOKENS · DETAIL 6] Keep predicted values visually softer than observed values.
+- [TYPOGRAPHY · DETAIL 6] Use the Bloom visual token system.
+- [ICONOGRAPHY · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [CHART ACCESSIBILITY · DETAIL 6] Keep technical details in developer diagnostics.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Respect privacy and authorization.
+- [FORM ACCESSIBILITY · DETAIL 6] Keep the interaction keyboard accessible.
+- [SHARE BEHAVIOR · DETAIL 6] Keep the interaction touch accessible.
+- [ROUTE BEHAVIOR · DETAIL 6] Prevent duplicate requests.
+- [PERFORMANCE · DETAIL 6] Prevent stale asynchronous results.
+- [MEMORY MANAGEMENT · DETAIL 6] Preserve valid state after failure.
+- [VISUAL REGRESSION · DETAIL 6] Update dependent UI after successful mutation.
+- [UNIT TESTING · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [INTEGRATION TESTING · DETAIL 6] Keep the layout stable during loading.
+- [BUILD QA · DETAIL 6] Keep the element responsive.
+- [CYCLE RING GEOMETRY · DETAIL 6] Respect reduced motion.
+- [PHASE LEGEND · DETAIL 6] Verify the behavior in the real browser.
+- [CURRENT-DAY MARKER · DETAIL 6] Add a focused test for this behavior.
+- [PREDICTION RANGE · DETAIL 6] Handle empty data intentionally.
+- [DATA CONFIDENCE · DETAIL 6] Handle partial data intentionally.
+- [CALENDAR NAVIGATION · DETAIL 6] Handle failed network requests intentionally.
+- [CALENDAR DAY STATE · DETAIL 6] Handle repeated interaction safely.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [PERIOD LOG · DETAIL 6] Use the existing application source of truth.
+- [FLOW INPUT · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [MOOD INPUT · DETAIL 6] Do not fabricate missing information.
+- [ENERGY INPUT · DETAIL 6] Keep observed values separate from derived values.
+- [SLEEP INPUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [SYMPTOM INPUT · DETAIL 6] Use the Bloom visual token system.
+- [TEMPERATURE INPUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [OVULATION-TEST INPUT · DETAIL 6] Keep technical details in developer diagnostics.
+- [CERVICAL-MUCUS INPUT · DETAIL 6] Respect privacy and authorization.
+- [CYCLE HISTORY CHART · DETAIL 6] Keep the interaction keyboard accessible.
+- [VARIABILITY CHART · DETAIL 6] Keep the interaction touch accessible.
+- [BASELINE VIEW · DETAIL 6] Prevent duplicate requests.
+- [TREND EXPLANATION · DETAIL 6] Prevent stale asynchronous results.
+- [RECOMMENDATION RANKING · DETAIL 6] Preserve valid state after failure.
+- [RECOMMENDATION DISMISSAL · DETAIL 6] Update dependent UI after successful mutation.
+- [AI LAUNCHER · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [AI CONTEXT · DETAIL 6] Keep the layout stable during loading.
+- [AI TOOL AUTHORIZATION · DETAIL 6] Keep the element responsive.
+- [AI STREAMING · DETAIL 6] Respect reduced motion.
+- [AI RETRY · DETAIL 6] Verify the behavior in the real browser.
+- [AI SAFETY · DETAIL 6] Add a focused test for this behavior.
+- [AI METHODOLOGY · DETAIL 6] Handle empty data intentionally.
+- [AI QUICK PROMPTS · DETAIL 6] Handle partial data intentionally.
+- [AI PERSONALIZATION · DETAIL 6] Handle failed network requests intentionally.
+- [PRIVACY BOUNDARIES · DETAIL 6] Handle repeated interaction safely.
+- [ERROR BOUNDARY · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [LOADING STATE · DETAIL 6] Use the existing application source of truth.
+- [EMPTY STATE · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [DESKTOP LAYOUT · DETAIL 6] Do not fabricate missing information.
+- [TABLET LAYOUT · DETAIL 6] Keep observed values separate from derived values.
+- [MOBILE LAYOUT · DETAIL 6] Keep predicted values visually softer than observed values.
+- [KEYBOARD NAVIGATION · DETAIL 6] Use the Bloom visual token system.
+- [SCREEN READER OUTPUT · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [REDUCED MOTION · DETAIL 6] Keep technical details in developer diagnostics.
+- [REACT STATE · DETAIL 6] Respect privacy and authorization.
+- [DATA FETCHING · DETAIL 6] Keep the interaction keyboard accessible.
+- [CACHE INVALIDATION · DETAIL 6] Keep the interaction touch accessible.
+- [TYPE SAFETY · DETAIL 6] Prevent duplicate requests.
+- [CSS TOKENS · DETAIL 6] Prevent stale asynchronous results.
+- [TYPOGRAPHY · DETAIL 6] Preserve valid state after failure.
+- [ICONOGRAPHY · DETAIL 6] Update dependent UI after successful mutation.
+- [CHART ACCESSIBILITY · DETAIL 6] Do not cause unnecessary full-page reloads.
+- [CALENDAR ACCESSIBILITY · DETAIL 6] Keep the layout stable during loading.
+- [FORM ACCESSIBILITY · DETAIL 6] Keep the element responsive.
+- [SHARE BEHAVIOR · DETAIL 6] Respect reduced motion.
+- [ROUTE BEHAVIOR · DETAIL 6] Verify the behavior in the real browser.
+- [PERFORMANCE · DETAIL 6] Add a focused test for this behavior.
+- [MEMORY MANAGEMENT · DETAIL 6] Handle empty data intentionally.
+- [VISUAL REGRESSION · DETAIL 6] Handle partial data intentionally.
+- [UNIT TESTING · DETAIL 6] Handle failed network requests intentionally.
+- [INTEGRATION TESTING · DETAIL 6] Handle repeated interaction safely.
+- [BUILD QA · DETAIL 6] Keep the visual hierarchy stronger than decorative effects.
+- [CYCLE RING GEOMETRY · DETAIL 6] Use the existing application source of truth.
+- [PHASE LEGEND · DETAIL 6] Keep the behavior deterministic when the inputs are unchanged.
+- [CURRENT-DAY MARKER · DETAIL 6] Do not fabricate missing information.
+- [PREDICTION RANGE · DETAIL 6] Keep observed values separate from derived values.
+- [DATA CONFIDENCE · DETAIL 6] Keep predicted values visually softer than observed values.
+- [CALENDAR NAVIGATION · DETAIL 6] Use the Bloom visual token system.
+- [CALENDAR DAY STATE · DETAIL 6] Keep the consumer-facing copy human and concise.
+- [CALENDAR DETAIL SHEET · DETAIL 6] Keep technical details in developer diagnostics.
+- [PERIOD LOG · DETAIL 6] Respect privacy and authorization.
+- [FLOW INPUT · DETAIL 6] Keep the interaction keyboard accessible.
+- [MOOD INPUT · DETAIL 6] Keep the interaction touch accessible.
+- [ENERGY INPUT · DETAIL 6] Prevent duplicate requests.
+- [SLEEP INPUT · DETAIL 6] Prevent stale asynchronous results.
+- [SYMPTOM INPUT · DETAIL 6] Preserve valid state after failure.
+- [TEMPERATURE INPUT · DETAIL 6] Update dependent UI after successful mutation.
+- [OVULATION-TEST INPUT · DETAIL 6] Do not cause unnecessary full-page reloads.
+## FINAL EXECUTION WORKFLOW
+- Inspect the existing Cycle route before editing it.
+- Inspect the existing Cycle components before replacing them.
+- Inspect existing prediction utilities before rewriting calculations.
+- Inspect existing data contracts before adding fields.
+- Inspect existing styling tokens before introducing new tokens.
+- Preserve working authentication.
+- Preserve working privacy.
+- Preserve working persistence.
+- Build typed Cycle view models.
+- Build the hero first.
+- Build the current-cycle visualization second.
+- Build next-event intelligence third.
+- Build Quick Log fourth.
+- Redesign Advanced Log fifth.
+- Build the calendar sixth.
+- Build historical analytics seventh.
+- Build recommendations eighth.
+- Build the floating AI assistant ninth.
+- Connect AI to real CycleContext.
+- Add deterministic fallbacks.
+- Add loading states.
+- Add error states.
+- Add empty states.
+- Add accessibility.
+- Add responsive behavior.
+- Add motion polish.
+- Run type checks.
+- Run lint.
+- Run build.
+- Open the live browser.
+- Inspect the top viewport.
+- Inspect the scroll experience.
+- Inspect the calendar.
+- Inspect Advanced Log.
+- Inspect analytics.
+- Inspect recommendations.
+- Open the AI assistant.
+- Test contextual AI answers.
+- Test AI failure.
+- Test zero data.
+- Test one cycle.
+- Test many cycles.
+- Test privacy boundaries.
+- Test mobile.
+- Test keyboard navigation.
+- Test reduced motion.
+- Fix every visual regression found.
+- Remove generic dashboard patterns.
+- Remove redundant cards.
+- Remove fake metrics.
+- Remove misleading accuracy.
+- Remove unsupported recommendations.
+- Remove generic AI copy.
+- Ground every AI response in actual data.
+- Keep the page useful without AI.
+- Keep the page beautiful without data.
+- Make the page richer with real data.
+- Do not stop at code compilation.
+- Do not stop at functional correctness.
+- Do not stop at aligned cards.
+- Inspect the actual product experience.
+- Iterate until the page feels intentionally designed.
+## FINAL ACCEPTANCE CHECKLIST
+- The first viewport explains what is happening now.
+- The first viewport explains what is likely next.
+- The cycle visualization communicates phase and position.
+- Observed and predicted states are distinguishable.
+- Prediction uncertainty is honest.
+- No fake accuracy appears.
+- Quick Log is fast.
+- Advanced Log is organized.
+- Calendar is genuinely interactive.
+- Historical analytics are meaningful.
+- Recommendations use actual context.
+- AI is contextual rather than generic.
+- AI does not invent personal facts.
+- AI does not diagnose.
+- AI does not make unsafe medical claims.
+- AI does not block Cycle functionality.
+- Private Cycle data remains private.
+- Raw technical errors never reach the user.
+- Zero-data states look finished.
+- Populated states look rich.
+- Desktop looks balanced.
+- Tablet looks intentional.
+- Mobile looks designed rather than compressed.
+- Keyboard navigation works.
+- Reduced motion is respected.
+- The final page is inspected in the running browser.
+- The final page is substantially more useful and visually sophisticated than the supplied screenshots.
+- The final page still feels unmistakably like Bloom.

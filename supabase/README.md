@@ -1,5 +1,25 @@
 # Bloom backend setup
 
+## Cycle intelligence — run `20260829_cycle_intelligence.sql`
+
+After the Profile migration, also run
+`migrations/20260829_cycle_intelligence.sql` in the SQL editor. It is
+idempotent and additive:
+
+- ensures `cycle_entries` exists with all advanced-log columns
+  (flow, temperature, cervical mucus, LH tests, pain, activity,
+  contraception, energy, sleep, mood, symptoms, notes)
+- unique index on `(profile_id, date)` — the upsert key the app uses
+- `updated_at` trigger
+- **owner-only RLS on every action, `anon` revoked entirely** — cycle
+  data is never readable cross-user and never appears in public profile
+  responses (the public profile function reads only profiles, stories,
+  and highlights)
+
+The React Cycle page (`/cycle`) reads and writes this same table; the
+legacy `public/bloom/cycle.html` remains untouched for compatibility.
+
+
 ## Profile 2.0 — identity, privacy, stories, highlights
 
 Run `migrations/20260828_profile_identity_stories.sql` in the Supabase SQL
