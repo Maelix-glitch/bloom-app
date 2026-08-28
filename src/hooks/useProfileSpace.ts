@@ -43,6 +43,7 @@ import {
 import {
   isStoryActive,
   type BloomAccent,
+  type HighlightIcon,
   type HighlightItem,
   type ProfilePrivacy,
   type Story,
@@ -408,10 +409,16 @@ export function useProfileSpace() {
   }, []);
 
   const saveHighlight = useCallback(
-    async (id: string | null, name: string, accent: BloomAccent, storyIds: string[]) => {
+    async (
+      id: string | null,
+      name: string,
+      accent: BloomAccent,
+      storyIds: string[],
+      icon: HighlightIcon | null = null,
+    ) => {
       if (!userId) throw authRequired();
-      if (id) await updateHighlight(id, name, accent, storyIds);
-      else await createHighlight(userId, name, accent, storyIds);
+      if (id) await updateHighlight(id, name, accent, storyIds, icon);
+      else await createHighlight(userId, name, accent, storyIds, icon);
       setReloadKey((k) => k + 1);
     },
     [userId],

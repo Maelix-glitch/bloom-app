@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Archive, RefreshCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { Archive, Plus, RefreshCcw } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { z } from "zod";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { BloomHeader } from "@/components/BloomHeader";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { Reveal, accentVar } from "@/components/mood/primitives";
-import { ProfileSection } from "@/components/profile/ProfileSection";
 import { cn } from "@/lib/utils";
 import { EMOTION_MAP } from "@/lib/mood/types";
 import { seenStories } from "@/lib/profile/drafts";
+import { objectUrl } from "@/lib/profile/profileService";
+import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { isStoryActive, type Story } from "@/lib/profile/types";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
 import { buildViewModel, resolveFeatured } from "@/components/profile/ProfileView";
@@ -19,20 +21,19 @@ import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
+import { StatsStrip } from "@/components/profile/StatsStrip";
+import { MomentsGrid } from "@/components/profile/MomentsGrid";
+import { JourneyCard } from "@/components/profile/JourneyCard";
+import { AccountRow } from "@/components/profile/AccountRow";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
-import { JourneySection } from "@/components/profile/JourneySection";
-import { AccountSection } from "@/components/profile/AccountSection";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
-import { objectUrl } from "@/lib/profile/profileService";
-import { useAvatarAmbient } from "@/lib/profile/ambient";
+import { ProfileSection } from "@/components/profile/ProfileSection";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
 import { StoryArchive } from "@/components/stories/StoryArchive";
 import { HighlightRail } from "@/components/highlights/HighlightRail";
 import { HighlightComposer } from "@/components/highlights/HighlightComposer";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-
-import { z } from "zod";
 
 const profileSearchSchema = z.object({
   story: z.string().optional(),
@@ -59,20 +60,6 @@ function ProfilePage() {
   const { story: storyParam } = Route.useSearch();
   const navigate = useNavigate();
   const space = useProfileSpace();
-
-  const [composerSource, setComposerSource] = useState<{
-    kind: "mood" | "reflection";
-    id: string;
-  } | null>(null);
-  useEffect(() => {
-    if (!storyParam) return;
-    const m = /^(mood|reflection):(.+)$/.exec(storyParam);
-    if (m) {
-      setComposerSource({ kind: m[1] as "mood" | "reflection", id: m[2]! });
-      setComposerOpen(true);
-    }
-    void navigate({ to: "/profile", search: {}, replace: true });
-  }, [storyParam, navigate]);
   const {
     identity,
     authState,
@@ -91,6 +78,7 @@ function ProfilePage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
+  const [highlightsAll, setHighlightsAll] = useState(false);
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
   const [highlightEditor, setHighlightEditor] = useState<{
     id: string | null;
@@ -127,7 +115,11 @@ function ProfilePage() {
   }, [online]);
 
   /* hero story state — one source of truth for the ring */
-  const activeStories = storiesByAge?.active ?? [];
+  const activeStories = useMemo(() => storiesByAge?.active ?? [], [storiesByAge]);
+  const allStories = useMemo(
+    () => (storiesByAge ? [...storiesByAge.active, ...storiesByAge.archived] : []),
+    [storiesByAge],
+  );
   const unseenCount = activeStories.filter((s) => !seenIds.has(s.id)).length;
   const nextExpiry = activeStories.length
     ? activeStories.reduce(
@@ -160,6 +152,21 @@ function ProfilePage() {
   }, [activeStories.length]);
   const avatarSrc = identity ? objectUrl(identity.identity.avatarPath) : null;
   const ambient = useAvatarAmbient(avatarSrc);
+
+  /* deep link from Mood: "share as story" */
+  const [composerSource, setComposerSource] = useState<{
+    kind: "mood" | "reflection";
+    id: string;
+  } | null>(null);
+  useEffect(() => {
+    if (!storyParam) return;
+    const m = /^(mood|reflection):(.+)$/.exec(storyParam);
+    if (m) {
+      setComposerSource({ kind: m[1] as "mood" | "reflection", id: m[2]! });
+      setComposerOpen(true);
+    }
+    void navigate({ to: "/profile", search: {}, replace: true });
+  }, [storyParam, navigate]);
 
   /* profile share */
   const handleShare = useCallback(async () => {
@@ -261,7 +268,10 @@ function ProfilePage() {
       .reverse()
       .map((e) => ({
         id: e.id,
-        title: `Reflection · ${new Date(e.timestamp).toLocaleDateString(undefined, { day: "numeric", month: "short" })}`,
+        title: `Reflection · ${new Date(e.timestamp).toLocaleDateString(undefined, {
+          day: "numeric",
+          month: "short",
+        })}`,
         body: e.note!.trim(),
         date: new Date(e.timestamp).toLocaleDateString(undefined, {
           day: "numeric",
@@ -282,12 +292,12 @@ function ProfilePage() {
         : "",
     }));
     return {
-      stories: storiesByAge ? [...storiesByAge.active, ...storiesByAge.archived] : [],
+      stories: allStories,
       reflections,
       rewards,
       milestones: milestonesList,
     };
-  }, [moodBlock, rewardsBlock, storiesByAge, milestonesList]);
+  }, [moodBlock, rewardsBlock, allStories, milestonesList]);
 
   const featuredContent = useMemo(
     () => (identity ? resolveFeatured(identity.identity.featured, featuredSources) : null),
@@ -297,7 +307,7 @@ function ProfilePage() {
   const previewModel = identity
     ? buildViewModel({
         identity: identity.identity,
-        allStories: featuredSources.stories,
+        allStories,
         highlights: highlightsBlock?.status === "ready" ? highlightsBlock.data : [],
         privacyPublic: identity.privacy.profileVisibility === "public",
         sources: featuredSources,
@@ -311,8 +321,10 @@ function ProfilePage() {
         : null
       : null;
 
+  const highlights = highlightsBlock?.status === "ready" ? highlightsBlock.data : [];
+
   /* ------------------------------- render ------------------------------- */
-  const content = (
+  return (
     <div
       className="relative min-h-screen bg-background text-foreground"
       style={{
@@ -325,7 +337,7 @@ function ProfilePage() {
       <BloomHeader />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[1020px] px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
+      <main className="relative mx-auto w-full max-w-[720px] px-5 pb-16 pt-8 sm:px-8 sm:pt-10">
         {authState === "checking" ? (
           <ProfileSkeleton />
         ) : !identity ? (
@@ -346,19 +358,6 @@ function ProfilePage() {
           </div>
         ) : (
           <div className="flex flex-col">
-            {space.identityBlock?.status === "error" ? (
-              <p className="mb-6 rounded-xl border border-amber/30 bg-amber/5 px-4 py-2.5 text-center text-[12.5px] text-amber">
-                Some of your Bloom space couldn't load — what's below may be out of date.{" "}
-                <button
-                  type="button"
-                  onClick={space.actions.refresh}
-                  className="underline underline-offset-2"
-                >
-                  Refresh
-                </button>
-              </p>
-            ) : null}
-
             {authState === "signed-out" ? (
               <p className="-mt-1 mb-2 text-center text-[12px] text-faint">
                 preview — nothing is saved until you{" "}
@@ -402,32 +401,39 @@ function ProfilePage() {
               />
             </Reveal>
 
-            {space.storiesBlock?.status === "error" ? (
-              <p className="mt-6 text-center text-[12.5px] text-faint">
-                {space.storiesBlock.message}{" "}
-                <button
-                  type="button"
-                  onClick={space.actions.refresh}
-                  className="underline underline-offset-2 hover:text-foreground"
-                >
-                  Try again
-                </button>
-              </p>
-            ) : null}
+            {/* stats strip */}
+            <Reveal delay={40}>
+              <div className="mt-7">
+                <StatsStrip
+                  stats={journey.status === "ready" ? journey.stats : null}
+                  loading={journey.status === "loading"}
+                />
+              </div>
+            </Reveal>
 
-            {/* Highlights */}
+            {/* highlights — kept circles */}
             <Reveal delay={40}>
               <ProfileSection
-                label="kept"
                 title="Highlights"
-                sub="The moments you decided to keep beyond 24 hours."
                 gap="default"
+                right={
+                  highlights.length > 4 ? (
+                    <button
+                      type="button"
+                      onClick={() => setHighlightsAll((v) => !v)}
+                      className="mono text-[10px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+                    >
+                      {highlightsAll ? "Less" : "See all"}
+                    </button>
+                  ) : null
+                }
               >
                 {highlightsBlock?.status === "ready" ? (
                   <HighlightRail
-                    highlights={highlightsBlock.data}
+                    highlights={highlights}
+                    showAll={highlightsAll}
                     onOpen={(i) => {
-                      const h = highlightsBlock.data[i];
+                      const h = highlights[i];
                       if (h && h.stories.length > 0)
                         setViewer({ stories: h.stories, startIndex: 0 });
                     }}
@@ -451,12 +457,62 @@ function ProfilePage() {
               </ProfileSection>
             </Reveal>
 
-            {/* Featured */}
+            {/* moments — every story, curated like a wall */}
+            <Reveal delay={40}>
+              <ProfileSection
+                title="Bloom moments"
+                gap="default"
+                right={
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setArchiveOpen(true)}
+                      className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] tracking-[0.06em] text-muted-foreground uppercase transition-colors hover:border-border-strong hover:text-foreground"
+                    >
+                      <Archive className="size-3" aria-hidden /> Archive
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setComposerOpen(true)}
+                      className="mono inline-flex items-center gap-1.5 rounded-full border border-[color:var(--profile-accent-border)] bg-[color:var(--profile-accent-soft)] px-3 py-1.5 text-[10px] tracking-[0.06em] text-foreground uppercase transition-[filter] hover:brightness-110"
+                    >
+                      <Plus className="size-3" aria-hidden /> New
+                    </button>
+                  </>
+                }
+              >
+                {space.storiesBlock?.status === "error" ? (
+                  <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[12.5px] text-muted-foreground">
+                    {space.storiesBlock.message}{" "}
+                    <button
+                      type="button"
+                      onClick={space.actions.refresh}
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      Try again
+                    </button>
+                  </p>
+                ) : (
+                  <MomentsGrid
+                    stories={allStories}
+                    onOpenAt={(index) => setViewer({ stories: allStories, startIndex: index })}
+                    onDelete={(story) => void deleteStory(story)}
+                    onAddToHighlight={(story) =>
+                      setHighlightEditor({ id: null, preselect: story.id })
+                    }
+                    onShareAgain={(story) => void shareAgain(story)}
+                    onCreate={() => setComposerOpen(true)}
+                  />
+                )}
+              </ProfileSection>
+            </Reveal>
+
+            {/* featured moment */}
             <Reveal delay={40}>
               <ProfileSection
                 label="yours, chosen"
                 title="Featured moment"
-                gap="wide"
+                gap="default"
                 right={
                   featuredContent ? (
                     <FeaturePrompt
@@ -477,60 +533,72 @@ function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => setFeaturedOpen(true)}
-                    className="group flex w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-dashed border-border px-4 py-3 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
+                    className="group flex w-full items-center gap-3 rounded-2xl border border-dashed border-border px-4 py-4 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
                   >
-                    <Sparkles
-                      className="size-3.5 shrink-0 text-faint transition-colors group-hover:text-[var(--profile-accent)]"
+                    <span
                       aria-hidden
-                    />
-                    <span className="min-w-0 flex-1 text-[13px] text-muted-foreground">
-                      <span className="text-foreground">
-                        Choose something that represents this chapter.
+                      className="grid size-9 shrink-0 place-items-center rounded-full"
+                      style={{
+                        background:
+                          "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
+                        color: "var(--profile-accent,var(--violet))",
+                      }}
+                    >
+                      <svg viewBox="0 0 16 16" className="size-4" fill="none">
+                        <path
+                          d="M8 2l1.3 3.7L13 7l-3.7 1.3L8 12l-1.3-3.7L3 7l3.7-1.3L8 2z"
+                          stroke="currentColor"
+                          strokeWidth="1.4"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        Choose one moment that feels like you.
                       </span>{" "}
                       A story, a reflection, a reward, a milestone — only one.
                     </span>
-                    <span className="mono shrink-0 rounded-full border border-border px-2.5 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint transition-colors group-hover:text-foreground">
-                      Feature a moment
+                    <span className="mono hidden shrink-0 text-[9.5px] tracking-[0.08em] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
+                      Feature
                     </span>
                   </button>
                 )}
               </ProfileSection>
             </Reveal>
 
-            {/* Journey */}
+            {/* journey */}
             <Reveal delay={40}>
-              <ProfileSection
-                title="Your Bloom journey"
-                sub="Kept privately, shown to no one unless you choose."
-                right={
-                  <span className="mono inline-flex items-center gap-1.5 text-[9.5px] tracking-[0.08em] text-faint uppercase">
-                    <ShieldCheck className="size-3" aria-hidden /> private to you
-                  </span>
-                }
-                gap="default"
-              >
-                <JourneySection
+              <ProfileSection title="Your Bloom journey" gap="default">
+                <JourneyCard
                   journey={journey}
                   accent={accent}
                   memberSince={identity.memberSince}
+                  storyCount={allStories.length}
                 />
               </ProfileSection>
             </Reveal>
 
-            {/* Account */}
+            {/* account + quick actions */}
             <Reveal delay={40}>
-              <ProfileSection label="the quiet part" title="Account & privacy" gap="wide">
-                <AccountSection
+              <div className="mt-11">
+                <AccountRow
+                  identity={identity.identity}
                   account={{ email: identity.email, memberSince: identity.memberSince }}
                   privacy={identity.privacy}
+                  stories={allStories}
+                  highlights={highlights}
                   onOpenPrivacy={() => setPrivacyOpen(true)}
+                  onShare={() => void handleShare()}
+                  onPreview={() => setPreviewOpen(true)}
                 />
-              </ProfileSection>
+              </div>
             </Reveal>
 
-            <footer className="mt-12 border-t border-border pt-4">
+            <footer className="mt-14 flex flex-col items-center gap-1.5 border-t border-border/60 pt-6 text-center">
+              <p className="display text-[15px] text-muted-foreground">Bloom</p>
               <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
-                Bloom · your records stay private unless you choose otherwise
+                Your space. Your story. Your Bloom.
               </p>
             </footer>
           </div>
@@ -559,21 +627,39 @@ function ProfilePage() {
               setPreviewOpen(true);
             }}
           />
-          <StoryComposer
-            open={composerOpen}
-            userId={userId ?? "preview"}
-            defaultAccent={accent}
-            defaultVisibility={identity.privacy.storyVisibility}
-            moodEntries={moodBlock?.status === "ready" ? moodBlock.data : []}
-            rewards={rewardsBlock?.status === "ready" ? rewardsBlock.data : []}
-            milestones={milestonesList}
-            initialSource={composerSource}
-            onPublish={publishStory}
-            onClose={() => {
-              setComposerOpen(false);
-              setComposerSource(null);
-            }}
-          />
+          {userId ? (
+            <StoryComposer
+              open={composerOpen}
+              userId={userId}
+              defaultAccent={accent}
+              defaultVisibility={identity.privacy.storyVisibility}
+              moodEntries={moodBlock?.status === "ready" ? moodBlock.data : []}
+              rewards={rewardsBlock?.status === "ready" ? rewardsBlock.data : []}
+              milestones={milestonesList}
+              initialSource={composerSource}
+              onPublish={publishStory}
+              onClose={() => {
+                setComposerOpen(false);
+                setComposerSource(null);
+              }}
+            />
+          ) : (
+            <StoryComposer
+              open={composerOpen}
+              userId="preview"
+              defaultAccent={accent}
+              defaultVisibility="private"
+              moodEntries={[]}
+              rewards={[]}
+              milestones={[]}
+              initialSource={null}
+              onPublish={publishStory}
+              onClose={() => {
+                setComposerOpen(false);
+                setComposerSource(null);
+              }}
+            />
+          )}
           <StoryArchive
             open={archiveOpen}
             onClose={() => setArchiveOpen(false)}
@@ -593,7 +679,7 @@ function ProfilePage() {
           <HighlightComposer
             open={highlightEditor !== null}
             editing={editingHighlight}
-            allStories={featuredSources.stories}
+            allStories={allStories}
             preselectedStoryId={highlightEditor?.preselect ?? null}
             defaultAccent={accent}
             onSave={space.actions.saveHighlight}
@@ -664,8 +750,6 @@ function ProfilePage() {
       />
     </div>
   );
-
-  return content;
 }
 
 function useOnlineStatus(): boolean {
@@ -686,24 +770,21 @@ function useOnlineStatus(): boolean {
 
 function ProfileSkeleton() {
   return (
-    <div className="animate-pulse pt-14" aria-label="Loading your profile" role="status">
+    <div className="animate-pulse pt-6" aria-label="Loading your profile" role="status">
       <div className="flex flex-col items-center gap-3">
-        <div className="size-[116px] rounded-full bg-surface-3/60" />
-        <div className="mt-2 h-7 w-44 rounded-lg bg-surface-3/50" />
+        <div className="size-[132px] rounded-full bg-surface-3/60" />
+        <div className="mt-3 h-9 w-52 rounded-lg bg-surface-3/50" />
         <div className="h-3.5 w-28 rounded bg-surface-3/40" />
         <div className="mt-1 h-3.5 w-64 rounded bg-surface-3/30" />
         <div className="mt-5 flex gap-2.5">
           <div className="h-10 w-32 rounded-full bg-surface-3/50" />
           <div className="h-10 w-20 rounded-full bg-surface-3/40" />
         </div>
-      </div>
-      <div className="mt-16 flex gap-4">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex flex-col items-center gap-2">
-            <div className="size-[62px] rounded-full bg-surface-3/40" />
-            <div className="h-2.5 w-12 rounded bg-surface-3/30" />
-          </div>
-        ))}
+        <div className="mt-7 grid w-full grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-[70px] bg-surface-3/30" />
+          ))}
+        </div>
       </div>
       <p className="sr-only">Loading your profile…</p>
     </div>
@@ -712,10 +793,10 @@ function ProfileSkeleton() {
 
 function RailSkeleton() {
   return (
-    <div className={cn("flex gap-4 opacity-60")} aria-hidden>
+    <div className={cn("flex gap-3 opacity-60")} aria-hidden>
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex flex-col items-center gap-2">
-          <div className="size-[62px] animate-pulse rounded-full bg-surface-3/40" />
+          <div className="size-[64px] animate-pulse rounded-full bg-surface-3/40" />
           <div className="h-2.5 w-12 animate-pulse rounded bg-surface-3/30" />
         </div>
       ))}

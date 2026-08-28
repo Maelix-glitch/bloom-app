@@ -10,7 +10,9 @@ import { report } from "./errors";
 import { PROFILE_MEDIA_BUCKET } from "./profileService";
 import {
   normalizeAccent,
+  normalizeHighlightIcon,
   type BloomAccent,
+  type HighlightIcon,
   type HighlightItem,
   type LocalImage,
   type Story,
@@ -211,7 +213,7 @@ type HighlightRow = {
   id: string;
   name: string;
   accent: string | null;
-  atmosphere: string | null;
+  icon: string | null;
   created_at: string | null;
   story_highlight_items:
     { story_id: string; position: number; stories: StoryRow | StoryRow[] | null }[] | null;
@@ -230,7 +232,7 @@ export async function listMyHighlights(userId: string): Promise<HighlightItem[]>
   const { data, error } = await supabase
     .from("story_highlights")
     .select(
-      `id, name, accent, created_at, story_highlight_items ( story_id, position, stories (${STORY_COLUMNS}) )`,
+      `id, name, accent, icon, created_at, story_highlight_items ( story_id, position, stories (${STORY_COLUMNS}) )`,
     )
     .eq("owner_id", userId)
     .order("created_at", { ascending: true });
@@ -240,10 +242,11 @@ export async function listMyHighlights(userId: string): Promise<HighlightItem[]>
     throw new StoryServiceError("Couldn't read your highlights.");
   }
 
-  return ((data ?? []) as HighlightRow[]).map((row) => ({
+  return ((data ?? []) as unknown as HighlightRow[]).map((row) => ({
     id: row.id,
     name: row.name,
     accent: normalizeAccent(row.accent),
+    icon: normalizeHighlightIcon(row.icon),
     createdAt: row.created_at ?? new Date().toISOString(),
     stories: (row.story_highlight_items ?? [])
       .slice()
@@ -259,10 +262,11 @@ export async function createHighlight(
   name: string,
   accent: BloomAccent,
   storyIds: string[],
+  icon: HighlightIcon | null = null,
 ): Promise<void> {
   const { data, error } = await supabase
     .from("story_highlights")
-    .insert({ owner_id: ownerId, name: name.trim().slice(0, 40), accent })
+    .insert({ owner_id: ownerId, name: name.trim().slice(0, 40), accent, icon })
     .select("id")
     .single();
 
@@ -289,10 +293,16 @@ export async function updateHighlight(
   name: string,
   accent: BloomAccent,
   storyIds: string[],
+  icon: HighlightIcon | null = null,
 ): Promise<void> {
   const { error } = await supabase
     .from("story_highlights")
-    .update({ name: name.trim().slice(0, 40), accent, updated_at: new Date().toISOString() })
+    .update({
+      name: name.trim().slice(0, 40),
+      accent,
+      icon,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", id);
 
   if (error) {

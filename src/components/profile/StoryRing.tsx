@@ -53,7 +53,7 @@ export function StoryRing({
               ? {
                   padding: stroke,
                   background:
-                    "conic-gradient(from 205deg, color-mix(in oklab, var(--violet) 92%, white 8%), var(--sky) 36%, color-mix(in oklab, var(--amber) 80%, var(--rose)) 66%, color-mix(in oklab, var(--violet) 92%, white 8%) 97%)",
+                    "linear-gradient(135deg, var(--violet), var(--sky) 52%, var(--amber))",
                   WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
                   WebkitMaskComposite: "xor",
                   maskComposite: "exclude",

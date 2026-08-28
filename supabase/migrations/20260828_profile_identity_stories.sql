@@ -188,6 +188,8 @@ create table if not exists public.story_highlights (
   name text not null check (char_length(trim(name)) between 1 and 40),
   accent text not null default 'violet'
     check (accent in ('violet', 'sky', 'amber', 'sage', 'rose')),
+  icon text
+    check (icon is null or icon in ('sparkle', 'trophy', 'journal', 'heart', 'plane', 'leaf', 'star')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

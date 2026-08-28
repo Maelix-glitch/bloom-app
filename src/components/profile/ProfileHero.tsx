@@ -138,8 +138,6 @@ export function ProfileHero({
       </div>
 
       <div className="flex flex-col items-center text-center">
-        <p className="eyebrow mb-6 flex items-center gap-2">Your Bloom space</p>
-
         {/* the identity circle — click = open story when alive, else tend the photo */}
         <div className="relative">
           <StoryRing
@@ -171,16 +169,15 @@ export function ProfileHero({
             </button>
           </StoryRing>
 
-          {!hasStory ? (
-            <button
-              type="button"
-              onClick={onCreateStory}
-              aria-label="Add story"
-              className="absolute right-0.5 bottom-0.5 z-10 grid size-[30px] place-items-center rounded-full border border-background bg-[var(--profile-accent,var(--violet))] text-[var(--primary-foreground)] shadow-sm transition-transform duration-[var(--motion-fast)] hover:scale-[1.08] active:scale-[0.96]"
-            >
-              <Plus className="size-4" strokeWidth={2.4} aria-hidden />
-            </button>
-          ) : null}
+          <button
+            type="button"
+            onClick={onCreateStory}
+            aria-label="Add story"
+            title="Add story"
+            className="absolute right-0.5 bottom-0.5 z-10 grid size-[30px] place-items-center rounded-full border-2 border-background bg-[var(--profile-accent,var(--violet))] text-[var(--primary-foreground)] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.9)] transition-transform duration-[var(--motion-fast)] hover:scale-[1.1] active:scale-[0.96]"
+          >
+            <Plus className="size-4" strokeWidth={2.4} aria-hidden />
+          </button>
         </div>
 
         <h1
@@ -264,24 +261,6 @@ export function ProfileHero({
                 {story.count} {story.count === 1 ? "moment" : "moments"}
                 {remaining ? <span className="text-amber">{remaining}</span> : null}
               </button>
-              <span className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={onOpenArchive}
-                  className="mono inline-flex items-center gap-1 text-[10px] tracking-[0.06em] text-faint uppercase transition-colors hover:text-foreground"
-                >
-                  <Archive className="size-3" aria-hidden /> Archive
-                </button>
-                <span className="h-2.5 w-px bg-border" aria-hidden />
-                <button
-                  type="button"
-                  onClick={onCreateStory}
-                  aria-label="Add story"
-                  className="mono inline-flex items-center gap-1 text-[10px] tracking-[0.06em] text-faint uppercase transition-colors hover:text-foreground"
-                >
-                  <Plus className="size-3" aria-hidden /> Add
-                </button>
-              </span>
             </div>
           ) : (
             <p className="text-[12px] text-faint">Add a story — a moment, a mood, a small win.</p>

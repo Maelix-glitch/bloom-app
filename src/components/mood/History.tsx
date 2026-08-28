@@ -133,7 +133,8 @@ export function History({
                   ) : null}
                 </span>
                 <span className="mono hidden text-[11px] text-faint sm:block">
-                  <span className="text-sage">E{e.energy}</span> · <span className="text-rose">S{e.stress}</span>
+                  <span className="text-sage">E{e.energy}</span> ·{" "}
+                  <span className="text-rose">S{e.stress}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
                   {onShareStory ? (

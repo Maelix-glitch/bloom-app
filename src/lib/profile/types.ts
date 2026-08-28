@@ -72,10 +72,29 @@ export interface LocalImage {
   blob: Blob;
 }
 
+export type HighlightIcon = "sparkle" | "trophy" | "journal" | "heart" | "plane" | "leaf" | "star";
+
+export const HIGHLIGHT_ICONS: HighlightIcon[] = [
+  "sparkle",
+  "trophy",
+  "journal",
+  "heart",
+  "plane",
+  "leaf",
+  "star",
+];
+
+export function normalizeHighlightIcon(value: unknown): HighlightIcon | null {
+  return typeof value === "string" && (HIGHLIGHT_ICONS as readonly string[]).includes(value)
+    ? (value as HighlightIcon)
+    : null;
+}
+
 export interface HighlightItem {
   id: string;
   name: string;
   accent: BloomAccent;
+  icon: HighlightIcon | null;
   stories: Story[];
   createdAt: string;
 }

@@ -15,6 +15,7 @@ import {
 } from "@/lib/profile/profileService";
 import {
   normalizeAccent,
+  normalizeHighlightIcon,
   type BloomAccent,
   type HighlightItem,
   type Story,
@@ -191,6 +192,7 @@ function mapPublicProfile(payload: PublicProfileResponse, handle: string): Profi
           id: string;
           name: string;
           accent: string | null;
+          icon?: string | null;
           created_at?: string;
           stories?: RawStory[];
         }[]
@@ -198,6 +200,7 @@ function mapPublicProfile(payload: PublicProfileResponse, handle: string): Profi
         id: h.id,
         name: h.name,
         accent: normalizeAccent(h.accent),
+        icon: normalizeHighlightIcon(h.icon),
         createdAt: h.created_at ?? "",
         stories: Array.isArray(h.stories) ? h.stories.map(mapStory) : [],
       }))

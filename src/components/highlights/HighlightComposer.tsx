@@ -11,11 +11,14 @@ import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import {
   BLOOM_ACCENTS,
+  HIGHLIGHT_ICONS,
   STORY_KIND_LABELS,
   type BloomAccent,
+  type HighlightIcon,
   type HighlightItem,
   type Story,
 } from "@/lib/profile/types";
+import { HIGHLIGHT_ICON_COMPONENTS, HIGHLIGHT_ICON_LABELS } from "@/lib/profile/highlightMeta";
 import { formatRelativeDay } from "@/lib/profile/journey";
 
 export function HighlightComposer({
@@ -38,12 +41,14 @@ export function HighlightComposer({
     name: string,
     accent: BloomAccent,
     storyIds: string[],
+    icon?: HighlightIcon | null,
   ) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onClose: () => void;
 }) {
   const [name, setName] = useState("");
   const [accent, setAccent] = useState<BloomAccent>(defaultAccent);
+  const [icon, setIcon] = useState<HighlightIcon | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +58,7 @@ export function HighlightComposer({
     setError(null);
     setName(editing?.name ?? "");
     setAccent(editing?.accent ?? defaultAccent);
+    setIcon(editing?.icon ?? null);
     setSelected(
       editing ? editing.stories.map((s) => s.id) : preselectedStoryId ? [preselectedStoryId] : [],
     );
@@ -70,7 +76,7 @@ export function HighlightComposer({
     }
     setSaving(true);
     try {
-      await onSave(editing?.id ?? null, name.trim(), accent, selected);
+      await onSave(editing?.id ?? null, name.trim(), accent, selected, icon);
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't save that highlight.");
