@@ -6,6 +6,7 @@ export function BloomHeader() {
   const moodActive = pathname === "/";
   const rewardsActive =
     pathname === "/rewards" || pathname.startsWith("/admin/rewards");
+  const coachActive = pathname === "/coach" || pathname.startsWith("/coach/");
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
 
   return (
@@ -101,7 +102,11 @@ export function BloomHeader() {
           Rewards
         </a>
 
-        <a href="/bloom/coach.html" className="bloom-nav-link shrink-0">
+        <a
+          href="/coach"
+          className={`bloom-nav-link shrink-0${coachActive ? " bloom-nav-active" : ""}`}
+          aria-current={coachActive ? "page" : undefined}
+        >
           Coach
         </a>
       </nav>
