@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoachRouteImport } from './routes/coach'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -31,30 +37,34 @@ const AdminRewardsRoute = AdminRewardsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/rewards' | '/admin/rewards'
+  fullPaths: '/' | '/coach' | '/rewards' | '/admin/rewards'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/rewards' | '/admin/rewards'
-  id: '__root__' | '/' | '/rewards' | '/admin/rewards'
+  to: '/' | '/coach' | '/rewards' | '/admin/rewards'
+  id: '__root__' | '/' | '/coach' | '/rewards' | '/admin/rewards'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CoachRoute: typeof CoachRoute
   RewardsRoute: typeof RewardsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CoachRoute: CoachRoute,
   RewardsRoute: RewardsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
 }
