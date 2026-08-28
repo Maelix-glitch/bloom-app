@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
 
 import { useMoodSystem } from "@/hooks/useMoodSystem";
@@ -73,6 +73,7 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
 }
 
 function MoodIntelligencePage() {
+  const navigate = useNavigate();
   const system = useMoodSystem();
   const {
     loading,
@@ -183,6 +184,12 @@ function MoodIntelligencePage() {
                 entries={entries}
                 onEdit={openEdit}
                 onDelete={system.removeEntry}
+                onShareStory={(e) =>
+                  navigate({
+                    to: "/profile",
+                    search: { story: `${e.note?.trim() ? "reflection" : "mood"}:${e.id}` },
+                  })
+                }
               />
             </Reveal>
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Download, Pencil, Search, Trash2 } from "lucide-react";
+import { Download, Pencil, Search, Sparkles, Trash2 } from "lucide-react";
 
 import { bucketOf } from "@/lib/mood/analytics";
 import { EMOTION_MAP, type MoodEntry, type Valence } from "@/lib/mood/types";
@@ -13,10 +13,13 @@ export function History({
   entries,
   onEdit,
   onDelete,
+  onShareStory,
 }: {
   entries: MoodEntry[];
   onEdit: (entry: MoodEntry) => void;
   onDelete: (id: string) => void;
+  /** Optional Mood → Story bridge (explicit user action, preview required). */
+  onShareStory?: (entry: MoodEntry) => void;
 }) {
   const [query, setQuery] = useState("");
   const [valence, setValence] = useState<ValenceFilter>("all");
@@ -130,9 +133,21 @@ export function History({
                   ) : null}
                 </span>
                 <span className="mono hidden text-[11px] text-faint sm:block">
-                  <span className="text-sage">E{e.energy}</span> · <span className="text-rose">S{e.stress}</span>
+                  <span className="text-sage">E{e.energy}</span> ·{" "}
+                  <span className="text-rose">S{e.stress}</span>
                 </span>
                 <span className="flex items-center gap-1.5">
+                  {onShareStory ? (
+                    <button
+                      type="button"
+                      onClick={() => onShareStory(e)}
+                      aria-label="Share as story"
+                      title="Share as story"
+                      className="rounded-full border border-border p-2 text-faint opacity-0 transition-all hover:border-border-strong hover:text-foreground focus:opacity-100 group-hover:opacity-100"
+                    >
+                      <Sparkles className="size-3.5" />
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => onEdit(e)}

@@ -1,0 +1,29 @@
+/*
+ * Bloom — Profile stylesheet (route-scoped).
+ * Same convention as rewards.css: imported by the /profile and /@handle
+ * routes only. Global tokens (colors, motion scale) and Tailwind
+ * @utility rules intentionally stay in src/styles.css, which every page
+ * loads — this file only carries profile-specific motion chrome.
+ */
+
+/* StoryRing entrance — one quiet settle when a first story appears. */
+@keyframes ring-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.story-ring-enter {
+  animation: ring-enter var(--motion-slow) var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-ring-enter {
+    animation: none;
+  }
+}
