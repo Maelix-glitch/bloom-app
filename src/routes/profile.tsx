@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Archive, RefreshCcw, Sparkles } from "lucide-react";
+import { Archive, RefreshCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { BloomHeader } from "@/components/BloomHeader";
 import { Atmosphere } from "@/components/mood/Atmosphere";
-import { Panel, Reveal, accentVar } from "@/components/mood/primitives";
+import { Reveal, accentVar } from "@/components/mood/primitives";
 import { ProfileSection } from "@/components/profile/ProfileSection";
 import { cn } from "@/lib/utils";
 import { EMOTION_MAP } from "@/lib/mood/types";
@@ -23,7 +23,8 @@ import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profil
 import { JourneySection } from "@/components/profile/JourneySection";
 import { AccountSection } from "@/components/profile/AccountSection";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
-import { StoryRail } from "@/components/stories/StoryRail";
+import { objectUrl } from "@/lib/profile/profileService";
+import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
 import { StoryArchive } from "@/components/stories/StoryArchive";
@@ -124,6 +125,41 @@ function ProfilePage() {
       offlineToastShown.current = false;
     }
   }, [online]);
+
+  /* hero story state — one source of truth for the ring */
+  const activeStories = storiesByAge?.active ?? [];
+  const unseenCount = activeStories.filter((s) => !seenIds.has(s.id)).length;
+  const nextExpiry = activeStories.length
+    ? activeStories.reduce(
+        (soonest, s) =>
+          new Date(s.expiresAt).getTime() < new Date(soonest).getTime() ? s.expiresAt : soonest,
+        activeStories[0]!.expiresAt,
+      )
+    : null;
+  const openStoryFromHero = useCallback(() => {
+    if (!activeStories.length) return;
+    const idx = Math.max(
+      0,
+      activeStories.findIndex((s) => !seenIds.has(s.id)),
+    );
+    setViewer({ stories: activeStories, startIndex: idx });
+  }, [activeStories, seenIds]);
+
+  /* one-time ring entrance when the first active story appears */
+  const [ringAnimate, setRingAnimate] = useState(false);
+  const prevActiveCount = useRef(activeStories.length);
+  useEffect(() => {
+    const prev = prevActiveCount.current;
+    prevActiveCount.current = activeStories.length;
+    if (activeStories.length > 0 && prev === 0) {
+      setRingAnimate(true);
+      const t = window.setTimeout(() => setRingAnimate(false), 800);
+      return () => window.clearTimeout(t);
+    }
+    return undefined;
+  }, [activeStories.length]);
+  const avatarSrc = identity ? objectUrl(identity.identity.avatarPath) : null;
+  const ambient = useAvatarAmbient(avatarSrc);
 
   /* profile share */
   const handleShare = useCallback(async () => {
@@ -339,6 +375,15 @@ function ProfilePage() {
             <Reveal>
               <ProfileHero
                 identity={identity.identity}
+                ambient={ambient}
+                story={{
+                  count: activeStories.length,
+                  unseen: unseenCount,
+                  nextExpiry,
+                  animateIn: ringAnimate,
+                }}
+                onOpenStory={openStoryFromHero}
+                onCreateStory={() => setComposerOpen(true)}
                 isSignedIn={authState === "signed-in"}
                 onSignIn={() => setSignInOpen(true)}
                 completion={
@@ -357,51 +402,18 @@ function ProfilePage() {
               />
             </Reveal>
 
-            {/* Stories */}
-            <Reveal delay={40}>
-              <ProfileSection
-                label="moments"
-                title="Stories"
-                gap="default"
-                right={
-                  <button
-                    type="button"
-                    onClick={() => setArchiveOpen(true)}
-                    className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] tracking-[0.06em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-                  >
-                    <Archive className="size-3" aria-hidden /> Archive
-                  </button>
-                }
-              >
-                {storiesByAge ? (
-                  <StoryRail
-                    stories={storiesByAge.active}
-                    displayName={identity.identity.displayName}
-                    avatarPath={identity.identity.avatarPath}
-                    accent={accent}
-                    seenIds={seenIds}
-                    onCreate={() => setComposerOpen(true)}
-                    onOpen={(index) =>
-                      setViewer({ stories: storiesByAge.active, startIndex: index })
-                    }
-                  />
-                ) : (
-                  <RailSkeleton />
-                )}
-                {space.storiesBlock?.status === "error" ? (
-                  <p className="mt-3 text-[12.5px] text-faint">
-                    {space.storiesBlock.message}{" "}
-                    <button
-                      type="button"
-                      onClick={space.actions.refresh}
-                      className="underline underline-offset-2 hover:text-foreground"
-                    >
-                      Try again
-                    </button>
-                  </p>
-                ) : null}
-              </ProfileSection>
-            </Reveal>
+            {space.storiesBlock?.status === "error" ? (
+              <p className="mt-6 text-center text-[12.5px] text-faint">
+                {space.storiesBlock.message}{" "}
+                <button
+                  type="button"
+                  onClick={space.actions.refresh}
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  Try again
+                </button>
+              </p>
+            ) : null}
 
             {/* Highlights */}
             <Reveal delay={40}>
@@ -487,10 +499,21 @@ function ProfilePage() {
 
             {/* Journey */}
             <Reveal delay={40}>
-              <ProfileSection title="Your Bloom journey" gap="default">
-                <Panel className="p-6 sm:p-7" sheen={false}>
-                  <JourneySection journey={journey} accent={accent} />
-                </Panel>
+              <ProfileSection
+                title="Your Bloom journey"
+                sub="Kept privately, shown to no one unless you choose."
+                right={
+                  <span className="mono inline-flex items-center gap-1.5 text-[9.5px] tracking-[0.08em] text-faint uppercase">
+                    <ShieldCheck className="size-3" aria-hidden /> private to you
+                  </span>
+                }
+                gap="default"
+              >
+                <JourneySection
+                  journey={journey}
+                  accent={accent}
+                  memberSince={identity.memberSince}
+                />
               </ProfileSection>
             </Reveal>
 
@@ -616,14 +639,14 @@ function ProfilePage() {
       />
 
       <Dialog open={previewOpen} onOpenChange={(o) => !o && setPreviewOpen(false)}>
-        <DialogContent className="top-1/2 left-1/2 max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-[680px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[20px] border-border bg-background">
+        <DialogContent className="top-1/2 left-1/2 max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-[680px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border-border bg-background">
           <DialogTitle className="sr-only">Profile preview</DialogTitle>
           {previewModel ? <PublicProfileView model={previewModel} asPreview /> : null}
         </DialogContent>
       </Dialog>
 
       <Dialog open={signInOpen} onOpenChange={(o) => !o && setSignInOpen(false)}>
-        <DialogContent className="top-1/2 left-1/2 w-[calc(100%-1.5rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] border-border bg-background">
+        <DialogContent className="top-1/2 left-1/2 w-[calc(100%-1.5rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-xl border-border bg-background">
           <DialogTitle className="sr-only">Sign in to Bloom</DialogTitle>
           <SignedOutProfile compact onSendMagicLink={space.actions.sendMagicLink} />
         </DialogContent>

@@ -20,6 +20,15 @@ export type StoryKind = "text" | "photo" | "mood" | "reflection" | "win" | "rewa
 
 export type StoryVisibility = "private" | "public";
 
+/** Story background moods — three restrained presets, nothing else. */
+export type StoryAtmosphere = "quiet" | "field" | "ink";
+
+export const STORY_ATMOSPHERES: { key: StoryAtmosphere; label: string }[] = [
+  { key: "quiet", label: "Quiet" },
+  { key: "field", label: "Field" },
+  { key: "ink", label: "Ink" },
+];
+
 export interface Story {
   id: string;
   kind: StoryKind;
@@ -29,6 +38,7 @@ export interface Story {
   mediaWidth: number | null;
   mediaHeight: number | null;
   accent: BloomAccent;
+  atmosphere: StoryAtmosphere;
   createdAt: string;
   expiresAt: string;
   visibility: StoryVisibility;
@@ -45,6 +55,7 @@ export interface StoryDraft {
   title: string;
   body: string;
   accent: BloomAccent;
+  atmosphere: StoryAtmosphere;
   visibility: StoryVisibility;
   /** Pending local photo (data URL) before upload. */
   photo: LocalImage | null;

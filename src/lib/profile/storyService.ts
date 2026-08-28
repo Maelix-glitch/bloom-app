@@ -34,6 +34,7 @@ type StoryRow = {
   media_width: number | null;
   media_height: number | null;
   accent: string | null;
+  atmosphere: string | null;
   created_at: string | null;
   expires_at: string | null;
   visibility: string | null;
@@ -41,7 +42,7 @@ type StoryRow = {
 };
 
 const STORY_COLUMNS =
-  "id, kind, title, body, media_path, media_width, media_height, accent, created_at, expires_at, visibility, deleted_at";
+  "id, kind, title, body, media_path, media_width, media_height, accent, atmosphere, created_at, expires_at, visibility, deleted_at";
 
 function fromRow(row: StoryRow): Story {
   const createdAt = row.created_at ?? new Date().toISOString();
@@ -58,6 +59,7 @@ function fromRow(row: StoryRow): Story {
     mediaWidth: row.media_width,
     mediaHeight: row.media_height,
     accent: normalizeAccent(row.accent),
+    atmosphere: row.atmosphere === "field" || row.atmosphere === "ink" ? row.atmosphere : "quiet",
     createdAt,
     expiresAt: row.expires_at ?? new Date(Date.now() + 24 * 3600_000).toISOString(),
     visibility: row.visibility === "public" ? "public" : "private",
@@ -83,6 +85,7 @@ export interface CreateStoryInput {
   title: string;
   body: string;
   accent: BloomAccent;
+  atmosphere: Story["atmosphere"];
   visibility: StoryVisibility;
   photo: LocalImage | null;
   source: { kind: string; id: string } | null;
@@ -108,6 +111,7 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
       media_width: input.photo?.width ?? null,
       media_height: input.photo?.height ?? null,
       accent: input.accent,
+      atmosphere: input.atmosphere,
       source_kind: input.source?.kind ?? null,
       source_id: input.source?.id ?? null,
       visibility: input.visibility,
@@ -185,6 +189,7 @@ export async function reshareStory(userId: string, story: Story): Promise<Story>
       media_width: story.mediaWidth,
       media_height: story.mediaHeight,
       accent: story.accent,
+      atmosphere: story.atmosphere,
       source_kind: null,
       source_id: null,
       visibility: story.visibility,
@@ -206,6 +211,7 @@ type HighlightRow = {
   id: string;
   name: string;
   accent: string | null;
+  atmosphere: string | null;
   created_at: string | null;
   story_highlight_items:
     { story_id: string; position: number; stories: StoryRow | StoryRow[] | null }[] | null;

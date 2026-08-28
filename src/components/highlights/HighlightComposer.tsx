@@ -83,7 +83,7 @@ export function HighlightComposer({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className="top-1/2 left-1/2 max-h-[min(90dvh,700px)] w-[calc(100%-1.5rem)] max-w-[480px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-border bg-background p-0 gap-0 flex flex-col"
+        className="top-1/2 left-1/2 max-h-[min(90dvh,700px)] w-[calc(100%-1.5rem)] max-w-[480px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border-border bg-background p-0 gap-0 flex flex-col"
       >
         <>
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -128,7 +128,7 @@ export function HighlightComposer({
                     aria-label={`${a} cover`}
                     onClick={() => setAccent(a)}
                     className={cn(
-                      "grid size-8 place-items-center rounded-[10px] border transition-colors",
+                      "grid size-8 place-items-center rounded-md border transition-colors",
                       accent === a
                         ? "border-foreground/40"
                         : "border-border hover:border-border-strong",

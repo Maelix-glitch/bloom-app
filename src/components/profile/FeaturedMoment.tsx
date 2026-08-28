@@ -165,7 +165,7 @@ export function FeaturedPicker({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="top-1/2 left-1/2 max-h-[min(86dvh,640px)] w-[calc(100%-1.5rem)] max-w-[480px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-border bg-background p-0 gap-0 flex flex-col">
+      <DialogContent className="top-1/2 left-1/2 max-h-[min(86dvh,640px)] w-[calc(100%-1.5rem)] max-w-[480px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border-border bg-background p-0 gap-0 flex flex-col">
         <div className="border-b border-border px-4 py-3">
           <DialogTitle className="display text-[16px]">What represents you right now?</DialogTitle>
         </div>

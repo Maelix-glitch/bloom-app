@@ -1,7 +1,7 @@
 /**
- * PublicProfileView — the honest public face of a profile. Everything here
- * is either public identity or content the user explicitly shared. Used by
- * the preview dialog and by someone else visiting /@username.
+ * PublicProfileView — the honest public face of a Bloom space. Identity
+ * first, shared moments second, kept things third. Used identically by the
+ * preview dialog and by a visitor arriving at /@handle.
  */
 
 import { useState } from "react";
@@ -11,7 +11,7 @@ import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import type { ProfileViewModel } from "@/components/profile/ProfileView";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { StoryRail } from "@/components/stories/StoryRail";
+import { StoryRing } from "@/components/profile/StoryRing";
 import { StoryViewer } from "@/components/stories/StoryViewer";
 import { HighlightRail } from "@/components/highlights/HighlightRail";
 import { FeaturedCard } from "@/components/profile/FeaturedMoment";
@@ -47,12 +47,11 @@ export function PublicProfileView({
 
   return (
     <div
-      className="flex flex-col gap-10"
+      className="flex flex-col gap-9"
       style={{
-        // profile-level personalization, expressed through tokens, not ad-hoc colors
         ["--profile-accent" as string]: accentVar[identity.accent],
         ["--profile-accent-soft" as string]: `color-mix(in oklab, ${accentVar[identity.accent]} 10%, transparent)`,
-        ["--profile-accent-border" as string]: `color-mix(in oklab, ${identity.accent ? accentVar[identity.accent] : "var(--violet)"} 40%, transparent)`,
+        ["--profile-accent-border" as string]: `color-mix(in oklab, ${accentVar[identity.accent]} 40%, transparent)`,
       }}
     >
       {asPreview ? (
@@ -67,39 +66,63 @@ export function PublicProfileView({
       ) : null}
 
       <header className="flex flex-col items-center text-center">
-        <ProfileAvatar
-          name={identity.displayName}
-          avatarPath={identity.avatarPath}
+        <StoryRing
+          state={stories.length > 0 ? "unseen" : "none"}
+          size={104}
           accent={identity.accent}
-          size={96}
-        />
-        <h1 className="display mt-4 text-[26px] leading-tight break-words">
+        >
+          <button
+            type="button"
+            onClick={() => stories.length > 0 && setViewer(0)}
+            disabled={stories.length === 0}
+            aria-label={
+              stories.length > 0
+                ? `View ${identity.displayName.split(" ")[0]}'s stories`
+                : undefined
+            }
+            className={
+              stories.length > 0
+                ? "cursor-pointer rounded-full transition-transform duration-[var(--motion-med)] hover:scale-[1.015]"
+                : "cursor-default"
+            }
+          >
+            <ProfileAvatar
+              name={identity.displayName}
+              avatarPath={identity.avatarPath}
+              accent={identity.accent}
+              size={104}
+            />
+          </button>
+        </StoryRing>
+        <h1 className="display mt-4 text-[28px] leading-tight break-words sm:text-[32px]">
           {identity.displayName}
         </h1>
         {identity.username ? (
-          <p className="mono mt-1 text-[12px] text-muted-foreground">@{identity.username}</p>
+          <p className="mono mt-1 text-[12px] text-faint">@{identity.username}</p>
         ) : null}
         {identity.bio ? (
           <p className="mt-3 max-w-[44ch] text-[14px] leading-relaxed text-muted-foreground">
             {identity.bio}
           </p>
         ) : null}
+        {stories.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setViewer(0)}
+            className="mono mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] tracking-[0.06em] text-muted-foreground uppercase transition-colors hover:text-foreground"
+            style={{
+              borderColor:
+                "color-mix(in oklab, var(--profile-accent, var(--violet)) 35%, transparent)",
+            }}
+          >
+            <span
+              className="size-1.5 rounded-full bg-[var(--profile-accent,var(--violet))]"
+              aria-hidden
+            />
+            {stories.length} {stories.length === 1 ? "story" : "stories"}
+          </button>
+        ) : null}
       </header>
-
-      {stories.length > 0 ? (
-        <section aria-label="Shared stories">
-          <StoryRail
-            stories={stories}
-            displayName={identity.displayName}
-            avatarPath={identity.avatarPath}
-            accent={identity.accent}
-            seenIds={EMPTY_SEEN}
-            onCreate={() => undefined}
-            onOpen={(i) => setViewer(i)}
-            viewOnly
-          />
-        </section>
-      ) : null}
 
       {highlights.length > 0 ? (
         <section aria-label="Highlights">
@@ -136,5 +159,3 @@ export function PublicProfileView({
     </div>
   );
 }
-
-const EMPTY_SEEN: ReadonlySet<string> = new Set();

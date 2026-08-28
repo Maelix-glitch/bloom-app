@@ -29,6 +29,7 @@ import { storyDraft } from "@/lib/profile/drafts";
 import type { RewardRecord } from "@/lib/profile/journey";
 import {
   BLOOM_ACCENTS,
+  STORY_ATMOSPHERES,
   STORY_KIND_LABELS,
   type BloomAccent,
   type LocalImage,
@@ -64,6 +65,7 @@ const emptyDraft = (accent: BloomAccent, visibility: StoryVisibility): StoryDraf
   title: "",
   body: "",
   accent,
+  atmosphere: "quiet",
   visibility,
   photo: null,
   source: null,
@@ -245,6 +247,7 @@ export function StoryComposer({
         title: draft.title,
         body: draft.body,
         accent: draft.accent,
+        atmosphere: draft.atmosphere,
         visibility: draft.visibility,
         photo: draft.photo,
         source: draft.source,
@@ -270,6 +273,7 @@ export function StoryComposer({
       mediaWidth: draft.photo?.width ?? null,
       mediaHeight: draft.photo?.height ?? null,
       accent: draft.accent,
+      atmosphere: draft.atmosphere,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
       visibility: draft.visibility,
@@ -293,7 +297,7 @@ export function StoryComposer({
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "top-1/2 left-1/2 max-h-[min(92dvh,760px)] w-[calc(100%-1.5rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border-border bg-background p-0 gap-0",
+          "top-1/2 left-1/2 max-h-[min(92dvh,760px)] w-[calc(100%-1.5rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border-border bg-background p-0 gap-0",
           "flex flex-col",
         )}
         onEscapeKeyDown={(e) => {

@@ -121,6 +121,8 @@ create table if not exists public.stories (
   media_height integer,
   accent text not null default 'violet'
     check (accent in ('violet', 'sky', 'amber', 'sage', 'rose')),
+  atmosphere text not null default 'quiet'
+    check (atmosphere in ('quiet', 'field', 'ink')),
   source_kind text,
   source_id text,
   created_at timestamptz not null default now(),

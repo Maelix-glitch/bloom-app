@@ -8,7 +8,11 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
 
-import { loadPublicProfile, type PublicProfileResponse } from "@/lib/profile/profileService";
+import {
+  loadPublicProfile,
+  objectUrl,
+  type PublicProfileResponse,
+} from "@/lib/profile/profileService";
 import {
   normalizeAccent,
   type BloomAccent,
@@ -168,6 +172,7 @@ function mapStory(raw: RawStory): Story {
     mediaWidth: null,
     mediaHeight: null,
     accent: normalizeAccent(raw.accent),
+    atmosphere: "quiet",
     createdAt: raw.created_at,
     expiresAt: raw.expires_at,
     visibility: "public",

@@ -12,6 +12,7 @@ import type {
   Story,
 } from "@/lib/profile/types";
 import { formatRelativeDay } from "@/lib/profile/journey";
+import { objectUrl } from "@/lib/profile/profileService";
 
 export interface FeaturedContent {
   eyebrow: string;
@@ -19,6 +20,8 @@ export interface FeaturedContent {
   body?: string | undefined;
   date: string;
   accent: BloomAccent;
+  /** real story media, when the featured item has one */
+  image?: string | null;
 }
 
 export interface ProfileViewModel {
@@ -50,6 +53,7 @@ export function resolveFeatured(
       body: story.body || undefined,
       date: formatRelativeDay(story.createdAt),
       accent: story.accent,
+      image: story.kind === "photo" ? objectUrl(story.mediaPath) : null,
     };
   }
   if (featured.kind === "reflection") {

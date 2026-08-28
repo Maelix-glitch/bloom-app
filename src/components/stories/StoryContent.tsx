@@ -28,6 +28,13 @@ export function StoryContent({
   const accent = accentVar[story.accent];
   const hasPhoto = story.kind === "photo" && Boolean(story.mediaPath);
   const meta = STORY_KIND_META[story.kind];
+  const atmosphere = story.atmosphere ?? "quiet";
+  const bg =
+    atmosphere === "field"
+      ? `linear-gradient(165deg, color-mix(in oklab, ${accent} 13%, transparent), transparent 42%), radial-gradient(120% 80% at 50% 115%, color-mix(in oklab, var(--sky) 10%, transparent), transparent 60%)`
+      : atmosphere === "ink"
+        ? "var(--surface)"
+        : `radial-gradient(120% 90% at 50% 0%, color-mix(in oklab, ${accent} 10%, transparent), transparent 62%), radial-gradient(90% 70% at 50% 110%, color-mix(in oklab, ${accent} 7%, transparent), transparent 55%)`;
 
   return (
     <figure
@@ -36,9 +43,7 @@ export function StoryContent({
         compact ? "gap-3 px-4 py-6" : "gap-5 px-6 py-8",
         className,
       )}
-      style={{
-        background: `radial-gradient(120% 90% at 50% 0%, color-mix(in oklab, ${accent} 10%, transparent), transparent 62%), radial-gradient(90% 70% at 50% 110%, color-mix(in oklab, ${accent} 7%, transparent), transparent 55%)`,
-      }}
+      style={{ background: bg }}
     >
       {hasPhoto ? (
         <div className={cn("relative flex min-h-0 w-full flex-1 items-center justify-center")}>

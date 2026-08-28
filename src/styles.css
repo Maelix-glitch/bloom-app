@@ -53,6 +53,11 @@
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Bloom motion system — fast: micro; med: panels; slow: stories/entrances. */
+  --motion-fast: 140ms;
+  --motion-med: 260ms;
+  --motion-slow: 460ms;
+
   --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-drift: drift 26s ease-in-out infinite;
   --animate-sheen: sheen 3.5s ease-in-out infinite;
@@ -88,7 +93,8 @@
   --primary-foreground: oklch(0.19 0.021 279);
 
   --grad-violet: linear-gradient(135deg, var(--violet), var(--sky));
-  --glow-violet: 0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
+  --glow-violet:
+    0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
     0 18px 50px -22px color-mix(in oklab, var(--violet) 70%, transparent);
   --shadow-depth: 0 26px 60px -30px oklch(0.1 0.02 279 / 0.85);
   --dim-violet: color-mix(in oklab, var(--violet) 14%, transparent);
@@ -96,6 +102,17 @@
   --dim-amber: color-mix(in oklab, var(--amber) 14%, transparent);
   --dim-sage: color-mix(in oklab, var(--sage) 14%, transparent);
   --dim-rose: color-mix(in oklab, var(--rose) 14%, transparent);
+}
+
+@keyframes ring-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes rise {
@@ -216,6 +233,16 @@
   100% {
     top: 112%;
     opacity: 0;
+  }
+}
+
+.story-ring-enter {
+  animation: ring-enter var(--motion-slow) var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-ring-enter {
+    animation: none;
   }
 }
 
