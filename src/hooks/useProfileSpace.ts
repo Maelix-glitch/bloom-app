@@ -103,6 +103,31 @@ export function useProfileSpace() {
 
   /* ----------------------------- parallel load ---------------------------- */
   useEffect(() => {
+    if (authState === "signed-out") {
+      // Preview mode: the full Profile renders without an account, backed by
+      // real empty state — never invented data.
+      setIdentityBlock({
+        status: "ready",
+        data: {
+          identity: {
+            displayName: "Bloom User",
+            username: null,
+            bio: null,
+            avatarPath: null,
+            accent: "violet",
+            featured: null,
+          },
+          privacy: { profileVisibility: "private", storyVisibility: "private" },
+          memberSince: null,
+          email: null,
+        },
+      });
+      setStoriesBlock({ status: "ready", data: [] });
+      setHighlightsBlock({ status: "ready", data: [] });
+      setMoodBlock({ status: "ready", data: [] });
+      setRewardsBlock({ status: "ready", data: [] });
+      return;
+    }
     if (authState !== "signed-in" || !userId) return;
     let alive = true;
 
@@ -275,7 +300,7 @@ export function useProfileSpace() {
 
   const saveIdentity = useCallback(
     async (patch: ProfilePatch) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       await saveProfile(userId, patch);
       patchIdentity((identity) => ({
         ...identity,
@@ -291,7 +316,7 @@ export function useProfileSpace() {
 
   const updateAccent = useCallback(
     async (accent: BloomAccent) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       const identity = currentIdentity();
       await saveProfile(userId, { ...toPatch(identity), accent });
       patchIdentity((i) => ({ ...i, accent }));
@@ -302,7 +327,7 @@ export function useProfileSpace() {
 
   const setFeatured = useCallback(
     async (featured: ProfilePatch["featured"]) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       const identity = currentIdentity();
       await saveProfile(userId, { ...toPatch(identity), featured });
       patchIdentity((i) => ({ ...i, featured }));
@@ -313,7 +338,7 @@ export function useProfileSpace() {
 
   const savePrivacySettings = useCallback(
     async (privacy: ProfilePrivacy) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       await savePrivacy(userId, privacy);
       setIdentityBlock((block) =>
         block?.status === "ready" ? { status: "ready", data: { ...block.data, privacy } } : block,
@@ -324,7 +349,7 @@ export function useProfileSpace() {
 
   const publishStory = useCallback(
     async (input: CreateStoryInput) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       const story = await createStory(userId, input);
       setStoriesBlock((block) =>
         block && block.status === "ready"
@@ -360,7 +385,7 @@ export function useProfileSpace() {
 
   const shareAgain = useCallback(
     async (story: Story) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       const updated = await reshareStory(userId, story);
       setStoriesBlock((block) =>
         block?.status === "ready" ? { status: "ready", data: [updated, ...block.data] } : block,
@@ -384,7 +409,7 @@ export function useProfileSpace() {
 
   const saveHighlight = useCallback(
     async (id: string | null, name: string, accent: BloomAccent, storyIds: string[]) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       if (id) await updateHighlight(id, name, accent, storyIds);
       else await createHighlight(userId, name, accent, storyIds);
       setReloadKey((k) => k + 1);
@@ -403,7 +428,7 @@ export function useProfileSpace() {
 
   const commitAvatar = useCallback(
     async (blob: Blob) => {
-      if (!userId) throw new Error("auth");
+      if (!userId) throw authRequired();
       // The object path is stable (uid/avatar.jpg), so uploading overwrites
       // cleanly — no orphaned files to sweep.
       const path = await uploadAvatar(userId, blob);
@@ -415,7 +440,7 @@ export function useProfileSpace() {
   );
 
   const clearAvatar = useCallback(async () => {
-    if (!userId) throw new Error("auth");
+    if (!userId) throw authRequired();
     patchIdentity((i) => ({ ...i, avatarPath: null }));
     await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: null });
     await removeAvatar(currentIdentity().avatarPath ?? `${userId}/avatar.jpg`);
@@ -469,6 +494,10 @@ export function useProfileSpace() {
       sendMagicLink,
     },
   };
+}
+
+export function authRequired(): Error {
+  return new Error("Sign in to save that.");
 }
 
 function toPatch(identity: {

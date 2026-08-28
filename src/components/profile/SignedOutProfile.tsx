@@ -9,8 +9,10 @@ import { cn } from "@/lib/utils";
 
 export function SignedOutProfile({
   onSendMagicLink,
+  compact = false,
 }: {
   onSendMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
+  compact?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
@@ -30,14 +32,29 @@ export function SignedOutProfile({
   };
 
   return (
-    <div className="mx-auto flex max-w-[520px] flex-col items-center pt-16 text-center">
+    <div
+      className={cn(
+        "mx-auto flex max-w-[520px] flex-col items-center text-center",
+        compact ? "py-4" : "pt-16",
+      )}
+    >
       <p className="eyebrow mb-5">A little place that's yours</p>
-      <h1 className="display text-[30px] leading-tight text-balance sm:text-[36px]">
+      <h1
+        className={cn(
+          "display leading-tight text-balance",
+          compact ? "text-[24px]" : "text-[30px] sm:text-[36px]",
+        )}
+      >
         Your profile is here,
         <br />
         behind a quiet door.
       </h1>
-      <p className="mt-4 max-w-[46ch] text-[14px] leading-relaxed text-muted-foreground">
+      <p
+        className={cn(
+          "mt-4 max-w-[46ch] text-[14px] leading-relaxed text-muted-foreground",
+          compact && "text-[13.5px]",
+        )}
+      >
         Sign in and Bloom will show you your moments, your milestones, and the things you've chosen
         to keep — exactly as you left them.
       </p>

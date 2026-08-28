@@ -28,6 +28,8 @@ export function ProfileHero({
   onSignOut,
   completion,
   avatarBusy = false,
+  isSignedIn = true,
+  onSignIn,
 }: {
   identity: ProfileIdentity;
   onEdit: () => void;
@@ -38,6 +40,8 @@ export function ProfileHero({
   onSignOut: () => void;
   completion: { done: number; total: number; show: boolean };
   avatarBusy?: boolean;
+  isSignedIn?: boolean;
+  onSignIn?: () => void;
 }) {
   return (
     <section

@@ -87,6 +87,7 @@ function ProfilePage() {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
   const [highlightEditor, setHighlightEditor] = useState<{
@@ -95,6 +96,11 @@ function ProfilePage() {
   } | null>(null);
   const [seenIds, setSeenIds] = useState<ReadonlySet<string>>(() => new Set());
   const online = useOnlineStatus();
+
+  // after a magic-link sign-in resolves, the dialog steps aside on its own
+  useEffect(() => {
+    if (authState === "signed-in") setSignInOpen(false);
+  }, [authState]);
 
   // watch/unwatch state hydrates after mount (SSR-safe)
   useEffect(() => {
@@ -285,8 +291,6 @@ function ProfilePage() {
       <main className="relative mx-auto w-full max-w-[1020px] px-5 pb-24 pt-10 sm:px-8 sm:pt-14">
         {authState === "checking" ? (
           <ProfileSkeleton />
-        ) : authState === "signed-out" ? (
-          <SignedOutProfile onSendMagicLink={space.actions.sendMagicLink} />
         ) : !identity ? (
           <div className="panel mx-auto mt-14 max-w-[560px] p-8 text-center">
             <p className="display text-[20px]">Your space is quiet right now.</p>
@@ -318,9 +322,26 @@ function ProfilePage() {
               </p>
             ) : null}
 
+            {authState === "signed-out" ? (
+              <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-border bg-surface/50 px-4 py-2.5 text-center text-[12.5px] text-muted-foreground">
+                <span>
+                  You're looking at a preview of your Bloom space — real empty state, nothing saved.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSignInOpen(true)}
+                  className="text-foreground underline underline-offset-2 transition-colors hover:text-[var(--profile-accent)]"
+                >
+                  Sign in
+                </button>
+              </div>
+            ) : null}
+
             <Reveal>
               <ProfileHero
                 identity={identity.identity}
+                isSignedIn={authState === "signed-in"}
+                onSignIn={() => setSignInOpen(true)}
                 completion={
                   journey.status === "ready"
                     ? journey.completeness
@@ -496,7 +517,7 @@ function ProfilePage() {
       </main>
 
       {/* overlays */}
-      {identity && userId ? (
+      {identity ? (
         <>
           <ProfileEditor
             open={editorOpen}
@@ -519,7 +540,7 @@ function ProfilePage() {
           />
           <StoryComposer
             open={composerOpen}
-            userId={userId}
+            userId={userId ?? "preview"}
             defaultAccent={accent}
             defaultVisibility={identity.privacy.storyVisibility}
             moodEntries={moodBlock?.status === "ready" ? moodBlock.data : []}
@@ -600,6 +621,13 @@ function ProfilePage() {
         <DialogContent className="top-1/2 left-1/2 max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-[680px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[20px] border-border bg-background">
           <DialogTitle className="sr-only">Profile preview</DialogTitle>
           {previewModel ? <PublicProfileView model={previewModel} asPreview /> : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={signInOpen} onOpenChange={(o) => !o && setSignInOpen(false)}>
+        <DialogContent className="top-1/2 left-1/2 w-[calc(100%-1.5rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] border-border bg-background">
+          <DialogTitle className="sr-only">Sign in to Bloom</DialogTitle>
+          <SignedOutProfile compact onSendMagicLink={space.actions.sendMagicLink} />
         </DialogContent>
       </Dialog>
 
