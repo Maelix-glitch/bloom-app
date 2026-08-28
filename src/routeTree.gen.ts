@@ -10,12 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HandleRouteImport } from './routes/$handle'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HandleRoute = HandleRouteImport.update({
+  id: '/$handle',
+  path: '/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -31,30 +43,38 @@ const AdminRewardsRoute = AdminRewardsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$handle': typeof HandleRoute
+  '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$handle': typeof HandleRoute
+  '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$handle': typeof HandleRoute
+  '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/rewards' | '/admin/rewards'
+  fullPaths: '/' | '/$handle' | '/profile' | '/rewards' | '/admin/rewards'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/rewards' | '/admin/rewards'
-  id: '__root__' | '/' | '/rewards' | '/admin/rewards'
+  to: '/' | '/$handle' | '/profile' | '/rewards' | '/admin/rewards'
+  id: '__root__' | '/' | '/$handle' | '/profile' | '/rewards' | '/admin/rewards'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HandleRoute: typeof HandleRoute
+  ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
 }
@@ -66,6 +86,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$handle': {
+      id: '/$handle'
+      path: '/$handle'
+      fullPath: '/$handle'
+      preLoaderRoute: typeof HandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -87,6 +121,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HandleRoute: HandleRoute,
+  ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
 }

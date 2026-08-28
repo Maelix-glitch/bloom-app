@@ -304,6 +304,14 @@
   height: 1px;
 }
 
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* One wide band of light that crosses a panel on a slow idle cycle. */
 @utility sheen-band {
   position: absolute;

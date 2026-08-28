@@ -1,3 +1,26 @@
+# Bloom backend setup
+
+## Profile 2.0 — identity, privacy, stories, highlights
+
+Run `migrations/20260828_profile_identity_stories.sql` in the Supabase SQL
+editor. It is additive and safe to re-run:
+
+- extends the existing `profiles` row with `display_name`, `username`, `bio`,
+  `avatar_path`, `accent`, `featured` (legacy `profile_name` rows keep working;
+  the value is copied into `display_name` once)
+- creates `profile_privacy` (profile + story visibility, private by default),
+  `stories` (24h lifetime, `expires_at`, soft `deleted_at`),
+  `story_highlights` + `story_highlight_items`
+- enforces every privacy rule with RLS; `get_public_bloom_profile()` is the
+  only path to another person's data and it returns public fields only
+- creates the public `profile-media` storage bucket, namespaced by user id
+  (`{user}/avatar.jpg`, `{user}/stories/{uuid}.jpg`), writes scoped by policy
+
+Until the migration is applied, the Profile page still renders gracefully and
+each section shows a calm "try again" state.
+
+---
+
 # Bloom Rewards setup
 
 The Rewards page is a curated delivery system. It does not generate rewards from mood, XP, points, streaks, or demo data.
