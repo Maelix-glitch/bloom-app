@@ -1,171 +1,210 @@
 /**
- * CycleHero — the first viewport rebuilt around one truth: the current cycle
- * state is the story. Two-part composition: the wheel as the dominant
- * anchor, and beside it a tight editorial status block, the up-next
- * intelligence hierarchy, and the inline quick-log strip. On narrow screens
- * the wheel leads, everything stacks beneath it — never a centered empty
- * marketing hero with a ring floating off to the side.
+ * CycleHero — the first viewport as one composed scene, not a split of text
+ * and donut. The orbit leads; beside it, a single contextual narrative
+ * ("your cycle right now") written from the live model: phase, the day in
+ * its cycle, what's closest, how much Bloom actually knows — then the
+ * today-surface, right where the information it changes lives. Selecting a
+ * day elsewhere moves the orbit's focus and the narrative follows. No
+ * marketing paragraph, no centered emptiness, no fake warmth.
  */
 
-import { CalendarDays, PencilLine } from "lucide-react";
-
-import type { CycleEntry, CycleModel, FlowValue, MoodValue } from "@/lib/cycle/types";
+import type { CycleEntry, CycleModel } from "@/lib/cycle/types";
 import { fmtShort } from "@/lib/cycle/engine";
-import { CycleWheel } from "./CycleWheel";
-import { UpcomingIntelligence } from "./UpcomingIntelligence";
-import { QuickLogStrip } from "./QuickLogStrip";
+import { PHASE_COLOR } from "@/lib/cycle/palette";
+import type { PhaseKey } from "@/lib/cycle/types";
+import { CycleOrbit } from "./CycleOrbit";
+import { TodaySurface, type TodayPatch } from "./TodaySurface";
 
 export function CycleHero({
   model,
+  entries,
   loading,
-  todayEntry,
-  onQuickLog,
-  onStripSave,
-  onOpenAdvanced,
+  logDate,
+  logEntry,
+  inspect,
+  onReturnToday,
+  onPatch,
+  onOpenFull,
   onAdjust,
-  onViewAll,
   onOpenMethod,
+  onViewForecast,
 }: {
   model: CycleModel | null;
+  entries: CycleEntry[];
   loading: boolean;
-  todayEntry: CycleEntry | null;
-  onQuickLog: () => void;
-  onStripSave: (patch: {
-    flow?: FlowValue | null;
-    mood?: MoodValue | null;
-    energy?: number | null;
-  }) => void;
-  onOpenAdvanced: () => void;
+  logDate: string;
+  logEntry: CycleEntry | null;
+  inspect: { day: number; date: string } | null;
+  onReturnToday: () => void;
+  onPatch: (patch: TodayPatch) => Promise<void>;
+  onOpenFull: () => void;
   onAdjust: () => void;
-  onViewAll: () => void;
   onOpenMethod: () => void;
+  onViewForecast: () => void;
 }) {
-  const headline = model?.currentDay
-    ? `Day ${model.currentDay} of ${Math.round(model.average ?? 28)}`
-    : "Your cycle, quietly kept";
-  const phaseLine = model?.currentPhase
-    ? model.currentPhase === "ovulation"
-      ? "Estimated fertile peak"
-      : `${cap(model.currentPhase)} phase`
-    : "Awaiting your first log";
-  const contextLine = model?.lastPeriodStart
-    ? model.usesDefaultAssumption
-      ? `Last period started ${fmtShort(model.lastPeriodStart)}. Until a couple of cycles accumulate, estimates follow a general pattern — then they become yours.`
-      : `Last period started ${fmtShort(model.lastPeriodStart)} — estimates follow your own ${Math.min(6, model.completed.length)}-cycle average of ${model.average?.toFixed(1)} days.`
-    : "Log the day a period starts and this whole page wakes up — phases, windows, patterns. Nothing is ever invented.";
-
   return (
-    <header className="cy-hero relative pt-3 pb-1 lg:pt-6">
-      {/* wheel column */}
-      <div className="cy-hero__wheel">
+    <header className="cy-hero">
+      <div className="relative">
         {model ? (
           <>
-            <CycleWheel model={model} />
-            <div className="flex items-center gap-3">
+            <div className="cy-orbit-wrap">
+              <CycleOrbit model={model} entries={entries} inspect={inspect} />
+            </div>
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
               <button
                 type="button"
                 onClick={onAdjust}
                 className="mono rounded-full border border-border px-3 py-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:border-[var(--border-strong)] hover:text-foreground"
               >
-                <PencilLine className="mr-1 inline size-2.5 align-[-1px]" aria-hidden />
                 adjust cycle
               </button>
-              <span className="mono text-[9px] uppercase tracking-[0.08em] text-faint">
-                {model.lastPeriodStart
-                  ? model.confidence === "assumed"
-                    ? "general pattern"
-                    : "personal model"
-                  : "no anchor yet"}
-              </span>
+              {inspect ? (
+                <button type="button" onClick={onReturnToday} className="cy-link">
+                  ← back to today
+                </button>
+              ) : null}
             </div>
           </>
         ) : (
           <div
-            className="cy-wheel animate-pulse rounded-full border border-[var(--cycle-hair)]"
-            style={{ background: "color-mix(in oklab, var(--surface) 45%, transparent)" }}
+            className="cy-orbit-wrap animate-pulse rounded-full border border-[var(--cycle-hair)]"
+            style={{ background: "var(--cy-fill)", aspectRatio: "1" }}
             role="status"
-            aria-label={loading ? "Reading your cycle record" : "Cycle wheel"}
+            aria-label={loading ? "Reading your cycle record" : "Cycle visualization"}
           />
         )}
       </div>
 
-      {/* status + intelligence column */}
-      <div className="cy-hero__head">
-        <p className="cy-eyebrow flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          Cycle · live model
-          {model ? (
-            <span
-              className="mono rounded-full border px-2 py-[3px] text-[8.5px] normal-case tracking-[0.04em] text-muted-foreground"
-              style={{
-                borderColor: "color-mix(in oklab, var(--border-strong) 70%, transparent)",
-              }}
+      <div className="min-w-0">
+        <p className="cy-eyebrow">Your cycle right now</p>
+        {model?.currentPhase ? (
+          <>
+            <h1
+              className="cy-title mt-2 text-[38px] leading-[1.05] tracking-[-0.025em] text-balance sm:text-[44px]"
+              style={{ color: PHASE_COLOR[model.currentPhase as PhaseKey] }}
             >
-              {model.lastPeriodStart && model.confidence !== "assumed"
-                ? "estimated from your logs"
-                : model.lastPeriodStart
-                  ? "estimated · general pattern"
-                  : "nothing logged yet"}
-            </span>
-          ) : null}
-        </p>
-        <h1 className="cy-title mt-2.5 text-[34px] leading-[1.06] tracking-[-0.024em] text-balance sm:text-[42px]">
-          {headline}
-        </h1>
-        <p
-          className="cy-title mt-1 text-[19px] leading-snug"
-          style={{
-            color: model?.currentPhase
-              ? `var(--cycle-${model.currentPhase === "ovulation" ? "ovulation" : model.currentPhase})`
-              : "var(--faint)",
-          }}
-        >
-          {phaseLine}
-        </p>
-        <p className="mt-3 max-w-[52ch] text-[13.5px] leading-relaxed text-muted-foreground">
-          {contextLine}
-        </p>
+              {model.currentPhase === "ovulation"
+                ? "Ovulation window"
+                : `${cap(model.currentPhase)} phase`}
+            </h1>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
+              {model.currentDay
+                ? `Day ${model.currentDay} of your ${model.confidence === "assumed" ? "general " : "estimated "}${Math.round(model.average ?? 28)}-day cycle`
+                : "Counting begins with your first logged period start"}
+              {model.currentPhase === "ovulation"
+                ? " — the brief, estimate-shaped peak of the cycle. Your own signs (tests, temperature, mucus) are the only things that can firm it up, and you can log those anytime."
+                : model.currentPhase === "menstrual"
+                  ? " — bleeding days. Rest isn't slacking here; log what the days are actually like and Bloom learns your version."
+                  : model.currentPhase === "follicular"
+                    ? " — the build-up. Quiet, useful days to log the small stuff: energy, sleep, what shows up when it shows up."
+                    : " — the long wait after ovulation. The most variable stretch for nearly everyone; your logs are what make it personal."}
+            </p>
+            <div className="mt-4 border-t border-[var(--cycle-hair)] pt-3">
+              <NarrativeRow model={model} />
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="cy-title mt-2 text-[34px] leading-[1.08] tracking-[-0.022em] text-balance sm:text-[40px]">
+              Your first cycle starts here.
+            </h1>
+            <p className="mt-3 max-w-[50ch] text-[13.5px] leading-relaxed text-muted-foreground">
+              Log the day your period begins and Bloom can start building your personal cycle model
+              — phases, windows, patterns, all computed from what you actually record. Nothing is
+              invented to make the page look busy.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button type="button" onClick={onOpenFull} className="cy-btn cy-btn--primary">
+                Log period
+              </button>
+              <button type="button" onClick={onOpenMethod} className="cy-link">
+                How predictions work →
+              </button>
+            </div>
+          </>
+        )}
 
-        <div className="mt-4 flex flex-wrap items-center gap-2.5">
-          <button type="button" onClick={onQuickLog} className="cy-btn cy-btn--primary">
-            Log today
-          </button>
-          <a href="#cycle-calendar" className="cy-btn cy-btn--quiet no-underline">
-            <CalendarDays className="size-3.5" aria-hidden />
-            Calendar
-          </a>
-          <button
-            type="button"
-            onClick={() =>
-              document
-                .getElementById("cycle-history")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            className="mono text-[10px] uppercase tracking-[0.08em] text-faint underline-offset-4 transition-colors hover:text-foreground hover:underline"
-          >
-            Your history
-          </button>
-        </div>
+        {model?.currentPhase ? (
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <a
+              href="#cycle-forecast"
+              onClick={(e) => {
+                e.preventDefault();
+                onViewForecast();
+              }}
+              className="cy-link no-underline hover:underline"
+            >
+              View forecast →
+            </a>
+            <span className="text-[10px]" aria-hidden />
+            <button type="button" onClick={onOpenMethod} className="cy-link">
+              Confidence & method
+            </button>
+          </div>
+        ) : null}
 
         {model ? (
-          <>
-            <UpcomingIntelligence
-              className="mt-6"
-              model={model}
-              onOpenMethod={onOpenMethod}
-              onViewAll={onViewAll}
-              onLogStart={onQuickLog}
-            />
-            <QuickLogStrip
-              model={model}
-              entry={todayEntry}
-              disabled={loading}
-              onSave={onStripSave}
-              onOpenAdvanced={onOpenAdvanced}
-            />
-          </>
+          <TodaySurface
+            model={model}
+            date={logDate}
+            entry={logEntry}
+            disabled={loading}
+            onPatch={onPatch}
+            onOpenFull={onOpenFull}
+          />
         ) : null}
       </div>
     </header>
+  );
+}
+
+/** the contextual mini-narrative — one line each, on hairlines, not cards */
+function NarrativeRow({ model }: { model: CycleModel }) {
+  const next = model.events.find((e) => e.id === "next-period");
+  const lines: { label: string; value: string; tone?: string }[] = [];
+  if (next?.date || next?.rangeEnd) {
+    lines.push({
+      label: "Next period",
+      value: `${next.date ? fmtShort(next.date) : `~${fmtShort(next.rangeEnd!)}`}${next.plusMinusDays ? ` · ±${next.plusMinusDays}d` : ""} · ${next.daysAway >= 0 ? `in ~${next.daysAway}d` : "past estimate"}`,
+      tone: "var(--cycle-menstrual)",
+    });
+  }
+  lines.push({
+    label: "Confidence",
+    value:
+      model.confidence === "assumed"
+        ? "general pattern — nothing personal yet"
+        : model.confidence === "early"
+          ? "learning — 1 completed cycle so far"
+          : model.confidence === "fair"
+            ? `building baseline — ${model.completed.length} cycles`
+            : `your own history — ${model.completed.length} cycles`,
+    tone: "var(--cycle-accent)",
+  });
+  return (
+    <dl className="flex flex-col gap-0">
+      {lines.map((l) => (
+        <div
+          key={l.label}
+          className="flex items-baseline gap-3 border-b border-[var(--cycle-hair)] py-1.5 last:border-b-0"
+        >
+          <dt className="mono w-[104px] shrink-0 text-[9px] uppercase tracking-[0.1em] text-faint">
+            {l.label}
+          </dt>
+          <dd
+            className="min-w-0 flex-1 truncate text-[12.5px]"
+            style={l.tone ? { color: "var(--muted-foreground)" } : undefined}
+          >
+            <span
+              className="mr-2 inline-block size-[6px] self-center rounded-full align-[1px]"
+              style={{ background: l.tone }}
+              aria-hidden
+            />
+            {l.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 

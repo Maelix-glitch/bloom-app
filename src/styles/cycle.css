@@ -1,15 +1,20 @@
 /*
- * Bloom — Cycle 2.0 stylesheet (route-scoped, same convention as profile.css).
- * Loaded only by /cycle. It re-grounds the page: a deep near-black navy
- * canvas, editorial serif headings, hairline rhythm instead of card walls,
- * and the four phase colors used consistently everywhere on this route.
- * Global tokens and Tailwind utilities stay in src/styles.css — nothing in
- * here leaks to other pages because every rule is scoped to .cycle-page
- * (or namespaced cy-*).
+ * Bloom — Cycle 3.0 stylesheet (route-scoped; loaded only by /cycle).
+ * This file is the design system for the Cycle experience: one set of
+ * tokens for spacing rhythm, radii, surfaces, borders, motion and the
+ * phase color language, plus the composition primitives (chapters, the
+ * orbit, the forecast rail, the today surface). Components consume these
+ * tokens instead of scattering arbitrary values.
+ *
+ * The visual language for data honesty, used everywhere on this page:
+ *   solid + full opacity   = logged (grounded in what you recorded)
+ *   dashed + soft          = estimated (Bloom's model, not a fact)
+ *   translucent            = forecast (ahead of today)
+ *   ivory dot + phase ring = today
  */
 
 .cycle-page {
-  /* deep near-black navy canvas */
+  /* ——— canvas & ink ——— */
   --background: oklch(0.145 0.016 264);
   --surface: oklch(0.178 0.02 264);
   --surface-2: oklch(0.212 0.022 264);
@@ -19,22 +24,53 @@
   --foreground: oklch(0.952 0.008 85);
   --muted-foreground: oklch(0.71 0.022 280);
   --faint: oklch(0.545 0.028 282);
-  /* phase system: rose / soft green / warm gold / lavender-violet */
+
+  /* ——— cycle color language ——— */
   --cycle-follicular: var(--sage);
   --cycle-hair: color-mix(in oklab, var(--border) 78%, transparent);
+  --cycle-hair-strong: color-mix(in oklab, var(--border-strong) 70%, transparent);
   --cycle-accent: color-mix(in oklab, var(--violet) 62%, var(--sky));
+
+  /* ——— spacing rhythm (intentional, not uniform) ——— */
+  --cy-s1: 10px;
+  --cy-s2: 16px;
+  --cy-s3: 26px;
+  --cy-s4: 42px;
+  --cy-s5: 68px;
+  --cy-s6: 104px;
+
+  /* ——— shape & surfaces ——— */
+  --cy-r-sm: 10px;
+  --cy-r-md: 16px;
+  --cy-r-lg: 22px;
+  --cy-r-pill: 999px;
+  --cy-fill: color-mix(in oklab, var(--surface) 62%, transparent);
+  --cy-fill-2: color-mix(in oklab, var(--surface-2) 55%, transparent);
+  --cy-elev: 0 24px 60px -32px color-mix(in oklab, black 82%, transparent);
+
+  /* ——— motion ——— */
+  --cy-fast: 160ms;
+  --cy-med: 260ms;
+  --cy-slow: 480ms;
+
+  --cy-page-w: 1160px;
 
   background:
     radial-gradient(
-      140% 52% at 50% -12%,
-      color-mix(in oklab, var(--violet) 7%, transparent),
-      transparent 62%
+      120% 46% at 22% -8%,
+      color-mix(in oklab, var(--violet) 8%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      90% 40% at 88% 4%,
+      color-mix(in oklab, var(--sky) 5%, transparent),
+      transparent 60%
     ),
     var(--background);
   color: var(--foreground);
 }
 
-/* faint grain so the flat canvas reads printed, not empty */
+/* faint grain so the canvas reads printed rather than empty */
 .cycle-page::before {
   content: "";
   position: fixed;
@@ -49,18 +85,92 @@
   background-size: 3px 3px;
 }
 
-.cycle-page ::selection {
-  background: color-mix(in oklab, var(--violet) 40%, transparent);
-}
-
-/* the page canvas never scrolls sideways; ambient light may bleed off-edge
-   but nothing on this route creates document-level overflow */
+/* nothing on this route may create document-level sideways overflow */
 .cycle-page {
   overflow-x: clip;
   max-width: 100vw;
 }
 
-/* ————— typography ————— */
+.cycle-page ::selection {
+  background: color-mix(in oklab, var(--violet) 40%, transparent);
+}
+
+/* ————————————————————————— layout ————————————————————————— */
+
+.cy-main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--cy-page-w);
+  margin-inline: auto;
+  padding: 14px 16px 96px;
+}
+
+@media (min-width: 640px) {
+  .cy-main {
+    padding-inline: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cy-main {
+    padding-inline: 44px;
+  }
+}
+
+/* chapters: large spacing between, hairline transitions, no card boxes */
+.cy-chapter {
+  position: relative;
+  margin-top: var(--cy-s5);
+  padding-top: var(--cy-s4);
+  scroll-margin-top: 24px;
+}
+
+.cy-chapter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cycle-hair), transparent 76%);
+}
+
+.cy-chapter--flush {
+  margin-top: var(--cy-s2);
+  padding-top: 0;
+}
+
+.cy-chapter--flush::before {
+  display: none;
+}
+
+.cy-chapter__no {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.cy-chapter__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(21px, 2.5vw, 27px);
+  letter-spacing: -0.018em;
+  line-height: 1.12;
+}
+
+.cy-chapter__sub {
+  margin-top: 6px;
+  max-width: 64ch;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+/* ————————————————————————— type ————————————————————————— */
+
 .cy-eyebrow {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -72,114 +182,109 @@
 .cy-title {
   font-family: var(--font-display);
   font-weight: 500;
-  letter-spacing: -0.022em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums lining-nums;
 }
 
-.cy-section-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(20px, 2.6vw, 26px);
-  letter-spacing: -0.018em;
-}
+/* ————————————————————————— hero + orbit ————————————————————————— */
 
-/* ————— structure: hairline rhythm, no card wall ————— */
-.cy-section {
-  position: relative;
-  margin-top: 52px;
-  padding-top: 36px;
-  scroll-margin-top: 24px;
-}
-
-.cy-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, var(--cycle-hair), transparent 78%);
-}
-
-/* ————— hero ————— */
 .cy-hero {
   display: grid;
-  gap: 30px;
+  gap: var(--cy-s4);
   align-items: center;
+  padding-top: var(--cy-s2);
 }
 
 @media (min-width: 1024px) {
   .cy-hero {
-    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
     gap: 56px;
-    align-items: stretch;
+    align-items: center;
   }
 }
 
-.cy-hero__wheel {
-  order: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.cy-hero__head {
-  order: 2;
-  min-width: 0;
+.cy-orbit-wrap {
+  position: relative;
+  width: clamp(280px, 74vw, 448px);
+  margin-inline: auto;
 }
 
 @media (min-width: 1024px) {
-  .cy-hero__wheel {
-    order: 0;
-    justify-content: center;
-  }
-  .cy-hero__head {
-    order: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
+  .cy-orbit-wrap {
+    width: clamp(320px, 34vw, 448px);
   }
 }
 
-/* the wheel is one of the largest elements on screen, optically centered */
-.cy-wheel {
-  width: clamp(248px, 38vw, 392px);
-  aspect-ratio: 1;
-}
-
-.cy-wheel svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-/* ambient light under the wheel — tied to the live phase, not decorative */
-.cy-wheel-glow {
+/* the soft light the orbit sits in — tied to the live phase, never random */
+.cy-orbit-halo {
   position: absolute;
-  inset: -14% -14% auto -14%;
-  height: 130%;
+  inset: -8%;
   z-index: -1;
   pointer-events: none;
   border-radius: 50%;
-  filter: blur(34px);
+  filter: blur(42px);
 }
 
-/* ————— buttons/chips used by hero + strip ————— */
+/* gentle breathing of today's marker — quiet, not a spinner */
+@keyframes cy-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.16;
+    transform: scale(1.16);
+  }
+}
+
+.cy-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cy-breathe 5.2s ease-in-out infinite;
+}
+
+/* a very subtle highlight travelling along the active phase */
+@keyframes cy-travel {
+  to {
+    stroke-dashoffset: -114;
+  }
+}
+
+.cy-travel {
+  animation: cy-travel 16s linear infinite;
+}
+
+/* the day the user is inspecting (from timeline/calendar) — focus moves */
+@keyframes cy-focus-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cy-focus-in {
+  animation: cy-focus-in var(--cy-slow) ease both;
+}
+
+/* ————————————————————————— buttons, pills, chips ————————————————————————— */
+
 .cy-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-radius: 999px;
+  border-radius: var(--cy-r-pill);
   font-size: 13px;
   font-weight: 500;
-  padding: 9px 18px;
+  padding: 10px 18px;
   transition:
-    transform var(--motion-med) var(--ease-out-expo),
-    background-color var(--motion-fast) ease,
-    border-color var(--motion-fast) ease,
-    color var(--motion-fast) ease;
+    transform var(--cy-med) var(--ease-out-expo),
+    background-color var(--cy-fast) ease,
+    border-color var(--cy-fast) ease,
+    color var(--cy-fast) ease,
+    box-shadow var(--cy-med) ease;
 }
 
 .cy-btn--primary {
@@ -187,23 +292,25 @@
   background: linear-gradient(
     135deg,
     var(--violet),
-    color-mix(in oklab, var(--sky) 70%, var(--violet))
+    color-mix(in oklab, var(--sky) 62%, var(--violet))
   );
+  box-shadow: 0 12px 30px -14px color-mix(in oklab, var(--violet) 55%, transparent);
 }
 
 .cy-btn--primary:hover {
-  transform: scale(1.015);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px -14px color-mix(in oklab, var(--violet) 65%, transparent);
 }
 
 .cy-btn--primary:active {
-  transform: scale(0.99);
+  transform: translateY(0) scale(0.99);
 }
 
 .cy-btn--quiet {
   border: 1px solid var(--border);
   color: var(--muted-foreground);
   background: transparent;
-  padding: 8px 14px;
+  padding: 9px 15px;
 }
 
 .cy-btn--quiet:hover {
@@ -211,76 +318,161 @@
   color: var(--foreground);
 }
 
-.cy-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: transparent;
-  padding: 5px 11px;
-  font-size: 12px;
-  color: var(--muted-foreground);
-  transition:
-    border-color var(--motion-fast) ease,
-    background-color var(--motion-fast) ease,
-    color var(--motion-fast) ease;
+.cy-link {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: none;
+  border: 0;
+  padding: 4px 2px;
   cursor: pointer;
-  min-height: 30px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition:
+    color var(--cy-fast) ease,
+    text-decoration-color var(--cy-fast) ease;
 }
 
-.cy-chip:hover {
+.cy-link:hover {
+  color: var(--foreground);
+  text-decoration-color: var(--cycle-accent);
+}
+
+/* the today surface's pills: bigger than chips, calm selection */
+.cy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 14px;
+  border-radius: var(--cy-r-pill);
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    border-color var(--cy-fast) ease,
+    background-color var(--cy-fast) ease,
+    color var(--cy-fast) ease,
+    box-shadow var(--cy-med) ease;
+}
+
+.cy-pill:hover {
   border-color: var(--border-strong);
   color: var(--foreground);
 }
 
-.cy-chip[aria-pressed="true"] {
-  border-color: color-mix(in oklab, var(--cycle-accent) 65%, transparent);
-  background: color-mix(in oklab, var(--cycle-accent) 16%, transparent);
+.cy-pill[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--cycle-accent) 70%, transparent);
+  background: color-mix(in oklab, var(--cycle-accent) 15%, var(--surface));
   color: var(--foreground);
+  box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--cycle-accent) 60%, transparent);
 }
 
-/* ————— quick-log strip (compact, inline, near the intelligence) ————— */
-.cy-strip {
-  margin-top: 18px;
-  border-radius: 18px;
+/* ————————————————————————— today surface ————————————————————————— */
+
+.cy-today {
+  margin-top: var(--cy-s3);
+  border-radius: var(--cy-r-lg);
   border: 1px solid var(--cycle-hair);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--surface) 88%, transparent),
-    color-mix(in oklab, var(--surface) 62%, transparent)
-  );
-  padding: 12px 14px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--surface) 82%, transparent),
+      color-mix(in oklab, var(--surface) 55%, transparent)
+    ),
+    var(--background);
+  padding: 16px 18px 12px;
+  transition: border-color var(--cy-med) ease;
 }
 
-/* ————— up-next intelligence hierarchy ————— */
-.cy-up {
-  display: flex;
-  flex-direction: column;
+.cy-today:focus-within {
+  border-color: var(--cycle-hair-strong);
 }
 
-.cy-up__lead {
+/* inline save status — no toast for tiny actions */
+.cy-saved {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
+  opacity: 0;
+  transition: opacity var(--cy-med) ease;
+}
+
+.cy-saved[data-on="1"] {
+  opacity: 1;
+}
+
+/* ————————————————————————— forecast rail (NOW → NEXT → AFTER) ————————————————————————— */
+
+.cy-fc {
+  display: grid;
+  gap: 0;
+}
+
+@media (min-width: 900px) {
+  .cy-fc {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
+  }
+}
+
+.cy-fc__col {
+  position: relative;
+  padding: var(--cy-s3) var(--cy-s3) var(--cy-s3) 0;
+}
+
+@media (min-width: 900px) {
+  .cy-fc__col {
+    padding-left: var(--cy-s3);
+    border-left: 1px solid var(--cycle-hair);
+  }
+  .cy-fc__col:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 899px) {
+  .cy-fc__col {
+    border-top: 1px solid var(--cycle-hair);
+  }
+  .cy-fc__col:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+.cy-fc__node {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cy-fc__lead {
   display: block;
   width: 100%;
   text-align: left;
-  border-radius: 16px;
-  border: 1px solid color-mix(in oklab, var(--cycle-menstrual) 26%, transparent);
-  background: linear-gradient(
-    120deg,
-    color-mix(in oklab, var(--cycle-menstrual) 9%, transparent),
-    transparent 65%
-  );
-  padding: 14px 16px 13px 14px;
-  transition:
-    border-color var(--motion-fast) ease,
-    background-color var(--motion-fast) ease;
+  border: 0;
+  background: none;
+  cursor: default;
+  padding: 0;
 }
 
-.cy-up__lead:hover {
-  border-color: color-mix(in oklab, var(--cycle-menstrual) 45%, transparent);
+.cy-fc__big {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(30px, 3.4vw, 40px);
+  letter-spacing: -0.025em;
+  line-height: 1.02;
 }
 
-.cy-up__row {
+.cy-fc__row {
   display: flex;
   width: 100%;
   align-items: baseline;
@@ -289,26 +481,31 @@
   border: 0;
   border-top: 1px solid var(--cycle-hair);
   background: transparent;
-  padding: 10px 4px;
-  cursor: default;
-  transition: color var(--motion-fast) ease;
+  padding: 11px 2px;
+  transition: background-color var(--cy-fast) ease;
 }
 
-button.cy-up__row:hover {
-  background: color-mix(in oklab, var(--surface) 55%, transparent);
+button.cy-fc__row {
+  cursor: pointer;
 }
 
-/* ————— today insight band ————— */
-.cy-insight {
+button.cy-fc__row:hover {
+  background: var(--cy-fill);
+}
+
+/* ————————————————————————— insight / “bloom noticed” ————————————————————————— */
+
+.cy-notice {
   position: relative;
-  border-radius: 0 16px 16px 0;
+  border-radius: 0 var(--cy-r-md) var(--cy-r-md) 0;
   border: 1px solid var(--cycle-hair);
   border-left: 2px solid var(--cycle-accent);
-  background: color-mix(in oklab, var(--surface) 55%, transparent);
-  padding: 12px 16px;
+  background:
+    linear-gradient(100deg, color-mix(in oklab, var(--violet) 6%, transparent), transparent 55%),
+    color-mix(in oklab, var(--surface) 55%, transparent);
+  padding: 14px 18px 13px;
 }
 
-/* ————— recommendations as hairline rows, not cards ————— */
 .cy-rec {
   display: flex;
   flex-wrap: wrap;
@@ -316,7 +513,7 @@ button.cy-up__row:hover {
   gap: 8px 14px;
   border-top: 1px solid var(--cycle-hair);
   padding: 14px 2px;
-  transition: background-color var(--motion-fast) ease;
+  transition: background-color var(--cy-fast) ease;
 }
 
 .cy-rec:hover {
@@ -326,23 +523,73 @@ button.cy-up__row:hover {
 .cy-rec--primary {
   border: 1px solid var(--border);
   border-left: 2px solid var(--cycle-accent);
-  border-radius: 16px;
+  border-radius: var(--cy-r-md);
   background: color-mix(in oklab, var(--surface) 72%, transparent);
   padding: 16px;
 }
 
-/* ————— phase education: one active voice, quiet observers ————— */
+/* ————————————————————————— beautiful learning states (never fake data) ————————————————————————— */
+
+.cy-ghost {
+  position: relative;
+  border-radius: var(--cy-r-lg);
+  border: 1px dashed var(--cycle-hair-strong);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 34%, transparent),
+    transparent
+  );
+  padding: 22px 22px 18px;
+}
+
+/* silhouette of what real data will look like — labeled “preview”, never values */
+.cy-ghost-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 64px;
+  opacity: 0.5;
+}
+
+.cy-ghost-bars i {
+  flex: 1;
+  border-radius: 6px 6px 3px 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--cycle-hair-strong) 0 1.5px,
+    transparent 1.5px 7px
+  );
+}
+
+/* confidence tier — informative, not a game meter */
+.cy-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--cy-r-pill);
+  border: 1px solid var(--cycle-hair-strong);
+  background: var(--cy-fill);
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ————————————————————————— phase education rows ————————————————————————— */
+
 .cy-phase {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 0 16px;
   align-items: start;
-  border-radius: 16px;
-  padding: 14px 14px 12px;
+  border-radius: var(--cy-r-md);
+  padding: 13px 14px 11px;
   transition:
-    background-color var(--motion-med) ease,
-    opacity var(--motion-med) ease;
-  opacity: 0.66;
+    background-color var(--cy-med) ease,
+    opacity var(--cy-med) ease;
+  opacity: 0.62;
 }
 
 .cy-phase:hover,
@@ -358,10 +605,11 @@ button.cy-up__row:hover {
   border-bottom: 1px solid var(--cycle-hair);
 }
 
-/* ————— calendar ————— */
+/* ————————————————————————— calendar ————————————————————————— */
+
 .cy-cal {
   display: grid;
-  gap: 26px;
+  gap: var(--cy-s4);
 }
 
 @media (min-width: 1024px) {
@@ -376,20 +624,21 @@ button.cy-up__row:hover {
   display: grid;
   place-items: center;
   aspect-ratio: 1;
-  min-height: 40px;
+  min-height: 42px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--cy-r-sm);
   background: transparent;
   font-size: 13px;
   color: var(--muted-foreground);
-  transition:
-    background-color var(--motion-fast) ease,
-    color var(--motion-fast) ease;
   cursor: pointer;
+  transition:
+    background-color var(--cy-fast) ease,
+    color var(--cy-fast) ease,
+    box-shadow var(--cy-fast) ease;
 }
 
 .cy-cal .cy-cell:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--surface-2) 80%, transparent);
+  background: var(--cy-fill-2);
   color: var(--foreground);
 }
 
@@ -404,19 +653,24 @@ button.cy-up__row:hover {
   color: var(--foreground);
 }
 
+.cy-cal .cy-cell--inspect {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--cycle-accent) 75%, transparent);
+}
+
 .cy-cal .cy-cell--today {
   color: var(--foreground);
   font-weight: 600;
   box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--violet) 75%, transparent);
 }
 
-/* ————— assistant launcher: native, still, unlit until needed ————— */
+/* ————————————————————————— assistant ————————————————————————— */
+
 .cy-ai {
   display: grid;
   place-items: center;
   width: 46px;
   height: 46px;
-  border-radius: 999px;
+  border-radius: var(--cy-r-pill);
   border: 1px solid color-mix(in oklab, var(--violet) 38%, var(--border));
   background:
     radial-gradient(
@@ -426,22 +680,45 @@ button.cy-up__row:hover {
     ),
     var(--surface-2);
   color: var(--foreground);
-  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.85);
+  box-shadow: var(--cy-elev);
   transition:
-    transform var(--motion-med) var(--ease-out-expo),
-    border-color var(--motion-fast) ease;
+    transform var(--cy-med) var(--ease-out-expo),
+    border-color var(--cy-fast) ease,
+    box-shadow var(--cy-med) ease;
 }
 
 .cy-ai:hover {
-  transform: scale(1.04);
+  transform: translateY(-2px);
   border-color: color-mix(in oklab, var(--violet) 65%, var(--border));
+  box-shadow:
+    0 22px 50px -20px color-mix(in oklab, var(--violet) 45%, transparent),
+    var(--cy-elev);
 }
 
 .cy-ai:active {
-  transform: scale(0.98);
+  transform: translateY(0) scale(0.98);
 }
 
-/* focus language — one calm ring everywhere on this route */
+/* one-time, dismissible — never nagging */
+.cy-ai-tip {
+  position: fixed;
+  right: 72px;
+  bottom: 26px;
+  z-index: 69;
+  max-width: 250px;
+  border-radius: var(--cy-r-md);
+  border: 1px solid var(--cycle-hair-strong);
+  background: var(--surface);
+  box-shadow: var(--cy-elev);
+  padding: 10px 13px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+  animation: cy-focus-in var(--cy-slow) var(--ease-out-expo) both;
+}
+
+/* ————————————————————————— focus + motion prefs ————————————————————————— */
+
 .cycle-page :focus-visible {
   outline: 2px solid color-mix(in oklab, var(--violet) 80%, white 20%);
   outline-offset: 2px;
@@ -449,12 +726,17 @@ button.cy-up__row:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .cy-breathe,
+  .cy-travel,
+  .cy-focus-in,
+  .cy-ai-tip {
+    animation: none;
+  }
   .cy-btn,
-  .cy-chip,
+  .cy-pill,
   .cy-ai,
   .cy-phase,
-  .cy-up__lead,
-  .cy-up__row {
+  .cy-fc__row {
     transition: none;
   }
   .cy-btn--primary:hover,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lightbulb, X } from "lucide-react";
+import { Sparkle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Insight } from "@/lib/cycle/intelligence";
 import { dismissStore } from "@/lib/cycle/intelligence";
@@ -10,56 +10,86 @@ export function InsightCard({
   insight,
   signals = [],
   onAsk,
+  stillLearning,
   className,
 }: {
   insight: Insight | null;
   signals?: string[];
   onAsk?: () => void;
+  /** what to show instead of an empty box when there isn't enough data yet */
+  stillLearning?: React.ReactNode;
   className?: string;
 }) {
   const [dismissed, setDismissed] = useState(false);
   const [why, setWhy] = useState(false);
-  if (!insight || dismissed || dismissStore.isDismissed(insight.id)) return null;
+  const gone = dismissed || (insight !== null && dismissStore.isDismissed(insight.id));
+  if (!insight || gone) {
+    if (!stillLearning) return null;
+    return <div className={cn("cy-ghost max-w-[860px] px-5 py-5", className)}>{stillLearning}</div>;
+  }
   return (
     <div
-      className={cn("cy-insight relative flex flex-wrap items-center gap-x-4 gap-y-1.5", className)}
+      className={cn("cy-notice", className)}
+      style={{
+        backgroundImage:
+          "linear-gradient(100deg, color-mix(in oklab, var(--violet) 6%, transparent), transparent 55%)",
+      }}
     >
-      <Lightbulb
-        className="size-4 shrink-0 text-[color:var(--violet)]"
-        strokeWidth={1.7}
-        aria-hidden
-      />
-      <p className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
-        <span className="font-medium text-foreground">From your data — </span>
-        {insight.text}
-      </p>
-      <div className="flex shrink-0 items-center gap-1.5">
-        {signals.length > 0 ? (
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="cy-eyebrow flex items-center gap-2">
+          <Sparkle className="size-3 text-[color:var(--violet)]" strokeWidth={1.8} aria-hidden />
+          Bloom noticed
+        </p>
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {onAsk ? (
+            <button type="button" onClick={onAsk} className="cy-link">
+              Ask Bloom why
+            </button>
+          ) : null}
           <button
             type="button"
-            onClick={() => setWhy((w) => !w)}
-            aria-expanded={why}
-            className="mono rounded-full border border-border px-2.5 py-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+            aria-label="Dismiss this insight"
+            onClick={() => {
+              dismissStore.dismiss(insight.id);
+              setDismissed(true);
+            }}
+            className="grid size-7 place-items-center rounded-full text-faint transition-colors hover:text-foreground"
           >
-            why this
+            <X className="size-3.5" />
           </button>
-        ) : null}
-        {onAsk ? <GhostButton onClick={onAsk}>Ask Bloom why</GhostButton> : null}
+        </div>
+      </div>
+      <p className="mt-1.5 max-w-[66ch] text-[13.5px] leading-relaxed text-foreground/90">
+        {insight.text}
+      </p>
+      {signals.length > 0 ? (
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          {signals.map((s) => (
+            <span
+              key={s}
+              className="mono rounded-full border border-[var(--cycle-hair-strong)] px-2.5 py-1 text-[8.5px] uppercase tracking-[0.07em] text-faint"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div className="mt-2.5 flex items-center gap-3">
         <button
           type="button"
-          aria-label="Dismiss this insight"
-          onClick={() => {
-            dismissStore.dismiss(insight.id);
-            setDismissed(true);
-          }}
-          className="grid size-7 place-items-center rounded-full text-faint transition-colors hover:text-foreground"
+          onClick={() => setWhy((w) => !w)}
+          aria-expanded={why}
+          className="cy-link"
         >
-          <X className="size-3.5" />
+          {why ? "less" : "Explore why →"}
         </button>
       </div>
-      <p className="mono w-full pl-8 text-[9px] uppercase tracking-[0.08em] text-faint">
-        {insight.why}
-      </p>
+      {why ? (
+        <p className="cy-focus-in mt-1.5 border-t border-[var(--cycle-hair)] pt-2 text-[12px] leading-relaxed text-muted-foreground">
+          {insight.why} — stated as correlation from your own logs; the page never claims more than
+          the data carries.
+        </p>
+      ) : null}
     </div>
   );
 }

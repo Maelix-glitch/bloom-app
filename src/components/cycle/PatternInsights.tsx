@@ -92,13 +92,23 @@ export function PatternInsights({
 
   if (cards.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border/70 bg-surface/20 px-4 py-5 text-center">
-        <p className="display text-[14.5px] text-muted-foreground">
-          Patterns need a few cycles of company.
+      <div className="cy-ghost max-w-[760px] px-5 py-6">
+        <p className="cy-eyebrow">Still taking shape</p>
+        <p className="cy-title mt-2 text-[19px] leading-snug">
+          Your personal rhythm is still becoming familiar.
         </p>
-        <p className="mx-auto mt-1 max-w-[44ch] text-[12px] leading-relaxed text-faint">
-          Once two or three cycles carry symptom or mood notes, this section starts showing what
-          recurs — with counts, never guesses.
+        <p className="mt-2 max-w-[56ch] text-[13px] leading-relaxed text-muted-foreground">
+          Once two or three cycles carry symptom, mood or energy notes, this section shows what
+          recurs — with counts and sample sizes, never guesses. The shape below is what it will look
+          like; the values only exist when your logs bring them.
+        </p>
+        <div className="cy-ghost-bars mt-5 max-w-[420px]" aria-hidden>
+          {[46, 62, 38, 56, 44, 60, 40, 54].map((h, i) => (
+            <i key={i} style={{ height: h }} />
+          ))}
+        </div>
+        <p className="mono mt-2 text-[8.5px] uppercase tracking-[0.1em] text-faint">
+          preview of the shape · no invented values
         </p>
       </div>
     );

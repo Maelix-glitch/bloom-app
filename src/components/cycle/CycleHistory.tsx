@@ -449,14 +449,22 @@ export function CycleHistory({ model, entries }: { model: CycleModel; entries: C
           ) : null}
         </>
       ) : (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-surface/20 px-4 py-8 text-center">
-          <LineChart className="size-5 text-faint" strokeWidth={1.5} aria-hidden />
-          <p className="display text-[15px] text-muted-foreground">
+        <div className="cy-ghost flex flex-col items-start gap-2 px-5 py-6">
+          <p className="cy-eyebrow">Your history, honestly empty</p>
+          <p className="cy-title text-[19px] leading-snug">
             The charts fill in as cycles complete.
           </p>
-          <p className="max-w-[46ch] text-[12.5px] text-faint">
-            Two logged cycles are enough for a personal average. Until then, everything on this page
-            stays honestly labeled as the general pattern.
+          <p className="max-w-[54ch] text-[13px] leading-relaxed text-muted-foreground">
+            Two logged cycles are enough for a personal average. Until then everything on this page
+            stays honestly labeled as the general pattern — no borrowed numbers.
+          </p>
+          <div className="cy-ghost-bars mt-4 w-full max-w-[560px]" aria-hidden>
+            {[30, 44, 38, 52, 34, 48, 40, 56, 36].map((h, i) => (
+              <i key={i} style={{ height: h }} />
+            ))}
+          </div>
+          <p className="mono text-[8.5px] uppercase tracking-[0.1em] text-faint">
+            shape preview · one completed cycle at a time
           </p>
         </div>
       )}

@@ -27,10 +27,13 @@ export function CycleTimeline({
   model,
   entries,
   onLogDay,
+  onInspect,
 }: {
   model: CycleModel;
   entries: CycleEntry[];
   onLogDay: (date: string) => void;
+  /** the day the page should focus everywhere — orbit marker, hero surface */
+  onInspect?: (date: string | null) => void;
 }) {
   const days = useMemo(
     () =>
@@ -41,7 +44,11 @@ export function CycleTimeline({
     [model, entries],
   );
 
-  const [selected, setSelected] = useState<string>(model.today);
+  const [selected, setSelectedInner] = useState<string>(model.today);
+  const setSelected = (d: string) => {
+    setSelectedInner(d);
+    onInspect?.(d === model.today ? null : d);
+  };
   const sel = days.find((d) => d.date === selected) ?? days[0]!;
 
   return (

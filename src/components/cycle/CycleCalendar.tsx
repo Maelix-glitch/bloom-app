@@ -68,6 +68,7 @@ function DayCell({
   inMonth,
   isToday,
   isSelected,
+  isInspect = false,
   state,
   onSelect,
   tabIndex,
@@ -78,6 +79,7 @@ function DayCell({
   inMonth: boolean;
   isToday: boolean;
   isSelected: boolean;
+  isInspect?: boolean;
   state: DayState;
   onSelect: () => void;
   tabIndex: number;
@@ -106,6 +108,7 @@ function DayCell({
         "cy-cell",
         hasFlow && "cy-cell--flow",
         isSelected && "cy-cell--sel",
+        isInspect && "cy-cell--inspect",
         isToday && "cy-cell--today",
         !inMonth && "pointer-events-none opacity-25",
       )}
@@ -147,17 +150,26 @@ export function CycleCalendar({
   entries,
   onQuickLog,
   onEditDay,
+  inspectDate = null,
+  onInspect,
 }: {
   model: CycleModel;
   entries: CycleEntry[];
   onQuickLog: (date: string) => void;
   onEditDay: (entry: CycleEntry) => void;
+  /** day focused elsewhere on the page — echoed here as a soft ring */
+  inspectDate?: string | null;
+  onInspect?: (date: string | null) => void;
 }) {
   const [anchor, setAnchor] = useState(() => {
     const t = new Date(`${localDateKey()}T00:00:00`);
     return { y: t.getFullYear(), m: t.getMonth() };
   });
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelectedRaw] = useState<string | null>(null);
+  const setSelected = (k: string | null) => {
+    setSelectedRaw(k);
+    onInspect?.(k === model.today ? null : k);
+  };
   const [roving, setRoving] = useState<string>("");
   const gridRef = useRef<HTMLDivElement | null>(null);
 
@@ -281,7 +293,8 @@ export function CycleCalendar({
                 isToday={c.inMonth && k === model.today}
                 isSelected={c.inMonth && k === selected}
                 state={c.inMonth ? stateFor(k) : EMPTY_STATE}
-                onSelect={() => c.inMonth && setSelected((s) => (s === k ? null : k))}
+                isInspect={c.inMonth && k === inspectDate}
+                onSelect={() => c.inMonth && setSelected(k)}
                 tabIndex={c.key === roving ? 0 : -1}
                 onKeyNav={(e) => move(e, i)}
               />

@@ -45,11 +45,14 @@ export function BloomCycleAI({
   insight,
   onSeenInsight,
   onQuickLog,
+  external,
 }: {
   context: CycleContext | null;
   insight: Insight | null;
   onSeenInsight?: () => void;
   onQuickLog?: () => void;
+  /** the page asking Bloom a question on the user's behalf (nonce-keyed) */
+  external?: { q: string; n: number } | null;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -59,6 +62,8 @@ export function BloomCycleAI({
   const inFlight = useRef<Promise<void> | null>(null);
   const launcherRef = useRef<HTMLButtonElement | null>(null);
   const [useLogs, setUseLogs] = useState(true);
+  const [tip, setTip] = useState(false);
+  const lastExternal = useRef(0);
   useEffect(() => {
     try {
       const v = window.localStorage.getItem("bloom.cycle.assistant.ctx");
@@ -113,7 +118,16 @@ export function BloomCycleAI({
     setOpen(false);
     launcherRef.current?.focus();
   }, []);
-  const toggle = useCallback(() => (open ? close() : setOpen(true)), [open, close]);
+  const toggle = useCallback(() => {
+    setTip(false);
+    try {
+      window.localStorage.setItem("bloom.cycle.ai.tip.v1", "1");
+    } catch {
+      /* fine */
+    }
+    if (open) close();
+    else setOpen(true);
+  }, [open, close]);
 
   useEffect(() => {
     if (!open) return;
@@ -128,8 +142,47 @@ export function BloomCycleAI({
     if (open && insight) onSeenInsight?.();
   }, [open, insight, onSeenInsight]);
 
+  /* one-time, gentle — never nagging: gone once used or after a while */
+  useEffect(() => {
+    if (!context) return;
+    try {
+      if (window.localStorage.getItem("bloom.cycle.ai.tip.v1")) return;
+    } catch {
+      /* private mode — skip the tip entirely */
+      return;
+    }
+    const t = setTimeout(() => setTip(true), 2600);
+    const off = setTimeout(() => setTip(false), 11000);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(off);
+    };
+  }, [context]);
+
+  /* "Ask Bloom why" from anywhere on the page opens and asks, honestly */
+  useEffect(() => {
+    if (!external || external.n === lastExternal.current) return;
+    lastExternal.current = external.n;
+    setOpen(true);
+    setTip(false);
+    try {
+      window.localStorage.setItem("bloom.cycle.ai.tip.v1", "1");
+    } catch {
+      /* fine */
+    }
+    if (external.q) void ask(external.q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [external]);
+
   return (
     <>
+      {tip && !open ? (
+        <div className="cy-ai-tip" role="status">
+          <span className="text-foreground">Bloom can talk about your actual data</span> — the
+          estimates, what they rest on, what to log next. Tap the mark, or press{" "}
+          <span className="mono text-[10px]">Esc</span> to ignore.
+        </div>
+      ) : null}
       <button
         ref={launcherRef}
         type="button"
