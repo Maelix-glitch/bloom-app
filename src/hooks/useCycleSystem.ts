@@ -4,7 +4,7 @@
  * recommendations and the assistant context all refresh without a reload.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 import { buildContext, buildCycleModel, localDateKey, normalizeEntry } from "@/lib/cycle/engine";
@@ -12,6 +12,33 @@ import { cycleStorage } from "@/lib/cycle/storage";
 import type { CycleEntry, CycleModel } from "@/lib/cycle/types";
 
 export type AuthState = "checking" | "signed-out" | "signed-in";
+
+/* Device-local store used when signed out — same "saved locally" behavior
+ * the legacy cycle page had, so the whole page stays usable without an
+ * account. Nothing is fabricated; it is the user's own browser data. */
+const LOCAL_KEY = "bloom.cycle.entries.local";
+
+function readLocal(): CycleEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(LOCAL_KEY);
+    const rows = raw ? (JSON.parse(raw) as Partial<CycleEntry>[]) : [];
+    return Array.isArray(rows)
+      ? rows.map((r) => normalizeEntry(r as Partial<CycleEntry> & { date: string }))
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocal(rows: CycleEntry[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LOCAL_KEY, JSON.stringify(rows));
+  } catch {
+    /* private mode etc. — in-memory state still stands for the session */
+  }
+}
 
 export function useCycleSystem() {
   const [authState, setAuthState] = useState<AuthState>("checking");
@@ -21,6 +48,7 @@ export function useCycleSystem() {
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
   const [today, setToday] = useState<string | null>(null);
+  const entriesRef = useRef<CycleEntry[]>([]);
 
   // today flips after mount → no server/client hydration mismatch
   useEffect(() => setToday(localDateKey()), []);
@@ -48,13 +76,28 @@ export function useCycleSystem() {
   }, []);
 
   useEffect(() => {
-    if (authState !== "signed-in" || !userId || !today) return;
+    if (!today || authState === "checking") return;
+
+    if (authState !== "signed-in" || !userId) {
+      // signed out: read the device-local log — the page stays fully usable
+      const local = readLocal();
+      entriesRef.current = local;
+      setEntries(local);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     let alive = true;
     setLoading(true);
     setError(null);
     void cycleStorage
       .all(userId)
-      .then((rows) => alive && setEntries(rows))
+      .then((rows) => {
+        if (!alive) return;
+        entriesRef.current = rows;
+        setEntries(rows);
+      })
       .catch((e: unknown) => {
         if (!alive) return;
         setError(e instanceof Error ? e.message : "Couldn't load your cycle record.");
@@ -74,12 +117,24 @@ export function useCycleSystem() {
 
   const saveDay = useCallback(
     async (patch: Partial<CycleEntry> & { date: string }) => {
-      if (!userId) throw new Error("Sign in first, and this saves for good.");
-      const normalized = normalizeEntry(patch);
-      await cycleStorage.save(userId, { ...normalized, logged_at: new Date().toISOString() });
+      const normalized = normalizeEntry({ ...patch, logged_at: new Date().toISOString() });
+      const mergeInto = (prev: CycleEntry[]) =>
+        [...prev.filter((e) => e.date !== normalized.date), normalized].sort((a, b) =>
+          a.date.localeCompare(b.date),
+        );
+
+      if (!userId) {
+        const next = mergeInto(entriesRef.current);
+        entriesRef.current = next;
+        writeLocal(next); // device-local, exactly like the legacy page's fallback
+        setEntries(next);
+        return;
+      }
+      await cycleStorage.save(userId, normalized);
       setEntries((prev) => {
-        const without = prev.filter((e) => e.date !== normalized.date);
-        return [...without, normalized].sort((a, b) => a.date.localeCompare(b.date));
+        const next = mergeInto(prev);
+        entriesRef.current = next;
+        return next;
       });
     },
     [userId],
@@ -87,9 +142,19 @@ export function useCycleSystem() {
 
   const removeDay = useCallback(
     async (date: string) => {
-      if (!userId) throw new Error("Sign in first.");
+      if (!userId) {
+        const next = entriesRef.current.filter((e) => e.date !== date);
+        entriesRef.current = next;
+        writeLocal(next);
+        setEntries(next);
+        return;
+      }
       await cycleStorage.remove(userId, date);
-      setEntries((prev) => prev.filter((e) => e.date !== date));
+      setEntries((prev) => {
+        const next = prev.filter((e) => e.date !== date);
+        entriesRef.current = next;
+        return next;
+      });
     },
     [userId],
   );
@@ -97,6 +162,7 @@ export function useCycleSystem() {
   return {
     authState,
     userId,
+    localOnly: authState !== "signed-in",
     loading,
     error,
     entries,
@@ -106,14 +172,5 @@ export function useCycleSystem() {
     refresh: () => setReload((r) => r + 1),
     saveDay,
     removeDay,
-    sendMagicLink: async (email: string) => {
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: { emailRedirectTo: `${window.location.origin}/cycle` },
-      });
-      return otpError
-        ? { ok: false as const, message: "We couldn't send that link just now." }
-        : { ok: true as const, message: "Check your inbox — a sign-in link is on its way." };
-    },
   };
 }

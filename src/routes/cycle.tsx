@@ -24,7 +24,6 @@ const Analytics = lazy(() =>
 import { InsightCard, RecommendationStack } from "@/components/cycle/Insights";
 import { AssistantDock } from "@/components/cycle/AssistantDock";
 import { CycleSection, ObserveLegend } from "@/components/cycle/parts";
-import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/cycle")({
@@ -43,7 +42,7 @@ export const Route = createFileRoute("/cycle")({
 
 function CyclePage() {
   const system = useCycleSystem();
-  const { model, context, entries, loading, error, authState } = system;
+  const { model, context, entries, loading, error, localOnly } = system;
 
   const [quickOpen, setQuickOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -108,9 +107,9 @@ function CyclePage() {
         sleep_hours: draft.sleep_hours,
         next_period_in_days: nextPeriodInDays,
       });
-      toast("Saved.");
+      toast(localOnly ? "Saved on this device." : "Saved.");
     },
-    [model, system],
+    [model, system, localOnly],
   );
 
   /* deep-ish keyboard shortcut: "q" opens quick log when not typing */
@@ -127,18 +126,6 @@ function CyclePage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openQuick]);
 
-  /* ------------------------------ signed out ------------------------------ */
-  if (authState === "signed-out") {
-    return (
-      <Shell>
-        <SignedOutProfile compact={false} onSendMagicLink={system.sendMagicLink} />
-        <p className="mx-auto mt-8 max-w-[46ch] text-center text-[12px] leading-relaxed text-faint">
-          Your cycle log stays private to your account — no one else, ever.
-        </p>
-      </Shell>
-    );
-  }
-
   const heroHeadline = model?.currentDay
     ? `Day ${model.currentDay} — ${model.currentPhase ? (PHASE_LABEL[model.currentPhase] ?? model.currentPhase).toLowerCase() : "your cycle"}`
     : "Your cycle, quietly tracked";
@@ -151,6 +138,12 @@ function CyclePage() {
 
   return (
     <Shell>
+      {localOnly ? (
+        <p className="mb-4 text-center text-[11.5px] text-faint">
+          preview — logs are kept on this device; signing in syncs them to your account, later, if
+          you ever want
+        </p>
+      ) : null}
       {error ? (
         <p className="mb-6 rounded-xl border border-amber/30 bg-amber/5 px-4 py-2.5 text-center text-[12.5px] text-amber">
           {error}{" "}
