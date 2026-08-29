@@ -1,0 +1,466 @@
+/*
+ * Bloom — Cycle 2.0 stylesheet (route-scoped, same convention as profile.css).
+ * Loaded only by /cycle. It re-grounds the page: a deep near-black navy
+ * canvas, editorial serif headings, hairline rhythm instead of card walls,
+ * and the four phase colors used consistently everywhere on this route.
+ * Global tokens and Tailwind utilities stay in src/styles.css — nothing in
+ * here leaks to other pages because every rule is scoped to .cycle-page
+ * (or namespaced cy-*).
+ */
+
+.cycle-page {
+  /* deep near-black navy canvas */
+  --background: oklch(0.145 0.016 264);
+  --surface: oklch(0.178 0.02 264);
+  --surface-2: oklch(0.212 0.022 264);
+  --surface-3: oklch(0.252 0.024 266);
+  --border: oklch(0.285 0.02 264);
+  --border-strong: oklch(0.385 0.03 266);
+  --foreground: oklch(0.952 0.008 85);
+  --muted-foreground: oklch(0.71 0.022 280);
+  --faint: oklch(0.545 0.028 282);
+  /* phase system: rose / soft green / warm gold / lavender-violet */
+  --cycle-follicular: var(--sage);
+  --cycle-hair: color-mix(in oklab, var(--border) 78%, transparent);
+  --cycle-accent: color-mix(in oklab, var(--violet) 62%, var(--sky));
+
+  background:
+    radial-gradient(
+      140% 52% at 50% -12%,
+      color-mix(in oklab, var(--violet) 7%, transparent),
+      transparent 62%
+    ),
+    var(--background);
+  color: var(--foreground);
+}
+
+/* faint grain so the flat canvas reads printed, not empty */
+.cycle-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 4%, transparent) 0.5px,
+    transparent 0.5px
+  );
+  background-size: 3px 3px;
+}
+
+.cycle-page ::selection {
+  background: color-mix(in oklab, var(--violet) 40%, transparent);
+}
+
+/* the page canvas never scrolls sideways; ambient light may bleed off-edge
+   but nothing on this route creates document-level overflow */
+.cycle-page {
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
+/* ————— typography ————— */
+.cy-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.cy-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.cy-section-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(20px, 2.6vw, 26px);
+  letter-spacing: -0.018em;
+}
+
+/* ————— structure: hairline rhythm, no card wall ————— */
+.cy-section {
+  position: relative;
+  margin-top: 52px;
+  padding-top: 36px;
+  scroll-margin-top: 24px;
+}
+
+.cy-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cycle-hair), transparent 78%);
+}
+
+/* ————— hero ————— */
+.cy-hero {
+  display: grid;
+  gap: 30px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .cy-hero {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: 56px;
+    align-items: stretch;
+  }
+}
+
+.cy-hero__wheel {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cy-hero__head {
+  order: 2;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .cy-hero__wheel {
+    order: 0;
+    justify-content: center;
+  }
+  .cy-hero__head {
+    order: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+}
+
+/* the wheel is one of the largest elements on screen, optically centered */
+.cy-wheel {
+  width: clamp(248px, 38vw, 392px);
+  aspect-ratio: 1;
+}
+
+.cy-wheel svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ambient light under the wheel — tied to the live phase, not decorative */
+.cy-wheel-glow {
+  position: absolute;
+  inset: -14% -14% auto -14%;
+  height: 130%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(34px);
+}
+
+/* ————— buttons/chips used by hero + strip ————— */
+.cy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 18px;
+  transition:
+    transform var(--motion-med) var(--ease-out-expo),
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+.cy-btn--primary {
+  color: oklch(0.16 0.02 264);
+  background: linear-gradient(
+    135deg,
+    var(--violet),
+    color-mix(in oklab, var(--sky) 70%, var(--violet))
+  );
+}
+
+.cy-btn--primary:hover {
+  transform: scale(1.015);
+}
+
+.cy-btn--primary:active {
+  transform: scale(0.99);
+}
+
+.cy-btn--quiet {
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  background: transparent;
+  padding: 8px 14px;
+}
+
+.cy-btn--quiet:hover {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+}
+
+.cy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 5px 11px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+  cursor: pointer;
+  min-height: 30px;
+}
+
+.cy-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+}
+
+.cy-chip[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--cycle-accent) 65%, transparent);
+  background: color-mix(in oklab, var(--cycle-accent) 16%, transparent);
+  color: var(--foreground);
+}
+
+/* ————— quick-log strip (compact, inline, near the intelligence) ————— */
+.cy-strip {
+  margin-top: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--cycle-hair);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 88%, transparent),
+    color-mix(in oklab, var(--surface) 62%, transparent)
+  );
+  padding: 12px 14px;
+}
+
+/* ————— up-next intelligence hierarchy ————— */
+.cy-up {
+  display: flex;
+  flex-direction: column;
+}
+
+.cy-up__lead {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--cycle-menstrual) 26%, transparent);
+  background: linear-gradient(
+    120deg,
+    color-mix(in oklab, var(--cycle-menstrual) 9%, transparent),
+    transparent 65%
+  );
+  padding: 14px 16px 13px 14px;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+
+.cy-up__lead:hover {
+  border-color: color-mix(in oklab, var(--cycle-menstrual) 45%, transparent);
+}
+
+.cy-up__row {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 10px;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--cycle-hair);
+  background: transparent;
+  padding: 10px 4px;
+  cursor: default;
+  transition: color var(--motion-fast) ease;
+}
+
+button.cy-up__row:hover {
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+}
+
+/* ————— today insight band ————— */
+.cy-insight {
+  position: relative;
+  border-radius: 0 16px 16px 0;
+  border: 1px solid var(--cycle-hair);
+  border-left: 2px solid var(--cycle-accent);
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+  padding: 12px 16px;
+}
+
+/* ————— recommendations as hairline rows, not cards ————— */
+.cy-rec {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 14px;
+  border-top: 1px solid var(--cycle-hair);
+  padding: 14px 2px;
+  transition: background-color var(--motion-fast) ease;
+}
+
+.cy-rec:hover {
+  background: color-mix(in oklab, var(--surface) 40%, transparent);
+}
+
+.cy-rec--primary {
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--cycle-accent);
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  padding: 16px;
+}
+
+/* ————— phase education: one active voice, quiet observers ————— */
+.cy-phase {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 0 16px;
+  align-items: start;
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  transition:
+    background-color var(--motion-med) ease,
+    opacity var(--motion-med) ease;
+  opacity: 0.66;
+}
+
+.cy-phase:hover,
+.cy-phase--active {
+  opacity: 1;
+}
+
+.cy-phase--active {
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  box-shadow: inset 2px 0 0 var(--phase-c, var(--cycle-accent));
+  border-top: 1px solid var(--cycle-hair);
+  border-right: 1px solid var(--cycle-hair);
+  border-bottom: 1px solid var(--cycle-hair);
+}
+
+/* ————— calendar ————— */
+.cy-cal {
+  display: grid;
+  gap: 26px;
+}
+
+@media (min-width: 1024px) {
+  .cy-cal {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    align-items: start;
+  }
+}
+
+.cy-cal .cy-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  transition:
+    background-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+  cursor: pointer;
+}
+
+.cy-cal .cy-cell:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--surface-2) 80%, transparent);
+  color: var(--foreground);
+}
+
+.cy-cal .cy-cell--flow {
+  background: color-mix(in oklab, var(--cycle-menstrual) 24%, transparent);
+  color: var(--foreground);
+}
+
+.cy-cal .cy-cell--sel {
+  outline: 1px solid var(--border-strong);
+  outline-offset: -1px;
+  color: var(--foreground);
+}
+
+.cy-cal .cy-cell--today {
+  color: var(--foreground);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--violet) 75%, transparent);
+}
+
+/* ————— assistant launcher: native, still, unlit until needed ————— */
+.cy-ai {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--violet) 38%, var(--border));
+  background:
+    radial-gradient(
+      80% 80% at 30% 20%,
+      color-mix(in oklab, var(--violet) 26%, transparent),
+      transparent 70%
+    ),
+    var(--surface-2);
+  color: var(--foreground);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.85);
+  transition:
+    transform var(--motion-med) var(--ease-out-expo),
+    border-color var(--motion-fast) ease;
+}
+
+.cy-ai:hover {
+  transform: scale(1.04);
+  border-color: color-mix(in oklab, var(--violet) 65%, var(--border));
+}
+
+.cy-ai:active {
+  transform: scale(0.98);
+}
+
+/* focus language — one calm ring everywhere on this route */
+.cycle-page :focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--violet) 80%, white 20%);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cy-btn,
+  .cy-chip,
+  .cy-ai,
+  .cy-phase,
+  .cy-up__lead,
+  .cy-up__row {
+    transition: none;
+  }
+  .cy-btn--primary:hover,
+  .cy-btn--primary:active,
+  .cy-ai:hover,
+  .cy-ai:active {
+    transform: none;
+  }
+}

@@ -437,7 +437,7 @@ export function QuickLog({
 
 /* ------------------------------- advanced log ------------------------------- */
 
-export function AdvancedLog({
+export function AdvancedCycleLog({
   open,
   onClose,
   model,

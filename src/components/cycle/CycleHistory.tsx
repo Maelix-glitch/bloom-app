@@ -198,7 +198,7 @@ function Bars({
   );
 }
 
-export function Analytics({ model, entries }: { model: CycleModel; entries: CycleEntry[] }) {
+export function CycleHistory({ model, entries }: { model: CycleModel; entries: CycleEntry[] }) {
   const [win, setWin] = useState<Window>(6);
   const [method, setMethod] = useState(false);
 
@@ -312,7 +312,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
       {windowed ? (
         <>
           <div className="grid gap-6 sm:grid-cols-[1.4fr_1fr]">
-            <div className="rounded-2xl border border-border/70 bg-surface/35 p-4 sm:p-5">
+            <div className="rounded-2xl bg-surface/40 p-4 sm:p-5">
               <p className="eyebrow mb-3">Cycle lengths</p>
               <Bars
                 values={windowed.values}
@@ -327,7 +327,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <div className="rounded-2xl border border-border/70 bg-surface/35 p-4">
+              <div className="rounded-2xl bg-surface/40 p-4">
                 <p className="eyebrow">Personal baseline</p>
                 <p className="numeric mt-1.5 text-[30px] leading-none">
                   {windowed.avg.toFixed(1)}
@@ -355,7 +355,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
                   </div>
                 ) : null}
               </div>
-              <div className="rounded-2xl border border-border/70 bg-surface/35 p-4">
+              <div className="rounded-2xl bg-surface/40 p-4">
                 <p className="eyebrow">Periods</p>
                 <p className="numeric mt-1.5 text-[24px] leading-none">
                   {(model.periodLengthAverage ?? 0).toFixed(1)}
@@ -370,7 +370,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
           </div>
 
           {runs.length >= 2 ? (
-            <div className="rounded-2xl border border-border/70 bg-surface/35 p-4 sm:p-5">
+            <div className="rounded-2xl bg-surface/40 p-4 sm:p-5">
               <p className="eyebrow mb-3">Period length history</p>
               <ul className="flex flex-wrap items-end gap-1.5">
                 {runs.slice(-8).map((r, i) => (
@@ -392,7 +392,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
 
           {/* symptom patterns — only when real */}
           {symptomCounts.some((s) => s.n >= 3) ? (
-            <div className="rounded-2xl border border-border/70 bg-surface/35 p-4 sm:p-5">
+            <div className="rounded-2xl bg-surface/40 p-4 sm:p-5">
               <p className="eyebrow mb-2.5">What recurs in your logs</p>
               <ul className="flex flex-col gap-1.5">
                 {symptomCounts
@@ -476,7 +476,7 @@ function TrendStrip({
   accent: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-surface/35 p-4">
+    <div className="rounded-2xl bg-surface/40 p-4">
       <p className="eyebrow mb-2.5">{title}</p>
       {series.length < 3 ? (
         <p className="py-3 text-center text-[12px] text-faint">
@@ -513,7 +513,7 @@ function BbtStrip({ temps }: { temps: CycleEntry[] }) {
   const split = Math.floor(vals.length / 2);
   const lowMean = vals.slice(0, split).reduce((a, b) => a + b, 0) / Math.max(1, split);
   return (
-    <div className="rounded-2xl border border-border/70 bg-surface/35 p-4">
+    <div className="rounded-2xl bg-surface/40 p-4">
       <p className="eyebrow mb-2.5">Basal temperature · °C, your measurements only</p>
       <div className="relative flex h-14 items-end gap-[4px]">
         {pts.map((p, i) => {
@@ -544,7 +544,7 @@ function BbtStrip({ temps }: { temps: CycleEntry[] }) {
 
 function LhStrip({ logs }: { logs: CycleEntry[] }) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-surface/35 p-4">
+    <div className="rounded-2xl bg-surface/40 p-4">
       <p className="eyebrow mb-2.5 flex items-center gap-1.5">
         <TestTube className="size-3" aria-hidden /> LH tests you logged
       </p>

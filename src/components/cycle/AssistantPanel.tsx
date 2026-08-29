@@ -1,6 +1,6 @@
 /**
  * The floating Cycle assistant — conversation panel.
- * Loads lazily on first open (see AssistantDock). Compact header, grounded
+ * Loads lazily on first open (see BloomCycleAI). Compact header, grounded
  * answers revealed with a gentle typewriter that can be stopped, contextual
  * quick prompts gated by real data, retry on failure, auto-scroll only when
  * the reader is near the bottom, Escape + focus handled by the dock.
@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 import type { CycleContext } from "@/lib/cycle/types";
 import type { QuickPrompt } from "@/lib/cycle/assistant";
 import type { Insight } from "@/lib/cycle/intelligence";
-import type { Msg } from "./AssistantDock";
-import { BloomMark } from "./AssistantDock";
+import type { Msg } from "./BloomCycleAI";
+import { BloomMark } from "./BloomCycleAI";
 
 export function AssistantPanel({
   context,
@@ -197,10 +197,13 @@ export function AssistantPanel({
         ) : (
           <ol className="flex flex-col gap-3" aria-live="polite">
             {messages.map((m) => {
-              const shownLen = reveal?.id === m.id ? reveal.len : m.text.length;
+              const shownLen = reveal !== null && reveal.id === m.id ? reveal.len : m.text.length;
               const display = m.role === "bloom" ? m.text.slice(0, shownLen) : m.text;
               const typing =
-                m.role === "bloom" && reveal?.id === m.id && reveal.len < m.text.length;
+                m.role === "bloom" &&
+                reveal !== null &&
+                reveal.id === m.id &&
+                reveal.len < m.text.length;
               return (
                 <li
                   key={m.id}

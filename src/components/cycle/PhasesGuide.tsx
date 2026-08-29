@@ -107,19 +107,17 @@ export function PhasesGuide({ model }: { model: CycleModel }) {
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-        {(Object.keys(PHASE_INFO) as PhaseKey[]).map((p) => (
-          <PhaseCard
-            key={p}
-            phase={p}
-            range={ranges[p]}
-            personal={personal && p !== "ovulation"}
-            current={model.currentPhase === p}
-          />
-        ))}
-      </div>
-      <p className="text-center text-[11px] leading-relaxed text-faint">
+    <div className="mx-auto flex w-full max-w-[780px] flex-col">
+      {(Object.keys(PHASE_INFO) as PhaseKey[]).map((p) => (
+        <PhaseCard
+          key={p}
+          phase={p}
+          range={ranges[p]}
+          personal={personal && p !== "ovulation"}
+          current={model.currentPhase === p}
+        />
+      ))}
+      <p className="mt-4 max-w-[64ch] text-[11.5px] leading-relaxed text-faint">
         Every body writes its own calendar — these are textbook outlines, and yours is the data on
         this page.
         {personal
@@ -146,15 +144,19 @@ function PhaseCard({
   const color = PHASE_COLOR[phase];
   return (
     <article
-      className={cn(
-        "flex min-w-0 flex-col rounded-2xl border px-4 py-3.5 transition-colors",
-        current
-          ? "border-[color:var(--border-strong)] bg-surface"
-          : "border-border/70 bg-surface/40",
-      )}
+      className={cn("cy-phase", current && "cy-phase--active")}
+      style={{ "--phase-c": color } as React.CSSProperties}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+      <svg
+        viewBox="0 0 40 36"
+        className="mt-1 h-9 w-10 shrink-0 opacity-70"
+        style={{ color }}
+        aria-hidden
+      >
+        {ART[info.art]}
+      </svg>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <p
             className="mono flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em]"
             style={{ color }}
@@ -166,48 +168,42 @@ function PhaseCard({
             />
             {phase}
           </p>
-          <h3 className="display mt-1 text-[15px] leading-tight capitalize">
-            {phase} phase
-            {current ? (
-              <span className="mono ml-2 rounded-full border border-border px-1.5 py-0.5 align-middle text-[8px] uppercase tracking-[0.08em] text-faint">
-                you are here
-              </span>
-            ) : null}
-          </h3>
+          {current ? (
+            <span className="mono rounded-full border border-border px-1.5 py-0.5 text-[8px] uppercase tracking-[0.08em] text-muted-foreground">
+              you are here
+            </span>
+          ) : null}
         </div>
-        <svg
-          viewBox="0 0 40 36"
-          className="h-9 w-10 shrink-0 opacity-60"
-          style={{ color }}
-          aria-hidden
-        >
-          {ART[info.art]}
-        </svg>
+        <h3 className="display mt-1 text-[15px] leading-tight capitalize">
+          {phase} phase · <span className="text-muted-foreground">{range}</span>
+        </h3>
+        <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{info.blurb}</p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="mono inline-flex items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+          >
+            {open ? "less" : "deeper note"}{" "}
+            <ChevronDown
+              className={cn(
+                "size-3 transition-transform duration-[var(--motion-med)]",
+                open && "rotate-180",
+              )}
+              aria-hidden
+            />
+          </button>
+          <span className="mono text-[9px] uppercase tracking-[0.07em] text-faint">
+            {personal ? "from your cycles" : "general range"}
+          </span>
+        </div>
+        {open ? (
+          <p className="mt-2 border-t border-[var(--cycle-hair)] pt-2 text-[11.5px] leading-relaxed text-muted-foreground">
+            {info.deeper}
+          </p>
+        ) : null}
       </div>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted-foreground">{info.blurb}</p>
-      <p className="mono mt-2 text-[9px] uppercase tracking-[0.07em] text-faint">
-        {range} · {personal ? "from your cycles" : "general range"}
-      </p>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="mono mt-1.5 inline-flex items-center gap-1 self-start text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
-      >
-        {open ? "less" : "deeper note"}{" "}
-        <ChevronDown
-          className={cn(
-            "size-3 transition-transform duration-[var(--motion-med)]",
-            open && "rotate-180",
-          )}
-          aria-hidden
-        />
-      </button>
-      {open ? (
-        <p className="mt-1.5 border-t border-border/50 pt-2 text-[11.5px] leading-relaxed text-muted-foreground">
-          {info.deeper}
-        </p>
-      ) : null}
     </article>
   );
 }

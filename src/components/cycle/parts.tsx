@@ -30,14 +30,14 @@ export function CycleSection({
     <section
       id={id}
       aria-label={title}
-      className={cn(gap === "wide" ? "mt-14 scroll-mt-6" : "mt-11", className)}
+      className={cn("cy-section", gap === "wide" && "mt-16", className)}
     >
       {title || right ? (
         <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div className="min-w-0">
-            <h2 className="display text-[20px] leading-tight sm:text-[22px]">{title}</h2>
+            <h2 className="cy-section-title text-pretty leading-tight">{title}</h2>
             {sub ? (
-              <p className="mt-1 max-w-[58ch] text-[12.5px] leading-relaxed text-muted-foreground">
+              <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed text-muted-foreground">
                 {sub}
               </p>
             ) : null}

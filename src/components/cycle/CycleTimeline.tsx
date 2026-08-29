@@ -1,9 +1,11 @@
 /**
- * Next 7 days — a continuous path with a node per day. Fertility/phase
- * states are read from the same engine the rest of the page uses; today is
- * anchored, logged days are solid, estimated days are soft. Selecting a node
- * opens an inline detail — never a modal — and can jump straight into the
- * advanced log for that date.
+ * CycleTimeline — the next seven days as ONE continuous visual path, a
+ * direct extension of the wheel, not a grid of day cards. Each day is a
+ * point on the line, colored by its phase; logged points are solid,
+ * estimated stay hollow and soft. Selecting a point reveals its detail
+ * inline (never a modal); from there the day opens straight into the
+ * advanced log. Small screens scroll the path horizontally inside its own
+ * container — the page itself never scrolls sideways.
  */
 
 import { useMemo, useState } from "react";
@@ -21,11 +23,7 @@ const PHASE_TEXT: Record<PhaseKey, string> = {
   luteal: "luteal",
 };
 
-function idxOf(days: { date: string }[], date: string): number {
-  return days.findIndex((d) => d.date === date);
-}
-
-export function Next7Timeline({
+export function CycleTimeline({
   model,
   entries,
   onLogDay,
@@ -34,36 +32,31 @@ export function Next7Timeline({
   entries: CycleEntry[];
   onLogDay: (date: string) => void;
 }) {
-  const days = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const date = addDays(model.today, i);
-      return { date, state: dayStateFor(date, entries, model) };
-    });
-  }, [model, entries]);
+  const days = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => {
+        const date = addDays(model.today, i);
+        return { date, state: dayStateFor(date, entries, model) };
+      }),
+    [model, entries],
+  );
 
   const [selected, setSelected] = useState<string>(model.today);
   const sel = days.find((d) => d.date === selected) ?? days[0]!;
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-surface/35 px-4 py-4 sm:px-5">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="eyebrow">Seven days ahead</p>
-        <p className="mono hidden text-[8.5px] uppercase tracking-[0.08em] text-faint sm:block">
-          solid = logged · soft = estimated
-        </p>
-      </div>
-
-      <div className="no-scrollbar overflow-x-auto pb-1">
-        <div className="relative mx-auto min-w-[560px] px-2">
-          {/* continuous path with a phase-coloured gradient underneath */}
+    <div>
+      <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        <div className="relative min-w-[560px] px-3">
+          {/* the path itself — phase-tinted, brighter through today */}
           <svg
             aria-hidden
-            viewBox="0 0 700 8"
+            viewBox="0 0 700 10"
             preserveAspectRatio="none"
-            className="absolute left-2 right-2 top-[31px] h-[8px] w-[calc(100%-1rem)]"
+            className="absolute left-3 right-3 top-[42px] h-[10px] w-[calc(100%-1.5rem)]"
           >
             <defs>
-              <linearGradient id="cyc-path" x1="0" y1="0" x2="1" y2="0">
+              <linearGradient id="cyc-path-grad" x1="0" y1="0" x2="1" y2="0">
                 {days.map((d, i) => (
                   <stop
                     key={d.date}
@@ -71,31 +64,33 @@ export function Next7Timeline({
                     stopColor={
                       d.state.phase ? PHASE_COLOR[d.state.phase as PhaseKey] : "var(--border)"
                     }
-                    stopOpacity={d.state.phase ? (d.date === model.today ? 0.95 : 0.5) : 0.25}
+                    stopOpacity={d.state.phase ? (d.date === model.today ? 0.9 : 0.42) : 0.2}
                   />
                 ))}
               </linearGradient>
             </defs>
-            <rect x="0" y="2.5" width="700" height="3" rx="1.5" fill="url(#cyc-path)" />
-            <rect x="0" y="3.4" width="700" height="1.2" rx="0.6" fill="none" />
+            <rect x="0" y="4" width="700" height="2.5" rx="1.25" fill="url(#cyc-path-grad)" />
           </svg>
 
           <ol className="relative flex justify-between">
-            {days.map((d) => {
+            {days.map((d, i) => {
               const isToday = d.date === model.today;
               const logged = d.state.logged !== null;
               const on = selected === d.date;
+              const [mm, dd] = [d.date.slice(5, 7), d.date.slice(8, 10)];
+              const monthChanged = i === 0 || days[i - 1]!.date.slice(5, 7) !== mm;
               return (
-                <li key={d.date} className="flex w-20 shrink-0 flex-col items-center gap-1.5">
+                <li key={d.date} className="flex w-[76px] shrink-0 flex-col items-center">
                   <button
                     type="button"
                     onClick={() => setSelected(d.date)}
                     aria-pressed={on}
-                    aria-label={`${fmtShort(d.date)}${isToday ? ", today" : ""}${d.state.phase ? `, ${d.state.phase} phase${logged ? ", logged" : ", estimated"}` : ""}`}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-xl px-2 py-1.5 outline-none transition-[background-color,transform] duration-[var(--motion-fast)] hover:bg-surface-2/60 focus-visible:bg-surface-2/80",
-                      on && "bg-surface-2/80",
-                    )}
+                    aria-label={`${fmtShort(d.date)}${isToday ? ", today" : ""}${
+                      d.state.phase
+                        ? `, ${d.state.phase} phase${logged ? ", logged" : ", estimated"}`
+                        : ""
+                    }`}
+                    className="flex min-h-[84px] flex-col items-center gap-1 rounded-xl px-1 pt-1 pb-2 outline-none transition-colors duration-[var(--motion-fast)] hover:bg-surface-2/45 focus-visible:bg-surface-2/70"
                   >
                     <span
                       className={cn(
@@ -103,21 +98,16 @@ export function Next7Timeline({
                         isToday ? "text-foreground" : "text-faint",
                       )}
                     >
-                      {(() => {
-                        const [y, m, day] = d.date.split("-");
-                        const prev = days[idxOf(days, d.date) - 1];
-                        const monthChanged = !prev || prev.date.slice(5, 7) !== m;
-                        return isToday
-                          ? "today"
-                          : monthChanged
-                            ? `${Number(m)}/${Number(day)}`
-                            : Number(day);
-                      })()}
+                      {isToday
+                        ? "today"
+                        : monthChanged
+                          ? `${Number(mm)}/${Number(dd)}`
+                          : Number(dd)}
                     </span>
                     <span
                       className={cn(
                         "grid place-items-center rounded-full border transition-all duration-[var(--motion-med)]",
-                        isToday ? "size-[22px]" : "size-[14px]",
+                        isToday ? "size-[24px]" : "size-[16px]",
                         on && "scale-110",
                       )}
                       style={{
@@ -129,15 +119,15 @@ export function Next7Timeline({
                             ? PHASE_COLOR[d.state.phase as PhaseKey]
                             : "var(--surface-3)"
                           : d.state.predictedFertile || d.state.predictedOvulation
-                            ? `color-mix(in oklab, var(--cycle-ovulation) 18%, transparent)`
+                            ? "color-mix(in oklab, var(--cycle-ovulation) 16%, transparent)"
                             : "transparent",
                         borderStyle: logged ? "solid" : "dashed",
                         boxShadow: isToday
-                          ? `0 0 0 4px color-mix(in oklab, ${
+                          ? `0 0 0 5px color-mix(in oklab, ${
                               d.state.phase
                                 ? PHASE_COLOR[d.state.phase as PhaseKey]
                                 : "var(--foreground)"
-                            } 14%, transparent)`
+                            } 12%, transparent)`
                           : undefined,
                       }}
                       aria-hidden
@@ -147,7 +137,7 @@ export function Next7Timeline({
                         <span
                           className={cn(
                             "block rounded-full",
-                            isToday ? "size-[6px]" : "size-[4px]",
+                            isToday ? "size-[7px]" : "size-[4px]",
                           )}
                           style={{ background: "var(--background)" }}
                           aria-hidden
@@ -162,6 +152,15 @@ export function Next7Timeline({
                     >
                       {d.state.phase ? PHASE_TEXT[d.state.phase as PhaseKey].split(" ")[0] : "—"}
                     </span>
+                    {on ? (
+                      <span className="mono mt-0.5 text-[8px] uppercase tracking-[0.1em] text-faint">
+                        {i === 0 ? "today" : `+${i}d`}
+                      </span>
+                    ) : (
+                      <span className="mt-0.5 text-[8px]" aria-hidden>
+                        &nbsp;
+                      </span>
+                    )}
                   </button>
                 </li>
               );
@@ -170,12 +169,17 @@ export function Next7Timeline({
         </div>
       </div>
 
-      {/* inline detail — selection never opens a modal */}
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-border/60 bg-surface/50 px-3.5 py-2.5">
+      {/* selected-day context — compact, inline, never a modal */}
+      <div
+        data-qa="tl-detail"
+        className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-2 rounded-xl bg-surface/45 px-3.5 py-2.5 ring-1 ring-[var(--cycle-hair)]"
+      >
         <p className="text-[13px]">
-          <span className="font-medium">{fmtShort(sel.date)}</span>
+          <span className="cy-title text-[15px]">{fmtShort(sel.date)}</span>
           <span className="text-muted-foreground">
-            {sel.state.phase ? ` · ${PHASE_TEXT[sel.state.phase as PhaseKey]}` : ""}
+            {sel.state.phase
+              ? ` · ${PHASE_TEXT[sel.state.phase as PhaseKey]}`
+              : " · a plain day until you log it"}
             {sel.state.predictedFertile && !sel.state.logged
               ? " · inside the estimated fertile window"
               : ""}
@@ -192,12 +196,16 @@ export function Next7Timeline({
         <button
           type="button"
           onClick={() => onLogDay(sel.date)}
-          className="mono ml-auto inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+          className="mono ml-auto inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-[var(--border-strong)] hover:text-foreground"
         >
           <Plus className="size-2.5" aria-hidden />
           {sel.state.logged ? "Edit in advanced log" : "Log this day"}
         </button>
       </div>
+
+      <p className="mono mt-2 text-[9px] uppercase tracking-[0.08em] text-faint">
+        solid = logged · hollow = estimated · a path, not a promise
+      </p>
     </div>
   );
 }

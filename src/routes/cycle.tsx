@@ -1,36 +1,33 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, Info, PencilLine, Plus } from "lucide-react";
+import { PencilLine } from "lucide-react";
 
+import cycleCss from "../styles/cycle.css?url";
 import { useCycleSystem } from "@/hooks/useCycleSystem";
 import { BloomHeader } from "@/components/BloomHeader";
-import { Atmosphere } from "@/components/mood/Atmosphere";
 import { Reveal } from "@/components/mood/primitives";
-import { cn } from "@/lib/utils";
-import { PHASE_LABEL } from "@/lib/cycle/types";
 import type { CycleEntry } from "@/lib/cycle/types";
-import { daysAwayLabel, fmtShort, localDateKey } from "@/lib/cycle/engine";
+import { fmtShort, localDateKey } from "@/lib/cycle/engine";
 import { buildPersonalInsight, buildRecommendations, dismissStore } from "@/lib/cycle/intelligence";
 import type { DayDraft } from "@/components/cycle/Logs";
 import { entriesToCsv } from "@/lib/cycle/storage";
-import { QuickLog, AdvancedLog } from "@/components/cycle/Logs";
-import { CycleRing } from "@/components/cycle/CycleRing";
+import { QuickLog, AdvancedCycleLog } from "@/components/cycle/Logs";
 import { CycleLengthSheet } from "@/components/cycle/CycleLengthSheet";
-import { AtAGlance } from "@/components/cycle/AtAGlance";
-import { MethodologyDialog } from "@/components/cycle/Analytics";
-import { Next7Timeline } from "@/components/cycle/Next7Timeline";
-import { PatternsSection } from "@/components/cycle/PatternsSection";
+import { MethodologyDialog } from "@/components/cycle/CycleHistory";
+import { CycleHero } from "@/components/cycle/CycleHero";
+import { CycleTimeline } from "@/components/cycle/CycleTimeline";
+import { PatternInsights } from "@/components/cycle/PatternInsights";
 import { PhasesGuide } from "@/components/cycle/PhasesGuide";
 import { CycleCalendar } from "@/components/cycle/CycleCalendar";
-/* below-the-fold weight loads progressively — the hero, events, and calendar never wait on it */
-
-const Analytics = lazy(() =>
-  import("@/components/cycle/Analytics").then((m) => ({ default: m.Analytics })),
-);
 import { InsightCard, RecommendationStack } from "@/components/cycle/Insights";
-import { AssistantDock } from "@/components/cycle/AssistantDock";
-import { CycleSection, ObserveLegend } from "@/components/cycle/parts";
+import { BloomCycleAI } from "@/components/cycle/BloomCycleAI";
+import { CycleSection } from "@/components/cycle/parts";
 import { toast, Toaster } from "sonner";
+
+/* below-the-fold weight loads progressively — hero, timeline and calendar never wait on it */
+const CycleHistory = lazy(() =>
+  import("@/components/cycle/CycleHistory").then((m) => ({ default: m.CycleHistory })),
+);
 
 export const Route = createFileRoute("/cycle")({
   head: () => ({
@@ -42,6 +39,7 @@ export const Route = createFileRoute("/cycle")({
           "Your personal cycle companion — phases, estimates and patterns computed from what you actually log.",
       },
     ],
+    links: [{ rel: "stylesheet", href: cycleCss }],
   }),
   component: CyclePage,
 });
@@ -75,6 +73,14 @@ function CyclePage() {
     setQuickDate(date ?? null);
     setQuickOpen(true);
   }, []);
+
+  const scrollToHistory = useCallback(
+    () =>
+      document
+        .getElementById("cycle-history")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    [],
+  );
 
   /* day draft → entry patch (cycle day + phase derived, never asked from user) */
   const saveDraft = useCallback(
@@ -120,6 +126,33 @@ function CyclePage() {
     [model, system, localOnly],
   );
 
+  /* one-tap strip logging: merge with today's existing entry — never clobber other fields */
+  const todayEntry = useMemo(
+    () => entries.find((e) => e.date === (model?.today ?? localDateKey())) ?? null,
+    [entries, model],
+  );
+  const stripSave = useCallback(
+    async (patch: Partial<Pick<DayDraft, "flow" | "mood" | "energy">>) => {
+      const base: DayDraft = {
+        date: model?.today ?? localDateKey(),
+        flow: todayEntry?.flow ?? null,
+        mood: todayEntry?.mood ?? null,
+        energy: todayEntry?.energy ?? null,
+        pain: todayEntry?.pain_level ?? null,
+        symptoms: todayEntry?.symptoms ?? [],
+        notes: todayEntry?.notes ?? "",
+        temperature: todayEntry?.temperature ?? null,
+        cervical_mucus: todayEntry?.cervical_mucus ?? null,
+        lh_test: todayEntry?.lh_test ?? null,
+        sexual_activity: todayEntry?.sexual_activity ?? null,
+        contraceptive: todayEntry?.contraceptive ?? null,
+        sleep_hours: todayEntry?.sleep_hours ?? null,
+      };
+      await saveDraft({ ...base, ...patch });
+    },
+    [model, todayEntry, saveDraft],
+  );
+
   /* deep-ish keyboard shortcut: "q" opens quick log when not typing */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -134,26 +167,15 @@ function CyclePage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openQuick]);
 
-  const heroHeadline = model?.currentDay
-    ? `Day ${model.currentDay} — ${model.currentPhase ? (PHASE_LABEL[model.currentPhase] ?? model.currentPhase).toLowerCase() : "your cycle"}`
-    : "Your cycle, quietly tracked";
-  const heroSub = model?.lastPeriodStart
-    ? model.usesDefaultAssumption
-      ? `Period started ${fmtShort(model.lastPeriodStart)}. Estimates follow a general 28-day pattern until you log a couple of cycles — then they become yours.`
-      : `Based on your last ${Math.min(6, model.completed.length)} cycle${model.completed.length === 1 ? "" : "s"} — average ${model.average?.toFixed(1)} days${model.variabilityPercent !== null ? `, variability ${model.variabilityPercent}%` : ""}.`
-    : "Log the day a period starts and the page becomes yours: phases, estimates, patterns — nothing invented.";
-  const nextPeriodEvent = model?.events.find((e) => e.id === "next-period");
-
   return (
     <Shell>
       {localOnly ? (
-        <p className="mb-4 text-center text-[11.5px] text-faint">
-          preview — logs are kept on this device; signing in syncs them to your account, later, if
-          you ever want
+        <p className="mono pt-1 text-center text-[9px] uppercase tracking-[0.09em] text-faint">
+          preview — kept on this device · signing in syncs it, if you ever want
         </p>
       ) : null}
       {error ? (
-        <p className="mb-6 rounded-xl border border-amber/30 bg-amber/5 px-4 py-2.5 text-center text-[12.5px] text-amber">
+        <p className="mt-3 rounded-xl border border-amber/30 bg-amber/5 px-4 py-2.5 text-center text-[12.5px] text-amber">
           {error}{" "}
           <button type="button" onClick={system.refresh} className="underline underline-offset-2">
             Try again
@@ -161,119 +183,32 @@ function CyclePage() {
         </p>
       ) : null}
 
-      {/* HERO */}
+      {/* HERO — wheel-anchored two-part composition with up-next + quick log */}
       <Reveal>
-        <section aria-label="Cycle today" className="relative pb-2 pt-4">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-[-40px] -z-[1] h-[380px]"
-            style={{
-              background: model?.currentPhase
-                ? `radial-gradient(50% 58% at 50% 46%, color-mix(in oklab, var(--cycle-${model.currentPhase === "ovulation" ? "ovulation" : model.currentPhase}) 10%, transparent), transparent 72%)`
-                : "radial-gradient(50% 58% at 50% 46%, color-mix(in oklab, var(--violet) 8%, transparent), transparent 72%)",
-            }}
-          />
-          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
-            <div className="order-2 min-w-0 lg:order-1">
-              <p className="eyebrow mb-3 flex items-center gap-2">
-                Cycle · personal insight
-                {loading ? <span className="text-faint">· reading your record…</span> : null}
-              </p>
-              <h1 className="display text-pretty text-[30px] leading-[1.08] tracking-[-0.022em] sm:text-[38px]">
-                {heroHeadline}
-              </h1>
-              <p className="mt-3 max-w-[54ch] text-[14px] leading-relaxed text-muted-foreground">
-                {heroSub}
-              </p>
-              <div className="mt-5 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => openQuick()}
-                  className="inline-flex items-center gap-2 rounded-full px-4.5 py-2 text-[13px] font-medium text-[var(--primary-foreground)] transition-transform duration-[var(--motion-med)] hover:scale-[1.015] active:scale-[0.99]"
-                  style={{ background: "linear-gradient(135deg, var(--violet), var(--sky))" }}
-                >
-                  <Plus className="size-3.5" aria-hidden /> Quick log
-                </button>
-                <a
-                  href="#cycle-calendar"
-                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[13px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-                >
-                  <CalendarDays className="size-3.5" aria-hidden /> Calendar
-                </a>
-                <a
-                  href="#cycle-intelligence"
-                  className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Info className="size-3.5" aria-hidden /> Insights
-                </a>
-              </div>
-            </div>
-            <div className="order-1 flex flex-col items-center gap-2 lg:order-2">
-              {model ? (
-                <>
-                  <CycleRing model={model} size={300} />
-                  <ObserveLegend />
-                  <button
-                    type="button"
-                    onClick={() => setAdjustOpen(true)}
-                    className="mono rounded-full border border-border px-3 py-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:border-border-strong hover:text-foreground"
-                  >
-                    adjust cycle
-                  </button>
-                </>
-              ) : (
-                <RingSkeleton />
-              )}
-            </div>
-
-            {model ? (
-              <AtAGlance
-                className="order-3 min-w-0 lg:col-span-3 lg:col-start-3 lg:row-span-2 xl:col-span-1 xl:row-span-1"
-                model={model}
-                onViewAll={() =>
-                  document
-                    .getElementById("cycle-intelligence")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
-                }
-                onOpenMethod={() => setMethodOpen(true)}
-              />
-            ) : null}
-          </div>
-
-          <div id="cycle-insight" className="mt-7 scroll-mt-6">
-            <InsightCard
-              insight={insight}
-              signals={
-                model
-                  ? [
-                      `phase · ${model.currentPhase ?? "unknown"}`,
-                      `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
-                      model.completed.length > 0
-                        ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
-                        : "no completed cycles yet",
-                      model.variabilityPercent !== null
-                        ? `spread ±${Math.round(model.stdDev ?? 0)}d`
-                        : "spread unknown",
-                    ]
-                  : []
-              }
-              onAsk={() =>
-                toast("Open the Bloom assistant (bottom right) — it remembers this question.")
-              }
-            />
-          </div>
-        </section>
+        <CycleHero
+          model={model}
+          loading={loading}
+          todayEntry={todayEntry}
+          onQuickLog={() => openQuick()}
+          onStripSave={stripSave}
+          onOpenAdvanced={() => {
+            setAdvEntry(null);
+            setAdvancedOpen(true);
+          }}
+          onAdjust={() => setAdjustOpen(true)}
+          onViewAll={scrollToHistory}
+          onOpenMethod={() => setMethodOpen(true)}
+        />
       </Reveal>
 
-      {/* NEXT 7 DAYS */}
+      {/* NEXT SEVEN DAYS */}
       <Reveal delay={40}>
         <CycleSection
           title="The next seven days"
-          sub="A path, not a promise — soft means estimated."
-          gap="default"
+          sub="A visual continuation of the wheel above — soft means estimated."
         >
           {model ? (
-            <Next7Timeline
+            <CycleTimeline
               model={model}
               entries={entries}
               onLogDay={(date) => {
@@ -288,51 +223,98 @@ function CyclePage() {
         </CycleSection>
       </Reveal>
 
-      {/* RECOMMENDATIONS */}
+      {/* TODAY — insight + honest suggestions, from real data only */}
       <Reveal delay={40}>
         <CycleSection
-          title="Might help right now"
-          sub="Optional suggestions drawn from your actual state — ignore freely."
-          gap="default"
+          id="cycle-insight"
+          title="Today, from your data"
+          sub="Correlation language only — Bloom describes what tends to go together in your logs."
         >
-          <RecommendationStack
-            recs={recs}
-            onDismiss={(id) => {
-              dismissStore.dismiss(id);
-              setDismissTick((t) => t + 1);
-            }}
-            onAsk={() =>
-              toast("The assistant answers from the same data — bottom-right button opens it.")
+          <InsightCard
+            insight={insight}
+            signals={
+              model
+                ? [
+                    `phase · ${model.currentPhase ?? "unknown"}`,
+                    `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
+                    model.completed.length > 0
+                      ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
+                      : "no completed cycles yet",
+                    model.variabilityPercent !== null
+                      ? `spread ±${Math.round(model.stdDev ?? 0)}d`
+                      : "spread unknown",
+                  ]
+                : []
             }
+            onAsk={() => toast("Open the Bloom assistant (bottom right) — it picks this up.")}
           />
+          <div className="mt-5">
+            <RecommendationStack
+              recs={recs}
+              onDismiss={(id) => {
+                dismissStore.dismiss(id);
+                setDismissTick((t) => t + 1);
+              }}
+              onAsk={() =>
+                toast("The assistant answers from the same data — bottom-right button opens it.")
+              }
+            />
+          </div>
         </CycleSection>
       </Reveal>
 
-      {/* PATTERNS */}
+      {/* HISTORY + PATTERNS */}
       <Reveal delay={40}>
         <CycleSection
-          title="Your patterns"
-          sub="What your own logs keep repeating — observation first, always with its sample size."
+          title="Your history"
+          id="cycle-history"
+          sub="Every bar is a cycle you actually completed. Averages appear only when the data earns them."
           gap="wide"
-          id="cycle-patterns"
+          right={
+            model && entries.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setAdvEntry(null);
+                  setAdvancedOpen(true);
+                }}
+                className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] uppercase tracking-[0.07em] text-muted-foreground transition-colors hover:border-[var(--border-strong)] hover:text-foreground"
+              >
+                <PencilLine className="size-3" aria-hidden /> Advanced log
+              </button>
+            ) : null
+          }
         >
           {model ? (
-            <PatternsSection
-              model={model}
-              entries={entries}
-              onOpenMethod={() => setMethodOpen(true)}
-            />
+            <Suspense fallback={<BlockSkeleton h={220} />}>
+              <CycleHistory model={model} entries={entries} />
+            </Suspense>
           ) : (
-            <BlockSkeleton h={160} />
+            <BlockSkeleton h={220} />
           )}
+          <div id="cycle-patterns" className="mt-12 scroll-mt-6">
+            <h3 className="cy-title mb-1 text-[19px]">Your patterns</h3>
+            <p className="mb-4 max-w-[62ch] text-[12.5px] leading-relaxed text-muted-foreground">
+              What your own logs keep repeating — observation first, always with its sample size.
+            </p>
+            {model ? (
+              <PatternInsights
+                model={model}
+                entries={entries}
+                onOpenMethod={() => setMethodOpen(true)}
+              />
+            ) : (
+              <BlockSkeleton h={160} />
+            )}
+          </div>
         </CycleSection>
       </Reveal>
 
-      {/* PHASES */}
+      {/* PHASE EDUCATION */}
       <Reveal delay={40}>
         <CycleSection
           title="The four phases"
-          sub="The textbook outline — your data writes the real story."
+          sub="General education, kept separate from your observations. The active phase leads."
           gap="wide"
         >
           {model ? <PhasesGuide model={model} /> : <BlockSkeleton h={180} />}
@@ -341,7 +323,12 @@ function CyclePage() {
 
       {/* CALENDAR */}
       <Reveal delay={40}>
-        <CycleSection title="Calendar" id="cycle-calendar" gap="wide">
+        <CycleSection
+          title="Calendar"
+          id="cycle-calendar"
+          sub="A surface for exploring dates — one month at a time, context for whatever you select."
+          gap="wide"
+        >
           {model ? (
             <CycleCalendar
               model={model}
@@ -359,41 +346,9 @@ function CyclePage() {
         </CycleSection>
       </Reveal>
 
-      {/* ANALYTICS */}
-      <Reveal delay={40}>
-        <CycleSection
-          title="Cycle intelligence"
-          id="cycle-intelligence"
-          sub="Summaries of what you've logged. Empty stretches stay honestly empty."
-          gap="wide"
-          right={
-            model && entries.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setAdvEntry(null);
-                  setAdvancedOpen(true);
-                }}
-                className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] uppercase tracking-[0.07em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-              >
-                <PencilLine className="size-3" aria-hidden /> Advanced log
-              </button>
-            ) : null
-          }
-        >
-          {model ? (
-            <Suspense fallback={<BlockSkeleton h={220} />}>
-              <Analytics model={model} entries={entries} />
-            </Suspense>
-          ) : (
-            <BlockSkeleton h={220} />
-          )}
-        </CycleSection>
-      </Reveal>
-
-      <footer className="mt-12 flex flex-col items-center gap-2 border-t border-border/60 pt-5 text-center">
-        <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
-          cycle records are private to your account · nothing here is medical advice
+      <footer className="cy-section mt-16 flex flex-col items-start gap-2">
+        <p className="mono text-[9.5px] uppercase tracking-[0.08em] text-faint">
+          cycle records stay private · nothing here is medical advice · estimates mean uncertainty
         </p>
         <button
           type="button"
@@ -412,11 +367,11 @@ function CyclePage() {
           }}
           className="mono rounded-full border border-border px-3 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
         >
-          Export my data (csv)
+          Export my data (csv) · {fmtShort(model?.today ?? localDateKey())}
         </button>
       </footer>
 
-      {/* overlays */}
+      {/* overlays — every form field the page supports lives here */}
       <CycleLengthSheet
         open={adjustOpen}
         onClose={() => setAdjustOpen(false)}
@@ -449,7 +404,7 @@ function CyclePage() {
           setAdvancedOpen(true);
         }}
       />
-      <AdvancedLog
+      <AdvancedCycleLog
         open={advancedOpen}
         onClose={() => {
           setAdvancedOpen(false);
@@ -469,7 +424,7 @@ function CyclePage() {
           URL.revokeObjectURL(url);
         }}
       />
-      <AssistantDock
+      <BloomCycleAI
         context={context}
         insight={insightSeen ? null : insight}
         onSeenInsight={() => setInsightSeen(true)}
@@ -495,29 +450,17 @@ function CyclePage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <div className="cycle-page relative min-h-screen bg-background text-foreground">
       <BloomHeader />
-      <Atmosphere />
-      <main className="relative mx-auto w-full max-w-[1060px] px-4 pb-20 pt-6 sm:px-6 lg:px-8">
+      <main className="relative z-[1] mx-auto w-full max-w-[1120px] px-4 pb-24 pt-4 sm:px-6 lg:px-10">
         {children}
       </main>
     </div>
   );
 }
 
-function RingSkeleton() {
-  return (
-    <div
-      className="grid size-[264px] animate-pulse place-items-center rounded-full border border-border/60 bg-surface-3/30"
-      aria-hidden
-    >
-      <div className="size-24 rounded-full bg-surface-3/50" />
-    </div>
-  );
-}
-
 function BlockSkeleton({ h }: { h: number }) {
   return (
-    <div className="animate-pulse rounded-2xl bg-surface-3/25" style={{ height: h }} aria-hidden />
+    <div className="animate-pulse rounded-2xl bg-surface/45" style={{ height: h }} aria-hidden />
   );
 }

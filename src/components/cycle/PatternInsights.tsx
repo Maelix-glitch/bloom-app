@@ -19,7 +19,7 @@ const PHASE_LABEL: Record<PhaseKey, string> = {
   luteal: "luteal",
 };
 
-export function PatternsSection({
+export function PatternInsights({
   model,
   entries,
   onOpenMethod,

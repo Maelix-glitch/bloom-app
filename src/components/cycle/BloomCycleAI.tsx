@@ -40,7 +40,7 @@ export const BloomMark = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export function AssistantDock({
+export function BloomCycleAI({
   context,
   insight,
   onSeenInsight,
@@ -136,12 +136,7 @@ export function AssistantDock({
         onClick={toggle}
         aria-label={open ? "Close Bloom assistant" : "Open the Bloom cycle assistant"}
         aria-expanded={open}
-        className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[70] grid size-[46px] place-items-center rounded-full border text-foreground shadow-[0_18px_40px_-18px_rgba(0,0,0,0.85)] transition-[transform,border-color] duration-[var(--motion-med)] hover:scale-[1.05] active:scale-[0.98] sm:right-6 sm:bottom-6"
-        style={{
-          background:
-            "linear-gradient(150deg, color-mix(in oklab, var(--violet) 34%, var(--surface-2)), color-mix(in oklab, var(--sky) 22%, var(--surface-2)))",
-          borderColor: "color-mix(in oklab, var(--violet) 45%, transparent)",
-        }}
+        className="cy-ai fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[70] sm:right-6 sm:bottom-6"
       >
         {open ? <X className="size-[18px]" /> : <BloomMark className="size-5" />}
         {showDot && !open ? (

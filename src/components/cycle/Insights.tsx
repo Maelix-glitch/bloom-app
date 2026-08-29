@@ -22,14 +22,7 @@ export function InsightCard({
   if (!insight || dismissed || dismissStore.isDismissed(insight.id)) return null;
   return (
     <div
-      className={cn(
-        "relative flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3.5",
-        className,
-      )}
-      style={{
-        backgroundImage:
-          "radial-gradient(120% 160% at 80% -40%, color-mix(in oklab, var(--violet) 8%, transparent), transparent 55%)",
-      }}
+      className={cn("cy-insight relative flex flex-wrap items-center gap-x-4 gap-y-1.5", className)}
     >
       <Lightbulb
         className="size-4 shrink-0 text-[color:var(--violet)]"
@@ -93,9 +86,9 @@ export function RecommendationStack({
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-x-8 gap-y-0 sm:grid-cols-2">
       {primary ? (
-        <article className="flex flex-col justify-between gap-3 rounded-2xl border border-[color:var(--border-strong)] bg-surface p-4 sm:row-span-2 sm:p-5">
+        <article className="cy-rec cy-rec--primary flex flex-col justify-between gap-3 sm:p-5">
           <div>
             <p className="eyebrow mb-1.5">{primary.category}</p>
             <h3 className="display text-[17px] leading-snug">{primary.title}</h3>
@@ -130,38 +123,40 @@ export function RecommendationStack({
           ) : null}
         </article>
       ) : null}
-      {rest.map((r) => (
-        <article
-          key={r.id}
-          className="flex flex-wrap items-start gap-x-3 gap-y-2 rounded-xl border border-border/70 bg-surface/40 px-4 py-3 transition-colors hover:bg-surface/70"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-[13.5px] font-medium">{r.title}</p>
-            <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">{r.body}</p>
-            <p className="mono mt-1 text-[9px] uppercase tracking-[0.08em] text-faint">
-              because: {r.reason}
-            </p>
-          </div>
-          <div className="flex shrink-0 gap-1">
-            <button
-              type="button"
-              onClick={() => setWhy(why === r.id ? null : r.id)}
-              aria-label={`See why: ${r.title}`}
-              className="mono rounded-full border border-border px-2.5 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint hover:text-foreground"
-            >
-              Why
-            </button>
-            <button
-              type="button"
-              onClick={() => onDismiss(r.id)}
-              aria-label={`Dismiss ${r.title}`}
-              className="mono rounded-full border border-border px-2.5 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint hover:text-rose"
-            >
-              No
-            </button>
-          </div>
-        </article>
-      ))}
+      <div className="flex flex-col">
+        {rest.map((r) => (
+          <article
+            key={r.id}
+            className="cy-rec flex flex-wrap items-start gap-x-3 gap-y-2 px-2 py-3.5 transition-colors"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[13.5px] font-medium">{r.title}</p>
+              <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">{r.body}</p>
+              <p className="mono mt-1 text-[9px] uppercase tracking-[0.08em] text-faint">
+                because: {r.reason}
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-1">
+              <button
+                type="button"
+                onClick={() => setWhy(why === r.id ? null : r.id)}
+                aria-label={`See why: ${r.title}`}
+                className="mono rounded-full border border-border px-2.5 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint hover:text-foreground"
+              >
+                Why
+              </button>
+              <button
+                type="button"
+                onClick={() => onDismiss(r.id)}
+                aria-label={`Dismiss ${r.title}`}
+                className="mono rounded-full border border-border px-2.5 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint hover:text-rose"
+              >
+                No
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
