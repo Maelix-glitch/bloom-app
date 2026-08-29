@@ -320,3 +320,79 @@ describe("model + predictions", () => {
     expect(localDateKey(new Date(2026, 7, 28))).toBe("2026-08-28");
   });
 });
+
+describe("intelligence: biomarkers actually move the estimate", () => {
+  it("a positive LH test shifts ovulation off the calendar, ~1 day after the surge", () => {
+    const rows = [
+      entry("2026-08-01", { flow: "medium" }),
+      entry("2026-08-02", { flow: "light" }),
+      // calendar would put ovulation around day 14 (2026-08-14) for a 28-day
+      // assumed cycle, but a real surge showed up on day 12 instead.
+      entry("2026-08-12", { lh_test: "positive" }),
+    ];
+    const m = buildCycleModel(rows, "2026-08-13");
+    const ovu = m.events.find((e) => e.id === "ovulation")!;
+    expect(ovu.date).toBe("2026-08-13"); // day after the positive test
+    expect(ovu.provenance?.source).toBe("confirmed");
+    expect(ovu.provenance?.confidence).toBe("high");
+    expect(ovu.plusMinusDays).toBe(1);
+    const fertile = m.events.find((e) => e.id === "fertile-window")!;
+    expect(fertile.rangeEnd).toBe("2026-08-14"); // ovu + 1, not the old calendar date
+  });
+
+  it("an implausibly early LH test (mislog) is ignored in favor of the calendar", () => {
+    const rows = [
+      entry("2026-08-01", { flow: "medium" }),
+      entry("2026-08-03", { lh_test: "positive" }), // day 3 — too early to trust
+    ];
+    const m = buildCycleModel(rows, "2026-08-05");
+    const ovu = m.events.find((e) => e.id === "ovulation")!;
+    expect(ovu.provenance?.source).not.toBe("confirmed");
+  });
+
+  it("a confirmed temperature rise moves ovulation to the day before the shift, when no LH test exists", () => {
+    const rows = [
+      entry("2026-08-01", { flow: "medium" }),
+      entry("2026-08-02", { flow: "light" }),
+      entry("2026-08-10", { temperature: 36.4 }),
+      entry("2026-08-11", { temperature: 36.5 }),
+      entry("2026-08-12", { temperature: 36.9 }), // shift begins
+      entry("2026-08-13", { temperature: 37.0 }),
+    ];
+    const m = buildCycleModel(rows, "2026-08-13");
+    const ovu = m.events.find((e) => e.id === "ovulation")!;
+    expect(ovu.date).toBe("2026-08-11"); // day before the shift date (08-12)
+    expect(ovu.provenance?.source).toBe("confirmed");
+  });
+
+  it("a past cycle with a confirmed BBT shift teaches a personal luteal length used for future predictions", () => {
+    const rows = [
+      // cycle 1: starts 08-01, confirmed ovulation via BBT shift on day 15
+      // (shift date 08-16 → confirmed ovulation 08-15), next period 08-29 →
+      // a 14-day luteal length for this cycle specifically.
+      entry("2026-08-01", { flow: "medium" }),
+      entry("2026-08-13", { temperature: 36.4 }),
+      entry("2026-08-14", { temperature: 36.5 }),
+      entry("2026-08-15", { temperature: 36.4 }),
+      entry("2026-08-16", { temperature: 36.9 }),
+      entry("2026-08-17", { temperature: 37.0 }),
+      // cycle 2 start — completes cycle 1 at 28 days
+      entry("2026-08-29", { flow: "medium" }),
+    ];
+    const m = buildCycleModel(rows, "2026-09-05");
+    // one completed cycle with a valid BBT-confirmed luteal length feeds in
+    expect(m.lutealLength).toBe(14);
+  });
+
+  it("egg-white cervical mucus logged ahead of the calendar window extends the fertile window earlier", () => {
+    const rows = [
+      entry("2026-08-01", { flow: "medium" }),
+      // calendar fertile window would start ~5 days before day-14 ovulation
+      // (2026-08-09); egg-white shows up two days earlier than that.
+      entry("2026-08-07", { cervical_mucus: "egg-white" }),
+    ];
+    const m = buildCycleModel(rows, "2026-08-08");
+    const fertile = m.events.find((e) => e.id === "fertile-window")!;
+    expect(fertile.rangeStart).toBe("2026-08-07");
+  });
+});

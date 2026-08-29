@@ -154,10 +154,13 @@ function whatChanged(ctx: CycleContext): string {
     parts.push(
       `Symptom notes on ${ctx.recentSymptoms.length} recent day${ctx.recentSymptoms.length === 1 ? "" : "s"}.`,
     );
-  if (ctx.observedEvidence.lhPositiveDates.length > 0)
+  if (ctx.observedEvidence.lhPositiveDates.length > 0) {
+    const ovu = ctx.events.find((e) => e.id === "ovulation");
+    const adjusted = ovu?.provenance?.source === "confirmed";
     parts.push(
-      `You logged ${ctx.observedEvidence.lhPositiveDates.length} positive LH test${ctx.observedEvidence.lhPositiveDates.length === 1 ? "" : "s"} this cycle — your entry stays separate from the calendar estimate.`,
+      `You logged ${ctx.observedEvidence.lhPositiveDates.length} positive LH test${ctx.observedEvidence.lhPositiveDates.length === 1 ? "" : "s"} this cycle${adjusted ? " — Bloom moved the ovulation estimate to match it" : ""}.`,
     );
+  }
   return (
     parts.join("\n") || "Nothing measurable has changed yet — there aren't enough logs to compare."
   );

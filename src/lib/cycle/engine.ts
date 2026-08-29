@@ -217,6 +217,27 @@ export function datesBetween(start: string, end: string): string[] {
   return Array.from({ length: n + 1 }, (_, i) => addDays(start, i));
 }
 
+/**
+ * A sustained ≥0.2° rise held for two consecutive readings, relative to the
+ * mean of the earlier (pre-shift) half of the window. Works on any cycle's
+ * entries — the current open cycle, or a completed historical one — so the
+ * same signal can both mark "ovulation already happened" now and teach the
+ * engine your personal luteal length from cycles you finished in the past.
+ */
+function detectBbtShiftDate(cycleEntries: CycleEntry[]): string | null {
+  const temps = cycleEntries.filter((e) => e.temperature !== null);
+  if (temps.length < 4) return null;
+  const split = Math.max(2, Math.floor(temps.length / 2));
+  const lowMean = mean(temps.slice(0, split).map((t) => t.temperature!));
+  if (lowMean === null) return null;
+  for (let i = split; i < temps.length - 1; i++) {
+    const a = temps[i]!.temperature!;
+    const b = temps[i + 1]!.temperature!;
+    if (a >= lowMean + 0.2 && b >= lowMean + 0.2) return temps[i]!.date;
+  }
+  return null;
+}
+
 const medianOf = (xs: number[]) => {
   if (!xs.length) return null;
   const s = [...xs].sort((a, b) => a - b);
@@ -358,6 +379,24 @@ export function buildCycleModel(
   const calculationVersion = calculationVersionFor(sorted, opts.defaultCycle ?? null);
   const issues = conflictIssues(sorted, runs);
 
+  // Learn a personal luteal length from any past cycle with a confirmed BBT
+  // shift, instead of always assuming the population-average 14 days. The
+  // shift is detected 1–3 days after ovulation actually happens, so the day
+  // before the shift is used as the confirmed ovulation date for that cycle.
+  const bbtConfirmedLutealLengths: number[] = [];
+  for (const c of completed) {
+    const cycleEnd = addDays(c.start, c.lengthDays);
+    const windowEntries = sorted.filter((e) => e.date >= c.start && e.date < cycleEnd);
+    const shift = detectBbtShiftDate(windowEntries);
+    if (!shift) continue;
+    const confirmedOvulation = addDays(shift, -1);
+    const lutealForCycle = diffDays(confirmedOvulation, cycleEnd);
+    if (lutealForCycle >= 9 && lutealForCycle <= 16) bbtConfirmedLutealLengths.push(lutealForCycle);
+  }
+  const personalizedLuteal = bbtConfirmedLutealLengths.length
+    ? Math.round(mean(bbtConfirmedLutealLengths)!)
+    : null;
+
   const lastStart = runs.length ? (runs[runs.length - 1]?.start ?? null) : null;
   const currentRun = currentRunFor(runs, today);
   const currentPeriodEpisode = currentRun
@@ -366,10 +405,10 @@ export function buildCycleModel(
   const currentDay = lastStart ? Math.max(1, diffDays(lastStart, today) + 1) : null;
 
   const avgSafe = avg ?? assumed;
-  const lutealLength = MEAN_LUTEAL;
+  const lutealLength = personalizedLuteal ?? MEAN_LUTEAL;
   const ovulationDay = usesDefault
-    ? assumed - MEAN_LUTEAL
-    : Math.max(8, Math.round(avgSafe - MEAN_LUTEAL));
+    ? assumed - lutealLength
+    : Math.max(8, Math.round(avgSafe - lutealLength));
 
   /* observed evidence in the CURRENT cycle window — shown alongside, never overwriting */
   const cycleStart = lastStart ?? today;
@@ -382,24 +421,7 @@ export function buildCycleModel(
   const eggWhiteDates = inCurrent
     .filter((e) => e.cervical_mucus === "egg-white")
     .map((e) => e.date);
-  let bbtShiftDate: string | null = null;
-  {
-    const temps = inCurrent.filter((e) => e.temperature !== null);
-    if (temps.length >= 4) {
-      const split = Math.max(2, Math.floor(temps.length / 2));
-      const lowMean = mean(temps.slice(0, split).map((t) => t.temperature!));
-      if (lowMean !== null) {
-        for (let i = split; i < temps.length - 1; i++) {
-          const a = temps[i]!.temperature!;
-          const b = temps[i + 1]!.temperature!;
-          if (a >= lowMean + 0.2 && b >= lowMean + 0.2) {
-            bbtShiftDate = temps[i]!.date;
-            break;
-          }
-        }
-      }
-    }
-  }
+  const bbtShiftDate = detectBbtShiftDate(inCurrent);
 
   const reproductivePhaseFor = (day: number): ReproductivePhaseKey => {
     if (day >= ovulationDay - 1 && day <= ovulationDay + 1) return "ovulation";
@@ -493,31 +515,95 @@ export function buildCycleModel(
       generatedFromVersion: calculationVersion,
     });
 
-    const ovu = addDays(lastStart, ovulationDay);
+    // A positive LH test is the strongest same-cycle signal available (surge
+    // precedes ovulation by ~24–36h); a confirmed temperature rise is the
+    // next best (it means ovulation already happened, ~1 day before the
+    // shift). Either one moves the prediction; absent both, it stays a
+    // calendar guess. Priority: LH > BBT > calendar.
+    const calendarOvu = addDays(lastStart, ovulationDay);
+    const latestLH = lhPositiveDates.length ? lhPositiveDates[lhPositiveDates.length - 1]! : null;
+    const lhOvulation = latestLH ? addDays(latestLH, 1) : null;
+    const lhCycleDay = lhOvulation ? diffDays(lastStart, lhOvulation) + 1 : null;
+    // Guard against a stray/mislogged early test producing a nonsense date.
+    const lhIsPlausible = lhOvulation !== null && lhCycleDay !== null && lhCycleDay >= 6;
+    const bbtOvulation = !lhIsPlausible && bbtShiftDate ? addDays(bbtShiftDate, -1) : null;
+    const confirmedBy: "lh" | "bbt" | "calendar" = lhIsPlausible
+      ? "lh"
+      : bbtOvulation
+        ? "bbt"
+        : "calendar";
+    const ovu = confirmedBy === "lh" ? lhOvulation! : (bbtOvulation ?? calendarOvu);
     const ovuAway = diffDays(today, ovu);
-    const hasOvuEvidence = lhPositiveDates.length > 0 || bbtShiftDate !== null;
+
     events.push({
       id: "ovulation",
-      label: "Ovulation (estimate)",
+      label:
+        confirmedBy === "lh"
+          ? "Ovulation (LH-adjusted)"
+          : confirmedBy === "bbt"
+            ? "Ovulation (temperature-confirmed)"
+            : "Ovulation (estimate)",
       date: ovu,
-      rangeStart: halfWidth !== null ? addDays(ovu, -halfWidth) : null,
-      rangeEnd: halfWidth !== null ? addDays(ovu, halfWidth) : null,
-      plusMinusDays: halfWidth,
+      rangeStart:
+        confirmedBy === "calendar"
+          ? halfWidth !== null
+            ? addDays(ovu, -halfWidth)
+            : null
+          : addDays(ovu, -1),
+      rangeEnd:
+        confirmedBy === "calendar"
+          ? halfWidth !== null
+            ? addDays(ovu, halfWidth)
+            : null
+          : addDays(ovu, 1),
+      plusMinusDays: confirmedBy === "calendar" ? halfWidth : 1,
       daysAway: ovuAway,
-      detail: hasOvuEvidence
-        ? "You have logged fertility-sign language this cycle — the estimate stays calendar-based unless a test confirms"
-        : usesDefault
-          ? "Calendar estimate only (typical 14-day luteal phase) — no personal data behind it yet"
-          : "Calendar estimate — an LH test or temperature shift sharpens it",
+      detail:
+        confirmedBy === "lh"
+          ? `Your positive LH test on ${fmtShort(latestLH!)} moved this off the calendar — a surge is typically followed by ovulation in ~24–36h`
+          : confirmedBy === "bbt"
+            ? `Your temperature rise on ${fmtShort(bbtShiftDate!)} suggests ovulation already happened, about a day earlier`
+            : personalizedLuteal !== null
+              ? `Calendar estimate, refined using your own ${personalizedLuteal}-day luteal phase from confirmed cycles`
+              : usesDefault
+                ? "Calendar estimate only (typical 14-day luteal phase) — no personal data behind it yet"
+                : "Calendar estimate — an LH test or temperature shift sharpens it",
+      // Ovulation itself is never directly observed, even when a biomarker
+      // narrows it a lot — keep this true so the UI never claims "logged".
       predicted: true,
-      provenance: usesDefault
-        ? PROV.baseline("Estimated from the general baseline and a 14-day luteal assumption.")
-        : PROV.predicted("Estimated from cycle length history; ovulation is never guaranteed."),
+      provenance:
+        confirmedBy === "lh"
+          ? {
+              source: "confirmed",
+              confidence: "high",
+              status: "estimated",
+              reason: "Adjusted from your positive LH test; ovulation is inferred, not observed.",
+            }
+          : confirmedBy === "bbt"
+            ? {
+                source: "confirmed",
+                confidence: "high",
+                status: "estimated",
+                reason:
+                  "Adjusted from your logged temperature rise; the shift confirms ovulation already occurred.",
+              }
+            : usesDefault
+              ? PROV.baseline("Estimated from the general baseline and a 14-day luteal assumption.")
+              : PROV.predicted("Estimated from cycle length history; ovulation is never guaranteed."),
       generatedFromVersion: calculationVersion,
     });
 
-    const fertileStart = addDays(ovu, -5);
+    // Fertile window follows whichever ovulation date won above, and can
+    // stretch a little earlier if egg-white cervical mucus — a recognized
+    // precursor sign — was logged ahead of the calendar window.
+    let fertileStart = addDays(ovu, -5);
     const fertileEnd = addDays(ovu, 1);
+    const earliestEggWhite = eggWhiteDates.length ? eggWhiteDates[0]! : null;
+    // diffDays(a, b) = b - a, so a positive gap means the mucus was logged
+    // that many days *before* the calendar fertile window starts.
+    const mucusLeadDays = earliestEggWhite ? diffDays(earliestEggWhite, fertileStart) : 0;
+    const extendedByMucus = earliestEggWhite !== null && mucusLeadDays > 0 && mucusLeadDays <= 3;
+    if (extendedByMucus) fertileStart = earliestEggWhite!;
     events.push({
       id: "fertile-window",
       label: "Fertile window (estimate)",
@@ -526,8 +612,11 @@ export function buildCycleModel(
       rangeEnd: fertileEnd,
       plusMinusDays: halfWidth,
       daysAway: diffDays(today, fertileStart),
-      detail:
-        "Planning awareness only — an estimate, not contraception and not a fertility guarantee",
+      detail: extendedByMucus
+        ? `Extended earlier to include egg-white cervical mucus logged on ${fmtShort(earliestEggWhite!)} — planning awareness only, not contraception`
+        : confirmedBy !== "calendar"
+          ? "Adjusted to match your confirmed ovulation — planning awareness only, not contraception"
+          : "Planning awareness only — an estimate, not contraception and not a fertility guarantee",
       predicted: true,
       provenance: usesDefault
         ? PROV.baseline("General fertile-window estimate; not contraception or a guarantee.")
