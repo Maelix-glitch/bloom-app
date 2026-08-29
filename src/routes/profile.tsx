@@ -4,6 +4,8 @@ import { Archive, Plus, RefreshCcw } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
 
+import profileCss from "../styles/profile.css?url";
+
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { BloomHeader } from "@/components/BloomHeader";
 import { Atmosphere } from "@/components/mood/Atmosphere";
@@ -44,6 +46,7 @@ export type ProfileSearch = z.infer<typeof profileSearchSchema>;
 export const Route = createFileRoute("/profile")({
   validateSearch: (search: Record<string, unknown>) => profileSearchSchema.parse(search),
   head: () => ({
+    links: [{ rel: "stylesheet", href: profileCss }],
     meta: [
       { title: "Bloom — Profile" },
       {

@@ -6,6 +6,11 @@ export function BloomHeader() {
   const moodActive = pathname === "/";
   const rewardsActive =
     pathname === "/rewards" || pathname.startsWith("/admin/rewards");
+  const coachActive =
+    pathname === "/coach" ||
+    pathname.startsWith("/coach/") ||
+    pathname === "/bloom/coach.html";
+  const cycleActive = pathname === "/cycle" || pathname.startsWith("/cycle/");
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
 
   return (
@@ -77,7 +82,11 @@ export function BloomHeader() {
           Trackers
         </a>
 
-        <a href="/bloom/cycle.html" className="bloom-nav-link shrink-0">
+        <a
+          href="/cycle"
+          className={`bloom-nav-link shrink-0${cycleActive ? " bloom-nav-active" : ""}`}
+          aria-current={cycleActive ? "page" : undefined}
+        >
           Cycle
         </a>
 
@@ -101,7 +110,13 @@ export function BloomHeader() {
           Rewards
         </a>
 
-        <a href="/bloom/coach.html" className="bloom-nav-link shrink-0">
+        <a
+          href="/coach"
+          className={`bloom-nav-link shrink-0${
+            coachActive ? " bloom-nav-active" : ""
+          }`}
+          aria-current={coachActive ? "page" : undefined}
+        >
           Coach
         </a>
       </nav>
