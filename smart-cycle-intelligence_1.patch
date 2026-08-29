@@ -1,0 +1,349 @@
+From 65bb9e9ec7acb54383ef4e77f9f294b2b835dcaa Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.local>
+Date: Sat, 29 Aug 2026 18:52:52 +0000
+Subject: [PATCH] cycle: let LH/BBT evidence and cervical mucus actually adjust
+ predictions
+
+- Positive LH test moves the ovulation estimate off the calendar (surge + ~24-36h), when the timing is plausible
+- Confirmed BBT temperature shift moves ovulation to the day before the shift, when no LH test exists
+- Past cycles with a confirmed BBT shift teach a personal luteal-phase length, replacing the fixed 14-day assumption
+- Egg-white cervical mucus logged ahead of the calendar window extends the fertile window earlier
+- Fertile window always follows whichever ovulation date won (LH > BBT > calendar)
+- Provenance marked 'confirmed'/'high confidence' when evidence-adjusted, vs 'baseline'/'predicted' for pure calendar guesses
+- Assistant copy updated: LH tests are no longer described as 'kept separate' from the estimate
+- 5 new tests covering LH adjustment, implausible-LH rejection, BBT adjustment, personalized luteal length, and mucus extension
+---
+ src/lib/cycle/assistant.ts   |   7 +-
+ src/lib/cycle/engine.test.ts |  76 ++++++++++++++++
+ src/lib/cycle/engine.ts      | 165 +++++++++++++++++++++++++++--------
+ 3 files changed, 208 insertions(+), 40 deletions(-)
+
+diff --git a/src/lib/cycle/assistant.ts b/src/lib/cycle/assistant.ts
+index 80b5def..3c488a0 100644
+--- a/src/lib/cycle/assistant.ts
++++ b/src/lib/cycle/assistant.ts
+@@ -154,10 +154,13 @@ function whatChanged(ctx: CycleContext): string {
+     parts.push(
+       `Symptom notes on ${ctx.recentSymptoms.length} recent day${ctx.recentSymptoms.length === 1 ? "" : "s"}.`,
+     );
+-  if (ctx.observedEvidence.lhPositiveDates.length > 0)
++  if (ctx.observedEvidence.lhPositiveDates.length > 0) {
++    const ovu = ctx.events.find((e) => e.id === "ovulation");
++    const adjusted = ovu?.provenance?.source === "confirmed";
+     parts.push(
+-      `You logged ${ctx.observedEvidence.lhPositiveDates.length} positive LH test${ctx.observedEvidence.lhPositiveDates.length === 1 ? "" : "s"} this cycle — your entry stays separate from the calendar estimate.`,
++      `You logged ${ctx.observedEvidence.lhPositiveDates.length} positive LH test${ctx.observedEvidence.lhPositiveDates.length === 1 ? "" : "s"} this cycle${adjusted ? " — Bloom moved the ovulation estimate to match it" : ""}.`,
+     );
++  }
+   return (
+     parts.join("\n") || "Nothing measurable has changed yet — there aren't enough logs to compare."
+   );
+diff --git a/src/lib/cycle/engine.test.ts b/src/lib/cycle/engine.test.ts
+index 2739495..ab2d609 100644
+--- a/src/lib/cycle/engine.test.ts
++++ b/src/lib/cycle/engine.test.ts
+@@ -320,3 +320,79 @@ describe("model + predictions", () => {
+     expect(localDateKey(new Date(2026, 7, 28))).toBe("2026-08-28");
+   });
+ });
++
++describe("intelligence: biomarkers actually move the estimate", () => {
++  it("a positive LH test shifts ovulation off the calendar, ~1 day after the surge", () => {
++    const rows = [
++      entry("2026-08-01", { flow: "medium" }),
++      entry("2026-08-02", { flow: "light" }),
++      // calendar would put ovulation around day 14 (2026-08-14) for a 28-day
++      // assumed cycle, but a real surge showed up on day 12 instead.
++      entry("2026-08-12", { lh_test: "positive" }),
++    ];
++    const m = buildCycleModel(rows, "2026-08-13");
++    const ovu = m.events.find((e) => e.id === "ovulation")!;
++    expect(ovu.date).toBe("2026-08-13"); // day after the positive test
++    expect(ovu.provenance?.source).toBe("confirmed");
++    expect(ovu.provenance?.confidence).toBe("high");
++    expect(ovu.plusMinusDays).toBe(1);
++    const fertile = m.events.find((e) => e.id === "fertile-window")!;
++    expect(fertile.rangeEnd).toBe("2026-08-14"); // ovu + 1, not the old calendar date
++  });
++
++  it("an implausibly early LH test (mislog) is ignored in favor of the calendar", () => {
++    const rows = [
++      entry("2026-08-01", { flow: "medium" }),
++      entry("2026-08-03", { lh_test: "positive" }), // day 3 — too early to trust
++    ];
++    const m = buildCycleModel(rows, "2026-08-05");
++    const ovu = m.events.find((e) => e.id === "ovulation")!;
++    expect(ovu.provenance?.source).not.toBe("confirmed");
++  });
++
++  it("a confirmed temperature rise moves ovulation to the day before the shift, when no LH test exists", () => {
++    const rows = [
++      entry("2026-08-01", { flow: "medium" }),
++      entry("2026-08-02", { flow: "light" }),
++      entry("2026-08-10", { temperature: 36.4 }),
++      entry("2026-08-11", { temperature: 36.5 }),
++      entry("2026-08-12", { temperature: 36.9 }), // shift begins
++      entry("2026-08-13", { temperature: 37.0 }),
++    ];
++    const m = buildCycleModel(rows, "2026-08-13");
++    const ovu = m.events.find((e) => e.id === "ovulation")!;
++    expect(ovu.date).toBe("2026-08-11"); // day before the shift date (08-12)
++    expect(ovu.provenance?.source).toBe("confirmed");
++  });
++
++  it("a past cycle with a confirmed BBT shift teaches a personal luteal length used for future predictions", () => {
++    const rows = [
++      // cycle 1: starts 08-01, confirmed ovulation via BBT shift on day 15
++      // (shift date 08-16 → confirmed ovulation 08-15), next period 08-29 →
++      // a 14-day luteal length for this cycle specifically.
++      entry("2026-08-01", { flow: "medium" }),
++      entry("2026-08-13", { temperature: 36.4 }),
++      entry("2026-08-14", { temperature: 36.5 }),
++      entry("2026-08-15", { temperature: 36.4 }),
++      entry("2026-08-16", { temperature: 36.9 }),
++      entry("2026-08-17", { temperature: 37.0 }),
++      // cycle 2 start — completes cycle 1 at 28 days
++      entry("2026-08-29", { flow: "medium" }),
++    ];
++    const m = buildCycleModel(rows, "2026-09-05");
++    // one completed cycle with a valid BBT-confirmed luteal length feeds in
++    expect(m.lutealLength).toBe(14);
++  });
++
++  it("egg-white cervical mucus logged ahead of the calendar window extends the fertile window earlier", () => {
++    const rows = [
++      entry("2026-08-01", { flow: "medium" }),
++      // calendar fertile window would start ~5 days before day-14 ovulation
++      // (2026-08-09); egg-white shows up two days earlier than that.
++      entry("2026-08-07", { cervical_mucus: "egg-white" }),
++    ];
++    const m = buildCycleModel(rows, "2026-08-08");
++    const fertile = m.events.find((e) => e.id === "fertile-window")!;
++    expect(fertile.rangeStart).toBe("2026-08-07");
++  });
++});
+diff --git a/src/lib/cycle/engine.ts b/src/lib/cycle/engine.ts
+index 6829f97..91e97bd 100644
+--- a/src/lib/cycle/engine.ts
++++ b/src/lib/cycle/engine.ts
+@@ -217,6 +217,27 @@ export function datesBetween(start: string, end: string): string[] {
+   return Array.from({ length: n + 1 }, (_, i) => addDays(start, i));
+ }
+ 
++/**
++ * A sustained ≥0.2° rise held for two consecutive readings, relative to the
++ * mean of the earlier (pre-shift) half of the window. Works on any cycle's
++ * entries — the current open cycle, or a completed historical one — so the
++ * same signal can both mark "ovulation already happened" now and teach the
++ * engine your personal luteal length from cycles you finished in the past.
++ */
++function detectBbtShiftDate(cycleEntries: CycleEntry[]): string | null {
++  const temps = cycleEntries.filter((e) => e.temperature !== null);
++  if (temps.length < 4) return null;
++  const split = Math.max(2, Math.floor(temps.length / 2));
++  const lowMean = mean(temps.slice(0, split).map((t) => t.temperature!));
++  if (lowMean === null) return null;
++  for (let i = split; i < temps.length - 1; i++) {
++    const a = temps[i]!.temperature!;
++    const b = temps[i + 1]!.temperature!;
++    if (a >= lowMean + 0.2 && b >= lowMean + 0.2) return temps[i]!.date;
++  }
++  return null;
++}
++
+ const medianOf = (xs: number[]) => {
+   if (!xs.length) return null;
+   const s = [...xs].sort((a, b) => a - b);
+@@ -358,6 +379,24 @@ export function buildCycleModel(
+   const calculationVersion = calculationVersionFor(sorted, opts.defaultCycle ?? null);
+   const issues = conflictIssues(sorted, runs);
+ 
++  // Learn a personal luteal length from any past cycle with a confirmed BBT
++  // shift, instead of always assuming the population-average 14 days. The
++  // shift is detected 1–3 days after ovulation actually happens, so the day
++  // before the shift is used as the confirmed ovulation date for that cycle.
++  const bbtConfirmedLutealLengths: number[] = [];
++  for (const c of completed) {
++    const cycleEnd = addDays(c.start, c.lengthDays);
++    const windowEntries = sorted.filter((e) => e.date >= c.start && e.date < cycleEnd);
++    const shift = detectBbtShiftDate(windowEntries);
++    if (!shift) continue;
++    const confirmedOvulation = addDays(shift, -1);
++    const lutealForCycle = diffDays(confirmedOvulation, cycleEnd);
++    if (lutealForCycle >= 9 && lutealForCycle <= 16) bbtConfirmedLutealLengths.push(lutealForCycle);
++  }
++  const personalizedLuteal = bbtConfirmedLutealLengths.length
++    ? Math.round(mean(bbtConfirmedLutealLengths)!)
++    : null;
++
+   const lastStart = runs.length ? (runs[runs.length - 1]?.start ?? null) : null;
+   const currentRun = currentRunFor(runs, today);
+   const currentPeriodEpisode = currentRun
+@@ -366,10 +405,10 @@ export function buildCycleModel(
+   const currentDay = lastStart ? Math.max(1, diffDays(lastStart, today) + 1) : null;
+ 
+   const avgSafe = avg ?? assumed;
+-  const lutealLength = MEAN_LUTEAL;
++  const lutealLength = personalizedLuteal ?? MEAN_LUTEAL;
+   const ovulationDay = usesDefault
+-    ? assumed - MEAN_LUTEAL
+-    : Math.max(8, Math.round(avgSafe - MEAN_LUTEAL));
++    ? assumed - lutealLength
++    : Math.max(8, Math.round(avgSafe - lutealLength));
+ 
+   /* observed evidence in the CURRENT cycle window — shown alongside, never overwriting */
+   const cycleStart = lastStart ?? today;
+@@ -382,24 +421,7 @@ export function buildCycleModel(
+   const eggWhiteDates = inCurrent
+     .filter((e) => e.cervical_mucus === "egg-white")
+     .map((e) => e.date);
+-  let bbtShiftDate: string | null = null;
+-  {
+-    const temps = inCurrent.filter((e) => e.temperature !== null);
+-    if (temps.length >= 4) {
+-      const split = Math.max(2, Math.floor(temps.length / 2));
+-      const lowMean = mean(temps.slice(0, split).map((t) => t.temperature!));
+-      if (lowMean !== null) {
+-        for (let i = split; i < temps.length - 1; i++) {
+-          const a = temps[i]!.temperature!;
+-          const b = temps[i + 1]!.temperature!;
+-          if (a >= lowMean + 0.2 && b >= lowMean + 0.2) {
+-            bbtShiftDate = temps[i]!.date;
+-            break;
+-          }
+-        }
+-      }
+-    }
+-  }
++  const bbtShiftDate = detectBbtShiftDate(inCurrent);
+ 
+   const reproductivePhaseFor = (day: number): ReproductivePhaseKey => {
+     if (day >= ovulationDay - 1 && day <= ovulationDay + 1) return "ovulation";
+@@ -493,31 +515,95 @@ export function buildCycleModel(
+       generatedFromVersion: calculationVersion,
+     });
+ 
+-    const ovu = addDays(lastStart, ovulationDay);
++    // A positive LH test is the strongest same-cycle signal available (surge
++    // precedes ovulation by ~24–36h); a confirmed temperature rise is the
++    // next best (it means ovulation already happened, ~1 day before the
++    // shift). Either one moves the prediction; absent both, it stays a
++    // calendar guess. Priority: LH > BBT > calendar.
++    const calendarOvu = addDays(lastStart, ovulationDay);
++    const latestLH = lhPositiveDates.length ? lhPositiveDates[lhPositiveDates.length - 1]! : null;
++    const lhOvulation = latestLH ? addDays(latestLH, 1) : null;
++    const lhCycleDay = lhOvulation ? diffDays(lastStart, lhOvulation) + 1 : null;
++    // Guard against a stray/mislogged early test producing a nonsense date.
++    const lhIsPlausible = lhOvulation !== null && lhCycleDay !== null && lhCycleDay >= 6;
++    const bbtOvulation = !lhIsPlausible && bbtShiftDate ? addDays(bbtShiftDate, -1) : null;
++    const confirmedBy: "lh" | "bbt" | "calendar" = lhIsPlausible
++      ? "lh"
++      : bbtOvulation
++        ? "bbt"
++        : "calendar";
++    const ovu = confirmedBy === "lh" ? lhOvulation! : (bbtOvulation ?? calendarOvu);
+     const ovuAway = diffDays(today, ovu);
+-    const hasOvuEvidence = lhPositiveDates.length > 0 || bbtShiftDate !== null;
++
+     events.push({
+       id: "ovulation",
+-      label: "Ovulation (estimate)",
++      label:
++        confirmedBy === "lh"
++          ? "Ovulation (LH-adjusted)"
++          : confirmedBy === "bbt"
++            ? "Ovulation (temperature-confirmed)"
++            : "Ovulation (estimate)",
+       date: ovu,
+-      rangeStart: halfWidth !== null ? addDays(ovu, -halfWidth) : null,
+-      rangeEnd: halfWidth !== null ? addDays(ovu, halfWidth) : null,
+-      plusMinusDays: halfWidth,
++      rangeStart:
++        confirmedBy === "calendar"
++          ? halfWidth !== null
++            ? addDays(ovu, -halfWidth)
++            : null
++          : addDays(ovu, -1),
++      rangeEnd:
++        confirmedBy === "calendar"
++          ? halfWidth !== null
++            ? addDays(ovu, halfWidth)
++            : null
++          : addDays(ovu, 1),
++      plusMinusDays: confirmedBy === "calendar" ? halfWidth : 1,
+       daysAway: ovuAway,
+-      detail: hasOvuEvidence
+-        ? "You have logged fertility-sign language this cycle — the estimate stays calendar-based unless a test confirms"
+-        : usesDefault
+-          ? "Calendar estimate only (typical 14-day luteal phase) — no personal data behind it yet"
+-          : "Calendar estimate — an LH test or temperature shift sharpens it",
++      detail:
++        confirmedBy === "lh"
++          ? `Your positive LH test on ${fmtShort(latestLH!)} moved this off the calendar — a surge is typically followed by ovulation in ~24–36h`
++          : confirmedBy === "bbt"
++            ? `Your temperature rise on ${fmtShort(bbtShiftDate!)} suggests ovulation already happened, about a day earlier`
++            : personalizedLuteal !== null
++              ? `Calendar estimate, refined using your own ${personalizedLuteal}-day luteal phase from confirmed cycles`
++              : usesDefault
++                ? "Calendar estimate only (typical 14-day luteal phase) — no personal data behind it yet"
++                : "Calendar estimate — an LH test or temperature shift sharpens it",
++      // Ovulation itself is never directly observed, even when a biomarker
++      // narrows it a lot — keep this true so the UI never claims "logged".
+       predicted: true,
+-      provenance: usesDefault
+-        ? PROV.baseline("Estimated from the general baseline and a 14-day luteal assumption.")
+-        : PROV.predicted("Estimated from cycle length history; ovulation is never guaranteed."),
++      provenance:
++        confirmedBy === "lh"
++          ? {
++              source: "confirmed",
++              confidence: "high",
++              status: "estimated",
++              reason: "Adjusted from your positive LH test; ovulation is inferred, not observed.",
++            }
++          : confirmedBy === "bbt"
++            ? {
++                source: "confirmed",
++                confidence: "high",
++                status: "estimated",
++                reason:
++                  "Adjusted from your logged temperature rise; the shift confirms ovulation already occurred.",
++              }
++            : usesDefault
++              ? PROV.baseline("Estimated from the general baseline and a 14-day luteal assumption.")
++              : PROV.predicted("Estimated from cycle length history; ovulation is never guaranteed."),
+       generatedFromVersion: calculationVersion,
+     });
+ 
+-    const fertileStart = addDays(ovu, -5);
++    // Fertile window follows whichever ovulation date won above, and can
++    // stretch a little earlier if egg-white cervical mucus — a recognized
++    // precursor sign — was logged ahead of the calendar window.
++    let fertileStart = addDays(ovu, -5);
+     const fertileEnd = addDays(ovu, 1);
++    const earliestEggWhite = eggWhiteDates.length ? eggWhiteDates[0]! : null;
++    // diffDays(a, b) = b - a, so a positive gap means the mucus was logged
++    // that many days *before* the calendar fertile window starts.
++    const mucusLeadDays = earliestEggWhite ? diffDays(earliestEggWhite, fertileStart) : 0;
++    const extendedByMucus = earliestEggWhite !== null && mucusLeadDays > 0 && mucusLeadDays <= 3;
++    if (extendedByMucus) fertileStart = earliestEggWhite!;
+     events.push({
+       id: "fertile-window",
+       label: "Fertile window (estimate)",
+@@ -526,8 +612,11 @@ export function buildCycleModel(
+       rangeEnd: fertileEnd,
+       plusMinusDays: halfWidth,
+       daysAway: diffDays(today, fertileStart),
+-      detail:
+-        "Planning awareness only — an estimate, not contraception and not a fertility guarantee",
++      detail: extendedByMucus
++        ? `Extended earlier to include egg-white cervical mucus logged on ${fmtShort(earliestEggWhite!)} — planning awareness only, not contraception`
++        : confirmedBy !== "calendar"
++          ? "Adjusted to match your confirmed ovulation — planning awareness only, not contraception"
++          : "Planning awareness only — an estimate, not contraception and not a fertility guarantee",
+       predicted: true,
+       provenance: usesDefault
+         ? PROV.baseline("General fertile-window estimate; not contraception or a guarantee.")
+-- 
+2.43.0
+
