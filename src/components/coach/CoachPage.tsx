@@ -1666,7 +1666,13 @@ export function CoachPage() {
         mode: lens,
         context: buildCoachContext(
           entries,
-          coach.memories,
+          coach.memories.map((memory) => ({
+            id: memory.id,
+            category: memory.category,
+            text: memory.text,
+            pinned: memory.pinned,
+            learnedAt: memory.learnedAt ?? "",
+          })),
           coach.habitData,
           lens,
           text,

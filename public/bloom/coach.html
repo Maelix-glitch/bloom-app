@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!--
+================================================================================
+BLOOM · COACH v3 — AI WIRING BIBLE
+================================================================================
+Read this whole block before touching anything. Everything below is written so a
+developer (or an AI agent) can wire this static file to a real backend without
+guessing. The UI is intentionally "dumb": all state lives in one object, and one
+render pass paints it. Replace the mock functions, keep the shape.
+
+--------------------------------------------------------------------------------
+0. WHAT CHANGED FROM v2 (why this is a product, not a chat page)
+--------------------------------------------------------------------------------
+v2 was "messages + memory list". v3 adds the pieces that make an AI coach feel
+engineered rather than decorated:
+
+  a) STRUCTURED COACH OUTPUT. The model does not only return prose. It returns
+     optional typed "blocks" (proposal / metric / plan) that render as real
+     interactive cards with Accept / Adjust / Dismiss. This is the single most
+     important upgrade — it turns advice into an action the app can execute.
+  b) PROVENANCE CHIPS. Every coach turn declares which data it used
+     (sleep-7d, habits-today, memory#12, cycle). Users trust what they can audit.
+  c) STREAMING RENDER. Tokens arrive and paint progressively with a caret.
+  d) MEMORY WITH CONFIDENCE + PROVENANCE + UNDO. Memories have a strength score,
+     a source, pin/forget, and a 6s undo window before the delete is committed.
+  e) COMMAND PALETTE (Cmd/Ctrl-K) — power surface for coach intents.
+  f) MODES (Ask / Reflect / Plan) that change the system prompt, not the colors.
+  g) CONTEXT BUDGET METER — shows the user (and you) how much context the next
+     call will carry. Real engineering surface, prevents silent token blowouts.
+  h) SIGNAL RAIL with real sparklines rendered from arrays, not decorative bars.
+
+--------------------------------------------------------------------------------
+1. SINGLE SOURCE OF TRUTH
+--------------------------------------------------------------------------------
+window.BloomCoach.state = {
+  profileId, mode, streaming, draft,
+  note:        { id, text, emphasis, date, seen },
+  turns:       [ Turn ],
+  memories:    [ Memory ],
+  signals:     { habits:{done,total}, sleepSeries:[], moodSeries:[], cycleDay },
+  pendingUndo: { memory, timer } | null
+}
+
+Turn = {
+  id, role: 'coach'|'user', time: ISO,
+  paragraphs: [string],                     // rendered as separate lines
+  sources:   [ 'sleep-7d' | 'habits-today' | 'mood-14d' | 'cycle' | 'memory:<id>' ],
+  blocks:    [ Block ],                     // structured, optional
+  status:    'sent'|'streaming'|'error'
+}
+
+Block (discriminated union on .type) — THE CONTRACT YOUR MODEL MUST EMIT:
+  { type:'proposal', id, title, detail, changes:[{habitId, field, from, to}],
+    accept:{label}, adjust:{label} }
+  { type:'metric',   id, label, value, delta, series:[num], unit }
+  { type:'plan',     id, title, steps:[{ id, text, when }] }
+
+Memory = { id, category:'pattern'|'preference'|'goal'|'context',
+           text, confidence:0..1, learnedAt, source:'chat'|'inferred'|'user',
+           pinned:bool }
+
+--------------------------------------------------------------------------------
+2. BACKEND SHAPE (Supabase / Lovable Cloud)
+--------------------------------------------------------------------------------
+TABLES
+  coach_messages(id, profile_id, role, content jsonb, sources text[], created_at)
+      content jsonb = { paragraphs:[], blocks:[] }  <- store the structured form,
+      never re-parse prose later.
+  coach_memory(id, profile_id, category, fact, confidence real, source,
+      created_at, last_referenced_at, pinned bool)
+  coach_notes(id, profile_id, note, emphasis text, for_date date, seen bool)
+  coach_proposals(id, profile_id, message_id, payload jsonb,
+      status 'pending'|'accepted'|'dismissed', resolved_at)
+
+RLS: every table scoped to profile_id = auth.uid(). Grant select/insert/update/
+delete to authenticated only; no anon. Memory delete must be hard-delete.
+
+EDGE / SERVER FUNCTIONS
+  bloom-dual-ai-router POST { message, mode } -> JSON response with optional
+                    JSON frame { blocks:[], sources:[], memoryCandidates:[] }
+  coach-extract     runs AFTER a turn (cheap model). Prompt:
+                    "Extract durable facts worth long-term memory. Return JSON
+                     [{fact, category, confidence}]. Empty array if none."
+                    De-dupe with embedding cosine > 0.9 against same category.
+  coach-note        cron per profile morning hour -> writes coach_notes.
+  coach-apply       POST { proposalId, decision } -> mutates the real habit rows
+                    inside a transaction, writes coach_proposals.status.
+
+CONTEXT ASSEMBLY (the important part, see the budget meter in the UI):
+  system prompt
+  + profile snapshot (habits today, sleep 7d, mood 14d, cycle day)
+  + top N memories ordered by (pinned desc, confidence desc, last_referenced desc)
+  + last 8 turns of transcript (NOT the whole history)
+  Target < ~2.5k tokens. Bump last_referenced_at on any memory actually cited.
+
+STRUCTURED OUTPUT: use the provider's JSON-schema / tool-calling mode with the
+Block union above as the schema. Do not regex prose into cards.
+
+--------------------------------------------------------------------------------
+3. INTEGRATION API (what the app calls)
+--------------------------------------------------------------------------------
+  BloomCoach.hydrate({ note, turns, memories, signals })   // initial paint
+  BloomCoach.send(text)                                    // user turn
+  BloomCoach.beginStream()      -> returns { push(tok), finish({blocks,sources}) }
+  BloomCoach.onSend    = async (text, mode) => {}          // OVERRIDE ME
+  BloomCoach.onProposal= async (blockId, decision) => {}   // OVERRIDE ME
+  BloomCoach.onMemory  = async (action, memory) => {}      // OVERRIDE ME
+  BloomCoach.onModeChange = (mode) => {}                   // OVERRIDE ME
+
+--------------------------------------------------------------------------------
+4. ACCESSIBILITY / MOTION CONTRACT (do not regress these)
+--------------------------------------------------------------------------------
+  - Thread is role="log" aria-live="polite"; only new turns are announced.
+  - Streaming text is aria-busy until finished.
+  - Command palette: focus trap, Esc closes, arrows move, Enter runs, returns
+    focus to the previously focused element.
+  - Every icon-only control has aria-label + visible focus ring.
+  - prefers-reduced-motion disables all transitions and the token caret.
+  - Composer: Enter sends, Shift+Enter newline, Cmd/Ctrl+Enter also sends.
+================================================================================
+-->
+
+<style>
+  /* ========================================================================
+     TOKENS — one place. Never hardcode a hex below this block.
+     Palette is a warm-neutral ink system, not "dark mode blue". Accents are
+     desaturated on purpose: the UI should read as paper-in-low-light.
+     ======================================================================== */
+  :root{
+    --ink-900:#0F1015; --ink-850:#14151B; --ink-800:#191A22; --ink-750:#1F212B;
+    --ink-700:#262834; --ink-600:#31343F;
+    --line:#23252F; --line-strong:#30333F;
+    --text:#EDEBE4; --text-2:#9B9CAC; --text-3:#63667A; --text-4:#454859;
+
+    --sage:#8FB69C; --sage-dim:rgba(143,182,156,.13);
+    --amber:#E0B36B; --amber-dim:rgba(224,179,107,.13);
+    --rose:#C98BA0;  --rose-dim:rgba(201,139,160,.13);
+    --sky:#8AA7CE;   --sky-dim:rgba(138,167,206,.13);
+    --violet:#9B8ED9;--violet-dim:rgba(155,142,217,.13);
+
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:22px; --s6:30px; --s7:44px;
+    --r-lg:16px; --r:11px; --r-sm:7px; --r-pill:999px;
+
+    --f-display:'Fraunces',Georgia,serif;
+    --f-body:'Inter',system-ui,sans-serif;
+    --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+
+    --ease:cubic-bezier(.16,1,.3,1);
+    --ease-io:cubic-bezier(.4,0,.2,1);
+    --shadow-1:0 1px 2px rgba(0,0,0,.4);
+    --shadow-2:0 18px 50px -12px rgba(0,0,0,.7), 0 0 0 1px var(--line);
+    --rail:296px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--ink-900); color:var(--text);
+    font-family:var(--f-body); font-size:14px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    font-feature-settings:"cv05" 1,"ss01" 1;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  /* Very fine film grain. Kills the flat "template" feel without adding color. */
+  body::before{
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:9;
+    opacity:.028; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+  :focus-visible{ outline:2px solid var(--sage); outline-offset:2px; border-radius:4px; }
+  button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+  ::selection{ background:var(--sage-dim); color:var(--text); }
+
+  .mono{ font-family:var(--f-mono); font-variant-numeric:tabular-nums; }
+  .eyebrow{ font-family:var(--f-mono); font-size:10px; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--text-3); }
+
+  /* ===================== TOP BAR ===================== */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 var(--s5); height:54px; flex-shrink:0;
+    border-bottom:1px solid var(--line); background:var(--ink-850);
+  }
+  .brand{ display:flex; align-items:center; gap:var(--s3); }
+  .brand svg{ width:22px; height:22px; }
+  .brand-name{ font-family:var(--f-display); font-size:16px; font-weight:500; letter-spacing:-.01em; }
+  .brand-sep{ width:1px; height:16px; background:var(--line-strong); margin:0 var(--s1); }
+  .brand-ctx{ font-size:12px; color:var(--text-3); }
+
+  nav{ display:flex; gap:2px; align-items:center; }
+  nav a{
+    color:var(--text-3); text-decoration:none; font-size:13px; font-weight:450;
+    padding:6px 11px; border-radius:var(--r-sm); transition:color .18s var(--ease-io), background .18s var(--ease-io);
+  }
+  nav a:hover{ color:var(--text-2); background:var(--ink-800); }
+  nav a[aria-current]{ color:var(--text); background:var(--ink-750); }
+
+  .top-right{ display:flex; align-items:center; gap:var(--s3); }
+  .kbd-hint{
+    display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-3);
+    border:1px solid var(--line); border-radius:var(--r-sm); padding:4px 8px;
+    transition:border-color .18s var(--ease-io), color .18s var(--ease-io);
+  }
+  .kbd-hint:hover{ border-color:var(--line-strong); color:var(--text-2); }
+  kbd{ font-family:var(--f-mono); font-size:10px; background:var(--ink-750);
+       border:1px solid var(--line-strong); border-radius:4px; padding:1px 4px; color:var(--text-2); }
+  .avatar{
+    width:26px; height:26px; border-radius:var(--r-pill); background:var(--ink-750);
+    border:1px solid var(--line-strong); display:grid; place-items:center;
+    font-family:var(--f-mono); font-size:10.5px; color:var(--text-2);
+  }
+
+  /* ===================== LAYOUT ===================== */
+  .layout{ flex:1; display:grid; grid-template-columns:1fr var(--rail); min-height:0; }
+  .chat-col{ display:flex; flex-direction:column; min-height:0; position:relative; }
+
+  /* thin session strip above the thread — mode + context budget */
+  .session-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--s4);
+    padding:var(--s2) var(--s6); border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,var(--ink-850),var(--ink-900)); flex-shrink:0;
+  }
+  .mode-switch{ display:flex; background:var(--ink-800); border:1px solid var(--line);
+                border-radius:var(--r-sm); padding:2px; gap:2px; }
+  .mode-btn{ font-size:11.5px; font-weight:500; color:var(--text-3); padding:4px 11px;
+             border-radius:5px; transition:color .18s var(--ease-io), background .18s var(--ease-io); }
+  .mode-btn:hover{ color:var(--text-2); }
+  .mode-btn[aria-pressed="true"]{ background:var(--ink-700); color:var(--text); box-shadow:var(--shadow-1); }
+
+  .budget{ display:flex; align-items:center; gap:var(--s2); }
+  .budget-label{ font-family:var(--f-mono); font-size:10px; color:var(--text-4); letter-spacing:.05em; }
+  .budget-track{ width:96px; height:3px; border-radius:2px; background:var(--ink-700); overflow:hidden; }
+  .budget-fill{ height:100%; background:var(--sage); transition:width .5s var(--ease); }
+  .budget-num{ font-family:var(--f-mono); font-size:10px; color:var(--text-3); }
+
+  /* ===================== THREAD ===================== */
+  .messages{ flex:1; overflow-y:auto; padding:var(--s6) var(--s6) var(--s4); scroll-behavior:smooth; }
+  .messages::-webkit-scrollbar{ width:6px }
+  .messages::-webkit-scrollbar-thumb{ background:var(--ink-700); border-radius:6px }
+  .messages::-webkit-scrollbar-thumb:hover{ background:var(--ink-600) }
+  .thread{ max-width:640px; margin:0 auto; width:100%; }
+
+  /* ---- daily note: an editorial slab, deliberately NOT a chat bubble ---- */
+  .note{
+    position:relative; border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:var(--s5) var(--s5) var(--s5) calc(var(--s5) + 6px);
+    background:
+      radial-gradient(120% 100% at 0% 0%, rgba(143,182,156,.055), transparent 62%),
+      var(--ink-850);
+    margin-bottom:var(--s6); overflow:hidden;
+    animation:rise .7s var(--ease) both;
+  }
+  .note::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+                 background:linear-gradient(180deg,var(--sage),transparent); }
+  @keyframes rise{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+  .note-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--s3); }
+  .note-eyebrow{ display:flex; align-items:center; gap:7px; }
+  .pulse{ width:5px; height:5px; border-radius:50%; background:var(--sage); position:relative; }
+  .pulse::after{ content:''; position:absolute; inset:-3px; border-radius:50%;
+                 border:1px solid var(--sage); opacity:.4; animation:pulse 2.6s var(--ease-io) infinite; }
+  @keyframes pulse{ 0%{transform:scale(.6);opacity:.5} 70%{transform:scale(1.7);opacity:0} 100%{opacity:0} }
+  .note-text{ font-family:var(--f-display); font-size:17px; font-weight:400; line-height:1.5;
+              letter-spacing:-.008em; color:var(--text); }
+  .note-text em{ font-style:italic; color:var(--sage); }
+  .note-actions{ display:flex; gap:var(--s2); margin-top:var(--s4); }
+
+  .ghost-btn{
+    font-size:11.5px; font-weight:500; color:var(--text-2);
+    border:1px solid var(--line-strong); border-radius:var(--r-sm); padding:5px 11px;
+    transition:border-color .18s var(--ease-io), color .18s var(--ease-io), background .18s var(--ease-io);
+  }
+  .ghost-btn:hover{ color:var(--text); border-color:var(--text-4); background:var(--ink-800); }
+  .ghost-btn.primary{ background:var(--sage-dim); border-color:rgba(143,182,156,.3); color:var(--sage); }
+  .ghost-btn.primary:hover{ background:rgba(143,182,156,.2); border-color:var(--sage); }
+
+  /* ---- day divider ---- */
+  .divider{ display:flex; align-items:center; gap:var(--s3); margin:var(--s6) 0 var(--s5); }
+  .divider::before,.divider::after{ content:''; flex:1; height:1px;
+    background:linear-gradient(90deg,transparent,var(--line),transparent); }
+  .divider span{ font-family:var(--f-mono); font-size:10px; letter-spacing:.08em;
+                 text-transform:uppercase; color:var(--text-4); }
+
+  /* ---- turns ---- */
+  .turn{ display:flex; gap:var(--s3); margin-bottom:var(--s5); animation:rise .5s var(--ease) both; }
+  .turn.user{ justify-content:flex-end; }
+  .turn-mark{
+    width:24px; height:24px; border-radius:var(--r-sm); flex-shrink:0; margin-top:1px;
+    background:var(--ink-800); border:1px solid var(--line-strong);
+    display:grid; place-items:center;
+  }
+  .turn-mark svg{ width:12px; height:12px; }
+  .turn-body{ max-width:480px; min-width:0; }
+  .turn.user .turn-body{ display:flex; flex-direction:column; align-items:flex-end; }
+
+  .msg{ font-size:14.5px; line-height:1.68; color:var(--text); letter-spacing:-.003em; }
+  .msg + .msg{ margin-top:var(--s3); }
+  .turn.coach .msg{ border-left:1.5px solid var(--line-strong); padding-left:var(--s4);
+                    transition:border-color .3s var(--ease-io); }
+  .turn.coach:hover .msg{ border-left-color:var(--sage); }
+  .turn.user .msg{ background:var(--ink-750); border:1px solid var(--line);
+                   padding:9px 14px; border-radius:var(--r) var(--r) 3px var(--r); }
+
+  /* provenance chips — auditability */
+  .sources{ display:flex; flex-wrap:wrap; gap:5px; margin-top:var(--s3); padding-left:var(--s4); }
+  .src{
+    display:inline-flex; align-items:center; gap:5px; font-family:var(--f-mono);
+    font-size:9.5px; letter-spacing:.03em; color:var(--text-3);
+    border:1px solid var(--line); border-radius:var(--r-pill); padding:2.5px 8px;
+    transition:border-color .18s var(--ease-io), color .18s var(--ease-io);
+  }
+  .src:hover{ border-color:var(--line-strong); color:var(--text-2); }
+  .src i{ width:4px; height:4px; border-radius:50%; background:currentColor; font-style:normal; }
+
+  /* hover action bar */
+  .turn-meta{ display:flex; align-items:center; gap:var(--s2); margin-top:6px; padding-left:var(--s4);
+              opacity:0; transition:opacity .18s var(--ease-io); }
+  .turn.user .turn-meta{ padding-left:0; justify-content:flex-end; }
+  .turn:hover .turn-meta,.turn:focus-within .turn-meta{ opacity:1; }
+  .turn-time{ font-family:var(--f-mono); font-size:9.5px; color:var(--text-4); }
+  .mini{ display:grid; place-items:center; width:22px; height:22px; border-radius:5px;
+         color:var(--text-4); transition:color .18s var(--ease-io), background .18s var(--ease-io); }
+  .mini:hover{ color:var(--text-2); background:var(--ink-800); }
+  .mini svg{ width:12px; height:12px; }
+
+  /* ---- STRUCTURED BLOCKS: proposal / metric / plan ---- */
+  .block{ margin-top:var(--s4); margin-left:var(--s4); border:1px solid var(--line);
+          border-radius:var(--r); background:var(--ink-850); overflow:hidden; }
+  .block-head{ display:flex; align-items:center; gap:var(--s2); padding:10px var(--s4);
+               border-bottom:1px solid var(--line); background:var(--ink-800); }
+  .block-kind{ font-family:var(--f-mono); font-size:9.5px; letter-spacing:.08em;
+               text-transform:uppercase; color:var(--text-3); }
+  .block-title{ font-size:13px; font-weight:550; margin-left:auto; color:var(--text); }
+  .block-body{ padding:var(--s4); }
+  .block-detail{ font-size:13px; color:var(--text-2); line-height:1.6; }
+
+  .change{ display:flex; align-items:center; gap:var(--s2); padding:8px 0;
+           border-bottom:1px dashed var(--line); font-size:12.5px; }
+  .change:last-of-type{ border-bottom:none; }
+  .change-name{ color:var(--text-2); flex:1; }
+  .from{ font-family:var(--f-mono); font-size:11px; color:var(--text-4); text-decoration:line-through; }
+  .arrow{ color:var(--text-4); font-size:11px; }
+  .to{ font-family:var(--f-mono); font-size:11px; color:var(--sage); }
+  .block-actions{ display:flex; gap:var(--s2); padding:0 var(--s4) var(--s4); }
+  .block.resolved{ opacity:.55; }
+  .resolved-tag{ font-family:var(--f-mono); font-size:10px; color:var(--sage);
+                 padding:0 var(--s4) var(--s4); }
+
+  .metric-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--s4); }
+  .metric-val{ font-family:var(--f-display); font-size:26px; font-weight:500; letter-spacing:-.02em; line-height:1; }
+  .metric-unit{ font-size:12px; color:var(--text-3); margin-left:3px; font-family:var(--f-body); }
+  .metric-delta{ font-family:var(--f-mono); font-size:11px; margin-top:5px; }
+  .up{ color:var(--sage) } .down{ color:var(--rose) }
+
+  .step{ display:flex; gap:var(--s3); padding:9px 0; border-bottom:1px dashed var(--line); }
+  .step:last-child{ border-bottom:none }
+  .step-when{ font-family:var(--f-mono); font-size:10.5px; color:var(--text-4); width:60px; flex-shrink:0; padding-top:2px; }
+  .step-text{ font-size:12.5px; color:var(--text-2); }
+
+  /* ---- streaming ---- */
+  .caret{ display:inline-block; width:7px; height:14px; background:var(--sage);
+          vertical-align:-2px; margin-left:2px; animation:blink 1.05s step-end infinite; }
+  @keyframes blink{ 50%{opacity:0} }
+  .thinking{ display:flex; gap:var(--s3); margin-bottom:var(--s5); }
+  .thinking-text{ font-family:var(--f-mono); font-size:11.5px; color:var(--text-4);
+                  padding-left:var(--s4); border-left:1.5px solid var(--line-strong);
+                  display:flex; align-items:center; gap:7px; }
+  .dots span{ display:inline-block; width:3px; height:3px; border-radius:50%;
+              background:var(--text-3); margin-right:3px; animation:bob 1.3s var(--ease-io) infinite; }
+  .dots span:nth-child(2){ animation-delay:.15s } .dots span:nth-child(3){ animation-delay:.3s }
+  @keyframes bob{ 0%,60%,100%{opacity:.25;transform:translateY(0)} 30%{opacity:1;transform:translateY(-3px)} }
+
+  /* ===================== COMPOSER ===================== */
+  .composer-wrap{ flex-shrink:0; padding:var(--s3) var(--s6) var(--s5);
+                  background:linear-gradient(180deg,transparent,var(--ink-900) 38%); }
+  .suggests{ max-width:640px; margin:0 auto var(--s3); display:flex; gap:6px; flex-wrap:wrap; }
+  .chip{ font-size:11.5px; color:var(--text-3); border:1px solid var(--line);
+         padding:5px 11px; border-radius:var(--r-pill);
+         transition:border-color .18s var(--ease-io), color .18s var(--ease-io), transform .18s var(--ease); }
+  .chip:hover{ border-color:var(--line-strong); color:var(--text); transform:translateY(-1px); }
+
+  .composer{
+    max-width:640px; margin:0 auto; background:var(--ink-850);
+    border:1px solid var(--line); border-radius:var(--r);
+    transition:border-color .2s var(--ease-io), box-shadow .2s var(--ease-io);
+  }
+  .composer:focus-within{ border-color:var(--line-strong); box-shadow:0 0 0 3px rgba(143,182,156,.07); }
+  .composer-top{ display:flex; align-items:flex-end; gap:var(--s2); padding:var(--s2); }
+  .composer textarea{
+    flex:1; background:none; border:none; resize:none; color:var(--text);
+    font-family:var(--f-body); font-size:14px; line-height:1.55; padding:8px 6px; max-height:150px;
+  }
+  .composer textarea:focus{ outline:none }
+  .composer textarea::placeholder{ color:var(--text-4) }
+  .icon-btn{ width:30px; height:30px; border-radius:var(--r-sm); display:grid; place-items:center;
+             color:var(--text-4); flex-shrink:0;
+             transition:color .18s var(--ease-io), background .18s var(--ease-io); }
+  .icon-btn:hover{ color:var(--text-2); background:var(--ink-750); }
+  .icon-btn.send{ background:var(--ink-700); color:var(--text-3); }
+  .icon-btn.send[data-ready="1"]{ background:var(--sage); color:var(--ink-900); }
+  .icon-btn.send[data-ready="1"]:hover{ filter:brightness(1.08); }
+  .icon-btn svg{ width:14px; height:14px }
+  .composer-foot{ display:flex; align-items:center; justify-content:space-between;
+                  padding:0 var(--s3) var(--s2); }
+  .attached{ display:flex; gap:5px; flex-wrap:wrap; }
+  .att{ display:inline-flex; align-items:center; gap:5px; font-family:var(--f-mono);
+        font-size:9.5px; color:var(--text-3); background:var(--ink-800);
+        border:1px solid var(--line); border-radius:var(--r-pill); padding:2.5px 7px; }
+  .att button{ color:var(--text-4); font-size:10px; line-height:1 }
+  .att button:hover{ color:var(--rose) }
+  .send-hint{ font-family:var(--f-mono); font-size:9.5px; color:var(--text-4) }
+
+  /* ===================== RIGHT RAIL ===================== */
+  .rail{ border-left:1px solid var(--line); background:var(--ink-850);
+         display:flex; flex-direction:column; min-height:0; }
+  .rail-tabs{ display:flex; border-bottom:1px solid var(--line); flex-shrink:0; }
+  .rail-tab{ flex:1; padding:12px 0; font-size:11.5px; font-weight:500; color:var(--text-3);
+             position:relative; transition:color .18s var(--ease-io); }
+  .rail-tab:hover{ color:var(--text-2) }
+  .rail-tab[aria-selected="true"]{ color:var(--text) }
+  .rail-tab[aria-selected="true"]::after{ content:''; position:absolute; left:22%; right:22%; bottom:-1px;
+                                          height:1.5px; background:var(--sage); border-radius:2px; }
+  .rail-body{ flex:1; overflow-y:auto; padding:var(--s4) var(--s5) var(--s5); }
+  .rail-body::-webkit-scrollbar{ width:4px }
+  .rail-body::-webkit-scrollbar-thumb{ background:var(--ink-700); border-radius:6px }
+  .rail-intro{ font-size:11.5px; color:var(--text-4); line-height:1.55; margin-bottom:var(--s4); }
+
+  .mem-filter{ display:flex; gap:4px; margin-bottom:var(--s4); flex-wrap:wrap; }
+  .mem-filter button{ font-family:var(--f-mono); font-size:9.5px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--text-4); border:1px solid var(--line);
+    border-radius:var(--r-pill); padding:3px 8px; transition:all .18s var(--ease-io); }
+  .mem-filter button[aria-pressed="true"]{ color:var(--text); border-color:var(--text-4); background:var(--ink-750); }
+
+  .mem{ padding:var(--s3) 0; border-bottom:1px solid var(--line); position:relative; }
+  .mem:last-child{ border-bottom:none }
+  .mem-top{ display:flex; align-items:flex-start; gap:var(--s2); }
+  .mem-text{ flex:1; font-size:12.5px; color:var(--text-2); line-height:1.5; }
+  .mem-tools{ display:flex; gap:2px; opacity:0; transition:opacity .18s var(--ease-io); flex-shrink:0; }
+  .mem:hover .mem-tools,.mem:focus-within .mem-tools{ opacity:1 }
+  .mem-tools button{ width:20px; height:20px; display:grid; place-items:center;
+                     border-radius:4px; color:var(--text-4); }
+  .mem-tools button:hover{ color:var(--text-2); background:var(--ink-750) }
+  .mem-tools svg{ width:11px; height:11px }
+  .mem.pinned .pin-btn{ color:var(--amber); opacity:1 }
+  .mem.pinned .mem-tools{ opacity:1 }
+  .mem-foot{ display:flex; align-items:center; gap:var(--s2); margin-top:6px; }
+  .conf{ width:38px; height:2px; border-radius:2px; background:var(--ink-700); overflow:hidden; }
+  .conf i{ display:block; height:100%; background:var(--text-4); }
+  .mem-meta{ font-family:var(--f-mono); font-size:9px; color:var(--text-4); }
+
+  .sig{ padding:var(--s4) 0; border-bottom:1px solid var(--line); }
+  .sig:last-child{ border-bottom:none }
+  .sig-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:var(--s2); }
+  .sig-name{ font-size:12px; color:var(--text-2); display:flex; align-items:center; gap:7px; }
+  .sig-dot{ width:5px; height:5px; border-radius:50% }
+  .sig-val{ font-family:var(--f-mono); font-size:12px; color:var(--text) }
+  .spark{ width:100%; height:26px; display:block }
+  .sig-note{ font-size:10.5px; color:var(--text-4); margin-top:5px }
+
+  .ring-wrap{ display:flex; align-items:center; gap:var(--s4); padding:var(--s3) 0 var(--s5); }
+  .ring{ width:54px; height:54px; flex-shrink:0 }
+  .ring-copy strong{ display:block; font-family:var(--f-display); font-size:16px; font-weight:500 }
+  .ring-copy span{ font-size:11px; color:var(--text-4) }
+
+  /* ===================== COMMAND PALETTE ===================== */
+  .scrim{ position:fixed; inset:0; background:rgba(8,9,13,.72); backdrop-filter:blur(6px);
+          z-index:40; display:none; align-items:flex-start; justify-content:center; padding-top:14vh; }
+  .scrim[data-open="1"]{ display:flex; animation:fade .18s var(--ease-io) both }
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+  .palette{ width:min(520px,92vw); background:var(--ink-850); border-radius:var(--r-lg);
+            box-shadow:var(--shadow-2); overflow:hidden; animation:pop .24s var(--ease) both }
+  @keyframes pop{ from{opacity:0;transform:translateY(-8px) scale(.98)} to{opacity:1;transform:none} }
+  .palette input{ width:100%; background:none; border:none; padding:16px var(--s5);
+                  color:var(--text); font-size:14.5px; border-bottom:1px solid var(--line) }
+  .palette input:focus{ outline:none }
+  .palette input::placeholder{ color:var(--text-4) }
+  .pal-list{ max-height:320px; overflow-y:auto; padding:var(--s2) }
+  .pal-group{ font-family:var(--f-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
+              color:var(--text-4); padding:var(--s3) var(--s3) var(--s2) }
+  .pal-item{ display:flex; align-items:center; gap:var(--s3); width:100%; text-align:left;
+             padding:9px var(--s3); border-radius:var(--r-sm); font-size:13px; color:var(--text-2) }
+  .pal-item[data-active="1"]{ background:var(--ink-750); color:var(--text) }
+  .pal-item svg{ width:14px; height:14px; color:var(--text-4); flex-shrink:0 }
+  .pal-item[data-active="1"] svg{ color:var(--sage) }
+  .pal-item .pal-kbd{ margin-left:auto; font-family:var(--f-mono); font-size:9.5px; color:var(--text-4) }
+  .pal-empty{ padding:var(--s5); text-align:center; font-size:12.5px; color:var(--text-4) }
+
+  /* ===================== UNDO TOAST ===================== */
+  .toast{ position:fixed; bottom:22px; left:50%; transform:translate(-50%,16px);
+          background:var(--ink-750); border:1px solid var(--line-strong); border-radius:var(--r);
+          padding:10px var(--s4); display:flex; align-items:center; gap:var(--s4);
+          box-shadow:var(--shadow-2); font-size:12.5px; color:var(--text-2);
+          opacity:0; pointer-events:none; transition:opacity .22s var(--ease), transform .22s var(--ease); z-index:50 }
+  .toast[data-open="1"]{ opacity:1; transform:translate(-50%,0); pointer-events:auto }
+  .toast button{ font-size:12px; font-weight:600; color:var(--sage) }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width:1080px){ :root{ --rail:262px } }
+  @media (max-width:900px){
+    .layout{ grid-template-columns:1fr } .rail{ display:none } nav{ display:none }
+    .messages{ padding:var(--s5) var(--s4) } .composer-wrap{ padding:var(--s3) var(--s4) var(--s4) }
+    .session-bar{ padding:var(--s2) var(--s4) } .budget{ display:none }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ TOP BAR ============================ -->
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="url(#bg1)" stroke-width="2.2" stroke-linecap="round"/>
+      <defs><linearGradient id="bg1" x1="4" y1="13" x2="24" y2="13" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#8FB69C"/><stop offset="1" stop-color="#E0B36B"/></linearGradient></defs>
+    </svg>
+    <span class="brand-name">Bloom</span>
+    <span class="brand-sep"></span>
+    <span class="brand-ctx">Coach</span>
+  </div>
+  <nav aria-label="Primary"><a href="index.html">Today</a><a href="trackers.html">Trackers</a><a href="cycle-advanced.html">Cycle</a><a href="/">Mood</a><a href="rewards.html">Rewards</a><a href="coach.html" aria-current="page">Coach</a></nav>
+  <div class="top-right">
+    <button class="kbd-hint" id="paletteOpen" aria-label="Open command palette">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      Actions <kbd>⌘K</kbd>
+    </button>
+    <div class="avatar" aria-hidden="true">M</div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="chat-col">
+
+    <!-- session bar: mode changes the SYSTEM PROMPT (see wiring notes §3) -->
+    <div class="session-bar">
+      <div class="mode-switch" role="group" aria-label="Coach mode">
+        <button class="mode-btn" data-mode="ask"     aria-pressed="true">Ask</button>
+        <button class="mode-btn" data-mode="reflect" aria-pressed="false">Reflect</button>
+        <button class="mode-btn" data-mode="plan"    aria-pressed="false">Plan</button>
+      </div>
+      <div class="budget" title="Approximate context sent with your next message">
+        <span class="budget-label">CONTEXT</span>
+        <div class="budget-track"><div class="budget-fill" id="budgetFill" style="width:38%"></div></div>
+        <span class="budget-num" id="budgetNum">1.9k / 5k</span>
+      </div>
+    </div>
+
+    <!-- thread -->
+    <div class="messages" id="messages">
+      <div class="thread" id="thread" role="log" aria-live="polite" aria-label="Coach conversation">
+        <div id="empty-state" style="text-align:center;padding:60px 20px;max-width:400px;margin:0 auto">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--ink-800);border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 16px">
+            <svg viewBox="0 0 28 28" fill="none" width="22" height="22"><path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="#8FB69C" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </div>
+          <h3 style="font-family:var(--f-display);font-size:18px;font-weight:500;margin-bottom:8px">New conversation</h3>
+          <p style="font-size:13px;color:var(--text-3);line-height:1.5;margin-bottom:20px">Brand new, no fake data. Your coach learns from real data — habits, sleep, mood, cycle. Clean welcome only.</p>
+        </div>
+        <div class="thinking" id="thinking" style="display:none">
+          <div class="turn-mark"><svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="#8FB69C" stroke-width="2.6" stroke-linecap="round"/></svg></div>
+          <div class="thinking-text">reading your live data <span class="dots"><span></span><span></span><span></span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- composer -->
+    <div class="composer-wrap">
+      <div class="suggests" id="suggests">
+        <button class="chip">How is my sleep actually trending?</button>
+        <button class="chip">Suggest one evening habit</button>
+        <button class="chip">Why was Sunday harder?</button>
+      </div>
+      <div class="composer">
+        <div class="composer-top">
+          <button class="icon-btn" id="micBtn" aria-label="Voice input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+          </button>
+          <textarea id="input" rows="1" placeholder="Ask your coach anything…" aria-label="Message your coach"></textarea>
+          <button class="icon-btn send" id="sendBtn" data-ready="0" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+        <div class="composer-foot">
+          <div class="attached">
+            <span class="att">habits · today <button aria-label="Remove context: habits today">✕</button></span>
+            <span class="att">sleep · 7d <button aria-label="Remove context: sleep 7 days">✕</button></span>
+          </div>
+          <span class="send-hint">↵ send · ⇧↵ newline</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ RIGHT RAIL ============================ -->
+  <aside class="rail">
+    <div class="rail-tabs" role="tablist" aria-label="Coach context">
+      <button class="rail-tab" role="tab" aria-selected="true"  data-tab="memory">Memory</button>
+      <button class="rail-tab" role="tab" aria-selected="false" data-tab="signals">Signals</button>
+    </div>
+
+    <div class="rail-body" id="tab-memory" role="tabpanel">
+      <p class="rail-intro">What your coach has learned. Pin what matters, forget what doesn't — deletes are permanent.</p>
+      <div class="mem-filter" role="group" aria-label="Filter memories">
+        <button aria-pressed="true"  data-filter="all">All</button>
+        <button aria-pressed="false" data-filter="pattern">Patterns</button>
+        <button aria-pressed="false" data-filter="preference">Prefs</button>
+        <button aria-pressed="false" data-filter="goal">Goals</button>
+      </div>
+      <div id="memList"></div>
+    </div>
+
+    <div class="rail-body" id="tab-signals" role="tabpanel" hidden>
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
+          <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--ink-700)" stroke-width="3"/>
+          <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--sage)" stroke-width="3"
+                  stroke-linecap="round" stroke-dasharray="58.5 97.4" transform="rotate(-90 18 18)"/>
+        </svg>
+        <div class="ring-copy"><strong>3 of 5</strong><span>habits done today</span></div>
+      </div>
+      <div id="sigList"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- ============================ COMMAND PALETTE ============================ -->
+<div class="scrim" id="scrim" data-open="0">
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Coach actions">
+    <input id="palInput" placeholder="Ask, plan, or run an action…" autocomplete="off">
+    <div class="pal-list" id="palList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status">
+  <span id="toastText">Memory forgotten</span>
+  <button id="toastUndo">Undo</button>
+</div>
+
+<script>
+/* ============================================================================
+   BLOOM COACH v3 — CONTROLLER
+   Pattern: state -> render(). Nothing mutates the DOM outside a render fn.
+   Everything marked OVERRIDE ME is where your backend plugs in.
+   ========================================================================= */
+(function(){
+  const $  = (s,r=document)=>r.querySelector(s);
+  const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- STATE (mirror this shape from your DB) ---------------- */
+  const state = {
+    profileId:'demo',
+    mode:'ask',
+    memFilter:'all',
+    streaming:false,
+    pendingUndo:null,
+    memories:[],
+    signals:[
+      {key:'sleep', name:'Sleep',  color:'var(--sky)',    val:'--', note:'Log sleep to see trend', series:[]},
+      {key:'mood',  name:'Mood',   color:'var(--violet)', val:'--', note:'Log mood', series:[]},
+      {key:'move',  name:'Movement', color:'var(--sage)', val:'--', note:'No data', series:[]},
+      {key:'cycle', name:'Cycle',  color:'var(--rose)',   val:'--', note:'Log cycle', series:[]}
+    ]
+  };
+
+  /* ---------------- PUBLIC API — OVERRIDE THESE ---------------- */
+  const API = {
+    state,
+    onSend:        async (text, mode)=>{ console.log('[wire] onSend', {text, mode}); },
+    onProposal:    async (id, decision)=>{ console.log('[wire] onProposal', {id, decision}); },
+    onMemory:      async (action, mem)=>{ console.log('[wire] onMemory', {action, mem}); },
+    onModeChange:  (mode)=>{ console.log('[wire] mode', mode); },
+    hydrate(data){ Object.assign(state, data||{}); renderAll(); },
+    /* Streaming helper. Backend: pipe SSE tokens into push(), then finish(). */
+    beginStream(){
+      const turn = mkCoachTurn();
+      const p = turn.querySelector('.msg');
+      const caret = document.createElement('span'); caret.className='caret';
+      p.appendChild(caret); turn.setAttribute('aria-busy','true');
+      return {
+        push(tok){ caret.insertAdjacentText('beforebegin', tok); scrollEnd(); },
+        finish(meta={}){
+          caret.remove(); turn.removeAttribute('aria-busy');
+          if(meta.sources?.length) turn.querySelector('.turn-body').appendChild(srcRow(meta.sources));
+          state.streaming=false; $('#thinking').style.display='none'; scrollEnd();
+        }
+      };
+    }
+  };
+  window.BloomCoach = API;
+
+  /* ---------------- RENDER: MEMORY ---------------- */
+  const ICON = {
+    pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>',
+    edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L20 8l-4-4L4 16z"/></svg>',
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+  };
+  const GROUP = {pattern:'Patterns', preference:'Preferences', goal:'Goals', context:'Context'};
+
+  function renderMemories(){
+    const list = $('#memList');
+    const rows = state.memories.filter(m => state.memFilter==='all' || m.category===state.memFilter);
+    const order = ['pattern','preference','goal','context'];
+    list.innerHTML = order.map(cat=>{
+      const items = rows.filter(m=>m.category===cat)
+                        .sort((a,b)=> (b.pinned-a.pinned) || (b.confidence-a.confidence));
+      if(!items.length) return '';
+      return `<div class="eyebrow" style="margin:18px 0 6px">${GROUP[cat]}</div>` + items.map(m=>`
+        <div class="mem ${m.pinned?'pinned':''}" data-id="${m.id}">
+          <div class="mem-top">
+            <div class="mem-text">${m.text}</div>
+            <div class="mem-tools">
+              <button class="pin-btn" data-act="pin"    aria-label="${m.pinned?'Unpin':'Pin'} memory">${ICON.pin}</button>
+              <button              data-act="edit"   aria-label="Edit memory">${ICON.edit}</button>
+              <button              data-act="forget" aria-label="Forget memory">${ICON.x}</button>
+            </div>
+          </div>
+          <div class="mem-foot">
+            <span class="conf" title="Confidence ${(m.confidence*100)|0}%"><i style="width:${(m.confidence*100)|0}%"></i></span>
+            <span class="mem-meta">${(m.confidence*100)|0}% · ${m.source} · ${m.learnedAt}</span>
+          </div>
+        </div>`).join('');
+    }).join('') || '<p class="rail-intro">Nothing here yet.</p>';
+  }
+
+  $('#memList').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-act]'); if(!btn) return;
+    const id = +btn.closest('.mem').dataset.id;
+    const mem = state.memories.find(m=>m.id===id);
+    const act = btn.dataset.act;
+    if(act==='pin'){ mem.pinned=!mem.pinned; API.onMemory('pin',mem); renderMemories(); }
+    if(act==='edit'){
+      const next = prompt('Edit what your coach remembers:', mem.text);
+      if(next && next.trim()){ mem.text=next.trim(); mem.source='user'; mem.confidence=1;
+        API.onMemory('edit',mem); renderMemories(); }
+    }
+    if(act==='forget'){
+      // Soft-remove locally, hard-delete only after the undo window closes.
+      const idx = state.memories.indexOf(mem);
+      state.memories.splice(idx,1); renderMemories(); renderBudget();
+      showUndo(mem, idx);
+    }
+  });
+
+  $('.mem-filter').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    state.memFilter = b.dataset.filter;
+    $$('.mem-filter button').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+    renderMemories();
+  });
+
+  /* ---------------- UNDO TOAST ---------------- */
+  let undoTimer=null;
+  function showUndo(mem, idx){
+    const t=$('#toast'); $('#toastText').textContent='Forgot: '+mem.text.slice(0,34)+'…';
+    t.dataset.open='1'; clearTimeout(undoTimer);
+    state.pendingUndo={mem,idx};
+    undoTimer=setTimeout(()=>{ t.dataset.open='0';
+      if(state.pendingUndo){ API.onMemory('forget', state.pendingUndo.mem); state.pendingUndo=null; }
+    },6000);
+  }
+  $('#toastUndo').addEventListener('click',()=>{
+    if(!state.pendingUndo) return;
+    state.memories.splice(state.pendingUndo.idx,0,state.pendingUndo.mem);
+    state.pendingUndo=null; clearTimeout(undoTimer);
+    $('#toast').dataset.open='0'; renderMemories(); renderBudget();
+  });
+
+  /* ---------------- RENDER: SIGNALS (real sparklines) ---------------- */
+  function sparkPath(series,w=232,h=26,pad=2){
+    const min=Math.min(...series), max=Math.max(...series), span=(max-min)||1;
+    return series.map((v,i)=>{
+      const x=pad+(i*(w-pad*2))/(series.length-1);
+      const y=h-pad-((v-min)/span)*(h-pad*2);
+      return `${i?'L':'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
+    }).join(' ');
+  }
+  function renderSignals(){
+    $('#sigList').innerHTML = state.signals.map(s=>{
+      const d=sparkPath(s.series);
+      return `<div class="sig">
+        <div class="sig-head">
+          <span class="sig-name"><span class="sig-dot" style="background:${s.color}"></span>${s.name}</span>
+          <span class="sig-val">${s.val}</span>
+        </div>
+        <svg class="spark" viewBox="0 0 232 26" preserveAspectRatio="none" aria-hidden="true">
+          <path d="${d}" fill="none" stroke="${s.color}" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+        </svg>
+        <div class="sig-note">${s.note}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------------- RENDER: CONTEXT BUDGET ----------------
+     Rough client-side estimate so the user (and you) can see cost.
+     Replace the constants with your real tokenizer counts. */
+  function renderBudget(){
+    const base=620, perMem=26, perTurn=95;
+    const turns=$$('.turn').length;
+    const est = base + state.memories.length*perMem + Math.min(turns,8)*perTurn;
+    const pct = Math.min(100, Math.round(est/5000*100));
+    $('#budgetFill').style.width = pct+'%';
+    $('#budgetFill').style.background = pct>80?'var(--amber)':'var(--sage)';
+    $('#budgetNum').textContent = (est/1000).toFixed(1)+'k / 5k';
+  }
+
+  /* ---------------- RAIL TABS ---------------- */
+  $$('.rail-tab').forEach(tab=>tab.addEventListener('click',()=>{
+    $$('.rail-tab').forEach(t=>t.setAttribute('aria-selected', String(t===tab)));
+    $('#tab-memory').hidden  = tab.dataset.tab!=='memory';
+    $('#tab-signals').hidden = tab.dataset.tab!=='signals';
+  }));
+
+  /* ---------------- MODE ---------------- */
+  $$('.mode-btn').forEach(b=>b.addEventListener('click',()=>{
+    state.mode=b.dataset.mode;
+    $$('.mode-btn').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+    const ph={ask:'Ask your coach anything…',reflect:'What is on your mind today?',plan:'What should we plan?'};
+    $('#input').placeholder=ph[state.mode];
+    API.onModeChange(state.mode);
+  }));
+
+  /* ---------------- PROPOSAL BLOCKS ---------------- */
+  document.addEventListener('click', e=>{
+    const b=e.target.closest('[data-proposal]'); if(!b) return;
+    const block=document.getElementById(b.dataset.proposal);
+    const decision=b.dataset.decision;
+    API.onProposal(b.dataset.proposal, decision);
+    if(decision==='adjust'){ $('#input').value='Adjust that proposal: '; $('#input').focus(); syncSend(); return; }
+    block.classList.add('resolved');
+    block.querySelector('.block-actions').remove();
+    const tag=document.createElement('div'); tag.className='resolved-tag';
+    tag.textContent = decision==='accept' ? '✓ Applied to today' : 'Dismissed — I won\u2019t suggest this again today';
+    block.appendChild(tag);
+  });
+
+  /* ---------------- COMPOSER ---------------- */
+  const input=$('#input'), sendBtn=$('#sendBtn');
+  function syncSend(){
+    input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,150)+'px';
+    sendBtn.dataset.ready = input.value.trim()?'1':'0';
+  }
+  input.addEventListener('input',syncSend);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+    if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){ e.preventDefault(); send(); }
+  });
+  sendBtn.addEventListener('click',send);
+  $('#suggests').addEventListener('click',e=>{
+    const c=e.target.closest('.chip'); if(!c) return;
+    input.value=c.textContent.trim(); syncSend(); input.focus();
+  });
+  $('.attached').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(b){ b.parentElement.remove(); renderBudget(); }
+  });
+  $('#micBtn').addEventListener('click',()=>{
+    /* Web Speech API — free, no extra key. Transcribe into the textarea and let
+       the user edit before sending; never auto-send a transcript. */
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ alert('Voice input is not supported in this browser.'); return; }
+    const r=new SR(); r.lang='en-US'; r.interimResults=true;
+    r.onresult=ev=>{ input.value=[...ev.results].map(x=>x[0].transcript).join(''); syncSend(); };
+    r.start();
+  });
+
+  function mkUserTurn(text){
+    const el=document.createElement('article'); el.className='turn user';
+    el.innerHTML=`<div class="turn-body"><p class="msg"></p>
+      <div class="turn-meta"><span class="turn-time">Now</span></div></div>`;
+    el.querySelector('.msg').textContent=text;      // textContent = no XSS
+    $('#thinking').before(el); return el;
+  }
+  function mkCoachTurn(){
+    const el=document.createElement('article'); el.className='turn coach';
+    el.innerHTML=`<div class="turn-mark"><svg viewBox="0 0 28 28" fill="none"><path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="#8FB69C" stroke-width="2.6" stroke-linecap="round"/></svg></div>
+      <div class="turn-body"><p class="msg"></p>
+      <div class="turn-meta"><span class="turn-time">Now</span></div></div>`;
+    $('#thinking').before(el); return el;
+  }
+  function srcRow(list){
+    const d=document.createElement('div'); d.className='sources';
+    d.innerHTML=list.map(s=>`<span class="src"><i style="color:var(--sage)"></i>${s}</span>`).join('');
+    return d;
+  }
+  const scrollEnd=()=>{ $('#messages').scrollTop=$('#messages').scrollHeight; };
+
+  function send(){
+    const text=input.value.trim(); if(!text||state.streaming) return;
+    state.streaming=true;
+    mkUserTurn(text); input.value=''; syncSend(); scrollEnd(); renderBudget();
+    // The real Bloom router is the only reply path. No demo reply and no old proxy.
+    Promise.resolve(API.onSend(text, state.mode)).finally(()=>{ state.streaming=false; });
+  }
+
+  /* ---------------- COMMAND PALETTE ---------------- */
+  const COMMANDS=[
+    {g:'Coach', label:'Summarise my week',        kbd:'W', run:()=>{ input.value='Summarise my week in three lines.'; syncSend(); input.focus(); }},
+    {g:'Coach', label:'Explain today\u2019s note', kbd:'',  run:()=>{ input.value='Why did you write that note this morning?'; syncSend(); input.focus(); }},
+    {g:'Coach', label:'Build an evening routine',  kbd:'',  run:()=>{ $('[data-mode="plan"]').click(); input.value='Build me an evening routine I can actually keep.'; syncSend(); input.focus(); }},
+    {g:'Memory',label:'Add a memory manually',     kbd:'',  run:()=>{
+        const t=prompt('What should your coach remember?'); if(!t) return;
+        state.memories.unshift({id:Date.now(),category:'context',text:t,confidence:1,learnedAt:'Today',source:'user',pinned:false});
+        API.onMemory('add', state.memories[0]); renderMemories(); renderBudget(); }},
+    {g:'Memory',label:'Show what was used last turn', kbd:'', run:()=>{ $('[data-tab="memory"]').click(); }},
+    {g:'View',  label:'Open signals',              kbd:'',  run:()=>$('[data-tab="signals"]').click()},
+    {g:'View',  label:'Switch to Reflect mode',    kbd:'',  run:()=>$('[data-mode="reflect"]').click()}
+  ];
+  const scrim=$('#scrim'), palInput=$('#palInput'), palList=$('#palList');
+  let palIdx=0, palRows=[], lastFocus=null;
+
+  function renderPalette(){
+    const q=palInput.value.toLowerCase().trim();
+    palRows=COMMANDS.filter(c=>c.label.toLowerCase().includes(q)||c.g.toLowerCase().includes(q));
+    if(!palRows.length){ palList.innerHTML='<div class="pal-empty">Nothing matches that.</div>'; return; }
+    palIdx=Math.min(palIdx,palRows.length-1);
+    let html='',last='';
+    palRows.forEach((c,i)=>{
+      if(c.g!==last){ html+=`<div class="pal-group">${c.g}</div>`; last=c.g; }
+      html+=`<button class="pal-item" data-i="${i}" data-active="${i===palIdx?1:0}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        ${c.label}${c.kbd?`<span class="pal-kbd">${c.kbd}</span>`:''}</button>`;
+    });
+    palList.innerHTML=html;
+  }
+  function openPalette(){ lastFocus=document.activeElement; scrim.dataset.open='1';
+    palInput.value=''; palIdx=0; renderPalette(); palInput.focus(); }
+  function closePalette(){ scrim.dataset.open='0'; lastFocus?.focus?.(); }
+
+  $('#paletteOpen').addEventListener('click',openPalette);
+  palInput.addEventListener('input',()=>{palIdx=0;renderPalette();});
+  palList.addEventListener('click',e=>{ const b=e.target.closest('.pal-item'); if(!b) return;
+    closePalette(); palRows[+b.dataset.i].run(); });
+  scrim.addEventListener('mousedown',e=>{ if(e.target===scrim) closePalette(); });
+
+  document.addEventListener('keydown',e=>{
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault();
+      scrim.dataset.open==='1'?closePalette():openPalette(); return; }
+    if(scrim.dataset.open!=='1') return;
+    if(e.key==='Escape'){ e.preventDefault(); closePalette(); }
+    if(e.key==='ArrowDown'){ e.preventDefault(); palIdx=(palIdx+1)%palRows.length; renderPalette(); }
+    if(e.key==='ArrowUp'){ e.preventDefault(); palIdx=(palIdx-1+palRows.length)%palRows.length; renderPalette(); }
+    if(e.key==='Enter'){ e.preventDefault(); const c=palRows[palIdx]; closePalette(); c?.run(); }
+  });
+
+  /* ---------------- NOTE ACTIONS ---------------- */
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-demo]'); if(!b) return;
+    if(b.dataset.demo==='note-plan'){ $('[data-mode="plan"]').click();
+      input.value='Turn this morning\u2019s note into a plan for tonight.'; syncSend(); input.focus(); }
+    else { b.closest('.note').style.display='none'; }
+  });
+
+  /* ---------------- BOOT ---------------- */
+  function renderAll(){ renderMemories(); renderSignals(); renderBudget(); }
+  renderAll(); syncSend();
+})();
+</script>
+
+<!-- ==================== MARKED.JS - Beautiful markdown parsing ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- ==================== SUPABASE + ONLINE ONLY WIRING - SINGLE DECLARATION - NO DUPLICATES ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// SINGLETON - ONLY ONE CLIENT - FIXES Multiple GoTrueClient + SUPABASE_URL duplicate + session duplicate
+const SUPABASE_URL = 'https://zsqsfxmjphctknnumgsi.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_tZoeD9y0_faPskrhd2aNmQ_tLqHuNtJ';
+let supabaseClient = null;
+let currentUser = null;
+let liveSignals = {habits:{done:0,total:0}, sleepSeries:[], moodSeries:[], cycleDay:14};
+
+function getSupabaseClientSingleton(){
+  if(supabaseClient) return supabaseClient;
+  if(window._supabaseClientSingleton) return window._supabaseClientSingleton;
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken:true, persistSession:true, detectSessionInUrl:true, storageKey: 'sb-zsqsfxmjphctknnumgsi-auth-token' }
+  });
+  window._supabaseClientSingleton = supabaseClient;
+  return supabaseClient;
+}
+
+async function initSupabase(){
+  supabaseClient = getSupabaseClientSingleton();
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  currentUser = session?.user||null;
+  console.log('Coach v3 clean FINAL FIXED - user', currentUser?.email);
+  if(!window._authListenerAttached){
+    supabaseClient.auth.onAuthStateChange(async (event, sess)=>{
+      if(event==='SIGNED_IN' && sess?.user){ currentUser=sess.user; await wireCoach(); }
+    });
+    window._authListenerAttached = true;
+  }
+  return currentUser;
+}
+
+async function loadSignals(){
+  if(!supabaseClient||!currentUser) return {habits:{done:0,total:0}, sleepSeries:[], moodSeries:[], cycleDay:14};
+  const today=new Date().toISOString().slice(0,10);
+  let habits=[], todayLogs=[];
+  try{
+    const {data} = await supabaseClient.from('habits').select('*').eq('profile_id', currentUser.id).eq('is_archived', false);
+    habits=data||[];
+    const {data: logs} = await supabaseClient.from('habit_logs').select('*').eq('profile_id', currentUser.id).eq('date', today);
+    todayLogs=logs||[];
+  }catch(e){}
+  return {habits:{done:todayLogs.length,total:habits.length||0}, sleepSeries:[], moodSeries:[], cycleDay:14};
+}
+
+async function loadMemories(){
+  if(!supabaseClient||!currentUser) return [];
+  try{
+    const {data} = await supabaseClient.from('coach_memory').select('*').eq('profile_id',currentUser.id).order('confidence',{ascending:false}).limit(20);
+    return (data||[]).map(m=>({id:m.id,category:m.category,text:m.fact||m.text,confidence:m.confidence||0.8,learnedAt:new Date(m.created_at).toLocaleDateString(),source:m.source||'chat',pinned:m.pinned||false}));
+  }catch{return [];}
+}
+
+async function loadMessages(){
+  if(!supabaseClient||!currentUser) return [];
+  try{
+    const {data} = await supabaseClient.from('coach_messages').select('*').eq('profile_id',currentUser.id).order('created_at',{ascending:true}).limit(50);
+    return (data||[]).map(m=>{
+      try{
+        const content = typeof m.content==='string'? JSON.parse(m.content) : m.content;
+        return {id:m.id,role:m.role,time:new Date(m.created_at).toISOString(),paragraphs:content.paragraphs||[content.text||''],sources:m.sources||[],blocks:content.blocks||[],status:'sent'};
+      }catch{
+        return {id:m.id,role:m.role,time:new Date(m.created_at).toISOString(),paragraphs:[String(m.content).slice(0,200)],sources:[],blocks:[],status:'sent'};
+      }
+    });
+  }catch{return [];}
+}
+
+function appendMessageToUI(role, rawText, sources=[], blocks=[]){
+  const empty=document.getElementById('empty-state');
+  if(empty) empty.style.display='none';
+  const article=document.createElement('article');
+  article.className=`turn ${role==='user'?'user':'coach'}`;
+  if(role==='user'){
+    article.innerHTML=`<div class="turn-body"><p class="msg">${rawText.replace(/</g,'&lt;')}</p></div>`;
+  } else {
+    let beautifulHtml='';
+    try{ beautifulHtml=marked.parse(rawText); }catch{ beautifulHtml=rawText.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'); }
+    article.innerHTML=`
+      <div class="turn-mark"><svg viewBox="0 0 28 28" fill="none"><path d="M4 20c3-9 7-14 10-14s7 5 10 14" stroke="#8FB69C" stroke-width="2.6" stroke-linecap="round"/></svg></div>
+      <div class="turn-body">
+        <div style="border:1px solid var(--line);border-radius:11px;background:var(--ink-850);overflow:hidden;max-width:480px">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;background:linear-gradient(180deg,rgba(255,255,255,0.03),transparent)"><span style="font-family:var(--f-display);font-size:13.5px">✦ Coach</span><span style="font-family:var(--f-mono);font-size:9px;padding:2px 8px;border-radius:999px;background:var(--sage-dim);color:var(--sage)">Premium · Live</span></div>
+          <div style="padding:14px;font-size:13px;line-height:1.6;color:var(--text-2)">${beautifulHtml}</div>
+          ${sources.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin:0 14px 12px;padding-top:12px;border-top:1px dashed var(--line)">${sources.map(s=>`<span style="font-family:var(--f-mono);font-size:9px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--text-3)"><i style="width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block"></i>${s}</span>`).join('')}</div>`:''}
+        </div>
+      </div>`;
+  }
+  document.getElementById('thinking').before(article);
+  document.getElementById('messages').scrollTop=document.getElementById('messages').scrollHeight;
+}
+
+async function wireCoach(){
+  await initSupabase();
+  const signals=await loadSignals();
+  liveSignals=signals;
+  const memories=await loadMemories();
+  const messages=await loadMessages();
+  if(window.BloomCoach){
+    window.BloomCoach.hydrate({note:null,turns:messages.length?messages:[],memories:memories,signals:[]});
+    window.BloomCoach.onSend = async (text, mode)=>{
+      if(!currentUser){
+        appendMessageToUI('assistant','Please login at Today page first, then come back. Online requires login.',[],[]);
+        return;
+      }
+      const thinkingEl=document.getElementById('thinking');
+      if(thinkingEl) thinkingEl.style.display='flex';
+      try{
+        // bloom-dual-ai-router is the single AI endpoint. Do not add coach-proxy back.
+        const {data,error}=await supabaseClient.functions.invoke('bloom-dual-ai-router',{
+          body:{message:text,mode,context:{habits:signals.habits,cycleDay:signals.cycleDay},fileType:null,base64Data:null,history:[]}
+        });
+        if(error) throw error;
+        const responseText = data?.paragraphs?.join('\n\n') || data?.text;
+        if(!responseText) throw new Error(data?.message || 'The AI router returned an empty response.');
+        const blocks=data?.blocks||[];
+        const sources=data?.sources||['live-data'];
+        if(thinkingEl) thinkingEl.style.display='none';
+        appendMessageToUI('assistant', responseText, sources, blocks);
+      }catch(e){
+        console.error(e);
+        if(document.getElementById('thinking')) document.getElementById('thinking').style.display='none';
+        appendMessageToUI('assistant', `⚠️ ONLINE ERROR: ${e.message}\n\nFix: Edge Functions → Secrets → GEMINI_API_KEY + GROQ_API_KEY exist and Deploy bloom-dual-ai-router`, [], []);
+      }
+    };
+  }
+  // File button
+  const fileBtn=document.getElementById('fileBtn');
+  const fileInput=document.getElementById('fileInput');
+  if(fileBtn && fileInput){
+    fileBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', async (e)=>{
+      const file=e.target.files?.[0];
+      if(!file) return;
+      const dataUrl=URL.createObjectURL(file);
+      const article=document.createElement('article');
+      article.className='turn user';
+      article.innerHTML=`<div class="turn-body"><p class="msg"><img src="${dataUrl}" style="max-width:200px;border-radius:8px" /><br>Analyze this image</p></div>`;
+      document.getElementById('thinking').before(article);
+      const thinkingEl=document.getElementById('thinking');
+      if(thinkingEl) thinkingEl.style.display='flex';
+      try{
+        const base64 = await new Promise((res,rej)=>{
+          const r=new FileReader();
+          r.onload=()=>{ const b=r.result.split(',')[1]; const mime=r.result.split(';')[0].split(':')[1]; res({base64:b,mimeType:mime}); };
+          r.onerror=()=>rej(new Error('Failed'));
+          r.readAsDataURL(file);
+        });
+        const {data,error}=await supabaseClient.functions.invoke('bloom-dual-ai-router',{
+          body:{message:'Analyze this image', context:liveSignals, mode:'scientific', fileType:base64.mimeType, base64Data:base64.base64, history:[]}
+        });
+        if(error) throw error;
+        if(thinkingEl) thinkingEl.style.display='none';
+        appendMessageToUI('assistant', data.text, ['vision-'+base64.mimeType], []);
+      }catch(err){
+        if(thinkingEl) thinkingEl.style.display='none';
+        appendMessageToUI('assistant', `Vision error: ${err.message}`, [], []);
+      }
+    });
+  }
+}
+
+window.addEventListener('load', wireCoach);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2f983cc89e27f77',t:'MTc4NzQ4MTc5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
