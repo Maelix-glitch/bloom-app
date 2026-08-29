@@ -20,6 +20,7 @@ import type { TodayPatch } from "@/components/cycle/TodaySurface";
 import { entriesToCsv } from "@/lib/cycle/storage";
 import { QuickLog, AdvancedCycleLog } from "@/components/cycle/Logs";
 import { CycleLengthSheet } from "@/components/cycle/CycleLengthSheet";
+import { StartCycleSheet } from "@/components/cycle/StartCycleSheet";
 import { MethodologyDialog } from "@/components/cycle/CycleHistory";
 import { CycleHero } from "@/components/cycle/CycleHero";
 import { CycleRoad } from "@/components/cycle/CycleRoad";
@@ -88,6 +89,7 @@ function CyclePage() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [adjustOpen, setAdjustOpen] = useState(false);
+  const [startOpen, setStartOpen] = useState(false);
   const [methodOpen, setMethodOpen] = useState(false);
   const [editing, setEditing] = useState<CycleEntry | null>(null);
   const [quickDate, setQuickDate] = useState<string | null>(null);
@@ -272,6 +274,7 @@ function CyclePage() {
                 setAdvancedOpen(true);
               }}
               onAdjust={() => setAdjustOpen(true)}
+              onStartNewCycle={() => setStartOpen(true)}
               onOpenMethod={() => setMethodOpen(true)}
               selectedPhase={selectedPhase}
               onSelectPhase={setSelectedPhase}
@@ -513,6 +516,15 @@ function CyclePage() {
           }}
           onSaveStart={async (date) => {
             await system.saveDay({ date, flow: "medium", cycle_day: 1, phase: "menstrual" });
+          }}
+        />
+        <StartCycleSheet
+          open={startOpen}
+          onClose={() => setStartOpen(false)}
+          initialDate={localDateKey()}
+          onSaveStart={async (date, flow) => {
+            await system.saveDay({ date, flow, cycle_day: 1, phase: "menstrual" });
+            toast(localOnly ? "New cycle started on this device." : "New cycle started.");
           }}
         />
         {model ? (

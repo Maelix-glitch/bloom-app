@@ -72,6 +72,7 @@ export function CycleOrbit({
   inspect = null,
   selectedPhase = null,
   onSelectPhase,
+  onStartNewCycle,
   className,
 }: {
   model: CycleModel;
@@ -81,6 +82,7 @@ export function CycleOrbit({
   /** phase focused page-wide (the phase explorer drives this too) */
   selectedPhase?: PhaseKey | null;
   onSelectPhase?: (p: PhaseKey | null) => void;
+  onStartNewCycle?: () => void;
   className?: string;
 }) {
   const uid = useId();
@@ -577,7 +579,19 @@ export function CycleOrbit({
             </text>
           </>
         ) : (
-          <>
+          <g
+            role={onStartNewCycle ? "button" : undefined}
+            tabIndex={onStartNewCycle ? 0 : -1}
+            aria-label={onStartNewCycle ? "Start your first cycle" : undefined}
+            onClick={() => onStartNewCycle?.()}
+            onKeyDown={(e) => {
+              if (onStartNewCycle && (e.key === "Enter" || e.key === " ")) {
+                e.preventDefault();
+                onStartNewCycle();
+              }
+            }}
+            className={onStartNewCycle ? "cursor-pointer outline-none" : undefined}
+          >
             <text
               x={C}
               y={CY - 16}
@@ -611,7 +625,7 @@ export function CycleOrbit({
               textAnchor="middle"
               style={{ fontSize: 11, fill: "var(--faint)" }}
             >
-              Log your first period day to begin
+              Start your first cycle to begin
             </text>
             <text
               x={C}
@@ -621,7 +635,7 @@ export function CycleOrbit({
             >
               building your personal pattern.
             </text>
-          </>
+          </g>
         )}
       </svg>
 

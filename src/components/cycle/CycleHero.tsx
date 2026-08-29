@@ -8,7 +8,7 @@
  * for decoration; the offset is the point — this page is about movement.
  */
 
-import { PencilLine } from "lucide-react";
+import { CalendarPlus, PencilLine } from "lucide-react";
 
 import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
 import { CycleOrbit, segmentsFor } from "./CycleOrbit";
@@ -25,6 +25,7 @@ export function CycleHero({
   onPatch,
   onOpenFull,
   onAdjust,
+  onStartNewCycle,
   onOpenMethod,
   onTrayReady,
   selectedPhase,
@@ -40,6 +41,7 @@ export function CycleHero({
   onPatch: (patch: TodayPatch) => Promise<void>;
   onOpenFull: () => void;
   onAdjust: () => void;
+  onStartNewCycle: () => void;
   onOpenMethod: () => void;
   onTrayReady?: React.Ref<HTMLButtonElement>;
   selectedPhase: PhaseKey | null;
@@ -56,8 +58,13 @@ export function CycleHero({
               inspect={inspect}
               selectedPhase={selectedPhase}
               onSelectPhase={onSelectPhase}
+              onStartNewCycle={onStartNewCycle}
             />
             <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+              <button type="button" onClick={onStartNewCycle} className="cy-link">
+                <CalendarPlus className="mr-1 inline size-3 align-[-1.5px]" aria-hidden />
+                start new cycle
+              </button>
               <button type="button" onClick={onAdjust} className="cy-link">
                 <PencilLine className="mr-1 inline size-3 align-[-1.5px]" aria-hidden />
                 edit cycle length
@@ -132,8 +139,12 @@ export function CycleHero({
               invented to fill the page.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button type="button" onClick={onOpenFull} className="cy-btn cy-btn--primary">
-                Log your period
+              <button type="button" onClick={onStartNewCycle} className="cy-btn cy-btn--primary">
+                <CalendarPlus className="mr-1.5 inline size-3.5 align-[-2px]" aria-hidden />
+                Start new cycle
+              </button>
+              <button type="button" onClick={onOpenFull} className="cy-btn cy-btn--quiet">
+                Log a day instead
               </button>
               <button type="button" onClick={onOpenMethod} className="cy-link">
                 How predictions work →

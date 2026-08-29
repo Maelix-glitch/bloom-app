@@ -94,7 +94,7 @@ export function CycleLengthSheet({
             )}
 
             <label className="flex flex-col gap-1.5">
-              <span className="eyebrow">Current period started on</span>
+              <span className="eyebrow">New cycle start date</span>
               <input
                 type="date"
                 value={start}
@@ -103,8 +103,8 @@ export function CycleLengthSheet({
                 className="mono rounded-lg border border-border bg-surface/60 px-3 py-2 text-[13px] outline-none [color-scheme:dark] focus:border-border-strong"
               />
               <span className="text-[11px] leading-relaxed text-faint">
-                Marks that day as a period start so day-counting, the ring and every estimate
-                re-anchor to it.
+                Use this to start a new cycle or correct today's anchor — it becomes day 1, and the
+                ring plus every estimate re-anchor to it.
               </span>
             </label>
 
