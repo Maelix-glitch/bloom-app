@@ -5,8 +5,6 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-
-import profileCss from "../styles/profile.css?url";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
 
@@ -33,7 +31,6 @@ const HANDLE_RE = /^@?[a-z0-9_]{3,30}$/;
 
 export const Route = createFileRoute("/$handle")({
   head: ({ params }: { params: { handle: string } }) => ({
-    links: [{ rel: "stylesheet", href: profileCss }],
     meta: [{ title: `Bloom — @${params.handle.replace(/^@/, "")}` }],
   }),
   loader: ({ params }) => {

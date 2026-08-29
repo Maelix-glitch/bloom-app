@@ -1,0 +1,2519 @@
+/* Bloom Coach — a quiet, route-scoped conversation surface. */
+
+.coach-page {
+  --coach-violet: var(--violet, #c8a7ee);
+  --coach-sky: var(--sky, #9fd6ed);
+  --coach-amber: var(--amber, #e0b36b);
+  --coach-sage: var(--sage, #9bc7a4);
+  --coach-rose: var(--rose, #e9b3c3);
+  --coach-faint: var(--faint, #66697c);
+  --coach-muted: var(--muted-foreground, #9a9aaa);
+  --coach-surface: var(--surface, #1d1f29);
+  --coach-surface-2: var(--surface-2, #252732);
+  --coach-border: var(--border, #363844);
+  --coach-border-soft: color-mix(in oklab, var(--coach-border) 68%, transparent);
+  --coach-mono: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  --coach-display: var(--font-display, "Fraunces", Georgia, serif);
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+@keyframes coach-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes coach-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes coach-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes coach-twinkle {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.38;
+  }
+}
+
+@keyframes coach-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+  78%,
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@keyframes coach-drift-gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes coach-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.coach-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--background) 97%, var(--coach-violet)),
+      var(--background) 38%
+    ),
+    var(--background);
+}
+
+.coach-page button,
+.coach-page a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.coach-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.coach-atmosphere > div {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+}
+
+.coach-page > header {
+  position: relative;
+  z-index: 20;
+}
+
+.coach-page-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  animation: coach-rise 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-gradient-text {
+  background: linear-gradient(
+    110deg,
+    var(--coach-violet),
+    var(--coach-sky) 54%,
+    var(--coach-amber)
+  );
+  background-size: 180% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: coach-drift-gradient 16s ease-in-out infinite;
+}
+
+.coach-live-dot {
+  position: relative;
+  display: inline-flex;
+  width: 7px;
+  height: 7px;
+  align-items: center;
+  justify-content: center;
+}
+
+.coach-live-dot::before,
+.coach-live-dot span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--coach-sage);
+}
+
+.coach-live-dot::before {
+  content: "";
+  animation: coach-pulse 3s ease-out infinite;
+}
+
+.coach-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.coach-command-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: var(--coach-faint);
+  background: color-mix(in oklab, var(--coach-surface) 42%, transparent);
+  font: 9px var(--coach-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.coach-command-button {
+  cursor: pointer;
+  color: var(--coach-violet);
+  border-color: color-mix(in oklab, var(--coach-violet) 28%, var(--coach-border));
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.coach-command-button:hover {
+  border-color: color-mix(in oklab, var(--coach-violet) 62%, var(--coach-border));
+  background: color-mix(in oklab, var(--coach-violet) 8%, transparent);
+  transform: translateY(-1px);
+}
+
+.coach-workspace {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 196px minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.coach-left-rail {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.coach-mode-selector {
+  padding: 4px 2px 0;
+}
+
+.coach-mode-list {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.coach-mode-item {
+  min-width: 0;
+  min-height: 0;
+}
+
+.coach-lens-button {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 6px;
+  cursor: pointer;
+  background: transparent;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.coach-lens-button:hover {
+  border-color: var(--coach-border-soft);
+  background: color-mix(in oklab, var(--coach-surface-2) 58%, transparent);
+  transform: translateX(1px);
+}
+
+.coach-lens-button-active {
+  border-color: color-mix(in oklab, var(--coach-violet) 32%, var(--coach-border));
+  background: color-mix(in oklab, var(--coach-violet) 8%, var(--coach-surface-2));
+}
+
+.coach-secondary-nav {
+  display: grid;
+  gap: 4px;
+  padding: 2px;
+}
+
+.coach-secondary-nav-button {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 6px 7px;
+  color: var(--coach-muted);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.coach-secondary-nav-button:hover,
+.coach-secondary-nav-button.selected {
+  border-color: var(--coach-border-soft);
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-surface-2) 52%, transparent);
+}
+
+.coach-secondary-nav-icon {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--coach-sky) 24%, var(--coach-border));
+  border-radius: 8px;
+  color: var(--coach-sky);
+}
+
+.coach-secondary-nav-icon-memory {
+  border-color: color-mix(in oklab, var(--coach-violet) 24%, var(--coach-border));
+  color: var(--coach-violet);
+}
+
+.coach-secondary-nav-button > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.coach-secondary-nav-button strong {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.coach-secondary-nav-button small {
+  overflow: hidden;
+  color: var(--coach-faint);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-lens-icon,
+.coach-chat-agent-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  background: color-mix(in oklab, currentColor 8%, transparent);
+}
+
+.coach-lens-label {
+  display: block;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.coach-lens-description {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--coach-faint);
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-lens-current {
+  width: 5px;
+  height: 5px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--coach-sage);
+}
+
+.coach-accent-violet {
+  color: var(--coach-violet);
+}
+
+.coach-accent-sky {
+  color: var(--coach-sky);
+}
+
+.coach-accent-amber {
+  color: var(--coach-amber);
+}
+
+.coach-accent-sage {
+  color: var(--coach-sage);
+}
+
+.coach-chat-shell {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 500px;
+  height: min(720px, calc(100svh - 240px));
+  height: min(720px, calc(100dvh - 240px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 18%, var(--coach-border));
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--coach-surface) 88%, var(--background));
+  box-shadow: 0 28px 70px -54px rgb(0 0 0 / 0.95);
+}
+
+.coach-chat-shell::before {
+  position: absolute;
+  top: 0;
+  right: 18%;
+  left: 18%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--coach-violet) 55%, var(--coach-sky)),
+    transparent
+  );
+  opacity: 0.7;
+}
+
+.coach-chat-header {
+  position: relative;
+  display: flex;
+  min-height: 66px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 14px 18px;
+}
+
+.coach-chat-agent-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--coach-violet);
+  border-color: color-mix(in oklab, var(--coach-violet) 35%, var(--coach-border));
+  background: color-mix(in oklab, var(--coach-violet) 8%, var(--coach-surface-2));
+}
+
+.coach-chat-agent-icon.is-thinking,
+.coach-avatar-coach.is-thinking {
+  animation: coach-breathe 2.4s ease-in-out infinite;
+}
+
+.coach-online-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--coach-sage);
+  font: 9px var(--coach-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.coach-online-pill.is-thinking {
+  color: var(--coach-violet);
+}
+
+.coach-online-pill span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.coach-icon-button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 9px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.coach-icon-button:hover,
+.coach-icon-button.selected {
+  border-color: color-mix(in oklab, var(--coach-violet) 44%, var(--coach-border));
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-violet) 8%, transparent);
+}
+
+.coach-chat-rule {
+  height: 1px;
+  margin: 0 18px;
+  background: var(--coach-border-soft);
+}
+
+.coach-storage-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 18px 0;
+  border-left: 2px solid color-mix(in oklab, var(--coach-amber) 48%, transparent);
+  padding: 7px 9px;
+  color: var(--coach-muted);
+  font-size: 10px;
+  line-height: 1.45;
+  animation: coach-fade 180ms ease both;
+}
+
+.coach-thread {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 17px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-bottom: 28px;
+  padding: 22px 24px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+.coach-message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  animation: coach-rise 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-message-row.coach-message-grouped {
+  margin-top: -9px;
+}
+
+.coach-message-user {
+  flex-direction: row-reverse;
+}
+
+.coach-message-avatar {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 50%;
+  color: var(--coach-faint);
+  background: color-mix(in oklab, var(--coach-surface-2) 60%, transparent);
+}
+
+.coach-avatar-coach {
+  color: var(--coach-violet);
+  border-color: color-mix(in oklab, var(--coach-violet) 30%, var(--coach-border));
+  background: color-mix(in oklab, var(--coach-violet) 8%, var(--coach-surface-2));
+}
+
+.coach-avatar-user {
+  color: var(--coach-sky);
+}
+
+.coach-message-grouped .coach-message-avatar {
+  visibility: hidden;
+}
+
+.coach-message-body {
+  min-width: 0;
+  max-width: min(82%, 680px);
+}
+
+.coach-message-user .coach-message-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.coach-message-meta {
+  display: flex;
+  min-height: 12px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 5px;
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.coach-message-meta time {
+  color: color-mix(in oklab, var(--coach-faint) 82%, var(--foreground));
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.coach-message-card {
+  position: relative;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 1px 0 1px 14px;
+  color: color-mix(in oklab, var(--coach-muted) 93%, var(--foreground));
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
+}
+
+.coach-message-card::before {
+  position: absolute;
+  inset: 2px auto 2px 0;
+  width: 1px;
+  content: "";
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklab, var(--coach-violet) 66%, transparent),
+    transparent
+  );
+}
+
+.coach-message-card-coach {
+  background: color-mix(in oklab, var(--coach-surface-2) 22%, transparent);
+}
+
+.coach-message-card-user {
+  border: 1px solid color-mix(in oklab, var(--coach-sky) 21%, var(--coach-border));
+  border-radius: 15px 15px 4px 15px;
+  padding: 11px 14px;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-sky) 8%, var(--coach-surface-2));
+}
+
+.coach-message-card-user::before {
+  inset: 5px 0 5px auto;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklab, var(--coach-sky) 58%, transparent),
+    transparent
+  );
+}
+
+.coach-message-card p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.coach-message-card p + p {
+  margin-top: 9px;
+}
+
+.coach-source-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 11px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in oklab, var(--coach-border) 52%, transparent);
+}
+
+.coach-source-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: color-mix(in oklab, var(--coach-faint) 82%, var(--coach-sky));
+  font: 9px var(--coach-mono);
+}
+
+.coach-source-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--coach-sky);
+}
+
+.coach-block-stack {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+}
+
+.coach-structured-card {
+  border-top: 1px solid color-mix(in oklab, var(--coach-border) 62%, transparent);
+  border-radius: 0;
+  padding: 12px 0 2px;
+  background: transparent;
+}
+
+.coach-structured-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coach-structured-icon {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, currentColor 29%, var(--coach-border));
+  border-radius: 8px;
+  background: color-mix(in oklab, currentColor 6%, transparent);
+}
+
+.coach-structured-title {
+  margin: 2px 0 0;
+  color: var(--foreground);
+  font: 500 16px/1.15 var(--coach-display);
+}
+
+.coach-metric-chart {
+  position: relative;
+  height: 48px;
+  margin-top: 11px;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in oklab, var(--coach-border) 50%, transparent);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--coach-border) 25%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 100% 20px;
+}
+
+.coach-sparkline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.coach-sparkline-violet {
+  color: var(--coach-violet);
+}
+
+.coach-sparkline-sky {
+  color: var(--coach-sky);
+}
+
+.coach-sparkline-amber {
+  color: var(--coach-amber);
+}
+
+.coach-sparkline-sage {
+  color: var(--coach-sage);
+}
+
+.coach-metric-chart > span {
+  position: absolute;
+  right: 0;
+  bottom: 5px;
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+}
+
+.coach-structured-detail {
+  margin-top: 8px !important;
+  color: var(--coach-faint);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.coach-plan-card {
+  border-top-color: color-mix(in oklab, var(--coach-amber) 34%, var(--coach-border));
+}
+
+.coach-plan-steps {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.coach-plan-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid color-mix(in oklab, var(--coach-border) 48%, transparent);
+  padding-top: 8px;
+}
+
+.coach-plan-step > span {
+  color: var(--coach-amber);
+  font: 9px var(--coach-mono);
+}
+
+.coach-plan-step > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.coach-plan-step p {
+  color: var(--foreground);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.coach-plan-step small {
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+}
+
+.coach-proposal-card {
+  border-top-color: color-mix(in oklab, var(--coach-violet) 34%, var(--coach-border));
+}
+
+.coach-proposal-changes {
+  display: grid;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.coach-proposal-changes > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid color-mix(in oklab, var(--coach-border) 48%, transparent);
+  padding-top: 7px;
+  color: var(--coach-muted);
+  font-size: 11px;
+}
+
+.coach-proposal-changes small {
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+  text-align: right;
+}
+
+.coach-structured-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.coach-card-action-primary,
+.coach-card-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 6px 9px;
+  cursor: pointer;
+  font-size: 10px;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.coach-card-action-primary {
+  border: 1px solid color-mix(in oklab, var(--coach-sage) 34%, var(--coach-border));
+  color: var(--coach-sage);
+  background: color-mix(in oklab, var(--coach-sage) 7%, transparent);
+}
+
+.coach-card-action-secondary {
+  border: 1px solid var(--coach-border-soft);
+  color: var(--coach-muted);
+  background: transparent;
+}
+
+.coach-card-action-primary:hover,
+.coach-card-action-secondary:hover {
+  border-color: currentColor;
+  background: color-mix(in oklab, currentColor 8%, transparent);
+  transform: translateY(-1px);
+}
+
+.coach-thinking {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 1px 0;
+  animation: coach-rise 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-thinking-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--coach-muted);
+  font: 10px var(--coach-mono);
+}
+
+.coach-thinking-label > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--foreground);
+}
+
+.coach-thinking-label em {
+  color: var(--coach-faint);
+  font-style: normal;
+}
+
+.coach-thinking-dots {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.coach-thinking-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--coach-violet);
+  animation: coach-breathe 1.25s ease-in-out infinite;
+}
+
+.coach-thinking-dots span:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+.coach-thinking-dots span:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+.coach-new-response {
+  position: sticky;
+  bottom: 5px;
+  z-index: 3;
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 34%, var(--coach-border));
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--coach-violet);
+  background: var(--coach-surface-2);
+  box-shadow: 0 10px 25px -16px rgb(0 0 0 / 0.9);
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+  animation: coach-rise 220ms ease both;
+}
+
+.coach-new-response:hover {
+  background: color-mix(in oklab, var(--coach-violet) 9%, var(--coach-surface-2));
+}
+
+.coach-chat-bottom {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--coach-border-soft);
+  padding: 11px 15px max(14px, env(safe-area-inset-bottom));
+  background: color-mix(in oklab, var(--coach-surface) 72%, transparent);
+}
+
+.coach-quick-prompts {
+  display: flex;
+  max-height: 42px;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 0 1px 10px;
+  opacity: 1;
+  scrollbar-width: none;
+  transition:
+    max-height 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms ease;
+}
+
+.coach-quick-prompts.is-dismissed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.coach-quick-prompts::-webkit-scrollbar {
+  display: none;
+}
+
+.coach-quick-prompts button {
+  flex: 0 0 auto;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: var(--coach-muted);
+  width: max-content;
+  max-width: 100%;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  white-space: nowrap;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.coach-quick-prompts button:hover {
+  border-color: color-mix(in oklab, var(--coach-violet) 45%, var(--coach-border));
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-violet) 7%, transparent);
+}
+
+.coach-quick-prompts button:active {
+  transform: translateY(1px);
+}
+
+.coach-quick-prompts button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.coach-quick-prompts button.selected {
+  border-color: color-mix(in oklab, var(--coach-violet) 45%, var(--coach-border));
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-violet) 9%, transparent);
+}
+
+.coach-composer {
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 14px;
+  padding: 5px;
+  background: color-mix(in oklab, var(--coach-surface-2) 84%, var(--background));
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.coach-composer:focus-within {
+  border-color: color-mix(in oklab, var(--coach-violet) 48%, var(--coach-border));
+  box-shadow: 0 7px 24px -20px color-mix(in oklab, var(--coach-violet) 80%, transparent);
+  transform: translateY(-1px);
+}
+
+.coach-composer.has-draft {
+  border-color: color-mix(in oklab, var(--coach-violet) 25%, var(--coach-border));
+}
+
+.coach-composer.is-responding {
+  border-color: color-mix(in oklab, var(--coach-violet) 30%, var(--coach-border));
+}
+
+.coach-composer-top {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.coach-composer textarea {
+  display: block;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 112px;
+  flex: 1;
+  resize: none;
+  border: 0;
+  outline: 0;
+  padding: 8px 7px;
+  overflow-y: hidden;
+  color: var(--foreground);
+  background: transparent;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.coach-composer textarea::placeholder {
+  color: var(--coach-faint);
+}
+
+.coach-composer-icon {
+  display: grid;
+  width: 37px;
+  height: 37px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.coach-composer-icon:hover:not(:disabled) {
+  border-color: var(--coach-border-soft);
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-surface) 75%, transparent);
+}
+
+.coach-composer-icon:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.coach-composer-icon:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.coach-composer-plus {
+  color: var(--coach-sky);
+}
+
+.coach-send-button {
+  display: grid;
+  width: 37px;
+  height: 37px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 65%, var(--coach-border));
+  border-radius: 10px;
+  color: var(--background);
+  background: var(--coach-violet);
+  cursor: pointer;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.coach-send-button:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--coach-violet) 88%, white);
+  transform: translateY(-1px);
+}
+
+.coach-send-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.coach-send-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.coach-composer-footer {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 3px 0;
+}
+
+.coach-context-toggle {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 999px;
+  padding: 5px 6px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+  transition:
+    color 180ms ease,
+    background 180ms ease;
+}
+
+.coach-context-toggle:hover,
+.coach-context-toggle.selected {
+  color: var(--coach-sage);
+  background: color-mix(in oklab, var(--coach-sage) 7%, transparent);
+}
+
+.coach-composer-hint {
+  flex: 0 1 auto;
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.coach-attachment-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.coach-attachment-menu {
+  position: absolute;
+  z-index: 12;
+  bottom: 43px;
+  left: 0;
+  display: grid;
+  min-width: 154px;
+  gap: 2px;
+  border: 1px solid var(--coach-border);
+  border-radius: 11px;
+  padding: 5px;
+  background: var(--coach-surface);
+  box-shadow: 0 18px 35px -24px rgb(0 0 0 / 0.95);
+  animation: coach-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-attachment-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 7px;
+  padding: 9px;
+  color: var(--coach-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+
+.coach-attachment-menu button:hover,
+.coach-attachment-menu button:focus-visible {
+  color: var(--foreground);
+  background: var(--coach-surface-2);
+}
+
+.coach-composer-notice {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 2px 8px;
+  border-left: 2px solid color-mix(in oklab, var(--coach-sky) 45%, transparent);
+  padding: 7px 8px;
+  color: var(--coach-muted);
+  font-size: 10px;
+  line-height: 1.45;
+  animation: coach-rise 220ms ease both;
+}
+
+.coach-composer-notice.is-sign-in-required {
+  border-left-color: color-mix(in oklab, var(--coach-sage) 58%, transparent);
+}
+
+.coach-composer-notice > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.coach-notice-action {
+  flex: 0 0 auto;
+  border-bottom: 1px solid color-mix(in oklab, var(--coach-sky) 50%, transparent);
+  padding-bottom: 1px;
+  color: var(--coach-sky);
+  font: 9px var(--coach-mono);
+  text-decoration: none;
+}
+
+.coach-notice-action:hover {
+  color: var(--foreground);
+}
+
+.coach-composer-notice > button {
+  display: grid;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+}
+
+.coach-attachment-preview {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 8px;
+  border-bottom: 1px solid var(--coach-border-soft);
+  padding: 0 2px 8px;
+  animation: coach-rise 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-attachment-preview-media {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 7px;
+  background: color-mix(in oklab, var(--coach-sky) 8%, var(--coach-surface));
+}
+
+.coach-attachment-preview-media.is-audio {
+  width: min(180px, 46vw);
+  height: 32px;
+  background: transparent;
+}
+
+.coach-attachment-preview-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coach-attachment-preview-media audio {
+  width: 100%;
+  height: 30px;
+}
+
+.coach-attachment-preview-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.coach-attachment-preview-copy strong {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-attachment-preview-copy small {
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+}
+
+.coach-attachment-preview > button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+}
+
+.coach-attachment-preview > button:hover {
+  color: var(--coach-rose);
+  background: color-mix(in oklab, var(--coach-rose) 8%, transparent);
+}
+
+.coach-recording-bar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 2px;
+  border: 1px solid color-mix(in oklab, var(--coach-rose) 30%, var(--coach-border));
+  border-radius: 12px;
+  padding: 7px 8px;
+  background: color-mix(in oklab, var(--coach-rose) 5%, var(--coach-surface-2));
+  animation: coach-rise 220ms ease both;
+}
+
+.coach-recording-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--coach-rose);
+  font: 10px var(--coach-mono);
+  text-transform: uppercase;
+}
+
+.coach-recording-live > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: coach-breathe 1.4s ease-in-out infinite;
+}
+
+.coach-recording-time {
+  color: var(--foreground);
+  font: 12px var(--coach-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.coach-recording-cancel {
+  margin-left: auto;
+  border: 0;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.coach-recording-stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid color-mix(in oklab, var(--coach-rose) 35%, transparent);
+  border-radius: 999px;
+  padding: 6px 8px;
+  color: var(--coach-rose);
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.coach-recording-stop:hover {
+  background: color-mix(in oklab, var(--coach-rose) 9%, transparent);
+}
+
+.coach-message-attachment {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px solid color-mix(in oklab, var(--coach-border) 50%, transparent);
+  padding-top: 8px;
+}
+
+.coach-message-attachment img {
+  width: 48px;
+  height: 48px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.coach-message-attachment audio {
+  width: min(240px, 100%);
+  height: 30px;
+}
+
+.coach-attachment-file-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--coach-sky);
+  background: color-mix(in oklab, var(--coach-sky) 8%, transparent);
+}
+
+.coach-message-attachment > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.coach-message-attachment strong {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coach-message-attachment small {
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+}
+
+.coach-message-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 5px 2px 0;
+  color: var(--coach-faint);
+  opacity: 0.7;
+  transition: opacity 180ms ease;
+}
+
+.coach-message-row:hover .coach-message-actions,
+.coach-message-actions:focus-within {
+  opacity: 1;
+}
+
+.coach-message-actions button {
+  display: inline-flex;
+  min-width: 28px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 0;
+  border-radius: 7px;
+  padding: 4px 6px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+}
+
+.coach-message-actions button:nth-child(2),
+.coach-message-actions button:nth-child(3) {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.coach-message-row:hover .coach-message-actions button:nth-child(2),
+.coach-message-row:hover .coach-message-actions button:nth-child(3),
+.coach-message-actions:focus-within button:nth-child(2),
+.coach-message-actions:focus-within button:nth-child(3) {
+  opacity: 1;
+}
+
+.coach-message-actions button:hover,
+.coach-message-actions button.selected {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-violet) 9%, transparent);
+}
+
+.coach-message-more {
+  position: relative;
+}
+
+.coach-message-more-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  right: 0;
+  display: grid;
+  min-width: 152px;
+  gap: 2px;
+  border: 1px solid var(--coach-border);
+  border-radius: 10px;
+  padding: 5px;
+  background: var(--coach-surface);
+  box-shadow: 0 18px 35px -23px rgb(0 0 0 / 0.95);
+  animation: coach-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-message-more-menu button {
+  width: 100%;
+  justify-content: flex-start;
+  color: var(--coach-muted);
+  font-size: 10px;
+  text-align: left;
+}
+
+.coach-message-more-menu button:hover {
+  color: var(--foreground);
+  background: var(--coach-surface-2);
+}
+
+.coach-message-error .coach-message-card {
+  color: var(--coach-rose);
+}
+
+.coach-message-error .coach-message-card::before {
+  background: linear-gradient(180deg, transparent, var(--coach-rose), transparent);
+}
+
+.coach-inline-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+  border-top: 1px solid color-mix(in oklab, var(--coach-rose) 24%, transparent);
+  padding-top: 9px;
+  color: var(--coach-rose);
+  font-size: 11px;
+}
+
+.coach-inline-error button {
+  border: 1px solid color-mix(in oklab, var(--coach-rose) 30%, transparent);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--coach-rose);
+  background: transparent;
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+}
+
+.coach-inline-error button:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--coach-rose) 8%, transparent);
+}
+
+.coach-inline-error button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.coach-empty-wrap {
+  display: flex;
+  min-height: 0;
+  max-height: 100%;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    max-height 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms ease;
+}
+
+.coach-empty-wrap.is-exiting {
+  max-height: 0;
+  flex: 0 0 auto;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.coach-empty-wrap.is-exiting .coach-empty-conversation {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.coach-message-list {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.coach-empty-conversation {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 16px;
+  text-align: center;
+}
+
+.coach-empty-mark {
+  position: relative;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 34%, var(--coach-border));
+  border-radius: 15px;
+  color: var(--coach-violet);
+  background: color-mix(in oklab, var(--coach-violet) 7%, var(--coach-surface-2));
+}
+
+.coach-empty-mark-pulse {
+  position: absolute;
+  inset: -6px;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 23%, transparent);
+  border-radius: 19px;
+  animation: coach-pulse 3.2s ease-out infinite;
+}
+
+.coach-empty-conversation > h2 {
+  margin-top: 14px;
+  font-size: 26px;
+  line-height: 1.08;
+}
+
+.coach-empty-copy {
+  max-width: 46ch;
+  margin-top: 9px;
+  color: var(--coach-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.coach-empty-modes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.coach-empty-mode-item {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.coach-empty-modes button {
+  display: inline-flex;
+  width: max-content;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 999px;
+  padding: 6px 9px 6px 6px;
+  color: var(--coach-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  white-space: nowrap;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.coach-empty-modes .coach-lens-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+}
+
+.coach-empty-modes button:hover {
+  border-color: color-mix(in oklab, var(--coach-violet) 42%, var(--coach-border));
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-violet) 6%, transparent);
+  transform: translateY(-1px);
+}
+
+.coach-empty-modes button:active {
+  transform: translateY(0);
+}
+
+.coach-empty-private {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 21px;
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+}
+
+.coach-thread-loading {
+  display: flex;
+  min-height: 300px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  color: var(--coach-faint);
+}
+
+.coach-loading-orb {
+  position: relative;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 30%, var(--coach-border));
+  border-radius: 50%;
+}
+
+.coach-loading-orb::before {
+  position: absolute;
+  inset: 7px;
+  border: 1px solid color-mix(in oklab, var(--coach-sky) 28%, transparent);
+  border-radius: 50%;
+  content: "";
+  border-top-color: transparent;
+  animation: coach-breathe 2s ease-in-out infinite;
+}
+
+.coach-loading-orb span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--coach-violet);
+}
+
+@keyframes coach-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.coach-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(5 4 12 / 0.48);
+  backdrop-filter: blur(5px);
+  animation: coach-fade 180ms ease both;
+}
+
+.coach-drawer {
+  display: flex;
+  width: min(380px, 100%);
+  height: 100%;
+  flex-direction: column;
+  overflow-y: auto;
+  border-left: 1px solid color-mix(in oklab, var(--coach-violet) 26%, var(--coach-border));
+  padding: 22px 20px max(22px, env(safe-area-inset-bottom));
+  background: color-mix(in oklab, var(--coach-surface) 97%, var(--background));
+  box-shadow: -26px 0 70px -48px rgb(0 0 0 / 0.95);
+  animation: coach-drawer-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.coach-drawer-header h2 {
+  margin-top: 4px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.coach-drawer-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 20px;
+  border-bottom: 1px solid var(--coach-border-soft);
+  padding-bottom: 8px;
+}
+
+.coach-drawer-tabs button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+  font: 10px var(--coach-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.coach-drawer-tabs button:hover,
+.coach-drawer-tabs button.selected {
+  border-color: var(--coach-border-soft);
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--coach-violet) 7%, transparent);
+}
+
+.coach-drawer-content {
+  display: grid;
+  gap: 20px;
+  padding-top: 20px;
+}
+
+.coach-drawer-lede {
+  max-width: 38ch;
+  color: var(--coach-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.coach-drawer-section {
+  border-top: 1px solid var(--coach-border-soft);
+  padding-top: 14px;
+}
+
+.coach-drawer-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.coach-drawer-section-head h3 {
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.coach-drawer-section-head > span {
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+  text-transform: uppercase;
+}
+
+.coach-drawer-signal-list {
+  display: grid;
+  margin-top: 9px;
+}
+
+.coach-drawer-signal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid color-mix(in oklab, var(--coach-border) 48%, transparent);
+  padding: 10px 0;
+  color: var(--coach-muted);
+  font-size: 11px;
+}
+
+.coach-drawer-signal strong {
+  color: var(--foreground);
+  font: 500 15px var(--coach-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.coach-drawer-caption {
+  color: var(--coach-faint);
+  font: 10px/1.5 var(--coach-mono);
+}
+
+.coach-drawer-memory-preview {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.coach-drawer-memory-preview p {
+  border-left: 1px solid var(--coach-border);
+  padding-left: 9px;
+  color: var(--coach-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.coach-drawer-memory-preview button {
+  justify-self: start;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--coach-violet) 38%, transparent);
+  padding: 0 0 2px;
+  color: var(--coach-violet);
+  background: transparent;
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+}
+
+.coach-drawer-memory-filters {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 1px;
+  scrollbar-width: none;
+}
+
+.coach-drawer-memory-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.coach-drawer-memory-filters button {
+  flex: 0 0 auto;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 999px;
+  padding: 6px 8px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+  text-transform: capitalize;
+}
+
+.coach-drawer-memory-filters button:hover,
+.coach-drawer-memory-filters button.selected {
+  border-color: color-mix(in oklab, var(--coach-violet) 40%, var(--coach-border));
+  color: var(--coach-violet);
+  background: color-mix(in oklab, var(--coach-violet) 7%, transparent);
+}
+
+.coach-drawer-memory-list {
+  display: grid;
+  gap: 8px;
+}
+
+.coach-drawer-memory-item {
+  border-left: 1px solid var(--coach-border);
+  padding-left: 10px;
+}
+
+.coach-drawer-memory-item p {
+  color: var(--coach-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.coach-drawer-memory-item > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.coach-drawer-memory-item > div > span {
+  min-width: 0;
+  flex: 1;
+  color: var(--coach-faint);
+  font: 8px var(--coach-mono);
+}
+
+.coach-drawer-memory-item button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  color: var(--coach-faint);
+  background: transparent;
+  cursor: pointer;
+}
+
+.coach-drawer-memory-item button:hover,
+.coach-drawer-memory-item button.selected {
+  color: var(--coach-violet);
+  background: color-mix(in oklab, var(--coach-violet) 8%, transparent);
+}
+
+.coach-drawer-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px 0 18px;
+  color: var(--coach-faint);
+  text-align: center;
+}
+
+.coach-drawer-empty p {
+  color: var(--coach-muted);
+  font-size: 11px;
+}
+
+.coach-drawer-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-top: 1px solid var(--coach-border-soft);
+  padding-top: 12px;
+  color: var(--coach-faint);
+  font: 9px/1.55 var(--coach-mono);
+}
+
+.coach-camera-backdrop,
+.coach-command-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(5 4 12 / 0.76);
+  backdrop-filter: blur(8px);
+  animation: coach-fade 180ms ease both;
+}
+
+.coach-camera-backdrop {
+  z-index: 110;
+}
+
+.coach-camera-modal,
+.coach-command-modal {
+  width: min(100%, 620px);
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 28%, var(--coach-border));
+  border-radius: 16px;
+  background: var(--coach-surface);
+  box-shadow: 0 32px 90px -36px rgb(0 0 0 / 0.95);
+  animation: coach-menu-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-camera-modal {
+  overflow: hidden;
+  padding: 17px;
+}
+
+.coach-camera-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.coach-camera-subtitle {
+  margin-top: 6px;
+  color: var(--coach-faint);
+  font-size: 11px;
+}
+
+.coach-camera-video,
+.coach-camera-capture {
+  display: block;
+  width: 100%;
+  max-height: min(58vh, 470px);
+  margin-top: 15px;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 11px;
+  background: #08090f;
+  object-fit: contain;
+}
+
+.coach-camera-capture {
+  object-fit: cover;
+}
+
+.coach-camera-error {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  margin-top: 15px;
+  border-left: 2px solid color-mix(in oklab, var(--coach-rose) 55%, transparent);
+  padding: 8px 0 8px 9px;
+  color: var(--coach-rose);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.coach-camera-fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--coach-rose) 45%, transparent);
+  padding: 0 0 2px;
+  color: var(--coach-rose);
+  background: transparent;
+  cursor: pointer;
+  font: 9px var(--coach-mono);
+}
+
+.coach-camera-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.coach-button-primary,
+.coach-button-secondary {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 9px;
+  padding: 8px 11px;
+  cursor: pointer;
+  font-size: 11px;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.coach-button-primary {
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 60%, var(--coach-border));
+  color: var(--background);
+  background: var(--coach-violet);
+}
+
+.coach-button-secondary {
+  border: 1px solid var(--coach-border-soft);
+  color: var(--coach-muted);
+  background: transparent;
+}
+
+.coach-button-primary:hover,
+.coach-button-secondary:hover {
+  border-color: currentColor;
+  transform: translateY(-1px);
+}
+
+.coach-command-backdrop {
+  place-items: start center;
+  padding-top: 13vh;
+}
+
+.coach-command-modal {
+  width: min(100%, 520px);
+  padding: 16px;
+}
+
+.coach-command-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.coach-command-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 10px;
+  padding: 10px;
+  color: var(--coach-faint);
+  font-size: 11px;
+}
+
+.coach-command-search kbd {
+  margin-left: auto;
+  border: 1px solid var(--coach-border-soft);
+  border-radius: 5px;
+  padding: 3px 5px;
+  color: var(--coach-faint);
+  font: 9px var(--coach-mono);
+}
+
+.coach-command-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 11px;
+}
+
+.coach-command-list button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 8px;
+  color: var(--foreground);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.coach-command-list button:hover,
+.coach-command-list button:focus-visible {
+  border-color: var(--coach-border-soft);
+  background: var(--coach-surface-2);
+}
+
+.coach-command-list button > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.coach-command-list strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.coach-command-list small {
+  color: var(--coach-faint);
+  font-size: 10px;
+}
+
+@media (max-width: 1180px) {
+  .coach-workspace {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 17px;
+  }
+}
+
+@media (max-width: 1050px) {
+  .coach-workspace {
+    grid-template-columns: 184px minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .coach-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .coach-header-actions {
+    justify-content: flex-start;
+  }
+
+  .coach-workspace {
+    grid-template-columns: 1fr;
+    gap: 13px;
+    margin-top: 24px;
+  }
+
+  .coach-left-rail {
+    display: block;
+  }
+
+  .coach-mode-selector {
+    padding-top: 0;
+  }
+
+  .coach-mode-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .coach-camera-inline {
+    display: none;
+  }
+
+  .coach-lens-button {
+    width: 100%;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .coach-mode-item {
+    min-width: 0;
+  }
+
+  .coach-lens-button > .min-w-0.flex-1 {
+    flex: 0 1 auto;
+  }
+
+  .coach-lens-button .coach-lens-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .coach-lens-button .coach-lens-description {
+    display: none;
+  }
+
+  .coach-secondary-nav {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .coach-secondary-nav-button {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .coach-chat-shell {
+    height: max(360px, calc(100svh - 235px));
+    height: max(360px, calc(100dvh - 235px));
+    min-height: 0;
+    border-radius: 16px;
+  }
+
+  .coach-chat-header {
+    padding: 12px 13px;
+  }
+
+  .coach-chat-rule {
+    margin: 0 13px;
+  }
+
+  .coach-storage-notice {
+    margin-right: 13px;
+    margin-left: 13px;
+  }
+
+  .coach-thread {
+    gap: 15px;
+    padding: 17px 13px 14px;
+  }
+
+  .coach-message-body {
+    max-width: calc(100% - 37px);
+  }
+
+  .coach-message-card {
+    font-size: 12px;
+  }
+
+  .coach-composer-hint {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .coach-page-header h1 {
+    font-size: 36px;
+  }
+
+  .coach-chat-header {
+    min-height: 62px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .coach-chat-header h2 {
+    font-size: 18px;
+  }
+
+  .coach-thread {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .coach-message-avatar {
+    width: 26px;
+    height: 26px;
+  }
+
+  .coach-message-body {
+    max-width: calc(100% - 35px);
+  }
+
+  .coach-message-card-user {
+    padding: 10px 12px;
+  }
+
+  .coach-chat-bottom {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .coach-composer-icon,
+  .coach-send-button {
+    width: 35px;
+    height: 35px;
+  }
+
+  .coach-composer textarea {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+
+  .coach-empty-wrap {
+    max-height: 100%;
+  }
+
+  .coach-empty-conversation {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+
+  .coach-empty-conversation > h2 {
+    font-size: 23px;
+  }
+
+  .coach-empty-modes {
+    display: grid;
+    width: 100%;
+    max-width: 360px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 17px;
+  }
+
+  .coach-empty-mode-item {
+    width: 100%;
+  }
+
+  .coach-empty-modes button {
+    width: 100%;
+    min-width: 0;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 5px;
+    font-size: 9px;
+  }
+
+  .coach-empty-modes .coach-lens-icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+  }
+
+  .coach-empty-private {
+    max-width: 31ch;
+    line-height: 1.5;
+  }
+
+  .coach-recording-bar {
+    flex-wrap: wrap;
+  }
+
+  .coach-recording-cancel {
+    margin-left: auto;
+  }
+
+  .coach-drawer {
+    width: 100%;
+    border-left: 0;
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+
+  .coach-camera-backdrop,
+  .coach-command-backdrop {
+    padding: 12px;
+  }
+
+  .coach-camera-modal,
+  .coach-command-modal {
+    border-radius: 14px;
+    padding: 13px;
+  }
+
+  .coach-camera-actions {
+    justify-content: stretch;
+  }
+
+  .coach-camera-actions > button {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-page *,
+  .coach-page *::before,
+  .coach-page *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

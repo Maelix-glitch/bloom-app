@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HandleRouteImport } from './routes/$handle'
-import { Route as CycleRouteImport } from './routes/cycle'
+import { Route as CoachRouteImport } from './routes/coach'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
@@ -26,9 +26,9 @@ const HandleRoute = HandleRouteImport.update({
   path: '/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CycleRoute = CycleRouteImport.update({
-  id: '/cycle',
-  path: '/cycle',
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -50,7 +50,7 @@ const AdminRewardsRoute = AdminRewardsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
-  '/cycle': typeof CycleRoute
+  '/coach': typeof CoachRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -58,7 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
-  '/cycle': typeof CycleRoute
+  '/coach': typeof CoachRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -67,7 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
-  '/cycle': typeof CycleRoute
+  '/coach': typeof CoachRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/admin/rewards': typeof AdminRewardsRoute
@@ -75,14 +75,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/$handle' | '/cycle' | '/profile' | '/rewards' | '/admin/rewards'
+    '/' | '/$handle' | '/coach' | '/profile' | '/rewards' | '/admin/rewards'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$handle' | '/cycle' | '/profile' | '/rewards' | '/admin/rewards'
+  to: '/' | '/$handle' | '/coach' | '/profile' | '/rewards' | '/admin/rewards'
   id:
     | '__root__'
     | '/'
     | '/$handle'
-    | '/cycle'
+    | '/coach'
     | '/profile'
     | '/rewards'
     | '/admin/rewards'
@@ -91,7 +91,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HandleRoute: typeof HandleRoute
-  CycleRoute: typeof CycleRoute
+  CoachRoute: typeof CoachRoute
   ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
@@ -113,11 +113,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HandleRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cycle': {
-      id: '/cycle'
-      path: '/cycle'
-      fullPath: '/cycle'
-      preLoaderRoute: typeof CycleRouteImport
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -147,7 +147,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HandleRoute: HandleRoute,
-  CycleRoute: CycleRoute,
+  CoachRoute: CoachRoute,
   ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
   AdminRewardsRoute: AdminRewardsRoute,
