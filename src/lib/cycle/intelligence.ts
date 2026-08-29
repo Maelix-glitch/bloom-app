@@ -119,9 +119,13 @@ export function buildPersonalInsight(model: CycleModel, context: CycleContext): 
       }
     }
     if (model.variabilityPercent !== null && model.variabilityPercent <= 6) {
+      const spread = Math.round(model.stdDev ?? 1);
       return {
         id: `steady-${model.today}`,
-        text: `Your cycles vary by only about ±${Math.round(model.stdDev ?? 1)} days — estimates are at their best with history this steady.`,
+        text:
+          spread <= 0
+            ? `Your last ${n} cycles ran at almost exactly ${model.average?.toFixed(0)} days — estimates are at their best with history this steady.`
+            : `Your cycles vary by only about ±${spread} ${spread === 1 ? "day" : "days"} — estimates are at their best with history this steady.`,
         why: `computed from your last ${Math.min(6, n)} completed cycles`,
       };
     }
