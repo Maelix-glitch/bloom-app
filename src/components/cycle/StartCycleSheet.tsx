@@ -48,8 +48,12 @@ export function StartCycleSheet({
   }, [open, initialDate]);
 
   const save = async () => {
-    setBusy(true);
     setErr(null);
+    if (!date) {
+      setErr("Choose the day your period started.");
+      return;
+    }
+    setBusy(true);
     try {
       await onSaveStart(date, flow);
       onClose();
