@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { Info, LineChart, TestTube } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { fmtShort } from "@/lib/cycle/engine";
+import { fmtShort, periodRuns } from "@/lib/cycle/engine";
 import type { CycleEntry, CycleModel, MoodValue } from "@/lib/cycle/types";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 import { GhostButton } from "./parts";
@@ -193,6 +193,8 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
     };
   }, [shown]);
 
+  const runs = useMemo(() => periodRuns(entries), [entries]);
+
   const temps = useMemo(() => entries.filter((e) => e.temperature !== null), [entries]);
   const lhLogs = useMemo(() => entries.filter((e) => e.lh_test), [entries]);
 
@@ -326,6 +328,27 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
               </div>
             </div>
           </div>
+
+          {runs.length >= 2 ? (
+            <div className="rounded-2xl border border-border/70 bg-surface/35 p-4 sm:p-5">
+              <p className="eyebrow mb-3">Period length history</p>
+              <ul className="flex flex-wrap items-end gap-1.5">
+                {runs.slice(-8).map((r, i) => (
+                  <li key={r.start} className="flex w-10 flex-col items-center gap-1.5">
+                    <span
+                      className="w-full rounded-t-md bg-[color-mix(in_oklab,var(--cycle-menstrual)_55%,var(--surface-3))] transition-[height] duration-500"
+                      style={{ height: `${Math.max(10, r.days * 9)}px` }}
+                      title={`${fmtShort(r.start)}–${fmtShort(r.end)} · ${r.days} days`}
+                    />
+                    <span className="mono text-[9.5px] text-faint">{r.days}d</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[11.5px] leading-relaxed text-muted-foreground">
+                {`Your logged periods have run ${Math.min(...runs.map((r) => r.days))}–${Math.max(...runs.map((r) => r.days))} days; each bar is one period, oldest left. Lengths differing between periods is ordinary — this is history, not a verdict.`}
+              </p>
+            </div>
+          ) : null}
 
           {/* symptom patterns — only when real */}
           {symptomCounts.some((s) => s.n >= 3) ? (

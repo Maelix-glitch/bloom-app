@@ -115,8 +115,10 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
       : error instanceof Error
         ? error.message
         : "";
-  if (/fetch|network|failed to fetch/i.test(raw)) return "You're offline — this reply stays on the device.";
-  if (/relation|does not exist|schema cache|404/i.test(raw)) return "Coach storage isn't set up yet — everything stays on this device.";
+  if (/fetch|network|failed to fetch/i.test(raw))
+    return "You're offline — this reply stays on the device.";
+  if (/relation|does not exist|schema cache|404/i.test(raw))
+    return "Coach storage isn't set up yet — everything stays on this device.";
   return fallback ?? "Something went wrong on our end. Your words are safe on this device.";
 }
 
@@ -144,7 +146,8 @@ function respond({ text, mode, context }: CoachRequest): CoachResponse {
       blocks.push({
         type: "plan",
         title: "A floor, not a ceiling",
-        detail: "Built from nothing but a kind default — log a couple of check-ins and the next plan is yours.",
+        detail:
+          "Built from nothing but a kind default — log a couple of check-ins and the next plan is yours.",
         steps: [
           { label: "Pick one task that matters tomorrow morning", time: "10 min tonight" },
           { label: "Set a soft stop for the evening", time: "before you tire out" },
@@ -200,9 +203,16 @@ function respond({ text, mode, context }: CoachRequest): CoachResponse {
     );
     const steps: { label: string; time?: string }[] = [];
     if (habits.available && habits.activeCount > 0) {
-      steps.push({ label: `Move the day with your routine (${habits.activeCount} habit${habits.activeCount === 1 ? "" : "s"} active)`, time: "first" });
+      steps.push({
+        label: `Move the day with your routine (${habits.activeCount} habit${habits.activeCount === 1 ? "" : "s"} active)`,
+        time: "first",
+      });
     }
-    if (bestBand) steps.push({ label: "The one task that needs real focus", time: bestBand.label.toLowerCase() });
+    if (bestBand)
+      steps.push({
+        label: "The one task that needs real focus",
+        time: bestBand.label.toLowerCase(),
+      });
     steps.push({ label: "Something small that counts as showing up", time: "afternoon" });
     steps.push({ label: "Stop before you're empty — future you logs the mood", time: "evening" });
     blocks.push({
@@ -247,7 +257,9 @@ function respond({ text, mode, context }: CoachRequest): CoachResponse {
       );
       if (mood.anomalies.length > 0) {
         const worst = mood.anomalies[mood.anomalies.length - 1]!;
-        paragraphs.push(`The sharpest single day was ${worst.date} — ${worst.kind === "low" ? "a real low, not a blip you imagined" : "an unusual high"}. One hard day doesn't rewrite the trend.`);
+        paragraphs.push(
+          `The sharpest single day was ${worst.date} — ${worst.kind === "low" ? "a real low, not a blip you imagined" : "an unusual high"}. One hard day doesn't rewrite the trend.`,
+        );
       }
       sources.push("Last 7 days", "Mood record");
     } else if (mentionsHabits && context.habits.available) {
@@ -270,7 +282,8 @@ function respond({ text, mode, context }: CoachRequest): CoachResponse {
             }. The month window reads ${fmt(mood.month.mood)}, so one week doesn't get to tell the whole story.`
           : "I read from your logs — mood, energy, stress, routines — and I'd rather say nothing than guess at something I can't see. Ask about your week, your patterns, your routine, or say 'plan tonight'.",
       );
-      if (mood.patterns.length > 0) paragraphs.push(`Pattern worth knowing: ${mood.patterns[0]!.statement.toLowerCase()}`);
+      if (mood.patterns.length > 0)
+        paragraphs.push(`Pattern worth knowing: ${mood.patterns[0]!.statement.toLowerCase()}`);
       sources.push("Last 7 days", "Last 30 days", "Mood record");
     }
     if (mood.entries >= 6) {
@@ -279,7 +292,9 @@ function respond({ text, mode, context }: CoachRequest): CoachResponse {
         label: `Mood · last 7 days`,
         value: `${fmt(mood.recent.mood)} / 10`,
         detail: `${mood.entries} entries · month reads ${fmt(mood.month.mood)}`,
-        series: [mood.previous.mood, mood.recent.mood, mood.month.mood].filter((v): v is number => Number.isFinite(v)),
+        series: [mood.previous.mood, mood.recent.mood, mood.month.mood].filter((v): v is number =>
+          Number.isFinite(v),
+        ),
         accent: "violet",
       });
     }
@@ -287,7 +302,12 @@ function respond({ text, mode, context }: CoachRequest): CoachResponse {
 
   const pinned = context.memory.selected.filter((m) => m.pinned);
   if (pinned.length > 0 && mode !== "plan") {
-    paragraphs.push(`Also keeping in view: ${pinned.slice(0, 2).map((m: { text: string }) => `“${m.text}”`).join(" and ")}.`);
+    paragraphs.push(
+      `Also keeping in view: ${pinned
+        .slice(0, 2)
+        .map((m: { text: string }) => `“${m.text}”`)
+        .join(" and ")}.`,
+    );
     sources.push("Pinned context");
   }
 
@@ -336,8 +356,18 @@ export function useCoachSystem() {
       void (async () => {
         try {
           const [{ data: rows }, { data: memRows }] = await Promise.all([
-            supabase.from("coach_messages").select("id, role, content, sources, created_at").eq("profile_id", profileId).order("created_at", { ascending: true }).limit(40),
-            supabase.from("coach_memory").select("id, category, fact, pinned, updated_at").eq("profile_id", profileId).order("updated_at", { ascending: false }).limit(30),
+            supabase
+              .from("coach_messages")
+              .select("id, role, content, sources, created_at")
+              .eq("profile_id", profileId)
+              .order("created_at", { ascending: true })
+              .limit(40),
+            supabase
+              .from("coach_memory")
+              .select("id, category, fact, pinned, updated_at")
+              .eq("profile_id", profileId)
+              .order("updated_at", { ascending: false })
+              .limit(30),
           ]);
           if (!mounted) return;
           if (Array.isArray(rows) && rows.length > 0) {
@@ -347,7 +377,9 @@ export function useCoachSystem() {
                 role: r["role"] === "user" ? "user" : "coach",
                 time: String(r["created_at"] ?? new Date().toISOString()),
                 text: typeof r["content"] === "string" ? r["content"] : undefined,
-                paragraphs: String(r["content"] ?? "").split("\n\n").filter(Boolean),
+                paragraphs: String(r["content"] ?? "")
+                  .split("\n\n")
+                  .filter(Boolean),
                 sources: Array.isArray(r["sources"]) ? (r["sources"] as string[]) : [],
                 blocks: [],
               })),
@@ -357,10 +389,16 @@ export function useCoachSystem() {
             setMemories(
               (memRows as Row[]).map((m) => ({
                 id: String(m["id"]),
-                category: (["pattern", "preference", "goal", "context"].includes(String(m["category"])) ? m["category"] : "context") as CoachMemory["category"],
+                category: (["pattern", "preference", "goal", "context"].includes(
+                  String(m["category"]),
+                )
+                  ? m["category"]
+                  : "context") as CoachMemory["category"],
                 text: String(m["fact"] ?? ""),
                 pinned: Boolean(m["pinned"]),
-                learnedAt: m["updated_at"] ? new Date(String(m["updated_at"])).toLocaleDateString() : null,
+                learnedAt: m["updated_at"]
+                  ? new Date(String(m["updated_at"])).toLocaleDateString()
+                  : null,
               })),
             );
           }
@@ -389,7 +427,8 @@ export function useCoachSystem() {
         const { error } = await supabase.from("coach_messages").insert({
           profile_id: profileId,
           role: message.role === "coach" ? "coach" : "user",
-          content: (message.role === "you" ? message.text : undefined) ?? message.paragraphs.join("\n\n"),
+          content:
+            (message.role === "you" ? message.text : undefined) ?? message.paragraphs.join("\n\n"),
           sources: message.sources,
         });
         return !error;
@@ -407,7 +446,11 @@ export function useCoachSystem() {
       setMemories((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
       if (!profileId) return;
       try {
-        await supabase.from("coach_memory").update({ pinned: Boolean(patch.pinned) }).eq("id", id).eq("profile_id", profileId);
+        await supabase
+          .from("coach_memory")
+          .update({ pinned: Boolean(patch.pinned) })
+          .eq("id", id)
+          .eq("profile_id", profileId);
       } catch {
         /* local-only */
       }
@@ -448,7 +491,18 @@ export function useCoachSystem() {
       forgetMemory,
       requestResponse,
     }),
-    [profileId, loading, messages, memories, habitData, storageError, saveMessage, updateMemory, forgetMemory, requestResponse],
+    [
+      profileId,
+      loading,
+      messages,
+      memories,
+      habitData,
+      storageError,
+      saveMessage,
+      updateMemory,
+      forgetMemory,
+      requestResponse,
+    ],
   );
 }
 
@@ -474,8 +528,12 @@ function readHabitData(): CoachHabitData {
         goal:
           h["goal"] && typeof h["goal"] === "object"
             ? {
-                target: (h["goal"] as Row)["target"] != null ? Number((h["goal"] as Row)["target"]) : null,
-                unit: (h["goal"] as Row)["unit"] != null ? String((h["goal"] as Row)["unit"]) : null,
+                target:
+                  (h["goal"] as Row)["target"] != null
+                    ? Number((h["goal"] as Row)["target"])
+                    : null,
+                unit:
+                  (h["goal"] as Row)["unit"] != null ? String((h["goal"] as Row)["unit"]) : null,
               }
             : null,
         startDate: typeof h["startDate"] === "string" ? h["startDate"] : null,

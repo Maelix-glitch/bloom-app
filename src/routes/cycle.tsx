@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarDays, Info, PencilLine, Plus } from "lucide-react";
 
@@ -17,7 +17,10 @@ import { QuickLog, AdvancedLog } from "@/components/cycle/Logs";
 import { CycleRing } from "@/components/cycle/CycleRing";
 import { NextEvents } from "@/components/cycle/NextEvents";
 import { CycleCalendar } from "@/components/cycle/CycleCalendar";
-import { Analytics } from "@/components/cycle/Analytics";
+/* below-the-fold weight loads progressively — the hero, events, and calendar never wait on it */
+const Analytics = lazy(() =>
+  import("@/components/cycle/Analytics").then((m) => ({ default: m.Analytics })),
+);
 import { InsightCard, RecommendationStack } from "@/components/cycle/Insights";
 import { AssistantDock } from "@/components/cycle/AssistantDock";
 import { CycleSection, ObserveLegend } from "@/components/cycle/parts";
@@ -313,7 +316,13 @@ function CyclePage() {
             ) : null
           }
         >
-          {model ? <Analytics model={model} entries={entries} /> : <BlockSkeleton h={220} />}
+          {model ? (
+            <Suspense fallback={<BlockSkeleton h={220} />}>
+              <Analytics model={model} entries={entries} />
+            </Suspense>
+          ) : (
+            <BlockSkeleton h={220} />
+          )}
         </CycleSection>
       </Reveal>
 
