@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bloom — seed demo data</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; min-height: 100vh; display: grid; place-items: center;
+        background: radial-gradient(120% 90% at 50% -10%, #232436, #14151b 55%) fixed;
+        color: #edebe4; font: 15px/1.6 -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+        padding: 32px 16px;
+      }
+      .card {
+        width: 100%; max-width: 560px; border: 1px solid #2b2d3a; border-radius: 20px;
+        background: #191a24; padding: 30px 28px; box-shadow: 0 40px 80px -50px rgba(0,0,0,.9);
+      }
+      h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; font-size: 25px; margin: 0 0 4px; letter-spacing: -0.01em; }
+      p.sub { color: #8a8ca0; font-size: 13px; margin: 0 0 20px; }
+      ul { margin: 0 0 22px; padding-left: 18px; color: #a9abbb; font-size: 13.5px; }
+      li { margin: 6px 0; }
+      .row { display: flex; gap: 10px; flex-wrap: wrap; }
+      button {
+        appearance: none; border: 0; cursor: pointer; border-radius: 999px; padding: 12px 22px;
+        font: 600 14px/1 inherit; color: #14151b;
+        background: linear-gradient(135deg, #8f7ce8, #7ea7d8);
+        transition: transform .18s ease;
+      }
+      button:hover { transform: scale(1.02); }
+      button.ghost { background: transparent; border: 1px solid #34374a; color: #a9abbb; }
+      button.ghost:hover { color: #edebe4; border-color: #4a4e66; }
+      .note { margin-top: 16px; font-size: 11.5px; color: #63667a; }
+      code { font: 12px/1.5 ui-monospace, Menlo, monospace; color: #9aa4d6; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Fill the Cycle page with demo data</h1>
+      <p class="sub">
+        Six plausible cycles written to this browser's local storage — exactly where the
+        signed-out Cycle page reads from. Nothing is uploaded anywhere.
+      </p>
+      <ul>
+        <li>6 completed cycles (27–30 days) + a live cycle currently on day 16</li>
+        <li>Period days with flow, pain, mood and symptoms; late-luteal dips</li>
+        <li>A basal-temperature stretch with a real shift, one LH surge, an egg-white note</li>
+        <li>Two short human notes so it doesn't feel like a spreadsheet</li>
+      </ul>
+      <div class="row">
+        <button id="go" type="button">Seed it &amp; open /cycle</button>
+        <button id="wipe" type="button" class="ghost">Remove demo data</button>
+      </div>
+      <p class="note">
+        Stored under <code>bloom.cycle.entries.local</code>. The real page and this demo
+        share that key while you're signed out — one click on “Remove demo data” empties it.
+      </p>
+    </main>
+    <script>
+      var KEY = "bloom.cycle.entries.local";
+      function pad(n) { return String(n).padStart(2, "0"); }
+      function keyFor(offsetDays) {
+        var d = new Date(Date.now() - offsetDays * 86400000);
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+      }
+      function e(date, extra) {
+        return Object.assign(
+          {
+            date: date, cycle_day: 1, phase: null, flow: null, temperature: null,
+            cervical_mucus: null, lh_test: null, pain_level: null, sexual_activity: null,
+            contraceptive: null, energy: null, sleep_hours: null, mood: null, symptoms: [],
+            notes: null, next_period_in_days: null,
+            logged_at: new Date().toISOString(), created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          extra || {},
+        );
+      }
+      function build() {
+        var rows = [];
+        // lengths of the six completed cycles, oldest→newest; live cycle starts 15 days ago
+        var lengths = [28, 30, 27, 28, 29, 28];
+        var lastStart = 15; // days ago → today is cycle day 16 of the live cycle
+        for (var i = lengths.length - 1; i >= 0; i--) {
+          // start of cycle i (counting back from the live start)
+          var back = lastStart;
+          for (var j = i; j >= 0; j--) back += j === i ? 0 : lengths[j];
+          var startAgo = back;
+          var perLen = 3 + (i % 2); // 3–4 day periods
+          for (var f = 0; f < perLen; f++) {
+            rows.push(
+              e(keyFor(startAgo - f), {
+                cycle_day: f + 1,
+                phase: "menstrual",
+                flow: f === 0 ? "heavy" : f === 1 ? "medium" : "light",
+                pain_level: f === 0 ? 3 : f === 1 ? 2 : 0,
+                energy: 2,
+                sleep_hours: 7 + (f % 2) * 0.5,
+                mood: f === 0 ? "Low" : "Flat",
+                symptoms: f === 0 ? ["Cramps", "Fatigue"] : f === 1 ? ["Headache"] : [],
+                notes: f === 0 && i === 2 ? "Stayed in. Heat pad won." : null,
+                next_period_in_days: Math.max(0, lengths[i] - (f + 1)),
+              }),
+            );
+          }
+          // an energy + one fertility marker mid-cycle
+          rows.push(
+            e(keyFor(startAgo - Math.round(lengths[i] * 0.55)), {
+              cycle_day: Math.round(lengths[i] * 0.55) + 1,
+              phase: "luteal",
+              energy: 3,
+              mood: "Okay",
+              sleep_hours: 7,
+            }),
+          );
+        }
+        var live = lastStart; // days-ago of live cycle start
+        // live cycle: period days 1–3
+        for (var g = 0; g < 3; g++) {
+          rows.push(
+            e(keyFor(live - g), {
+              cycle_day: g + 1,
+              phase: "menstrual",
+              flow: g === 0 ? "heavy" : g === 1 ? "medium" : "light",
+              pain_level: g === 0 ? 4 : 1,
+              energy: 2,
+              sleep_hours: 8,
+              mood: g === 0 ? "Low" : "Flat",
+              symptoms: g === 0 ? ["Cramps", "Back pain"] : [],
+              notes: g === 0 ? "Day one — cancelled plans, no regrets." : null,
+              next_period_in_days: 13,
+            }),
+          );
+        }
+        // BBT before/during the shift (days 11–15 of the live cycle)
+        [36.45, 36.4, 36.5, 36.75, 36.85].forEach(function (t, idx) {
+          rows.push(
+            e(keyFor(live - (10 + idx)), {
+              cycle_day: 11 + idx,
+              temperature: t,
+              energy: 4,
+              mood: idx >= 3 ? "Okay" : "Energized",
+              sleep_hours: 7.5,
+            }),
+          );
+        });
+        // LH surge + egg-white note around day 13–14
+        rows.push(e(keyFor(live - 12), { cycle_day: 13, lh_test: "positive", cervical_mucus: "egg-white", energy: 5 }));
+        rows.push(e(keyFor(live - 13), { cycle_day: 14, cervical_mucus: "egg-white", mood: "Good", energy: 5 }));
+        // yesterday — a plain late-ish note
+        rows.push(
+          e(keyFor(1), {
+            cycle_day: 15,
+            energy: 3,
+            mood: "Okay",
+            symptoms: ["Tender breasts"],
+            sleep_hours: 6.5,
+            notes: "Weather turned. Sleep did too.",
+          }),
+        );
+        // dedupe by date, keep richest (later pushes win is fine: order below)
+        var byDate = {};
+        rows.forEach(function (r) {
+          var prev = byDate[r.date];
+          byDate[r.date] = prev ? Object.assign({}, prev, clean(r)) : r;
+        });
+        function clean(r) {
+          var out = {};
+          Object.keys(r).forEach(function (k) {
+            if (r[k] !== null && r[k] !== undefined && !(Array.isArray(r[k]) && r[k].length === 0)) out[k] = r[k];
+          });
+          return out;
+        }
+        return Object.keys(byDate)
+          .sort()
+          .map(function (k) { return byDate[k]; });
+      }
+      document.getElementById("go").onclick = function () {
+        localStorage.setItem(KEY, JSON.stringify(build()));
+        location.href = "/cycle";
+      };
+      document.getElementById("wipe").onclick = function () {
+        localStorage.removeItem(KEY);
+        document.getElementById("wipe").textContent = "Removed — demo data gone";
+      };
+    </script>
+  </body>
+</html>
