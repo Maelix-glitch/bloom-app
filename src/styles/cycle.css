@@ -1,83 +1,84 @@
 /*
- * Bloom — Cycle 3.0 stylesheet (route-scoped; loaded only by /cycle).
- * This file is the design system for the Cycle experience: one set of
- * tokens for spacing rhythm, radii, surfaces, borders, motion and the
- * phase color language, plus the composition primitives (chapters, the
- * orbit, the forecast rail, the today surface). Components consume these
- * tokens instead of scattering arbitrary values.
- *
- * The visual language for data honesty, used everywhere on this page:
- *   solid + full opacity   = logged (grounded in what you recorded)
- *   dashed + soft          = estimated (Bloom's model, not a fact)
- *   translucent            = forecast (ahead of today)
- *   ivory dot + phase ring = today
+ * Bloom — Cycle 3.1 stylesheet (route-scoped; /cycle only).
+ * Art-direction pass: the page as ONE composition, not a dashboard stack.
+ * Design decisions encoded here:
+ *  - asymmetric "stage" hero: orbit as physical object lit by moonlight,
+ *    serif statement beside it, the today tray docked underneath-right
+ *  - a meridian thread: one continuous left-edge line with chapter nodes
+ *    that visually connects orbit → road → week → rhythm → patterns
+ *  - uncertainty is material: solid = logged, dashed = estimated,
+ *    gradient-fade = forecast; never a fake certainty treatment
+ *  - typographic hierarchy replaces label spam: big serif statements and
+ *    numbers, sentence-case interface text, micro-labels only where they
+ *    carry real meaning (chapter nodes, road dates)
+ *  - depth from tonal layering and soft light, not glass or neon
  */
 
 .cycle-page {
-  /* ——— canvas & ink ——— */
-  --background: oklch(0.145 0.016 264);
-  --surface: oklch(0.178 0.02 264);
+  /* canvas & ink */
+  --background: oklch(0.138 0.015 264);
+  --surface: oklch(0.176 0.02 264);
   --surface-2: oklch(0.212 0.022 264);
-  --surface-3: oklch(0.252 0.024 266);
+  --surface-3: oklch(0.254 0.024 266);
   --border: oklch(0.285 0.02 264);
   --border-strong: oklch(0.385 0.03 266);
   --foreground: oklch(0.952 0.008 85);
-  --muted-foreground: oklch(0.71 0.022 280);
-  --faint: oklch(0.545 0.028 282);
+  --muted-foreground: oklch(0.722 0.022 280);
+  --faint: oklch(0.565 0.028 282);
 
-  /* ——— cycle color language ——— */
+  /* phase language */
   --cycle-follicular: var(--sage);
   --cycle-hair: color-mix(in oklab, var(--border) 78%, transparent);
   --cycle-hair-strong: color-mix(in oklab, var(--border-strong) 70%, transparent);
   --cycle-accent: color-mix(in oklab, var(--violet) 62%, var(--sky));
 
-  /* ——— spacing rhythm (intentional, not uniform) ——— */
-  --cy-s1: 10px;
-  --cy-s2: 16px;
-  --cy-s3: 26px;
-  --cy-s4: 42px;
-  --cy-s5: 68px;
-  --cy-s6: 104px;
-
-  /* ——— shape & surfaces ——— */
+  /* rhythm & shape */
+  --cy-s1: 8px;
+  --cy-s2: 14px;
+  --cy-s3: 24px;
+  --cy-s4: 40px;
+  --cy-s5: 62px;
   --cy-r-sm: 10px;
   --cy-r-md: 16px;
   --cy-r-lg: 22px;
   --cy-r-pill: 999px;
   --cy-fill: color-mix(in oklab, var(--surface) 62%, transparent);
-  --cy-fill-2: color-mix(in oklab, var(--surface-2) 55%, transparent);
-  --cy-elev: 0 24px 60px -32px color-mix(in oklab, black 82%, transparent);
-
-  /* ——— motion ——— */
-  --cy-fast: 160ms;
-  --cy-med: 260ms;
-  --cy-slow: 480ms;
-
-  --cy-page-w: 1160px;
+  --cy-elev: 0 30px 70px -34px color-mix(in oklab, black 85%, transparent);
+  --cy-tray: inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
+  --cy-fast: 150ms;
+  --cy-med: 240ms;
+  --cy-slow: 460ms;
+  --cy-page-w: 1180px;
+  --cy-thread-x: 26px;
 
   background:
     radial-gradient(
-      120% 46% at 22% -8%,
-      color-mix(in oklab, var(--violet) 8%, transparent),
+      58% 42% at 30% -6%,
+      color-mix(in oklab, var(--violet) 9%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      42% 30% at 84% 2%,
+      color-mix(in oklab, var(--sky) 5.5%, transparent),
       transparent 58%
     ),
     radial-gradient(
-      90% 40% at 88% 4%,
-      color-mix(in oklab, var(--sky) 5%, transparent),
+      120% 90% at 50% 120%,
+      color-mix(in oklab, black 55%, transparent),
       transparent 60%
     ),
     var(--background);
   color: var(--foreground);
 }
 
-/* faint grain so the canvas reads printed rather than empty */
+/* faint grain — printed, not empty */
 .cycle-page::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.45;
   background-image: radial-gradient(
     color-mix(in oklab, var(--foreground) 4%, transparent) 0.5px,
     transparent 0.5px
@@ -85,7 +86,6 @@
   background-size: 3px 3px;
 }
 
-/* nothing on this route may create document-level sideways overflow */
 .cycle-page {
   overflow-x: clip;
   max-width: 100vw;
@@ -95,7 +95,7 @@
   background: color-mix(in oklab, var(--violet) 40%, transparent);
 }
 
-/* ————————————————————————— layout ————————————————————————— */
+/* ————————————————————— layout + meridian thread ————————————————————— */
 
 .cy-main {
   position: relative;
@@ -103,7 +103,7 @@
   width: 100%;
   max-width: var(--cy-page-w);
   margin-inline: auto;
-  padding: 14px 16px 96px;
+  padding: 10px 16px 90px;
 }
 
 @media (min-width: 640px) {
@@ -112,173 +112,868 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1120px) {
   .cy-main {
-    padding-inline: 44px;
+    padding-left: 64px;
   }
 }
 
-/* chapters: large spacing between, hairline transitions, no card boxes */
+/* one continuous hairline down the left edge, lit only while a chapter is
+   in view — the thread connecting the whole page */
+@media (min-width: 1120px) {
+  .cy-main::before {
+    content: "";
+    position: absolute;
+    left: var(--cy-thread-x);
+    top: 132px;
+    bottom: 140px;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in oklab, var(--foreground) 13%, transparent) 6%,
+      color-mix(in oklab, var(--foreground) 13%, transparent) 88%,
+      transparent
+    );
+  }
+}
+
 .cy-chapter {
   position: relative;
-  margin-top: var(--cy-s5);
-  padding-top: var(--cy-s4);
+  margin-top: var(--cy-s4);
+  padding-top: var(--cy-s3);
   scroll-margin-top: 24px;
 }
 
-.cy-chapter::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, var(--cycle-hair), transparent 76%);
+.cy-chapter + .cy-chapter {
+  margin-top: var(--cy-s5);
 }
 
-.cy-chapter--flush {
-  margin-top: var(--cy-s2);
-  padding-top: 0;
+/* chapter node on the thread — pinned to the left gutter on wide screens */
+@media (min-width: 1120px) {
+  .cy-chapter > .cy-node {
+    position: absolute;
+    left: -38px;
+    top: calc(var(--cy-s3) + 7px);
+    width: 9px;
+    height: 9px;
+    transform: translateX(-50%);
+  }
 }
 
-.cy-chapter--flush::before {
+.cy-node {
   display: none;
 }
 
-.cy-chapter__no {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--faint);
+@media (min-width: 1120px) {
+  .cy-node {
+    display: inline-block;
+  }
+}
+
+.cy-node i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--node-c, var(--cycle-accent));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--node-c, var(--cycle-accent)) 14%, transparent);
 }
 
 .cy-chapter__title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(21px, 2.5vw, 27px);
-  letter-spacing: -0.018em;
+  font-size: clamp(24px, 2.9vw, 31px);
+  letter-spacing: -0.02em;
   line-height: 1.12;
 }
 
 .cy-chapter__sub {
-  margin-top: 6px;
-  max-width: 64ch;
-  font-size: 12.5px;
-  line-height: 1.6;
+  margin-top: 5px;
+  max-width: 60ch;
+  font-size: 13.5px;
+  line-height: 1.55;
   color: var(--muted-foreground);
 }
 
-/* ————————————————————————— type ————————————————————————— */
-
-.cy-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-.cy-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums lining-nums;
-}
-
-/* ————————————————————————— hero + orbit ————————————————————————— */
+/* ————————————————————— hero stage ————————————————————— */
 
 .cy-hero {
+  position: relative;
   display: grid;
-  gap: var(--cy-s4);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
   padding-top: var(--cy-s2);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1120px) {
   .cy-hero {
-    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
-    gap: 56px;
-    align-items: center;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    grid-template-areas:
+      "orbit statement"
+      "orbit tray";
+    column-gap: 20px;
+    align-items: start;
+  }
+  .cy-hero__orbit {
+    grid-area: orbit;
+  }
+  .cy-hero__statement {
+    grid-area: statement;
+    padding-top: clamp(8px, 6vh, 64px);
+  }
+  .cy-tray {
+    grid-area: tray;
+    margin-top: var(--cy-s2);
   }
 }
 
-.cy-orbit-wrap {
+.cy-hero__orbit {
   position: relative;
-  width: clamp(280px, 74vw, 448px);
+  width: clamp(292px, 78vw, 480px);
   margin-inline: auto;
 }
 
-@media (min-width: 1024px) {
-  .cy-orbit-wrap {
-    width: clamp(320px, 34vw, 448px);
+@media (min-width: 1120px) {
+  .cy-hero__orbit {
+    width: clamp(400px, 36vw, 480px);
+    margin-left: calc(var(--cy-thread-x) - 6px);
+    margin-inline-end: 0;
   }
 }
 
-/* the soft light the orbit sits in — tied to the live phase, never random */
-.cy-orbit-halo {
+.cy-hero__statement {
+  min-width: 0;
+}
+
+@media (max-width: 1119px) {
+  .cy-hero__statement {
+    padding-top: 0;
+  }
+}
+
+/* moonlight the orbit sits in — the page's single big light source */
+.cy-stage-light {
   position: absolute;
-  inset: -8%;
   z-index: -1;
   pointer-events: none;
   border-radius: 50%;
-  filter: blur(42px);
+  filter: blur(64px);
 }
 
-/* gentle breathing of today's marker — quiet, not a spinner */
-@keyframes cy-breathe {
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
+/* serif statement */
+.cy-statement {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(38px, 4.6vw, 54px);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+}
+
+.cy-statement__support {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+}
+
+.cy-statement__support b {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* ————————————————————— today tray (docked surface) ————————————————————— */
+
+.cy-tray {
+  margin-top: var(--cy-s3);
+  border-radius: var(--cy-r-lg);
+  border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 92%, transparent),
+    color-mix(in oklab, var(--surface) 66%, transparent)
+  );
+  box-shadow: var(--cy-elev), var(--cy-tray);
+  padding: 16px 18px 14px;
+}
+
+@media (max-width: 1119px) {
+  .cy-tray {
+    margin-top: 6px;
   }
-  50% {
-    opacity: 0.16;
-    transform: scale(1.16);
-  }
 }
 
-.cy-breathe {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: cy-breathe 5.2s ease-in-out infinite;
+.cy-tray__head {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
 }
 
-/* a very subtle highlight travelling along the active phase */
-@keyframes cy-travel {
-  to {
-    stroke-dashoffset: -114;
-  }
+.cy-tray__head .cy-link {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.cy-travel {
-  animation: cy-travel 16s linear infinite;
+.cy-tray__title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* the day the user is inspecting (from timeline/calendar) — focus moves */
-@keyframes cy-focus-in {
-  from {
-    opacity: 0;
-  }
+.cy-tray__title em {
+  font-style: normal;
+  color: var(--muted-foreground);
+}
+
+.cy-saved {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--sage);
+  opacity: 0;
+  transition: opacity var(--cy-med) ease;
+  margin-left: auto;
+}
+
+.cy-saved[data-on="1"] {
+  opacity: 1;
+}
+
+.cy-fieldrow {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-top: 9px;
+}
+
+.cy-fieldlabel {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.cy-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.cy-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 33px;
+  padding: 5px 12px;
+  border-radius: var(--cy-r-pill);
+  white-space: nowrap;
+  border: 1px solid var(--cycle-hair-strong);
+  background: transparent;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    border-color var(--cy-fast) ease,
+    background-color var(--cy-fast) ease,
+    color var(--cy-fast) ease,
+    box-shadow var(--cy-med) ease,
+    transform var(--cy-fast) ease;
+}
+
+.cy-pill:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+  transform: translateY(-0.5px);
+}
+
+.cy-pill:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+
+.cy-pill[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--pill-c, var(--cycle-accent)) 62%, transparent);
+  background: color-mix(in oklab, var(--pill-c, var(--cycle-accent)) 15%, var(--surface));
+  color: var(--foreground);
+  box-shadow: 0 8px 22px -12px
+    color-mix(in oklab, var(--pill-c, var(--cycle-accent)) 70%, transparent);
+}
+
+/* check dot so selection never relies on color alone */
+.cy-pill[aria-pressed="true"]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pill-c, var(--cycle-accent));
+}
+
+/* five-level energy selector */
+.cy-levels {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 36px;
+}
+
+.cy-levels button {
+  width: 34px;
+  border-radius: 8px 8px 5px 5px;
+  line-height: 1;
+  padding-bottom: 3px;
+  border: 1px solid var(--cycle-hair-strong);
+  background: transparent;
+  color: var(--faint);
+  font-size: 11px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition:
+    background-color var(--cy-fast) ease,
+    border-color var(--cy-fast) ease,
+    color var(--cy-fast) ease;
+}
+
+.cy-levels button:nth-child(1) {
+  height: 20px;
+}
+.cy-levels button:nth-child(2) {
+  height: 24px;
+}
+.cy-levels button:nth-child(3) {
+  height: 28px;
+}
+.cy-levels button:nth-child(4) {
+  height: 32px;
+}
+.cy-levels button:nth-child(5) {
+  height: 36px;
+}
+
+.cy-levels button:hover {
+  border-color: var(--border-strong);
+}
+
+.cy-levels button[data-on="1"] {
+  background: color-mix(in oklab, var(--cycle-accent) 34%, var(--surface));
+  border-color: color-mix(in oklab, var(--cycle-accent) 65%, transparent);
+  color: var(--foreground);
+}
+
+/* ————————————————————— tooltips (Bloom-styled, never native) ————————————————————— */
+
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: 240px;
+  white-space: normal;
+  text-align: left;
+  border-radius: 10px;
+  border: 1px solid var(--cycle-hair-strong);
+  background: color-mix(in oklab, var(--surface) 94%, black 6%);
+  box-shadow: var(--cy-elev);
+  padding: 7px 10px;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--muted-foreground);
+  opacity: 0;
+  animation: cy-tip-in 140ms var(--cy-fast) ease forwards;
+  pointer-events: none;
+}
+
+@keyframes cy-tip-in {
   to {
     opacity: 1;
   }
 }
 
-.cy-focus-in {
-  animation: cy-focus-in var(--cy-slow) ease both;
+/* the orbit's contextual phase card — positioned near the ring, styled as
+   a floating dark tooltip with title / line / evidence */
+.cy-phasecard {
+  position: absolute;
+  z-index: 5;
+  width: 232px;
+  border-radius: 14px;
+  border: 1px solid var(--cycle-hair-strong);
+  background: color-mix(in oklab, var(--surface) 94%, black 6%);
+  box-shadow: var(--cy-elev), var(--cy-tray);
+  padding: 12px 14px 11px;
+  animation: cy-focus-in var(--cy-med) ease both;
 }
 
-/* ————————————————————————— buttons, pills, chips ————————————————————————— */
+/* ————————————————————— road ahead (forecast ribbon) ————————————————————— */
+
+.cy-road {
+  position: relative;
+  padding: 8px 8px;
+}
+
+.cy-road__lane {
+  position: relative;
+  padding: 30px 0 34px;
+}
+
+.cy-road svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cy-road__ms {
+  position: absolute;
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cy-road__ms--above {
+  top: 0;
+}
+
+.cy-road__ms--below {
+  bottom: 0;
+}
+
+.cy-road__ms b {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.cy-road__ms span {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.cy-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-top: 18px;
+  border-top: 1px solid var(--cycle-hair);
+  padding-top: 14px;
+}
+
+.cy-next__big {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 33px);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* ————————————————————— week rhythm ————————————————————— */
+
+.cy-week {
+  position: relative;
+}
+
+.cy-week__rail {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 50px;
+  height: 3px;
+  border-radius: 2px;
+  opacity: 0.85;
+}
+
+.cy-week ol {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (max-width: 639px) {
+  .cy-week ol {
+    min-width: 560px;
+  }
+  .cy-week {
+    overflow-x: auto;
+  }
+}
+
+.cy-week li {
+  flex: 1;
+  min-width: 72px;
+}
+
+.cy-day {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color var(--cy-fast) ease,
+    border-color var(--cy-fast) ease,
+    transform var(--cy-fast) ease;
+}
+
+.cy-day:hover {
+  background: var(--cy-fill);
+  transform: translateY(-1px);
+}
+
+.cy-day[aria-pressed="true"],
+.cy-day--today {
+  border-color: var(--cycle-hair-strong);
+}
+
+.cy-day--today {
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+}
+
+.cy-day__date {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.cy-day__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
+
+.cy-day__num {
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.cy-day__phase {
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.cy-day__flag {
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+
+/* ————————————————————— personal rhythm (history) ————————————————————— */
+
+.cy-score {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  position: relative;
+  padding-right: 8px;
+}
+
+.cy-score__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: none;
+  padding: 5px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--muted-foreground);
+  transition: background-color var(--cy-fast) ease;
+}
+
+.cy-score__row:hover,
+.cy-score__row[aria-pressed="true"] {
+  background: var(--cy-fill);
+}
+
+.cy-score__name {
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.cy-score__bar {
+  position: relative;
+  height: 5px;
+}
+
+.cy-score__bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--cycle-menstrual) 85%, transparent),
+    var(--cycle-luteal)
+  );
+  opacity: 0.8;
+}
+
+.cy-score__bar u {
+  position: absolute;
+  top: -5px;
+  width: 1.5px;
+  height: 15px;
+  background: color-mix(in oklab, var(--foreground) 55%, transparent);
+  border-radius: 1px;
+}
+
+.cy-score__len {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--foreground);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cy-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px 42px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--cycle-hair);
+}
+
+.cy-metric b {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(26px, 3.2vw, 34px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.cy-metric span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* ————————————————————— patterns tiers + evidence dots ————————————————————— */
+
+.cy-evi {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  vertical-align: 2px;
+}
+
+.cy-evi i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cycle-hair-strong);
+}
+
+.cy-evi i.on {
+  background: var(--cycle-accent);
+}
+
+.cy-tierchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--cy-r-pill);
+  border: 1px solid var(--cycle-hair-strong);
+  padding: 3px 9px;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+  background: var(--cy-fill);
+}
+
+/* ————————————————————— insight / learning ghost ————————————————————— */
+
+.cy-notice {
+  position: relative;
+  border-radius: 0 var(--cy-r-md) var(--cy-r-md) 0;
+  border: 1px solid var(--cycle-hair);
+  border-left: 2px solid var(--cycle-accent);
+  background:
+    linear-gradient(100deg, color-mix(in oklab, var(--violet) 7%, transparent), transparent 55%),
+    color-mix(in oklab, var(--surface) 52%, transparent);
+  padding: 16px 20px 15px;
+}
+
+.cy-ghost {
+  position: relative;
+  border-radius: var(--cy-r-lg);
+  border: 1px dashed var(--cycle-hair-strong);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 34%, transparent),
+    transparent
+  );
+  padding: 20px 22px 18px;
+}
+
+.cy-ghost-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-width: 460px;
+  opacity: 0.6;
+}
+
+.cy-ghost-lines i {
+  height: 4px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--cycle-hair-strong) 0 1.5px,
+    transparent 1.5px 7px
+  );
+}
+
+.cy-rec {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 14px;
+  border-top: 1px solid var(--cycle-hair);
+  padding: 13px 2px;
+  transition: background-color var(--cy-fast) ease;
+}
+
+.cy-rec:hover {
+  background: color-mix(in oklab, var(--surface) 40%, transparent);
+}
+
+.cy-rec--primary {
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--cycle-accent);
+  border-radius: var(--cy-r-md);
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  padding: 15px 16px;
+}
+
+/* ————————————————————— calendar (compact) + phases rows ————————————————————— */
+
+.cy-cal {
+  display: grid;
+  gap: var(--cy-s3);
+}
+
+@media (min-width: 1024px) {
+  .cy-cal {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+    align-items: start;
+  }
+}
+
+.cy-cal .cy-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color var(--cy-fast) ease,
+    color var(--cy-fast) ease;
+}
+
+.cy-cal .cy-cell:hover:not(:disabled) {
+  background: var(--cy-fill);
+  color: var(--foreground);
+}
+
+.cy-cal .cy-cell--flow {
+  background: color-mix(in oklab, var(--cycle-menstrual) 22%, transparent);
+  color: var(--foreground);
+}
+
+.cy-cal .cy-cell--sel {
+  outline: 1px solid var(--border-strong);
+  outline-offset: -1px;
+}
+
+.cy-cal .cy-cell--inspect {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--cycle-accent) 70%, transparent);
+}
+
+.cy-cal .cy-cell--today {
+  color: var(--foreground);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--violet) 75%, transparent);
+}
+
+.cy-phase {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 0 16px;
+  align-items: start;
+  border-radius: var(--cy-r-md);
+  padding: 12px 14px 10px;
+  transition:
+    background-color var(--cy-med) ease,
+    opacity var(--cy-med) ease;
+  opacity: 0.6;
+}
+
+.cy-phase:hover,
+.cy-phase--active {
+  opacity: 1;
+}
+
+.cy-phase--active {
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  box-shadow: inset 2px 0 0 var(--phase-c, var(--cycle-accent));
+  border-top: 1px solid var(--cycle-hair);
+  border-right: 1px solid var(--cycle-hair);
+  border-bottom: 1px solid var(--cycle-hair);
+}
+
+/* ————————————————————— buttons / links / chips ————————————————————— */
 
 .cy-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   border-radius: var(--cy-r-pill);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
-  padding: 10px 18px;
+  padding: 11px 20px;
   transition:
     transform var(--cy-med) var(--ease-out-expo),
     background-color var(--cy-fast) ease,
@@ -288,18 +983,18 @@
 }
 
 .cy-btn--primary {
-  color: oklch(0.16 0.02 264);
+  color: oklch(0.155 0.02 264);
   background: linear-gradient(
     135deg,
     var(--violet),
-    color-mix(in oklab, var(--sky) 62%, var(--violet))
+    color-mix(in oklab, var(--sky) 58%, var(--violet))
   );
-  box-shadow: 0 12px 30px -14px color-mix(in oklab, var(--violet) 55%, transparent);
+  box-shadow: 0 16px 38px -16px color-mix(in oklab, var(--violet) 62%, transparent);
 }
 
 .cy-btn--primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 34px -14px color-mix(in oklab, var(--violet) 65%, transparent);
+  box-shadow: 0 20px 44px -16px color-mix(in oklab, var(--violet) 72%, transparent);
 }
 
 .cy-btn--primary:active {
@@ -307,10 +1002,10 @@
 }
 
 .cy-btn--quiet {
-  border: 1px solid var(--border);
+  border: 1px solid var(--cycle-hair-strong);
   color: var(--muted-foreground);
   background: transparent;
-  padding: 9px 15px;
+  padding: 10px 16px;
 }
 
 .cy-btn--quiet:hover {
@@ -318,15 +1013,18 @@
   color: var(--foreground);
 }
 
+.cy-btn:disabled {
+  opacity: 0.55;
+  transform: none;
+  cursor: default;
+}
+
 .cy-link {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12.5px;
   color: var(--faint);
   background: none;
   border: 0;
-  padding: 4px 2px;
+  padding: 4px 1px;
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: transparent;
@@ -341,329 +1039,7 @@
   text-decoration-color: var(--cycle-accent);
 }
 
-/* the today surface's pills: bigger than chips, calm selection */
-.cy-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 6px 14px;
-  border-radius: var(--cy-r-pill);
-  border: 1px solid var(--border);
-  background: transparent;
-  font-size: 12.5px;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition:
-    border-color var(--cy-fast) ease,
-    background-color var(--cy-fast) ease,
-    color var(--cy-fast) ease,
-    box-shadow var(--cy-med) ease;
-}
-
-.cy-pill:hover {
-  border-color: var(--border-strong);
-  color: var(--foreground);
-}
-
-.cy-pill[aria-pressed="true"] {
-  border-color: color-mix(in oklab, var(--cycle-accent) 70%, transparent);
-  background: color-mix(in oklab, var(--cycle-accent) 15%, var(--surface));
-  color: var(--foreground);
-  box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--cycle-accent) 60%, transparent);
-}
-
-/* ————————————————————————— today surface ————————————————————————— */
-
-.cy-today {
-  margin-top: var(--cy-s3);
-  border-radius: var(--cy-r-lg);
-  border: 1px solid var(--cycle-hair);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--surface) 82%, transparent),
-      color-mix(in oklab, var(--surface) 55%, transparent)
-    ),
-    var(--background);
-  padding: 16px 18px 12px;
-  transition: border-color var(--cy-med) ease;
-}
-
-.cy-today:focus-within {
-  border-color: var(--cycle-hair-strong);
-}
-
-/* inline save status — no toast for tiny actions */
-.cy-saved {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--sage);
-  opacity: 0;
-  transition: opacity var(--cy-med) ease;
-}
-
-.cy-saved[data-on="1"] {
-  opacity: 1;
-}
-
-/* ————————————————————————— forecast rail (NOW → NEXT → AFTER) ————————————————————————— */
-
-.cy-fc {
-  display: grid;
-  gap: 0;
-}
-
-@media (min-width: 900px) {
-  .cy-fc {
-    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
-  }
-}
-
-.cy-fc__col {
-  position: relative;
-  padding: var(--cy-s3) var(--cy-s3) var(--cy-s3) 0;
-}
-
-@media (min-width: 900px) {
-  .cy-fc__col {
-    padding-left: var(--cy-s3);
-    border-left: 1px solid var(--cycle-hair);
-  }
-  .cy-fc__col:first-child {
-    padding-left: 0;
-    border-left: 0;
-  }
-}
-
-@media (max-width: 899px) {
-  .cy-fc__col {
-    border-top: 1px solid var(--cycle-hair);
-  }
-  .cy-fc__col:first-child {
-    border-top: 0;
-    padding-top: 0;
-  }
-}
-
-.cy-fc__node {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cy-fc__lead {
-  display: block;
-  width: 100%;
-  text-align: left;
-  border: 0;
-  background: none;
-  cursor: default;
-  padding: 0;
-}
-
-.cy-fc__big {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(30px, 3.4vw, 40px);
-  letter-spacing: -0.025em;
-  line-height: 1.02;
-}
-
-.cy-fc__row {
-  display: flex;
-  width: 100%;
-  align-items: baseline;
-  gap: 10px;
-  text-align: left;
-  border: 0;
-  border-top: 1px solid var(--cycle-hair);
-  background: transparent;
-  padding: 11px 2px;
-  transition: background-color var(--cy-fast) ease;
-}
-
-button.cy-fc__row {
-  cursor: pointer;
-}
-
-button.cy-fc__row:hover {
-  background: var(--cy-fill);
-}
-
-/* ————————————————————————— insight / “bloom noticed” ————————————————————————— */
-
-.cy-notice {
-  position: relative;
-  border-radius: 0 var(--cy-r-md) var(--cy-r-md) 0;
-  border: 1px solid var(--cycle-hair);
-  border-left: 2px solid var(--cycle-accent);
-  background:
-    linear-gradient(100deg, color-mix(in oklab, var(--violet) 6%, transparent), transparent 55%),
-    color-mix(in oklab, var(--surface) 55%, transparent);
-  padding: 14px 18px 13px;
-}
-
-.cy-rec {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 8px 14px;
-  border-top: 1px solid var(--cycle-hair);
-  padding: 14px 2px;
-  transition: background-color var(--cy-fast) ease;
-}
-
-.cy-rec:hover {
-  background: color-mix(in oklab, var(--surface) 40%, transparent);
-}
-
-.cy-rec--primary {
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--cycle-accent);
-  border-radius: var(--cy-r-md);
-  background: color-mix(in oklab, var(--surface) 72%, transparent);
-  padding: 16px;
-}
-
-/* ————————————————————————— beautiful learning states (never fake data) ————————————————————————— */
-
-.cy-ghost {
-  position: relative;
-  border-radius: var(--cy-r-lg);
-  border: 1px dashed var(--cycle-hair-strong);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--surface) 34%, transparent),
-    transparent
-  );
-  padding: 22px 22px 18px;
-}
-
-/* silhouette of what real data will look like — labeled “preview”, never values */
-.cy-ghost-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  height: 64px;
-  opacity: 0.5;
-}
-
-.cy-ghost-bars i {
-  flex: 1;
-  border-radius: 6px 6px 3px 3px;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--cycle-hair-strong) 0 1.5px,
-    transparent 1.5px 7px
-  );
-}
-
-/* confidence tier — informative, not a game meter */
-.cy-tier {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: var(--cy-r-pill);
-  border: 1px solid var(--cycle-hair-strong);
-  background: var(--cy-fill);
-  padding: 6px 12px;
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-
-/* ————————————————————————— phase education rows ————————————————————————— */
-
-.cy-phase {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 0 16px;
-  align-items: start;
-  border-radius: var(--cy-r-md);
-  padding: 13px 14px 11px;
-  transition:
-    background-color var(--cy-med) ease,
-    opacity var(--cy-med) ease;
-  opacity: 0.62;
-}
-
-.cy-phase:hover,
-.cy-phase--active {
-  opacity: 1;
-}
-
-.cy-phase--active {
-  background: color-mix(in oklab, var(--surface) 80%, transparent);
-  box-shadow: inset 2px 0 0 var(--phase-c, var(--cycle-accent));
-  border-top: 1px solid var(--cycle-hair);
-  border-right: 1px solid var(--cycle-hair);
-  border-bottom: 1px solid var(--cycle-hair);
-}
-
-/* ————————————————————————— calendar ————————————————————————— */
-
-.cy-cal {
-  display: grid;
-  gap: var(--cy-s4);
-}
-
-@media (min-width: 1024px) {
-  .cy-cal {
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
-    align-items: start;
-  }
-}
-
-.cy-cal .cy-cell {
-  position: relative;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  min-height: 42px;
-  border: 0;
-  border-radius: var(--cy-r-sm);
-  background: transparent;
-  font-size: 13px;
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition:
-    background-color var(--cy-fast) ease,
-    color var(--cy-fast) ease,
-    box-shadow var(--cy-fast) ease;
-}
-
-.cy-cal .cy-cell:hover:not(:disabled) {
-  background: var(--cy-fill-2);
-  color: var(--foreground);
-}
-
-.cy-cal .cy-cell--flow {
-  background: color-mix(in oklab, var(--cycle-menstrual) 24%, transparent);
-  color: var(--foreground);
-}
-
-.cy-cal .cy-cell--sel {
-  outline: 1px solid var(--border-strong);
-  outline-offset: -1px;
-  color: var(--foreground);
-}
-
-.cy-cal .cy-cell--inspect {
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--cycle-accent) 75%, transparent);
-}
-
-.cy-cal .cy-cell--today {
-  color: var(--foreground);
-  font-weight: 600;
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--violet) 75%, transparent);
-}
-
-/* ————————————————————————— assistant ————————————————————————— */
+/* ————————————————————— assistant launcher + tip ————————————————————— */
 
 .cy-ai {
   display: grid;
@@ -699,7 +1075,6 @@ button.cy-fc__row:hover {
   transform: translateY(0) scale(0.98);
 }
 
-/* one-time, dismissible — never nagging */
 .cy-ai-tip {
   position: fixed;
   right: 72px;
@@ -717,7 +1092,91 @@ button.cy-fc__row:hover {
   animation: cy-focus-in var(--cy-slow) var(--ease-out-expo) both;
 }
 
-/* ————————————————————————— focus + motion prefs ————————————————————————— */
+/* ————————————————————— motion: draw-in + breathing ————————————————————— */
+
+@keyframes cy-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.16;
+    transform: scale(1.16);
+  }
+}
+
+.cy-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cy-breathe 5.2s ease-in-out infinite;
+}
+
+@keyframes cy-travel {
+  to {
+    stroke-dashoffset: -114;
+  }
+}
+
+.cy-travel {
+  animation: cy-travel 16s linear infinite;
+}
+
+@keyframes cy-draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.cy-draw {
+  stroke-dasharray: 100 100;
+  animation: cy-draw 1100ms var(--cy-fast) cubic-bezier(0.25, 0.6, 0.25, 1) both;
+}
+
+@keyframes cy-focus-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cy-focus-in {
+  animation: cy-focus-in var(--cy-slow) ease both;
+}
+
+@keyframes cy-road-draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* legacy class kept referenced by parts.tsx (GhostButton uses .mono already) */
+.cy-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.cy-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ————————————————————— focus + reduced motion ————————————————————— */
 
 .cycle-page :focus-visible {
   outline: 2px solid color-mix(in oklab, var(--violet) 80%, white 20%);
@@ -728,21 +1187,28 @@ button.cy-fc__row:hover {
 @media (prefers-reduced-motion: reduce) {
   .cy-breathe,
   .cy-travel,
+  .cy-draw,
+  .cy-road-draw,
   .cy-focus-in,
   .cy-ai-tip {
-    animation: none;
+    animation: none !important;
   }
-  .cy-btn,
-  .cy-pill,
-  .cy-ai,
-  .cy-phase,
-  .cy-fc__row {
-    transition: none;
+  .cy-draw,
+  .cy-road {
+    stroke-dashoffset: 0 !important;
+    stroke-dasharray: none !important;
   }
+  .cy-pill:hover:not(:disabled),
   .cy-btn--primary:hover,
   .cy-btn--primary:active,
   .cy-ai:hover,
-  .cy-ai:active {
+  .cy-ai:active,
+  .cy-day:hover {
     transform: none;
+  }
+  [data-tip]:hover::after,
+  [data-tip]:focus-visible::after {
+    animation: none;
+    opacity: 1;
   }
 }

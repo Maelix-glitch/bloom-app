@@ -1,13 +1,12 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { PencilLine } from "lucide-react";
 
 import cycleCss from "../styles/cycle.css?url";
 import { useCycleSystem } from "@/hooks/useCycleSystem";
 import { BloomHeader } from "@/components/BloomHeader";
 import { Reveal } from "@/components/mood/primitives";
 import type { CycleEntry } from "@/lib/cycle/types";
-import { fmtShort, localDateKey } from "@/lib/cycle/engine";
+import { localDateKey } from "@/lib/cycle/engine";
 import { buildPersonalInsight, buildRecommendations, dismissStore } from "@/lib/cycle/intelligence";
 import type { DayDraft } from "@/components/cycle/Logs";
 import type { TodayPatch } from "@/components/cycle/TodaySurface";
@@ -16,8 +15,9 @@ import { QuickLog, AdvancedCycleLog } from "@/components/cycle/Logs";
 import { CycleLengthSheet } from "@/components/cycle/CycleLengthSheet";
 import { MethodologyDialog } from "@/components/cycle/CycleHistory";
 import { CycleHero } from "@/components/cycle/CycleHero";
-import { CycleForecast } from "@/components/cycle/CycleForecast";
+import { CycleRoad } from "@/components/cycle/CycleRoad";
 import { CycleTimeline } from "@/components/cycle/CycleTimeline";
+import { CycleRhythm } from "@/components/cycle/CycleRhythm";
 import { PatternInsights } from "@/components/cycle/PatternInsights";
 import { PhasesGuide } from "@/components/cycle/PhasesGuide";
 import { CycleCalendar } from "@/components/cycle/CycleCalendar";
@@ -25,7 +25,7 @@ import { InsightCard, RecommendationStack } from "@/components/cycle/Insights";
 import { BloomCycleAI } from "@/components/cycle/BloomCycleAI";
 import { toast, Toaster } from "sonner";
 
-/* below-the-fold weight loads progressively — hero, forecast and calendar never wait on it */
+/* the deeper analytics load lazily — never block the story above */
 const CycleHistory = lazy(() =>
   import("@/components/cycle/CycleHistory").then((m) => ({ default: m.CycleHistory })),
 );
@@ -46,30 +46,26 @@ export const Route = createFileRoute("/cycle")({
 });
 
 function Chapter({
-  no,
+  nodeColor,
   title,
-  sub,
-  right,
   id,
   children,
 }: {
-  no: string;
+  nodeColor?: string;
   title: string;
-  sub?: string;
-  right?: React.ReactNode;
   id?: string;
   children: React.ReactNode;
 }) {
   return (
     <section id={id} aria-label={title} className="cy-chapter scroll-mt-6">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-        <div className="min-w-0">
-          <p className="cy-chapter__no">{no}</p>
-          <h2 className="cy-chapter__title mt-1.5 text-pretty">{title}</h2>
-          {sub ? <p className="cy-chapter__sub">{sub}</p> : null}
-        </div>
-        {right ? <div className="flex shrink-0 items-center gap-2">{right}</div> : null}
-      </div>
+      <span
+        className="cy-node"
+        aria-hidden
+        style={{ ["--node-c" as never]: nodeColor ?? "var(--cycle-accent)" }}
+      >
+        <i />
+      </span>
+      <h2 className="cy-chapter__title mb-4 text-pretty">{title}</h2>
       {children}
     </section>
   );
@@ -90,11 +86,9 @@ function CyclePage() {
   const [insightSeen, setInsightSeen] = useState(false);
   const [inspect, setInspect] = useState<{ day: number; date: string } | null>(null);
   const [aiAsk, setAiAsk] = useState<{ q: string; n: number } | null>(null);
-  const aiNonce = useRef(0);
 
   const askBloom = useCallback((q = "") => {
-    aiNonce.current += 1;
-    setAiAsk({ q, n: aiNonce.current });
+    setAiAsk({ q, n: Date.now() });
   }, []);
 
   const insight = useMemo(
@@ -158,13 +152,12 @@ function CyclePage() {
         sleep_hours: draft.sleep_hours,
         next_period_in_days: nextPeriodInDays,
       });
-      /* the today surface answers inline — dialogs are the only ones that toast */
       if (!opts?.silent) toast(localOnly ? "Saved on this device." : "Saved.");
     },
     [model, system, localOnly],
   );
 
-  /* the today surface follows the selected day; merges, never clobbers */
+  /* the tray follows the selected day; merges, never clobbers */
   const logDate = inspect?.date ?? model?.today ?? localDateKey();
   const logEntry = useMemo(
     () => entries.find((e) => e.date === logDate) ?? null,
@@ -192,7 +185,6 @@ function CyclePage() {
     [logDate, logEntry, saveDraft],
   );
 
-  /* selection sync: timeline/calendar pick a day → the orbit and hero follow */
   const inspectDate = useCallback(
     (date: string | null) => {
       if (!date || !model || date === model.today) {
@@ -211,7 +203,7 @@ function CyclePage() {
     [model],
   );
 
-  /* keyboard shortcut: "q" opens the quick log when not typing */
+  /* "q" opens the quick log when not typing */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
@@ -225,48 +217,13 @@ function CyclePage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openQuick]);
 
-  const tierChip = (() => {
-    if (!model) return null;
-    const n = model.completed.length;
-    const label =
-      n === 0
-        ? "awaiting first anchor"
-        : n === 1
-          ? "learning · 1 cycle"
-          : n <= 3
-            ? `building baseline · ${n} cycles`
-            : `personal pattern · ${n} cycles`;
-    return (
-      <span
-        className="cy-tier"
-        title="How much of this page is your data rather than the general pattern"
-      >
-        <span
-          className="inline-block size-1.5 rounded-full"
-          style={{
-            background:
-              n === 0
-                ? "var(--faint)"
-                : n === 1
-                  ? "var(--amber)"
-                  : n <= 3
-                    ? "var(--sky)"
-                    : "var(--sage)",
-          }}
-          aria-hidden
-        />
-        {label}
-      </span>
-    );
-  })();
-
   return (
     <div className="cycle-page relative min-h-screen bg-background text-foreground">
       <BloomHeader />
       <main className="cy-main">
         {localOnly ? (
-          <p className="mono pb-1 text-center text-[9px] uppercase tracking-[0.09em] text-faint">
-            preview — kept on this device · signing in syncs it, if you ever want
+          <p className="pb-1 text-center text-[11px] text-faint">
+            preview — kept on this device; signing in syncs it, if you ever want
           </p>
         ) : null}
         {error ? (
@@ -278,105 +235,100 @@ function CyclePage() {
           </p>
         ) : null}
 
-        {/* I — where you are */}
+        {/* the stage — orbit, statement, tray: one object, one composition */}
         <Reveal>
-          <div className="cy-chapter cy-chapter--flush">
-            <CycleHero
-              model={model}
-              entries={entries}
-              loading={loading}
-              logDate={logDate}
-              logEntry={logEntry}
-              inspect={inspect}
-              onReturnToday={() => setInspect(null)}
-              onPatch={surfacePatch}
-              onOpenFull={() => {
-                setAdvEntry(null);
-                setQuickDate(logDate);
-                setAdvancedOpen(true);
-              }}
-              onAdjust={() => setAdjustOpen(true)}
-              onOpenMethod={() => setMethodOpen(true)}
-              onViewForecast={() => scrollTo("cycle-forecast")}
-            />
-          </div>
+          <CycleHero
+            model={model}
+            entries={entries}
+            loading={loading}
+            logDate={logDate}
+            logEntry={logEntry}
+            inspect={inspect}
+            onReturnToday={() => setInspect(null)}
+            onPatch={surfacePatch}
+            onOpenFull={() => {
+              setAdvEntry(null);
+              setQuickDate(logDate);
+              setAdvancedOpen(true);
+            }}
+            onAdjust={() => setAdjustOpen(true)}
+            onOpenMethod={() => setMethodOpen(true)}
+          />
         </Reveal>
 
-        {/* II — what's next */}
+        {/* the road ahead — forecast as one path, then the week on the same thread */}
         <Reveal delay={40}>
-          <Chapter
-            no="II · what's coming"
-            title="The road ahead, honestly drawn"
-            sub="Solid where your logs anchor it, soft where the model reaches beyond them."
-            id="cycle-forecast"
-            right={tierChip}
-          >
+          <Chapter nodeColor="var(--cycle-menstrual)" title="The road ahead" id="cycle-road">
             {model ? (
-              <CycleForecast
-                model={model}
-                onOpenMethod={() => setMethodOpen(true)}
-                onLogStart={() => openQuick()}
-              />
-            ) : (
-              <BlockSkeleton h={150} />
-            )}
-            <div className="mt-9">
-              <p className="cy-eyebrow mb-3">The week, day by day</p>
-              {model ? (
-                <CycleTimeline
+              <>
+                <CycleRoad
                   model={model}
-                  entries={entries}
-                  onLogDay={(date) => {
-                    setQuickDate(date);
-                    setEditing(entries.find((e) => e.date === date) ?? null);
-                    setAdvancedOpen(true);
-                  }}
-                  onInspect={inspectDate}
+                  onOpenMethod={() => setMethodOpen(true)}
+                  onLogStart={() => openQuick()}
                 />
-              ) : (
-                <BlockSkeleton h={140} />
-              )}
-            </div>
+                <div className="mt-10 border-t border-[var(--cycle-hair)] pt-5">
+                  <p className="cy-eyebrow mb-2.5">the week, day by day</p>
+                  <CycleTimeline
+                    model={model}
+                    entries={entries}
+                    selected={inspect?.date ?? null}
+                    onSelect={inspectDate}
+                    onLogDay={(date) => {
+                      setQuickDate(date);
+                      setEditing(entries.find((e) => e.date === date) ?? null);
+                      setAdvancedOpen(true);
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <BlockSkeleton h={190} />
+            )}
           </Chapter>
         </Reveal>
 
-        {/* III — what Bloom notices */}
+        {/* what bloom noticed — insight + honest suggestions */}
         <Reveal delay={40}>
-          <Chapter
-            no="III · what bloom notices"
-            title="Bloom noticed"
-            sub="Correlation language only — descriptions of what tends to go together in your logs, never diagnoses."
-            id="cycle-insight"
-          >
+          <Chapter nodeColor="var(--violet)" title="What Bloom noticed" id="cycle-insight">
             <InsightCard
               insight={insight}
               signals={
                 model
                   ? [
-                      `phase · ${model.currentPhase ?? "unknown"}`,
+                      model.currentPhase ? `${model.currentPhase} phase` : "phase unknown yet",
                       `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
                       model.completed.length > 0
                         ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
                         : "no completed cycles yet",
                       model.variabilityPercent !== null
-                        ? `spread ±${Math.round(model.stdDev ?? 0)}d`
+                        ? `spread ±${Math.round(model.stdDev ?? 0)} days`
                         : "spread unknown",
                     ]
                   : []
               }
-              onAsk={() => askBloom("Why am I seeing this insight?")}
+              onAsk={() => askBloom("What have you noticed about my cycles?")}
               stillLearning={
-                <p className="cy-title text-[17px] leading-snug text-muted-foreground">
-                  Bloom is still learning your rhythm.
-                  <span className="mt-1.5 block text-[13px] font-normal">
-                    A few more completed cycles let the page compare your own records instead of
-                    leaning on general estimates — nothing will be said about you before it's true
-                    of your data.
-                  </span>
-                </p>
+                <div className="flex flex-wrap items-end gap-8">
+                  <div className="min-w-0 max-w-[46ch]">
+                    <p className="cy-title text-[17px] leading-snug text-muted-foreground">
+                      Bloom is still learning your rhythm.
+                    </p>
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-faint">
+                      A few more completed cycles let this page compare your own records instead of
+                      leaning on general estimates. No personal pattern has been established yet —
+                      and nothing will be claimed before it's true of your data.
+                    </p>
+                  </div>
+                  <div className="cy-ghost-lines" aria-hidden>
+                    <i style={{ width: "150px" }} />
+                    <i style={{ width: "190px" }} />
+                    <i style={{ width: "132px" }} />
+                    <i style={{ width: "172px", opacity: 0.55 }} />
+                  </div>
+                </div>
               }
             />
-            <div className="mt-5">
+            <div className="mt-4">
               <RecommendationStack
                 recs={recs}
                 onDismiss={(id) => {
@@ -389,47 +341,40 @@ function CyclePage() {
           </Chapter>
         </Reveal>
 
-        {/* IV — your recent rhythm */}
+        {/* your recent rhythm — history as a score */}
         <Reveal delay={40}>
-          <Chapter
-            no="IV · your recent rhythm"
-            title="Your history so far"
-            sub="Every mark is a cycle you actually completed. Averages appear only when the data earns them."
-            id="cycle-history"
-            right={
-              <>
-                {model && entries.length > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAdvEntry(null);
-                      setAdvancedOpen(true);
-                    }}
-                    className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] uppercase tracking-[0.07em] text-muted-foreground transition-colors hover:border-[var(--border-strong)] hover:text-foreground"
-                  >
-                    <PencilLine className="size-3" aria-hidden /> Advanced log
-                  </button>
-                ) : null}
-                {tierChip}
-              </>
-            }
-          >
+          <Chapter nodeColor="var(--sage)" title="Your recent rhythm" id="cycle-history">
             {model ? (
-              <Suspense fallback={<BlockSkeleton h={220} />}>
-                <CycleHistory model={model} entries={entries} />
-              </Suspense>
+              <>
+                <CycleRhythm model={model} entries={entries} />
+                <details className="group mt-7 border-t border-[var(--cycle-hair)] pt-3">
+                  <summary className="cy-link flex cursor-pointer list-none items-center gap-1.5 [&::-webkit-details-marker]:hidden">
+                    Further in your record
+                    <span
+                      className="text-[10px] transition-transform duration-[var(--cy-med)] group-open:rotate-90"
+                      aria-hidden
+                    >
+                      ›
+                    </span>
+                  </summary>
+                  <div className="pt-4">
+                    <Suspense fallback={<BlockSkeleton h={220} />}>
+                      <CycleHistory model={model} entries={entries} />
+                    </Suspense>
+                  </div>
+                </details>
+              </>
             ) : (
               <BlockSkeleton h={220} />
             )}
           </Chapter>
         </Reveal>
 
-        {/* V — what is becoming personal */}
+        {/* patterns */}
         <Reveal delay={40}>
           <Chapter
-            no="V · what is becoming personal"
-            title="Your patterns"
-            sub="What your own logs keep repeating — observation first, always with its sample size."
+            nodeColor="var(--cycle-luteal)"
+            title="Patterns taking shape"
             id="cycle-patterns"
           >
             {model ? (
@@ -444,14 +389,9 @@ function CyclePage() {
           </Chapter>
         </Reveal>
 
-        {/* VI + VII — closer looks */}
+        {/* calendar + phases, quieter */}
         <Reveal delay={40}>
-          <Chapter
-            no="VI · a closer look"
-            title="Calendar"
-            sub="For exploring dates — one month at a time; selecting a day shows what Bloom actually knows about it."
-            id="cycle-calendar"
-          >
+          <Chapter nodeColor="var(--sky)" title="A closer look" id="cycle-calendar">
             {model ? (
               <CycleCalendar
                 model={model}
@@ -466,25 +406,22 @@ function CyclePage() {
                 }}
               />
             ) : (
-              <BlockSkeleton h={300} />
+              <BlockSkeleton h={280} />
             )}
           </Chapter>
         </Reveal>
 
         <Reveal delay={40}>
-          <Chapter
-            no="VII · the fine print of the body"
-            title="The four phases"
-            sub="General education, kept separate from your observations. Your active phase leads."
-          >
+          <Chapter nodeColor="var(--cycle-follicular)" title="The four phases">
             {model ? <PhasesGuide model={model} /> : <BlockSkeleton h={180} />}
           </Chapter>
         </Reveal>
 
-        <footer className="cy-chapter flex flex-col items-start gap-2">
-          <p className="mono text-[9.5px] uppercase tracking-[0.08em] text-faint">
-            cycle records stay private · nothing here is medical advice · estimates mean uncertainty
-          </p>
+        <footer className="cy-chapter flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-faint">
+          <span>cycle records stay private</span>
+          <span aria-hidden>·</span>
+          <span>nothing here is medical advice</span>
+          <span aria-hidden>·</span>
           <button
             type="button"
             onClick={() => {
@@ -500,14 +437,14 @@ function CyclePage() {
               a.click();
               URL.revokeObjectURL(url);
             }}
-            className="mono rounded-full border border-border px-3 py-1 text-[9.5px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+            className="underline decoration-[var(--cycle-hair-strong)] underline-offset-4 transition-colors hover:text-foreground"
           >
-            Export my data (csv) · {fmtShort(model?.today ?? localDateKey())}
+            export my data (csv)
           </button>
         </footer>
       </main>
 
-      {/* overlays — the deep forms live here; the everyday ones live inline above */}
+      {/* overlays — the deep forms; everyday logging lives in the tray */}
       <CycleLengthSheet
         open={adjustOpen}
         onClose={() => setAdjustOpen(false)}

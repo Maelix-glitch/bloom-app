@@ -33,12 +33,18 @@ export function PatternInsights({
   const mood = phaseTally(entries, model, "mood");
   const sleep = sleepVsLength(entries, model);
 
-  const cards: { key: string; title: string; body: React.ReactNode }[] = [];
+  const cards: {
+    key: string;
+    title: string;
+    body: React.ReactNode;
+    evidence?: { seen: number; total: number } | undefined;
+  }[] = [];
 
   for (const s of symptoms) {
     cards.push({
       key: `sym-${s.symptom}`,
       title: `${s.symptom} shows up early`,
+      evidence: { seen: s.seenInCycles, total: s.totalCycles },
       body: (
         <Observation
           found={`Seen around cycle day ${s.medianCycleDay} on ${s.seenInCycles} of your ${s.totalCycles} logged cycles.`}
@@ -117,7 +123,13 @@ export function PatternInsights({
   return (
     <div className="grid gap-2.5 sm:grid-cols-2">
       {cards.slice(0, 4).map((c) => (
-        <PatternCard key={c.key} title={c.title} onMethod={onOpenMethod}>
+        <PatternCard
+          key={c.key}
+          title={c.title}
+          evidence={c.evidence}
+          cycles={model.completed.length}
+          onMethod={onOpenMethod}
+        >
           {c.body}
         </PatternCard>
       ))}
@@ -128,17 +140,38 @@ export function PatternInsights({
 function PatternCard({
   title,
   children,
+  evidence,
+  cycles,
   onMethod,
 }: {
   title: string;
   children: React.ReactNode;
+  evidence?: { seen: number; total: number } | undefined;
+  cycles: number;
   onMethod: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const strength = evidence ? evidence.seen : Math.min(cycles, 2);
+  const tier =
+    strength >= 5 ? "repeated pattern" : strength >= 3 ? "emerging pattern" : "early signal";
   return (
     <article className="rounded-2xl border border-border/70 bg-surface/45 px-4 py-3.5 transition-colors hover:border-border">
-      <p className="eyebrow">seen in your logs</p>
-      <h3 className="display mt-1 text-[15.5px] leading-snug">{title}</h3>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <span className="cy-tierchip">{tier}</span>
+        {evidence ? (
+          <span className="flex items-center gap-2 text-[11px] text-faint">
+            <span className="cy-evi" aria-hidden>
+              {Array.from({ length: Math.min(evidence.total, 8) }, (_, i) => (
+                <i key={i} className={i < Math.min(evidence.seen, 8) ? "on" : undefined} />
+              ))}
+            </span>
+            observed in {evidence.seen} of {evidence.total} cycles
+          </span>
+        ) : (
+          <span className="text-[11px] text-faint">from your logged history</span>
+        )}
+      </div>
+      <h3 className="display mt-1.5 text-[15.5px] leading-snug">{title}</h3>
       <div className="mt-2">{children}</div>
       <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-border/50 pt-2">
         <button

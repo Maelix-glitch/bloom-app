@@ -176,10 +176,13 @@ export function AssistantPanel({
                 </p>
               </div>
             ) : null}
-            <p className="text-[12.5px] text-muted-foreground">
+            <p className="cy-title text-[14.5px] leading-snug text-foreground">
+              I'm looking at your cycle with you.
+            </p>
+            <p className="-mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
               {context?.currentDay
-                ? `Cycle day ${context.currentDay}${context.currentPhase ? ` · ${context.currentPhase}` : ""}. Ask me about what's happening, why estimates move, or what's worth logging.`
-                : "Ask me about phases, estimates, or what's worth logging — I only answer from what you've actually logged."}
+                ? `Day ${context.currentDay}${context.currentPhase ? ` · ${context.currentPhase}` : ""}${context.completedCount < 2 ? " — no personal baseline yet, so I'll say exactly that when it's true." : ` · ${context.completedCount} completed cycles in hand.`}`
+                : "No anchor logged yet — ask me what that means and I'll explain what Bloom needs before anything becomes personal."}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {prompts.map((p) => (

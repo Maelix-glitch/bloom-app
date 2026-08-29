@@ -1,16 +1,16 @@
 /**
- * CycleOrbit — the bespoke center of the page. Layered SVG: an outer guide
- * hairline with week ticks, the four phase arcs with small separations,
- * the day's truth split into what is grounded and what is modelled
- * (solid = logged stretch, soft-dashed = estimated ahead), a quiet ivory
- * trace of the days actually lived so far, a breathing today marker with an
- * ivory center and thin accent ring, and a highlight that travels, slowly,
- * through the active phase. Phase names sit on the orbit itself — you can
- * see where you are and where you're going without reading a legend, but
- * the keyboard-accessible legend + pinned selection stay for everyone.
- * Selecting a day anywhere on the page (timeline, calendar) moves the
- * focus indicator here; the geometry recomputes from the model, never from
- * hardcoded pixels.
+ * CycleOrbit v2 — a personal orbital map, not an analytics donut.
+ * Five layers, each legible on its own and composed as one object:
+ *   outer complete-cycle ring with week ticks · phase arcs that flow into
+ *   one another (micro-separations, no heavy borders) · the current-state
+ *   trace (solid ivory = days actually logged/lived) · the forecast shell
+ *   (dashed, translucent — uncertainty rendered as material, honestly) ·
+ *   today's marker (ivory core, soft glow, indicator hairline, tiny label).
+ * Phase names whisper around the rim; hovering or focusing one emphasizes
+ * the arc and floats a contextual card beside the ring — dates when the
+ * data supports them, "not enough personal data yet" when it doesn't.
+ * Rings draw themselves in once on mount; everything honors reduced
+ * motion. Geometry adapts to the real cycle length — 24 days, 31, any.
  */
 
 import { useId, useMemo, useState } from "react";
@@ -20,13 +20,14 @@ import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
 import { fmtShort } from "@/lib/cycle/engine";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 
-const VBW = 540;
-const VBH = 424;
+const VBW = 596;
+const VBH = 470;
 const C = VBW / 2;
 const CY = VBH / 2;
-const R = 164; // phase ring
-const GUIDE = 192; // outer hairline
-const TRACE = 140; // "days lived" inner track
+const R = 168; // phase ring
+const GUIDE = 198; // outer hairline
+const TRACE = 140; // days-lived track
+const LABEL_R = 224;
 
 function polar(r: number, deg: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
@@ -42,13 +43,6 @@ function arcPath(r: number, a0: number, a1: number) {
 }
 
 export type Seg = { phase: PhaseKey; from: number; to: number };
-
-const PHASE_NOTE: Record<PhaseKey, string> = {
-  menstrual: "bleeding days — mostly defined by what you log",
-  follicular: "the build-up toward ovulation",
-  ovulation: "the brief fertile peak — a window, never a guaranteed day",
-  luteal: "the long wait — the most variable stretch of any cycle",
-};
 
 export function segmentsFor(model: CycleModel): Seg[] {
   const cycle = Math.round(model.average ?? 28);
@@ -77,7 +71,7 @@ export function CycleOrbit({
 }: {
   model: CycleModel;
   entries: CycleEntry[];
-  /** a day selected elsewhere on the page — the focus indicator moves here */
+  /** a day selected elsewhere on the page — the focus indicator follows */
   inspect?: { day: number; date: string } | null;
   className?: string;
 }) {
@@ -90,6 +84,7 @@ export function CycleOrbit({
   const degForDay = (d: number) => ((d - 1) / cycle) * 360;
   const segments = useMemo(() => segmentsFor(model), [model]);
   const shown = pinned ?? hover;
+  const activePhase = model.currentPhase;
 
   const pick = (s: Seg) => {
     const wasPinned = pinned?.phase === s.phase;
@@ -99,11 +94,10 @@ export function CycleOrbit({
 
   const todayDeg = day > 0 ? degForDay(Math.min(day, cycle)) : 0;
   const todayPos = polar(R, todayDeg);
+  const todayLabelPos = polar(GUIDE + 18, todayDeg);
   const inspectPos = inspect
     ? polar(R, degForDay(Math.min(Math.max(inspect.day, 1), cycle)))
     : null;
-
-  const activePhase = model.currentPhase;
 
   const loggedCount = (s: Seg) => {
     if (!model.lastPeriodStart) return 0;
@@ -112,21 +106,26 @@ export function CycleOrbit({
     return entries.filter((e) => e.date >= from && e.date <= to).length;
   };
 
-  const note = shown
-    ? `${shown.phase} — days ${shown.from}–${Math.max(shown.to, shown.from)}${
-        model.lastPeriodStart
-          ? ` · ${fmtShort(dayToDate(model, shown.from))} – ${fmtShort(dayToDate(model, shown.to))}`
-          : ""
-      } · ${PHASE_NOTE[shown.phase]}.${
-        model.lastPeriodStart
-          ? loggedCount(shown) > 0
-            ? ` You logged ${loggedCount(shown)} day${loggedCount(shown) === 1 ? "" : "s"} in this stretch of the current cycle.`
-            : " Nothing logged in this stretch yet — it stays an outline until you do."
-          : ""
-      }`
-    : inspect
-      ? `Viewing ${fmtShort(inspect.date)} — cycle day ${inspect.day}. Everything on the page follows your selection.`
-      : "Solid = your logged stretch · soft dashes = Bloom's estimate ahead.";
+  // what the ring can honestly claim about the highlighted phase
+  const card = (() => {
+    if (!shown) return null;
+    const hasDates = model.lastPeriodStart !== null;
+    const n = loggedCount(shown);
+    return {
+      phase: shown.phase,
+      dates: hasDates
+        ? `${fmtShort(dayToDate(model, shown.from))} – ${fmtShort(dayToDate(model, shown.to))}`
+        : `days ${shown.from}–${Math.max(shown.to, shown.from)}`,
+      basis: hasDates
+        ? n > 0
+          ? `based on ${n} logged day${n === 1 ? "" : "s"} in this stretch`
+          : model.confidence === "assumed"
+            ? "general pattern — not enough personal data yet"
+            : "outlined by your model; nothing logged here yet"
+        : "not enough personal data yet — Bloom won't invent any",
+      est: shown.phase === "ovulation" || shown.phase === "luteal",
+    };
+  })();
 
   const alt = model.currentDay
     ? `Cycle orbit — day ${model.currentDay} of about ${cycle}. ` +
@@ -139,14 +138,16 @@ export function CycleOrbit({
     : "Cycle orbit — waiting for your first logged period start.";
 
   return (
-    <figure className={cn("relative flex w-full flex-col items-center gap-3", className)}>
+    <figure className={cn("relative m-0 w-full", className)} aria-label="Your cycle orbit">
+      {/* the stage light — the page's single soft source, phase-tinted */}
       <span
-        className="cy-orbit-halo"
+        className="cy-stage-light"
         aria-hidden
         style={{
+          inset: "-16% -10%",
           background: activePhase
-            ? `radial-gradient(46% 46% at 50% 50%, color-mix(in oklab, ${PHASE_COLOR[activePhase]} 15%, transparent), transparent 70%)`
-            : "radial-gradient(46% 46% at 50% 50%, color-mix(in oklab, var(--violet) 9%, transparent), transparent 70%)",
+            ? `radial-gradient(46% 46% at 50% 46%, color-mix(in oklab, ${PHASE_COLOR[activePhase]} 17%, transparent), transparent 68%)`
+            : "radial-gradient(46% 46% at 50% 46%, color-mix(in oklab, var(--violet) 10%, transparent), transparent 68%)",
         }}
       />
       <svg
@@ -157,59 +158,70 @@ export function CycleOrbit({
         style={{ height: "auto" }}
       >
         <defs>
-          <radialGradient id={`face-${uid}`} cx="50%" cy="42%" r="65%">
-            <stop offset="0%" stopColor="var(--foreground)" stopOpacity="0.045" />
-            <stop offset="70%" stopColor="var(--foreground)" stopOpacity="0.012" />
+          <radialGradient id={`face-${uid}`} cx="50%" cy="44%" r="64%">
+            <stop offset="0%" stopColor="var(--foreground)" stopOpacity="0.05" />
+            <stop offset="72%" stopColor="var(--foreground)" stopOpacity="0.014" />
             <stop offset="100%" stopColor="transparent" stopOpacity="0" />
           </radialGradient>
+          <linearGradient id={`lived-${uid}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="var(--foreground)" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="var(--foreground)" stopOpacity="0.5" />
+          </linearGradient>
         </defs>
 
-        {/* floating face + outer guide with week ticks */}
-        <circle cx={C} cy={CY} r={R + 26} fill={`url(#face-${uid})`} pointerEvents="none" />
+        {/* face + outer complete-cycle ring with week ticks */}
+        <circle cx={C} cy={CY} r={R + 34} fill={`url(#face-${uid})`} pointerEvents="none" />
+        <g className="cy-draw" style={{ animationDelay: "80ms" }}>
+          <circle
+            cx={C}
+            cy={CY}
+            r={GUIDE}
+            fill="none"
+            stroke="var(--cycle-hair)"
+            strokeWidth={1}
+            pointerEvents="none"
+            pathLength={100}
+            className="cy-draw"
+            style={{ animationDelay: "120ms" }}
+          />
+          {Array.from({ length: Math.floor(cycle / 7) }, (_, i) => {
+            const d = 1 + (i + 1) * 7;
+            if (d > cycle) return null;
+            const p0 = polar(GUIDE - 4, degForDay(d));
+            const p1 = polar(GUIDE + 4, degForDay(d));
+            return (
+              <line
+                key={`t${i}`}
+                x1={p0.x}
+                y1={p0.y}
+                x2={p1.x}
+                y2={p1.y}
+                stroke="var(--cycle-hair-strong)"
+                strokeWidth={1}
+                pointerEvents="none"
+              />
+            );
+          })}
+        </g>
+
+        {/* forecast shell — the whole cycle outlined as estimate by default */}
         <circle
           cx={C}
           cy={CY}
-          r={GUIDE}
-          fill="none"
-          stroke="var(--cycle-hair)"
-          strokeWidth={1}
-          pointerEvents="none"
-        />
-        {Array.from({ length: Math.floor(cycle / 7) }, (_, i) => {
-          const d = 1 + (i + 1) * 7;
-          if (d > cycle) return null;
-          const p0 = polar(GUIDE - 4, degForDay(d));
-          const p1 = polar(GUIDE + 4, degForDay(d));
-          return (
-            <line
-              key={`t${i}`}
-              x1={p0.x}
-              y1={p0.y}
-              x2={p1.x}
-              y2={p1.y}
-              stroke="var(--cycle-hair-strong)"
-              strokeWidth={1}
-            />
-          );
-        })}
-
-        {/* faint base ring so the orbit reads as one system */}
-        <circle
-          cx={C}
-          cy={C}
           r={R}
           fill="none"
           stroke="var(--border)"
-          strokeOpacity={0.5}
-          strokeWidth={12}
+          strokeOpacity={0.55}
+          strokeWidth={13}
+          pointerEvents="none"
         />
 
-        {/* phase arcs: grounded stretch solid, estimate ahead soft-dashed */}
-        {segments.map((s) => {
+        {/* phase arcs flowing into one another; solid where lived, dashed ahead */}
+        {segments.map((s, i) => {
           const a0 = degForDay(s.from);
           const a1 = degForDay(Math.max(s.to + 1, s.from + 1));
           const span = a1 - a0;
-          const gap = span > 10 ? 2 : 0.4;
+          const gap = span > 10 ? 1.6 : 0.4;
           const isActive = activePhase === s.phase;
           const isShown = shown?.phase === s.phase;
           const pastEnd = Math.min(Math.max(s.to, s.from), day);
@@ -219,13 +231,20 @@ export function CycleOrbit({
             day > 0 && s.to > day
               ? arcPath(R, degForDay(Math.max(day + 1, s.from)) + gap, a1 - gap)
               : "";
-          const whole = solid || dashed ? "" : arcPath(R, a0 + gap, a1 - gap); // pre-anchor: all outline
+          const whole = solid || dashed ? "" : arcPath(R, a0 + gap, a1 - gap);
+          const emphasize = isShown ? 1 : 0.72;
           return (
             <g
               key={`${uid}-${s.phase}`}
               role="button"
               tabIndex={0}
-              aria-label={`${s.phase} phase, cycle days ${s.from} to ${Math.max(s.to, s.from)}. Activate to keep its summary open.`}
+              aria-label={`${s.phase} phase, days ${s.from} to ${Math.max(s.to, s.from)}. ${
+                model.lastPeriodStart
+                  ? loggedCount(s) > 0
+                    ? `${loggedCount(s)} day${loggedCount(s) === 1 ? "" : "s"} logged in this stretch of the current cycle`
+                    : "nothing logged in this stretch yet"
+                  : "not enough personal data yet"
+              }. Select to keep its summary.`}
               aria-pressed={pinned?.phase === s.phase}
               onClick={() => pick(s)}
               onKeyDown={(e) => {
@@ -245,28 +264,29 @@ export function CycleOrbit({
                   d={arcPath(R, a0 + gap * 0.25, a1 - gap * 0.25)}
                   fill="none"
                   stroke={PHASE_COLOR[s.phase]}
-                  strokeOpacity={0.17}
-                  strokeWidth={20}
+                  strokeOpacity={0.18}
+                  strokeWidth={22}
                   strokeLinecap="round"
                 />
               ) : null}
-              {/* soft modelled baseline for the whole segment */}
               <path
                 d={arcPath(R, a0 + gap, a1 - gap)}
+                className="cy-draw"
+                style={{ animationDelay: `${220 + i * 110}ms` }}
+                pathLength={100}
                 fill="none"
                 stroke={PHASE_COLOR[s.phase]}
-                strokeOpacity={isShown ? 0.4 : 0.24}
+                strokeOpacity={(isShown ? 0.5 : 0.26) * emphasize}
                 strokeWidth={isActive ? 13 : 11}
                 strokeLinecap="round"
-                className="transition-all duration-[var(--cy-med)]"
               />
               {solid ? (
                 <path
                   d={solid}
                   fill="none"
                   stroke={PHASE_COLOR[s.phase]}
-                  strokeOpacity={isShown ? 1 : 0.88}
-                  strokeWidth={isActive ? 14 : 12}
+                  strokeOpacity={isShown ? 1 : 0.92}
+                  strokeWidth={isActive ? 15 : 13}
                   strokeLinecap="round"
                   className="transition-all duration-[var(--cy-med)]"
                 />
@@ -276,7 +296,7 @@ export function CycleOrbit({
                   d={dashed}
                   fill="none"
                   stroke={PHASE_COLOR[s.phase]}
-                  strokeOpacity={0.42}
+                  strokeOpacity={0.44}
                   strokeWidth={isActive ? 12 : 10}
                   strokeDasharray="7 7"
                   strokeLinecap="round"
@@ -287,25 +307,23 @@ export function CycleOrbit({
                   d={whole}
                   fill="none"
                   stroke={PHASE_COLOR[s.phase]}
-                  strokeOpacity={0.5}
-                  strokeWidth={10}
+                  strokeOpacity={0.52}
+                  strokeWidth={11}
                   strokeDasharray="3 7"
                   strokeLinecap="round"
                 />
               ) : null}
-              {/* the slow highlight travelling through the active phase */}
-              {isActive && day > 0 && !inspect ? (
+              {isActive && day > 0 && !inspect && !pinned ? (
                 <path
                   d={arcPath(R, a0 + gap, a1 - gap)}
                   className="cy-travel"
                   fill="none"
                   stroke="var(--foreground)"
-                  strokeOpacity={0.28}
+                  strokeOpacity={0.26}
                   strokeWidth={4}
                   strokeLinecap="round"
                   pathLength={100}
                   strokeDasharray="12 102"
-                  style={{ strokeDashoffset: 0 }}
                 />
               ) : null}
               <path d={arcPath(R, a0, a1)} fill="none" stroke="transparent" strokeWidth={30} />
@@ -313,48 +331,46 @@ export function CycleOrbit({
           );
         })}
 
-        {/* phase names integrated on the orbit */}
+        {/* rim whispers — subtle until the phase is touched */}
         {segments.map((s) => {
           const mid = (degForDay(s.from) + degForDay(Math.max(s.to, s.from) + 1)) / 2;
-          const p = polar(R + 36, mid);
-          const isActive = activePhase === s.phase;
+          const p = polar(LABEL_R, mid);
+          const lit = shown?.phase === s.phase || activePhase === s.phase;
           const anchor =
             mid > 30 && mid < 150 ? "start" : mid > 210 && mid < 330 ? "end" : "middle";
-          const dx = anchor === "start" ? -4 : anchor === "end" ? 4 : 0;
           return (
             <text
               key={`lbl-${uid}-${s.phase}`}
-              x={p.x + dx}
+              x={p.x + (anchor === "start" ? -6 : anchor === "end" ? 6 : 0)}
               y={p.y}
               textAnchor={anchor}
               dominantBaseline="middle"
+              pointerEvents="none"
               style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 9.2,
-                letterSpacing: "0.1em",
+                fontFamily: "var(--font-sans)",
+                fontSize: 10.5,
+                fontWeight: 500,
+                letterSpacing: "0.22em",
                 fill: PHASE_COLOR[s.phase],
-                opacity: shown?.phase === s.phase || isActive ? 0.95 : 0.48,
+                opacity: lit ? 0.95 : 0.4,
                 textTransform: "uppercase",
-                cursor: "pointer",
                 transition: "opacity var(--cy-med) ease",
               }}
-              onClick={() => pick(s)}
-              aria-hidden
             >
               {s.phase}
             </text>
           );
         })}
 
-        {/* the stretch actually lived — ivory trace inside */}
+        {/* the days lived — solid ivory trace; the way ahead stays a whisper */}
         {day > 1 ? (
           <path
             d={arcPath(TRACE, 0, todayDeg)}
             fill="none"
-            stroke="var(--foreground)"
-            strokeOpacity={0.6}
-            strokeWidth={2}
+            stroke={`url(#lived-${uid})`}
+            strokeWidth={2.2}
             strokeLinecap="round"
+            pointerEvents="none"
           />
         ) : null}
         {day > 0 && day < cycle ? (
@@ -366,103 +382,113 @@ export function CycleOrbit({
             strokeWidth={1.5}
             strokeDasharray="1 6"
             strokeLinecap="round"
+            pointerEvents="none"
           />
         ) : null}
 
-        {/* today — deliberate, not a chart cursor */}
+        {/* today — ivory core, thin outer ring, soft glow, indicator line, label */}
         {day > 0 ? (
-          <g>
+          <g pointerEvents="none">
             <line
-              x1={polar(R - 34, todayDeg).x}
-              y1={polar(R - 34, todayDeg).y}
-              x2={polar(R - 20, todayDeg).x}
-              y2={polar(R - 20, todayDeg).y}
+              x1={polar(R - 36, todayDeg).x}
+              y1={polar(R - 36, todayDeg).y}
+              x2={polar(R - 18, todayDeg).x}
+              y2={polar(R - 18, todayDeg).y}
               stroke="var(--foreground)"
-              strokeOpacity={0.45}
-              strokeWidth={1.4}
+              strokeOpacity={0.4}
+              strokeWidth={1.3}
               strokeLinecap="round"
             />
             <circle
               className="cy-breathe"
               cx={todayPos.x}
               cy={todayPos.y}
-              r={15}
+              r={16}
               fill={activePhase ? PHASE_COLOR[activePhase] : "var(--violet)"}
               opacity={0.16}
             />
-            <circle cx={todayPos.x} cy={todayPos.y} r={10} fill="var(--background)" />
+            <circle cx={todayPos.x} cy={todayPos.y} r={10.5} fill="var(--background)" />
             <circle
               cx={todayPos.x}
               cy={todayPos.y}
-              r={7}
+              r={7.2}
               fill="none"
               stroke={activePhase ? PHASE_COLOR[activePhase] : "var(--foreground)"}
-              strokeWidth={2}
+              strokeWidth={1.8}
             />
-            <circle cx={todayPos.x} cy={todayPos.y} r={3.1} fill="var(--foreground)" />
+            <circle cx={todayPos.x} cy={todayPos.y} r={3.2} fill="var(--foreground)" />
+            <text
+              x={todayLabelPos.x}
+              y={todayLabelPos.y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                fontWeight: 600,
+                letterSpacing: "0.24em",
+                fill: "var(--foreground)",
+                opacity: 0.75,
+                textTransform: "uppercase",
+              }}
+            >
+              today
+            </text>
           </g>
         ) : null}
 
-        {/* selected-day focus moves here */}
         {inspectPos ? (
-          <g className="cy-focus-in">
+          <g className="cy-focus-in" pointerEvents="none">
             <circle
               cx={inspectPos.x}
               cy={inspectPos.y}
               r={9}
               fill="none"
               stroke="var(--foreground)"
-              strokeOpacity={0.55}
+              strokeOpacity={0.5}
               strokeWidth={1.4}
               strokeDasharray="2.5 3.5"
             />
           </g>
         ) : null}
 
-        {/* center: a hierarchy, not just a number */}
+        {/* the center — heart of the page */}
         {model.lastPeriodStart && model.currentDay ? (
           <>
             <text
               x={C}
-              y={CY - 44}
-              textAnchor="middle"
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 9.5,
-                letterSpacing: "0.16em",
-                fill: "var(--faint)",
-                textTransform: "uppercase",
-              }}
-            >
-              {inspect ? `viewing · ${fmtShort(inspect.date)}` : "cycle day"}
-            </text>
-            <text
-              x={C}
-              y={CY + 4}
+              y={CY - 22}
               textAnchor="middle"
               className="fill-foreground"
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 500,
-                fontSize: 62,
-                letterSpacing: "-0.035em",
-                fontVariantNumeric: "tabular-nums",
+                fontSize: 46,
+                letterSpacing: "-0.02em",
               }}
             >
-              {inspect ? inspect.day : model.currentDay}
+              Day{" "}
+              <tspan
+                style={{
+                  fontSize: 58,
+                  letterSpacing: "-0.03em",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {inspect ? inspect.day : model.currentDay}
+              </tspan>
             </text>
             <text
               x={C}
-              y={CY + 30}
+              y={CY + 8}
               textAnchor="middle"
-              className="fill-muted-foreground"
-              style={{ fontSize: 12.5, letterSpacing: "0.02em" }}
+              style={{ fontSize: 12.5, fill: "var(--muted-foreground)" }}
             >
-              of your {model.confidence === "assumed" ? "general" : "estimated"} {cycle}-day cycle
+              {inspect ? `of your cycle — viewing ${fmtShort(inspect.date)}` : "of your cycle"}
             </text>
             <text
               x={C}
-              y={CY + 58}
+              y={CY + 36}
               textAnchor="middle"
               style={{
                 fontFamily: "var(--font-display)",
@@ -475,12 +501,27 @@ export function CycleOrbit({
               {(() => {
                 const ph = inspect ? model.dayPhase(inspect.day) : model.currentPhase;
                 if (!ph) return "";
-                const label =
-                  ph === "ovulation"
-                    ? "Ovulation window"
-                    : ph.charAt(0).toUpperCase() + ph.slice(1) + " phase";
-                return model.confidence === "assumed" ? `${label} · estimated` : label;
+                return ph === "ovulation" ? "Ovulation window" : cap(ph) + " phase";
               })()}
+            </text>
+            <line
+              x1={C - 14}
+              y1={CY + 54}
+              x2={C + 14}
+              y2={CY + 54}
+              stroke="var(--cycle-hair-strong)"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+            />
+            <text
+              x={C}
+              y={CY + 74}
+              textAnchor="middle"
+              style={{ fontSize: 10.5, fill: "var(--faint)" }}
+            >
+              {model.confidence === "assumed"
+                ? `estimated on a general ${cycle}-day pattern`
+                : `your cycles average ${model.average?.toFixed(1)} days`}
             </text>
           </>
         ) : (
@@ -489,56 +530,66 @@ export function CycleOrbit({
               x={C}
               y={CY - 16}
               textAnchor="middle"
+              className="fill-foreground"
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: 21,
+                fontWeight: 500,
+                fontSize: 27,
                 letterSpacing: "-0.015em",
-                fill: "var(--foreground)",
               }}
             >
-              Your first cycle
+              Your cycle
             </text>
             <text
               x={C}
-              y={CY + 10}
+              y={CY + 14}
               textAnchor="middle"
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: 21,
-                letterSpacing: "-0.015em",
-                fill: "var(--foreground)",
+                fontStyle: "italic",
+                fontSize: 22,
+                fill: "var(--muted-foreground)",
               }}
             >
               starts here
             </text>
             <text
               x={C}
-              y={CY + 38}
+              y={CY + 42}
               textAnchor="middle"
-              className="fill-muted-foreground"
-              style={{ fontSize: 11.5 }}
+              style={{ fontSize: 11, fill: "var(--faint)" }}
             >
-              Bloom is ready to learn your pattern —
+              Log your first period day to begin
             </text>
             <text
               x={C}
-              y={CY + 54}
+              y={CY + 58}
               textAnchor="middle"
-              className="fill-muted-foreground"
-              style={{ fontSize: 11.5 }}
+              style={{ fontSize: 11, fill: "var(--faint)" }}
             >
-              not to guess it.
+              building your personal pattern.
             </text>
           </>
         )}
       </svg>
 
-      <p
-        aria-live="polite"
-        className="min-h-[34px] max-w-[46ch] px-2 text-center text-[11.5px] leading-snug text-muted-foreground"
-      >
-        {note}
-      </p>
+      {/* the contextual phase card — dark, warm, compact */}
+      {card ? (
+        <div className="cy-phasecard" style={{ top: "-6px", right: "-10px" }} role="status">
+          <p className="cy-eyebrow" style={{ opacity: 0.9, color: PHASE_COLOR[card.phase] }}>
+            {card.phase}
+          </p>
+          <p className="cy-title mt-1 text-[15.5px] leading-snug">{card.dates}</p>
+          <p className="mt-1 text-[11.5px] leading-relaxed text-muted-foreground">
+            {card.basis}
+            {card.est && model.lastPeriodStart ? " · estimates stay estimates" : ""}
+          </p>
+        </div>
+      ) : null}
     </figure>
   );
+}
+
+function cap(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

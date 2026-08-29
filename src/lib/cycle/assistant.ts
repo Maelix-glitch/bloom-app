@@ -32,57 +32,39 @@ export function quickPromptsFor(ctx: CycleContext): QuickPrompt[] {
 const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: "phase",
-    label: "Explain my current phase",
-    question: "What does my current phase mean — and how sure are we?",
+    label: "What does this phase mean?",
+    question: "What does this phase mean — and how sure are we?",
     available: (c) => c.currentDay !== null,
   },
   {
     id: "estimate",
-    label: "Why did my estimate change?",
-    question: "Why did my next-period estimate move?",
+    label: "Why is my period prediction changing?",
+    question: "Why is my period prediction changing?",
     available: (c) => c.completedCount >= 1,
   },
   {
-    id: "compare",
-    label: "Compare my recent cycles",
-    question: "Compare my recent cycles with my average.",
+    id: "noticed",
+    label: "What have you noticed about my cycles?",
+    question: "What have you noticed about my cycles so far?",
     available: (c) => c.completedCount >= 2,
   },
   {
-    id: "changed",
-    label: "What changed this cycle?",
-    question: "What's different about this cycle compared with my usual?",
-    available: (c) => c.completedCount >= 1,
+    id: "energy",
+    label: "Help me understand my energy pattern.",
+    question: "Help me understand my energy pattern.",
+    available: (c) => c.loggedDays30 >= 3,
   },
   {
-    id: "attention",
-    label: "What should I pay attention to today?",
-    question: "What's coming up that's worth knowing about?",
+    id: "learning",
+    label: "What do you need from me before predictions become personal?",
+    question: "What do you need from me before your predictions become personal?",
+    available: (c) => c.completedCount < 2,
+  },
+  {
+    id: "how",
+    label: "How do estimates work here?",
+    question: "How do estimates work here — and how do you handle uncertainty?",
     available: () => true,
-  },
-  {
-    id: "prepare",
-    label: "Help me prepare for the next few days",
-    question: "Help me prepare for the next few days.",
-    available: (c) => c.events.some((e) => e.daysAway >= 0 && e.daysAway <= 10),
-  },
-  {
-    id: "whypattern",
-    label: "Why am I seeing this pattern?",
-    question: "Why am I seeing this pattern — how do you know?",
-    available: (c) => c.loggedDays30 >= 4,
-  },
-  {
-    id: "log",
-    label: "What should I log today?",
-    question: "What's worth logging today without making this a chore?",
-    available: () => true,
-  },
-  {
-    id: "patterns",
-    label: "Show me patterns in my logs",
-    question: "Do any symptoms or moods show a pattern across my cycles?",
-    available: (c) => c.loggedDays30 >= 4,
   },
 ];
 
@@ -260,7 +242,24 @@ export const deterministicProvider: AssistantProvider = async (ctx, question) =>
   if (/what.*(different|changed) this cycle|this cycle/.test(q)) return whatChanged(ctx);
   if (/attention|upcoming|coming up|watch/.test(q)) return attention(ctx);
   if (/prepare|prep|next few days/.test(q)) return prepare(ctx);
-  if (/why.*(pattern|seeing this)|how do you know/.test(q)) return patternMethod(ctx);
+  if (/why.*(pattern|seeing this)|how do you know|how do estimates|uncertainty/.test(q))
+    return patternMethod(ctx);
+  if (/noticed|what have you seen/.test(q))
+    return ctx.completedCount >= 2
+      ? compareCycles(ctx)
+      : `Not much yet — and that's the honest answer. I have ${ctx.loggedDays30} logged day${ctx.loggedDays30 === 1 ? "" : "s"} and ${ctx.completedCount} completed cycle${ctx.completedCount === 1 ? "" : "s"} to look across; patterns only get said out loud when a few cycles keep repeating them. Anything else would be invention, and you didn't come here for that.`;
+  if (/energy/.test(q) && /pattern|understand|why|low|high/.test(q)) {
+    const es = ctx.recentEnergy;
+    if (es.length === 0)
+      return `You haven't logged energy on any recent day yet — one tap on the "energy" row of the Today tray and this becomes a real question I can answer with your numbers.`;
+    const avg = es.reduce((a, b) => a + b.energy, 0) / es.length;
+    const lows = es.filter((e) => e.energy <= 2).length;
+    return `Across your last ${es.length} logged energy marks you averaged ${avg.toFixed(1)} of 5${lows > 0 ? `, with ${lows} low day${lows === 1 ? "" : "s"} (1–2) in that window` : " — no 1–2 days in it"}. That's a description of your logs, not a verdict about your body; the patterns section is where phase-by-phase repeats show up with their sample sizes.`;
+  }
+  if (/what do you need|become personal|before your predictions/.test(q))
+    return ctx.completedCount >= 2
+      ? `You're already past the general stage — ${ctx.completedCount} completed cycles mean estimates ride on your own averages and spread. Keep logging period starts (and energy or symptoms if you like); ranges tighten honestly from here, with nothing invented.`
+      : `Two completed cycles, at minimum — that means the first day of your next period after this one. With that, estimates stop leaning on the general 28-day pattern and start following your own average and variability. Everything logged in between (flow, mood, energy) feeds patterns, not predictions — no field is required.`;
   if (/log|track|record|today/.test(q) && !/pattern/.test(q)) return whatToLog(ctx);
   if (/pattern|symptom|recurr/.test(q)) return patterns(ctx);
   if (/accur|confiden|sure/.test(q))
