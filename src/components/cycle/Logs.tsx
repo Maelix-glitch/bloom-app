@@ -379,6 +379,13 @@ export function QuickLog({
             max={5}
             onChange={(v) => setDraft((d) => ({ ...d, pain: v }))}
           />
+          <Stepper
+            label="Slept (h)"
+            value={draft.sleep_hours}
+            min={0}
+            max={16}
+            onChange={(v) => setDraft((d) => ({ ...d, sleep_hours: v }))}
+          />
 
           <div>
             <p className="eyebrow mb-1.5">Symptoms</p>
@@ -485,7 +492,7 @@ export function AdvancedLog({
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="w-full gap-0 border-border bg-background p-0 sm:max-w-[520px]"
+        className="w-full gap-0 border-border bg-background p-0 sm:max-w-[560px]"
       >
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex items-start justify-between border-b border-border px-5 py-4">

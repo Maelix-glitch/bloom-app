@@ -144,14 +144,19 @@ export function confidenceFor(completedCount: number): Confidence {
 
 /* -------------------------------- the model ------------------------------- */
 
-export function buildCycleModel(entries: CycleEntry[], today = localDateKey()): CycleModel {
+export function buildCycleModel(
+  entries: CycleEntry[],
+  today = localDateKey(),
+  opts: { defaultCycle?: number | null } = {},
+): CycleModel {
+  const assumed = Math.min(45, Math.max(20, Math.round(opts.defaultCycle ?? DEFAULT_CYCLE)));
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const runs = periodRuns(sorted);
   const completed = completedCycles(runs);
   const recent = completed.slice(-6).map((c) => c.lengthDays);
 
   const usesDefault = completed.length === 0;
-  const avg = usesDefault ? DEFAULT_CYCLE : mean(recent);
+  const avg = usesDefault ? assumed : mean(recent);
   const med = recent.length >= 3 ? medianOf(recent) : null;
   const std = usesDefault ? null : stdOf(recent, avg);
   const variabilityPercent = std !== null && avg ? Math.round((std / avg) * 100) : null;
@@ -165,7 +170,7 @@ export function buildCycleModel(entries: CycleEntry[], today = localDateKey()): 
   const avgSafe = avg ?? DEFAULT_CYCLE;
   const lutealLength = MEAN_LUTEAL;
   const ovulationDay = usesDefault
-    ? DEFAULT_CYCLE - MEAN_LUTEAL
+    ? assumed - MEAN_LUTEAL
     : Math.max(8, Math.round(avgSafe - MEAN_LUTEAL));
 
   /* observed evidence in the CURRENT cycle window — shown alongside, never overwriting */
@@ -236,7 +241,7 @@ export function buildCycleModel(entries: CycleEntry[], today = localDateKey()): 
       plusMinusDays: halfWidth,
       daysAway,
       detail: usesDefault
-        ? "Estimated from a general 28-day pattern — log two cycles and it becomes yours"
+        ? `Estimated from a general ${assumed}-day pattern — log two cycles and it becomes yours`
         : `Estimated around day ${expectedDay ?? "—"} of this cycle, from your last ${recent.length} cycles`,
       predicted: true,
     });

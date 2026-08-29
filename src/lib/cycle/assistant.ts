@@ -56,9 +56,21 @@ const QUICK_PROMPTS: QuickPrompt[] = [
   },
   {
     id: "attention",
-    label: "What should I pay attention to?",
+    label: "What should I pay attention to today?",
     question: "What's coming up that's worth knowing about?",
     available: () => true,
+  },
+  {
+    id: "prepare",
+    label: "Help me prepare for the next few days",
+    question: "Help me prepare for the next few days.",
+    available: (c) => c.events.some((e) => e.daysAway >= 0 && e.daysAway <= 10),
+  },
+  {
+    id: "whypattern",
+    label: "Why am I seeing this pattern?",
+    question: "Why am I seeing this pattern — how do you know?",
+    available: (c) => c.loggedDays30 >= 4,
   },
   {
     id: "log",
@@ -173,6 +185,44 @@ function whatToLog(ctx: CycleContext): string {
   return "Whatever actually stands out — a temperature or an LH test if you track those, otherwise energy + one honest sentence is plenty.";
 }
 
+function prepare(ctx: CycleContext): string {
+  const near = ctx.events.filter((e) => e.daysAway >= 0 && e.daysAway <= 10).slice(0, 3);
+  if (near.length === 0)
+    return "Nothing lands in the next ten days — an uneventful stretch is worth keeping too: energy logs here are the quiet baseline future estimates lean on.";
+  const parts: string[] = ["Looking at what's near:"];
+  for (const e of near) {
+    const when = e.date
+      ? fmtShort(e.date)
+      : `${fmtShort(e.rangeStart ?? ctx.today)}–${fmtShort(e.rangeEnd ?? ctx.today)}`;
+    if (e.id === "next-period")
+      parts.push(
+        `· Next period ${when} — the practical prep is comfort + buffer: easy nights, laundry reality, an early Sunday.`,
+      );
+    else if (e.id === "fertile-window")
+      parts.push(
+        `· Fertile window ${when} — calendar estimate for awareness only; it doesn't promise or prevent anything.`,
+      );
+    else if (e.id === "ovulation")
+      parts.push(
+        `· Estimated ovulation ${when} — if you track tests or temperature, this is the stretch where they'd say the most.`,
+      );
+    else if (e.id === "pms-window") itemsNote(parts, e);
+    else parts.push(`· ${e.label} — ${when}.`);
+  }
+  parts.push("\nThat's it — planning-shaped advice, not a to-do list.");
+  return parts.join("\n");
+}
+
+function itemsNote(parts: string[], e: { label: string; daysAway: number }): void {
+  parts.push(
+    `· ${e.label} ${e.daysAway === 0 ? "starts today" : `in ${e.daysAway} day${e.daysAway === 1 ? "" : "s"}`} — the kind of window where lowering the bar for chores is strategy, not laziness.`,
+  );
+}
+
+function patternMethod(ctx: CycleContext): string {
+  return `A pattern card appears when something you logged recurs across at least two cycles — it's pure counting over your own entries, grouped by the cycle-day your logs define.\n\nThe card states observations ("seen in ${Math.max(2, 3)} of your ${Math.max(ctx.completedCount + 1, 3)} logged cycles") with sample sizes; the gentle-read line is the only interpretation, and it stays descriptive on purpose — cycles don't owe causes.\n\n${ctx.confidence === "assumed" ? "You're early: patterns here will stay sparse until a few cycles are in — that's the engine being honest, not you failing to log." : "Your data is rich enough that the counts are real — one unusual cycle will not flip a pattern by itself."}`;
+}
+
 function patterns(ctx: CycleContext): string {
   if (ctx.recentSymptoms.length < 3)
     return "Not enough data yet to call anything a pattern — I don't read trends from one-off logs.";
@@ -189,6 +239,18 @@ function patterns(ctx: CycleContext): string {
   return `From your own logs (last 30 days, ${ctx.recentSymptoms.length} entries):\n${lines.join("\n")}\n\nThat's frequency, not causation — I won't claim a phase 'causes' anything.`;
 }
 
+export function genericAnswer(question: string): string {
+  const q = question.toLowerCase();
+  const topic = /pattern/.test(q)
+    ? "patterns are just counts of what recurred across your own logged cycles — sample-gated, never interpreted as cause"
+    : /prepare|attention|upcoming/.test(q)
+      ? "planning hints come from the estimated windows the page already shows — soft by design"
+      : /log|track/.test(q)
+        ? "the most useful log is a period start day; two of them turn every estimate on this page personal"
+        : "everything here is computed from your logs on this device — no network, no storage of the conversation";
+  return `You've turned my cycle context off, so I'll stay general: ${topic}.\n\nFlip "Use my logs" back on whenever you want answers that quote your actual numbers.`;
+}
+
 export const deterministicProvider: AssistantProvider = async (ctx, question) => {
   const q = question.toLowerCase();
   if (/phase|where am i|current/.test(q)) return describePhase(ctx);
@@ -197,6 +259,8 @@ export const deterministicProvider: AssistantProvider = async (ctx, question) =>
   if (/compar|vs|versus|recent cycles/.test(q)) return compareCycles(ctx);
   if (/what.*(different|changed) this cycle|this cycle/.test(q)) return whatChanged(ctx);
   if (/attention|upcoming|coming up|watch/.test(q)) return attention(ctx);
+  if (/prepare|prep|next few days/.test(q)) return prepare(ctx);
+  if (/why.*(pattern|seeing this)|how do you know/.test(q)) return patternMethod(ctx);
   if (/log|track|record|today/.test(q) && !/pattern/.test(q)) return whatToLog(ctx);
   if (/pattern|symptom|recurr/.test(q)) return patterns(ctx);
   if (/accur|confiden|sure/.test(q))

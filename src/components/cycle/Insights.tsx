@@ -8,14 +8,17 @@ import { GhostButton } from "./parts";
 
 export function InsightCard({
   insight,
+  signals = [],
   onAsk,
   className,
 }: {
   insight: Insight | null;
+  signals?: string[];
   onAsk?: () => void;
   className?: string;
 }) {
   const [dismissed, setDismissed] = useState(false);
+  const [why, setWhy] = useState(false);
   if (!insight || dismissed || dismissStore.isDismissed(insight.id)) return null;
   return (
     <div
@@ -38,6 +41,16 @@ export function InsightCard({
         {insight.text}
       </p>
       <div className="flex shrink-0 items-center gap-1.5">
+        {signals.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => setWhy((w) => !w)}
+            aria-expanded={why}
+            className="mono rounded-full border border-border px-2.5 py-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+          >
+            why this
+          </button>
+        ) : null}
         {onAsk ? <GhostButton onClick={onAsk}>Ask Bloom why</GhostButton> : null}
         <button
           type="button"

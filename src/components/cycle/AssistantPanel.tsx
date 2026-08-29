@@ -27,6 +27,9 @@ export function AssistantPanel({
   answering,
   error,
   onClose,
+  useLogs = true,
+  onToggleLogs,
+  onQuickLog,
 }: {
   context: CycleContext | null;
   insight: Insight | null;
@@ -38,6 +41,9 @@ export function AssistantPanel({
   answering: boolean;
   error: string | null;
   onClose: () => void;
+  useLogs?: boolean | undefined;
+  onToggleLogs?: ((on: boolean) => void) | undefined;
+  onQuickLog?: (() => void) | undefined;
 }) {
   const listRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -119,6 +125,43 @@ export function AssistantPanel({
           <X className="size-4" />
         </button>
       </header>
+
+      <div className="flex items-center justify-between gap-2 border-b border-border/50 bg-surface/30 px-4 py-1.5">
+        <label className="flex min-w-0 cursor-pointer items-center gap-2">
+          <input
+            type="checkbox"
+            checked={useLogs}
+            onChange={(e) => onToggleLogs?.(e.target.checked)}
+            className="size-3.5 accent-[var(--violet)]"
+            aria-label="Use my cycle logs for answers"
+          />
+          <span className="mono truncate text-[9px] uppercase tracking-[0.07em] text-faint">
+            {useLogs ? "reading your on-device logs" : "context off — general answers"}
+          </span>
+        </label>
+        <div className="flex shrink-0 gap-1.5">
+          {onQuickLog ? (
+            <button
+              type="button"
+              onClick={onQuickLog}
+              className="mono rounded-full border border-border px-2.5 py-1 text-[9px] uppercase tracking-[0.07em] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              log today
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("cycle-patterns")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="mono rounded-full border border-border px-2.5 py-1 text-[9px] uppercase tracking-[0.07em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            my patterns
+          </button>
+        </div>
+      </div>
 
       <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-3.5">
         {!greeted ? (

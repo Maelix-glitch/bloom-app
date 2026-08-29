@@ -15,9 +15,15 @@ import type { DayDraft } from "@/components/cycle/Logs";
 import { entriesToCsv } from "@/lib/cycle/storage";
 import { QuickLog, AdvancedLog } from "@/components/cycle/Logs";
 import { CycleRing } from "@/components/cycle/CycleRing";
-import { NextEvents } from "@/components/cycle/NextEvents";
+import { CycleLengthSheet } from "@/components/cycle/CycleLengthSheet";
+import { AtAGlance } from "@/components/cycle/AtAGlance";
+import { MethodologyDialog } from "@/components/cycle/Analytics";
+import { Next7Timeline } from "@/components/cycle/Next7Timeline";
+import { PatternsSection } from "@/components/cycle/PatternsSection";
+import { PhasesGuide } from "@/components/cycle/PhasesGuide";
 import { CycleCalendar } from "@/components/cycle/CycleCalendar";
 /* below-the-fold weight loads progressively — the hero, events, and calendar never wait on it */
+
 const Analytics = lazy(() =>
   import("@/components/cycle/Analytics").then((m) => ({ default: m.Analytics })),
 );
@@ -46,6 +52,8 @@ function CyclePage() {
 
   const [quickOpen, setQuickOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [adjustOpen, setAdjustOpen] = useState(false);
+  const [methodOpen, setMethodOpen] = useState(false);
   const [editing, setEditing] = useState<CycleEntry | null>(null);
   const [quickDate, setQuickDate] = useState<string | null>(null);
   const [advEntry, setAdvEntry] = useState<CycleEntry | null>(null);
@@ -165,7 +173,7 @@ function CyclePage() {
                 : "radial-gradient(50% 58% at 50% 46%, color-mix(in oklab, var(--violet) 8%, transparent), transparent 72%)",
             }}
           />
-          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
+          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
             <div className="order-2 min-w-0 lg:order-1">
               <p className="eyebrow mb-3 flex items-center gap-2">
                 Cycle · personal insight
@@ -177,19 +185,6 @@ function CyclePage() {
               <p className="mt-3 max-w-[54ch] text-[14px] leading-relaxed text-muted-foreground">
                 {heroSub}
               </p>
-              {nextPeriodEvent ? (
-                <p className="mono mt-3 flex flex-wrap items-center gap-x-2 text-[11px] uppercase tracking-[0.06em] text-faint">
-                  <CalendarDays className="size-3.5" aria-hidden />
-                  next period estimated{" "}
-                  {fmtShort(nextPeriodEvent.date ?? nextPeriodEvent.rangeStart ?? localDateKey())}
-                  <span className="text-muted-foreground">
-                    ({daysAwayLabel(nextPeriodEvent.daysAway)})
-                  </span>
-                  {model?.usesDefaultAssumption ? (
-                    <span className="text-[color:var(--cycle-ovulation)]">· general pattern</span>
-                  ) : null}
-                </p>
-              ) : null}
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -216,18 +211,52 @@ function CyclePage() {
             <div className="order-1 flex flex-col items-center gap-2 lg:order-2">
               {model ? (
                 <>
-                  <CycleRing model={model} />
+                  <CycleRing model={model} size={300} />
                   <ObserveLegend />
+                  <button
+                    type="button"
+                    onClick={() => setAdjustOpen(true)}
+                    className="mono rounded-full border border-border px-3 py-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:border-border-strong hover:text-foreground"
+                  >
+                    adjust cycle
+                  </button>
                 </>
               ) : (
                 <RingSkeleton />
               )}
             </div>
+
+            {model ? (
+              <AtAGlance
+                className="order-3 min-w-0 lg:col-span-3 lg:col-start-3 lg:row-span-2 xl:col-span-1 xl:row-span-1"
+                model={model}
+                onViewAll={() =>
+                  document
+                    .getElementById("cycle-intelligence")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+                onOpenMethod={() => setMethodOpen(true)}
+              />
+            ) : null}
           </div>
 
-          <div className="mt-7">
+          <div id="cycle-insight" className="mt-7 scroll-mt-6">
             <InsightCard
               insight={insight}
+              signals={
+                model
+                  ? [
+                      `phase · ${model.currentPhase ?? "unknown"}`,
+                      `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
+                      model.completed.length > 0
+                        ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
+                        : "no completed cycles yet",
+                      model.variabilityPercent !== null
+                        ? `spread ±${Math.round(model.stdDev ?? 0)}d`
+                        : "spread unknown",
+                    ]
+                  : []
+              }
               onAsk={() =>
                 toast("Open the Bloom assistant (bottom right) — it remembers this question.")
               }
@@ -236,33 +265,25 @@ function CyclePage() {
         </section>
       </Reveal>
 
-      {/* NEXT EVENTS */}
+      {/* NEXT 7 DAYS */}
       <Reveal delay={40}>
         <CycleSection
-          title="What comes next"
-          sub="Estimates for awareness and planning — never verdicts."
+          title="The next seven days"
+          sub="A path, not a promise — soft means estimated."
           gap="default"
         >
-          {model ? <NextEvents model={model} /> : <BlockSkeleton h={120} />}
-        </CycleSection>
-      </Reveal>
-
-      {/* CALENDAR */}
-      <Reveal delay={40}>
-        <CycleSection title="Calendar" id="cycle-calendar" gap="wide">
           {model ? (
-            <CycleCalendar
+            <Next7Timeline
               model={model}
               entries={entries}
-              onQuickLog={(date) => openQuick(date)}
-              onEditDay={(entry) => {
-                setEditing(entry);
-                setQuickDate(entry.date);
-                setQuickOpen(true);
+              onLogDay={(date) => {
+                setQuickDate(date);
+                setEditing(entries.find((e) => e.date === date) ?? null);
+                setAdvancedOpen(true);
               }}
             />
           ) : (
-            <BlockSkeleton h={300} />
+            <BlockSkeleton h={140} />
           )}
         </CycleSection>
       </Reveal>
@@ -284,6 +305,57 @@ function CyclePage() {
               toast("The assistant answers from the same data — bottom-right button opens it.")
             }
           />
+        </CycleSection>
+      </Reveal>
+
+      {/* PATTERNS */}
+      <Reveal delay={40}>
+        <CycleSection
+          title="Your patterns"
+          sub="What your own logs keep repeating — observation first, always with its sample size."
+          gap="wide"
+          id="cycle-patterns"
+        >
+          {model ? (
+            <PatternsSection
+              model={model}
+              entries={entries}
+              onOpenMethod={() => setMethodOpen(true)}
+            />
+          ) : (
+            <BlockSkeleton h={160} />
+          )}
+        </CycleSection>
+      </Reveal>
+
+      {/* PHASES */}
+      <Reveal delay={40}>
+        <CycleSection
+          title="The four phases"
+          sub="The textbook outline — your data writes the real story."
+          gap="wide"
+        >
+          {model ? <PhasesGuide model={model} /> : <BlockSkeleton h={180} />}
+        </CycleSection>
+      </Reveal>
+
+      {/* CALENDAR */}
+      <Reveal delay={40}>
+        <CycleSection title="Calendar" id="cycle-calendar" gap="wide">
+          {model ? (
+            <CycleCalendar
+              model={model}
+              entries={entries}
+              onQuickLog={(date) => openQuick(date)}
+              onEditDay={(entry) => {
+                setEditing(entry);
+                setQuickDate(entry.date);
+                setQuickOpen(true);
+              }}
+            />
+          ) : (
+            <BlockSkeleton h={300} />
+          )}
         </CycleSection>
       </Reveal>
 
@@ -345,6 +417,21 @@ function CyclePage() {
       </footer>
 
       {/* overlays */}
+      <CycleLengthSheet
+        open={adjustOpen}
+        onClose={() => setAdjustOpen(false)}
+        model={model}
+        defaultCycle={system.defaultCycle}
+        onSaveLength={async (days) => {
+          system.setDefaultCycle(days);
+        }}
+        onSaveStart={async (date) => {
+          await system.saveDay({ date, flow: "medium", cycle_day: 1, phase: "menstrual" });
+        }}
+      />
+      {model ? (
+        <MethodologyDialog open={methodOpen} onClose={() => setMethodOpen(false)} model={model} />
+      ) : null}
       <QuickLog
         open={quickOpen}
         onClose={() => {
@@ -386,6 +473,11 @@ function CyclePage() {
         context={context}
         insight={insightSeen ? null : insight}
         onSeenInsight={() => setInsightSeen(true)}
+        onQuickLog={() => {
+          setEditing(null);
+          setQuickDate(null);
+          setQuickOpen(true);
+        }}
       />
       <Toaster
         position="bottom-center"

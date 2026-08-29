@@ -17,6 +17,28 @@ export type AuthState = "checking" | "signed-out" | "signed-in";
  * the legacy cycle page had, so the whole page stays usable without an
  * account. Nothing is fabricated; it is the user's own browser data. */
 const LOCAL_KEY = "bloom.cycle.entries.local";
+const PREFS_KEY = "bloom.cycle.prefs.v1"; // user-set working length while personal history is absent
+
+function readDefaultCycle(): number | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(PREFS_KEY);
+    const v = raw ? ((JSON.parse(raw) as { defaultCycle?: unknown }).defaultCycle ?? null) : null;
+    return typeof v === "number" && v >= 20 && v <= 45 ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDefaultCycle(days: number | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (days === null) window.localStorage.removeItem(PREFS_KEY);
+    else window.localStorage.setItem(PREFS_KEY, JSON.stringify({ defaultCycle: days }));
+  } catch {
+    /* prefs just won't persist this session */
+  }
+}
 
 function readLocal(): CycleEntry[] {
   if (typeof window === "undefined") return [];
@@ -44,6 +66,7 @@ export function useCycleSystem() {
   const [authState, setAuthState] = useState<AuthState>("checking");
   const [userId, setUserId] = useState<string | null>(null);
   const [entries, setEntries] = useState<CycleEntry[]>([]);
+  const [defaultCycle, setDefaultCycleState] = useState<number | null>(() => readDefaultCycle());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
@@ -109,9 +132,14 @@ export function useCycleSystem() {
   }, [authState, userId, reload, today]);
 
   const model: CycleModel | null = useMemo(
-    () => (today ? buildCycleModel(entries, today) : null),
-    [entries, today],
+    () => (today ? buildCycleModel(entries, today, { defaultCycle }) : null),
+    [entries, today, defaultCycle],
   );
+
+  const setDefaultCycle = useCallback((days: number | null) => {
+    writeDefaultCycle(days);
+    setDefaultCycleState(days);
+  }, []);
 
   const context = useMemo(() => (model ? buildContext(entries, model) : null), [entries, model]);
 
@@ -162,6 +190,8 @@ export function useCycleSystem() {
   return {
     authState,
     userId,
+    defaultCycle,
+    setDefaultCycle,
     localOnly: authState !== "signed-in",
     loading,
     error,

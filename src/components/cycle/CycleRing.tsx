@@ -87,13 +87,35 @@ export function CycleRing({
           strokeWidth={9}
         />
 
-        {/* phase arcs (whole cycle, soft) */}
+        {/* phase arcs — selectable; whole-cycle soft base */}
         {segments.map((s) => {
           const d = arc(cx, cy, r, degForDay(s.from), degForDay(Math.max(s.to, s.from + 0.2)));
           if (!d) return null;
           const active = focus?.phase === s.phase;
+          const label = `${s.phase}: days ${s.from}–${Math.max(s.to, s.from)}${
+            model.lastPeriodStart
+              ? ` · ${fmtShort(dayToDate(model, s.from))} – ${fmtShort(dayToDate(model, s.to))}`
+              : ""
+          }${s.phase === "ovulation" || s.phase === "luteal" ? " · estimated unless you logged evidence" : ""}`;
           return (
-            <g key={`${uid}-${s.phase}`}>
+            <g
+              key={`${uid}-${s.phase}`}
+              role="button"
+              tabIndex={0}
+              aria-label={label}
+              aria-pressed={active}
+              onClick={() => setFocus(active ? null : { phase: s.phase, from: s.from, to: s.to })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setFocus(active ? null : { phase: s.phase, from: s.from, to: s.to });
+                }
+              }}
+              className="cursor-pointer focus:outline-none"
+              onFocus={() => setFocus({ phase: s.phase, from: s.from, to: s.to })}
+            >
+              {/* fat invisible hit area for touch */}
+              <path d={d} fill="none" stroke="transparent" strokeWidth={22} strokeLinecap="round" />
               <path
                 d={d}
                 fill="none"
@@ -146,7 +168,7 @@ export function CycleRing({
           />
         </g>
 
-        {/* center read-out */}
+        {/* center read-out — day and total length */}
         <text
           x={cx}
           y={cy - 10}
@@ -155,6 +177,10 @@ export function CycleRing({
           style={{ fontFamily: "var(--font-display)", fontSize: 44, letterSpacing: "-0.03em" }}
         >
           {model.currentDay ?? "—"}
+          <tspan style={{ fontSize: 18 }} className="fill-[var(--muted-foreground)]">
+            {" "}
+            / {cycle}
+          </tspan>
         </text>
         <text
           x={cx}
@@ -163,7 +189,7 @@ export function CycleRing({
           className="fill-muted-foreground"
           style={{ fontSize: 11, letterSpacing: "0.08em" }}
         >
-          CYCLE DAY
+          CYCLE DAY · {model.usesDefaultAssumption ? "general length" : "your length"}
         </text>
         {model.currentPhase ? (
           <text
@@ -182,14 +208,13 @@ export function CycleRing({
       {/* focusable phase legend */}
       <div
         className="flex flex-wrap items-center justify-center gap-1"
-        role="list"
-        aria-label="Cycle phases of the current model"
+        role="group"
+        aria-label="Cycle phases of the current model — select one for its range"
       >
         {segments.map((s) => (
           <button
             key={`lg-${s.phase}`}
             type="button"
-            role="listitem"
             onFocus={() => setFocus({ phase: s.phase, from: s.from, to: s.to })}
             onBlur={() => setFocus(null)}
             onMouseEnter={() => setFocus({ phase: s.phase, from: s.from, to: s.to })}

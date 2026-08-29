@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { Info, LineChart, TestTube } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { fmtShort, periodRuns } from "@/lib/cycle/engine";
+import { addDays, fmtShort, periodRuns } from "@/lib/cycle/engine";
 import type { CycleEntry, CycleModel, MoodValue } from "@/lib/cycle/types";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 import { GhostButton } from "./parts";
@@ -20,7 +20,7 @@ type Window = 3 | 6 | 12 | null; // null = all
 
 const MOOD_ORDER: Record<MoodValue, number> = { Low: 1, Flat: 2, Okay: 3, Good: 4, Energized: 5 };
 
-function MethodologyDialog({
+export function MethodologyDialog({
   open,
   onClose,
   model,
@@ -104,34 +104,54 @@ function Bars({
   average,
   median,
   labels,
+  ends,
 }: {
   values: number[];
   average: number | null;
   median: number | null;
   labels: string[];
+  ends: string[];
 }) {
   const max = Math.max(...values, average ?? 0, 30) * 1.12;
+  const [sel, setSel] = useState<number | null>(null);
+  const selected = sel !== null && values[sel] !== undefined ? sel : null;
   return (
     <div>
       <div
         className="relative flex h-32 items-end gap-2 sm:gap-3"
-        role="list"
-        aria-label="Cycle lengths, newest on the right"
+        role="group"
+        aria-label="Cycle lengths, oldest left newest right — select one for its dates"
       >
         {values.map((v, i) => (
-          <div
+          <button
             key={i}
-            role="listitem"
-            tabIndex={0}
+            type="button"
+            aria-pressed={selected === i}
             aria-label={`Cycle ${i + 1}: ${v} days, started ${labels[i]}`}
-            className="group flex h-full min-w-0 flex-1 flex-col justify-end gap-1.5 rounded-md outline-none focus-visible:bg-surface-2/60"
+            onClick={() => setSel(selected === i ? null : i)}
+            className={cn(
+              "group flex h-full min-w-0 flex-1 cursor-pointer flex-col justify-end gap-1.5 rounded-md outline-none transition-colors focus-visible:bg-surface-2/60",
+              selected === i && "bg-surface-2/70",
+            )}
           >
             <div
-              className="rounded-t-md bg-surface-3 transition-colors duration-300 group-hover:bg-[color-mix(in_oklab,var(--violet)_45%,var(--surface-3))] group-focus-visible:bg-[color-mix(in_oklab,var(--violet)_45%,var(--surface-3))]"
+              className={cn(
+                "rounded-t-md transition-colors duration-300",
+                selected === i
+                  ? "bg-[color-mix(in_oklab,var(--violet)_70%,var(--surface-3))]"
+                  : "bg-surface-3 group-hover:bg-[color-mix(in_oklab,var(--violet)_45%,var(--surface-3))]",
+              )}
               style={{ height: `${(v / max) * 100}%` }}
             />
-            <span className="mono text-center text-[10px] text-faint">{v}</span>
-          </div>
+            <span
+              className={cn(
+                "mono text-center text-[10px]",
+                selected === i ? "text-foreground" : "text-faint",
+              )}
+            >
+              {v}
+            </span>
+          </button>
         ))}
         {average !== null ? (
           <span
@@ -141,7 +161,25 @@ function Bars({
           />
         ) : null}
       </div>
-      <p className="mono mt-1.5 flex flex-wrap items-center justify-center gap-x-3 text-[9px] uppercase tracking-[0.08em] text-faint">
+      <p
+        aria-live="polite"
+        className="mt-1.5 min-h-[18px] rounded-lg bg-surface-2/40 px-2 py-1 text-center text-[11px] text-muted-foreground"
+      >
+        {selected === null
+          ? "Tap any bar to see that cycle's dates and how it compares."
+          : `Cycle ${selected + 1} ran ${values[selected]} days — ${labels[selected]} → ${ends[selected]} · ${
+              average !== null
+                ? `${Math.abs((values[selected] ?? 0) - average).toFixed(1)} days ${
+                    (values[selected] ?? 0) >= average ? "longer" : "shorter"
+                  } than your ${average.toFixed(1)}-day average${
+                    Math.abs((values[selected] ?? 0) - average) <= 2
+                      ? " — well within ordinary wobble"
+                      : ""
+                  }`
+                : ""
+            }`}
+      </p>
+      <p className="mono mt-1 flex flex-wrap items-center justify-center gap-x-3 text-[9px] uppercase tracking-[0.08em] text-faint">
         <span>
           {labels[0]} … {labels[labels.length - 1]}
         </span>
@@ -189,6 +227,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
       max: Math.max(...lens),
       n: lens.length,
       labels: shown.map((c) => fmtShort(c.start)),
+      ends: shown.map((c) => fmtShort(addDays(c.start, c.lengthDays))),
       values: lens,
     };
   }, [shown]);
@@ -280,6 +319,7 @@ export function Analytics({ model, entries }: { model: CycleModel; entries: Cycl
                 average={windowed.avg}
                 median={windowed.med}
                 labels={windowed.labels}
+                ends={windowed.ends}
               />
               <p className="sr-only">
                 Cycle lengths ranged {windowed.min} to {windowed.max} days, averaging{" "}

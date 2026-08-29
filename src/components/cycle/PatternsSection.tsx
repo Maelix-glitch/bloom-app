@@ -1,0 +1,205 @@
+/**
+ * Your Patterns + Lifestyle links — observation first, interpretation on
+ * request, causation never. Every card names its sample ("seen in 3 of your
+ * 6 cycles"), and the whole section explains itself through one method note.
+ */
+
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { isTallyMeaningful, phaseTally, sleepVsLength, symptomTimings } from "@/lib/cycle/patterns";
+import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
+import { PHASE_COLOR } from "@/lib/cycle/palette";
+
+const PHASE_LABEL: Record<PhaseKey, string> = {
+  menstrual: "period",
+  follicular: "follicular",
+  ovulation: "fertile",
+  luteal: "luteal",
+};
+
+export function PatternsSection({
+  model,
+  entries,
+  onOpenMethod,
+}: {
+  model: CycleModel;
+  entries: CycleEntry[];
+  onOpenMethod: () => void;
+}) {
+  const symptoms = symptomTimings(entries, model);
+  const energy = phaseTally(entries, model, "energy");
+  const mood = phaseTally(entries, model, "mood");
+  const sleep = sleepVsLength(entries, model);
+
+  const cards: { key: string; title: string; body: React.ReactNode }[] = [];
+
+  for (const s of symptoms) {
+    cards.push({
+      key: `sym-${s.symptom}`,
+      title: `${s.symptom} shows up early`,
+      body: (
+        <Observation
+          found={`Seen around cycle day ${s.medianCycleDay} on ${s.seenInCycles} of your ${s.totalCycles} logged cycles.`}
+          reading={`That's a pattern worth expecting — ${s.symptom.toLowerCase()} tending to appear near the start rather than the middle of your month.`}
+        />
+      ),
+    });
+  }
+  if (isTallyMeaningful(energy)) {
+    cards.push({
+      key: "energy-phase",
+      title: "Energy leans on one side of the cycle",
+      body: (
+        <PhaseBars
+          tally={energy}
+          scale={5}
+          unit="/5"
+          reading="Your average energy differs noticeably between phases — an observation across your own logs, not a rule."
+        />
+      ),
+    });
+  }
+  if (isTallyMeaningful(mood)) {
+    cards.push({
+      key: "mood-phase",
+      title: "Mood has a seasonal feel to it",
+      body: (
+        <PhaseBars
+          tally={mood}
+          scale={5}
+          unit="/5"
+          reading="Mood scores (Low→Energized) group differently by phase across your entries. Yours may shift differently — that's normal."
+        />
+      ),
+    });
+  }
+  if (sleep.shortAvg !== null && sleep.longAvg !== null) {
+    const delta = sleep.shortAvg - sleep.longAvg;
+    cards.push({
+      key: "sleep-length",
+      title: "Sleep and cycle length, side by side",
+      body: (
+        <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+          On shorter cycles you logged ~{sleep.shortAvg.toFixed(1)} h of sleep vs ~
+          {sleep.longAvg.toFixed(1)} h on longer ones ({sleep.pairs} cycles compared). A link
+          visible in {sleep.pairs} cycles isn't a cause — it's a thread you might enjoy noticing.
+        </p>
+      ),
+    });
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border/70 bg-surface/20 px-4 py-5 text-center">
+        <p className="display text-[14.5px] text-muted-foreground">
+          Patterns need a few cycles of company.
+        </p>
+        <p className="mx-auto mt-1 max-w-[44ch] text-[12px] leading-relaxed text-faint">
+          Once two or three cycles carry symptom or mood notes, this section starts showing what
+          recurs — with counts, never guesses.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-2.5 sm:grid-cols-2">
+      {cards.slice(0, 4).map((c) => (
+        <PatternCard key={c.key} title={c.title} onMethod={onOpenMethod}>
+          {c.body}
+        </PatternCard>
+      ))}
+    </div>
+  );
+}
+
+function PatternCard({
+  title,
+  children,
+  onMethod,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onMethod: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <article className="rounded-2xl border border-border/70 bg-surface/45 px-4 py-3.5 transition-colors hover:border-border">
+      <p className="eyebrow">seen in your logs</p>
+      <h3 className="display mt-1 text-[15.5px] leading-snug">{title}</h3>
+      <div className="mt-2">{children}</div>
+      <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-border/50 pt-2">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="mono inline-flex items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+        >
+          How this reads{" "}
+          <ChevronDown
+            className={cn(
+              "size-3 transition-transform duration-[var(--motion-med)]",
+              open && "rotate-180",
+            )}
+            aria-hidden
+          />
+        </button>
+        <button
+          type="button"
+          onClick={onMethod}
+          className="mono text-[9px] uppercase tracking-[0.08em] text-faint underline underline-offset-2 hover:text-foreground"
+        >
+          method
+        </button>
+      </div>
+      {open ? (
+        <p className="mt-1.5 text-[11px] leading-relaxed text-faint">
+          We group every day you logged into the phase your model puts it in, average the values,
+          and only call it a pattern when at least two phases hold two-plus observations. It is
+          observation, not cause — and it only reflects the days you actually logged.
+        </p>
+      ) : null}
+    </article>
+  );
+}
+
+function Observation({ found, reading }: { found: string; reading: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <p className="text-[12.5px] leading-relaxed text-muted-foreground">{found}</p>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="mono mt-1.5 text-[9px] uppercase tracking-[0.08em] text-faint underline underline-offset-2 hover:text-foreground"
+      >
+        {open ? "hide the gentle read" : "the gentle read"}
+      </button>
+      {open ? <p className="mt-1 text-[11.5px] leading-relaxed text-faint">{reading}</p> : null}
+    </div>
+  );
+}
+
+function PhaseBars({
+  tally,
+  scale,
+  unit,
+  reading,
+}: {
+  tally: ReturnType<typeof phaseTally>;
+  scale: number;
+  unit: string;
+  reading: string;
+}) {
+  return (
+    <Observation
+      found={`Across ${tally.n} logged days: ${tally.byPhase
+        .filter((p) => p.n >= 2 && p.avg !== null)
+        .map((p) => `${PHASE_LABEL[p.phase]} ${p.avg!.toFixed(1)}${unit} (${p.n})`)
+        .join(" · ")}`}
+      reading={reading}
+    />
+  );
+}

@@ -14,7 +14,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { X } from "lucide-react";
 
 import type { CycleContext } from "@/lib/cycle/types";
-import { deterministicProvider, quickPromptsFor } from "@/lib/cycle/assistant";
+import { deterministicProvider, genericAnswer, quickPromptsFor } from "@/lib/cycle/assistant";
 import type { Insight } from "@/lib/cycle/intelligence";
 import { dismissStore } from "@/lib/cycle/intelligence";
 
@@ -44,10 +44,12 @@ export function AssistantDock({
   context,
   insight,
   onSeenInsight,
+  onQuickLog,
 }: {
   context: CycleContext | null;
   insight: Insight | null;
   onSeenInsight?: () => void;
+  onQuickLog?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -56,6 +58,23 @@ export function AssistantDock({
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef<Promise<void> | null>(null);
   const launcherRef = useRef<HTMLButtonElement | null>(null);
+  const [useLogs, setUseLogs] = useState(true);
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem("bloom.cycle.assistant.ctx");
+      if (v !== null) setUseLogs(v === "1");
+    } catch {
+      /* default stays on */
+    }
+  }, []);
+  const toggleUseLogs = useCallback((on: boolean) => {
+    setUseLogs(on);
+    try {
+      window.localStorage.setItem("bloom.cycle.assistant.ctx", on ? "1" : "0");
+    } catch {
+      /* session-only */
+    }
+  }, []);
 
   const prompts = useMemo(() => (context ? quickPromptsFor(context) : []), [context]);
   const showDot =
@@ -74,7 +93,10 @@ export function AssistantDock({
       setAnswering(true);
       const run = (async () => {
         try {
-          const answer = await deterministicProvider(context, q, { aborted: false });
+          const answer =
+            !useLogs || !context
+              ? genericAnswer(q)
+              : await deterministicProvider(context, q, { aborted: false });
           setMessages((m) => [...m, { id: `a-${Date.now()}`, role: "bloom", text: answer }]);
         } catch {
           setError("Couldn't answer that just now — try again in a moment.");
@@ -84,7 +106,7 @@ export function AssistantDock({
       })();
       inFlight.current = run;
     },
-    [context, answering],
+    [context, answering, useLogs],
   );
 
   const close = useCallback(() => {
@@ -141,7 +163,10 @@ export function AssistantDock({
           }
         >
           <AssistantPanel
-            context={context}
+            context={useLogs ? context : null}
+            useLogs={useLogs}
+            onToggleLogs={toggleUseLogs}
+            onQuickLog={onQuickLog}
             insight={insight}
             prompts={prompts}
             messages={messages}
