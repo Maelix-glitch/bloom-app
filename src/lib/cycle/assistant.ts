@@ -31,40 +31,40 @@ export function quickPromptsFor(ctx: CycleContext): QuickPrompt[] {
 
 const QUICK_PROMPTS: QuickPrompt[] = [
   {
-    id: "phase",
-    label: "What does this phase mean?",
-    question: "What does this phase mean — and how sure are we?",
-    available: (c) => c.currentDay !== null,
-  },
-  {
-    id: "estimate",
-    label: "Why is my period prediction changing?",
-    question: "Why is my period prediction changing?",
-    available: (c) => c.completedCount >= 1,
-  },
-  {
     id: "noticed",
-    label: "What have you noticed about my cycles?",
-    question: "What have you noticed about my cycles so far?",
+    label: "What is Bloom noticing?",
+    question: "What is Bloom noticing about my cycles?",
+    available: (c) => c.loggedDays30 > 0 || c.completedCount >= 1,
+  },
+  {
+    id: "datewhy",
+    label: "Why is this date estimated?",
+    question: "Why is this date estimated and not logged?",
+    available: (c) => c.currentDay !== null || c.completedCount >= 1,
+  },
+  {
+    id: "pattern",
+    label: "Show me my recent pattern.",
+    question: "Show me my recent pattern across cycles.",
     available: (c) => c.completedCount >= 2,
   },
   {
-    id: "energy",
-    label: "Help me understand my energy pattern.",
-    question: "Help me understand my energy pattern.",
-    available: (c) => c.loggedDays30 >= 3,
+    id: "changed",
+    label: "What changed this cycle?",
+    question: "What's different or changed this cycle?",
+    available: (c) => c.currentDay !== null,
+  },
+  {
+    id: "logtoday",
+    label: "What should I log today?",
+    question: "What should I log today?",
+    available: () => true,
   },
   {
     id: "learning",
     label: "What do you need from me before predictions become personal?",
     question: "What do you need from me before your predictions become personal?",
     available: (c) => c.completedCount < 2,
-  },
-  {
-    id: "how",
-    label: "How do estimates work here?",
-    question: "How do estimates work here — and how do you handle uncertainty?",
-    available: () => true,
   },
 ];
 
@@ -244,7 +244,13 @@ export const deterministicProvider: AssistantProvider = async (ctx, question) =>
   if (/prepare|prep|next few days/.test(q)) return prepare(ctx);
   if (/why.*(pattern|seeing this)|how do you know|how do estimates|uncertainty/.test(q))
     return patternMethod(ctx);
-  if (/noticed|what have you seen/.test(q))
+  if (/why is (this|that) date|this date (is )?estimated|not logged/.test(q))
+    return `A date is "logged" when you recorded something on it — flow, mood, energy, anything. Everything else on this page is derived: phase positions come from your period-start dates and your average length, so future dates (and past days you skipped) are shown softer, dashed or hollow, on purpose.${
+      ctx.completedCount < 2
+        ? " Right now the derivation leans on the general pattern too — two completed cycles and it leans on you."
+        : ` With ${ctx.completedCount} completed cycles behind it, the derivation is already yours, but it remains an estimate — a range, not a promise.`
+    }`;
+  if (/noticed|what have you seen|what is bloom noticing/.test(q))
     return ctx.completedCount >= 2
       ? compareCycles(ctx)
       : `Not much yet — and that's the honest answer. I have ${ctx.loggedDays30} logged day${ctx.loggedDays30 === 1 ? "" : "s"} and ${ctx.completedCount} completed cycle${ctx.completedCount === 1 ? "" : "s"} to look across; patterns only get said out loud when a few cycles keep repeating them. Anything else would be invention, and you didn't come here for that.`;

@@ -10,8 +10,8 @@
 
 import { PencilLine } from "lucide-react";
 
-import type { CycleEntry, CycleModel } from "@/lib/cycle/types";
-import { CycleOrbit } from "./CycleOrbit";
+import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
+import { CycleOrbit, segmentsFor } from "./CycleOrbit";
 import { TodaySurface, type TodayPatch } from "./TodaySurface";
 
 export function CycleHero({
@@ -27,6 +27,8 @@ export function CycleHero({
   onAdjust,
   onOpenMethod,
   onTrayReady,
+  selectedPhase,
+  onSelectPhase,
 }: {
   model: CycleModel | null;
   entries: CycleEntry[];
@@ -40,13 +42,21 @@ export function CycleHero({
   onAdjust: () => void;
   onOpenMethod: () => void;
   onTrayReady?: React.Ref<HTMLButtonElement>;
+  selectedPhase: PhaseKey | null;
+  onSelectPhase: (p: PhaseKey | null) => void;
 }) {
   return (
     <header className="cy-hero">
-      <div className="cy-hero__orbit">
+      <div className="cy-hero__orbit" id="cycle-orbit">
         {model ? (
           <>
-            <CycleOrbit model={model} entries={entries} inspect={inspect} />
+            <CycleOrbit
+              model={model}
+              entries={entries}
+              inspect={inspect}
+              selectedPhase={selectedPhase}
+              onSelectPhase={onSelectPhase}
+            />
             <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
               <button type="button" onClick={onAdjust} className="cy-link">
                 <PencilLine className="mr-1 inline size-3 align-[-1.5px]" aria-hidden />
@@ -78,9 +88,7 @@ export function CycleHero({
                 color: `var(--cycle-${model.currentPhase === "ovulation" ? "ovulation" : model.currentPhase})`,
               }}
             >
-              {model.currentPhase === "ovulation"
-                ? "Ovulation window"
-                : `${cap(model.currentPhase)} phase`}
+              {momentHead(model)}
             </h1>
             <p className="cy-statement__support">
               Day <b>{model.currentDay}</b> · of your{" "}
@@ -166,4 +174,26 @@ function phaseLine(phase: CycleModel["currentPhase"]): string {
 
 function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * The headline reflects where the day actually sits inside the phase —
+ * derived from the same model that draws the orbit, never a canned string.
+ * "Late luteal" when the estimate is close, "Period day 3" while bleeding.
+ */
+function momentHead(model: CycleModel): string {
+  const phase = model.currentPhase;
+  const day = model.currentDay ?? 0;
+  if (!phase) return "Awaiting your first log";
+  if (phase === "ovulation") return "Ovulation window";
+  const seg = segmentsFor(model).find((x) => x.phase === phase);
+  const span = seg ? Math.max(1, seg.to - seg.from + 1) : 1;
+  const rel = seg ? (day - seg.from) / span : 0;
+  if (phase === "menstrual") return `Period day ${Math.max(1, Math.min(day, Math.round(span)))}`;
+  const next = model.events.find((e) => e.id === "next-period");
+  if (phase === "luteal") {
+    if (next && next.daysAway >= 0 && next.daysAway <= 3) return "Late luteal";
+    return rel <= 0.34 ? "Early luteal" : "Luteal phase";
+  }
+  return rel >= 0.67 ? "Late follicular" : rel <= 0.34 ? "Early follicular" : "Follicular phase";
 }

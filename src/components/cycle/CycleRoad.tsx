@@ -11,7 +11,9 @@
  */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
+import { FADE, TAP } from "@/lib/cycle/motion";
 import { cn } from "@/lib/utils";
 import type { CycleModel } from "@/lib/cycle/types";
 import { fmtShort } from "@/lib/cycle/engine";
@@ -41,6 +43,7 @@ export function CycleRoad({
 }) {
   const pathRef = useRef<SVGPathElement | null>(null);
   const [pts, setPts] = useState<number[] | null>(null);
+  const [selStop, setSelStop] = useState<string | null>(null);
 
   const stops: Stop[] = useMemo(() => {
     if (!model.lastPeriodStart) return [];
@@ -233,7 +236,7 @@ export function CycleRoad({
             <circle cx={8} cy={98} r={2.6} fill="var(--foreground)" />
             <text
               x={8}
-              y={44}
+              y={22}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: 12.5,
@@ -243,7 +246,7 @@ export function CycleRoad({
             >
               Today · day {model.currentDay}
             </text>
-            <text x={8} y={62} style={{ fontSize: 11.5, fill: "var(--faint)" }}>
+            <text x={8} y={38} style={{ fontSize: 11.5, fill: "var(--faint)" }}>
               {model.currentPhase ? `${model.currentPhase} phase · ${cycle}-day model` : ""}
             </text>
           </g>
@@ -258,17 +261,29 @@ export function CycleRoad({
                     className="cy-focus-in"
                     role="button"
                     tabIndex={0}
-                    onClick={onOpenMethod}
+                    onClick={() => setSelStop(selStop === s.key ? null : s.key)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        onOpenMethod();
+                        setSelStop(selStop === s.key ? null : s.key);
                       }
                     }}
-                    aria-label={`${s.name}, ${fmtShort(s.date)} — ${s.est ? "estimated" : "observed"}. Activate to see how estimates work.`}
+                    aria-label={`${s.name}, ${fmtShort(s.date)} — ${s.est ? "estimated" : "observed"}. Activate for what Bloom can say about it.`}
                     style={{ cursor: "pointer" }}
                   >
                     <circle cx={x} cy={cy} r={15} fill="transparent" />
+                    {selStop === s.key ? (
+                      <motion.circle
+                        initial={{ r: 7, opacity: 0.9 }}
+                        animate={{ r: 11, opacity: 0.35 }}
+                        transition={TAP}
+                        cx={x}
+                        cy={cy}
+                        fill="none"
+                        stroke={s.tone}
+                        strokeWidth={1.5}
+                      />
+                    ) : null}
                     <circle cx={x} cy={cy} r={7} fill="var(--background)" />
                     <circle
                       cx={x}
@@ -314,7 +329,48 @@ export function CycleRoad({
         </svg>
       </div>
 
-      {nextStop ? (
+      <AnimatePresence initial={false}>
+        {selStop
+          ? (() => {
+              const st = stops.find((x) => x.key === selStop);
+              if (!st) return null;
+              const ev = model.events.find((e) =>
+                st.key === "period"
+                  ? e.id === "next-period"
+                  : st.key === "ovu"
+                    ? e.id === "ovulation"
+                    : st.key === "fertile"
+                      ? e.id === "fertile-window"
+                      : e.id === "phase-change",
+              );
+              return (
+                <motion.div
+                  key="road-detail"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={FADE}
+                  className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1.5 rounded-xl border border-[var(--cycle-hair)] bg-[var(--cy-fill)] px-4 py-3"
+                >
+                  <span className="cy-title text-[15.5px]" style={{ color: st.tone }}>
+                    {st.name} · {fmtShort(st.date)}
+                  </span>
+                  <span className="text-[12.5px] text-muted-foreground">
+                    {st.est ? "Estimated" : "Logged"} —{" "}
+                    {model.confidence === "assumed"
+                      ? "a general-pattern figure; nothing personal yet"
+                      : `based on your previous cycles${ev?.plusMinusDays ? `, shown as ±${ev.plusMinusDays} days because that is the honest spread` : ""}`}
+                  </span>
+                  <button type="button" onClick={onOpenMethod} className="cy-link ml-auto">
+                    how this was built →
+                  </button>
+                </motion.div>
+              );
+            })()
+          : null}
+      </AnimatePresence>
+
+      {nextStop && !selStop ? (
         <div className="cy-next">
           <span className="cy-eyebrow shrink-0" style={{ color: nextStop.tone }}>
             Next

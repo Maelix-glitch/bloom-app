@@ -10,7 +10,9 @@
  */
 
 import { useMemo } from "react";
+import { motion } from "motion/react";
 
+import { SELECT, TAP } from "@/lib/cycle/motion";
 import { cn } from "@/lib/utils";
 import { addDays, dayStateFor, fmtShort } from "@/lib/cycle/engine";
 import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
@@ -57,7 +59,7 @@ export function CycleTimeline({
           aria-hidden
         />
         <ol>
-          {days.map((d) => {
+          {days.map((d, i) => {
             const isToday = d.date === model.today;
             const logged = d.state.logged !== null;
             const on = (selected ?? model.today) === d.date;
@@ -73,8 +75,11 @@ export function CycleTimeline({
                   : null;
             return (
               <li key={d.date}>
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.97 }}
+                  transition={TAP}
+                  style={{ opacity: isToday || on ? 1 : Math.max(0.55, 1 - i * 0.075) }}
                   aria-pressed={on}
                   onClick={() => onSelect(isToday ? null : d.date)}
                   data-tip={`${logged ? "you logged this day" : "estimate — softer by design"}${event ? ` · ${event}` : ""}`}
@@ -85,6 +90,21 @@ export function CycleTimeline({
                   )}
                   aria-label={`${fmtShort(d.date)}${isToday ? ", today" : ""}${d.state.phase ? `, ${d.state.phase} phase${logged ? ", logged" : ", estimated"}` : ""}`}
                 >
+                  {on ? (
+                    <motion.span
+                      layoutId="week-selection"
+                      transition={SELECT}
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: 14,
+                        border: "1px solid var(--border-strong)",
+                        background: "color-mix(in oklab, var(--surface) 60%, transparent)",
+                        zIndex: -1,
+                      }}
+                      aria-hidden
+                    />
+                  ) : null}
                   <span className="cy-day__date">
                     {(() => {
                       const mm = d.date.slice(5, 7);
@@ -101,10 +121,16 @@ export function CycleTimeline({
                     {model.lastPeriodStart ? dayNum(model, d.date) : Number(d.date.slice(8, 10))}
                   </span>
                   <span className="cy-day__phase">{d.state.phase ? d.state.phase : "—"}</span>
+                  {logged && (d.state.logged?.mood || d.state.logged?.energy) ? (
+                    <span className="cy-day__marks" aria-hidden>
+                      {d.state.logged?.mood ? d.state.logged.mood[0] : ""}
+                      {d.state.logged?.energy ? `·${d.state.logged.energy}/5` : ""}
+                    </span>
+                  ) : null}
                   <span className="cy-day__flag" style={{ opacity: isToday || event ? 1 : 0 }}>
                     {isToday ? "here" : (event ?? "·")}
                   </span>
-                </button>
+                </motion.button>
               </li>
             );
           })}

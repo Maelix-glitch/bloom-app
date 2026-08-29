@@ -13,7 +13,10 @@
  * motion. Geometry adapts to the real cycle length — 24 days, 31, any.
  */
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+
+import { FADE, MOVE, TAP } from "@/lib/cycle/motion";
 
 import { cn } from "@/lib/utils";
 import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
@@ -67,29 +70,32 @@ export function CycleOrbit({
   model,
   entries,
   inspect = null,
+  selectedPhase = null,
+  onSelectPhase,
   className,
 }: {
   model: CycleModel;
   entries: CycleEntry[];
   /** a day selected elsewhere on the page — the focus indicator follows */
   inspect?: { day: number; date: string } | null;
+  /** phase focused page-wide (the phase explorer drives this too) */
+  selectedPhase?: PhaseKey | null;
+  onSelectPhase?: (p: PhaseKey | null) => void;
   className?: string;
 }) {
   const uid = useId();
   const [hover, setHover] = useState<Seg | null>(null);
-  const [pinned, setPinned] = useState<Seg | null>(null);
 
   const cycle = Math.round(model.average ?? 28);
   const day = model.currentDay ?? 0;
   const degForDay = (d: number) => ((d - 1) / cycle) * 360;
   const segments = useMemo(() => segmentsFor(model), [model]);
-  const shown = pinned ?? hover;
+  const animated = useAnimatedSegments(segments);
+  const shown = hover ?? segments.find((x) => x.phase === selectedPhase) ?? null;
   const activePhase = model.currentPhase;
 
   const pick = (s: Seg) => {
-    const wasPinned = pinned?.phase === s.phase;
-    setPinned(wasPinned ? null : s);
-    setHover(wasPinned ? null : s);
+    onSelectPhase?.(selectedPhase === s.phase ? null : s.phase);
   };
 
   const todayDeg = day > 0 ? degForDay(Math.min(day, cycle)) : 0;
@@ -217,7 +223,7 @@ export function CycleOrbit({
         />
 
         {/* phase arcs flowing into one another; solid where lived, dashed ahead */}
-        {segments.map((s, i) => {
+        {animated.map((s, i) => {
           const a0 = degForDay(s.from);
           const a1 = degForDay(Math.max(s.to + 1, s.from + 1));
           const span = a1 - a0;
@@ -245,7 +251,7 @@ export function CycleOrbit({
                     : "nothing logged in this stretch yet"
                   : "not enough personal data yet"
               }. Select to keep its summary.`}
-              aria-pressed={pinned?.phase === s.phase}
+              aria-pressed={selectedPhase === s.phase}
               onClick={() => pick(s)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -254,9 +260,9 @@ export function CycleOrbit({
                 }
               }}
               onMouseEnter={() => setHover(s)}
-              onMouseLeave={() => pinned === null && setHover(null)}
+              onMouseLeave={() => setHover(null)}
               onFocus={() => setHover(s)}
-              onBlur={() => pinned === null && setHover(null)}
+              onBlur={() => setHover(null)}
               className="cursor-pointer outline-none"
             >
               {isShown ? (
@@ -313,7 +319,7 @@ export function CycleOrbit({
                   strokeLinecap="round"
                 />
               ) : null}
-              {isActive && day > 0 && !inspect && !pinned ? (
+              {isActive && day > 0 && !inspect ? (
                 <path
                   d={arcPath(R, a0 + gap, a1 - gap)}
                   className="cy-travel"
@@ -389,37 +395,55 @@ export function CycleOrbit({
         {/* today — ivory core, thin outer ring, soft glow, indicator line, label */}
         {day > 0 ? (
           <g pointerEvents="none">
-            <line
-              x1={polar(R - 36, todayDeg).x}
-              y1={polar(R - 36, todayDeg).y}
-              x2={polar(R - 18, todayDeg).x}
-              y2={polar(R - 18, todayDeg).y}
+            <motion.line
+              initial={false}
+              animate={{
+                x1: polar(R - 36, todayDeg).x,
+                y1: polar(R - 36, todayDeg).y,
+                x2: polar(R - 18, todayDeg).x,
+                y2: polar(R - 18, todayDeg).y,
+              }}
+              transition={MOVE}
               stroke="var(--foreground)"
               strokeOpacity={0.4}
               strokeWidth={1.3}
               strokeLinecap="round"
             />
-            <circle
+            <motion.circle
+              initial={false}
+              animate={{ cx: todayPos.x, cy: todayPos.y, r: 16 }}
+              transition={MOVE}
               className="cy-breathe"
-              cx={todayPos.x}
-              cy={todayPos.y}
-              r={16}
               fill={activePhase ? PHASE_COLOR[activePhase] : "var(--violet)"}
               opacity={0.16}
             />
-            <circle cx={todayPos.x} cy={todayPos.y} r={10.5} fill="var(--background)" />
-            <circle
-              cx={todayPos.x}
-              cy={todayPos.y}
+            <motion.circle
+              initial={false}
+              animate={{ cx: todayPos.x, cy: todayPos.y }}
+              transition={MOVE}
+              r={10.5}
+              fill="var(--background)"
+            />
+            <motion.circle
+              initial={false}
+              animate={{ cx: todayPos.x, cy: todayPos.y, scale: hover || selectedPhase ? 1.14 : 1 }}
+              transition={{ ...MOVE, scale: TAP }}
               r={7.2}
               fill="none"
               stroke={activePhase ? PHASE_COLOR[activePhase] : "var(--foreground)"}
               strokeWidth={1.8}
             />
-            <circle cx={todayPos.x} cy={todayPos.y} r={3.2} fill="var(--foreground)" />
-            <text
-              x={todayLabelPos.x}
-              y={todayLabelPos.y}
+            <motion.circle
+              initial={false}
+              animate={{ cx: todayPos.x, cy: todayPos.y }}
+              transition={MOVE}
+              r={3.2}
+              fill="var(--foreground)"
+            />
+            <motion.text
+              initial={false}
+              animate={{ x: todayLabelPos.x, y: todayLabelPos.y }}
+              transition={MOVE}
               textAnchor="middle"
               dominantBaseline="middle"
               style={{
@@ -433,15 +457,43 @@ export function CycleOrbit({
               }}
             >
               today
-            </text>
+            </motion.text>
           </g>
         ) : null}
 
-        {inspectPos ? (
-          <g className="cy-focus-in" pointerEvents="none">
+        {/* predicted ovulation position — a quiet gold node, only when the model is personal */}
+        {model.ovulationDay !== null && model.confidence !== "assumed" ? (
+          <g pointerEvents="none" className="cy-focus-in">
             <circle
-              cx={inspectPos.x}
-              cy={inspectPos.y}
+              cx={polar(R - 26, degForDay(model.ovulationDay)).x}
+              cy={polar(R - 26, degForDay(model.ovulationDay)).y}
+              r={3.4}
+              fill="none"
+              stroke="var(--cycle-ovulation)"
+              strokeWidth={1.4}
+              opacity={0.8}
+            />
+            <circle
+              cx={polar(R - 26, degForDay(model.ovulationDay)).x}
+              cy={polar(R - 26, degForDay(model.ovulationDay)).y}
+              r={0.9}
+              fill="var(--cycle-ovulation)"
+              opacity={0.9}
+            />
+          </g>
+        ) : null}
+
+        <motion.g
+          initial={false}
+          animate={{ opacity: inspectPos ? 1 : 0 }}
+          transition={FADE}
+          pointerEvents="none"
+        >
+          {inspectPos ? (
+            <motion.circle
+              initial={false}
+              animate={{ cx: inspectPos.x, cy: inspectPos.y }}
+              transition={MOVE}
               r={9}
               fill="none"
               stroke="var(--foreground)"
@@ -449,8 +501,8 @@ export function CycleOrbit({
               strokeWidth={1.4}
               strokeDasharray="2.5 3.5"
             />
-          </g>
-        ) : null}
+          ) : null}
+        </motion.g>
 
         {/* the center — heart of the page */}
         {model.lastPeriodStart && model.currentDay ? (
@@ -592,4 +644,47 @@ export function CycleOrbit({
 
 function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * Arc geometry interpolates from its previous shape to the new one over a
+ * soft beat — logging a period start flows the ring into its new state
+ * instead of snapping. Reduced motion jumps straight to the answer.
+ */
+function useAnimatedSegments(target: Seg[]): Seg[] {
+  const reduced = useReducedMotion();
+  const [cur, setCur] = useState<Seg[]>(target);
+  const curRef = useRef<Seg[]>(target);
+  const rafRef = useRef(0);
+
+  useEffect(() => {
+    if (reduced) {
+      curRef.current = target;
+      setCur(target);
+      return;
+    }
+    const from = curRef.current.length === target.length ? curRef.current : target;
+    const start = performance.now();
+    const dur = 460;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / dur);
+      const e = 1 - Math.pow(1 - t, 3);
+      const next = target.map((s, i) => {
+        const f = from[i] ?? s;
+        return {
+          phase: s.phase,
+          from: f.from + (s.from - f.from) * e,
+          to: f.to + (s.to - f.to) * e,
+        };
+      });
+      curRef.current = next;
+      setCur(next);
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, reduced]);
+
+  return cur;
 }

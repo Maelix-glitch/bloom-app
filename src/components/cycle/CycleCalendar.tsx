@@ -9,8 +9,10 @@
  */
 
 import { useMemo, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Pencil, Plus } from "lucide-react";
 
+import { SELECT, TAP } from "@/lib/cycle/motion";
 import { cn } from "@/lib/utils";
 import { dayStateFor, fmtShort, localDateKey, pad2 } from "@/lib/cycle/engine";
 import type { CycleEntry, CycleModel, DayState, PhaseKey } from "@/lib/cycle/types";
@@ -86,8 +88,14 @@ function DayCell({
   onKeyNav: (e: React.KeyboardEvent) => void;
 }) {
   const hasFlow = state.logged?.flow && state.logged.flow !== "none";
+  const tint =
+    !hasFlow && state.phase && !state.logged
+      ? `color-mix(in oklab, ${PHASE_COLOR[state.phase as PhaseKey]} 9%, transparent)`
+      : undefined;
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.94 }}
+      transition={TAP}
       type="button"
       role="gridcell"
       aria-selected={isSelected}
@@ -141,7 +149,7 @@ function DayCell({
           className="absolute right-1.5 top-1.5 size-[3px] rounded-full bg-[var(--muted-foreground)]"
         />
       ) : null}
-    </button>
+    </motion.button>
   );
 }
 

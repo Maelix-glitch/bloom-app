@@ -208,7 +208,7 @@
 
 @media (min-width: 1120px) {
   .cy-hero {
-    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
     grid-template-areas:
       "orbit statement"
       "orbit tray";
@@ -360,6 +360,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+}
+
+.cy-fieldrow > div {
+  flex-wrap: wrap;
 }
 
 .cy-pill {
@@ -1211,4 +1215,51 @@
     animation: none;
     opacity: 1;
   }
+}
+
+/* week micro-marks for logged mood/energy */
+.cy-day__marks {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  line-height: 1;
+}
+
+.cy-day {
+  position: relative;
+  isolation: isolate;
+}
+
+/* observation rows under "what bloom noticed" */
+.cy-obs {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-top: 1px solid var(--cycle-hair);
+  padding: 11px 2px;
+}
+
+/* chart cards — open surfaces with just enough container to feel intentional */
+.cy-chart-card {
+  border-radius: var(--cy-r-lg);
+  border: 1px solid var(--cycle-hair);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 46%, transparent),
+    transparent 70%
+  );
+  padding: 15px 17px 13px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

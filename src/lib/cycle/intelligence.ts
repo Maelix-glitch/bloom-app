@@ -4,8 +4,9 @@
  * invented, nothing shames, medical conclusions are never drawn.
  */
 
-import type { CycleContext, CycleModel, Recommendation } from "./types";
+import type { CycleContext, CycleEntry, CycleModel, Recommendation } from "./types";
 import { daysAwayLabel, fmtShort } from "./engine";
+import { isTallyMeaningful, phaseTally, sleepVsLength, symptomTimings } from "./patterns";
 
 export interface Insight {
   id: string;
@@ -181,3 +182,63 @@ export const dismissStore = {
     }
   },
 };
+
+/**
+ * Compact, evidence-complete observations for the "What Bloom noticed"
+ * chapter — every line names its sample and nothing more. Built from the
+ * same pure pattern functions the deep section uses; if the data can't back
+ * a statement, no statement is made.
+ */
+export interface Observation {
+  id: string;
+  text: string;
+  seen: number;
+  total: number;
+}
+
+export function buildObservations(model: CycleModel, entries: CycleEntry[]): Observation[] {
+  const out: Observation[] = [];
+
+  for (const st of symptomTimings(entries, model).slice(0, 2)) {
+    out.push({
+      id: `sym-${st.symptom}`,
+      text: `${st.symptom} showed up around day ${st.medianCycleDay} in ${st.seenInCycles} of your ${st.totalCycles} logged cycles.`,
+      seen: st.seenInCycles,
+      total: st.totalCycles,
+    });
+  }
+
+  const energy = phaseTally(entries, model, "energy");
+  if (isTallyMeaningful(energy)) {
+    const filled = energy.byPhase.filter((b) => b.n >= 2);
+    const hi = [...filled].sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0))[0]!;
+    const lo = [...filled].sort((a, b) => (a.avg ?? 0) - (b.avg ?? 0))[0]!;
+    out.push({
+      id: "energy-phase",
+      text: `Energy averaged ${hi.avg?.toFixed(1)}/5 in your ${hi.phase} days vs ${lo.avg?.toFixed(1)}/5 in your ${lo.phase} days — across ${energy.n} logged days.`,
+      seen: Math.min(energy.n, 9),
+      total: 9,
+    });
+  }
+
+  const sleep = sleepVsLength(entries, model);
+  if (sleep.shortAvg !== null && sleep.longAvg !== null) {
+    out.push({
+      id: "sleep-length",
+      text: `On your shorter cycles you logged ~${sleep.shortAvg.toFixed(1)} h of sleep, ~${sleep.longAvg.toFixed(1)} h on longer ones — compared across ${sleep.pairs} cycles.`,
+      seen: sleep.pairs,
+      total: model.completed.length,
+    });
+  }
+
+  if (model.completed.length >= 3 && model.stdDev !== null) {
+    out.push({
+      id: "variability",
+      text: `Your recent cycles varied by ±${model.stdDev.toFixed(1)} days — that spread is why estimates arrive as ranges.`,
+      seen: model.completed.length,
+      total: model.completed.length,
+    });
+  }
+
+  return out.slice(0, 3);
+}

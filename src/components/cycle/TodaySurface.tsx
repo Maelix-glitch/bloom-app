@@ -11,7 +11,10 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
+
+import { GROW, TAP } from "@/lib/cycle/motion";
 
 import { cn } from "@/lib/utils";
 import type { CycleEntry, CycleModel, FlowValue, MoodValue } from "@/lib/cycle/types";
@@ -210,161 +213,175 @@ export function TodaySurface({
         </div>
       </div>
 
-      {more ? (
-        <div className="cy-focus-in mt-1.5 border-t border-[var(--cycle-hair)] pt-2">
-          <div className="cy-fieldrow">
-            <span className="cy-fieldlabel">sleep</span>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min={0}
-                max={14}
-                step={0.5}
-                defaultValue={entry?.sleep_hours ?? ""}
-                disabled={disabled}
-                aria-label="Hours of sleep"
-                data-tip="only what you actually slept — nothing filled in"
-                onBlur={(e) => {
-                  const v = e.target.value === "" ? null : Number(e.target.value);
-                  if (v === null || (Number.isFinite(v) && v >= 0 && v <= 14))
-                    save({ sleep_hours: v });
-                }}
-                className="w-20 rounded-lg border border-border bg-transparent px-2.5 py-1.5 text-[13px] text-foreground transition-colors focus:border-[var(--border-strong)] focus:outline-none"
-              />
-              <span className="text-[12px] text-faint">hours</span>
-              <span
-                className="mx-2.5 inline-block h-4 w-px bg-[var(--cycle-hair-strong)]"
-                aria-hidden
-              />
-              <span className="cy-fieldlabel !w-auto">pain</span>
-              <div className="flex gap-1" role="group" aria-label="Pain level, zero to five">
-                {[0, 1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
+      <AnimatePresence initial={false}>
+        {more ? (
+          <motion.div
+            key="more"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={GROW}
+            style={{ overflow: "hidden" }}
+            className="mt-1.5"
+          >
+            <div className="border-t border-[var(--cycle-hair)] pt-2">
+              <div className="cy-fieldrow">
+                <span className="cy-fieldlabel">sleep</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    max={14}
+                    step={0.5}
+                    defaultValue={entry?.sleep_hours ?? ""}
                     disabled={disabled}
-                    aria-pressed={(entry?.pain_level ?? null) === n}
-                    data-tip={n === 0 ? "none" : `${n}/5`}
-                    aria-label={`Pain ${n} of 5`}
-                    onClick={() => save({ pain: entry?.pain_level === n ? null : n })}
-                    className={cn(
-                      "size-[13px] rounded-full border transition-colors",
-                      (entry?.pain_level ?? null) === n
-                        ? "border-[color:var(--cycle-accent)] bg-[color:var(--cycle-accent)]"
-                        : "border-[var(--border-strong)] hover:border-[color:var(--cycle-accent)]",
-                      n === 0 && "rounded-[3px]",
-                    )}
+                    aria-label="Hours of sleep"
+                    data-tip="only what you actually slept — nothing filled in"
+                    onBlur={(e) => {
+                      const v = e.target.value === "" ? null : Number(e.target.value);
+                      if (v === null || (Number.isFinite(v) && v >= 0 && v <= 14))
+                        save({ sleep_hours: v });
+                    }}
+                    className="w-20 rounded-lg border border-border bg-transparent px-2.5 py-1.5 text-[13px] text-foreground transition-colors focus:border-[var(--border-strong)] focus:outline-none"
                   />
-                ))}
+                  <span className="text-[12px] text-faint">hours</span>
+                  <span
+                    className="mx-2.5 inline-block h-4 w-px bg-[var(--cycle-hair-strong)]"
+                    aria-hidden
+                  />
+                  <span className="cy-fieldlabel !w-auto">pain</span>
+                  <div className="flex gap-1" role="group" aria-label="Pain level, zero to five">
+                    {[0, 1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        disabled={disabled}
+                        aria-pressed={(entry?.pain_level ?? null) === n}
+                        data-tip={n === 0 ? "none" : `${n}/5`}
+                        aria-label={`Pain ${n} of 5`}
+                        onClick={() => save({ pain: entry?.pain_level === n ? null : n })}
+                        className={cn(
+                          "size-[13px] rounded-full border transition-colors",
+                          (entry?.pain_level ?? null) === n
+                            ? "border-[color:var(--cycle-accent)] bg-[color:var(--cycle-accent)]"
+                            : "border-[var(--border-strong)] hover:border-[color:var(--cycle-accent)]",
+                          n === 0 && "rounded-[3px]",
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="cy-fieldrow">
-            <span className="cy-fieldlabel">temp</span>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min={35}
-                max={38.5}
-                step={0.01}
-                defaultValue={entry?.temperature ?? ""}
-                disabled={disabled}
-                aria-label="Basal temperature in Celsius"
-                data-tip="°C, only if you measured — observations, not guesses"
-                onBlur={(e) => {
-                  const v = e.target.value === "" ? null : Number(e.target.value);
-                  if (v === null || (Number.isFinite(v) && v >= 35 && v <= 38.5))
-                    save({ temperature: v });
-                }}
-                className="w-20 rounded-lg border border-border bg-transparent px-2.5 py-1.5 text-[13px] text-foreground transition-colors focus:border-[var(--border-strong)] focus:outline-none"
-              />
-              <span className="text-[12px] text-faint">°C measured</span>
-              <span
-                className="mx-2.5 inline-block h-4 w-px bg-[var(--cycle-hair-strong)]"
-                aria-hidden
-              />
-              <span className="cy-fieldlabel !w-auto">mucus</span>
-              <div className="cy-pills" role="group" aria-label="Cervical mucus today">
-                {MUCUS.map((m) => (
-                  <button
-                    key={m.v}
-                    type="button"
+              <div className="cy-fieldrow">
+                <span className="cy-fieldlabel">temp</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={35}
+                    max={38.5}
+                    step={0.01}
+                    defaultValue={entry?.temperature ?? ""}
                     disabled={disabled}
-                    aria-pressed={(entry?.cervical_mucus ?? null) === m.v}
-                    onClick={() =>
-                      save({
-                        cervical_mucus: toggle(
-                          (entry?.cervical_mucus ?? null) as string | null,
-                          m.v,
-                        ),
-                      })
-                    }
-                    className="cy-pill !min-h-[28px] !px-3 !text-[12px]"
-                  >
-                    {m.label}
-                  </button>
-                ))}
+                    aria-label="Basal temperature in Celsius"
+                    data-tip="°C, only if you measured — observations, not guesses"
+                    onBlur={(e) => {
+                      const v = e.target.value === "" ? null : Number(e.target.value);
+                      if (v === null || (Number.isFinite(v) && v >= 35 && v <= 38.5))
+                        save({ temperature: v });
+                    }}
+                    className="w-20 rounded-lg border border-border bg-transparent px-2.5 py-1.5 text-[13px] text-foreground transition-colors focus:border-[var(--border-strong)] focus:outline-none"
+                  />
+                  <span className="text-[12px] text-faint">°C measured</span>
+                  <span
+                    className="mx-2.5 inline-block h-4 w-px bg-[var(--cycle-hair-strong)]"
+                    aria-hidden
+                  />
+                  <span className="cy-fieldlabel !w-auto">mucus</span>
+                  <div className="cy-pills" role="group" aria-label="Cervical mucus today">
+                    {MUCUS.map((m) => (
+                      <button
+                        key={m.v}
+                        type="button"
+                        disabled={disabled}
+                        aria-pressed={(entry?.cervical_mucus ?? null) === m.v}
+                        onClick={() =>
+                          save({
+                            cervical_mucus: toggle(
+                              (entry?.cervical_mucus ?? null) as string | null,
+                              m.v,
+                            ),
+                          })
+                        }
+                        className="cy-pill !min-h-[28px] !px-3 !text-[12px]"
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="cy-fieldrow">
+                <span className="cy-fieldlabel">lh test</span>
+                <div className="cy-pills" role="group" aria-label="LH test result">
+                  {(["negative", "positive"] as const).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      disabled={disabled}
+                      aria-pressed={entry?.lh_test === v}
+                      onClick={() => save({ lh_test: toggle(entry?.lh_test ?? null, v) })}
+                      className="cy-pill !min-h-[30px] !text-[12.5px]"
+                      style={{ ["--pill-c" as never]: "var(--cycle-ovulation)" }}
+                    >
+                      {v === "positive" ? "positive — surge" : "negative"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="cy-fieldrow">
+                <span className="cy-fieldlabel">symptoms</span>
+                <div className="cy-pills" role="group" aria-label="Symptoms today">
+                  {SYMPTOMS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      disabled={disabled}
+                      aria-pressed={(entry?.symptoms ?? []).includes(s)}
+                      onClick={() => {
+                        const cur = entry?.symptoms ?? [];
+                        save({
+                          symptoms: cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s],
+                        });
+                      }}
+                      className="cy-pill !min-h-[28px] !px-3 !text-[12px]"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="cy-fieldrow items-start">
+                <span className="cy-fieldlabel pt-2">note</span>
+                <textarea
+                  rows={2}
+                  value={notes}
+                  disabled={disabled}
+                  placeholder="Anything worth remembering about this day…"
+                  aria-label="Note for this day"
+                  onChange={(e) => setNotes(e.target.value)}
+                  onBlur={() => notes !== (entry?.notes ?? "") && save({ notes })}
+                  className="w-full resize-none rounded-lg border border-border bg-transparent px-3 py-2 text-[12.5px] leading-relaxed text-foreground placeholder:text-faint focus:border-[var(--border-strong)] focus:outline-none"
+                />
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <button type="button" onClick={onOpenFull} className="cy-link">
+                  or open the full grouped log →
+                </button>
               </div>
             </div>
-          </div>
-          <div className="cy-fieldrow">
-            <span className="cy-fieldlabel">lh test</span>
-            <div className="cy-pills" role="group" aria-label="LH test result">
-              {(["negative", "positive"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  disabled={disabled}
-                  aria-pressed={entry?.lh_test === v}
-                  onClick={() => save({ lh_test: toggle(entry?.lh_test ?? null, v) })}
-                  className="cy-pill !min-h-[30px] !text-[12.5px]"
-                  style={{ ["--pill-c" as never]: "var(--cycle-ovulation)" }}
-                >
-                  {v === "positive" ? "positive — surge" : "negative"}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="cy-fieldrow">
-            <span className="cy-fieldlabel">symptoms</span>
-            <div className="cy-pills" role="group" aria-label="Symptoms today">
-              {SYMPTOMS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  disabled={disabled}
-                  aria-pressed={(entry?.symptoms ?? []).includes(s)}
-                  onClick={() => {
-                    const cur = entry?.symptoms ?? [];
-                    save({ symptoms: cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s] });
-                  }}
-                  className="cy-pill !min-h-[28px] !px-3 !text-[12px]"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="cy-fieldrow items-start">
-            <span className="cy-fieldlabel pt-2">note</span>
-            <textarea
-              rows={2}
-              value={notes}
-              disabled={disabled}
-              placeholder="Anything worth remembering about this day…"
-              aria-label="Note for this day"
-              onChange={(e) => setNotes(e.target.value)}
-              onBlur={() => notes !== (entry?.notes ?? "") && save({ notes })}
-              className="w-full resize-none rounded-lg border border-border bg-transparent px-3 py-2 text-[12.5px] leading-relaxed text-foreground placeholder:text-faint focus:border-[var(--border-strong)] focus:outline-none"
-            />
-          </div>
-          <div className="flex items-center justify-between pt-1">
-            <button type="button" onClick={onOpenFull} className="cy-link">
-              or open the full grouped log →
-            </button>
-          </div>
-        </div>
-      ) : null}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

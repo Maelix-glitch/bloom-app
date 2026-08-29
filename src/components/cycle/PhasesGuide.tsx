@@ -93,7 +93,15 @@ const ART: Record<string, React.ReactNode> = {
   ),
 };
 
-export function PhasesGuide({ model }: { model: CycleModel }) {
+export function PhasesGuide({
+  model,
+  selectedPhase,
+  onSelectPhase,
+}: {
+  model: CycleModel;
+  selectedPhase?: PhaseKey | null;
+  onSelectPhase?: (p: PhaseKey | null) => void;
+}) {
   const personal = model.average !== null;
   const flowLen = Math.max(2, Math.round(model.periodLengthAverage ?? 4));
   const ovu = model.ovulationDay ?? 14;
@@ -115,6 +123,13 @@ export function PhasesGuide({ model }: { model: CycleModel }) {
           range={ranges[p]}
           personal={personal && p !== "ovulation"}
           current={model.currentPhase === p}
+          focused={selectedPhase === p}
+          onFocus={() => {
+            onSelectPhase?.(selectedPhase === p ? null : p);
+            document
+              .getElementById("cycle-orbit")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
         />
       ))}
       <p className="mt-4 max-w-[64ch] text-[11.5px] leading-relaxed text-faint">
@@ -133,11 +148,15 @@ function PhaseCard({
   range,
   personal,
   current,
+  focused,
+  onFocus,
 }: {
   phase: PhaseKey;
   range: string;
   personal: boolean;
   current: boolean;
+  focused: boolean;
+  onFocus: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const info = PHASE_INFO[phase];
@@ -156,6 +175,33 @@ function PhaseCard({
         {ART[info.art]}
       </svg>
       <div className="min-w-0">
+        <button
+          type="button"
+          onClick={onFocus}
+          aria-pressed={focused}
+          className="group/focus flex w-fit items-center gap-1.5 rounded-full text-left"
+          title={
+            focused ? "Release the focus on the cycle orbit" : "Focus this phase on the cycle orbit"
+          }
+        >
+          <span
+            className="mono flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em]"
+            style={{ color }}
+          >
+            <span
+              className="inline-block size-1.5 rounded-full"
+              style={{ background: color }}
+              aria-hidden
+            />
+            {phase}
+          </span>
+          <span
+            className="mono text-[8.5px] uppercase tracking-[0.08em] text-faint opacity-0 transition-opacity group-hover/focus:opacity-100 group-aria-pressed/focus:opacity-100"
+            aria-hidden
+          >
+            focus on the ring →
+          </span>
+        </button>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <p
             className="mono flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em]"

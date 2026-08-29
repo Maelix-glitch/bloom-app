@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { MotionConfig } from "motion/react";
 
 import cycleCss from "../styles/cycle.css?url";
 import { useCycleSystem } from "@/hooks/useCycleSystem";
@@ -7,7 +8,13 @@ import { BloomHeader } from "@/components/BloomHeader";
 import { Reveal } from "@/components/mood/primitives";
 import type { CycleEntry } from "@/lib/cycle/types";
 import { localDateKey } from "@/lib/cycle/engine";
-import { buildPersonalInsight, buildRecommendations, dismissStore } from "@/lib/cycle/intelligence";
+import {
+  buildObservations,
+  buildPersonalInsight,
+  buildRecommendations,
+  dismissStore,
+} from "@/lib/cycle/intelligence";
+import type { PhaseKey } from "@/lib/cycle/types";
 import type { DayDraft } from "@/components/cycle/Logs";
 import type { TodayPatch } from "@/components/cycle/TodaySurface";
 import { entriesToCsv } from "@/lib/cycle/storage";
@@ -25,9 +32,12 @@ import { InsightCard, RecommendationStack } from "@/components/cycle/Insights";
 import { BloomCycleAI } from "@/components/cycle/BloomCycleAI";
 import { toast, Toaster } from "sonner";
 
-/* the deeper analytics load lazily — never block the story above */
+/* the deeper analytics + charts load lazily — never block the story above */
 const CycleHistory = lazy(() =>
   import("@/components/cycle/CycleHistory").then((m) => ({ default: m.CycleHistory })),
+);
+const PatternCharts = lazy(() =>
+  import("@/components/cycle/PatternCharts").then((m) => ({ default: m.PatternCharts })),
 );
 
 export const Route = createFileRoute("/cycle")({
@@ -86,6 +96,7 @@ function CyclePage() {
   const [insightSeen, setInsightSeen] = useState(false);
   const [inspect, setInspect] = useState<{ day: number; date: string } | null>(null);
   const [aiAsk, setAiAsk] = useState<{ q: string; n: number } | null>(null);
+  const [selectedPhase, setSelectedPhase] = useState<PhaseKey | null>(null);
 
   const askBloom = useCallback((q = "") => {
     setAiAsk({ q, n: Date.now() });
@@ -94,6 +105,10 @@ function CyclePage() {
   const insight = useMemo(
     () => (model && context ? buildPersonalInsight(model, context) : null),
     [model, context],
+  );
+  const observations = useMemo(
+    () => (model ? buildObservations(model, entries) : []),
+    [model, entries],
   );
   const recs = useMemo(() => {
     if (!model || !context) return [];
@@ -218,307 +233,351 @@ function CyclePage() {
   }, [openQuick]);
 
   return (
-    <div className="cycle-page relative min-h-screen bg-background text-foreground">
-      <BloomHeader />
-      <main className="cy-main">
-        {localOnly ? (
-          <p className="pb-1 text-center text-[11px] text-faint">
-            preview — kept on this device; signing in syncs it, if you ever want
-          </p>
-        ) : null}
-        {error ? (
-          <p className="mb-4 rounded-xl border border-amber/30 bg-amber/5 px-4 py-2.5 text-center text-[12.5px] text-amber">
-            {error}{" "}
-            <button type="button" onClick={system.refresh} className="underline underline-offset-2">
-              Try again
-            </button>
-          </p>
-        ) : null}
+    <MotionConfig reducedMotion="user">
+      <div className="cycle-page relative min-h-screen bg-background text-foreground">
+        <BloomHeader />
+        <main className="cy-main">
+          {localOnly ? (
+            <p className="pb-1 text-center text-[11px] text-faint">
+              preview — kept on this device; signing in syncs it, if you ever want
+            </p>
+          ) : null}
+          {error ? (
+            <p className="mb-4 rounded-xl border border-amber/30 bg-amber/5 px-4 py-2.5 text-center text-[12.5px] text-amber">
+              {error}{" "}
+              <button
+                type="button"
+                onClick={system.refresh}
+                className="underline underline-offset-2"
+              >
+                Try again
+              </button>
+            </p>
+          ) : null}
 
-        {/* the stage — orbit, statement, tray: one object, one composition */}
-        <Reveal>
-          <CycleHero
-            model={model}
-            entries={entries}
-            loading={loading}
-            logDate={logDate}
-            logEntry={logEntry}
-            inspect={inspect}
-            onReturnToday={() => setInspect(null)}
-            onPatch={surfacePatch}
-            onOpenFull={() => {
-              setAdvEntry(null);
-              setQuickDate(logDate);
-              setAdvancedOpen(true);
-            }}
-            onAdjust={() => setAdjustOpen(true)}
-            onOpenMethod={() => setMethodOpen(true)}
-          />
-        </Reveal>
+          {/* the stage — orbit, statement, tray: one object, one composition */}
+          <Reveal>
+            <CycleHero
+              model={model}
+              entries={entries}
+              loading={loading}
+              logDate={logDate}
+              logEntry={logEntry}
+              inspect={inspect}
+              onReturnToday={() => setInspect(null)}
+              onPatch={surfacePatch}
+              onOpenFull={() => {
+                setAdvEntry(null);
+                setQuickDate(logDate);
+                setAdvancedOpen(true);
+              }}
+              onAdjust={() => setAdjustOpen(true)}
+              onOpenMethod={() => setMethodOpen(true)}
+              selectedPhase={selectedPhase}
+              onSelectPhase={setSelectedPhase}
+            />
+          </Reveal>
 
-        {/* the road ahead — forecast as one path, then the week on the same thread */}
-        <Reveal delay={40}>
-          <Chapter nodeColor="var(--cycle-menstrual)" title="The road ahead" id="cycle-road">
-            {model ? (
-              <>
-                <CycleRoad
-                  model={model}
-                  onOpenMethod={() => setMethodOpen(true)}
-                  onLogStart={() => openQuick()}
+          {/* the road ahead — forecast as one path, then the week on the same thread */}
+          <Reveal delay={40}>
+            <Chapter nodeColor="var(--cycle-menstrual)" title="The road ahead" id="cycle-road">
+              {model ? (
+                <>
+                  <CycleRoad
+                    model={model}
+                    onOpenMethod={() => setMethodOpen(true)}
+                    onLogStart={() => openQuick()}
+                  />
+                  <div className="mt-10 border-t border-[var(--cycle-hair)] pt-5">
+                    <p className="cy-eyebrow mb-2.5">the week, day by day</p>
+                    <CycleTimeline
+                      model={model}
+                      entries={entries}
+                      selected={inspect?.date ?? null}
+                      onSelect={inspectDate}
+                      onLogDay={(date) => {
+                        setQuickDate(date);
+                        setEditing(entries.find((e) => e.date === date) ?? null);
+                        setAdvancedOpen(true);
+                      }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <BlockSkeleton h={190} />
+              )}
+            </Chapter>
+          </Reveal>
+
+          {/* what bloom noticed — insight + honest suggestions */}
+          <Reveal delay={40}>
+            <Chapter nodeColor="var(--violet)" title="What Bloom noticed" id="cycle-insight">
+              <InsightCard
+                insight={insight}
+                signals={
+                  model
+                    ? [
+                        model.currentPhase ? `${model.currentPhase} phase` : "phase unknown yet",
+                        `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
+                        model.completed.length > 0
+                          ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
+                          : "no completed cycles yet",
+                        model.variabilityPercent !== null
+                          ? `spread ±${Math.round(model.stdDev ?? 0)} days`
+                          : "spread unknown",
+                      ]
+                    : []
+                }
+                onAsk={() => askBloom("What have you noticed about my cycles?")}
+                stillLearning={
+                  <div className="flex flex-wrap items-end gap-8">
+                    <div className="min-w-0 max-w-[46ch]">
+                      <p className="cy-title text-[17px] leading-snug text-muted-foreground">
+                        Bloom is still learning your rhythm.
+                      </p>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-faint">
+                        What unlocks the first comparisons: your next period start (that completes a
+                        cycle), plus a handful of days with mood or energy tapped in the tray above.
+                        Two completed cycles and Bloom starts speaking about you, not about
+                        averages.
+                      </p>
+                    </div>
+                    <div className="cy-ghost-lines" aria-hidden>
+                      <i style={{ width: "150px" }} />
+                      <i style={{ width: "190px" }} />
+                      <i style={{ width: "132px" }} />
+                      <i style={{ width: "172px", opacity: 0.55 }} />
+                    </div>
+                  </div>
+                }
+              />
+              {observations.length > 0 ? (
+                <ul
+                  className="mt-4 flex flex-col gap-0"
+                  aria-label="What Bloom can back with your data"
+                >
+                  {observations.map((o) => (
+                    <li key={o.id} className="cy-obs">
+                      <span className="cy-evi" aria-hidden>
+                        {Array.from({ length: Math.min(o.total, 8) }, (_, i) => (
+                          <i key={i} className={i < Math.min(o.seen, 8) ? "on" : undefined} />
+                        ))}
+                      </span>
+                      <span className="min-w-0 flex-1 text-[13px] leading-relaxed text-muted-foreground">
+                        {o.text}
+                      </span>
+                      <span className="mono shrink-0 text-[9px] uppercase tracking-[0.08em] text-faint">
+                        {o.seen} of {o.total}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="mt-4">
+                <RecommendationStack
+                  recs={recs}
+                  onDismiss={(id) => {
+                    dismissStore.dismiss(id);
+                    setDismissTick((t) => t + 1);
+                  }}
+                  onAsk={() => askBloom("What should I pay attention to today?")}
                 />
-                <div className="mt-10 border-t border-[var(--cycle-hair)] pt-5">
-                  <p className="cy-eyebrow mb-2.5">the week, day by day</p>
-                  <CycleTimeline
+              </div>
+            </Chapter>
+          </Reveal>
+
+          {/* your recent rhythm — history as a score */}
+          <Reveal delay={40}>
+            <Chapter nodeColor="var(--sage)" title="Your recent rhythm" id="cycle-history">
+              {model ? (
+                <>
+                  <CycleRhythm model={model} entries={entries} />
+                  <details className="group mt-7 border-t border-[var(--cycle-hair)] pt-3">
+                    <summary className="cy-link flex cursor-pointer list-none items-center gap-1.5 [&::-webkit-details-marker]:hidden">
+                      Further in your record
+                      <span
+                        className="text-[10px] transition-transform duration-[var(--cy-med)] group-open:rotate-90"
+                        aria-hidden
+                      >
+                        ›
+                      </span>
+                    </summary>
+                    <div className="pt-4">
+                      <Suspense fallback={<BlockSkeleton h={220} />}>
+                        <CycleHistory model={model} entries={entries} />
+                      </Suspense>
+                    </div>
+                  </details>
+                </>
+              ) : (
+                <BlockSkeleton h={220} />
+              )}
+            </Chapter>
+          </Reveal>
+
+          {/* patterns */}
+          <Reveal delay={40}>
+            <Chapter
+              nodeColor="var(--cycle-luteal)"
+              title="Your personal patterns"
+              id="cycle-patterns"
+            >
+              <Suspense fallback={<BlockSkeleton h={220} />}>
+                {model ? <PatternCharts model={model} entries={entries} /> : null}
+              </Suspense>
+              <div className="mt-9">
+                {model ? (
+                  <PatternInsights
                     model={model}
                     entries={entries}
-                    selected={inspect?.date ?? null}
-                    onSelect={inspectDate}
-                    onLogDay={(date) => {
-                      setQuickDate(date);
-                      setEditing(entries.find((e) => e.date === date) ?? null);
-                      setAdvancedOpen(true);
-                    }}
+                    onOpenMethod={() => setMethodOpen(true)}
                   />
-                </div>
-              </>
-            ) : (
-              <BlockSkeleton h={190} />
-            )}
-          </Chapter>
-        </Reveal>
+                ) : (
+                  <BlockSkeleton h={160} />
+                )}
+              </div>
+            </Chapter>
+          </Reveal>
 
-        {/* what bloom noticed — insight + honest suggestions */}
-        <Reveal delay={40}>
-          <Chapter nodeColor="var(--violet)" title="What Bloom noticed" id="cycle-insight">
-            <InsightCard
-              insight={insight}
-              signals={
-                model
-                  ? [
-                      model.currentPhase ? `${model.currentPhase} phase` : "phase unknown yet",
-                      `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
-                      model.completed.length > 0
-                        ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
-                        : "no completed cycles yet",
-                      model.variabilityPercent !== null
-                        ? `spread ±${Math.round(model.stdDev ?? 0)} days`
-                        : "spread unknown",
-                    ]
-                  : []
-              }
-              onAsk={() => askBloom("What have you noticed about my cycles?")}
-              stillLearning={
-                <div className="flex flex-wrap items-end gap-8">
-                  <div className="min-w-0 max-w-[46ch]">
-                    <p className="cy-title text-[17px] leading-snug text-muted-foreground">
-                      Bloom is still learning your rhythm.
-                    </p>
-                    <p className="mt-1.5 text-[13px] leading-relaxed text-faint">
-                      A few more completed cycles let this page compare your own records instead of
-                      leaning on general estimates. No personal pattern has been established yet —
-                      and nothing will be claimed before it's true of your data.
-                    </p>
-                  </div>
-                  <div className="cy-ghost-lines" aria-hidden>
-                    <i style={{ width: "150px" }} />
-                    <i style={{ width: "190px" }} />
-                    <i style={{ width: "132px" }} />
-                    <i style={{ width: "172px", opacity: 0.55 }} />
-                  </div>
-                </div>
-              }
-            />
-            <div className="mt-4">
-              <RecommendationStack
-                recs={recs}
-                onDismiss={(id) => {
-                  dismissStore.dismiss(id);
-                  setDismissTick((t) => t + 1);
-                }}
-                onAsk={() => askBloom("What should I pay attention to today?")}
-              />
-            </div>
-          </Chapter>
-        </Reveal>
+          {/* calendar + phases, quieter */}
+          <Reveal delay={40}>
+            <Chapter nodeColor="var(--sky)" title="A closer look" id="cycle-calendar">
+              {model ? (
+                <CycleCalendar
+                  model={model}
+                  entries={entries}
+                  inspectDate={inspect?.date ?? null}
+                  onInspect={inspectDate}
+                  onQuickLog={(date) => openQuick(date)}
+                  onEditDay={(entry) => {
+                    setEditing(entry);
+                    setQuickDate(entry.date);
+                    setQuickOpen(true);
+                  }}
+                />
+              ) : (
+                <BlockSkeleton h={280} />
+              )}
+            </Chapter>
+          </Reveal>
 
-        {/* your recent rhythm — history as a score */}
-        <Reveal delay={40}>
-          <Chapter nodeColor="var(--sage)" title="Your recent rhythm" id="cycle-history">
-            {model ? (
-              <>
-                <CycleRhythm model={model} entries={entries} />
-                <details className="group mt-7 border-t border-[var(--cycle-hair)] pt-3">
-                  <summary className="cy-link flex cursor-pointer list-none items-center gap-1.5 [&::-webkit-details-marker]:hidden">
-                    Further in your record
-                    <span
-                      className="text-[10px] transition-transform duration-[var(--cy-med)] group-open:rotate-90"
-                      aria-hidden
-                    >
-                      ›
-                    </span>
-                  </summary>
-                  <div className="pt-4">
-                    <Suspense fallback={<BlockSkeleton h={220} />}>
-                      <CycleHistory model={model} entries={entries} />
-                    </Suspense>
-                  </div>
-                </details>
-              </>
-            ) : (
-              <BlockSkeleton h={220} />
-            )}
-          </Chapter>
-        </Reveal>
+          <Reveal delay={40}>
+            <Chapter nodeColor="var(--cycle-follicular)" title="The four phases">
+              {model ? (
+                <PhasesGuide
+                  model={model}
+                  selectedPhase={selectedPhase}
+                  onSelectPhase={setSelectedPhase}
+                />
+              ) : (
+                <BlockSkeleton h={180} />
+              )}
+            </Chapter>
+          </Reveal>
 
-        {/* patterns */}
-        <Reveal delay={40}>
-          <Chapter
-            nodeColor="var(--cycle-luteal)"
-            title="Patterns taking shape"
-            id="cycle-patterns"
-          >
-            {model ? (
-              <PatternInsights
-                model={model}
-                entries={entries}
-                onOpenMethod={() => setMethodOpen(true)}
-              />
-            ) : (
-              <BlockSkeleton h={160} />
-            )}
-          </Chapter>
-        </Reveal>
+          <footer className="cy-chapter flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-faint">
+            <span>cycle records stay private</span>
+            <span aria-hidden>·</span>
+            <span>nothing here is medical advice</span>
+            <span aria-hidden>·</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (entries.length === 0) {
+                  toast("Nothing to export yet.");
+                  return;
+                }
+                const blob = new Blob([entriesToCsv(entries)], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "bloom-cycle-export.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="underline decoration-[var(--cycle-hair-strong)] underline-offset-4 transition-colors hover:text-foreground"
+            >
+              export my data (csv)
+            </button>
+          </footer>
+        </main>
 
-        {/* calendar + phases, quieter */}
-        <Reveal delay={40}>
-          <Chapter nodeColor="var(--sky)" title="A closer look" id="cycle-calendar">
-            {model ? (
-              <CycleCalendar
-                model={model}
-                entries={entries}
-                inspectDate={inspect?.date ?? null}
-                onInspect={inspectDate}
-                onQuickLog={(date) => openQuick(date)}
-                onEditDay={(entry) => {
-                  setEditing(entry);
-                  setQuickDate(entry.date);
-                  setQuickOpen(true);
-                }}
-              />
-            ) : (
-              <BlockSkeleton h={280} />
-            )}
-          </Chapter>
-        </Reveal>
-
-        <Reveal delay={40}>
-          <Chapter nodeColor="var(--cycle-follicular)" title="The four phases">
-            {model ? <PhasesGuide model={model} /> : <BlockSkeleton h={180} />}
-          </Chapter>
-        </Reveal>
-
-        <footer className="cy-chapter flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-faint">
-          <span>cycle records stay private</span>
-          <span aria-hidden>·</span>
-          <span>nothing here is medical advice</span>
-          <span aria-hidden>·</span>
-          <button
-            type="button"
-            onClick={() => {
-              if (entries.length === 0) {
-                toast("Nothing to export yet.");
-                return;
-              }
-              const blob = new Blob([entriesToCsv(entries)], { type: "text/csv" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "bloom-cycle-export.csv";
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            className="underline decoration-[var(--cycle-hair-strong)] underline-offset-4 transition-colors hover:text-foreground"
-          >
-            export my data (csv)
-          </button>
-        </footer>
-      </main>
-
-      {/* overlays — the deep forms; everyday logging lives in the tray */}
-      <CycleLengthSheet
-        open={adjustOpen}
-        onClose={() => setAdjustOpen(false)}
-        model={model}
-        defaultCycle={system.defaultCycle}
-        onSaveLength={async (days) => {
-          system.setDefaultCycle(days);
-        }}
-        onSaveStart={async (date) => {
-          await system.saveDay({ date, flow: "medium", cycle_day: 1, phase: "menstrual" });
-        }}
-      />
-      {model ? (
-        <MethodologyDialog open={methodOpen} onClose={() => setMethodOpen(false)} model={model} />
-      ) : null}
-      <QuickLog
-        open={quickOpen}
-        onClose={() => {
-          setQuickOpen(false);
-          setEditing(null);
-          setQuickDate(null);
-        }}
-        model={model}
-        editing={editing}
-        defaultDate={quickDate}
-        onSave={(draft) => saveDraft(draft)}
-        onAdvanced={() => {
-          setQuickOpen(false);
-          setAdvEntry(editing);
-          setAdvancedOpen(true);
-        }}
-      />
-      <AdvancedCycleLog
-        open={advancedOpen}
-        onClose={() => {
-          setAdvancedOpen(false);
-          setAdvEntry(null);
-        }}
-        model={model}
-        editing={advEntry}
-        defaultDate={quickDate ?? logDate}
-        onSave={(draft) => saveDraft(draft)}
-        onExport={() => {
-          const blob = new Blob([entriesToCsv(entries)], { type: "text/csv" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "bloom-cycle-export.csv";
-          a.click();
-          URL.revokeObjectURL(url);
-        }}
-      />
-      <BloomCycleAI
-        context={context}
-        insight={insightSeen ? null : insight}
-        onSeenInsight={() => setInsightSeen(true)}
-        onQuickLog={() => {
-          setEditing(null);
-          setQuickDate(null);
-          setQuickOpen(true);
-        }}
-        external={aiAsk}
-      />
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: "var(--surface-2)",
-            borderColor: "var(--border)",
-            color: "var(--foreground)",
-          },
-        }}
-      />
-    </div>
+        {/* overlays — the deep forms; everyday logging lives in the tray */}
+        <CycleLengthSheet
+          open={adjustOpen}
+          onClose={() => setAdjustOpen(false)}
+          model={model}
+          defaultCycle={system.defaultCycle}
+          onSaveLength={async (days) => {
+            system.setDefaultCycle(days);
+          }}
+          onSaveStart={async (date) => {
+            await system.saveDay({ date, flow: "medium", cycle_day: 1, phase: "menstrual" });
+          }}
+        />
+        {model ? (
+          <MethodologyDialog open={methodOpen} onClose={() => setMethodOpen(false)} model={model} />
+        ) : null}
+        <QuickLog
+          open={quickOpen}
+          onClose={() => {
+            setQuickOpen(false);
+            setEditing(null);
+            setQuickDate(null);
+          }}
+          model={model}
+          editing={editing}
+          defaultDate={quickDate}
+          onSave={(draft) => saveDraft(draft)}
+          onAdvanced={() => {
+            setQuickOpen(false);
+            setAdvEntry(editing);
+            setAdvancedOpen(true);
+          }}
+        />
+        <AdvancedCycleLog
+          open={advancedOpen}
+          onClose={() => {
+            setAdvancedOpen(false);
+            setAdvEntry(null);
+          }}
+          model={model}
+          editing={advEntry}
+          defaultDate={quickDate ?? logDate}
+          onSave={(draft) => saveDraft(draft)}
+          onExport={() => {
+            const blob = new Blob([entriesToCsv(entries)], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "bloom-cycle-export.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        />
+        <BloomCycleAI
+          context={context}
+          insight={insightSeen ? null : insight}
+          onSeenInsight={() => setInsightSeen(true)}
+          onQuickLog={() => {
+            setEditing(null);
+            setQuickDate(null);
+            setQuickOpen(true);
+          }}
+          external={aiAsk}
+        />
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              background: "var(--surface-2)",
+              borderColor: "var(--border)",
+              color: "var(--foreground)",
+            },
+          }}
+        />
+      </div>
+    </MotionConfig>
   );
 }
 
