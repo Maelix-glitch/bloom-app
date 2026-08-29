@@ -7,7 +7,7 @@ import { useCycleSystem } from "@/hooks/useCycleSystem";
 import { BloomHeader } from "@/components/BloomHeader";
 import { Reveal } from "@/components/mood/primitives";
 import type { CycleEntry } from "@/lib/cycle/types";
-import { localDateKey } from "@/lib/cycle/engine";
+import { diffDays, localDateKey } from "@/lib/cycle/engine";
 import {
   buildObservations,
   buildPersonalInsight,
@@ -133,26 +133,17 @@ function CyclePage() {
     async (draft: DayDraft, opts?: { silent?: boolean }) => {
       const dayNum = (() => {
         if (!model?.lastPeriodStart) return draft.flow && draft.flow !== "none" ? 1 : null;
-        const d = new Date(`${draft.date}T00:00:00`).getTime();
-        const s = new Date(`${model.lastPeriodStart}T00:00:00`).getTime();
-        const diff = Math.floor((d - s) / 86_400_000) + 1;
+        const diff = diffDays(model.lastPeriodStart, draft.date) + 1;
         return diff > 0 ? diff : null;
       })();
-      const phase =
-        dayNum !== null
-          ? draft.flow && draft.flow !== "none"
-            ? "menstrual"
-            : model
-              ? model.dayPhase(dayNum)
-              : null
-          : null;
       const nextPeriodInDays =
         dayNum !== null && model?.average ? Math.max(0, Math.round(model.average - dayNum)) : null;
 
+      const before = entries.find((e) => e.date === draft.date) ?? null;
       await system.saveDay({
         date: draft.date,
         cycle_day: dayNum ?? 1,
-        phase: phase as CycleEntry["phase"],
+        phase: draft.flow && draft.flow !== "none" ? "menstrual" : null,
         flow: draft.flow,
         mood: draft.mood,
         energy: draft.energy,
@@ -167,9 +158,30 @@ function CyclePage() {
         sleep_hours: draft.sleep_hours,
         next_period_in_days: nextPeriodInDays,
       });
-      if (!opts?.silent) toast(localOnly ? "Saved on this device." : "Saved.");
+      if (!opts?.silent) {
+        const addedPeriodDay = draft.flow && draft.flow !== "none" && before?.flow !== draft.flow;
+        toast(
+          addedPeriodDay
+            ? "Period day recorded. Your timeline recalculated."
+            : localOnly
+              ? "Saved on this device."
+              : "Saved.",
+          {
+            description: addedPeriodDay
+              ? `Your latest entry changed the cycle forecast. Logged days always come first.`
+              : undefined,
+            action: {
+              label: "Undo",
+              onClick: () => {
+                if (before) void system.saveDay(before);
+                else void system.removeDay(draft.date);
+              },
+            },
+          },
+        );
+      }
     },
-    [model, system, localOnly],
+    [model, system, localOnly, entries],
   );
 
   /* the tray follows the selected day; merges, never clobbers */
@@ -208,9 +220,7 @@ function CyclePage() {
       }
       const day = (() => {
         if (!model.lastPeriodStart) return null;
-        const d = new Date(`${date}T00:00:00`).getTime();
-        const s = new Date(`${model.lastPeriodStart}T00:00:00`).getTime();
-        const diff = Math.floor((d - s) / 86_400_000) + 1;
+        const diff = diffDays(model.lastPeriodStart, date) + 1;
         return diff > 0 ? diff : null;
       })();
       setInspect(day ? { day, date } : null);
@@ -278,6 +288,28 @@ function CyclePage() {
             />
           </Reveal>
 
+          {import.meta.env.DEV && model ? <CycleDebugPanel model={model} /> : null}
+
+          {system.latestChange?.forecastChanged ? (
+            <Reveal delay={20}>
+              <div className="cy-change-note" role="status">
+                <div>
+                  <p className="cy-eyebrow">updated from your log</p>
+                  <p className="cy-title mt-1 text-[15px]">
+                    Your latest entry changed the forecast.
+                  </p>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
+                    {system.latestChange.message} Your recorded days always take priority over
+                    Bloom’s estimates.
+                  </p>
+                </div>
+                <button type="button" className="cy-link" onClick={() => setMethodOpen(true)}>
+                  Why did this change?
+                </button>
+              </div>
+            </Reveal>
+          ) : null}
+
           {/* the road ahead — forecast as one path, then the week on the same thread */}
           <Reveal delay={40}>
             <Chapter nodeColor="var(--cycle-menstrual)" title="The road ahead" id="cycle-road">
@@ -317,7 +349,12 @@ function CyclePage() {
                 signals={
                   model
                     ? [
-                        model.currentPhase ? `${model.currentPhase} phase` : "phase unknown yet",
+                        model.currentBleedingState !== "unlogged" &&
+                        model.currentBleedingState !== "none"
+                          ? "period logged today"
+                          : model.currentReproductivePhase
+                            ? `${model.currentReproductivePhase} phase estimate`
+                            : "nothing confirmed today",
                         `${entries.length} day${entries.length === 1 ? "" : "s"} logged`,
                         model.completed.length > 0
                           ? `${model.completed.length} completed cycle${model.completed.length === 1 ? "" : "s"}`
@@ -499,6 +536,24 @@ function CyclePage() {
             >
               export my data (csv)
             </button>
+            <span aria-hidden>·</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (entries.length === 0) {
+                  toast("Cycle data is already empty.");
+                  return;
+                }
+                const ok = window.confirm(
+                  "Reset all cycle entries on this device? This clears the cycle data you entered and recalculates the page from an empty state.",
+                );
+                if (!ok) return;
+                void system.resetAll().then(() => toast("Cycle data reset."));
+              }}
+              className="underline decoration-[var(--cycle-hair-strong)] underline-offset-4 transition-colors hover:text-foreground"
+            >
+              reset cycle data
+            </button>
           </footer>
         </main>
 
@@ -578,6 +633,46 @@ function CyclePage() {
         />
       </div>
     </MotionConfig>
+  );
+}
+
+function CycleDebugPanel({
+  model,
+}: {
+  model: NonNullable<ReturnType<typeof useCycleSystem>["model"]>;
+}) {
+  return (
+    <details className="cy-debug mx-auto mt-4 max-w-[760px]">
+      <summary className="cy-link cursor-pointer list-none">Cycle debug</summary>
+      <div className="mt-2 grid gap-1.5 text-[11px] text-muted-foreground sm:grid-cols-2">
+        <span>version: {model.calculationVersion}</span>
+        <span>sufficiency: {model.dataSufficiency}</span>
+        <span>anchor: {model.lastPeriodStart ?? "none"}</span>
+        <span>day: {model.currentDay ?? "—"}</span>
+        <span>phase: {model.currentPhase ?? "unknown"}</span>
+        <span>source: {model.currentProvenance.source}</span>
+        <span>
+          period episode:{" "}
+          {model.currentPeriodEpisode ? `Started ${model.currentPeriodEpisode.start}` : "none"}
+        </span>
+        <span>status: {model.currentPeriodEpisode?.status ?? "—"}</span>
+        <span>observed bleeding days: {model.currentPeriodEpisode?.observedBleedingDays ?? 0}</span>
+        <span>confirmed end: {model.currentPeriodEpisode?.confirmedEnd ?? "—"}</span>
+        <span>
+          estimated bleeding window:{" "}
+          {model.events.find((e) => e.id === "bleeding-window")?.rangeStart ?? "—"}→
+          {model.events.find((e) => e.id === "bleeding-window")?.rangeEnd ?? "—"}
+        </span>
+        <span>period length input: {model.periodLengthAverage?.toFixed(1) ?? "baseline"}</span>
+        <span>cycle length input: {model.average?.toFixed(1) ?? "general baseline"}</span>
+        <span>ovulation estimate: day {model.ovulationDay ?? "—"}</span>
+        {model.issues.map((issue) => (
+          <span key={issue.id} className="text-amber">
+            {issue.message}
+          </span>
+        ))}
+      </div>
+    </details>
   );
 }
 

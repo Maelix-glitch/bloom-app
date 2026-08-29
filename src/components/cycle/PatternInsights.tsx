@@ -165,7 +165,7 @@ function PatternCard({
                 <i key={i} className={i < Math.min(evidence.seen, 8) ? "on" : undefined} />
               ))}
             </span>
-            observed in {evidence.seen} of {evidence.total} cycles
+            seen in {evidence.seen} of {evidence.total} cycles
           </span>
         ) : (
           <span className="text-[11px] text-faint">from your logged history</span>

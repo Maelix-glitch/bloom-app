@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { Info, LineChart, TestTube } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { addDays, fmtShort, periodRuns } from "@/lib/cycle/engine";
+import { addDays, fmtShort } from "@/lib/cycle/engine";
 import type { CycleEntry, CycleModel, MoodValue } from "@/lib/cycle/types";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 import { GhostButton } from "./parts";
@@ -232,7 +232,10 @@ export function CycleHistory({ model, entries }: { model: CycleModel; entries: C
     };
   }, [shown]);
 
-  const runs = useMemo(() => periodRuns(entries), [entries]);
+  const completedBleedingEpisodes = useMemo(
+    () => model.periodEpisodes.filter((episode) => episode.confirmedDuration !== null),
+    [model.periodEpisodes],
+  );
 
   const temps = useMemo(() => entries.filter((e) => e.temperature !== null), [entries]);
   const lhLogs = useMemo(() => entries.filter((e) => e.lh_test), [entries]);
@@ -369,23 +372,25 @@ export function CycleHistory({ model, entries }: { model: CycleModel; entries: C
             </div>
           </div>
 
-          {runs.length >= 2 ? (
+          {completedBleedingEpisodes.length >= 2 ? (
             <div className="rounded-2xl bg-surface/40 p-4 sm:p-5">
               <p className="eyebrow mb-3">Period length history</p>
               <ul className="flex flex-wrap items-end gap-1.5">
-                {runs.slice(-8).map((r, i) => (
-                  <li key={r.start} className="flex w-10 flex-col items-center gap-1.5">
+                {completedBleedingEpisodes.slice(-8).map((episode) => (
+                  <li key={episode.start} className="flex w-10 flex-col items-center gap-1.5">
                     <span
                       className="w-full rounded-t-md bg-[color-mix(in_oklab,var(--cycle-menstrual)_55%,var(--surface-3))] transition-[height] duration-500"
-                      style={{ height: `${Math.max(10, r.days * 9)}px` }}
-                      title={`${fmtShort(r.start)}–${fmtShort(r.end)} · ${r.days} days`}
+                      style={{ height: `${Math.max(10, (episode.confirmedDuration ?? 1) * 9)}px` }}
+                      title={`${fmtShort(episode.start)}–${fmtShort(episode.confirmedEnd ?? episode.start)} · ${episode.confirmedDuration} logged bleeding days`}
                     />
-                    <span className="mono text-[9.5px] text-faint">{r.days}d</span>
+                    <span className="mono text-[9.5px] text-faint">
+                      {episode.confirmedDuration}d
+                    </span>
                   </li>
                 ))}
               </ul>
               <p className="mt-2 text-[11.5px] leading-relaxed text-muted-foreground">
-                {`Your logged periods have run ${Math.min(...runs.map((r) => r.days))}–${Math.max(...runs.map((r) => r.days))} days; each bar is one period, oldest left. Lengths differing between periods is ordinary — this is history, not a verdict.`}
+                {`Your completed logged periods have run ${Math.min(...completedBleedingEpisodes.map((r) => r.confirmedDuration ?? 0))}–${Math.max(...completedBleedingEpisodes.map((r) => r.confirmedDuration ?? 0))} days; open or uncertain episodes are not counted as known durations.`}
               </p>
             </div>
           ) : null}
@@ -571,14 +576,14 @@ function LhStrip({ logs }: { logs: CycleEntry[] }) {
                     : "border-border text-faint",
                 )}
               >
-                {l.lh_test === "positive" ? "surge observed" : "negative"}
+                {l.lh_test === "positive" ? "surge logged" : "negative"}
               </span>
             </li>
           ))}
       </ul>
       <p className="mt-2 text-[11px] leading-relaxed text-faint">
-        Observed results stay separate from the calendar estimate — the estimate is what would
-        appear without them.
+        Logged results stay separate from Bloom’s estimate — the estimate is what would appear
+        without them.
       </p>
     </div>
   );

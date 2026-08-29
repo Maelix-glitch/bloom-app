@@ -18,7 +18,7 @@ import { GROW, TAP } from "@/lib/cycle/motion";
 
 import { cn } from "@/lib/utils";
 import type { CycleEntry, CycleModel, FlowValue, MoodValue } from "@/lib/cycle/types";
-import { fmtShort } from "@/lib/cycle/engine";
+import { diffDays, fmtShort } from "@/lib/cycle/engine";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 import type { PhaseKey } from "@/lib/cycle/types";
 
@@ -107,8 +107,12 @@ export function TodaySurface({
 
   const toggle = <T,>(cur: T | null, v: T): T | null => (cur === v ? null : v);
   const dayNum = model?.currentDay && model.lastPeriodStart ? dayFor(model, date) : null;
-  const phase = dayNum && model ? model.dayPhase(dayNum) : null;
   const isToday = date === (model?.today ?? "");
+  const phase = isToday
+    ? (model?.currentPhase ?? model?.currentReproductivePhase ?? null)
+    : dayNum && model
+      ? model.reproductivePhaseFor(dayNum)
+      : null;
 
   return (
     <section
@@ -388,7 +392,5 @@ export function TodaySurface({
 
 function dayFor(model: CycleModel, date: string): number {
   if (!model.lastPeriodStart) return 0;
-  const d = new Date(`${date}T00:00:00`).getTime();
-  const s = new Date(`${model.lastPeriodStart}T00:00:00`).getTime();
-  return Math.floor((d - s) / 86_400_000) + 1;
+  return diffDays(model.lastPeriodStart, date) + 1;
 }

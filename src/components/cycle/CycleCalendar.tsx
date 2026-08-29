@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight, Pencil, Plus } from "lucide-react";
 import { SELECT, TAP } from "@/lib/cycle/motion";
 import { cn } from "@/lib/utils";
 import { dayStateFor, fmtShort, localDateKey, pad2 } from "@/lib/cycle/engine";
+import { dayStateCopy, evidenceGlyph } from "@/lib/cycle/presentation";
 import type { CycleEntry, CycleModel, DayState, PhaseKey } from "@/lib/cycle/types";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 
@@ -170,8 +171,8 @@ export function CycleCalendar({
   onInspect?: (date: string | null) => void;
 }) {
   const [anchor, setAnchor] = useState(() => {
-    const t = new Date(`${localDateKey()}T00:00:00`);
-    return { y: t.getFullYear(), m: t.getMonth() };
+    const [y, m] = localDateKey().split("-").map(Number);
+    return { y: y ?? 1970, m: (m ?? 1) - 1 };
   });
   const [selected, setSelectedRaw] = useState<string | null>(null);
   const setSelected = (k: string | null) => {
@@ -196,6 +197,7 @@ export function CycleCalendar({
   };
 
   const selState = selected ? stateFor(selected) : null;
+  const selCopy = selState ? dayStateCopy(selState) : null;
 
   const glance = useMemo(() => {
     let periodDays = 0;
@@ -255,8 +257,8 @@ export function CycleCalendar({
             <button
               type="button"
               onClick={() => {
-                const t = new Date();
-                setAnchor({ y: t.getFullYear(), m: t.getMonth() });
+                const [y, m] = localDateKey().split("-").map(Number);
+                setAnchor({ y: y ?? 1970, m: (m ?? 1) - 1 });
                 setSelected(null);
               }}
               className="mono rounded-full border border-border px-2.5 py-1 text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
@@ -358,7 +360,10 @@ export function CycleCalendar({
             aria-label={`Details for ${fmtShort(selected)}`}
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="cy-title text-[17px]">{fmtShort(selected)}</p>
+              <div>
+                <p className="cy-title text-[17px]">{selCopy?.title ?? fmtShort(selected)}</p>
+                <p className="mt-0.5 text-[11.5px] text-faint">{fmtShort(selected)}</p>
+              </div>
               <button
                 type="button"
                 aria-label="Close day detail"
@@ -386,17 +391,45 @@ export function CycleCalendar({
                 "Nothing logged for this day."
               )}
             </p>
-            {selState.phase ? (
-              <p className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] text-faint">
+            <div className="mt-2 space-y-1 text-[11.5px] text-faint">
+              <p className="inline-flex flex-wrap items-center gap-1.5">
                 <span
-                  className="size-2 rounded-full"
-                  style={{ background: PHASE_COLOR[selState.phase as PhaseKey] }}
+                  className="size-2 rounded-full border border-[color:var(--cycle-menstrual)]"
+                  style={{
+                    background:
+                      selState.bleedingState !== "unlogged" && selState.bleedingState !== "none"
+                        ? "var(--cycle-menstrual)"
+                        : "transparent",
+                  }}
                   aria-hidden
                 />
-                {selState.logged ? "logged phase" : "estimated"} · {selState.phase}
-                {selState.predictedPeriod ? " · inside estimated period days" : ""}
-                {selState.predictedFertile ? " · inside estimated fertile window" : ""}
-                {selState.predictedOvulation ? " · estimated ovulation day" : ""}
+                {evidenceGlyph(selState.bleedingProvenance)} {selCopy?.support}
+                {selState.predictedPeriod ? " · Bloom estimate for your period" : ""}
+              </p>
+              <p className="inline-flex flex-wrap items-center gap-1.5">
+                <span
+                  className="size-2 rounded-full"
+                  style={{
+                    background: selState.reproductivePhase
+                      ? PHASE_COLOR[selState.reproductivePhase as PhaseKey]
+                      : "transparent",
+                    boxShadow: selState.reproductivePhase
+                      ? undefined
+                      : "inset 0 0 0 1px var(--cycle-hair-strong)",
+                  }}
+                  aria-hidden
+                />
+                {evidenceGlyph(selState.reproductiveProvenance)} {selCopy?.secondary}
+                {selState.predictedFertile ? " · likely fertile window" : ""}
+                {selState.predictedOvulation ? " · estimated ovulation" : ""}
+              </p>
+            </div>
+            <p className="mt-2 rounded-lg border border-[var(--cycle-hair)] px-2.5 py-2 text-[11.5px] leading-relaxed text-muted-foreground">
+              <b className="font-medium text-foreground">Why:</b> {selState.provenance.reason}
+            </p>
+            {selState.conflict ? (
+              <p className="mt-2 rounded-lg border border-amber/30 bg-amber/5 px-2.5 py-2 text-[11.5px] leading-relaxed text-amber">
+                {selState.conflict.message}
               </p>
             ) : null}
             {selState.logged?.notes ? (

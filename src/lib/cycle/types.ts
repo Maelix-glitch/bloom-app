@@ -12,6 +12,8 @@ export type ContraceptiveValue = "none" | "pill" | "condom" | "iud" | "other";
 export type MoodValue = "Low" | "Flat" | "Okay" | "Good" | "Energized";
 
 export type PhaseKey = "menstrual" | "follicular" | "ovulation" | "luteal";
+export type ReproductivePhaseKey = "follicular" | "ovulation" | "luteal";
+export type BleedingState = "unlogged" | FlowValue;
 
 export const PHASE_LABEL: Record<PhaseKey, string> = {
   menstrual: "Menstrual",
@@ -19,6 +21,18 @@ export const PHASE_LABEL: Record<PhaseKey, string> = {
   ovulation: "Ovulation window",
   luteal: "Luteal",
 };
+
+export type EvidenceSource =
+  "user" | "correction" | "imported" | "confirmed" | "derived" | "predicted" | "baseline";
+export type EvidenceConfidence = "high" | "medium" | "low";
+export type EvidenceStatus = "observed" | "estimated" | "corrected" | "unknown" | "conflict";
+
+export interface Provenance {
+  source: EvidenceSource;
+  confidence: EvidenceConfidence;
+  status: EvidenceStatus;
+  reason: string;
+}
 
 /** A single logged day — exactly the shape persisted in `cycle_entries`. */
 export interface CycleEntry {
@@ -44,6 +58,13 @@ export interface CycleEntry {
 }
 
 export type Confidence = "assumed" | "early" | "fair" | "strong";
+export type DataSufficiency =
+  | "no_data"
+  | "first_observation"
+  | "partial_cycle"
+  | "one_completed_cycle"
+  | "multiple_cycles"
+  | "strong_personal_history";
 
 export const CONFIDENCE_LABEL: Record<Confidence, string> = {
   assumed: "Based on a general pattern — no personal history yet",
@@ -54,18 +75,44 @@ export const CONFIDENCE_LABEL: Record<Confidence, string> = {
 
 export interface PeriodRun {
   start: string;
-  end: string; // inclusive; === start when only one day logged
+  /** Latest logged bleeding date in this cluster; not a confirmed period end unless an episode says so. */
+  end: string;
+  /** Calendar span from first to latest logged bleeding date; not a confirmed duration for open/unresolved episodes. */
   days: number;
+  observedDates?: string[];
+  inferredGapDates?: string[];
+  provenance?: Provenance;
+}
+
+export interface PeriodEpisode {
+  start: string;
+  status: "open" | "completed" | "unresolved";
+  /** Last logged bleeding day only when the end is supported by explicit no-flow or a following start. */
+  confirmedEnd: string | null;
+  observedBleedingDates: string[];
+  unknownGapDates: string[];
+  explicitNoFlowDate: string | null;
+  nextPeriodStart: string | null;
+  observedBleedingDays: number;
+  confirmedDuration: number | null;
+  provenance: Provenance;
 }
 
 export interface CompletedCycle {
   index: number;
   start: string;
   lengthDays: number;
+  provenance?: Provenance;
 }
 
 export interface PredictionEvent {
-  id: "next-period" | "ovulation" | "fertile-window" | "pms-window" | "phase-change";
+  id:
+    | "bleeding-window"
+    | "next-period"
+    | "ovulation"
+    | "fertile-window"
+    | "pms-window"
+    | "phase-change";
   label: string;
   /** Single date, or null when the event is a range. */
   date: string | null;
@@ -77,6 +124,34 @@ export interface PredictionEvent {
   detail: string;
   /** true = derived estimate; false/absent = observed evidence. */
   predicted: boolean;
+  provenance?: Provenance;
+  generatedFromVersion?: string;
+}
+
+export interface CycleChange {
+  id: string;
+  date: string;
+  at: string;
+  kind: "add" | "edit" | "delete" | "preference";
+  before: Partial<CycleEntry> | null;
+  after: Partial<CycleEntry> | null;
+  message: string;
+  previousEstimate?: {
+    phase: PhaseKey | null;
+    bleedingState?: BleedingState;
+    bleedingProvenance?: Provenance;
+    reproductivePhase?: ReproductivePhaseKey | null;
+    reproductiveProvenance?: Provenance;
+    provenance: Provenance;
+  } | null;
+  forecastChanged?: boolean;
+}
+
+export interface CycleIssue {
+  id: string;
+  severity: "info" | "warning";
+  message: string;
+  date?: string;
 }
 
 export interface CycleModel {
@@ -84,7 +159,16 @@ export interface CycleModel {
   lastPeriodStart: string | null;
   currentDay: number | null; // 1-based; null before any period logged
   currentPhase: PhaseKey | null;
+  currentProvenance: Provenance;
+  currentBleedingState: BleedingState;
+  currentBleedingProvenance: Provenance;
+  currentReproductivePhase: ReproductivePhaseKey | null;
+  currentReproductiveProvenance: Provenance;
   completed: CompletedCycle[];
+  periodRuns: PeriodRun[];
+  periodEpisodes: PeriodEpisode[];
+  currentRun: PeriodRun | null;
+  currentPeriodEpisode: PeriodEpisode | null;
   average: number | null;
   median: number | null;
   stdDev: number | null;
@@ -92,11 +176,18 @@ export interface CycleModel {
   rangeMin: number | null;
   rangeMax: number | null;
   periodLengthAverage: number | null;
+  estimatedPeriodLength: number;
   confidence: Confidence;
-  usesDefaultAssumption: boolean; // 28-day general pattern until personal data exists
+  dataSufficiency: DataSufficiency;
+  usesDefaultAssumption: boolean; // general pattern until personal data exists
+  baselineCycleLength: number;
+  calculationVersion: string;
+  issues: CycleIssue[];
   events: PredictionEvent[];
-  /** cycle day → phase for painting rings/calendars (observed days override). */
+  /** Legacy primary display phase. Use `dayStateFor` for UI truth. */
   dayPhase: (day: number) => PhaseKey;
+  /** Reproductive phase is independent from bleeding; follicular begins at cycle day 1. */
+  reproductivePhaseFor: (day: number) => ReproductivePhaseKey;
   ovulationDay: number | null;
   lutealLength: number;
   observedEvidence: {
@@ -118,11 +209,15 @@ export interface Recommendation {
 /** Compact, summarized context — what the assistant may read. Never raw history. */
 export interface CycleContext {
   generatedAt: string;
+  calculationVersion: string;
   today: string;
   currentDay: number | null;
   currentPhase: PhaseKey | null;
+  currentProvenance: Provenance;
   confidence: Confidence;
+  dataSufficiency: DataSufficiency;
   usesDefaultAssumption: boolean;
+  baselineCycleLength: number;
   completedCount: number;
   recentLengths: number[];
   average: number | null;
@@ -131,8 +226,20 @@ export interface CycleContext {
   rangeMax: number | null;
   variabilityPercent: number | null;
   periodLengthAverage: number | null;
+  estimatedPeriodLength: number;
+  currentPeriodEpisode: PeriodEpisode | null;
+  recentCorrections: CycleChange[];
+  issues: CycleIssue[];
   events: PredictionEvent[];
   loggedDays30: number;
+  observedPeriodDays: string[];
+  explicitNoFlowDays: string[];
+  unloggedRecentDays: string[];
+  estimatedPeriodDays: string[];
+  bleedingState: BleedingState;
+  reproductivePhase: ReproductivePhaseKey | null;
+  reproductiveProvenance: Provenance;
+  recentFlow: { date: string; flow: FlowValue | null; provenance: Provenance }[];
   recentMood: { date: string; mood: MoodValue }[];
   recentEnergy: { date: string; energy: number }[];
   recentSymptoms: { date: string; symptoms: string[] }[];
@@ -142,9 +249,18 @@ export interface CycleContext {
 
 export type DayState = {
   logged: CycleEntry | null;
+  /** Primary user-facing state: observed bleeding wins; unknown stays null. */
   phase: PhaseKey | null;
+  /** Bleeding state is separate from reproductive phase. Missing row = unlogged, not no-flow. */
+  bleedingState: BleedingState;
+  bleedingProvenance: Provenance;
+  reproductivePhase: ReproductivePhaseKey | null;
+  reproductiveProvenance: Provenance;
+  cycleDay: number | null;
   predictedPeriod: boolean;
   predictedFertile: boolean;
   predictedOvulation: boolean;
   pms: boolean;
+  provenance: Provenance;
+  conflict: CycleIssue | null;
 };

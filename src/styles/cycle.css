@@ -283,6 +283,31 @@
 
 /* ————————————————————— today tray (docked surface) ————————————————————— */
 
+.cy-debug {
+  border-top: 1px solid var(--cycle-hair);
+  border-bottom: 1px solid var(--cycle-hair);
+  padding: 10px 2px;
+}
+
+.cy-change-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px auto 0;
+  max-width: 760px;
+  border-top: 1px solid var(--cycle-hair);
+  border-bottom: 1px solid var(--cycle-hair);
+  padding: 13px 2px;
+}
+
+@media (max-width: 639px) {
+  .cy-change-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .cy-tray {
   margin-top: var(--cy-s3);
   border-radius: var(--cy-r-lg);
@@ -514,6 +539,7 @@
   position: absolute;
   z-index: 5;
   width: 232px;
+  pointer-events: none;
   border-radius: 14px;
   border: 1px solid var(--cycle-hair-strong);
   background: color-mix(in oklab, var(--surface) 94%, black 6%);
@@ -1023,6 +1049,51 @@
   cursor: default;
 }
 
+.cy-fix-option {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--cycle-hair);
+  background: color-mix(in oklab, var(--surface) 46%, transparent);
+  padding: 12px 13px;
+  text-align: left;
+  color: var(--muted-foreground);
+  transition:
+    border-color var(--cy-fast) ease,
+    background-color var(--cy-fast) ease,
+    color var(--cy-fast) ease,
+    transform var(--cy-fast) ease;
+}
+
+.cy-fix-option svg {
+  margin-top: 2px;
+  color: var(--cycle-accent);
+  opacity: 0.9;
+}
+
+.cy-fix-option b {
+  display: block;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cy-fix-option small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--faint);
+}
+
+.cy-fix-option:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  background: color-mix(in oklab, var(--surface-2) 64%, transparent);
+}
+
 .cy-link {
   font-size: 12.5px;
   color: var(--faint);
@@ -1126,6 +1197,83 @@
   animation: cy-travel 16s linear infinite;
 }
 
+@keyframes cy-orbit-heartbeat-line {
+  0%,
+  100% {
+    opacity: 0.16;
+    stroke-width: 3.5;
+  }
+  10% {
+    opacity: 0.34;
+    stroke-width: 5.5;
+  }
+  20% {
+    opacity: 0.18;
+    stroke-width: 4;
+  }
+  34% {
+    opacity: 0.28;
+    stroke-width: 5;
+  }
+  58% {
+    opacity: 0.14;
+    stroke-width: 3.5;
+  }
+}
+
+.cy-orbit-heartbeat,
+.cy-orbit-heartbeat * {
+  pointer-events: none;
+}
+
+.cy-orbit-heartbeat__line {
+  stroke-linecap: round;
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  animation: cy-orbit-heartbeat-line 2.1s ease-in-out infinite;
+}
+
+@keyframes cy-pointer-pulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    opacity: 0.36;
+    stroke-dashoffset: -10;
+  }
+}
+
+.cy-you-pointer__beam {
+  stroke-dasharray: 2.5 5.5;
+  filter: drop-shadow(
+    0 0 7px color-mix(in oklab, var(--pointer-c, var(--cycle-accent)) 58%, transparent)
+  );
+  animation: cy-pointer-pulse 2.8s ease-in-out infinite;
+}
+
+.cy-you-pointer__ship {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cy-you-pointer__label {
+  font-family: var(--font-mono);
+  font-size: 8.8px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  fill: color-mix(in oklab, var(--foreground) 88%, var(--pointer-c, var(--cycle-accent)) 12%);
+  paint-order: stroke;
+  stroke: color-mix(in oklab, var(--background) 80%, transparent);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  filter: drop-shadow(
+    0 0 10px color-mix(in oklab, var(--pointer-c, var(--cycle-accent)) 42%, transparent)
+  );
+}
+
 @keyframes cy-draw {
   from {
     stroke-dashoffset: 100;
@@ -1194,7 +1342,9 @@
   .cy-draw,
   .cy-road-draw,
   .cy-focus-in,
-  .cy-ai-tip {
+  .cy-ai-tip,
+  .cy-orbit-heartbeat__line,
+  .cy-you-pointer__beam {
     animation: none !important;
   }
   .cy-draw,

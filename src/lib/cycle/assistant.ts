@@ -82,18 +82,29 @@ function describePhase(ctx: CycleContext): string {
       : conf === "early"
         ? "One completed cycle sits behind this. Real, but early — more logs sharpen it."
         : `This is built from your last ${Math.min(6, ctx.completedCount)} completed cycles.`;
+  const bleeding =
+    ctx.bleedingState === "unlogged"
+      ? "bleeding not logged"
+      : ctx.bleedingState === "none"
+        ? "explicit no-flow logged"
+        : `${ctx.bleedingState} bleeding logged`;
+  const reproductive = ctx.reproductivePhase
+    ? `${ctx.reproductivePhase} reproductive phase (${ctx.reproductiveProvenance.status})`
+    : "reproductive phase unknown";
   const phaseText =
     ctx.currentPhase === "menstrual"
-      ? "You're inside the bleeding window — energy dips are common here, and so is feeling fine. Neither means anything is wrong."
-      : ctx.currentPhase === "follicular"
-        ? "Follicular stretch — the estrogen-rising half of the cycle. A good slot for demanding tasks if that matches how you feel."
-        : ctx.currentPhase === "ovulation"
-          ? "Around the estimated ovulation window. It's an estimate unless a test or a sustained temperature shift says otherwise."
-          : "Luteal phase — the second half. Some people notice energy or mood settling here; plenty feel nothing in particular.";
-  return `Cycle day ${day} — ${ctx.currentPhase ?? "phase not assigned"}.\n${phaseText}\n\n${basis}`;
+      ? "Logged bleeding can overlap the follicular phase; Bloom does not treat follicular as proof your period ended."
+      : ctx.currentPhase === null
+        ? "Bloom keeps the bleeding layer unknown when a day is not logged. The reproductive layer can still be an estimate from the cycle-day anchor."
+        : "This reproductive phase is estimated from the cycle model unless there is logged ovulation evidence; bleeding is tracked as a separate layer.";
+  return `Cycle day ${day} — ${bleeding}; ${reproductive}.\n${phaseText}\n\nWhy Bloom says this: ${ctx.currentProvenance.reason}\n\n${basis}`;
 }
 
 function whyEstimateMoved(ctx: CycleContext): string {
+  const correction = ctx.recentCorrections[0];
+  if (correction?.forecastChanged) {
+    return `${correction.message}\n\nPrevious estimate for ${correction.date}: ${correction.previousEstimate?.phase ?? "unknown"}. Current user-entered records are more authoritative than estimates, so the cycle engine recalculated future dates from the updated record. I can explain it, but I cannot override it.`;
+  }
   if (ctx.completedCount === 0) {
     return "Nothing moved — there isn't a personal estimate yet. Right now the page shows a general 28-day pattern, clearly labelled as such. Log two period starts and the estimate becomes yours.";
   }
@@ -115,6 +126,20 @@ function compareCycles(ctx: CycleContext): string {
   return `Your recent lengths:\n${lines}\n\nAverage ${n(ctx.average)}, median ${n(ctx.median)}${ctx.rangeMin !== null ? `, range ${ctx.rangeMin}–${ctx.rangeMax} days` : ""}.\n${ctx.variabilityPercent !== null ? `Spread is about ${ctx.variabilityPercent}% — ${ctx.variabilityPercent <= 8 ? "fairly steady territory" : "wide enough that I'll show ranges instead of single dates"}.` : ""}`;
 }
 
+function periodLengthAnswer(ctx: CycleContext): string {
+  const loggedBleeding = ctx.observedPeriodDays.length;
+  const noFlow = ctx.explicitNoFlowDays.length;
+  if (loggedBleeding === 0) return "I don't have a logged bleeding day in the recent record yet.";
+  if (ctx.periodLengthAverage === null) {
+    const open =
+      ctx.currentPeriodEpisode?.status === "open"
+        ? ` Your current period started ${ctx.currentPeriodEpisode.start} and is still open, with ${ctx.currentPeriodEpisode.observedBleedingDays} bleeding day${ctx.currentPeriodEpisode.observedBleedingDays === 1 ? "" : "s"} logged.`
+        : "";
+    return `Bloom has ${loggedBleeding} recent period day${loggedBleeding === 1 ? "" : "s"} logged by you. I don't know the full period length yet because missing days are not treated as no bleeding.${open}${noFlow > 0 ? ` You also logged ${noFlow} no-bleeding day${noFlow === 1 ? "" : "s"}, which helps show the transition.` : ""}`;
+  }
+  return `Your period-length estimate is ${n(ctx.periodLengthAverage)} from logged period runs. Missing days are kept separate from no-bleeding days.`;
+}
+
 function whatChanged(ctx: CycleContext): string {
   const parts: string[] = [];
   if (ctx.recentLengths.length >= 2) {
@@ -131,7 +156,7 @@ function whatChanged(ctx: CycleContext): string {
     );
   if (ctx.observedEvidence.lhPositiveDates.length > 0)
     parts.push(
-      `You logged ${ctx.observedEvidence.lhPositiveDates.length} positive LH test${ctx.observedEvidence.lhPositiveDates.length === 1 ? "" : "s"} this cycle — observed data, kept separate from the calendar estimate.`,
+      `You logged ${ctx.observedEvidence.lhPositiveDates.length} positive LH test${ctx.observedEvidence.lhPositiveDates.length === 1 ? "" : "s"} this cycle — your entry stays separate from the calendar estimate.`,
     );
   return (
     parts.join("\n") || "Nothing measurable has changed yet — there aren't enough logs to compare."
@@ -235,7 +260,8 @@ export function genericAnswer(question: string): string {
 
 export const deterministicProvider: AssistantProvider = async (ctx, question) => {
   const q = question.toLowerCase();
-  if (/phase|where am i|current/.test(q)) return describePhase(ctx);
+  if (/how long.*period|period.*last/.test(q)) return periodLengthAnswer(ctx);
+  if (/phase|where am i|current|am i follicular/.test(q)) return describePhase(ctx);
   if (/estimate|moved|changed.*(date|predict)|why.*(change|shift)/.test(q))
     return whyEstimateMoved(ctx);
   if (/compar|vs|versus|recent cycles/.test(q)) return compareCycles(ctx);
@@ -245,7 +271,7 @@ export const deterministicProvider: AssistantProvider = async (ctx, question) =>
   if (/why.*(pattern|seeing this)|how do you know|how do estimates|uncertainty/.test(q))
     return patternMethod(ctx);
   if (/why is (this|that) date|this date (is )?estimated|not logged/.test(q))
-    return `A date is "logged" when you recorded something on it — flow, mood, energy, anything. Everything else on this page is derived: phase positions come from your period-start dates and your average length, so future dates (and past days you skipped) are shown softer, dashed or hollow, on purpose.${
+    return `A date is "logged" when you recorded something on it — flow, mood, energy, anything. Missing flow stays unlogged, explicit no-flow only appears when you record no flow, and reproductive phase is a separate estimated layer. Everything else on this page is derived: phase positions come from your period-start dates and your average length, so future dates (and past days you skipped) are shown softer, dashed or hollow, on purpose.${
       ctx.completedCount < 2
         ? " Right now the derivation leans on the general pattern too — two completed cycles and it leans on you."
         : ` With ${ctx.completedCount} completed cycles behind it, the derivation is already yours, but it remains an estimate — a range, not a promise.`

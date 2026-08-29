@@ -13,7 +13,7 @@
 import { useMemo, useState } from "react";
 
 import type { CycleEntry, CycleModel } from "@/lib/cycle/types";
-import { fmtShort } from "@/lib/cycle/engine";
+import { addDays, fmtShort } from "@/lib/cycle/engine";
 
 export function CycleRhythm({ model, entries }: { model: CycleModel; entries: CycleEntry[] }) {
   const [sel, setSel] = useState<number | null>(null);
@@ -194,7 +194,5 @@ function Metric({
 }
 
 function addLen(c: { start: string; lengthDays: number }, extra: number): string {
-  const d = new Date(`${c.start}T00:00:00`);
-  d.setDate(d.getDate() + c.lengthDays - 1 + extra);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return addDays(c.start, c.lengthDays - 1 + extra);
 }

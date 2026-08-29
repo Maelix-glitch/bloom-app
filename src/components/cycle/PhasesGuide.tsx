@@ -108,8 +108,8 @@ export function PhasesGuide({
   const total = Math.round(model.average ?? 28);
 
   const ranges: Record<PhaseKey, string> = {
-    menstrual: `days 1–${flowLen}`,
-    follicular: `days ${flowLen + 1}–${ovu - 2}`,
+    menstrual: `bleeding estimate days 1–${flowLen}`,
+    follicular: `reproductive days 1–${ovu - 2}`,
     ovulation: `around day ${ovu}`,
     luteal: `day ${ovu + 2}–${personal ? total : 28}`,
   };
@@ -122,7 +122,7 @@ export function PhasesGuide({
           phase={p}
           range={ranges[p]}
           personal={personal && p !== "ovulation"}
-          current={model.currentPhase === p}
+          current={model.currentPhase === p || model.currentReproductivePhase === p}
           focused={selectedPhase === p}
           onFocus={() => {
             onSelectPhase?.(selectedPhase === p ? null : p);
@@ -133,8 +133,9 @@ export function PhasesGuide({
         />
       ))}
       <p className="mt-4 max-w-[64ch] text-[11.5px] leading-relaxed text-faint">
-        Every body writes its own calendar — these are textbook outlines, and yours is the data on
-        this page.
+        Bleeding and reproductive phase are separate layers: follicular starts on cycle day 1 and
+        can overlap menstruation. Every body writes its own calendar — these are textbook outlines,
+        and yours is the data on this page.
         {personal
           ? " The ranges above are drawn from your logged cycles."
           : " Typical ranges shown are general until your history accumulates."}
@@ -175,45 +176,36 @@ function PhaseCard({
         {ART[info.art]}
       </svg>
       <div className="min-w-0">
-        <button
-          type="button"
-          onClick={onFocus}
-          aria-pressed={focused}
-          className="group/focus flex w-fit items-center gap-1.5 rounded-full text-left"
-          title={
-            focused ? "Release the focus on the cycle orbit" : "Focus this phase on the cycle orbit"
-          }
-        >
-          <span
-            className="mono flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em]"
-            style={{ color }}
-          >
-            <span
-              className="inline-block size-1.5 rounded-full"
-              style={{ background: color }}
-              aria-hidden
-            />
-            {phase}
-          </span>
-          <span
-            className="mono text-[8.5px] uppercase tracking-[0.08em] text-faint opacity-0 transition-opacity group-hover/focus:opacity-100 group-aria-pressed/focus:opacity-100"
-            aria-hidden
-          >
-            focus on the ring →
-          </span>
-        </button>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p
-            className="mono flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em]"
-            style={{ color }}
+          <button
+            type="button"
+            onClick={onFocus}
+            aria-pressed={focused}
+            className="group/focus flex w-fit items-center gap-1.5 rounded-full text-left"
+            title={
+              focused
+                ? "Release the focus on the cycle orbit"
+                : "Focus this phase on the cycle orbit"
+            }
           >
             <span
-              className="inline-block size-1.5 rounded-full"
-              style={{ background: color }}
+              className="mono flex items-center gap-1.5 text-[9px] uppercase tracking-[0.1em]"
+              style={{ color }}
+            >
+              <span
+                className="inline-block size-1.5 rounded-full"
+                style={{ background: color }}
+                aria-hidden
+              />
+              {phase}
+            </span>
+            <span
+              className="mono text-[8.5px] uppercase tracking-[0.08em] text-faint opacity-0 transition-opacity group-hover/focus:opacity-100 group-aria-pressed/focus:opacity-100"
               aria-hidden
-            />
-            {phase}
-          </p>
+            >
+              focus on the ring →
+            </span>
+          </button>
           {current ? (
             <span className="mono rounded-full border border-border px-1.5 py-0.5 text-[8px] uppercase tracking-[0.08em] text-muted-foreground">
               you are here

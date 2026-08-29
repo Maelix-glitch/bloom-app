@@ -11,12 +11,10 @@
  */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-
-import { FADE, TAP } from "@/lib/cycle/motion";
 import { cn } from "@/lib/utils";
+import { flowLabel, sourceLabel } from "@/lib/cycle/presentation";
 import type { CycleModel } from "@/lib/cycle/types";
-import { fmtShort } from "@/lib/cycle/engine";
+import { diffDays, fmtShort } from "@/lib/cycle/engine";
 
 type Stop = {
   key: string;
@@ -43,15 +41,24 @@ export function CycleRoad({
 }) {
   const pathRef = useRef<SVGPathElement | null>(null);
   const [pts, setPts] = useState<number[] | null>(null);
-  const [selStop, setSelStop] = useState<string | null>(null);
-
   const stops: Stop[] = useMemo(() => {
     if (!model.lastPeriodStart) return [];
     const out: Stop[] = [];
+    const bleeding = model.events.find((e) => e.id === "bleeding-window");
     const next = model.events.find((e) => e.id === "next-period");
     const ovu = model.events.find((e) => e.id === "ovulation");
     const fertile = model.events.find((e) => e.id === "fertile-window");
     const phaseChange = model.events.find((e) => e.id === "phase-change");
+    if (bleeding?.rangeEnd && bleeding.daysAway >= 0)
+      out.push({
+        key: "bleeding",
+        name: "Your period",
+        date: bleeding.rangeEnd,
+        tone: "var(--cycle-menstrual)",
+        est: true,
+        above: true,
+        frac: 0,
+      });
     if (phaseChange && (phaseChange.date ?? phaseChange.rangeStart) && phaseChange.daysAway >= 0)
       out.push({
         key: "phase",
@@ -100,23 +107,19 @@ export function CycleRoad({
     // sort by date, drop duplicates in time, and compute road fraction 0..1
     const uniq: Stop[] = [];
     for (const s of [...out].sort((a, b) => a.date.localeCompare(b.date))) {
-      if (
-        uniq.some(
-          (u) =>
-            Math.abs(new Date(u.date).getTime() - new Date(s.date).getTime()) < 86_400_000 * 1.5,
-        )
-      )
-        continue;
+      if (uniq.some((u) => Math.abs(diffDays(u.date, s.date)) <= 1)) continue;
       uniq.push(s);
     }
     if (uniq.length === 0) return [];
-    const d0 = new Date(model.today).getTime();
-    const dEnd = Math.max(...uniq.map((s) => new Date(s.date).getTime()), d0 + 7 * 86_400_000);
-    const span = Math.max(1, dEnd - d0);
-    return uniq.map((s) => ({ ...s, frac: Math.min(1, (new Date(s.date).getTime() - d0) / span) }));
+    const horizonDays = Math.max(7, ...uniq.map((s) => Math.max(0, diffDays(model.today, s.date))));
+    return uniq.map((s) => ({
+      ...s,
+      frac: Math.min(1, Math.max(0, diffDays(model.today, s.date)) / horizonDays),
+    }));
   }, [model]);
 
   const nextStop = stops.find((s) => s.key !== "fertile") ?? null;
+  const currentBleeding = `${flowLabel(model.currentBleedingState)} · ${sourceLabel(model.currentBleedingProvenance)}`;
   const horizon = useMemo(() => {
     // where the modelled (dashed) stretch starts: end of the logged day
     return 0.045;
@@ -180,6 +183,11 @@ export function CycleRoad({
   }
 
   const cycle = Math.round(model.average ?? 28);
+  const showStillBleeding =
+    Boolean(model.currentDay) &&
+    model.currentBleedingState === "unlogged" &&
+    (model.currentDay ?? 0) <=
+      Math.max(model.estimatedPeriodLength + 3, (model.currentRun?.days ?? 0) + 2);
 
   return (
     <div
@@ -247,10 +255,10 @@ export function CycleRoad({
               Today · day {model.currentDay}
             </text>
             <text x={8} y={38} style={{ fontSize: 11.5, fill: "var(--faint)" }}>
-              {model.currentPhase ? `${model.currentPhase} phase · ${cycle}-day model` : ""}
+              {currentBleeding} · {cycle}-day estimate
             </text>
           </g>
-          {/* milestone dots on the path */}
+          {/* milestone dots on the path. Labels live below so close events never collide. */}
           {pts
             ? stops.map((s, i) => {
                 const x = pts[i] ?? 0;
@@ -259,31 +267,8 @@ export function CycleRoad({
                   <g
                     key={s.key}
                     className="cy-focus-in"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelStop(selStop === s.key ? null : s.key)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelStop(selStop === s.key ? null : s.key);
-                      }
-                    }}
-                    aria-label={`${s.name}, ${fmtShort(s.date)} — ${s.est ? "estimated" : "observed"}. Activate for what Bloom can say about it.`}
-                    style={{ cursor: "pointer" }}
+                    aria-label={`${s.name}, ${fmtShort(s.date)} — ${s.est ? "Bloom estimate" : "logged by you"}`}
                   >
-                    <circle cx={x} cy={cy} r={15} fill="transparent" />
-                    {selStop === s.key ? (
-                      <motion.circle
-                        initial={{ r: 7, opacity: 0.9 }}
-                        animate={{ r: 11, opacity: 0.35 }}
-                        transition={TAP}
-                        cx={x}
-                        cy={cy}
-                        fill="none"
-                        stroke={s.tone}
-                        strokeWidth={1.5}
-                      />
-                    ) : null}
                     <circle cx={x} cy={cy} r={7} fill="var(--background)" />
                     <circle
                       cx={x}
@@ -295,33 +280,6 @@ export function CycleRoad({
                       strokeDasharray={s.est ? "2.4 2.2" : undefined}
                     />
                     {s.est ? null : <circle cx={x} cy={cy} r={2} fill={s.tone} />}
-                    <text
-                      x={Math.min(Math.max(x, 60), 940)}
-                      y={s.above ? 30 : 121}
-                      textAnchor={x > 860 ? "end" : x < 140 ? "start" : "middle"}
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: 12.5,
-                        fontWeight: 500,
-                        fill: s.tone,
-                      }}
-                    >
-                      {s.name}
-                    </text>
-                    <text
-                      x={Math.min(Math.max(x, 60), 940)}
-                      y={s.above ? 48 : 137}
-                      textAnchor={x > 860 ? "end" : x < 140 ? "start" : "middle"}
-                      style={{ fontSize: 11.5, fill: "var(--faint)" }}
-                    >
-                      {fmtShort(s.date)}
-                      {s.key === "period" && nextStop?.key === "period"
-                        ? (() => {
-                            const n = model.events.find((e) => e.id === "next-period");
-                            return n?.plusMinusDays ? ` ±${n.plusMinusDays}d` : "";
-                          })()
-                        : ""}
-                    </text>
                   </g>
                 );
               })
@@ -329,54 +287,55 @@ export function CycleRoad({
         </svg>
       </div>
 
-      <AnimatePresence initial={false}>
-        {selStop
-          ? (() => {
-              const st = stops.find((x) => x.key === selStop);
-              if (!st) return null;
-              const ev = model.events.find((e) =>
-                st.key === "period"
-                  ? e.id === "next-period"
-                  : st.key === "ovu"
-                    ? e.id === "ovulation"
-                    : st.key === "fertile"
-                      ? e.id === "fertile-window"
-                      : e.id === "phase-change",
-              );
-              return (
-                <motion.div
-                  key="road-detail"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  transition={FADE}
-                  className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1.5 rounded-xl border border-[var(--cycle-hair)] bg-[var(--cy-fill)] px-4 py-3"
-                >
-                  <span className="cy-title text-[15.5px]" style={{ color: st.tone }}>
-                    {st.name} · {fmtShort(st.date)}
-                  </span>
-                  <span className="text-[12.5px] text-muted-foreground">
-                    {st.est ? "Estimated" : "Logged"} —{" "}
-                    {model.confidence === "assumed"
-                      ? "a general-pattern figure; nothing personal yet"
-                      : `based on your previous cycles${ev?.plusMinusDays ? `, shown as ±${ev.plusMinusDays} days because that is the honest spread` : ""}`}
-                  </span>
-                  <button type="button" onClick={onOpenMethod} className="cy-link ml-auto">
-                    how this was built →
-                  </button>
-                </motion.div>
-              );
-            })()
-          : null}
-      </AnimatePresence>
+      {stops.length ? (
+        <ol
+          className="mt-1 grid gap-x-6 gap-y-2 sm:grid-cols-4"
+          aria-label="Upcoming cycle estimates"
+        >
+          {stops.map((s) => (
+            <li key={s.key} className="min-w-0 text-[12px] leading-snug">
+              <span className="mb-1 inline-flex items-center gap-1.5 text-[11px] text-faint">
+                <span
+                  className="size-2 rounded-full"
+                  style={{
+                    border: `1px ${s.est ? "dashed" : "solid"} ${s.tone}`,
+                    background: s.est ? "transparent" : s.tone,
+                  }}
+                  aria-hidden
+                />
+                {s.est ? "Bloom estimate" : "Logged by you"}
+              </span>
+              <p className="truncate font-medium" style={{ color: s.tone }}>
+                {s.name}
+              </p>
+              <p className="text-faint">{roadDateLabel(s.key, s.date)}</p>
+            </li>
+          ))}
+        </ol>
+      ) : null}
 
-      {nextStop && !selStop ? (
+      {showStillBleeding ? (
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-[var(--cycle-hair)] bg-[var(--cy-fill)] px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="cy-title text-[15.5px]">Still bleeding?</p>
+            <p className="mt-1 text-[12px] leading-snug text-faint">
+              Log today if your period is continuing. Bloom will adapt the forecast from your entry.
+            </p>
+          </div>
+          <button type="button" onClick={onLogStart} className="cy-btn cy-btn--quiet">
+            Log today
+          </button>
+        </div>
+      ) : null}
+
+      {nextStop ? (
         <div className="cy-next">
           <span className="cy-eyebrow shrink-0" style={{ color: nextStop.tone }}>
             Next
           </span>
           <p className="cy-next__big">
-            {nextStop.name} · {fmtShort(nextStop.date)}
+            {nextStop.key === "bleeding" ? "Estimated bleeding window" : nextStop.name} ·{" "}
+            {roadDateLabel(nextStop.key, nextStop.date)}
             {nextStop.key === "period"
               ? (() => {
                   const n = model.events.find((e) => e.id === "next-period");
@@ -395,4 +354,11 @@ export function CycleRoad({
       ) : null}
     </div>
   );
+}
+
+function roadDateLabel(key: string, date: string): string {
+  if (key === "bleeding") return `through ${fmtShort(date)}`;
+  if (key === "period" || key === "ovu") return `around ${fmtShort(date)}`;
+  if (key === "fertile") return `from ${fmtShort(date)}`;
+  return fmtShort(date);
 }

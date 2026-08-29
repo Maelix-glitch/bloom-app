@@ -87,9 +87,9 @@ export function CycleLengthSheet({
               </label>
             ) : (
               <p className="rounded-xl border border-border/70 bg-surface/40 px-3.5 py-3 text-[12.5px] leading-relaxed text-muted-foreground">
-                Personal average active — nothing to set. {Math.round(model?.ovulationDay ?? 14)}d
-                follicular-side estimate, {model?.lutealLength ?? 14}d luteal, recalculated from
-                your last {Math.min(6, model?.completed.length ?? 0)} cycles each time you log.
+                Personal average active — nothing to set. Bloom estimates ovulation around day{" "}
+                {Math.round(model?.ovulationDay ?? 0)} and updates future dates from your last{" "}
+                {Math.min(6, model?.completed.length ?? 0)} completed cycles each time you log.
               </p>
             )}
 

@@ -86,7 +86,7 @@ export function GhostButton({
   );
 }
 
-/** Observed vs predicted legend — used by ring + calendar. */
+/** Logged vs Bloom estimate legend — used by ring + calendar. */
 export function ObserveLegend({ className }: { className?: string }) {
   return (
     <p

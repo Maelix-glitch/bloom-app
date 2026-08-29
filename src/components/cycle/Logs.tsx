@@ -11,11 +11,11 @@ import { Download, Loader2, SlidersHorizontal } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { localDateKey } from "@/lib/cycle/engine";
+import { diffDays, localDateKey } from "@/lib/cycle/engine";
 import type { CycleEntry, CycleModel, FlowValue, MoodValue } from "@/lib/cycle/types";
 
 const FLOWS: { v: FlowValue; label: string }[] = [
-  { v: "none", label: "None" },
+  { v: "none", label: "No flow" },
   { v: "spotting", label: "Spotting" },
   { v: "light", label: "Light" },
   { v: "medium", label: "Medium" },
@@ -297,9 +297,7 @@ export function QuickLog({
 
   const cycleDay = useMemo(() => {
     if (!model?.lastPeriodStart) return null;
-    const d = new Date(`${draft.date}T00:00:00`);
-    const s = new Date(`${model.lastPeriodStart}T00:00:00`);
-    const diff = Math.floor((d.getTime() - s.getTime()) / 86_400_000) + 1;
+    const diff = diffDays(model.lastPeriodStart, draft.date) + 1;
     return diff > 0 ? diff : null;
   }, [draft.date, model]);
 

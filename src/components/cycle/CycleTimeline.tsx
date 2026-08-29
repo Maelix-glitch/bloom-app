@@ -15,6 +15,7 @@ import { motion } from "motion/react";
 import { SELECT, TAP } from "@/lib/cycle/motion";
 import { cn } from "@/lib/utils";
 import { addDays, dayStateFor, fmtShort } from "@/lib/cycle/engine";
+import { dayStateCopy, evidenceGlyph } from "@/lib/cycle/presentation";
 import type { CycleEntry, CycleModel, PhaseKey } from "@/lib/cycle/types";
 import { PHASE_COLOR } from "@/lib/cycle/palette";
 
@@ -41,10 +42,15 @@ export function CycleTimeline({
   );
 
   const sel = days.find((d) => d.date === (selected ?? model.today)) ?? days[0]!;
+  const selCopy = dayStateCopy(sel.state);
 
   const railGradient = `linear-gradient(90deg, ${days
     .map((d, i) => {
-      const color = d.state.phase ? PHASE_COLOR[d.state.phase as PhaseKey] : "var(--border)";
+      const color = d.state.phase
+        ? PHASE_COLOR[d.state.phase as PhaseKey]
+        : d.state.reproductivePhase
+          ? `color-mix(in oklab, ${PHASE_COLOR[d.state.reproductivePhase as PhaseKey]} 45%, var(--border))`
+          : "var(--border)";
       const pct = (i / (days.length - 1)) * 100;
       return `${color} ${pct}%`;
     })
@@ -62,10 +68,13 @@ export function CycleTimeline({
           {days.map((d, i) => {
             const isToday = d.date === model.today;
             const logged = d.state.logged !== null;
+            const copy = dayStateCopy(d.state);
             const on = (selected ?? model.today) === d.date;
             const tone = d.state.phase
               ? PHASE_COLOR[d.state.phase as PhaseKey]
-              : "var(--border-strong)";
+              : d.state.reproductivePhase
+                ? PHASE_COLOR[d.state.reproductivePhase as PhaseKey]
+                : "var(--border-strong)";
             const event = d.state.predictedOvulation
               ? "ovulation est."
               : d.state.predictedPeriod
@@ -88,7 +97,7 @@ export function CycleTimeline({
                     isToday && "cy-day--today",
                     on && "!border-[var(--border-strong)]",
                   )}
-                  aria-label={`${fmtShort(d.date)}${isToday ? ", today" : ""}${d.state.phase ? `, ${d.state.phase} phase${logged ? ", logged" : ", estimated"}` : ""}`}
+                  aria-label={`${fmtShort(d.date)}${isToday ? ", today" : ""}, bleeding ${d.state.bleedingState === "unlogged" ? "not logged" : d.state.bleedingState}${d.state.reproductivePhase ? `, reproductive ${d.state.reproductivePhase} (${d.state.reproductiveProvenance.status})` : ""}`}
                 >
                   {on ? (
                     <motion.span
@@ -118,9 +127,17 @@ export function CycleTimeline({
                     aria-hidden
                   />
                   <span className="cy-day__num">
-                    {model.lastPeriodStart ? dayNum(model, d.date) : Number(d.date.slice(8, 10))}
+                    {d.state.cycleDay ?? Number(d.date.slice(8, 10))}
                   </span>
-                  <span className="cy-day__phase">{d.state.phase ? d.state.phase : "—"}</span>
+                  <span className="cy-day__phase">
+                    {d.state.bleedingState !== "unlogged" && d.state.bleedingState !== "none"
+                      ? "period"
+                      : d.state.bleedingState === "none"
+                        ? "no bleeding"
+                        : d.state.reproductivePhase
+                          ? `${d.state.reproductivePhase} est.`
+                          : "—"}
+                  </span>
                   {logged && (d.state.logged?.mood || d.state.logged?.energy) ? (
                     <span className="cy-day__marks" aria-hidden>
                       {d.state.logged?.mood ? d.state.logged.mood[0] : ""}
@@ -143,14 +160,16 @@ export function CycleTimeline({
       >
         <span className="cy-title text-[15px]">{fmtShort(sel.date)}</span>
         <span className="text-muted-foreground">
-          {model.lastPeriodStart ? `cycle day ${dayNum(model, sel.date)} · ` : ""}
-          {sel.state.phase ?? "unphased"}
-          {sel.state.predictedFertile && !sel.state.logged
-            ? " · inside the estimated fertile window"
-            : ""}
+          {selCopy.title} · {evidenceGlyph(sel.state.bleedingProvenance)} {selCopy.support} ·{" "}
+          {evidenceGlyph(sel.state.reproductiveProvenance)} {selCopy.secondary}
+          {sel.state.predictedFertile && !sel.state.logged ? " · likely fertile window" : ""}
         </span>
         <span className="mono rounded-full border border-[var(--cycle-hair-strong)] px-2 py-0.5 text-[9px] tracking-[0.06em] text-faint">
-          {sel.state.logged ? "logged" : "estimated"}
+          {sel.state.provenance.status === "unknown"
+            ? "unknown"
+            : sel.state.logged
+              ? "logged"
+              : "estimated"}
         </span>
         {sel.state.logged?.mood ? (
           <span className="text-faint">mood: {sel.state.logged.mood.toLowerCase()}</span>
@@ -167,10 +186,3 @@ export function CycleTimeline({
 }
 
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function dayNum(model: CycleModel, date: string): number {
-  if (!model.lastPeriodStart) return 1;
-  const d = new Date(`${date}T00:00:00`).getTime();
-  const s = new Date(`${model.lastPeriodStart}T00:00:00`).getTime();
-  return Math.max(1, Math.floor((d - s) / 86_400_000) + 1);
-}

@@ -36,7 +36,11 @@ export function buildRecommendations(model: CycleModel, context: CycleContext): 
     });
   }
 
-  if (model.currentPhase === "menstrual" && (model.currentDay ?? 0) <= 4) {
+  if (
+    model.currentBleedingState !== "unlogged" &&
+    model.currentBleedingState !== "none" &&
+    (model.currentDay ?? 0) <= 4
+  ) {
     out.push({
       id: `care-day-${model.currentDay}`,
       category: "care",
@@ -62,7 +66,7 @@ export function buildRecommendations(model: CycleModel, context: CycleContext): 
   }
 
   const lowEnergy = context.recentEnergy.slice(-7).filter((e) => e.energy <= 2).length;
-  if (model.currentPhase === "luteal" && lowEnergy >= 3) {
+  if (model.currentReproductivePhase === "luteal" && lowEnergy >= 3) {
     out.push({
       id: "plan-luteal-load",
       category: "plan",

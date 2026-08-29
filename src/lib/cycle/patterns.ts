@@ -4,6 +4,7 @@
  * keeps interpretation separate and cautious. No causation, no diagnosis.
  */
 
+import { addDays, diffDays } from "./engine";
 import type { CycleEntry, CycleModel, PhaseKey } from "./types";
 
 export interface SymptomTiming {
@@ -75,10 +76,7 @@ function windowIndex(
 }
 
 function dayFrom(date: string, start: string): number | null {
-  const a = Date.parse(`${start}T00:00:00Z`);
-  const b = Date.parse(`${date}T00:00:00Z`);
-  if (Number.isNaN(a) || Number.isNaN(b)) return null;
-  return Math.round((b - a) / 86_400_000) + 1;
+  return diffDays(start, date) + 1;
 }
 
 const MOOD_SCORE: Record<string, number> = { Low: 1, Flat: 2, Okay: 3, Good: 4, Energized: 5 };
@@ -94,7 +92,10 @@ export function phaseTally(
     const raw =
       metric === "energy" ? e.energy : e.mood !== null ? (MOOD_SCORE[e.mood] ?? null) : null;
     if (raw === null) continue;
-    const phase = e.phase ?? model.dayPhase(e.cycle_day);
+    const phase: PhaseKey =
+      e.flow && e.flow !== "none"
+        ? "menstrual"
+        : (e.phase ?? model.reproductivePhaseFor(e.cycle_day));
     const cur = acc.get(phase) ?? { sum: 0, n: 0 };
     cur.sum += raw;
     cur.n += 1;
@@ -146,9 +147,7 @@ export function sleepVsLength(
 }
 
 function dayOffset(start: string, days: number): string {
-  const d = new Date(`${start}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
+  return addDays(start, days);
 }
 
 /** Recurring period-length observation — needs ≥3 completed cycles. */
