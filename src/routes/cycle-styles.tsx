@@ -24,9 +24,11 @@ import { PredictionsCard } from "@/components/ci/PredictionsCard";
 import { InsightsPanel } from "@/components/ci/InsightsPanel";
 import { TipsCard } from "@/components/ci/TipsCard";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
+import { DayLogInsights } from "@/components/ci/DayLogInsights";
 import { Button, ConfidenceBadge, Disclaimer } from "@/components/ci/primitives";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { analyzeCycle, addDays, todayKey, type PeriodLog } from "@/lib/cycle/predict";
+import { analyzeDayLogs, type DayLog } from "@/lib/cycle/dayLogs";
 import { CYCLE_THEMES, DEFAULT_THEME_ID, themeById } from "@/lib/cycle/themes";
 import { loadThemeId, PERIODS_CHANGED, saveThemeId } from "@/lib/cycle/periodStore";
 
@@ -66,6 +68,59 @@ function demoLogs(today: string): PeriodLog[] {
     flow: flows[i] ?? null,
     notes: i === 2 ? "Travel week, sleep was a mess" : null,
   }));
+}
+
+/**
+ * A believable daily log for the same imaginary record, so the advanced-log
+ * charts can be judged in every direction too.
+ */
+function demoDays(today: string): DayLog[] {
+  const d = (offset: number, extra: Partial<DayLog>): DayLog => ({
+    date: addDays(today, offset),
+    ...extra,
+  });
+  return [
+    d(-12, {
+      flow: "heavy",
+      pain: 4,
+      mood: "rough",
+      energy: 2,
+      sleep: 6.5,
+      temperature: 36.5,
+      symptoms: ["cramps", "tiredness"],
+    }),
+    d(-11, {
+      flow: "heavy",
+      pain: 3,
+      mood: "low",
+      energy: 2,
+      sleep: 7,
+      temperature: 36.4,
+      symptoms: ["cramps"],
+    }),
+    d(-10, {
+      flow: "medium",
+      pain: 2,
+      mood: "low",
+      energy: 3,
+      sleep: 7,
+      symptoms: ["cramps", "bloating"],
+    }),
+    d(-9, { flow: "light", pain: 1, mood: "okay", energy: 3, sleep: 7.5, symptoms: ["bloating"] }),
+    d(-8, { flow: "light", pain: 1, mood: "okay", energy: 4, sleep: 8 }),
+    d(-7, { mood: "good", energy: 4, sleep: 8, temperature: 36.4 }),
+    d(-5, { mood: "good", energy: 4, sleep: 7.5, mucus: "watery" }),
+    d(-3, {
+      mood: "great",
+      energy: 5,
+      sleep: 8,
+      temperature: 36.3,
+      lh: "positive",
+      notes: "best day of the month",
+    }),
+    d(-2, { mood: "good", energy: 4, sleep: 7, mucus: "egg-white" }),
+    d(-1, { mood: "good", energy: 4, sleep: 8, temperature: 36.8, notes: "slept well" }),
+  ];
 }
 
 /** One edge case of each kind, purely to show how the banners look. */
@@ -162,6 +217,11 @@ function CycleStylesPage() {
     [store.logs, today, usingRealData],
   );
   const messy = useMemo(() => analyzeCycle(messyLogs(today), today), [today]);
+  const usingRealDays = store.days.length >= 3;
+  const dayAnalysis = useMemo(
+    () => analyzeDayLogs(usingRealDays ? store.days : demoDays(today), analysis),
+    [store.days, analysis, today, usingRealDays],
+  );
 
   const apply = (id: string) => {
     saveThemeId(id);
@@ -450,6 +510,14 @@ function CycleStylesPage() {
               </div>
             </div>
           </section>
+
+          <div className="mt-4">
+            <DayLogInsights
+              days={usingRealDays ? store.days : demoDays(today).slice().reverse()}
+              dayAnalysis={dayAnalysis}
+              compact
+            />
+          </div>
 
           {/* ------------------------------- the bar ----------------------------- */}
           <section className="mt-12" aria-label="What does not change">

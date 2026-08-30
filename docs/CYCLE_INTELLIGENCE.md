@@ -61,9 +61,18 @@ wrong _and_ how to fix it, so bad data never reaches the averaging logic.
 | Tips for this phase  | Phase-matched wellness suggestions.                                                                                                                                                        |
 | Entry form + history | Logging with inline validation; every entry with its computed length since the previous one, anomaly flags, edit, delete, clear all.                                                       |
 
-With no entries the page hides predictions entirely and lists the seven views
+With no entries the page hides predictions entirely and lists the eight views
 that fill in once something is logged — no fake numbers, no greyed-out dummy
 charts.
+
+### Advanced log
+
+`src/lib/cycle/dayLogs.ts` is the pure core for day-level logging:
+`placeDate()` puts any date in a cycle (reconstructing earlier cycles from the
+average, and flagging that it did), `validateDayLog()` keeps numbers in range,
+and `analyzeDayLogs()` aggregates everything by phase. Day logs are stored
+separately from period entries under `bloom.cycle.days.v1` and are exported as
+their own CSV.
 
 ## Edge cases, each with its own message
 

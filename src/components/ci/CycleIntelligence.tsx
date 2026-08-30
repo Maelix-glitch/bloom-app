@@ -12,6 +12,8 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { PhaseWave } from "./PhaseWave";
 import { RhythmChart } from "./RhythmChart";
 import { FlowBreakdown, ForecastStrip, PhaseCards, StatsStrip } from "./AnalyticsCards";
+import { DayLogForm } from "./DayLogForm";
+import { DayLogInsights } from "./DayLogInsights";
 import { PredictionsCard } from "./PredictionsCard";
 import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
@@ -19,7 +21,7 @@ import { EntryForm } from "./EntryForm";
 import { HistoryTable } from "./HistoryTable";
 import { Button, Card, Disclaimer } from "./primitives";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
-import { logsToCsv } from "@/lib/cycle/periodStore";
+import { daysToCsv, logsToCsv } from "@/lib/cycle/periodStore";
 import { DEFAULT_THEME_ID } from "@/lib/cycle/themes";
 import { formatDate, type LogDraft, type PeriodLog } from "@/lib/cycle/predict";
 
@@ -37,8 +39,18 @@ export function CycleIntelligence({
   const { analysis, logs, today, hydrated } = store;
   const [editing, setEditing] = useState<PeriodLog | null>(null);
   const [pendingStart, setPendingStart] = useState<string | null>(null);
+  const [logDate, setLogDate] = useState<string>(store.today);
   const formRef = useRef<HTMLDivElement>(null);
+  const dayLogRef = useRef<HTMLDivElement>(null);
   const hasEntries = analysis.entryCount > 0;
+
+  const focusDayLog = useCallback((date?: string) => {
+    if (date) setLogDate(date);
+    dayLogRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "center",
+    });
+  }, []);
 
   const focusForm = useCallback(() => {
     formRef.current?.scrollIntoView({
@@ -49,6 +61,11 @@ export function CycleIntelligence({
       formRef.current?.querySelector<HTMLInputElement>("input[type='date']")?.focus();
     }, 220);
   }, []);
+
+  /* follow the clock so "today" in the day log stays today */
+  useEffect(() => {
+    setLogDate((current) => (current === "" ? today : current));
+  }, [today]);
 
   /* when an edit is cancelled from anywhere, drop the draft */
   useEffect(() => {
@@ -65,15 +82,20 @@ export function CycleIntelligence({
   );
 
   const exportCsv = useCallback(() => {
-    if (logs.length === 0) return;
-    const blob = new Blob([logsToCsv(logs)], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "bloom-cycle-entries.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [logs]);
+    if (logs.length === 0 && store.days.length === 0) return;
+    const stamp = today.replace(/-/g, "");
+    const download = (name: string, body: string) => {
+      const blob = new Blob([body], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    if (logs.length > 0) download(`bloom-cycle-entries-${stamp}.csv`, logsToCsv(logs));
+    if (store.days.length > 0) download(`bloom-daily-log-${stamp}.csv`, daysToCsv(store.days));
+  }, [logs, store.days, today]);
 
   return (
     <div className="ci ci-root" data-theme={theme}>
@@ -157,7 +179,7 @@ export function CycleIntelligence({
                 <Card className="lg:col-span-2">
                   <p className="ci-eyebrow">What appears once you log</p>
                   <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                    Seven views, all computed from your own entries
+                    Eight views, all computed from your own entries
                   </h2>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {[
@@ -188,6 +210,10 @@ export function CycleIntelligence({
                       {
                         name: "Forward look",
                         body: "The next three cycles projected from your average, phase by phase.",
+                      },
+                      {
+                        name: "Advanced daily log",
+                        body: "Symptoms, mood, energy, pain, sleep and fertility signs per day — then compared across your phases.",
                       },
                     ].map((item) => (
                       <div
@@ -381,6 +407,30 @@ export function CycleIntelligence({
                   />
                 </div>
 
+                {/* ------------------------- advanced log ------------------------ */}
+                <div ref={dayLogRef} className="ci-rise mt-4">
+                  <DayLogForm
+                    days={store.days}
+                    today={today}
+                    analysis={analysis}
+                    date={logDate}
+                    onDateChange={setLogDate}
+                    onSave={store.saveDay}
+                    onDelete={store.removeDay}
+                    disabled={preview}
+                  />
+                </div>
+
+                <div className="ci-rise mt-4">
+                  <DayLogInsights
+                    days={store.days}
+                    dayAnalysis={store.dayAnalysis}
+                    onEditDate={preview ? undefined : focusDayLog}
+                    onDeleteDate={preview ? undefined : store.removeDay}
+                    disabled={preview}
+                  />
+                </div>
+
                 {/* ---------------------------- history ------------------------- */}
                 <div className="ci-rise mt-4">
                   <HistoryTable
@@ -394,6 +444,7 @@ export function CycleIntelligence({
                     onDelete={(id) => store.remove(id)}
                     onClearAll={() => {
                       store.clearAll();
+                      store.clearDays();
                       setEditing(null);
                     }}
                     onExport={exportCsv}

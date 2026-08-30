@@ -19,19 +19,32 @@ import {
   type PeriodLog,
 } from "@/lib/cycle/predict";
 import {
+  analyzeDayLogs,
+  validateDayLog,
+  type DayFieldErrors,
+  type DayLog,
+  type DayLogAnalysis,
+} from "@/lib/cycle/dayLogs";
+import {
+  loadDays,
   loadLogs,
   loadThemeId,
   legacyPeriodCandidates,
   PERIODS_CHANGED,
+  saveDays,
   saveLogs,
 } from "@/lib/cycle/periodStore";
 import { DEFAULT_THEME_ID } from "@/lib/cycle/themes";
 
 export type SaveResult = { ok: true; id: string } | { ok: false; errors: FieldErrors };
+export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
 export interface PeriodLogStore {
   logs: PeriodLog[];
   analysis: CycleAnalysis;
+  /** Advanced daily log, newest first. */
+  days: DayLog[];
+  dayAnalysis: DayLogAnalysis;
   today: string;
   /** False until localStorage has been read (server render has no storage). */
   hydrated: boolean;
@@ -41,24 +54,34 @@ export interface PeriodLogStore {
   remove: (id: string) => void;
   clearAll: () => void;
   importLegacy: () => number;
+  /** Upsert a daily log by date; merges with whatever is already there. */
+  saveDay: (draft: DayLog) => SaveDayResult;
+  removeDay: (date: string) => void;
+  clearDays: () => void;
 }
 
 export function usePeriodLog(): PeriodLogStore {
   const [logs, setLogs] = useState<PeriodLog[]>([]);
+  const [days, setDays] = useState<DayLog[]>([]);
   const [today, setToday] = useState<string>(() => todayKey());
   const [hydrated, setHydrated] = useState(false);
   const [legacyAvailable, setLegacyAvailable] = useState(false);
   const skipPersist = useRef(true);
+  const skipDayPersist = useRef(true);
 
   /* read once on mount, then keep in sync with other instances of the hook */
   useEffect(() => {
     const read = () => {
       setLogs(loadLogs());
+      setDays(loadDays());
       setToday(todayKey());
       setHydrated(true);
     };
     read();
-    const onExternal = () => setLogs(loadLogs());
+    const onExternal = () => {
+      setLogs(loadLogs());
+      setDays(loadDays());
+    };
     window.addEventListener(PERIODS_CHANGED, onExternal);
     window.addEventListener("storage", onExternal);
     return () => {
@@ -93,6 +116,15 @@ export function usePeriodLog(): PeriodLogStore {
     if (!hydrated) return;
     saveLogs(logs);
   }, [logs, hydrated]);
+
+  useEffect(() => {
+    if (skipDayPersist.current) {
+      skipDayPersist.current = false;
+      return;
+    }
+    if (!hydrated) return;
+    saveDays(days);
+  }, [days, hydrated]);
 
   const add = useCallback((draft: LogDraft): SaveResult => {
     const errors = validateLogDraft(draft, loadLogs(), todayKey());
@@ -148,11 +180,31 @@ export function usePeriodLog(): PeriodLogStore {
     return candidates.length;
   }, []);
 
+  const saveDay = useCallback((draft: DayLog): SaveDayResult => {
+    const errors = validateDayLog(draft, todayKey());
+    if (Object.keys(errors).length > 0) return { ok: false, errors };
+    setDays((prev) => {
+      const next = prev.filter((d) => d.date !== draft.date);
+      next.push({ ...draft, updatedAt: new Date().toISOString() });
+      return next.sort((a, b) => a.date.localeCompare(b.date));
+    });
+    return { ok: true };
+  }, []);
+
+  const removeDay = useCallback((date: string) => {
+    setDays((prev) => prev.filter((d) => d.date !== date));
+  }, []);
+
+  const clearDays = useCallback(() => setDays([]), []);
+
   const analysis = useMemo(() => analyzeCycle(logs, today), [logs, today]);
+  const dayAnalysis = useMemo(() => analyzeDayLogs(days, analysis), [days, analysis]);
 
   return {
     logs,
     analysis,
+    days: useMemo(() => [...days].sort((a, b) => b.date.localeCompare(a.date)), [days]),
+    dayAnalysis,
     today,
     hydrated,
     legacyAvailable,
@@ -161,6 +213,9 @@ export function usePeriodLog(): PeriodLogStore {
     remove,
     clearAll,
     importLegacy,
+    saveDay,
+    removeDay,
+    clearDays,
   };
 }
 
