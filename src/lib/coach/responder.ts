@@ -14,7 +14,9 @@
  */
 
 import type { CoachContext, CoachMode } from "@/lib/coach/intelligence";
-import type { TrackerId } from "@/lib/trackers/core";
+
+/** The six daily trackers, restated so this module stands on its own. */
+export type TrackerId = "sleep" | "water" | "study" | "movement" | "energy" | "screen";
 
 export type CoachBlock =
   | {

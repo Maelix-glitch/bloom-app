@@ -18,8 +18,6 @@ import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/respond
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
 import { analyzeCycle } from "@/lib/cycle/predict";
 import { loadLogs as loadPeriodLogs, loadDays as loadCycleDays } from "@/lib/cycle/periodStore";
-import { analyzeTrackers, TRACKERS } from "@/lib/trackers/core";
-import { loadDays as loadTrackerDays, loadGoals as loadTrackerGoals } from "@/lib/trackers/store";
 import { todayKey } from "@/lib/cycle/predict";
 
 export type { CoachMode };
@@ -334,6 +332,118 @@ export function useCoachSystem() {
   );
 }
 
+/* -------------------------------- the record ------------------------------- */
+/* The trackers page is optional — some installs run the coach without it — so
+ * this reads the same localStorage keys directly rather than importing
+ * `lib/trackers/*`. A missing folder then costs the coach a topic, not the
+ * page. The formatting below mirrors core.ts so both pages quote a day the
+ * same way.                                                                   */
+
+const TRACKER_DAYS_KEY = "bloom.trackers.days.v1";
+const TRACKER_GOALS_KEY = "bloom.trackers.goals.v1";
+
+const hours = (m: number) => `${Math.floor(m / 60)}h${m % 60 === 0 ? "" : ` ${m % 60}m`}`;
+
+const TRACKER_SHAPE: {
+  id: "sleep" | "water" | "study" | "movement" | "energy" | "screen";
+  name: string;
+  goalKey: string;
+  fallback: number;
+  format: (v: number) => string;
+}[] = [
+  { id: "sleep", name: "Sleep", goalKey: "sleepMinutes", fallback: 480, format: hours },
+  {
+    id: "water",
+    name: "Water",
+    goalKey: "waterMl",
+    fallback: 2200,
+    format: (v) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}L` : `${v}ml`),
+  },
+  { id: "study", name: "Study", goalKey: "studyMinutes", fallback: 120, format: hours },
+  {
+    id: "movement",
+    name: "Movement",
+    goalKey: "movementMinutes",
+    fallback: 30,
+    format: (v) => (v < 60 ? `${v}m` : hours(v)),
+  },
+  { id: "energy", name: "Energy", goalKey: "energy", fallback: 3, format: (v) => `${v}/5` },
+  { id: "screen", name: "Screen", goalKey: "screenMinutes", fallback: 180, format: hours },
+];
+
+function valueFor(day: Row, id: string): number | null {
+  if (id === "study") {
+    const sessions = Array.isArray(day["sessions"]) ? (day["sessions"] as Row[]) : [];
+    const total = sessions.reduce(
+      (sum, s) => sum + (typeof s["minutes"] === "number" ? Math.max(s["minutes"], 0) : 0),
+      0,
+    );
+    return total > 0 ? total : null;
+  }
+  const v = day[`${id}Minutes`] ?? day[id];
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+const dateKey = (offset = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+};
+
+function readTrackerFacts(): CoachRecord["trackers"] {
+  const days = readJson<Row[]>(TRACKER_DAYS_KEY, []);
+  if (!Array.isArray(days) || days.length === 0) return [];
+  const goals = readJson<Row>(TRACKER_GOALS_KEY, {});
+
+  const byDate = new Map<string, Row>();
+  for (const day of days) {
+    const date = day?.["date"];
+    if (typeof date === "string") byDate.set(date, day);
+  }
+
+  const window: string[] = [];
+  for (let i = 13; i >= 0; i -= 1) window.push(dateKey(-i));
+
+  return TRACKER_SHAPE.map((shape) => {
+    const goal =
+      typeof goals[shape.goalKey] === "number" && Number.isFinite(goals[shape.goalKey])
+        ? (goals[shape.goalKey] as number)
+        : shape.fallback;
+    const series = window.map((date) => {
+      const day = byDate.get(date);
+      return day ? valueFor(day, shape.id) : null;
+    });
+    const known = series.filter((v): v is number => v !== null);
+    const logsCount = [...byDate.values()].filter((d) => valueFor(d, shape.id) !== null).length;
+    const last7 = known.slice(-7);
+    const avg7 = last7.length ? last7.reduce((sum, v) => sum + v, 0) / last7.length : null;
+
+    /* streak: consecutive days back from today that met the target */
+    let streak = 0;
+    for (let i = series.length - 1; i >= 0; i -= 1) {
+      const v = series[i];
+      if (typeof v !== "number") break;
+      const met = shape.id === "screen" ? v <= goal : v >= goal;
+      if (!met) break;
+      streak += 1;
+    }
+
+    return {
+      id: shape.id,
+      name: shape.name,
+      today: series[series.length - 1] ?? null,
+      goal,
+      avg7,
+      streak,
+      daysLogged: logsCount,
+      series,
+      format: shape.format,
+    };
+  });
+}
+
 /**
  * Everything the coach is allowed to speak from, read fresh on every request so
  * the answer always reflects the record as it stands this second.
@@ -343,22 +453,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
 
   let trackers: CoachRecord["trackers"] = [];
   try {
-    const goals = loadTrackerGoals();
-    const analysis = analyzeTrackers(loadTrackerDays(), goals, today);
-    trackers = TRACKERS.map((def) => {
-      const stat = analysis.trackers[def.id];
-      return {
-        id: def.id,
-        name: def.name,
-        today: stat.today,
-        goal: stat.goal,
-        avg7: stat.avg7,
-        streak: stat.streak,
-        daysLogged: stat.daysLogged,
-        series: stat.series.map((point) => point.value),
-        format: def.format,
-      };
-    });
+    trackers = readTrackerFacts();
   } catch {
     trackers = [];
   }
