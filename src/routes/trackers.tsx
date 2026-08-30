@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import designSystemCss from "../styles/cycle2.css?url";
-import trackersCss from "../styles/trackers.css?url";
+import trackersConsoleCss from "../styles/trackers.css?url";
+import trackersCss from "../styles/trackers2.css?url";
 import { BloomHeader } from "@/components/BloomHeader";
-import { TrackersPage } from "@/components/tk/TrackersPage";
+import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
 const FONTS =
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/trackers")({
       { rel: "stylesheet", href: FONTS },
       { rel: "stylesheet", href: designSystemCss },
       { rel: "stylesheet", href: trackersCss },
+      { rel: "stylesheet", href: trackersConsoleCss },
     ],
   }),
   component: TrackersRoute,
@@ -34,7 +36,7 @@ function TrackersRoute() {
     <>
       <BloomHeader />
       <main>
-        <TrackersPage theme={theme} />
+        <TrackersDesign theme={theme} />
       </main>
     </>
   );
