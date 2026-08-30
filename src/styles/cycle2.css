@@ -1,0 +1,1223 @@
+/*
+ * Bloom — Cycle Intelligence design system.
+ *
+ * One component set, five directions. Everything is driven by CSS custom
+ * properties set by [data-theme] on the `.ci` root, so a direction can be
+ * previewed, switched and applied without touching a line of component code.
+ *
+ * Deliberately NOT: soft-pink period app, cream + serif + terracotta, or
+ * all-black with a single neon accent.
+ */
+
+.ci {
+  --ci-font-display: "Fraunces", ui-serif, Georgia, serif;
+  --ci-font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --ci-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  color-scheme: dark;
+}
+
+/* ------------------------------- 1. Nocturne ------------------------------ */
+/* Deep charcoal-teal. Warm off-white ink. Berry / teal / gold. Hairline cards. */
+.ci[data-theme="nocturne"] {
+  --ci-bg: #0c1416;
+  --ci-bg-deep: #080f11;
+  --ci-surface: #121c1f;
+  --ci-surface-2: #172327;
+  --ci-line: #1f2c2e;
+  --ci-line-strong: #2d3d3f;
+  --ci-text: #f1ebe0;
+  --ci-text-soft: #cbc5b8;
+  --ci-text-mute: #8c928c;
+  --ci-menstrual: #c4567f;
+  --ci-follicular: #4fb3a0;
+  --ci-luteal: #3f8f93;
+  --ci-ovulation: #e5b45e;
+  --ci-late: #9d8fb5;
+  --ci-accent: #4fb3a0;
+  --ci-accent-soft: rgba(79, 179, 160, 0.14);
+  --ci-focus: #7fd3c3;
+  --ci-ok: #4fb3a0;
+  --ci-warn: #e5b45e;
+  --ci-danger: #e07a5f;
+  --ci-input-bg: #0f191c;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(79, 179, 160, 0.11), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(196, 86, 127, 0.09), transparent 55%);
+  --ci-radius-lg: 14px;
+  --ci-radius-md: 10px;
+  --ci-radius-sm: 8px;
+  --ci-shadow: 0 20px 44px -30px rgba(0, 0, 0, 0.9);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* ------------------------------ 2. Orchid ink ----------------------------- */
+/* Charcoal-plum ground, orchid bleed, jade and brass. Glassier raised panels. */
+.ci[data-theme="orchid"] {
+  --ci-bg: #12101a;
+  --ci-bg-deep: #0c0a13;
+  --ci-surface: #1a1626;
+  --ci-surface-2: #211c30;
+  --ci-line: #2a2338;
+  --ci-line-strong: #3a3150;
+  --ci-text: #f4edf4;
+  --ci-text-soft: #d0c5d8;
+  --ci-text-mute: #968ba6;
+  --ci-menstrual: #d2608f;
+  --ci-follicular: #52b69b;
+  --ci-luteal: #3e8c90;
+  --ci-ovulation: #e3b55e;
+  --ci-late: #b39ad6;
+  --ci-accent: #d2608f;
+  --ci-accent-soft: rgba(210, 96, 143, 0.16);
+  --ci-focus: #d79ae0;
+  --ci-ok: #52b69b;
+  --ci-warn: #e3b55e;
+  --ci-danger: #e2795f;
+  --ci-input-bg: #15111f;
+  --ci-veil:
+    radial-gradient(120% 80% at 8% -10%, rgba(210, 96, 143, 0.16), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(82, 182, 155, 0.1), transparent 55%);
+  --ci-radius-lg: 20px;
+  --ci-radius-md: 14px;
+  --ci-radius-sm: 10px;
+  --ci-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.02em;
+}
+
+/* ------------------------------- 3. Deep tide ----------------------------- */
+/* Charcoal-slate blue, crisp and technical. Raspberry / aqua / saffron. */
+.ci[data-theme="tide"] {
+  --ci-bg: #0d1620;
+  --ci-bg-deep: #080f16;
+  --ci-surface: #131f2a;
+  --ci-surface-2: #182734;
+  --ci-line: #1e2e3b;
+  --ci-line-strong: #2b4153;
+  --ci-text: #edf1f5;
+  --ci-text-soft: #c3ced7;
+  --ci-text-mute: #8b9baa;
+  --ci-menstrual: #c4557a;
+  --ci-follicular: #3fb6c6;
+  --ci-luteal: #2f8ca0;
+  --ci-ovulation: #edbb5f;
+  --ci-late: #93a9c4;
+  --ci-accent: #3fb6c6;
+  --ci-accent-soft: rgba(63, 182, 198, 0.14);
+  --ci-focus: #74d6e4;
+  --ci-ok: #3fb6c6;
+  --ci-warn: #edbb5f;
+  --ci-danger: #e5765c;
+  --ci-input-bg: #0f1b26;
+  --ci-veil:
+    radial-gradient(120% 80% at 10% -10%, rgba(63, 182, 198, 0.13), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(196, 85, 122, 0.1), transparent 55%);
+  --ci-radius-lg: 10px;
+  --ci-radius-md: 7px;
+  --ci-radius-sm: 5px;
+  --ci-shadow: none;
+  --ci-display-weight: 600;
+  --ci-display-track: -0.01em;
+}
+
+/* ------------------------------- 4. Fern & fig ---------------------------- */
+/* Deep charcoal-green. Shadow-built surfaces, no hairlines. Softer geometry. */
+.ci[data-theme="fern"] {
+  --ci-bg: #0d1512;
+  --ci-bg-deep: #070c0a;
+  --ci-surface: #131e19;
+  --ci-surface-2: #18261f;
+  --ci-line: #16221c;
+  --ci-line-strong: #22332a;
+  --ci-text: #eef1e7;
+  --ci-text-soft: #c7d0c2;
+  --ci-text-mute: #8e9a8c;
+  --ci-menstrual: #b4547c;
+  --ci-follicular: #4fb38a;
+  --ci-luteal: #2e8570;
+  --ci-ovulation: #dfb35c;
+  --ci-late: #9aa8b6;
+  --ci-accent: #4fb38a;
+  --ci-accent-soft: rgba(79, 179, 138, 0.15);
+  --ci-focus: #7fd6ae;
+  --ci-ok: #4fb38a;
+  --ci-warn: #dfb35c;
+  --ci-danger: #dd7a5c;
+  --ci-input-bg: #101a15;
+  --ci-veil:
+    radial-gradient(120% 80% at 10% -10%, rgba(79, 179, 138, 0.13), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(180, 84, 124, 0.1), transparent 55%);
+  --ci-radius-lg: 18px;
+  --ci-radius-md: 13px;
+  --ci-radius-sm: 9px;
+  --ci-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.85);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* --------------------- 5. Daybreak (light, optional) ---------------------- */
+/* The same structure in daylight — warm paper, ink text, muted accents. */
+.ci[data-theme="daybreak"] {
+  color-scheme: light;
+  --ci-bg: #f3efe6;
+  --ci-bg-deep: #e9e4d8;
+  --ci-surface: #fbf9f3;
+  --ci-surface-2: #f5f1e7;
+  --ci-line: #e3ddcd;
+  --ci-line-strong: #cdc4b0;
+  --ci-text: #1b211e;
+  --ci-text-soft: #454f49;
+  --ci-text-mute: #6c756e;
+  --ci-menstrual: #a63e68;
+  --ci-follicular: #1f7f74;
+  --ci-luteal: #16636f;
+  --ci-ovulation: #a8781f;
+  --ci-late: #5d6470;
+  --ci-accent: #1f7f74;
+  --ci-accent-soft: rgba(31, 127, 116, 0.12);
+  --ci-focus: #1f7f74;
+  --ci-ok: #1f7f74;
+  --ci-warn: #a8781f;
+  --ci-danger: #b4462f;
+  --ci-input-bg: #ffffff;
+  --ci-veil:
+    radial-gradient(120% 80% at 10% -10%, rgba(31, 127, 116, 0.09), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(166, 62, 104, 0.07), transparent 55%);
+  --ci-radius-lg: 12px;
+  --ci-radius-md: 9px;
+  --ci-radius-sm: 7px;
+  --ci-shadow: 0 16px 34px -26px rgba(27, 33, 30, 0.5);
+  --ci-display-weight: 600;
+  --ci-display-track: -0.015em;
+}
+
+/* --------------------------------- shell --------------------------------- */
+
+.ci-root {
+  position: relative;
+  min-height: 100dvh;
+  background: var(--ci-bg);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.ci-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--ci-veil);
+}
+
+/** A themed panel that is NOT full-viewport — used by the style gallery. */
+.ci-panel {
+  position: relative;
+  background: var(--ci-bg);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.ci-shell {
+  position: relative;
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: clamp(22px, 4vw, 46px) clamp(16px, 4vw, 30px) 80px;
+}
+
+.ci-display {
+  font-family: var(--ci-font-display);
+  font-weight: var(--ci-display-weight);
+  letter-spacing: var(--ci-display-track);
+  font-optical-sizing: auto;
+}
+
+.ci-eyebrow {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.ci-num {
+  font-family: var(--ci-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.ci-card {
+  position: relative;
+  min-width: 0;
+  background: var(--ci-surface);
+  border: 1px solid var(--ci-line);
+  border-radius: var(--ci-radius-lg);
+  box-shadow: var(--ci-shadow);
+}
+
+.ci-card--pad {
+  padding: clamp(16px, 2.6vw, 24px);
+}
+
+.ci-hair {
+  border-color: var(--ci-line);
+}
+
+.ci-muted {
+  color: var(--ci-text-mute);
+}
+
+.ci-soft {
+  color: var(--ci-text-soft);
+}
+
+/* --------------------------------- focus ---------------------------------- */
+
+.ci :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--ci-focus);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+/* --------------------------------- buttons -------------------------------- */
+
+.ci-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line-strong);
+  background: var(--ci-surface-2);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.ci-btn:hover:not(:disabled) {
+  border-color: var(--ci-accent);
+  background: var(--ci-accent-soft);
+}
+
+.ci-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ci-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ci-btn--primary {
+  background: var(--ci-accent);
+  border-color: var(--ci-accent);
+  color: var(--ci-bg-deep);
+  font-weight: 600;
+}
+
+.ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.07);
+  background: var(--ci-accent);
+}
+
+.ci-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ci-text-soft);
+  padding: 6px 10px;
+}
+
+.ci-btn--ghost:hover:not(:disabled) {
+  background: var(--ci-surface-2);
+  border-color: var(--ci-line);
+}
+
+.ci-btn--danger {
+  border-color: color-mix(in oklab, var(--ci-danger) 55%, transparent);
+  color: var(--ci-danger);
+  background: transparent;
+}
+
+.ci-btn--danger:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--ci-danger) 14%, transparent);
+  border-color: var(--ci-danger);
+}
+
+.ci-btn--sm {
+  padding: 8px 13px;
+  font-size: 12px;
+}
+
+/* ---------------------------------- form ---------------------------------- */
+
+.ci-field {
+  display: grid;
+  gap: 6px;
+}
+
+.ci-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ci-text-soft);
+}
+
+.ci-hint {
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+}
+
+.ci-input {
+  width: 100%;
+  background: var(--ci-input-bg);
+  border: 1px solid var(--ci-line-strong);
+  border-radius: var(--ci-radius-sm);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  font-size: 14px;
+  padding: 10px 12px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.ci-input::placeholder {
+  color: color-mix(in oklab, var(--ci-text-mute) 80%, transparent);
+}
+
+.ci-input:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--ci-accent) 40%, var(--ci-line-strong));
+}
+
+.ci-input[aria-invalid="true"] {
+  border-color: var(--ci-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ci-danger) 14%, transparent);
+}
+
+.ci-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+textarea.ci-input {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.ci-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ci-seg-item {
+  border: 1px solid var(--ci-line-strong);
+  background: transparent;
+  color: var(--ci-text-soft);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12.5px;
+  font-family: var(--ci-font-sans);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.ci-seg-item:hover:not(:disabled) {
+  border-color: var(--ci-accent);
+  color: var(--ci-text);
+}
+
+.ci-seg-item[aria-pressed="true"] {
+  border-color: var(--ci-accent);
+  background: var(--ci-accent-soft);
+  color: var(--ci-text);
+  font-weight: 500;
+}
+
+.ci-error {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ci-danger);
+}
+
+.ci-error svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* --------------------------------- badges --------------------------------- */
+
+.ci-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--c-line, var(--ci-line-strong));
+  background: var(--c-bg, transparent);
+  color: var(--c-fg, var(--ci-text-soft));
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.ci-badge--dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-fg, currentColor);
+}
+
+.ci-confidence[data-level="none"] {
+  --c-fg: var(--ci-text-mute);
+  --c-line: var(--ci-line-strong);
+  --c-bg: transparent;
+}
+.ci-confidence[data-level="low"] {
+  --c-fg: var(--ci-menstrual);
+  --c-line: color-mix(in oklab, var(--ci-menstrual) 45%, transparent);
+  --c-bg: color-mix(in oklab, var(--ci-menstrual) 12%, transparent);
+}
+.ci-confidence[data-level="medium"] {
+  --c-fg: var(--ci-ovulation);
+  --c-line: color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+  --c-bg: color-mix(in oklab, var(--ci-ovulation) 12%, transparent);
+}
+.ci-confidence[data-level="high"] {
+  --c-fg: var(--ci-follicular);
+  --c-line: color-mix(in oklab, var(--ci-follicular) 45%, transparent);
+  --c-bg: color-mix(in oklab, var(--ci-follicular) 12%, transparent);
+}
+
+/* ------------------------------- phase tokens ----------------------------- */
+
+.ci [data-phase="menstrual"] {
+  --phase: var(--ci-menstrual);
+}
+.ci [data-phase="follicular"] {
+  --phase: var(--ci-follicular);
+}
+.ci [data-phase="ovulation"] {
+  --phase: var(--ci-ovulation);
+}
+.ci [data-phase="luteal"] {
+  --phase: var(--ci-luteal);
+}
+.ci [data-phase="late"] {
+  --phase: var(--ci-late);
+}
+
+/* --------------------------------- lists ---------------------------------- */
+
+.ci-tip {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--ci-line);
+}
+
+.ci-tip:first-of-type {
+  border-top: none;
+}
+
+.ci-tip__mark {
+  width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  border-radius: 2px;
+  background: var(--phase, var(--ci-accent));
+  transform: rotate(45deg);
+}
+
+.ci-flag {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 11px;
+  padding: 15px 16px;
+  border-radius: var(--ci-radius-md);
+  border: 1px solid var(--f-line, var(--ci-line));
+  background: var(--f-bg, var(--ci-surface-2));
+}
+
+.ci-flag[data-tone="info"] {
+  --f-line: color-mix(in oklab, var(--ci-follicular) 34%, transparent);
+  --f-bg: color-mix(in oklab, var(--ci-follicular) 8%, transparent);
+}
+.ci-flag[data-tone="attention"] {
+  --f-line: color-mix(in oklab, var(--ci-ovulation) 38%, transparent);
+  --f-bg: color-mix(in oklab, var(--ci-ovulation) 8%, transparent);
+}
+.ci-flag[data-tone="calm"] {
+  --f-line: var(--ci-line);
+  --f-bg: var(--ci-surface-2);
+}
+
+.ci-flag__icon {
+  margin-top: 2px;
+  color: var(--f-icon, var(--ci-text-soft));
+}
+
+.ci-flag[data-tone="info"] .ci-flag__icon {
+  --f-icon: var(--ci-follicular);
+}
+.ci-flag[data-tone="attention"] .ci-flag__icon {
+  --f-icon: var(--ci-ovulation);
+}
+
+/* --------------------------------- tables --------------------------------- */
+
+.ci-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.ci-table th {
+  text-align: left;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+  font-weight: 400;
+  padding: 0 12px 9px;
+  border-bottom: 1px solid var(--ci-line-strong);
+}
+
+.ci-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--ci-line);
+  vertical-align: middle;
+  color: var(--ci-text-soft);
+}
+
+.ci-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ci-table tbody tr.is-anomaly {
+  background: color-mix(in oklab, var(--ci-ovulation) 6%, transparent);
+}
+
+/* --------------------------------- motion --------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .ci-rise {
+    animation: ci-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .ci-rise-1 {
+    animation-delay: 60ms;
+  }
+  .ci-rise-2 {
+    animation-delay: 120ms;
+  }
+  .ci-rise-3 {
+    animation-delay: 180ms;
+  }
+  .ci-rise-4 {
+    animation-delay: 240ms;
+  }
+  .ci-draw {
+    animation: ci-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes ci-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ci-draw {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ci *,
+  .ci *::before,
+  .ci *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------- utilities -------------------------------- */
+
+.ci-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ci-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ci-line-strong) transparent;
+}
+
+.ci-link {
+  color: var(--ci-text-mute);
+  text-decoration: underline;
+  text-decoration-color: var(--ci-line-strong);
+  text-underline-offset: 4px;
+  transition: color 160ms ease;
+}
+
+.ci-link:hover {
+  color: var(--ci-text);
+}
+
+/* =========================================================================
+   6. Aurora — deep teal-indigo, glass panels, drifting light
+   ========================================================================= */
+
+.ci[data-theme="aurora"] {
+  --ci-bg: #09131a;
+  --ci-bg-deep: #050d12;
+  --ci-surface: rgba(16, 34, 42, 0.72);
+  --ci-surface-2: rgba(22, 46, 56, 0.6);
+  --ci-line: rgba(120, 200, 210, 0.14);
+  --ci-line-strong: rgba(120, 200, 210, 0.26);
+  --ci-text: #e8f6f4;
+  --ci-text-soft: #b9d6d6;
+  --ci-text-mute: #7fa3a8;
+  --ci-menstrual: #e2578c;
+  --ci-follicular: #45e0c0;
+  --ci-luteal: #2f9fbb;
+  --ci-ovulation: #ffd166;
+  --ci-late: #9db6d8;
+  --ci-accent: #45e0c0;
+  --ci-accent-soft: rgba(69, 224, 192, 0.14);
+  --ci-focus: #7ff2dd;
+  --ci-ok: #45e0c0;
+  --ci-warn: #ffd166;
+  --ci-danger: #f2805f;
+  --ci-input-bg: rgba(8, 22, 28, 0.7);
+  --ci-veil: none;
+  --ci-atmos-1: #1fb8a6;
+  --ci-atmos-2: #7d4bd8;
+  --ci-atmos-3: #e2578c;
+  --ci-atmos-opacity: 0.3;
+  --ci-glass: 1;
+  --ci-grain: 0.5;
+  --ci-radius-lg: 18px;
+  --ci-radius-md: 13px;
+  --ci-radius-sm: 9px;
+  --ci-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.02em;
+}
+
+/* =========================================================================
+   7. Ember — warm charcoal, candlelight glow, softest geometry
+   ========================================================================= */
+
+.ci[data-theme="ember"] {
+  --ci-bg: #14100e;
+  --ci-bg-deep: #0c0908;
+  --ci-surface: #1d1714;
+  --ci-surface-2: #251d18;
+  --ci-line: #31251f;
+  --ci-line-strong: #43342b;
+  --ci-text: #f6ece1;
+  --ci-text-soft: #d6c3b2;
+  --ci-text-mute: #9c8676;
+  --ci-menstrual: #d05a6e;
+  --ci-follicular: #4fae9b;
+  --ci-luteal: #3a8c86;
+  --ci-ovulation: #f0a94c;
+  --ci-late: #b09a8c;
+  --ci-accent: #f0a94c;
+  --ci-accent-soft: rgba(240, 169, 76, 0.15);
+  --ci-focus: #ffc98a;
+  --ci-ok: #4fae9b;
+  --ci-warn: #f0a94c;
+  --ci-danger: #e0705a;
+  --ci-input-bg: #171210;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(240, 169, 76, 0.12), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(208, 90, 110, 0.09), transparent 55%);
+  --ci-atmos-1: #f0a94c;
+  --ci-atmos-2: #d05a6e;
+  --ci-atmos-3: #4fae9b;
+  --ci-atmos-opacity: 0.18;
+  --ci-grain: 0.7;
+  --ci-radius-lg: 22px;
+  --ci-radius-md: 16px;
+  --ci-radius-sm: 11px;
+  --ci-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.9);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* =========================================================================
+   8. Ink — near-black, bone white, hairline sharpness, no ornament
+   ========================================================================= */
+
+.ci[data-theme="ink"] {
+  --ci-bg: #0a0a0b;
+  --ci-bg-deep: #050506;
+  --ci-surface: #111113;
+  --ci-surface-2: #17171a;
+  --ci-line: #242428;
+  --ci-line-strong: #34343a;
+  --ci-text: #f4f4f1;
+  --ci-text-soft: #c4c4bf;
+  --ci-text-mute: #8a8a85;
+  --ci-menstrual: #e35d84;
+  --ci-follicular: #7fd1c3;
+  --ci-luteal: #4fa3ae;
+  --ci-ovulation: #f2c46b;
+  --ci-late: #a3a3ad;
+  --ci-accent: #f4f4f1;
+  --ci-accent-soft: rgba(244, 244, 241, 0.08);
+  --ci-focus: #ffffff;
+  --ci-ok: #7fd1c3;
+  --ci-warn: #f2c46b;
+  --ci-danger: #e8654f;
+  --ci-input-bg: #0d0d0f;
+  --ci-veil: none;
+  --ci-atmos-opacity: 0;
+  --ci-grain: 0.35;
+  --ci-radius-lg: 6px;
+  --ci-radius-md: 4px;
+  --ci-radius-sm: 3px;
+  --ci-shadow: none;
+  --ci-display-weight: 600;
+  --ci-display-track: -0.02em;
+}
+
+/* ------------------------------- atmosphere ------------------------------ */
+
+.ci-atmos {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ci-atmos i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: var(--ci-atmos-opacity, 0.22);
+  will-change: transform;
+}
+
+.ci-atmos i:nth-child(1) {
+  width: 46vw;
+  height: 46vw;
+  top: -14vw;
+  left: -8vw;
+  background: var(--ci-atmos-1, var(--ci-follicular));
+  animation: ci-drift-a 38s ease-in-out infinite alternate;
+}
+.ci-atmos i:nth-child(2) {
+  width: 38vw;
+  height: 38vw;
+  top: 18vh;
+  right: -10vw;
+  background: var(--ci-atmos-2, var(--ci-luteal));
+  animation: ci-drift-b 46s ease-in-out infinite alternate;
+}
+.ci-atmos i:nth-child(3) {
+  width: 30vw;
+  height: 30vw;
+  bottom: -8vw;
+  left: 26vw;
+  background: var(--ci-atmos-3, var(--ci-menstrual));
+  animation: ci-drift-c 54s ease-in-out infinite alternate;
+}
+
+.ci-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: calc(var(--ci-grain, 0.5) * 0.16);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* glass panels for the aurora direction */
+.ci[data-theme="aurora"] .ci-card,
+.ci[data-theme="aurora"] .ci-flag {
+  backdrop-filter: blur(16px);
+}
+
+@keyframes ci-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6vw, 5vh, 0) scale(1.12);
+  }
+}
+@keyframes ci-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-7vw, -4vh, 0) scale(1);
+  }
+}
+@keyframes ci-drift-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4vw, -6vh, 0) scale(1.15);
+  }
+}
+
+/* --------------------------------- motion -------------------------------- */
+
+/* scroll reveal — the component adds [data-visible] when it enters the viewport */
+.ci-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 560ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.ci-reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* cards lift slightly on hover — never on touch, and never for reduced motion */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ci-lift {
+    transition:
+      transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 320ms ease,
+      box-shadow 320ms ease;
+  }
+  .ci-lift:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--ci-accent) 40%, var(--ci-line));
+    box-shadow:
+      var(--ci-shadow),
+      0 0 0 1px color-mix(in oklab, var(--ci-accent) 14%, transparent);
+  }
+}
+
+/* bars and fills grow in once their section is on screen */
+.ci-grow {
+  transform-origin: left center;
+  animation: ci-grow-x 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--grow-delay, 0ms);
+}
+.ci-grow-y {
+  transform-origin: bottom center;
+  animation: ci-grow-y 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--grow-delay, 0ms);
+}
+
+@keyframes ci-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes ci-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* the today marker breathes */
+.ci-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ci-pulse 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ci-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.55);
+  }
+}
+
+/* a single slow sheen across the "you are here" marker */
+.ci-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.ci-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--phase, var(--ci-text)) 30%, transparent) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: ci-sheen 4.5s ease-in-out infinite;
+}
+
+@keyframes ci-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* numbers settle in rather than popping */
+.ci-tick {
+  font-variant-numeric: tabular-nums;
+  transition: opacity 200ms ease;
+}
+
+/* editorial section numbering */
+.ci-index {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--ci-text-mute);
+}
+
+/* a top highlight inside every card, like light catching an edge */
+.ci-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--ci-text) 12%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ci-atmos i,
+  .ci-sheen::after,
+  .ci-pulse,
+  .ci-dial-pulse,
+  .ci-petal,
+  .ci-adv-body {
+    animation: none !important;
+  }
+  .ci-gauge-arc {
+    transition: none !important;
+  }
+  .ci-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ci-grow,
+  .ci-grow-y {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------ cycle dial -------------------------------- */
+/* One cycle, one circle: phase arcs, day ticks, the dot that is today. */
+.ci-dial-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ci-pulse-ring 2.8s ease-in-out infinite;
+}
+
+@keyframes ci-pulse-ring {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.08;
+    transform: scale(1.6);
+  }
+}
+
+.ci-dial-dots circle {
+  animation: ci-fade-in 0.5s ease both;
+}
+
+@keyframes ci-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.42;
+  }
+}
+
+/* ----------------------------- symptom bloom ------------------------------ */
+.ci-petal {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: ci-petal-in 0.7s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes ci-petal-in {
+  from {
+    transform: scale(0.15);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0.78;
+  }
+}
+
+/* -------------------------------- gauges ---------------------------------- */
+/* The final value is always on the attribute, so a gauge that is never
+   scrolled to still reads correctly — the animation only adds the sweep. */
+.ci-gauge-arc.is-go {
+  animation: ci-gauge-in 1s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes ci-gauge-in {
+  from {
+    stroke-dashoffset: var(--circ);
+  }
+  to {
+    stroke-dashoffset: var(--dash);
+  }
+}
+
+/* --------------------------- merged log panel ----------------------------- */
+.ci-adv {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--ci-radius-md);
+  border: 1px dashed color-mix(in oklab, var(--ci-text) 26%, transparent);
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ci-adv:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--ci-ovulation) 55%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 8%, transparent);
+}
+
+.ci-adv:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ci-adv__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  color: var(--ci-ovulation);
+  background: color-mix(in oklab, var(--ci-ovulation) 18%, transparent);
+}
+
+.ci-adv__tag {
+  margin-left: auto;
+  flex: none;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--ci-ovulation);
+  border: 1px solid color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 10%, transparent);
+}
+
+.ci-adv__chev {
+  flex: none;
+  opacity: 0.6;
+  transition: transform 0.25s ease;
+}
+
+.ci-adv-body {
+  animation: ci-unfold 0.32s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes ci-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ci-check {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--ci-follicular);
+}

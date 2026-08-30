@@ -71,6 +71,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "jsdom": "^25.0.1",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^2.15.0",
     "@types/node": "^22.16.5",

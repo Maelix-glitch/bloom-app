@@ -56,13 +56,28 @@ function monthCells(year: number, month: number) {
 }
 
 const keyOf = (y: number, m: number, d: number) => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+/** Baseline "nothing known" state for cells outside the modelled window. */
+const UNAVAILABLE_PROVENANCE = {
+  source: "baseline",
+  confidence: "low",
+  status: "unknown",
+  reason: "No prediction available for this day yet.",
+} as const;
+
 const EMPTY_STATE: DayState = {
   logged: null,
   phase: null,
+  bleedingState: "unlogged",
+  bleedingProvenance: UNAVAILABLE_PROVENANCE,
+  reproductivePhase: null,
+  reproductiveProvenance: UNAVAILABLE_PROVENANCE,
+  cycleDay: null,
   predictedPeriod: false,
   predictedFertile: false,
   predictedOvulation: false,
   pms: false,
+  provenance: UNAVAILABLE_PROVENANCE,
+  conflict: null,
 };
 
 function DayCell({
