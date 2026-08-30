@@ -17,6 +17,7 @@ import { Route as CycleClassicRouteImport } from './routes/cycle-classic'
 import { Route as CycleStylesRouteImport } from './routes/cycle-styles'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as TrackersRouteImport } from './routes/trackers'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const RewardsRoute = RewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackersRoute = TrackersRouteImport.update({
+  id: '/trackers',
+  path: '/trackers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRewardsRoute = AdminRewardsRouteImport.update({
   id: '/admin/rewards',
   path: '/admin/rewards',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/cycle-styles': typeof CycleStylesRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/trackers': typeof TrackersRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/cycle-styles': typeof CycleStylesRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/trackers': typeof TrackersRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/cycle-styles': typeof CycleStylesRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
+  '/trackers': typeof TrackersRoute
   '/admin/rewards': typeof AdminRewardsRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/cycle-styles'
     | '/profile'
     | '/rewards'
+    | '/trackers'
     | '/admin/rewards'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/cycle-styles'
     | '/profile'
     | '/rewards'
+    | '/trackers'
     | '/admin/rewards'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/cycle-styles'
     | '/profile'
     | '/rewards'
+    | '/trackers'
     | '/admin/rewards'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   CycleStylesRoute: typeof CycleStylesRoute
   ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
+  TrackersRoute: typeof TrackersRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RewardsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trackers': {
+      id: '/trackers'
+      path: '/trackers'
+      fullPath: '/trackers'
+      preLoaderRoute: typeof TrackersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/rewards': {
       id: '/admin/rewards'
       path: '/admin/rewards'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   CycleStylesRoute: CycleStylesRoute,
   ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
+  TrackersRoute: TrackersRoute,
   AdminRewardsRoute: AdminRewardsRoute,
 }
 export const routeTree = rootRouteImport
