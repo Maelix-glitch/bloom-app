@@ -17,12 +17,14 @@ import { SymptomPhaseGrid } from "./SymptomPhaseGrid";
 import { CycleHeatmap } from "./CycleHeatmap";
 import { RhythmChart } from "./RhythmChart";
 import { FlowBreakdown, ForecastStrip, PhaseCards, StatsStrip } from "./AnalyticsCards";
-import { DayLogForm } from "./DayLogForm";
+import { LogPanel } from "./LogPanel";
+import { CycleDial } from "./CycleDial";
+import { SymptomBloom } from "./SymptomBloom";
+import { VitalDials } from "./VitalDials";
 import { DayLogInsights } from "./DayLogInsights";
 import { PredictionsCard } from "./PredictionsCard";
 import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
-import { EntryForm } from "./EntryForm";
 import { HistoryTable } from "./HistoryTable";
 import { Button, Card, Disclaimer } from "./primitives";
 import { BlockHead } from "./SignatureStrip";
@@ -45,14 +47,15 @@ export function CycleIntelligence({
   const { analysis, logs, today, hydrated } = store;
   const [editing, setEditing] = useState<PeriodLog | null>(null);
   const [pendingStart, setPendingStart] = useState<string | null>(null);
+  /** Survives the panel remounting when the first entry switches the layout. */
+  const [notice, setNotice] = useState<string | null>(null);
   const [logDate, setLogDate] = useState<string>(store.today);
   const formRef = useRef<HTMLDivElement>(null);
-  const dayLogRef = useRef<HTMLDivElement>(null);
   const hasEntries = analysis.entryCount > 0;
 
   const focusDayLog = useCallback((date?: string) => {
     if (date) setLogDate(date);
-    dayLogRef.current?.scrollIntoView({
+    formRef.current?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "center",
     });
@@ -81,7 +84,12 @@ export function CycleIntelligence({
   const submit = useCallback(
     (draft: LogDraft) => {
       const result = editing ? store.update(editing.id, draft) : store.add(draft);
-      if (result.ok && editing) setEditing(null);
+      if (result.ok) {
+        setNotice(
+          editing ? "Entry updated — every number below was recalculated." : "Period logged.",
+        );
+        if (editing) setEditing(null);
+      }
       return result;
     },
     [editing, store],
@@ -157,10 +165,9 @@ export function CycleIntelligence({
                     One date is enough to begin.
                   </h2>
                   <p className="mt-3 text-[13px] leading-relaxed ci-soft">
-                    Add the first day of your most recent period. With a single entry you'll get a
-                    generic 28-day placeholder — clearly labelled as a placeholder. Log a second
-                    period and the page switches to your own pattern, then keeps getting steadier
-                    with every cycle after that.
+                    Add the first day of your most recent period. One entry gives you a generic
+                    28-day placeholder, clearly labelled as one. Log a second period and the page
+                    switches to your own pattern.
                   </p>
                   <ul className="mt-5 space-y-2.5">
                     {[
@@ -187,7 +194,19 @@ export function CycleIntelligence({
                 </Card>
 
                 <div ref={formRef} className="ci-rise ci-rise-2">
-                  <EntryForm logs={logs} today={today} disabled={preview} onSubmit={submit} />
+                  <LogPanel
+                    logs={logs}
+                    days={store.days}
+                    today={today}
+                    analysis={analysis}
+                    date={logDate}
+                    onDateChange={setLogDate}
+                    disabled={preview}
+                    onSavePeriod={submit}
+                    onSaveDay={store.saveDay}
+                    onDeleteDay={store.removeDay}
+                    notice={notice}
+                  />
                 </div>
 
                 <Card className="lg:col-span-2">
@@ -282,29 +301,29 @@ export function CycleIntelligence({
                     <div>
                       <p className="ci-eyebrow">Phase overview</p>
                       <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                        You're on day {analysis.cycleDay} of about{" "}
-                        {Math.round(analysis.averageLength)}
+                        Day {analysis.cycleDay} of about {Math.round(analysis.averageLength)}
                       </h2>
                       <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
-                        Estimated phase:{" "}
                         <span
                           style={{ color: `var(--ci-${analysis.phase ?? "follicular"})` }}
                           className="font-medium"
                         >
                           {analysis.phaseLabel}
                         </span>
-                        {analysis.lastStart
-                          ? ` · last period started ${formatDate(analysis.lastStart)}`
-                          : null}
+                        {analysis.lastStart ? ` · started ${formatDate(analysis.lastStart)}` : null}
                       </p>
                     </div>
-                    <p className="max-w-[34ch] text-[11.5px] leading-relaxed ci-muted">
-                      An estimate, not a fact: the map assumes your next period lands on the
-                      predicted date. Log a new start and it redraws immediately.
-                    </p>
                   </div>
-                  <div className="mt-4">
-                    <PhaseWave analysis={analysis} />
+
+                  <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">
+                    <CycleDial analysis={analysis} days={store.days} />
+                    <div>
+                      <PhaseWave analysis={analysis} />
+                      <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
+                        An estimate, not a fact — both assume your next period lands on the
+                        predicted date. Log a new start and they redraw immediately.
+                      </p>
+                    </div>
                   </div>
                 </Card>
 
@@ -332,9 +351,8 @@ export function CycleIntelligence({
                           Your rhythm over time
                         </h2>
                         <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-relaxed ci-soft">
-                          Each bar is one cycle. Dashed bars were left out of the average because
-                          they were too short or too long to be a real cycle — they stay on the
-                          chart so you can see exactly what was excluded.
+                          Each bar is one cycle. Dashed bars were left out of the average — too
+                          short or too long to be a real cycle — but they stay on the chart.
                         </p>
                       </div>
                       {analysis.trend ? (
@@ -382,8 +400,7 @@ export function CycleIntelligence({
                       This cycle, split into phases
                     </h2>
                     <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
-                      Dates come from your own average cycle length, so they shift as your record
-                      shifts. The highlighted phase is where today falls.
+                      From your own average, so the dates shift as your record shifts.
                     </p>
                     <div className="mt-4">
                       <PhaseCards analysis={analysis} />
@@ -396,7 +413,7 @@ export function CycleIntelligence({
                       The next three cycles
                     </h2>
                     <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
-                      Projected from your average — useful for planning, never a promise.
+                      Projected from your average. Useful for planning, never a promise.
                     </p>
                     <div className="mt-4">
                       <ForecastStrip analysis={analysis} />
@@ -421,18 +438,25 @@ export function CycleIntelligence({
                   </Reveal>
                 </div>
 
-                {/* ------------------------------ form -------------------------- */}
+                {/* ------------------------------ log --------------------------- */}
                 <div ref={formRef} className="mt-4">
                   <Reveal>
-                    <EntryForm
+                    <LogPanel
                       logs={logs}
+                      days={store.days}
                       today={today}
+                      analysis={analysis}
+                      date={logDate}
+                      onDateChange={setLogDate}
                       editing={editing}
+                      onCancelEdit={() => setEditing(null)}
                       pendingStart={pendingStart}
                       onPendingConsumed={() => setPendingStart(null)}
                       disabled={preview}
-                      onSubmit={submit}
-                      onCancelEdit={() => setEditing(null)}
+                      onSavePeriod={submit}
+                      onSaveDay={store.saveDay}
+                      onDeleteDay={store.removeDay}
+                      notice={notice}
                     />
                   </Reveal>
                 </div>
@@ -464,20 +488,33 @@ export function CycleIntelligence({
                   </div>
                 </div>
 
-                {/* ------------------------- advanced log ------------------------ */}
-                <div ref={dayLogRef} className="mt-4">
-                  <Reveal delay={60}>
-                    <DayLogForm
-                      days={store.days}
-                      today={today}
-                      analysis={analysis}
-                      date={logDate}
-                      onDateChange={setLogDate}
-                      onSave={store.saveDay}
-                      onDelete={store.removeDay}
-                      disabled={preview}
+                <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
+                  <div className="ci-card ci-card--pad ci-lift">
+                    <BlockHead
+                      index="06"
+                      eyebrow="Bloom"
+                      title="What shows up, and how often"
+                      note="One petal per symptom."
                     />
-                  </Reveal>
+                    <div className="mt-4">
+                      <SymptomBloom
+                        tally={store.dayAnalysis.symptoms}
+                        total={store.dayAnalysis.total}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="ci-card ci-card--pad ci-lift">
+                    <BlockHead
+                      index="07"
+                      eyebrow="Averages"
+                      title="Energy, pain, sleep, mood"
+                      note="Weighted across every day you logged."
+                    />
+                    <div className="mt-5">
+                      <VitalDials dayAnalysis={store.dayAnalysis} />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-4">

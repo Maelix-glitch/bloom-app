@@ -24,8 +24,11 @@ import { PredictionsCard } from "@/components/ci/PredictionsCard";
 import { InsightsPanel } from "@/components/ci/InsightsPanel";
 import { TipsCard } from "@/components/ci/TipsCard";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
+import { CycleDial } from "@/components/ci/CycleDial";
 import { CycleHeatmap } from "@/components/ci/CycleHeatmap";
+import { SymptomBloom } from "@/components/ci/SymptomBloom";
 import { SymptomPhaseGrid } from "@/components/ci/SymptomPhaseGrid";
+import { VitalDials } from "@/components/ci/VitalDials";
 import { SignatureStrip } from "@/components/ci/SignatureStrip";
 import { DayLogInsights } from "@/components/ci/DayLogInsights";
 import { Button, ConfidenceBadge, Disclaimer } from "@/components/ci/primitives";
@@ -164,7 +167,8 @@ function MiniPreview({
             </div>
             <ConfidenceBadge level={analysis.confidence} reason={analysis.confidenceReason} />
           </div>
-          <div className="mt-2.5">
+          <div className="mt-2.5 grid items-center gap-3 sm:grid-cols-[132px_1fr]">
+            <CycleDial analysis={analysis} days={previewDays} />
             <PhaseWave analysis={analysis} compact />
           </div>
           <div className="mt-3.5">
@@ -485,6 +489,27 @@ function CycleStylesPage() {
                 </p>
                 <div className="mt-3.5">
                   <SymptomPhaseGrid rows={dayAnalysis.symptomPhase} compact />
+                </div>
+              </div>
+
+              <div className="ci-card ci-card--pad">
+                <p className="ci-eyebrow">Bloom</p>
+                <p className="mt-2 text-[12.5px] leading-relaxed ci-muted">
+                  One petal per symptom, length for how many days it was logged, colour for the
+                  phase it belongs to.
+                </p>
+                <div className="mt-3.5">
+                  <SymptomBloom tally={dayAnalysis.symptoms} total={dayAnalysis.total} />
+                </div>
+              </div>
+
+              <div className="ci-card ci-card--pad">
+                <p className="ci-eyebrow">Averages</p>
+                <p className="mt-2 text-[12.5px] leading-relaxed ci-muted">
+                  Energy, pain, sleep and mood, weighted across every day logged.
+                </p>
+                <div className="mt-4">
+                  <VitalDials dayAnalysis={dayAnalysis} />
                 </div>
               </div>
 

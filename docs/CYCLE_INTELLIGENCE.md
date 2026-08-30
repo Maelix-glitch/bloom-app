@@ -6,11 +6,11 @@ how much to trust them, your current phase, and what tends to help.
 
 ## Routes
 
-| Route            | What it is                                                                                               |
-| ---------------- | -------------------------------------------------------------------------------------------------------- |
-| `/cycle`         | The Cycle Intelligence page (new).                                                                       |
-| `/cycle-styles`  | Design gallery: five directions for the same page, previewed on real components, with an "apply" switch. |
-| `/cycle-classic` | The previous version of the page, kept for comparison.                                                   |
+| Route            | What it is                                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| `/cycle`         | The Cycle Intelligence page (new).                                                                        |
+| `/cycle-styles`  | Design gallery: eight directions for the same page, previewed on real components, with an "apply" switch. |
+| `/cycle-classic` | The previous version of the page, kept for comparison.                                                    |
 
 ## The pure core — `src/lib/cycle/predict.ts`
 
@@ -53,24 +53,36 @@ ring (share of cycles within ±3 days of the average), a one-sentence read of
 the person's own pattern, and the four figures that matter — cycle day, cycles
 logged, average length, logging streak. Numbers count up when they scroll in.
 
-| Section              | What it shows                                                                                                                                                                              |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Phase wave           | The signature element: where today sits in the cycle, banded by phase, with ovulation, the fertile window and the predicted next start marked.                                             |
-| Predictions          | Next period, days until/late, ovulation estimate, fertile window, average cycle length, where you are — each next to a confidence badge.                                                   |
-| Cycle lengths chart  | Every cycle as a bar against the recency-weighted average, with a ±1 SD band. Excluded gaps stay on the chart as dashed bars, so the chart explains the average instead of hiding from it. |
-| The numbers          | Cycles logged, average, shortest–longest range, variability and the share of cycles within ±3 days, average bleed length, days tracked since the first entry.                              |
-| Flow mix             | Light / medium / heavy distribution across entries, plus how many entries carry an end date or a note.                                                                                     |
-| Phase cards          | The current cycle split into the four phases, with the dates each window is expected to cover and a "you are here" marker.                                                                 |
-| Forward look         | The next three cycles projected from the average, phase by phase, with ovulation and fertile dates.                                                                                        |
-| Insights             | Whichever edge-case banners currently apply — each with a specific message and, where it can be fixed, a one-click action.                                                                 |
-| Tips for this phase  | Phase-matched wellness suggestions.                                                                                                                                                        |
-| Entry form + history | Logging with inline validation; every entry with its computed length since the previous one, anomaly flags, edit, delete, clear all.                                                       |
+| Section             | What it shows                                                                                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cycle dial          | One cycle as one circle: day 1 at twelve o'clock, phase arcs, day ticks, a dashed fertile band, a dot for ovulation, a pulsing dot for today, and a small dot for every day actually logged. |
+| Phase wave          | Where today sits in the cycle, banded by phase, with ovulation, the fertile window and the predicted next start marked.                                                                      |
+| Predictions         | Next period, days until/late, ovulation estimate, fertile window, average cycle length, where you are — each next to a confidence badge.                                                     |
+| Cycle lengths chart | Every cycle as a bar against the recency-weighted average, with a ±1 SD band. Excluded gaps stay on the chart as dashed bars, so the chart explains the average instead of hiding from it.   |
+| The numbers         | Cycles logged, average, shortest–longest range, variability and the share of cycles within ±3 days, average bleed length, days tracked since the first entry.                                |
+| Flow mix            | Light / medium / heavy distribution across entries, plus how many entries carry an end date or a note.                                                                                       |
+| Phase cards         | The current cycle split into the four phases, with the dates each window is expected to cover and a "you are here" marker.                                                                   |
+| Forward look        | The next three cycles projected from the average, phase by phase, with ovulation and fertile dates.                                                                                          |
+| Insights            | Whichever edge-case banners currently apply — each with a specific message and, where it can be fixed, a one-click action.                                                                   |
+| Tips for this phase | Phase-matched wellness suggestions, opening with the symptom this person logs most in that phase.                                                                                            |
+| Symptom bloom       | One petal per symptom, length for how many days it was logged, colour for the phase it belongs to.                                                                                           |
+| Averages            | Four gauges — energy, pain, sleep, mood — weighted across every day logged.                                                                                                                  |
+| Log (merged)        | One date, one save. A bleed level can start a period; the advanced log lives behind a visible _Advanced log · Recommended_ button on the same form.                                          |
+| History             | Every entry with its computed length since the previous one, anomaly flags, edit, delete, clear all, CSV export.                                                                             |
 
-With no entries the page hides predictions entirely and lists the eight views
+With no entries the page hides predictions entirely and lists the ten views
 that fill in once something is logged — no fake numbers, no greyed-out dummy
 charts.
 
-### Advanced log
+### Advanced log — merged into the log form
+
+The advanced log is not a second card any more. `LogPanel.tsx` holds one date
+and one save: pick a bleed level and it can start a period (feeding the
+predictions), open **Advanced log · Recommended** and the same day carries
+symptoms, mood, energy, pain, sleep and fertility signs. Both writes are
+independent, the day is validated before anything is written, so a bad
+temperature can never leave a period logged with no explanation, and neither
+half is ever saved silently.
 
 `src/lib/cycle/dayLogs.ts` is the pure core for day-level logging:
 `placeDate()` puts any date in a cycle (reconstructing earlier cycles from the

@@ -1054,8 +1054,14 @@ textarea.ci-input {
 @media (prefers-reduced-motion: reduce) {
   .ci-atmos i,
   .ci-sheen::after,
-  .ci-pulse {
+  .ci-pulse,
+  .ci-dial-pulse,
+  .ci-petal,
+  .ci-adv-body {
     animation: none !important;
+  }
+  .ci-gauge-arc {
+    transition: none !important;
   }
   .ci-reveal {
     opacity: 1 !important;
@@ -1065,4 +1071,153 @@ textarea.ci-input {
   .ci-grow-y {
     animation: none !important;
   }
+}
+
+/* ------------------------------ cycle dial -------------------------------- */
+/* One cycle, one circle: phase arcs, day ticks, the dot that is today. */
+.ci-dial-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ci-pulse-ring 2.8s ease-in-out infinite;
+}
+
+@keyframes ci-pulse-ring {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.08;
+    transform: scale(1.6);
+  }
+}
+
+.ci-dial-dots circle {
+  animation: ci-fade-in 0.5s ease both;
+}
+
+@keyframes ci-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.42;
+  }
+}
+
+/* ----------------------------- symptom bloom ------------------------------ */
+.ci-petal {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: ci-petal-in 0.7s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes ci-petal-in {
+  from {
+    transform: scale(0.15);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0.78;
+  }
+}
+
+/* -------------------------------- gauges ---------------------------------- */
+/* The final value is always on the attribute, so a gauge that is never
+   scrolled to still reads correctly — the animation only adds the sweep. */
+.ci-gauge-arc.is-go {
+  animation: ci-gauge-in 1s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes ci-gauge-in {
+  from {
+    stroke-dashoffset: var(--circ);
+  }
+  to {
+    stroke-dashoffset: var(--dash);
+  }
+}
+
+/* --------------------------- merged log panel ----------------------------- */
+.ci-adv {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--ci-radius-md);
+  border: 1px dashed color-mix(in oklab, var(--ci-text) 26%, transparent);
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ci-adv:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--ci-ovulation) 55%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 8%, transparent);
+}
+
+.ci-adv:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ci-adv__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  color: var(--ci-ovulation);
+  background: color-mix(in oklab, var(--ci-ovulation) 18%, transparent);
+}
+
+.ci-adv__tag {
+  margin-left: auto;
+  flex: none;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--ci-ovulation);
+  border: 1px solid color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 10%, transparent);
+}
+
+.ci-adv__chev {
+  flex: none;
+  opacity: 0.6;
+  transition: transform 0.25s ease;
+}
+
+.ci-adv-body {
+  animation: ci-unfold 0.32s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes ci-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ci-check {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--ci-follicular);
 }

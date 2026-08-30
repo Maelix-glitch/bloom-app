@@ -18,7 +18,7 @@ export function useInView<T extends HTMLElement>(
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || inView) return;
     if (typeof IntersectionObserver === "undefined") {
       setInView(true);
       return;
@@ -35,8 +35,32 @@ export function useInView<T extends HTMLElement>(
       { rootMargin, threshold: 0.05 },
     );
     io.observe(el);
-    return () => io.disconnect();
-  }, [rootMargin]);
+
+    /* Fallback. A very fast scroll — or a jump straight to an anchor further
+       down the page — can move an element from below the fold to above it
+       without a single intersecting frame, which would leave it hidden for
+       good. Anything that has reached the fold counts as seen. */
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      if (el.getBoundingClientRect().top < window.innerHeight) {
+        setInView(true);
+        io.disconnect();
+      }
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [rootMargin, inView]);
 
   return { ref, inView };
 }

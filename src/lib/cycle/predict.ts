@@ -606,10 +606,7 @@ export function analyzeCycle(
       from: addDays(anchor, w.fromDay - 1),
       to: addDays(anchor, w.toDay - 1),
       current:
-        anchor === lastStart &&
-        cycleDay !== null &&
-        cycleDay >= w.fromDay &&
-        cycleDay <= w.toDay,
+        anchor === lastStart && cycleDay !== null && cycleDay >= w.fromDay && cycleDay <= w.toDay,
     }));
   };
 
@@ -661,8 +658,7 @@ export function analyzeCycle(
     shortest: cycleLengths.length > 0 ? Math.min(...cycleLengths) : null,
     longest: cycleLengths.length > 0 ? Math.max(...cycleLengths) : null,
     excludedGaps: gaps.filter((g) => !g.plausible).length,
-    averageBleed:
-      loggedDurations.length > 0 ? Math.round(mean(loggedDurations) * 10) / 10 : null,
+    averageBleed: loggedDurations.length > 0 ? Math.round(mean(loggedDurations) * 10) / 10 : null,
     entriesWithEnd: loggedDurations.length,
     predictability: cycleLengths.length >= 2 ? steady / cycleLengths.length : null,
     daysTracked: firstEntry ? diffDays(firstEntry, today) + 1 : null,
@@ -803,7 +799,11 @@ export interface LogDraft {
   notes?: string | null;
 }
 
-export type FieldErrors = Partial<Record<"start" | "end" | "notes", string>>;
+/**
+ * Field-level errors for the entry form. `flow` is never set by the validator —
+ * it exists so a UI that collects flow separately can report on it too.
+ */
+export type FieldErrors = Partial<Record<"start" | "end" | "notes" | "flow", string>>;
 
 /**
  * Entry-time validation. Bad data is rejected here so it can never reach the
