@@ -184,3 +184,63 @@ describe("analyzeDayLogs", () => {
     expect(a.total).toBe(6);
   });
 });
+
+describe("phase matrix, streaks and the personal headline", () => {
+  const days: DayLog[] = [
+    day("2026-08-18", { flow: "heavy", pain: 4, mood: "rough", symptoms: ["cramps"] }),
+    day("2026-08-19", { flow: "medium", pain: 3, mood: "low", symptoms: ["cramps"] }),
+    day("2026-08-20", { flow: "light", pain: 2, mood: "okay", symptoms: ["cramps", "bloating"] }),
+    day("2026-08-29", { pain: 0, mood: "good", symptoms: ["headache"] }),
+    day("2026-08-30", { pain: 1, mood: "great" }),
+  ];
+
+  it("splits each symptom across the phases", () => {
+    const a = analyzeDayLogs(days, base);
+    const cramps = a.symptomPhase.find((s) => s.key === "cramps");
+    expect(cramps?.total).toBe(3);
+    expect(cramps?.counts.menstrual).toBe(3);
+    expect(cramps?.shares.menstrual).toBe(1);
+    const headache = a.symptomPhase.find((s) => s.key === "headache");
+    expect(headache?.total).toBe(1);
+    expect(headache?.counts.menstrual).toBe(0);
+  });
+
+  it("counts the current streak back from today", () => {
+    const a = analyzeDayLogs(days, base);
+    // 2026-08-30 and 2026-08-29 are logged, 2026-08-28 is not
+    expect(a.streak).toBe(2);
+    expect(a.bestStreak).toBe(3); // 18–20 August
+  });
+
+  it("does not break a streak just because today isn't logged yet", () => {
+    const a = analyzeDayLogs(
+      days.filter((d) => d.date !== "2026-08-30"),
+      base,
+    );
+    expect(a.streak).toBe(1);
+  });
+
+  it("reports zero streaks with an empty log", () => {
+    const a = analyzeDayLogs([], base);
+    expect(a.streak).toBe(0);
+    expect(a.bestStreak).toBe(0);
+    expect(a.headline).toBeNull();
+  });
+
+  it("writes a personalised headline in plain language", () => {
+    const a = analyzeDayLogs(days, base);
+    // base has four 28-day cycles → high confidence → the "steady" phrasing
+    expect(a.headline).toContain("steady");
+    expect(a.headline).toContain("Cramps shows up most");
+    expect(a.headline).toContain("Pain runs highest in the menstrual phase");
+  });
+
+  it("says 'steady' only when the cycles really are", () => {
+    const steady = analyzeCycle(
+      ["2026-01-01", "2026-01-29", "2026-02-26", "2026-03-26", "2026-04-23"].map((s) => log(s)),
+      "2026-05-10",
+    );
+    const a = analyzeDayLogs([day("2026-04-25", { pain: 1 })], steady);
+    expect(a.headline).toContain("steady");
+  });
+});

@@ -24,6 +24,9 @@ import { PredictionsCard } from "@/components/ci/PredictionsCard";
 import { InsightsPanel } from "@/components/ci/InsightsPanel";
 import { TipsCard } from "@/components/ci/TipsCard";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
+import { CycleHeatmap } from "@/components/ci/CycleHeatmap";
+import { SymptomPhaseGrid } from "@/components/ci/SymptomPhaseGrid";
+import { SignatureStrip } from "@/components/ci/SignatureStrip";
 import { DayLogInsights } from "@/components/ci/DayLogInsights";
 import { Button, ConfidenceBadge, Disclaimer } from "@/components/ci/primitives";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
@@ -142,9 +145,11 @@ function messyLogs(today: string): PeriodLog[] {
 function MiniPreview({
   themeId,
   analysis,
+  previewDays,
 }: {
   themeId: string;
   analysis: ReturnType<typeof analyzeCycle>;
+  previewDays: DayLog[];
 }) {
   return (
     <div className="ci" data-theme={themeId}>
@@ -169,8 +174,11 @@ function MiniPreview({
             <p className="ci-eyebrow">Cycle lengths</p>
             <RhythmChart analysis={analysis} compact />
           </div>
-          <div className="mt-2.5">
-            <PhaseCards analysis={analysis} compact />
+          <div className="mt-3">
+            <p className="ci-eyebrow">Twelve weeks</p>
+            <div className="mt-1.5">
+              <CycleHeatmap days={previewDays} analysis={analysis} compact />
+            </div>
           </div>
         </div>
       </div>
@@ -218,6 +226,7 @@ function CycleStylesPage() {
   );
   const messy = useMemo(() => analyzeCycle(messyLogs(today), today), [today]);
   const usingRealDays = store.days.length >= 3;
+  const previewDays = usingRealDays ? store.days : demoDays(today);
   const dayAnalysis = useMemo(
     () => analyzeDayLogs(usingRealDays ? store.days : demoDays(today), analysis),
     [store.days, analysis, today, usingRealDays],
@@ -238,7 +247,7 @@ function CycleStylesPage() {
         <div className="ci-veil" aria-hidden />
         <div className="ci-shell">
           <header className="ci-rise max-w-[70ch]">
-            <p className="ci-eyebrow">Bloom · Cycle · Design directions</p>
+            <p className="ci-eyebrow">Bloom · Cycle · Eight directions</p>
             <h1 className="ci-display mt-3 text-[30px] leading-[1.08] sm:text-[40px]">
               Five directions.
               <br />
@@ -318,7 +327,11 @@ function CycleStylesPage() {
                     </ul>
 
                     <div className="mt-4">
-                      <MiniPreview themeId={theme.id} analysis={analysis} />
+                      <MiniPreview
+                        themeId={theme.id}
+                        analysis={analysis}
+                        previewDays={previewDays}
+                      />
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -465,6 +478,17 @@ function CycleStylesPage() {
               </div>
 
               <div className="ci-card ci-card--pad">
+                <p className="ci-eyebrow">Symptom map</p>
+                <p className="mt-2 text-[12.5px] leading-relaxed ci-muted">
+                  Symptoms down, phases across, colour for frequency. Empty when nothing has been
+                  logged for that pairing.
+                </p>
+                <div className="mt-3.5">
+                  <SymptomPhaseGrid rows={dayAnalysis.symptomPhase} compact />
+                </div>
+              </div>
+
+              <div className="ci-card ci-card--pad">
                 <p className="ci-eyebrow">Edge-case banners</p>
                 <p className="mt-2 text-[12.5px] leading-relaxed ci-muted">
                   The same record with a 138-day gap (a period that went unlogged) and a late
@@ -474,6 +498,10 @@ function CycleStylesPage() {
                   <InsightsPanel analysis={messy} />
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4">
+              <SignatureStrip analysis={analysis} dayAnalysis={dayAnalysis} />
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">

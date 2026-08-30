@@ -223,6 +223,16 @@ export interface FlowCurvePoint {
   days: number;
 }
 
+/** One symptom row, split across the four phases — for the heat grid. */
+export interface SymptomPhaseRow {
+  key: string;
+  total: number;
+  /** Raw day counts per phase. */
+  counts: Record<Phase, number>;
+  /** Counts relative to this symptom's own total, 0–1. */
+  shares: Record<Phase, number>;
+}
+
 export interface DayLogAnalysis {
   total: number;
   firstDate: string | null;
@@ -239,6 +249,14 @@ export interface DayLogAnalysis {
   temperatures: { date: string; value: number; phase: Phase }[];
   mucus: { date: string; value: MucusValue; phase: Phase }[];
   lhPositives: { date: string; cycleDay: number | null }[];
+  /** Symptom × phase counts, for the heat grid. */
+  symptomPhase: SymptomPhaseRow[];
+  /** Consecutive days with a log, counting back from today (or yesterday). */
+  streak: number;
+  /** Longest run of consecutive logged days in the whole record. */
+  bestStreak: number;
+  /** A one-sentence read on the person's own pattern, never diagnostic. */
+  headline: string | null;
   /** Plain-language patterns worth surfacing, never diagnostic. */
   notes: string[];
 }
@@ -342,6 +360,29 @@ export function analyzeDayLogs(days: readonly DayLog[], analysis: CycleAnalysis)
     }))
     .sort((a, b) => a.day - b.day);
 
+  const symptomPhase: SymptomPhaseRow[] = [...symptomCounter.entries()]
+    .map(([key, value]) => {
+      const counts = { menstrual: 0, follicular: 0, ovulation: 0, luteal: 0 } as Record<
+        Phase,
+        number
+      >;
+      for (const [phase, n] of value.phases) counts[phase] = n;
+      const shares = { menstrual: 0, follicular: 0, ovulation: 0, luteal: 0 } as Record<
+        Phase,
+        number
+      >;
+      for (const phase of PHASE_ORDER)
+        shares[phase] = value.count > 0 ? counts[phase]! / value.count : 0;
+      return { key, total: value.count, counts, shares };
+    })
+    .sort((a, b) => b.total - a.total || a.key.localeCompare(b.key))
+    .slice(0, 8);
+
+  const { current, best } = streaks(
+    sorted.map((d) => d.date),
+    analysis.today,
+  );
+
   const lastThirty = analysis.today
     ? sorted.filter((d) => {
         const back = diffDays(d.date, analysis.today);
@@ -363,11 +404,104 @@ export function analyzeDayLogs(days: readonly DayLog[], analysis: CycleAnalysis)
     temperatures,
     mucus,
     lhPositives,
+    symptomPhase,
+    streak: current,
+    bestStreak: best,
+    headline:
+      sorted.length === 0
+        ? null
+        : buildHeadline(analysis, sorted.length, symptoms, groupByPhase(painRows), current),
     notes: buildNotes(symptoms, groupByPhase(painRows), groupByPhase(moodRows), sorted.length),
   };
 }
 
 /* -------------------------- plain-language notes -------------------------- */
+
+/**
+ * Consecutive-day runs. The current streak counts back from today, or from
+ * yesterday so a day that hasn't been logged *yet* doesn't break it.
+ */
+export function streaks(
+  dates: readonly string[],
+  today: string,
+): { current: number; best: number } {
+  const set = new Set(dates);
+  const has = (d: string) => set.has(d);
+  let best = 0;
+  for (const date of dates) {
+    if (has(addDaysKey(date, -1))) continue; // only start counting at a run's beginning
+    let run = 0;
+    let cursor = date;
+    while (has(cursor)) {
+      run += 1;
+      cursor = addDaysKey(cursor, 1);
+    }
+    best = Math.max(best, run);
+  }
+  let current = 0;
+  const anchor = has(today) ? today : has(addDaysKey(today, -1)) ? addDaysKey(today, -1) : null;
+  if (anchor) {
+    let cursor = anchor;
+    while (has(cursor)) {
+      current += 1;
+      cursor = addDaysKey(cursor, -1);
+    }
+  }
+  return { current, best };
+}
+
+function addDaysKey(key: string, days: number): string {
+  const dt = new Date(`${key}T00:00:00Z`);
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    dt.getUTCDate(),
+  ).padStart(2, "0")}`;
+}
+
+function buildHeadline(
+  analysis: CycleAnalysis,
+  dayCount: number,
+  symptoms: SymptomTally[],
+  pain: PhaseAverage[],
+  streak: number,
+): string | null {
+  if (dayCount === 0) return null;
+  const bits: string[] = [];
+
+  if (analysis.confidence === "high") {
+    bits.push(
+      `Your cycles are steady — ${analysis.cycleLengths.length} of them inside ±3 days of ${analysis.averageLength.toFixed(1)}.`,
+    );
+  } else if (analysis.irregular) {
+    bits.push(
+      `Your cycles move around more than most people's expectations: ±${analysis.variability.toFixed(1)} days across ${analysis.cycleLengths.length}.`,
+    );
+  } else {
+    bits.push(
+      `Across ${analysis.cycleLengths.length} logged ${analysis.cycleLengths.length === 1 ? "cycle" : "cycles"}, your average sits at ${analysis.averageLength.toFixed(1)} days.`,
+    );
+  }
+
+  const top = symptoms[0];
+  if (top && top.count >= 3) {
+    bits.push(
+      top.topPhase
+        ? `${cap(top.key)} shows up most, usually in the ${top.topPhase} phase.`
+        : `${cap(top.key)} shows up most in your log.`,
+    );
+  }
+
+  const painiest = pain
+    .filter((p) => p.days >= 2)
+    .sort((a, b) => (b.average ?? 0) - (a.average ?? 0))[0];
+  if (painiest && (painiest.average ?? 0) >= 1) {
+    bits.push(`Pain runs highest in the ${painiest.phase} phase.`);
+  }
+  if (streak >= 3) {
+    bits.push(`You've logged ${streak} days in a row.`);
+  }
+  return bits.slice(0, 3).join(" ");
+}
 
 function buildNotes(
   symptoms: SymptomTally[],

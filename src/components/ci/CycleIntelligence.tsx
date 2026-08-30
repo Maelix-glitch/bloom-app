@@ -10,6 +10,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { PhaseWave } from "./PhaseWave";
+import { Atmosphere } from "./Atmosphere";
+import { Reveal, CountUp } from "./motion";
+import { SignatureStrip } from "./SignatureStrip";
+import { SymptomPhaseGrid } from "./SymptomPhaseGrid";
+import { CycleHeatmap } from "./CycleHeatmap";
 import { RhythmChart } from "./RhythmChart";
 import { FlowBreakdown, ForecastStrip, PhaseCards, StatsStrip } from "./AnalyticsCards";
 import { DayLogForm } from "./DayLogForm";
@@ -20,6 +25,7 @@ import { TipsCard } from "./TipsCard";
 import { EntryForm } from "./EntryForm";
 import { HistoryTable } from "./HistoryTable";
 import { Button, Card, Disclaimer } from "./primitives";
+import { BlockHead } from "./SignatureStrip";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { daysToCsv, logsToCsv } from "@/lib/cycle/periodStore";
 import { DEFAULT_THEME_ID } from "@/lib/cycle/themes";
@@ -99,11 +105,13 @@ export function CycleIntelligence({
 
   return (
     <div className="ci ci-root" data-theme={theme}>
+      <Atmosphere />
+      <div className="ci-grain" aria-hidden />
       <div className="ci-veil" aria-hidden />
       <div className="ci-shell">
         {/* ------------------------------- header ------------------------------ */}
         <header className="ci-rise max-w-[68ch]">
-          <p className="ci-eyebrow">Bloom · Cycle Intelligence</p>
+          <p className="ci-eyebrow">{greeting()} · Bloom Cycle Intelligence</p>
           <h1 className="ci-display mt-3 text-[30px] leading-[1.08] sm:text-[40px]">
             Your cycle, read back to you —
             <br />
@@ -126,6 +134,12 @@ export function CycleIntelligence({
             ) : null}
           </div>
         </header>
+
+        {hydrated && analysis.entryCount > 0 ? (
+          <div className="mt-6">
+            <SignatureStrip analysis={analysis} dayAnalysis={store.dayAnalysis} />
+          </div>
+        ) : null}
 
         {!hydrated ? (
           <div className="mt-10 space-y-4" aria-hidden>
@@ -179,7 +193,7 @@ export function CycleIntelligence({
                 <Card className="lg:col-span-2">
                   <p className="ci-eyebrow">What appears once you log</p>
                   <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                    Eight views, all computed from your own entries
+                    Ten views, all computed from your own entries
                   </h2>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {[
@@ -214,6 +228,14 @@ export function CycleIntelligence({
                       {
                         name: "Advanced daily log",
                         body: "Symptoms, mood, energy, pain, sleep and fertility signs per day — then compared across your phases.",
+                      },
+                      {
+                        name: "Twelve-week rhythm map",
+                        body: "One cell per day, coloured by phase, brighter where you logged more.",
+                      },
+                      {
+                        name: "Symptom map",
+                        body: "Which symptom belongs to which phase in your record, at a glance.",
                       },
                     ].map((item) => (
                       <div
@@ -288,17 +310,21 @@ export function CycleIntelligence({
 
                 {/* ----------------- predictions · insights · tips -------------- */}
                 <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-                  <div className="ci-rise ci-rise-2">
-                    <PredictionsCard analysis={analysis} />
+                  <div>
+                    <Reveal delay={0}>
+                      <PredictionsCard analysis={analysis} />
+                    </Reveal>
                   </div>
-                  <div className="ci-rise ci-rise-3">
-                    <TipsCard analysis={analysis} />
+                  <div>
+                    <Reveal delay={90}>
+                      <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
+                    </Reveal>
                   </div>
                 </div>
 
                 {/* ------------------------ analytics --------------------------- */}
                 <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-                  <div className="ci-card ci-card--pad ci-rise">
+                  <div className="ci-card ci-card--pad ci-lift">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
                         <p className="ci-eyebrow">Cycle lengths</p>
@@ -331,7 +357,7 @@ export function CycleIntelligence({
                     </div>
                   </div>
 
-                  <div className="ci-card ci-card--pad ci-rise">
+                  <div className="ci-card ci-card--pad ci-lift">
                     <p className="ci-eyebrow">The numbers</p>
                     <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
                       What your record adds up to
@@ -350,7 +376,7 @@ export function CycleIntelligence({
 
                 {/* ------------------- phases + forward look -------------------- */}
                 <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-                  <div className="ci-card ci-card--pad ci-rise">
+                  <div className="ci-card ci-card--pad ci-lift">
                     <p className="ci-eyebrow">The four phases</p>
                     <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
                       This cycle, split into phases
@@ -364,7 +390,7 @@ export function CycleIntelligence({
                     </div>
                   </div>
 
-                  <div className="ci-card ci-card--pad ci-rise">
+                  <div className="ci-card ci-card--pad ci-lift">
                     <p className="ci-eyebrow">Forward look</p>
                     <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
                       The next three cycles
@@ -378,77 +404,114 @@ export function CycleIntelligence({
                   </div>
                 </div>
 
-                <div className="ci-rise ci-rise-4 mt-4">
-                  <InsightsPanel
-                    analysis={analysis}
-                    onAddSuggested={
-                      preview
-                        ? undefined
-                        : (start) => {
-                            setEditing(null);
-                            setPendingStart(start);
-                            focusForm();
-                          }
-                    }
-                  />
+                <div className="mt-4">
+                  <Reveal>
+                    <InsightsPanel
+                      analysis={analysis}
+                      onAddSuggested={
+                        preview
+                          ? undefined
+                          : (start) => {
+                              setEditing(null);
+                              setPendingStart(start);
+                              focusForm();
+                            }
+                      }
+                    />
+                  </Reveal>
                 </div>
 
                 {/* ------------------------------ form -------------------------- */}
-                <div ref={formRef} className="ci-rise mt-4">
-                  <EntryForm
-                    logs={logs}
-                    today={today}
-                    editing={editing}
-                    pendingStart={pendingStart}
-                    onPendingConsumed={() => setPendingStart(null)}
-                    disabled={preview}
-                    onSubmit={submit}
-                    onCancelEdit={() => setEditing(null)}
-                  />
+                <div ref={formRef} className="mt-4">
+                  <Reveal>
+                    <EntryForm
+                      logs={logs}
+                      today={today}
+                      editing={editing}
+                      pendingStart={pendingStart}
+                      onPendingConsumed={() => setPendingStart(null)}
+                      disabled={preview}
+                      onSubmit={submit}
+                      onCancelEdit={() => setEditing(null)}
+                    />
+                  </Reveal>
+                </div>
+
+                {/* --------------------- patterns in your record ------------------- */}
+                <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
+                  <div className="ci-card ci-card--pad ci-lift">
+                    <BlockHead
+                      index="04"
+                      eyebrow="Rhythm map"
+                      title="Twelve weeks, one cell per day"
+                      note="Each square is a day, coloured by the phase it fell in. Brighter squares carry more logged detail; the outlined square is today."
+                    />
+                    <div className="mt-4">
+                      <CycleHeatmap days={store.days} analysis={analysis} />
+                    </div>
+                  </div>
+
+                  <div className="ci-card ci-card--pad ci-lift">
+                    <BlockHead
+                      index="05"
+                      eyebrow="Symptom map"
+                      title="Which symptom lives in which phase"
+                      note="Built only from days you logged — a symptom you've never recorded isn't on the grid."
+                    />
+                    <div className="mt-4">
+                      <SymptomPhaseGrid rows={store.dayAnalysis.symptomPhase} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* ------------------------- advanced log ------------------------ */}
-                <div ref={dayLogRef} className="ci-rise mt-4">
-                  <DayLogForm
-                    days={store.days}
-                    today={today}
-                    analysis={analysis}
-                    date={logDate}
-                    onDateChange={setLogDate}
-                    onSave={store.saveDay}
-                    onDelete={store.removeDay}
-                    disabled={preview}
-                  />
+                <div ref={dayLogRef} className="mt-4">
+                  <Reveal delay={60}>
+                    <DayLogForm
+                      days={store.days}
+                      today={today}
+                      analysis={analysis}
+                      date={logDate}
+                      onDateChange={setLogDate}
+                      onSave={store.saveDay}
+                      onDelete={store.removeDay}
+                      disabled={preview}
+                    />
+                  </Reveal>
                 </div>
 
-                <div className="ci-rise mt-4">
-                  <DayLogInsights
-                    days={store.days}
-                    dayAnalysis={store.dayAnalysis}
-                    onEditDate={preview ? undefined : focusDayLog}
-                    onDeleteDate={preview ? undefined : store.removeDay}
-                    disabled={preview}
-                  />
+                <div className="mt-4">
+                  <Reveal delay={120}>
+                    <DayLogInsights
+                      days={store.days}
+                      dayAnalysis={store.dayAnalysis}
+                      onEditDate={preview ? undefined : focusDayLog}
+                      onDeleteDate={preview ? undefined : store.removeDay}
+                      disabled={preview}
+                    />
+                  </Reveal>
                 </div>
 
                 {/* ---------------------------- history ------------------------- */}
-                <div className="ci-rise mt-4">
-                  <HistoryTable
-                    analysis={analysis}
-                    logs={logs}
-                    disabled={preview}
-                    onEdit={(entry) => {
-                      setEditing(entry);
-                      focusForm();
-                    }}
-                    onDelete={(id) => store.remove(id)}
-                    onClearAll={() => {
-                      store.clearAll();
-                      store.clearDays();
-                      setEditing(null);
-                    }}
-                    onExport={exportCsv}
-                  />
+                <div className="mt-4">
+                  <Reveal>
+                    <HistoryTable
+                      analysis={analysis}
+                      logs={logs}
+                      disabled={preview}
+                      onEdit={(entry) => {
+                        setEditing(entry);
+                        focusForm();
+                      }}
+                      onDelete={(id) => store.remove(id)}
+                      onClearAll={() => {
+                        store.clearAll();
+                        store.clearDays();
+                        setEditing(null);
+                      }}
+                      onExport={exportCsv}
+                    />
+                  </Reveal>
                 </div>
               </>
             )}
@@ -475,4 +538,13 @@ export function CycleIntelligence({
       </div>
     </div>
   );
+}
+
+/** A time-of-day hello — small, but it makes the page feel addressed to you. */
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 5) return "Late night";
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }

@@ -177,7 +177,7 @@ export function PhaseCards({
               </div>
               {w.current ? (
                 <span
-                  className="ci-badge shrink-0"
+                  className="ci-badge ci-sheen shrink-0"
                   style={{
                     borderColor: "var(--phase)",
                     color: "var(--phase)",

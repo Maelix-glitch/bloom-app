@@ -48,6 +48,11 @@ wrong _and_ how to fix it, so bad data never reaches the averaging logic.
 
 ## What's on the page
 
+Opening with a time-of-day greeting, then a **signature strip**: a consistency
+ring (share of cycles within ±3 days of the average), a one-sentence read of
+the person's own pattern, and the four figures that matter — cycle day, cycles
+logged, average length, logging streak. Numbers count up when they scroll in.
+
 | Section              | What it shows                                                                                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Phase wave           | The signature element: where today sits in the cycle, banded by phase, with ovulation, the fertile window and the predicted next start marked.                                             |
@@ -90,10 +95,30 @@ their own CSV.
 
 ## Design system — `src/styles/cycle2.css`
 
-One component tree, five directions, switched by `data-theme` on a `.ci` root:
-`nocturne` (default, charcoal-teal), `orchid` (plum-black), `tide` (slate-blue),
-`fern` (charcoal-green), `daybreak` (light). Palette, surface treatment, corner
-geometry and type weights change; structure, copy and behaviour do not.
+One component tree, eight directions, switched by `data-theme` on a `.ci` root:
+`nocturne` (default, charcoal-teal), `orchid` (plum-black, glassy), `tide`
+(slate-blue, flat), `fern` (charcoal-green, shadow-built), `aurora` (drifting
+light behind glass panels), `ember` (warm charcoal and candlelight), `ink`
+(near-black, 6px corners, no ornament), `daybreak` (light). Palette, surface
+treatment, corner geometry and type weights change; structure, copy and
+behaviour do not.
+
+### Life, and when to take it away
+
+- **Atmosphere** — three blurred orbs drift behind the page (`ci-drift-a/b/c`,
+  38–54s). `--ci-atmos-opacity: 0` turns it off for a direction (`ink`).
+- **Grain** — a low-opacity fractal-noise overlay per direction.
+- **Reveal** — sections fade and lift in as they enter the viewport
+  (IntersectionObserver, staggered), so the page assembles as you scroll.
+- **Count-up** — the signature figures tick up from zero on first view.
+- **Grow-in** — chart bars and grid cells scale in, staggered.
+- **Pulse & sheen** — the today marker breathes; the "you are here" badge has a
+  slow sheen.
+- **Lift** — cards rise 3px on hover (pointer devices only).
+
+All of it is off under `prefers-reduced-motion: reduce`, and `.ci-reveal`
+elements fall back to visible if IntersectionObserver is unavailable, so no
+content can ever be trapped at opacity 0.
 
 Type: Fraunces (characterful serif) for headings, Space Grotesk (geometric sans)
 for body and controls, IBM Plex Mono for data.

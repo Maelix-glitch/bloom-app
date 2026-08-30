@@ -302,6 +302,13 @@ export function PhaseWave({
                 <circle
                   cx={todayX}
                   cy={todayY}
+                  r={compact ? 9 : 11}
+                  className="ci-pulse"
+                  style={{ fill: "var(--ci-text)" }}
+                />
+                <circle
+                  cx={todayX}
+                  cy={todayY}
                   r={compact ? 4.5 : 5.5}
                   style={{ fill: "var(--ci-bg)", stroke: "var(--ci-text)", strokeWidth: 2 }}
                 />

@@ -704,3 +704,365 @@ textarea.ci-input {
 .ci-link:hover {
   color: var(--ci-text);
 }
+
+/* =========================================================================
+   6. Aurora — deep teal-indigo, glass panels, drifting light
+   ========================================================================= */
+
+.ci[data-theme="aurora"] {
+  --ci-bg: #09131a;
+  --ci-bg-deep: #050d12;
+  --ci-surface: rgba(16, 34, 42, 0.72);
+  --ci-surface-2: rgba(22, 46, 56, 0.6);
+  --ci-line: rgba(120, 200, 210, 0.14);
+  --ci-line-strong: rgba(120, 200, 210, 0.26);
+  --ci-text: #e8f6f4;
+  --ci-text-soft: #b9d6d6;
+  --ci-text-mute: #7fa3a8;
+  --ci-menstrual: #e2578c;
+  --ci-follicular: #45e0c0;
+  --ci-luteal: #2f9fbb;
+  --ci-ovulation: #ffd166;
+  --ci-late: #9db6d8;
+  --ci-accent: #45e0c0;
+  --ci-accent-soft: rgba(69, 224, 192, 0.14);
+  --ci-focus: #7ff2dd;
+  --ci-ok: #45e0c0;
+  --ci-warn: #ffd166;
+  --ci-danger: #f2805f;
+  --ci-input-bg: rgba(8, 22, 28, 0.7);
+  --ci-veil: none;
+  --ci-atmos-1: #1fb8a6;
+  --ci-atmos-2: #7d4bd8;
+  --ci-atmos-3: #e2578c;
+  --ci-atmos-opacity: 0.3;
+  --ci-glass: 1;
+  --ci-grain: 0.5;
+  --ci-radius-lg: 18px;
+  --ci-radius-md: 13px;
+  --ci-radius-sm: 9px;
+  --ci-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.02em;
+}
+
+/* =========================================================================
+   7. Ember — warm charcoal, candlelight glow, softest geometry
+   ========================================================================= */
+
+.ci[data-theme="ember"] {
+  --ci-bg: #14100e;
+  --ci-bg-deep: #0c0908;
+  --ci-surface: #1d1714;
+  --ci-surface-2: #251d18;
+  --ci-line: #31251f;
+  --ci-line-strong: #43342b;
+  --ci-text: #f6ece1;
+  --ci-text-soft: #d6c3b2;
+  --ci-text-mute: #9c8676;
+  --ci-menstrual: #d05a6e;
+  --ci-follicular: #4fae9b;
+  --ci-luteal: #3a8c86;
+  --ci-ovulation: #f0a94c;
+  --ci-late: #b09a8c;
+  --ci-accent: #f0a94c;
+  --ci-accent-soft: rgba(240, 169, 76, 0.15);
+  --ci-focus: #ffc98a;
+  --ci-ok: #4fae9b;
+  --ci-warn: #f0a94c;
+  --ci-danger: #e0705a;
+  --ci-input-bg: #171210;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(240, 169, 76, 0.12), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(208, 90, 110, 0.09), transparent 55%);
+  --ci-atmos-1: #f0a94c;
+  --ci-atmos-2: #d05a6e;
+  --ci-atmos-3: #4fae9b;
+  --ci-atmos-opacity: 0.18;
+  --ci-grain: 0.7;
+  --ci-radius-lg: 22px;
+  --ci-radius-md: 16px;
+  --ci-radius-sm: 11px;
+  --ci-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.9);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* =========================================================================
+   8. Ink — near-black, bone white, hairline sharpness, no ornament
+   ========================================================================= */
+
+.ci[data-theme="ink"] {
+  --ci-bg: #0a0a0b;
+  --ci-bg-deep: #050506;
+  --ci-surface: #111113;
+  --ci-surface-2: #17171a;
+  --ci-line: #242428;
+  --ci-line-strong: #34343a;
+  --ci-text: #f4f4f1;
+  --ci-text-soft: #c4c4bf;
+  --ci-text-mute: #8a8a85;
+  --ci-menstrual: #e35d84;
+  --ci-follicular: #7fd1c3;
+  --ci-luteal: #4fa3ae;
+  --ci-ovulation: #f2c46b;
+  --ci-late: #a3a3ad;
+  --ci-accent: #f4f4f1;
+  --ci-accent-soft: rgba(244, 244, 241, 0.08);
+  --ci-focus: #ffffff;
+  --ci-ok: #7fd1c3;
+  --ci-warn: #f2c46b;
+  --ci-danger: #e8654f;
+  --ci-input-bg: #0d0d0f;
+  --ci-veil: none;
+  --ci-atmos-opacity: 0;
+  --ci-grain: 0.35;
+  --ci-radius-lg: 6px;
+  --ci-radius-md: 4px;
+  --ci-radius-sm: 3px;
+  --ci-shadow: none;
+  --ci-display-weight: 600;
+  --ci-display-track: -0.02em;
+}
+
+/* ------------------------------- atmosphere ------------------------------ */
+
+.ci-atmos {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ci-atmos i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: var(--ci-atmos-opacity, 0.22);
+  will-change: transform;
+}
+
+.ci-atmos i:nth-child(1) {
+  width: 46vw;
+  height: 46vw;
+  top: -14vw;
+  left: -8vw;
+  background: var(--ci-atmos-1, var(--ci-follicular));
+  animation: ci-drift-a 38s ease-in-out infinite alternate;
+}
+.ci-atmos i:nth-child(2) {
+  width: 38vw;
+  height: 38vw;
+  top: 18vh;
+  right: -10vw;
+  background: var(--ci-atmos-2, var(--ci-luteal));
+  animation: ci-drift-b 46s ease-in-out infinite alternate;
+}
+.ci-atmos i:nth-child(3) {
+  width: 30vw;
+  height: 30vw;
+  bottom: -8vw;
+  left: 26vw;
+  background: var(--ci-atmos-3, var(--ci-menstrual));
+  animation: ci-drift-c 54s ease-in-out infinite alternate;
+}
+
+.ci-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: calc(var(--ci-grain, 0.5) * 0.16);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* glass panels for the aurora direction */
+.ci[data-theme="aurora"] .ci-card,
+.ci[data-theme="aurora"] .ci-flag {
+  backdrop-filter: blur(16px);
+}
+
+@keyframes ci-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6vw, 5vh, 0) scale(1.12);
+  }
+}
+@keyframes ci-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-7vw, -4vh, 0) scale(1);
+  }
+}
+@keyframes ci-drift-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4vw, -6vh, 0) scale(1.15);
+  }
+}
+
+/* --------------------------------- motion -------------------------------- */
+
+/* scroll reveal — the component adds [data-visible] when it enters the viewport */
+.ci-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 560ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.ci-reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* cards lift slightly on hover — never on touch, and never for reduced motion */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ci-lift {
+    transition:
+      transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 320ms ease,
+      box-shadow 320ms ease;
+  }
+  .ci-lift:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--ci-accent) 40%, var(--ci-line));
+    box-shadow:
+      var(--ci-shadow),
+      0 0 0 1px color-mix(in oklab, var(--ci-accent) 14%, transparent);
+  }
+}
+
+/* bars and fills grow in once their section is on screen */
+.ci-grow {
+  transform-origin: left center;
+  animation: ci-grow-x 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--grow-delay, 0ms);
+}
+.ci-grow-y {
+  transform-origin: bottom center;
+  animation: ci-grow-y 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--grow-delay, 0ms);
+}
+
+@keyframes ci-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes ci-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* the today marker breathes */
+.ci-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ci-pulse 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ci-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.55);
+  }
+}
+
+/* a single slow sheen across the "you are here" marker */
+.ci-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.ci-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--phase, var(--ci-text)) 30%, transparent) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: ci-sheen 4.5s ease-in-out infinite;
+}
+
+@keyframes ci-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* numbers settle in rather than popping */
+.ci-tick {
+  font-variant-numeric: tabular-nums;
+  transition: opacity 200ms ease;
+}
+
+/* editorial section numbering */
+.ci-index {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--ci-text-mute);
+}
+
+/* a top highlight inside every card, like light catching an edge */
+.ci-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--ci-text) 12%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ci-atmos i,
+  .ci-sheen::after,
+  .ci-pulse {
+    animation: none !important;
+  }
+  .ci-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ci-grow,
+  .ci-grow-y {
+    animation: none !important;
+  }
+}
