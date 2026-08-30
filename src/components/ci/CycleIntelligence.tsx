@@ -27,6 +27,7 @@ import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
 import { HistoryTable } from "./HistoryTable";
 import { Button, Card, Disclaimer } from "./primitives";
+import { SyncLine } from "./SyncLine";
 import { BlockHead } from "./SignatureStrip";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { daysToCsv, logsToCsv } from "@/lib/cycle/periodStore";
@@ -131,7 +132,7 @@ export function CycleIntelligence({
             recalculated the moment you change it.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] ci-muted">
-            <span>stored in this browser only</span>
+            <SyncLine sync={store.sync} onRetry={store.syncNow} />
             <span aria-hidden>·</span>
             <span>estimates, not medical advice</span>
             {preview ? (
