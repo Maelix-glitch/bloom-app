@@ -1294,3 +1294,47 @@
     transition: none;
   }
 }
+
+/* ------------------------------- sync note -------------------------------- */
+/* One honest line about where these days live. Sits under each header.       */
+
+.tk2-sync {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.01em;
+  color: var(--ci-text-mute);
+}
+
+.tk2-sync-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ci-text-mute);
+  transform: translateY(-2px);
+}
+
+.tk2-sync[data-state="saved"] .tk2-sync-dot { background: var(--ci-follicular); }
+.tk2-sync[data-state="pending"] .tk2-sync-dot { background: var(--ci-ovulation); }
+.tk2-sync[data-state="loading"] .tk2-sync-dot { background: var(--ci-text-mute); }
+.tk2-sync[data-state="error"] { color: var(--ci-menstrual); }
+.tk2-sync[data-state="error"] .tk2-sync-dot { background: var(--ci-menstrual); }
+
+.tk2-sync-retry {
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.tk2-sync-retry:hover { opacity: 0.7; }
+.tk2-sync-retry:focus-visible {
+  outline: 1px solid var(--ci-text-soft);
+  outline-offset: 2px;
+}

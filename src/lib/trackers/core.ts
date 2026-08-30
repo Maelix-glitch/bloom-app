@@ -43,6 +43,9 @@ export interface DayEntry {
   energy: number | null;
   screenMinutes: number | null;
   notes: string | null;
+  /** When this day was last written, on this device or another. Optional, and
+   *  only used to reconcile two copies of the same date. */
+  updatedAt?: string | null;
 }
 
 export interface Goals {
@@ -196,6 +199,7 @@ export function emptyDay(date: string): DayEntry {
     energy: null,
     screenMinutes: null,
     notes: null,
+    updatedAt: null,
   };
 }
 

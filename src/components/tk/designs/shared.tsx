@@ -70,6 +70,28 @@ export function Observations({
   );
 }
 
+/**
+ * SyncNote — one honest line about where these days live right now.
+ *
+ * The page always draws from this device first, so a failed sync costs exactly
+ * one thing: the day isn't on the account yet. It says that instead of spinning.
+ */
+export function SyncNote({ sync, onRetry }: { sync: TrackerStore["sync"]; onRetry: () => void }) {
+  if (sync.state === "off") return null;
+  const retryable = sync.state === "error" || sync.state === "signed-out";
+  return (
+    <p className="tk2-sync" data-state={sync.state} aria-live="polite">
+      <i className="tk2-sync-dot" aria-hidden />
+      <span>{sync.message}</span>
+      {retryable ? (
+        <button type="button" onClick={onRetry} className="tk2-sync-retry">
+          try again
+        </button>
+      ) : null}
+    </p>
+  );
+}
+
 export function Footer({ children }: { children?: ReactNode }) {
   return (
     <footer className="tk2-footer">
@@ -79,4 +101,5 @@ export function Footer({ children }: { children?: ReactNode }) {
   );
 }
 
+export type { TrackerStore };
 export { useTrackers };

@@ -16,7 +16,7 @@ import { StudyMap } from "@/components/tk/StudyMap";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
-import { applyQuickAdd, Footer, Observations, useTrackers } from "./shared";
+import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers } from "./shared";
 
 const C = 130;
 
@@ -137,6 +137,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
             Six territories, one day. The compass draws night as an arc and everything else as the
             share of its target you've covered — all of it from your own entries.
           </p>
+          <SyncNote sync={store.sync} onRetry={store.syncNow} />
         </header>
 
         {!hydrated ? (

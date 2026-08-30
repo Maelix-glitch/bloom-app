@@ -16,7 +16,7 @@ import { TrackerIcon } from "@/components/tk/icons";
 import { TRACKERS, type TrackerDef } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
-import { applyQuickAdd, Footer, Observations, useTrackers, valuesOf } from "./shared";
+import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers, valuesOf } from "./shared";
 
 const QUICK: Partial<Record<string, { amount: number; label: string }[]>> = {
   water: [{ amount: 250, label: "+250" }, { amount: 500, label: "+500" }],
@@ -51,6 +51,7 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
               Sleep, water, study, movement, energy, screen. One line each, totalled honestly —
               nothing estimated, nothing filled in for you.
             </p>
+            <SyncNote sync={store.sync} onRetry={store.syncNow} />
           </div>
           <dl className="lg-meta">
             <div>

@@ -15,7 +15,7 @@ import { LogPanel } from "@/components/tk/LogPanel";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDateShort } from "@/lib/cycle/predict";
 
-import { applyQuickAdd, Footer, Observations, useTrackers } from "./shared";
+import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers } from "./shared";
 
 const STEPS: Partial<Record<TrackerId, { amount: number; label: string }[]>> = {
   water: [{ amount: 250, label: "+250" }, { amount: 500, label: "+500" }],
@@ -52,6 +52,7 @@ export function Strip({ theme = "nocturne" }: { theme?: string }) {
             Each band is one tracker, each cell one day, and the line is today. Tap a cell to scroll
             the strip, or use the buttons on the right to add to today.
           </p>
+          <SyncNote sync={store.sync} onRetry={store.syncNow} />
         </header>
 
         {!hydrated ? (

@@ -65,6 +65,7 @@ export function normalizeDay(raw: unknown): DayEntry | null {
   day.sessions = Array.isArray(row["sessions"])
     ? (row["sessions"] as unknown[]).map(normalizeSession).filter((s): s is StudySession => s !== null).slice(0, 12)
     : [];
+  day.updatedAt = typeof row["updatedAt"] === "string" ? row["updatedAt"] : null;
   return day;
 }
 
