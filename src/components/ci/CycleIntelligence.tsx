@@ -10,6 +10,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { PhaseWave } from "./PhaseWave";
+import { RhythmChart } from "./RhythmChart";
+import { FlowBreakdown, ForecastStrip, PhaseCards, StatsStrip } from "./AnalyticsCards";
 import { PredictionsCard } from "./PredictionsCard";
 import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
@@ -152,6 +154,53 @@ export function CycleIntelligence({
                   <EntryForm logs={logs} today={today} disabled={preview} onSubmit={submit} />
                 </div>
 
+                <Card className="lg:col-span-2">
+                  <p className="ci-eyebrow">What appears once you log</p>
+                  <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                    Seven views, all computed from your own entries
+                  </h2>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {[
+                      {
+                        name: "Phase wave",
+                        body: "Where today sits in your cycle, with ovulation, the fertile window and your next start marked on one line.",
+                      },
+                      {
+                        name: "Predictions",
+                        body: "Next period, ovulation estimate, fertile window and average length — each with a confidence badge.",
+                      },
+                      {
+                        name: "Cycle lengths chart",
+                        body: "Every cycle as a bar against your average. Gaps that were excluded stay on the chart, marked as excluded.",
+                      },
+                      {
+                        name: "The numbers",
+                        body: "Average, shortest–longest range, variability, average bleed length and total days tracked.",
+                      },
+                      {
+                        name: "Flow mix",
+                        body: "How light, medium and heavy distribute across everything you've logged.",
+                      },
+                      {
+                        name: "Phase cards",
+                        body: "Your current cycle split into the four phases, with the real dates each one is expected to cover.",
+                      },
+                      {
+                        name: "Forward look",
+                        body: "The next three cycles projected from your average, phase by phase.",
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.name}
+                        className="rounded-[var(--ci-radius-md)] border px-3.5 py-3 ci-hair"
+                      >
+                        <p className="text-[12.5px] font-medium">{item.name}</p>
+                        <p className="mt-1 text-[11.5px] leading-relaxed ci-muted">{item.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
                 {store.legacyAvailable && !preview ? (
                   <Card className="lg:col-span-2">
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -218,6 +267,88 @@ export function CycleIntelligence({
                   </div>
                   <div className="ci-rise ci-rise-3">
                     <TipsCard analysis={analysis} />
+                  </div>
+                </div>
+
+                {/* ------------------------ analytics --------------------------- */}
+                <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+                  <div className="ci-card ci-card--pad ci-rise">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="ci-eyebrow">Cycle lengths</p>
+                        <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                          Your rhythm over time
+                        </h2>
+                        <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-relaxed ci-soft">
+                          Each bar is one cycle. Dashed bars were left out of the average because
+                          they were too short or too long to be a real cycle — they stay on the
+                          chart so you can see exactly what was excluded.
+                        </p>
+                      </div>
+                      {analysis.trend ? (
+                        <span
+                          className="ci-badge"
+                          style={{
+                            color: "var(--ci-ovulation)",
+                            borderColor:
+                              "color-mix(in oklab, var(--ci-ovulation) 45%, transparent)",
+                          }}
+                        >
+                          {analysis.trend.direction === "lengthening"
+                            ? "getting longer"
+                            : "getting shorter"}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="mt-3">
+                      <RhythmChart analysis={analysis} />
+                    </div>
+                  </div>
+
+                  <div className="ci-card ci-card--pad ci-rise">
+                    <p className="ci-eyebrow">The numbers</p>
+                    <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                      What your record adds up to
+                    </h2>
+                    <div className="mt-4">
+                      <StatsStrip analysis={analysis} />
+                    </div>
+                    <div className="mt-5 border-t pt-4 ci-hair">
+                      <p className="ci-eyebrow">Flow mix</p>
+                      <div className="mt-3">
+                        <FlowBreakdown analysis={analysis} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ------------------- phases + forward look -------------------- */}
+                <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                  <div className="ci-card ci-card--pad ci-rise">
+                    <p className="ci-eyebrow">The four phases</p>
+                    <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                      This cycle, split into phases
+                    </h2>
+                    <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                      Dates come from your own average cycle length, so they shift as your record
+                      shifts. The highlighted phase is where today falls.
+                    </p>
+                    <div className="mt-4">
+                      <PhaseCards analysis={analysis} />
+                    </div>
+                  </div>
+
+                  <div className="ci-card ci-card--pad ci-rise">
+                    <p className="ci-eyebrow">Forward look</p>
+                    <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                      The next three cycles
+                    </h2>
+                    <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                      Projected from your average — useful for planning, never a promise.
+                    </p>
+                    <div className="mt-4">
+                      <ForecastStrip analysis={analysis} />
+                    </div>
                   </div>
                 </div>
 

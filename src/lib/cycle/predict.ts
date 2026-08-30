@@ -181,6 +181,50 @@ export interface Tip {
   body: string;
 }
 
+/** One phase inside one cycle — used by the phase cards and the forecast. */
+export interface PhaseWindow {
+  phase: Exclude<Phase, "late">;
+  /** 1-based day range inside the cycle. */
+  fromDay: number;
+  toDay: number;
+  from: string;
+  to: string;
+  /** True when today falls inside this window. */
+  current: boolean;
+}
+
+/** A forward look at a cycle that hasn't started yet. */
+export interface ForecastCycle {
+  /** 1 = the next cycle, 2 = the one after. */
+  index: number;
+  start: string;
+  end: string;
+  ovulation: string;
+  fertileStart: string;
+  fertileEnd: string;
+  phases: PhaseWindow[];
+}
+
+/** Everything the analytics views need, all derived from the entries. */
+export interface CycleStats {
+  cyclesLogged: number;
+  shortest: number | null;
+  longest: number | null;
+  excludedGaps: number;
+  /** Mean of the logged bleed durations, null when no end dates exist. */
+  averageBleed: number | null;
+  entriesWithEnd: number;
+  /** Share of plausible cycles within ±3 days of the average, 0–1. */
+  predictability: number | null;
+  /** Days from the first logged start to today. */
+  daysTracked: number | null;
+  firstEntry: string | null;
+  flowCounts: Record<FlowLevel | "unspecified", number>;
+  mostCommonFlow: FlowLevel | "unspecified" | null;
+  /** Entries carrying a note — a small nudge that notes make patterns visible. */
+  entriesWithNotes: number;
+}
+
 export interface CycleAnalysis {
   /** Echoed back so callers can assert against a known "today". */
   today: string;
@@ -228,6 +272,13 @@ export interface CycleAnalysis {
   irregular: boolean;
   flags: InsightFlag[];
   tips: Tip[];
+
+  /** The four phases of the current cycle, with dates. */
+  phaseWindows: PhaseWindow[];
+  /** The next three cycles, projected from the current average. */
+  forecast: ForecastCycle[];
+  /** Derived numbers for the analytics cards. */
+  stats: CycleStats;
 }
 
 /* --------------------------------- maths --------------------------------- */
@@ -358,6 +409,40 @@ export const PHASE_TIPS: Record<Phase, Tip[]> = {
   ],
 };
 
+/**
+ * Plain-language description of each phase for the phase cards.
+ * General education, not advice, and never diagnostic.
+ */
+export const PHASE_GUIDE: Record<
+  Exclude<Phase, "late">,
+  { window: string; summary: string; signals: string[] }
+> = {
+  menstrual: {
+    window: "Bleeding days",
+    summary:
+      "The cycle's day one. The lining built up over the previous cycle is shed, which is why energy often sits at its lowest here.",
+    signals: ["cramping", "lower energy", "heavier need for rest"],
+  },
+  follicular: {
+    window: "Bleed → ovulation",
+    summary:
+      "Oestrogen rises and the body lines up the next ovulation. Many people find this the steadier, more capable stretch of the month.",
+    signals: ["energy returning", "steadier mood", "easier training"],
+  },
+  ovulation: {
+    window: "Around the estimated day",
+    summary:
+      "One egg is released. It's a short window — and the stretch of the cycle where pregnancy is most likely, whichever way that matters to you.",
+    signals: ["mucus changes", "a small temperature shift", "brief energy lift"],
+  },
+  luteal: {
+    window: "Ovulation → next bleed",
+    summary:
+      "Progesterone rises then falls. This is the half that stays roughly the same length for most people, and where premenstrual symptoms tend to live.",
+    signals: ["mood dips", "cravings", "sleep changes", "soreness"],
+  },
+};
+
 /* --------------------------------- analysis -------------------------------- */
 
 /**
@@ -448,6 +533,11 @@ export function analyzeCycle(
     lastDuration ??
     (loggedDurations.length > 0 ? Math.round(mean(loggedDurations)) : o.defaultPeriodLength);
   const periodLengthIsLogged = lastDuration !== null;
+  /** Bleed length clamped so the four phases always have room to exist. */
+  const bleedDays = Math.min(
+    Math.max(1, periodLength),
+    Math.max(1, cycleLength - (o.lutealLength - 4)),
+  );
 
   /* --- predictions ------------------------------------------------------- */
   const nextStart = lastStart ? addDays(lastStart, cycleLength) : null;
@@ -468,7 +558,7 @@ export function analyzeCycle(
   if (cycleDay !== null && cycleDay > 0 && lastStart) {
     if (cycleDay > cycleLength) {
       phase = "late";
-    } else if (cycleDay <= periodLength) {
+    } else if (cycleDay <= bleedDays) {
       phase = "menstrual";
     } else if (cycleDay >= ovulationDay - 1 && cycleDay <= ovulationDay + 1) {
       phase = "ovulation";
@@ -498,6 +588,89 @@ export function analyzeCycle(
   }
 
   const irregular = cycleLengths.length >= 3 && variability > o.moderateVariability;
+
+  /* --- the four phases, laid out against real dates ---------------------- */
+  const layoutPhases = (anchor: string): PhaseWindow[] => {
+    const windows: { phase: Exclude<Phase, "late">; fromDay: number; toDay: number }[] = [
+      { phase: "menstrual", fromDay: 1, toDay: bleedDays },
+      {
+        phase: "follicular",
+        fromDay: bleedDays + 1,
+        toDay: Math.max(bleedDays + 1, ovulationDay - 2),
+      },
+      { phase: "ovulation", fromDay: ovulationDay - 1, toDay: ovulationDay + 1 },
+      { phase: "luteal", fromDay: ovulationDay + 2, toDay: cycleLength },
+    ];
+    return windows.map((w) => ({
+      ...w,
+      from: addDays(anchor, w.fromDay - 1),
+      to: addDays(anchor, w.toDay - 1),
+      current:
+        anchor === lastStart &&
+        cycleDay !== null &&
+        cycleDay >= w.fromDay &&
+        cycleDay <= w.toDay,
+    }));
+  };
+
+  const phaseWindows = lastStart ? layoutPhases(lastStart) : [];
+
+  /* --- forecast: the next three cycles, same maths, further out ---------- */
+  const forecast: ForecastCycle[] = [];
+  if (nextStart) {
+    for (let i = 0; i < 3; i += 1) {
+      const start = addDays(nextStart, i * cycleLength);
+      const ovulation = addDays(start, cycleLength - o.lutealLength);
+      forecast.push({
+        index: i + 1,
+        start,
+        end: addDays(start, cycleLength - 1),
+        ovulation,
+        fertileStart: addDays(ovulation, -o.fertileBefore),
+        fertileEnd: addDays(ovulation, o.fertileAfter),
+        phases: layoutPhases(start).map((w) => ({ ...w, current: false })),
+      });
+    }
+  }
+
+  /* --- analytics ---------------------------------------------------------- */
+  const flowCounts: Record<FlowLevel | "unspecified", number> = {
+    light: 0,
+    medium: 0,
+    heavy: 0,
+    unspecified: 0,
+  };
+  let entriesWithNotes = 0;
+  for (const entry of sorted) {
+    if (entry.flow && entry.flow in flowCounts) flowCounts[entry.flow] += 1;
+    else flowCounts.unspecified += 1;
+    if (entry.notes) entriesWithNotes += 1;
+  }
+  const rankedFlows = (Object.keys(flowCounts) as (FlowLevel | "unspecified")[]).filter(
+    (k) => flowCounts[k] > 0,
+  );
+  const mostCommonFlow =
+    rankedFlows.length === 0
+      ? null
+      : rankedFlows.reduce((best, key) => (flowCounts[key] > flowCounts[best] ? key : best));
+  const steady = cycleLengths.filter((len) => Math.abs(len - averageLengthRaw) <= 3).length;
+  const firstEntry = sorted[0]?.start ?? null;
+
+  const stats: CycleStats = {
+    cyclesLogged: cycleLengths.length,
+    shortest: cycleLengths.length > 0 ? Math.min(...cycleLengths) : null,
+    longest: cycleLengths.length > 0 ? Math.max(...cycleLengths) : null,
+    excludedGaps: gaps.filter((g) => !g.plausible).length,
+    averageBleed:
+      loggedDurations.length > 0 ? Math.round(mean(loggedDurations) * 10) / 10 : null,
+    entriesWithEnd: loggedDurations.length,
+    predictability: cycleLengths.length >= 2 ? steady / cycleLengths.length : null,
+    daysTracked: firstEntry ? diffDays(firstEntry, today) + 1 : null,
+    firstEntry,
+    flowCounts,
+    mostCommonFlow,
+    entriesWithNotes,
+  };
 
   /* --- flags (the loopholes, each with its own message) ------------------ */
   const flags: InsightFlag[] = [];
@@ -615,6 +788,9 @@ export function analyzeCycle(
     irregular,
     flags,
     tips,
+    phaseWindows,
+    forecast,
+    stats,
   };
 }
 

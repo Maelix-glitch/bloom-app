@@ -13,6 +13,13 @@ import { Check, Palette } from "lucide-react";
 import cycleIntelligenceCss from "../styles/cycle2.css?url";
 import { BloomHeader } from "@/components/BloomHeader";
 import { PhaseWave } from "@/components/ci/PhaseWave";
+import { RhythmChart } from "@/components/ci/RhythmChart";
+import {
+  FlowBreakdown,
+  ForecastStrip,
+  PhaseCards,
+  StatsStrip,
+} from "@/components/ci/AnalyticsCards";
 import { PredictionsCard } from "@/components/ci/PredictionsCard";
 import { InsightsPanel } from "@/components/ci/InsightsPanel";
 import { TipsCard } from "@/components/ci/TipsCard";
@@ -102,6 +109,13 @@ function MiniPreview({
           </div>
           <div className="mt-3.5">
             <PredictionsCard analysis={analysis} compact />
+          </div>
+          <div className="mt-3">
+            <p className="ci-eyebrow">Cycle lengths</p>
+            <RhythmChart analysis={analysis} compact />
+          </div>
+          <div className="mt-2.5">
+            <PhaseCards analysis={analysis} compact />
           </div>
         </div>
       </div>
@@ -364,6 +378,29 @@ function CycleStylesPage() {
                   <ConfidenceBadge level="low" reason="low" />
                   <ConfidenceBadge level="medium" reason="medium" />
                   <ConfidenceBadge level="high" reason="high" />
+                </div>
+              </div>
+
+              <div className="ci-card ci-card--pad">
+                <p className="ci-eyebrow">Analytics</p>
+                <p className="mt-2 text-[12.5px] leading-relaxed ci-muted">
+                  The numbers, the flow mix and the three-cycle forward look — all derived from
+                  logged entries, none of them invented.
+                </p>
+                <div className="mt-3.5">
+                  <StatsStrip analysis={analysis} />
+                </div>
+                <div className="mt-5 border-t pt-4 ci-hair">
+                  <p className="ci-eyebrow">Flow mix</p>
+                  <div className="mt-3">
+                    <FlowBreakdown analysis={analysis} />
+                  </div>
+                </div>
+                <div className="mt-5 border-t pt-4 ci-hair">
+                  <p className="ci-eyebrow">Forward look</p>
+                  <div className="mt-3">
+                    <ForecastStrip analysis={analysis} compact />
+                  </div>
                 </div>
               </div>
 

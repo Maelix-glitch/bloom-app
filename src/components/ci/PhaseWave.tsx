@@ -11,9 +11,10 @@
  * screen readers.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 
 import { PHASE_LABEL, type CycleAnalysis } from "@/lib/cycle/predict";
+import { useMeasuredWidth } from "./useMeasuredWidth";
 
 interface Pt {
   x: number;
@@ -92,22 +93,7 @@ export function PhaseWave({
   compact?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    const el = hostRef.current;
-    if (!el) return;
-    const measure = () =>
-      setWidth((prev) => (prev === el.clientWidth ? prev : el.clientWidth));
-    measure();
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", measure);
-      return () => window.removeEventListener("resize", measure);
-    }
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const width = useMeasuredWidth(hostRef);
 
   const height = compact ? 132 : width < 560 ? 158 : 196;
   const padX = compact ? 8 : 14;

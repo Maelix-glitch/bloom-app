@@ -372,3 +372,104 @@ describe("edge case 4 — entry-time validation", () => {
     expect(validateLogDraft({ start: "2026-02-06" }, existing, today)).toEqual({});
   });
 });
+
+describe("phase windows", () => {
+  const steady = series("2026-01-01", [28, 28, 28]).map((s) => log(s));
+
+  it("lays the four phases across the cycle with real dates", () => {
+    const a = analyzeCycle(steady, "2026-04-10");
+    expect(a.phaseWindows.map((w) => w.phase)).toEqual([
+      "menstrual",
+      "follicular",
+      "ovulation",
+      "luteal",
+    ]);
+    expect(a.phaseWindows[0]).toMatchObject({ fromDay: 1, toDay: 5, from: "2026-03-26" });
+    expect(a.phaseWindows[2]).toMatchObject({ fromDay: 13, toDay: 15 });
+    expect(a.phaseWindows[3]).toMatchObject({ fromDay: 16, toDay: 28 });
+  });
+
+  it("marks the window today falls in, and only that one", () => {
+    // last start 2026-03-26, cycle length 28 → ovulation around day 14 (2026-04-08)
+    const a = analyzeCycle(steady, "2026-04-08");
+    const current = a.phaseWindows.filter((w) => w.current);
+    expect(current).toHaveLength(1);
+    expect(current[0]?.phase).toBe("ovulation");
+    expect(a.phase).toBe("ovulation");
+  });
+
+  it("marks nothing when today is past the predicted start", () => {
+    const a = analyzeCycle(steady, "2026-04-30");
+    expect(a.phaseWindows.every((w) => !w.current)).toBe(true);
+    expect(a.phase).toBe("late");
+  });
+});
+
+describe("forecast", () => {
+  it("projects three cycles forward from the predicted start", () => {
+    const a = analyzeCycle(
+      series("2026-01-01", [28, 28, 28]).map((s) => log(s)),
+      "2026-04-10",
+    );
+    expect(a.forecast.map((f) => f.index)).toEqual([1, 2, 3]);
+    expect(a.forecast[0]?.start).toBe(a.nextStart);
+    expect(a.forecast[0]?.start).toBe("2026-04-23");
+    expect(a.forecast[1]?.start).toBe(addDays("2026-04-23", 28));
+    expect(a.forecast[2]?.start).toBe(addDays("2026-04-23", 56));
+  });
+
+  it("keeps ovulation 14 days before each following period", () => {
+    const a = analyzeCycle(
+      series("2026-01-01", [30, 30, 30]).map((s) => log(s)),
+      "2026-04-10",
+    );
+    for (const f of a.forecast) {
+      expect(diffDays(f.ovulation, f.end) + 1).toBe(14);
+      expect(diffDays(f.start, f.ovulation)).toBe(16); // 30 - 14
+    }
+  });
+
+  it("is empty with no entries", () => {
+    expect(analyzeCycle([], "2026-04-10").forecast).toEqual([]);
+    expect(analyzeCycle([], "2026-04-10").phaseWindows).toEqual([]);
+  });
+});
+
+describe("analytics stats", () => {
+  const logs: PeriodLog[] = [
+    log("2026-01-01", { end: "2026-01-05", flow: "heavy" }),
+    log("2026-01-29", { end: "2026-02-02", flow: "medium", notes: "ok" }),
+    log("2026-02-26", { end: "2026-03-01", flow: "heavy" }),
+    log("2026-03-26", { flow: "light" }),
+  ];
+
+  it("counts flows and finds the most common one", () => {
+    const a = analyzeCycle(logs, "2026-04-10");
+    expect(a.stats.flowCounts).toEqual({ light: 1, medium: 1, heavy: 2, unspecified: 0 });
+    expect(a.stats.mostCommonFlow).toBe("heavy");
+    expect(a.stats.entriesWithNotes).toBe(1);
+  });
+
+  it("reports the range, the tracked span and the excluded gaps", () => {
+    const a = analyzeCycle([...logs, log("2026-09-01")], "2026-09-20");
+    expect(a.stats.shortest).toBe(28);
+    expect(a.stats.longest).toBe(28);
+    expect(a.stats.excludedGaps).toBe(1); // the 159-day gap to September
+    expect(a.stats.daysTracked).toBe(diffDays("2026-01-01", "2026-09-20") + 1);
+    expect(a.stats.firstEntry).toBe("2026-01-01");
+  });
+
+  it("averages logged bleed lengths and scores predictability", () => {
+    const a = analyzeCycle(logs, "2026-04-10");
+    // 5 + 5 + 4 days (February 2026 has 28 days) / 3
+    expect(a.stats.averageBleed).toBe(4.7);
+    expect(a.stats.entriesWithEnd).toBe(3);
+    expect(a.stats.predictability).toBe(1); // every cycle within ±3 days
+  });
+
+  it("leaves predictability null until there are two cycles", () => {
+    const a = analyzeCycle(logs.slice(0, 2), "2026-02-10");
+    expect(a.stats.predictability).toBeNull();
+    expect(a.stats.cyclesLogged).toBe(1);
+  });
+});

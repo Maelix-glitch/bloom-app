@@ -46,6 +46,25 @@ duplicates, dates inside an existing logged period, backwards end dates, future
 dates and impossible bleed lengths are rejected with a message that says what is
 wrong _and_ how to fix it, so bad data never reaches the averaging logic.
 
+## What's on the page
+
+| Section              | What it shows                                                                                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Phase wave           | The signature element: where today sits in the cycle, banded by phase, with ovulation, the fertile window and the predicted next start marked.                                             |
+| Predictions          | Next period, days until/late, ovulation estimate, fertile window, average cycle length, where you are — each next to a confidence badge.                                                   |
+| Cycle lengths chart  | Every cycle as a bar against the recency-weighted average, with a ±1 SD band. Excluded gaps stay on the chart as dashed bars, so the chart explains the average instead of hiding from it. |
+| The numbers          | Cycles logged, average, shortest–longest range, variability and the share of cycles within ±3 days, average bleed length, days tracked since the first entry.                              |
+| Flow mix             | Light / medium / heavy distribution across entries, plus how many entries carry an end date or a note.                                                                                     |
+| Phase cards          | The current cycle split into the four phases, with the dates each window is expected to cover and a "you are here" marker.                                                                 |
+| Forward look         | The next three cycles projected from the average, phase by phase, with ovulation and fertile dates.                                                                                        |
+| Insights             | Whichever edge-case banners currently apply — each with a specific message and, where it can be fixed, a one-click action.                                                                 |
+| Tips for this phase  | Phase-matched wellness suggestions.                                                                                                                                                        |
+| Entry form + history | Logging with inline validation; every entry with its computed length since the previous one, anomaly flags, edit, delete, clear all.                                                       |
+
+With no entries the page hides predictions entirely and lists the seven views
+that fill in once something is logged — no fake numbers, no greyed-out dummy
+charts.
+
 ## Edge cases, each with its own message
 
 1. No entries → predictions hidden, prompt to log the first period.
