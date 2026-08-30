@@ -12,6 +12,7 @@ import { useMemo, useRef, useState } from "react";
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
 import { LogPanel } from "@/components/tk/LogPanel";
+import { StudyMap } from "@/components/tk/StudyMap";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
@@ -47,6 +48,17 @@ function contourPath(values: (number | null)[], width: number, height: number, p
   return { line, area };
 }
 
+/** Where day `i` of fourteen sits on the route chart. */
+const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
+
+/** "+30m", "+1h", "+250ml" — whatever reads shortest and truest. */
+function stepLabel(def: (typeof TRACKERS)[number], amount: number): string {
+  if (def.kind === "volume") return amount >= 1000 ? `${amount / 1000}L` : `${amount}ml`;
+  if (amount < 60) return `${amount}m`;
+  const hours = amount / 60;
+  return Number.isInteger(hours) ? `${hours}h` : `${Math.floor(hours)}h ${amount % 60}m`;
+}
+
 export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const store = useTrackers();
   const { analysis, today, hydrated } = store;
@@ -73,6 +85,23 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
         d: `M ${a.x} ${a.y} A 118 118 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
       });
     }
+    /* study, as a block wherever the session started */
+    const sessions = entry?.sessions ?? [];
+    if (sessions.length > 0) {
+      let cursor = 9;
+      sessions.forEach((session, i) => {
+        const start = session.startAt ? Number(session.startAt.split(":")[0]) : cursor;
+        const length = Math.max((session.minutes / 60) * 15, 1.5);
+        cursor = start + Math.max(session.minutes / 60, 0.25) + 0.25;
+        const a = polar(46, start * 15);
+        const b = polar(46, start * 15 + length);
+        out.push({
+          id: "study",
+          r: 46,
+          d: `M ${a.x} ${a.y} A 46 46 0 ${length > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
+        });
+      });
+    }
     const shares: [TrackerId, number, number][] = [
       ["water", 100, (entry?.waterMl ?? 0) / (store.goals.waterMl || 2200)],
       ["movement", 64, (entry?.movementMinutes ?? 0) / (store.goals.movementMinutes || 30)],
@@ -96,7 +125,9 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
     <div className="ci ci-root tk2-root" data-theme={theme} data-design="atlas">
       <div className="at">
         <header className="at-head">
-          <p className="at-kicker">Bloom · Atlas of a day</p>
+          <p className="at-kicker">
+            Bloom · Atlas of a day · {hasDays ? `${analysis.daysLogged} days plotted` : "nothing plotted yet"}
+          </p>
           <h1 className="at-title">
             Where your hours
             <br />
@@ -157,6 +188,15 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 </svg>
               </div>
 
+              <ul className="at-key" aria-label="Compass key">
+                {defs.map((def) => (
+                  <li key={def.id} data-id={def.id}>
+                    <i aria-hidden />
+                    {def.name}
+                  </li>
+                ))}
+              </ul>
+
               <ul className="at-territories">
                 {defs.map((def) => {
                   const stat = analysis.trackers[def.id];
@@ -208,9 +248,9 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                                 key={amount}
                                 type="button"
                                 onClick={() => tap(def.id, amount)}
-                                aria-label={`Add ${def.format(amount)} to ${def.name}`}
+                                aria-label={`Add ${stepLabel(def, amount)} to ${def.name}`}
                               >
-                                +{def.format(amount)}
+                                +{stepLabel(def, amount)}
                               </button>
                             ))
                           )}
@@ -243,7 +283,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 {/* ------------------------------ the route --------------------------- */}
                 <section className="at-section">
                   <p className="at-sectionhead">The route · fourteen days, six paths</p>
-                  <svg viewBox="0 0 720 220" className="at-route" role="img" aria-label="Fourteen days of all six trackers">
+                  <svg viewBox="0 0 720 230" className="at-route" role="img" aria-label="Fourteen days of all six trackers">
                     {defs.map((def) => {
                       const values = analysis.trackers[def.id].series.map((p) => p.value);
                       const peak = Math.max(...values.map((v) => v ?? 0), 1);
@@ -251,19 +291,26 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                         .map((v, i) => ({ v, i }))
                         .filter((p): p is { v: number; i: number } => p.v !== null);
                       if (points.length < 2) return null;
-                      const x = (i: number) => Math.round((i / 13) * 690 + 15);
                       const y = (v: number) => Math.round(200 - (v / peak) * 170);
-                      let d = `M ${x(points[0]!.i)} ${y(points[0]!.v)}`;
+                      let d = `M ${routeX(points[0]!.i)} ${y(points[0]!.v)}`;
                       for (let i = 1; i < points.length; i += 1) {
                         const prev = points[i - 1]!;
                         const cur = points[i]!;
-                        const cx = (x(prev.i) + x(cur.i)) / 2;
-                        d += ` C ${cx} ${y(prev.v)} ${cx} ${y(cur.v)} ${x(cur.i)} ${y(cur.v)}`;
+                        const cx = (routeX(prev.i) + routeX(cur.i)) / 2;
+                        d += ` C ${cx} ${y(prev.v)} ${cx} ${y(cur.v)} ${routeX(cur.i)} ${y(cur.v)}`;
                       }
                       return (
                         <path key={def.id} d={d} className="at-route-line" data-id={def.id} />
                       );
                     })}
+                    <line x1={routeX(13)} y1={0} x2={routeX(13)} y2={206} className="at-route-today" />
+                    {analysis.trackers.sleep.series.map((p, i) =>
+                      i % 3 === 0 || i === 13 ? (
+                        <text key={p.date} x={routeX(i)} y={224} className="at-route-date">
+                          {p.date.slice(5)}
+                        </text>
+                      ) : null,
+                    )}
                   </svg>
                   <ul className="at-legend">
                     {defs.map((def) => (
@@ -277,6 +324,26 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                     Each path is scaled to its own range — they cross, they don't compete. A break in
                     a line is a day you didn't log, left empty on purpose.
                   </p>
+                </section>
+
+                {/* ------------------------------ study field -------------------------- */}
+                <section className="at-section">
+                  <p className="at-sectionhead">Study · the field</p>
+                  <StudyMap days={store.days} today={today} goal={store.goals.studyMinutes} />
+                  {analysis.subjects.length > 0 ? (
+                    <ul className="at-leaders">
+                      {analysis.subjects.slice(0, 6).map((s) => (
+                        <li key={s.subject}>
+                          <span>{s.subject}</span>
+                          <i aria-hidden />
+                          <span>
+                            {defs[2]!.format(s.minutes)} · {s.sessions} session
+                            {s.sessions === 1 ? "" : "s"}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </section>
 
                 {/* ------------------------------- the deep read ---------------------- */}

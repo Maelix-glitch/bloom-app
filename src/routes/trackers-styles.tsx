@@ -41,15 +41,18 @@ export const DESIGNS = [
 
 export type DesignId = (typeof DESIGNS)[number]["id"];
 
+/** What /trackers shows when nobody has chosen yet. */
+export const DEFAULT_DESIGN: DesignId = "atlas";
+
 const KEY = "bloom.trackers.design.v1";
 
 export function loadDesignId(): DesignId {
-  if (typeof window === "undefined") return "ledger";
+  if (typeof window === "undefined") return DEFAULT_DESIGN;
   try {
     const raw = window.localStorage.getItem(KEY);
-    return DESIGNS.some((d) => d.id === raw) ? (raw as DesignId) : "ledger";
+    return DESIGNS.some((d) => d.id === raw) ? (raw as DesignId) : DEFAULT_DESIGN;
   } catch {
-    return "ledger";
+    return DEFAULT_DESIGN;
   }
 }
 

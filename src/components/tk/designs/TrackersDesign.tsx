@@ -11,10 +11,10 @@ import { Atlas } from "./Atlas";
 import { Ledger } from "./Ledger";
 import { Strip } from "./Strip";
 import { TrackersPage } from "@/components/tk/TrackersPage";
-import { loadDesignId, type DesignId } from "@/routes/trackers-styles";
+import { DEFAULT_DESIGN, loadDesignId, type DesignId } from "@/routes/trackers-styles";
 
 export function TrackersDesign({ theme = "nocturne" }: { theme?: string }) {
-  const [design, setDesign] = useState<DesignId>("ledger");
+  const [design, setDesign] = useState<DesignId>(DEFAULT_DESIGN);
 
   useEffect(() => {
     const sync = () => setDesign(loadDesignId());

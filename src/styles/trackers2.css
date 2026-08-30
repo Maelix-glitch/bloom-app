@@ -495,6 +495,115 @@
   opacity: 0.55;
 }
 
+[data-design="atlas"] .at-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-key li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-design="atlas"] .at-key i {
+  width: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ci-text);
+  opacity: 0.7;
+}
+
+[data-design="atlas"] .at-key li[data-id="sleep"] i {
+  background: var(--ci-late);
+}
+[data-design="atlas"] .at-key li[data-id="water"] i {
+  background: color-mix(in oklab, var(--ci-follicular) 70%, #5ad2f5 30%);
+}
+[data-design="atlas"] .at-key li[data-id="study"] i {
+  background: var(--ci-ovulation);
+}
+[data-design="atlas"] .at-key li[data-id="movement"] i {
+  background: color-mix(in oklab, var(--ci-follicular) 50%, var(--ci-ovulation) 50%);
+}
+[data-design="atlas"] .at-key li[data-id="energy"] i {
+  background: color-mix(in oklab, var(--ci-ovulation) 60%, #ffd08a 40%);
+}
+[data-design="atlas"] .at-key li[data-id="screen"] i {
+  background: var(--ci-menstrual);
+}
+
+[data-design="atlas"] .at-arc[data-id="study"] {
+  stroke: var(--ci-ovulation);
+  stroke-width: 7;
+}
+
+[data-design="atlas"] .at-route-today {
+  stroke: var(--ci-late);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+}
+
+[data-design="atlas"] .at-route-date {
+  font-family: var(--ci-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  text-anchor: middle;
+  fill: var(--ci-text);
+  opacity: 0.45;
+}
+
+/* the study field — round cells, so it reads as a field rather than a grid */
+[data-design="atlas"] .tk-heat {
+  gap: 5px;
+  max-width: 34rem;
+}
+
+[data-design="atlas"] .tk-heat i {
+  border-radius: 999px;
+}
+
+[data-design="atlas"] .tk-heat i[data-level="1"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 22%, transparent);
+}
+
+[data-design="atlas"] .at-leaders {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 34rem;
+}
+
+[data-design="atlas"] .at-leaders li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-size: 12.5px;
+  border-bottom: 1px dotted var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-leaders li i {
+  flex: 1;
+  border-bottom: 1px dotted color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="atlas"] .at-leaders li span:last-child {
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-soft);
+}
+
 [data-design="atlas"] .at-territories {
   display: grid;
   gap: 1.75rem;

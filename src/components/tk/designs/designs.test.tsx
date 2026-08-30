@@ -65,13 +65,18 @@ describe("the three trackers designs", () => {
     expect(errors).toHaveLength(0);
   });
 
-  it("Atlas draws the compass and the six territories", () => {
-    render(<Atlas />);
+  it("Atlas draws the compass, its key and the study field", () => {
+    const { container } = render(<Atlas />);
     expect(screen.getByText(/Where your hours/)).toBeTruthy();
     expect(screen.getByRole("img", { name: /twenty-four hour compass/i })).toBeTruthy();
     for (const name of ["Sleep", "Water", "Study", "Movement", "Energy", "Screen"]) {
       expect(screen.getAllByText(name).length).toBeGreaterThan(0);
     }
+    /* every tracker has a ring, arc or block on the compass */
+    expect(container.querySelectorAll(".at-key li")).toHaveLength(6);
+    /* study gets a field of its own, and the route carries all six paths */
+    expect(screen.getByText(/Study · the field/)).toBeTruthy();
+    expect(container.querySelectorAll(".at-route-line").length).toBeGreaterThanOrEqual(5);
     expect(errors).toHaveLength(0);
   });
 

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/trackers")({
       {
         name: "description",
         content:
-          "Sleep, water, study, movement, energy and screen time — one row per day, read back as rings, streaks, correlations and plain-language observations computed only from what you log.",
+          "Sleep, water, study, movement, energy and screen time — one day at a time, drawn as a map: a twenty-four hour compass, six territories, and a route through the last fortnight, all computed only from what you log.",
       },
     ],
     links: [
