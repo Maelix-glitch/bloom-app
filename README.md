@@ -1066,3 +1066,12 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+---
+
+## Cycle Intelligence
+
+The cycle page was rebuilt from scratch: a pure prediction core
+(`src/lib/cycle/predict.ts`), a redesigned `/cycle` page, and `/cycle-styles`, a
+gallery of five design directions for the same page that can be applied live.
+See [`docs/CYCLE_INTELLIGENCE.md`](./docs/CYCLE_INTELLIGENCE.md).

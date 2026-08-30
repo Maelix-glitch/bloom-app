@@ -8,6 +8,7 @@
 import type {
   CompletedCycle,
   Confidence,
+  CycleIssue,
   CycleChange,
   CycleContext,
   CycleEntry,
@@ -19,6 +20,7 @@ import type {
   PeriodRun,
   PhaseKey,
   PredictionEvent,
+  ReproductivePhaseKey,
 } from "./types";
 
 /* ------------------------------ date helpers ------------------------------ */
@@ -718,7 +720,7 @@ type ResolveCtx = {
   estimatedPeriodLength: number;
   usesDefault: boolean;
   events: PredictionEvent[];
-  issues: ReturnType<typeof conflictIssues>;
+  issues: CycleIssue[];
 };
 
 const within = (d: string, a: string | null, b: string | null) =>
