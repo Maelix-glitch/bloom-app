@@ -74,6 +74,11 @@ describe("the three trackers designs", () => {
     }
     /* every tracker has a ring, arc or block on the compass */
     expect(container.querySelectorAll(".at-key li")).toHaveLength(6);
+    /* the board is a two-column grid: compass, then everything it explains.
+       A third child would drop into row two and leave the right column empty. */
+    const board = container.querySelector(".at-board");
+    expect(board?.children).toHaveLength(2);
+    expect(board?.children[1]?.querySelectorAll(".at-territory")).toHaveLength(6);
     /* study gets a field of its own, and the route carries all six paths */
     expect(screen.getByText(/Study · the field/)).toBeTruthy();
     expect(container.querySelectorAll(".at-route-line").length).toBeGreaterThanOrEqual(5);

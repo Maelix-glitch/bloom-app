@@ -43,7 +43,7 @@
 
 @media (min-width: 860px) {
   [data-design="ledger"] .lg-masthead {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
   }
 }
@@ -102,7 +102,7 @@
 
 [data-design="ledger"] .lg-row {
   display: grid;
-  grid-template-columns: 1.2fr 0.7fr 0.7fr 2fr 0.7fr 0.5fr auto;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr minmax(0, 2fr) 0.7fr 0.5fr auto;
   gap: 0.75rem;
   align-items: center;
   padding: 0.7rem 0.25rem;
@@ -139,6 +139,10 @@
 [data-design="ledger"] .lg-fig--strong {
   font-size: 14px;
   color: var(--ci-text);
+}
+
+[data-design="ledger"] .lg-row > * {
+  min-width: 0;
 }
 
 [data-design="ledger"] .lg-ticks {
@@ -319,7 +323,7 @@
 
 [data-design="ledger"] .lg-observations li {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--tk2-rule);
@@ -418,9 +422,31 @@
 
 @media (min-width: 960px) {
   [data-design="atlas"] .at-board {
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 300px minmax(0, 1fr);
     align-items: start;
   }
+}
+
+/* The compass column and everything it explains. One wrapper, so the grid
+   keeps exactly two children — a third child would drop into row two and
+   leave the right-hand column empty beside it. */
+[data-design="atlas"] .at-board-main {
+  min-width: 0;
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+
+[data-design="atlas"] .at-board-main .at-key {
+  margin-top: 0;
+}
+
+[data-design="atlas"] .at-territories {
+  min-width: 0;
+}
+
+[data-design="atlas"] .at-territory {
+  min-width: 0;
 }
 
 [data-design="atlas"] .at-compass {
@@ -614,7 +640,7 @@
 
 @media (min-width: 640px) {
   [data-design="atlas"] .at-territories {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -810,7 +836,7 @@
 
 [data-design="atlas"] .at-contrasts li {
   display: grid;
-  grid-template-columns: 8rem 1fr auto;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
   padding: 0.7rem 0;
@@ -862,7 +888,7 @@
 
 [data-design="atlas"] .at-observations li {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
   gap: 0.75rem;
 }
 
@@ -938,30 +964,13 @@
 }
 
 [data-design="strip"] .sp-axis {
-  display: grid;
-  grid-template-columns: 132px 1fr;
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
 }
 
-[data-design="strip"] .sp-axis span:first-child {
-  grid-row: 1;
-}
-
-[data-design="strip"] .sp-axis {
-  align-items: center;
-}
-
-[data-design="strip"] .sp-axis > span:not(:first-child) {
-  display: block;
-}
-
-[data-design="strip"] .sp-axis {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
+/* The empty first cell lines the dates up with the day-cells below them. */
 [data-design="strip"] .sp-axis span:first-child {
   width: 132px;
   flex: none;
@@ -1167,7 +1176,7 @@
 
 [data-design="strip"] .sp-contrast {
   display: grid;
-  grid-template-columns: 7rem 1fr auto;
+  grid-template-columns: 7rem minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
 }
@@ -1230,7 +1239,7 @@
 
 [data-design="strip"] .sp-observations li {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--tk2-rule);

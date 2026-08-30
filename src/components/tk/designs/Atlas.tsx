@@ -189,78 +189,80 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 </svg>
               </div>
 
-              <ul className="at-key" aria-label="Compass key">
-                {defs.map((def) => (
-                  <li key={def.id} data-id={def.id}>
-                    <i aria-hidden />
-                    {def.name}
-                  </li>
-                ))}
-              </ul>
-
-              <ul className="at-territories">
-                {defs.map((def) => {
-                  const stat = analysis.trackers[def.id];
-                  const values = stat.series.map((p) => p.value);
-                  const peak = Math.max(...values.map((v) => v ?? 0), stat.goal, 1);
-                  const { line, area } = contourPath(values, 240, 54, peak);
-                  return (
-                    <li key={def.id} className="at-territory" data-id={def.id}>
-                      <div className="at-territory-head">
-                        <span className="at-place">{def.name}</span>
-                        <span className="at-coord">
-                          {stat.today === null ? "unlogged" : def.format(Math.round(stat.today))}
-                        </span>
-                      </div>
-                      <svg viewBox="0 0 240 54" className="at-contour" role="img" aria-label={`${def.name} contour`}>
-                        {line ? (
-                          <>
-                            <path d={area} className="at-contour-area" />
-                            <path d={line} className="at-contour-line" />
-                          </>
-                        ) : (
-                          <line x1="0" y1="51" x2="240" y2="51" className="at-contour-empty" />
-                        )}
-                      </svg>
-                      <div className="at-territory-foot">
-                        <span>
-                          target {def.format(stat.goal)} · avg {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
-                        </span>
-                        <span className="at-territory-actions">
-                          {def.id === "energy" ? (
-                            [1, 2, 3, 4, 5].map((n) => (
-                              <button
-                                key={n}
-                                type="button"
-                                onClick={() => tap(def.id, n)}
-                                aria-label={`Set energy to ${n}`}
-                                aria-pressed={stat.today === n}
-                              >
-                                {n}
-                              </button>
-                            ))
-                          ) : def.id === "sleep" ? (
-                            <button type="button" onClick={() => logRef.current?.scrollIntoView({ block: "start" })}>
-                              log night
-                            </button>
-                          ) : (
-                            def.quickAdds.map((amount) => (
-                              <button
-                                key={amount}
-                                type="button"
-                                onClick={() => tap(def.id, amount)}
-                                aria-label={`Add ${stepLabel(def, amount)} to ${def.name}`}
-                              >
-                                +{stepLabel(def, amount)}
-                              </button>
-                            ))
-                          )}
-                        </span>
-                      </div>
+              <div className="at-board-main">
+                <ul className="at-key" aria-label="Compass key">
+                  {defs.map((def) => (
+                    <li key={def.id} data-id={def.id}>
+                      <i aria-hidden />
+                      {def.name}
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                </ul>
+
+                <ul className="at-territories">
+                  {defs.map((def) => {
+                    const stat = analysis.trackers[def.id];
+                    const values = stat.series.map((p) => p.value);
+                    const peak = Math.max(...values.map((v) => v ?? 0), stat.goal, 1);
+                    const { line, area } = contourPath(values, 240, 54, peak);
+                    return (
+                      <li key={def.id} className="at-territory" data-id={def.id}>
+                        <div className="at-territory-head">
+                          <span className="at-place">{def.name}</span>
+                          <span className="at-coord">
+                            {stat.today === null ? "unlogged" : def.format(Math.round(stat.today))}
+                          </span>
+                        </div>
+                        <svg viewBox="0 0 240 54" className="at-contour" role="img" aria-label={`${def.name} contour`}>
+                          {line ? (
+                            <>
+                              <path d={area} className="at-contour-area" />
+                              <path d={line} className="at-contour-line" />
+                            </>
+                          ) : (
+                            <line x1="0" y1="51" x2="240" y2="51" className="at-contour-empty" />
+                          )}
+                        </svg>
+                        <div className="at-territory-foot">
+                          <span>
+                            target {def.format(stat.goal)} · avg {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
+                          </span>
+                          <span className="at-territory-actions">
+                            {def.id === "energy" ? (
+                              [1, 2, 3, 4, 5].map((n) => (
+                                <button
+                                  key={n}
+                                  type="button"
+                                  onClick={() => tap(def.id, n)}
+                                  aria-label={`Set energy to ${n}`}
+                                  aria-pressed={stat.today === n}
+                                >
+                                  {n}
+                                </button>
+                              ))
+                            ) : def.id === "sleep" ? (
+                              <button type="button" onClick={() => logRef.current?.scrollIntoView({ block: "start" })}>
+                                log night
+                              </button>
+                            ) : (
+                              def.quickAdds.map((amount) => (
+                                <button
+                                  key={amount}
+                                  type="button"
+                                  onClick={() => tap(def.id, amount)}
+                                  aria-label={`Add ${stepLabel(def, amount)} to ${def.name}`}
+                                >
+                                  +{stepLabel(def, amount)}
+                                </button>
+                              ))
+                            )}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </section>
             <p aria-live="polite" className="at-notice">
               {notice}
