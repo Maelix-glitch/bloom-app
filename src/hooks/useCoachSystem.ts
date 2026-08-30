@@ -13,7 +13,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase } from "@/lib/supabase";
+import { answer as groundedAnswer } from "@/lib/coach/responder";
+import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
+import { analyzeCycle } from "@/lib/cycle/predict";
+import { loadLogs as loadPeriodLogs, loadDays as loadCycleDays } from "@/lib/cycle/periodStore";
+import { todayKey } from "@/lib/cycle/predict";
 
 export type { CoachMode };
 
@@ -42,27 +47,7 @@ export interface CoachMessage {
   status?: "sent" | "local" | "error" | undefined;
 }
 
-export type CoachBlock =
-  | {
-      type: "metric";
-      label: string;
-      value: string;
-      detail?: string;
-      series: number[];
-      accent?: "violet" | "sky" | "amber" | "sage" | "rose";
-    }
-  | {
-      type: "plan";
-      title: string;
-      detail?: string;
-      steps: { label: string; time?: string }[];
-    }
-  | {
-      type: "proposal";
-      title: string;
-      detail?: string;
-      changes?: { label: string; from: string; to: string }[];
-    };
+export type { CoachBlock, CoachResponse } from "@/lib/coach/responder";
 
 export interface CoachMemory {
   id: string;
@@ -80,11 +65,6 @@ export interface CoachRequest {
   attachment?: CoachFilePayload | undefined;
 }
 
-export interface CoachResponse {
-  paragraphs: string[];
-  sources: string[];
-  blocks: CoachBlock[];
-}
 
 const THREAD_KEY = (uid: string | null) => `bloom.coach.thread.${uid ?? "anon"}`;
 const MEMORIES_KEY = (uid: string | null) => `bloom.coach.memories.${uid ?? "anon"}`;
@@ -108,6 +88,34 @@ function writeJson(key: string, value: unknown): void {
   }
 }
 
+/**
+ * Message content as text.
+ *
+ * The `coach_messages.content` column is written as a string here, but rows can
+ * also come back as jsonb — a string, an array of parts, or an object with a
+ * `text` field. `String({})` used to render "[object Object]" in the thread, so
+ * every shape is unwrapped here instead.
+ */
+export function contentToText(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) {
+    return value
+      .map(contentToText)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join("\n\n");
+  }
+  if (value && typeof value === "object") {
+    const row = value as Record<string, unknown>;
+    for (const key of ["text", "content", "value", "message", "output", "parts"]) {
+      const nested = contentToText(row[key]);
+      if (nested.trim()) return nested;
+    }
+  }
+  return "";
+}
+
 export function coachErrorMessage(error: unknown, fallback?: string): string {
   const raw =
     error && typeof error === "object" && "message" in error
@@ -125,194 +133,6 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
 /* --------------------------- the grounded responder --------------------------- */
 
 const fmt = (n: number) => `${Math.round(n * 10) / 10}`;
-
-function respond({ text, mode, context }: CoachRequest): CoachResponse {
-  const mood = context.mood;
-  const paragraphs: string[] = [];
-  const sources: string[] = [];
-  const blocks: CoachBlock[] = [];
-
-  const quality = mood.dataQuality;
-  const asked = text.trim().toLowerCase();
-
-  if (quality === "none") {
-    paragraphs.push(
-      "There's no mood history to read you from yet — so I won't pretend otherwise. Two or three check-ins and this conversation starts having something real to say.",
-    );
-    if (mode === "plan") {
-      paragraphs.push(
-        "For tonight, keep it small: one thing worth finishing, one thing worth resting. That's a plan that survives a bad day.",
-      );
-      blocks.push({
-        type: "plan",
-        title: "A floor, not a ceiling",
-        detail:
-          "Built from nothing but a kind default — log a couple of check-ins and the next plan is yours.",
-        steps: [
-          { label: "Pick one task that matters tomorrow morning", time: "10 min tonight" },
-          { label: "Set a soft stop for the evening", time: "before you tire out" },
-          { label: "One mood check-in before bed", time: "60 seconds" },
-        ],
-      });
-    }
-    return { paragraphs, sources, blocks };
-  }
-
-  const dir = mood.change.direction;
-  const delta = mood.change.mood;
-
-  if (mode === "reflect") {
-    paragraphs.push(
-      `You've logged ${mood.entries} check-in${mood.entries === 1 ? "" : "s"}. The seven-day mood sits at ${fmt(mood.recent.mood)} — ${
-        dir === "improving"
-          ? `up ${fmt(Math.abs(delta ?? 0))} from the week before`
-          : dir === "declining"
-            ? `down ${fmt(Math.abs(delta ?? 0))} from the week before`
-            : "steady against the previous week"
-      }. Energy ${fmt(mood.recent.energy)}, stress ${fmt(mood.recent.stress)}, both out of ten.`,
-    );
-    if (mood.patterns.length > 0) {
-      const p = mood.patterns[0]!;
-      paragraphs.push(`One thing stands out: ${p.statement.toLowerCase()}`);
-    } else {
-      paragraphs.push(
-        "Nothing repeats clearly yet — that's a reading too, not a failure. Patterns need a few weeks of ordinary logging, not perfect streaks.",
-      );
-    }
-    const series = mood.timeOfDay.map((band) => band.mood ?? mood.recent.mood);
-    if (series.length >= 2) {
-      blocks.push({
-        type: "metric",
-        label: "Mood through the day",
-        value: `${fmt(mood.recent.mood)} avg · ${mood.entries} entries`,
-        detail: "by time band, last 7 days",
-        series,
-        accent: "violet",
-      });
-    }
-    sources.push("Last 7 days", "Previous 7 days", "Mood record");
-  } else if (mode === "plan") {
-    const habits = context.habits;
-    const bestBand = [...mood.timeOfDay]
-      .filter((b) => b.energy !== null)
-      .sort((a, b) => (b.energy ?? 0) - (a.energy ?? 0))[0];
-    paragraphs.push(
-      bestBand
-        ? `Your energy logs say ${bestBand.label.toLowerCase()} is your strongest band this week — put the thing that needs a brain there, and keep the rest gentle.`
-        : "A plan you can actually keep beats an ambitious one you won't: one hard thing, one kind thing, one done.",
-    );
-    const steps: { label: string; time?: string }[] = [];
-    if (habits.available && habits.activeCount > 0) {
-      steps.push({
-        label: `Move the day with your routine (${habits.activeCount} habit${habits.activeCount === 1 ? "" : "s"} active)`,
-        time: "first",
-      });
-    }
-    if (bestBand)
-      steps.push({
-        label: "The one task that needs real focus",
-        time: bestBand.label.toLowerCase(),
-      });
-    steps.push({ label: "Something small that counts as showing up", time: "afternoon" });
-    steps.push({ label: "Stop before you're empty — future you logs the mood", time: "evening" });
-    blocks.push({
-      type: "plan",
-      title: "Tonight's shape",
-      detail:
-        quality === "sparse"
-          ? "Partly from thin data — the more you log, the less generic this gets."
-          : "Built from your recent windows, not a template.",
-      steps,
-    });
-    sources.push("Last 7 days", "Time-of-day bands");
-    if (habits.available) sources.push("Tracker data");
-    paragraphs.push("It's a starting shape, not a contract. Adjust anything.");
-  } else {
-    // ask
-    const mentionsMood = /mood|feel|down|low|flat|good|fine|okay/.test(asked);
-    const mentionsSleep = /sleep|rest|tired|energy/.test(asked);
-    const mentionsStress = /stress|anxious|overwhelm|tense/.test(asked);
-    const mentionsHabits = /habit|routine|track|consisten/.test(asked);
-
-    if (mentionsSleep) {
-      paragraphs.push(
-        `Energy in the last seven days averages ${fmt(mood.recent.energy)} of 10, against ${fmt(mood.previous.energy)} the week before. ${
-          (mood.change.energy ?? 0) > 0.5
-            ? "That's a lift worth noticing — whatever changed, it's holding so far."
-            : (mood.change.energy ?? 0) < -0.5
-              ? "That's a dip. Not an alarm — a nudge to protect the evening a little."
-              : "Flat, which is its own kind of data."
-        }`,
-      );
-      sources.push("Energy logs", "Last 7 days", "Previous 7 days");
-    } else if (mentionsStress) {
-      paragraphs.push(
-        `Stress reads ${fmt(mood.recent.stress)} on average over the last week ${
-          (mood.change.stress ?? 0) < -0.5
-            ? "— down from before, which is the direction most people want."
-            : (mood.change.stress ?? 0) > 0.5
-              ? "— up against the previous week. The spikes sit on specific days; they aren't your whole week."
-              : ", holding roughly steady."
-        }`,
-      );
-      if (mood.anomalies.length > 0) {
-        const worst = mood.anomalies[mood.anomalies.length - 1]!;
-        paragraphs.push(
-          `The sharpest single day was ${worst.date} — ${worst.kind === "low" ? "a real low, not a blip you imagined" : "an unusual high"}. One hard day doesn't rewrite the trend.`,
-        );
-      }
-      sources.push("Last 7 days", "Mood record");
-    } else if (mentionsHabits && context.habits.available) {
-      const h = context.habits;
-      paragraphs.push(
-        `Your routine is ${h.activeCount} habit${h.activeCount === 1 ? "" : "s"} tracked; recent logs show ${h.recentCompleted} completion${h.recentCompleted === 1 ? "" : "s"} this window${
-          h.previousCompleted > 0 ? `, ${h.previousCompleted} in the one before` : ""
-        }. ${h.recentCompleted >= h.previousCompleted ? "Holding or quietly improving." : "A little lighter than before — worth a glance at what changed."}`,
-      );
-      sources.push("Tracker data");
-    } else {
-      paragraphs.push(
-        mentionsMood
-          ? `Here's what your record actually says: mood around ${fmt(mood.recent.mood)} of 10 across ${mood.entries} check-in${mood.entries === 1 ? "" : "s"}, ${
-              dir === "stable" || dir === "insufficient"
-                ? "steady week over week"
-                : dir === "improving"
-                  ? "climbing gently"
-                  : "eased off a little"
-            }. The month window reads ${fmt(mood.month.mood)}, so one week doesn't get to tell the whole story.`
-          : "I read from your logs — mood, energy, stress, routines — and I'd rather say nothing than guess at something I can't see. Ask about your week, your patterns, your routine, or say 'plan tonight'.",
-      );
-      if (mood.patterns.length > 0)
-        paragraphs.push(`Pattern worth knowing: ${mood.patterns[0]!.statement.toLowerCase()}`);
-      sources.push("Last 7 days", "Last 30 days", "Mood record");
-    }
-    if (mood.entries >= 6) {
-      blocks.push({
-        type: "metric",
-        label: `Mood · last 7 days`,
-        value: `${fmt(mood.recent.mood)} / 10`,
-        detail: `${mood.entries} entries · month reads ${fmt(mood.month.mood)}`,
-        series: [mood.previous.mood, mood.recent.mood, mood.month.mood].filter((v): v is number =>
-          Number.isFinite(v),
-        ),
-        accent: "violet",
-      });
-    }
-  }
-
-  const pinned = context.memory.selected.filter((m) => m.pinned);
-  if (pinned.length > 0 && mode !== "plan") {
-    paragraphs.push(
-      `Also keeping in view: ${pinned
-        .slice(0, 2)
-        .map((m: { text: string }) => `“${m.text}”`)
-        .join(" and ")}.`,
-    );
-    sources.push("Pinned context");
-  }
-
-  return { paragraphs, sources: [...new Set(sources)], blocks };
-}
 
 /* --------------------------------- the hook --------------------------------- */
 
@@ -376,9 +196,10 @@ export function useCoachSystem() {
                 id: String(r["id"]),
                 role: r["role"] === "user" ? "user" : "coach",
                 time: String(r["created_at"] ?? new Date().toISOString()),
-                text: typeof r["content"] === "string" ? r["content"] : undefined,
-                paragraphs: String(r["content"] ?? "")
+                text: contentToText(r["content"]) || undefined,
+                paragraphs: contentToText(r["content"])
                   .split("\n\n")
+                  .map((part) => part.trim())
                   .filter(Boolean),
                 sources: Array.isArray(r["sources"]) ? (r["sources"] as string[]) : [],
                 blocks: [],
@@ -472,10 +293,15 @@ export function useCoachSystem() {
   );
 
   const requestResponse = useCallback(async (request: CoachRequest): Promise<CoachResponse> => {
-    // deterministic + grounded — see module header. A future provider
-    // adapter can slot in behind this same signature.
-    return respond(request);
-  }, []);
+    // deterministic + grounded — see the responder's module header. A model
+    // provider can slot in behind this same signature later.
+    const record = readCoachRecord(
+      memories.filter((m) => m.pinned).map((m) => m.text),
+    );
+    const context = request.context;
+    record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
+    return groundedAnswer({ text: request.text, mode: request.mode }, context, record);
+  }, [memories]);
 
   return useMemo(
     () => ({
@@ -504,6 +330,153 @@ export function useCoachSystem() {
       requestResponse,
     ],
   );
+}
+
+/* -------------------------------- the record ------------------------------- */
+/* The trackers page is optional — some installs run the coach without it — so
+ * this reads the same localStorage keys directly rather than importing
+ * `lib/trackers/*`. A missing folder then costs the coach a topic, not the
+ * page. The formatting below mirrors core.ts so both pages quote a day the
+ * same way.                                                                   */
+
+const TRACKER_DAYS_KEY = "bloom.trackers.days.v1";
+const TRACKER_GOALS_KEY = "bloom.trackers.goals.v1";
+
+const hours = (m: number) => `${Math.floor(m / 60)}h${m % 60 === 0 ? "" : ` ${m % 60}m`}`;
+
+const TRACKER_SHAPE: {
+  id: "sleep" | "water" | "study" | "movement" | "energy" | "screen";
+  name: string;
+  goalKey: string;
+  fallback: number;
+  format: (v: number) => string;
+}[] = [
+  { id: "sleep", name: "Sleep", goalKey: "sleepMinutes", fallback: 480, format: hours },
+  {
+    id: "water",
+    name: "Water",
+    goalKey: "waterMl",
+    fallback: 2200,
+    format: (v) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}L` : `${v}ml`),
+  },
+  { id: "study", name: "Study", goalKey: "studyMinutes", fallback: 120, format: hours },
+  {
+    id: "movement",
+    name: "Movement",
+    goalKey: "movementMinutes",
+    fallback: 30,
+    format: (v) => (v < 60 ? `${v}m` : hours(v)),
+  },
+  { id: "energy", name: "Energy", goalKey: "energy", fallback: 3, format: (v) => `${v}/5` },
+  { id: "screen", name: "Screen", goalKey: "screenMinutes", fallback: 180, format: hours },
+];
+
+function valueFor(day: Row, id: string): number | null {
+  if (id === "study") {
+    const sessions = Array.isArray(day["sessions"]) ? (day["sessions"] as Row[]) : [];
+    const total = sessions.reduce(
+      (sum, s) => sum + (typeof s["minutes"] === "number" ? Math.max(s["minutes"], 0) : 0),
+      0,
+    );
+    return total > 0 ? total : null;
+  }
+  const v = day[`${id}Minutes`] ?? day[id];
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+const dateKey = (offset = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+};
+
+function readTrackerFacts(): CoachRecord["trackers"] {
+  const days = readJson<Row[]>(TRACKER_DAYS_KEY, []);
+  if (!Array.isArray(days) || days.length === 0) return [];
+  const goals = readJson<Row>(TRACKER_GOALS_KEY, {});
+
+  const byDate = new Map<string, Row>();
+  for (const day of days) {
+    const date = day?.["date"];
+    if (typeof date === "string") byDate.set(date, day);
+  }
+
+  const window: string[] = [];
+  for (let i = 13; i >= 0; i -= 1) window.push(dateKey(-i));
+
+  return TRACKER_SHAPE.map((shape) => {
+    const goal =
+      typeof goals[shape.goalKey] === "number" && Number.isFinite(goals[shape.goalKey])
+        ? (goals[shape.goalKey] as number)
+        : shape.fallback;
+    const series = window.map((date) => {
+      const day = byDate.get(date);
+      return day ? valueFor(day, shape.id) : null;
+    });
+    const known = series.filter((v): v is number => v !== null);
+    const logsCount = [...byDate.values()].filter((d) => valueFor(d, shape.id) !== null).length;
+    const last7 = known.slice(-7);
+    const avg7 = last7.length ? last7.reduce((sum, v) => sum + v, 0) / last7.length : null;
+
+    /* streak: consecutive days back from today that met the target */
+    let streak = 0;
+    for (let i = series.length - 1; i >= 0; i -= 1) {
+      const v = series[i];
+      if (typeof v !== "number") break;
+      const met = shape.id === "screen" ? v <= goal : v >= goal;
+      if (!met) break;
+      streak += 1;
+    }
+
+    return {
+      id: shape.id,
+      name: shape.name,
+      today: series[series.length - 1] ?? null,
+      goal,
+      avg7,
+      streak,
+      daysLogged: logsCount,
+      series,
+      format: shape.format,
+    };
+  });
+}
+
+/**
+ * Everything the coach is allowed to speak from, read fresh on every request so
+ * the answer always reflects the record as it stands this second.
+ */
+export function readCoachRecord(memories: string[] = []): CoachRecord {
+  const today = todayKey();
+
+  let trackers: CoachRecord["trackers"] = [];
+  try {
+    trackers = readTrackerFacts();
+  } catch {
+    trackers = [];
+  }
+
+  let cycle: CoachRecord["cycle"] = null;
+  try {
+    const logs = loadPeriodLogs();
+    const analysis = analyzeCycle(logs, today);
+    cycle = {
+      daysLogged: loadCycleDays().length + logs.length,
+      cycleDay: analysis.cycleDay,
+      phaseLabel: analysis.phaseLabel || null,
+      nextStart: analysis.nextStart,
+      daysUntilNext: analysis.daysUntilNext,
+      averageLength: analysis.isGeneric ? null : analysis.averageLength,
+      confidence: analysis.confidence === "none" ? null : String(analysis.confidence),
+      confidenceReason: analysis.confidenceReason || null,
+    };
+  } catch {
+    cycle = null;
+  }
+
+  return { today, trackers, cycle, memories, habitsActive: 0 };
 }
 
 function readHabitData(): CoachHabitData {

@@ -82,7 +82,7 @@ export function CycleOrbit({
   className?: string;
 }) {
   const uid = useId();
-  const figureRef = useRef<HTMLFigureElement>(null);
+  const figureRef = useRef<HTMLElement>(null);
   const [hover, setHover] = useState<Seg | null>(null);
   const [cardPos, setCardPos] = useState({ left: 0, top: 0 });
 
