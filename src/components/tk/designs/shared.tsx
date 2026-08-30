@@ -77,7 +77,6 @@ export function Observations({
  * one thing: the day isn't on the account yet. It says that instead of spinning.
  */
 export function SyncNote({ sync, onRetry }: { sync: TrackerStore["sync"]; onRetry: () => void }) {
-  if (sync.state === "off") return null;
   const retryable = sync.state === "error" || sync.state === "signed-out";
   return (
     <p className="tk2-sync" data-state={sync.state} aria-live="polite">
