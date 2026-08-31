@@ -79,6 +79,28 @@ describe("the three trackers designs", () => {
     const board = container.querySelector(".at-board");
     expect(board?.children).toHaveLength(2);
     expect(board?.children[1]?.querySelectorAll(".at-territory")).toHaveLength(6);
+    /* every mark on the compass has to fall inside its own viewBox — the hour
+       labels sit at r=140 and used to be drawn outside a 260-wide box, so all
+       four were clipped away. */
+    const compass = container.querySelector(".at-compass svg")!;
+    const [vx, vy, vw, vh] = compass.getAttribute("viewBox")!.split(/\s+/).map(Number);
+    const inside = (x: number, y: number) =>
+      x >= vx! && x <= vx! + vw! && y >= vy! && y <= vy! + vh!;
+    const marks = [
+      ...Array.from(compass.querySelectorAll("text")).map((t) => ({
+        x: Number(t.getAttribute("x")),
+        y: Number(t.getAttribute("y")) - 3,
+      })),
+      ...Array.from(compass.querySelectorAll("circle")).map((c) => ({
+        x: Number(c.getAttribute("cx")) + Number(c.getAttribute("r")),
+        y: Number(c.getAttribute("cy")) + Number(c.getAttribute("r")),
+      })),
+    ];
+    expect(marks.length).toBeGreaterThan(4);
+    for (const m of marks) {
+      expect(inside(m.x, m.y), `mark at ${m.x},${m.y} falls outside the viewBox`).toBe(true);
+    }
+    expect(compass.querySelectorAll(".at-hour")).toHaveLength(4);
     /* study gets a field of its own, and the route carries all six paths */
     expect(screen.getByText(/Study · the field/)).toBeTruthy();
     expect(container.querySelectorAll(".at-route-line").length).toBeGreaterThanOrEqual(5);

@@ -422,7 +422,7 @@
 
 @media (min-width: 960px) {
   [data-design="atlas"] .at-board {
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: 340px minmax(0, 1fr);
     align-items: start;
   }
 }

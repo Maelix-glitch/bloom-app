@@ -1,8 +1,15 @@
 # Every file changed on this branch
 
-Compared with `main`: **93 files** — 77 new, 16 replaced.
+Compared with `9eff36f` — the commit this branch started from: **97 files** —
+84 new, 13 replaced.
 
 If you took `bloom-app-full.zip`, you already have all of this; nothing to paste.
+
+> Heads up: `main` has been rewritten since this branch started (it now points at
+> a `coach-fixed` commit that isn't descended from `9eff36f`). This list is
+> measured against the commit the branch was cut from, which is the honest
+> "what does this branch add" number. If you merge, expect to resolve that
+> history difference first.
 
 ## The short version
 
@@ -45,6 +52,9 @@ If you'd rather paste file by file: **replace** the 12 below, **add** the rest, 
 | `downloads/bloom-cycle-page.zip` | new | just the cycle route and what it imports |
 | `downloads/bloom-trackers-page.zip` | new | just the trackers route and what it imports |
 | `scripts/make-zips.py` | new | rebuilds the three zips from the import graph, so they can't drift |
+| `scripts/make-sql.py` | new | assembles every migration into one paste-ready SQL file |
+| `supabase/COMPLETE-SETUP.sql` | new | **all seven migrations in one file** — paste into the SQL editor and run once |
+| `docs/SUPABASE-SETUP.md` | new | what each table is for, the run order, and the one-file shortcut |
 
 ### src/routes/
 
@@ -172,8 +182,15 @@ If you'd rather paste file by file: **replace** the 12 below, **add** the rest, 
 
 | File | | What it is |
 |---|---|---|
-| `supabase/migrations/20260829_cycle_intelligence.sql` | new | the `cycle_entries` table + RLS |
-| `supabase/migrations/20260830120000_tracker_days.sql` | new | the `tracker_days` table + RLS — **run this for /trackers** |
+| `supabase/migrations/20260826_reward_delivery.sql` | new | `reward_items`, `reward_assignments`, `app_admins` + the reward functions |
+| `supabase/migrations/20260827_profiles_bootstrap.sql` | new | `public.profiles` — **only if your project doesn't already have it**; the next file ALTERs it |
+| `supabase/migrations/20260828_profile_identity_stories.sql` | new | identity columns, `profile_privacy`, `stories`, highlights, the media bucket |
+| `supabase/migrations/20260829_cycle_intelligence.sql` | new | `cycle_entries` + RLS — the cycle page |
+| `supabase/migrations/20260830120000_tracker_days.sql` | new | `tracker_days` + RLS — the trackers page |
+| `supabase/migrations/20260831000000_mood_entries.sql` | new | `mood_entries` + RLS — the mood page. **This table had no migration at all before; saving a mood was failing silently** |
+| `supabase/migrations/20260831000100_coach_memory.sql` | new | `coach_messages`, `coach_memory` + RLS — the coach's thread. **Also missing before** |
+
+### Everything else
 
 ### Everything else
 

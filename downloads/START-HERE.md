@@ -19,15 +19,29 @@ Both pages are **wired to Supabase** and behave the same way: the device draws
 first, the table reconciles in the background, and the page always says which
 state it's in.
 
-| Page | Table | Migration to run |
-| --- | --- | --- |
-| `/cycle` | `cycle_entries` | `supabase/migrations/20260829_cycle_intelligence.sql` |
-| `/trackers` | `tracker_days` | `supabase/migrations/20260830120000_tracker_days.sql` |
+| Page | Table |
+| --- | --- |
+| `/` | `mood_entries` |
+| `/cycle` | `cycle_entries` |
+| `/trackers` | `tracker_days` |
+| `/coach` | `coach_messages`, `coach_memory` |
+| `/profile` | `profiles`, `profile_privacy`, `stories`, highlights |
+| `/rewards` | `reward_items`, `reward_assignments` |
 
-Copy `.env.example` to `.env.local` and fill in `VITE_SUPABASE_URL` and
-`VITE_SUPABASE_ANON_KEY`. Until the table exists the pages keep working from
-the device and say so in the header — nothing is lost by running them first and
-adding the SQL later.
+**One file does all of it:** open `supabase/COMPLETE-SETUP.sql`, paste it into
+your project's SQL editor (Supabase → SQL editor → New query) and press Run.
+Every statement is `if not exists`, so it's safe on a project that already has
+some of these tables. `docs/SUPABASE-SETUP.md` explains what each one is for.
+
+Three of those tables had **no migration in this repo at all** until now —
+`mood_entries`, `coach_messages` and `coach_memory`. If you set your project up
+by hand they may already exist; if not, the mood page and the coach have been
+quietly falling back to the device this whole time.
+
+Then copy `.env.example` to `.env.local` and fill in `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY`. Until a table exists its page keeps working from the
+device and says so — nothing is lost by running the app first and adding the SQL
+later.
 
 ## Which download is which
 

@@ -33,11 +33,15 @@ ROUTES = {
 EXTRA = {
     "cycle": [
         "supabase/migrations/20260829_cycle_intelligence.sql",
+        "supabase/COMPLETE-SETUP.sql",
+        "docs/SUPABASE-SETUP.md",
         ".env.example",
         "README.md",
     ],
     "trackers": [
         "supabase/migrations/20260830120000_tracker_days.sql",
+        "supabase/COMPLETE-SETUP.sql",
+        "docs/SUPABASE-SETUP.md",
         ".env.example",
         "README.md",
     ],

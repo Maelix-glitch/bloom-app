@@ -110,8 +110,9 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
     for (const [id, r, share] of shares) {
       if (share <= 0) continue;
       const a = polar(r, 0);
-      const b = polar(r, Math.max(share * 360, 2));
-      out.push({ id, r, d: `M ${a.x} ${a.y} A ${r} ${r} 0 ${share > 0.5 ? 1 : 0} 1 ${b.x} ${b.y}` });
+      const sweep = Math.max(Math.min(share, 1) * 360, 2);
+      const b = polar(r, sweep);
+      out.push({ id, r, d: `M ${a.x} ${a.y} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${b.x} ${b.y}` });
     }
     return out;
   }, [store.days, store.goals, today]);
@@ -149,7 +150,11 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
             {/* ------------------------------ the compass --------------------------- */}
             <section className="at-board">
               <div className="at-compass">
-                <svg viewBox="0 0 260 260" role="img" aria-label="Today on a twenty-four hour compass">
+                <svg
+                  viewBox="-26 -26 312 312"
+                  role="img"
+                  aria-label="Today on a twenty-four hour compass"
+                >
                   <circle cx={C} cy={C} r={118} className="at-track" />
                   <circle cx={C} cy={C} r={100} className="at-track" />
                   <circle cx={C} cy={C} r={82} className="at-track" />
