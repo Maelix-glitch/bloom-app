@@ -38,30 +38,62 @@ the old static app in `public/bloom/` (the `.html` pages and `public/bloom/js/`)
 
 ## Before you delete anything
 
-**Don't drop them yet — rename them.** A rename is instant and reversible, and if
-something does break you rename it back. Run this, use the app for a week, and
-only then drop:
+**Don't drop them yet — rename them.** A rename is instant and reversible; if
+something breaks you rename it back.
+
+Run this as one block. It's deliberately written without `schema.table` pairs in
+the SQL text — some chat apps auto-link `public.something` into a hyperlink and
+corrupt the statement before it ever reaches Postgres (that produces
+`42P01: relation "[public.app](http://public.app)_admin" does not exist`).
 
 ```sql
-alter table public.water_logs         rename to legacy_water_logs;
-alter table public.sleep_logs         rename to legacy_sleep_logs;
-alter table public.study_logs         rename to legacy_study_logs;
-alter table public.habits             rename to legacy_habits;
-alter table public.habit_logs         rename to legacy_habit_logs;
-alter table public.coach_conversations rename to legacy_coach_conversations;
-alter table public.coach_notes        rename to legacy_coach_notes;
-alter table public.coach_proposals    rename to legacy_coach_proposals;
-alter table public.app_admin          rename to legacy_app_admin;
-alter table public.insights           rename to legacy_insights;
+set search_path to public;
+
+do $$
+declare
+  r record;
+begin
+  for r in
+    select * from (values
+      ('water_logs',          'legacy_water_logs'),
+      ('sleep_logs',          'legacy_sleep_logs'),
+      ('study_logs',          'legacy_study_logs'),
+      ('habits',              'legacy_habits'),
+      ('habit_logs',          'legacy_habit_logs'),
+      ('coach_conversations', 'legacy_coach_conversations'),
+      ('coach_notes',         'legacy_coach_notes'),
+      ('coach_proposals',     'legacy_coach_proposals'),
+      ('app_admin',           'legacy_app_admin'),
+      ('insights',            'legacy_insights')
+    ) as v(old_name, new_name)
+  loop
+    if to_regclass('public' || '.' || r.old_name) is not null
+       and to_regclass('public' || '.' || r.new_name) is null
+    then
+      execute format('alter table %I rename to %I', r.old_name, r.new_name);
+      raise notice 'renamed % to %', r.old_name, r.new_name;
+    end if;
+  end loop;
+end $$;
 ```
 
-To undo any of them: `alter table public.legacy_water_logs rename to water_logs;`
-
-Only when you're sure:
+It renames only what's there and skips anything already renamed, so it's safe to
+run twice. To confirm what happened:
 
 ```sql
-drop table if exists public.legacy_water_logs;
--- …one line per table
+select table_name
+  from information_schema.tables
+ where table_schema = 'public'
+ order by table_name;
+```
+
+To undo one: `alter table legacy_water_logs rename to water_logs;`
+
+Only when you're sure, a week later:
+
+```sql
+drop table if exists legacy_water_logs;
+-- one line per table
 ```
 
 **One question first: do you still use the old pages?** If you ever open
