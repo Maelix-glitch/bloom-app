@@ -13,7 +13,7 @@ the old static app in `public/bloom/` (the `.html` pages and `public/bloom/js/`)
 | `stories` | `/profile` | Exact match, including `deleted_at` and the `bloom_story_kind` / `bloom_visibility` enums. |
 | `story_highlights` | `/profile` | Exact match. |
 | `story_highlight_items` | `/profile` | Exact match. |
-| `mood_entries` | `/` | Table exists. **Columns not yet confirmed** — see below. |
+| `mood_entries` | `/` | **Verified 2026-08-31.** All nine columns the app writes are present: `profile_id`, `mood_label`, `mood_intensity`, `energy`, `stress`, `tags`, `note`, `logged_at`, `date`, plus `id` and `created_at`. Two unused extras, `updated_at` and `intensity`, are harmless. |
 | `cycle_entries` | `/cycle` | Every column the app writes is present. Extra legacy columns (`cycle_length`, `last_logged_at`, `next_period_in_days`, `sexual_activity`, `contraceptive`, `mood_label`) are unused but harmless. |
 | `tracker_days` | `/trackers` | Exact match — created by `20260830120000_tracker_days.sql`. |
 | `coach_messages` | `/coach` | All needed columns present. Note your `content` is `jsonb` where the migration says `text` — your table was kept, and the app writes a plain string, which jsonb stores and returns as a string. Works either way. |
@@ -100,22 +100,6 @@ drop table if exists legacy_water_logs;
 `/bloom/index.html`, `/bloom/coach.html` or the other files in `public/bloom/`,
 those tables are still live and renaming them will break those pages. If the
 React app at `/` is all you use, they're dead weight.
-
-## One thing still to confirm
-
-`mood_entries` wasn't in the column dump, and it's the one table where a mismatch
-would matter. Run this and compare:
-
-```sql
-select column_name, data_type
-  from information_schema.columns
- where table_schema = 'public' and table_name = 'mood_entries'
- order by ordinal_position;
-```
-
-Expected — `id`, `profile_id`, `mood_label`, `mood_intensity`, `energy`,
-`stress`, `note`, `tags`, `logged_at`, `date`, `created_at`. Anything missing
-from that list will make the mood page fall back to the device.
 
 ## How to prove a table is really wired
 
