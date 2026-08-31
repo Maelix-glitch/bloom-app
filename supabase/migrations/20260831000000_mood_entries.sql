@@ -26,6 +26,13 @@ create table if not exists public.mood_entries (
   created_at      timestamptz not null default now()
 );
 
+-- mood_entries usually already exists on a project that has been running the
+-- mood page; make sure the columns the indexes need are there. No-op otherwise.
+alter table public.mood_entries
+  add column if not exists logged_at timestamptz not null default now(),
+  add column if not exists date date,
+  add column if not exists profile_id uuid;
+
 create index if not exists mood_entries_profile_logged_idx
   on public.mood_entries (profile_id, logged_at desc);
 

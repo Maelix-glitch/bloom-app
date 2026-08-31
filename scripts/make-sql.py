@@ -19,6 +19,7 @@ OUT = ROOT / "supabase" / "COMPLETE-SETUP.sql"
 
 # filename → one line on what it gives you
 ORDER: list[tuple[str, str]] = [
+    ("20260825000000_compat_guards.sql", "adds any missing columns to tables that already exist — must run first"),
     ("20260826_reward_delivery.sql", "reward_items, reward_assignments, app_admins + the reward functions"),
     ("20260827_profiles_bootstrap.sql", "public.profiles — created only if your project doesn't have it yet"),
     ("20260828_profile_identity_stories.sql", "identity columns, privacy, stories, highlights, the profile-media bucket"),

@@ -17,6 +17,11 @@ create table if not exists public.coach_messages (
   created_at  timestamptz not null default now()
 );
 
+-- If coach_messages was already there from an earlier setup, make sure the
+-- column the index below needs actually exists. No-op on a fresh project.
+alter table public.coach_messages
+  add column if not exists created_at timestamptz not null default now();
+
 create index if not exists coach_messages_profile_created_idx
   on public.coach_messages (profile_id, created_at desc);
 
@@ -30,6 +35,11 @@ create table if not exists public.coach_memory (
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+
+-- Same for coach_memory.updated_at — this is the one that stopped the setup
+-- with 42703 on projects where the table already existed without it.
+alter table public.coach_memory
+  add column if not exists updated_at timestamptz not null default now();
 
 create index if not exists coach_memory_profile_updated_idx
   on public.coach_memory (profile_id, updated_at desc);

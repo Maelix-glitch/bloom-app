@@ -61,18 +61,45 @@ this repo — they existed only on projects that had been set up by hand:
 If your project already has any of them, the `if not exists` guards leave your
 data alone.
 
+## If it fails
+
+**`ERROR: 42703: column "updated_at" does not exist`** (or any other column) —
+your project already had that table, created outside this repo, without the
+column a later statement needs. `create table if not exists` skips tables that
+are already there, so the column never got added.
+
+`20260825000000_compat_guards.sql` handles this: it runs first and adds any
+missing column to any table that already exists. Run that one file on its own,
+then run `COMPLETE-SETUP.sql` again — or just re-run the combined file, which
+now includes it as its first section.
+
+To see what your project is missing before you run anything:
+
+```sql
+select c.table_name
+  from information_schema.columns c
+ where c.table_schema = 'public'
+ group by c.table_name
+having count(*) filter (where c.column_name = 'updated_at') = 0
+ order by 1;
+```
+
+If a statement still fails, paste the error **with the few lines above it** —
+the message alone doesn't say which statement it was.
+
 ## Running the migrations individually
 
 If you'd rather apply them one at a time (or you use `supabase db push`), the
 order matters — the identity migration ALTERs `profiles`:
 
-1. `20260826_reward_delivery.sql`
-2. `20260827_profiles_bootstrap.sql`
-3. `20260828_profile_identity_stories.sql`
-4. `20260829_cycle_intelligence.sql`
-5. `20260830120000_tracker_days.sql`
-6. `20260831000000_mood_entries.sql`
-7. `20260831000100_coach_memory.sql`
+1. `20260825000000_compat_guards.sql` — adds missing columns to tables that already exist
+2. `20260826_reward_delivery.sql`
+3. `20260827_profiles_bootstrap.sql`
+4. `20260828_profile_identity_stories.sql`
+5. `20260829_cycle_intelligence.sql`
+6. `20260830120000_tracker_days.sql`
+7. `20260831000000_mood_entries.sql`
+8. `20260831000100_coach_memory.sql`
 
 ## How each page behaves once it's connected
 
