@@ -21,6 +21,27 @@ the old static app in `public/bloom/` (the `.html` pages and `public/bloom/js/`)
 | `reward_items`, `reward_assignments` | `/rewards` | Used through the `claim_reward` / `get_my_rewards` / `admin_*` functions, not read directly. |
 | `app_admins` | `/admin` | Used by `is_rewards_admin()` inside those functions. |
 
+## Verified state — 2026-08-31
+
+After the archive rename, `public` holds exactly these 22 tables. Every one the
+app needs is present, and every one that was renamed is unused:
+
+```
+app_admins              coach_memory            coach_messages
+cycle_entries           mood_entries            profile_privacy
+profiles                reward_assignments      reward_items
+stories                 story_highlight_items   story_highlights
+tracker_days
+
+legacy_coach_conversations   legacy_coach_notes      legacy_coach_proposals
+legacy_habit_logs            legacy_habits           legacy_insights
+legacy_sleep_logs            legacy_study_logs       legacy_water_logs
+```
+
+Note there is no `app_admin` and no `legacy_app_admin`. The reward functions use
+`app_admins` (plural), which exists — the singular name in the earlier listing
+was a typo.
+
 ## Not wired — only the old static pages touch these
 
 | Table | Used by | Safe to remove? |
@@ -33,7 +54,7 @@ the old static app in `public/bloom/` (the `.html` pages and `public/bloom/js/`)
 | `coach_conversations` | `public/bloom/coach.html` | Superseded by `coach_messages` |
 | `coach_notes` | `public/bloom/coach.html` | Nothing in React reads it |
 | `coach_proposals` | `public/bloom/coach.html` | Nothing in React reads it |
-| `app_admin` (singular) | nothing anywhere | The functions use `app_admins` (plural). This one is a leftover |
+| `app_admin` (singular) | nothing anywhere | Doesn't actually exist — the functions use `app_admins` (plural), which the migration created. Nothing to do here |
 | `insights` | nothing | The word appears in component names only; no table is read |
 
 ## Before you delete anything
