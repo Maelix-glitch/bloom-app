@@ -16,6 +16,7 @@ import { TrackerIcon } from "@/components/tk/icons";
 import { TRACKERS, type TrackerDef } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
+import { Achievements, TargetSheet } from "./Targets";
 import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers, valuesOf } from "./shared";
 
 const QUICK: Partial<Record<string, { amount: number; label: string }[]>> = {
@@ -156,6 +157,22 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
             <p aria-live="polite" className="lg-notice">
               {notice}
             </p>
+
+            <section className="lg-block">
+              <div className="lg-blockhead">
+                <h2>Targets</h2>
+                <span>what the sheet measures against</span>
+              </div>
+              <TargetSheet store={store} />
+            </section>
+
+            <section className="lg-block">
+              <div className="lg-blockhead">
+                <h2>Achievements</h2>
+                <span>read off your own record</span>
+              </div>
+              <Achievements analysis={analysis} />
+            </section>
 
             {/* -------------------------------- log ------------------------------ */}
             <div ref={logRef} className="lg-block">

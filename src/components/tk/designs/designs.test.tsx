@@ -1,4 +1,7 @@
 // @vitest-environment jsdom
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -6,6 +9,7 @@ import { Atlas } from "./Atlas";
 import { Ledger } from "./Ledger";
 import { Strip } from "./Strip";
 import { todayKey } from "@/lib/cycle/predict";
+import { TRACKERS } from "@/lib/trackers/core";
 
 /** Fourteen real-looking days ending today, so the pages have something to draw. */
 function seed() {
@@ -67,7 +71,7 @@ describe("the three trackers designs", () => {
 
   it("Atlas draws the compass, its key and the study field", () => {
     const { container } = render(<Atlas />);
-    expect(screen.getByText(/Where your hours/)).toBeTruthy();
+    expect(screen.getByText(/Your day, on one dial/)).toBeTruthy();
     expect(screen.getByRole("img", { name: /twenty-four hour compass/i })).toBeTruthy();
     for (const name of ["Sleep", "Water", "Study", "Movement", "Energy", "Screen"]) {
       expect(screen.getAllByText(name).length).toBeGreaterThan(0);
@@ -101,6 +105,38 @@ describe("the three trackers designs", () => {
       expect(inside(m.x, m.y), `mark at ${m.x},${m.y} falls outside the viewBox`).toBe(true);
     }
     expect(compass.querySelectorAll(".at-hour")).toHaveLength(4);
+    /* all six trackers draw on the compass, each in its own colour. Energy
+       used to be missing entirely and study shared movement's colour. */
+    const arcs = new Set(
+      Array.from(container.querySelectorAll(".at-arc")).map((a) => a.getAttribute("data-id")),
+    );
+    for (const id of ["sleep", "water", "movement", "screen", "study", "energy"]) {
+      expect(arcs, `no arc drawn for ${id}`).toContain(id);
+    }
+    /* jsdom doesn't load the stylesheet, so check the colours where they're
+       written. Study used to reuse movement's colour and energy had none. */
+    /* jsdom gives import.meta.url an http base, so resolve from the project
+       root instead — vitest always runs from there. */
+    const css = readFileSync(
+      resolve(process.cwd(), "src/styles/trackers2.css"),
+      "utf8",
+    );
+    const strokeOf = (id: string) => {
+      const m = css.match(
+        new RegExp(`\\.at-arc\\[data-id="${id}"\\]\\s*\\{[^}]*?stroke:\\s*([^;]+);`),
+      );
+      return m?.[1]?.trim() ?? null;
+    };
+    const strokes = TRACKERS.map((t) => strokeOf(t.id));
+    strokes.forEach((value, i) => {
+      expect(value, `no arc colour declared for ${TRACKERS[i]!.id}`).toBeTruthy();
+    });
+    expect(new Set(strokes).size, "two trackers share an arc colour").toBe(TRACKERS.length);
+
+    /* targets are editable here, and achievements are read off the record */
+    expect(container.querySelectorAll(".tk2-targets-grid input")).toHaveLength(6);
+    expect(container.querySelectorAll(".tk2-badges-grid li")).toHaveLength(4);
+
     /* study gets a field of its own, and the route carries all six paths */
     expect(screen.getByText(/Study · the field/)).toBeTruthy();
     expect(container.querySelectorAll(".at-route-line").length).toBeGreaterThanOrEqual(5);

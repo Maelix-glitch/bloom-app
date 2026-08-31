@@ -16,6 +16,7 @@ import { StudyMap } from "@/components/tk/StudyMap";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
+import { Achievements, TargetSheet } from "./Targets";
 import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers } from "./shared";
 
 const C = 130;
@@ -106,11 +107,15 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
       ["water", 100, (entry?.waterMl ?? 0) / (store.goals.waterMl || 2200)],
       ["movement", 64, (entry?.movementMinutes ?? 0) / (store.goals.movementMinutes || 30)],
       ["screen", 82, (entry?.screenMinutes ?? 0) / (store.goals.screenMinutes || 180)],
+      /* energy sits closest to the middle: it's a rating out of five, not a
+         share of a target, so it reads as five equal steps round the ring */
+      ["energy", 28, (entry?.energy ?? 0) / 5],
     ];
     for (const [id, r, share] of shares) {
       if (share <= 0) continue;
       const a = polar(r, 0);
-      const sweep = Math.max(Math.min(share, 1) * 360, 2);
+      /* a logged minute still has to be visible — 2° disappeared entirely */
+      const sweep = Math.max(Math.min(share, 1) * 360, 8);
       const b = polar(r, sweep);
       out.push({ id, r, d: `M ${a.x} ${a.y} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${b.x} ${b.y}` });
     }
@@ -127,16 +132,12 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
       <div className="at">
         <header className="at-head">
           <p className="at-kicker">
-            Bloom · Atlas of a day · {hasDays ? `${analysis.daysLogged} days plotted` : "nothing plotted yet"}
+            {hasDays ? `${analysis.daysLogged} days on the map` : "nothing logged yet"} ·{" "}
+            {analysis.goalsMetToday} of 6 targets today
           </p>
-          <h1 className="at-title">
-            Where your hours
-            <br />
-            actually went.
-          </h1>
+          <h1 className="at-title">Your day, on one dial.</h1>
           <p className="at-lede">
-            Six territories, one day. The compass draws night as an arc and everything else as the
-            share of its target you've covered — all of it from your own entries.
+            Six trackers, drawn only from days you logged yourself. Nothing here is estimated.
           </p>
           <SyncNote sync={store.sync} onRetry={store.syncNow} />
         </header>
@@ -273,6 +274,17 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
               {notice}
             </p>
 
+            {/* ---------------------- targets + achievements -------------------- */}
+            <section className="at-section">
+              <p className="at-sectionhead">Targets · what the dial measures against</p>
+              <TargetSheet store={store} />
+            </section>
+
+            <section className="at-section">
+              <p className="at-sectionhead">Achievements</p>
+              <Achievements analysis={analysis} />
+            </section>
+
             {/* -------------------------------- log --------------------------------- */}
             <div ref={logRef} className="at-section">
               <p className="at-sectionhead">Add to the map</p>
@@ -291,7 +303,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 {/* ------------------------------ the route --------------------------- */}
                 <section className="at-section">
                   <p className="at-sectionhead">The route · fourteen days, six paths</p>
-                  <svg viewBox="0 0 720 230" className="at-route" role="img" aria-label="Fourteen days of all six trackers">
+                  <div className="at-route-scroll">
+                    <svg viewBox="0 0 720 230" className="at-route" role="img" aria-label="Fourteen days of all six trackers">
                     {defs.map((def) => {
                       const values = analysis.trackers[def.id].series.map((p) => p.value);
                       const peak = Math.max(...values.map((v) => v ?? 0), 1);
@@ -318,8 +331,9 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                           {p.date.slice(5)}
                         </text>
                       ) : null,
-                    )}
-                  </svg>
+                      )}
+                    </svg>
+                  </div>
                   <ul className="at-legend">
                     {defs.map((def) => (
                       <li key={def.id} data-id={def.id}>

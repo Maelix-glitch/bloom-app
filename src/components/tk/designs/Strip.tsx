@@ -15,6 +15,7 @@ import { LogPanel } from "@/components/tk/LogPanel";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDateShort } from "@/lib/cycle/predict";
 
+import { Achievements, TargetSheet } from "./Targets";
 import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers } from "./shared";
 
 const STEPS: Partial<Record<TrackerId, { amount: number; label: string }[]>> = {
@@ -151,6 +152,16 @@ export function Strip({ theme = "nocturne" }: { theme?: string }) {
             <p aria-live="polite" className="sp-notice">
               {notice}
             </p>
+
+            <section className="sp-section">
+              <p className="sp-sectionhead">Targets · what the bands measure against</p>
+              <TargetSheet store={store} />
+            </section>
+
+            <section className="sp-section">
+              <p className="sp-sectionhead">Achievements</p>
+              <Achievements analysis={analysis} />
+            </section>
 
             {/* --------------------------------- log -------------------------------- */}
             <div ref={logRef} className="sp-section">

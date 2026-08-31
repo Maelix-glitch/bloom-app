@@ -184,18 +184,18 @@ export function useTrackers(): TrackerStore {
     syncing.current = true;
     dirtyDates.current.clear();
     deletedDates.current.clear();
-    setSync((prev) => ({ ...prev, state: "pending", message: "Saving to your account…" }));
+    setSync((prev) => ({ ...prev, state: "pending", message: "Saving…" }));
     try {
       for (const day of pushes) await pushDay(pid, day);
       for (const date of removals) await deleteDay(pid, date);
-      setSync({ state: "saved", message: "Saved to your account.", signedIn: true });
+      setSync({ state: "saved", message: "Saved to your account", signedIn: true });
     } catch {
       /* put them back so the next attempt retries instead of losing them */
       for (const day of pushes) dirtyDates.current.add(day.date);
       for (const date of removals) deletedDates.current.add(date);
       setSync({
         state: "error",
-        message: "Couldn't reach your account — these days are safe on this device.",
+        message: "Saved here — not on your account yet",
         signedIn: true,
       });
     } finally {
@@ -208,19 +208,19 @@ export function useTrackers(): TrackerStore {
       if (!hasCloud()) {
         setSync({
           state: "off",
-          message: "No database connected in this build — days stay on this device.",
+          message: "Saved on this device",
           signedIn: false,
         });
         return;
       }
-      setSync((prev) => ({ ...prev, state: "loading", message: "Fetching your record…" }));
+      setSync((prev) => ({ ...prev, state: "loading", message: "Checking your account…" }));
       try {
         const pid = await currentProfileId();
         profileId.current = pid;
         if (!pid) {
           setSync({
             state: "signed-out",
-            message: "Not signed in — days are saved on this device only.",
+            message: "Saved on this device — not signed in",
             signedIn: false,
           });
           return;
@@ -234,7 +234,7 @@ export function useTrackers(): TrackerStore {
       } catch {
         setSync({
           state: "error",
-          message: "Couldn't reach your account — showing what's saved on this device.",
+          message: "Saved here — not on your account yet",
           signedIn: profileId.current !== null,
         });
       }

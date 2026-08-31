@@ -112,6 +112,6 @@ describe("trackers sync", () => {
     });
     await waitFor(() => expect(result.current.sync.state).toBe("error"), { timeout: 3000 });
     expect(result.current.days.map((d) => d.date)).toContain(todayKey());
-    expect(result.current.sync.message).toMatch(/safe on this device/i);
+    expect(result.current.sync.message).toMatch(/saved here/i);
   });
 });
