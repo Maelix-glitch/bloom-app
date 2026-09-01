@@ -6,6 +6,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Atlas } from "./Atlas";
+import { CapsuleDock } from "./shared";
 import { Ledger } from "./Ledger";
 import { Strip } from "./Strip";
 import { todayKey } from "@/lib/cycle/predict";
@@ -154,6 +155,35 @@ describe("the three trackers designs", () => {
     expect(container.querySelectorAll(".sp-band")).toHaveLength(6);
     expect(container.querySelectorAll(".sp-cell")).toHaveLength(84);
     expect(errors).toHaveLength(0);
+  });
+
+  it("slides the capsule dock's metal chip to the active option", () => {
+    const { container } = render(
+      <CapsuleDock
+        options={[
+          { value: 1, label: "Rough" },
+          { value: 2, label: "Fair" },
+          { value: 3, label: "Okay" },
+        ]}
+        value={3}
+        onSelect={() => {}}
+      />,
+    );
+
+    const dock = container.querySelector(".tk2-dock") as HTMLElement;
+    expect(dock.style.getPropertyValue("--tk2-dock-i")).toBe("2");
+    expect(dock.style.getPropertyValue("--tk2-dock-n")).toBe("3");
+    expect(container.querySelector(".tk2-dock-tracer")?.getAttribute("data-visible")).toBe("true");
+    expect(container.querySelectorAll(".tk2-dock-btn")).toHaveLength(3);
+    expect(
+      container.querySelector('.tk2-dock-btn[data-active="true"]')?.textContent,
+    ).toBe("Okay");
+
+    /* with nothing chosen the chip hides itself rather than sitting on option one */
+    const { container: empty } = render(
+      <CapsuleDock options={[{ value: 1, label: "Rough" }]} value={null} onSelect={() => {}} />,
+    );
+    expect(empty.querySelector(".tk2-dock-tracer")?.getAttribute("data-visible")).toBe("false");
   });
 
   it("all three show the advanced read, not a placeholder", () => {

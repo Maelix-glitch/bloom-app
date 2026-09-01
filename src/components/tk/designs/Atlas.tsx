@@ -17,7 +17,7 @@ import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
-import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers } from "./shared";
+import { applyQuickAdd, Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
 
 const C = 130;
 
@@ -242,7 +242,11 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                         <div className="at-territory-head">
                           <span className="at-place">{def.name}</span>
                           <span className="at-coord">
-                            {stat.today === null ? "unlogged" : def.format(Math.round(stat.today))}
+                            {stat.today === null ? (
+                              "unlogged"
+                            ) : (
+                              <Metric value={def.format(Math.round(stat.today))} />
+                            )}
                           </span>
                         </div>
                         <svg viewBox="0 0 240 54" className="at-contour" role="img" aria-label={`${def.name} contour`}>
@@ -257,7 +261,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                         </svg>
                         <div className="at-territory-foot">
                           <span>
-                            target {def.format(stat.goal)} · avg {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
+                            target <Metric value={def.format(stat.goal)} /> · avg{" "}
+                            {stat.avg7 === null ? "—" : <Metric value={def.format(Math.round(stat.avg7))} />}
                           </span>
                           <span className="at-territory-actions">
                             {def.id === "energy" ? (

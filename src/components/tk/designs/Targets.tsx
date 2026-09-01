@@ -43,7 +43,7 @@ export function TargetSheet({ store }: { store: TrackerStore }) {
                   store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, next)));
                 }}
               />
-              <em>{unit(def.kind)}</em>
+              <span className="tk2-unit">{unit(def.kind)}</span>
             </span>
           </li>
         ))}

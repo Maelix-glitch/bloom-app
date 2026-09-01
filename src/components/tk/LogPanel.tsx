@@ -23,6 +23,7 @@ import {
   type TrackerId,
 } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
+import { CapsuleDock, Metric } from "@/components/tk/designs/shared";
 
 const QUALITY_LABEL = ["", "Rough", "Fair", "Okay", "Good", "Deep"];
 const ENERGY_LABEL = ["", "Drained", "Low", "Steady", "Bright", "Wired"];
@@ -273,20 +274,12 @@ export function LogPanel({
 
           <div className="mt-3">
             <span className="ci-label">Quality</span>
-            <div className="tk-pill mt-1.5">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className=""
-                  aria-pressed={draft.sleepQuality === n}
-                  disabled={disabled}
-                  onClick={() => set("sleepQuality", draft.sleepQuality === n ? null : n)}
-                >
-                  {QUALITY_LABEL[n]}
-                </button>
-              ))}
-            </div>
+            <CapsuleDock
+              options={[1, 2, 3, 4, 5].map((n) => ({ value: n, label: QUALITY_LABEL[n]! }))}
+              value={draft.sleepQuality}
+              onSelect={(n) => set("sleepQuality", draft.sleepQuality === n ? null : n)}
+              disabled={disabled}
+            />
             {errors.sleepQuality ? (
               <p className="ci-error">
                 <AlertCircle size={13} aria-hidden />
@@ -304,7 +297,7 @@ export function LogPanel({
               Water
             </span>
             <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.water" }}>
-              {draft.waterMl === null ? "0ml" : trackerDef("water").format(draft.waterMl)}
+              <Metric value={draft.waterMl === null ? "0ml" : trackerDef("water").format(draft.waterMl)} />
             </span>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -349,24 +342,16 @@ export function LogPanel({
               Study
             </span>
             <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.study" }}>
-              {studyTotal === 0 ? "no sessions" : trackerDef("study").format(studyTotal)}
+              <Metric value={studyTotal === 0 ? "no sessions" : trackerDef("study").format(studyTotal)} />
             </span>
           </div>
 
-          <div className="tk-pill mt-2">
-            {SUBJECTS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className=""
-                aria-pressed={subject === s}
-                disabled={disabled}
-                onClick={() => setSubject(s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+          <CapsuleDock
+            options={SUBJECTS.map((s) => ({ value: s, label: s }))}
+            value={subject}
+            onSelect={setSubject}
+            disabled={disabled}
+          />
 
           <div className="mt-2 flex flex-wrap items-end gap-2">
             <div className="ci-field min-w-[110px]">
@@ -459,7 +444,7 @@ export function LogPanel({
               <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.movement" }}>
                 {draft.movementMinutes === null
                   ? "—"
-                  : trackerDef("movement").format(draft.movementMinutes)}
+                  : <Metric value={trackerDef("movement").format(draft.movementMinutes)} />}
               </span>
             </div>
             <input
@@ -506,20 +491,12 @@ export function LogPanel({
                 {draft.energy === null ? "—" : ENERGY_LABEL[draft.energy]}
               </span>
             </div>
-            <div className="tk-pill mt-2">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className="ci-num"
-                  aria-pressed={draft.energy === n}
-                  disabled={disabled}
-                  onClick={() => set("energy", draft.energy === n ? null : n)}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
+            <CapsuleDock
+              options={[1, 2, 3, 4, 5].map((n) => ({ value: n, label: String(n) }))}
+              value={draft.energy}
+              onSelect={(n) => set("energy", draft.energy === n ? null : n)}
+              disabled={disabled}
+            />
             {errors.energy ? (
               <p className="ci-error">
                 <AlertCircle size={13} aria-hidden />
@@ -537,7 +514,7 @@ export function LogPanel({
               <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.screen" }}>
                 {draft.screenMinutes === null
                   ? "—"
-                  : trackerDef("screen").format(draft.screenMinutes)}
+                  : <Metric value={trackerDef("screen").format(draft.screenMinutes)} />}
               </span>
             </div>
             <input
