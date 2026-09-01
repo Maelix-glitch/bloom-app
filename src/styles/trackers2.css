@@ -15,6 +15,52 @@
   --tk2-soft: color-mix(in oklab, var(--ci-text) 62%, transparent);
 }
 
+/* ------------------------------ palette ---------------------------------- */
+/* The trackers page runs on obsidian and champagne whatever theme the cycle  */
+/* page is set to: a near-black ground, charcoal cards, platinum type, gold   */
+/* for the figures and every active/met state, and six ring colours spaced    */
+/* evenly round the wheel so they stay legible on #0b0c10.                    */
+
+.tk2-root[data-design][data-theme] {
+  --ci-bg: #0b0c10;
+  --ci-bg-deep: #07080b;
+  --ci-surface: #1f2833;
+  --ci-surface-2: #232e3a;
+  --ci-line: #2b3543;
+  --ci-line-strong: #3b4858;
+  --ci-text: #e5e9f0;
+  --ci-text-soft: #c5c6c7;
+  --ci-text-mute: #8b94a3;
+  --ci-accent: #d4af37;
+  --ci-accent-soft: rgba(212, 175, 55, 0.14);
+  --ci-focus: #e8c96a;
+  --ci-ok: #5fd39a;
+  --ci-warn: #d4af37;
+  --ci-danger: #e0705f;
+  --ci-input-bg: #151b23;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(212, 175, 55, 0.1), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(197, 198, 199, 0.05), transparent 55%);
+
+  /* gold carries the chrome: met marks, notices, saved state */
+  --ci-follicular: #d4af37;
+  --ci-ovulation: #d4af37;
+  /* the two phase names left over keep their ring colour so nothing falls back */
+  --ci-late: var(--tk2-ring-sleep);
+  --ci-menstrual: var(--tk2-ring-screen);
+
+  /* six rings, ~40 degrees of hue apart */
+  --tk2-ring-sleep: #6b8cff;
+  --tk2-ring-water: #3ec8e8;
+  --tk2-ring-movement: #3fd18a;
+  --tk2-ring-energy: #f5a623;
+  --tk2-ring-screen: #f2698a;
+  --tk2-ring-study: #b07cff;
+
+  --tk2-rule: rgba(197, 198, 199, 0.16);
+  --tk2-soft: rgba(197, 198, 199, 0.62);
+}
+
 .tk2-footer {
   margin-top: 3rem;
   padding-top: 1.25rem;
@@ -492,16 +538,16 @@
 }
 
 [data-design="atlas"] .at-arc[data-id="sleep"] {
-  stroke: var(--ci-late);
+  stroke: var(--tk2-ring-sleep);
 }
 [data-design="atlas"] .at-arc[data-id="water"] {
-  stroke: color-mix(in oklab, var(--ci-follicular) 70%, #5ad2f5 30%);
+  stroke: var(--tk2-ring-water);
 }
 [data-design="atlas"] .at-arc[data-id="screen"] {
-  stroke: var(--ci-menstrual);
+  stroke: var(--tk2-ring-screen);
 }
 [data-design="atlas"] .at-arc[data-id="movement"] {
-  stroke: var(--ci-ovulation);
+  stroke: var(--tk2-ring-movement);
 }
 
 [data-design="atlas"] .at-hour {
@@ -559,36 +605,36 @@
 }
 
 [data-design="atlas"] .at-key li[data-id="sleep"] i {
-  background: var(--ci-late);
+  background: var(--tk2-ring-sleep);
 }
 [data-design="atlas"] .at-key li[data-id="water"] i {
-  background: color-mix(in oklab, var(--ci-follicular) 70%, #5ad2f5 30%);
+  background: var(--tk2-ring-water);
 }
 [data-design="atlas"] .at-key li[data-id="study"] i {
-  background: color-mix(in oklab, #7ea8e0 75%, var(--ci-late) 25%);
+  background: var(--tk2-ring-study);
 }
 [data-design="atlas"] .at-key li[data-id="movement"] i {
-  background: color-mix(in oklab, var(--ci-follicular) 50%, var(--ci-ovulation) 50%);
+  background: var(--tk2-ring-movement);
 }
 [data-design="atlas"] .at-key li[data-id="energy"] i {
-  background: color-mix(in oklab, #8ec07c 80%, var(--ci-follicular) 20%);
+  background: var(--tk2-ring-energy);
 }
 [data-design="atlas"] .at-key li[data-id="screen"] i {
-  background: var(--ci-menstrual);
+  background: var(--tk2-ring-screen);
 }
 
 [data-design="atlas"] .at-arc[data-id="study"] {
-  stroke: color-mix(in oklab, #7ea8e0 75%, var(--ci-late) 25%);
+  stroke: var(--tk2-ring-study);
   stroke-width: 7;
 }
 
 [data-design="atlas"] .at-arc[data-id="energy"] {
-  stroke: color-mix(in oklab, #8ec07c 80%, var(--ci-follicular) 20%);
+  stroke: var(--tk2-ring-energy);
   stroke-width: 6;
 }
 
 [data-design="atlas"] .at-route-today {
-  stroke: var(--ci-late);
+  stroke: var(--ci-accent);
   stroke-width: 1;
   stroke-dasharray: 3 4;
   opacity: 0.6;
@@ -781,22 +827,22 @@
 }
 
 [data-design="atlas"] .at-route-line[data-id="sleep"] {
-  stroke: var(--ci-late);
+  stroke: var(--tk2-ring-sleep);
 }
 [data-design="atlas"] .at-route-line[data-id="water"] {
-  stroke: color-mix(in oklab, var(--ci-follicular) 70%, #5ad2f5 30%);
+  stroke: var(--tk2-ring-water);
 }
 [data-design="atlas"] .at-route-line[data-id="study"] {
-  stroke: var(--ci-ovulation);
+  stroke: var(--tk2-ring-study);
 }
 [data-design="atlas"] .at-route-line[data-id="movement"] {
-  stroke: color-mix(in oklab, var(--ci-follicular) 50%, var(--ci-ovulation) 50%);
+  stroke: var(--tk2-ring-movement);
 }
 [data-design="atlas"] .at-route-line[data-id="energy"] {
-  stroke: color-mix(in oklab, var(--ci-ovulation) 60%, #ffd08a 40%);
+  stroke: var(--tk2-ring-energy);
 }
 [data-design="atlas"] .at-route-line[data-id="screen"] {
-  stroke: var(--ci-menstrual);
+  stroke: var(--tk2-ring-screen);
 }
 
 [data-design="atlas"] .at-legend {
@@ -825,19 +871,22 @@
 }
 
 [data-design="atlas"] .at-legend li[data-id="sleep"] i {
-  background: var(--ci-late);
+  background: var(--tk2-ring-sleep);
 }
 [data-design="atlas"] .at-legend li[data-id="water"] i {
-  background: color-mix(in oklab, var(--ci-follicular) 70%, #5ad2f5 30%);
+  background: var(--tk2-ring-water);
 }
 [data-design="atlas"] .at-legend li[data-id="study"] i {
-  background: var(--ci-ovulation);
+  background: var(--tk2-ring-study);
 }
 [data-design="atlas"] .at-legend li[data-id="movement"] i {
-  background: color-mix(in oklab, var(--ci-follicular) 50%, var(--ci-ovulation) 50%);
+  background: var(--tk2-ring-movement);
 }
 [data-design="atlas"] .at-legend li[data-id="screen"] i {
-  background: var(--ci-menstrual);
+  background: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-legend li[data-id="energy"] i {
+  background: var(--tk2-ring-energy);
 }
 
 [data-design="atlas"] .at-statement {
@@ -1005,7 +1054,7 @@
 }
 
 [data-design="strip"] .sp-axis span[data-today="true"] {
-  color: var(--ci-late);
+  color: var(--ci-accent);
   font-weight: 600;
 }
 
@@ -1102,7 +1151,7 @@
   bottom: 0;
   left: calc(132px + 0.75rem + (100% - 132px - 0.75rem - 5.5rem) * (13 / 14) + 2px);
   width: 1px;
-  background: color-mix(in oklab, var(--ci-late) 60%, transparent);
+  background: color-mix(in oklab, var(--ci-accent) 55%, transparent);
   pointer-events: none;
 }
 
@@ -1347,11 +1396,13 @@
   transform: translateY(-2px);
 }
 
-.tk2-sync[data-state="saved"] .tk2-sync-dot { background: var(--ci-follicular); }
-.tk2-sync[data-state="pending"] .tk2-sync-dot { background: var(--ci-ovulation); }
+.tk2-sync[data-state="saved"] .tk2-sync-dot { background: var(--ci-accent); }
+.tk2-sync[data-state="pending"] .tk2-sync-dot {
+  background: color-mix(in oklab, var(--ci-accent) 40%, transparent);
+}
 .tk2-sync[data-state="loading"] .tk2-sync-dot { background: var(--ci-text-mute); }
-.tk2-sync[data-state="error"] { color: var(--ci-menstrual); }
-.tk2-sync[data-state="error"] .tk2-sync-dot { background: var(--ci-menstrual); }
+.tk2-sync[data-state="error"] { color: var(--ci-danger); }
+.tk2-sync[data-state="error"] .tk2-sync-dot { background: var(--ci-danger); }
 
 .tk2-sync-retry {
   font: inherit;
