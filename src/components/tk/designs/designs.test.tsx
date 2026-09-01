@@ -133,6 +133,11 @@ describe("the three trackers designs", () => {
     });
     expect(new Set(strokes).size, "two trackers share an arc colour").toBe(TRACKERS.length);
 
+    /* every ring shows a track even when nothing is logged, and every filled
+       arc ends in a lit cap */
+    expect(container.querySelectorAll(".at-track")).toHaveLength(6);
+    expect(container.querySelectorAll(".at-cap").length).toBeGreaterThan(0);
+
     /* targets are editable here, and achievements are read off the record */
     expect(container.querySelectorAll(".tk2-targets-grid input")).toHaveLength(6);
     expect(container.querySelectorAll(".tk2-badges-grid li")).toHaveLength(4);

@@ -1563,3 +1563,198 @@
     font-size: 15px;
   }
 }
+
+/* ==========================================================================
+   The finishing pass.
+
+   Five things, all of them about how the page feels rather than what it says:
+   champagne on the actions instead of a flat block of colour, small labels set
+   in tracked capitals, containers that read as glass over the obsidian rather
+   than as grey boxes, roomier log cards with pill selectors, and a dial that
+   still looks like a dial on a day nothing has been logged.
+   ========================================================================== */
+
+.tk2-root[data-design][data-theme] {
+  /* brushed metal: light catches the top-left corner and falls away */
+  --tk2-champagne: linear-gradient(135deg, #ecd488 0%, #d4af37 42%, #a8842a 100%);
+  --tk2-champagne-line: rgba(212, 175, 55, 0.45);
+  --tk2-champagne-glow: rgba(212, 175, 55, 0.55);
+
+  /* glass: charcoal at 60% over the obsidian, with a laser-cut rim */
+  --tk2-glass: rgba(31, 40, 51, 0.6);
+  --tk2-glass-rim: rgba(255, 255, 255, 0.04);
+  --tk2-glass-lift: radial-gradient(
+    120% 120% at 0% 0%,
+    rgba(255, 255, 255, 0.055),
+    transparent 62%
+  );
+
+  /* serif headers carry more weight and sit tighter */
+  --ci-display-weight: 600;
+  --ci-display-track: -0.02em;
+}
+
+/* ------------------------------- 1. actions ------------------------------ */
+
+.tk2-root .ci-btn--primary {
+  background-image: var(--tk2-champagne);
+  border-color: var(--tk2-champagne-line);
+  color: #0b0c10;
+  font-weight: 600;
+  box-shadow: 0 10px 26px -14px var(--tk2-champagne-glow);
+}
+
+.tk2-root .ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* the study-subject tags read as glass chips, not coloured labels */
+.tk2-root .tk-session {
+  background-color: var(--tk2-glass);
+  background-image: var(--tk2-glass-lift);
+  border-color: var(--tk2-glass-rim);
+  backdrop-filter: blur(12px);
+  padding: 0.5rem 0.85rem;
+}
+
+/* ----------------------------- 2. typography ----------------------------- */
+/* Small labels go to tracked capitals; the units drop to 40% so the figures
+   themselves carry the weight. */
+
+.tk2-root .at-kicker,
+.tk2-root .at-sectionhead,
+.tk2-root .at-coord,
+.tk2-root .at-key span,
+.tk2-root .at-legend li,
+.tk2-root .tk2-sync,
+.tk2-root .tk2-badges-count,
+.tk2-root .tk2-targets-grid label,
+.tk2-root .ci-label,
+.tk2-root .tk-quick button,
+.tk2-root .tk-pill button {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tk2-root .tk2-target-field em,
+.tk2-root .ci-hint,
+.tk2-root .at-fine {
+  opacity: 0.4;
+}
+
+.tk2-root .at-title,
+.tk2-root .at-statement {
+  letter-spacing: -0.02em;
+}
+
+/* --------------------------- 3. glass containers -------------------------- */
+
+.tk2-root .ci-card,
+.tk2-root .tk-block,
+.tk2-root .tk2-targets-grid li,
+.tk2-root .tk2-badges-grid li,
+.tk2-root .tk-panel {
+  background-color: var(--tk2-glass);
+  background-image: var(--tk2-glass-lift);
+  border: 1px solid var(--tk2-glass-rim);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ------------------------ 4. spacing and selectors ------------------------ */
+
+.tk2-root .tk-block {
+  padding: 24px;
+  border-radius: var(--ci-radius-md, 12px);
+}
+
+.tk2-root .tk-quick {
+  gap: 0.4rem;
+}
+
+.tk2-root .tk-quick button {
+  padding: 0.42rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--ci-text-soft);
+  font-size: 11.5px;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.tk2-root .tk-quick button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--ci-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* rating scales: capsule pills, champagne glow on the selected one */
+.tk2-root .tk-pill {
+  gap: 0.3rem;
+  padding: 0.28rem;
+  border-color: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tk2-root .tk-pill button {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid transparent;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+
+.tk2-root .tk-pill button[aria-pressed="true"] {
+  color: #0b0c10;
+  background-image: var(--tk2-champagne);
+  border-color: var(--tk2-champagne-line);
+  box-shadow: 0 0 18px -6px var(--tk2-champagne-glow);
+}
+
+/* ------------------------------- 5. the dial ------------------------------ */
+/* An unlogged ring is a faint deep track; a filled one is jewel-toned with a
+   glow along its length and a lit cap where it stops. */
+
+[data-design="atlas"] .at-track {
+  stroke: rgba(255, 255, 255, 0.03);
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--tk2-ring-sleep) 60%, transparent));
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--tk2-ring-water) 60%, transparent));
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--tk2-ring-movement) 60%, transparent));
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--tk2-ring-screen) 60%, transparent));
+}
+[data-design="atlas"] .at-arc[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+  stroke-width: 7;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--tk2-ring-study) 60%, transparent));
+}
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+  stroke-width: 6;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--tk2-ring-energy) 60%, transparent));
+}
+
+[data-design="atlas"] .at-cap {
+  filter: drop-shadow(0 0 8px currentcolor);
+}
+
+[data-design="atlas"] .at-cap[data-id="sleep"] { fill: var(--tk2-ring-sleep); }
+[data-design="atlas"] .at-cap[data-id="water"] { fill: var(--tk2-ring-water); }
+[data-design="atlas"] .at-cap[data-id="movement"] { fill: var(--tk2-ring-movement); }
+[data-design="atlas"] .at-cap[data-id="screen"] { fill: var(--tk2-ring-screen); }
+[data-design="atlas"] .at-cap[data-id="study"] { fill: var(--tk2-ring-study); }
+[data-design="atlas"] .at-cap[data-id="energy"] { fill: var(--tk2-ring-energy); }

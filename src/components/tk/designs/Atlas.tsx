@@ -75,7 +75,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
     const entry = store.days.find((d) => d.date === today);
     const bed = entry?.bedTime ? Number(entry.bedTime.split(":")[0]) : null;
     const wake = entry?.wakeTime ? Number(entry.wakeTime.split(":")[0]) : null;
-    const out: { id: TrackerId; r: number; d: string }[] = [];
+    const out: { id: TrackerId; r: number; d: string; cap?: { x: number; y: number } }[] = [];
     if (bed !== null && wake !== null) {
       const span = ((wake - bed + 24) % 24) * 15 || 5;
       const a = polar(118, bed * 15);
@@ -84,6 +84,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
         id: "sleep",
         r: 118,
         d: `M ${a.x} ${a.y} A 118 118 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
+        cap: { x: b.x, y: b.y },
       });
     }
     /* study, as a block wherever the session started */
@@ -100,6 +101,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
           id: "study",
           r: 46,
           d: `M ${a.x} ${a.y} A 46 46 0 ${length > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
+          cap: { x: b.x, y: b.y },
         });
       });
     }
@@ -117,7 +119,12 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
       /* a logged minute still has to be visible — 2° disappeared entirely */
       const sweep = Math.max(Math.min(share, 1) * 360, 8);
       const b = polar(r, sweep);
-      out.push({ id, r, d: `M ${a.x} ${a.y} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${b.x} ${b.y}` });
+      out.push({
+        id,
+        r,
+        d: `M ${a.x} ${a.y} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
+        cap: { x: b.x, y: b.y },
+      });
     }
     return out;
   }, [store.days, store.goals, today]);
@@ -160,6 +167,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                   <circle cx={C} cy={C} r={100} className="at-track" />
                   <circle cx={C} cy={C} r={82} className="at-track" />
                   <circle cx={C} cy={C} r={64} className="at-track" />
+                  <circle cx={C} cy={C} r={46} className="at-track" />
+                  <circle cx={C} cy={C} r={28} className="at-track" />
                   {Array.from({ length: 24 }, (_, h) => {
                     const a = polar(126, h * 15);
                     const b = polar(h % 6 === 0 ? 120 : 123, h * 15);
@@ -176,8 +185,25 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                     );
                   })}
                   {rings.map((ring) => (
-                    <path key={ring.id} d={ring.d} className="at-arc" data-id={ring.id} />
+                    <path
+                      key={ring.id}
+                      d={ring.d}
+                      className="at-arc"
+                      data-id={ring.id}
+                    />
                   ))}
+                  {rings.map((ring, i) =>
+                    ring.cap ? (
+                      <circle
+                        key={`cap-${i}`}
+                        className="at-cap"
+                        data-id={ring.id}
+                        cx={ring.cap.x}
+                        cy={ring.cap.y}
+                        r={3.4}
+                      />
+                    ) : null,
+                  )}
                   {[0, 6, 12, 18].map((h) => {
                     const p = polar(140, h * 15);
                     return (
