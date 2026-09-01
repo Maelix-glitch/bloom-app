@@ -392,6 +392,28 @@ describe("the three trackers designs", () => {
     expect(insight?.querySelectorAll(".tk2-insight-index").length).toBeGreaterThan(0);
   });
 
+  it("clearing the record takes two taps, and the first one changes nothing", () => {
+    const { container } = render(<Atlas />);
+    fireEvent.click(screen.getByText("Clear the record"));
+    /* the ask alone must not touch the log */
+    expect(JSON.parse(window.localStorage.getItem("bloom.trackers.days.v1") ?? "null")).toHaveLength(14);
+    expect(screen.getByText(/Erase 14 days/)).toBeTruthy();
+
+    fireEvent.click(screen.getByText("Yes, clear"));
+    expect(JSON.parse(window.localStorage.getItem("bloom.trackers.days.v1") ?? "null")).toHaveLength(0);
+    expect(screen.getByText(/Record cleared/)).toBeTruthy();
+    /* nothing left to clear, so the offer goes away with it */
+    expect(container.querySelector(".at-reset")).toBeNull();
+    expect(errors).toHaveLength(0);
+  });
+
+  it("offers no clear when the record is already empty", () => {
+    window.localStorage.clear();
+    render(<Atlas />);
+    expect(screen.queryByText("Clear the record")).toBeNull();
+    expect(errors).toHaveLength(0);
+  });
+
   it("all three show the advanced read, not a placeholder", () => {
     for (const [name, Component] of [
       ["Ledger", Ledger],

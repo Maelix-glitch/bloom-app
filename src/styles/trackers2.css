@@ -2690,3 +2690,75 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ------------------------- 7. clearing the record ------------------------ */
+
+/* Sits under the ledger as the last thing on the page, quiet by default and
+   only loud once it has been asked. Two steps, because a clear takes the
+   account with it and one click should never erase a log. */
+.tk2-root .at-reset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin: 1.75rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--glass-border-rim);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-cool-silver);
+}
+
+.tk2-root .at-reset button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.tk2-root .at-reset-open {
+  color: var(--text-cool-silver);
+  opacity: 0.7;
+}
+
+.tk2-root .at-reset-open:hover {
+  color: var(--text-ultra-white);
+  opacity: 1;
+}
+
+.tk2-root .at-reset-armed {
+  gap: 14px;
+}
+
+.tk2-root .at-reset-ask {
+  color: var(--text-ultra-white);
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.78rem;
+}
+
+.tk2-root .at-reset-yes {
+  color: #ff453a;
+}
+
+.tk2-root .at-reset-yes:hover {
+  color: #ff6b61;
+}
+
+.tk2-root .at-reset-keep {
+  color: var(--text-cool-silver);
+}
+
+.tk2-root .at-reset-keep:hover {
+  color: var(--text-ultra-white);
+}
+
+@media (max-width: 460px) {
+  .tk2-root .at-reset {
+    gap: 12px;
+  }
+}

@@ -18,7 +18,15 @@ import { formatDate } from "@/lib/cycle/predict";
 import { Achievements, TargetSheet } from "./Targets";
 import { ReflectSheet } from "./ReflectSheet";
 import { TrackerModal } from "./TrackerModal";
-import { applyQuickAdd, Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
+import {
+  applyQuickAdd,
+  Footer,
+  Metric,
+  Observations,
+  SyncNote,
+  useTrackers,
+  type TrackerStore,
+} from "./shared";
 
 const C = 130;
 
@@ -64,6 +72,59 @@ function contourPath(values: (number | null)[], width: number, height: number, p
 const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
 
 /** "+30m", "+1h", "+250ml" — whatever reads shortest and truest. */
+
+/**
+ * Wiping the record, in two steps.
+ *
+ * A clear takes the device and, if they are signed in, the account with it, so
+ * the first tap only asks. One click never destroys anything.
+ */
+function ResetRecord({
+  store,
+  onNotice,
+}: {
+  store: TrackerStore;
+  onNotice: (message: string) => void;
+}) {
+  const [armed, setArmed] = useState(false);
+  const count = store.days.length;
+
+  /* nothing typed, nothing to offer */
+  if (count === 0) return null;
+
+  if (!armed) {
+    return (
+      <p className="at-reset">
+        <button type="button" className="at-reset-open" onClick={() => setArmed(true)}>
+          Clear the record
+        </button>
+      </p>
+    );
+  }
+
+  return (
+    <p className="at-reset at-reset-armed" role="group" aria-label="Clear the record">
+      <span className="at-reset-ask">
+        Erase {count} {count === 1 ? "day" : "days"} from this device
+        {store.sync.signedIn ? " and your account" : ""}?
+      </span>
+      <button
+        type="button"
+        className="at-reset-yes"
+        onClick={() => {
+          store.clearAll();
+          setArmed(false);
+          onNotice("Record cleared. The map is empty again.");
+        }}
+      >
+        Yes, clear
+      </button>
+      <button type="button" className="at-reset-keep" onClick={() => setArmed(false)}>
+        Keep
+      </button>
+    </p>
+  );
+}
 
 export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const store = useTrackers();
@@ -451,6 +512,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 <section className="at-section">
                   <p className="at-sectionhead">Field notes · every entry</p>
                   <HistoryTable days={store.days} analysis={analysis} onDelete={store.removeDay} />
+                  <ResetRecord store={store} onNotice={setNotice} />
                 </section>
               </>
             ) : (
