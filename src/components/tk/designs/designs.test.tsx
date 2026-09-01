@@ -157,6 +157,26 @@ describe("the three trackers designs", () => {
     expect(errors).toHaveLength(0);
   });
 
+  it("keeps the picker rules in the stylesheet", () => {
+    /* jsdom applies no stylesheet, so assert the rules exist where they're
+       written - a lost block here is invisible to every other test. */
+    const css = readFileSync(resolve(process.cwd(), "src/styles/trackers2.css"), "utf8");
+    for (const rule of [
+      ".tk2-tags {",
+      ".tk2-tag {",
+      ".tk2-numbers {",
+      ".tk2-number {",
+      '.tk2-tag[data-active="true"] {',
+      '.tk2-number[data-active="true"] {',
+    ]) {
+      expect(css, `missing rule: ${rule}`).toContain(rule);
+    }
+    /* tags wrap, the number bar is a capsule, and the number is a circle */
+    expect(css).toMatch(/\.tk2-tags \{[^}]*flex-wrap: wrap;/);
+    expect(css).toMatch(/\.tk2-numbers \{[^}]*border-radius: 30px;/);
+    expect(css).toMatch(/\.tk2-number \{[^}]*border-radius: 50%;/);
+  });
+
   it("renders each tag choice as its own element, not one run of text", () => {
     const { container } = render(
       <TagGroup
