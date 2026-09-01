@@ -9,12 +9,27 @@
  * alone rather than being zeroed — an empty box means "no change", not "none".
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 
-import { Overlay, readTrackerValue, setTrackerValues } from "./shared";
+import {
+  CURTAIN_STYLE,
+  Overlay,
+  PANEL_STYLE,
+  SAVE_STYLE,
+  readTrackerValue,
+  setTrackerValues,
+} from "./shared";
+
+/** Two columns of fields, collapsing to one on a phone (see the stylesheet). */
+const GRID_STYLE: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "18px 20px",
+  marginTop: 26,
+};
 
 export function ReflectSheet({
   store,
@@ -81,10 +96,11 @@ export function ReflectSheet({
 
   return (
     <Overlay>
-      <div className="tk2-curtain" onClick={onClose} aria-hidden />
+      <div className="tk2-curtain" style={CURTAIN_STYLE} onClick={onClose} aria-hidden />
 
       <div
         className="tk2-modal tk2-sheet"
+        style={{ ...PANEL_STYLE, maxWidth: 520 }}
         role="dialog"
         aria-modal="true"
         aria-label="Log today"
@@ -93,7 +109,7 @@ export function ReflectSheet({
           ×
         </button>
 
-        <div className="tk2-sheet-grid">
+        <div className="tk2-sheet-grid" style={GRID_STYLE}>
           {TRACKERS.map((def, i) => (
             <label key={def.id} className="tk2-sheet-field">
               <span>{def.name}</span>
@@ -124,7 +140,7 @@ export function ReflectSheet({
           </p>
         ) : null}
 
-        <button type="button" className="tk2-modal-save" onClick={save}>
+        <button type="button" className="tk2-modal-save" style={SAVE_STYLE} onClick={save}>
           Save {changed.length > 0 ? `${changed.length} change${changed.length === 1 ? "" : "s"}` : "& close"}
         </button>
       </div>

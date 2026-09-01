@@ -7,7 +7,7 @@
  * coordinates where a card would have a title.
  */
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
@@ -64,6 +64,40 @@ function contourPath(values: (number | null)[], width: number, height: number, p
 const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
 
 /** "+30m", "+1h", "+250ml" — whatever reads shortest and truest. */
+
+/**
+ * The one control on the page, drawn inline as well as in the stylesheet.
+ *
+ * Everything else can wait for a stylesheet to arrive; this cannot. Should
+ * the file be slow, cached stale or blocked, the button still has to be a
+ * button and the panel still has to be a panel — not bare words at the foot
+ * of the page. The stylesheet keeps the states inline styles cannot carry:
+ * hover, press, focus and the reduced-motion preference.
+ */
+const DOCK_STYLE: CSSProperties = {
+  position: "fixed",
+  bottom: 32,
+  left: "50%",
+  transform: "translateX(-50%)",
+  zIndex: 9999,
+  pointerEvents: "none",
+};
+
+const CTA_STYLE: CSSProperties = {
+  pointerEvents: "auto",
+  background: "linear-gradient(135deg, #F4E7D3 0%, #D4AF37 50%, #AA8232 100%)",
+  color: "#070708",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.14em",
+  fontSize: "0.78rem",
+  padding: "16px 38px",
+  borderRadius: 40,
+  border: "1px solid rgba(255, 255, 255, 0.2)",
+  boxShadow: "0 12px 32px rgba(212, 175, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+};
 
 export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const store = useTrackers();
@@ -471,22 +505,23 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
 
           <ReflectSheet store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
 
-          {openId === null && !sheetOpen ? (
-            <div className="premium-action-dock">
-              <button
-                type="button"
-                className="premium-log-cta"
-                onClick={() => setSheetOpen(true)}
-                aria-haspopup="dialog"
-              >
-                Reflect &amp; log today
-              </button>
-            </div>
-          ) : null}
-
             <Footer />
           </>
         )}
+
+        {openId === null && !sheetOpen ? (
+          <div className="premium-action-dock" style={DOCK_STYLE}>
+            <button
+              type="button"
+              className="premium-log-cta"
+              style={CTA_STYLE}
+              onClick={() => setSheetOpen(true)}
+              aria-haspopup="dialog"
+            >
+              Reflect &amp; log today
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

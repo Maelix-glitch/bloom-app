@@ -19,7 +19,14 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 
-import { Overlay, readTrackerValue, setTrackerValue } from "./shared";
+import {
+  CURTAIN_STYLE,
+  Overlay,
+  PANEL_STYLE,
+  SAVE_STYLE,
+  readTrackerValue,
+  setTrackerValue,
+} from "./shared";
 
 /** The word under the field, so nobody has to guess what the number means. */
 const PROMPT: Record<TrackerId, string> = {
@@ -90,9 +97,15 @@ export function TrackerModal({
 
   return (
     <Overlay>
-      <div className="tk2-curtain" onClick={onClose} aria-hidden />
+      <div className="tk2-curtain" style={CURTAIN_STYLE} onClick={onClose} aria-hidden />
 
-      <div className="tk2-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div
+        className="tk2-modal"
+        style={{ ...PANEL_STYLE, maxWidth: 420 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
         <button type="button" className="tk2-modal-close" onClick={onClose} aria-label="Close">
           ×
         </button>
@@ -147,7 +160,12 @@ export function TrackerModal({
           </p>
         ) : null}
 
-        <button type="button" className="tk2-modal-save" onClick={() => commit(draft)}>
+        <button
+          type="button"
+          className="tk2-modal-save"
+          style={SAVE_STYLE}
+          onClick={() => commit(draft)}
+        >
           Save &amp; close
         </button>
       </div>

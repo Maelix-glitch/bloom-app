@@ -12,6 +12,8 @@ import { createPortal } from "react-dom";
 import { useTrackers, type SaveDayResult, type TrackerStore } from "@/hooks/useTrackers";
 import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/trackers/core";
 
+const OVERLAY_STYLE: CSSProperties = { position: "fixed", inset: 0, zIndex: 2000 };
+
 /**
  * The overlay layer — where every panel and sheet actually lives.
  *
@@ -25,16 +27,60 @@ import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/track
 export function Overlay({ children }: { children: ReactNode }) {
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div
-      className="tk2-modal-root"
-      data-overlay=""
-      style={{ position: "fixed", inset: 0, zIndex: 2000 }}
-    >
+    <div className="tk2-modal-root" data-overlay="" style={OVERLAY_STYLE}>
       {children}
     </div>,
     document.body,
   );
 }
+
+/** The dim behind a panel. Positioned inline so it can never sit in the flow. */
+export const CURTAIN_STYLE: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 1999,
+  background: "rgba(0, 0, 0, 0.65)",
+};
+
+/**
+ * The panel itself. Same reasoning as the floating action: if the stylesheet
+ * is missing or stale this is the difference between a panel and a paragraph,
+ * so the box is set here and the stylesheet only adds what it must.
+ */
+export const PANEL_STYLE: CSSProperties = {
+  position: "fixed",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  zIndex: 2000,
+  width: "calc(100% - 32px)",
+  padding: 32,
+  borderRadius: 24,
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  background: "rgba(18, 18, 21, 0.94)",
+  backdropFilter: "blur(30px)",
+  WebkitBackdropFilter: "blur(30px)",
+  boxShadow: "0 30px 60px rgba(0, 0, 0, 0.7)",
+  color: "#f5f5f7",
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+};
+
+export const SAVE_STYLE: CSSProperties = {
+  display: "block",
+  width: "100%",
+  marginTop: 26,
+  padding: "14px 20px",
+  borderRadius: 14,
+  border: 0,
+  background: "linear-gradient(135deg, #fdf3e3 0%, #d4af37 50%, #997528 100%)",
+  color: "#070708",
+  fontSize: "0.78rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.14em",
+  cursor: "pointer",
+};
 
 export const DISCLAIMER =
   "Everything here is read back from days you logged yourself. It's a description of your own record — not medical advice, and it can't diagnose anything.";

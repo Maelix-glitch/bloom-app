@@ -398,6 +398,27 @@ describe("the three trackers designs", () => {
     cleanup();
   });
 
+  it("the chrome carries its own styling, so a missing sheet can't bare it", () => {
+    const { container } = render(<Atlas />);
+    const dock = container.querySelector(".premium-action-dock") as HTMLElement;
+    expect(dock.style.position).toBe("fixed");
+    expect(dock.style.zIndex).toBe("9999");
+    expect(dock.style.pointerEvents).toBe("none");
+
+    const cta = container.querySelector(".premium-log-cta") as HTMLElement;
+    expect(cta.style.background).toContain("gradient");
+    expect(cta.style.letterSpacing).toBe("0.14em");
+    expect(cta.style.borderRadius).toBe("40px");
+    expect(cta.style.pointerEvents).toBe("auto");
+
+    fireEvent.click(container.querySelector('.at-territory[data-id="water"]')!);
+    const dialog = screen.getByRole("dialog");
+    /* the panel is positioned on itself: it cannot fall into the page flow */
+    expect(dialog.style.position).toBe("fixed");
+    expect(dialog.style.zIndex).toBe("2000");
+    cleanup();
+  });
+
   it("reads the insights out as a core with a caption", () => {
     const { container } = render(<Atlas />);
     const insight = container.querySelector(".tk2-insight");
