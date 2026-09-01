@@ -2593,3 +2593,68 @@
   pointer-events: none;
   transform: translateX(-50%) scale(0.9);
 }
+
+/* --------------------------- the reflect sheet --------------------------- */
+/* Six fields, one per tracker, each opening on what today holds. Wider than
+   the single-category panel, and arranged in two columns so it stays short. */
+
+.tk2-sheet {
+  max-width: 520px;
+}
+
+.tk2-sheet-lede {
+  margin: 10px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.tk2-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  margin-top: 26px;
+}
+
+.tk2-sheet-field {
+  display: block;
+}
+
+.tk2-sheet-field > span {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-sheet-input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--ci-font-mono), ui-monospace, monospace;
+  font-size: 1.25rem;
+  font-weight: 300;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+
+.tk2-sheet-input:focus {
+  outline: none;
+  border-bottom-color: var(--accent-solid);
+}
+
+.tk2-sheet-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 460px) {
+  .tk2-sheet-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
