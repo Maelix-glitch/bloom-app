@@ -9,12 +9,12 @@
  * alone rather than being zeroed — an empty box means "no change", not "none".
  */
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 
-import { readTrackerValue, setTrackerValues } from "./shared";
+import { Overlay, readTrackerValue, setTrackerValues } from "./shared";
 
 export function ReflectSheet({
   store,
@@ -28,7 +28,6 @@ export function ReflectSheet({
   const [drafts, setDrafts] = useState<Partial<Record<TrackerId, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const firstRef = useRef<HTMLInputElement>(null);
-  const titleId = useId();
 
   /* open on what today already holds */
   useEffect(() => {
@@ -81,25 +80,18 @@ export function ReflectSheet({
   };
 
   return (
-    <div className="tk2-modal-root">
+    <Overlay>
       <div className="tk2-curtain" onClick={onClose} aria-hidden />
 
       <div
         className="tk2-modal tk2-sheet"
         role="dialog"
         aria-modal="true"
-        aria-labelledby={titleId}
+        aria-label="Log today"
       >
         <button type="button" className="tk2-modal-close" onClick={onClose} aria-label="Close">
           ×
         </button>
-
-        <p className="tk2-modal-kicker" id={titleId}>
-          Reflect on today
-        </p>
-        <p className="tk2-sheet-lede">
-          Every figure is a total for today. Leave a box empty to leave it as it is.
-        </p>
 
         <div className="tk2-sheet-grid">
           {TRACKERS.map((def, i) => (
@@ -136,6 +128,6 @@ export function ReflectSheet({
           Save {changed.length > 0 ? `${changed.length} change${changed.length === 1 ? "" : "s"}` : "& close"}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 }

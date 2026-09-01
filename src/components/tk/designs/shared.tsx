@@ -7,9 +7,34 @@
  */
 
 import type { CSSProperties, ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import { useTrackers, type SaveDayResult, type TrackerStore } from "@/hooks/useTrackers";
 import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/trackers/core";
+
+/**
+ * The overlay layer — where every panel and sheet actually lives.
+ *
+ * Two reasons it is not rendered inside the page. A `position: fixed` element
+ * stops being fixed the moment some ancestor gains a transform or a filter,
+ * which drops the panel into the page flow; and anything rendered in the flow
+ * shows up as bare words at the foot of the canvas if the stylesheet fails to
+ * arrive. Portalling to <body> puts it outside both. The handful of rules it
+ * cannot do without are set inline so they hold even with no CSS at all.
+ */
+export function Overlay({ children }: { children: ReactNode }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div
+      className="tk2-modal-root"
+      data-overlay=""
+      style={{ position: "fixed", inset: 0, zIndex: 2000 }}
+    >
+      {children}
+    </div>,
+    document.body,
+  );
+}
 
 export const DISCLAIMER =
   "Everything here is read back from days you logged yourself. It's a description of your own record — not medical advice, and it can't diagnose anything.";

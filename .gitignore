@@ -33,3 +33,6 @@ dist-ssr
 
 # generated zip served by the dev server
 public/downloads/
+
+# generated page snapshots
+/preview/

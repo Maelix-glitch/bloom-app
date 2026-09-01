@@ -19,7 +19,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 
-import { readTrackerValue, setTrackerValue } from "./shared";
+import { Overlay, readTrackerValue, setTrackerValue } from "./shared";
 
 /** The word under the field, so nobody has to guess what the number means. */
 const PROMPT: Record<TrackerId, string> = {
@@ -89,7 +89,7 @@ export function TrackerModal({
   };
 
   return (
-    <div className="tk2-modal-root">
+    <Overlay>
       <div className="tk2-curtain" onClick={onClose} aria-hidden />
 
       <div className="tk2-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
@@ -151,6 +151,6 @@ export function TrackerModal({
           Save &amp; close
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 }

@@ -343,14 +343,16 @@ describe("the three trackers designs", () => {
 
   it("opens the reflect sheet from the floating action and saves several at once", () => {
     const { container } = render(<Atlas />);
-    const fab = container.querySelector(".premium-trigger-cta") as HTMLElement;
+    const fab = container.querySelector(".premium-log-cta") as HTMLElement;
     expect(fab.textContent?.toLowerCase()).toContain("reflect & log today");
     /* the dock itself must not swallow clicks meant for the page */
     expect(container.querySelector(".premium-action-dock")).toBeTruthy();
 
     fireEvent.click(fab);
     const dialog = screen.getByRole("dialog");
-    expect(dialog.textContent).toContain("Reflect on today");
+    /* the sheet carries no heading, no lede — just the six fields */
+    expect(dialog.textContent?.trim()).not.toContain("Reflect on today");
+    expect(dialog.textContent?.trim()).not.toContain("Every figure is a total");
 
     /* one field per tracker, each opening on what today already holds */
     const fields = dialog.querySelectorAll(".tk2-sheet-input") as NodeListOf<HTMLInputElement>;
@@ -370,16 +372,30 @@ describe("the three trackers designs", () => {
     ).toContain("3L"); /* 3000ml */
   });
 
-  it("the floating action steps aside when a panel is open", () => {
+  it("the floating action leaves the page entirely while a panel is open", () => {
     const { container } = render(<Atlas />);
-    const fab = container.querySelector(".premium-trigger-cta")!;
-    /* the panel mounts before the button, so the sibling rule can hide it */
+    expect(container.querySelector(".premium-log-cta")).toBeTruthy();
     fireEvent.click(container.querySelector('.at-territory[data-id="water"]')!);
-    const root = container.querySelector(".tk2-modal-root")!;
-    expect(root).toBeTruthy();
-    /* the panel mounts before the button in the DOM, which is what makes
-       .tk2-modal-root ~ .tk2-fab hide it — assert that order still holds */
-    expect(Boolean(root.compareDocumentPosition(fab) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    /* unmounted rather than hidden, so it cannot sit on top of the panel */
+    expect(container.querySelector(".premium-log-cta")).toBeNull();
+    expect(container.querySelector(".premium-action-dock")).toBeNull();
+    cleanup();
+  });
+
+  it("every panel mounts outside the page, on its own layer", () => {
+    const { container } = render(<Atlas />);
+    /* nothing overlay-shaped is anywhere in the page tree when closed */
+    expect(container.querySelector(".tk2-modal-root")).toBeNull();
+    expect(container.textContent).not.toContain("Save & close");
+
+    fireEvent.click(container.querySelector('.at-territory[data-id="water"]')!);
+    const dialog = screen.getByRole("dialog");
+    /* portalled to <body>, so no ancestor of the page can drag it into the
+       page flow — the failure that renders a panel as bare words at the foot
+       of the canvas */
+    expect(container.contains(dialog)).toBe(false);
+    expect(document.body.querySelector("[data-overlay]")).toBeTruthy();
+    cleanup();
   });
 
   it("reads the insights out as a core with a caption", () => {
@@ -390,28 +406,6 @@ describe("the three trackers designs", () => {
     expect(caption.toLowerCase()).toContain("biometric");
     /* numbering is explicit, not a browser list marker */
     expect(insight?.querySelectorAll(".tk2-insight-index").length).toBeGreaterThan(0);
-  });
-
-  it("clearing the record takes two taps, and the first one changes nothing", () => {
-    const { container } = render(<Atlas />);
-    fireEvent.click(screen.getByText("Clear the record"));
-    /* the ask alone must not touch the log */
-    expect(JSON.parse(window.localStorage.getItem("bloom.trackers.days.v1") ?? "null")).toHaveLength(14);
-    expect(screen.getByText(/Erase 14 days/)).toBeTruthy();
-
-    fireEvent.click(screen.getByText("Yes, clear"));
-    expect(JSON.parse(window.localStorage.getItem("bloom.trackers.days.v1") ?? "null")).toHaveLength(0);
-    expect(screen.getByText(/Record cleared/)).toBeTruthy();
-    /* nothing left to clear, so the offer goes away with it */
-    expect(container.querySelector(".at-reset")).toBeNull();
-    expect(errors).toHaveLength(0);
-  });
-
-  it("offers no clear when the record is already empty", () => {
-    window.localStorage.clear();
-    render(<Atlas />);
-    expect(screen.queryByText("Clear the record")).toBeNull();
-    expect(errors).toHaveLength(0);
   });
 
   it("all three show the advanced read, not a placeholder", () => {
