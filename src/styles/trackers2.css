@@ -1826,67 +1826,12 @@
 /* Multi-option rows become a single capsule with a metal chip that slides
    beneath the active option rather than each button lighting up alone. */
 
-.tk2-dock {
-  position: relative;
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid var(--card-border);
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.02);
-}
 
-.tk2-dock-btn {
-  position: relative;
-  z-index: 1;
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 0.42rem 0.9rem;
-  border: 0;
-  border-radius: 100px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.tk2-dock-btn:hover:not(:disabled) {
-  color: var(--text-primary);
-}
 
-.tk2-dock-btn[data-active="true"] {
-  color: #070708 !important;
-  font-weight: 600;
-  text-shadow: none;
-}
 
-.tk2-dock-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
 
-.tk2-dock-tracer {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  z-index: 0;
-  width: calc((100% - 8px - (var(--tk2-dock-n, 1) - 1) * 4px) / var(--tk2-dock-n, 1));
-  border-radius: 100px;
-  background: var(--accent-champagne);
-  box-shadow: 0 4px 14px -8px rgba(212, 175, 55, 0.8);
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.tk2-dock-tracer[data-visible="true"] {
-  opacity: 1;
-  transform: translateX(calc(var(--tk2-dock-i, 0) * (100% + 4px)));
-}
 
 /* ------------------------- 7. quick-add counters ------------------------- */
 
@@ -1924,7 +1869,7 @@
 .tk2-root .tk2-targets-grid li,
 .tk2-root .tk2-badges-grid li,
 .tk2-root .tk-panel,
-.tk2-root .tk2-dock-wrap {
+.tk2-root .tk2-picker {
   background: rgba(18, 18, 21, 0.7);
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
@@ -1994,4 +1939,48 @@
 
 [data-design="atlas"] .at-cap {
   filter: drop-shadow(0px 0px 8px currentcolor);
+}
+
+/* --------------------- 3b. the territory action rows --------------------- */
+/* The taps under each card — the energy scale and the +250ml style
+   increments — get the same treatment as the log sheet's, and sit clear of
+   the contour above them rather than crowding its baseline. */
+
+[data-design="atlas"] .at-territory-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+[data-design="atlas"] .at-territory-actions button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory-actions button:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+[data-design="atlas"] .at-territory-actions button:active {
+  transform: scale(0.94);
+}
+
+[data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
+  background: var(--accent-champagne);
+  background-color: var(--accent-solid);
+  border-color: rgba(212, 175, 55, 0.45);
+  color: #121214;
+  font-weight: 600;
 }

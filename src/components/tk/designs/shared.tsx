@@ -130,14 +130,13 @@ export function Metric({ value, className }: { value: string; className?: string
 }
 
 /**
- * A capsule dock — one control, not a row of buttons.
+ * A row of tag choices — one distinct element per word.
  *
- * The metal chip slides beneath the active option instead of each button
- * lighting up on its own, so the whole thing reads as a single instrument.
- * `--tk2-dock-i` and `--tk2-dock-n` are what position the chip; the CSS does
- * the arithmetic so a dock can hold any number of options.
+ * These wrap rather than sit in a single rigid track: "Rough Fair Okay Good
+ * Deep" is five separate controls, and in a narrow column it's better they
+ * flow onto a second line than compress into each other.
  */
-export function CapsuleDock<T extends string | number>({
+export function TagGroup<T extends string | number>({
   label,
   labelId,
   options,
@@ -152,31 +151,66 @@ export function CapsuleDock<T extends string | number>({
   onSelect: (value: T) => void;
   disabled?: boolean;
 }) {
-  const index = value === null ? -1 : options.findIndex((o) => o.value === value);
   return (
-    <div className="tk2-dock-wrap">
+    <div className="tk2-picker">
       {label ? (
         <span className="ci-label" id={labelId}>
           {label}
         </span>
       ) : null}
-      <div
-        className="tk2-dock"
-        role="group"
-        aria-labelledby={labelId}
-        style={
-          {
-            "--tk2-dock-i": Math.max(index, 0),
-            "--tk2-dock-n": options.length,
-          } as CSSProperties
-        }
-      >
-        <span className="tk2-dock-tracer" data-visible={index >= 0 ? "true" : "false"} aria-hidden />
+      <div className="tk2-tags" role="group" aria-labelledby={labelId}>
         {options.map((option) => (
           <button
             key={String(option.value)}
             type="button"
-            className="tk2-dock-btn"
+            className="tk2-tag"
+            data-active={option.value === value ? "true" : "false"}
+            aria-pressed={option.value === value}
+            disabled={disabled}
+            onClick={() => onSelect(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A scale of numbers as circles in a capsule bar — energy out of five.
+ *
+ * Each digit is its own 32px circle so it reads as a dial setting rather than
+ * a line of text, and the bar itself is a single capsule the circles sit in.
+ */
+export function NumberPicker<T extends string | number>({
+  label,
+  labelId,
+  options,
+  value,
+  onSelect,
+  disabled,
+}: {
+  label?: string;
+  labelId?: string;
+  options: { value: T; label: string }[];
+  value: T | null;
+  onSelect: (value: T) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="tk2-picker">
+      {label ? (
+        <span className="ci-label" id={labelId}>
+          {label}
+        </span>
+      ) : null}
+      <div className="tk2-numbers" role="group" aria-labelledby={labelId}>
+        {options.map((option) => (
+          <button
+            key={String(option.value)}
+            type="button"
+            className="tk2-number"
             data-active={option.value === value ? "true" : "false"}
             aria-pressed={option.value === value}
             disabled={disabled}

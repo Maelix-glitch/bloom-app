@@ -6,7 +6,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Atlas } from "./Atlas";
-import { CapsuleDock } from "./shared";
+import { NumberPicker, TagGroup } from "./shared";
 import { Ledger } from "./Ledger";
 import { Strip } from "./Strip";
 import { todayKey } from "@/lib/cycle/predict";
@@ -157,9 +157,9 @@ describe("the three trackers designs", () => {
     expect(errors).toHaveLength(0);
   });
 
-  it("slides the capsule dock's metal chip to the active option", () => {
+  it("renders each tag choice as its own element, not one run of text", () => {
     const { container } = render(
-      <CapsuleDock
+      <TagGroup
         options={[
           { value: 1, label: "Rough" },
           { value: 2, label: "Fair" },
@@ -170,20 +170,42 @@ describe("the three trackers designs", () => {
       />,
     );
 
-    const dock = container.querySelector(".tk2-dock") as HTMLElement;
-    expect(dock.style.getPropertyValue("--tk2-dock-i")).toBe("2");
-    expect(dock.style.getPropertyValue("--tk2-dock-n")).toBe("3");
-    expect(container.querySelector(".tk2-dock-tracer")?.getAttribute("data-visible")).toBe("true");
-    expect(container.querySelectorAll(".tk2-dock-btn")).toHaveLength(3);
+    const tags = container.querySelectorAll(".tk2-tag");
+    expect(tags).toHaveLength(3);
+    expect(Array.from(tags).map((t) => t.textContent)).toEqual(["Rough", "Fair", "Okay"]);
+    /* one word per element is the whole point — no "RoughFairOkay" */
     expect(
-      container.querySelector('.tk2-dock-btn[data-active="true"]')?.textContent,
+      container.querySelector('.tk2-tag[data-active="true"]')?.textContent,
     ).toBe("Okay");
+    expect(container.querySelectorAll('.tk2-tag[data-active="true"]')).toHaveLength(1);
+  });
 
-    /* with nothing chosen the chip hides itself rather than sitting on option one */
-    const { container: empty } = render(
-      <CapsuleDock options={[{ value: 1, label: "Rough" }]} value={null} onSelect={() => {}} />,
+  it("renders the energy scale as separate circles in a capsule bar", () => {
+    const { container } = render(
+      <NumberPicker
+        options={[1, 2, 3, 4, 5].map((n) => ({ value: n, label: String(n) }))}
+        value={4}
+        onSelect={() => {}}
+      />,
     );
-    expect(empty.querySelector(".tk2-dock-tracer")?.getAttribute("data-visible")).toBe("false");
+
+    expect(container.querySelector(".tk2-numbers")).toBeTruthy();
+    const circles = container.querySelectorAll(".tk2-number");
+    expect(circles).toHaveLength(5);
+    expect(Array.from(circles).map((c) => c.textContent)).toEqual(["1", "2", "3", "4", "5"]);
+    expect(
+      container.querySelector('.tk2-number[data-active="true"]')?.textContent,
+    ).toBe("4");
+
+    /* nothing chosen: no circle is lit, rather than the first one lighting up */
+    const { container: empty } = render(
+      <NumberPicker
+        options={[1, 2, 3].map((n) => ({ value: n, label: String(n) }))}
+        value={null}
+        onSelect={() => {}}
+      />,
+    );
+    expect(empty.querySelectorAll('[data-active="true"]')).toHaveLength(0);
   });
 
   it("all three show the advanced read, not a placeholder", () => {

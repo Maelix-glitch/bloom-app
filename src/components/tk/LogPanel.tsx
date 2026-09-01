@@ -23,7 +23,7 @@ import {
   type TrackerId,
 } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
-import { CapsuleDock, Metric } from "@/components/tk/designs/shared";
+import { Metric, NumberPicker, TagGroup } from "@/components/tk/designs/shared";
 
 const QUALITY_LABEL = ["", "Rough", "Fair", "Okay", "Good", "Deep"];
 const ENERGY_LABEL = ["", "Drained", "Low", "Steady", "Bright", "Wired"];
@@ -274,7 +274,7 @@ export function LogPanel({
 
           <div className="mt-3">
             <span className="ci-label">Quality</span>
-            <CapsuleDock
+            <TagGroup
               options={[1, 2, 3, 4, 5].map((n) => ({ value: n, label: QUALITY_LABEL[n]! }))}
               value={draft.sleepQuality}
               onSelect={(n) => set("sleepQuality", draft.sleepQuality === n ? null : n)}
@@ -346,7 +346,7 @@ export function LogPanel({
             </span>
           </div>
 
-          <CapsuleDock
+          <TagGroup
             options={SUBJECTS.map((s) => ({ value: s, label: s }))}
             value={subject}
             onSelect={setSubject}
@@ -491,7 +491,7 @@ export function LogPanel({
                 {draft.energy === null ? "—" : ENERGY_LABEL[draft.energy]}
               </span>
             </div>
-            <CapsuleDock
+            <NumberPicker
               options={[1, 2, 3, 4, 5].map((n) => ({ value: n, label: String(n) }))}
               value={draft.energy}
               onSelect={(n) => set("energy", draft.energy === n ? null : n)}
