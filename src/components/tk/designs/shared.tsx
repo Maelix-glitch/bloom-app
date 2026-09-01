@@ -23,6 +23,7 @@ export function applyQuickAdd(
   const today = store.today;
   const current = store.days.find((d) => d.date === today) ?? emptyDay(today);
   const next: DayEntry = { ...current, date: today };
+  if (id === "sleep") next.sleepMinutes = (current.sleepMinutes ?? 0) + amount;
   if (id === "water") next.waterMl = (current.waterMl ?? 0) + amount;
   if (id === "movement") next.movementMinutes = (current.movementMinutes ?? 0) + amount;
   if (id === "screen") next.screenMinutes = (current.screenMinutes ?? 0) + amount;

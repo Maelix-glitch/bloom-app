@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Atlas } from "./Atlas";
@@ -226,6 +226,82 @@ describe("the three trackers designs", () => {
       />,
     );
     expect(empty.querySelectorAll('[data-active="true"]')).toHaveLength(0);
+  });
+
+  it("cards are read-only: no inline controls left on them", () => {
+    const { container } = render(<Atlas />);
+    expect(container.querySelectorAll(".at-territory button")).toHaveLength(0);
+    expect(container.querySelectorAll(".at-territory input")).toHaveLength(0);
+    /* the card itself is the trigger */
+    const card = container.querySelector('.at-territory[data-id="movement"]')!;
+    expect(card.getAttribute("role")).toBe("button");
+    expect(card.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("opens the logging modal from a card, saves an increment and closes", () => {
+    const { container } = render(<Atlas />);
+    const card = container.querySelector('.at-territory[data-id="movement"]') as HTMLElement;
+
+    fireEvent.click(card);
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("Log movement");
+
+    /* two quick taps of the first increment, staged in the field */
+    const tapButton = dialog.querySelectorAll(".tk2-modal-tap")[0]!;
+    fireEvent.click(tapButton);
+    fireEvent.click(tapButton);
+    expect((dialog.querySelector(".tk2-modal-input") as HTMLInputElement).value).toBe("20");
+
+    fireEvent.click(screen.getByText(/confirm & save/i));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    /* the card's own readout moved, and so did the notice */
+    expect(
+      container.querySelector('.at-territory[data-id="movement"] .at-coord')?.textContent,
+    ).toContain("53"); /* seeded 33m, two taps of +10m */
+
+    expect(container.querySelector(".at-notice")?.textContent).toContain("noted on the map");
+  });
+
+  it("sets energy from the modal and fills its ring to the full sweep", () => {
+    const { container } = render(<Atlas />);
+    fireEvent.click(container.querySelector('.at-territory[data-id="energy"]')!);
+
+    const dialog = screen.getByRole("dialog");
+    const five = Array.from(dialog.querySelectorAll(".tk2-number")).at(-1)!;
+    fireEvent.click(five);
+    fireEvent.click(screen.getByText(/confirm & save/i));
+
+    expect(
+      container.querySelector('.at-territory[data-id="energy"] .at-coord')?.textContent,
+    ).toContain("5");
+
+    /* 5 of 5 leaves nothing hidden — the whole circumference is drawn */
+    const ring = container.querySelector('.at-arc[data-id="energy"]')!;
+    expect(Number(ring.getAttribute("stroke-dasharray"))).toBeGreaterThan(0);
+    expect(Number(ring.getAttribute("stroke-dashoffset"))).toBeCloseTo(0, 1);
+  });
+
+  it("a ring's hidden length is exactly the share still missing", () => {
+    const { container } = render(<Atlas />);
+    const ring = container.querySelector('.at-arc[data-id="water"]')!;
+    const circumference = Number(ring.getAttribute("stroke-dasharray"));
+    const offset = Number(ring.getAttribute("stroke-dashoffset"));
+    /* seeded day ends at 1400 + 13*90 = 2570ml against a 2200ml target */
+    const share = Math.min(2570 / 2200, 1);
+    expect(offset).toBeCloseTo(circumference * (1 - share), 0);
+  });
+
+  it("escape closes the modal without saving anything", () => {
+    const { container } = render(<Atlas />);
+    const before = container.querySelector('.at-territory[data-id="screen"] .at-coord')
+      ?.textContent;
+    fireEvent.click(container.querySelector('.at-territory[data-id="screen"]')!);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(
+      container.querySelector('.at-territory[data-id="screen"] .at-coord')?.textContent,
+    ).toBe(before);
   });
 
   it("all three show the advanced read, not a placeholder", () => {

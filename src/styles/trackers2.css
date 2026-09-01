@@ -1869,7 +1869,8 @@
 .tk2-root .tk2-targets-grid li,
 .tk2-root .tk2-badges-grid li,
 .tk2-root .tk-panel,
-.tk2-root .tk2-picker {
+.tk2-root .tk2-picker,
+[data-design="atlas"] .at-territory {
   background: rgba(18, 18, 21, 0.7);
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
@@ -2072,4 +2073,266 @@
   border-color: rgba(212, 175, 55, 0.45);
   color: #121214;
   font-weight: 600;
+}
+
+/* -------------------- the dial: percentage-driven rings ------------------ */
+/* Each ring is one circle whose dashoffset hides whatever share of the target
+   is still missing, so an increment sweeps into place instead of jumping. */
+
+[data-design="atlas"] .at-arc {
+  transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-design="atlas"] .at-cap {
+  transition:
+    cx 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    cy 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* the night itself — bed to wake — kept as a hairline outside the rings */
+[data-design="atlas"] .at-nightspan {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="atlas"] .at-arc,
+  [data-design="atlas"] .at-cap {
+    transition: none;
+  }
+}
+
+/* -------------------------- the logging modal ---------------------------- */
+/* One category at a time, over a blurred curtain. The card is the trigger;
+   this is the only place that writes. */
+
+.tk2-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: tk2-curtain-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tk2-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 90%;
+  max-width: 440px;
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(18, 18, 21, 0.85);
+  backdrop-filter: blur(25px) saturate(140%);
+  -webkit-backdrop-filter: blur(25px) saturate(140%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  animation: tk2-modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tk2-curtain-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes tk2-modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px));
+  }
+}
+
+.tk2-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.tk2-modal-close:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tk2-modal-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-modal-hint {
+  margin: 22px 0 10px;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tk2-modal-taps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tk2-modal-tap {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-modal-tap:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+.tk2-modal-tap:active {
+  transform: scale(0.94);
+}
+
+.tk2-modal-label {
+  display: block;
+  margin: 26px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tk2-modal-input {
+  width: 100%;
+  padding: 12px 4px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 300;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.tk2-modal-input:focus {
+  outline: none;
+  border-bottom: 1px solid #d4af37;
+}
+
+.tk2-modal-unit {
+  margin: 8px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.tk2-modal-error {
+  margin: 14px 0 0;
+  font-size: 0.72rem;
+  color: #e0705f;
+}
+
+.tk2-modal-save {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 14px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 100px;
+  background: var(--accent-champagne);
+  background-color: var(--accent-solid);
+  color: #121214 !important;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: none;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -14px rgba(212, 175, 55, 0.7);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tk2-modal-save:hover {
+  filter: brightness(1.05);
+}
+
+.tk2-modal-save:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk2-curtain,
+  .tk2-modal {
+    animation: none;
+  }
+}
+
+/* ------------------- the card is the trigger, not a form ----------------- */
+/* Cards read as panels and do nothing until you open them. The only hint
+   that they're pressable is a word that fades in on hover. */
+
+[data-design="atlas"] .at-territory {
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+[data-design="atlas"] .at-territory:focus-visible {
+  outline: 2px solid var(--accent-solid);
+  outline-offset: 3px;
+}
+
+[data-design="atlas"] .at-territory-more {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory:hover .at-territory-more,
+[data-design="atlas"] .at-territory:focus-visible .at-territory-more {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="atlas"] .at-territory {
+    transition: none;
+  }
+
+  [data-design="atlas"] .at-territory:hover {
+    transform: none;
+  }
 }

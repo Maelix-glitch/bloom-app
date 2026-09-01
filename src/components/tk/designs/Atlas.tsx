@@ -7,19 +7,30 @@
  * coordinates where a card would have a title.
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
 import { LogPanel } from "@/components/tk/LogPanel";
 import { StudyMap } from "@/components/tk/StudyMap";
-import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
+import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
+import { TrackerModal } from "./TrackerModal";
 import { applyQuickAdd, Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
 
 const C = 130;
+
+/** Ring radii, outermost in. Every tracker has one, and they never overlap. */
+const RING_ORDER: { id: TrackerId; r: number }[] = [
+  { id: "sleep", r: 118 },
+  { id: "water", r: 100 },
+  { id: "screen", r: 82 },
+  { id: "movement", r: 64 },
+  { id: "study", r: 46 },
+  { id: "energy", r: 28 },
+];
 
 const polar = (r: number, deg: number) => {
   const rad = ((deg - 90) * Math.PI) / 180;
@@ -53,12 +64,6 @@ function contourPath(values: (number | null)[], width: number, height: number, p
 const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
 
 /** "+30m", "+1h", "+250ml" — whatever reads shortest and truest. */
-function stepLabel(def: (typeof TRACKERS)[number], amount: number): string {
-  if (def.kind === "volume") return amount >= 1000 ? `${amount / 1000}L` : `${amount}ml`;
-  if (amount < 60) return `${amount}m`;
-  const hours = amount / 60;
-  return Number.isInteger(hours) ? `${hours}h` : `${Math.floor(hours)}h ${amount % 60}m`;
-}
 
 export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const store = useTrackers();
@@ -71,68 +76,77 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const defs = TRACKERS;
 
   /* the compass: sleep as the night's arc, everything else as a share of its target */
+  /**
+   * One ring per tracker, each a circle revealed by its share of the target.
+   *
+   * stroke-dasharray is the whole circumference and stroke-dashoffset is what
+   * hides the remainder, so a ring is pure geometry: value over target, no
+   * path building. That also means the browser can animate it — the CSS
+   * transition on stroke-dashoffset is what makes a tap sweep rather than
+   * jump. Caps sit at the end of the revealed part.
+   */
   const rings = useMemo(() => {
+    const entry = store.days.find((d) => d.date === today);
+    const studyMinutes = (entry?.sessions ?? []).reduce((sum, s) => sum + s.minutes, 0);
+    const values: Record<TrackerId, number> = {
+      sleep: entry?.sleepMinutes ?? 0,
+      water: entry?.waterMl ?? 0,
+      study: studyMinutes,
+      movement: entry?.movementMinutes ?? 0,
+      energy: entry?.energy ?? 0,
+      screen: entry?.screenMinutes ?? 0,
+    };
+    const goals: Record<TrackerId, number> = {
+      sleep: store.goals.sleepMinutes || 480,
+      water: store.goals.waterMl || 2200,
+      study: store.goals.studyMinutes || 120,
+      movement: store.goals.movementMinutes || 30,
+      energy: 5,
+      screen: store.goals.screenMinutes || 180,
+    };
+
+    return RING_ORDER.map(({ id, r }) => {
+      const circumference = 2 * Math.PI * r;
+      const share = Math.min(Math.max(values[id] / goals[id], 0), 1);
+      return {
+        id,
+        r,
+        circumference: Math.round(circumference * 100) / 100,
+        offset: Math.round(circumference * (1 - share) * 100) / 100,
+        share,
+      };
+    });
+  }, [store.days, store.goals, today]);
+
+  /**
+   * The night itself, as a hairline outside the rings.
+   *
+   * Sleep is the one tracker where *when* matters as much as how much, so the
+   * bed-to-wake span stays drawn on the dial even though the ring inside it
+   * now fills by hours against target.
+   */
+  const nightSpan = useMemo(() => {
     const entry = store.days.find((d) => d.date === today);
     const bed = entry?.bedTime ? Number(entry.bedTime.split(":")[0]) : null;
     const wake = entry?.wakeTime ? Number(entry.wakeTime.split(":")[0]) : null;
-    const out: { id: TrackerId; r: number; d: string; cap?: { x: number; y: number } }[] = [];
-    if (bed !== null && wake !== null) {
-      const span = ((wake - bed + 24) % 24) * 15 || 5;
-      const a = polar(118, bed * 15);
-      const b = polar(118, bed * 15 + span);
-      out.push({
-        id: "sleep",
-        r: 118,
-        d: `M ${a.x} ${a.y} A 118 118 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
-        cap: { x: b.x, y: b.y },
-      });
-    }
-    /* study, as a block wherever the session started */
-    const sessions = entry?.sessions ?? [];
-    if (sessions.length > 0) {
-      let cursor = 9;
-      sessions.forEach((session, i) => {
-        const start = session.startAt ? Number(session.startAt.split(":")[0]) : cursor;
-        const length = Math.max((session.minutes / 60) * 15, 1.5);
-        cursor = start + Math.max(session.minutes / 60, 0.25) + 0.25;
-        const a = polar(46, start * 15);
-        const b = polar(46, start * 15 + length);
-        out.push({
-          id: "study",
-          r: 46,
-          d: `M ${a.x} ${a.y} A 46 46 0 ${length > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
-          cap: { x: b.x, y: b.y },
-        });
-      });
-    }
-    const shares: [TrackerId, number, number][] = [
-      ["water", 100, (entry?.waterMl ?? 0) / (store.goals.waterMl || 2200)],
-      ["movement", 64, (entry?.movementMinutes ?? 0) / (store.goals.movementMinutes || 30)],
-      ["screen", 82, (entry?.screenMinutes ?? 0) / (store.goals.screenMinutes || 180)],
-      /* energy sits closest to the middle: it's a rating out of five, not a
-         share of a target, so it reads as five equal steps round the ring */
-      ["energy", 28, (entry?.energy ?? 0) / 5],
-    ];
-    for (const [id, r, share] of shares) {
-      if (share <= 0) continue;
-      const a = polar(r, 0);
-      /* a logged minute still has to be visible — 2° disappeared entirely */
-      const sweep = Math.max(Math.min(share, 1) * 360, 8);
-      const b = polar(r, sweep);
-      out.push({
-        id,
-        r,
-        d: `M ${a.x} ${a.y} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${b.x} ${b.y}`,
-        cap: { x: b.x, y: b.y },
-      });
-    }
-    return out;
-  }, [store.days, store.goals, today]);
+    if (bed === null || wake === null) return null;
+    const r = 132;
+    const span = ((wake - bed + 24) % 24) * 15 || 5;
+    const a = polar(r, bed * 15);
+    const b = polar(r, bed * 15 + span);
+    return `M ${a.x} ${a.y} A ${r} ${r} 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`;
+  }, [store.days, today]);
 
-  const tap = (id: TrackerId, amount: number) => {
-    const def = defs.find((d) => d.id === id)!;
-    setNotice(applyQuickAdd(store, id, amount) ?? `${def.name} noted on the map.`);
-  };
+
+  const [openId, setOpenId] = useState<TrackerId | null>(null);
+
+  const closeModal = useCallback(() => {
+    setOpenId(null);
+    /* focus returns to the card that opened it, so the page isn't left nowhere */
+    window.requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`.at-territory[data-id="${openId}"]`)?.focus();
+    });
+  }, [openId]);
 
   return (
     <div className="ci ci-root tk2-root" data-theme={theme} data-design="atlas">
@@ -169,6 +183,9 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                   <circle cx={C} cy={C} r={64} className="at-track" />
                   <circle cx={C} cy={C} r={46} className="at-track" />
                   <circle cx={C} cy={C} r={28} className="at-track" />
+                  {nightSpan ? (
+                    <path d={nightSpan} className="at-nightspan" />
+                  ) : null}
                   {Array.from({ length: 24 }, (_, h) => {
                     const a = polar(126, h * 15);
                     const b = polar(h % 6 === 0 ? 120 : 123, h * 15);
@@ -185,25 +202,34 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                     );
                   })}
                   {rings.map((ring) => (
-                    <path
+                    <circle
                       key={ring.id}
-                      d={ring.d}
                       className="at-arc"
                       data-id={ring.id}
+                      cx={C}
+                      cy={C}
+                      r={ring.r}
+                      strokeDasharray={ring.circumference}
+                      strokeDashoffset={ring.offset}
+                      transform={`rotate(-90 ${C} ${C})`}
+                      pathLength={ring.circumference}
                     />
                   ))}
-                  {rings.map((ring, i) =>
-                    ring.cap ? (
-                      <circle
-                        key={`cap-${i}`}
-                        className="at-cap"
-                        data-id={ring.id}
-                        cx={ring.cap.x}
-                        cy={ring.cap.y}
-                        r={3.4}
-                      />
-                    ) : null,
-                  )}
+                  {rings
+                    .filter((ring) => ring.share > 0)
+                    .map((ring) => {
+                      const end = polar(ring.r, ring.share * 360);
+                      return (
+                        <circle
+                          key={`cap-${ring.id}`}
+                          className="at-cap"
+                          data-id={ring.id}
+                          cx={end.x}
+                          cy={end.y}
+                          r={3.4}
+                        />
+                      );
+                    })}
                   {[0, 6, 12, 18].map((h) => {
                     const p = polar(140, h * 15);
                     return (
@@ -238,7 +264,21 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                     const peak = Math.max(...values.map((v) => v ?? 0), stat.goal, 1);
                     const { line, area } = contourPath(values, 240, 54, peak);
                     return (
-                      <li key={def.id} className="at-territory" data-id={def.id}>
+                      <li
+                        key={def.id}
+                        className="at-territory"
+                        data-id={def.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Log ${def.name}`}
+                        onClick={() => setOpenId(def.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setOpenId(def.id);
+                          }
+                        }}
+                      >
                         <div className="at-territory-head">
                           <span className="at-place">{def.name}</span>
                           <span className="at-coord">
@@ -264,35 +304,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                             target <Metric value={def.format(stat.goal)} /> · avg{" "}
                             {stat.avg7 === null ? "—" : <Metric value={def.format(Math.round(stat.avg7))} />}
                           </span>
-                          <span className="at-territory-actions">
-                            {def.id === "energy" ? (
-                              [1, 2, 3, 4, 5].map((n) => (
-                                <button
-                                  key={n}
-                                  type="button"
-                                  onClick={() => tap(def.id, n)}
-                                  aria-label={`Set energy to ${n}`}
-                                  aria-pressed={stat.today === n}
-                                >
-                                  {n}
-                                </button>
-                              ))
-                            ) : def.id === "sleep" ? (
-                              <button type="button" onClick={() => logRef.current?.scrollIntoView({ block: "start" })}>
-                                log night
-                              </button>
-                            ) : (
-                              def.quickAdds.map((amount) => (
-                                <button
-                                  key={amount}
-                                  type="button"
-                                  onClick={() => tap(def.id, amount)}
-                                  aria-label={`Add ${stepLabel(def, amount)} to ${def.name}`}
-                                >
-                                  +{stepLabel(def, amount)}
-                                </button>
-                              ))
-                            )}
+                          <span className="at-territory-more" aria-hidden>
+                            log
                           </span>
                         </div>
                       </li>
@@ -463,6 +476,13 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 </p>
               </section>
             )}
+
+            <TrackerModal
+            store={store}
+            tracker={openId}
+            onClose={closeModal}
+            onSaved={(id) => setNotice(`${trackerDef(id).name} noted on the map.`)}
+          />
 
             <Footer />
           </>
