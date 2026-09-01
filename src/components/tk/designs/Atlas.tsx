@@ -437,11 +437,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                   <Observations
                     items={analysis.observations}
                     className="at-observations"
-                    caption={
-                      analysis.daysLogged < 7
-                        ? "Intelligent forecast · the biometric map is synchronizing"
-                        : "Intelligent read · drawn from your own logged days"
-                    }
+                    caption="AI cognitive analysis · active biometric patterns"
                   />
                 </section>
 
@@ -475,14 +471,16 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
 
           <ReflectSheet store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
 
-          <button
-            type="button"
-            className="tk2-fab"
-            onClick={() => setSheetOpen(true)}
-            aria-haspopup="dialog"
-          >
-            Reflect on today
-          </button>
+          <div className="premium-action-dock">
+            <button
+              type="button"
+              className="premium-trigger-cta"
+              onClick={() => setSheetOpen(true)}
+              aria-haspopup="dialog"
+            >
+              Reflect &amp; log today
+            </button>
+          </div>
 
             <Footer />
           </>

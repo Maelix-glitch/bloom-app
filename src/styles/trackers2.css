@@ -22,31 +22,31 @@
 /* evenly round the wheel so they stay legible on #0b0c10.                    */
 
 .tk2-root[data-design][data-theme] {
-  /* ---- the design tokens ---- */
-  --bg-deep: #070708;
-  --surface-card: #121215;
-  --card-border: rgba(255, 255, 255, 0.05);
-  --accent-champagne: linear-gradient(135deg, #f4e7d3 0%, #d4af37 50%, #aa8232 100%);
-  --accent-solid: #d4af37;
-  --text-primary: #f5f5f7;
-  --text-muted: #86868b;
-  --text-dim: rgba(255, 255, 255, 0.35);
+  /* ---- the token manifest ---- */
+  --bg-absolute-dark: #050506;
+  --panel-glass-bg: rgba(16, 16, 19, 0.7);
+  --glass-border-rim: rgba(255, 255, 255, 0.055);
+  --accent-luxury-gold: linear-gradient(135deg, #fdf3e3 0%, #d4af37 50%, #997528 100%);
+  --gold-solid-fallback: #d4af37;
+  --text-ultra-white: #f5f5f7;
+  --text-cool-silver: #8e8e93;
+  --text-architectural: rgba(255, 255, 255, 0.3);
 
   /* ---- the app's own variables, bound to those tokens ---- */
-  --ci-bg: var(--bg-deep);
-  --ci-bg-deep: #050506;
-  --ci-surface: var(--surface-card);
-  --ci-surface-2: #17171b;
-  --ci-line: var(--card-border);
+  --ci-bg: var(--bg-absolute-dark);
+  --ci-bg-deep: #030304;
+  --ci-surface: #101013;
+  --ci-surface-2: #16161a;
+  --ci-line: var(--glass-border-rim);
   --ci-line-strong: rgba(255, 255, 255, 0.1);
-  --ci-text: var(--text-primary);
+  --ci-text: var(--text-ultra-white);
   --ci-text-soft: #c7c7cc;
-  --ci-text-mute: var(--text-muted);
-  --ci-accent: var(--accent-solid);
+  --ci-text-mute: var(--text-cool-silver);
+  --ci-accent: var(--gold-solid-fallback);
   --ci-accent-soft: rgba(212, 175, 55, 0.14);
   --ci-focus: #e8c96a;
   --ci-ok: #5fd39a;
-  --ci-warn: #d4af37;
+  --ci-warn: var(--gold-solid-fallback);
   --ci-danger: #e0705f;
   --ci-input-bg: #0f0f12;
   --ci-veil:
@@ -54,8 +54,8 @@
     radial-gradient(90% 70% at 100% 0%, rgba(255, 255, 255, 0.03), transparent 55%);
 
   /* gold carries the chrome: met marks, notices, saved state */
-  --ci-follicular: var(--accent-solid);
-  --ci-ovulation: var(--accent-solid);
+  --ci-follicular: var(--gold-solid-fallback);
+  --ci-ovulation: var(--gold-solid-fallback);
   /* the two phase names left over keep their ring colour so nothing falls back */
   --ci-late: var(--tk2-ring-sleep);
   --ci-menstrual: var(--tk2-ring-screen);
@@ -68,12 +68,48 @@
   --tk2-ring-screen: #f2698a;
   --tk2-ring-study: #b07cff;
 
-  --tk2-rule: var(--card-border);
-  --tk2-soft: var(--text-muted);
+  --tk2-rule: var(--glass-border-rim);
+  --tk2-soft: var(--text-cool-silver);
 
   /* serif headers carry more weight and sit tighter */
   --ci-display-weight: 600;
   --ci-display-track: -0.02em;
+
+  /* ---- aliases ----
+     The manifest above is the source of truth. These keep the names the rest
+     of the stylesheet already used pointing at it, so renaming a token can
+     never leave a rule quietly resolving to nothing. */
+  --bg-deep: var(--bg-absolute-dark);
+  --surface-card: #101013;
+  --card-border: var(--glass-border-rim);
+  --accent-champagne: var(--accent-luxury-gold);
+  --accent-solid: var(--gold-solid-fallback);
+  --text-primary: var(--text-ultra-white);
+  --text-muted: var(--text-cool-silver);
+  --text-dim: var(--text-architectural);
+  --tk2-champagne: var(--accent-luxury-gold);
+  --tk2-champagne-line: rgba(212, 175, 55, 0.45);
+  --tk2-champagne-glow: rgba(212, 175, 55, 0.55);
+  --tk2-glass: var(--panel-glass-bg);
+  --tk2-glass-rim: var(--glass-border-rim);
+  --tk2-glass-lift: radial-gradient(
+    120% 120% at 0% 0%,
+    rgba(255, 255, 255, 0.055),
+    transparent 62%
+  );
+}
+
+/* The canvas itself. Scoped to the trackers page rather than set on <body>,
+   so this can't repaint cycle, coach and profile blind. */
+.tk2-root {
+  background-color: var(--bg-absolute-dark);
+  color: var(--text-ultra-white);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .tk2-footer {
@@ -1589,25 +1625,6 @@
    still looks like a dial on a day nothing has been logged.
    ========================================================================== */
 
-.tk2-root[data-design][data-theme] {
-  /* brushed metal: light catches the top-left corner and falls away */
-  --tk2-champagne: linear-gradient(135deg, #ecd488 0%, #d4af37 42%, #a8842a 100%);
-  --tk2-champagne-line: rgba(212, 175, 55, 0.45);
-  --tk2-champagne-glow: rgba(212, 175, 55, 0.55);
-
-  /* glass: charcoal at 60% over the obsidian, with a laser-cut rim */
-  --tk2-glass: rgba(31, 40, 51, 0.6);
-  --tk2-glass-rim: rgba(255, 255, 255, 0.04);
-  --tk2-glass-lift: radial-gradient(
-    120% 120% at 0% 0%,
-    rgba(255, 255, 255, 0.055),
-    transparent 62%
-  );
-
-  /* serif headers carry more weight and sit tighter */
-  --ci-display-weight: 600;
-  --ci-display-track: -0.02em;
-}
 
 /* ------------------------------- 1. actions ------------------------------ */
 
@@ -1916,26 +1933,22 @@
 }
 
 [data-design="atlas"] .at-arc[data-id="sleep"] {
-  --track-color: var(--tk2-ring-sleep);
+  --active-track-color-hex: var(--tk2-ring-sleep);
 }
 [data-design="atlas"] .at-arc[data-id="water"] {
-  --track-color: var(--tk2-ring-water);
+  --active-track-color-hex: var(--tk2-ring-water);
 }
 [data-design="atlas"] .at-arc[data-id="movement"] {
-  --track-color: var(--tk2-ring-movement);
+  --active-track-color-hex: var(--tk2-ring-movement);
 }
 [data-design="atlas"] .at-arc[data-id="screen"] {
-  --track-color: var(--tk2-ring-screen);
+  --active-track-color-hex: var(--tk2-ring-screen);
 }
 [data-design="atlas"] .at-arc[data-id="study"] {
-  --track-color: var(--tk2-ring-study);
+  --active-track-color-hex: var(--tk2-ring-study);
 }
 [data-design="atlas"] .at-arc[data-id="energy"] {
-  --track-color: var(--tk2-ring-energy);
-}
-
-[data-design="atlas"] .at-arc {
-  filter: drop-shadow(0px 0px 8px var(--track-color));
+  --active-track-color-hex: var(--tk2-ring-energy);
 }
 
 [data-design="atlas"] .at-cap {
@@ -2080,7 +2093,7 @@
    is still missing, so an increment sweeps into place instead of jumping. */
 
 [data-design="atlas"] .at-arc {
-  transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-design="atlas"] .at-cap {
@@ -2349,90 +2362,102 @@
    surface: no new data, no new claims — the same numbers, better lit.
    ========================================================================== */
 
-/* ------------------------- 2. the floating action ------------------------ */
+/* ------------------------- the floating action --------------------------- */
 
-.tk2-fab {
+.premium-action-dock {
   position: fixed;
-  bottom: 32px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 5000;
-  padding: 16px 36px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 40px;
-  background: linear-gradient(135deg, #f4e7d3 0%, #d4af37 50%, #aa8232 100%);
-  color: #070708;
-  font-family: system-ui, -apple-system, sans-serif;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.premium-trigger-cta {
+  pointer-events: auto;
+  background: var(--accent-luxury-gold);
+  color: #050506;
+  font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.8rem;
-  cursor: pointer;
+  letter-spacing: 0.16em;
+  padding: 18px 44px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow:
-    0px 12px 40px rgba(212, 175, 55, 0.3),
-    inset 0px 1px 0px rgba(255, 255, 255, 0.4);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    0 16px 32px rgba(212, 175, 55, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease;
 }
 
-.tk2-fab:hover {
-  transform: translateX(-50%) scale(1.04);
-  box-shadow: 0px 20px 50px rgba(212, 175, 55, 0.45);
+.premium-trigger-cta:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 24px 48px rgba(212, 175, 55, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
-.tk2-fab:active {
-  transform: translateX(-50%) scale(0.96);
+.premium-trigger-cta:active {
+  transform: scale(0.96);
   opacity: 0.9;
 }
 
-.tk2-fab:focus-visible {
-  outline: 2px solid #f4e7d3;
+.premium-trigger-cta:focus-visible {
+  outline: 2px solid #fdf3e3;
   outline-offset: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tk2-fab {
+  .premium-trigger-cta {
     transition: none;
   }
 
-  .tk2-fab:hover {
-    transform: translateX(-50%);
+  .premium-trigger-cta:hover {
+    transform: none;
   }
 }
 
-/* ------------------------- 3. the insight core --------------------------- */
+/* ------------------------- the insight dock ------------------------------ */
 
 .tk2-insight {
-  background: linear-gradient(180deg, rgba(20, 20, 24, 0.4) 0%, rgba(10, 10, 12, 0.6) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  padding: 24px;
-  margin: 24px 0;
+  background: linear-gradient(180deg, rgba(18, 18, 22, 0.4) 0%, rgba(8, 8, 10, 0.6) 100%);
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 20px;
+  padding: 32px;
+  margin: 32px 0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .tk2-insight-caption {
-  margin: 0 0 4px;
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  color: #d4af37;
-  font-weight: 600;
+  display: block;
+  margin: 0 0 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--gold-solid-fallback);
   text-transform: uppercase;
 }
 
 .tk2-insight-list {
-  margin: 16px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .tk2-insight-list li {
   display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: 16px;
-  padding: 12px 0;
+  grid-template-columns: 32px 1fr;
+  gap: 20px;
+  padding: 16px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  color: #f5f5f7;
+  color: var(--text-ultra-white);
   font-size: 0.88rem;
   font-weight: 300;
+  line-height: 1.6;
 }
 
 .tk2-insight-list li:last-child {
@@ -2443,47 +2468,52 @@
 .tk2-insight-index {
   color: #e5d3b3;
   font-weight: 500;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
 }
 
 .tk2-insight-list p {
   margin: 0;
 }
 
-/* ------------------ 4. the summary matrix: glass cards ------------------- */
+/* ------------------ the summary matrix: glass cards ---------------------- */
 
 [data-design="atlas"] .at-territory {
   overflow: hidden;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  background: rgba(18, 18, 22, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  padding: 24px;
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 20px;
+  background: var(--panel-glass-bg);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.02),
-    0 8px 24px rgba(0, 0, 0, 0.3);
-  transition: border-color 0.3s ease;
+    0 10px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease;
 }
 
 [data-design="atlas"] .at-territory:hover {
   border-color: rgba(212, 175, 55, 0.25);
+  transform: translateY(-2px);
 }
 
 [data-design="atlas"] .at-place {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
-  color: #f5f5f7;
+  color: var(--text-ultra-white);
   letter-spacing: -0.01em;
+  margin: 0 0 12px 0;
 }
 
 [data-design="atlas"] .at-territory-foot span {
   font-size: 0.68rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #86868b;
-  margin-top: 8px;
-  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--text-cool-silver);
+  margin-top: 14px;
 }
 
 /* the contour must never push its card wider than the grid gives it */
@@ -2501,63 +2531,65 @@
   margin-left: 1px;
 }
 
-/* --------------------------- 5. the record ------------------------------ */
+/* --------------------------- the record ---------------------------------- */
 
 .tk2-root .ci-table-wrap,
 [data-design="atlas"] .ci-table {
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 16px;
   overflow: hidden;
-  background: rgba(10, 10, 12, 0.4);
+  background: rgba(12, 12, 15, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
 [data-design="atlas"] .ci-table thead tr {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.015);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 [data-design="atlas"] .ci-table th {
-  padding: 16px 20px;
-  color: #86868b;
-  font-size: 0.65rem;
+  padding: 18px 24px;
+  color: var(--text-cool-silver);
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-weight: 600;
   text-align: left;
 }
 
 [data-design="atlas"] .ci-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.025);
   background: transparent;
-  transition: background 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 [data-design="atlas"] .ci-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.01);
+  background-color: rgba(255, 255, 255, 0.01);
 }
 
 [data-design="atlas"] .ci-table tbody th,
 [data-design="atlas"] .ci-table td {
-  padding: 18px 20px;
-  font-size: 0.82rem;
-  color: #f5f5f7;
+  padding: 20px 24px;
+  font-size: 0.85rem;
+  color: var(--text-ultra-white);
   font-weight: 400;
+  vertical-align: middle;
 }
 
 .tk2-cell-met {
-  color: var(--accent-solid);
+  color: var(--gold-solid-fallback);
 }
 
 .tk2-row-action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
-  background: transparent;
+  background: none;
   border: none;
-  color: #86868b;
+  color: var(--text-cool-silver);
+  padding: 4px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.2s ease;
 }
 
 .tk2-row-action:hover:not(:disabled) {
@@ -2574,23 +2606,23 @@
 [data-design="atlas"] .at-arc {
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: drop-shadow(0px 0px 6px var(--track-color));
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0px 0px 8px var(--active-track-color-hex));
 }
 
 [data-design="atlas"] .at-track {
-  stroke: rgba(255, 255, 255, 0.04);
+  stroke: rgba(255, 255, 255, 0.035);
+  stroke-width: 2.5px;
 }
 
 /* the floating action needs room at the foot of the page, and it must never
    sit on top of an open panel */
 [data-design="atlas"] .at {
-  padding-bottom: 96px;
+  padding-bottom: 120px;
 }
 
-.tk2-modal-root ~ .tk2-fab {
+.tk2-modal-root ~ .premium-action-dock {
   opacity: 0;
-  pointer-events: none;
   transform: translateX(-50%) scale(0.9);
 }
 

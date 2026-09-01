@@ -158,6 +158,32 @@ describe("the three trackers designs", () => {
     expect(errors).toHaveLength(0);
   });
 
+  it("never references a design token that isn't declared", () => {
+    /* Renaming a token silently breaks every rule that used the old name:
+       var() resolves to nothing and the declaration is dropped. jsdom cannot
+       see that, so the stylesheet is checked directly. */
+    const css = readFileSync(resolve(process.cwd(), "src/styles/trackers2.css"), "utf8");
+    const declared = new Set(
+      Array.from(css.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gm), (m) => m[1]!),
+    );
+    /* these come from the theme blocks in cycle2.css */
+    const inherited = new Set([
+      "--ci-font-display",
+      "--ci-font-mono",
+      "--ci-font-sans",
+      "--ci-radius-md",
+      "--ci-radius-lg",
+      "--ci-radius-sm",
+      /* set per arc by the [data-id] rules below */
+      "--active-track-color-hex",
+    ]);
+    const used = new Set(Array.from(css.matchAll(/var\((--[a-z0-9-]+)/g), (m) => m[1]!));
+    const missing = Array.from(used).filter(
+      (name) => !declared.has(name) && !inherited.has(name),
+    );
+    expect(missing, `undeclared tokens: ${missing.join(", ")}`).toEqual([]);
+  });
+
   it("keeps the picker rules in the stylesheet", () => {
     /* jsdom applies no stylesheet, so assert the rules exist where they're
        written - a lost block here is invisible to every other test. */
@@ -317,8 +343,10 @@ describe("the three trackers designs", () => {
 
   it("opens the reflect sheet from the floating action and saves several at once", () => {
     const { container } = render(<Atlas />);
-    const fab = container.querySelector(".tk2-fab") as HTMLElement;
-    expect(fab.textContent?.toLowerCase()).toContain("reflect on today");
+    const fab = container.querySelector(".premium-trigger-cta") as HTMLElement;
+    expect(fab.textContent?.toLowerCase()).toContain("reflect & log today");
+    /* the dock itself must not swallow clicks meant for the page */
+    expect(container.querySelector(".premium-action-dock")).toBeTruthy();
 
     fireEvent.click(fab);
     const dialog = screen.getByRole("dialog");
@@ -344,7 +372,7 @@ describe("the three trackers designs", () => {
 
   it("the floating action steps aside when a panel is open", () => {
     const { container } = render(<Atlas />);
-    const fab = container.querySelector(".tk2-fab")!;
+    const fab = container.querySelector(".premium-trigger-cta")!;
     /* the panel mounts before the button, so the sibling rule can hide it */
     fireEvent.click(container.querySelector('.at-territory[data-id="water"]')!);
     const root = container.querySelector(".tk2-modal-root")!;
@@ -359,9 +387,7 @@ describe("the three trackers designs", () => {
     const insight = container.querySelector(".tk2-insight");
     expect(insight).toBeTruthy();
     const caption = insight?.querySelector(".tk2-insight-caption")?.textContent ?? "";
-    expect(caption.length).toBeGreaterThan(0);
-    /* fourteen seeded days is past the threshold, so it reads as a read */
-    expect(caption.toLowerCase()).toContain("intelligent read");
+    expect(caption.toLowerCase()).toContain("biometric");
     /* numbering is explicit, not a browser list marker */
     expect(insight?.querySelectorAll(".tk2-insight-index").length).toBeGreaterThan(0);
   });
