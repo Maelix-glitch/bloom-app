@@ -1,10 +1,13 @@
 /**
- * The logging modal — one category at a time.
+ * The logging modal — one number, one category.
  *
- * The dashboard cards are read-only: they show where the day stands and do
- * nothing else. Everything that writes goes through here, so the grid stays
- * quiet and a log is a deliberate act rather than a row of buttons you have to
- * walk past.
+ * The dashboard is a reading surface: the dial and six cards, nothing that
+ * can be typed into. Everything that writes happens here, in a panel that
+ * mounts only when a card is opened and unmounts the moment it closes.
+ *
+ * The field takes the *total* for the category, not an increment — you type
+ * 1750 for water because that's what you've drunk, not +250 on top of
+ * something you have to remember.
  *
  * The store is passed in rather than created here: useTrackers holds its own
  * state per instance, so a fresh one inside the modal would write to a copy
@@ -16,26 +19,16 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 
-import { applyQuickAdd } from "./shared";
+import { readTrackerValue, setTrackerValue } from "./shared";
 
-/** What the header reads for each category. */
-const HEADLINE: Record<TrackerId, string> = {
-  sleep: "Log last night",
-  water: "Log water",
-  study: "Log study session",
-  movement: "Log movement",
-  energy: "Log energy",
-  screen: "Log screen time",
-};
-
-/** The unit sitting under the number field, so nobody has to guess. */
-const UNIT: Record<TrackerId, string> = {
-  sleep: "minutes",
-  water: "millilitres",
-  study: "minutes",
-  movement: "minutes",
-  energy: "out of five",
-  screen: "minutes",
+/** The word under the field, so nobody has to guess what the number means. */
+const PROMPT: Record<TrackerId, string> = {
+  sleep: "Enter total minutes slept",
+  water: "Enter total millilitres",
+  study: "Enter total minutes studied",
+  movement: "Enter total minutes moved",
+  energy: "Enter energy out of five",
+  screen: "Enter total minutes on screen",
 };
 
 export function TrackerModal({
@@ -49,28 +42,22 @@ export function TrackerModal({
   onClose: () => void;
   onSaved?: (id: TrackerId) => void;
 }) {
-  const [amount, setAmount] = useState<string>("");
-  const [level, setLevel] = useState<number | null>(null);
+  const [draft, setDraft] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
 
   const def = tracker ? trackerDef(tracker) : null;
 
-  /* reset each time a different category opens */
+  /* start from what's already logged, so the field is a correction not a blank */
   useEffect(() => {
-    setAmount("");
+    if (!tracker) return;
+    const current = readTrackerValue(store, tracker);
+    setDraft(current == null || current === 0 ? "" : String(current));
     setError(null);
-    if (tracker === "energy") {
-      const today = store.days.find((d) => d.date === store.today);
-      setLevel(today?.energy ?? null);
-    } else {
-      setLevel(null);
-    }
   }, [tracker, store.days, store.today]);
 
-  /* escape closes, and focus goes to the field so typing works immediately */
+  /* escape closes, and focus lands in the field so typing works straight away */
   useEffect(() => {
     if (!tracker) return;
     const onKey = (event: KeyboardEvent) => {
@@ -86,15 +73,13 @@ export function TrackerModal({
 
   if (!tracker || !def) return null;
 
-  const isEnergy = tracker === "energy";
-  const pending = isEnergy ? level : Number(amount);
-
-  const commit = () => {
-    if (pending === null || Number.isNaN(pending) || pending <= 0) {
-      setError("Enter a number first.");
+  const commit = (value: string) => {
+    const parsed = Number(value);
+    if (value.trim() === "" || !Number.isFinite(parsed) || parsed < 0) {
+      setError("Type a number first.");
       return;
     }
-    const message = applyQuickAdd(store, tracker, pending);
+    const message = setTrackerValue(store, tracker, parsed);
     if (message) {
       setError(message);
       return;
@@ -103,89 +88,58 @@ export function TrackerModal({
     onClose();
   };
 
-  const bump = (step: number) => {
-    setError(null);
-    setAmount((current) => String(Math.max((Number(current) || 0) + step, 0)));
-  };
-
   return (
     <div className="tk2-modal-root">
-      <div
-        className="tk2-curtain"
-        onClick={onClose}
-        aria-hidden
-      />
-      <div
-        className="tk2-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        ref={panelRef}
-      >
+      <div className="tk2-curtain" onClick={onClose} aria-hidden />
+
+      <div className="tk2-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <button type="button" className="tk2-modal-close" onClick={onClose} aria-label="Close">
           ×
         </button>
 
         <p className="tk2-modal-kicker" id={titleId}>
-          {HEADLINE[tracker]}
+          Log {def.name}
         </p>
 
-        {isEnergy ? (
-          <>
-            <p className="tk2-modal-hint">Where your energy sits right now</p>
-            <div className="tk2-numbers" role="group" aria-label="Energy out of five">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className="tk2-number"
-                  data-active={level === n ? "true" : "false"}
-                  aria-pressed={level === n}
-                  onClick={() => {
-                    setError(null);
-                    setLevel(n);
-                  }}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="tk2-modal-hint">Quick taps</p>
-            <div className="tk2-modal-taps">
-              {def.quickAdds.map((step) => (
-                <button key={step} type="button" className="tk2-modal-tap" onClick={() => bump(step)}>
-                  +{step}
-                </button>
-              ))}
-            </div>
+        {tracker === "energy" ? (
+          <div className="tk2-numbers" role="group" aria-label="Energy out of five">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className="tk2-number"
+                data-active={Number(draft) === n ? "true" : "false"}
+                aria-pressed={Number(draft) === n}
+                onClick={() => {
+                  setError(null);
+                  setDraft(String(n));
+                }}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
-            <label className="tk2-modal-label" htmlFor={`${titleId}-amount`}>
-              or type it
-            </label>
-            <input
-              id={`${titleId}-amount`}
-              ref={inputRef}
-              className="tk2-modal-input"
-              type="number"
-              inputMode="numeric"
-              min={0}
-              max={def.max}
-              placeholder="0"
-              value={amount}
-              onChange={(event) => {
-                setError(null);
-                setAmount(event.target.value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") commit();
-              }}
-            />
-            <p className="tk2-modal-unit">{UNIT[tracker]}</p>
-          </>
-        )}
+        <input
+          ref={inputRef}
+          className="tk2-modal-input"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={def.max}
+          placeholder="0"
+          aria-label={PROMPT[tracker]}
+          value={draft}
+          onChange={(event) => {
+            setError(null);
+            setDraft(event.target.value);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commit(draft);
+          }}
+        />
+        <p className="tk2-modal-unit">{PROMPT[tracker]}</p>
 
         {error ? (
           <p className="tk2-modal-error" role="alert">
@@ -193,8 +147,8 @@ export function TrackerModal({
           </p>
         ) : null}
 
-        <button type="button" className="tk2-modal-save" onClick={commit}>
-          Confirm &amp; save
+        <button type="button" className="tk2-modal-save" onClick={() => commit(draft)}>
+          Save &amp; close
         </button>
       </div>
     </div>

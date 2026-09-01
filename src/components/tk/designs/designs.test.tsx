@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Atlas } from "./Atlas";
@@ -56,6 +56,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  cleanup();
   vi.restoreAllMocks();
 });
 
@@ -228,6 +229,15 @@ describe("the three trackers designs", () => {
     expect(empty.querySelectorAll('[data-active="true"]')).toHaveLength(0);
   });
 
+  it("the dashboard carries no logging form at all", () => {
+    const { container } = render(<Atlas />);
+    expect(container.querySelectorAll("textarea")).toHaveLength(0);
+    expect(container.querySelectorAll("select")).toHaveLength(0);
+    /* the old sheet's field wrapper and its date picker are gone from this view */
+    expect(container.querySelector(".ci-field")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
   it("cards are read-only: no inline controls left on them", () => {
     const { container } = render(<Atlas />);
     expect(container.querySelectorAll(".at-territory button")).toHaveLength(0);
@@ -238,27 +248,26 @@ describe("the three trackers designs", () => {
     expect(card.getAttribute("tabindex")).toBe("0");
   });
 
-  it("opens the logging modal from a card, saves an increment and closes", () => {
+  it("opens the logging modal from a card, saves a typed total and closes", () => {
     const { container } = render(<Atlas />);
     const card = container.querySelector('.at-territory[data-id="movement"]') as HTMLElement;
 
     fireEvent.click(card);
     const dialog = screen.getByRole("dialog");
-    expect(dialog.textContent).toContain("Log movement");
+    expect(dialog.textContent).toContain("Log Movement");
 
-    /* two quick taps of the first increment, staged in the field */
-    const tapButton = dialog.querySelectorAll(".tk2-modal-tap")[0]!;
-    fireEvent.click(tapButton);
-    fireEvent.click(tapButton);
-    expect((dialog.querySelector(".tk2-modal-input") as HTMLInputElement).value).toBe("20");
+    /* the field opens on what's already there, not on a blank */
+    const field = dialog.querySelector(".tk2-modal-input") as HTMLInputElement;
+    expect(field.value).toBe("33");
 
-    fireEvent.click(screen.getByText(/confirm & save/i));
+    fireEvent.change(field, { target: { value: "45" } });
+    fireEvent.click(screen.getByText(/save & close/i));
+
     expect(screen.queryByRole("dialog")).toBeNull();
-    /* the card's own readout moved, and so did the notice */
+    /* 45 is the total, not 33 + 45 */
     expect(
       container.querySelector('.at-territory[data-id="movement"] .at-coord')?.textContent,
-    ).toContain("53"); /* seeded 33m, two taps of +10m */
-
+    ).toContain("45");
     expect(container.querySelector(".at-notice")?.textContent).toContain("noted on the map");
   });
 
@@ -269,7 +278,9 @@ describe("the three trackers designs", () => {
     const dialog = screen.getByRole("dialog");
     const five = Array.from(dialog.querySelectorAll(".tk2-number")).at(-1)!;
     fireEvent.click(five);
-    fireEvent.click(screen.getByText(/confirm & save/i));
+    /* the circle fills the field, and saving writes what the field holds */
+    expect((dialog.querySelector(".tk2-modal-input") as HTMLInputElement).value).toBe("5");
+    fireEvent.click(screen.getByText(/save & close/i));
 
     expect(
       container.querySelector('.at-territory[data-id="energy"] .at-coord')?.textContent,

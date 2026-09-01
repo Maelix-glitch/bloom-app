@@ -11,7 +11,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
-import { LogPanel } from "@/components/tk/LogPanel";
 import { StudyMap } from "@/components/tk/StudyMap";
 import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
@@ -69,8 +68,6 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const store = useTrackers();
   const { analysis, today, hydrated } = store;
   const [notice, setNotice] = useState<string | null>(null);
-  const [date, setDate] = useState<string>(today);
-  const logRef = useRef<HTMLDivElement>(null);
   const hasDays = analysis.daysLogged > 0;
 
   const defs = TRACKERS;
@@ -329,19 +326,6 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
               <Achievements analysis={analysis} />
             </section>
 
-            {/* -------------------------------- log --------------------------------- */}
-            <div ref={logRef} className="at-section">
-              <p className="at-sectionhead">Add to the map</p>
-              <LogPanel
-                days={store.days}
-                today={today}
-                date={date}
-                onDateChange={setDate}
-                onSave={store.saveDay}
-                onDelete={store.removeDay}
-              />
-            </div>
-
             {hasDays ? (
               <>
                 {/* ------------------------------ the route --------------------------- */}
@@ -460,12 +444,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
 
                 <section className="at-section">
                   <p className="at-sectionhead">Field notes · every entry</p>
-                  <HistoryTable
-                    days={store.days}
-                    analysis={analysis}
-                    onEdit={setDate}
-                    onDelete={store.removeDay}
-                  />
+                  <HistoryTable days={store.days} analysis={analysis} onDelete={store.removeDay} />
                 </section>
               </>
             ) : (

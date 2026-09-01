@@ -9,7 +9,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import { useTrackers, type TrackerStore } from "@/hooks/useTrackers";
-import { emptyDay, type DayEntry, type TrackerId } from "@/lib/trackers/core";
+import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/trackers/core";
 
 export const DISCLAIMER =
   "Everything here is read back from days you logged yourself. It's a description of your own record — not medical advice, and it can't diagnose anything.";
@@ -31,6 +31,59 @@ export function applyQuickAdd(
   if (id === "study") {
     next.sessions = [...current.sessions, { subject: "General", minutes: amount, startAt: null }];
   }
+  const result = store.saveDay(next);
+  if (result.ok) return null;
+  const first = Object.values(result.errors)[0];
+  return typeof first === "string" ? first : "That didn't save.";
+}
+
+/**
+ * What a tracker stands at today, so a field can open on the real number
+ * rather than on a blank.
+ */
+export function readTrackerValue(store: TrackerStore, id: TrackerId): number | null {
+  const entry = store.days.find((d) => d.date === store.today);
+  if (!entry) return null;
+  if (id === "study") return entry.sessions.reduce((sum, s) => sum + s.minutes, 0);
+  if (id === "sleep") return entry.sleepMinutes;
+  if (id === "water") return entry.waterMl;
+  if (id === "movement") return entry.movementMinutes;
+  if (id === "energy") return entry.energy;
+  return entry.screenMinutes;
+}
+
+/**
+ * Write a total, not an increment.
+ *
+ * You type 1750 for water because that's what you've drunk today; you don't
+ * have to remember what was there before and add to it. Study keeps the start
+ * time of its first session if it has one, and collapses to a single block —
+ * the total is the number being set.
+ */
+export function setTrackerValue(
+  store: TrackerStore,
+  id: TrackerId,
+  value: number,
+): string | null {
+  const today = store.today;
+  const current = store.days.find((d) => d.date === today) ?? emptyDay(today);
+  const next: DayEntry = { ...current, date: today };
+  const max = trackerDef(id).max;
+  const clamped = Math.min(Math.max(Math.round(value), 0), max);
+
+  if (id === "sleep") next.sleepMinutes = clamped;
+  if (id === "water") next.waterMl = clamped;
+  if (id === "movement") next.movementMinutes = clamped;
+  if (id === "screen") next.screenMinutes = clamped;
+  if (id === "energy") next.energy = Math.min(Math.max(Math.round(value), 1), 5);
+  if (id === "study") {
+    const first = current.sessions[0];
+    next.sessions =
+      clamped > 0
+        ? [{ subject: first?.subject ?? "General", minutes: clamped, startAt: first?.startAt ?? null }]
+        : [];
+  }
+
   const result = store.saveDay(next);
   if (result.ok) return null;
   const first = Object.values(result.errors)[0];
