@@ -16,6 +16,7 @@ import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
+import { ReflectSheet } from "./ReflectSheet";
 import { TrackerModal } from "./TrackerModal";
 import { applyQuickAdd, Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
 
@@ -136,6 +137,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
 
 
   const [openId, setOpenId] = useState<TrackerId | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const closeModal = useCallback(() => {
     setOpenId(null);
@@ -432,7 +434,15 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
 
                 <section className="at-section">
                   <p className="at-sectionhead">What the record shows</p>
-                  <Observations items={analysis.observations} className="at-observations" />
+                  <Observations
+                    items={analysis.observations}
+                    className="at-observations"
+                    caption={
+                      analysis.daysLogged < 7
+                        ? "Intelligent forecast · the biometric map is synchronizing"
+                        : "Intelligent read · drawn from your own logged days"
+                    }
+                  />
                 </section>
 
                 {analysis.correlations.length > 0 ? (
@@ -462,6 +472,17 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
             onClose={closeModal}
             onSaved={(id) => setNotice(`${trackerDef(id).name} noted on the map.`)}
           />
+
+          <ReflectSheet store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
+
+          <button
+            type="button"
+            className="tk2-fab"
+            onClick={() => setSheetOpen(true)}
+            aria-haspopup="dialog"
+          >
+            Reflect on today
+          </button>
 
             <Footer />
           </>

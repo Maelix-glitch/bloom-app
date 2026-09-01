@@ -315,6 +315,57 @@ describe("the three trackers designs", () => {
     ).toBe(before);
   });
 
+  it("opens the reflect sheet from the floating action and saves several at once", () => {
+    const { container } = render(<Atlas />);
+    const fab = container.querySelector(".tk2-fab") as HTMLElement;
+    expect(fab.textContent?.toLowerCase()).toContain("reflect on today");
+
+    fireEvent.click(fab);
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("Reflect on today");
+
+    /* one field per tracker, each opening on what today already holds */
+    const fields = dialog.querySelectorAll(".tk2-sheet-input") as NodeListOf<HTMLInputElement>;
+    expect(fields).toHaveLength(6);
+    expect(fields[0]!.value).toBe("485"); /* seeded sleep, 420 + 13*5 */
+
+    fireEvent.change(fields[0]!, { target: { value: "500" } });
+    fireEvent.change(fields[1]!, { target: { value: "3000" } });
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(
+      container.querySelector('.at-territory[data-id="sleep"] .at-coord')?.textContent,
+    ).toContain("8h 20m"); /* 500 minutes */
+    expect(
+      container.querySelector('.at-territory[data-id="water"] .at-coord')?.textContent,
+    ).toContain("3L"); /* 3000ml */
+  });
+
+  it("the floating action steps aside when a panel is open", () => {
+    const { container } = render(<Atlas />);
+    const fab = container.querySelector(".tk2-fab")!;
+    /* the panel mounts before the button, so the sibling rule can hide it */
+    fireEvent.click(container.querySelector('.at-territory[data-id="water"]')!);
+    const root = container.querySelector(".tk2-modal-root")!;
+    expect(root).toBeTruthy();
+    /* the panel mounts before the button in the DOM, which is what makes
+       .tk2-modal-root ~ .tk2-fab hide it — assert that order still holds */
+    expect(Boolean(root.compareDocumentPosition(fab) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  });
+
+  it("reads the insights out as a core with a caption", () => {
+    const { container } = render(<Atlas />);
+    const insight = container.querySelector(".tk2-insight");
+    expect(insight).toBeTruthy();
+    const caption = insight?.querySelector(".tk2-insight-caption")?.textContent ?? "";
+    expect(caption.length).toBeGreaterThan(0);
+    /* fourteen seeded days is past the threshold, so it reads as a read */
+    expect(caption.toLowerCase()).toContain("intelligent read");
+    /* numbering is explicit, not a browser list marker */
+    expect(insight?.querySelectorAll(".tk2-insight-index").length).toBeGreaterThan(0);
+  });
+
   it("all three show the advanced read, not a placeholder", () => {
     for (const [name, Component] of [
       ["Ledger", Ledger],

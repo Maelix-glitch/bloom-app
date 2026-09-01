@@ -2340,3 +2340,256 @@
     transform: none;
   }
 }
+
+/* ==========================================================================
+   The clean blueprint.
+
+   One floating action, cards that only ever report, and a record table that
+   reads like a statement rather than a spreadsheet. Everything here is
+   surface: no new data, no new claims — the same numbers, better lit.
+   ========================================================================== */
+
+/* ------------------------- 2. the floating action ------------------------ */
+
+.tk2-fab {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5000;
+  padding: 16px 36px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 40px;
+  background: linear-gradient(135deg, #f4e7d3 0%, #d4af37 50%, #aa8232 100%);
+  color: #070708;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow:
+    0px 12px 40px rgba(212, 175, 55, 0.3),
+    inset 0px 1px 0px rgba(255, 255, 255, 0.4);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tk2-fab:hover {
+  transform: translateX(-50%) scale(1.04);
+  box-shadow: 0px 20px 50px rgba(212, 175, 55, 0.45);
+}
+
+.tk2-fab:active {
+  transform: translateX(-50%) scale(0.96);
+  opacity: 0.9;
+}
+
+.tk2-fab:focus-visible {
+  outline: 2px solid #f4e7d3;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk2-fab {
+    transition: none;
+  }
+
+  .tk2-fab:hover {
+    transform: translateX(-50%);
+  }
+}
+
+/* ------------------------- 3. the insight core --------------------------- */
+
+.tk2-insight {
+  background: linear-gradient(180deg, rgba(20, 20, 24, 0.4) 0%, rgba(10, 10, 12, 0.6) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.tk2-insight-caption {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: #d4af37;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tk2-insight-list {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tk2-insight-list li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #f5f5f7;
+  font-size: 0.88rem;
+  font-weight: 300;
+}
+
+.tk2-insight-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.tk2-insight-index {
+  color: #e5d3b3;
+  font-weight: 500;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.tk2-insight-list p {
+  margin: 0;
+}
+
+/* ------------------ 4. the summary matrix: glass cards ------------------- */
+
+[data-design="atlas"] .at-territory {
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  background: rgba(18, 18, 22, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.02),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease;
+}
+
+[data-design="atlas"] .at-territory:hover {
+  border-color: rgba(212, 175, 55, 0.25);
+}
+
+[data-design="atlas"] .at-place {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #f5f5f7;
+  letter-spacing: -0.01em;
+}
+
+[data-design="atlas"] .at-territory-foot span {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #86868b;
+  margin-top: 8px;
+  font-weight: 400;
+}
+
+/* the contour must never push its card wider than the grid gives it */
+[data-design="atlas"] .at-contour {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* --------------------- units inside every metric ------------------------ */
+
+.tk2-unit,
+.tk2-root .tk2-target-field em {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.78rem;
+  margin-left: 1px;
+}
+
+/* --------------------------- 5. the record ------------------------------ */
+
+.tk2-root .ci-table-wrap,
+[data-design="atlas"] .ci-table {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(10, 10, 12, 0.4);
+}
+
+[data-design="atlas"] .ci-table thead tr {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-design="atlas"] .ci-table th {
+  padding: 16px 20px;
+  color: #86868b;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  text-align: left;
+}
+
+[data-design="atlas"] .ci-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+[data-design="atlas"] .ci-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+[data-design="atlas"] .ci-table tbody th,
+[data-design="atlas"] .ci-table td {
+  padding: 18px 20px;
+  font-size: 0.82rem;
+  color: #f5f5f7;
+  font-weight: 400;
+}
+
+.tk2-cell-met {
+  color: var(--accent-solid);
+}
+
+.tk2-row-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.tk2-row-action:hover:not(:disabled) {
+  color: #ff453a;
+}
+
+.tk2-row-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --------------------------- 6. the dial -------------------------------- */
+
+[data-design="atlas"] .at-arc {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0px 0px 6px var(--track-color));
+}
+
+[data-design="atlas"] .at-track {
+  stroke: rgba(255, 255, 255, 0.04);
+}
+
+/* the floating action needs room at the foot of the page, and it must never
+   sit on top of an open panel */
+[data-design="atlas"] .at {
+  padding-bottom: 96px;
+}
+
+.tk2-modal-root ~ .tk2-fab {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) scale(0.9);
+}

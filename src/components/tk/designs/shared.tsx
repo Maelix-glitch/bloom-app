@@ -8,7 +8,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 
-import { useTrackers, type TrackerStore } from "@/hooks/useTrackers";
+import { useTrackers, type SaveDayResult, type TrackerStore } from "@/hooks/useTrackers";
 import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/trackers/core";
 
 export const DISCLAIMER =
@@ -60,17 +60,15 @@ export function readTrackerValue(store: TrackerStore, id: TrackerId): number | n
  * time of its first session if it has one, and collapses to a single block —
  * the total is the number being set.
  */
-export function setTrackerValue(
-  store: TrackerStore,
+/** Put one number onto a day. Used by both write paths below. */
+function applyValue(
+  next: DayEntry,
+  current: DayEntry,
   id: TrackerId,
   value: number,
-): string | null {
-  const today = store.today;
-  const current = store.days.find((d) => d.date === today) ?? emptyDay(today);
-  const next: DayEntry = { ...current, date: today };
+): void {
   const max = trackerDef(id).max;
   const clamped = Math.min(Math.max(Math.round(value), 0), max);
-
   if (id === "sleep") next.sleepMinutes = clamped;
   if (id === "water") next.waterMl = clamped;
   if (id === "movement") next.movementMinutes = clamped;
@@ -80,14 +78,56 @@ export function setTrackerValue(
     const first = current.sessions[0];
     next.sessions =
       clamped > 0
-        ? [{ subject: first?.subject ?? "General", minutes: clamped, startAt: first?.startAt ?? null }]
+        ? [
+            {
+              subject: first?.subject ?? "General",
+              minutes: clamped,
+              startAt: first?.startAt ?? null,
+            },
+          ]
         : [];
   }
+}
 
-  const result = store.saveDay(next);
+function report(result: SaveDayResult): string | null {
   if (result.ok) return null;
   const first = Object.values(result.errors)[0];
   return typeof first === "string" ? first : "That didn't save.";
+}
+
+/**
+ * Write a total, not an increment.
+ *
+ * You type 1750 for water because that's what you've drunk today; you don't
+ * have to remember what was there before and add to it. Study keeps the start
+ * time of its first session if it has one, and collapses to a single block —
+ * the total is the number being set.
+ */
+export function setTrackerValue(
+  store: TrackerStore,
+  id: TrackerId,
+  value: number,
+): string | null {
+  return setTrackerValues(store, [{ id, value }]);
+}
+
+/**
+ * Write several totals in one go.
+ *
+ * This exists because a day is stored whole: two separate writes in the same
+ * tick would each rebuild the day from the same snapshot, and the second would
+ * quietly throw the first away. Every field the sheet touches lands on one
+ * copy of the day before it's saved.
+ */
+export function setTrackerValues(
+  store: TrackerStore,
+  entries: { id: TrackerId; value: number }[],
+): string | null {
+  const today = store.today;
+  const current = store.days.find((d) => d.date === today) ?? emptyDay(today);
+  const next: DayEntry = { ...current, date: today };
+  for (const entry of entries) applyValue(next, current, entry.id, entry.value);
+  return report(store.saveDay(next));
 }
 
 /** Last fourteen values, nulls where nothing was logged. */
@@ -105,22 +145,28 @@ export function valuesOf(
 export function Observations({
   items,
   className = "",
+  caption,
 }: {
   items: string[];
   className?: string;
+  /** The gold line above the list — what kind of read this is. */
+  caption?: string;
 }) {
   if (items.length === 0) return null;
   return (
-    <ul className={className}>
-      {items.map((line, i) => (
-        <li key={line}>
-          <span aria-hidden className="tabular-nums">
-            {String(i + 1).padStart(2, "0")}
-          </span>
-          <p>{line}</p>
-        </li>
-      ))}
-    </ul>
+    <div className={`tk2-insight ${className}`.trim()}>
+      {caption ? <p className="tk2-insight-caption">{caption}</p> : null}
+      <ul className="tk2-insight-list">
+        {items.map((line, i) => (
+          <li key={line}>
+            <span aria-hidden className="tk2-insight-index">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <p>{line}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -167,7 +213,7 @@ export { useTrackers };
 export function Metric({ value, className }: { value: string; className?: string }) {
   const parts = value.match(/\d+(?:[.,]\d+)?|\D+/g) ?? [value];
   return (
-    <span className={className ? `tk2-metric ${className}` : "tk2-metric"}>
+    <span className={`tk2-metric ${className ?? ""}`.trim()}>
       {parts.map((part, i) =>
         /^\d/.test(part) ? (
           <b key={i}>{part}</b>

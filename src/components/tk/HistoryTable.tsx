@@ -10,6 +10,7 @@ import { Download, Pencil, Trash2 } from "lucide-react";
 
 import { Button, Card } from "@/components/ci/primitives";
 import { formatDateShort } from "@/lib/cycle/predict";
+import { Metric } from "@/components/tk/designs/shared";
 import {
   TRACKERS,
   trackerDef,
@@ -98,18 +99,16 @@ export function HistoryTable({
                         {value === null ? (
                           <span className="ci-muted">—</span>
                         ) : (
-                          <span
-                            style={{
-                              color:
-                                met === true
-                                  ? def.accent
-                                  : met === false
-                                    ? "var(--ci-text-soft)"
-                                    : undefined,
-                            }}
-                          >
-                            {def.format(Math.round(value))}
-                          </span>
+                          <Metric
+                            value={def.format(Math.round(value))}
+                            className={
+                              met === true
+                                ? "tk2-cell-met"
+                                : met === false
+                                  ? "tk2-cell-under"
+                                  : ""
+                            }
+                          />
                         )}
                       </td>
                     );
@@ -130,7 +129,7 @@ export function HistoryTable({
                       {onDelete ? (
                         <button
                           type="button"
-                          className="ci-btn ci-btn--ghost ci-btn--sm"
+                          className="tk2-row-action"
                           disabled={disabled}
                           aria-label={`Delete ${formatDateShort(day.date)}`}
                           onClick={() => onDelete(day.date)}
