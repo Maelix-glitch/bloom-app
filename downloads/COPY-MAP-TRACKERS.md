@@ -38,7 +38,9 @@ says so.
 | `src/components/tk/designs/Atlas.tsx` | new | **the default** — compass, territories, route |
 | `src/components/tk/designs/Ledger.tsx` | new | bookkeeper's sheet |
 | `src/components/tk/designs/Strip.tsx` | new | filmstrip bands |
-| `src/components/tk/designs/shared.tsx` | new | disclaimer, quick-add, sync note |
+| `src/components/tk/designs/shared.tsx` | new | disclaimer, sync note, the overlay layer, writes |
+| `src/components/tk/designs/TrackerModal.tsx` | new | one category, opened by tapping a card |
+| `src/components/tk/designs/ReflectSheet.tsx` | new | all six at once, opened by the floating button |
 
 ## 4. `src/components/tk/` — the parts
 
@@ -90,6 +92,14 @@ npm run dev
 
 - `http://localhost:3000/trackers` — Atlas, the default
 - `http://localhost:3000/trackers-styles` — Atlas / Ledger / Strip / Console
+
+On Atlas the page is read-only: the dial, six cards and the record. The only
+control is the gold button floating at the bottom, which opens the sheet. Tap a
+card to set one tracker on its own. Nothing writes unless you open one of them.
+
+The floating button and the two panels carry their own styling inline, so they
+stay in place and stay legible even before the stylesheet loads; the stylesheet
+adds the hover, press and focus states on top.
 
 If `/trackers` 404s, restart the dev server so `routeTree.gen.ts` regenerates.
 
