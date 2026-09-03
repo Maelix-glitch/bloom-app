@@ -39,6 +39,9 @@ EXTRA = {
         "README.md",
     ],
     "trackers": [
+        # (where it lives, where it lands in the zip) — the installer sits at
+        # the root of the extracted folder, next to src/, so it can be clicked
+        ("scripts/install-trackers.bat", "install-trackers.bat"),
         "supabase/migrations/20260830120000_tracker_days.sql",
         "supabase/COMPLETE-SETUP.sql",
         "docs/SUPABASE-SETUP.md",
@@ -118,7 +121,10 @@ def main() -> None:
                 if f not in files:
                     files.append(f)
         pairs = [(f, f"{PREFIX}/{f.relative_to(ROOT)}") for f in files]
-        pairs += [(ROOT / e, f"{PREFIX}/{e}") for e in EXTRA[name]]
+        for e in EXTRA[name]:
+            # an entry may be "path" or ("path", "where it lands in the zip")
+            src, dest = e if isinstance(e, tuple) else (e, e)
+            pairs.append((ROOT / src, f"{PREFIX}/{dest}"))
         pairs.append((DOWNLOADS / f"COPY-MAP{'' if name == 'cycle' else '-TRACKERS'}.md", f"{PREFIX}/COPY-MAP.md"))
         write(DOWNLOADS / f"bloom-{name}-page.zip", pairs)
 

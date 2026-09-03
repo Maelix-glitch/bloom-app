@@ -5,15 +5,20 @@ and `src/`. Everything below is written from there.
 
 ## The one command
 
-Unzip `bloom-trackers-page.zip`, then from **your project root**:
+**Windows — double-click `install-trackers.bat`** in the unzipped folder. It
+asks for your project root, backs up the files this page shares with the cycle
+page, copies the page in, then tells you the two things left to do by hand.
+Nothing else in your project is touched.
+
+macOS / Linux, from **your project root** — this MERGES into `src/`:
 
 ```bash
-# macOS / Linux — this MERGES into src/ (nothing else is touched)
 cp -R /path/to/bloom-trackers-page/src/. src/
 ```
 
+Or by hand on Windows:
+
 ```bat
-:: Windows
 xcopy /E /Y /I "C:\path\to\bloom-trackers-page\src" "src"
 ```
 
