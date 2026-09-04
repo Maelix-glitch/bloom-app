@@ -307,12 +307,17 @@ export function ReflectSheet({
   const handleSave = () => {
     try {
       setState("loading");
-      const result = setTrackerValues(store, changed);
-      if (result) {
+      const errorMsg = setTrackerValues(store, changed);
+
+      // setTrackerValues returns null on success, or an error message on failure
+      if (errorMsg) {
+        console.error("[ReflectSheet] Save error:", errorMsg);
         setState("error");
         setFieldErrors({});
         return;
       }
+
+      // Success - show confirmation and close after 2 seconds
       setSuccessData(changed);
       setState("success");
       const closeTimer = window.setTimeout(() => {
@@ -320,7 +325,7 @@ export function ReflectSheet({
       }, 2000);
       return () => window.clearTimeout(closeTimer);
     } catch (err) {
-      console.error("[ReflectSheet] Save error:", err);
+      console.error("[ReflectSheet] Save exception:", err);
       setState("error");
       setFieldErrors({});
     }
