@@ -17,6 +17,7 @@ import { TRACKERS, type TrackerDef } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
+import { MetricsEntryModal } from "./MetricsEntryModal";
 import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers, valuesOf } from "./shared";
 
 const QUICK: Partial<Record<string, { amount: number; label: string }[]>> = {
@@ -31,6 +32,7 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
   const { analysis, goals, today, hydrated } = store;
   const [notice, setNotice] = useState<string | null>(null);
   const [date, setDate] = useState<string>(today);
+  const [metricsOpen, setMetricsOpen] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   const defs = TRACKERS;
@@ -329,7 +331,42 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
             )}
 
             <Footer />
-          </>
+
+            <MetricsEntryModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
+
+            <div style={{ position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)", zIndex: 9999, pointerEvents: "none" }}>
+              <button
+                type="button"
+                onClick={() => setMetricsOpen(true)}
+                aria-haspopup="dialog"
+                style={{
+                  pointerEvents: "auto",
+                  background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                  fontSize: "0.78rem",
+                  padding: "16px 38px",
+                  borderRadius: 40,
+                  border: "1px solid rgba(255, 0, 85, 0.6)",
+                  boxShadow: "0 0 24px rgba(255, 0, 85, 0.5), 0 12px 32px rgba(255, 0, 85, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 0 32px rgba(255, 0, 85, 0.6), 0 16px 40px rgba(255, 0, 85, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 0 24px rgba(255, 0, 85, 0.5), 0 12px 32px rgba(255, 0, 85, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
+                }}
+              >
+                Log Metrics Today
+              </button>
+            </div>
+    </>
         )}
       </div>
     </div>
