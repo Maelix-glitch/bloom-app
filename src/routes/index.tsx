@@ -1,298 +1,229 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { TrendingUp, Zap, Plus, Calendar, Target, Award } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
 
+import { useMoodSystem } from "@/hooks/useMoodSystem";
+import type { MoodEntry } from "@/lib/mood/types";
+import { Atmosphere } from "@/components/mood/Atmosphere";
+import { Hero } from "@/components/mood/Hero";
+import { MoodChart } from "@/components/mood/MoodChart";
+import { Heatmap } from "@/components/mood/Heatmap";
+import { Emotions } from "@/components/mood/Emotions";
+import { Calendar } from "@/components/mood/Calendar";
+import { Timeline } from "@/components/mood/Timeline";
+import { Correlations } from "@/components/mood/Correlations";
+import { Patterns, Anomalies } from "@/components/mood/Patterns";
+import { Distribution } from "@/components/mood/Distribution";
+import { Insights } from "@/components/mood/Insights";
+import { History } from "@/components/mood/History";
+import { Composer } from "@/components/mood/Composer";
+import { Reveal } from "@/components/mood/primitives";
 import { BloomHeader } from "@/components/BloomHeader";
-import { useTrackers } from "@/hooks/useTrackers";
-import { useCycleTheme } from "@/hooks/usePeriodLog";
-import { AddHabitModal } from "@/components/tk/AddHabitModal";
-import { TRACKERS } from "@/lib/trackers/core";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Bloom — Dashboard" },
+      { title: "Bloom — Mood Intelligence" },
       {
         name: "description",
         content:
-          "Your personal wellness dashboard. Track habits, sleep, energy, study, movement, and more. Premium analytics and insights powered by your data.",
-      },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
+          "A private analytics command center for your emotional life — trends, rhythms, correlations, anomalies and insights computed entirely from what you log.",
       },
     ],
   }),
-  component: HomeRoute,
+  component: MoodIntelligencePage,
 });
 
-function HomeRoute() {
-  const store = useTrackers();
-  const [theme] = useCycleTheme();
-  const { analysis, hydrated } = store;
-  const [addHabitOpen, setAddHabitOpen] = useState(false);
+function EmptyState({ onCompose }: { onCompose: () => void }) {
+  return (
+    <Reveal delay={120} className="mx-auto max-w-[680px] pt-10 text-center">
+      <p className="eyebrow mb-4 flex items-center justify-center gap-2">
+        <Sparkles className="size-3.5 text-violet" /> Begin the record
+      </p>
 
-  if (!hydrated) {
-    return (
-      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.1rem" }}>Loading your dashboard...</p>
+      <h2 className="display text-[30px] leading-tight sm:text-[40px]">
+        The intelligence arrives
+        <br />
+        <span className="bg-gradient-to-r from-violet via-sky to-amber bg-clip-text text-transparent">
+          once you do.
+        </span>
+      </h2>
+
+      <p className="mx-auto mt-4 max-w-[52ch] text-[14px] leading-relaxed text-muted-foreground">
+        Every chart, correlation and insight on this page is computed only from
+        your own check-ins. Log your first entry to begin your private Mood
+        Intelligence record.
+      </p>
+
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={onCompose}
+          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[13px] font-medium text-background transition-transform duration-500 hover:scale-[1.03]"
+          style={{
+            background: "var(--grad-violet)",
+            boxShadow: "var(--glow-violet)",
+          }}
+        >
+          <PenLine className="size-4" /> Log your first entry
+        </button>
       </div>
-    );
-  }
+    </Reveal>
+  );
+}
 
-  const completion = Math.round(analysis.completion * 100);
-  const stats = [
-    { label: "Completion", value: `${completion}%`, icon: "📊", color: "#00E676" },
-    { label: "Streak", value: `${analysis.streak}d`, icon: "🔥", color: "#FF0055" },
-    { label: "Days Logged", value: `${analysis.daysLogged}`, icon: "📅", color: "#7FA0C9" },
-    { label: "Best Streak", value: `${analysis.bestStreak}d`, icon: "🏆", color: "#E8B75E" },
-  ];
+function MoodIntelligencePage() {
+  const navigate = useNavigate();
+  const system = useMoodSystem();
+  const {
+    loading,
+    entries,
+    analytics: a,
+    emotionFilter,
+    setEmotionFilter,
+    authError,
+  } = system;
+
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [editing, setEditing] = useState<MoodEntry | null>(null);
+
+  const openNew = () => {
+    setEditing(null);
+    setComposerOpen(true);
+  };
+
+  const openEdit = (entry: MoodEntry) => {
+    setEditing(entry);
+    setComposerOpen(true);
+  };
 
   return (
-    <>
+    <div className="relative min-h-screen bg-background text-foreground">
       <BloomHeader />
-      <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 50%, #16213E 100%)" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem 1rem" }}>
-          {/* Hero Section */}
-          <div style={{ marginBottom: "3rem", textAlign: "center" }}>
-            <h1 style={{ fontSize: "3.5rem", fontWeight: 700, color: "#ffffff", margin: 0, letterSpacing: "-0.02em" }}>
-              Welcome back
-            </h1>
-            <p style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.6)", margin: "0.5rem 0 0", fontWeight: 400 }}>
-              {completion}% of your goals met today
+      <Atmosphere />
+
+      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-24 pt-14 sm:px-8 sm:pt-20">
+        <Reveal>
+          <Hero system={system} onCompose={openNew} />
+        </Reveal>
+
+        {authError ? (
+          <div className="panel mx-auto mt-12 max-w-[680px] p-7 text-center">
+            <p className="eyebrow mb-3">Mood Intelligence</p>
+            <h2 className="display text-[28px]">Your private record is waiting.</h2>
+            <p className="mt-3 text-[14px] text-muted-foreground">
+              {authError}
             </p>
           </div>
+        ) : loading ? (
+          <div className="flex items-center justify-center gap-3 py-32 text-faint">
+            <Loader2 className="size-4 animate-spin" />
+            <span className="mono text-[11px] uppercase tracking-[0.08em]">
+              Reading your record…
+            </span>
+          </div>
+        ) : entries.length === 0 ? (
+          <EmptyState onCompose={openNew} />
+        ) : (
+          <div className="mt-14 flex flex-col gap-6">
+            <Reveal delay={80}>
+              <MoodChart days={a.days} />
+            </Reveal>
 
-          {/* Stats Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                style={{
-                  padding: "1.5rem",
-                  borderRadius: "16px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  backdropFilter: "blur(20px)",
-                  transition: "all 0.3s ease",
-                  cursor: "pointer",
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Reveal delay={120}>
+                <Emotions
+                  stats={a.emotions}
+                  filter={emotionFilter}
+                  onFilter={setEmotionFilter}
+                />
+              </Reveal>
+
+              <Reveal delay={160}>
+                <Heatmap cells={a.heatmap} />
+              </Reveal>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-5">
+              <Reveal delay={120} className="lg:col-span-3">
+                <Calendar days={a.allDays} />
+              </Reveal>
+
+              <Reveal delay={160} className="lg:col-span-2">
+                <Timeline days={a.days} />
+              </Reveal>
+            </div>
+
+            <Reveal delay={100}>
+              <Correlations correlations={a.correlations} />
+            </Reveal>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Reveal delay={120}>
+                <Patterns patterns={a.patterns} />
+              </Reveal>
+
+              <Reveal delay={160}>
+                <Anomalies anomalies={a.anomalies} />
+              </Reveal>
+            </div>
+
+            <Reveal delay={100}>
+              <Distribution
+                buckets={a.distribution}
+                volatility={a.volatility}
+              />
+            </Reveal>
+
+            <Reveal delay={120}>
+              <Insights insights={a.insights} tier={a.tier} />
+            </Reveal>
+
+            <Reveal delay={140}>
+              <History
+                entries={entries}
+                onEdit={openEdit}
+                onDelete={system.removeEntry}
+                onShareStory={(e) =>
+                  navigate({
+                    to: "/profile",
+                    search: { story: `${e.note?.trim() ? "reflection" : "mood"}:${e.id}` },
+                  })
+                }
+              />
+            </Reveal>
+
+            <footer className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
+              <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
+                Bloom · your data is saved securely to your private account
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Erase every recorded Mood entry? This cannot be undone.",
+                    )
+                  ) {
+                    void system.resetAll();
+                  }
                 }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
+                className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[10px] uppercase tracking-[0.08em] text-faint transition-colors hover:border-rose/50 hover:text-rose"
               >
-                <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>{stat.icon}</div>
-                <div style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
-                  {stat.label}
-                </div>
-                <div style={{ fontSize: "2rem", fontWeight: 700, color: stat.color, fontFamily: "'IBM Plex Mono', monospace" }}>
-                  {stat.value}
-                </div>
-              </div>
-            ))}
+                <RotateCcw className="size-3" /> Reset all data
+              </button>
+            </footer>
           </div>
-
-          {/* CTA Button */}
-          <div style={{ display: "flex", gap: "1rem", marginBottom: "3rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={() => setAddHabitOpen(true)}
-              style={{
-                padding: "14px 32px",
-                borderRadius: "12px",
-                border: "none",
-                background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
-                color: "#ffffff",
-                fontWeight: 700,
-                fontSize: "1rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 12px 26px -12px rgba(255,0,85,0.4)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <Plus size={18} />
-              Add New Habit
-            </button>
-            <a
-              href="/trackers-premium"
-              style={{
-                padding: "14px 32px",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.2)",
-                background: "transparent",
-                color: "#ffffff",
-                fontWeight: 600,
-                fontSize: "1rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                textDecoration: "none",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-              }}
-            >
-              <TrendingUp size={18} />
-              View Full Dashboard
-            </a>
-          </div>
-
-          {/* Trackers Showcase Grid */}
-          <div style={{ marginBottom: "3rem" }}>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 600, color: "#ffffff", marginBottom: "1.5rem" }}>Your Trackers</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
-              {TRACKERS.map((def) => {
-                const stat = analysis.trackers[def.id];
-                const progress = Math.min(Math.max(stat.progress * 100, 0), 100);
-                const isMet = stat.met === true;
-
-                return (
-                  <div
-                    key={def.id}
-                    style={{
-                      padding: "1.5rem",
-                      borderRadius: "16px",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      backdropFilter: "blur(20px)",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                      e.currentTarget.style.transform = "translateY(0)";
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                      <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#ffffff" }}>{def.name}</h3>
-                      {isMet && (
-                        <div style={{ padding: "4px 12px", borderRadius: "999px", background: "rgba(0,230,118,0.15)", border: "1px solid rgba(0,230,118,0.3)", fontSize: "0.75rem", fontWeight: 600, color: "#00E676" }}>
-                          ✓ Met
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div style={{ width: "100%", height: "8px", borderRadius: "999px", background: "rgba(255,255,255,0.1)", overflow: "hidden", marginBottom: "1rem" }}>
-                      <div
-                        style={{
-                          height: "100%",
-                          background: "linear-gradient(90deg, #00E676, #00D9A3)",
-                          width: `${progress}%`,
-                          transition: "width 0.3s ease",
-                          borderRadius: "999px",
-                        }}
-                      />
-                    </div>
-
-                    {/* Stats */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem" }}>
-                      <div style={{ padding: "0.75rem", borderRadius: "8px", background: "rgba(255,255,255,0.03)", textAlign: "center" }}>
-                        <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "#00E676", fontFamily: "'IBM Plex Mono', monospace" }}>
-                          {stat.today === null ? "—" : def.format(Math.round(stat.today))}
-                        </div>
-                        <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                          Today
-                        </div>
-                      </div>
-                      <div style={{ padding: "0.75rem", borderRadius: "8px", background: "rgba(255,255,255,0.03)", textAlign: "center" }}>
-                        <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "#00E676", fontFamily: "'IBM Plex Mono', monospace" }}>
-                          {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
-                        </div>
-                        <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                          7-day avg
-                        </div>
-                      </div>
-                      <div style={{ padding: "0.75rem", borderRadius: "8px", background: "rgba(255,255,255,0.03)", textAlign: "center" }}>
-                        <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "#00E676", fontFamily: "'IBM Plex Mono', monospace" }}>
-                          {def.format(stat.goal)}
-                        </div>
-                        <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                          Target
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Insights */}
-          {analysis.observations.length > 0 && (
-            <div
-              style={{
-                padding: "1.5rem",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                backdropFilter: "blur(20px)",
-              }}
-            >
-              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#ffffff", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem", margin: "0 0 1rem 0" }}>
-                <TrendingUp size={20} />
-                Insights
-              </h2>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {analysis.observations.slice(0, 3).map((obs, i) => (
-                  <li
-                    key={i}
-                    style={{
-                      padding: "0.75rem 0",
-                      fontSize: "0.95rem",
-                      color: "rgba(255,255,255,0.7)",
-                      borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                      paddingBottom: i < 2 ? "0.75rem" : "0",
-                    }}
-                  >
-                    {obs}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+        )}
       </main>
 
-      {/* Add Habit Modal */}
-      <AddHabitModal
-        open={addHabitOpen}
-        onClose={() => setAddHabitOpen(false)}
-        onSubmit={async (habit) => {
-          console.log("[Home] Habit created:", habit);
-          // TODO: Call API to save habit
-        }}
+      <Composer
+        open={composerOpen}
+        initial={editing}
+        onClose={() => setComposerOpen(false)}
+        onSave={(entry) => void system.saveEntry(entry)}
       />
-    </>
+    </div>
   );
 }
