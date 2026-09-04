@@ -16,7 +16,7 @@ import { TRACKERS, type TrackerId } from "@/lib/trackers/core";
 import { formatDateShort } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
-import { MetricsEntryModal } from "./MetricsEntryModal";
+import { MetricsModal } from "@/components/tk/MetricsModal";
 import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers } from "./shared";
 
 const STEPS: Partial<Record<TrackerId, { amount: number; label: string }[]>> = {
@@ -277,7 +277,7 @@ export function Strip({ theme = "nocturne" }: { theme?: string }) {
 
             <Footer />
 
-            <MetricsEntryModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
+            <MetricsModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
 
             <div style={{ position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)", zIndex: 9999, pointerEvents: "none" }}>
               <button

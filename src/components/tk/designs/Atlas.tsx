@@ -16,7 +16,7 @@ import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
-import { MetricsEntryModal } from "./MetricsEntryModal";
+import { MetricsModal } from "@/components/tk/MetricsModal";
 import { TrackerModal } from "./TrackerModal";
 import { applyQuickAdd, Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
 
@@ -507,7 +507,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
             onSaved={(id) => setNotice(`${trackerDef(id).name} noted on the map.`)}
           />
 
-          <MetricsEntryModal store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
+          <MetricsModal store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
 
             <Footer />
           </>
