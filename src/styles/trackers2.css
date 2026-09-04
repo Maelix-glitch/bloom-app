@@ -1,0 +1,2695 @@
+/**
+ * Trackers — three design directions, one stylesheet.
+ *
+ * All three share the theme's ground, ink and type scale, so they belong to the
+ * same app. Nothing else is shared with the cycle page: no cards, no numbered
+ * editorial blocks, no ring grids, no eyebrow-plus-rule heads.
+ *
+ *   [data-design="ledger"]  a bookkeeper's sheet — rules, tabular figures, ticks
+ *   [data-design="atlas"]   a map — a 24-hour compass, territories, one route
+ *   [data-design="strip"]   a filmstrip — one band per tracker, one playhead
+ */
+
+.tk2-root {
+  --tk2-rule: color-mix(in oklab, var(--ci-text) 14%, transparent);
+  --tk2-soft: color-mix(in oklab, var(--ci-text) 62%, transparent);
+}
+
+/* ------------------------------ palette ---------------------------------- */
+/* The trackers page runs on obsidian and champagne whatever theme the cycle  */
+/* page is set to: a near-black ground, charcoal cards, platinum type, gold   */
+/* for the figures and every active/met state, and six ring colours spaced    */
+/* evenly round the wheel so they stay legible on #0b0c10.                    */
+
+.tk2-root[data-design][data-theme] {
+  /* ---- the token manifest — VIBRANT & BOLD NEON REDESIGN ---- */
+  --bg-absolute-dark: #000000;
+  --panel-glass-bg: rgba(10, 10, 12, 0.85);
+  --glass-border-rim: rgba(255, 255, 255, 0.12);
+  --accent-neon-gradient: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  --neon-primary: #FF0055;
+  --text-ultra-white: #ffffff;
+  --text-cool-silver: #b0b0b8;
+  --text-architectural: rgba(255, 255, 255, 0.4);
+
+  /* ---- the app's own variables, bound to those tokens ---- */
+  --ci-bg: var(--bg-absolute-dark);
+  --ci-bg-deep: #000000;
+  --ci-surface: #0a0a0c;
+  --ci-surface-2: #141416;
+  --ci-line: var(--glass-border-rim);
+  --ci-line-strong: rgba(255, 255, 255, 0.16);
+  --ci-text: var(--text-ultra-white);
+  --ci-text-soft: #e8e8ec;
+  --ci-text-mute: var(--text-cool-silver);
+  --ci-accent: var(--neon-primary);
+  --ci-accent-soft: rgba(255, 0, 85, 0.16);
+  --ci-focus: #FF0055;
+  --ci-ok: #00E676;
+  --ci-warn: #FFEA00;
+  --ci-danger: #FF0055;
+  --ci-input-bg: #050506;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(255, 0, 85, 0.06), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(0, 240, 255, 0.03), transparent 55%);
+
+  /* neon accent marks met states */
+  --ci-follicular: #FF0055;
+  --ci-ovulation: #00F0FF;
+  /* the two phase names left over keep their ring colour */
+  --ci-late: var(--tk2-ring-sleep);
+  --ci-menstrual: var(--tk2-ring-screen);
+
+  /* six vibrant neon rings */
+  --tk2-ring-sleep: #AF52FF;
+  --tk2-ring-water: #00F0FF;
+  --tk2-ring-movement: #00E676;
+  --tk2-ring-energy: #FFEA00;
+  --tk2-ring-screen: #FF0055;
+  --tk2-ring-study: #0066FF;
+
+  --tk2-rule: var(--glass-border-rim);
+  --tk2-soft: var(--text-cool-silver);
+
+  /* bold sans-serif for sporty, tech-forward feel */
+  --ci-display-weight: 700;
+  --ci-display-track: -0.03em;
+
+  /* ---- aliases ---- */
+  --bg-deep: var(--bg-absolute-dark);
+  --surface-card: #0a0a0c;
+  --card-border: var(--glass-border-rim);
+  --accent-neon: var(--accent-neon-gradient);
+  --accent-solid: var(--neon-primary);
+  --text-primary: var(--text-ultra-white);
+  --text-muted: var(--text-cool-silver);
+  --text-dim: var(--text-architectural);
+  --tk2-neon: var(--accent-neon-gradient);
+  --tk2-neon-line: rgba(255, 0, 85, 0.6);
+  --tk2-neon-glow: rgba(255, 0, 85, 0.8);
+  --tk2-glass: var(--panel-glass-bg);
+  --tk2-glass-rim: var(--glass-border-rim);
+  --tk2-glass-lift: radial-gradient(
+    120% 120% at 0% 0%,
+    rgba(255, 255, 255, 0.08),
+    transparent 62%
+  );
+}
+
+/* The canvas itself. Scoped to the trackers page rather than set on <body>,
+   so this can't repaint cycle, coach and profile blind. */
+.tk2-root {
+  background-color: var(--bg-absolute-dark);
+  color: var(--text-ultra-white);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.tk2-footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--tk2-rule);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ci-text-mute);
+}
+
+/* ==========================================================================
+   LEDGER — rules and tabular figures
+   ========================================================================== */
+
+[data-design="ledger"] .lg {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+[data-design="ledger"] .lg-masthead {
+  display: grid;
+  gap: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid color-mix(in oklab, var(--ci-text) 26%, transparent);
+}
+
+@media (min-width: 860px) {
+  [data-design="ledger"] .lg-masthead {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+[data-design="ledger"] .lg-kicker {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-title {
+  margin: 0.6rem 0 0;
+  font-family: var(--ci-font-sans);
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+[data-design="ledger"] .lg-lede {
+  margin-top: 0.75rem;
+  max-width: 54ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-meta {
+  display: flex;
+  gap: 1.75rem;
+  margin: 0;
+}
+
+[data-design="ledger"] .lg-meta dt {
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-meta dd {
+  margin: 0.3rem 0 0;
+  font-family: var(--ci-font-mono);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the sheet */
+[data-design="ledger"] .lg-sheet {
+  margin-top: 2rem;
+  border-top: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr minmax(0, 2fr) 0.7fr 0.5fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 0.25rem;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-row--head {
+  padding: 0.5rem 0.25rem;
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-row:not(.lg-row--head):hover {
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+}
+
+[data-design="ledger"] .lg-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+}
+
+[data-design="ledger"] .lg-fig {
+  font-family: var(--ci-font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-fig--strong {
+  font-size: 14px;
+  color: var(--ci-text);
+}
+
+[data-design="ledger"] .lg-row > * {
+  min-width: 0;
+}
+
+[data-design="ledger"] .lg-ticks {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 26px;
+}
+
+[data-design="ledger"] .lg-ticks i {
+  flex: 1;
+  min-height: 1px;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="ledger"] .lg-ticks i[data-met="true"] {
+  background: var(--ci-follicular);
+}
+
+[data-design="ledger"] .lg-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+[data-design="ledger"] .lg-actions button {
+  padding: 0.22rem 0.5rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 3px;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+[data-design="ledger"] .lg-actions button:hover,
+[data-design="ledger"] .lg-actions button[aria-pressed="true"] {
+  color: var(--ci-text);
+  border-color: color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+[data-design="ledger"] .lg-notice {
+  min-height: 1.2rem;
+  margin-top: 0.6rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-follicular);
+}
+
+[data-design="ledger"] .lg-block {
+  margin-top: 3rem;
+}
+
+[data-design="ledger"] .lg-blockhead {
+  margin-bottom: 1rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-table-scroll {
+  overflow-x: auto;
+}
+
+[data-design="ledger"] .lg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-design="ledger"] .lg-table th,
+[data-design="ledger"] .lg-table td {
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--tk2-rule);
+  white-space: nowrap;
+}
+
+[data-design="ledger"] .lg-table thead th {
+  font-weight: 400;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-table tbody th {
+  font-weight: 400;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-table td {
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-table td i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 0.4rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--ci-text) 30%, transparent);
+}
+
+[data-design="ledger"] .lg-table td i[data-met="true"] {
+  background: var(--ci-follicular);
+  border-color: var(--ci-follicular);
+}
+
+[data-design="ledger"] .lg-dash {
+  color: color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="ledger"] .lg-leaders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-design="ledger"] .lg-leaders li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 12.5px;
+  border-bottom: 1px dotted var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-leaders li i {
+  flex: 1;
+  border-bottom: 1px dotted color-mix(in oklab, var(--ci-text) 25%, transparent);
+}
+
+[data-design="ledger"] .lg-leaders li span:last-child {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-statement {
+  max-width: 68ch;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+[data-design="ledger"] .lg-table--insight {
+  margin-top: 1.25rem;
+}
+
+[data-design="ledger"] .lg-finelist {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 72ch;
+}
+
+[data-design="ledger"] .lg-finelist li {
+  padding: 0.3rem 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-observations {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 74ch;
+}
+
+[data-design="ledger"] .lg-observations li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-observations li span {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+  padding-top: 0.25rem;
+}
+
+[data-design="ledger"] .lg-observations li p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+[data-design="ledger"] .lg-fine,
+[data-design="ledger"] .lg-loading {
+  margin-top: 0.75rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+@media (max-width: 720px) {
+  [data-design="ledger"] .lg-row {
+    grid-template-columns: 1fr auto;
+    row-gap: 0.4rem;
+  }
+
+  [data-design="ledger"] .lg-row--head {
+    display: none;
+  }
+
+  [data-design="ledger"] .lg-ticks,
+  [data-design="ledger"] .lg-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ==========================================================================
+   ATLAS — a map of the day
+   ========================================================================== */
+
+[data-design="atlas"] .at {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+}
+
+[data-design="atlas"] .at-head {
+  max-width: 46rem;
+}
+
+[data-design="atlas"] .at-kicker,
+[data-design="atlas"] .at-sectionhead {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-title {
+  margin: 0.6rem 0 0;
+  font-family: var(--ci-font-sans);
+  font-size: clamp(26px, 5vw, 44px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+[data-design="atlas"] .at-lede {
+  margin-top: 0.7rem;
+  max-width: 52ch;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-board {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 960px) {
+  [data-design="atlas"] .at-board {
+    grid-template-columns: 340px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* The compass column and everything it explains. One wrapper, so the grid
+   keeps exactly two children — a third child would drop into row two and
+   leave the right-hand column empty beside it. */
+[data-design="atlas"] .at-board-main {
+  min-width: 0;
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+
+[data-design="atlas"] .at-board-main .at-key {
+  margin-top: 0;
+}
+
+[data-design="atlas"] .at-territories {
+  min-width: 0;
+}
+
+[data-design="atlas"] .at-territory {
+  min-width: 0;
+}
+
+[data-design="atlas"] .at-compass {
+  position: sticky;
+  top: 1.5rem;
+}
+
+[data-design="atlas"] .at-compass svg {
+  width: 100%;
+  height: auto;
+}
+
+/* On a phone the compass would otherwise be as wide as the screen. */
+@media (max-width: 959px) {
+  [data-design="atlas"] .at-compass {
+    position: static;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+[data-design="atlas"] .at-track {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ci-text) 8%, transparent);
+  stroke-width: 10;
+}
+
+[data-design="atlas"] .at-tick {
+  stroke: var(--ci-text);
+  opacity: 0.25;
+  stroke-width: 0.7;
+}
+
+[data-design="atlas"] .at-tick[data-major="true"] {
+  opacity: 0.5;
+  stroke-width: 1.4;
+}
+
+[data-design="atlas"] .at-arc {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+}
+
+[data-design="atlas"] .at-hour {
+  font-family: var(--ci-font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-anchor: middle;
+  fill: var(--ci-text);
+  opacity: 0.5;
+}
+
+[data-design="atlas"] .at-centre-fig {
+  font-family: var(--ci-font-display);
+  font-size: 34px;
+  text-anchor: middle;
+  fill: var(--ci-text);
+}
+
+[data-design="atlas"] .at-centre-label {
+  font-family: var(--ci-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-anchor: middle;
+  text-transform: uppercase;
+  fill: var(--ci-text);
+  opacity: 0.55;
+}
+
+[data-design="atlas"] .at-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-key li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-design="atlas"] .at-key i {
+  width: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ci-text);
+  opacity: 0.7;
+}
+
+[data-design="atlas"] .at-key li[data-id="sleep"] i {
+  background: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-key li[data-id="water"] i {
+  background: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-key li[data-id="study"] i {
+  background: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-key li[data-id="movement"] i {
+  background: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-key li[data-id="energy"] i {
+  background: var(--tk2-ring-energy);
+}
+[data-design="atlas"] .at-key li[data-id="screen"] i {
+  background: var(--tk2-ring-screen);
+}
+
+[data-design="atlas"] .at-arc[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+  stroke-width: 7;
+}
+
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+  stroke-width: 6;
+}
+
+[data-design="atlas"] .at-route-today {
+  stroke: var(--ci-accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+}
+
+[data-design="atlas"] .at-route-date {
+  font-family: var(--ci-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  text-anchor: middle;
+  fill: var(--ci-text);
+  opacity: 0.45;
+}
+
+/* the study field — round cells, so it reads as a field rather than a grid */
+[data-design="atlas"] .tk-heat {
+  gap: 5px;
+  max-width: 34rem;
+}
+
+[data-design="atlas"] .tk-heat i {
+  border-radius: 999px;
+}
+
+[data-design="atlas"] .tk-heat i[data-level="1"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 22%, transparent);
+}
+
+[data-design="atlas"] .at-leaders {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 34rem;
+}
+
+[data-design="atlas"] .at-leaders li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-size: 12.5px;
+  border-bottom: 1px dotted var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-leaders li i {
+  flex: 1;
+  border-bottom: 1px dotted color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="atlas"] .at-leaders li span:last-child {
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-territories {
+  display: grid;
+  gap: 1.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  [data-design="atlas"] .at-territories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+[data-design="atlas"] .at-territory {
+  position: relative;
+  padding-left: 1rem;
+  border-left: 1px solid var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-territory-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+[data-design="atlas"] .at-place {
+  font-family: var(--ci-font-display);
+  font-size: 19px;
+}
+
+[data-design="atlas"] .at-coord {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-contour {
+  display: block;
+  width: 100%;
+  height: 54px;
+  margin-top: 0.5rem;
+}
+
+[data-design="atlas"] .at-contour-line {
+  fill: none;
+  stroke: var(--ci-text);
+  stroke-width: 1.4;
+  opacity: 0.75;
+}
+
+[data-design="atlas"] .at-contour-area {
+  fill: color-mix(in oklab, var(--ci-text) 10%, transparent);
+  stroke: none;
+}
+
+[data-design="atlas"] .at-contour-empty {
+  stroke: var(--ci-text);
+  opacity: 0.2;
+  stroke-dasharray: 2 4;
+}
+
+[data-design="atlas"] .at-territory-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-territory-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+[data-design="atlas"] .at-territory-actions button {
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 999px;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+}
+
+[data-design="atlas"] .at-territory-actions button:hover,
+[data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
+  color: var(--ci-text);
+  border-color: color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+[data-design="atlas"] .at-notice {
+  min-height: 1.2rem;
+  margin-top: 1rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-follicular);
+}
+
+[data-design="atlas"] .at-section {
+  margin-top: 3.5rem;
+}
+
+[data-design="atlas"] .at-sectionhead {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--tk2-rule);
+  margin-bottom: 1.5rem;
+  font-family: var(--ci-font-sans);
+  font-weight: 600;
+}
+
+[data-design="atlas"] .at-route-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+[data-design="atlas"] .at-route {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 560px;
+}
+
+[data-design="atlas"] .at-route-line {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+[data-design="atlas"] .at-route-line[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-route-line[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-route-line[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-route-line[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-route-line[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+}
+[data-design="atlas"] .at-route-line[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+}
+
+[data-design="atlas"] .at-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-design="atlas"] .at-legend i {
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ci-text);
+}
+
+[data-design="atlas"] .at-legend li[data-id="sleep"] i {
+  background: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-legend li[data-id="water"] i {
+  background: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-legend li[data-id="study"] i {
+  background: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-legend li[data-id="movement"] i {
+  background: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-legend li[data-id="screen"] i {
+  background: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-legend li[data-id="energy"] i {
+  background: var(--tk2-ring-energy);
+}
+
+[data-design="atlas"] .at-statement {
+  max-width: 64ch;
+  font-family: var(--ci-font-display);
+  font-size: clamp(19px, 2.6vw, 25px);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+[data-design="atlas"] .at-contrasts {
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-design="atlas"] .at-contrasts li {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-pair {
+  display: grid;
+  gap: 3px;
+}
+
+[data-design="atlas"] .at-pair i {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ci-text);
+}
+
+[data-design="atlas"] .at-pair i[data-kind="low"] {
+  opacity: 0.28;
+}
+
+[data-design="atlas"] .at-pair i[data-kind="bright"] {
+  opacity: 0.9;
+}
+
+[data-design="atlas"] .at-coord em {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-style: normal;
+  opacity: 0.6;
+}
+
+[data-design="atlas"] .at-finelist,
+[data-design="atlas"] .at-observations {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 72ch;
+}
+
+[data-design="atlas"] .at-finelist li,
+[data-design="atlas"] .at-observations li {
+  padding: 0.35rem 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-observations li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+[data-design="atlas"] .at-observations li span {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+  padding-top: 0.3rem;
+}
+
+[data-design="atlas"] .at-observations li p {
+  margin: 0;
+}
+
+[data-design="atlas"] .at-fine {
+  margin-top: 0.85rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-loading {
+  margin-top: 3rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-mute);
+}
+
+/* ==========================================================================
+   STRIP — one band per tracker
+   ========================================================================== */
+
+[data-design="strip"] .sp {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+}
+
+[data-design="strip"] .sp-head {
+  padding: 0 0.5rem 2rem;
+}
+
+[data-design="strip"] .sp-kicker,
+[data-design="strip"] .sp-sectionhead {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-title {
+  margin: 0.75rem 0 0;
+  font-family: var(--ci-font-sans);
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+[data-design="strip"] .sp-lede {
+  margin-top: 0.85rem;
+  max-width: 52ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ci-text-soft);
+}
+
+[data-design="strip"] .sp-strip {
+  position: relative;
+  padding: 0.5rem;
+}
+
+[data-design="strip"] .sp-axis {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* The empty first cell lines the dates up with the day-cells below them. */
+[data-design="strip"] .sp-axis span:first-child {
+  width: 132px;
+  flex: none;
+}
+
+[data-design="strip"] .sp-axis > span:not(:first-child) {
+  flex: 1;
+  text-align: center;
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-axis span[data-today="true"] {
+  color: var(--ci-accent);
+  font-weight: 600;
+}
+
+[data-design="strip"] .sp-band {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--tk2-rule);
+}
+
+[data-design="strip"] .sp-band:last-of-type {
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="strip"] .sp-band-id {
+  width: 132px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+[data-design="strip"] .sp-band-name {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-band-fig {
+  font-family: var(--ci-font-mono);
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+[data-design="strip"] .sp-band-sub {
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-cells {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 74px;
+  padding: 0 2px;
+}
+
+[data-design="strip"] .sp-cell {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--ci-text) 5%, transparent);
+  overflow: hidden;
+}
+
+[data-design="strip"] .sp-cell i {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  background: color-mix(in oklab, var(--ci-text) 22%, transparent);
+  transition: height 0.4s ease;
+}
+
+[data-design="strip"] .sp-cell[data-met="true"] i {
+  background: var(--ci-follicular);
+}
+
+[data-design="strip"] .sp-cell[data-today="true"] {
+  outline: 1px solid color-mix(in oklab, var(--ci-text) 45%, transparent);
+  outline-offset: 1px;
+}
+
+[data-design="strip"] .sp-target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed color-mix(in oklab, var(--ci-text) 35%, transparent);
+  pointer-events: none;
+}
+
+[data-design="strip"] .sp-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(132px + 0.75rem + (100% - 132px - 0.75rem - 5.5rem) * (13 / 14) + 2px);
+  width: 1px;
+  background: color-mix(in oklab, var(--ci-accent) 55%, transparent);
+  pointer-events: none;
+}
+
+[data-design="strip"] .sp-band-actions {
+  width: 5.5rem;
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.25rem;
+}
+
+[data-design="strip"] .sp-band-actions button {
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 999px;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+}
+
+[data-design="strip"] .sp-band-actions button:hover,
+[data-design="strip"] .sp-band-actions button[aria-pressed="true"] {
+  color: var(--ci-text);
+  border-color: color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+[data-design="strip"] .sp-notice {
+  min-height: 1.2rem;
+  margin-top: 0.75rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-follicular);
+  padding-left: 0.5rem;
+}
+
+[data-design="strip"] .sp-section {
+  margin-top: 3rem;
+  padding: 0 0.5rem;
+}
+
+[data-design="strip"] .sp-sectionhead {
+  margin-bottom: 1.25rem;
+}
+
+[data-design="strip"] .sp-heat {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 4px;
+}
+
+[data-design="strip"] .sp-heat i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--ci-text) 7%, transparent);
+}
+
+[data-design="strip"] .sp-heat i[data-level="1"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 25%, transparent);
+}
+[data-design="strip"] .sp-heat i[data-level="2"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+}
+[data-design="strip"] .sp-heat i[data-level="3"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 68%, transparent);
+}
+[data-design="strip"] .sp-heat i[data-level="4"] {
+  background: var(--ci-ovulation);
+}
+
+[data-design="strip"] .sp-heat i[data-today="true"] {
+  outline: 1px solid var(--ci-text);
+  outline-offset: 1px;
+}
+
+[data-design="strip"] .sp-statement {
+  max-width: 66ch;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+[data-design="strip"] .sp-contrasts {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+[data-design="strip"] .sp-contrast {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+[data-design="strip"] .sp-contrast-name {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-contrast-bars {
+  display: grid;
+  gap: 3px;
+}
+
+[data-design="strip"] .sp-contrast-bars i {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ci-text);
+}
+
+[data-design="strip"] .sp-contrast-bars i[data-kind="low"] {
+  opacity: 0.25;
+}
+
+[data-design="strip"] .sp-contrast-fig {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-design="strip"] .sp-contrast-fig em {
+  margin: 0 0.4rem;
+  font-style: normal;
+  opacity: 0.5;
+}
+
+[data-design="strip"] .sp-contrast-fig b {
+  margin-left: 0.6rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+[data-design="strip"] .sp-finelist,
+[data-design="strip"] .sp-observations {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 74ch;
+}
+
+[data-design="strip"] .sp-finelist li {
+  padding: 0.3rem 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ci-text-soft);
+}
+
+[data-design="strip"] .sp-observations li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="strip"] .sp-observations li span {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+  padding-top: 0.25rem;
+}
+
+[data-design="strip"] .sp-observations li p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+[data-design="strip"] .sp-fine {
+  margin-top: 0.85rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-loading {
+  padding: 2rem 0.5rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-mute);
+}
+
+@media (max-width: 720px) {
+  [data-design="strip"] .sp-band {
+    flex-wrap: wrap;
+  }
+
+  [data-design="strip"] .sp-band-id {
+    width: 100%;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  [data-design="strip"] .sp-cells {
+    flex: 1 1 100%;
+  }
+
+  [data-design="strip"] .sp-band-actions {
+    width: auto;
+  }
+
+  [data-design="strip"] .sp-playhead {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="strip"] .sp-cell i {
+    transition: none;
+  }
+}
+
+/* ------------------------------- sync note -------------------------------- */
+/* One honest line about where these days live. Sits under each header.       */
+
+.tk2-sync {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.01em;
+  color: var(--ci-text-mute);
+}
+
+.tk2-sync-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ci-text-mute);
+  transform: translateY(-2px);
+}
+
+.tk2-sync[data-state="saved"] .tk2-sync-dot { background: var(--ci-accent); }
+.tk2-sync[data-state="pending"] .tk2-sync-dot {
+  background: color-mix(in oklab, var(--ci-accent) 40%, transparent);
+}
+.tk2-sync[data-state="loading"] .tk2-sync-dot { background: var(--ci-text-mute); }
+.tk2-sync[data-state="error"] { color: var(--ci-danger); }
+.tk2-sync[data-state="error"] .tk2-sync-dot { background: var(--ci-danger); }
+
+.tk2-sync-retry {
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.tk2-sync-retry:hover { opacity: 0.7; }
+.tk2-sync-retry:focus-visible {
+  outline: 1px solid var(--ci-text-soft);
+  outline-offset: 2px;
+}
+
+/* --------------------------- targets + badges ---------------------------- */
+/* Editable targets and the achievements read off the record. Both live on    */
+/* the page rather than in a settings screen, because every chart above       */
+/* measures against them.                                                     */
+
+.tk2-targets-grid,
+.tk2-badges-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.tk2-targets-grid li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 10px;
+}
+
+.tk2-targets-grid label {
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.tk2-target-field {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.tk2-targets-grid input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.15rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--tk2-rule);
+  background: transparent;
+  color: var(--ci-text);
+  font-family: var(--ci-font-mono);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.18s ease;
+}
+
+.tk2-targets-grid input:focus {
+  outline: none;
+  border-bottom-color: var(--ci-text-soft);
+}
+
+.tk2-targets-grid input:focus-visible {
+  outline: 2px solid var(--ci-focus, var(--ci-text-soft));
+  outline-offset: 3px;
+}
+
+.tk2-target-field em {
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  font-style: normal;
+  color: var(--ci-text-mute);
+}
+
+.tk2-targets-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin: 1rem 0 0;
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+}
+
+.tk2-targets-foot button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ci-text-soft);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.tk2-targets-foot button:hover {
+  color: var(--ci-text);
+}
+
+.tk2-badges {
+  margin-top: 1rem;
+}
+
+.tk2-badges-count {
+  margin: 0 0 0.75rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.tk2-badges-grid li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 10px;
+  opacity: 0.55;
+}
+
+.tk2-badges-grid li[data-earned="true"] {
+  opacity: 1;
+  border-color: color-mix(in oklab, var(--ci-follicular) 55%, transparent);
+  background: color-mix(in oklab, var(--ci-follicular) 8%, transparent);
+}
+
+.tk2-badge-name {
+  font-size: 12.5px;
+  color: var(--ci-text);
+}
+
+.tk2-badge-detail {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+}
+
+@media (max-width: 560px) {
+  .tk2-targets-grid,
+  .tk2-badges-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tk2-targets-grid input {
+    font-size: 15px;
+  }
+}
+
+/* ==========================================================================
+   The finishing pass.
+
+   Five things, all of them about how the page feels rather than what it says:
+   champagne on the actions instead of a flat block of colour, small labels set
+   in tracked capitals, containers that read as glass over the obsidian rather
+   than as grey boxes, roomier log cards with pill selectors, and a dial that
+   still looks like a dial on a day nothing has been logged.
+   ========================================================================== */
+
+
+/* ------------------------------- 1. actions ------------------------------ */
+
+.tk2-root .ci-btn--primary {
+  background-image: var(--tk2-champagne);
+  border-color: var(--tk2-champagne-line);
+  color: #0b0c10;
+  font-weight: 600;
+  box-shadow: 0 10px 26px -14px var(--tk2-champagne-glow);
+}
+
+.tk2-root .ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* the study-subject tags read as glass chips, not coloured labels */
+.tk2-root .tk-session {
+  background-color: var(--tk2-glass);
+  background-image: var(--tk2-glass-lift);
+  border-color: var(--tk2-glass-rim);
+  backdrop-filter: blur(12px);
+  padding: 0.5rem 0.85rem;
+}
+
+/* ----------------------------- 2. typography ----------------------------- */
+/* Small labels go to tracked capitals; the units drop to 40% so the figures
+   themselves carry the weight. */
+
+.tk2-root .at-kicker,
+.tk2-root .at-sectionhead,
+.tk2-root .at-coord,
+.tk2-root .at-key span,
+.tk2-root .at-legend li,
+.tk2-root .tk2-sync,
+.tk2-root .tk2-badges-count,
+.tk2-root .tk2-targets-grid label,
+.tk2-root .ci-label,
+.tk2-root .tk-quick button,
+.tk2-root .tk-pill button {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tk2-root .tk2-target-field em,
+.tk2-root .ci-hint,
+.tk2-root .at-fine {
+  opacity: 0.4;
+}
+
+.tk2-root .at-title,
+.tk2-root .at-statement {
+  letter-spacing: -0.02em;
+}
+
+/* --------------------------- 3. glass containers -------------------------- */
+
+.tk2-root .ci-card,
+.tk2-root .tk-block,
+.tk2-root .tk2-targets-grid li,
+.tk2-root .tk2-badges-grid li,
+.tk2-root .tk-panel {
+  background-color: var(--tk2-glass);
+  background-image: var(--tk2-glass-lift);
+  border: 1px solid var(--tk2-glass-rim);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ------------------------ 4. spacing and selectors ------------------------ */
+
+.tk2-root .tk-block {
+  padding: 24px;
+  border-radius: var(--ci-radius-md, 12px);
+}
+
+.tk2-root .tk-quick {
+  gap: 0.4rem;
+}
+
+.tk2-root .tk-quick button {
+  padding: 0.42rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--ci-text-soft);
+  font-size: 11.5px;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.tk2-root .tk-quick button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--ci-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* rating scales: capsule pills, champagne glow on the selected one */
+.tk2-root .tk-pill {
+  gap: 0.3rem;
+  padding: 0.28rem;
+  border-color: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tk2-root .tk-pill button {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid transparent;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+
+.tk2-root .tk-pill button[aria-pressed="true"] {
+  color: #0b0c10;
+  background-image: var(--tk2-champagne);
+  border-color: var(--tk2-champagne-line);
+  box-shadow: 0 0 18px -6px var(--tk2-champagne-glow);
+}
+
+/* ------------------------------- 5. the dial ------------------------------ */
+/* An unlogged ring is a faint deep track; a filled one is jewel-toned with a
+   glow along its length and a lit cap where it stops. */
+
+[data-design="atlas"] .at-track {
+  stroke: rgba(255, 255, 255, 0.03);
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+  filter: drop-shadow(0 0 8px var(--tk2-ring-sleep));
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+  filter: drop-shadow(0 0 8px var(--tk2-ring-water));
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+  filter: drop-shadow(0 0 8px var(--tk2-ring-movement));
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+  filter: drop-shadow(0 0 8px var(--tk2-ring-screen));
+}
+[data-design="atlas"] .at-arc[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+  stroke-width: 7;
+  filter: drop-shadow(0 0 8px var(--tk2-ring-study));
+}
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+  stroke-width: 6;
+  filter: drop-shadow(0 0 8px var(--tk2-ring-energy));
+}
+
+[data-design="atlas"] .at-cap {
+  filter: drop-shadow(0 0 8px currentcolor);
+}
+
+[data-design="atlas"] .at-cap[data-id="sleep"] { fill: var(--tk2-ring-sleep); }
+[data-design="atlas"] .at-cap[data-id="water"] { fill: var(--tk2-ring-water); }
+[data-design="atlas"] .at-cap[data-id="movement"] { fill: var(--tk2-ring-movement); }
+[data-design="atlas"] .at-cap[data-id="screen"] { fill: var(--tk2-ring-screen); }
+[data-design="atlas"] .at-cap[data-id="study"] { fill: var(--tk2-ring-study); }
+[data-design="atlas"] .at-cap[data-id="energy"] { fill: var(--tk2-ring-energy); }
+
+/* ==========================================================================
+   Haute-horlogerie pass.
+
+   The page is built the way a watch dial is: a deep ground, hairline guides
+   that sit just above the surface, jewel-toned progress with a lit terminal,
+   and chamfered metal on anything you press. Numbers carry the weight and
+   their units fall back to a whisper.
+   ========================================================================== */
+
+/* -------------------- 4. editorial labels and metrics -------------------- */
+/* Micro-metadata sits in tracked capitals; the figures themselves stay in
+   platinum while the units drop to 35% so the number is what you read. */
+
+.tk2-root .at-kicker,
+.tk2-root .at-sectionhead,
+.tk2-root .at-coord,
+.tk2-root .at-key span,
+.tk2-root .at-legend li,
+.tk2-root .at-fine,
+.tk2-root .at-territory-foot span,
+.tk2-root .tk2-sync,
+.tk2-root .tk2-badges-count,
+.tk2-root .tk2-badge-detail,
+.tk2-root .tk2-targets-grid label,
+.tk2-root .ci-label,
+.tk2-root .ci-hint,
+.tk2-root .tk-quick button {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-metric b {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.tk2-unit,
+.tk2-root .tk2-target-field em {
+  color: var(--text-dim);
+  font-size: 0.85em;
+  margin-left: 2px;
+  opacity: 1;
+}
+
+/* ------------------ 5. capsule docks and the tracer chip ----------------- */
+/* Multi-option rows become a single capsule with a metal chip that slides
+   beneath the active option rather than each button lighting up alone. */
+
+
+
+
+
+
+
+
+/* ------------------------- 7. quick-add counters ------------------------- */
+
+.tk2-root .tk-quick {
+  gap: 0.4rem;
+}
+
+.tk2-root .tk-quick button {
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.tk2-root .tk-quick button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.tk2-root .tk-quick button:active:not(:disabled) {
+  transform: scale(0.94);
+  border-color: var(--text-muted);
+}
+
+/* ----------------------- 6. glassmorphic containers ---------------------- */
+
+.tk2-root .ci-card,
+.tk2-root .tk-block,
+.tk2-root .tk2-targets-grid li,
+.tk2-root .tk2-badges-grid li,
+.tk2-root .tk-panel,
+.tk2-root .tk2-picker,
+[data-design="atlas"] .at-territory {
+  background: rgba(18, 18, 21, 0.7);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow:
+    inset 0px 1px 1px rgba(255, 255, 255, 0.03),
+    0px 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.tk2-root .tk-block {
+  padding: 24px;
+}
+
+/* --------------------------- 3. active surfaces -------------------------- */
+/* Anything selected or primary is champagne with hard-contrast type. */
+
+.tk2-root .ci-btn--primary,
+.tk2-root .tk-pill button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  background-color: #FF0055;
+  border-color: rgba(255, 0, 85, 0.8);
+  color: #ffffff !important;
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: 0 10px 26px -6px rgba(255, 0, 85, 0.6);
+}
+
+.tk2-root .ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* --------------------------- 2. the dial itself -------------------------- */
+
+[data-design="atlas"] .at-track {
+  stroke: rgba(255, 255, 255, 0.03);
+  stroke-width: 2;
+}
+
+[data-design="atlas"] .at-arc {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  --active-track-color-hex: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  --active-track-color-hex: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  --active-track-color-hex: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  --active-track-color-hex: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-arc[data-id="study"] {
+  --active-track-color-hex: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  --active-track-color-hex: var(--tk2-ring-energy);
+}
+
+[data-design="atlas"] .at-cap {
+  filter: drop-shadow(0px 0px 8px currentcolor);
+}
+
+/* ------------------ 5. tag groups and the number scale ------------------- */
+/* Every choice is its own element. Tags wrap onto a second line rather than
+   compressing into each other in a narrow column; the scale sits as circles
+   inside a capsule bar. */
+
+.tk2-picker {
+  margin-top: 8px;
+}
+
+.tk2-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tk2-tag {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-tag:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+.tk2-tag[data-active="true"] {
+  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  background-color: #FF0055;
+  border-color: rgba(255, 0, 85, 0.8);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(255, 0, 85, 0.4);
+}
+
+.tk2-tag:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tk2-numbers {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tk2-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-number:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tk2-number[data-active="true"] {
+  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(255, 0, 85, 0.5);
+}
+
+.tk2-number:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --------------------- 3b. the territory action rows --------------------- */
+/* The taps under each card — the energy scale and the +250ml style
+   increments — get the same treatment as the log sheet's, and sit clear of
+   the contour above them rather than crowding its baseline. */
+
+[data-design="atlas"] .at-territory-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+[data-design="atlas"] .at-territory-actions button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory-actions button:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+[data-design="atlas"] .at-territory-actions button:active {
+  transform: scale(0.94);
+}
+
+[data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  background-color: #FF0055;
+  border-color: rgba(255, 0, 85, 0.8);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+}
+
+/* -------------------- the dial: percentage-driven rings ------------------ */
+/* Each ring is one circle whose dashoffset hides whatever share of the target
+   is still missing, so an increment sweeps into place instead of jumping. */
+
+[data-design="atlas"] .at-arc {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-design="atlas"] .at-cap {
+  transition:
+    cx 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    cy 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* the night itself — bed to wake — kept as a hairline outside the rings */
+[data-design="atlas"] .at-nightspan {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="atlas"] .at-arc,
+  [data-design="atlas"] .at-cap {
+    transition: none;
+  }
+}
+
+/* The overlay layer. Panels mount to <body> through a portal, out of the page
+   tree entirely, so nothing here can fall into the page flow if a stylesheet
+   is slow or missing. */
+.tk2-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+/* -------------------------- the logging modal ---------------------------- */
+/* One category at a time, over a blurred curtain. The card is the trigger;
+   this is the only place that writes. */
+
+.tk2-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1999;
+  background: rgba(0, 0, 0, 0.65);
+  animation: tk2-curtain-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tk2-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(18, 18, 21, 0.9);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+  animation: tk2-modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tk2-curtain-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes tk2-modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px));
+  }
+}
+
+.tk2-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.tk2-modal-close:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tk2-modal-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-modal-hint {
+  margin: 22px 0 10px;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tk2-modal-taps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tk2-modal-tap {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-modal-tap:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+}
+
+.tk2-modal-tap:active {
+  transform: scale(0.94);
+}
+
+.tk2-modal-label {
+  display: block;
+  margin: 26px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tk2-modal-input {
+  width: 100%;
+  margin-top: 26px;
+  padding: 16px 0;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  background: transparent;
+  color: #f5f5f7;
+  font-family: var(--ci-font-mono), ui-monospace, monospace;
+  font-size: 2.2rem;
+  font-weight: 300;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.tk2-modal-input:focus {
+  outline: none;
+  border-bottom-color: #d4af37;
+}
+
+.tk2-modal-unit {
+  margin: 12px 0 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  opacity: 0.5;
+  text-align: center;
+}
+
+.tk2-modal-error {
+  margin: 14px 0 0;
+  font-size: 0.72rem;
+  color: #e0705f;
+}
+
+.tk2-modal-save {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 14px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 100px;
+  background: var(--accent-champagne);
+  background-color: var(--accent-solid);
+  color: #121214 !important;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: none;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -14px rgba(212, 175, 55, 0.7);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tk2-modal-save:hover {
+  filter: brightness(1.05);
+}
+
+.tk2-modal-save:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk2-curtain,
+  .tk2-modal {
+    animation: none;
+  }
+}
+
+/* ------------------- the card is the trigger, not a form ----------------- */
+/* Cards read as panels and do nothing until you open them. The only hint
+   that they're pressable is a word that fades in on hover. */
+
+[data-design="atlas"] .at-territory {
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+[data-design="atlas"] .at-territory:focus-visible {
+  outline: 2px solid var(--accent-solid);
+  outline-offset: 3px;
+}
+
+[data-design="atlas"] .at-territory-more {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory:hover .at-territory-more,
+[data-design="atlas"] .at-territory:focus-visible .at-territory-more {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="atlas"] .at-territory {
+    transition: none;
+  }
+
+  [data-design="atlas"] .at-territory:hover {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   The clean blueprint.
+
+   One floating action, cards that only ever report, and a record table that
+   reads like a statement rather than a spreadsheet. Everything here is
+   surface: no new data, no new claims — the same numbers, better lit.
+   ========================================================================== */
+
+/* ------------------------- the floating action --------------------------- */
+
+/* The dock is inert — it only holds the button, and it never eats a click
+   meant for the page under it. */
+.premium-action-dock {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.premium-log-cta {
+  pointer-events: auto;
+  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  color: #ffffff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  padding: 16px 38px;
+  border-radius: 40px;
+  border: 1px solid rgba(255, 0, 85, 0.6);
+  box-shadow:
+    0 0 24px rgba(255, 0, 85, 0.5),
+    0 12px 32px rgba(255, 0, 85, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.premium-log-cta:hover {
+  transform: scale(1.04);
+  box-shadow: 0 18px 40px rgba(212, 175, 55, 0.35);
+}
+
+.premium-log-cta:active {
+  transform: scale(0.97);
+}
+
+.premium-log-cta:focus-visible {
+  outline: 2px solid #fdf3e3;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-log-cta {
+    transition: none;
+  }
+
+  .premium-log-cta:hover,
+  .premium-log-cta:active {
+    transform: none;
+  }
+}
+
+/* ------------------------- the insight dock ------------------------------ */
+
+.tk2-insight {
+  background: linear-gradient(180deg, rgba(18, 18, 22, 0.4) 0%, rgba(8, 8, 10, 0.6) 100%);
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 20px;
+  padding: 32px;
+  margin: 32px 0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.tk2-insight-caption {
+  display: block;
+  margin: 0 0 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--gold-solid-fallback);
+  text-transform: uppercase;
+}
+
+.tk2-insight-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tk2-insight-list li {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--text-ultra-white);
+  font-size: 0.88rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.tk2-insight-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.tk2-insight-index {
+  color: #e5d3b3;
+  font-weight: 500;
+  font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.tk2-insight-list p {
+  margin: 0;
+}
+
+/* ------------------ the summary matrix: glass cards ---------------------- */
+
+[data-design="atlas"] .at-territory {
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 0, 85, 0.03) 0%, rgba(138, 43, 226, 0.03) 100%), var(--panel-glass-bg);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.03),
+    0 10px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+[data-design="atlas"] .at-territory:hover {
+  border-color: rgba(255, 0, 85, 0.5);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.03),
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(255, 0, 85, 0.2);
+}
+
+[data-design="atlas"] .at-place {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-ultra-white);
+  letter-spacing: -0.01em;
+  margin: 0 0 12px 0;
+}
+
+[data-design="atlas"] .at-territory-foot span {
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-cool-silver);
+  margin-top: 14px;
+}
+
+/* the contour must never push its card wider than the grid gives it */
+[data-design="atlas"] .at-contour {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* --------------------- units inside every metric ------------------------ */
+
+.tk2-unit,
+.tk2-root .tk2-target-field em {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.78rem;
+  margin-left: 1px;
+}
+
+/* --------------------------- the record ---------------------------------- */
+
+.tk2-root .ci-table-wrap,
+[data-design="atlas"] .ci-table {
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(12, 12, 15, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-design="atlas"] .ci-table thead tr {
+  background: rgba(255, 255, 255, 0.015);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-design="atlas"] .ci-table th {
+  padding: 18px 24px;
+  color: var(--text-cool-silver);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  text-align: left;
+}
+
+[data-design="atlas"] .ci-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+[data-design="atlas"] .ci-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+[data-design="atlas"] .ci-table tbody th,
+[data-design="atlas"] .ci-table td {
+  padding: 20px 24px;
+  font-size: 0.85rem;
+  color: var(--text-ultra-white);
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.tk2-cell-met {
+  color: var(--gold-solid-fallback);
+}
+
+.tk2-row-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-cool-silver);
+  padding: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tk2-row-action:hover:not(:disabled) {
+  color: #ff453a;
+}
+
+.tk2-row-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --------------------------- 6. the dial -------------------------------- */
+
+[data-design="atlas"] .at-arc {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0px 0px 8px var(--active-track-color-hex));
+}
+
+[data-design="atlas"] .at-track {
+  stroke: rgba(255, 255, 255, 0.035);
+  stroke-width: 2.5px;
+}
+
+/* the floating action needs room at the foot of the page, and it must never
+   sit on top of an open panel */
+[data-design="atlas"] .at {
+  padding-bottom: 120px;
+}
+
+/* --------------------------- the reflect sheet --------------------------- */
+/* Six fields, one per tracker, each opening on what today holds. Wider than
+   the single-category panel, and arranged in two columns so it stays short. */
+
+.tk2-sheet {
+  max-width: 520px;
+}
+
+.tk2-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  margin-top: 26px;
+}
+
+.tk2-sheet-field {
+  display: block;
+}
+
+.tk2-sheet-field > span {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-sheet-input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--ci-font-mono), ui-monospace, monospace;
+  font-size: 1.25rem;
+  font-weight: 300;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+
+.tk2-sheet-input:focus {
+  outline: none;
+  border-bottom-color: var(--accent-solid);
+}
+
+.tk2-sheet-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 460px) {
+  .tk2-sheet-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

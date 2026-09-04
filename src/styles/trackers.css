@@ -1,0 +1,556 @@
+/**
+ * Trackers — its own visual language inside the shared Bloom design system.
+ *
+ * The theme (ground, ink, type, radius scale) comes from cycle2.css so the page
+ * belongs to the same family. Everything else is deliberately different from
+ * the cycle page:
+ *
+ *  - tinted panels with a corner wash, not hairline cards with a top edge
+ *  - icon tiles and rules instead of numbered editorial blocks
+ *  - a console: one row per tracker with its own ring, sparkline and
+ *    quick-add, rather than a grid of identical cards
+ *  - beads for streaks, pills for choices, circles for actions
+ *  - its own six accents, drawn from the theme's hues but re-mixed
+ */
+
+.tk-root {
+  --tk-radius: 20px;
+  --tk-radius-sm: 14px;
+  --tk-sleep: var(--ci-late);
+  --tk-water: color-mix(in oklab, var(--ci-follicular) 62%, #5ad2f5 38%);
+  --tk-study: color-mix(in oklab, var(--ci-ovulation) 72%, #ff9f45 28%);
+  --tk-movement: color-mix(in oklab, var(--ci-follicular) 48%, var(--ci-ovulation) 52%);
+  --tk-energy: var(--ci-ovulation);
+  --tk-screen: var(--ci-menstrual);
+  --tk-panel-tint: var(--ci-late);
+}
+
+/* --------------------------------- panels -------------------------------- */
+
+.tk-panel {
+  position: relative;
+  border-radius: var(--tk-radius);
+  border: 1px solid color-mix(in oklab, var(--ci-line) 85%, transparent);
+  background:
+    radial-gradient(
+      130% 150% at 0% 0%,
+      color-mix(in oklab, var(--tk-panel-tint) 12%, transparent),
+      transparent 58%
+    ),
+    var(--ci-surface);
+  padding: 1.05rem 1.1rem;
+  box-shadow: 0 18px 40px -34px rgb(0 0 0 / 90%);
+}
+
+.tk-panel--flush {
+  padding: 0.9rem 0.9rem;
+}
+
+/* ------------------------------ section heads ----------------------------- */
+
+.tk-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.tk-head__tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--tk-accent, var(--ci-follicular));
+  background: color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 16%, transparent);
+  border: 1px solid color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 34%, transparent);
+}
+
+.tk-head__label {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tk-accent, var(--ci-follicular));
+  white-space: nowrap;
+}
+
+.tk-head__rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 42%, transparent),
+    transparent
+  );
+}
+
+.tk-head__aside {
+  flex: none;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-mute);
+}
+
+/* --------------------------------- console -------------------------------- */
+
+.tk-console {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tk-row {
+  display: grid;
+  grid-template-columns: auto minmax(96px, 1.1fr) minmax(80px, 1.6fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--tk-radius-sm);
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 3%, transparent);
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+.tk-row:hover {
+  border-color: color-mix(in oklab, var(--tk-accent) 45%, transparent);
+  background: color-mix(in oklab, var(--tk-accent) 7%, transparent);
+}
+
+.tk-row__id {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.tk-row__name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tk-row__value {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+  white-space: nowrap;
+}
+
+.tk-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+@media (max-width: 720px) {
+  .tk-row {
+    grid-template-columns: auto 1fr;
+    row-gap: 0.55rem;
+  }
+
+  .tk-row__spark {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .tk-row__actions {
+    grid-column: 1 / -1;
+    order: 4;
+    flex-wrap: wrap;
+  }
+}
+
+/* --------------------------------- beads ---------------------------------- */
+
+.tk-beads {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tk-beads i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ci-text) 13%, transparent);
+}
+
+.tk-beads i[data-on="true"] {
+  background: var(--tk-accent, var(--ci-follicular));
+}
+
+.tk-beads i[data-today="true"] {
+  box-shadow: 0 0 0 1.5px color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+/* ------------------------------- ring (row) ------------------------------- */
+
+.tk-ring {
+  flex: none;
+  width: 46px;
+  height: 46px;
+}
+
+.tk-ring--lg {
+  width: 84px;
+  height: 84px;
+}
+
+/* --------------------------------- pills ---------------------------------- */
+
+.tk-pill {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+}
+
+.tk-pill button {
+  padding: 0.34rem 0.7rem;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.tk-pill button:hover:not(:disabled) {
+  color: var(--ci-text);
+  background: color-mix(in oklab, var(--ci-text) 7%, transparent);
+}
+
+.tk-pill button[aria-pressed="true"] {
+  color: var(--tk-accent, var(--ci-follicular));
+  background: color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 18%, transparent);
+}
+
+.tk-pill button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ------------------------------ circle buttons ---------------------------- */
+
+.tk-circle {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+  color: var(--ci-text-soft);
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.tk-circle:hover:not(:disabled) {
+  transform: translateY(-1px);
+  color: var(--tk-accent, var(--ci-follicular));
+  border-color: color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 55%, transparent);
+  background: color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 12%, transparent);
+}
+
+.tk-circle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --------------------------------- charts -------------------------------- */
+
+.tk-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.28rem;
+  height: 116px;
+}
+
+.tk-bar {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.tk-bar__fill {
+  width: 100%;
+  border-radius: 999px 999px 3px 3px;
+  background: linear-gradient(
+    180deg,
+    var(--tk-accent, var(--ci-follicular)),
+    color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 28%, transparent)
+  );
+  opacity: 0.9;
+  transform-origin: bottom;
+  animation: tk-grow 0.7s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+.tk-bar__fill[data-empty="true"] {
+  height: 2px !important;
+  background: color-mix(in oklab, var(--ci-text) 14%, transparent);
+  opacity: 1;
+}
+
+.tk-bar[data-met="true"] .tk-bar__fill {
+  opacity: 1;
+}
+
+.tk-bar__goal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed color-mix(in oklab, var(--ci-text) 30%, transparent);
+  pointer-events: none;
+}
+
+.tk-axis {
+  display: flex;
+  gap: 0.28rem;
+  margin-top: 0.4rem;
+}
+
+.tk-axis span {
+  flex: 1;
+  text-align: center;
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  opacity: 0.5;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@keyframes tk-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ---------------------------------- heat --------------------------------- */
+
+.tk-heat {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.tk-heat-axis {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.tk-heat-axis span {
+  text-align: center;
+  font-size: 9px;
+  font-family: var(--ci-font-mono);
+  opacity: 0.45;
+}
+
+.tk-heat i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--ci-text) 8%, transparent);
+}
+
+.tk-heat i[data-level="1"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 25%, transparent);
+}
+.tk-heat i[data-level="2"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+}
+.tk-heat i[data-level="3"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 68%, transparent);
+}
+.tk-heat i[data-level="4"] {
+  background: var(--ci-ovulation);
+}
+
+.tk-heat i[data-today="true"] {
+  outline: 1.5px solid var(--ci-text);
+  outline-offset: 1px;
+}
+
+/* -------------------------------- sessions ------------------------------- */
+
+.tk-session {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+  font-size: 12px;
+}
+
+.tk-session span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tk-session button {
+  margin-left: auto;
+  flex: none;
+  color: var(--ci-text);
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.tk-session button:hover {
+  opacity: 1;
+  color: var(--ci-menstrual);
+}
+
+/* ------------------------------- observations ---------------------------- */
+
+.tk-note {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--tk-radius-sm);
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 3%, transparent);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.tk-note i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: var(--tk-accent, var(--ci-ovulation));
+}
+
+/* ----------------------------- advanced insight --------------------------- */
+
+.tk-insight {
+  border-radius: var(--tk-radius);
+  border: 1px solid color-mix(in oklab, var(--ci-late) 34%, transparent);
+  background:
+    radial-gradient(
+      120% 140% at 100% 0%,
+      color-mix(in oklab, var(--ci-late) 16%, transparent),
+      transparent 60%
+    ),
+    color-mix(in oklab, var(--ci-surface) 92%, var(--ci-late) 8%);
+  padding: 1.15rem 1.2rem;
+}
+
+.tk-insight__contrast {
+  display: grid;
+  grid-template-columns: minmax(64px, auto) 1fr minmax(52px, auto);
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tk-insight__track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ci-text) 10%, transparent);
+  overflow: hidden;
+}
+
+.tk-insight__track i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: var(--tk-accent, var(--ci-follicular));
+  transition: width 0.8s cubic-bezier(0.22, 0.9, 0.24, 1);
+}
+
+/* ------------------------- the log panel's blocks -------------------------- */
+
+.tk-block {
+  border-radius: var(--tk-radius-sm);
+  border: 1px solid color-mix(in oklab, var(--tk-accent, var(--ci-line)) 26%, transparent);
+  background: color-mix(in oklab, var(--tk-accent, var(--ci-text)) 6%, transparent);
+  padding: 0.75rem 0.85rem;
+}
+
+.tk-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* ---------------------------------- misc --------------------------------- */
+
+.tk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+  font-size: 11.5px;
+}
+
+.tk-goal-input {
+  width: 84px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line);
+  background: color-mix(in oklab, var(--ci-text) 5%, transparent);
+  color: var(--ci-text);
+  font-family: var(--ci-font-mono);
+  font-size: 12px;
+}
+
+.tk-goal-input:focus-visible {
+  outline: 2px solid var(--ci-follicular);
+  outline-offset: 1px;
+}
+
+/* `sr-only` lives in the older cycle stylesheet, not the base one — this page
+   carries its own so screen-reader text never renders on screen. */
+.tk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-bar__fill,
+  .tk-circle,
+  .tk-row,
+  .tk-insight__track i,
+  .tk-pill button {
+    animation: none !important;
+    transition: none !important;
+  }
+}
