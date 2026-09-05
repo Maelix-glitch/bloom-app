@@ -403,3 +403,116 @@
   color: #edebe4;
   background: #1f212b;
 }
+
+/* ---------------------------------------------------------------------------
+ * Today / home page — ported from Maelix-glitch/insight-map.
+ * Everything is scoped under .home-page so the six signal colours, the
+ * softer surfaces and the glow/float motion never leak into other routes
+ * (Rewards owns its own --gold, Mood owns the global panel utility).
+ * ------------------------------------------------------------------------- */
+.home-page {
+  --home-surface: color-mix(in oklab, var(--surface) 85%, transparent);
+  --home-surface-2: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  --home-secondary: var(--surface-2);
+  --home-gold: oklch(0.83 0.1 78);
+  --home-mood: oklch(0.78 0.13 20);
+  --home-sleep: oklch(0.72 0.13 255);
+  --home-habits: oklch(0.78 0.14 152);
+  --home-study: oklch(0.75 0.14 285);
+  --home-cycle: oklch(0.7 0.17 8);
+  --home-energy: oklch(0.84 0.13 85);
+  --home-gradient-glow: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--violet) 35%, transparent),
+    transparent 70%
+  );
+  --home-shadow-soft: 0 24px 60px -30px oklch(0 0 0 / 80%);
+}
+
+.home-panel {
+  background: var(--home-surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 8px);
+  box-shadow: var(--home-shadow-soft);
+  backdrop-filter: blur(14px);
+}
+
+.home-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--home-surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.8125rem;
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+.home-chip:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.home-node-glow {
+  box-shadow:
+    0 0 18px -2px currentColor,
+    inset 0 0 12px -6px currentColor;
+}
+
+.home-text-gradient {
+  background: linear-gradient(100deg, oklch(0.95 0.03 90), var(--home-gold));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.home-halo {
+  animation: home-pulse 5s ease-in-out infinite;
+}
+.home-float {
+  animation: home-float 6s ease-in-out infinite;
+}
+.home-rise {
+  animation: home-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.home-dash {
+  animation: home-dash 18s linear infinite;
+}
+
+@keyframes home-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes home-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+@keyframes home-dash {
+  to {
+    stroke-dashoffset: -240;
+  }
+}
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { moodStorage } from "@/lib/mood/storage";
 import {
   aggregateDays,
@@ -119,6 +119,18 @@ export function useMoodSystem() {
 
   useEffect(() => {
     let alive = true;
+
+    if (!hasSupabaseConfig) {
+      // No project in this environment: keep the page up with an honest,
+      // empty record rather than taking the route down.
+      setProfileId(null);
+      setEntries([]);
+      setLoading(false);
+      setAuthError(
+        "Bloom isn't connected to a database in this environment, so Mood entries can't be loaded here.",
+      );
+      return;
+    }
 
     async function start() {
       const {

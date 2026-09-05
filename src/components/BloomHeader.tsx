@@ -3,13 +3,11 @@ import { Link, useLocation } from "@tanstack/react-router";
 export function BloomHeader() {
   const { pathname } = useLocation();
 
-  const moodActive = pathname === "/";
-  const rewardsActive =
-    pathname === "/rewards" || pathname.startsWith("/admin/rewards");
+  const todayActive = pathname === "/";
+  const moodActive = pathname === "/mood" || pathname.startsWith("/mood/");
+  const rewardsActive = pathname === "/rewards" || pathname.startsWith("/admin/rewards");
   const coachActive =
-    pathname === "/coach" ||
-    pathname.startsWith("/coach/") ||
-    pathname === "/bloom/coach.html";
+    pathname === "/coach" || pathname.startsWith("/coach/") || pathname === "/bloom/coach.html";
   const cycleActive = pathname === "/cycle" || pathname.startsWith("/cycle/");
   const trackersActive = pathname === "/trackers" || pathname.startsWith("/trackers/");
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
@@ -24,13 +22,7 @@ export function BloomHeader() {
     >
       {/* Bloom brand */}
       <div className="flex shrink-0 items-center gap-3">
-        <svg
-          viewBox="0 0 28 28"
-          fill="none"
-          width="22"
-          height="22"
-          aria-hidden="true"
-        >
+        <svg viewBox="0 0 28 28" fill="none" width="22" height="22" aria-hidden="true">
           <path
             d="M4 20c3-9 7-14 10-14s7 5 10 14"
             stroke="url(#bloomBrandGradient)"
@@ -39,13 +31,7 @@ export function BloomHeader() {
           />
 
           <defs>
-            <linearGradient
-              id="bloomBrandGradient"
-              x1="4"
-              y1="13"
-              x2="24"
-              y2="13"
-            >
+            <linearGradient id="bloomBrandGradient" x1="4" y1="13" x2="24" y2="13">
               <stop stopColor="#8FB69C" />
               <stop offset="1" stopColor="#E0B36B" />
             </linearGradient>
@@ -66,7 +52,21 @@ export function BloomHeader() {
         <span className="mx-1 hidden h-4 w-px sm:block" style={{ background: "#30333F" }} />
 
         <span className="hidden text-[12px] sm:block" style={{ color: "#63667A" }}>
-          Mood
+          {todayActive
+            ? "Today"
+            : trackersActive
+              ? "Trackers"
+              : cycleActive
+                ? "Cycle"
+                : moodActive
+                  ? "Mood"
+                  : rewardsActive
+                    ? "Rewards"
+                    : coachActive
+                      ? "Coach"
+                      : profileActive
+                        ? "Profile"
+                        : "Bloom"}
         </span>
       </div>
 
@@ -75,9 +75,13 @@ export function BloomHeader() {
         className="no-scrollbar flex min-w-0 items-center gap-[2px] overflow-x-auto"
         aria-label="Primary"
       >
-        <a href="/bloom/index.html" className="bloom-nav-link shrink-0">
+        <Link
+          to="/"
+          className={`bloom-nav-link shrink-0${todayActive ? " bloom-nav-active" : ""}`}
+          aria-current={todayActive ? "page" : undefined}
+        >
           Today
-        </a>
+        </Link>
 
         <Link
           to="/trackers"
@@ -95,21 +99,17 @@ export function BloomHeader() {
           Cycle
         </a>
 
-        <a
-          href="/"
-          className={`bloom-nav-link shrink-0${
-            moodActive ? " bloom-nav-active" : ""
-          }`}
+        <Link
+          to="/mood"
+          className={`bloom-nav-link shrink-0${moodActive ? " bloom-nav-active" : ""}`}
           aria-current={moodActive ? "page" : undefined}
         >
           Mood
-        </a>
+        </Link>
 
         <a
           href="/rewards"
-          className={`bloom-nav-link shrink-0${
-            rewardsActive ? " bloom-nav-active" : ""
-          }`}
+          className={`bloom-nav-link shrink-0${rewardsActive ? " bloom-nav-active" : ""}`}
           aria-current={rewardsActive ? "page" : undefined}
         >
           Rewards
@@ -117,9 +117,7 @@ export function BloomHeader() {
 
         <a
           href="/coach"
-          className={`bloom-nav-link shrink-0${
-            coachActive ? " bloom-nav-active" : ""
-          }`}
+          className={`bloom-nav-link shrink-0${coachActive ? " bloom-nav-active" : ""}`}
           aria-current={coachActive ? "page" : undefined}
         >
           Coach

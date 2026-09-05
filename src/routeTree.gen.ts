@@ -16,6 +16,7 @@ import { Route as CycleRouteImport } from './routes/cycle'
 import { Route as CycleClassicRouteImport } from './routes/cycle-classic'
 import { Route as CycleStylesRouteImport } from './routes/cycle-styles'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as MoodRouteImport } from './routes/mood'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as TrackersRouteImport } from './routes/trackers'
@@ -58,6 +59,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MoodRoute = MoodRouteImport.update({
+  id: '/mood',
+  path: '/mood',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/cycle-classic': typeof CycleClassicRoute
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
+  '/mood': typeof MoodRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/trackers': typeof TrackersRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/cycle-classic': typeof CycleClassicRoute
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
+  '/mood': typeof MoodRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/trackers': typeof TrackersRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/cycle-classic': typeof CycleClassicRoute
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
+  '/mood': typeof MoodRoute
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/trackers': typeof TrackersRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/cycle-classic'
     | '/cycle-styles'
     | '/dashboard'
+    | '/mood'
     | '/profile'
     | '/rewards'
     | '/trackers'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/cycle-classic'
     | '/cycle-styles'
     | '/dashboard'
+    | '/mood'
     | '/profile'
     | '/rewards'
     | '/trackers'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/cycle-classic'
     | '/cycle-styles'
     | '/dashboard'
+    | '/mood'
     | '/profile'
     | '/rewards'
     | '/trackers'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   CycleClassicRoute: typeof CycleClassicRoute
   CycleStylesRoute: typeof CycleStylesRoute
   DashboardRoute: typeof DashboardRoute
+  MoodRoute: typeof MoodRoute
   ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
   TrackersRoute: typeof TrackersRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mood': {
+      id: '/mood'
+      path: '/mood'
+      fullPath: '/mood'
+      preLoaderRoute: typeof MoodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -303,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   CycleClassicRoute: CycleClassicRoute,
   CycleStylesRoute: CycleStylesRoute,
   DashboardRoute: DashboardRoute,
+  MoodRoute: MoodRoute,
   ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
   TrackersRoute: TrackersRoute,

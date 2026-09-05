@@ -13,10 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentPage = pageInfo[fileName] || "Bloom";
 
   const navItems = [
-    { label: "Today", href: "index.html" },
+    { label: "Today", href: "/" },
     { label: "Trackers", href: "trackers.html" },
     { label: "Cycle", href: "cycle.html" },
-    { label: "Mood", href: "/" },
+    { label: "Mood", href: "/mood" },
     { label: "Rewards", href: "rewards.html" },
     { label: "Coach", href: "coach.html" },
   ];

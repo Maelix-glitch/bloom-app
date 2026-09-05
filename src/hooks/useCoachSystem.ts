@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { answer as groundedAnswer } from "@/lib/coach/responder";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
@@ -153,6 +153,12 @@ export function useCoachSystem() {
       if (!mounted) return;
       setProfileId(uid);
     };
+    if (!hasSupabaseConfig) {
+      apply(null);
+      return () => {
+        mounted = false;
+      };
+    }
     void supabase.auth.getSession().then(({ data }) => apply(data.session?.user.id ?? null));
     const {
       data: { subscription },

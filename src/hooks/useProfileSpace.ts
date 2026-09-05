@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { moodStorage } from "@/lib/mood/storage";
 import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
@@ -79,6 +79,12 @@ export function useProfileSpace() {
   /* ------------------------------- session ------------------------------- */
   useEffect(() => {
     let mounted = true;
+
+    if (!hasSupabaseConfig) {
+      setUserId(null);
+      setAuthState("signed-out");
+      return;
+    }
 
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;

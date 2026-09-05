@@ -2049,7 +2049,7 @@ export function CoachPage() {
                   <span>{composerNotice}</span>
                   {signInRequired ? (
                     <a
-                      href="/bloom/index.html?return=/coach"
+                      href="/profile"
                       className="coach-notice-action"
                       onClick={preserveDraftForSignIn}
                     >
