@@ -1,11 +1,120 @@
-# Metrics data-entry modal — why it looks faded / unfinished
+# Metrics data-entry modal — why it looked faded / unfinished, and the fix
 
 **Date:** 2026-09-05
-**Page:** `/trackers` → "REFLECT & LOG TODAY" button
+**Page:** `/trackers` → "REFLECT & LOG TODAY" / "LOG METRICS TODAY" button
 **Reference ("perfect") version:** https://github.com/Maelix-glitch/lovable-data-entry → `src/components/metrics-entry-modal.tsx`
 
-This is a diagnosis only. No app code has been changed — the screenshots in this
-folder were taken by actually running both projects in a headless browser.
+> **Status: FIXED** on branch `arena/01a0702b-bloom-app`. Part 1 below is the
+> diagnosis (kept for the record). Part 2 is exactly what was removed,
+> replaced and changed. All screenshots were taken by running the app in a
+> headless browser — `current-*` = before, `fixed-*` = after,
+> `reference-*` = the lovable-data-entry original.
+
+---
+
+## Part 2 — What was done
+
+### After
+
+| Empty (opens on today's real values when there are any) | Validation (Bloom's 1–5 energy scale) |
+|---|---|
+| ![fixed empty](fixed-empty.png) | ![fixed error](fixed-error.png) |
+
+| Saved | Page after "View My Day" — 7.5 hrs → `7h 30m`, 3/6 on target |
+|---|---|
+| ![fixed saved](fixed-saved.png) | ![page](fixed-page-after-save.png) |
+
+Mobile 390 px: ![mobile](fixed-mobile-390px.png)
+
+### ❌ REMOVED (7 things — all dead or broken, nothing imported them)
+
+| Path | Why |
+|---|---|
+| `src/components/tk/MetricsModal.tsx` | the faded AI rewrite that was actually rendering |
+| `src/components/tk/designs/MetricsEntryModal.tsx` | 3rd unused copy, 10 TypeScript errors |
+| `src/styles/lovable-styles.css` | never imported; its tokens moved into `src/styles.css` |
+| `src/components/lovable/ui/*` (47 files) | duplicate of `src/components/ui/*`, never imported |
+| `src/hooks/lovable-use-mobile.tsx` | duplicate of `hooks/use-mobile.tsx`, never imported |
+| `src/lib/lovable-utils.ts` | duplicate of `lib/utils.ts`, never imported |
+| `src/lib/lovable-error-capture.ts` | duplicate of `lib/error-capture.ts`, never imported |
+
+Kept: `src/lib/lovable-error-reporting.ts` — `routes/__root.tsx` really uses it.
+
+### 🔁 REPLACED
+
+`src/components/lovable/metrics-entry-modal.tsx` (your perfect file, unused)
+→ **moved to** `src/components/tk/MetricsEntryModal.tsx` and wired in.
+
+The JSX, Tailwind classes, colours, header gradient, 2-column grid, three
+views (form → saved / reset), "Clear all fields", "Add Another Entry" are
+**unchanged from the reference**. Only the data layer under it is Bloom's:
+
+| Concern | Reference | Now |
+|---|---|---|
+| Props | `open, onClose, onSaved?` | `store, open, onClose, onSaved?` |
+| Opens with | blank fields | today's values from `readTrackerValue(store, id)` |
+| Save | `onSaved(values)` only | `setTrackerValues(store, [...six])` — one write, one copy of the day — then `onSaved` |
+| Units typed | hrs / ml / hrs / min / **/10** / hrs | hrs / ml / hrs / min / **/5** / hrs |
+| Units stored | — | sleep·study·screen ×60 → minutes; water ml; movement min; energy 1–5 |
+| Validation ranges | hard-coded (0–24 h, 1–10) | derived from `trackerDef(id).min/max` → 0–18 h sleep, 0–8000 ml, 0–16 h study, 0–8 h movement, 1–5 energy, 0–20 h screen. The form can no longer accept a value the store would reject |
+| Mounting | inline `fixed inset-0 z-50` | `createPortal(…, document.body)` + `z-[2000]` (same layer as every other Bloom sheet) |
+| Save failure | n/a | store error string shown in red under Confirm (`role="alert"`) |
+| Extras | — | `type="button"` on all buttons, `aria-label`/`aria-invalid` on inputs, Enter key confirms, `min`/`max`/`step` on inputs |
+
+### ✏️ CHANGED
+
+**`src/components/tk/designs/Atlas.tsx`, `Ledger.tsx`, `Strip.tsx`** — one
+import + one JSX tag each:
+
+```diff
+- import { MetricsModal } from "@/components/tk/MetricsModal";
++ import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
+…
+- <MetricsModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
++ <MetricsEntryModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
+```
+
+**`src/styles.css`** — the reference's tokens added to `:root` (the modal is
+portalled to `<body>`, so they must be global) and registered in
+`@theme inline` so `bg-metric-sleep`, `text-brand`, `border-danger`… work:
+
+```
+--metric-sleep / -water / -study / -movement / -energy / -screen
+--brand  --success  --danger
+--metric-surface  --metric-surface-raised   ← renamed from the reference's
+                                               --surface / --surface-raised
+                                               because Bloom already owns --surface
+```
+
+The component uses `var(--metric-surface)` / `var(--metric-surface-raised)`
+accordingly — the only two token names that differ from the reference file.
+
+### ✅ Verified
+
+- `tsc`: 0 errors in touched files (project total went 21 → 11; the 11 left are
+  pre-existing in `ReflectSheet.tsx`, `BloomCycleAI.tsx`, `cycle-classic.tsx`
+  and a test — untouched).
+- `eslint src/components/tk/MetricsEntryModal.tsx`: 0 errors.
+- `vitest run`: 19/19 pass. `vite build`: succeeds.
+- Headless-browser round trip on all three designs (Atlas, Ledger, Strip):
+  opens → type `7.5 / 2000 / 3 / 30 / 4 / 4` → energy `9` shows
+  "Must be between 1–5." → fix → Saved! → localStorage holds
+  `sleepMinutes: 450, waterMl: 2000, sessions:[{minutes:180}], movementMinutes: 30, energy: 4, screenMinutes: 240`
+  → page reads `7h 30m`, `3/6 on target` → reopen shows `7.5, 2000, 3, 30, 4, 4` pre-filled.
+- Inputs now 146 px inside 197 px cards (was 402 px inside 201 px), no
+  horizontal scroll, dialog `scrollWidth === clientWidth`.
+
+### ⚠️ One product decision to make
+
+The reference enforces **all six fields required** ("Real data only. No
+estimates, no blanks."). Bloom's old modal allowed partial entry. I kept the
+reference behaviour because that's the design you called perfect — if you'd
+rather allow saving 3 of 6, it's a one-line change in `handleConfirm`
+(drop the `if (!allFilled) return;` and only write the filled entries).
+
+---
+
+## Part 1 — Original diagnosis (2026-09-05, before the fix)
 
 ---
 
@@ -166,10 +275,9 @@ scratch with inline styles and lost the design in the process.
 
 ---
 
-## What needs to change (for when you fix it)
+## The fix checklist that Part 2 carried out
 
-You said you'll do the code changes yourself — this is the shopping list, in
-order of impact:
+(Written before the fix; every item below is now done.)
 
 1. **Render the right component.** In `Atlas.tsx`, `Ledger.tsx`, `Strip.tsx`
    swap the import from `@/components/tk/MetricsModal` to your perfect

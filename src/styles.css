@@ -47,6 +47,19 @@
   --color-sage: var(--sage);
   --color-rose: var(--rose);
 
+  /* Metrics entry modal tokens → bg-metric-sleep, text-brand, border-danger… */
+  --color-metric-sleep: var(--metric-sleep);
+  --color-metric-water: var(--metric-water);
+  --color-metric-study: var(--metric-study);
+  --color-metric-movement: var(--metric-movement);
+  --color-metric-energy: var(--metric-energy);
+  --color-metric-screen: var(--metric-screen);
+  --color-metric-surface: var(--metric-surface);
+  --color-metric-surface-raised: var(--metric-surface-raised);
+  --color-brand: var(--brand);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -109,6 +122,24 @@
   --dim-amber: color-mix(in oklab, var(--amber) 14%, transparent);
   --dim-sage: color-mix(in oklab, var(--sage) 14%, transparent);
   --dim-rose: color-mix(in oklab, var(--rose) 14%, transparent);
+
+  /*
+   * Metrics entry modal ("Today's snapshot") — ported from lovable-data-entry.
+   * Defined on :root because the modal is portalled to <body>, outside any
+   * page-scoped token set. Bloom already owns --surface, so the modal's two
+   * surfaces are namespaced as --metric-surface / --metric-surface-raised.
+   */
+  --metric-sleep: oklch(0.62 0.22 290);
+  --metric-water: oklch(0.72 0.14 220);
+  --metric-study: oklch(0.75 0.17 155);
+  --metric-movement: oklch(0.72 0.19 55);
+  --metric-energy: oklch(0.85 0.17 95);
+  --metric-screen: oklch(0.62 0.25 355);
+  --metric-surface: oklch(0.13 0.02 275);
+  --metric-surface-raised: oklch(0.17 0.02 275);
+  --brand: oklch(0.6 0.28 320);
+  --success: oklch(0.75 0.19 165);
+  --danger: oklch(0.65 0.24 20);
 }
 
 @keyframes rise {
