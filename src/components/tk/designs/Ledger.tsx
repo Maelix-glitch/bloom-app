@@ -17,7 +17,7 @@ import { TRACKERS, type TrackerDef } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
 import { Achievements, TargetSheet } from "./Targets";
-import { MetricsModal } from "@/components/tk/MetricsModal";
+import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { applyQuickAdd, Footer, Observations, SyncNote, useTrackers, valuesOf } from "./shared";
 
 const QUICK: Partial<Record<string, { amount: number; label: string }[]>> = {
@@ -332,7 +332,7 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
 
             <Footer />
 
-            <MetricsModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
+            <MetricsEntryModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
 
             <div style={{ position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)", zIndex: 9999, pointerEvents: "none" }}>
               <button
