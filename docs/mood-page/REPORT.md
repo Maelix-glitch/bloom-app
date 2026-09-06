@@ -95,3 +95,22 @@ changes.
 Screenshots: `mood-desktop-full.jpg`, `mood-log-your-mood.png`,
 `mood-journey.png`, `mood-insights.png`, `mood-desktop-empty.png`,
 `mood-mobile-full.jpg`, `rail-avatar-block.png`.
+
+## Kit — its own download
+
+`docs/mood-page/bloom-mood-page.zip` (`apply-mood-page.mjs` + `files/`),
+separate from the Today-home kit, which the user has already applied and
+which stays at v5 untouched. Requires `HomeSidebar.tsx` to exist (Today-home
+v2+). Steps: move `src/routes/mood.tsx` → `src/routes/mood/intelligence.tsx`
+(route id + "← Mood" link; falls back to the kit's copy, keeping an
+unexpected local version as `mood.tsx.before-mood-kit.txt` so it never
+registers `/mood` twice); copy the page files, `useRailIdentity.ts`, the
+images and `HomeSidebar.tsx`; five marker-guarded edits in
+`useProfileSpace.ts`; the Rewards link; `styles.css` gold tokens +
+`.mood-page` block + refreshed app-shell tail (marker
+`.app-sidebar-gold-rule {`). Idempotent; CRLF-preserving. Tested from
+`02bcc2a` (v5), `4e2a87b` (v4), `df7d705` (v3), `8945284` (v2) and a CRLF
+v4 tree: every run ends byte-identical to this branch for the files it owns,
+second runs make 0 edits, and the applied v4 tree passes 34/34 tests, adds no
+type errors once the dev server regenerates `routeTree.gen.ts`, and builds
+with the six images bundled. Zip: 603,330 bytes.
