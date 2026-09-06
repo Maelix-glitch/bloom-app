@@ -1,54 +1,36 @@
-# Bloom — Today (home) page kit
+# Bloom — Today home kit (v2)
 
-Migrates the home page from `Maelix-glitch/insight-map` into the main Bloom app
-as the index route (`/`), wired to real data. Mood Intelligence (the old `/`)
-moves to `/mood`.
+What it installs on top of your repo:
 
-## Apply
+1. **Today page at `/`** (v1) — insight-map layout wired to Supabase, live rings, the coach.
+2. **Habits section** right under the greeting, with per-habit streaks, points, a progress bar and an empty state (v2).
+3. **Floating "Add habit" button** bottom-right on every screen size; it opens the existing Add-habit modal (v2).
+4. **The same sidebar on every main page** — Today, Trackers, Cycle, Mood, Rewards, Coach (and Profile): the rail on desktop, a bottom tab bar on phones (v2).
+5. Rewards no longer crashes when the app runs without a Supabase `.env` (same guard the other hooks already had).
+
+Safe to run whether or not v1 was applied before — it only adds what is missing, and it is safe to run twice.
+
+## Apply (Windows, PowerShell or cmd)
+
+Requires the metrics-modal fix kit applied first (`src\components\tk\MetricsEntryModal.tsx` must exist).
 
 ```
 cd "C:\Users\Windows 11 Pro\Documents\trae_projects\bloom-app\chronos-feel"
-node "<where you unzipped>\bloom-today-home\apply-today-home.mjs"
+node "C:\Users\Windows 11 Pro\OneDrive\Desktop\bloom-today-home\apply-today-home.mjs"
 ```
 
-(If the zip extracts double-nested like last time, the script is at
-`…\bloom-today-home\bloom-today-home\apply-today-home.mjs`.)
+(If the unzip produced a double folder, add another `\bloom-today-home` to the second path.)
 
-Expected output ends with `Done.` and eight ✔ checks. Safe to run twice.
-
-**Requires** the metrics-modal fix already applied (it reuses
-`src/components/tk/MetricsEntryModal.tsx`).
+Expected: a list of `✔` lines, then `Verify:` with every line `✔`, then `Done.`
+If anything prints `✖`, nothing else was touched — send me the output.
 
 ## Then
 
-1. `npm run dev` → `/` is the Today page; `/mood` is Mood Intelligence.
-2. In Supabase → SQL editor, run `supabase/migrations/20260906_today_home.sql`
-   once. It creates (if missing) `tracker_days`, `habits`, `habit_logs`,
-   `profiles.total_points` + the points RPCs, all owner-only RLS, and enables
-   realtime for habits. It is idempotent and tolerant of the legacy tables.
-3. `git add -A && git commit -m "feat(home): Today page from insight-map, wired to Supabase" && git push`
+- `npm run dev` → `/` (Today: habits section + floating Add habit), then `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach` — same sidebar on each, the page's own design unchanged inside it.
+- Supabase → SQL editor → run `supabase/migrations/20260906_today_home.sql` once (idempotent; creates `tracker_days`, `habits`, `habit_logs`, `profiles.total_points` + RPCs, RLS, realtime). Skip if you already ran it for v1.
+- `git add -A && git commit -m "feat(home): habits section, floating add-habit, shared sidebar on every page" && git push`
 
-## What's wired
+## What's in the box
 
-| Panel | Source | Persists to |
-| --- | --- | --- |
-| Progress ring | habits 40% · trackers 35% · mood 25% (only inputs that exist) | — |
-| Connection map | node strength = share of last 30 days carrying that signal; arcs = real correlations (trackers + mood) | — |
-| Trackers at a glance | `useTrackers` (same store as /trackers) | `tracker_days` |
-| Today's habits / focus / flow | `useHabits` (new) | `habits`, `habit_logs`, `profiles.total_points` (+ realtime) |
-| Mood chip / composer | `useMoodSystem` | `mood_entries` |
-| Cycle ring | `usePeriodLog` | `cycle_entries` |
-| Coach card | `useCoachSystem` — same grounded responder as /coach | `coach_messages` |
-| Insights / activity | computed from all of the above | — |
-
-Signed out or without `.env`: everything still renders from device storage;
-nothing is invented.
-
-## Files
-
-- new: `src/routes/index.tsx`, `src/routes/mood.tsx` (moved), `src/components/home/*`,
-  `src/hooks/useHabits.ts`, `src/lib/home/{habits,today}.ts`, `src/assets/home/*.jpg`,
-  `supabase/migrations/20260906_today_home.sql`
-- patched: `src/components/BloomHeader.tsx` (Today → `/`, Mood → `/mood`, context label),
-  `src/styles.css` (scoped `.home-*` tokens appended), `src/hooks/{useMoodSystem,useProfileSpace,useCoachSystem}.ts`
-  (skip Supabase when no config), `RewardsPage.tsx`, `CoachPage.tsx`, `public/bloom/shared-bloom-header.js` (links)
+- `apply-today-home.mjs` — the script (Node ≥ 18, no dependencies). Preserves CRLF line endings; marker-guarded edits.
+- `files/` — full copies of new/replaced files + the two CSS blocks it appends to `src/styles.css`.

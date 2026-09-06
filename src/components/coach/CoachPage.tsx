@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 
 import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import {
@@ -1831,13 +1832,14 @@ export function CoachPage() {
   };
 
   return (
-    <div className="coach-page relative min-h-screen bg-background text-foreground">
+    <div className="coach-page app-shell relative min-h-screen bg-background text-foreground">
       <BloomHeader />
+      <AppNav />
       <div className="coach-atmosphere">
         <Atmosphere />
       </div>
 
-      <main className="relative z-10 mx-auto w-full max-w-[1360px] px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
+      <main className="relative z-10 mx-auto w-full max-w-[1360px] px-5 pb-24 pt-10 sm:px-8 sm:pt-14 lg:pb-20">
         <header className="coach-page-header">
           <div>
             <p className="eyebrow flex items-center gap-2">

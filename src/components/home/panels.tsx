@@ -1,17 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Check,
-  Loader2,
-  Plus,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Loader2, Plus, type LucideIcon } from "lucide-react";
 
 import { ProgressRing } from "./ProgressRing";
 import { SIGNAL_COLOR, SIGNAL_ICON } from "./ConnectionMap";
-import type { HabitToday } from "@/hooks/useHabits";
 import type {
   ActivityItem,
   FlowItem,
@@ -391,97 +382,13 @@ export function ActivityPanel({ items }: { items: ActivityItem[] }) {
                 >
                   <Icon className="size-4" />
                 </span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px]">{a.title}</span>
-                  <span className="block text-[11px] text-muted-foreground">{a.sub}</span>
+                  <span className="block truncate text-[11px] text-muted-foreground">{a.sub}</span>
                 </span>
               </li>
             );
           })}
-        </ul>
-      )}
-    </section>
-  );
-}
-
-/* --------------------------------- habits -------------------------------- */
-
-export function HabitsPanel({
-  habits,
-  loading,
-  onToggle,
-  onAdd,
-  points,
-}: {
-  habits: HabitToday[];
-  loading: boolean;
-  onToggle: (id: string) => void;
-  onAdd: () => void;
-  points: number | null;
-}) {
-  return (
-    <section className="home-panel p-5" aria-labelledby="home-habits-title">
-      <header className="flex items-center justify-between gap-3">
-        <h2 id="home-habits-title" className="font-display text-xl">
-          Today's habits
-        </h2>
-        <div className="flex items-center gap-2">
-          {points !== null ? (
-            <span className="home-chip text-[11px] tabular-nums" title="Bloom points">
-              <Sparkles className="size-3.5" style={{ color: "var(--home-gold)" }} />{" "}
-              {points.toLocaleString()}
-            </span>
-          ) : null}
-          <button type="button" onClick={onAdd} className="home-chip text-xs">
-            <Plus className="size-3.5" /> Add
-          </button>
-        </div>
-      </header>
-      {loading && habits.length === 0 ? (
-        <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-3.5 animate-spin" /> Loading your habits…
-        </p>
-      ) : habits.length === 0 ? (
-        <p className="mt-4 text-sm leading-snug text-muted-foreground">
-          No habits yet. Add one and it becomes part of today's ring.
-        </p>
-      ) : (
-        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-          {habits.map((h) => (
-            <li key={h.id}>
-              <button
-                type="button"
-                onClick={() => onToggle(h.id)}
-                aria-pressed={h.done}
-                data-testid={`home-habit-${h.id}`}
-                className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors ${
-                  h.done
-                    ? "border-primary/50 bg-primary/10"
-                    : "border-border bg-surface-2/40 hover:border-primary/40"
-                }`}
-              >
-                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface text-base">
-                  {h.iconUrl ? <img src={h.iconUrl} alt="" className="size-5 rounded" /> : h.icon}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className={`block truncate text-sm ${h.done ? "opacity-70" : ""}`}>
-                    {h.name}
-                  </span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    {h.done ? "Done" : h.reminderTime ? `Around ${h.reminderTime}` : "Today"} · +
-                    {h.points}
-                  </span>
-                </span>
-                <span
-                  className={`grid size-5 shrink-0 place-items-center rounded-full border ${
-                    h.done ? "border-primary bg-primary text-primary-foreground" : "border-border"
-                  }`}
-                >
-                  {h.done ? <Check className="size-3" /> : null}
-                </span>
-              </button>
-            </li>
-          ))}
         </ul>
       )}
     </section>

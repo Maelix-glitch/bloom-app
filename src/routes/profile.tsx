@@ -8,6 +8,7 @@ import profileCss from "../styles/profile.css?url";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { Reveal, accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
@@ -329,7 +330,7 @@ function ProfilePage() {
   /* ------------------------------- render ------------------------------- */
   return (
     <div
-      className="relative min-h-screen bg-background text-foreground"
+      className="app-shell relative min-h-screen bg-background text-foreground"
       style={{
         ["--profile-accent" as string]: accentVar[accent],
         ["--profile-accent-soft" as string]: `color-mix(in oklab, ${accentVar[accent]} 10%, transparent)`,
@@ -338,9 +339,10 @@ function ProfilePage() {
       }}
     >
       <BloomHeader />
+      <AppNav />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[720px] px-5 pb-16 pt-8 sm:px-8 sm:pt-10">
+      <main className="relative mx-auto w-full max-w-[720px] px-5 pb-28 pt-8 sm:px-8 sm:pt-10 lg:pb-16">
         {authState === "checking" ? (
           <ProfileSkeleton />
         ) : !identity ? (

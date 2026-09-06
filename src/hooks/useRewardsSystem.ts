@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 
 export type RewardStatus = "draft" | "published" | "claimed" | "expired" | "revoked";
 
@@ -77,6 +77,18 @@ export function useRewardsSystem() {
     setLoading(true);
     setError(null);
 
+    if (!hasSupabaseConfig) {
+      // No project in this environment: keep the page up with an honest,
+      // empty record rather than taking the route down.
+      setUserId(null);
+      setRewards([]);
+      setError(
+        "Bloom isn't connected to a database in this environment, so rewards can't be loaded here.",
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const {
         data: { session },
@@ -103,6 +115,7 @@ export function useRewardsSystem() {
 
   useEffect(() => {
     void loadUserRewards();
+    if (!hasSupabaseConfig) return;
 
     const listener = supabase.auth.onAuthStateChange((_event, session) => {
       setUserId(session?.user?.id ?? null);

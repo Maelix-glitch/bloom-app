@@ -516,3 +516,100 @@
     transform: translateY(0);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * App shell — the insight-map rail and the phone tab bar that every main page
+ * shares (Today, Trackers, Cycle, Mood, Rewards, Coach). A page opts in by
+ * adding `app-shell` to its wrapper and rendering <AppNav /> after its
+ * <BloomHeader />; the wrapper becomes a two-column grid at lg with the
+ * header across the top, the rail in column 1 and the page's own <main> in
+ * column 2. Fixed atmospheres and overlays are out of flow, so they are
+ * untouched. See src/components/home/HomeSidebar.tsx.
+ * ------------------------------------------------------------------------- */
+.app-shell {
+  /* Height of the phone tab bar; 0 once the rail takes over at lg. Anything a
+     page pins to the bottom of the viewport should add this to its offset. */
+  --app-bottom-nav: 56px;
+}
+@media (min-width: 64rem) {
+  .app-shell {
+    --app-bottom-nav: 0px;
+    display: grid;
+    grid-template-columns: 212px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .app-shell > header {
+    grid-column: 1 / -1;
+  }
+  .app-shell > .app-sidebar {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .app-shell > main {
+    grid-row: 2;
+    grid-column: 2;
+    min-width: 0;
+  }
+}
+
+/* The rail reads Bloom's base palette on every route — even inside pages
+   that retint the shared tokens (Rewards) — so it is identical everywhere. */
+.app-nav {
+  --background: oklch(0.19 0.021 279);
+  --surface: oklch(0.235 0.023 279);
+  --surface-2: oklch(0.272 0.026 279);
+  --surface-3: oklch(0.305 0.028 279);
+  --border: oklch(0.33 0.026 279);
+  --border-strong: oklch(0.4 0.03 279);
+  --foreground: oklch(0.955 0.008 85);
+  --muted-foreground: oklch(0.66 0.026 285);
+  --primary: oklch(0.7 0.107 297);
+  --radius: 1rem;
+  color: var(--foreground);
+}
+.app-sidebar {
+  background: color-mix(in oklab, var(--surface) 40%, var(--background));
+}
+
+/* Bottom-anchored controls other pages already own sit above the tab bar
+   on phones instead of underneath it. (The trackers dock also sets its
+   offset inline, hence the !important.) */
+.app-shell .premium-action-dock {
+  bottom: calc(32px + var(--app-bottom-nav)) !important;
+}
+.app-shell .reward-toast {
+  bottom: calc(20px + var(--app-bottom-nav));
+}
+
+/* Floating "Add habit" on Today — clears the tab bar on phones. */
+.home-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + var(--app-bottom-nav, 0px));
+  z-index: 30;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
+    0 18px 50px -18px color-mix(in oklab, var(--violet) 80%, transparent);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease;
+}
+.home-fab:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--violet) 60%, transparent),
+    0 22px 56px -16px color-mix(in oklab, var(--violet) 90%, transparent);
+}
+@media (min-width: 40rem) {
+  .home-fab {
+    right: 1.5rem;
+    bottom: calc(1.5rem + var(--app-bottom-nav, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-fab,
+  .home-fab:hover {
+    transition: none;
+    transform: none;
+  }
+}

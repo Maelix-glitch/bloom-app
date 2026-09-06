@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import cycleIntelligenceCss from "../styles/cycle2.css?url";
 import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
@@ -29,11 +30,12 @@ export const Route = createFileRoute("/cycle")({
 function CyclePage() {
   const [theme] = useCycleTheme();
   return (
-    <>
+    <div className="app-shell min-h-screen bg-background text-foreground">
       <BloomHeader />
-      <main>
+      <AppNav />
+      <main className="min-w-0">
         <CycleIntelligence theme={theme} />
       </main>
-    </>
+    </div>
   );
 }

@@ -316,3 +316,37 @@ export function isDueOn(habit: Habit, date: string): boolean {
   }
   return true;
 }
+
+/* -------------------------------- streaks -------------------------------- */
+
+const shift = (date: string, days: number): string => {
+  const d = new Date(`${date}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/**
+ * Consecutive due days completed, counting back from today. A day the habit
+ * isn't scheduled (custom weekdays, before its start date) neither counts nor
+ * breaks the run. Today only counts once it's done, so an open habit still
+ * shows yesterday's streak instead of dropping to zero at midnight.
+ */
+export function streakOf(habit: Habit, logs: readonly HabitLog[], today: string): number {
+  const done = new Set<string>();
+  for (const l of logs) if (l.habitId === habit.id) done.add(l.date);
+  if (done.size === 0) return 0;
+
+  let streak = 0;
+  let date = today;
+  // Today is a free pass while it's still open.
+  if (!done.has(date)) date = shift(date, -1);
+  for (let guard = 0; guard < 366; guard++) {
+    if (habit.startDate && date < habit.startDate) break;
+    if (isDueOn(habit, date)) {
+      if (!done.has(date)) break;
+      streak++;
+    }
+    date = shift(date, -1);
+  }
+  return streak;
+}

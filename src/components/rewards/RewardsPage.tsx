@@ -18,6 +18,7 @@ import {
 
 import crownCrest from "@/assets/crown-crest.png";
 import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { RewardClaimCinematic, type RewardReveal } from "@/components/rewards/RewardClaimCinematic";
 import { useRewardsSystem, type UserReward } from "@/hooks/useRewardsSystem";
@@ -334,8 +335,9 @@ export function RewardsPage() {
   };
 
   return (
-    <div className="rewards-delivery-page relative min-h-screen bg-background text-foreground">
+    <div className="rewards-delivery-page app-shell relative min-h-screen bg-background text-foreground">
       <BloomHeader />
+      <AppNav />
       <Atmosphere />
       <div className="rewards-starfield" aria-hidden="true">
         {Array.from({ length: 18 }, (_, index) => (
@@ -352,7 +354,7 @@ export function RewardsPage() {
           />
         ))}
       </div>
-      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-24 pt-12 sm:px-8 sm:pt-16">
+      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-28 pt-12 sm:px-8 sm:pt-16 lg:pb-24">
         <header className="reward-page-header">
           <div>
             <p className="eyebrow flex items-center gap-2">

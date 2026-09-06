@@ -19,6 +19,7 @@ import { History } from "@/components/mood/History";
 import { Composer } from "@/components/mood/Composer";
 import { Reveal } from "@/components/mood/primitives";
 import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 
 export const Route = createFileRoute("/mood")({
   head: () => ({
@@ -98,11 +99,12 @@ function MoodIntelligencePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <div className="app-shell relative min-h-screen bg-background text-foreground">
       <BloomHeader />
+      <AppNav />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-24 pt-14 sm:px-8 sm:pt-20">
+      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-28 pt-14 sm:px-8 sm:pt-20 lg:pb-24">
         <Reveal>
           <Hero system={system} onCompose={openNew} />
         </Reveal>

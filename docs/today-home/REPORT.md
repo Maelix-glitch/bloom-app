@@ -76,3 +76,78 @@ everything, `anon` revoked, realtime publication for habits. Idempotent.
 ## Apply locally
 
 `bloom-today-home.zip` in this folder — see `KIT-README.md`.
+
+---
+
+# v2 — habits section, floating add-habit, one sidebar everywhere
+
+Three requests, nothing else changed:
+
+## 1. Dedicated habits section, high on the page
+
+`src/components/home/HabitsSection.tsx`, rendered directly under the greeting/hero and
+above the progress ring + connection map (`src/routes/index.tsx`). Same theme
+tokens as the rest of Today (`.home-panel`, `.home-chip`, `--home-*` colours).
+
+| Element | Source |
+| --- | --- |
+| Habit cards (icon tinted by the habit's colour, name, reminder time, `+N pts`) | `useHabits().todayHabits` — Supabase `habits` + `habit_logs` when signed in, `bloom.habits` / `bloom.habit_logs` on the device otherwise |
+| Tap to toggle | `useHabits().toggle(id)` — the same optimistic path the progress ring, the trackers ring, the Coach and the points already use |
+| Streak flame per habit (≥ 2 days) + "N-day streak" chip | new pure `streakOf(habit, logs, today)` in `src/lib/home/habits.ts`; counts consecutive *due* days back from today, today only counts once done, unscheduled days neither count nor break the run. 7 unit tests in `src/lib/home/habits.test.ts` |
+| Progress bar + "2 of 3 done today" | derived from the same list |
+| Points chip | `useHabits().points` (`profiles.total_points`) |
+| Empty state | copy + "Add your first habit" button, opens the modal |
+
+The previous lower "Today's habits" panel was removed (it duplicated this section);
+`HabitsPanel` was deleted from `panels.tsx`.
+
+## 2. Floating "Add habit" button
+
+Fixed bottom-right (`.home-fab`), violet primary with the page's glow, icon-only on
+phones (`aria-label="Add habit"`), label on `sm+`. Opens the existing
+`AddHabitModal` → `useHabits().addHabit()` → `habits` insert (or device fallback).
+On phones it sits above the tab bar via `--app-bottom-nav`.
+
+## 3. The same sidebar on every main page
+
+- `AppNav` (`src/components/home/HomeSidebar.tsx`) = the insight-map rail
+  (`lg+`) + the bottom tab bar (`< lg`). Dropped right after `<BloomHeader />` on
+  `/`, `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach` and `/profile`.
+- The page wrapper gets `app-shell`: at `lg+` it becomes a two-column grid
+  (`212px | 1fr`) with the header across the top, the rail in column 1 and the
+  page's own `<main>` in column 2 (`src/styles.css`). Below `lg` nothing changes
+  except bottom padding for the tab bar. **No page was re-nested** — each patch is
+  one import + one class + one line, so the pages' fixed atmospheres, modals,
+  drawers and z-indexes are untouched (verified: metrics modal centred on the
+  viewport, Coach drawer/command palette cover the rail, Rewards toast and the
+  trackers "Reflect & log" dock lift above the tab bar on phones).
+- The rail pins Bloom's base palette on itself (`.app-nav`), so it is identical on
+  Rewards (which re-tints `--background/--surface/--border`) and inside the Cycle
+  themes. The nav block is sticky so it stays in reach on long pages; the
+  botanical still sits at the very bottom.
+- `BloomHeader` stays on top of every page as before.
+
+## Also fixed on the way
+
+- `/rewards` crashed to "This page didn't load" whenever the app runs without a
+  Supabase `.env` (pre-existing; `useRewardsSystem` called `supabase.auth` without
+  the `hasSupabaseConfig` guard the other hooks have). Now shows its normal
+  "vault could not be opened" notice instead.
+- Two `min-w-0` / explicit-column fixes on the Today grid so long activity lines
+  can no longer widen the page horizontally.
+
+## Verification (this branch, headless Chromium, no `.env`)
+
+- `tsc`: the same 11 pre-existing errors (ReflectSheet, BloomCycleAI, cycle-classic, usePeriodLog test), none in touched files
+- `eslint` on every touched file: 0 new errors (mood.tsx keeps its 7 pre-existing prettier errors — the patch there is 3 lines)
+- `vitest`: 26/26 (19 existing + 7 streak tests) · `vite build`: ✓
+- Desktop 1440 and phone 390 on `/`, `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach`, `/profile`: rail visible at 1440 with the right item active, tab bar at 390, `<main>` starts at x=212 beside the rail, no horizontal overflow (`scrollWidth == 1440 / 390`) — screenshots `p5-*.png`
+- Today: section top is 24 px under the hero; toggling a habit from the section moves the ring 16% → 33% and the section bar to 33%; FAB opens the Add-habit modal (`p5-today-fab-modal.png`); on 390 the FAB bottom (772) clears the tab bar top (783); trackers dock bottom (756) clears it too
+
+## Kit
+
+`bloom-today-home.zip` (v2) — `apply-today-home.mjs` + `files/`. Tested from both
+starting points: the metrics-fix baseline (`4f924ee`, everything applied, 31 steps)
+and the v1 state (`bf49c7f`, only the v2 parts applied). Both results are
+byte-identical to this branch, CRLF preserved, second run = 0 changes, `tsc` =
+the same 11 pre-existing errors.

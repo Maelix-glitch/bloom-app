@@ -54,19 +54,27 @@ export function BloomMark({
   );
 }
 
+/**
+ * The left rail every main page shares (lg and up). Inside an `.app-shell`
+ * grid it takes the first column and stretches the full page height so the
+ * botanical sits at the very bottom, while the brand + nav block is sticky so
+ * the links stay in reach on long pages like Coach. `.app-nav` pins Bloom's
+ * base palette so the rail is identical on every route, even ones that retint
+ * the shared tokens (Rewards).
+ */
 export function HomeSidebar() {
   const { pathname } = useLocation();
   return (
-    <aside className="relative hidden w-[212px] shrink-0 flex-col justify-between overflow-hidden border-r border-border bg-surface/40 py-6 lg:flex">
+    <aside className="app-nav app-sidebar relative z-[2] hidden w-[212px] shrink-0 flex-col justify-between overflow-clip border-r border-border py-6 lg:flex">
       <img
         src={botanical}
         alt=""
         loading="lazy"
         width={600}
         height={1200}
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] w-full object-cover opacity-45"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] max-h-[720px] w-full object-cover opacity-45"
       />
-      <div className="relative">
+      <div className="relative lg:sticky lg:top-6">
         <Link to="/" className="flex items-center gap-2.5 px-6 text-foreground">
           <BloomMark size={22} id="bloomBrandGradientSidebar" />
           <span className="font-display text-2xl tracking-wide">Bloom</span>
@@ -105,7 +113,7 @@ export function HomeMobileNav() {
   const { pathname } = useLocation();
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 py-2 backdrop-blur-xl lg:hidden"
+      className="app-nav fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 py-2 backdrop-blur-xl lg:hidden"
       aria-label="Primary"
     >
       {HOME_NAV.map((item) => {
@@ -126,5 +134,20 @@ export function HomeMobileNav() {
         );
       })}
     </nav>
+  );
+}
+
+/**
+ * AppNav — drop this right after <BloomHeader /> inside any page wrapper that
+ * carries the `app-shell` class: the rail appears beside the page's own
+ * <main> on desktop and the tab bar on phones. No re-nesting needed — the
+ * `.app-shell` grid (src/styles.css) places the rail and the <main>.
+ */
+export function AppNav() {
+  return (
+    <>
+      <HomeSidebar />
+      <HomeMobileNav />
+    </>
   );
 }
