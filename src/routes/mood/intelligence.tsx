@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
 
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import type { MoodEntry } from "@/lib/mood/types";
@@ -20,7 +20,7 @@ import { Composer } from "@/components/mood/Composer";
 import { Reveal } from "@/components/mood/primitives";
 import { AppNav } from "@/components/home/HomeSidebar";
 
-export const Route = createFileRoute("/mood")({
+export const Route = createFileRoute("/mood/intelligence")({
   head: () => ({
     meta: [
       { title: "Bloom — Mood Intelligence" },
@@ -102,7 +102,13 @@ function MoodIntelligencePage() {
       <AppNav />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-28 pt-14 sm:px-8 sm:pt-20 lg:pb-24">
+      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-28 pt-8 sm:px-8 sm:pt-10 lg:pb-24">
+        <Link
+          to="/mood"
+          className="mono mb-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" /> Mood
+        </Link>
         <Reveal>
           <Hero system={system} onCompose={openNew} />
         </Reveal>

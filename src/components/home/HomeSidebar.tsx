@@ -6,11 +6,14 @@ import {
   Smile,
   Gift,
   LifeBuoy,
+  Settings,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
 
 import botanical from "@/assets/home/sidebar-botanical.jpg";
+import { useRailIdentity } from "@/hooks/useRailIdentity";
+import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 
 export const HOME_NAV: {
   label: string;
@@ -149,10 +152,63 @@ export function HomeSidebar() {
         </Link>
       </div>
 
-      <p className="relative px-7 pb-8 font-display text-[17px] italic leading-snug text-muted-foreground">
-        <span className="mb-3 block h-px w-8 bg-border" />A calmer you, a brighter tomorrow.
-      </p>
+      <div className="relative">
+        <div className="app-sidebar-quote px-7">
+          <span className="app-sidebar-gold-rule block h-px w-8" />
+          <p className="mt-5 font-display text-[17px] italic leading-snug text-muted-foreground">
+            A calmer you, a brighter tomorrow.
+          </p>
+          <span className="app-sidebar-gold-rule mt-5 block h-px w-8" />
+        </div>
+        <RailProfile />
+      </div>
     </aside>
+  );
+}
+
+/**
+ * The identity block at the foot of the rail — the avatar row the
+ * harmonious-dashboard model shows under its sidebar: a settings glyph, the
+ * avatar, the name and a one-line tagline. Real data: the signed-in user's
+ * profile (photo when set, initials otherwise); signed out it invites you in.
+ */
+function RailProfile() {
+  const id = useRailIdentity();
+  const signedIn = id.status === "signed-in";
+  const name = signedIn ? (id.displayName ?? "Your profile") : "Sign in";
+  const line = signedIn
+    ? (id.bio ?? "Keep growing.")
+    : id.status === "checking"
+      ? "…"
+      : "Sync across your devices";
+  return (
+    <div className="mt-8 flex items-center gap-3 border-t border-border px-7 py-6">
+      <Link
+        to="/profile"
+        aria-label="Settings"
+        title="Settings"
+        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <Settings className="size-[18px]" strokeWidth={1.5} />
+      </Link>
+      <Link
+        to="/profile"
+        className="ml-2 flex min-w-0 items-center gap-3 rounded-full"
+        aria-label={signedIn ? "Your profile" : "Sign in"}
+        data-testid="rail-profile"
+      >
+        <ProfileAvatar
+          name={id.displayName ?? "Bloom"}
+          avatarPath={id.avatarPath}
+          accent={id.accent}
+          size={36}
+        />
+        <span className="min-w-0">
+          <span className="block truncate text-sm text-foreground">{name}</span>
+          <span className="block truncate text-xs text-muted-foreground">{line}</span>
+        </span>
+      </Link>
+    </div>
   );
 }
 

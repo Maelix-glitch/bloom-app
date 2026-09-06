@@ -40,6 +40,7 @@ import {
   computeStats,
   type RewardRecord,
 } from "@/lib/profile/journey";
+import { announceProfileChanged } from "@/hooks/useRailIdentity";
 import {
   isStoryActive,
   type BloomAccent,
@@ -317,6 +318,7 @@ export function useProfileSpace() {
         accent: patch.accent as BloomAccent,
         featured: patch.featured,
       }));
+      announceProfileChanged();
     },
     [userId, patchIdentity],
   );
@@ -327,6 +329,7 @@ export function useProfileSpace() {
       const identity = currentIdentity();
       await saveProfile(userId, { ...toPatch(identity), accent });
       patchIdentity((i) => ({ ...i, accent }));
+      announceProfileChanged();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId, patchIdentity],
@@ -447,6 +450,7 @@ export function useProfileSpace() {
       const path = await uploadAvatar(userId, blob);
       patchIdentity((i) => ({ ...i, avatarPath: path }));
       await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: path });
+      announceProfileChanged();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId, patchIdentity],
@@ -457,6 +461,7 @@ export function useProfileSpace() {
     patchIdentity((i) => ({ ...i, avatarPath: null }));
     await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: null });
     await removeAvatar(currentIdentity().avatarPath ?? `${userId}/avatar.jpg`);
+    announceProfileChanged();
   }, [userId, patchIdentity]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signOut = useCallback(async () => {

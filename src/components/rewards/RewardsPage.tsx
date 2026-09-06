@@ -261,7 +261,7 @@ function EmptyRewardsState({ isAdmin, onRetry }: { isAdmin: boolean; onRetry: ()
         <button type="button" onClick={onRetry} className="reward-secondary-button">
           <RefreshCw className="size-3.5" /> Check again
         </button>
-        <Link to="/mood" className="reward-text-button">
+        <Link to="/mood/intelligence" className="reward-text-button">
           Back to Mood Intelligence <ArrowUpRight className="size-3.5" />
         </Link>
       </div>

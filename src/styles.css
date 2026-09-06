@@ -46,6 +46,8 @@
   --color-amber: var(--amber);
   --color-sage: var(--sage);
   --color-rose: var(--rose);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
 
   /* Metrics entry modal tokens → bg-metric-sleep, text-brand, border-danger… */
   --color-metric-sleep: var(--metric-sleep);
@@ -98,6 +100,8 @@
   --violet: oklch(0.7 0.107 297);
   --sky: oklch(0.71 0.073 250);
   --amber: oklch(0.81 0.11 82);
+  --gold: oklch(0.855 0.086 82);
+  --gold-soft: oklch(0.9 0.05 88);
   --sage: oklch(0.71 0.062 155);
   --rose: oklch(0.72 0.083 355);
   --destructive: oklch(0.66 0.16 22);
@@ -518,6 +522,38 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Mood page (harmonious-dashboard model). Scoped under `.mood-page` so the
+ * model's gold / mood palette and its `panel` surfaces exist only here and
+ * never leak into the rail or other routes. Utilities the page uses that
+ * Tailwind doesn't know (`text-gold`, `bg-gold/10`, `text-gold-soft`, …) are
+ * registered as real colours in @theme via the --color-gold* tokens below.
+ * ------------------------------------------------------------------------- */
+.mood-page {
+  --mp-happy: oklch(0.86 0.1 85);
+  --mp-calm: oklch(0.76 0.06 145);
+  --mp-neutral: oklch(0.62 0.01 160);
+  --mp-sad: oklch(0.72 0.06 250);
+  --mp-anxious: oklch(0.71 0.08 30);
+  --mp-angry: oklch(0.64 0.12 25);
+  --mp-gradient-gold: linear-gradient(135deg, oklch(0.9 0.06 90), oklch(0.82 0.1 78));
+  --mp-shadow-soft: 0 24px 60px -30px oklch(0 0 0 / 0.75);
+  /* The model's button text sits on a gold fill. */
+  --primary-foreground: oklch(0.19 0.02 150);
+}
+.mp-panel {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--mp-shadow-soft);
+}
+.mp-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------------------------
  * App shell — the one piece of chrome every main page shares (Today,
  * Trackers, Cycle, Mood, Rewards, Coach, Profile). A page opts in by adding
  * `app-shell` to its wrapper and rendering <AppNav /> first; there is no
@@ -593,6 +629,17 @@
 .app-sidebar-rule {
   background: linear-gradient(90deg, var(--border-strong), transparent);
   opacity: 0.7;
+}
+/* The short gold hairlines around the rail's quote (from the mood model). */
+.app-sidebar-gold-rule {
+  background: color-mix(in oklab, var(--amber) 50%, transparent);
+}
+/* On short windows the quote gives way first, so the links and the identity
+   row at the foot never collide. */
+@media (max-height: 40rem) {
+  .app-sidebar-quote {
+    display: none;
+  }
 }
 .app-nav-link-active {
   background: color-mix(in oklab, var(--surface-2) 70%, transparent);
