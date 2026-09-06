@@ -189,3 +189,23 @@ branch across `src/`, second runs make 0 edits, and the applied tree passes
 43/43 tests, adds no type errors once `routeTree.gen.ts` regenerates, and
 builds. Zip: 650,257 bytes, 53 files.
 
+
+## Mood fixes kit — its own download
+
+The user applied a kit and reported "still the same", and asked for a
+separate kit only for the reported problems. `docs/mood-fixes/bloom-mood-fixes.zip`
+(`apply-mood-fixes.mjs` + `files/`, 34 files, 179,037 bytes) installs exactly
+Phase 10 on top of an installed Mood page (v1 or v2 — v2 trees get all
+"already done"). Differences from the page kit: it refuses to run if the Mood
+page isn't there (points at the page kit); prints a **Found:** block first
+(one `→`/`✔` line per reported problem, so "nothing changed" is diagnosable
+before any file is written); replaced files are version-checked (md5 after
+CRLF/EOF-whitespace normalisation) against the v1 / original app versions and
+any other version is kept as `<name>.before-mood-fixes.txt`; the README has an
+"If it still looks the same" checklist (restart dev server + Ctrl+F5,
+push for hosted previews, right repo, `<MoodGraph` file test). Tested from
+`4e2a87b`+v1, `02bcc2a`+v2 (all skips), a CRLF tree, a locally-edited file
+(backup made), a bare tree (refused), and the unzipped kit in a path with
+spaces: every run ends byte-identical to this branch across `src/`, second
+runs make 0 edits, the applied tree passes 43/43, builds, and adds 0 type
+errors once `routeTree.gen.ts` regenerates.
