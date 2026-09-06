@@ -151,3 +151,18 @@ starting points: the metrics-fix baseline (`4f924ee`, everything applied, 31 ste
 and the v1 state (`bf49c7f`, only the v2 parts applied). Both results are
 byte-identical to this branch, CRLF preserved, second run = 0 changes, `tsc` =
 the same 11 pre-existing errors.
+
+## v3 — the v3 "latest" Add-habit dialog
+
+The floating button and the habits section now open a 1:1 React port of
+`public/bloom/bloom-add-habit-modal-v3-latest.html` (three steps, live
+preview, icon search + upload, accent re-tint, custom days / weekly target,
+measurable goal, start date, points, priority, reminder, tags, success
+overlay), wired to real habit creation. Details, faithfulness measurements
+and screenshots: `docs/add-habit-modal/REPORT.md`.
+
+Kit: same zip (`bloom-today-home.zip`, same URL), now v3 — on a repo that
+already has v2 it writes exactly three files (`AddHabitModal.tsx`,
+`styles/add-habit-modal.css`, `lib/home/habits.ts`); tested from `4f924ee`
+(54 steps), `bf49c7f` (37) and `8945284` (3), all idempotent and byte-identical
+to this branch.

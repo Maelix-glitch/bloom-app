@@ -37,15 +37,21 @@ export interface HabitLog {
   completedAt: string;
 }
 
+/** What the Add-habit dialog emits (see components/tk/AddHabitModal.tsx). */
 export interface HabitDraft {
   name: string;
   note?: string | undefined;
   icon?: { type: string; value: string } | undefined;
   color?: string | undefined;
   frequency?: string | undefined;
+  /** 0=Sun..6=Sat — only meaningful when frequency is "custom" */
+  days?: number[] | undefined;
+  /** only meaningful when frequency is "weekly" */
+  timesPerWeek?: number | null | undefined;
+  goal?: { enabled: boolean; target: number | null; unit: string | null } | null | undefined;
   priority?: string | undefined;
   points?: number | undefined;
-  reminder?: { enabled: boolean; time: string } | undefined;
+  reminder?: { enabled: boolean; time: string | null } | undefined;
   tags?: string[] | undefined;
   startDate?: string | undefined;
 }
@@ -268,9 +274,14 @@ export async function insertHabit(profileId: string, draft: HabitDraft): Promise
     icon_url: iconType === "image" ? iconValue : null,
     color: draft.color ?? "amber",
     frequency: draft.frequency ?? "daily",
+    days: draft.frequency === "custom" && draft.days?.length ? draft.days : null,
+    times_per_week: draft.frequency === "weekly" ? (draft.timesPerWeek ?? null) : null,
+    goal_enabled: Boolean(draft.goal?.enabled),
+    goal_target: draft.goal?.enabled ? draft.goal.target : null,
+    goal_unit: draft.goal?.enabled ? draft.goal.unit : null,
     point_value: draft.points ?? 10,
     priority: draft.priority ?? "medium",
-    reminder_enabled: Boolean(draft.reminder?.enabled),
+    reminder_enabled: Boolean(draft.reminder?.enabled && draft.reminder.time),
     reminder_time: draft.reminder?.enabled ? draft.reminder.time : null,
     tags: draft.tags && draft.tags.length ? draft.tags : null,
     start_date: draft.startDate ?? new Date().toISOString().slice(0, 10),
@@ -296,9 +307,9 @@ export function draftToLocalHabit(draft: HabitDraft): Habit {
     reminderTime: draft.reminder?.enabled ? draft.reminder.time : null,
     priority: draft.priority ?? "medium",
     tags: draft.tags ?? [],
-    goal: null,
-    days: [],
-    timesPerWeek: null,
+    goal: draft.goal?.enabled ? { target: draft.goal.target, unit: draft.goal.unit } : null,
+    days: draft.frequency === "custom" ? [...(draft.days ?? [])] : [],
+    timesPerWeek: draft.frequency === "weekly" ? (draft.timesPerWeek ?? null) : null,
     startDate: draft.startDate ?? now.slice(0, 10),
     note: draft.note?.trim() || null,
     createdAt: now,

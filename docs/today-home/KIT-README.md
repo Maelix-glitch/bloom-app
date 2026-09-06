@@ -1,14 +1,15 @@
-# Bloom — Today home kit (v2)
+# Bloom — Today home kit (v3)
 
 What it installs on top of your repo:
 
 1. **Today page at `/`** (v1) — insight-map layout wired to Supabase, live rings, the coach.
 2. **Habits section** right under the greeting, with per-habit streaks, points, a progress bar and an empty state (v2).
-3. **Floating "Add habit" button** bottom-right on every screen size; it opens the existing Add-habit modal (v2).
-4. **The same sidebar on every main page** — Today, Trackers, Cycle, Mood, Rewards, Coach (and Profile): the rail on desktop, a bottom tab bar on phones (v2).
-5. Rewards no longer crashes when the app runs without a Supabase `.env` (same guard the other hooks already had).
+3. **Floating "Add habit" button** bottom-right on every screen size (v2) — it opens…
+4. **The v3 "latest" Add-habit dialog** (v3): a 1:1 port of `public/bloom/bloom-add-habit-modal-v3-latest.html` — three steps (Basics · Schedule · Details), live preview card, icon search + custom image upload, colour swatch that re-tints the dialog, custom-day picker, weekly target, measurable goal, start date, points stepper, priority, reminder, tags, validation, success overlay. Wired to real habit creation (Supabase when signed in, this device otherwise); days / weekly target / goal are now saved too.
+5. **The same sidebar on every main page** — Today, Trackers, Cycle, Mood, Rewards, Coach (and Profile): the rail on desktop, a bottom tab bar on phones (v2).
+6. Rewards no longer crashes when the app runs without a Supabase `.env` (same guard the other hooks already had).
 
-Safe to run whether or not v1 was applied before — it only adds what is missing, and it is safe to run twice.
+Safe to run whether v1, v2 or nothing was applied before — it only adds what is missing, and it is safe to run twice. On a repo that already has v2, it writes exactly three files: `src/components/tk/AddHabitModal.tsx`, `src/styles/add-habit-modal.css`, `src/lib/home/habits.ts`.
 
 ## Apply (Windows, PowerShell or cmd)
 
@@ -26,9 +27,9 @@ If anything prints `✖`, nothing else was touched — send me the output.
 
 ## Then
 
-- `npm run dev` → `/` (Today: habits section + floating Add habit), then `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach` — same sidebar on each, the page's own design unchanged inside it.
+- `npm run dev` → `/` (Today: habits section + floating Add habit → the 3-step dialog), then `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach` — same sidebar on each, the page's own design unchanged inside it.
 - Supabase → SQL editor → run `supabase/migrations/20260906_today_home.sql` once (idempotent; creates `tracker_days`, `habits`, `habit_logs`, `profiles.total_points` + RPCs, RLS, realtime). Skip if you already ran it for v1.
-- `git add -A && git commit -m "feat(home): habits section, floating add-habit, shared sidebar on every page" && git push`
+- `git add -A && git commit -m "feat(home): v3 add-habit dialog, habits section, floating add-habit, shared sidebar" && git push`
 
 ## What's in the box
 

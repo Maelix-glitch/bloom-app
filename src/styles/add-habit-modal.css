@@ -1,0 +1,268 @@
+/*
+ * Bloom — Add Habit dialog (v3, advanced).
+ *
+ * This is the <style> block of public/bloom/bloom-add-habit-modal-v3-latest.html,
+ * generated verbatim with every selector scoped under `.bloom-add-habit` (the
+ * portal root rendered by src/components/tk/AddHabitModal.tsx) so the dialog's
+ * bare element rules (input, textarea, button, .chip, .tag, .switch, .day…) and
+ * its design tokens cannot leak into the rest of Bloom. Keyframes carry a
+ * `bah-` prefix for the same reason.
+ *
+ * Deliberate differences from the HTML: no body/.demo-trigger rules (they styled
+ * the standalone demo page — the root class carries the body font/colour
+ * instead), z-index 2000 so it sits above Bloom's tab bar and floating button,
+ * and the dropzone "Remove" button is lifted above the invisible file input
+ * (in the HTML it was painted underneath it and could not be clicked).
+ */
+/* ---------- DESIGN TOKENS -------------------------------------------- */
+.bloom-add-habit{
+  color:var(--text); font-family:var(--font-body); font-size:16px; line-height:normal;
+  -webkit-font-smoothing:antialiased;
+  --bg:#14151F; --surface:#1C1E2B; --surface-2:#23263A; --surface-3:#292C42;
+  --border:#2E3145; --border-hover:#3A3D56;
+  --text:#F0EFEA; --text-muted:#8B8CA3; --text-faint:#5A5D75;
+
+  --amber:#E8B75E;  --amber-dim:rgba(232,183,94,.14);
+  --sage:#7FA88F;   --sage-dim:rgba(127,168,143,.14);
+  --rose:#C98BA0;   --rose-dim:rgba(201,139,160,.14);
+  --sky:#7FA0C9;    --sky-dim:rgba(127,160,201,.14);
+  --violet:#A48BC9; --violet-dim:rgba(164,139,201,.14);
+  --danger:#E07A7A;
+
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:24px; --space-6:32px; --space-7:48px;
+  --radius:18px; --radius-sm:10px;
+  --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+
+  /* accent = live theme colour, overridden per data-accent below */
+  --accent:var(--amber); --accent-dim:var(--amber-dim);
+}
+/* accent switching: one attribute re-tints everything */
+.bloom-add-habit [data-accent="amber"]{ --accent:var(--amber);  --accent-dim:var(--amber-dim); }
+.bloom-add-habit [data-accent="sage"]{ --accent:var(--sage);   --accent-dim:var(--sage-dim); }
+.bloom-add-habit [data-accent="rose"]{ --accent:var(--rose);   --accent-dim:var(--rose-dim); }
+.bloom-add-habit [data-accent="sky"]{ --accent:var(--sky);    --accent-dim:var(--sky-dim); }
+.bloom-add-habit [data-accent="violet"]{ --accent:var(--violet); --accent-dim:var(--violet-dim); }
+
+.bloom-add-habit *{ box-sizing:border-box; margin:0; padding:0; }
+@media (prefers-reduced-motion: reduce){ .bloom-add-habit *{ animation:none !important; transition:none !important; } }
+
+
+/* ---------- SHELL ----------------------------------------------------- */
+.bloom-add-habit .backdrop{
+  position:fixed; inset:0; background:rgba(10,10,16,.66); backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center; z-index:2000; padding:var(--space-5);
+}
+.bloom-add-habit .backdrop.open{ display:flex; animation:bah-fadeIn .28s var(--ease) both; }
+@keyframes bah-fadeIn{ from{opacity:0} to{opacity:1} }
+
+.bloom-add-habit .modal{
+  position:relative; width:100%; max-width:520px; max-height:90vh; display:flex; flex-direction:column;
+  background:linear-gradient(180deg,var(--surface),var(--surface-2));
+  border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:0 40px 90px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.03);
+  animation:bah-modalIn .45s var(--ease) both; overflow:hidden;
+}
+@keyframes bah-modalIn{ from{opacity:0; transform:translateY(20px) scale(.97)} to{opacity:1; transform:none} }
+/* soft accent glow at the top edge, follows the theme */
+.bloom-add-habit .modal::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:150px; pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 0%, var(--accent-dim), transparent 70%);
+  transition:background .4s ease;
+}
+
+/* ---------- HEADER + PROGRESS ---------------------------------------- */
+.bloom-add-habit .modal-head{ position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-4); padding:var(--space-6) var(--space-6) var(--space-4); }
+.bloom-add-habit .modal-eyebrow{ font-family:var(--font-mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+.bloom-add-habit .modal-title{ font-family:var(--font-display); font-weight:500; font-size:24px; letter-spacing:-.01em; }
+.bloom-add-habit .modal-close{
+  width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+  color:var(--text-muted); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  transition:all .25s var(--ease); font-size:14px;
+}
+.bloom-add-habit .modal-close:hover{ border-color:var(--rose); color:var(--text); transform:rotate(90deg); }
+
+.bloom-add-habit .steps{ position:relative; display:flex; gap:var(--space-2); padding:0 var(--space-6) var(--space-4); }
+.bloom-add-habit .step-pill{ flex:1; display:flex; flex-direction:column; gap:6px; background:none; border:none; cursor:pointer; text-align:left; padding:0; font-family:var(--font-body); }
+.bloom-add-habit .step-bar{ height:3px; border-radius:999px; background:var(--surface-3); overflow:hidden; }
+.bloom-add-habit .step-bar i{ display:block; height:100%; width:0; background:var(--accent); border-radius:999px; transition:width .45s var(--ease), background .3s ease; }
+.bloom-add-habit .step-pill.active .step-bar i, .bloom-add-habit .step-pill.done .step-bar i{ width:100%; }
+.bloom-add-habit .step-name{ font-size:11px; font-family:var(--font-mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); transition:color .25s ease; }
+.bloom-add-habit .step-pill.active .step-name{ color:var(--accent); }
+.bloom-add-habit .step-pill.done .step-name{ color:var(--text-muted); }
+
+/* ---------- BODY ------------------------------------------------------ */
+.bloom-add-habit .modal-body{ position:relative; overflow-y:auto; padding:0 var(--space-6) var(--space-4); }
+.bloom-add-habit .modal-body::-webkit-scrollbar{ width:6px; }
+.bloom-add-habit .modal-body::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+
+.bloom-add-habit section[data-step]{ display:none; flex-direction:column; gap:var(--space-5); }
+.bloom-add-habit section[data-step].active{ display:flex; animation:bah-panelIn .35s var(--ease) both; }
+@keyframes bah-panelIn{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+
+.bloom-add-habit .field-label{ font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:var(--space-2); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.bloom-add-habit .field-hint{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); font-weight:400; }
+.bloom-add-habit .error-msg{ font-size:12px; color:var(--danger); margin-top:6px; display:none; }
+.bloom-add-habit .error-msg.show{ display:block; animation:bah-panelIn .2s var(--ease) both; }
+
+/* live preview card — shows the habit as it will appear in the app list */
+.bloom-add-habit .preview-card{
+  display:flex; align-items:center; gap:var(--space-3);
+  background:var(--surface-3); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:var(--space-3) var(--space-4);
+}
+.bloom-add-habit .icon-preview{
+  width:52px; height:52px; border-radius:var(--radius-sm); background:var(--accent-dim);
+  display:flex; align-items:center; justify-content:center; font-size:25px; flex-shrink:0; overflow:hidden;
+  transition:background .3s ease, transform .25s var(--ease);
+}
+.bloom-add-habit .icon-preview img{ width:100%; height:100%; object-fit:cover; }
+.bloom-add-habit .preview-meta{ min-width:0; flex:1; }
+.bloom-add-habit .preview-name{ font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bloom-add-habit .preview-sub{ font-size:12px; color:var(--text-faint); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bloom-add-habit .preview-points{ font-family:var(--font-mono); font-size:13px; color:var(--accent); flex-shrink:0; }
+
+.bloom-add-habit input[type="text"], .bloom-add-habit input[type="time"], .bloom-add-habit input[type="number"], .bloom-add-habit input[type="date"], .bloom-add-habit textarea{
+  width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:13px 14px; color:var(--text); font-family:var(--font-body); font-size:15px;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.bloom-add-habit textarea{ resize:vertical; min-height:72px; font-size:14px; }
+.bloom-add-habit input::placeholder, .bloom-add-habit textarea::placeholder{ color:var(--text-faint); }
+.bloom-add-habit input:focus, .bloom-add-habit textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+.bloom-add-habit input[aria-invalid="true"]{ border-color:var(--danger); }
+
+/* ---------- ICON PICKER ---------------------------------------------- */
+.bloom-add-habit .icon-tabs{ display:flex; gap:var(--space-2); margin-bottom:var(--space-3); }
+.bloom-add-habit .icon-tab{
+  font-size:12px; font-weight:600; color:var(--text-faint); background:var(--surface-2);
+  border:1px solid var(--border); border-radius:999px; padding:7px 14px; cursor:pointer;
+  font-family:var(--font-body); transition:all .2s var(--ease);
+}
+.bloom-add-habit .icon-tab.active{ background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+.bloom-add-habit .icon-tab:hover:not(.active){ color:var(--text); border-color:var(--border-hover); }
+
+.bloom-add-habit .icon-panel{ display:none; }
+.bloom-add-habit .icon-panel.active{ display:block; animation:bah-panelIn .3s var(--ease) both; }
+
+.bloom-add-habit .icon-search{ margin-bottom:var(--space-3); }
+.bloom-add-habit .icon-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:var(--space-2); max-height:168px; overflow-y:auto; padding-right:2px; }
+.bloom-add-habit .icon-grid::-webkit-scrollbar{ width:5px; }
+.bloom-add-habit .icon-grid::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+.bloom-add-habit .icon-opt{
+  aspect-ratio:1; border-radius:var(--radius-sm); background:var(--surface-2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer;
+  transition:all .18s var(--ease);
+}
+.bloom-add-habit .icon-opt:hover{ transform:translateY(-2px); border-color:var(--border-hover); }
+.bloom-add-habit .icon-opt.selected{ background:var(--accent-dim); border-color:var(--accent); transform:scale(1.06); }
+.bloom-add-habit .icon-empty{ font-size:12px; color:var(--text-faint); padding:var(--space-4) 0; text-align:center; }
+
+.bloom-add-habit .dropzone{
+  border:1.5px dashed var(--border); border-radius:var(--radius-sm); padding:var(--space-6) var(--space-4);
+  text-align:center; cursor:pointer; transition:all .25s var(--ease); position:relative;
+}
+.bloom-add-habit .dropzone:hover, .bloom-add-habit .dropzone.dragover{ border-color:var(--accent); background:var(--accent-dim); }
+.bloom-add-habit .dropzone input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+.bloom-add-habit .dropzone-icon{ font-size:22px; margin-bottom:var(--space-2); }
+.bloom-add-habit .dropzone-text{ font-size:13px; color:var(--text-muted); }
+.bloom-add-habit .dropzone-sub{ font-size:11px; color:var(--text-faint); margin-top:2px; }
+.bloom-add-habit .dropzone-preview{ display:flex; align-items:center; justify-content:center; gap:var(--space-3); }
+.bloom-add-habit .dropzone-preview img{ width:44px; height:44px; border-radius:var(--radius-sm); object-fit:cover; border:1px solid var(--border); }
+.bloom-add-habit .dropzone-remove{ position:relative; z-index:1; font-size:12px; color:var(--rose); text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--font-body); }
+
+/* ---------- COLOUR SWATCHES ------------------------------------------ */
+.bloom-add-habit .swatch-row{ display:flex; gap:var(--space-3); }
+.bloom-add-habit .swatch{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; padding:0; position:relative; transition:transform .2s var(--ease); }
+.bloom-add-habit .swatch:hover{ transform:scale(1.12); }
+.bloom-add-habit .swatch[aria-pressed="true"]{ border-color:var(--text); box-shadow:0 0 0 3px rgba(255,255,255,.08); }
+.bloom-add-habit .sw-amber{background:var(--amber)} .bloom-add-habit .sw-sage{background:var(--sage)} .bloom-add-habit .sw-rose{background:var(--rose)}
+.bloom-add-habit .sw-sky{background:var(--sky)} .bloom-add-habit .sw-violet{background:var(--violet)}
+
+/* ---------- CHIPS ----------------------------------------------------- */
+.bloom-add-habit .chip-row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
+.bloom-add-habit .chip{
+  padding:9px 16px; border-radius:999px; font-size:13px; font-weight:500; color:var(--text-muted);
+  background:var(--surface-2); border:1px solid var(--border); cursor:pointer; font-family:var(--font-body);
+  transition:all .2s var(--ease); display:flex; align-items:center; gap:6px;
+}
+.bloom-add-habit .chip:hover{ border-color:var(--border-hover); color:var(--text); }
+.bloom-add-habit .chip[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600; }
+.bloom-add-habit .chip[data-priority="low"][aria-pressed="true"]{ background:var(--sage); border-color:var(--sage); color:var(--bg); }
+.bloom-add-habit .chip[data-priority="medium"][aria-pressed="true"]{ background:var(--amber); border-color:var(--amber); color:var(--bg); }
+.bloom-add-habit .chip[data-priority="high"][aria-pressed="true"]{ background:var(--rose); border-color:var(--rose); color:var(--bg); }
+.bloom-add-habit .priority-dot{ width:7px; height:7px; border-radius:50%; }
+.bloom-add-habit .priority-dot.low{background:var(--sage)} .bloom-add-habit .priority-dot.medium{background:var(--amber)} .bloom-add-habit .priority-dot.high{background:var(--rose)}
+
+/* ---------- DAY PICKER (custom frequency) ---------------------------- */
+.bloom-add-habit .conditional{ max-height:0; overflow:hidden; opacity:0; transition:max-height .35s var(--ease), opacity .25s ease; }
+.bloom-add-habit .conditional.open{ max-height:220px; opacity:1; margin-top:var(--space-3); }
+.bloom-add-habit .day-row{ display:flex; gap:6px; }
+.bloom-add-habit .day{
+  flex:1; aspect-ratio:1; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--text-muted); font-size:11px; font-weight:600; font-family:var(--font-body); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .18s var(--ease);
+}
+.bloom-add-habit .day:hover{ border-color:var(--border-hover); color:var(--text); }
+.bloom-add-habit .day[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--bg); }
+
+/* ---------- ROWS: points, goal, toggles ------------------------------ */
+.bloom-add-habit .row-box{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
+  background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:var(--space-3) var(--space-4);
+}
+.bloom-add-habit .row-title{ font-size:14px; font-weight:500; }
+.bloom-add-habit .row-sub{ font-size:12px; color:var(--text-faint); }
+.bloom-add-habit .stepper{ display:flex; align-items:center; gap:var(--space-3); }
+.bloom-add-habit .step-btn{
+  width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+  color:var(--text); font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.bloom-add-habit .step-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); transform:scale(1.08); }
+.bloom-add-habit .step-btn:disabled{ opacity:.35; cursor:not-allowed; }
+.bloom-add-habit .step-value{ font-family:var(--font-mono); font-size:18px; min-width:38px; text-align:center; color:var(--accent); }
+
+.bloom-add-habit .switch{ width:42px; height:24px; border-radius:999px; background:var(--surface-3); border:1px solid var(--border); position:relative; cursor:pointer; transition:background .25s ease, border-color .25s ease; flex-shrink:0; padding:0; }
+.bloom-add-habit .switch::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--text-faint); transition:transform .25s var(--ease), background .25s ease; }
+.bloom-add-habit .switch[aria-checked="true"]{ background:var(--accent-dim); border-color:var(--accent); }
+.bloom-add-habit .switch[aria-checked="true"]::after{ transform:translateX(18px); background:var(--accent); }
+
+/* ---------- TAGS ------------------------------------------------------ */
+.bloom-add-habit .tag-input-wrap{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; }
+.bloom-add-habit .tag-input-wrap:focus-within{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+.bloom-add-habit .tag{ display:flex; align-items:center; gap:6px; font-size:12px; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:4px 10px; }
+.bloom-add-habit .tag button{ background:none; border:none; color:inherit; cursor:pointer; font-size:12px; line-height:1; }
+.bloom-add-habit .tag-input-wrap input{ flex:1; min-width:110px; background:none; border:none; padding:6px 2px; box-shadow:none !important; }
+
+/* ---------- FOOTER ---------------------------------------------------- */
+.bloom-add-habit .modal-foot{ display:flex; gap:var(--space-3); padding:var(--space-4) var(--space-6) var(--space-6); border-top:1px solid var(--border); background:var(--surface-2); }
+.bloom-add-habit .btn{ flex:1; padding:13px; border-radius:var(--radius-sm); font-family:var(--font-body); font-weight:600; font-size:14px; cursor:pointer; border:1px solid transparent; transition:all .25s var(--ease); }
+.bloom-add-habit .btn-secondary{ background:var(--surface-3); border-color:var(--border); color:var(--text-muted); }
+.bloom-add-habit .btn-secondary:hover{ color:var(--text); border-color:var(--border-hover); }
+.bloom-add-habit .btn-primary{ background:linear-gradient(135deg,var(--accent), color-mix(in oklab, var(--accent) 78%, #000)); color:#14151F; }
+.bloom-add-habit .btn-primary:hover:not(:disabled){ transform:translateY(-2px); box-shadow:0 12px 26px -12px var(--accent); }
+.bloom-add-habit .btn-primary:active{ transform:none; }
+.bloom-add-habit .btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+.bloom-add-habit .btn.loading{ pointer-events:none; opacity:.7; }
+
+/* ---------- SUCCESS OVERLAY ------------------------------------------ */
+.bloom-add-habit .success{
+  position:absolute; inset:0; background:linear-gradient(180deg,var(--surface),var(--surface-2));
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:var(--space-3); z-index:5; text-align:center; padding:var(--space-6);
+}
+.bloom-add-habit .success.show{ display:flex; animation:bah-fadeIn .3s var(--ease) both; }
+.bloom-add-habit .success-badge{ width:64px; height:64px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:28px; animation:bah-pop .5s var(--ease) both; }
+@keyframes bah-pop{ from{transform:scale(.6); opacity:0} to{transform:scale(1); opacity:1} }
+.bloom-add-habit .success h3{ font-family:var(--font-display); font-weight:500; font-size:20px; }
+.bloom-add-habit .success p{ font-size:13px; color:var(--text-muted); }
+
+.bloom-add-habit button:focus-visible, .bloom-add-habit input:focus-visible, .bloom-add-habit textarea:focus-visible, .bloom-add-habit .icon-opt:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+@media (max-width:480px){
+  .bloom-add-habit .modal{ max-height:94vh; }
+  .bloom-add-habit .icon-grid{ grid-template-columns:repeat(6,1fr); }
+  .bloom-add-habit .modal-head, .bloom-add-habit .steps, .bloom-add-habit .modal-body, .bloom-add-habit .modal-foot{ padding-left:var(--space-4); padding-right:var(--space-4); }
+}
