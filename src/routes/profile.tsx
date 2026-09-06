@@ -7,7 +7,6 @@ import { z } from "zod";
 import profileCss from "../styles/profile.css?url";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
-import { BloomHeader } from "@/components/BloomHeader";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { Reveal, accentVar } from "@/components/mood/primitives";
@@ -338,7 +337,6 @@ function ProfilePage() {
         ["--profile-accent-glow" as string]: `0 16px 44px -26px color-mix(in oklab, ${accentVar[accent]} 65%, transparent)`,
       }}
     >
-      <BloomHeader />
       <AppNav />
       <Atmosphere />
 

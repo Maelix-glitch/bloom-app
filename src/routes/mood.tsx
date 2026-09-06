@@ -18,7 +18,6 @@ import { Insights } from "@/components/mood/Insights";
 import { History } from "@/components/mood/History";
 import { Composer } from "@/components/mood/Composer";
 import { Reveal } from "@/components/mood/primitives";
-import { BloomHeader } from "@/components/BloomHeader";
 import { AppNav } from "@/components/home/HomeSidebar";
 
 export const Route = createFileRoute("/mood")({
@@ -100,7 +99,6 @@ function MoodIntelligencePage() {
 
   return (
     <div className="app-shell relative min-h-screen bg-background text-foreground">
-      <BloomHeader />
       <AppNav />
       <Atmosphere />
 

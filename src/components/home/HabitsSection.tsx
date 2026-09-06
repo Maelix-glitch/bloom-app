@@ -49,7 +49,7 @@ export function HabitsSection({
 
   return (
     <section
-      className="home-panel home-rise p-5 sm:p-6"
+      className="home-panel home-rise p-5 sm:p-7"
       style={{ animationDelay: "70ms" }}
       aria-labelledby="home-habits-title"
       data-testid="home-habits-section"
@@ -63,7 +63,7 @@ export function HabitsSection({
           >
             Your habits today
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">{summary}</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">{summary}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {points !== null ? (
@@ -91,7 +91,7 @@ export function HabitsSection({
 
       {due > 0 ? (
         <div
-          className="mt-4 h-1.5 overflow-hidden rounded-full"
+          className="mt-5 h-1.5 overflow-hidden rounded-full"
           style={{ background: "var(--home-secondary)" }}
           role="progressbar"
           aria-label="Habits completed today"
@@ -115,7 +115,7 @@ export function HabitsSection({
           <Loader2 className="size-3.5 animate-spin" /> Loading your habits…
         </p>
       ) : due === 0 ? (
-        <div className="mt-5 flex flex-col items-start gap-4 rounded-2xl border border-dashed border-border p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col items-start gap-4 rounded-2xl border border-dashed border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <p className="font-display text-lg">No habits yet.</p>
             <p className="mt-1 max-w-[52ch] text-sm leading-snug text-muted-foreground">
@@ -132,7 +132,7 @@ export function HabitsSection({
           </button>
         </div>
       ) : (
-        <ul className="mt-4 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {habits.map((h) => {
             const streak = streaks.get(h.id) ?? 0;
             const tone = `var(--${habitColorVar(h.color)})`;

@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 
 import crownCrest from "@/assets/crown-crest.png";
-import { BloomHeader } from "@/components/BloomHeader";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { RewardClaimCinematic, type RewardReveal } from "@/components/rewards/RewardClaimCinematic";
@@ -336,7 +335,6 @@ export function RewardsPage() {
 
   return (
     <div className="rewards-delivery-page app-shell relative min-h-screen bg-background text-foreground">
-      <BloomHeader />
       <AppNav />
       <Atmosphere />
       <div className="rewards-starfield" aria-hidden="true">

@@ -34,7 +34,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { BloomHeader } from "@/components/BloomHeader";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
@@ -1833,7 +1832,6 @@ export function CoachPage() {
 
   return (
     <div className="coach-page app-shell relative min-h-screen bg-background text-foreground">
-      <BloomHeader />
       <AppNav />
       <div className="coach-atmosphere">
         <Atmosphere />

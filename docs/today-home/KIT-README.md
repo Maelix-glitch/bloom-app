@@ -1,6 +1,8 @@
-# Bloom — Today home kit (v3)
+# Bloom — Today home kit (v4)
 
 What it installs on top of your repo:
+
+0. **One chrome, no second header** (v4): the old top header bar is gone from Today, Trackers, Cycle, Mood, Rewards, Coach and Profile. The left rail now runs from the very top of the page (brand → links → Profile), stays put while you scroll, and the botanical photo fills its foot at its natural proportions (never stretched) and fades into the panel. On phones: a slim brand bar on top, the tab bar at the bottom. Plus a little more, controlled breathing room on Today.
 
 1. **Today page at `/`** (v1) — insight-map layout wired to Supabase, live rings, the coach.
 2. **Habits section** right under the greeting, with per-habit streaks, points, a progress bar and an empty state (v2).
@@ -9,7 +11,7 @@ What it installs on top of your repo:
 5. **The same sidebar on every main page** — Today, Trackers, Cycle, Mood, Rewards, Coach (and Profile): the rail on desktop, a bottom tab bar on phones (v2).
 6. Rewards no longer crashes when the app runs without a Supabase `.env` (same guard the other hooks already had).
 
-Safe to run whether v1, v2 or nothing was applied before — it only adds what is missing, and it is safe to run twice. On a repo that already has v2, it writes exactly three files: `src/components/tk/AddHabitModal.tsx`, `src/styles/add-habit-modal.css`, `src/lib/home/habits.ts`.
+Safe to run whether v1, v2, v3 or nothing was applied before — it only adds what is missing, and it is safe to run twice. On a repo that already has v3 it rewrites five files (`index.tsx`, `trackers.tsx`, `cycle.tsx`, `HomeSidebar.tsx`, `HabitsSection.tsx`), swaps the app-shell block at the end of `src/styles.css`, and removes the `<BloomHeader />` line + import from `mood.tsx`, `profile.tsx`, `CoachPage.tsx`, `RewardsPage.tsx`.
 
 ## Apply (Windows, PowerShell or cmd)
 
@@ -27,9 +29,9 @@ If anything prints `✖`, nothing else was touched — send me the output.
 
 ## Then
 
-- `npm run dev` → `/` (Today: habits section + floating Add habit → the 3-step dialog), then `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach` — same sidebar on each, the page's own design unchanged inside it.
+- `npm run dev` → `/` (Today: one rail from the top, habits section, floating Add habit → the 3-step dialog), then `/trackers`, `/cycle`, `/mood`, `/rewards`, `/coach` — same rail on each, no second header, the page's own design unchanged inside it.
 - Supabase → SQL editor → run `supabase/migrations/20260906_today_home.sql` once (idempotent; creates `tracker_days`, `habits`, `habit_logs`, `profiles.total_points` + RPCs, RLS, realtime). Skip if you already ran it for v1.
-- `git add -A && git commit -m "feat(home): v3 add-habit dialog, habits section, floating add-habit, shared sidebar" && git push`
+- `git add -A && git commit -m "feat(home): single rail chrome, v3 add-habit dialog, habits section" && git push`
 
 ## What's in the box
 

@@ -518,13 +518,14 @@
 }
 
 /* ---------------------------------------------------------------------------
- * App shell — the insight-map rail and the phone tab bar that every main page
- * shares (Today, Trackers, Cycle, Mood, Rewards, Coach). A page opts in by
- * adding `app-shell` to its wrapper and rendering <AppNav /> after its
- * <BloomHeader />; the wrapper becomes a two-column grid at lg with the
- * header across the top, the rail in column 1 and the page's own <main> in
- * column 2. Fixed atmospheres and overlays are out of flow, so they are
- * untouched. See src/components/home/HomeSidebar.tsx.
+ * App shell — the one piece of chrome every main page shares (Today,
+ * Trackers, Cycle, Mood, Rewards, Coach, Profile). A page opts in by adding
+ * `app-shell` to its wrapper and rendering <AppNav /> first; there is no
+ * separate top header any more. At lg the wrapper becomes a two-column grid:
+ * the rail in column 1 from the very top of the page, the page's own <main>
+ * in column 2. Below lg the rail is gone and a slim sticky brand bar sits on
+ * top with the tab bar at the bottom. Fixed atmospheres and overlays are out
+ * of flow, so they are untouched. See src/components/home/HomeSidebar.tsx.
  * ------------------------------------------------------------------------- */
 .app-shell {
   /* Height of the phone tab bar; 0 once the rail takes over at lg. Anything a
@@ -535,18 +536,22 @@
   .app-shell {
     --app-bottom-nav: 0px;
     display: grid;
-    grid-template-columns: 212px minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
   }
-  .app-shell > header {
-    grid-column: 1 / -1;
-  }
+  /* The rail is exactly one viewport tall and sticks, so the brand, the links
+     and the botanical at the foot are always in view however long the page. */
   .app-shell > .app-sidebar {
-    grid-row: 2;
+    grid-row: 1;
     grid-column: 1;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    height: 100dvh;
   }
   .app-shell > main {
-    grid-row: 2;
+    grid-row: 1;
     grid-column: 2;
     min-width: 0;
   }
@@ -569,6 +574,28 @@
 }
 .app-sidebar {
   background: color-mix(in oklab, var(--surface) 40%, var(--background));
+}
+.app-mobile-bar {
+  background: color-mix(in oklab, var(--surface) 55%, var(--background));
+  backdrop-filter: blur(16px);
+}
+.app-sidebar-rule {
+  background: linear-gradient(90deg, var(--border-strong), transparent);
+  opacity: 0.7;
+}
+.app-nav-link-active {
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* The botanical spans the whole rail: object-fit: cover keeps the photo's own
+   proportions (never stretched) and anchors it to the foot; at typical
+   viewport heights the 600×1200 source is scaled down, not up, so it stays
+   sharp. It dissolves upward into the panel so there is no seam. */
+.app-sidebar-botanical {
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 100%);
 }
 
 /* Bottom-anchored controls other pages already own sit above the tab bar

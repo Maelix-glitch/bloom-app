@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell, Droplet, Gift, Loader2, PenLine, Plus, Smile } from "lucide-react";
 
-import { BloomHeader } from "@/components/BloomHeader";
-import { AppNav, BloomMark } from "@/components/home/HomeSidebar";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap } from "@/components/home/ConnectionMap";
 import { CoachPanel } from "@/components/home/CoachPanel";
 import { HabitsSection } from "@/components/home/HabitsSection";
@@ -229,22 +228,17 @@ function TodayPage() {
 
   return (
     <div className="home-page app-shell min-h-screen bg-background text-foreground">
-      {/* Bloom's shared header — same brand mark and nav as every other page. */}
-      <BloomHeader />
-
-      {/* the shared rail + phone tab bar, identical on every main page */}
+      {/* the one shared chrome: rail on desktop, brand bar + tab bar on phones */}
       <AppNav />
 
-      <main className="min-w-0 px-4 pb-28 pt-5 sm:px-7 lg:pb-24">
-        {/* top bar */}
+      <main className="min-w-0 px-5 pb-28 pt-6 sm:px-8 lg:px-10 lg:pb-24 lg:pt-7">
+        {/* top bar: the date on the left, quick actions on the right */}
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 lg:hidden">
-            <BloomMark size={20} id="bloomBrandGradientTop" />
-            <span className="font-display text-xl">Bloom</span>
-          </div>
-          <p className="hidden text-xs text-muted-foreground lg:block">
+          <p className="text-xs text-muted-foreground">
             {longDate(now)}
-            {syncLine ? <span className="ml-3 text-faint">· {syncLine}</span> : null}
+            {syncLine ? (
+              <span className="ml-3 hidden text-faint sm:inline">· {syncLine}</span>
+            ) : null}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -273,17 +267,15 @@ function TodayPage() {
             <Link
               to="/profile"
               aria-label="Your profile"
-              className="grid size-9 place-items-center rounded-full border border-primary/40 bg-surface-3/60 text-xs"
+              className="hidden size-9 place-items-center rounded-full border border-primary/40 bg-surface-3/60 text-xs lg:grid"
             >
               {initial}
             </Link>
           </div>
         </div>
 
-        <p className="mt-3 text-xs text-muted-foreground lg:hidden">{longDate(now)}</p>
-
         {/* hero */}
-        <header className="home-rise mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <header className="home-rise mt-7 grid gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div>
             <h1 className="font-display text-4xl leading-tight sm:text-5xl">
               {firstName ? (
@@ -351,7 +343,7 @@ function TodayPage() {
         </header>
 
         {/* habits — high on the page, right under the greeting */}
-        <div className="mt-6">
+        <div className="mt-8">
           <HabitsSection
             habits={habits.todayHabits}
             logs={habits.logs}
@@ -364,8 +356,8 @@ function TodayPage() {
         </div>
 
         {/* main grid */}
-        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
             <div className="grid gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
               <ProgressPanel
                 score={score}
@@ -381,7 +373,7 @@ function TodayPage() {
             </div>
           </div>
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 lg:content-start">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:content-start">
             <FocusPanel
               items={focus}
               onToggleHabit={(id) => void habits.toggle(id)}
@@ -405,7 +397,7 @@ function TodayPage() {
           </div>
         </div>
 
-        <footer className="mt-10 hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
+        <footer className="mt-14 hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
           <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
           <span className="h-px w-16 bg-border" />
           <span>A MORE INTENTIONAL DAY, EVERYWHERE</span>

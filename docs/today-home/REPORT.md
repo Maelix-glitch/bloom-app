@@ -166,3 +166,46 @@ already has v2 it writes exactly three files (`AddHabitModal.tsx`,
 `styles/add-habit-modal.css`, `lib/home/habits.ts`); tested from `4f924ee`
 (54 steps), `bf49c7f` (37) and `8945284` (3), all idempotent and byte-identical
 to this branch.
+
+## v4 — one chrome: the rail from the top, no second header
+
+**Ask.** The Today page (and the other main pages) showed two headers: Bloom's
+old top bar *and* the rail's own brand block underneath it. Remove the
+duplicate, run the rail's photo up to the top without stretching it, and give
+the whole thing a cleaner, slightly airier finish.
+
+**What changed**
+
+- `<BloomHeader />` is no longer rendered on `/`, `/trackers`, `/cycle`,
+  `/mood`, `/rewards`, `/coach`, `/profile` (the component itself stays for the
+  legacy pages that still use it). `AppNav` is now the only chrome.
+- `HomeSidebar`: the rail starts at the very top of the page, is exactly one
+  viewport tall and sticky (brand, links and the botanical foot always in
+  view), 220 px wide, with hairline rules and a Profile link at the end of the
+  list. The botanical (600×1200) now covers the whole rail with
+  `object-fit: cover` anchored to the bottom — it keeps its own proportions,
+  is scaled *down* at normal viewport heights (so it stays sharp), and
+  dissolves upward with a mask so there is no seam.
+- New `HomeMobileBar` (< lg): a slim sticky brand bar with the mark, the
+  wordmark and a profile link; primary links stay in the bottom tab bar.
+- `.app-shell` grid: single row (`220px minmax(0,1fr)`), `> header` rule
+  removed. Pages' own `<main>` untouched.
+- Today: the top bar is just the date + quick actions (no second wordmark on
+  phones any more); hero `mt-7/8`, habits section `mt-8`, main grid
+  `mt-6 gap-6`, panel padding `p-7` at sm, footer `mt-14` — a little more
+  space, evenly.
+
+**Verified** (headless, 1440 and 390): 0 top headers on all seven routes
+(Coach's own in-page `<header>` is inside `<main>`), rail `0,0 → 220×900`
+sticky while the page scrolls 900 px, botanical box = rail box, natural
+600×1200 source, `docW == viewport` everywhere, brand bar 52 px sticky on
+phones, tab bar at 783, no page errors; the Add-habit dialog flow still
+passes end to end; tsc 11 pre-existing, eslint 0 new, vitest 26/26, build OK.
+Screenshots: `p6-today-desktop.png`, `p6-today-full.png`,
+`p6-rail-sticky.png` (top vs scrolled), `p6-pages-desktop.png`,
+`p6-pages-mobile.png`.
+
+Kit: same zip, now v4 — from a v3 checkout it rewrites five files, swaps the
+app-shell CSS block and strips the `<BloomHeader />` line from four pages;
+tested from `4f924ee`, `bf49c7f`, `8945284` and `df7d705`, all idempotent and
+byte-identical to this branch.
