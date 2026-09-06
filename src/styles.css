@@ -360,7 +360,6 @@
   }
 }
 
-/* One wide band of light that crosses a panel on a slow idle cycle. */
 /* One-shot entrance for Mood Intelligence sections: starts on mount, ends
    at full opacity, and is skipped entirely under reduced motion. */
 .mood-reveal {
@@ -372,6 +371,7 @@
   }
 }
 
+/* One wide band of light that crosses a panel on a slow idle cycle. */
 @utility sheen-band {
   position: absolute;
   top: 0;

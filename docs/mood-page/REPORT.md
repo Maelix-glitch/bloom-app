@@ -114,3 +114,78 @@ v4 tree: every run ends byte-identical to this branch for the files it owns,
 second runs make 0 edits, and the applied v4 tree passes 34/34 tests, adds no
 type errors once the dev server regenerates `routeTree.gen.ts`, and builds
 with the six images bundled. Zip: 603,330 bytes.
+
+---
+
+# Phase 10 — width, flicker, lag, and the mood web
+
+Follow-up on the first `/mood` build. Everything below was measured in
+headless Chromium against the dev server before and after the change.
+
+## What was wrong, and why
+
+| Symptom | Cause found | Fix |
+| --- | --- | --- |
+| `/mood` and `/mood/intelligence` narrower than Today | `MoodPage` wrapped in `mx-auto max-w-6xl`, Intelligence in `max-w-[1200px]`; Today has a full-width `main` | Both now use Today's main (`min-w-0 w-full px-5 … lg:px-10`). Content spans x 260–1880 at 1920 on all three pages. |
+| Spinner / flash when moving between pages | `useMoodSystem` fetched entries per mount **and** twice per mount (`getSession`, then supabase-js's `INITIAL_SESSION` event set `loading=true` again, remounting the page under it); `Reveal` started at `opacity-0` on hydration | New `src/lib/mood/record.ts` — one shared record per session read through `useSyncExternalStore`; auth events revalidate silently; `Reveal` is a CSS-only one-shot (`.mood-reveal`). Spinner now appears once per session, never again on navigation; 0 main remounts. |
+| Lag (slow scroll, sluggish range switches) | 27 infinite animations idle on Intelligence: 18 motes, 3 blurred drift fields, a 60 fps spotlight rAF, per-panel sweep/breathe, 10 evidence-pill pings. **Atmosphere was invisible on Intelligence** (opaque `.app-shell` above its `-z-10` layer — 0-pixel screenshot diff) yet running. Range switch: ~370 ms of JS — every panel re-rendered, and the ECharts line re-rasterised an 18 px canvas `shadowBlur` on every animation frame. | Atmosphere: 8 motes, no blur, spotlight settles; removed from Intelligence. Panels static, pills quiet. Nine Intelligence panels `memo`ised with stable callbacks. Chart: no `shadowBlur`, merge-update (`replaceMerge`) instead of `notMerge`. **Idle infinite animations 27 → 3 on Intelligence, 2 on `/mood`; range-switch overhead 370 ms → ~30 ms.** |
+| Click → wait on `/mood` → `/mood/intelligence` | The route's code chunk downloaded on click | `defaultPreload: "intent"` in `router.tsx` (plus `preload="intent"` on the mood links): cold click 758 ms → ~300 ms, hover-first 258 ms. |
+
+## Your mood web
+
+New section on `/mood`, right after the journey (`src/lib/mood/graph.ts`,
+`src/components/mood/page/MoodGraph.tsx`, styles under `.mood-page .mg-*`).
+
+- **Model.** Mood is the hub. Inner ring = the signals you actually log
+  (energy and stress always; sleep, exercise, screen time, productivity,
+  social, study, steps only when present). Outer ring = up to six named
+  emotions (four on phones), sized by frequency. Edges Mood↔signal use the
+  page's existing Pearson correlations on paired days; up to four
+  signal↔signal cross-links are added only with real evidence. Gold = lifts
+  mood, rose = lowers, dashed = not enough days (`evidenceFor`: n ≥ 8 and
+  |r| ≥ 0.15). Node distance from the centre shrinks with |r|; line weight
+  grows with it. Particles run along the strongest links only (SMIL
+  `animateMotion`, ≤ 6, hidden under reduced motion).
+- **Layout.** Deterministic, per-axis elliptical rings so a landscape canvas
+  is filled; overlap relaxation; everything clamped in-bounds. Separate
+  desktop (640×440) and mobile (360×440) layouts, only one mounted at a time.
+- **Interaction.** Hover reads a node in the side column (signal average,
+  each link's r and a plain-words statement); click / tap / Enter pins,
+  Escape or "Unpin" releases. Headline is the strongest measured link
+  ("Higher energy, higher mood."). "Open in Intelligence" and "See the full
+  analysis" deep-link to `#relationships` on Intelligence.
+- **Empty state.** Just the hub ("no entries yet") and a short explanation —
+  which is what a signed-out preview shows.
+- **Font note.** The display face has no "→" glyph (it rendered as a box), so
+  statements read "Longer sleep, higher mood" instead.
+- Tests: 9 new (`graph.test.ts`) — nodes only for logged signals, evidence
+  gating, hub centred, in-bounds, no overlap, determinism, headline choice.
+
+## Verified
+
+- vitest 43/43; tsc 0 new errors (11 pre-existing); eslint 0 new errors on
+  every touched file (pre-existing prettier drift in `MoodChart.tsx` and
+  `analytics.ts` untouched); `npm run build` OK.
+- Width at 1440/1920: `/`, `/mood`, `/mood/intelligence` share the same
+  content edges. Phone 390: no horizontal overflow, single canvas, labels
+  inside the card.
+- Navigation `/mood` → `/mood/intelligence`: no spinner, no main remount.
+- With a 118-day demo record (preview only): 14 nodes / 18 edges / 6
+  particles; energy r +0.83, sleep r +0.50, stress r −0.82; hover, pin,
+  Escape all behave.
+
+Screenshots: `mood-web-1440.png`, `mood-web-1920.png`, `mood-web-390.png`
+(signed-out, as the live preview shows it); `mood-web-demo-data.png`,
+`mood-web-pinned.png`, `mood-web-demo-390.png` (with the demo record).
+
+## Kit v2 (same download URL)
+
+`docs/mood-page/bloom-mood-page.zip` now applies v1 + Phase 10. Idempotent
+over a v1 tree and over a tree that never had it; byte-compared copies; CRLF
+preserved; the two new CSS blocks are marker-guarded (`.mood-reveal {`,
+`* Mood web —`). Tested from `4e2a87b` + v1, `02bcc2a` bare, a CRLF tree and
+the unzipped kit in a path with spaces: every run ends byte-identical to this
+branch across `src/`, second runs make 0 edits, and the applied tree passes
+43/43 tests, adds no type errors once `routeTree.gen.ts` regenerates, and
+builds. Zip: 650,257 bytes, 53 files.
+
