@@ -33,12 +33,21 @@ export const HOME_NAV: {
 export function BloomMark({
   size = 22,
   id = "bloomBrandGradientHome",
+  className,
 }: {
   size?: number;
   id?: string;
+  className?: string;
 }) {
   return (
-    <svg viewBox="0 0 28 28" fill="none" width={size} height={size} aria-hidden="true">
+    <svg
+      viewBox="0 0 28 28"
+      fill="none"
+      width={size}
+      height={size}
+      className={className}
+      aria-hidden="true"
+    >
       <path
         d="M4 20c3-9 7-14 10-14s7 5 10 14"
         stroke={`url(#${id})`}
@@ -57,18 +66,23 @@ export function BloomMark({
 
 /**
  * The left rail every main page shares (lg and up). Inside an `.app-shell`
- * grid it takes the first column and runs the full page height — from the
- * very top, there is no separate header bar any more — so the botanical can
- * sit at the bottom under a soft fade, while the brand + nav block is sticky
- * so the links stay in reach on long pages like Coach. `.app-nav` pins
- * Bloom's base palette so the rail is identical on every route, even ones
- * that retint the shared tokens (Rewards).
+ * wrapper it is fixed to the left edge of the viewport — exactly one screen
+ * tall, from the very top (there is no separate header bar any more) to the
+ * bottom, where the botanical sits under a soft fade — so it never scrolls
+ * with the page, however long the page is (Coach). The wrapper pads for its
+ * width (see the App shell block in src/styles.css). `.app-nav` pins Bloom's
+ * base palette so the rail is identical on every route, even ones that retint
+ * the shared tokens (Rewards).
+ *
+ * Alignment: the brand row is laid out exactly like a nav link (the same
+ * 16px icon slot at the same x, the same gap), so the mark sits on the icon
+ * column and the wordmark on the label column.
  */
 export function HomeSidebar() {
   const { pathname } = useLocation();
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
-    <aside className="app-nav app-sidebar relative z-[2] hidden w-[220px] shrink-0 flex-col justify-between overflow-clip border-r border-border lg:flex">
+    <aside className="app-nav app-sidebar z-[2] hidden w-[220px] shrink-0 flex-col justify-between overflow-clip border-r border-border lg:fixed lg:inset-y-0 lg:left-0 lg:flex">
       {/* Botanical: the 1:2 photo covers the whole rail — cover keeps its
           proportions (no stretch), anchored to the foot, fading into the
           panel above so there is never a hard line. */}
@@ -89,11 +103,14 @@ export function HomeSidebar() {
       <div className="relative">
         <Link
           to="/"
-          className="flex h-[64px] items-center gap-2.5 px-7 text-foreground"
+          className="mx-4 flex h-[64px] items-center gap-3 px-3 text-foreground"
           aria-label="Bloom — Today"
         >
-          <BloomMark size={22} id="bloomBrandGradientSidebar" />
-          <span className="font-display text-[22px] tracking-wide">Bloom</span>
+          {/* -3px margins give the 22px arc a 16px box — a nav icon's — so it
+              is centred on the icon column and the wordmark starts where the
+              labels do. */}
+          <BloomMark size={22} id="bloomBrandGradientSidebar" className="-m-[3px] shrink-0" />
+          <span className="font-display text-[22px] leading-none tracking-wide">Bloom</span>
         </Link>
         <span className="app-sidebar-rule mx-7 block h-px" />
         <nav className="mt-5 space-y-1 px-4" aria-label="Primary">
@@ -140,24 +157,25 @@ export function HomeSidebar() {
 }
 
 /**
- * Phones and tablets have no rail, so a slim brand bar at the top carries the
- * mark, the wordmark and the profile link; the primary links live in the
- * bottom tab bar (HomeMobileNav).
+ * Phones and tablets have no rail, so a brand bar fixed to the top carries
+ * the mark, the wordmark and the profile link; the primary links live in the
+ * bottom tab bar (HomeMobileNav). Its height is `--app-top-bar` (60px) and
+ * the `.app-shell` wrapper pads for it — see src/styles.css.
  */
 export function HomeMobileBar() {
   const { pathname } = useLocation();
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
-    <div className="app-nav app-mobile-bar sticky top-0 z-20 flex h-[52px] items-center justify-between border-b border-border px-5 lg:hidden">
+    <div className="app-nav app-mobile-bar fixed inset-x-0 top-0 z-20 flex h-[60px] items-center justify-between border-b border-border px-5 lg:hidden">
       <Link to="/" className="flex items-center gap-2.5 text-foreground" aria-label="Bloom — Today">
-        <BloomMark size={20} id="bloomBrandGradientMobile" />
-        <span className="font-display text-[19px] tracking-wide">Bloom</span>
+        <BloomMark size={22} id="bloomBrandGradientMobile" />
+        <span className="font-display text-[21px] leading-none tracking-wide">Bloom</span>
       </Link>
       <Link
         to="/profile"
         aria-label="Your profile"
         aria-current={profileActive ? "page" : undefined}
-        className={`grid size-8 place-items-center rounded-full border transition-colors ${
+        className={`grid size-9 place-items-center rounded-full border transition-colors ${
           profileActive
             ? "border-primary/50 text-foreground"
             : "border-border text-muted-foreground hover:text-foreground"
@@ -200,9 +218,9 @@ export function HomeMobileNav() {
 /**
  * AppNav — the only chrome a main page renders. Drop it first inside any page
  * wrapper that carries the `app-shell` class: on desktop the rail (brand +
- * primary links + profile) sits beside the page's own <main>; on phones a
- * slim brand bar sits on top and the tab bar at the bottom. No re-nesting
- * needed — the `.app-shell` grid (src/styles.css) places the rail and <main>.
+ * primary links + profile) is fixed beside the page's own <main>; on phones
+ * the brand bar is fixed on top and the tab bar at the bottom. No re-nesting
+ * needed — `.app-shell` (src/styles.css) pads for whichever chrome is shown.
  */
 export function AppNav() {
   return (

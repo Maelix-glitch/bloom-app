@@ -209,3 +209,55 @@ Kit: same zip, now v4 — from a v3 checkout it rewrites five files, swaps the
 app-shell CSS block and strips the `<BloomHeader />` line from four pages;
 tested from `4f924ee`, `bf49c7f`, `8945284` and `df7d705`, all idempotent and
 byte-identical to this branch.
+
+## v5 — a rail that stays put, an aligned brand, a taller phone header
+
+**Ask** (from a desktop screenshot of the rail): the Bloom mark/wordmark in
+the sidebar was slightly out of line with the nav; the phone header was "a bit
+too thin"; and the sidebar was "too long" and scrolled along with the page.
+
+**Why the rail scrolled for you but not in the headless checks.** v4 pinned
+the rail with `position: sticky` inside the `.app-shell` grid. Sticky is
+fragile: it silently stops working if *any* ancestor scrolls or clips
+(`body` already has `overflow-x: hidden`, which some engines treat as a
+scroll container), or if the sticky element's grid track is as tall as the
+element itself. In the sandbox's Chromium the rail happened to stick; in your
+browser it did not — and when sticky fails the rail simply flows with the
+page, which is exactly what you saw. Rather than chase which ancestor breaks
+it on your machine, the rail no longer depends on any ancestor at all.
+
+**What changed**
+
+- `.app-shell` (src/styles.css): no grid any more. At lg the wrapper gets
+  `padding-left: 220px` and the rail is `position: fixed; inset: 0 auto 0 0;
+  width: 220px` — pinned to the left edge of the viewport, exactly one screen
+  tall, on every route, however far the page is scrolled and whatever the
+  page's own overflow/transform situation is (the seven wrappers were checked
+  for transform/filter/contain, which would trap `fixed`; none has any).
+  Below lg the wrapper gets `padding-top: var(--app-top-bar)` (60px) and the
+  brand bar is `position: fixed` at the top, so it can't be lost to the same
+  sticky failure. New tokens: `--app-top-bar`, `--app-rail`.
+- `HomeSidebar` brand row: laid out exactly like a nav link — `mx-4 px-3
+  gap-3`, and the 22 px mark is given a 16 px box (`-m-[3px]`) which is a nav
+  icon's box. Result: the arc's centre is at x = 36 = the icon column's
+  centre; the wordmark starts at x = 56 = where the labels start; mark and
+  wordmark share the same centre line (y = 32). Before: mark centre 39 (3 px
+  right of the icons), wordmark at 60 (4 px right of the labels).
+- `HomeMobileBar`: 60 px (was 52), mark 22 (was 20), wordmark 21 px (was 19),
+  profile button 36 px (was 32), fixed to the top.
+
+**Verified** (headless Chromium, 1280×720 and 390×844, no `.env`): on all
+seven routes the rail is `position: fixed`, `0,0 → 220×720`, and after
+scrolling to the bottom of the page (up to 1146 px) it is still at `y = 0`,
+720 tall; `<main>` starts at x = 220 (Profile's centred column at 390);
+brand geometry as above on every route. Phones: brand bar fixed, 60 px,
+`<main>` starts at y = 60, tab bar at 783, and the bar stays at y = 0 after
+scrolling 500 px. tsc: 0 new (11 pre-existing), eslint: 0 new, vitest 26/26,
+build OK. Screenshots: `p8-rail-aligned.png`,
+`p8-today-scrolled-rail-fixed.png`, `p8-coach-scrolled-rail-fixed.png`,
+`p8-mobile-bar-60.png`.
+
+Kit: same zip, now v5 — from a v4 checkout it rewrites `HomeSidebar.tsx` and
+swaps the app-shell CSS block (marker: `.app-shell > .app-mobile-bar {`),
+nothing else; tested from `4e2a87b` (v4) and `df7d705` (v3), both idempotent
+and byte-identical to this branch.
