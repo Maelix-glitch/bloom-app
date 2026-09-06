@@ -194,7 +194,7 @@ builds. Zip: 650,257 bytes, 53 files.
 
 The user applied a kit and reported "still the same", and asked for a
 separate kit only for the reported problems. `docs/mood-fixes/bloom-mood-fixes.zip`
-(`apply-mood-fixes.mjs` + `files/`, 34 files, 179,037 bytes) installs exactly
+(`apply-mood-fixes.mjs` + `files/`, 34 files, 64,251-byte zip) installs exactly
 Phase 10 on top of an installed Mood page (v1 or v2 — v2 trees get all
 "already done"). Differences from the page kit: it refuses to run if the Mood
 page isn't there (points at the page kit); prints a **Found:** block first
