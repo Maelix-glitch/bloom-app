@@ -24,41 +24,30 @@ export const accentVar: Record<Accent, string> = {
  * Staggers the idle sheen across panels. Applied after hydration via a ref so
  * SSR markup and the first client render stay byte-identical.
  */
-let panelOrdinal = 0;
-
 export function Panel({
   className,
   children,
   glow,
-  sheen = true,
+  sheen: _sheen,
   ...rest
 }: React.HTMLAttributes<HTMLDivElement> & { glow?: Accent; sheen?: boolean }) {
-  const sheenRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = sheenRef.current;
-    if (el) el.style.animationDelay = `${((panelOrdinal++ % 8) * 1.15).toFixed(2)}s`;
-  }, []);
-
   return (
     <div
       {...rest}
       className={cn(
-        "panel relative overflow-hidden transition-[border-color,box-shadow,transform] duration-500",
-        "hover:-translate-y-[2px] hover:border-border-strong",
+        "panel relative overflow-hidden transition-[border-color] duration-300",
+        "hover:border-border-strong",
         className,
       )}
     >
       {glow ? (
         <div
           aria-hidden
-          className="animate-breathe pointer-events-none absolute inset-x-0 top-0 h-32"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32"
           style={{
-            background: `radial-gradient(120% 100% at 50% 0%, color-mix(in oklab, ${accentVar[glow]} 16%, transparent), transparent 70%)`,
+            background: `radial-gradient(120% 100% at 50% 0%, color-mix(in oklab, ${accentVar[glow]} 14%, transparent), transparent 70%)`,
           }}
         />
-      ) : null}
-      {sheen ? (
-        <div ref={sheenRef} aria-hidden className="sheen-band animate-sweep" />
       ) : null}
       <div className="relative">{children}</div>
     </div>
@@ -93,7 +82,8 @@ export function useCountUp(value: number, decimals = 1, duration = 900) {
   const from = useRef(value);
   useEffect(() => {
     const reduce =
-      typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       setDisplay(value);
       from.current = value;
@@ -119,7 +109,15 @@ export function CountUp({ value, decimals = 1 }: { value: number; decimals?: num
   return <>{useCountUp(value, decimals)}</>;
 }
 
-export function Delta({ value, unit = "%", invert }: { value: number | null; unit?: string; invert?: boolean }) {
+export function Delta({
+  value,
+  unit = "%",
+  invert,
+}: {
+  value: number | null;
+  unit?: string;
+  invert?: boolean;
+}) {
   if (value === null || Number.isNaN(value))
     return <span className="mono text-[11px] text-faint">no baseline</span>;
   const good = invert ? value < 0 : value > 0;
@@ -154,7 +152,7 @@ export function EvidencePill({ evidence, n }: { evidence: Evidence; n?: number }
         evidenceStyles[evidence],
       )}
     >
-      <span className="animate-sheen size-1 rounded-full bg-current" />
+      <span className="size-1 rounded-full bg-current" />
       {evidence === "insufficient" ? "insufficient" : evidence}
       {typeof n === "number" ? <span className="text-faint">· {n} obs</span> : null}
     </span>
@@ -208,40 +206,19 @@ export function Insufficient({ children }: { children: ReactNode }) {
 export function Reveal({
   delay = 0,
   className,
+  id,
   children,
 }: {
   delay?: number;
   className?: string;
+  id?: string;
   children: ReactNode;
 }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || shown) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setShown(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "0px 0px -6% 0px", threshold: 0.04 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [shown]);
-
   return (
     <div
-      ref={ref}
-      className={cn(shown ? "animate-rise" : "opacity-0", className)}
-      style={shown ? { animationDelay: `${delay}ms`, animationFillMode: "forwards" } : undefined}
+      id={id}
+      className={cn("mood-reveal", className)}
+      style={delay ? { animationDelay: `${Math.min(delay, 160)}ms` } : undefined}
     >
       {children}
     </div>

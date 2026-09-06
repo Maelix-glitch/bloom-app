@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Download, Pencil, Search, Sparkles, Trash2 } from "lucide-react";
 
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 type ValenceFilter = "all" | Valence;
 
-export function History({
+function HistoryImpl({
   entries,
   onEdit,
   onDelete,
@@ -200,3 +200,6 @@ export function History({
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const History = memo(HistoryImpl);

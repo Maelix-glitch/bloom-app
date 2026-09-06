@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
 
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import type { MoodEntry } from "@/lib/mood/types";
-import { Atmosphere } from "@/components/mood/Atmosphere";
 import { Hero } from "@/components/mood/Hero";
 import { MoodChart } from "@/components/mood/MoodChart";
 import { Heatmap } from "@/components/mood/Heatmap";
@@ -50,9 +49,8 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
       </h2>
 
       <p className="mx-auto mt-4 max-w-[52ch] text-[14px] leading-relaxed text-muted-foreground">
-        Every chart, correlation and insight on this page is computed only from
-        your own check-ins. Log your first entry to begin your private Mood
-        Intelligence record.
+        Every chart, correlation and insight on this page is computed only from your own check-ins.
+        Log your first entry to begin your private Mood Intelligence record.
       </p>
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -75,34 +73,40 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
 function MoodIntelligencePage() {
   const navigate = useNavigate();
   const system = useMoodSystem();
-  const {
-    loading,
-    entries,
-    analytics: a,
-    emotionFilter,
-    setEmotionFilter,
-    authError,
-  } = system;
+  const { loading, entries, analytics: a, emotionFilter, setEmotionFilter, authError } = system;
 
   const [composerOpen, setComposerOpen] = useState(false);
   const [editing, setEditing] = useState<MoodEntry | null>(null);
 
-  const openNew = () => {
+  const openNew = useCallback(() => {
     setEditing(null);
     setComposerOpen(true);
-  };
+  }, []);
 
-  const openEdit = (entry: MoodEntry) => {
+  // Stable callbacks so the memoised panels below don't re-render on every
+  // range switch.
+  const openEdit = useCallback((entry: MoodEntry) => {
     setEditing(entry);
     setComposerOpen(true);
-  };
+  }, []);
+
+  const shareStory = useCallback(
+    (e: MoodEntry) =>
+      navigate({
+        to: "/profile",
+        search: { story: `${e.note?.trim() ? "reflection" : "mood"}:${e.id}` },
+      }),
+    [navigate],
+  );
 
   return (
     <div className="app-shell relative min-h-screen bg-background text-foreground">
       <AppNav />
-      <Atmosphere />
+      {/* No <Atmosphere /> here: the opaque .app-shell sits above its -z-10
+          layer so it was never visible on this page — only its 11 looping
+          animations and rAF spotlight were running. */}
 
-      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-28 pt-8 sm:px-8 sm:pt-10 lg:pb-24">
+      <main className="relative min-w-0 w-full px-5 pb-28 pt-6 sm:px-8 sm:pt-7 lg:px-10 lg:pb-24 lg:pt-7">
         <Link
           to="/mood"
           className="mono mb-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
@@ -117,9 +121,7 @@ function MoodIntelligencePage() {
           <div className="panel mx-auto mt-12 max-w-[680px] p-7 text-center">
             <p className="eyebrow mb-3">Mood Intelligence</p>
             <h2 className="display text-[28px]">Your private record is waiting.</h2>
-            <p className="mt-3 text-[14px] text-muted-foreground">
-              {authError}
-            </p>
+            <p className="mt-3 text-[14px] text-muted-foreground">{authError}</p>
           </div>
         ) : loading ? (
           <div className="flex items-center justify-center gap-3 py-32 text-faint">
@@ -138,11 +140,7 @@ function MoodIntelligencePage() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               <Reveal delay={120}>
-                <Emotions
-                  stats={a.emotions}
-                  filter={emotionFilter}
-                  onFilter={setEmotionFilter}
-                />
+                <Emotions stats={a.emotions} filter={emotionFilter} onFilter={setEmotionFilter} />
               </Reveal>
 
               <Reveal delay={160}>
@@ -160,7 +158,7 @@ function MoodIntelligencePage() {
               </Reveal>
             </div>
 
-            <Reveal delay={100}>
+            <Reveal delay={100} className="scroll-mt-6" id="relationships">
               <Correlations correlations={a.correlations} />
             </Reveal>
 
@@ -175,10 +173,7 @@ function MoodIntelligencePage() {
             </div>
 
             <Reveal delay={100}>
-              <Distribution
-                buckets={a.distribution}
-                volatility={a.volatility}
-              />
+              <Distribution buckets={a.distribution} volatility={a.volatility} />
             </Reveal>
 
             <Reveal delay={120}>
@@ -190,12 +185,7 @@ function MoodIntelligencePage() {
                 entries={entries}
                 onEdit={openEdit}
                 onDelete={system.removeEntry}
-                onShareStory={(e) =>
-                  navigate({
-                    to: "/profile",
-                    search: { story: `${e.note?.trim() ? "reflection" : "mood"}:${e.id}` },
-                  })
-                }
+                onShareStory={shareStory}
               />
             </Reveal>
 
@@ -207,11 +197,7 @@ function MoodIntelligencePage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (
-                    window.confirm(
-                      "Erase every recorded Mood entry? This cannot be undone.",
-                    )
-                  ) {
+                  if (window.confirm("Erase every recorded Mood entry? This cannot be undone.")) {
                     void system.resetAll();
                   }
                 }}

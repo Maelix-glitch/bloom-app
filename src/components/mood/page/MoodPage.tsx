@@ -68,6 +68,7 @@ import type { BloomAccent } from "@/lib/profile/types";
 import { MOOD_LABELS, MoodBlob } from "./MoodBlob";
 import { MoodJourneyChart } from "./MoodJourneyChart";
 import { MoodDonut } from "./MoodDonut";
+import { MoodGraph } from "./MoodGraph";
 
 export type MoodPageIdentity = {
   displayName: string | null;
@@ -131,7 +132,7 @@ export function MoodPage({
   const firstName = identity.displayName ? identity.displayName.split(" ")[0]! : null;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-5 pt-6 sm:px-8 sm:pt-8 md:space-y-14 lg:px-12">
+    <div className="w-full space-y-10 px-5 pt-6 sm:px-8 sm:pt-7 md:space-y-14 lg:px-10 lg:pt-7">
       <TopBar identity={identity} />
 
       <Hero
@@ -162,6 +163,8 @@ export function MoodPage({
         changePct={a.changePct}
         best={a.bestDay?.date ?? null}
       />
+
+      <MoodGraph days={a.allDays} entries={entries} correlations={a.correlations} />
 
       <MoodDistribution
         slices={slices}

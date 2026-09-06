@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { TIME_BANDS, type HeatCell } from "@/lib/mood/analytics";
 import { Panel, SectionHead, Insufficient } from "./primitives";
@@ -12,7 +12,7 @@ function intensity(mood: number | null) {
   return Math.max(0.06, Math.min(1, (mood - 3) / 6));
 }
 
-export function Heatmap({ cells }: { cells: HeatCell[] }) {
+function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
   const [hover, setHover] = useState<HeatCell | null>(null);
   const populated = cells.filter((c) => c.count > 0);
 
@@ -36,14 +36,18 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
       />
 
       {populated.length < 4 ? (
-        <Insufficient>Log across a few different days and times to reveal weekly rhythm.</Insufficient>
+        <Insufficient>
+          Log across a few different days and times to reveal weekly rhythm.
+        </Insufficient>
       ) : (
         <div className="relative">
           <div className="grid grid-cols-[64px_repeat(4,1fr)] gap-1.5">
             <div />
             {TIME_BANDS.map((b) => (
               <div key={b.key} className="pb-2 text-center">
-                <p className="mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{b.label}</p>
+                <p className="mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  {b.label}
+                </p>
                 <p className="mono text-[9px] text-faint">{b.range}</p>
               </div>
             ))}
@@ -102,13 +106,17 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
             <div className="mono flex items-center gap-2 text-[10px] text-faint">
               <span>low</span>
-              <span className="h-1.5 w-28 rounded-full" style={{ background: "linear-gradient(90deg, var(--surface-2), var(--sky))" }} />
+              <span
+                className="h-1.5 w-28 rounded-full"
+                style={{ background: "linear-gradient(90deg, var(--surface-2), var(--sky))" }}
+              />
               <span>high</span>
             </div>
             {hover && hover.count > 0 ? (
               <div className="mono flex flex-wrap gap-4 text-[11px]">
                 <span className="text-faint">
-                  {WEEKDAYS[ORDER.indexOf(hover.weekday)]} · {TIME_BANDS.find((b) => b.key === hover.band)?.label}
+                  {WEEKDAYS[ORDER.indexOf(hover.weekday)]} ·{" "}
+                  {TIME_BANDS.find((b) => b.key === hover.band)?.label}
                 </span>
                 <span>
                   mood <span className="text-sky">{hover.mood?.toFixed(2)}</span>
@@ -130,3 +138,6 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Heatmap = memo(HeatmapImpl);

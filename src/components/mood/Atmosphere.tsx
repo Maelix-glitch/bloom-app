@@ -15,7 +15,7 @@ const PALETTE = ["var(--violet)", "var(--sky)", "var(--amber)", "var(--sage)", "
 
 const MOTES = (() => {
   const rand = mulberry32(1337);
-  return Array.from({ length: 18 }, (_, i) => ({
+  return Array.from({ length: 8 }, (_, i) => ({
     left: rand() * 100,
     bottom: rand() * 30,
     size: 1.5 + rand() * 2.5,
@@ -45,18 +45,21 @@ function Spotlight() {
     let ty = window.innerHeight * 0.28;
     let x = tx;
     let y = ty;
+    el.style.transform = `translate3d(${x - 320}px, ${y - 320}px, 0)`;
+    // The loop only runs while the lamp is still catching up with the
+    // pointer; once it has settled it stops until the next move.
+    const loop = () => {
+      x += (tx - x) * 0.08;
+      y += (ty - y) * 0.08;
+      el.style.transform = `translate3d(${x - 320}px, ${y - 320}px, 0)`;
+      raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.5 ? requestAnimationFrame(loop) : 0;
+    };
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
-    };
-    const loop = () => {
-      x += (tx - x) * 0.06;
-      y += (ty - y) * 0.06;
-      el.style.transform = `translate3d(${x - 320}px, ${y - 320}px, 0)`;
-      raf = requestAnimationFrame(loop);
+      if (!raf) raf = requestAnimationFrame(loop);
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
     return () => {
       window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
@@ -92,26 +95,29 @@ export function Atmosphere() {
 
       {/* Ambient color fields */}
       <span
-        className="animate-drift absolute -left-52 -top-56 size-[620px] rounded-full blur-[110px] opacity-45"
+        className="animate-drift absolute -left-52 -top-56 size-[760px] rounded-full opacity-45"
         style={{
           background:
-            "radial-gradient(circle, color-mix(in oklab, var(--violet) 22%, transparent), transparent 70%)",
+            "radial-gradient(circle, color-mix(in oklab, var(--violet) 18%, transparent), transparent 62%)",
+          willChange: "transform",
         }}
       />
       <span
-        className="animate-drift absolute -bottom-40 -right-40 size-[540px] rounded-full blur-[110px] opacity-40"
+        className="animate-drift absolute -bottom-40 -right-40 size-[680px] rounded-full opacity-40"
         style={{
           animationDelay: "-9s",
           background:
-            "radial-gradient(circle, color-mix(in oklab, var(--sky) 20%, transparent), transparent 70%)",
+            "radial-gradient(circle, color-mix(in oklab, var(--sky) 16%, transparent), transparent 62%)",
+          willChange: "transform",
         }}
       />
       <span
-        className="animate-drift absolute left-1/2 top-1/3 size-[420px] -translate-x-1/2 rounded-full blur-[130px] opacity-25"
+        className="animate-drift absolute left-1/2 top-1/3 size-[560px] -translate-x-1/2 rounded-full opacity-25"
         style={{
           animationDelay: "-16s",
           background:
-            "radial-gradient(circle, color-mix(in oklab, var(--rose) 16%, transparent), transparent 70%)",
+            "radial-gradient(circle, color-mix(in oklab, var(--rose) 13%, transparent), transparent 62%)",
+          willChange: "transform",
         }}
       />
 
@@ -151,7 +157,7 @@ export function Atmosphere() {
 
       {/* Film grain */}
       <div
-        className="absolute inset-0 opacity-[0.18] mix-blend-soft-light"
+        className="absolute inset-0 opacity-[0.06]"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",

@@ -361,6 +361,17 @@
 }
 
 /* One wide band of light that crosses a panel on a slow idle cycle. */
+/* One-shot entrance for Mood Intelligence sections: starts on mount, ends
+   at full opacity, and is skipped entirely under reduced motion. */
+.mood-reveal {
+  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mood-reveal {
+    animation: none;
+  }
+}
+
 @utility sheen-band {
   position: absolute;
   top: 0;
@@ -551,6 +562,195 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------------------------
+ * Mood web — the connection map on /mood (components/mood/page/MoodGraph).
+ * Every continuous motion here is transform/opacity on its own layer, or SMIL
+ * along a fixed path; nothing re-renders per frame.
+ * ------------------------------------------------------------------------- */
+.mood-page .mg-canvas-bg {
+  background:
+    radial-gradient(60% 60% at 50% 45%, color-mix(in oklab, var(--gold) 7%, transparent), transparent 70%),
+    linear-gradient(to right, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    36px 36px,
+    36px 36px;
+  mask-image: radial-gradient(90% 90% at 50% 50%, black 40%, transparent 100%);
+}
+.mood-page .mg-svg {
+  font-family: var(--font-sans);
+  user-select: none;
+}
+.mood-page .mg-svg [role="button"] {
+  cursor: pointer;
+  outline: none;
+}
+.mood-page .mg-orbits ellipse {
+  fill: none;
+  stroke: color-mix(in oklab, var(--foreground) 9%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+}
+
+/* edges */
+.mood-page .mg-edge {
+  transition:
+    opacity 0.35s ease,
+    stroke-width 0.35s ease;
+}
+.mood-page .mg-edge-up {
+  stroke: color-mix(in oklab, var(--gold) 75%, transparent);
+}
+.mood-page .mg-edge-down {
+  stroke: color-mix(in oklab, var(--mp-angry) 75%, transparent);
+}
+.mood-page .mg-edge-weak {
+  stroke: color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+.mood-page .mg-edge[data-state="off"] {
+  opacity: 0.12;
+}
+.mood-page .mg-edge[data-state="on"] {
+  opacity: 1;
+}
+
+/* particles */
+.mood-page .mg-particle {
+  transition: opacity 0.35s ease;
+}
+.mood-page .mg-particle-up {
+  fill: var(--gold-soft);
+}
+.mood-page .mg-particle-down {
+  fill: var(--mp-angry);
+}
+.mood-page .mg-particle[data-state="off"] {
+  opacity: 0;
+}
+
+/* hub */
+.mood-page .mg-hub-glow {
+  animation: mg-breathe 6s ease-in-out infinite;
+}
+.mood-page .mg-hub-ring {
+  fill: none;
+  stroke: color-mix(in oklab, var(--gold) 45%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  animation: mg-spin 48s linear infinite;
+}
+.mood-page .mg-hub-core {
+  stroke: color-mix(in oklab, var(--gold-soft) 60%, transparent);
+  stroke-width: 1;
+}
+.mood-page .mg-hub-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  fill: var(--background);
+  pointer-events: none;
+}
+.mood-page .mg-hub-sub {
+  font-size: 9.5px;
+  fill: color-mix(in oklab, var(--background) 75%, transparent);
+  pointer-events: none;
+}
+.mood-page .mg-hub[data-state="off"] {
+  opacity: 0.55;
+}
+
+/* satellites */
+.mood-page .mg-node {
+  transition: opacity 0.35s ease;
+}
+.mood-page .mg-node[data-state="off"] {
+  opacity: 0.22;
+}
+.mood-page .mg-node-halo {
+  fill: var(--mg-c);
+  opacity: 0;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.mood-page .mg-node:hover .mg-node-halo,
+.mood-page .mg-node:focus-visible .mg-node-halo,
+.mood-page .mg-node[data-state="on"] .mg-node-halo {
+  opacity: 0.18;
+  transform: scale(1.35);
+}
+.mood-page .mg-node-body {
+  fill: color-mix(in oklab, var(--mg-c) 18%, var(--surface));
+  stroke: color-mix(in oklab, var(--mg-c) 70%, transparent);
+  stroke-width: 1.2;
+  transition: fill 0.35s ease;
+}
+.mood-page .mg-node:hover .mg-node-body,
+.mood-page .mg-node[data-state="on"] .mg-node-body {
+  fill: color-mix(in oklab, var(--mg-c) 34%, var(--surface));
+}
+.mood-page .mg-node-emotion .mg-node-body {
+  stroke-dasharray: 2 3;
+}
+.mood-page .mg-node-dot {
+  fill: var(--mg-c);
+}
+.mood-page .mg-label {
+  font-size: 11px;
+  fill: var(--muted-foreground);
+  transition: fill 0.3s ease;
+  pointer-events: none;
+}
+.mood-page .mg-node-emotion .mg-label {
+  font-size: 10px;
+  font-style: italic;
+}
+.mood-page .mg-node:hover .mg-label,
+.mood-page .mg-node[data-state="on"] .mg-label {
+  fill: var(--foreground);
+}
+.mood-page .mg-empty {
+  font-size: 11px;
+  fill: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* the reading column */
+.mood-page .mg-reading {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  padding: 1.5rem;
+}
+
+@keyframes mg-breathe {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+@keyframes mg-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mood-page .mg-hub-glow,
+  .mood-page .mg-hub-ring {
+    animation: none;
+  }
+  .mood-page .mg-particles {
+    display: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------

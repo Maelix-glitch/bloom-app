@@ -1,10 +1,19 @@
+import { memo } from "react";
 import dayjs from "dayjs";
 
 import type { Anomaly, DetectedPattern } from "@/lib/mood/types";
-import { EvidencePill, Insufficient, Panel, SectionHead, accentText, accentVar, type Accent } from "./primitives";
+import {
+  EvidencePill,
+  Insufficient,
+  Panel,
+  SectionHead,
+  accentText,
+  accentVar,
+  type Accent,
+} from "./primitives";
 import { cn } from "@/lib/utils";
 
-export function Patterns({ patterns }: { patterns: DetectedPattern[] }) {
+function PatternsImpl({ patterns }: { patterns: DetectedPattern[] }) {
   return (
     <Panel className="p-6" glow="sage">
       <SectionHead
@@ -13,7 +22,9 @@ export function Patterns({ patterns }: { patterns: DetectedPattern[] }) {
         sub="Behavioural splits found in your own history, each with the sample it was derived from."
       />
       {patterns.length === 0 ? (
-        <Insufficient>Patterns appear once you have logged enough days on both sides of a behaviour.</Insufficient>
+        <Insufficient>
+          Patterns appear once you have logged enough days on both sides of a behaviour.
+        </Insufficient>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {patterns.map((p) => {
@@ -30,9 +41,13 @@ export function Patterns({ patterns }: { patterns: DetectedPattern[] }) {
                 />
                 <div className="flex items-start justify-between gap-3">
                   <p className={cn("text-[13px] font-medium", accentText[accent])}>{p.title}</p>
-                  {p.delta ? <span className="numeric text-[15px] text-foreground">{p.delta}</span> : null}
+                  {p.delta ? (
+                    <span className="numeric text-[15px] text-foreground">{p.delta}</span>
+                  ) : null}
                 </div>
-                <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">{p.statement}</p>
+                <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+                  {p.statement}
+                </p>
                 <div className="mono mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[11px]">
                   {p.metrics.map((m) => (
                     <span key={m.label} className="text-faint">
@@ -52,7 +67,7 @@ export function Patterns({ patterns }: { patterns: DetectedPattern[] }) {
   );
 }
 
-export function Anomalies({ anomalies }: { anomalies: Anomaly[] }) {
+function AnomaliesImpl({ anomalies }: { anomalies: Anomaly[] }) {
   return (
     <Panel className="p-6" glow="rose">
       <SectionHead
@@ -61,7 +76,9 @@ export function Anomalies({ anomalies }: { anomalies: Anomaly[] }) {
         sub="Statistical deviations beyond 1.6σ from your baseline, with the context recorded that day."
       />
       {anomalies.length === 0 ? (
-        <Insufficient>No significant deviations detected — or not enough history to judge yet.</Insufficient>
+        <Insufficient>
+          No significant deviations detected — or not enough history to judge yet.
+        </Insufficient>
       ) : (
         <div className="flex flex-col divide-y divide-border">
           {anomalies.map((a) => (
@@ -74,7 +91,9 @@ export function Anomalies({ anomalies }: { anomalies: Anomaly[] }) {
               >
                 {a.kind === "high" ? "peak" : "dip"}
               </span>
-              <span className="text-[13px] text-foreground">{dayjs(a.date).format("ddd, MMM D YYYY")}</span>
+              <span className="text-[13px] text-foreground">
+                {dayjs(a.date).format("ddd, MMM D YYYY")}
+              </span>
               <span className="numeric text-[15px] text-foreground">{a.mood.toFixed(1)}</span>
               <span className={cn("mono text-[11px]", a.deviation > 0 ? "text-sage" : "text-rose")}>
                 {a.deviation > 0 ? "+" : ""}
@@ -94,3 +113,6 @@ export function Anomalies({ anomalies }: { anomalies: Anomaly[] }) {
     </Panel>
   );
 }
+
+export const Patterns = memo(PatternsImpl);
+export const Anomalies = memo(AnomaliesImpl);
