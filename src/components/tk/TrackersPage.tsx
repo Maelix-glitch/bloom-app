@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { History, Sparkles, Waypoints } from "lucide-react";
 
 import { Atmosphere } from "@/components/ci/Atmosphere";
+import { UndoToast } from "@/components/ci/UndoToast";
 import { Reveal } from "@/components/ci/motion";
 import { Button, Card } from "@/components/ci/primitives";
 import { AdvancedCard } from "@/components/tk/AdvancedCard";
@@ -615,6 +616,14 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
           </>
         )}
       </div>
+      {!preview ? (
+        <UndoToast
+          undoable={store.undoable}
+          onUndo={store.undo}
+          onDismiss={store.dismissUndo}
+          testId="tk-undo"
+        />
+      ) : null}
     </div>
   );
 }

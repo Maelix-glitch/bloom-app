@@ -41,6 +41,7 @@ import {
   saveLogs,
   type CycleSettings,
 } from "@/lib/cycle/periodStore";
+import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 import {
   EMPTY_MEMORY,
   pruneMemory,
@@ -74,16 +75,8 @@ export interface SyncStatus {
 export type SaveResult = { ok: true; id: string } | { ok: false; errors: FieldErrors };
 export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
-/** A deletion that can still be taken back. */
-export interface Undoable {
-  id: number;
-  message: string;
-  /** Epoch ms after which the snapshot is dropped. */
-  until: number;
-}
-
-/** How long a delete / clear can be undone for. */
-export const UNDO_WINDOW_MS = 8000;
+/* the undo contract is shared with the trackers — see lib/undo */
+export { UNDO_WINDOW_MS, type Undoable };
 
 /** What the page should do after a check-in answer that needs the form. */
 export type CheckInFollowUp =

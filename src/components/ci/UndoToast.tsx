@@ -5,17 +5,19 @@
 
 import { Undo2, X } from "lucide-react";
 
-import type { Undoable } from "@/hooks/usePeriodLog";
-import { UNDO_WINDOW_MS } from "@/hooks/usePeriodLog";
+import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 
 export function UndoToast({
   undoable,
   onUndo,
   onDismiss,
+  testId = "cycle-undo",
 }: {
   undoable: Undoable | null;
   onUndo: () => void;
   onDismiss: () => void;
+  /** Test id prefix — the button gets `${testId}-button`. */
+  testId?: string | undefined;
 }) {
   if (!undoable) return null;
   return (
@@ -24,7 +26,7 @@ export function UndoToast({
       className="ci-undo"
       role="status"
       aria-live="polite"
-      data-testid="cycle-undo"
+      data-testid={testId}
       style={{ ["--ci-undo-ms" as string]: `${UNDO_WINDOW_MS}ms` }}
     >
       <span className="min-w-0 truncate">{undoable.message}</span>
@@ -32,7 +34,7 @@ export function UndoToast({
         type="button"
         className="ci-btn ci-btn--sm ci-btn--primary"
         onClick={onUndo}
-        data-testid="cycle-undo-button"
+        data-testid={`${testId}-button`}
       >
         <Undo2 size={13} aria-hidden />
         Undo

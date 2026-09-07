@@ -8,7 +8,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { todayKey } from "@/lib/cycle/predict";
+import { formatDate, todayKey } from "@/lib/cycle/predict";
+import { UNDO_WINDOW_MS, restoreRemoved, type Undoable } from "@/lib/undo";
 import {
   DEFAULT_GOALS,
   analyzeTrackers,
@@ -58,10 +59,16 @@ export interface TrackerStore {
   today: string;
   hydrated: boolean;
   saveDay: (draft: DayEntry) => SaveDayResult;
+  /** Removes a day. It can be taken back for a few seconds via `undo`. */
   removeDay: (date: string) => void;
+  /** Removes every day. It can be taken back for a few seconds via `undo`. */
   clearAll: () => void;
   setGoal: (key: keyof Goals, value: number) => void;
   resetGoals: () => void;
+  /** The last delete / clear, while it can still be taken back. */
+  undoable: Undoable | null;
+  undo: () => void;
+  dismissUndo: () => void;
 }
 
 export function useTrackers(): TrackerStore {
@@ -83,6 +90,10 @@ export function useTrackers(): TrackerStore {
   const syncing = useRef(false);
   const daysRef = useRef<DayEntry[]>(days);
   daysRef.current = days;
+  /* a delete keeps the days it removed for a moment */
+  const [undoable, setUndoable] = useState<Undoable | null>(null);
+  const undoSeq = useRef(0);
+  const snapshot = useRef<{ id: number; days: DayEntry[] } | null>(null);
 
   /* read once on mount, then follow other instances of the hook */
   useEffect(() => {
@@ -145,22 +156,75 @@ export function useTrackers(): TrackerStore {
     return { ok: true };
   }, []);
 
-  const removeDay = useCallback((date: string) => {
-    setDays((prev) => {
-      if (prev.some((d) => d.date === date)) deletedDates.current.add(date);
-      return prev.filter((d) => d.date !== date);
-    });
-    dirtyDates.current.delete(date);
+  /* ------------------------------- undo ---------------------------------- */
+
+  /** Keep the days about to disappear, then let the caller remove them. */
+  const keepForUndo = useCallback((removed: DayEntry[], message: string) => {
+    if (removed.length === 0) return;
+    const id = ++undoSeq.current;
+    snapshot.current = { id, days: removed };
+    setUndoable({ id, message, until: Date.now() + UNDO_WINDOW_MS });
   }, []);
 
+  /* the snapshot expires by itself */
+  useEffect(() => {
+    if (!undoable) return;
+    const ms = Math.max(0, undoable.until - Date.now());
+    const t = window.setTimeout(() => {
+      setUndoable((u) => (u && u.id === undoable.id ? null : u));
+      if (snapshot.current?.id === undoable.id) snapshot.current = null;
+    }, ms);
+    return () => window.clearTimeout(t);
+  }, [undoable]);
+
+  const undo = useCallback(() => {
+    const snap = snapshot.current;
+    if (!snap) return;
+    snapshot.current = null;
+    setUndoable(null);
+    setDays((current) => {
+      /* put back what was removed (unless it was re-logged meanwhile) and
+         re-queue it for the account instead of the delete */
+      const { merged, restored } = restoreRemoved(current, snap.days, (d) => d.date);
+      for (const d of restored) {
+        deletedDates.current.delete(d.date);
+        dirtyDates.current.add(d.date);
+      }
+      return merged.sort((a, b) => a.date.localeCompare(b.date));
+    });
+  }, []);
+
+  const dismissUndo = useCallback(() => {
+    snapshot.current = null;
+    setUndoable(null);
+  }, []);
+
+  const removeDay = useCallback(
+    (date: string) => {
+      const gone = daysRef.current.filter((d) => d.date === date);
+      keepForUndo(gone, `Removed ${formatDate(date)} from your record.`);
+      setDays((prev) => {
+        if (prev.some((d) => d.date === date)) deletedDates.current.add(date);
+        return prev.filter((d) => d.date !== date);
+      });
+      dirtyDates.current.delete(date);
+    },
+    [keepForUndo],
+  );
+
   const clearAll = useCallback(() => {
+    const gone = daysRef.current;
+    keepForUndo(
+      gone,
+      `Cleared ${gone.length} ${gone.length === 1 ? "day" : "days"} from your record.`,
+    );
     setDays((prev) => {
       for (const d of prev) deletedDates.current.add(d.date);
       return [];
     });
     dirtyDates.current.clear();
     clearDays();
-  }, []);
+  }, [keepForUndo]);
 
   const setGoal = useCallback((key: keyof Goals, value: number) => {
     setGoals((prev) => ({ ...prev, [key]: value }));
@@ -269,5 +333,8 @@ export function useTrackers(): TrackerStore {
     clearAll,
     setGoal,
     resetGoals,
+    undoable,
+    undo,
+    dismissUndo,
   };
 }

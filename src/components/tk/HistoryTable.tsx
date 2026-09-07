@@ -6,6 +6,7 @@
  * and the whole record exports as CSV.
  */
 
+import { useEffect, useState } from "react";
 import { Download, Pencil, Trash2 } from "lucide-react";
 
 import { Button, Card } from "@/components/ci/primitives";
@@ -37,6 +38,11 @@ export function HistoryTable({
   onClearAll?: (() => void) | undefined;
 }) {
   const rows = days.slice(0, 21);
+  /* "Clear all" asks once, inline, and the answer can still be undone after. */
+  const [confirmClear, setConfirmClear] = useState(false);
+  useEffect(() => {
+    if (days.length === 0) setConfirmClear(false);
+  }, [days.length]);
 
   return (
     <Card>
@@ -58,13 +64,51 @@ export function HistoryTable({
               Export CSV
             </Button>
           ) : null}
-          {onClearAll ? (
-            <Button variant="danger" size="sm" onClick={onClearAll} disabled={rows.length === 0}>
+          {onClearAll && !confirmClear ? (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setConfirmClear(true)}
+              disabled={disabled || days.length === 0}
+              data-testid="tk-clear-all"
+            >
               Clear all
             </Button>
           ) : null}
         </div>
       </div>
+
+      {onClearAll && confirmClear ? (
+        <div
+          className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 ci-hair"
+          role="alertdialog"
+          aria-live="polite"
+          aria-label="Confirm clearing the record"
+          data-testid="tk-clear-all-confirm"
+        >
+          <p className="text-[12.5px] leading-relaxed ci-soft">
+            Remove all {days.length} {days.length === 1 ? "day" : "days"} from your record
+            {" — "}every tracker, every date? You'll get a few seconds to undo.
+          </p>
+          <span className="flex items-center gap-2">
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={disabled}
+              onClick={() => {
+                onClearAll();
+                setConfirmClear(false);
+              }}
+              data-testid="tk-clear-all-yes"
+            >
+              Yes, clear everything
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setConfirmClear(false)}>
+              Keep it
+            </Button>
+          </span>
+        </div>
+      ) : null}
 
       {rows.length === 0 ? (
         <p className="mt-4 text-[12.5px] leading-relaxed ci-muted">
@@ -131,7 +175,8 @@ export function HistoryTable({
                           type="button"
                           className="tk2-row-action"
                           disabled={disabled}
-                          aria-label={`Delete ${formatDateShort(day.date)}`}
+                          aria-label={`Delete ${formatDateShort(day.date)} — you can undo for a few seconds`}
+                          title="Delete this day (undo available)"
                           onClick={() => onDelete(day.date)}
                         >
                           <Trash2 size={12} aria-hidden />
