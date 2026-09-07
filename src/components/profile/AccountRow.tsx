@@ -1,10 +1,24 @@
 /**
- * Account & privacy + quick actions — the administrative corner, kept at
- * the bottom, quiet, and genuinely functional (every row does something real).
+ * Account & data — the settings list at the bottom of the profile, in the
+ * grouped-rows grammar phones use. Every row does something real: nothing
+ * is a placeholder. The export payload is unchanged from the first profile
+ * (identity, stories, highlights → one JSON file, client-side).
  */
 
 import { useState } from "react";
-import { ChevronRight, Download, Eye, Lock, Share2, ShieldCheck } from "lucide-react";
+import {
+  Archive,
+  ChevronRight,
+  Clock,
+  Download,
+  Eye,
+  Lock,
+  LogIn,
+  LogOut,
+  Mail,
+  Palette,
+  Share2,
+} from "lucide-react";
 
 import type {
   AccountDetails,
@@ -20,43 +34,30 @@ function Row({
   value,
   onClick,
   danger = false,
+  testId,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value?: string;
   onClick?: () => void;
   danger?: boolean;
+  testId?: string;
 }) {
   const inner = (
     <>
-      <span
-        className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-surface-2/60 text-faint"
-        aria-hidden
-      >
+      <span className="pf-row-icon" aria-hidden>
         {icon}
       </span>
-      <span className="min-w-0 flex-1 text-left text-[12.5px] text-muted-foreground">{label}</span>
-      <span
-        className={
-          danger
-            ? "text-[12.5px] text-rose"
-            : "mono truncate max-w-[46%] text-[11.5px] text-foreground"
-        }
-      >
-        {value}
-      </span>
-      {onClick ? <ChevronRight className="size-3.5 shrink-0 text-faint" aria-hidden /> : null}
+      <span className="min-w-0 truncate">{label}</span>
+      <span className={danger ? "pf-row-value pf-row-value--danger" : "pf-row-value"}>{value}</span>
+      {onClick ? <ChevronRight className="pf-row-chevron size-3.5" aria-hidden /> : <span />}
     </>
   );
   if (!onClick) {
-    return <div className="flex w-full items-center gap-3 px-4 py-2.5">{inner}</div>;
+    return <div className="pf-row">{inner}</div>;
   }
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-2/50"
-    >
+    <button type="button" onClick={onClick} className="pf-row" data-testid={testId}>
       {inner}
     </button>
   );
@@ -102,49 +103,62 @@ function exportProfile(
   URL.revokeObjectURL(url);
 }
 
+const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
+  violet: "Violet",
+  sky: "Sky",
+  amber: "Amber",
+  sage: "Sage",
+  rose: "Rose",
+};
+
 export function AccountRow({
   identity,
   account,
   privacy,
   stories,
   highlights,
+  isSignedIn,
   onOpenPrivacy,
   onShare,
   onPreview,
+  onOpenArchive,
+  onEdit,
+  onSignOut,
+  onSignIn,
 }: {
   identity: ProfileIdentity;
   account: AccountDetails;
   privacy: ProfilePrivacy;
   stories: Story[];
   highlights: HighlightItem[];
+  isSignedIn: boolean;
   onOpenPrivacy: () => void;
   onShare: () => void;
   onPreview: () => void;
+  onOpenArchive: () => void;
+  onEdit: () => void;
+  onSignOut: () => void;
+  onSignIn: () => void;
 }) {
   const [exporting, setExporting] = useState(false);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <section
-        aria-label="Account and privacy"
-        className="overflow-hidden rounded-2xl border border-border/80 bg-surface/40"
-      >
-        <header className="flex items-center gap-2 px-4 pb-1 pt-4">
-          <ShieldCheck className="size-4 text-sage" strokeWidth={1.8} aria-hidden />
-          <h3 className="display text-[15px]">Account &amp; privacy</h3>
-        </header>
-        <div className="flex flex-col divide-y divide-border/40">
+    <div className="grid gap-3 lg:grid-cols-2">
+      <section aria-label="Account" className="pf-card overflow-hidden">
+        <p className="pf-eyebrow px-4 pt-3.5 pb-1">Account</p>
+        <div className="pf-rows">
           <Row
-            icon={<span className="text-[10px]">✉</span>}
+            icon={<Mail className="size-3.5" />}
             label="Email"
             value={account.email ?? "not connected"}
           />
           <Row
-            icon={<span className="text-[10px]">◷</span>}
-            label="Member since"
+            icon={<Clock className="size-3.5" />}
+            label="Tracking since"
             value={
               account.memberSince
                 ? new Date(account.memberSince).toLocaleDateString(undefined, {
+                    day: "numeric",
                     month: "short",
                     year: "numeric",
                   })
@@ -152,38 +166,46 @@ export function AccountRow({
             }
           />
           <Row
+            icon={<Palette className="size-3.5" />}
+            label="Accent"
+            value={ACCENT_LABEL[identity.accent]}
+            onClick={onEdit}
+          />
+          <Row
             icon={<Lock className="size-3.5" />}
             label="Privacy"
-            value={
-              privacy.profileVisibility === "public" ? "Shared by choice" : "Private by default"
-            }
+            value={privacy.profileVisibility === "public" ? "Shared by choice" : "Private"}
             onClick={onOpenPrivacy}
+            testId="pf-row-privacy"
           />
-        </div>
-        <div className="px-4 pb-4 pt-2">
-          <button
-            type="button"
-            onClick={onOpenPrivacy}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-[12.5px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-          >
-            <ShieldCheck className="size-3.5" aria-hidden /> Privacy settings
-          </button>
+          {isSignedIn ? (
+            <Row
+              icon={<LogOut className="size-3.5" />}
+              label="Sign out"
+              value="this device"
+              onClick={onSignOut}
+              danger
+              testId="pf-row-signout"
+            />
+          ) : (
+            <Row
+              icon={<LogIn className="size-3.5" />}
+              label="Sign in"
+              value="magic link"
+              onClick={onSignIn}
+              testId="pf-row-signin"
+            />
+          )}
         </div>
       </section>
 
-      <section
-        aria-label="Quick actions"
-        className="overflow-hidden rounded-2xl border border-border/80 bg-surface/40"
-      >
-        <header className="flex items-center gap-2 px-4 pb-1 pt-4">
-          <SparkleMark />
-          <h3 className="display text-[15px]">Quick actions</h3>
-        </header>
-        <div className="flex flex-col divide-y divide-border/40 pb-1">
+      <section aria-label="Your data" className="pf-card overflow-hidden">
+        <p className="pf-eyebrow px-4 pt-3.5 pb-1">Sharing &amp; data</p>
+        <div className="pf-rows">
           <Row
             icon={<Share2 className="size-3.5" />}
             label="Share profile"
-            value="link"
+            value={identity.username ? `/@${identity.username}` : "pick a @username"}
             onClick={onShare}
           />
           <Row
@@ -193,39 +215,27 @@ export function AccountRow({
             onClick={onPreview}
           />
           <Row
+            icon={<Archive className="size-3.5" />}
+            label="Story archive"
+            value={`${stories.length} kept`}
+            onClick={onOpenArchive}
+          />
+          <Row
             icon={<Download className="size-3.5" />}
-            label="Export my data"
+            label="Export my profile"
             value={exporting ? "preparing…" : "json"}
+            testId="pf-row-export"
             onClick={() => {
               setExporting(true);
               try {
                 exportProfile(identity, stories, highlights, account);
               } finally {
-                setExporting(false);
+                window.setTimeout(() => setExporting(false), 600);
               }
             }}
           />
         </div>
-        <p className="px-4 pb-4 pt-1 text-[11px] leading-relaxed text-faint">
-          Account security — email changes, data, sign-out — lives with your Bloom settings, not
-          here.
-        </p>
       </section>
     </div>
-  );
-}
-
-function SparkleMark() {
-  return (
-    <span className="grid size-[16px] place-items-center" aria-hidden>
-      <svg viewBox="0 0 16 16" className="size-4 text-amber" fill="none">
-        <path
-          d="M8 2l1.3 3.7L13 7l-3.7 1.3L8 12l-1.3-3.7L3 7l3.7-1.3L8 2z"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
   );
 }

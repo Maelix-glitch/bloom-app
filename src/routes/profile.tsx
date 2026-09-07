@@ -1,15 +1,32 @@
+/**
+ * /profile — a tracker's profile.
+ *
+ * The layout borrows what people already know from social apps (cover,
+ * avatar over the edge, name + @handle, numbers row, tabs, a pinned post,
+ * a grid) and fills every slot with the record: twelve weeks of logged days,
+ * what is being tracked, streaks and milestones. Under the new skin, every
+ * feature of the first profile is intact — identity editing, stories,
+ * highlights, featured moment, privacy, preview, share, export, sign-in/out.
+ *
+ * Data: `useProfileSpace` (profiles / stories / highlights / privacy in
+ * Supabase) + `useProfileRecord` (the same local-first tracker, mood, habit
+ * and cycle stores their own pages use). This route only reads them and
+ * calls the actions the hook already exposes — no new SQL.
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Archive, Plus, RefreshCcw } from "lucide-react";
+import { Archive, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
 
 import profileCss from "../styles/profile.css?url";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
+import { useProfileRecord } from "@/hooks/useProfileRecord";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
-import { Reveal, accentVar } from "@/components/mood/primitives";
+import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import { EMOTION_MAP } from "@/lib/mood/types";
 import { seenStories } from "@/lib/profile/drafts";
@@ -23,13 +40,12 @@ import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
-import { StatsStrip } from "@/components/profile/StatsStrip";
+import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
 import { JourneyCard } from "@/components/profile/JourneyCard";
 import { AccountRow } from "@/components/profile/AccountRow";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
-import { ProfileSection } from "@/components/profile/ProfileSection";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
 import { StoryArchive } from "@/components/stories/StoryArchive";
@@ -59,6 +75,14 @@ export const Route = createFileRoute("/profile")({
   component: ProfilePage,
 });
 
+type ProfileTab = "moments" | "highlights" | "journey";
+
+const TABS: { id: ProfileTab; label: string }[] = [
+  { id: "moments", label: "Moments" },
+  { id: "highlights", label: "Highlights" },
+  { id: "journey", label: "Journey" },
+];
+
 function ProfilePage() {
   const { story: storyParam } = Route.useSearch();
   const navigate = useNavigate();
@@ -82,6 +106,7 @@ function ProfilePage() {
   const [signInOpen, setSignInOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
+  const [tab, setTab] = useState<ProfileTab>("moments");
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
   const [highlightEditor, setHighlightEditor] = useState<{
     id: string | null;
@@ -155,6 +180,13 @@ function ProfilePage() {
   }, [activeStories.length]);
   const avatarSrc = identity ? objectUrl(identity.identity.avatarPath) : null;
   const ambient = useAvatarAmbient(avatarSrc);
+
+  /* the record — same stores the tracker pages read */
+  const moodEntries = useMemo(
+    () => (moodBlock?.status === "ready" ? moodBlock.data : []),
+    [moodBlock],
+  );
+  const record = useProfileRecord(moodEntries);
 
   /* deep link from Mood: "share as story" */
   const [composerSource, setComposerSource] = useState<{
@@ -265,7 +297,7 @@ function ProfilePage() {
   }, [journey]);
 
   const featuredSources = useMemo(() => {
-    const reflections = (moodBlock?.status === "ready" ? moodBlock.data : [])
+    const reflections = moodEntries
       .filter((e) => e.note && e.note.trim())
       .slice(-12)
       .reverse()
@@ -300,7 +332,7 @@ function ProfilePage() {
       rewards,
       milestones: milestonesList,
     };
-  }, [moodBlock, rewardsBlock, allStories, milestonesList]);
+  }, [moodEntries, rewardsBlock, allStories, milestonesList]);
 
   const featuredContent = useMemo(
     () => (identity ? resolveFeatured(identity.identity.featured, featuredSources) : null),
@@ -326,10 +358,34 @@ function ProfilePage() {
 
   const highlights = highlightsBlock?.status === "ready" ? highlightsBlock.data : [];
 
+  /* tapping a day in the grid goes to the page that can show it */
+  const openDay = useCallback(
+    (date: string) => {
+      const day = record.grid.find((d) => d.date === date);
+      const src = day?.sources[0];
+      const to =
+        src === "mood"
+          ? "/mood"
+          : src === "cycle"
+            ? "/cycle"
+            : src === "habits"
+              ? "/"
+              : "/trackers";
+      void navigate({ to });
+    },
+    [navigate, record.grid],
+  );
+
+  const tabCounts: Record<ProfileTab, number> = {
+    moments: allStories.length,
+    highlights: highlights.length,
+    journey: journey.status === "ready" ? journey.milestones.achieved.length : 0,
+  };
+
   /* ------------------------------- render ------------------------------- */
   return (
     <div
-      className="app-shell relative min-h-screen bg-background text-foreground"
+      className="pf app-shell relative min-h-screen bg-background text-foreground"
       style={{
         ["--profile-accent" as string]: accentVar[accent],
         ["--profile-accent-soft" as string]: `color-mix(in oklab, ${accentVar[accent]} 10%, transparent)`,
@@ -340,7 +396,7 @@ function ProfilePage() {
       <AppNav />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[720px] px-5 pb-28 pt-8 sm:px-8 sm:pt-10 lg:pb-16">
+      <main className="relative mx-auto w-full max-w-[1120px] px-3 pb-28 pt-3 sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
         {authState === "checking" ? (
           <ProfileSkeleton />
         ) : !identity ? (
@@ -362,7 +418,7 @@ function ProfilePage() {
         ) : (
           <div className="flex flex-col">
             {authState === "signed-out" ? (
-              <p className="-mt-1 mb-2 text-center text-[12px] text-faint">
+              <p className="mb-2 text-center text-[12px] text-faint">
                 preview — nothing is saved until you{" "}
                 <button
                   type="button"
@@ -374,63 +430,239 @@ function ProfilePage() {
               </p>
             ) : null}
 
-            <Reveal>
-              <ProfileHero
-                identity={identity.identity}
-                ambient={ambient}
-                story={{
-                  count: activeStories.length,
-                  unseen: unseenCount,
-                  nextExpiry,
-                  animateIn: ringAnimate,
-                }}
-                onOpenStory={openStoryFromHero}
-                onCreateStory={() => setComposerOpen(true)}
-                isSignedIn={authState === "signed-in"}
-                onSignIn={() => setSignInOpen(true)}
-                completion={
-                  journey.status === "ready"
-                    ? journey.completeness
-                    : { done: 0, total: 5, show: false }
-                }
-                onEdit={() => setEditorOpen(true)}
-                onShare={() => void handleShare()}
-                onPreview={() => setPreviewOpen(true)}
-                onOpenArchive={() => setArchiveOpen(true)}
-                onOpenPrivacy={() => setPrivacyOpen(true)}
-                onSignOut={() => {
-                  void space.actions.signOut();
-                }}
-              />
-            </Reveal>
+            {/* cover · avatar · name · actions */}
+            <ProfileHero
+              identity={identity.identity}
+              ambient={ambient}
+              pulse={record.pulse}
+              tags={record.tags}
+              memberSince={identity.memberSince}
+              story={{
+                count: activeStories.length,
+                unseen: unseenCount,
+                nextExpiry,
+                animateIn: ringAnimate,
+              }}
+              onOpenStory={openStoryFromHero}
+              onCreateStory={() => setComposerOpen(true)}
+              isSignedIn={authState === "signed-in"}
+              onSignIn={() => setSignInOpen(true)}
+              completion={
+                journey.status === "ready"
+                  ? journey.completeness
+                  : { done: 0, total: 5, show: false }
+              }
+              onEdit={() => setEditorOpen(true)}
+              onShare={() => void handleShare()}
+              onPreview={() => setPreviewOpen(true)}
+              onOpenArchive={() => setArchiveOpen(true)}
+              onOpenPrivacy={() => setPrivacyOpen(true)}
+              onSignOut={() => {
+                void space.actions.signOut();
+              }}
+            />
 
-            {/* stats strip */}
-            <Reveal delay={40}>
-              <div className="mt-7">
-                <StatsStrip
-                  stats={journey.status === "ready" ? journey.stats : null}
-                  loading={journey.status === "loading"}
-                />
+            {/* numbers only logging can move */}
+            <RecordNumbers
+              totals={record.hydrated ? record.totals : null}
+              stats={journey.status === "ready" ? journey.stats : null}
+              loading={!record.hydrated}
+            />
+
+            {/* the record: 12 weeks + what's being tracked */}
+            <section className="pf-section pf-rise pf-rise-2" aria-labelledby="pf-record-title">
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+                <div className="pf-card pf-card--pad">
+                  <div className="pf-section-head">
+                    <div>
+                      <p className="pf-eyebrow">The record</p>
+                      <h2 id="pf-record-title" className="pf-title">
+                        Last twelve weeks
+                      </h2>
+                    </div>
+                    <p className="text-[12px] text-faint">
+                      {record.totals.last30} of the last 30 days
+                    </p>
+                  </div>
+                  <RecordGrid days={record.grid} today={record.today} onSelectDay={openDay} />
+                </div>
+                <div className="pf-card pf-card--pad">
+                  <div className="pf-section-head">
+                    <div>
+                      <p className="pf-eyebrow">Tracking now</p>
+                      <h2 className="pf-title">
+                        {record.things.filter((t) => t.on).length} things
+                      </h2>
+                    </div>
+                  </div>
+                  <TrackedThings things={record.things} />
+                </div>
               </div>
-            </Reveal>
+            </section>
 
-            {/* highlights — kept circles */}
-            <Reveal delay={40}>
-              <ProfileSection
-                title="Highlights"
-                gap="default"
-                right={
-                  highlights.length > 4 ? (
+            {/* featured — the pinned post */}
+            <section className="pf-section pf-rise pf-rise-3" aria-labelledby="pf-featured-title">
+              <div className="pf-section-head">
+                <div>
+                  <p className="pf-eyebrow inline-flex items-center gap-1.5">
+                    <Pin className="size-3" aria-hidden /> Pinned
+                  </p>
+                  <h2 id="pf-featured-title" className="pf-title">
+                    Featured moment
+                  </h2>
+                </div>
+                {featuredContent ? (
+                  <FeaturePrompt
+                    hasFeatured
+                    onPick={() => setFeaturedOpen(true)}
+                    onClear={() =>
+                      void space.actions
+                        .setFeatured(null)
+                        .then(() => toast("Removed from your profile."))
+                    }
+                  />
+                ) : null}
+              </div>
+              {featuredContent ? (
+                <FeaturedCard content={featuredContent} accent={accent} />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setFeaturedOpen(true)}
+                  className="pf-card group flex w-full items-center gap-3 border-dashed px-4 py-4 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
+                >
+                  <span
+                    aria-hidden
+                    className="grid size-10 shrink-0 place-items-center rounded-full"
+                    style={{
+                      background:
+                        "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
+                      color: "var(--profile-accent,var(--violet))",
+                    }}
+                  >
+                    <Sparkles className="size-4" strokeWidth={1.8} />
+                  </span>
+                  <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      Pin one moment that feels like you.
+                    </span>{" "}
+                    A story, a reflection, a reward, a milestone — only one.
+                  </span>
+                  <span className="mono hidden shrink-0 text-[9.5px] tracking-[0.08em] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
+                    Choose
+                  </span>
+                </button>
+              )}
+            </section>
+
+            {/* tabs — moments / highlights / journey */}
+            <div className="pf-tabs pf-rise pf-rise-4" role="tablist" aria-label="Profile sections">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  id={`pf-tab-${t.id}`}
+                  aria-selected={tab === t.id}
+                  aria-controls={`pf-panel-${t.id}`}
+                  className="pf-tab"
+                  onClick={() => setTab(t.id)}
+                  data-testid={`pf-tab-${t.id}`}
+                >
+                  {t.label}
+                  {tabCounts[t.id] > 0 ? (
+                    <span className="pf-tab-count">{tabCounts[t.id]}</span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+
+            {tab === "moments" ? (
+              <section
+                id="pf-panel-moments"
+                role="tabpanel"
+                aria-labelledby="pf-tab-moments"
+                className="pf-section"
+              >
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Stories · 24 hours, then kept</p>
+                    <h2 className="pf-title">Bloom moments</h2>
+                  </div>
+                  <div className="pf-section-right">
                     <button
                       type="button"
-                      onClick={() => setHighlightsAll((v) => !v)}
-                      className="mono text-[10px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+                      onClick={() => setArchiveOpen(true)}
+                      className="pf-btn pf-btn--ghost h-8 px-3 text-[12px]"
                     >
-                      {highlightsAll ? "Less" : "See all"}
+                      <Archive className="size-3.5" aria-hidden /> Archive
                     </button>
-                  ) : null
-                }
+                    <button
+                      type="button"
+                      onClick={() => setComposerOpen(true)}
+                      className="pf-btn h-8 px-3 text-[12px]"
+                    >
+                      <Plus className="size-3.5" aria-hidden /> New
+                    </button>
+                  </div>
+                </div>
+                {space.storiesBlock?.status === "error" ? (
+                  <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[12.5px] text-muted-foreground">
+                    {space.storiesBlock.message}{" "}
+                    <button
+                      type="button"
+                      onClick={space.actions.refresh}
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      Try again
+                    </button>
+                  </p>
+                ) : (
+                  <MomentsGrid
+                    stories={allStories}
+                    onOpenAt={(index) => setViewer({ stories: allStories, startIndex: index })}
+                    onDelete={(story) => void deleteStory(story)}
+                    onAddToHighlight={(story) =>
+                      setHighlightEditor({ id: null, preselect: story.id })
+                    }
+                    onShareAgain={(story) => void shareAgain(story)}
+                    onCreate={() => setComposerOpen(true)}
+                  />
+                )}
+              </section>
+            ) : null}
+
+            {tab === "highlights" ? (
+              <section
+                id="pf-panel-highlights"
+                role="tabpanel"
+                aria-labelledby="pf-tab-highlights"
+                className="pf-section"
               >
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Kept circles</p>
+                    <h2 className="pf-title">Highlights</h2>
+                  </div>
+                  <div className="pf-section-right">
+                    {highlights.length > 4 ? (
+                      <button
+                        type="button"
+                        onClick={() => setHighlightsAll((v) => !v)}
+                        className="pf-link"
+                      >
+                        {highlightsAll ? "Less" : "See all"}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => setHighlightEditor({ id: null, preselect: null })}
+                      className="pf-btn h-8 px-3 text-[12px]"
+                    >
+                      <Plus className="size-3.5" aria-hidden /> New highlight
+                    </button>
+                  </div>
+                </div>
                 {highlightsBlock?.status === "ready" ? (
                   <HighlightRail
                     highlights={highlights}
@@ -457,151 +689,64 @@ function ProfilePage() {
                 ) : (
                   <RailSkeleton />
                 )}
-              </ProfileSection>
-            </Reveal>
+              </section>
+            ) : null}
 
-            {/* moments — every story, curated like a wall */}
-            <Reveal delay={40}>
-              <ProfileSection
-                title="Bloom moments"
-                gap="default"
-                right={
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setArchiveOpen(true)}
-                      className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[10px] tracking-[0.06em] text-muted-foreground uppercase transition-colors hover:border-border-strong hover:text-foreground"
-                    >
-                      <Archive className="size-3" aria-hidden /> Archive
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setComposerOpen(true)}
-                      className="mono inline-flex items-center gap-1.5 rounded-full border border-[color:var(--profile-accent-border)] bg-[color:var(--profile-accent-soft)] px-3 py-1.5 text-[10px] tracking-[0.06em] text-foreground uppercase transition-[filter] hover:brightness-110"
-                    >
-                      <Plus className="size-3" aria-hidden /> New
-                    </button>
-                  </>
-                }
+            {tab === "journey" ? (
+              <section
+                id="pf-panel-journey"
+                role="tabpanel"
+                aria-labelledby="pf-tab-journey"
+                className="pf-section"
               >
-                {space.storiesBlock?.status === "error" ? (
-                  <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[12.5px] text-muted-foreground">
-                    {space.storiesBlock.message}{" "}
-                    <button
-                      type="button"
-                      onClick={space.actions.refresh}
-                      className="underline underline-offset-2 hover:text-foreground"
-                    >
-                      Try again
-                    </button>
-                  </p>
-                ) : (
-                  <MomentsGrid
-                    stories={allStories}
-                    onOpenAt={(index) => setViewer({ stories: allStories, startIndex: index })}
-                    onDelete={(story) => void deleteStory(story)}
-                    onAddToHighlight={(story) =>
-                      setHighlightEditor({ id: null, preselect: story.id })
-                    }
-                    onShareAgain={(story) => void shareAgain(story)}
-                    onCreate={() => setComposerOpen(true)}
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Milestones &amp; lately</p>
+                    <h2 className="pf-title">Your Bloom journey</h2>
+                  </div>
+                </div>
+                <div className="pf-card pf-card--pad">
+                  <JourneyCard
+                    journey={journey}
+                    accent={accent}
+                    memberSince={identity.memberSince}
+                    storyCount={allStories.length}
                   />
-                )}
-              </ProfileSection>
-            </Reveal>
+                </div>
+              </section>
+            ) : null}
 
-            {/* featured moment */}
-            <Reveal delay={40}>
-              <ProfileSection
-                label="yours, chosen"
-                title="Featured moment"
-                gap="default"
-                right={
-                  featuredContent ? (
-                    <FeaturePrompt
-                      hasFeatured
-                      onPick={() => setFeaturedOpen(true)}
-                      onClear={() =>
-                        void space.actions
-                          .setFeatured(null)
-                          .then(() => toast("Removed from your profile."))
-                      }
-                    />
-                  ) : null
-                }
-              >
-                {featuredContent ? (
-                  <FeaturedCard content={featuredContent} accent={accent} />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setFeaturedOpen(true)}
-                    className="group flex w-full items-center gap-3 rounded-2xl border border-dashed border-border px-4 py-4 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
-                  >
-                    <span
-                      aria-hidden
-                      className="grid size-9 shrink-0 place-items-center rounded-full"
-                      style={{
-                        background:
-                          "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
-                        color: "var(--profile-accent,var(--violet))",
-                      }}
-                    >
-                      <svg viewBox="0 0 16 16" className="size-4" fill="none">
-                        <path
-                          d="M8 2l1.3 3.7L13 7l-3.7 1.3L8 12l-1.3-3.7L3 7l3.7-1.3L8 2z"
-                          stroke="currentColor"
-                          strokeWidth="1.4"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                    <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
-                      <span className="font-medium text-foreground">
-                        Choose one moment that feels like you.
-                      </span>{" "}
-                      A story, a reflection, a reward, a milestone — only one.
-                    </span>
-                    <span className="mono hidden shrink-0 text-[9.5px] tracking-[0.08em] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
-                      Feature
-                    </span>
-                  </button>
-                )}
-              </ProfileSection>
-            </Reveal>
-
-            {/* journey */}
-            <Reveal delay={40}>
-              <ProfileSection title="Your Bloom journey" gap="default">
-                <JourneyCard
-                  journey={journey}
-                  accent={accent}
-                  memberSince={identity.memberSince}
-                  storyCount={allStories.length}
-                />
-              </ProfileSection>
-            </Reveal>
-
-            {/* account + quick actions */}
-            <Reveal delay={40}>
-              <div className="mt-11">
-                <AccountRow
-                  identity={identity.identity}
-                  account={{ email: identity.email, memberSince: identity.memberSince }}
-                  privacy={identity.privacy}
-                  stories={allStories}
-                  highlights={highlights}
-                  onOpenPrivacy={() => setPrivacyOpen(true)}
-                  onShare={() => void handleShare()}
-                  onPreview={() => setPreviewOpen(true)}
-                />
+            {/* account + data — settings rows */}
+            <section className="pf-section mt-10" aria-label="Account and data">
+              <div className="pf-section-head">
+                <div>
+                  <p className="pf-eyebrow">Settings</p>
+                  <h2 className="pf-title">Account &amp; data</h2>
+                </div>
               </div>
-            </Reveal>
+              <AccountRow
+                identity={identity.identity}
+                account={{ email: identity.email, memberSince: identity.memberSince }}
+                privacy={identity.privacy}
+                stories={allStories}
+                highlights={highlights}
+                isSignedIn={authState === "signed-in"}
+                onOpenPrivacy={() => setPrivacyOpen(true)}
+                onShare={() => void handleShare()}
+                onPreview={() => setPreviewOpen(true)}
+                onOpenArchive={() => setArchiveOpen(true)}
+                onEdit={() => setEditorOpen(true)}
+                onSignOut={() => {
+                  void space.actions.signOut();
+                }}
+                onSignIn={() => setSignInOpen(true)}
+              />
+            </section>
 
-            <footer className="mt-14 flex flex-col items-center gap-1.5 border-t border-border/60 pt-6 text-center">
+            <footer className="pf-footer">
               <p className="display text-[15px] text-muted-foreground">Bloom</p>
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
-                Your space. Your story. Your Bloom.
+              <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
+                Your record. Your story. Your Bloom.
               </p>
             </footer>
           </div>
@@ -636,7 +781,7 @@ function ProfilePage() {
               userId={userId}
               defaultAccent={accent}
               defaultVisibility={identity.privacy.storyVisibility}
-              moodEntries={moodBlock?.status === "ready" ? moodBlock.data : []}
+              moodEntries={moodEntries}
               rewards={rewardsBlock?.status === "ready" ? rewardsBlock.data : []}
               milestones={milestonesList}
               initialSource={composerSource}
@@ -773,21 +918,28 @@ function useOnlineStatus(): boolean {
 
 function ProfileSkeleton() {
   return (
-    <div className="animate-pulse pt-6" aria-label="Loading your profile" role="status">
-      <div className="flex flex-col items-center gap-3">
-        <div className="size-[132px] rounded-full bg-surface-3/60" />
-        <div className="mt-3 h-9 w-52 rounded-lg bg-surface-3/50" />
-        <div className="h-3.5 w-28 rounded bg-surface-3/40" />
-        <div className="mt-1 h-3.5 w-64 rounded bg-surface-3/30" />
-        <div className="mt-5 flex gap-2.5">
-          <div className="h-10 w-32 rounded-full bg-surface-3/50" />
-          <div className="h-10 w-20 rounded-full bg-surface-3/40" />
+    <div className="pt-1" aria-label="Loading your profile" role="status">
+      <div className="pf-skel" style={{ height: "var(--pf-cover-h)", borderRadius: 22 }} />
+      <div className="pf-head">
+        <div className="pf-avatar-wrap">
+          <div className="pf-skel size-full rounded-full" />
         </div>
-        <div className="mt-7 grid w-full grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-[70px] bg-surface-3/30" />
-          ))}
+        <div className="pf-head-main">
+          <div>
+            <div className="pf-skel h-8 w-52" />
+            <div className="pf-skel mt-2 h-3.5 w-28" />
+            <div className="pf-skel mt-3 h-3.5 w-64" />
+          </div>
+          <div className="flex gap-2">
+            <div className="pf-skel h-[38px] w-32 rounded-full" />
+            <div className="pf-skel h-[38px] w-24 rounded-full" />
+          </div>
         </div>
+      </div>
+      <div className="pf-numbers">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="pf-skel h-[82px] rounded-2xl" />
+        ))}
       </div>
       <p className="sr-only">Loading your profile…</p>
     </div>
@@ -799,8 +951,8 @@ function RailSkeleton() {
     <div className={cn("flex gap-3 opacity-60")} aria-hidden>
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex flex-col items-center gap-2">
-          <div className="size-[64px] animate-pulse rounded-full bg-surface-3/40" />
-          <div className="h-2.5 w-12 animate-pulse rounded bg-surface-3/30" />
+          <div className="pf-skel size-[64px] rounded-full" />
+          <div className="pf-skel h-2.5 w-12" />
         </div>
       ))}
     </div>
