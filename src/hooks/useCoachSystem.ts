@@ -495,6 +495,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
 function readHabitData(): CoachHabitData {
   const empty: CoachHabitData = { available: false, habits: [], logs: [] };
   if (typeof window === "undefined") return empty;
+  const today = todayKey();
   const habits = readJson<Row[] | null>("bloom.habits", null);
   const logs = readJson<Row[] | null>("bloom.habit_logs", null);
   if (!Array.isArray(habits) || habits.length === 0) return empty;
@@ -502,6 +503,13 @@ function readHabitData(): CoachHabitData {
     available: true,
     habits: habits
       .filter((h) => !h["archived"] && !h["completed"])
+      // a paused habit is off the table today — the coach shouldn't nag about it
+      .filter((h) => {
+        const until = typeof h["pausedUntil"] === "string" ? h["pausedUntil"] : null;
+        if (!until) return true;
+        const from = typeof h["pausedFrom"] === "string" ? h["pausedFrom"] : until;
+        return !(today >= from && today <= until);
+      })
       .map((h) => ({
         id: String(h["id"] ?? h["name"]),
         name: String(h["name"] ?? "Habit"),

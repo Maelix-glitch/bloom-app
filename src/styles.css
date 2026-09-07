@@ -532,6 +532,59 @@
   }
 }
 
+/* the undo strip after archiving / deleting a habit — same shape as the
+   Cycle and Trackers pages, in the home tokens */
+.home-page .home-undo {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(92vw, 480px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in oklab, var(--surface) 94%, var(--foreground) 6%);
+  box-shadow: var(--home-shadow-soft);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  transform: translateX(-50%);
+  animation: home-rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 1024px) {
+  .home-page .home-undo {
+    left: calc(50% + var(--app-rail, 0px) / 2);
+    bottom: 28px;
+  }
+}
+.home-page .home-undo__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--home-habits);
+  transform-origin: left;
+  animation: home-drain var(--home-undo-ms, 8000ms) linear both;
+}
+@keyframes home-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page .home-undo,
+  .home-page .home-undo__bar {
+    animation: none;
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * Mood page (harmonious-dashboard model). Scoped under `.mood-page` so the
  * model's gold / mood palette and its `panel` surfaces exist only here and

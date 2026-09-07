@@ -13,6 +13,8 @@ import { supabase } from "@/lib/supabase";
 import {
   HABITS_CHANGED,
   adjustPoints,
+  applyDraft,
+  deleteHabitRow,
   deleteLog,
   draftToLocalHabit,
   fetchHabits,
@@ -21,14 +23,23 @@ import {
   insertHabit,
   insertLog,
   isDueOn,
+  isLocalHabitId,
+  isPausedOn,
+  isWeekly,
   loadLocalHabits,
   loadLocalLogs,
+  patchHabit,
   readPoints,
   saveLocal,
+  updateHabit,
+  uploadLocalHabits,
+  weeklyProgress,
   type Habit,
   type HabitDraft,
   type HabitLog,
 } from "@/lib/home/habits";
+import { todayLocal } from "@/lib/localDay";
+import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 
 export type HabitsAuth = "checking" | "signed-out" | "signed-in" | "off";
 
@@ -36,6 +47,8 @@ export interface HabitToday extends Habit {
   done: boolean;
   doneAt: string | null;
   due: boolean;
+  /** "N× a week" habits: how the week is going. Null for daily/custom. */
+  week: { done: number; target: number } | null;
 }
 
 export interface HabitsStore {
@@ -55,11 +68,27 @@ export interface HabitsStore {
   points: number | null;
   toggle: (habitId: string) => Promise<void>;
   addHabit: (draft: HabitDraft) => Promise<void>;
+  /** Change anything about a habit. Id and history are kept. */
+  editHabit: (habitId: string, draft: HabitDraft) => Promise<void>;
+  /** Neutral days from today through `until` (inclusive). Streaks survive. */
+  pauseHabit: (habitId: string, until: string) => Promise<void>;
+  resumeHabit: (habitId: string) => Promise<void>;
+  /** Out of the day, history kept, restorable from the archive. */
+  archiveHabit: (habitId: string) => Promise<void>;
+  restoreHabit: (habitId: string) => Promise<void>;
+  /** Gone for good once the undo window closes. */
+  deleteHabit: (habitId: string) => Promise<void>;
+  /** Habits that are paused today or archived — for the "manage" view. */
+  pausedHabits: Habit[];
+  archivedHabits: Habit[];
+  /** The last archive / delete, while it can still be taken back. */
+  undoable: Undoable | null;
+  undo: () => void;
+  dismissUndo: () => void;
   refresh: () => void;
 }
 
-const localDate = (d = new Date()) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const localDate = (d = new Date()) => todayLocal(d);
 
 const daysAgo = (n: number) => {
   const d = new Date();
@@ -78,6 +107,20 @@ export function useHabits(): HabitsStore {
   const [today, setToday] = useState(() => localDate());
   const [reload, setReload] = useState(0);
   const hydrated = useRef(false);
+  const habitsRef = useRef<Habit[]>(habits);
+  habitsRef.current = habits;
+  const logsRef = useRef<HabitLog[]>(logs);
+  logsRef.current = logs;
+  /* archive / delete keep a snapshot for a moment */
+  const [undoable, setUndoable] = useState<Undoable | null>(null);
+  const undoSeq = useRef(0);
+  const snapshot = useRef<{
+    id: number;
+    habit: Habit;
+    logs: HabitLog[];
+    /** what to do on the account if the window closes without an undo */
+    commit: (() => Promise<void>) | null;
+  } | null>(null);
 
   /* session */
   useEffect(() => {
@@ -141,16 +184,53 @@ export function useHabits(): HabitsStore {
     setError(null);
     void (async () => {
       try {
+        /* habits made before signing in join the account instead of
+           disappearing — every one of them, with every tick. The device
+           mirror is the source here: on a cold signed-in load the React
+           state hasn't caught up with it yet. */
+        const mirrorHabits = loadLocalHabits();
+        const mirrorLogs = loadLocalLogs();
+        const localOnly = mirrorHabits.filter((h) => isLocalHabitId(h.id));
+        let carried: Habit[] = [];
+        let carriedLogs: HabitLog[] = [];
+        let keptLocal: Habit[] = [];
+        let keptLocalLogs: HabitLog[] = [];
+        if (localOnly.length > 0) {
+          const moved = await uploadLocalHabits(profileId, localOnly, mirrorLogs);
+          const replaced = new Set(moved.replacedIds);
+          carried = moved.uploaded;
+          carriedLogs = moved.logs;
+          keptLocal = localOnly.filter((h) => !replaced.has(h.id));
+          const keptIds = new Set(keptLocal.map((h) => h.id));
+          keptLocalLogs = mirrorLogs.filter((l) => keptIds.has(l.habitId));
+          if (moved.failed > 0 && mounted) {
+            setError(
+              `${moved.failed} ${moved.failed === 1 ? "habit" : "habits"} from this device couldn't be moved to your account yet — they're still here and will be retried.`,
+            );
+          }
+        }
         const [remoteHabits, remoteLogs, pts] = await Promise.all([
           fetchHabits(profileId),
           fetchLogs(profileId, daysAgo(45)),
           readPoints(profileId),
         ]);
         if (!mounted) return;
-        setHabits(remoteHabits);
-        setLogs(remoteLogs);
+        const known = new Set(remoteHabits.map((h) => h.id));
+        const nextHabits = [
+          ...remoteHabits,
+          ...carried.filter((h) => !known.has(h.id)),
+          ...keptLocal,
+        ];
+        const logKey = (l: HabitLog) => `${l.habitId}|${l.date}`;
+        const seen = new Set(remoteLogs.map(logKey));
+        const nextLogs = [
+          ...remoteLogs,
+          ...[...carriedLogs, ...keptLocalLogs].filter((l) => !seen.has(logKey(l))),
+        ];
+        setHabits(nextHabits);
+        setLogs(nextLogs);
         setPoints(pts);
-        saveLocal(remoteHabits, remoteLogs);
+        saveLocal(nextHabits, nextLogs);
       } catch (e) {
         console.warn("[bloom:habits] load:", e);
         if (mounted) setError("Your habits couldn't be loaded from your account just now.");
@@ -209,14 +289,24 @@ export function useHabits(): HabitsStore {
     const doneMap = new Map<string, string>();
     for (const l of logs) if (l.date === today) doneMap.set(l.habitId, l.completedAt);
     return habits
-      .filter((h) => isDueOn(h, today))
-      .map((h) => ({
-        ...h,
-        due: true,
-        done: doneMap.has(h.id),
-        doneAt: doneMap.get(h.id) ?? null,
-      }));
+      .filter((h) => isDueOn(h, today, logs))
+      .map((h) => {
+        const week = isWeekly(h) ? weeklyProgress(h, logs, today) : null;
+        return {
+          ...h,
+          due: true,
+          done: doneMap.has(h.id),
+          doneAt: doneMap.get(h.id) ?? null,
+          week: week ? { done: week.done, target: week.target } : null,
+        };
+      });
   }, [habits, logs, today]);
+
+  const pausedHabits = useMemo(
+    () => habits.filter((h) => !h.archived && isPausedOn(h, today)),
+    [habits, today],
+  );
+  const archivedHabits = useMemo(() => habits.filter((h) => h.archived), [habits]);
 
   const completedToday = todayHabits.filter((h) => h.done).length;
   const dueToday = todayHabits.length;
@@ -233,7 +323,7 @@ export function useHabits(): HabitsStore {
       // optimistic — the ring moves before the network does
       setLogs(nextLogs);
       saveLocal(habits, nextLogs);
-      if (auth !== "signed-in" || !profileId || habitId.startsWith("local-")) return;
+      if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
       try {
         if (wasDone) await deleteLog(profileId, habitId, today);
         else await insertLog(profileId, habitId, today);
@@ -271,6 +361,183 @@ export function useHabits(): HabitsStore {
     [auth, logs, profileId],
   );
 
+  /** Replace one habit in the list and mirror it. */
+  const putHabit = useCallback((next: Habit) => {
+    const prev = habitsRef.current;
+    const list = prev.some((h) => h.id === next.id)
+      ? prev.map((h) => (h.id === next.id ? next : h))
+      : [...prev, next];
+    habitsRef.current = list;
+    setHabits(list);
+    saveLocal(list, logsRef.current);
+  }, []);
+
+  const editHabit = useCallback(
+    async (habitId: string, draft: HabitDraft) => {
+      const habit = habitsRef.current.find((h) => h.id === habitId);
+      if (!habit || !draft.name.trim()) return;
+      const optimistic = applyDraft(habit, draft);
+      putHabit(optimistic);
+      if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
+      try {
+        const saved = await updateHabit(profileId, habitId, draft);
+        putHabit({
+          ...saved,
+          archived: habit.archived,
+          pausedFrom: habit.pausedFrom,
+          pausedUntil: habit.pausedUntil,
+        });
+      } catch (e) {
+        console.warn("[bloom:habits] edit:", e);
+        putHabit(habit);
+        setError("That change didn't reach your account. Try again in a moment.");
+        throw e;
+      }
+    },
+    [auth, profileId, putHabit],
+  );
+
+  const setPause = useCallback(
+    async (habitId: string, from: string | null, until: string | null) => {
+      const habit = habitsRef.current.find((h) => h.id === habitId);
+      if (!habit) return;
+      putHabit({ ...habit, pausedFrom: from, pausedUntil: until });
+      if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
+      try {
+        await patchHabit(profileId, habitId, { pausedFrom: from, pausedUntil: until });
+      } catch (e) {
+        console.warn("[bloom:habits] pause:", e);
+        putHabit(habit);
+        setError("That change didn't reach your account. Try again in a moment.");
+      }
+    },
+    [auth, profileId, putHabit],
+  );
+
+  const pauseHabit = useCallback(
+    (habitId: string, until: string) => setPause(habitId, today, until < today ? today : until),
+    [setPause, today],
+  );
+  const resumeHabit = useCallback((habitId: string) => setPause(habitId, null, null), [setPause]);
+
+  /* ------------------------------- undo ---------------------------------- */
+
+  const keepForUndo = useCallback(
+    (habit: Habit, message: string, commit: (() => Promise<void>) | null) => {
+      const id = ++undoSeq.current;
+      snapshot.current = {
+        id,
+        habit,
+        logs: logsRef.current.filter((l) => l.habitId === habit.id),
+        commit,
+      };
+      setUndoable({ id, message, until: Date.now() + UNDO_WINDOW_MS });
+    },
+    [],
+  );
+
+  const settle = useCallback((id: number) => {
+    const snap = snapshot.current;
+    if (!snap || snap.id !== id) return;
+    snapshot.current = null;
+    setUndoable((u) => (u && u.id === id ? null : u));
+    if (snap.commit) {
+      void snap.commit().catch((e) => {
+        console.warn("[bloom:habits] commit after undo window:", e);
+        setError("That change didn't reach your account. It will show again on refresh.");
+      });
+    }
+  }, []);
+
+  /* the window closes by itself — and the account change happens then */
+  useEffect(() => {
+    if (!undoable) return;
+    const ms = Math.max(0, undoable.until - Date.now());
+    const t = window.setTimeout(() => settle(undoable.id), ms);
+    return () => window.clearTimeout(t);
+  }, [undoable, settle]);
+
+  const undo = useCallback(() => {
+    const snap = snapshot.current;
+    if (!snap) return;
+    snapshot.current = null;
+    setUndoable(null);
+    const have = new Set(logsRef.current.map((l) => `${l.habitId}|${l.date}`));
+    const back = snap.logs.filter((l) => !have.has(`${l.habitId}|${l.date}`));
+    const nextLogs = [...logsRef.current, ...back];
+    const nextHabits = habitsRef.current.some((h) => h.id === snap.habit.id)
+      ? habitsRef.current.map((h) => (h.id === snap.habit.id ? snap.habit : h))
+      : [...habitsRef.current, snap.habit];
+    logsRef.current = nextLogs;
+    habitsRef.current = nextHabits;
+    setLogs(nextLogs);
+    setHabits(nextHabits);
+    saveLocal(nextHabits, nextLogs);
+  }, []);
+
+  const dismissUndo = useCallback(() => {
+    if (snapshot.current) settle(snapshot.current.id);
+  }, [settle]);
+
+  const archiveHabit = useCallback(
+    async (habitId: string) => {
+      const habit = habitsRef.current.find((h) => h.id === habitId);
+      if (!habit || habit.archived) return;
+      // anything still undoable is settled first — one thing at a time
+      if (snapshot.current) settle(snapshot.current.id);
+      putHabit({ ...habit, archived: true });
+      const remote =
+        auth === "signed-in" && profileId && !isLocalHabitId(habitId)
+          ? () => patchHabit(profileId, habitId, { archived: true })
+          : null;
+      keepForUndo(habit, `Archived "${habit.name}". Its history is kept.`, remote);
+    },
+    [auth, keepForUndo, profileId, putHabit, settle],
+  );
+
+  const restoreHabit = useCallback(
+    async (habitId: string) => {
+      const habit = habitsRef.current.find((h) => h.id === habitId);
+      if (!habit || !habit.archived) return;
+      putHabit({ ...habit, archived: false });
+      if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
+      try {
+        await patchHabit(profileId, habitId, { archived: false });
+      } catch (e) {
+        console.warn("[bloom:habits] restore:", e);
+        putHabit(habit);
+        setError("That change didn't reach your account. Try again in a moment.");
+      }
+    },
+    [auth, profileId, putHabit],
+  );
+
+  const deleteHabit = useCallback(
+    async (habitId: string) => {
+      const habit = habitsRef.current.find((h) => h.id === habitId);
+      if (!habit) return;
+      if (snapshot.current) settle(snapshot.current.id);
+      const ownLogs = logsRef.current.filter((l) => l.habitId === habitId);
+      const nextHabits = habitsRef.current.filter((h) => h.id !== habitId);
+      const nextLogs = logsRef.current.filter((l) => l.habitId !== habitId);
+      habitsRef.current = nextHabits;
+      logsRef.current = nextLogs;
+      setHabits(nextHabits);
+      setLogs(nextLogs);
+      saveLocal(nextHabits, nextLogs);
+      const remote =
+        auth === "signed-in" && profileId && !isLocalHabitId(habitId)
+          ? () => deleteHabitRow(profileId, habitId)
+          : null;
+      keepForUndo(
+        habit,
+        `Deleted "${habit.name}"${ownLogs.length ? ` and ${ownLogs.length} ${ownLogs.length === 1 ? "tick" : "ticks"}` : ""}.`,
+        remote,
+      );
+    },
+    [auth, keepForUndo, profileId, settle],
+  );
+
   const refresh = useCallback(() => setReload((r) => r + 1), []);
 
   // keep the Coach's mirror warm even when nothing changes here
@@ -298,6 +565,17 @@ export function useHabits(): HabitsStore {
     points,
     toggle,
     addHabit,
+    editHabit,
+    pauseHabit,
+    resumeHabit,
+    archiveHabit,
+    restoreHabit,
+    deleteHabit,
+    pausedHabits,
+    archivedHabits,
+    undoable,
+    undo,
+    dismissUndo,
     refresh,
   };
 }

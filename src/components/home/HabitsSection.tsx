@@ -1,14 +1,48 @@
-import { useMemo } from "react";
-import { Check, Flame, Loader2, Plus, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Archive,
+  ArchiveRestore,
+  Check,
+  Flame,
+  Loader2,
+  MoreHorizontal,
+  PauseCircle,
+  Pencil,
+  PlayCircle,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { HabitToday } from "@/hooks/useHabits";
-import { streakOf, type HabitLog } from "@/lib/home/habits";
+import { streakOf, streakUnitOf, type Habit, type HabitLog } from "@/lib/home/habits";
 import { habitColorVar } from "@/lib/home/today";
+import { formatDateShort } from "@/lib/cycle/predict";
+import { shiftDay } from "@/lib/localDay";
+
+/** What the "…" menu on a habit row can do. All optional: read-only callers pass nothing. */
+export interface HabitActions {
+  onEdit?: ((id: string) => void) | undefined;
+  onPause?: ((id: string, until: string) => void) | undefined;
+  onResume?: ((id: string) => void) | undefined;
+  onArchive?: ((id: string) => void) | undefined;
+  onRestore?: ((id: string) => void) | undefined;
+  onDelete?: ((id: string) => void) | undefined;
+}
 
 /**
  * HabitsSection — the dedicated habits block that sits directly under the
  * hero on Today. One tap toggles a habit (the same path the ring, the points
- * and the Coach read from); streaks are computed from the same logs.
+ * and the Coach read from); streaks are computed from the same logs. The "…"
+ * on each row edits, pauses, archives or deletes it — nothing about a habit
+ * is permanent any more.
  */
 export function HabitsSection({
   habits,
@@ -18,6 +52,9 @@ export function HabitsSection({
   points,
   onToggle,
   onAdd,
+  paused = [],
+  archived = [],
+  actions = {},
 }: {
   habits: HabitToday[];
   logs: HabitLog[];
@@ -26,12 +63,19 @@ export function HabitsSection({
   points: number | null;
   onToggle: (id: string) => void;
   onAdd: () => void;
+  paused?: Habit[] | undefined;
+  archived?: Habit[] | undefined;
+  actions?: HabitActions | undefined;
 }) {
   const streaks = useMemo(() => {
     const m = new Map<string, number>();
     for (const h of habits) m.set(h.id, streakOf(h, logs, today));
     return m;
   }, [habits, logs, today]);
+  const [showArchive, setShowArchive] = useState(false);
+  const hasMenu = Boolean(
+    actions.onEdit || actions.onPause || actions.onArchive || actions.onDelete,
+  );
 
   const done = habits.filter((h) => h.done).length;
   const due = habits.length;
@@ -135,15 +179,19 @@ export function HabitsSection({
         <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {habits.map((h) => {
             const streak = streaks.get(h.id) ?? 0;
+            const unit = streakUnitOf(h);
             const tone = `var(--${habitColorVar(h.color)})`;
             return (
-              <li key={h.id}>
+              <li key={h.id} className="relative">
+                {hasMenu ? <HabitMenu habit={h} today={today} actions={actions} /> : null}
                 <button
                   type="button"
                   onClick={() => onToggle(h.id)}
                   aria-pressed={h.done}
                   data-testid={`home-habit-${h.id}`}
                   className={`group flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
+                    hasMenu ? "pr-11" : ""
+                  } ${
                     h.done
                       ? "border-primary/50 bg-primary/10"
                       : "border-border bg-surface-2/40 hover:border-primary/40"
@@ -166,20 +214,27 @@ export function HabitsSection({
                     </span>
                     <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
                       <span>
-                        {h.done
-                          ? "Done"
-                          : h.reminderTime
-                            ? `Around ${h.reminderTime}`
-                            : "Anytime today"}
+                        {h.week
+                          ? h.done
+                            ? `${h.week.done} of ${h.week.target} this week`
+                            : `${h.week.done} of ${h.week.target} this week${
+                                h.reminderTime ? ` · around ${h.reminderTime}` : ""
+                              }`
+                          : h.done
+                            ? "Done"
+                            : h.reminderTime
+                              ? `Around ${h.reminderTime}`
+                              : "Anytime today"}
                       </span>
                       <span className="tabular-nums">· +{h.points} pts</span>
                       {streak >= 2 ? (
                         <span
                           className="inline-flex items-center gap-0.5 tabular-nums"
                           style={{ color: "var(--home-energy)" }}
-                          title={`${streak}-day streak`}
+                          title={`${streak}-${unit} streak`}
                         >
                           <Flame className="size-3" /> {streak}
+                          {unit === "week" ? "w" : ""}
                         </span>
                       ) : null}
                     </span>
@@ -200,6 +255,155 @@ export function HabitsSection({
           })}
         </ul>
       )}
+
+      {paused.length > 0 || archived.length > 0 ? (
+        <div className="mt-5 border-t border-border pt-4" data-testid="home-habits-aside">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              {paused.length > 0 && archived.length > 0
+                ? "Paused & archived"
+                : paused.length > 0
+                  ? "Paused"
+                  : "Archived"}
+            </p>
+            <button
+              type="button"
+              className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+              onClick={() => setShowArchive((v) => !v)}
+              aria-expanded={showArchive}
+              data-testid="home-habits-aside-toggle"
+            >
+              {showArchive ? "Hide" : `Show ${paused.length + archived.length}`}
+            </button>
+          </div>
+          {showArchive ? (
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {paused.map((h) => (
+                <li
+                  key={h.id}
+                  className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3 py-2.5 text-sm"
+                  data-testid={`home-habit-paused-${h.id}`}
+                >
+                  <span className="text-base opacity-70">{h.icon}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{h.name}</span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      Paused until {h.pausedUntil ? formatDateShort(h.pausedUntil) : "—"} · streak
+                      kept
+                    </span>
+                  </span>
+                  {actions.onResume ? (
+                    <button
+                      type="button"
+                      className="home-chip text-[11px]"
+                      onClick={() => actions.onResume?.(h.id)}
+                    >
+                      <PlayCircle className="size-3.5" /> Resume
+                    </button>
+                  ) : null}
+                </li>
+              ))}
+              {archived.map((h) => (
+                <li
+                  key={h.id}
+                  className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3 py-2.5 text-sm opacity-80"
+                  data-testid={`home-habit-archived-${h.id}`}
+                >
+                  <span className="text-base opacity-60">{h.icon}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{h.name}</span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      Archived · history kept
+                    </span>
+                  </span>
+                  {actions.onRestore ? (
+                    <button
+                      type="button"
+                      className="home-chip text-[11px]"
+                      onClick={() => actions.onRestore?.(h.id)}
+                    >
+                      <ArchiveRestore className="size-3.5" /> Restore
+                    </button>
+                  ) : null}
+                  {actions.onDelete ? (
+                    <button
+                      type="button"
+                      className="rounded-full p-1.5 text-muted-foreground transition-colors hover:text-destructive"
+                      aria-label={`Delete ${h.name}`}
+                      onClick={() => actions.onDelete?.(h.id)}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+/** The "…" on a habit row. Edit, pause (with three sensible lengths), archive, delete. */
+function HabitMenu({
+  habit,
+  today,
+  actions,
+}: {
+  habit: HabitToday;
+  today: string;
+  actions: HabitActions;
+}) {
+  const pauseOptions: { label: string; until: string }[] = [
+    { label: "Pause for the rest of today", until: today },
+    { label: "Pause for 3 days", until: shiftDay(today, 2) },
+    { label: "Pause for a week", until: shiftDay(today, 6) },
+    { label: "Pause for two weeks", until: shiftDay(today, 13) },
+  ];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="absolute right-2 top-2 z-[1] grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+          aria-label={`More for ${habit.name}`}
+          data-testid={`home-habit-menu-${habit.id}`}
+        >
+          <MoreHorizontal className="size-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[230px] border-border bg-surface-2">
+        {actions.onEdit ? (
+          <DropdownMenuItem onSelect={() => actions.onEdit?.(habit.id)}>
+            <Pencil className="size-4" /> Edit habit
+          </DropdownMenuItem>
+        ) : null}
+        {actions.onPause ? (
+          <>
+            <DropdownMenuSeparator />
+            {pauseOptions.map((o) => (
+              <DropdownMenuItem key={o.until} onSelect={() => actions.onPause?.(habit.id, o.until)}>
+                <PauseCircle className="size-4" /> {o.label}
+              </DropdownMenuItem>
+            ))}
+          </>
+        ) : null}
+        {actions.onArchive || actions.onDelete ? <DropdownMenuSeparator /> : null}
+        {actions.onArchive ? (
+          <DropdownMenuItem onSelect={() => actions.onArchive?.(habit.id)}>
+            <Archive className="size-4" /> Archive — keep its history
+          </DropdownMenuItem>
+        ) : null}
+        {actions.onDelete ? (
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onSelect={() => actions.onDelete?.(habit.id)}
+          >
+            <Trash2 className="size-4" /> Delete habit and its ticks
+          </DropdownMenuItem>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

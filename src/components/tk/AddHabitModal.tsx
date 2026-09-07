@@ -992,7 +992,15 @@ function AddHabitDialog({ onClose, onSubmit, prefill }: Omit<AddHabitModalProps,
             disabled={s.submitting}
             onClick={() => (s.step === 2 ? void submit() : goStep(s.step + 1))}
           >
-            {s.submitting ? "Creating…" : s.step === 2 ? "Create habit" : "Continue"}
+            {s.submitting
+              ? prefill
+                ? "Saving…"
+                : "Creating…"
+              : s.step === 2
+                ? prefill
+                  ? "Save changes"
+                  : "Create habit"
+                : "Continue"}
           </button>
         </div>
 
@@ -1009,8 +1017,18 @@ function AddHabitDialog({ onClose, onSubmit, prefill }: Omit<AddHabitModalProps,
               (success?.icon.value ?? "⭐")
             )}
           </div>
-          <h3 id="successTitle">{success ? `“${success.name}” created` : "Habit created"}</h3>
-          <p id="successSub">It’s on your board — first check-in starts today.</p>
+          <h3 id="successTitle">
+            {success
+              ? `“${success.name}” ${prefill ? "updated" : "created"}`
+              : prefill
+                ? "Habit updated"
+                : "Habit created"}
+          </h3>
+          <p id="successSub">
+            {prefill
+              ? "Your changes are saved — its history stays exactly as it was."
+              : "It’s on your board — first check-in starts today."}
+          </p>
         </div>
       </div>
     </div>

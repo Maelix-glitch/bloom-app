@@ -6,6 +6,7 @@ import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap } from "@/components/home/ConnectionMap";
 import { CoachPanel } from "@/components/home/CoachPanel";
 import { HabitsSection } from "@/components/home/HabitsSection";
+import { HabitUndo } from "@/components/home/HabitUndo";
 import {
   ActivityPanel,
   FlowPanel,
@@ -35,7 +36,8 @@ import {
   readings,
   scoreOf,
 } from "@/lib/home/today";
-import type { HabitDraft } from "@/lib/home/habits";
+import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
+import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
 import leafDark from "@/assets/home/leaf-dark.jpg";
@@ -83,6 +85,8 @@ function TodayPage() {
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [moodOpen, setMoodOpen] = useState(false);
   const [habitOpen, setHabitOpen] = useState(false);
+  /** Which habit the dialog is editing; null = creating a new one. */
+  const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
   const [habitNotice, setHabitNotice] = useState<string | null>(null);
 
   const today = trackers.today;
@@ -215,16 +219,34 @@ function TodayPage() {
 
   const addHabit = async (draft: HabitDraft) => {
     try {
-      await habits.addHabit(draft);
+      if (editingHabitId) await habits.editHabit(editingHabitId, draft);
+      else await habits.addHabit(draft);
       setHabitNotice(null);
     } catch (e) {
-      console.warn("[bloom:home] add habit:", e);
+      console.warn("[bloom:home] save habit:", e);
       setHabitNotice(
-        "That habit couldn't be saved to your account. It's kept on this device for now.",
+        editingHabitId
+          ? "That change couldn't reach your account. Try again in a moment."
+          : "That habit couldn't be saved to your account. It's kept on this device for now.",
       );
       throw e;
     }
   };
+
+  const openNewHabit = () => {
+    setEditingHabitId(null);
+    setHabitOpen(true);
+  };
+  const openEditHabit = (id: string) => {
+    setEditingHabitId(id);
+    setHabitOpen(true);
+  };
+  const editingHabit = editingHabitId
+    ? (habits.habits.find((h) => h.id === editingHabitId) ?? null)
+    : null;
+  const habitPrefill: AddHabitPrefill | undefined = editingHabit
+    ? (habitToDraft(editingHabit) as AddHabitPrefill)
+    : undefined;
 
   return (
     <div className="home-page app-shell min-h-screen bg-background text-foreground">
@@ -351,7 +373,17 @@ function TodayPage() {
             loading={habits.loading}
             points={habits.points}
             onToggle={(id) => void habits.toggle(id)}
-            onAdd={() => setHabitOpen(true)}
+            onAdd={openNewHabit}
+            paused={habits.pausedHabits}
+            archived={habits.archivedHabits}
+            actions={{
+              onEdit: openEditHabit,
+              onPause: (id, until) => void habits.pauseHabit(id, until),
+              onResume: (id) => void habits.resumeHabit(id),
+              onArchive: (id) => void habits.archiveHabit(id),
+              onRestore: (id) => void habits.restoreHabit(id),
+              onDelete: (id) => void habits.deleteHabit(id),
+            }}
           />
         </div>
 
@@ -377,7 +409,7 @@ function TodayPage() {
             <FocusPanel
               items={focus}
               onToggleHabit={(id) => void habits.toggle(id)}
-              onAddHabit={() => setHabitOpen(true)}
+              onAddHabit={openNewHabit}
             />
             <CoachPanel entries={mood.entries} habitsStore={habits} />
             <figure className="relative overflow-hidden rounded-2xl border border-border">
@@ -407,7 +439,7 @@ function TodayPage() {
       {/* floating add-habit — always in reach, clears the tab bar on phones */}
       <button
         type="button"
-        onClick={() => setHabitOpen(true)}
+        onClick={openNewHabit}
         aria-label="Add habit"
         title="Add habit"
         data-testid="home-fab-add-habit"
@@ -429,7 +461,16 @@ function TodayPage() {
         onClose={() => setMoodOpen(false)}
         onSave={(entry) => void mood.saveEntry(entry)}
       />
-      <AddHabitModal open={habitOpen} onClose={() => setHabitOpen(false)} onSubmit={addHabit} />
+      <AddHabitModal
+        open={habitOpen}
+        onClose={() => {
+          setHabitOpen(false);
+          setEditingHabitId(null);
+        }}
+        onSubmit={addHabit}
+        prefill={habitPrefill}
+      />
+      <HabitUndo undoable={habits.undoable} onUndo={habits.undo} onDismiss={habits.dismissUndo} />
 
       {!trackers.hydrated ? (
         <div
