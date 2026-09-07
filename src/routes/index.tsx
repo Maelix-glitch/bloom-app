@@ -23,6 +23,7 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
+import { useFlowTimes } from "@/hooks/useFlowTimes";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import {
   activityOf,
@@ -152,9 +153,17 @@ function TodayPage() {
     ],
   );
 
+  const flowTimes = useFlowTimes();
   const flow = useMemo(
-    () => flowOf({ habits: habits.todayHabits, mood: moodEntry, trackers: trackers.analysis, now }),
-    [habits.todayHabits, moodEntry, trackers.analysis, now],
+    () =>
+      flowOf({
+        habits: habits.todayHabits,
+        mood: moodEntry,
+        trackers: trackers.analysis,
+        now,
+        times: flowTimes.times,
+      }),
+    [habits.todayHabits, moodEntry, trackers.analysis, now, flowTimes.times],
   );
 
   const focus = useMemo(
@@ -400,7 +409,15 @@ function TodayPage() {
             </div>
             <TrackersPanel readings={signalReadings} />
             <div className="grid gap-5 md:grid-cols-2">
-              <FlowPanel items={flow} now={now} onToggleHabit={(id) => void habits.toggle(id)} />
+              <FlowPanel
+                items={flow}
+                now={now}
+                onToggleHabit={(id) => void habits.toggle(id)}
+                times={flowTimes.times}
+                onTimeChange={flowTimes.setTime}
+                onResetTimes={flowTimes.reset}
+                timesAreDefault={flowTimes.isDefault}
+              />
               <InsightsPanel items={insights} loading={mood.loading || !trackers.hydrated} />
             </div>
           </div>

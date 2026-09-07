@@ -35,7 +35,8 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
   const [metricsOpen, setMetricsOpen] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
-  const defs = TRACKERS;
+  /* only what this person tracks — switched-off trackers keep their history but leave the page */
+  const defs = TRACKERS.filter((def) => store.active.includes(def.id));
   const hasDays = analysis.daysLogged > 0;
 
   const tap = (def: TrackerDef, amount: number) => {
@@ -64,7 +65,7 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
             <div>
               <dt>On target</dt>
               <dd>
-                {analysis.goalsMetToday}/{TRACKERS.length}
+                {analysis.goalsMetToday}/{analysis.goalsCounted}
               </dd>
             </div>
             <div>

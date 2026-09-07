@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import { normalizeAccent, type BloomAccent } from "@/lib/profile/types";
+import { syncPrefs } from "@/lib/prefs";
 
 export const PROFILE_CHANGED_EVENT = "bloom:profile-changed";
 
@@ -74,6 +75,9 @@ export function useRailIdentity(): RailIdentity {
 
     function apply(uid: string | null) {
       userId = uid;
+      /* the rail is on every page, so this is where device preferences
+         (goals, active trackers, subjects, flow times) meet the account */
+      void syncPrefs(uid);
       if (!uid) {
         setIdentity(SIGNED_OUT);
         return;

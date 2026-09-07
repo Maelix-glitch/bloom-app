@@ -166,8 +166,9 @@ export function readings(input: {
 
   const cycleDay = cycle.cycleDay;
   const cycleLen = cycle.averageLength > 0 ? cycle.averageLength : 28;
+  const tracks = (id: TrackerId) => trackers.active.includes(id);
 
-  return [
+  const all: (SignalReading | null)[] = [
     {
       id: "habits",
       label: "Habits",
@@ -184,23 +185,29 @@ export function readings(input: {
       empty: !mood,
       to: "/mood",
     },
-    {
-      id: "sleep",
-      label: "Sleep",
-      value: sleep.today === null ? "—" : fmt("sleep", sleep.today),
-      pct: sleep.progress,
-      empty: sleep.today === null,
-      to: "/trackers",
-    },
-    {
-      id: "study",
-      label: "Study",
-      value:
-        study.today === null ? "—" : `${fmt("study", study.today)} / ${fmt("study", study.goal)}`,
-      pct: study.progress,
-      empty: study.today === null,
-      to: "/trackers",
-    },
+    tracks("sleep")
+      ? {
+          id: "sleep",
+          label: "Sleep",
+          value: sleep.today === null ? "—" : fmt("sleep", sleep.today),
+          pct: sleep.progress,
+          empty: sleep.today === null,
+          to: "/trackers",
+        }
+      : null,
+    tracks("study")
+      ? {
+          id: "study",
+          label: "Study",
+          value:
+            study.today === null
+              ? "—"
+              : `${fmt("study", study.today)} / ${fmt("study", study.goal)}`,
+          pct: study.progress,
+          empty: study.today === null,
+          to: "/trackers",
+        }
+      : null,
     {
       id: "cycle",
       label: "Cycle",
@@ -209,20 +216,27 @@ export function readings(input: {
       empty: cycleDay === null,
       to: "/cycle",
     },
+    /* energy also comes from the mood check-in, so it stays even when the tracker is off */
     {
       id: "energy",
       label: "Energy",
       value:
-        energy.today !== null
+        tracks("energy") && energy.today !== null
           ? `${energy.today} / 5`
           : mood
             ? `${Math.round(mood.energy)} / 10`
             : "—",
-      pct: energy.today !== null ? clamp01(energy.today / 5) : mood ? clamp01(mood.energy / 10) : 0,
-      empty: energy.today === null && !mood,
-      to: "/trackers",
+      pct:
+        tracks("energy") && energy.today !== null
+          ? clamp01(energy.today / 5)
+          : mood
+            ? clamp01(mood.energy / 10)
+            : 0,
+      empty: (!tracks("energy") || energy.today === null) && !mood,
+      to: tracks("energy") ? "/trackers" : "/mood",
     },
   ];
+  return all.filter((r): r is SignalReading => r !== null);
 }
 
 /* --------------------------------- score --------------------------------- */
@@ -431,13 +445,50 @@ function dedupeLinks(links: CrossLink[]): CrossLink[] {
 
 /* ---------------------------------- flow --------------------------------- */
 
+/** The anchor times on Today's flow. Editable — a night shift starts its day at 21:00. */
+export interface FlowTimes {
+  mood: string;
+  study: string;
+  movement: string;
+  reflection: string;
+}
+
+export const DEFAULT_FLOW_TIMES: FlowTimes = {
+  mood: "12:00",
+  study: "14:00",
+  movement: "18:00",
+  reflection: "21:00",
+};
+
+const isClock = (v: unknown): v is string =>
+  typeof v === "string" && /^([01]?\d|2[0-3]):[0-5]\d$/.test(v);
+
+/** Anything on disk → a complete FlowTimes (bad or missing fields fall back). */
+export function parseFlowTimes(raw: unknown): FlowTimes | null {
+  if (!raw || typeof raw !== "object") return null;
+  const row = raw as Record<string, unknown>;
+  const out: FlowTimes = { ...DEFAULT_FLOW_TIMES };
+  let any = false;
+  for (const key of Object.keys(DEFAULT_FLOW_TIMES) as (keyof FlowTimes)[]) {
+    if (isClock(row[key])) {
+      out[key] = row[key].padStart(5, "0");
+      any = true;
+    }
+  }
+  return any ? out : null;
+}
+
 export function flowOf(input: {
   habits: readonly HabitToday[];
   mood: MoodEntry | null;
   trackers: TrackerAnalysis;
   now: Date;
+  /** Anchor times; defaults when omitted. */
+  times?: FlowTimes | undefined;
 }): FlowItem[] {
   const { habits, mood, trackers, now } = input;
+  const times = input.times ?? DEFAULT_FLOW_TIMES;
+  const tracks = (id: TrackerId) => trackers.active.includes(id);
   const items: FlowItem[] = habits.map((h) => ({
     id: `habit-${h.id}`,
     time: h.reminderTime ?? "08:00",
@@ -455,7 +506,7 @@ export function flowOf(input: {
 
   items.push({
     id: "mood-checkin",
-    time: mood ? localTime(mood.timestamp) : "12:00",
+    time: mood ? localTime(mood.timestamp) : times.mood,
     title: "Mood check-in",
     sub: mood ? `Logged ${Math.round(mood.mood)}/10` : "How are you, really?",
     done: Boolean(mood),
@@ -464,36 +515,40 @@ export function flowOf(input: {
   });
 
   const study = trackers.trackers.study;
-  items.push({
-    id: "study-block",
-    time: "14:00",
-    title: "Study block",
-    sub:
-      study.today !== null
-        ? `${fmt("study", study.today)} of ${fmt("study", study.goal)}`
-        : `Goal ${fmt("study", study.goal)}`,
-    done: study.met === true,
-    kind: "tracker",
-    color: "var(--home-study)",
-  });
+  if (tracks("study")) {
+    items.push({
+      id: "study-block",
+      time: times.study,
+      title: "Study block",
+      sub:
+        study.today !== null
+          ? `${fmt("study", study.today)} of ${fmt("study", study.goal)}`
+          : `Goal ${fmt("study", study.goal)}`,
+      done: study.met === true,
+      kind: "tracker",
+      color: "var(--home-study)",
+    });
+  }
 
   const movement = trackers.trackers.movement;
-  items.push({
-    id: "movement",
-    time: "18:00",
-    title: "Movement",
-    sub:
-      movement.today !== null
-        ? `${fmt("movement", movement.today)} logged`
-        : "Get outside or stretch",
-    done: movement.met === true,
-    kind: "tracker",
-    color: "var(--home-energy)",
-  });
+  if (tracks("movement")) {
+    items.push({
+      id: "movement",
+      time: times.movement,
+      title: "Movement",
+      sub:
+        movement.today !== null
+          ? `${fmt("movement", movement.today)} logged`
+          : "Get outside or stretch",
+      done: movement.met === true,
+      kind: "tracker",
+      color: "var(--home-energy)",
+    });
+  }
 
   items.push({
     id: "evening-reflection",
-    time: "21:00",
+    time: times.reflection,
     title: "Evening reflection",
     sub: mood?.note ? "Reflection written" : "A line about the day",
     done: Boolean(mood?.note && mood.note.trim().length > 0),
@@ -550,7 +605,7 @@ export function focusOf(input: {
     });
   }
 
-  const gaps = (Object.keys(trackers.trackers) as TrackerId[])
+  const gaps = trackers.active
     .map((id) => trackers.trackers[id])
     .filter((t) => t.today === null || t.met === false)
     .sort((a, b) => a.progress - b.progress);

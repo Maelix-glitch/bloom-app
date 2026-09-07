@@ -34,7 +34,8 @@ export function Strip({ theme = "nocturne" }: { theme?: string }) {
   const [metricsOpen, setMetricsOpen] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
   const hasDays = analysis.daysLogged > 0;
-  const defs = TRACKERS;
+  /* only what this person tracks — switched-off trackers keep their history but leave the page */
+  const defs = TRACKERS.filter((def) => store.active.includes(def.id));
 
   const tap = (id: TrackerId, amount: number) => {
     const def = defs.find((d) => d.id === id)!;

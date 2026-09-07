@@ -429,9 +429,13 @@ export interface TrackerAnalysis {
   /** Consecutive days with any entry, anchored to today (or yesterday). */
   streak: number;
   bestStreak: number;
-  /** Share of the six goals met today, 0–1. */
+  /** Share of the ACTIVE goals met today, 0–1 (someone tracking three things can reach 100%). */
   completion: number;
   goalsMetToday: number;
+  /** How many trackers count towards `completion` — the active ones. */
+  goalsCounted: number;
+  /** The trackers this person tracks, in canonical order. Stats exist for all six regardless. */
+  active: TrackerId[];
   trackers: Record<TrackerId, TrackerStat>;
   /** Minutes per subject across the whole record, newest-agnostic. */
   subjects: { subject: string; minutes: number; sessions: number }[];
@@ -581,8 +585,14 @@ export function analyzeTrackers(
   entries: readonly DayEntry[],
   goals: Goals,
   today: string,
+  options: { active?: readonly TrackerId[] | undefined } = {},
 ): TrackerAnalysis {
-  const sorted = [...entries].filter((e) => isValidDateKey(e.date)).sort((a, b) => a.date.localeCompare(b.date));
+  const activeSet = new Set<TrackerId>(options.active ?? TRACKERS.map((t) => t.id));
+  const active = TRACKERS.map((t) => t.id).filter((id) => activeSet.has(id));
+  const counted = active.length > 0 ? active : TRACKERS.map((t) => t.id);
+  const sorted = [...entries]
+    .filter((e) => isValidDateKey(e.date))
+    .sort((a, b) => a.date.localeCompare(b.date));
   const map = dayMap(sorted);
   const desc = [...sorted].reverse();
 
@@ -654,10 +664,7 @@ export function analyzeTrackers(
       streak,
       bestStreak,
       daysLogged: logged.length,
-      spread:
-        logged.length >= 3
-          ? Math.round(stdDev(logged.map((l) => l.value)) * 10) / 10
-          : null,
+      spread: logged.length >= 3 ? Math.round(stdDev(logged.map((l) => l.value)) * 10) / 10 : null,
     };
   }
 
@@ -725,8 +732,8 @@ export function analyzeTrackers(
   }
   bestStreak = Math.max(bestStreak, streak);
 
-  const goalsMetToday = TRACKERS.filter((t) => trackers[t.id].met === true).length;
-  const completion = goalsMetToday / TRACKERS.length;
+  const goalsMetToday = counted.filter((id) => trackers[id].met === true).length;
+  const completion = goalsMetToday / counted.length;
 
   return {
     today,
@@ -736,6 +743,8 @@ export function analyzeTrackers(
     bestStreak,
     completion,
     goalsMetToday,
+    goalsCounted: counted.length,
+    active: counted,
     trackers,
     subjects,
     studyHours,
@@ -947,9 +956,19 @@ function observationsOf(
   /* Energy against sleep, from the person's own days. */
   const energy = trackers.energy;
   if (energy.avg7 !== null && sleep.avg7 !== null && energy.daysLogged >= 5) {
-    const best = desc.find((d) => d.energy !== null && d.sleepMinutes !== null && d.sleepMinutes >= sleep.goal);
-    const worst = desc.find((d) => d.energy !== null && d.sleepMinutes !== null && d.sleepMinutes < sleep.goal - 60);
-    if (best && worst && best.energy !== null && worst.energy !== null && best.energy > worst.energy) {
+    const best = desc.find(
+      (d) => d.energy !== null && d.sleepMinutes !== null && d.sleepMinutes >= sleep.goal,
+    );
+    const worst = desc.find(
+      (d) => d.energy !== null && d.sleepMinutes !== null && d.sleepMinutes < sleep.goal - 60,
+    );
+    if (
+      best &&
+      worst &&
+      best.energy !== null &&
+      worst.energy !== null &&
+      best.energy > worst.energy
+    ) {
       out.push(
         `On the nights you hit ${trackerDef("sleep").format(Math.round(sleep.goal))}, your energy read higher than on your short nights.`,
       );

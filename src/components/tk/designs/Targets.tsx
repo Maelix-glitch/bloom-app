@@ -24,8 +24,47 @@ const step = (kind: "duration" | "volume" | "rating") =>
 export function TargetSheet({ store }: { store: TrackerStore }) {
   return (
     <div className="tk2-targets">
+      <div className="tk2-active" role="group" aria-label="Which trackers you track">
+        <p className="tk2-active-head">
+          What you track
+          <span>
+            Switch off anything you don't measure — it leaves the rings, the quick log and today's
+            score. Nothing is deleted.
+          </span>
+        </p>
+        <ul className="tk2-active-list">
+          {TRACKERS.map((def) => {
+            const on = store.active.includes(def.id);
+            const last = on && store.active.length === 1;
+            return (
+              <li key={def.id} data-id={def.id}>
+                <button
+                  type="button"
+                  className="tk2-active-toggle"
+                  role="switch"
+                  aria-checked={on}
+                  data-on={on ? "true" : "false"}
+                  disabled={last}
+                  title={
+                    last
+                      ? "At least one tracker stays on"
+                      : on
+                        ? `Stop tracking ${def.name.toLowerCase()}`
+                        : `Track ${def.name.toLowerCase()}`
+                  }
+                  onClick={() => store.toggleActive(def.id)}
+                  data-testid={`tk-active-${def.id}`}
+                >
+                  <i aria-hidden />
+                  {def.name}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       <ul className="tk2-targets-grid">
-        {TRACKERS.map((def) => (
+        {TRACKERS.filter((def) => store.active.includes(def.id)).map((def) => (
           <li key={def.id} data-id={def.id}>
             <label htmlFor={`target-${def.id}`}>{def.name}</label>
             <span className="tk2-target-field">
@@ -60,15 +99,14 @@ export function TargetSheet({ store }: { store: TrackerStore }) {
 
 export function Achievements({ analysis }: { analysis: TrackerAnalysis }) {
   const items = useMemo(() => {
-    const longest = Math.max(...TRACKERS.map((t) => analysis.trackers[t.id].streak), 0);
+    const longest = Math.max(...analysis.active.map((id) => analysis.trackers[id].streak), 0);
+    const n = analysis.goalsCounted;
+    const words = ["", "one", "two", "three", "four", "five", "six"];
     return [
       {
-        label: "All six in one day",
-        detail:
-          analysis.goalsMetToday === 6
-            ? "today"
-            : `${analysis.goalsMetToday} of 6 today`,
-        earned: analysis.goalsMetToday === 6,
+        label: n === 6 ? "All six in one day" : `All ${words[n] ?? n} in one day`,
+        detail: analysis.goalsMetToday === n ? "today" : `${analysis.goalsMetToday} of ${n} today`,
+        earned: analysis.goalsMetToday === n,
       },
       {
         label: "Three days running",

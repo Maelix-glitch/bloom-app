@@ -6,7 +6,9 @@
  * was swapped for Bloom's tracker store:
  *
  *   • opens on today's real values (readTrackerValue) instead of blank
- *   • saves all six at once on one copy of the day (setTrackerValues)
+ *   • shows only the trackers this person tracks (store.active) and saves
+ *     whatever is filled in — a blank field leaves that tracker untouched,
+ *     so logging sleep and water on their own is a complete, valid entry
  *   • validation ranges come from Bloom's tracker definitions, so the form
  *     can never accept a number the store would reject
  *   • sleep / study / screen are typed in hours (decimal ok) and stored in
@@ -152,9 +154,11 @@ export function MetricsEntryModal({
 
   if (!open || typeof document === "undefined") return null;
 
+  const metrics = METRICS.filter((m) => store.active.includes(m.key));
   const filled = (key: MetricKey) => (values[key] ?? "").trim() !== "";
-  const isEmpty = METRICS.every((m) => !filled(m.key));
-  const allFilled = METRICS.every((m) => filled(m.key));
+  const isEmpty = metrics.every((m) => !filled(m.key));
+  const allFilled = metrics.every((m) => filled(m.key));
+  const filledCount = metrics.filter((m) => filled(m.key)).length;
 
   function validateField(def: MetricDef, raw: string): string | null {
     const n = Number(raw);
@@ -180,7 +184,7 @@ export function MetricsEntryModal({
   const handleConfirm = () => {
     setSubmitted(true);
     const nextErrors: Partial<Record<MetricKey, string>> = {};
-    for (const def of METRICS) {
+    for (const def of metrics) {
       const raw = values[def.key] ?? "";
       if (raw.trim() === "") continue;
       const msg = validateField(def, raw);
@@ -189,16 +193,19 @@ export function MetricsEntryModal({
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || isEmpty) return;
 
+    /* a partial entry is a real entry: only the filled fields are written,
+       blanks leave whatever today already holds untouched */
     setPartial(!allFilled);
-    if (!allFilled) return;
 
     // Typed units → stored units, written in one go so no field overwrites another.
     const parsed = {} as MetricsValues;
-    const entries = METRICS.map((m) => {
-      const typed = Number(values[m.key]);
-      parsed[m.key] = typed;
-      return { id: m.key, value: Math.round(typed * m.scale) };
-    });
+    const entries = metrics
+      .filter((m) => filled(m.key))
+      .map((m) => {
+        const typed = Number(values[m.key]);
+        parsed[m.key] = typed;
+        return { id: m.key, value: Math.round(typed * m.scale) };
+      });
     const error = setTrackerValues(store, entries);
     if (error) {
       setSaveError(error);
@@ -228,8 +235,8 @@ export function MetricsEntryModal({
           ? "Please fix the highlighted fields."
           : allFilled
             ? "You're doing great — one day at a time."
-            : partial || (!isEmpty && !allFilled)
-              ? "Fill in the remaining fields."
+            : !isEmpty
+              ? `${filledCount} of ${metrics.length} filled — save what you have, or keep going.`
               : "Enter your metrics now";
 
   return createPortal(
@@ -267,7 +274,7 @@ export function MetricsEntryModal({
         {view === "form" && (
           <div className="px-5 pb-6 pt-5">
             <div className="grid grid-cols-2 gap-3">
-              {METRICS.map((m, i) => {
+              {metrics.map((m, i) => {
                 const raw = values[m.key] ?? "";
                 const err = errors[m.key];
                 return (
@@ -323,7 +330,7 @@ export function MetricsEntryModal({
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={submitted && (hasErrors || !allFilled)}
+              disabled={(submitted && hasErrors) || isEmpty}
               className="mt-4 w-full rounded-lg py-3 text-sm font-bold uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
               style={{
                 background:
@@ -339,9 +346,11 @@ export function MetricsEntryModal({
             >
               {saveError
                 ? saveError
-                : submitted && !allFilled
-                  ? "All fields are required."
-                  : "Real data only. No estimates, no blanks."}
+                : submitted && isEmpty
+                  ? "Fill in at least one field."
+                  : allFilled
+                    ? "Real data only. No estimates."
+                    : "Real data only — leave anything you didn't measure blank."}
             </p>
             {!isEmpty && (
               <button
@@ -369,17 +378,24 @@ export function MetricsEntryModal({
             </div>
             <h3 className="mt-5 text-2xl font-bold text-foreground">Saved!</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Your metrics for today have been recorded.
+              {partial
+                ? "What you filled in is on today's record. The rest stays open."
+                : "Your metrics for today have been recorded."}
             </p>
 
             <div
-              className="mt-6 grid w-full grid-cols-6 gap-1 rounded-xl border border-border p-3"
-              style={{ backgroundColor: "var(--metric-surface-raised)" }}
+              className="mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
+              style={{
+                backgroundColor: "var(--metric-surface-raised)",
+                gridTemplateColumns: `repeat(${Math.max(1, metrics.length)}, minmax(0, 1fr))`,
+              }}
             >
-              {METRICS.map((m) => (
+              {metrics.map((m) => (
                 <div key={m.key} className="flex flex-col items-center gap-1">
                   <m.icon className="h-3.5 w-3.5" style={{ color: m.colorVar }} />
-                  <span className="text-sm font-bold text-foreground">{values[m.key]}</span>
+                  <span className="text-sm font-bold text-foreground">
+                    {filled(m.key) ? values[m.key] : "—"}
+                  </span>
                   <span className="text-[10px] text-muted-foreground">{m.unit}</span>
                 </div>
               ))}

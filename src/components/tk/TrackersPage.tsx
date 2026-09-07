@@ -103,7 +103,8 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
   }, [store.days, today]);
 
   const hasDays = analysis.daysLogged > 0;
-  const defs = TRACKERS;
+  /* only what this person tracks — switched-off trackers keep their history but leave the page */
+  const defs = TRACKERS.filter((def) => store.active.includes(def.id));
   const todayEntry = store.days.find((d) => d.date === today) ?? emptyDay(today);
 
   /* A tap on a quick-add writes straight to today and saves it. */
@@ -207,7 +208,7 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
                 </span>
                 <span className="tk-head__rule" />
                 <span className="tk-head__aside">
-                  {analysis.goalsMetToday} of {TRACKERS.length} on target
+                  {analysis.goalsMetToday} of {analysis.goalsCounted} on target
                 </span>
               </div>
 
@@ -309,6 +310,9 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
                   onDelete={store.removeDay}
                   disabled={preview}
                   focus={focus}
+                  customSubjects={store.customSubjects}
+                  onRememberSubject={store.rememberSubject}
+                  onForgetSubject={store.forgetSubject}
                 />
               </Reveal>
             </div>

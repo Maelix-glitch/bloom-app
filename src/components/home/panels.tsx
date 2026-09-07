@@ -1,11 +1,21 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, Check, Loader2, Plus, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Clock3,
+  Loader2,
+  Plus,
+  type LucideIcon,
+} from "lucide-react";
 
 import { ProgressRing } from "./ProgressRing";
 import { SIGNAL_COLOR, SIGNAL_ICON } from "./ConnectionMap";
 import type {
   ActivityItem,
   FlowItem,
+  FlowTimes,
   FocusItem,
   InsightItem,
   SignalReading,
@@ -234,20 +244,87 @@ export function TrackersPanel({ readings }: { readings: SignalReading[] }) {
 
 /* ---------------------------------- flow --------------------------------- */
 
+const FLOW_TIME_LABELS: { key: keyof FlowTimes; label: string }[] = [
+  { key: "mood", label: "Mood check-in" },
+  { key: "study", label: "Study block" },
+  { key: "movement", label: "Movement" },
+  { key: "reflection", label: "Evening reflection" },
+];
+
 export function FlowPanel({
   items,
   now,
   onToggleHabit,
+  times,
+  onTimeChange,
+  onResetTimes,
+  timesAreDefault = true,
 }: {
   items: FlowItem[];
   now: Date;
   onToggleHabit: (habitId: string) => void;
+  /** When given, a small clock button lets the person move the anchor times. */
+  times?: FlowTimes | undefined;
+  onTimeChange?: ((key: keyof FlowTimes, value: string) => void) | undefined;
+  onResetTimes?: (() => void) | undefined;
+  timesAreDefault?: boolean | undefined;
 }) {
+  const [editing, setEditing] = useState(false);
+  const editable = Boolean(times && onTimeChange);
   return (
     <section className="home-panel p-5" aria-labelledby="home-flow-title">
-      <h2 id="home-flow-title" className="font-display text-xl">
-        Today's flow
-      </h2>
+      <header className="flex items-center justify-between gap-3">
+        <h2 id="home-flow-title" className="font-display text-xl">
+          Today's flow
+        </h2>
+        {editable ? (
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            aria-expanded={editing}
+            aria-controls="home-flow-times"
+            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            data-testid="home-flow-times-toggle"
+          >
+            <Clock3 className="size-3.5" /> {editing ? "Done" : "Times"}
+          </button>
+        ) : null}
+      </header>
+      {editable && editing && times && onTimeChange ? (
+        <div
+          id="home-flow-times"
+          className="mt-3 rounded-xl border border-dashed border-border p-3"
+          data-testid="home-flow-times"
+        >
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            When your day happens. Anything past its time reads as "missed", so set these to your
+            own rhythm — a night shift can start at 21:00.
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {FLOW_TIME_LABELS.map(({ key, label }) => (
+              <label key={key} className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                {label}
+                <input
+                  type="time"
+                  value={times[key]}
+                  onChange={(e) => e.target.value && onTimeChange(key, e.target.value)}
+                  className="rounded-lg border border-border bg-surface-2/40 px-2 py-1 text-sm tabular-nums text-foreground"
+                  data-testid={`home-flow-time-${key}`}
+                />
+              </label>
+            ))}
+          </div>
+          {!timesAreDefault && onResetTimes ? (
+            <button
+              type="button"
+              onClick={onResetTimes}
+              className="mt-2 text-[11px] text-muted-foreground underline-offset-2 hover:underline"
+            >
+              Back to the defaults
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <ol className="relative mt-4 space-y-5 pl-1">
         {items.map((f, i) => {
           const state = flowState(f, now);

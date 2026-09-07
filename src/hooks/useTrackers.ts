@@ -19,6 +19,7 @@ import {
   type DayFieldErrors,
   type Goals,
   type TrackerAnalysis,
+  type TrackerId,
 } from "@/lib/trackers/core";
 import {
   currentProfileId,
@@ -30,12 +31,18 @@ import {
 } from "@/lib/trackers/trackerCloud";
 import {
   clearDays,
+  forgetSubject,
+  loadActiveTrackers,
+  loadCustomSubjects,
   loadDays,
   loadGoals,
+  rememberSubject,
+  saveActiveTrackers,
   saveDays,
   saveGoals,
   TRACKERS_CHANGED,
 } from "@/lib/trackers/store";
+import { PREFS_CHANGED } from "@/lib/prefs";
 
 export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
@@ -65,6 +72,14 @@ export interface TrackerStore {
   clearAll: () => void;
   setGoal: (key: keyof Goals, value: number) => void;
   resetGoals: () => void;
+  /** The trackers this person tracks. Everything else is kept but out of the way. */
+  active: TrackerId[];
+  setActive: (ids: readonly TrackerId[]) => void;
+  toggleActive: (id: TrackerId) => void;
+  /** Study subjects the person typed, newest first. */
+  customSubjects: string[];
+  rememberSubject: (subject: string) => void;
+  forgetSubject: (subject: string) => void;
   /** The last delete / clear, while it can still be taken back. */
   undoable: Undoable | null;
   undo: () => void;
@@ -74,6 +89,8 @@ export interface TrackerStore {
 export function useTrackers(): TrackerStore {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [goals, setGoals] = useState<Goals>(() => ({ ...loadGoals() }));
+  const [active, setActiveState] = useState<TrackerId[]>(() => loadActiveTrackers());
+  const [customSubjects, setCustomSubjects] = useState<string[]>(() => loadCustomSubjects());
   const [today, setToday] = useState<string>(() => todayKey());
   const [hydrated, setHydrated] = useState(false);
   const skipPersist = useRef(true);
@@ -104,11 +121,23 @@ export function useTrackers(): TrackerStore {
     };
     read();
     const onExternal = () => setDays(loadDays());
+    /* preferences arrive from the account (or another tab) — re-read them */
+    const onPrefs = () => {
+      setActiveState(loadActiveTrackers());
+      setCustomSubjects(loadCustomSubjects());
+      const g = loadGoals();
+      setGoals((prev) =>
+        (Object.keys(g) as (keyof Goals)[]).every((k) => g[k] === prev[k]) ? prev : g,
+      );
+    };
     window.addEventListener(TRACKERS_CHANGED, onExternal);
     window.addEventListener("storage", onExternal);
+    window.addEventListener(PREFS_CHANGED, onPrefs);
+    onPrefs();
     return () => {
       window.removeEventListener(TRACKERS_CHANGED, onExternal);
       window.removeEventListener("storage", onExternal);
+      window.removeEventListener(PREFS_CHANGED, onPrefs);
     };
   }, []);
 
@@ -140,8 +169,33 @@ export function useTrackers(): TrackerStore {
       return;
     }
     if (!hydrated) return;
+    /* only a real change is written — a re-read from the account must not
+       re-stamp the same numbers as "newer" */
+    const stored = loadGoals();
+    if ((Object.keys(goals) as (keyof Goals)[]).every((k) => stored[k] === goals[k])) return;
     saveGoals(goals);
   }, [goals, hydrated]);
+
+  const setActive = useCallback((ids: readonly TrackerId[]) => {
+    saveActiveTrackers(ids);
+    setActiveState(loadActiveTrackers());
+  }, []);
+
+  const toggleActive = useCallback((id: TrackerId) => {
+    const current = loadActiveTrackers();
+    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+    if (next.length === 0) return; // one always stays on
+    saveActiveTrackers(next);
+    setActiveState(loadActiveTrackers());
+  }, []);
+
+  const rememberSubjectCb = useCallback((subject: string) => {
+    setCustomSubjects(rememberSubject(subject));
+  }, []);
+
+  const forgetSubjectCb = useCallback((subject: string) => {
+    setCustomSubjects(forgetSubject(subject));
+  }, []);
 
   const saveDay = useCallback((draft: DayEntry): SaveDayResult => {
     const errors = validateDay(draft, todayKey());
@@ -318,7 +372,10 @@ export function useTrackers(): TrackerStore {
     return () => window.clearTimeout(id);
   }, [days, hydrated, pushPending]);
 
-  const analysis = useMemo(() => analyzeTrackers(days, goals, today), [days, goals, today]);
+  const analysis = useMemo(
+    () => analyzeTrackers(days, goals, today, { active }),
+    [days, goals, today, active],
+  );
 
   return {
     sync,
@@ -333,6 +390,12 @@ export function useTrackers(): TrackerStore {
     clearAll,
     setGoal,
     resetGoals,
+    active,
+    setActive,
+    toggleActive,
+    customSubjects,
+    rememberSubject: rememberSubjectCb,
+    forgetSubject: forgetSubjectCb,
     undoable,
     undo,
     dismissUndo,
