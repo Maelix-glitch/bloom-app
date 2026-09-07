@@ -869,7 +869,15 @@ button.pf-cell:hover {
   text-align: left;
   font-size: 13px;
   color: var(--muted-foreground);
-  transition: background-color var(--motion-fast) ease;
+  transition:
+    background-color var(--motion-fast) ease,
+    transform 180ms var(--ease-out-expo);
+}
+/* the give that makes a tap feel received on a touchscreen, where there is
+   no hover state to confirm it */
+button.pf-row:active {
+  transform: scale(0.995);
+  background: color-mix(in oklab, var(--surface-2) 80%, transparent);
 }
 .pf-row:first-child {
   border-top: 0;

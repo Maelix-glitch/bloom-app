@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+/* Bloom's own motion primitives: press, arrival, changed, pending. */
+@import "./styles/motion.css";
 
 @custom-variant dark (&:is(.dark *));
 

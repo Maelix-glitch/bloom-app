@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
 import { useSoundBoot } from "@/hooks/useSound";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 
 function NotFoundComponent() {
@@ -147,6 +148,8 @@ function RootComponent() {
 
   /* Sound: read the preference, and arm the audio context on the first gesture. */
   useSoundBoot();
+  /* One delegated listener gives every control its cue — except on Rewards. */
+  useAmbientSound();
 
   return (
     <QueryClientProvider client={queryClient}>
