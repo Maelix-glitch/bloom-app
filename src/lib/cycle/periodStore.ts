@@ -18,6 +18,12 @@ const THEME_KEY = "bloom.cycle.theme.v1";
 /** Answers to the check-in questions — never ask the same thing twice. */
 const CHECKIN_KEY = "bloom.cycle.checkins.v1";
 const SETTINGS_KEY = "bloom.cycle.settings.v1";
+/**
+ * Sync sidecar for the period entries: per id, when it last changed and
+ * whether it was deleted (a tombstone). Readers of the plain list above never
+ * need this; only the sync layer does.
+ */
+const PERIOD_META_KEY = "bloom.cycle.periods.meta.v1";
 /** Legacy day-level log written by the previous version of the cycle page. */
 const LEGACY_KEY = "bloom.cycle.entries.local";
 
@@ -202,6 +208,58 @@ export function saveCheckInMemory(memory: CheckInMemory): void {
   if (!hasWindow()) return;
   try {
     window.localStorage.setItem(CHECKIN_KEY, JSON.stringify(memory));
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/* ---------------------------- period sync meta ---------------------------- */
+
+export interface PeriodMeta {
+  /** id → ISO time of the last change on any device. */
+  updatedAt: Record<string, string>;
+  /** id → ISO time of deletion; the entry is kept out of the list. */
+  deleted: Record<string, { log: PeriodLog; at: string }>;
+}
+
+export const EMPTY_PERIOD_META: PeriodMeta = { updatedAt: {}, deleted: {} };
+
+const isoMap = (v: unknown): Record<string, string> => {
+  const out: Record<string, string> = {};
+  if (!isRecord(v)) return out;
+  for (const [k, d] of Object.entries(v)) {
+    if (typeof d === "string" && !Number.isNaN(Date.parse(d))) out[k] = d;
+  }
+  return out;
+};
+
+export function loadPeriodMeta(): PeriodMeta {
+  if (!hasWindow()) return EMPTY_PERIOD_META;
+  try {
+    const raw = window.localStorage.getItem(PERIOD_META_KEY);
+    if (!raw) return EMPTY_PERIOD_META;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return EMPTY_PERIOD_META;
+    const deleted: PeriodMeta["deleted"] = {};
+    if (isRecord(parsed["deleted"])) {
+      for (const [id, v] of Object.entries(parsed["deleted"])) {
+        if (!isRecord(v)) continue;
+        const log = normalizeLog(v["log"]);
+        const at =
+          typeof v["at"] === "string" && !Number.isNaN(Date.parse(v["at"])) ? v["at"] : null;
+        if (log && at) deleted[id] = { log: { ...log, id }, at };
+      }
+    }
+    return { updatedAt: isoMap(parsed["updatedAt"]), deleted };
+  } catch {
+    return EMPTY_PERIOD_META;
+  }
+}
+
+export function savePeriodMeta(meta: PeriodMeta): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(PERIOD_META_KEY, JSON.stringify(meta));
   } catch {
     /* non-fatal */
   }

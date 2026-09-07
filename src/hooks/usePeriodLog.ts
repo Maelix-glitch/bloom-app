@@ -32,6 +32,7 @@ import {
   loadCycleSettings,
   loadDays,
   loadLogs,
+  loadPeriodMeta,
   loadThemeId,
   legacyPeriodCandidates,
   PERIODS_CHANGED,
@@ -39,8 +40,28 @@ import {
   saveCycleSettings,
   saveDays,
   saveLogs,
+  savePeriodMeta,
   type CycleSettings,
+  type PeriodMeta,
 } from "@/lib/cycle/periodStore";
+import {
+  isEmptyState,
+  liveLogs,
+  mergePeriodRecords,
+  mergeState,
+  PeriodTablesMissing,
+  periodTablesReady,
+  pruneTombstones,
+  reprobePeriodTables,
+  pullPeriods,
+  pullState,
+  pushPeriods,
+  pushState,
+  recordsFromLogs,
+  sameState,
+  type CycleState,
+  type PeriodRecord,
+} from "@/lib/cycle/periodCloud";
 import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 import {
   EMPTY_MEMORY,
@@ -70,6 +91,11 @@ export interface SyncStatus {
   state: SyncState;
   message: string;
   signedIn: boolean;
+  /**
+   * Set when the account syncs the daily log but not yet the period entries —
+   * the project hasn't run the 20260907_cycle_periods migration.
+   */
+  periodsOnDevice?: boolean;
 }
 
 export type SaveResult = { ok: true; id: string } | { ok: false; errors: FieldErrors };
@@ -124,6 +150,35 @@ export interface PeriodLogStore {
   dismissUndo: () => void;
 }
 
+/**
+ * The device's plain list + its sync sidecar → records the sync layer reasons
+ * about. An entry with no known stamp (logged before sync existed) is dated to
+ * its own first day — certainly no later than that — so a real edit made
+ * anywhere since wins over it.
+ */
+function recordsFromMeta(logs: readonly PeriodLog[], meta: PeriodMeta): PeriodRecord[] {
+  const alive = logs.map((log) => ({
+    log,
+    updatedAt: meta.updatedAt[log.id] ?? `${log.start}T12:00:00.000Z`,
+    deletedAt: null,
+  }));
+  const dead = Object.entries(meta.deleted).map(([id, d]) => ({
+    log: { ...d.log, id },
+    updatedAt: d.at,
+    deletedAt: d.at,
+  }));
+  return [...alive, ...dead];
+}
+
+function metaFromRecords(records: readonly PeriodRecord[]): PeriodMeta {
+  const meta: PeriodMeta = { updatedAt: {}, deleted: {} };
+  for (const r of records) {
+    if (r.deletedAt) meta.deleted[r.log.id] = { log: r.log, at: r.deletedAt };
+    else meta.updatedAt[r.log.id] = r.updatedAt;
+  }
+  return meta;
+}
+
 export function usePeriodLog(): PeriodLogStore {
   const [logs, setLogs] = useState<PeriodLog[]>([]);
   const [days, setDays] = useState<DayLog[]>([]);
@@ -137,6 +192,16 @@ export function usePeriodLog(): PeriodLogStore {
   });
   const [memory, setMemory] = useState<CheckInMemory>(EMPTY_MEMORY);
   const [settings, setSettings] = useState<CycleSettings>(DEFAULT_CYCLE_SETTINGS);
+  /** Per-entry change stamps + tombstones — what the period sync reasons about. */
+  const periodRecords = useRef<PeriodRecord[]>([]);
+  /** Period ids changed here and not yet on the account. */
+  const dirtyPeriods = useRef<Set<string>>(new Set());
+  /** Memory/settings changed here and not yet on the account. */
+  const dirtyState = useRef(false);
+  const logsRef = useRef<PeriodLog[]>([]);
+  const memoryRef = useRef<CheckInMemory>(EMPTY_MEMORY);
+  const settingsRef = useRef<CycleSettings>(DEFAULT_CYCLE_SETTINGS);
+  const stateStamp = useRef<string>(new Date(0).toISOString());
   const [undoable, setUndoable] = useState<Undoable | null>(null);
   /** The record as it was just before the last delete / clear. */
   const snapshot = useRef<{ id: number; at: number; logs: PeriodLog[]; days: DayLog[] } | null>(
@@ -158,16 +223,26 @@ export function usePeriodLog(): PeriodLogStore {
       /* First run on this device: pick up whatever the old page left behind,
          so the record doesn't look empty after a redesign. */
       const days = stored.length === 0 ? mergeDayLists([], legacyLocalDays()).days : stored;
-      setLogs(loadLogs());
+      const logs = loadLogs();
+      const memory = loadCheckInMemory();
+      const settings = loadCycleSettings();
+      periodRecords.current = recordsFromMeta(logs, loadPeriodMeta());
+      logsRef.current = logs;
+      memoryRef.current = memory;
+      settingsRef.current = settings;
+      setLogs(logs);
       setDays(days);
-      setMemory(loadCheckInMemory());
-      setSettings(loadCycleSettings());
+      setMemory(memory);
+      setSettings(settings);
       setToday(todayKey());
       setHydrated(true);
     };
     read();
     const onExternal = () => {
-      setLogs(loadLogs());
+      const logs = loadLogs();
+      periodRecords.current = recordsFromMeta(logs, loadPeriodMeta());
+      logsRef.current = logs;
+      setLogs(logs);
       setDays(loadDays());
       setSettings(loadCycleSettings());
     };
@@ -206,13 +281,33 @@ export function usePeriodLog(): PeriodLogStore {
       day: daysRef.current.find((d) => d.date === date) ?? null,
     }));
     const removals = [...deletedDates.current];
-    if (pushes.length === 0 && removals.length === 0) return;
+    const periodIds = [...dirtyPeriods.current];
+    const periods = periodRecords.current.filter((r) => periodIds.includes(r.log.id));
+    const stateDirty = dirtyState.current;
+    if (pushes.length === 0 && removals.length === 0 && periods.length === 0 && !stateDirty) return;
 
     syncing.current = true;
     dirtyDates.current.clear();
     deletedDates.current.clear();
+    dirtyPeriods.current.clear();
+    dirtyState.current = false;
     setSync((prev) => ({ ...prev, state: "pending", message: "Saving to your account…" }));
     try {
+      if (periodTablesReady()) {
+        try {
+          await pushPeriods(pid, periods);
+          if (stateDirty) {
+            await pushState(pid, {
+              memory: memoryRef.current,
+              settings: settingsRef.current,
+              updatedAt: stateStamp.current,
+            });
+          }
+        } catch (e) {
+          if (!(e instanceof PeriodTablesMissing)) throw e;
+          /* the daily log still goes up; periods wait for the migration */
+        }
+      }
       for (const { day } of pushes) {
         if (!day) continue;
         const placement = placeDate(analysisRef.current, day.date);
@@ -222,11 +317,24 @@ export function usePeriodLog(): PeriodLogStore {
         });
       }
       for (const date of removals) await deleteDay(pid, date);
-      setSync({ state: "saved", message: "Saved to your account.", signedIn: true });
+      const periodsOnDevice = !periodTablesReady();
+      setSync({
+        state: "saved",
+        message: "Saved to your account.",
+        signedIn: true,
+        periodsOnDevice,
+      });
+      if (periodsOnDevice) {
+        /* keep them queued: they go up the moment the tables exist */
+        for (const id of periodIds) dirtyPeriods.current.add(id);
+        if (stateDirty) dirtyState.current = true;
+      }
     } catch {
       /* Put them back so the next attempt (or the next save) retries. */
       for (const { date } of pushes) dirtyDates.current.add(date);
       for (const date of removals) deletedDates.current.add(date);
+      for (const id of periodIds) dirtyPeriods.current.add(id);
+      if (stateDirty) dirtyState.current = true;
       setSync({
         state: "error",
         message: "Couldn't reach your account — this day is safe on this device.",
@@ -259,12 +367,71 @@ export function usePeriodLog(): PeriodLogStore {
           });
           return;
         }
-        const remote = await pullDays(pid);
+        reprobePeriodTables();
+        const [remote, periodSide] = await Promise.all([
+          pullDays(pid),
+          Promise.all([pullPeriods(pid), pullState(pid)]).catch((e: unknown) => {
+            if (e instanceof PeriodTablesMissing) return null;
+            throw e;
+          }),
+        ]);
         const merged = mergeDayLists(daysRef.current, remote);
         setDays(merged.days);
         for (const date of merged.newerLocal) dirtyDates.current.add(date);
+
+        if (!periodSide) {
+          /* the project hasn't run the period migration yet — the daily log
+             syncs as before; periods and answers stay on this device for now */
+          setSync({
+            state: "saved",
+            message:
+              "Daily log synced. Period entries stay on this device until the cycle_periods migration is run.",
+            signedIn: true,
+            periodsOnDevice: true,
+          });
+          if (merged.newerLocal.length > 0) void pushPending();
+          return;
+        }
+        const [remotePeriods, remoteState] = periodSide;
+
+        /* period entries: per id, the later change wins — tombstones too */
+        const mergedPeriods = mergePeriodRecords(periodRecords.current, remotePeriods);
+        periodRecords.current = mergedPeriods.records;
+        const nextLogs = liveLogs(mergedPeriods.records);
+        logsRef.current = nextLogs;
+        setLogs(nextLogs);
+        for (const id of mergedPeriods.newerLocal) dirtyPeriods.current.add(id);
+        /* anything the table has never seen (first sign-in) goes up as well */
+        const remoteIds = new Set(remotePeriods.map((r) => r.log.id));
+        for (const r of mergedPeriods.records)
+          if (!remoteIds.has(r.log.id)) dirtyPeriods.current.add(r.log.id);
+
+        /* check-in memory + settings: answers given anywhere count everywhere */
+        const localState: CycleState = {
+          memory: memoryRef.current,
+          settings: settingsRef.current,
+          updatedAt: stateStamp.current,
+        };
+        const combined = remoteState ? mergeState(localState, remoteState) : localState;
+        if (!sameState(combined, localState)) {
+          memoryRef.current = combined.memory;
+          settingsRef.current = combined.settings;
+          setMemory(combined.memory);
+          setSettings(combined.settings);
+          saveCheckInMemory(combined.memory);
+          saveCycleSettings(combined.settings);
+        }
+        const worthWriting = remoteState
+          ? !sameState(combined, remoteState)
+          : !isEmptyState(combined);
+        if (worthWriting) {
+          stateStamp.current = new Date().toISOString();
+          dirtyState.current = true;
+        }
+
         setSync({ state: "saved", message: "Synced with your account.", signedIn: true });
-        if (merged.newerLocal.length > 0) void pushPending();
+        if (merged.newerLocal.length > 0 || dirtyPeriods.current.size > 0 || dirtyState.current)
+          void pushPending();
       } catch {
         setSync({
           state: "error",
@@ -286,7 +453,7 @@ export function usePeriodLog(): PeriodLogStore {
     if (!hydrated) return;
     const id = window.setTimeout(() => void pushPending(), 700);
     return () => window.clearTimeout(id);
-  }, [days, hydrated, pushPending]);
+  }, [days, logs, memory, settings, hydrated, pushPending]);
 
   /* persist every change (but not the initial empty render) */
   useEffect(() => {
@@ -296,7 +463,24 @@ export function usePeriodLog(): PeriodLogStore {
     }
     if (!hydrated) return;
     saveLogs(logs);
+    /* stamp what changed, tombstone what vanished, queue both for the account */
+    const now = new Date().toISOString();
+    const { records, changed } = recordsFromLogs(logs, periodRecords.current, now);
+    periodRecords.current = pruneTombstones(records, now);
+    logsRef.current = logs;
+    for (const id of changed) dirtyPeriods.current.add(id);
+    savePeriodMeta(metaFromRecords(periodRecords.current));
   }, [logs, hydrated]);
+
+  /* memory and settings ride along in one state row */
+  useEffect(() => {
+    if (!hydrated) return;
+    if (memoryRef.current === memory && settingsRef.current === settings) return;
+    memoryRef.current = memory;
+    settingsRef.current = settings;
+    stateStamp.current = new Date().toISOString();
+    dirtyState.current = true;
+  }, [memory, settings, hydrated]);
 
   useEffect(() => {
     if (skipDayPersist.current) {

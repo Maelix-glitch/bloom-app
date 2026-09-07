@@ -46,6 +46,9 @@ import mountainLake from "@/assets/mood/mountain-lake.jpg";
 
 import type { MoodSystem } from "@/hooks/useMoodSystem";
 import type { MoodEntry, RangeKey } from "@/lib/mood/types";
+import { contextFromTrackerDay, fillContext } from "@/lib/mood/context";
+import { loadDays as loadTrackerDays } from "@/lib/trackers/store";
+import { hasSupabaseConfig } from "@/lib/supabase";
 import {
   PAGE_MOODS,
   distributionNote,
@@ -88,13 +91,14 @@ export function MoodPage({
   onCompose: () => void;
   onEdit: (entry: MoodEntry) => void;
 }) {
-  const { entries, analytics: a, loading, authError, range, rangeKey, setRangeKey } = system;
+  const { entries, analytics: a, loading, sync, range, rangeKey, setRangeKey } = system;
   const today = useMemo(() => localDay(new Date().toISOString()), []);
   const todays = useMemo(() => todayEntry(entries, today), [entries, today]);
   const selected: PageMood | null = todays ? faceForEntry(todays) : null;
   const [saving, setSaving] = useState<PageMood | null>(null);
 
-  const canSave = Boolean(system.profileId);
+  /* Device first: a check-in is always possible; the account catches up. */
+  const canSave = true;
 
   const tap = async (face: PageMood) => {
     if (!canSave || saving) return;
@@ -103,7 +107,7 @@ export function MoodPage({
       // Re-logging today replaces today's quick entry instead of stacking a
       // second one; a Composer entry with a note is left alone.
       const replace = todays && todays.tags.includes("quick-log") ? todays : null;
-      const fresh = entryFromFace(face);
+      const fresh = withTrackerContext(entryFromFace(face));
       await system.saveEntry(replace ? { ...fresh, id: replace.id } : fresh);
     } finally {
       setSaving(null);
@@ -143,12 +147,12 @@ export function MoodPage({
         onEdit={onEdit}
       />
 
-      {authError && !loading && entries.length === 0 ? <Notice text={authError} /> : null}
-
       <LogMood
         selected={selected}
         saving={saving}
         disabled={!canSave}
+        sync={sync}
+        onRetry={() => void system.retrySync()}
         onSelect={(m) => void tap(m)}
         onCompose={onCompose}
       />
@@ -222,14 +226,56 @@ function TopBar({ identity }: { identity: MoodPageIdentity }) {
   );
 }
 
-function Notice({ text }: { text: string }) {
+/** A one-tap entry still carries what the day's trackers know (sleep, movement, study, screen). */
+function withTrackerContext(entry: MoodEntry): MoodEntry {
+  const day = loadTrackerDays().find((d) => d.date === localDay(entry.timestamp)) ?? null;
+  return fillContext(entry, contextFromTrackerDay(day));
+}
+
+/** Where the record is — the same honest line trackers and cycle show. */
+function MoodSyncLine({ sync, onRetry }: { sync: MoodSystem["sync"]; onRetry: () => void }) {
+  if (sync.state === "loading") return null;
+  const tone =
+    sync.state === "error"
+      ? "text-gold-soft"
+      : sync.state === "signed-out"
+        ? "text-muted-foreground"
+        : "text-muted-foreground/80";
   return (
-    <p className="rounded-2xl border border-border bg-card/70 px-5 py-4 text-sm leading-relaxed text-muted-foreground">
-      {text}{" "}
-      <Link to="/profile" className="text-gold underline-offset-4 hover:underline">
-        Sign in
-      </Link>
-      .
+    <p
+      className={`mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-relaxed ${tone}`}
+      data-testid="mood-sync"
+      data-state={sync.state}
+      aria-live="polite"
+    >
+      <span
+        className={`inline-block h-1.5 w-1.5 rounded-full ${
+          sync.state === "saved"
+            ? "bg-gold/70"
+            : sync.state === "pending"
+              ? "animate-pulse bg-gold/70"
+              : sync.state === "error"
+                ? "bg-gold-soft"
+                : "bg-muted-foreground/50"
+        }`}
+        aria-hidden
+      />
+      <span>{sync.message}</span>
+      {sync.state === "signed-out" && hasSupabaseConfig ? (
+        <Link to="/profile" className="text-gold underline-offset-4 hover:underline">
+          Sign in
+        </Link>
+      ) : null}
+      {sync.state === "error" && sync.pending > 0 ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-gold underline-offset-4 hover:underline"
+          data-testid="mood-sync-retry"
+        >
+          Retry now
+        </button>
+      ) : null}
     </p>
   );
 }
@@ -372,12 +418,16 @@ function LogMood({
   selected,
   saving,
   disabled,
+  sync,
+  onRetry,
   onSelect,
   onCompose,
 }: {
   selected: PageMood | null;
   saving: PageMood | null;
   disabled: boolean;
+  sync: MoodSystem["sync"];
+  onRetry: () => void;
   onSelect: (m: PageMood) => void;
   onCompose: () => void;
 }) {
@@ -387,11 +437,7 @@ function LogMood({
         <SectionHead
           icon={Sparkles}
           title="Log your mood"
-          subtitle={
-            disabled
-              ? "Sign in to save a check-in — it takes one tap."
-              : "Take a moment. Be honest with yourself."
-          }
+          subtitle="Take a moment. Be honest with yourself."
           action={
             <button
               type="button"
@@ -404,6 +450,8 @@ function LogMood({
             </button>
           }
         />
+
+        <MoodSyncLine sync={sync} onRetry={onRetry} />
 
         <div className="mt-10 grid grid-cols-3 gap-x-4 gap-y-9 sm:grid-cols-6 sm:gap-x-6 lg:gap-x-8">
           {PAGE_MOODS.map((mood) => {

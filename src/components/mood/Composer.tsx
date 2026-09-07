@@ -4,6 +4,16 @@ import { X } from "lucide-react";
 
 import { EMOTIONS, type EmotionKey, type MoodEntry, type Weather } from "@/lib/mood/types";
 import { moodLabel } from "@/lib/mood/analytics";
+import {
+  CONTEXT_LABEL,
+  CONTEXT_KEYS,
+  applyPrefill,
+  contextFromTrackerDay,
+  prefilledKeys,
+  type ContextKey,
+  type MoodContext,
+} from "@/lib/mood/context";
+import { loadDays as loadTrackerDays } from "@/lib/trackers/store";
 import { accentVar, type Accent } from "./primitives";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +88,13 @@ function toDraft(entry: MoodEntry | null): Draft {
     workload: num(entry.workload),
     weather: entry.weather ?? "",
   };
+}
+
+function describePrefill(keys: ContextKey[]): string {
+  const names = CONTEXT_KEYS.filter((k) => keys.includes(k)).map((k) => CONTEXT_LABEL[k]);
+  const capital = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+  if (names.length === 1) return `${capital(names[0]!)} filled in`;
+  return `${capital(names.slice(0, -1).join(", "))} and ${names[names.length - 1]} filled in`;
 }
 
 function Slider({
@@ -158,6 +175,13 @@ function NumField({
   );
 }
 
+/** What the trackers already know about a local day — nothing when they don't. */
+function trackerContext(localDate: string): MoodContext {
+  if (typeof window === "undefined") return {};
+  const day = loadTrackerDays().find((d) => d.date === localDate) ?? null;
+  return contextFromTrackerDay(day);
+}
+
 export function Composer({
   open,
   initial,
@@ -170,10 +194,34 @@ export function Composer({
   onSave: (entry: MoodEntry) => void;
 }) {
   const [draft, setDraft] = useState<Draft>(() => toDraft(initial));
+  /** The tracker prefill currently shown, so a date change can swap it cleanly. */
+  const [prefill, setPrefill] = useState<MoodContext>({});
 
+  /* Don't ask twice: fields the day's trackers already answered start filled. */
   useEffect(() => {
-    if (open) setDraft(toDraft(initial));
+    if (!open) return;
+    const base = toDraft(initial);
+    const fill = trackerContext(base.timestamp.slice(0, 10));
+    setPrefill(fill);
+    setDraft({ ...base, ...applyPrefill(base, {}, fill) });
   }, [open, initial]);
+
+  /* Moving "When" to another day moves the prefill with it — typed values stay. */
+  const draftDay = draft.timestamp.slice(0, 10);
+  useEffect(() => {
+    if (!open) return;
+    const fill = trackerContext(draftDay);
+    setPrefill((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(fill)) return prev;
+      setDraft((d) => ({ ...d, ...applyPrefill(d, prev, fill) }));
+      return fill;
+    });
+  }, [open, draftDay]);
+
+  const fromTrackers = useMemo(
+    () => prefilledKeys(prefill).filter((k) => draft[k] !== "" && draft[k] === String(prefill[k])),
+    [prefill, draft],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -288,8 +336,18 @@ export function Composer({
             accent="violet"
             hint={moodLabel(draft.mood)}
           />
-          <Slider label="Energy" value={draft.energy} onChange={(v) => set("energy", v)} accent="sage" />
-          <Slider label="Stress" value={draft.stress} onChange={(v) => set("stress", v)} accent="rose" />
+          <Slider
+            label="Energy"
+            value={draft.energy}
+            onChange={(v) => set("energy", v)}
+            accent="sage"
+          />
+          <Slider
+            label="Stress"
+            value={draft.stress}
+            onChange={(v) => set("stress", v)}
+            accent="rose"
+          />
         </div>
 
         <div className="mt-7">
@@ -367,8 +425,19 @@ export function Composer({
 
         <div className="mt-7">
           <p className="eyebrow mb-3">Context signals · optional</p>
+          {fromTrackers.length > 0 ? (
+            <p className="mono mb-3 text-[10px] text-faint" data-testid="mood-context-prefill">
+              {describePrefill(fromTrackers)} — from your trackers for this day. Change anything
+              that doesn't feel right.
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <NumField label="Sleep" unit="hrs" value={draft.sleep} onChange={(v) => set("sleep", v)} />
+            <NumField
+              label="Sleep"
+              unit="hrs"
+              value={draft.sleep}
+              onChange={(v) => set("sleep", v)}
+            />
             <NumField
               label="Sleep quality"
               unit="/10"

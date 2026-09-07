@@ -117,11 +117,18 @@ function MoodIntelligencePage() {
           <Hero system={system} onCompose={openNew} />
         </Reveal>
 
-        {authError ? (
+        {authError && entries.length === 0 ? (
           <div className="panel mx-auto mt-12 max-w-[680px] p-7 text-center">
             <p className="eyebrow mb-3">Mood Intelligence</p>
             <h2 className="display text-[28px]">Your private record is waiting.</h2>
             <p className="mt-3 text-[14px] text-muted-foreground">{authError}</p>
+            <button
+              type="button"
+              onClick={openNew}
+              className="mono mt-6 rounded-full border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+            >
+              Log an entry on this device
+            </button>
           </div>
         ) : loading ? (
           <div className="flex items-center justify-center gap-3 py-32 text-faint">

@@ -347,6 +347,26 @@ export async function updateHabit(
   return habit;
 }
 
+/** True for PostgREST's "no such column" answers (before a migration has been run). */
+export function isMissingColumn(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const e = error as { code?: unknown; message?: unknown };
+  const msg = typeof e.message === "string" ? e.message : "";
+  return (
+    e.code === "42703" ||
+    e.code === "PGRST204" ||
+    /column .* does not exist|schema cache/i.test(msg)
+  );
+}
+
+/** Thrown when a pause is asked of a table that doesn't have the pause columns yet. */
+export class PauseColumnsMissing extends Error {
+  constructor() {
+    super("This project hasn't run 20260907_habit_pause.sql yet — the pause stays on this device.");
+    this.name = "PauseColumnsMissing";
+  }
+}
+
 /** Archive / restore, pause / resume — small column flips, history untouched. */
 export async function patchHabit(
   profileId: string,
@@ -359,6 +379,7 @@ export async function patchHabit(
 ): Promise<void> {
   const row: Row = { updated_at: new Date().toISOString() };
   if (patch.archived !== undefined) row["is_archived"] = patch.archived;
+  const pausing = patch.pausedFrom !== undefined || patch.pausedUntil !== undefined;
   if (patch.pausedFrom !== undefined) row["paused_from"] = patch.pausedFrom;
   if (patch.pausedUntil !== undefined) row["paused_until"] = patch.pausedUntil;
   const { error } = await supabase
@@ -366,6 +387,7 @@ export async function patchHabit(
     .update(row)
     .eq("id", habitId)
     .eq("profile_id", profileId);
+  if (error && pausing && isMissingColumn(error)) throw new PauseColumnsMissing();
   if (error) throw error;
 }
 

@@ -74,7 +74,7 @@ export function useMoodSystem() {
     moodRecord.getSnapshot,
     moodRecord.getServerSnapshot,
   );
-  const { entries, loading, profileId, authError } = record;
+  const { entries, loading, profileId, authError, sync } = record;
 
   const [rangeKey, setRangeKey] = useState<RangeKey>("30d");
 
@@ -90,6 +90,7 @@ export function useMoodSystem() {
   const saveEntry = useCallback((entry: MoodEntry) => moodRecord.save(entry), []);
   const removeEntry = useCallback((id: string) => moodRecord.remove(id), []);
   const resetAll = useCallback(() => moodRecord.reset(), []);
+  const retrySync = useCallback(() => moodRecord.retry(), []);
 
   // Work that only depends on the record (not the range) is memoised on its
   // own, so switching 7D -> 30D -> 90D never re-runs the all-time passes.
@@ -186,6 +187,8 @@ export function useMoodSystem() {
     entries,
     profileId,
     authError,
+    /** Where the record is right now — device, account, or on its way. */
+    sync,
 
     range,
     rangeKey,
@@ -202,6 +205,7 @@ export function useMoodSystem() {
     saveEntry,
     removeEntry,
     resetAll,
+    retrySync,
   };
 }
 

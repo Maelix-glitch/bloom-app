@@ -588,6 +588,9 @@ export function CycleIntelligence({
                         setEditing(null);
                       }}
                       onExport={exportCsv}
+                      storedOn={
+                        store.sync.signedIn && !store.sync.periodsOnDevice ? "account" : "device"
+                      }
                     />
                   </Reveal>
                 </div>

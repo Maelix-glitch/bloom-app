@@ -29,6 +29,7 @@ import {
   loadLocalHabits,
   loadLocalLogs,
   patchHabit,
+  PauseColumnsMissing,
   readPoints,
   saveLocal,
   updateHabit,
@@ -407,6 +408,14 @@ export function useHabits(): HabitsStore {
         await patchHabit(profileId, habitId, { pausedFrom: from, pausedUntil: until });
       } catch (e) {
         console.warn("[bloom:habits] pause:", e);
+        if (e instanceof PauseColumnsMissing) {
+          /* the pause holds on this device; the account learns it once the
+             migration has been run and the habit is saved again */
+          setError(
+            "Paused on this device. To keep pauses on your account, run the habit_pause migration once.",
+          );
+          return;
+        }
         putHabit(habit);
         setError("That change didn't reach your account. Try again in a moment.");
       }

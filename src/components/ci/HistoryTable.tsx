@@ -23,6 +23,7 @@ export function HistoryTable({
   onDelete,
   onClearAll,
   onExport,
+  storedOn = "device",
 }: {
   analysis: CycleAnalysis;
   logs: PeriodLog[];
@@ -31,6 +32,8 @@ export function HistoryTable({
   onDelete: (id: string) => void;
   onClearAll: () => void;
   onExport?: () => void;
+  /** Where these entries live right now — the footer says so honestly. */
+  storedOn?: "device" | "account" | undefined;
 }) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -271,8 +274,8 @@ export function HistoryTable({
       {ordered.length > 0 ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4 ci-hair">
           <p className="text-[11.5px] ci-muted">
-            {ordered.length} {ordered.length === 1 ? "entry" : "entries"} · stored in this browser
-            only
+            {ordered.length} {ordered.length === 1 ? "entry" : "entries"} ·{" "}
+            {storedOn === "account" ? "on your account" : "stored on this device"}
           </p>
           {confirmClear ? (
             <span className="flex flex-wrap items-center gap-2">
