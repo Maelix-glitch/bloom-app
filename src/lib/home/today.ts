@@ -123,16 +123,25 @@ export const SIGNAL_ROUTE: Record<SignalId, string> = {
   sleep: "/trackers",
 };
 
+import { greeting } from "@/lib/voice/copy";
+import type { Daypart } from "@/lib/voice/messages";
+
 const fmt = (id: TrackerId, v: number) => TRACKERS.find((t) => t.id === id)!.format(v);
 
 /* ------------------------------- greeting -------------------------------- */
 
+
+/**
+ * A time-of-day hello, from a pool rather than a constant.
+ *
+ * Seeded on the hour, so it is stable across re-renders and server/client
+ * (no hydration mismatch), but a person who opens Bloom morning and evening
+ * doesn't read the same two words every day.
+ */
 export function greetingFor(hour: number): string {
-  if (hour < 5) return "Still up";
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  if (hour < 22) return "Good evening";
-  return "Good night";
+  const part: Daypart =
+    hour < 5 ? "night" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+  return greeting(part, `${part}-${hour}`);
 }
 
 export function longDate(d = new Date()): string {

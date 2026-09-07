@@ -6,6 +6,7 @@
  * comes from days the person actually logged; an empty day is never filled in.
  */
 
+import { greetingFor } from "@/lib/home/today";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { History, Sparkles, Waypoints } from "lucide-react";
 
@@ -51,12 +52,9 @@ const QUICK: Partial<
 const TRACKER_HINT =
   "sleep has a field of its own below, because a night is worth typing out";
 
+/* The shared, rotating hello — see src/lib/voice. */
 function greeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 5) return "Late night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  return greetingFor(new Date().getHours());
 }
 
 function download(name: string, contents: string) {

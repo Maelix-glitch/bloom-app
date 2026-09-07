@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import type { ProfilePrivacy } from "@/lib/profile/types";
 import { toast } from "sonner";
 
+import { saidSaved } from "@/lib/voice/copy";
+
 export function PrivacySheet({
   open,
   onClose,
@@ -46,7 +48,7 @@ export function PrivacySheet({
     setError(null);
     try {
       await onSave(draft);
-      toast("Privacy updated.");
+      toast(saidSaved());
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't save that just now.");

@@ -48,6 +48,8 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PresetPicker } from "@/components/profile/PresetPicker";
 import { toast } from "sonner";
 
+import { saidSaved } from "@/lib/voice/copy";
+
 import heroArt from "@/assets/mood/hero-window.jpg";
 
 export interface ProfileEditorSave {
@@ -217,7 +219,7 @@ export function ProfileEditor({
         ...(preset !== null && !pending ? { avatarPath: preset } : {}),
       });
       profileDraft.clear();
-      toast("Profile updated.");
+      toast(saidSaved());
       onClose();
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Couldn't save that just now.");

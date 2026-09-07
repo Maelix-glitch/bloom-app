@@ -6,6 +6,7 @@
  * real content instead of swatches alone.
  */
 
+import { greetingFor } from "@/lib/home/today";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 
@@ -675,10 +676,7 @@ export function CycleIntelligence({
 }
 
 /** A time-of-day hello — small, but it makes the page feel addressed to you. */
+/* The shared, rotating hello — see src/lib/voice. */
 function greeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 5) return "Late night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  return greetingFor(new Date().getHours());
 }
