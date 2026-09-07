@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import type { EmotionKey, MoodEntry } from "./types";
 import { localDay } from "@/lib/localDay";
 import { contextFromJson, contextToJson } from "./context";
+import { pageAll } from "@/lib/pageAll";
 
 type MoodRow = {
   id: string;
@@ -130,14 +131,19 @@ function toRow(profileId: string, entry: MoodEntry, withContext: boolean) {
 
 export const moodStorage = {
   async all(profileId: string): Promise<MoodEntry[]> {
-    const data = await withContextFallback<MoodRow[] | null>(async (withContext) => {
-      const res = await supabase
-        .from("mood_entries")
-        .select(withContext ? `${BASE_COLUMNS}, context` : BASE_COLUMNS)
-        .eq("profile_id", profileId)
-        .order("logged_at", { ascending: true });
-      return { data: res.data as MoodRow[] | null, error: res.error };
-    });
+    const data = await withContextFallback<MoodRow[] | null>((withContext) =>
+      /* every row, in pages — the whole record, not the first thousand */
+      pageAll<MoodRow>((from, to) =>
+        supabase
+          .from("mood_entries")
+          .select(withContext ? `${BASE_COLUMNS}, context` : BASE_COLUMNS)
+          .eq("profile_id", profileId)
+          .order("logged_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, to)
+          .then((res) => ({ data: res.data as MoodRow[] | null, error: res.error })),
+      ),
+    );
 
     return (data ?? []).map(fromRow);
   },

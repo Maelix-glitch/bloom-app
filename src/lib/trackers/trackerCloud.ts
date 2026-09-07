@@ -12,6 +12,7 @@
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import { normalizeDay } from "@/lib/trackers/store";
 import type { DayEntry, StudySession } from "@/lib/trackers/core";
+import { pageAll } from "@/lib/pageAll";
 
 export const TRACKER_TABLE = "tracker_days";
 export const TRACKER_CONFLICT = "profile_id,date";
@@ -41,8 +42,12 @@ function toSessions(value: unknown): StudySession[] {
     .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
     .map((s) => {
       const subject = typeof s["subject"] === "string" ? s["subject"].trim().slice(0, 40) : "";
-      const minutes = typeof s["minutes"] === "number" && Number.isFinite(s["minutes"]) ? s["minutes"] : null;
-      const startAt = typeof s["startAt"] === "string" && /^\d{1,2}:\d{2}$/.test(s["startAt"]) ? s["startAt"] : null;
+      const minutes =
+        typeof s["minutes"] === "number" && Number.isFinite(s["minutes"]) ? s["minutes"] : null;
+      const startAt =
+        typeof s["startAt"] === "string" && /^\d{1,2}:\d{2}$/.test(s["startAt"])
+          ? s["startAt"]
+          : null;
       if (!subject || minutes === null || minutes < 1 || minutes > 16 * 60) return null;
       return { subject, minutes: Math.round(minutes), startAt };
     })
@@ -125,14 +130,22 @@ export function mergeDayLists(
 /* ------------------------------- the network ------------------------------ */
 
 export async function pullDays(profileId: string): Promise<DayEntry[]> {
-  const { data, error } = await supabase
-    .from(TRACKER_TABLE)
-    .select(COLUMNS)
-    .eq("profile_id", profileId)
-    .order("date", { ascending: true });
-  if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown[]).map(rowToDay).filter((d): d is DayEntry => d !== null);
+  const { data, error } = await pageAll<unknown>((from, to) =>
+    supabase
+      .from(TRACKER_TABLE)
+      .select(COLUMNS)
+      .eq("profile_id", profileId)
+      .order("date", { ascending: true })
+      .range(from, to),
+  );
+  if (error) throw new Error(errorText(error));
+  return (data ?? []).map(rowToDay).filter((d): d is DayEntry => d !== null);
 }
+
+const errorText = (e: unknown): string =>
+  e && typeof e === "object" && "message" in e
+    ? String((e as { message: unknown }).message)
+    : String(e);
 
 export async function pushDay(profileId: string, day: DayEntry): Promise<void> {
   const { error } = await supabase

@@ -19,6 +19,7 @@ import {
   draftToLocalHabit,
   fetchHabits,
   fetchLogs,
+  LOG_WINDOW_DAYS,
   hasHabitCloud,
   insertHabit,
   insertLog,
@@ -212,7 +213,7 @@ export function useHabits(): HabitsStore {
         }
         const [remoteHabits, remoteLogs, pts] = await Promise.all([
           fetchHabits(profileId),
-          fetchLogs(profileId, daysAgo(45)),
+          fetchLogs(profileId, daysAgo(LOG_WINDOW_DAYS)),
           readPoints(profileId),
         ]);
         if (!mounted) return;

@@ -23,6 +23,7 @@ import { normalizeLog } from "@/lib/cycle/periodStore";
 import { isValidDateKey, type PeriodLog } from "@/lib/cycle/predict";
 import type { CheckInMemory } from "@/lib/cycle/reconcile";
 import type { CycleSettings } from "@/lib/cycle/periodStore";
+import { pageAll } from "@/lib/pageAll";
 
 export const PERIODS_TABLE = "cycle_periods";
 export const PERIODS_CONFLICT = "profile_id,id";
@@ -350,13 +351,17 @@ function raise(error: { code?: string; message: string }): never {
 /** Every period row for this profile, tombstones included, oldest first. */
 export async function pullPeriods(profileId: string): Promise<PeriodRecord[]> {
   if (!tablesReady) throw new PeriodTablesMissing();
-  const { data, error } = await supabase
-    .from(PERIODS_TABLE)
-    .select(PERIOD_COLUMNS)
-    .eq("profile_id", profileId)
-    .order("start_date", { ascending: true });
-  if (error) raise(error);
-  return ((data ?? []) as unknown[]).map(rowToPeriod).filter((r): r is PeriodRecord => r !== null);
+  const { data, error } = await pageAll<unknown>((from, to) =>
+    supabase
+      .from(PERIODS_TABLE)
+      .select(PERIOD_COLUMNS)
+      .eq("profile_id", profileId)
+      .order("start_date", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  if (error) raise(error as { code?: string; message: string });
+  return (data ?? []).map(rowToPeriod).filter((r): r is PeriodRecord => r !== null);
 }
 
 /** Upsert a batch of records (alive or tombstoned) keyed by (profile_id, id). */

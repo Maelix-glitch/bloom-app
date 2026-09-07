@@ -19,7 +19,7 @@ const state = {
 
 const chain = (result: unknown) => {
   const c: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "order", "upsert", "delete", "insert"]) {
+  for (const m of ["select", "eq", "order", "range", "upsert", "delete", "insert"]) {
     c[m] = vi.fn(() => c);
   }
   c["then"] = (onOk: (v: unknown) => unknown, onErr?: (e: unknown) => unknown) => {
@@ -40,6 +40,7 @@ vi.mock("@/lib/supabase", () => ({
         select: vi.fn(() => c),
         eq: vi.fn(() => c),
         order: vi.fn(() => c),
+        range: vi.fn(() => c),
         maybeSingle: vi.fn(() => c),
         delete: vi.fn(() => c),
         upsert: vi.fn((payload: Record<string, unknown> | Record<string, unknown>[]) => {

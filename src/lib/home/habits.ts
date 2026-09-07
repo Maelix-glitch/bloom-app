@@ -11,6 +11,7 @@
  */
 
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
+import { pageAll } from "@/lib/pageAll";
 import { localDayOf, todayLocal } from "@/lib/localDay";
 
 export interface Habit {
@@ -215,24 +216,40 @@ export function hasHabitCloud(): boolean {
 }
 
 export async function fetchHabits(profileId: string): Promise<Habit[]> {
-  const { data, error } = await supabase
-    .from("habits")
-    .select("*")
-    .eq("profile_id", profileId)
-    .order("created_at", { ascending: true });
+  const { data, error } = await pageAll<Row>((from, to) =>
+    supabase
+      .from("habits")
+      .select("*")
+      .eq("profile_id", profileId)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
   if (error) throw error;
-  return ((data ?? []) as Row[]).map(rowToHabit).filter((h): h is Habit => h !== null);
+  return (data ?? []).map(rowToHabit).filter((h): h is Habit => h !== null);
 }
 
-/** Every completion in the last `days` days — enough for streaks and the coach. */
+/**
+ * How far back completions are read. Streak maths needs the whole run: a real
+ * 60-day streak used to read "45" because only 45 days were fetched. 400 days
+ * covers a year-long streak and the coach's look-back with room to spare.
+ */
+export const LOG_WINDOW_DAYS = 400;
+
+/** Every completion since `since` (YYYY-MM-DD) — the whole run, in pages. */
 export async function fetchLogs(profileId: string, since: string): Promise<HabitLog[]> {
-  const { data, error } = await supabase
-    .from("habit_logs")
-    .select("habit_id, date, completed_at")
-    .eq("profile_id", profileId)
-    .gte("date", since);
+  const { data, error } = await pageAll<Row>((from, to) =>
+    supabase
+      .from("habit_logs")
+      .select("habit_id, date, completed_at")
+      .eq("profile_id", profileId)
+      .gte("date", since)
+      .order("date", { ascending: true })
+      .order("habit_id", { ascending: true })
+      .range(from, to),
+  );
   if (error) throw error;
-  return ((data ?? []) as Row[])
+  return (data ?? [])
     .filter((l) => l["habit_id"] != null && typeof l["date"] === "string")
     .map((l) => ({
       habitId: String(l["habit_id"]),
