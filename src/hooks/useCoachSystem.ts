@@ -17,7 +17,11 @@ import { answer as groundedAnswer } from "@/lib/coach/responder";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
 import { analyzeCycle } from "@/lib/cycle/predict";
-import { loadLogs as loadPeriodLogs, loadDays as loadCycleDays } from "@/lib/cycle/periodStore";
+import {
+  loadLogs as loadPeriodLogs,
+  loadDays as loadCycleDays,
+  loadCycleSettings,
+} from "@/lib/cycle/periodStore";
 import { todayKey } from "@/lib/cycle/predict";
 
 export type { CoachMode };
@@ -467,7 +471,10 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
   let cycle: CoachRecord["cycle"] = null;
   try {
     const logs = loadPeriodLogs();
-    const analysis = analyzeCycle(logs, today);
+    /* same options as the Cycle page, so the coach never contradicts it */
+    const analysis = analyzeCycle(logs, today, {
+      personalMaxPlausible: loadCycleSettings().personalMaxPlausible,
+    });
     cycle = {
       daysLogged: loadCycleDays().length + logs.length,
       cycleDay: analysis.cycleDay,

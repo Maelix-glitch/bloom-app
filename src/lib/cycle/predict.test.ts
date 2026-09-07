@@ -4,6 +4,7 @@ import {
   addDays,
   analyzeCycle,
   assessLogDraft,
+  effectiveMaxPlausible,
   MAX_BLEED_DAYS,
   validateLogDraft,
   type PeriodLog,
@@ -122,13 +123,130 @@ describe("analyzeCycle — what the check-ins rely on", () => {
     expect(a.gaps[0]!.suggestedMissedDate).toBe(ago(55));
   });
 
-  it("reports lateness only from three days past the prediction", () => {
+  it("reports lateness only from three days past the prediction (medium+ confidence)", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(118) },
+      { id: "b", start: ago(89) },
+      { id: "c", start: ago(60) },
+      { id: "d", start: ago(31) }, // 3 steady cycles → medium; average 29 → due 2 days ago
+    ];
+    expect(analyzeCycle(logs, TODAY).confidence).toBe("medium");
+    expect(analyzeCycle(logs, TODAY).isLate).toBe(false);
+    expect(analyzeCycle(logs, addDays(TODAY, 1)).isLate).toBe(true);
+  });
+
+  it("waits a week before calling a rough estimate late (low confidence)", () => {
     const logs: PeriodLog[] = [
       { id: "a", start: ago(89) },
       { id: "b", start: ago(60) },
-      { id: "c", start: ago(31) }, // average 29 → due 2 days ago
+      { id: "c", start: ago(31) }, // only 2 usable cycles → low; due 2 days ago
     ];
-    expect(analyzeCycle(logs, TODAY).isLate).toBe(false);
-    expect(analyzeCycle(logs, addDays(TODAY, 1)).isLate).toBe(true);
+    expect(analyzeCycle(logs, TODAY).confidence).toBe("low");
+    expect(analyzeCycle(logs, addDays(TODAY, 4)).isLate).toBe(false); // 6 days past
+    expect(analyzeCycle(logs, addDays(TODAY, 5)).isLate).toBe(true); // 7 days past
+    expect(
+      analyzeCycle(logs, addDays(TODAY, 5)).flags.find((f) => f.kind === "late")?.title,
+    ).toMatch(/past a rough estimate/);
+  });
+
+  it("is never late against the population fallback", () => {
+    // one period, a natural 35-day body: on day 32 the 28-day guess is 3 days "past"
+    const logs: PeriodLog[] = [{ id: "a", start: ago(31), end: ago(27) }];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.isGeneric).toBe(true);
+    expect(a.lateBy).toBe(3);
+    expect(a.isLate).toBe(false);
+    expect(a.flags.map((f) => f.kind)).not.toContain("late");
+    // and the honest window is wide
+    expect(a.nextWindow?.spread).toBe(4);
+  });
+
+  it("gives a window that widens as confidence falls", () => {
+    const steady: PeriodLog[] = [0, 1, 2, 3, 4].map((i) => ({
+      id: `s${i}`,
+      start: ago(10 + (4 - i) * 28),
+    }));
+    const high = analyzeCycle(steady, TODAY);
+    expect(high.confidence).toBe("high");
+    expect(high.nextWindow?.spread).toBe(1);
+
+    const uneven: PeriodLog[] = [
+      { id: "a", start: ago(129) },
+      { id: "b", start: ago(108) }, // 21
+      { id: "c", start: ago(70) }, // 38
+      { id: "d", start: ago(44) }, // 26
+      { id: "e", start: ago(0) }, // 44
+    ];
+    const low = analyzeCycle(uneven, TODAY);
+    expect(low.confidence).toBe("low");
+    expect(low.nextWindow!.spread).toBeGreaterThanOrEqual(3);
+    expect(low.nextWindow!.from < low.nextStart!).toBe(true);
+    expect(low.nextWindow!.to > low.nextStart!).toBe(true);
+  });
+});
+
+describe("analyzeCycle — long cycles are a rhythm, not a mistake", () => {
+  const longHistory: PeriodLog[] = [
+    { id: "a", start: ago(155) },
+    { id: "b", start: ago(103) }, // 52
+    { id: "c", start: ago(55) }, // 48
+    { id: "d", start: ago(0) }, // 55
+  ];
+
+  it("accepts consistent long cycles once two consecutive gaps agree", () => {
+    const a = analyzeCycle(longHistory, TODAY);
+    expect(a.longCyclesAccepted).toBe(true);
+    expect(a.maxPlausible).toBe(55);
+    expect(a.cycleLengths).toEqual([52, 48, 55]);
+    expect(a.isGeneric).toBe(false);
+    expect(a.confidence).not.toBe("none");
+    expect(a.flags.map((f) => f.kind)).not.toContain("anomaly");
+    expect(a.flags.map((f) => f.kind)).toContain("long-cycles");
+    expect(Math.round(a.averageLength)).toBeGreaterThan(48);
+  });
+
+  it("still treats a single long gap in an otherwise ordinary record as a probable missed log", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(115) },
+      { id: "b", start: ago(87) }, // 28
+      { id: "c", start: ago(29) }, // 58 — alone
+      { id: "d", start: ago(0) }, // 29
+    ];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.longCyclesAccepted).toBe(false);
+    expect(a.cycleLengths).toEqual([28, 29]);
+    expect(a.gaps[1]!.plausible).toBe(false);
+  });
+
+  it("honours what the person confirmed, up to the hard ceiling", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(87) },
+      { id: "b", start: ago(29) }, // 58 — alone, but confirmed
+      { id: "c", start: ago(0) }, // 29
+    ];
+    expect(analyzeCycle(logs, TODAY).cycleLengths).toEqual([29]);
+    const confirmed = analyzeCycle(logs, TODAY, { personalMaxPlausible: 58 });
+    expect(confirmed.cycleLengths).toEqual([58, 29]);
+    expect(confirmed.maxPlausible).toBe(58);
+    // a 200-day postpartum gap is never one cycle, whatever was confirmed
+    const huge = analyzeCycle(
+      [
+        { id: "x", start: ago(229) },
+        { id: "y", start: ago(29) },
+        { id: "z", start: ago(0) },
+      ],
+      TODAY,
+      { personalMaxPlausible: 200 },
+    );
+    expect(huge.maxPlausible).toBe(90);
+    expect(huge.gaps[0]!.plausible).toBe(false);
+  });
+
+  it("effectiveMaxPlausible needs agreement, not just length", () => {
+    const o = { maxPlausible: 45, hardMaxPlausible: 90, longCycleAgreement: 7 };
+    expect(effectiveMaxPlausible([28, 60, 29], o)).toBe(45);
+    expect(effectiveMaxPlausible([50, 70], o)).toBe(45); // 20 days apart — not a rhythm
+    expect(effectiveMaxPlausible([50, 56], o)).toBe(56);
+    expect(effectiveMaxPlausible([95, 96], o)).toBe(45); // beyond the hard ceiling
   });
 });

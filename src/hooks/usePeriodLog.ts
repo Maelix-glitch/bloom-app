@@ -27,15 +27,19 @@ import {
   type DayLogAnalysis,
 } from "@/lib/cycle/dayLogs";
 import {
+  DEFAULT_CYCLE_SETTINGS,
   loadCheckInMemory,
+  loadCycleSettings,
   loadDays,
   loadLogs,
   loadThemeId,
   legacyPeriodCandidates,
   PERIODS_CHANGED,
   saveCheckInMemory,
+  saveCycleSettings,
   saveDays,
   saveLogs,
+  type CycleSettings,
 } from "@/lib/cycle/periodStore";
 import {
   EMPTY_MEMORY,
@@ -117,6 +121,10 @@ export interface PeriodLogStore {
   answerCheckIn: (checkIn: CheckIn, actionId: string) => CheckInFollowUp;
   /** Change just the last day of an entry (used by check-ins and the form). */
   setPeriodEnd: (id: string, end: string | null) => SaveResult;
+  /** What the person has told the engine about their own body. */
+  settings: CycleSettings;
+  /** "It really was that long" — count gaps up to `days` as real cycles from now on. */
+  acceptLongCycles: (days: number) => void;
   /** The most recent delete / clear that can still be taken back. */
   undoable: Undoable | null;
   undo: () => void;
@@ -135,6 +143,7 @@ export function usePeriodLog(): PeriodLogStore {
     signedIn: false,
   });
   const [memory, setMemory] = useState<CheckInMemory>(EMPTY_MEMORY);
+  const [settings, setSettings] = useState<CycleSettings>(DEFAULT_CYCLE_SETTINGS);
   const [undoable, setUndoable] = useState<Undoable | null>(null);
   /** The record as it was just before the last delete / clear. */
   const snapshot = useRef<{ id: number; at: number; logs: PeriodLog[]; days: DayLog[] } | null>(
@@ -159,6 +168,7 @@ export function usePeriodLog(): PeriodLogStore {
       setLogs(loadLogs());
       setDays(days);
       setMemory(loadCheckInMemory());
+      setSettings(loadCycleSettings());
       setToday(todayKey());
       setHydrated(true);
     };
@@ -166,6 +176,7 @@ export function usePeriodLog(): PeriodLogStore {
     const onExternal = () => {
       setLogs(loadLogs());
       setDays(loadDays());
+      setSettings(loadCycleSettings());
     };
     window.addEventListener(PERIODS_CHANGED, onExternal);
     window.addEventListener("storage", onExternal);
@@ -464,7 +475,21 @@ export function usePeriodLog(): PeriodLogStore {
     dirtyDates.current.clear();
   }, [keepForUndo]);
 
-  const analysis = useMemo(() => analyzeCycle(logs, today), [logs, today]);
+  const analysis = useMemo(
+    () => analyzeCycle(logs, today, { personalMaxPlausible: settings.personalMaxPlausible }),
+    [logs, today, settings.personalMaxPlausible],
+  );
+
+  const acceptLongCycles = useCallback((days: number) => {
+    setSettings((prev) => {
+      const next: CycleSettings = {
+        ...prev,
+        personalMaxPlausible: Math.max(prev.personalMaxPlausible ?? 0, Math.round(days)),
+      };
+      saveCycleSettings(next);
+      return next;
+    });
+  }, []);
   const daysRef = useRef<DayLog[]>(days);
   const analysisRef = useRef(analysis);
   daysRef.current = days;
@@ -530,6 +555,13 @@ export function usePeriodLog(): PeriodLogStore {
         case "edit-period":
           rememberAnswer(checkIn.id, "snooze");
           return { type: "edit-period", periodId: resolution.periodId };
+        case "accept-long-cycles":
+          acceptLongCycles(resolution.days);
+          rememberAnswer(checkIn.id, "dismiss");
+          return {
+            type: "saved",
+            message: `Understood — cycles up to ${resolution.days} days now count as yours. Average and predictions recalculated.`,
+          };
         case "dismiss":
           rememberAnswer(checkIn.id, "dismiss");
           return { type: "none" };
@@ -539,7 +571,7 @@ export function usePeriodLog(): PeriodLogStore {
           return { type: "none" };
       }
     },
-    [add, rememberAnswer, setPeriodEnd],
+    [acceptLongCycles, add, rememberAnswer, setPeriodEnd],
   );
 
   return {
@@ -563,6 +595,8 @@ export function usePeriodLog(): PeriodLogStore {
     checkIns,
     answerCheckIn,
     setPeriodEnd,
+    settings,
+    acceptLongCycles,
     undoable,
     undo,
     dismissUndo,

@@ -53,6 +53,8 @@ export type CheckInResolution =
   | { type: "add-period"; start: string; end: string | null; flow: FlowLevel | null }
   | { type: "focus-form"; date: string; startPeriod: boolean }
   | { type: "edit-period"; periodId: string }
+  /** "It really was that long": raise this person's plausible-cycle ceiling. */
+  | { type: "accept-long-cycles"; days: number }
   | { type: "dismiss" }
   | { type: "snooze" };
 
@@ -94,6 +96,12 @@ export interface ReconcileOptions {
   snoozeDays?: number;
   /** An open period this many days past its usual length asks to be closed. */
   openGraceDays?: number;
+  /**
+   * …and stops asking this many days past it. Beyond that the period is
+   * plainly over; the estimate assumes the usual length and the question
+   * would only be noise.
+   */
+  openAskUntilDays?: number;
   /** Days past the predicted start before we ask "has it started?". */
   lateAfterDays?: number;
   /** A bleed day this many days (or fewer) after a period counts as the same one. */
@@ -105,6 +113,7 @@ export interface ReconcileOptions {
 const DEFAULTS: Required<ReconcileOptions> = {
   snoozeDays: 2,
   openGraceDays: 2,
+  openAskUntilDays: 10,
   lateAfterDays: CYCLE_DEFAULTS.lateAfterDays,
   samePeriodWithinDays: 3,
   maxBleedDays: 14,
@@ -392,8 +401,14 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
     }
 
     /* c) STILL OPEN — no last day, and today is well past the usual length
-          with nothing in the daily log to settle it. */
-    if (!end && dayOfPeriod > usual + o.openGraceDays) {
+          with nothing in the daily log to settle it. Asked inside a window:
+          past the grace days, but not weeks later when the answer is obvious
+          and the question would only be noise. */
+    if (
+      !end &&
+      dayOfPeriod > usual + o.openGraceDays &&
+      dayOfPeriod <= usual + o.openAskUntilDays
+    ) {
       const guess = lastBleed ?? addDays(last.start, usual - 1);
       const since = lastBleed ? diffDays(lastBleed, today) : null;
       ask({
@@ -558,9 +573,14 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
   /* ------------------------------------------------------------------ */
   /* 3 · time passing without a word                                     */
   /* ------------------------------------------------------------------ */
+  const askedAboutNewPeriod = out.some((c) => c.kind === "new-period");
   if (last && analysis.nextStart && analysis.daysUntilNext !== null) {
     const lateBy = -analysis.daysUntilNext;
-    if (lateBy >= o.lateAfterDays) {
+    /* `analysis.isLate` already knows the difference between a personal
+       average and the population fallback (never late against a guess) and
+       widens the margin while the estimate is rough. A bleed the daily log
+       already holds is a better question than this one, so it goes first. */
+    if (analysis.isLate && lateBy > 0 && !askedAboutNewPeriod) {
       /* a bleed already in the daily log is the best guess for the first day */
       const floor = recordedEnd(last) ?? last.start;
       const suggested =
@@ -574,8 +594,15 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         tone: "attention",
         periodId: last.id,
         date: suggested,
-        title: `Your period was due ${lateBy} ${plural(lateBy, "day", "days")} ago — has it started?`,
-        body: `Predicted for ${formatDate(analysis.nextStart)} from your own average. Late periods are very common — stress, travel, illness, sleep, weight or exercise changes, some medications. If it has started, log the first day and everything recalculates; if not, Bloom simply keeps counting.`,
+        title:
+          analysis.confidence === "low"
+            ? `Your period was roughly expected ${lateBy} ${plural(lateBy, "day", "days")} ago — has it started?`
+            : `Your period was due ${lateBy} ${plural(lateBy, "day", "days")} ago — has it started?`,
+        body: `${
+          analysis.confidence === "low"
+            ? `Estimated around ${formatDate(analysis.nextStart)} from a short or uneven record, so a week either side is normal.`
+            : `Predicted for ${formatDate(analysis.nextStart)} from your own average.`
+        } Late periods are very common — stress, travel, illness, sleep, weight or exercise changes, some medications. If it has started, log the first day and everything recalculates; if not, Bloom simply keeps counting.`,
         actions: [
           {
             id: "yes",
@@ -616,13 +643,28 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
             startPeriod: true,
           },
         },
-        { id: "none", label: "No — it really was that long", resolution: { type: "dismiss" } },
+        /* Up to the hard ceiling the person can vouch for it themselves;
+           beyond that (months without a log) it really is a missed stretch,
+           and the honest answer is just to stop asking. */
+        longGap.days <= CYCLE_DEFAULTS.hardMaxPlausible
+          ? {
+              id: "none",
+              label: "No — it really was that long",
+              resolution: { type: "accept-long-cycles", days: longGap.days },
+            }
+          : { id: "none", label: "No — nothing to add", resolution: { type: "dismiss" } },
         { id: "later", label: "Not now", resolution: { type: "snooze" } },
       ],
     });
   }
 
-  return out.sort((a, b) => ORDER[a.kind] - ORDER[b.kind]);
+  /* One situation, one card: once the record is past due and a still-open
+     question is on the table for the same period, the late question is the
+     one that matters. */
+  const hasLate = out.some((c) => c.kind === "late" || c.kind === "new-period");
+  const deduped = hasLate ? out.filter((c) => c.kind !== "still-open") : out;
+
+  return deduped.sort((a, b) => ORDER[a.kind] - ORDER[b.kind]);
 }
 
 /* ------------------------------ form guidance ----------------------------- */

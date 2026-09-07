@@ -17,6 +17,7 @@ const DAY_KEY = "bloom.cycle.days.v1";
 const THEME_KEY = "bloom.cycle.theme.v1";
 /** Answers to the check-in questions — never ask the same thing twice. */
 const CHECKIN_KEY = "bloom.cycle.checkins.v1";
+const SETTINGS_KEY = "bloom.cycle.settings.v1";
 /** Legacy day-level log written by the previous version of the cycle page. */
 const LEGACY_KEY = "bloom.cycle.entries.local";
 
@@ -201,6 +202,45 @@ export function saveCheckInMemory(memory: CheckInMemory): void {
   if (!hasWindow()) return;
   try {
     window.localStorage.setItem(CHECKIN_KEY, JSON.stringify(memory));
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/* ------------------------------- settings -------------------------------- */
+
+/** What the person has told the engine about their own body. */
+export interface CycleSettings {
+  /**
+   * The longest gap they've confirmed as one real cycle ("no — it really was
+   * that long"). Null until they say so. Bounded by the engine's hard ceiling.
+   */
+  personalMaxPlausible: number | null;
+}
+
+export const DEFAULT_CYCLE_SETTINGS: CycleSettings = { personalMaxPlausible: null };
+
+export function loadCycleSettings(): CycleSettings {
+  if (!hasWindow()) return DEFAULT_CYCLE_SETTINGS;
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return DEFAULT_CYCLE_SETTINGS;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return DEFAULT_CYCLE_SETTINGS;
+    const v = parsed["personalMaxPlausible"];
+    return {
+      personalMaxPlausible:
+        typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.round(v) : null,
+    };
+  } catch {
+    return DEFAULT_CYCLE_SETTINGS;
+  }
+}
+
+export function saveCycleSettings(settings: CycleSettings): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   } catch {
     /* non-fatal */
   }

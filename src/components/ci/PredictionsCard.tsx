@@ -21,9 +21,16 @@ export function PredictionsCard({
   analysis: CycleAnalysis;
   compact?: boolean;
 }) {
-  const { nextStart, daysUntilNext } = analysis;
+  const { nextStart, daysUntilNext, nextWindow } = analysis;
   const countdown = describeCountdown(daysUntilNext);
-  const late = daysUntilNext !== null && daysUntilNext < 0;
+  /* "Late" is the engine's call, not a raw sign flip: never against the
+     population fallback, and only past a wider margin while the estimate is
+     rough. Before that, a passed date is just "around now". */
+  const late = analysis.isLate;
+  const pastEstimate = !late && daysUntilNext !== null && daysUntilNext < 0;
+  /* A single date only when the record can vouch for one; otherwise the
+     honest answer is a window. */
+  const showWindow = nextWindow !== null && analysis.confidence !== "high";
 
   return (
     <Card className={compact ? "p-4" : undefined}>
@@ -44,25 +51,44 @@ export function PredictionsCard({
       >
         <Stat
           emphasis
-          label="Next period"
-          value={nextStart ? formatDate(nextStart) : "—"}
+          label={showWindow ? "Next period (window)" : "Next period"}
+          value={
+            !nextStart
+              ? "—"
+              : showWindow && nextWindow
+                ? `${formatDateShort(nextWindow.from)} – ${formatDateShort(nextWindow.to)}`
+                : formatDate(nextStart)
+          }
           sub={
             <span className={late ? "text-[var(--ci-ovulation)]" : undefined}>
-              {nextStart ? countdown : "log a period to start predicting"}
+              {!nextStart
+                ? "log a period to start predicting"
+                : showWindow && nextWindow
+                  ? `most likely around ${formatDateShort(nextStart)} · ${countdown}`
+                  : countdown}
               {analysis.isGeneric ? " · generic estimate" : ""}
             </span>
           }
+          testId="cycle-next-period"
         />
 
         <Stat
-          label={late ? "Days late" : "Days until"}
+          label={late ? "Days late" : pastEstimate ? "Past the estimate" : "Days until"}
           value={
             <span className={late ? "text-[var(--ci-ovulation)]" : undefined}>
               {daysUntilNext === null ? "—" : Math.abs(daysUntilNext)}
             </span>
           }
           unit={daysUntilNext === null ? undefined : plural(Math.abs(daysUntilNext), "day", "days")}
-          sub={late ? "later than predicted — see insights" : "until the predicted start"}
+          sub={
+            late
+              ? "later than predicted — see insights"
+              : pastEstimate
+                ? analysis.isGeneric
+                  ? "a generic guess, not your pattern — nothing is late"
+                  : "within the normal range for a rough estimate"
+                : "until the predicted start"
+          }
         />
 
         <Stat

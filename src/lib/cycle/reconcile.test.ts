@@ -187,16 +187,91 @@ describe("reconcile · still open · late · missed", () => {
     });
   });
 
-  it("offers the bleed already in the daily log as the first day when late", () => {
+  it("asks ONE question when late and a bleed is already in the daily log", () => {
     const logs = history(33, ago(29));
     const days = [day(ago(2), "medium")];
-    const q = find(reconcile({ logs, days, today: TODAY }), "late")!;
-    expect(q.actions[0]!.label).toContain("it started");
-    expect(q.actions[0]!.resolution).toEqual({
-      type: "focus-form",
-      date: ago(2),
-      startPeriod: true,
-    });
+    const list = reconcile({ logs, days, today: TODAY });
+    // the bleed is the sharper question — "was that a period starting?" — so
+    // the late card steps aside instead of asking the same thing twice
+    expect(kinds(list)).toEqual(["new-period"]);
+    const q = list[0]!;
+    expect(q.actions[0]!.label).toContain("period started");
+    expect(q.actions[0]!.resolution).toMatchObject({ type: "add-period", start: ago(2) });
+  });
+
+  it("never asks 'has it started?' against the population fallback", () => {
+    // one period, a natural 35-day body, day 32: the 28-day guess is 3 days past
+    const logs: PeriodLog[] = [{ id: "only", start: ago(31), end: ago(27) }];
+    expect(find(reconcile({ logs, days: [], today: TODAY }), "late")).toBeUndefined();
+  });
+
+  it("waits a week past a rough (low-confidence) estimate before asking", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(93) },
+      { id: "b", start: ago(64) },
+      { id: "c", start: ago(35) }, // 2 usable cycles → low; average 29 → due 6 days ago
+    ];
+    expect(find(reconcile({ logs, days: [], today: TODAY }), "late")).toBeUndefined();
+    const later = reconcile({ logs, days: [], today: addDays(TODAY, 1) }); // 7 days past
+    const q = find(later, "late");
+    expect(q).toBeDefined();
+    expect(q!.title).toMatch(/roughly expected/);
+  });
+
+  it("stops asking whether an open period has finished once it is plainly over", () => {
+    // day 10 with no end: asked (usual 5 + grace 2 < 10 <= 5 + 10)
+    expect(
+      find(reconcile({ logs: history(9), days: [], today: TODAY }), "still-open"),
+    ).toBeDefined();
+    // day 20: no longer asked — the answer is obvious and the estimate assumes the usual length
+    expect(
+      find(reconcile({ logs: history(19), days: [], today: TODAY }), "still-open"),
+    ).toBeUndefined();
+  });
+
+  it("does not ask 'has it finished?' alongside 'has it started?' for the same period", () => {
+    // open latest period, 33 days on: late (medium confidence) — still-open would be noise
+    const logs = history(33);
+    const list = reconcile({ logs, days: [], today: TODAY });
+    expect(kinds(list)).toContain("late");
+    expect(kinds(list)).not.toContain("still-open");
+  });
+
+  it("'it really was that long' teaches the engine instead of just dismissing", () => {
+    const logs: PeriodLog[] = [
+      { id: "x", start: ago(87) },
+      { id: "y", start: ago(29) }, // 58-day gap — alone
+      { id: "z", start: ago(0) },
+    ];
+    const q = find(reconcile({ logs, days: [], today: TODAY }), "missed-log")!;
+    const none = q.actions.find((a) => a.id === "none")!;
+    expect(none.resolution).toEqual({ type: "accept-long-cycles", days: 58 });
+    // once accepted, the gap is a cycle and the question is gone
+    const accepted = analyzeCycle(logs, TODAY, { personalMaxPlausible: 58 });
+    expect(accepted.cycleLengths).toEqual([58, 29]);
+    expect(
+      find(reconcile({ logs, days: [], today: TODAY, analysis: accepted }), "missed-log"),
+    ).toBeUndefined();
+  });
+
+  it("a months-long gap can only be dismissed, never accepted as one cycle", () => {
+    const logs: PeriodLog[] = [
+      { id: "x", start: ago(229) },
+      { id: "y", start: ago(29) }, // 200 days — postpartum, contraception, whatever it was
+      { id: "z", start: ago(0) },
+    ];
+    const q = find(reconcile({ logs, days: [], today: TODAY }), "missed-log")!;
+    expect(q.actions.find((a) => a.id === "none")!.resolution).toEqual({ type: "dismiss" });
+  });
+
+  it("is silent for a person whose cycles simply run long", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(155), end: ago(151) },
+      { id: "b", start: ago(103), end: ago(99) }, // 52
+      { id: "c", start: ago(55), end: ago(51) }, // 48
+      { id: "d", start: ago(3), end: null }, // 52 — day 4, still bleeding
+    ];
+    expect(reconcile({ logs, days: [], today: TODAY })).toEqual([]);
   });
 
   it("points at the midpoint of an implausibly long gap", () => {

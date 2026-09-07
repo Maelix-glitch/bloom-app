@@ -127,6 +127,22 @@ export interface AnalyzeOptions {
   trendThreshold?: number;
   /** Assumed bleed length when nothing has been logged. */
   defaultPeriodLength?: number;
+  /**
+   * Days past a *rough* prediction (fewer than three usable cycles, or a very
+   * variable history) before we call a period "late". Wider than
+   * `lateAfterDays` because the date itself is only a direction.
+   */
+  lateAfterDaysLowConfidence?: number;
+  /**
+   * Long cycles the person has confirmed as real ("no — it really was that
+   * long"), or that the record itself shows as this person's steady rhythm.
+   * Gaps up to this length count as cycles instead of missed logs.
+   */
+  personalMaxPlausible?: number | null;
+  /** The longest gap adaptive plausibility will ever accept as one cycle. */
+  hardMaxPlausible?: number;
+  /** Two long gaps within this many days of each other look like a rhythm. */
+  longCycleAgreement?: number;
 }
 
 export const CYCLE_DEFAULTS = {
@@ -138,13 +154,58 @@ export const CYCLE_DEFAULTS = {
   fertileBefore: 5,
   fertileAfter: 1,
   lateAfterDays: 3,
+  lateAfterDaysLowConfidence: 7,
   moderateVariability: 7,
   lowVariability: 3,
   trendThreshold: 3,
   defaultPeriodLength: 5,
+  personalMaxPlausible: null as number | null,
+  hardMaxPlausible: 90,
+  longCycleAgreement: 7,
 } as const;
 
 const DEFAULTS = CYCLE_DEFAULTS;
+
+/**
+ * How long a gap this person's record can vouch for.
+ *
+ * The population ceiling (45 days) is right for most people and wrong for
+ * anyone whose cycles simply run long — PCOS, the years after a first period,
+ * perimenopause, the months after a birth. Their 50-day gaps are not missed
+ * logs, and treating them that way leaves them with a generic 28-day guess and
+ * a "did you forget?" question every single cycle.
+ *
+ * So the ceiling adapts, on evidence only: when at least two *consecutive*
+ * gaps run past 45 days and agree with each other (within a week), that is a
+ * rhythm, not an accident, and the ceiling rises to cover the longest of
+ * them. A single long gap on its own still reads as a probable missed log —
+ * one data point can't tell the two apart, and the person can say "it really
+ * was that long", which sets `personalMaxPlausible` and is honoured here.
+ */
+export function effectiveMaxPlausible(
+  gapDays: readonly number[],
+  o: {
+    maxPlausible: number;
+    hardMaxPlausible: number;
+    longCycleAgreement: number;
+    personalMaxPlausible?: number | null;
+  },
+): number {
+  let ceiling = o.maxPlausible;
+  if (o.personalMaxPlausible && o.personalMaxPlausible > ceiling) {
+    ceiling = Math.min(o.hardMaxPlausible, o.personalMaxPlausible);
+  }
+  for (let i = 1; i < gapDays.length; i += 1) {
+    const a = gapDays[i - 1]!;
+    const b = gapDays[i]!;
+    const bothLong = a > o.maxPlausible && b > o.maxPlausible;
+    const bothReal = a <= o.hardMaxPlausible && b <= o.hardMaxPlausible;
+    if (bothLong && bothReal && Math.abs(a - b) <= o.longCycleAgreement) {
+      ceiling = Math.max(ceiling, Math.max(a, b));
+    }
+  }
+  return Math.min(o.hardMaxPlausible, ceiling);
+}
 
 /* -------------------------------- results -------------------------------- */
 
@@ -164,7 +225,8 @@ export interface CycleGap {
   suggestedMissedDate: string | null;
 }
 
-export type FlagKind = "generic" | "anomaly" | "late" | "variability" | "trend" | "building";
+export type FlagKind =
+  "generic" | "anomaly" | "late" | "variability" | "trend" | "building" | "long-cycles";
 
 export type FlagTone = "calm" | "info" | "attention";
 
@@ -241,6 +303,10 @@ export interface CycleAnalysis {
   averageLengthRaw: number;
   /** True when no plausible cycle exists yet and the 28-day fallback is used. */
   isGeneric: boolean;
+  /** The longest gap counted as one cycle for this person (45 unless their record says otherwise). */
+  maxPlausible: number;
+  /** True when the ceiling was raised by the person's own long, steady cycles. */
+  longCyclesAccepted: boolean;
   /** Population standard deviation of the plausible cycle lengths. */
   variability: number;
   confidence: Confidence;
@@ -261,7 +327,17 @@ export interface CycleAnalysis {
   nextStart: string | null;
   /** Positive = days until; negative = days late. */
   daysUntilNext: number | null;
+  /**
+   * The honest version of `nextStart`: a window that widens as confidence
+   * falls. Show this, not the single date, whenever confidence isn't high.
+   */
+  nextWindow: { from: string; to: string; spread: number } | null;
+  /**
+   * True only when the record can vouch for it: never from the population
+   * fallback, and only past a wider margin while confidence is low.
+   */
   isLate: boolean;
+  /** Days past `nextStart`; 0 when not past it. Informational — see `isLate`. */
   lateBy: number;
 
   ovulationDate: string | null;
@@ -464,18 +540,29 @@ export function analyzeCycle(
   );
 
   /* --- gaps: the raw cycle-length history -------------------------------- */
+  const rawGapDays: number[] = [];
+  for (let i = 1; i < sorted.length; i += 1) {
+    const prev = sorted[i - 1];
+    const cur = sorted[i];
+    if (prev && cur) rawGapDays.push(diffDays(prev.start, cur.start));
+  }
+  const maxPlausible = effectiveMaxPlausible(rawGapDays, o);
+  const longCyclesAccepted = maxPlausible > o.maxPlausible;
+
   const gaps: CycleGap[] = [];
   for (let i = 1; i < sorted.length; i += 1) {
     const prev = sorted[i - 1];
     const cur = sorted[i];
     if (!prev || !cur) continue;
     const days = diffDays(prev.start, cur.start);
-    const plausible = days >= o.minPlausible && days <= o.maxPlausible;
+    const plausible = days >= o.minPlausible && days <= maxPlausible;
     let reason: string | null = null;
     if (days < o.minPlausible) {
       reason = `${days} ${plural(days, "day", "days")} apart — too short for a cycle. Usually a duplicate or a mistyped date rather than a real cycle.`;
-    } else if (days > o.maxPlausible) {
-      reason = `${days} days apart — longer than a plausible cycle. Almost always a period that went unlogged, not one long cycle.`;
+    } else if (days > maxPlausible) {
+      reason = longCyclesAccepted
+        ? `${days} days apart — longer even than your own long cycles (up to ${maxPlausible} days). Probably a period that went unlogged.`
+        : `${days} days apart — longer than a plausible cycle. Almost always a period that went unlogged, not one long cycle.`;
     }
     gaps.push({
       index: i,
@@ -486,7 +573,7 @@ export function analyzeCycle(
       days,
       plausible,
       reason,
-      suggestedMissedDate: days > o.maxPlausible ? addDays(prev.start, Math.round(days / 2)) : null,
+      suggestedMissedDate: days > maxPlausible ? addDays(prev.start, Math.round(days / 2)) : null,
     });
   }
 
@@ -545,7 +632,28 @@ export function analyzeCycle(
   const nextStart = lastStart ? addDays(lastStart, cycleLength) : null;
   const daysUntilNext = nextStart ? diffDays(today, nextStart) : null;
   const lateBy = daysUntilNext !== null && daysUntilNext < 0 ? Math.abs(daysUntilNext) : 0;
-  const isLate = lateBy >= o.lateAfterDays;
+  /* "Late" is a claim about this person's rhythm, so it needs one to be late
+     against: never from the population fallback, and only after a wider
+     margin while the estimate is still rough. */
+  const lateThreshold =
+    confidence === "none"
+      ? Number.POSITIVE_INFINITY
+      : confidence === "low"
+        ? o.lateAfterDaysLowConfidence
+        : o.lateAfterDays;
+  const isLate = lateBy >= lateThreshold;
+  /* A range, not a date, when the record can't vouch for a single day. */
+  const spread =
+    confidence === "none"
+      ? 4
+      : confidence === "low"
+        ? Math.max(3, Math.round(variability))
+        : confidence === "medium"
+          ? Math.max(2, Math.round(variability))
+          : Math.max(1, Math.round(variability));
+  const nextWindow = nextStart
+    ? { from: addDays(nextStart, -spread), to: addDays(nextStart, spread), spread }
+    : null;
 
   // Ovulation is counted *backwards* from the next period: the luteal phase
   // (ovulation → bleed) is the steadier half, the follicular half is what
@@ -558,8 +666,14 @@ export function analyzeCycle(
   /* --- current phase ----------------------------------------------------- */
   let phase: Phase | null = null;
   if (cycleDay !== null && cycleDay > 0 && lastStart) {
-    if (cycleDay > cycleLength) {
+    if (cycleDay > cycleLength && isLate) {
       phase = "late";
+    } else if (cycleDay > cycleLength) {
+      // Past the estimate but not (yet) late — a generic guess, or a rough
+      // one still inside its own margin. The body is simply in a longer
+      // luteal stretch; calling it "past predicted date" would dress a
+      // population average up as a fact about this person.
+      phase = "luteal";
     } else if (cycleDay <= bleedDays) {
       phase = "menstrual";
     } else if (cycleDay >= ovulationDay - 1 && cycleDay <= ovulationDay + 1) {
@@ -694,6 +808,18 @@ export function analyzeCycle(
     });
   }
 
+  // Long cycles the record itself vouches for — say so, instead of asking
+  // "did you forget?" every month.
+  if (longCyclesAccepted && cycleLengths.length > 0) {
+    flags.push({
+      id: "long-cycles",
+      kind: "long-cycles",
+      tone: "calm",
+      title: "Your cycles run long — and that's what Bloom now expects",
+      body: `Your record shows cycles of up to ${maxPlausible} days that agree with each other, so they count as your rhythm rather than as missed periods. Predictions, phases and the fertile window are built from that. Cycles this long are common and have many ordinary causes; if they're new for you, that's worth a conversation with a clinician — not because a chart flagged it.`,
+    });
+  }
+
   // Edge case 3 — implausible gaps, kept visible with a suggested fix.
   const anomalies = gaps.filter((g) => !g.plausible);
   for (const g of anomalies.slice(-3)) {
@@ -721,8 +847,15 @@ export function analyzeCycle(
       id: "late",
       kind: "late",
       tone: "attention",
-      title: `Your period is ${lateBy} ${plural(lateBy, "day", "days")} later than predicted`,
-      body: "Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.",
+      title:
+        confidence === "low"
+          ? `Your period is ${lateBy} ${plural(lateBy, "day", "days")} past a rough estimate`
+          : `Your period is ${lateBy} ${plural(lateBy, "day", "days")} later than predicted`,
+      body: `${
+        confidence === "low"
+          ? "That estimate was only a direction — built from a short or uneven record — so a week either side is normal. "
+          : ""
+      }Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.`,
     });
   }
 
@@ -765,6 +898,8 @@ export function analyzeCycle(
     averageLength: Math.round(averageLengthRaw * 10) / 10,
     averageLengthRaw,
     isGeneric,
+    maxPlausible,
+    longCyclesAccepted,
     variability: Math.round(variability * 10) / 10,
     confidence,
     confidenceReason,
@@ -776,6 +911,7 @@ export function analyzeCycle(
     phaseLabel: phase ? PHASE_LABEL[phase] : "Unknown",
     nextStart,
     daysUntilNext,
+    nextWindow,
     isLate,
     lateBy,
     ovulationDate,
