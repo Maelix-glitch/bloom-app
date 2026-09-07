@@ -56,7 +56,15 @@
   height: 100%;
   overflow: hidden;
   border-radius: 28px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  /*
+   * The rim is doing real work. A single 12% hairline disappears against a
+   * photograph, which is what made the sheet look unfinished at the top: the
+   * hero image ran to an edge that wasn't there. So the edge is now built from
+   * three parts — an outer dark line that separates the panel from whatever is
+   * behind it, the hairline itself, and an inset highlight that catches along
+   * the top curve the way a real bevel would.
+   */
+  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
   background:
     linear-gradient(
       180deg,
@@ -66,15 +74,22 @@
     color-mix(in oklab, var(--surface) 78%, transparent);
   box-shadow:
     0 40px 90px -30px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent);
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
   backdrop-filter: blur(24px) saturate(1.2);
   -webkit-backdrop-filter: blur(24px) saturate(1.2);
 }
 .bsheet--phone .bsheet-panel {
   border-radius: 28px 28px 0 0;
+  /* No bottom edge — it sits on the screen edge, and a line there reads as a
+     seam rather than a border. The side borders stop with it. */
   border-bottom: 0;
   padding-bottom: env(safe-area-inset-bottom);
+  box-shadow:
+    0 -20px 60px -20px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent);
 }
 
 .bsheet-grab {
@@ -227,10 +242,26 @@
 /* photograph behind the header, faded into the glass below */
 .bmoment-hero-art {
   position: absolute;
-  inset: 0 0 -60px;
+  /*
+   * Inset by 1px at the top and sides so the photograph sits *inside* the
+   * panel's border instead of painting over it. Without this the rim vanished
+   * behind the image exactly where the eye looks first, which is what made the
+   * top of the sheet read as unfinished.
+   */
+  inset: 1px 1px -60px;
   z-index: -1;
   overflow: hidden;
-  border-radius: 28px 28px 0 0;
+  border-radius: 27px 27px 0 0;
+  pointer-events: none;
+}
+/* the light catch along the top curve, over the photo rather than under it */
+.bmoment-hero-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 22%, transparent);
   pointer-events: none;
 }
 .bmoment-hero-art img {
@@ -292,11 +323,17 @@
   padding: 16px 16px 14px;
   overflow: hidden;
   border-radius: 22px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  /* Over a photograph a foreground-mix hairline reads as nothing, so the tile
+     edge is a light inner rim plus a dark outer one — legible on both a bright
+     and a dark image. */
+  border: 1px solid color-mix(in oklab, #fff 16%, transparent);
   text-align: left;
   color: var(--foreground);
   isolation: isolate;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 color-mix(in oklab, #fff 20%, transparent),
+    0 14px 30px -20px rgba(0, 0, 0, 0.9);
   transition:
     transform 420ms var(--ease-out-expo),
     border-color var(--motion-fast) ease,
@@ -349,9 +386,10 @@
 }
 .bmoment-tile:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--foreground) 32%, transparent);
+  border-color: color-mix(in oklab, #fff 34%, transparent);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 14%, transparent),
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 color-mix(in oklab, #fff 28%, transparent),
     0 22px 40px -24px rgba(0, 0, 0, 0.9);
 }
 .bmoment-tile:hover img {
@@ -652,8 +690,13 @@
   margin: 0 26px 12px;
   padding: 14px 12px 12px;
   border-radius: 22px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  /* Lifted from 10% — at 10% these groups had no visible edge on a phone, so
+     the sections ran together and the sheet looked unfinished. */
+  border: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
   background: color-mix(in oklab, var(--surface-2) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent),
+    0 10px 26px -22px rgba(0, 0, 0, 0.9);
 }
 @media (max-width: 640px) {
   .bedit-group {
@@ -695,7 +738,7 @@
   column-gap: 12px;
   padding: 10px 12px;
   border-radius: 16px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 42%, transparent);
   transition:
     border-color var(--motion-fast) ease,
@@ -949,5 +992,95 @@ textarea.bedit-field-input {
   .bedit-photo-disc,
   .bedit-accent {
     transition: none;
+  }
+}
+
+/* ------------------------------------------------- preset profile photos */
+/*
+ * A rail of photographs Bloom ships, sitting under the upload row. Kept
+ * visually subordinate to it — smaller discs, a quiet label — so "use your own
+ * picture" still reads as the primary path.
+ */
+
+.bedit-presets {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.bedit-presets-label {
+  padding: 0 4px 8px;
+  font-size: 11.5px;
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+}
+.bedit-presets-rail {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 3px 4px 5px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.bedit-presets-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.bedit-preset {
+  position: relative;
+  flex: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  /* the tint is the photo's own dominant hue, so selection never clashes */
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--preset-tint, var(--violet)) 80%, transparent);
+  transition:
+    transform 300ms var(--ease-out-expo),
+    box-shadow 300ms var(--ease-out-expo),
+    border-color 200ms ease;
+}
+.bedit-preset img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 260ms ease;
+  filter: saturate(0.9) brightness(0.94);
+}
+.bedit-preset:hover {
+  transform: translateY(-2px);
+}
+.bedit-preset:hover img {
+  filter: saturate(1.02) brightness(1);
+}
+.bedit-preset[data-on="true"] {
+  border-color: transparent;
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px color-mix(in oklab, var(--preset-tint, var(--violet)) 85%, #fff),
+    0 8px 22px -8px color-mix(in oklab, var(--preset-tint, var(--violet)) 75%, transparent);
+}
+.bedit-preset[data-on="true"] img {
+  filter: saturate(1.05) brightness(1);
+}
+
+.bedit-preset-tick {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #16131e;
+  background: color-mix(in oklab, var(--preset-tint, var(--violet)) 55%, transparent);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.bedit-preset[data-on="true"] .bedit-preset-tick {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bedit-preset,
+  .bedit-preset img {
+    transition-duration: 1ms;
   }
 }

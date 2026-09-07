@@ -45,6 +45,7 @@ import {
 } from "@/lib/profile/types";
 import { AvatarEditor, type PendingAvatar } from "@/components/profile/AvatarEditor";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { PresetPicker } from "@/components/profile/PresetPicker";
 import { toast } from "sonner";
 
 import heroArt from "@/assets/mood/hero-window.jpg";
@@ -54,6 +55,12 @@ export interface ProfileEditorSave {
   username: string | null;
   bio: string | null;
   accent: BloomAccent;
+  /**
+   * Only present when the person picked one of the photographs Bloom ships
+   * (a `preset:` path). Uploads still go through `onCommitAvatar`, which owns
+   * the storage write; leaving this undefined means "don't touch the avatar".
+   */
+  avatarPath?: string | null;
 }
 
 export function ProfileEditor({
@@ -77,6 +84,8 @@ export function ProfileEditor({
   const [accent, setAccent] = useState<BloomAccent>(identity.accent);
   const [pending, setPending] = useState<PendingAvatar | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
+  /** A `preset:` path chosen this session, not yet saved. */
+  const [preset, setPreset] = useState<string | null>(null);
 
   const [nameError, setNameError] = useState<string | null>(null);
   const [bioError, setBioError] = useState<string | null>(null);
@@ -96,6 +105,7 @@ export function ProfileEditor({
     setAccent(identity.accent);
     setPending(null);
     setPhotoOpen(false);
+    setPreset(null);
     setSaveError(null);
     setNameError(null);
     setBioError(null);
@@ -203,6 +213,8 @@ export function ProfileEditor({
         username: trimmed === "" ? null : normalizeUsername(trimmed),
         bio: bio.trim() === "" ? null : bio.trim(),
         accent,
+        /* An upload wins: it has already been committed just above. */
+        ...(preset !== null && !pending ? { avatarPath: preset } : {}),
       });
       profileDraft.clear();
       toast("Profile updated.");
@@ -212,7 +224,18 @@ export function ProfileEditor({
     } finally {
       setSaving(false);
     }
-  }, [pending, displayName, username, bio, accent, usernameState, onCommitAvatar, onSave, onClose]);
+  }, [
+    pending,
+    preset,
+    displayName,
+    username,
+    bio,
+    accent,
+    usernameState,
+    onCommitAvatar,
+    onSave,
+    onClose,
+  ]);
 
   const previewIdentity: ProfileIdentity = {
     ...identity,
@@ -220,7 +243,8 @@ export function ProfileEditor({
     username: username.trim() ? normalizeUsername(username) : null,
     bio: bio.trim() || identity.bio,
     accent,
-    avatarPath: pending ? null : identity.avatarPath,
+    /* Live preview: an upload beats a preset, a preset beats what's saved. */
+    avatarPath: pending ? null : (preset ?? identity.avatarPath),
   };
 
   const openPhoto = () => {
@@ -484,7 +508,7 @@ export function ProfileEditor({
                           />
                         )}
                       </span>
-                      {pending ? "New" : identity.avatarPath ? "Current" : "Initials"}
+                      {pending ? "New" : preset ? "Chosen" : identity.avatarPath ? "Current" : "Initials"}
                     </div>
                     {identity.avatarPath && !pending ? (
                       <button
@@ -521,6 +545,17 @@ export function ProfileEditor({
                       </button>
                     ) : null}
                   </div>
+                ) : null}
+
+                {!photoOpen ? (
+                  <PresetPicker
+                    value={preset}
+                    onPick={(path) => {
+                      /* Choosing one of ours discards a half-cropped upload. */
+                      setPending(null);
+                      setPreset(path);
+                    }}
+                  />
                 ) : (
                   <div className="bedit-crop">
                     <AvatarEditor

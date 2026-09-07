@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { EMOTION_MAP } from "@/lib/mood/types";
 import { seenStories } from "@/lib/profile/drafts";
 import { objectUrl } from "@/lib/profile/profileService";
+import { resolveAvatar } from "@/lib/profile/presetAvatars";
 import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { isStoryActive, type Story } from "@/lib/profile/types";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
@@ -185,7 +186,7 @@ function ProfilePage() {
     }
     return undefined;
   }, [activeStories.length]);
-  const avatarSrc = identity ? objectUrl(identity.identity.avatarPath) : null;
+  const avatarSrc = identity ? resolveAvatar(identity.identity.avatarPath, objectUrl) : null;
   const ambient = useAvatarAmbient(avatarSrc);
 
   /* the record — same stores the tracker pages read */
