@@ -249,7 +249,7 @@ function CycleStylesPage() {
       <div className="ci-root">
         <BloomHeader />
         <div className="ci-veil" aria-hidden />
-        <div className="ci-shell">
+        <div className="ci-shell ci-shell--narrow">
           <header className="ci-rise max-w-[70ch]">
             <p className="ci-eyebrow">Bloom · Cycle · Eight directions</p>
             <h1 className="ci-display mt-3 text-[30px] leading-[1.08] sm:text-[40px]">

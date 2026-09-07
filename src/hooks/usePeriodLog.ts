@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   analyzeCycle,
+  formatDate,
   newLogId,
   todayKey,
   validateLogDraft,
@@ -26,14 +27,25 @@ import {
   type DayLogAnalysis,
 } from "@/lib/cycle/dayLogs";
 import {
+  loadCheckInMemory,
   loadDays,
   loadLogs,
   loadThemeId,
   legacyPeriodCandidates,
   PERIODS_CHANGED,
+  saveCheckInMemory,
   saveDays,
   saveLogs,
 } from "@/lib/cycle/periodStore";
+import {
+  EMPTY_MEMORY,
+  pruneMemory,
+  reconcile,
+  remember,
+  type CheckIn,
+  type CheckInMemory,
+  type CheckInResolution,
+} from "@/lib/cycle/reconcile";
 import {
   currentProfileId,
   deleteDay,
@@ -58,6 +70,24 @@ export interface SyncStatus {
 export type SaveResult = { ok: true; id: string } | { ok: false; errors: FieldErrors };
 export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
+/** A deletion that can still be taken back. */
+export interface Undoable {
+  id: number;
+  message: string;
+  /** Epoch ms after which the snapshot is dropped. */
+  until: number;
+}
+
+/** How long a delete / clear can be undone for. */
+export const UNDO_WINDOW_MS = 8000;
+
+/** What the page should do after a check-in answer that needs the form. */
+export type CheckInFollowUp =
+  | { type: "focus-form"; date: string; startPeriod: boolean }
+  | { type: "edit-period"; periodId: string }
+  | { type: "saved"; message: string }
+  | { type: "none" };
+
 export interface PeriodLogStore {
   /** Whether this day is on the account, on the device, or on its way up. */
   sync: SyncStatus;
@@ -81,6 +111,16 @@ export interface PeriodLogStore {
   saveDay: (draft: DayLog) => SaveDayResult;
   removeDay: (date: string) => void;
   clearDays: () => void;
+  /** Questions the record is asking right now, most pressing first. */
+  checkIns: CheckIn[];
+  /** Apply one answer. Returns what the page should do next, if anything. */
+  answerCheckIn: (checkIn: CheckIn, actionId: string) => CheckInFollowUp;
+  /** Change just the last day of an entry (used by check-ins and the form). */
+  setPeriodEnd: (id: string, end: string | null) => SaveResult;
+  /** The most recent delete / clear that can still be taken back. */
+  undoable: Undoable | null;
+  undo: () => void;
+  dismissUndo: () => void;
 }
 
 export function usePeriodLog(): PeriodLogStore {
@@ -94,6 +134,13 @@ export function usePeriodLog(): PeriodLogStore {
     message: "",
     signedIn: false,
   });
+  const [memory, setMemory] = useState<CheckInMemory>(EMPTY_MEMORY);
+  const [undoable, setUndoable] = useState<Undoable | null>(null);
+  /** The record as it was just before the last delete / clear. */
+  const snapshot = useRef<{ id: number; at: number; logs: PeriodLog[]; days: DayLog[] } | null>(
+    null,
+  );
+  const undoSeq = useRef(0);
   const skipPersist = useRef(true);
   const skipDayPersist = useRef(true);
   const profileId = useRef<string | null>(null);
@@ -111,6 +158,7 @@ export function usePeriodLog(): PeriodLogStore {
       const days = stored.length === 0 ? mergeDayLists([], legacyLocalDays()).days : stored;
       setLogs(loadLogs());
       setDays(days);
+      setMemory(loadCheckInMemory());
       setToday(todayKey());
       setHydrated(true);
     };
@@ -289,12 +337,82 @@ export function usePeriodLog(): PeriodLogStore {
     return { ok: true, id };
   }, []);
 
-  const remove = useCallback((id: string) => {
-    setLogs((prev) => prev.filter((l) => l.id !== id));
+  /* ------------------------------- undo ---------------------------------- */
+
+  /** Keep a copy of the record, then let the caller change it. */
+  const keepForUndo = useCallback((message: string) => {
+    const id = ++undoSeq.current;
+    const at = Date.now();
+    snapshot.current = { id, at, logs: loadLogs(), days: daysRef.current };
+    setUndoable({ id, message, until: at + UNDO_WINDOW_MS });
   }, []);
 
+  /* the snapshot expires by itself */
+  useEffect(() => {
+    if (!undoable) return;
+    const ms = Math.max(0, undoable.until - Date.now());
+    const t = window.setTimeout(() => {
+      setUndoable((u) => (u && u.id === undoable.id ? null : u));
+      if (snapshot.current?.id === undoable.id) snapshot.current = null;
+    }, ms);
+    return () => window.clearTimeout(t);
+  }, [undoable]);
+
+  const undo = useCallback(() => {
+    const snap = snapshot.current;
+    if (!snap) return;
+    snapshot.current = null;
+    setUndoable(null);
+    setLogs(snap.logs);
+    setDays((current) => {
+      /* restore days that were removed; re-queue them for the account */
+      const have = new Set(current.map((d) => d.date));
+      const restored = snap.days.filter((d) => !have.has(d.date));
+      for (const d of restored) {
+        deletedDates.current.delete(d.date);
+        dirtyDates.current.add(d.date);
+      }
+      return [...current, ...restored].sort((a, b) => a.date.localeCompare(b.date));
+    });
+  }, []);
+
+  const dismissUndo = useCallback(() => {
+    snapshot.current = null;
+    setUndoable(null);
+  }, []);
+
+  const remove = useCallback(
+    (id: string) => {
+      const entry = loadLogs().find((l) => l.id === id);
+      keepForUndo(
+        entry
+          ? `Removed the period that started ${formatDate(entry.start)}.`
+          : "Removed the entry.",
+      );
+      setLogs((prev) => prev.filter((l) => l.id !== id));
+    },
+    [keepForUndo],
+  );
+
   const clearAll = useCallback(() => {
+    keepForUndo("Cleared your whole record.");
     setLogs([]);
+  }, [keepForUndo]);
+
+  const setPeriodEnd = useCallback((id: string, end: string | null): SaveResult => {
+    const current = loadLogs();
+    const entry = current.find((l) => l.id === id);
+    if (!entry) return { ok: false, errors: { start: "That entry no longer exists." } };
+    const draft: LogDraft = {
+      start: entry.start,
+      end,
+      flow: entry.flow ?? null,
+      notes: entry.notes ?? null,
+    };
+    const errors = validateLogDraft(draft, current, todayKey(), id);
+    if (Object.keys(errors).length > 0) return { ok: false, errors };
+    setLogs((prev) => prev.map((l) => (l.id === id ? { ...l, end } : l)));
+    return { ok: true, id };
   }, []);
 
   const importLegacy = useCallback(() => {
@@ -322,21 +440,29 @@ export function usePeriodLog(): PeriodLogStore {
     return { ok: true };
   }, []);
 
-  const removeDay = useCallback((date: string) => {
-    setDays((prev) => {
-      for (const d of prev) if (d.date === date) deletedDates.current.add(date);
-      return prev.filter((d) => d.date !== date);
-    });
-    dirtyDates.current.delete(date);
-  }, []);
+  const removeDay = useCallback(
+    (date: string) => {
+      keepForUndo(`Cleared what you logged for ${formatDate(date)}.`);
+      setDays((prev) => {
+        for (const d of prev) if (d.date === date) deletedDates.current.add(date);
+        return prev.filter((d) => d.date !== date);
+      });
+      dirtyDates.current.delete(date);
+    },
+    [keepForUndo],
+  );
 
   const clearDays = useCallback(() => {
+    /* When this follows clearAll in the same tick, that snapshot already holds
+       the days too — one undo brings everything back. */
+    const fresh = snapshot.current && Date.now() - snapshot.current.at < 250;
+    if (!fresh) keepForUndo("Cleared your daily log.");
     setDays((prev) => {
       for (const d of prev) deletedDates.current.add(d.date);
       return [];
     });
     dirtyDates.current.clear();
-  }, []);
+  }, [keepForUndo]);
 
   const analysis = useMemo(() => analyzeCycle(logs, today), [logs, today]);
   const daysRef = useRef<DayLog[]>(days);
@@ -344,6 +470,77 @@ export function usePeriodLog(): PeriodLogStore {
   daysRef.current = days;
   analysisRef.current = analysis;
   const dayAnalysis = useMemo(() => analyzeDayLogs(days, analysis), [days, analysis]);
+
+  /* --------------------------- check-in questions ------------------------ */
+
+  const checkIns = useMemo(
+    () => (hydrated ? reconcile({ logs, days, today, analysis, memory }) : []),
+    [logs, days, today, analysis, memory, hydrated],
+  );
+
+  const rememberAnswer = useCallback(
+    (id: string, how: "dismiss" | "snooze") => {
+      setMemory((prev) => {
+        const next = pruneMemory(remember(prev, id, how, today), loadLogs(), today);
+        saveCheckInMemory(next);
+        return next;
+      });
+    },
+    [today],
+  );
+
+  const answerCheckIn = useCallback(
+    (checkIn: CheckIn, actionId: string): CheckInFollowUp => {
+      const action = checkIn.actions.find((a) => a.id === actionId);
+      if (!action) return { type: "none" };
+      const resolution: CheckInResolution = action.resolution;
+      switch (resolution.type) {
+        case "set-end": {
+          const result = setPeriodEnd(resolution.periodId, resolution.end);
+          if (!result.ok) {
+            /* the record moved under us — park it rather than loop */
+            rememberAnswer(checkIn.id, "snooze");
+            return { type: "none" };
+          }
+          rememberAnswer(checkIn.id, "dismiss");
+          return {
+            type: "saved",
+            message: `Last day recorded as ${formatDate(resolution.end)} — everything below was recalculated.`,
+          };
+        }
+        case "add-period": {
+          const result = add({
+            start: resolution.start,
+            end: resolution.end,
+            flow: resolution.flow,
+            notes: null,
+          });
+          rememberAnswer(checkIn.id, "dismiss");
+          if (!result.ok) {
+            return { type: "focus-form", date: resolution.start, startPeriod: true };
+          }
+          return {
+            type: "saved",
+            message: `Period logged from ${formatDate(resolution.start)} — predictions updated.`,
+          };
+        }
+        case "focus-form":
+          rememberAnswer(checkIn.id, "snooze");
+          return { type: "focus-form", date: resolution.date, startPeriod: resolution.startPeriod };
+        case "edit-period":
+          rememberAnswer(checkIn.id, "snooze");
+          return { type: "edit-period", periodId: resolution.periodId };
+        case "dismiss":
+          rememberAnswer(checkIn.id, "dismiss");
+          return { type: "none" };
+        case "snooze":
+        default:
+          rememberAnswer(checkIn.id, "snooze");
+          return { type: "none" };
+      }
+    },
+    [add, rememberAnswer, setPeriodEnd],
+  );
 
   return {
     sync,
@@ -363,6 +560,12 @@ export function usePeriodLog(): PeriodLogStore {
     saveDay,
     removeDay,
     clearDays,
+    checkIns,
+    answerCheckIn,
+    setPeriodEnd,
+    undoable,
+    undo,
+    dismissUndo,
   };
 }
 

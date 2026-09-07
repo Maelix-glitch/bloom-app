@@ -26,6 +26,8 @@ import { PredictionsCard } from "./PredictionsCard";
 import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
 import { HistoryTable } from "./HistoryTable";
+import { CheckIns } from "./CheckIns";
+import { UndoToast } from "./UndoToast";
 import { Button, Card, Disclaimer } from "./primitives";
 import { SyncLine } from "./SyncLine";
 import { BlockHead } from "./SignatureStrip";
@@ -33,6 +35,7 @@ import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { daysToCsv, logsToCsv } from "@/lib/cycle/periodStore";
 import { DEFAULT_THEME_ID } from "@/lib/cycle/themes";
 import { formatDate, type LogDraft, type PeriodLog } from "@/lib/cycle/predict";
+import type { CheckIn } from "@/lib/cycle/reconcile";
 
 export function CycleIntelligence({
   theme = DEFAULT_THEME_ID,
@@ -96,6 +99,35 @@ export function CycleIntelligence({
     [editing, store],
   );
 
+  /* a check-in answer either edits the record itself or hands over to the form */
+  const answerCheckIn = useCallback(
+    (checkIn: CheckIn, actionId: string) => {
+      const next = store.answerCheckIn(checkIn, actionId);
+      switch (next.type) {
+        case "saved":
+          setNotice(next.message);
+          break;
+        case "focus-form":
+          setEditing(null);
+          if (next.startPeriod) setPendingStart(next.date);
+          else setLogDate(next.date);
+          focusForm();
+          break;
+        case "edit-period": {
+          const entry = logs.find((l) => l.id === next.periodId);
+          if (entry) {
+            setEditing(entry);
+            focusForm();
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    },
+    [store, logs, focusForm],
+  );
+
   const exportCsv = useCallback(() => {
     if (logs.length === 0 && store.days.length === 0) return;
     const stamp = today.replace(/-/g, "");
@@ -147,6 +179,12 @@ export function CycleIntelligence({
         {hydrated && analysis.entryCount > 0 ? (
           <div className="mt-6">
             <SignatureStrip analysis={analysis} dayAnalysis={store.dayAnalysis} />
+          </div>
+        ) : null}
+
+        {hydrated && store.checkIns.length > 0 ? (
+          <div className="mt-6">
+            <CheckIns checkIns={store.checkIns} onAnswer={answerCheckIn} disabled={preview} />
           </div>
         ) : null}
 
@@ -204,6 +242,7 @@ export function CycleIntelligence({
                     onDateChange={setLogDate}
                     disabled={preview}
                     onSavePeriod={submit}
+                    onSetPeriodEnd={store.setPeriodEnd}
                     onSaveDay={store.saveDay}
                     onDeleteDay={store.removeDay}
                     notice={notice}
@@ -455,6 +494,7 @@ export function CycleIntelligence({
                       onPendingConsumed={() => setPendingStart(null)}
                       disabled={preview}
                       onSavePeriod={submit}
+                      onSetPeriodEnd={store.setPeriodEnd}
                       onSaveDay={store.saveDay}
                       onDeleteDay={store.removeDay}
                       notice={notice}
@@ -574,6 +614,9 @@ export function CycleIntelligence({
           </>
         )}
       </div>
+      {!preview ? (
+        <UndoToast undoable={store.undoable} onUndo={store.undo} onDismiss={store.dismissUndo} />
+      ) : null}
     </div>
   );
 }

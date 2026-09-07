@@ -129,7 +129,7 @@ export interface AnalyzeOptions {
   defaultPeriodLength?: number;
 }
 
-const DEFAULTS = {
+export const CYCLE_DEFAULTS = {
   minPlausible: 15,
   maxPlausible: 45,
   recentWindow: 6,
@@ -143,6 +143,8 @@ const DEFAULTS = {
   trendThreshold: 3,
   defaultPeriodLength: 5,
 } as const;
+
+const DEFAULTS = CYCLE_DEFAULTS;
 
 /* -------------------------------- results -------------------------------- */
 
@@ -828,9 +830,8 @@ export function validateLogDraft(
   } else if (diffDays(today, start) > 0) {
     errors.start =
       "That date is in the future. Log a period that has already started, or use today.";
-  } else if (diffDays(start, today) > 730) {
-    errors.start =
-      "That's more than two years back. It's allowed, but check the year — a typo here skews every average.";
+  } else if (diffDays(start, today) > MAX_YEARS_BACK * 365) {
+    errors.start = `That's more than ${MAX_YEARS_BACK} years back. Check the year — a typo here skews every average.`;
   } else if (others.some((e) => e.start === start)) {
     errors.start = `You already have a period starting ${formatDate(start)}. Edit that entry instead of adding a second one.`;
   } else {
@@ -855,9 +856,16 @@ export function validateLogDraft(
       errors.end = `The end date is before the start date (${formatDateShort(start)}). Swap them, or clear the end date — it's optional.`;
     } else if (diffDays(today, end) > 0) {
       errors.end = "The end date is in the future. Leave it blank until the bleeding stops.";
-    } else if (start !== "" && isValidDateKey(start) && diffDays(start, end) > 14) {
-      errors.end =
-        "That's longer than 15 days of bleeding. Check the date, or leave the end date blank and we'll estimate it.";
+    } else if (start !== "" && isValidDateKey(start) && diffDays(start, end) + 1 > MAX_BLEED_DAYS) {
+      errors.end = `That's more than ${MAX_BLEED_DAYS} days of bleeding. Check the date, or leave the end date blank and we'll estimate it.`;
+    } else if (start !== "" && isValidDateKey(start)) {
+      /* The last day can't run into the period that came after it. */
+      const following = others
+        .filter((e) => e.start > start)
+        .sort((a, b) => a.start.localeCompare(b.start))[0];
+      if (following && end >= following.start) {
+        errors.end = `That last day runs into the period you logged starting ${formatDate(following.start)}. Pick an earlier day, or edit that entry.`;
+      }
     }
   }
 
@@ -867,6 +875,106 @@ export function validateLogDraft(
   }
 
   return errors;
+}
+
+/** Hard ceiling for a logged bleed — beyond this it is almost certainly a typo. */
+export const MAX_BLEED_DAYS = 30;
+/** A bleed longer than this is allowed, but worth a gentle note. */
+export const LONG_BLEED_DAYS = 10;
+/** Entries further back than this are refused (a wrong year, not a memory). */
+export const MAX_YEARS_BACK = 10;
+
+export type WarningKey = "start" | "end" | "gap";
+
+export interface LogWarning {
+  key: WarningKey;
+  message: string;
+}
+
+export interface LogAssessment {
+  errors: FieldErrors;
+  /** Non-blocking notes shown next to the fields. The save still goes through. */
+  warnings: LogWarning[];
+  /** Days since the previous logged start, when there is one. */
+  gapBefore: number | null;
+  /** Days until the next logged start, when there is one. */
+  gapAfter: number | null;
+}
+
+/**
+ * Everything the form should say about a draft: hard errors (the save is
+ * refused) plus soft warnings (the save goes through, the person is told).
+ * A cycle is different for every body, so the margins here are wide on
+ * purpose — a warning never blocks a real record.
+ */
+export function assessLogDraft(
+  draft: LogDraft,
+  existing: readonly PeriodLog[],
+  today: string = todayKey(),
+  editingId?: string | null,
+  options: { averageLength?: number | undefined; minPlausible?: number | undefined } = {},
+): LogAssessment {
+  const errors = validateLogDraft(draft, existing, today, editingId);
+  const warnings: LogWarning[] = [];
+  const others = existing.filter((e) => e.id !== editingId);
+  const start = draft.start?.trim() ?? "";
+  const end = draft.end?.trim() ?? "";
+  const minPlausible = options.minPlausible ?? DEFAULTS.minPlausible;
+
+  let gapBefore: number | null = null;
+  let gapAfter: number | null = null;
+
+  if (isValidDateKey(start) && !errors.start) {
+    const before = others
+      .filter((e) => e.start < start)
+      .sort((a, b) => b.start.localeCompare(a.start))[0];
+    const after = others
+      .filter((e) => e.start > start)
+      .sort((a, b) => a.start.localeCompare(b.start))[0];
+    gapBefore = before ? diffDays(before.start, start) : null;
+    gapAfter = after ? diffDays(start, after.start) : null;
+
+    if (diffDays(start, today) > 730) {
+      warnings.push({
+        key: "start",
+        message:
+          "That's more than two years back. Allowed — just check the year, because a typo here skews every average.",
+      });
+    }
+    if (gapBefore !== null && gapBefore < minPlausible) {
+      warnings.push({
+        key: "gap",
+        message: `Only ${gapBefore} ${plural(gapBefore, "day", "days")} after the period that started ${formatDate(before!.start)}. That's too close to count as a new cycle, so this gap will be left out of your average — if it's the same period continuing, extend that entry instead.`,
+      });
+    } else if (
+      gapBefore !== null &&
+      options.averageLength &&
+      gapBefore < Math.round(options.averageLength * 0.75)
+    ) {
+      warnings.push({
+        key: "gap",
+        message: `${gapBefore} days after your last start — noticeably earlier than your usual ${Math.round(options.averageLength)}. If this was spotting rather than a period, untick "first day of a period".`,
+      });
+    }
+    if (gapAfter !== null && gapAfter < minPlausible) {
+      warnings.push({
+        key: "gap",
+        message: `Only ${gapAfter} ${plural(gapAfter, "day", "days")} before the period that started ${formatDate(after!.start)}. One of the two is probably the same period — the gap will be left out of your average.`,
+      });
+    }
+  }
+
+  if (isValidDateKey(start) && isValidDateKey(end) && !errors.end) {
+    const length = diffDays(start, end) + 1;
+    if (length > LONG_BLEED_DAYS) {
+      warnings.push({
+        key: "end",
+        message: `${length} days of bleeding is longer than most periods. It's recorded as you logged it — if bleeds this long are new for you, that's worth mentioning to a doctor or nurse.`,
+      });
+    }
+  }
+
+  return { errors, warnings, gapBefore, gapAfter };
 }
 
 /* --------------------------------- misc ---------------------------------- */

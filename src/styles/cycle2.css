@@ -220,12 +220,33 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/**
+ * Full width, like Today and Mood: the shell's <main> already sits beside the
+ * rail, so the page runs edge to edge inside it. Side padding mirrors the
+ * app-shell contract (px-5 · sm:px-8 · lg:px-10); the bottom clears the
+ * phone tab bar.
+ */
 .ci-shell {
   position: relative;
   width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px 20px 112px;
+}
+@media (min-width: 640px) {
+  .ci-shell {
+    padding: 28px 32px 112px;
+  }
+}
+@media (min-width: 1024px) {
+  .ci-shell {
+    padding: 28px 40px 96px;
+  }
+}
+/** The design gallery has no rail beside it, so it keeps a centred column. */
+.ci-shell--narrow {
   max-width: 1060px;
   margin: 0 auto;
-  padding: clamp(22px, 4vw, 46px) clamp(16px, 4vw, 30px) 80px;
 }
 
 .ci-display {
@@ -1220,4 +1241,137 @@ textarea.ci-input {
   height: 16px;
   margin-top: 2px;
   accent-color: var(--ci-follicular);
+}
+
+/* ------------------------------- check-ins -------------------------------- */
+/* One question at a time, about the period being lived right now. Never a
+   wall: every check-in has a "Not now" and disappears when the record no
+   longer needs it. */
+
+.ci-checkin {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  padding: 16px 18px 15px;
+  border-radius: var(--ci-radius-md);
+  border: 1px solid var(--c-line, var(--ci-line-strong));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--c-tint, var(--ci-follicular)) 12%, transparent),
+      transparent 62%
+    ),
+    var(--ci-surface-2);
+  animation: ci-unfold 0.36s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+.ci-checkin[data-tone="info"] {
+  --c-tint: var(--ci-follicular);
+  --c-line: color-mix(in oklab, var(--ci-follicular) 36%, transparent);
+}
+.ci-checkin[data-tone="attention"] {
+  --c-tint: var(--ci-ovulation);
+  --c-line: color-mix(in oklab, var(--ci-ovulation) 40%, transparent);
+}
+.ci-checkin[data-tone="calm"] {
+  --c-tint: var(--ci-luteal);
+  --c-line: var(--ci-line-strong);
+}
+.ci-checkin__icon {
+  margin-top: 1px;
+  color: var(--c-tint, var(--ci-text-soft));
+}
+.ci-checkin__title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ci-text);
+}
+.ci-checkin__body {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ci-text-soft);
+}
+.ci-checkin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ci-checkin__more {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+}
+
+/* the undo strip that follows a delete / clear */
+.ci-undo {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(92vw, 480px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line-strong);
+  background: color-mix(in oklab, var(--ci-surface) 92%, var(--ci-text) 8%);
+  box-shadow: var(--ci-shadow);
+  color: var(--ci-text);
+  font-size: 12.5px;
+  transform: translateX(-50%);
+  animation: ci-unfold 0.3s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+@media (min-width: 1024px) {
+  .ci-undo {
+    left: calc(50% + var(--app-rail, 0px) / 2);
+    bottom: 28px;
+  }
+}
+.ci-undo__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ci-follicular);
+  transform-origin: left;
+  animation: ci-drain var(--ci-undo-ms, 8000ms) linear both;
+}
+@keyframes ci-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ci-checkin,
+  .ci-undo {
+    animation: none;
+  }
+}
+
+/* a soft, non-blocking note under a field (a warning that still saves) */
+.ci-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: var(--ci-radius-sm, 8px);
+  border: 1px solid color-mix(in oklab, var(--ci-ovulation) 36%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 8%, transparent);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ci-text-soft);
+}
+.ci-note svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--ci-ovulation);
 }

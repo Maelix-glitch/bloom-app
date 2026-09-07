@@ -12,10 +12,10 @@ import type { SyncStatus } from "@/hooks/usePeriodLog";
 const COPY: Record<SyncStatus["state"], string> = {
   off: "stored in this browser only",
   loading: "checking your account…",
-  saved: "saved to your account",
-  pending: "saving to your account…",
-  "signed-out": "saved on this device — sign in to sync",
-  error: "saved here, not yet on your account",
+  saved: "daily log saved to your account · period dates stay on this device",
+  pending: "saving your daily log to your account…",
+  "signed-out": "saved on this device — sign in to sync your daily log",
+  error: "saved here — daily log not yet on your account",
 };
 
 const TONE: Record<SyncStatus["state"], string> = {

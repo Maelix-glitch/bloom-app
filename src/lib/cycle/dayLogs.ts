@@ -24,7 +24,8 @@ import {
 export type MoodValue = "rough" | "low" | "okay" | "good" | "great";
 export type MucusValue = "dry" | "sticky" | "creamy" | "watery" | "egg-white";
 export type LhValue = "negative" | "positive";
-export type DayFlow = FlowLevel | "none";
+/** What a day's bleeding looked like. Spotting is recorded but never counts as a period day. */
+export type DayFlow = FlowLevel | "none" | "spotting";
 
 export const MOOD_VALUES: MoodValue[] = ["rough", "low", "okay", "good", "great"];
 export const MOOD_SCORE: Record<MoodValue, number> = {
@@ -70,6 +71,7 @@ export const MUCUS_LABEL: Record<MucusValue, string> = {
 
 export const FLOW_SCORE: Record<DayFlow, number> = {
   none: 0,
+  spotting: 0.5,
   light: 1,
   medium: 2,
   heavy: 3,
@@ -326,7 +328,12 @@ export function analyzeDayLogs(days: readonly DayLog[], analysis: CycleAnalysis)
       symptomCounter.set(key, entry);
     }
 
-    if (day.flow && day.flow !== "none" && place.cycleDay <= analysis.periodLength) {
+    if (
+      day.flow &&
+      day.flow !== "none" &&
+      day.flow !== "spotting" &&
+      place.cycleDay <= analysis.periodLength
+    ) {
       const list = flowSamples.get(place.cycleDay) ?? [];
       list.push(FLOW_SCORE[day.flow]);
       flowSamples.set(place.cycleDay, list);

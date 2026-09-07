@@ -8,12 +8,15 @@
 
 import type { DayFlow, DayLog, LhValue, MoodValue, MucusValue } from "./dayLogs";
 import { isValidDateKey, type FlowLevel, type PeriodLog } from "./predict";
+import { EMPTY_MEMORY, type CheckInMemory } from "./reconcile";
 import { DEFAULT_THEME_ID } from "./themes";
 
 const KEY = "bloom.cycle.periods.v1";
 /** Advanced daily log — one row per calendar day, keyed by date. */
 const DAY_KEY = "bloom.cycle.days.v1";
 const THEME_KEY = "bloom.cycle.theme.v1";
+/** Answers to the check-in questions — never ask the same thing twice. */
+const CHECKIN_KEY = "bloom.cycle.checkins.v1";
 /** Legacy day-level log written by the previous version of the cycle page. */
 const LEGACY_KEY = "bloom.cycle.entries.local";
 
@@ -82,7 +85,7 @@ function isLh(v: unknown): v is LhValue {
   return v === "negative" || v === "positive";
 }
 function isDayFlow(v: unknown): v is DayFlow {
-  return v === "none" || v === "light" || v === "medium" || v === "heavy";
+  return v === "none" || v === "spotting" || v === "light" || v === "medium" || v === "heavy";
 }
 const inRange = (v: unknown, lo: number, hi: number): v is number =>
   typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
@@ -166,6 +169,43 @@ export function daysToCsv(days: DayLog[]): string {
   ].join("\n");
 }
 
+/* ------------------------------- check-ins -------------------------------- */
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+function dateMap(v: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!isRecord(v)) return out;
+  for (const [k, val] of Object.entries(v)) {
+    if (typeof val === "string" && isValidDateKey(val)) out[k] = val;
+  }
+  return out;
+}
+
+export function loadCheckInMemory(): CheckInMemory {
+  if (!hasWindow()) return EMPTY_MEMORY;
+  try {
+    const raw = window.localStorage.getItem(CHECKIN_KEY);
+    if (!raw) return EMPTY_MEMORY;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return EMPTY_MEMORY;
+    return { dismissed: dateMap(parsed["dismissed"]), snoozed: dateMap(parsed["snoozed"]) };
+  } catch {
+    return EMPTY_MEMORY;
+  }
+}
+
+export function saveCheckInMemory(memory: CheckInMemory): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(CHECKIN_KEY, JSON.stringify(memory));
+  } catch {
+    /* non-fatal */
+  }
+}
+
 export function loadThemeId(): string {
   if (!hasWindow()) return DEFAULT_THEME_ID;
   try {
@@ -209,7 +249,9 @@ export function legacyPeriodCandidates(): PeriodLog[] {
         typeof row["date"] === "string" && isValidDateKey(row["date"]) ? row["date"] : null;
       const flow = row["flow"];
       if (!date) return null;
-      if (flow === undefined || flow === null || flow === "none") return null;
+      /* spotting is an observation, not a period day — it must not start one */
+      if (flow === undefined || flow === null || flow === "none" || flow === "spotting")
+        return null;
       return {
         date,
         flow: isFlow(flow) ? flow : ("medium" as FlowLevel),

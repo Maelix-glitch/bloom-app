@@ -32,20 +32,30 @@ import {
 } from "@/lib/cycle/dayLogs";
 import {
   FLOW_LABEL,
+  addDays,
+  assessLogDraft,
   formatDate,
+  formatDateShort,
   type CycleAnalysis,
   type FieldErrors,
   type FlowLevel,
   type LogDraft,
+  type LogWarning,
   type PeriodLog,
 } from "@/lib/cycle/predict";
+import { classifyBleedDay, recordedEnd, usualBleedLength } from "@/lib/cycle/reconcile";
 
 const BLEEDS: { value: DayFlow; label: string }[] = [
   { value: "none", label: "None" },
+  { value: "spotting", label: "Spotting" },
   { value: "light", label: "Light" },
   { value: "medium", label: "Medium" },
   { value: "heavy", label: "Heavy" },
 ];
+
+/** A real period day — spotting and "none" are observations, not periods. */
+const isPeriodBleed = (b: DayFlow | null): b is FlowLevel =>
+  b === "light" || b === "medium" || b === "heavy";
 const MUCUS_VALUES: MucusValue[] = ["dry", "sticky", "creamy", "watery", "egg-white"];
 const LH_VALUES: { value: LhValue; label: string }[] = [
   { value: "negative", label: "Negative" },
@@ -65,6 +75,11 @@ export interface LogPanelProps {
   onPendingConsumed?: () => void;
   disabled?: boolean;
   onSavePeriod: (draft: LogDraft) => { ok: true; id: string } | { ok: false; errors: FieldErrors };
+  /** Change just the last day of an existing entry (closing / extending it from the day log). */
+  onSetPeriodEnd?: (
+    id: string,
+    end: string | null,
+  ) => { ok: true; id: string } | { ok: false; errors: FieldErrors };
   onSaveDay: (draft: DayLog) => { ok: true } | { ok: false; errors: DayFieldErrors };
   onDeleteDay: (date: string) => void;
   /**
@@ -88,6 +103,7 @@ export function LogPanel({
   onPendingConsumed,
   disabled = false,
   onSavePeriod,
+  onSetPeriodEnd,
   onSaveDay,
   onDeleteDay,
   notice = null,
@@ -117,6 +133,11 @@ export function LogPanel({
   const [open, setOpen] = useState(false);
 
   const [periodErrors, setPeriodErrors] = useState<FieldErrors>({});
+  const [periodWarnings, setPeriodWarnings] = useState<LogWarning[]>([]);
+  /** "Bleeding: none" inside an open period → offer to close it on the previous day. */
+  const [closePeriod, setClosePeriod] = useState(false);
+  /** A bleed right after a period → offer to extend it instead of starting a new one. */
+  const [extendPeriod, setExtendPeriod] = useState(false);
   const [dayErrors, setDayErrors] = useState<DayFieldErrors>({});
   const [status, setStatus] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -150,6 +171,9 @@ export function LogPanel({
     setBleed(existing?.flow ?? null);
     setNotes(existing?.notes ?? "");
     setDayErrors({});
+    setPeriodWarnings([]);
+    setClosePeriod(false);
+    setExtendPeriod(false);
     setStatus(null);
     setConfirmDelete(false);
     if (existing && ((existing.symptoms ?? []).length > 0 || existing.mood !== null)) {
@@ -187,6 +211,49 @@ export function LogPanel({
   const placement = placeDate(analysis, date);
   const numOrNull = (v: string) => (v.trim() === "" ? null : Number(v));
 
+  /* What a bleed on this date most likely means, given the record. */
+  const context = useMemo(
+    () => (editing ? null : classifyBleedDay(date, logs, analysis)),
+    [editing, date, logs, analysis],
+  );
+  /** The period this date sits inside or right after, if any. */
+  const nearPeriod =
+    context && (context.kind === "inside" || context.kind === "adjacent") ? context.period : null;
+  const nearPeriodEnd = nearPeriod ? recordedEnd(nearPeriod) : null;
+  const usual = usualBleedLength(analysis);
+  /** "None" on day ≥2 of a period that is open (or recorded as still running) → can close it. */
+  const canCloseHere =
+    !!nearPeriod &&
+    context?.kind === "inside" &&
+    context.dayOfPeriod >= 2 &&
+    bleed === "none" &&
+    (nearPeriodEnd === null || nearPeriodEnd >= date) &&
+    !!onSetPeriodEnd;
+  /** A bleed that continues a period → can extend it to this day. */
+  const canExtendHere =
+    !!nearPeriod &&
+    isPeriodBleed(bleed) &&
+    !startPeriod &&
+    !!onSetPeriodEnd &&
+    ((context?.kind === "adjacent" && !!nearPeriodEnd) ||
+      (context?.kind === "inside" &&
+        context.dayOfPeriod >= 2 &&
+        (nearPeriodEnd === null || nearPeriodEnd < date)));
+  /** Live soft warnings for the period half of the form. */
+  const liveAssessment = useMemo(
+    () =>
+      startPeriod && isPeriodBleed(bleed)
+        ? assessLogDraft(
+            { start: date, end: end === "" ? null : end, flow: bleed, notes: null },
+            logs,
+            today,
+            editing?.id ?? null,
+            { averageLength: analysis.isGeneric ? undefined : analysis.averageLengthRaw },
+          )
+        : null,
+    [startPeriod, bleed, date, end, logs, today, editing, analysis],
+  );
+
   const dayDraft: DayLog = {
     date,
     flow: bleed,
@@ -219,7 +286,7 @@ export function LogPanel({
     setDayErrors({});
     setStatus(null);
 
-    if (!startPeriod && !dayHasContent) {
+    if (!startPeriod && !closePeriod && !extendPeriod && !dayHasContent) {
       setDayErrors({ notes: "Pick a bleed level or open the advanced log first." });
       setOpen(true);
       return;
@@ -238,22 +305,49 @@ export function LogPanel({
     }
 
     let periodOk = false;
+    let periodNote: string | null = null;
     if (startPeriod) {
-      if (!bleed || bleed === "none") {
-        setPeriodErrors({ flow: "Pick a bleed level for the day it started." });
+      if (!isPeriodBleed(bleed)) {
+        setPeriodErrors({
+          flow:
+            bleed === "spotting"
+              ? "Spotting on its own doesn't start a period. Pick light, medium or heavy for the first real day — or untick the box to log it as spotting."
+              : "Pick a bleed level for the day it started.",
+        });
         return;
       }
-      const result = onSavePeriod({
+      const draft: LogDraft = {
         start: date,
         end: end === "" ? null : end,
-        flow: bleed as FlowLevel,
+        flow: bleed,
         notes: notes.trim() === "" ? null : notes.trim(),
-      });
+      };
+      const result = onSavePeriod(draft);
       if (!result.ok) {
         setPeriodErrors(result.errors);
         return;
       }
       periodOk = true;
+      const warned = assessLogDraft(draft, logs, today, editing?.id ?? null, {
+        averageLength: analysis.isGeneric ? undefined : analysis.averageLengthRaw,
+      }).warnings;
+      if (warned.length > 0) periodNote = "Saved — with a note below.";
+      setPeriodWarnings(warned);
+    } else if (closePeriod && nearPeriod && onSetPeriodEnd) {
+      const lastDay = date > nearPeriod.start ? addDays(date, -1) : nearPeriod.start;
+      const result = onSetPeriodEnd(nearPeriod.id, lastDay);
+      if (!result.ok) {
+        setPeriodErrors(result.errors);
+        return;
+      }
+      periodNote = `Period closed — last day ${formatDateShort(lastDay)}. Predictions updated.`;
+    } else if (extendPeriod && nearPeriod && onSetPeriodEnd) {
+      const result = onSetPeriodEnd(nearPeriod.id, date);
+      if (!result.ok) {
+        setPeriodErrors(result.errors);
+        return;
+      }
+      periodNote = `Period extended — now runs to ${formatDateShort(date)}.`;
     }
 
     if (dayHasContent) {
@@ -269,17 +363,24 @@ export function LogPanel({
     setStatus(
       editing
         ? "Updated. Everything below was recalculated."
-        : periodOk && dayHasContent
-          ? "Period and day logged."
-          : periodOk
-            ? "Period logged — predictions updated."
-            : existing
-              ? "Day updated."
-              : "Day logged.",
+        : periodNote && periodOk
+          ? periodNote
+          : periodOk && dayHasContent
+            ? "Period and day logged."
+            : periodOk
+              ? "Period logged — predictions updated."
+              : periodNote
+                ? periodNote
+                : existing
+                  ? "Day updated."
+                  : "Day logged.",
     );
     if (!editing) {
       setEnd("");
       setPeriodErrors({});
+      setStartPeriod(false);
+      setClosePeriod(false);
+      setExtendPeriod(false);
     }
   };
 
@@ -306,8 +407,31 @@ export function LogPanel({
   const pickBleed = (value: DayFlow) => {
     const next = bleed === value ? null : value;
     setBleed(next);
-    setStartPeriod(next !== null && next !== "none");
     setPeriodErrors({});
+    setPeriodWarnings([]);
+    if (editing) return;
+    /* Pre-tick "first day of a period" ONLY when this date plausibly starts a
+       new cycle. Day 3 of a period, or the day after it ended, is not day 1 —
+       that was the loophole that created 2-day "cycles". */
+    const ctx = classifyBleedDay(date, logs, analysis);
+    const startsCycle =
+      isPeriodBleed(next) &&
+      (ctx.kind === "new" || (ctx.kind === "inside" && ctx.dayOfPeriod === 1));
+    setStartPeriod(startsCycle);
+    /* A bleed right after a period defaults to extending it; "none" on a day
+       inside an open period defaults to closing it. Both are visible ticks. */
+    setExtendPeriod(
+      isPeriodBleed(next) &&
+        !startsCycle &&
+        ((ctx.kind === "adjacent" && !!recordedEnd(ctx.period)) ||
+          (ctx.kind === "inside" && ctx.dayOfPeriod >= 2 && !recordedEnd(ctx.period))),
+    );
+    setClosePeriod(
+      next === "none" &&
+        ctx.kind === "inside" &&
+        ctx.dayOfPeriod >= 2 &&
+        (recordedEnd(ctx.period) === null || recordedEnd(ctx.period)! >= date),
+    );
   };
 
   const periodErrorCount = Object.keys(periodErrors).length;
@@ -395,8 +519,82 @@ export function LogPanel({
           ) : null}
         </fieldset>
 
+        {/* ------------------------- where this day sits ------------------------- */}
+        {!editing && nearPeriod && bleed !== null ? (
+          <p className="mt-2.5 text-[11.5px] leading-relaxed ci-muted" data-testid="log-context">
+            {context?.kind === "inside"
+              ? `Day ${context.dayOfPeriod} of the period that started ${formatDateShort(nearPeriod.start)}${
+                  nearPeriodEnd
+                    ? ` (recorded to ${formatDateShort(nearPeriodEnd)})`
+                    : " (no last day yet)"
+                }.`
+              : context?.kind === "adjacent"
+                ? `${context.daysAfterEnd} ${context.daysAfterEnd === 1 ? "day" : "days"} after the period that started ${formatDateShort(nearPeriod.start)}${
+                    nearPeriodEnd
+                      ? ` ended (${formatDateShort(nearPeriodEnd)})`
+                      : ` would usually have ended (about ${usual} days)`
+                  }.`
+                : null}
+          </p>
+        ) : null}
+        {!editing && context?.kind === "soon-after" && isPeriodBleed(bleed) ? (
+          <p className="mt-2.5 text-[11.5px] leading-relaxed ci-muted" data-testid="log-context">
+            {context.daysSinceStart} days after your last period started — too soon to count as a
+            new cycle, so if you log it as one the gap is left out of your average.
+          </p>
+        ) : null}
+
+        {/* ---------------------- close / extend the current period --------------- */}
+        {canCloseHere && nearPeriod ? (
+          <div className="mt-4 rounded-[var(--ci-radius-md)] px-3.5 py-3 ci-hair">
+            <label className="flex items-start gap-2.5 text-[12.5px] leading-snug">
+              <input
+                type="checkbox"
+                className="ci-check"
+                checked={closePeriod}
+                disabled={disabled}
+                onChange={(e) => setClosePeriod(e.target.checked)}
+                data-testid="log-close-period"
+              />
+              <span>
+                {context?.kind === "inside" && context.dayOfPeriod - 1 < usual
+                  ? "The period ended early"
+                  : "The period has ended"}{" "}
+                — record{" "}
+                <strong className="font-medium">
+                  {formatDateShort(date > nearPeriod.start ? addDays(date, -1) : nearPeriod.start)}
+                </strong>{" "}
+                as its last day
+                <span className="ci-muted">
+                  {" "}
+                  — untick if it's just a quiet day and the bleeding is continuing
+                </span>
+              </span>
+            </label>
+          </div>
+        ) : null}
+        {canExtendHere && nearPeriod && !startPeriod ? (
+          <div className="mt-4 rounded-[var(--ci-radius-md)] px-3.5 py-3 ci-hair">
+            <label className="flex items-start gap-2.5 text-[12.5px] leading-snug">
+              <input
+                type="checkbox"
+                className="ci-check"
+                checked={extendPeriod}
+                disabled={disabled}
+                onChange={(e) => setExtendPeriod(e.target.checked)}
+                data-testid="log-extend-period"
+              />
+              <span>
+                <strong className="font-medium">Same period, still going</strong> — move its last
+                day to {formatDateShort(date)}
+                <span className="ci-muted"> — untick if this is spotting between periods</span>
+              </span>
+            </label>
+          </div>
+        ) : null}
+
         {/* ---------------------------- period start ----------------------------- */}
-        {bleed && bleed !== "none" ? (
+        {isPeriodBleed(bleed) ? (
           <div className="mt-4 rounded-[var(--ci-radius-md)] px-3.5 py-3 ci-hair">
             <label className="flex items-start gap-2.5 text-[12.5px] leading-snug">
               <input
@@ -404,11 +602,23 @@ export function LogPanel({
                 className="ci-check"
                 checked={startPeriod}
                 disabled={disabled || Boolean(editing)}
-                onChange={(e) => setStartPeriod(e.target.checked)}
+                onChange={(e) => {
+                  setStartPeriod(e.target.checked);
+                  if (e.target.checked) setExtendPeriod(false);
+                }}
+                data-testid="log-start-period"
               />
               <span>
                 This is the <strong className="font-medium">first day of a period</strong>
-                <span className="ci-muted"> — used for predictions</span>
+                <span className="ci-muted">
+                  {" "}
+                  — used for predictions
+                  {!editing && context?.kind === "inside" && context.dayOfPeriod > 1
+                    ? `. Not ticked, because this looks like day ${context.dayOfPeriod} of a period you already logged`
+                    : !editing && context?.kind === "adjacent"
+                      ? ". Not ticked, because this looks like the same period continuing"
+                      : ""}
+                </span>
               </span>
             </label>
 
@@ -456,8 +666,22 @@ export function LogPanel({
                 A period already starts on this date — saving will update it.
               </p>
             ) : null}
+            {(liveAssessment?.warnings ?? []).map((w) => (
+              <p key={w.key + w.message} className="ci-note" data-testid={`log-warning-${w.key}`}>
+                <AlertCircle size={13} aria-hidden />
+                <span>{w.message}</span>
+              </p>
+            ))}
           </div>
         ) : null}
+        {periodWarnings.length > 0 && !startPeriod
+          ? periodWarnings.map((w) => (
+              <p key={w.key + w.message} className="ci-note" data-testid={`log-warning-${w.key}`}>
+                <AlertCircle size={13} aria-hidden />
+                <span>{w.message}</span>
+              </p>
+            ))
+          : null}
 
         {/* --------------------------- advanced log ------------------------------ */}
         <button
@@ -763,6 +987,9 @@ export function LogPanel({
                 setEnd("");
                 setNotes("");
                 setPeriodErrors({});
+                setPeriodWarnings([]);
+                setClosePeriod(false);
+                setExtendPeriod(false);
                 setStatus(null);
               }}
             >

@@ -94,7 +94,11 @@ export function HistoryTable({
                           <span className="mt-0.5 block text-[11.5px] ci-muted">
                             {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
                           </span>
-                        ) : null}
+                        ) : (
+                          <span className="mt-0.5 block text-[11.5px] ci-muted">
+                            no last day logged
+                          </span>
+                        )}
                       </td>
                       <td>
                         {isFirst ? (
@@ -210,7 +214,9 @@ export function HistoryTable({
                       <span>
                         {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
                       </span>
-                    ) : null}
+                    ) : (
+                      <span>no last day logged</span>
+                    )}
                     {entry.flow ? <span className="capitalize">{entry.flow}</span> : null}
                     {entry.notes ? (
                       <span className="line-clamp-2 basis-full">{entry.notes}</span>
