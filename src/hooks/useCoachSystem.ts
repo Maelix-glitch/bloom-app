@@ -13,7 +13,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
-import { answer as groundedAnswer } from "@/lib/coach/responder";
+import { ask as askCoach } from "@/lib/coach/engine";
+import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
 import { analyzeCycle, describeNextPeriod } from "@/lib/cycle/predict";
@@ -303,16 +304,55 @@ export function useCoachSystem() {
     [profileId],
   );
 
-  const requestResponse = useCallback(async (request: CoachRequest): Promise<CoachResponse> => {
-    // deterministic + grounded — see the responder's module header. A model
-    // provider can slot in behind this same signature later.
-    const record = readCoachRecord(
-      memories.filter((m) => m.pinned).map((m) => m.text),
-    );
-    const context = request.context;
-    record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
-    return groundedAnswer({ text: request.text, mode: request.mode }, context, record);
-  }, [memories]);
+  /**
+   * One request in flight at a time. Sending a second question abandons the
+   * first — the answer to a question you've moved on from is just noise, and
+   * an edge function on a cold start can easily still be thinking.
+   */
+  const inFlight = useRef<AbortController | null>(null);
+
+  const requestResponse = useCallback(
+    async (request: CoachRequest): Promise<CoachResponse> => {
+      inFlight.current?.abort();
+      const controller = new AbortController();
+      inFlight.current = controller;
+
+      const record = readCoachRecord(memories.filter((m) => m.pinned).map((m) => m.text));
+      const context = request.context;
+      record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
+
+      /*
+       * The engine tries the Supabase edge function and falls back to the
+       * on-device responder by itself, so there is no error path to handle
+       * here — an answer always comes back.
+       */
+      const result = await askCoach({
+        text: request.text,
+        mode: request.mode,
+        record,
+        context,
+        history: request.history
+          .filter((m) => m.paragraphs.length > 0 || m.text)
+          .slice(-8)
+          .map((m) => ({
+            role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
+            content: m.text ?? m.paragraphs.join("\n\n"),
+          })),
+        provider: activeProvider().id,
+        signal: controller.signal,
+      });
+
+      return {
+        paragraphs: result.paragraphs,
+        sources: result.sources,
+        blocks: result.blocks,
+      };
+    },
+    [memories],
+  );
+
+  /* Abandon anything still in flight when the page goes away. */
+  useEffect(() => () => inFlight.current?.abort(), []);
 
   return useMemo(
     () => ({
