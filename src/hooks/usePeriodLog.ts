@@ -28,6 +28,7 @@ import {
 } from "@/lib/cycle/dayLogs";
 import {
   DEFAULT_CYCLE_SETTINGS,
+  effectiveMode,
   loadCheckInMemory,
   loadCycleSettings,
   loadDays,
@@ -41,6 +42,8 @@ import {
   saveDays,
   saveLogs,
   savePeriodMeta,
+  type CycleMode,
+  type CyclePause,
   type CycleSettings,
   type PeriodMeta,
 } from "@/lib/cycle/periodStore";
@@ -144,6 +147,15 @@ export interface PeriodLogStore {
   settings: CycleSettings;
   /** "It really was that long" — count gaps up to `days` as real cycles from now on. */
   acceptLongCycles: (days: number) => void;
+  /**
+   * The mode as it applies today (a dated pause that has passed reads as
+   * tracking). `tracking` predicts; `paused` keeps history and the daily
+   * log but predicts nothing and is never "late"; `off` also takes the
+   * cycle out of Today, the nav and the coach.
+   */
+  mode: CycleMode;
+  /** "I'm not expecting periods right now / I don't track a cycle." */
+  setMode: (mode: CycleMode, pause?: Partial<Omit<CyclePause, "since">>) => void;
   /** The most recent delete / clear that can still be taken back. */
   undoable: Undoable | null;
   undo: () => void;
@@ -665,10 +677,44 @@ export function usePeriodLog(): PeriodLogStore {
     dirtyDates.current.clear();
   }, [keepForUndo]);
 
+  const mode = effectiveMode(settings, today);
   const analysis = useMemo(
-    () => analyzeCycle(logs, today, { personalMaxPlausible: settings.personalMaxPlausible }),
-    [logs, today, settings.personalMaxPlausible],
+    () =>
+      analyzeCycle(logs, today, {
+        personalMaxPlausible: settings.personalMaxPlausible,
+        expecting: mode === "tracking",
+      }),
+    [logs, today, settings.personalMaxPlausible, mode],
   );
+
+  const setMode = useCallback(
+    (nextMode: CycleMode, pause?: Partial<Omit<CyclePause, "since">>) => {
+      setSettings((prev) => {
+        const next: CycleSettings = {
+          ...prev,
+          mode: nextMode,
+          pause:
+            nextMode === "paused"
+              ? {
+                  until: pause?.until ?? prev.pause?.until ?? null,
+                  reason: pause?.reason ?? prev.pause?.reason ?? null,
+                  since: prev.mode === "paused" && prev.pause ? prev.pause.since : today,
+                }
+              : null,
+          modeChangedAt: new Date().toISOString(),
+        };
+        saveCycleSettings(next);
+        return next;
+      });
+    },
+    [today],
+  );
+
+  /* a dated pause that has run out becomes plain tracking in storage too */
+  useEffect(() => {
+    if (!hydrated) return;
+    if (settings.mode === "paused" && mode === "tracking") setMode("tracking");
+  }, [hydrated, settings.mode, mode, setMode]);
 
   const acceptLongCycles = useCallback((days: number) => {
     setSettings((prev) => {
@@ -769,6 +815,14 @@ export function usePeriodLog(): PeriodLogStore {
             type: "saved",
             message: `Understood — cycles up to ${resolution.days} days now count as yours. Average and predictions recalculated.`,
           };
+        case "pause-tracking":
+          setMode("paused");
+          rememberAnswer(checkIn.id, "dismiss");
+          return {
+            type: "saved",
+            message:
+              "Understood — predictions are paused and nothing will be called late. Your history stays; turn tracking back on from the Cycle page whenever you like.",
+          };
         case "dismiss":
           rememberAnswer(checkIn.id, "dismiss");
           return { type: "none" };
@@ -778,7 +832,7 @@ export function usePeriodLog(): PeriodLogStore {
           return { type: "none" };
       }
     },
-    [acceptLongCycles, add, remove, rememberAnswer, setPeriodEnd, setPeriodStart],
+    [acceptLongCycles, add, remove, rememberAnswer, setMode, setPeriodEnd, setPeriodStart],
   );
 
   return {
@@ -804,6 +858,8 @@ export function usePeriodLog(): PeriodLogStore {
     setPeriodEnd,
     settings,
     acceptLongCycles,
+    mode,
+    setMode,
     undoable,
     undo,
     dismissUndo,

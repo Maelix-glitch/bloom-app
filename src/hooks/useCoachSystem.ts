@@ -20,6 +20,7 @@ import { analyzeCycle, describeNextPeriod } from "@/lib/cycle/predict";
 import {
   loadLogs as loadPeriodLogs,
   loadDays as loadCycleDays,
+  effectiveMode,
   loadCycleSettings,
 } from "@/lib/cycle/periodStore";
 import { todayKey } from "@/lib/cycle/predict";
@@ -471,21 +472,29 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
   let cycle: CoachRecord["cycle"] = null;
   try {
     const logs = loadPeriodLogs();
+    const settings = loadCycleSettings();
+    const mode = effectiveMode(settings, today);
     /* same options as the Cycle page, so the coach never contradicts it */
     const analysis = analyzeCycle(logs, today, {
-      personalMaxPlausible: loadCycleSettings().personalMaxPlausible,
+      personalMaxPlausible: settings.personalMaxPlausible,
+      expecting: mode === "tracking",
     });
-    cycle = {
-      daysLogged: loadCycleDays().length + logs.length,
-      cycleDay: analysis.cycleDay,
-      phaseLabel: analysis.phaseLabel || null,
-      nextStart: analysis.nextStart,
-      daysUntilNext: analysis.daysUntilNext,
-      averageLength: analysis.isGeneric ? null : analysis.averageLength,
-      confidence: analysis.confidence === "none" ? null : String(analysis.confidence),
-      confidenceReason: analysis.confidenceReason || null,
-      nextPeriod: describeNextPeriod(analysis),
-    };
+    /* cycle tracking turned off → not a topic; the coach neither mentions nor prompts it */
+    cycle =
+      mode === "off"
+        ? null
+        : {
+            paused: mode === "paused",
+            daysLogged: loadCycleDays().length + logs.length,
+            cycleDay: analysis.cycleDay,
+            phaseLabel: analysis.phaseLabel || null,
+            nextStart: analysis.nextStart,
+            daysUntilNext: analysis.daysUntilNext,
+            averageLength: analysis.isGeneric ? null : analysis.averageLength,
+            confidence: analysis.confidence === "none" ? null : String(analysis.confidence),
+            confidenceReason: analysis.confidenceReason || null,
+            nextPeriod: describeNextPeriod(analysis),
+          };
   } catch {
     cycle = null;
   }

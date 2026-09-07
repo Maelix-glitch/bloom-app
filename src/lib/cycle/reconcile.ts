@@ -61,6 +61,8 @@ export type CheckInResolution =
   | { type: "edit-period"; periodId: string }
   /** "It really was that long": raise this person's plausible-cycle ceiling. */
   | { type: "accept-long-cycles"; days: number }
+  /** "I'm not expecting a period": pause predictions and late logic until they say. */
+  | { type: "pause-tracking" }
   | { type: "dismiss" }
   | { type: "snooze" };
 
@@ -730,6 +732,11 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
           },
           { id: "no", label: "Not yet", resolution: { type: "snooze" } },
           { id: "never", label: "Don't ask this cycle", resolution: { type: "dismiss" } },
+          {
+            id: "not-expecting",
+            label: "I'm not expecting a period",
+            resolution: { type: "pause-tracking" },
+          },
         ],
       });
     }
@@ -739,7 +746,8 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
   /* 4 · a gap in the history that probably hides a period               */
   /* ------------------------------------------------------------------ */
   const longGap = analysis.gaps.filter((g) => !g.plausible && g.suggestedMissedDate).slice(-1)[0];
-  if (longGap && longGap.suggestedMissedDate) {
+  /* while periods aren't expected, a long gap is the point, not a puzzle */
+  if (analysis.expecting && longGap && longGap.suggestedMissedDate) {
     ask({
       id: `missed-log:${longGap.toId}:${longGap.fromStart}`,
       kind: "missed-log",

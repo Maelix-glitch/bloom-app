@@ -268,15 +268,96 @@ export function savePeriodMeta(meta: PeriodMeta): void {
 /* ------------------------------- settings -------------------------------- */
 
 /** What the person has told the engine about their own body. */
+/**
+ * Whether Bloom should expect periods right now.
+ *
+ * - `tracking` — the default: predictions, phases, "late" logic.
+ * - `paused`   — pregnancy, postpartum, contraception with no bleed, a
+ *                break: history and the daily log stay, but nothing is
+ *                predicted and nothing is ever "late". Optionally until a
+ *                date, after which tracking resumes on its own.
+ * - `off`      — not tracking a cycle at all: the Cycle ring, focus items,
+ *                nav entry and coach topic disappear. History is kept.
+ */
+export type CycleMode = "tracking" | "paused" | "off";
+
+export interface CyclePause {
+  /** Resume automatically on this day (inclusive); null = until they say. */
+  until: string | null;
+  /** Free text, never required — "pregnant", "on the pill", "just a break". */
+  reason: string | null;
+  /** When they paused, so the page can say "paused since March". */
+  since: string;
+}
+
 export interface CycleSettings {
   /**
    * The longest gap they've confirmed as one real cycle ("no — it really was
    * that long"). Null until they say so. Bounded by the engine's hard ceiling.
    */
   personalMaxPlausible: number | null;
+  mode: CycleMode;
+  /** Only meaningful while `mode === "paused"`. */
+  pause: CyclePause | null;
+  /** ISO stamp of the last mode change — lets two devices agree on the later choice. */
+  modeChangedAt?: string | undefined;
 }
 
-export const DEFAULT_CYCLE_SETTINGS: CycleSettings = { personalMaxPlausible: null };
+export const DEFAULT_CYCLE_SETTINGS: CycleSettings = {
+  personalMaxPlausible: null,
+  mode: "tracking",
+  pause: null,
+};
+
+const MODES: readonly CycleMode[] = ["tracking", "paused", "off"];
+
+export function normalizeMode(v: unknown): CycleMode {
+  return typeof v === "string" && (MODES as readonly string[]).includes(v)
+    ? (v as CycleMode)
+    : "tracking";
+}
+
+export function normalizePause(v: unknown): CyclePause | null {
+  if (!isRecord(v)) return null;
+  const until = v["until"];
+  const reason = v["reason"];
+  const since = v["since"];
+  return {
+    until: typeof until === "string" && isValidDateKey(until) ? until : null,
+    reason: typeof reason === "string" && reason.trim() !== "" ? reason.trim().slice(0, 80) : null,
+    since: typeof since === "string" && isValidDateKey(since) ? since : "1970-01-01",
+  };
+}
+
+/** Whole settings object from anything — storage, a table row, junk. */
+export function normalizeSettings(v: unknown): CycleSettings {
+  if (!isRecord(v)) return { ...DEFAULT_CYCLE_SETTINGS };
+  const pmp = v["personalMaxPlausible"];
+  const mode = normalizeMode(v["mode"]);
+  const out: CycleSettings = {
+    personalMaxPlausible:
+      typeof pmp === "number" && Number.isFinite(pmp) && pmp > 0 ? Math.round(pmp) : null,
+    mode,
+    pause:
+      mode === "paused"
+        ? (normalizePause(v["pause"]) ?? { until: null, reason: null, since: "1970-01-01" })
+        : null,
+  };
+  const stamp = v["modeChangedAt"];
+  if (typeof stamp === "string" && !Number.isNaN(Date.parse(stamp))) out.modeChangedAt = stamp;
+  return out;
+}
+
+/**
+ * The mode as it applies *today*: a pause with an end date that has passed
+ * reads as tracking again — nobody should have to remember to switch back.
+ */
+export function effectiveMode(settings: CycleSettings, today: string): CycleMode {
+  if (settings.mode === "paused" && settings.pause?.until && settings.pause.until < today) {
+    return "tracking";
+  }
+  return settings.mode;
+}
 
 export function loadCycleSettings(): CycleSettings {
   if (!hasWindow()) return DEFAULT_CYCLE_SETTINGS;
@@ -284,16 +365,13 @@ export function loadCycleSettings(): CycleSettings {
     const raw = window.localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_CYCLE_SETTINGS;
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed)) return DEFAULT_CYCLE_SETTINGS;
-    const v = parsed["personalMaxPlausible"];
-    return {
-      personalMaxPlausible:
-        typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.round(v) : null,
-    };
+    return normalizeSettings(parsed);
   } catch {
     return DEFAULT_CYCLE_SETTINGS;
   }
 }
+
+export const CYCLE_SETTINGS_CHANGED = "bloom:cycle-mode-changed";
 
 export function saveCycleSettings(settings: CycleSettings): void {
   if (!hasWindow()) return;
@@ -302,6 +380,9 @@ export function saveCycleSettings(settings: CycleSettings): void {
   } catch {
     /* non-fatal */
   }
+  /* the rail and the coach follow the mode live (not PERIODS_CHANGED — that
+     one makes the period store re-read everything) */
+  window.dispatchEvent(new CustomEvent(CYCLE_SETTINGS_CHANGED));
 }
 
 export function loadThemeId(): string {

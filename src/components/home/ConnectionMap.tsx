@@ -79,9 +79,11 @@ export function ConnectionMap({
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
+  /* a signal the model left out (cycle tracking turned off) simply isn't drawn;
+     everything else keeps its fixed place so the map still reads the same */
   const spokes = useMemo(
     () =>
-      LAYOUT.map((l) => ({
+      LAYOUT.filter((l) => byId.has(l.id)).map((l) => ({
         ...l,
         d: spoke(l.angle),
         strength: byId.get(l.id)?.strength ?? 0,

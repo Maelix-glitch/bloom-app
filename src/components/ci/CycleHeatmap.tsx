@@ -42,10 +42,13 @@ export function CycleHeatmap({
   days,
   analysis,
   compact = false,
+  onSelectDay,
 }: {
   days: DayLog[];
   analysis: CycleAnalysis;
   compact?: boolean;
+  /** When given, every past-or-today cell is a button that opens that day in the log. */
+  onSelectDay?: ((date: string) => void) | undefined;
 }) {
   if (analysis.entryCount === 0) {
     return (
@@ -95,27 +98,46 @@ export function CycleHeatmap({
         <div
           className="grid flex-1 gap-[3px]"
           style={{ gridTemplateColumns: `repeat(${totalDays / 7}, minmax(0, 1fr))` }}
-          role="img"
-          aria-label={`The last ${WEEKS} weeks: ${logged} days logged. Cells are coloured by the phase each day fell in.`}
+          role={onSelectDay ? "group" : "img"}
+          aria-label={`The last ${WEEKS} weeks: ${logged} days logged. Cells are coloured by the phase each day fell in.${
+            onSelectDay ? " Tap a day to log it." : ""
+          }`}
         >
           {cells.map((cell) => {
             const intensity = cell.count === 0 ? 0 : Math.min(1, 0.35 + cell.count * 0.16);
+            const style = {
+              background: cell.day
+                ? `color-mix(in oklab, var(--ci-${cell.phase ?? "follicular"}) ${Math.round(25 + intensity * 70)}%, transparent)`
+                : "var(--ci-surface-2)",
+              outline:
+                cell.date === analysis.today
+                  ? "1px solid var(--ci-text)"
+                  : cell.day
+                    ? `1px solid color-mix(in oklab, var(--ci-${cell.phase ?? "follicular"}) 35%, transparent)`
+                    : "none",
+            };
+            const label = describe(cell, analysis);
+            /* tap a day to log it — "I bled last Tuesday" without hunting for the date input */
+            if (onSelectDay && cell.date <= analysis.today) {
+              return (
+                <button
+                  key={cell.date}
+                  type="button"
+                  title={`${label} — tap to log this day`}
+                  aria-label={`${label}. Log this day.`}
+                  onClick={() => onSelectDay(cell.date)}
+                  className="h-[13px] cursor-pointer rounded-[2px] border-0 p-0 transition-transform hover:scale-[1.35] focus-visible:scale-[1.35] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[var(--ci-text)]"
+                  style={style}
+                  data-testid={`cycle-heat-${cell.date}`}
+                />
+              );
+            }
             return (
               <span
                 key={cell.date}
-                title={describe(cell, analysis)}
+                title={label}
                 className="h-[13px] rounded-[2px]"
-                style={{
-                  background: cell.day
-                    ? `color-mix(in oklab, var(--ci-${cell.phase ?? "follicular"}) ${Math.round(25 + intensity * 70)}%, transparent)`
-                    : "var(--ci-surface-2)",
-                  outline:
-                    cell.date === analysis.today
-                      ? "1px solid var(--ci-text)"
-                      : cell.day
-                        ? `1px solid color-mix(in oklab, var(--ci-${cell.phase ?? "follicular"}) 35%, transparent)`
-                        : "none",
-                }}
+                style={style}
               />
             );
           })}

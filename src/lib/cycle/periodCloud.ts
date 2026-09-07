@@ -19,7 +19,7 @@
  */
 
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
-import { normalizeLog } from "@/lib/cycle/periodStore";
+import { normalizeLog, normalizeSettings } from "@/lib/cycle/periodStore";
 import { isValidDateKey, type PeriodLog } from "@/lib/cycle/predict";
 import type { CheckInMemory } from "@/lib/cycle/reconcile";
 import type { CycleSettings } from "@/lib/cycle/periodStore";
@@ -244,14 +244,9 @@ export function rowToState(row: unknown): CycleState | null {
   if (!row || typeof row !== "object") return null;
   const r = row as Record<string, unknown>;
   const mem = (r["checkins"] ?? {}) as Record<string, unknown>;
-  const set = (r["settings"] ?? {}) as Record<string, unknown>;
-  const pmp = set["personalMaxPlausible"];
   return {
     memory: { dismissed: dateMap(mem["dismissed"]), snoozed: dateMap(mem["snoozed"]) },
-    settings: {
-      personalMaxPlausible:
-        typeof pmp === "number" && Number.isFinite(pmp) && pmp > 0 ? Math.round(pmp) : null,
-    },
+    settings: normalizeSettings(r["settings"]),
     updatedAt: iso(r["updated_at"]) ?? new Date(0).toISOString(),
   };
 }
@@ -260,7 +255,13 @@ export function stateToRow(state: CycleState, profileId: string): Record<string,
   return {
     profile_id: profileId,
     checkins: { dismissed: state.memory.dismissed, snoozed: state.memory.snoozed },
-    settings: { personalMaxPlausible: state.settings.personalMaxPlausible },
+    settings: {
+      personalMaxPlausible: state.settings.personalMaxPlausible,
+      mode: state.settings.mode,
+      pause: state.settings.pause,
+      /* the mode is a deliberate choice, so it carries its own stamp for merging */
+      modeChangedAt: state.settings.modeChangedAt ?? null,
+    },
     updated_at: state.updatedAt,
   };
 }
@@ -282,8 +283,18 @@ export function mergeState(local: CycleState, remote: CycleState): CycleState {
   const a = local.settings.personalMaxPlausible;
   const b = remote.settings.personalMaxPlausible;
   const personalMaxPlausible = a === null ? b : b === null ? a : Math.max(a, b);
+  /* the mode is a single deliberate choice — the later choice wins */
+  const la = local.settings.modeChangedAt ?? "";
+  const ra = remote.settings.modeChangedAt ?? "";
+  const modeSource = ra > la ? remote.settings : local.settings;
   const updatedAt = local.updatedAt > remote.updatedAt ? local.updatedAt : remote.updatedAt;
-  return { memory: { dismissed, snoozed }, settings: { personalMaxPlausible }, updatedAt };
+  const settings: CycleSettings = {
+    personalMaxPlausible,
+    mode: modeSource.mode,
+    pause: modeSource.pause,
+  };
+  if (modeSource.modeChangedAt) settings.modeChangedAt = modeSource.modeChangedAt;
+  return { memory: { dismissed, snoozed }, settings, updatedAt };
 }
 
 /** Nothing answered, nothing confirmed — not worth a row. */
@@ -291,7 +302,8 @@ export function isEmptyState(s: CycleState): boolean {
   return (
     Object.keys(s.memory.dismissed).length === 0 &&
     Object.keys(s.memory.snoozed).length === 0 &&
-    s.settings.personalMaxPlausible === null
+    s.settings.personalMaxPlausible === null &&
+    s.settings.mode === "tracking"
   );
 }
 
@@ -299,7 +311,9 @@ export function sameState(a: CycleState, b: CycleState): boolean {
   return (
     JSON.stringify(a.memory.dismissed) === JSON.stringify(b.memory.dismissed) &&
     JSON.stringify(a.memory.snoozed) === JSON.stringify(b.memory.snoozed) &&
-    a.settings.personalMaxPlausible === b.settings.personalMaxPlausible
+    a.settings.personalMaxPlausible === b.settings.personalMaxPlausible &&
+    a.settings.mode === b.settings.mode &&
+    JSON.stringify(a.settings.pause) === JSON.stringify(b.settings.pause)
   );
 }
 

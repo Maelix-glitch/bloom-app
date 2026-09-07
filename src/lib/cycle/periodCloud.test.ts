@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isEmptyState,
   liveLogs,
   mergePeriodRecords,
   mergeState,
@@ -149,7 +150,7 @@ describe("recordsFromLogs — the plain list becomes stamped records", () => {
 describe("check-in memory + settings travel together", () => {
   const local: CycleState = {
     memory: { dismissed: { "late:x": "2026-09-01" }, snoozed: { "still-open:y": "2026-09-05" } },
-    settings: { personalMaxPlausible: 52 },
+    settings: { personalMaxPlausible: 52, mode: "tracking", pause: null },
     updatedAt: T2,
   };
   const remote: CycleState = {
@@ -157,7 +158,7 @@ describe("check-in memory + settings travel together", () => {
       dismissed: { "missed-log:z": "2026-08-20" },
       snoozed: { "still-open:y": "2026-09-08" },
     },
-    settings: { personalMaxPlausible: 58 },
+    settings: { personalMaxPlausible: 58, mode: "tracking", pause: null },
     updatedAt: T1,
   };
 
@@ -183,8 +184,45 @@ describe("check-in memory + settings travel together", () => {
     expect(rowToState(row)).toEqual(local);
     expect(rowToState({ checkins: "junk", settings: { personalMaxPlausible: -3 } })).toEqual({
       memory: { dismissed: {}, snoozed: {} },
-      settings: { personalMaxPlausible: null },
+      settings: { personalMaxPlausible: null, mode: "tracking", pause: null },
       updatedAt: new Date(0).toISOString(),
     });
+  });
+
+  it("the cycle mode is one deliberate choice — the later choice wins on either side", () => {
+    const paused: CycleState = {
+      ...local,
+      settings: {
+        personalMaxPlausible: 52,
+        mode: "paused",
+        pause: { until: null, reason: "pregnant", since: "2026-09-01" },
+        modeChangedAt: T2,
+      },
+    };
+    const backOn: CycleState = {
+      ...remote,
+      settings: { personalMaxPlausible: 58, mode: "tracking", pause: null, modeChangedAt: T3 },
+    };
+    expect(mergeState(paused, backOn).settings.mode).toBe("tracking");
+    expect(mergeState(backOn, paused).settings.mode).toBe("tracking");
+    const olderOn: CycleState = {
+      ...backOn,
+      settings: { ...backOn.settings, modeChangedAt: T1 },
+    };
+    const m = mergeState(olderOn, paused);
+    expect(m.settings.mode).toBe("paused");
+    expect(m.settings.pause?.reason).toBe("pregnant");
+    /* the ceiling still merges independently */
+    expect(m.settings.personalMaxPlausible).toBe(58);
+    /* an "off" choice is worth a row even with nothing else in it */
+    expect(
+      isEmptyState({
+        memory: { dismissed: {}, snoozed: {} },
+        settings: { personalMaxPlausible: null, mode: "off", pause: null },
+        updatedAt: T1,
+      }),
+    ).toBe(false);
+    /* round trip keeps the pause */
+    expect(rowToState(stateToRow(paused, "p1"))).toEqual(paused);
   });
 });

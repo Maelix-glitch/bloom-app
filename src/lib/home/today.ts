@@ -12,6 +12,7 @@
 import type { TrackerAnalysis, TrackerId } from "@/lib/trackers/core";
 import { TRACKERS } from "@/lib/trackers/core";
 import { describeNextPeriodShort, type CycleAnalysis } from "@/lib/cycle/predict";
+import type { CycleMode } from "@/lib/cycle/periodStore";
 import type {
   Correlation as MoodCorrelation,
   DayAggregate,
@@ -158,8 +159,11 @@ export function readings(input: {
   habits: { completedToday: number; dueToday: number };
   mood: MoodEntry | null;
   cycle: CycleAnalysis;
+  /** `off` removes the Cycle ring entirely; `paused` shows it without a day count. */
+  cycleMode?: CycleMode | undefined;
 }): SignalReading[] {
   const { trackers, habits, mood, cycle } = input;
+  const cycleMode = input.cycleMode ?? "tracking";
   const sleep = trackers.trackers.sleep;
   const study = trackers.trackers.study;
   const energy = trackers.trackers.energy;
@@ -208,14 +212,16 @@ export function readings(input: {
           to: "/trackers",
         }
       : null,
-    {
-      id: "cycle",
-      label: "Cycle",
-      value: cycleDay === null ? "—" : `Day ${cycleDay}`,
-      pct: cycleDay === null ? 0 : clamp01(cycleDay / cycleLen),
-      empty: cycleDay === null,
-      to: "/cycle",
-    },
+    cycleMode === "off"
+      ? null
+      : {
+          id: "cycle",
+          label: "Cycle",
+          value: cycleMode === "paused" ? "Paused" : cycleDay === null ? "—" : `Day ${cycleDay}`,
+          pct: cycleDay === null ? 0 : clamp01(cycleDay / cycleLen),
+          empty: cycleDay === null,
+          to: "/cycle",
+        },
     /* energy also comes from the mood check-in, so it stays even when the tracker is off */
     {
       id: "energy",
@@ -321,9 +327,11 @@ export function connections(input: {
   moodDays: readonly DayAggregate[];
   moodCorrelations: readonly MoodCorrelation[];
   cycle: CycleAnalysis;
+  cycleMode?: CycleMode | undefined;
   today: string;
 }): { nodes: Connection[]; links: CrossLink[] } {
   const { trackers, habits, moodEntries, moodDays, moodCorrelations, cycle, today } = input;
+  const cycleMode = input.cycleMode ?? "tracking";
   const monthAgo = shiftDate(today, -29);
 
   /* strength = evidence: how many of the last 30 days carry this signal,
@@ -343,7 +351,7 @@ export function connections(input: {
   const bestMoodCorr = (key: string) =>
     moodCorrelations.find((c) => c.key === key && c.evidence !== "insufficient") ?? null;
 
-  const nodes: Connection[] = [
+  const nodeList: (Connection | null)[] = [
     {
       id: "mood",
       strength: evidence(moodMonth.length, moodLoggedToday),
@@ -365,18 +373,23 @@ export function connections(input: {
             ? "Nothing due today."
             : `${habits.completedToday} of ${habits.dueToday} done today · ${habitDays} active ${habitDays === 1 ? "day" : "days"} this month.`,
     },
-    {
-      id: "cycle",
-      strength: evidence(Math.min(30, cycleDays * 5), cycle.cycleDay !== null),
-      days: cycleDays,
-      note: cycle.upcomingStart
-        ? `Your latest period entry is dated in the future — fix it on the Cycle page.`
-        : cycle.cycleDay === null
-          ? "Log a period start and Bloom places you in your cycle."
-          : `Day ${cycle.cycleDay} · ${cycle.phaseLabel.toLowerCase()} phase${
-              describeNextPeriodShort(cycle) ? ` · ${describeNextPeriodShort(cycle)}` : ""
-            }.`,
-    },
+    cycleMode === "off"
+      ? null
+      : {
+          id: "cycle" as const,
+          strength: evidence(Math.min(30, cycleDays * 5), cycle.cycleDay !== null),
+          days: cycleDays,
+          note:
+            cycleMode === "paused"
+              ? "Cycle predictions are paused — history kept, nothing due, nothing late."
+              : cycle.upcomingStart
+                ? `Your latest period entry is dated in the future — fix it on the Cycle page.`
+                : cycle.cycleDay === null
+                  ? "Log a period start and Bloom places you in your cycle."
+                  : `Day ${cycle.cycleDay} · ${cycle.phaseLabel.toLowerCase()} phase${
+                      describeNextPeriodShort(cycle) ? ` · ${describeNextPeriodShort(cycle)}` : ""
+                    }.`,
+        },
     {
       id: "energy",
       strength: evidence(energy.daysLogged, energy.today !== null),
@@ -411,6 +424,7 @@ export function connections(input: {
             : `${sleep.daysLogged} nights logged.`,
     },
   ];
+  const nodes = nodeList.filter((n): n is Connection => n !== null);
 
   /* cross links: real correlations only */
   const links: CrossLink[] = [];
@@ -576,8 +590,10 @@ export function focusOf(input: {
   mood: MoodEntry | null;
   trackers: TrackerAnalysis;
   cycle: CycleAnalysis;
+  cycleMode?: CycleMode | undefined;
 }): FocusItem[] {
   const { habits, mood, trackers, cycle } = input;
+  const cycleMode = input.cycleMode ?? "tracking";
   const out: FocusItem[] = [];
 
   const openHabits = [...habits]
@@ -630,7 +646,8 @@ export function focusOf(input: {
     });
   }
 
-  if (out.length < 3 && cycle.cycleDay === null) {
+  /* never nag someone who has said they aren't expecting periods */
+  if (out.length < 3 && cycle.cycleDay === null && cycleMode === "tracking") {
     out.push({
       id: "cycle",
       title: "Set your cycle anchor",

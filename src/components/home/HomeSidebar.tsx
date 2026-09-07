@@ -13,6 +13,7 @@ import {
 
 import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
+import { useCycleMode } from "@/hooks/useCycleMode";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 
 export const HOME_NAV: {
@@ -81,7 +82,14 @@ export function BloomMark({
  * 16px icon slot at the same x, the same gap), so the mark sits on the icon
  * column and the wordmark on the label column.
  */
+/** The primary nav minus "Cycle" when the person has turned cycle tracking off. */
+function useNavItems() {
+  const mode = useCycleMode();
+  return mode === "off" ? HOME_NAV.filter((i) => i.to !== "/cycle") : HOME_NAV;
+}
+
 export function HomeSidebar() {
+  const navItems = useNavItems();
   const { pathname } = useLocation();
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
@@ -117,7 +125,7 @@ export function HomeSidebar() {
         </Link>
         <span className="app-sidebar-rule mx-7 block h-px" />
         <nav className="mt-5 space-y-1 px-4" aria-label="Primary">
-          {HOME_NAV.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = item.match(pathname);
             return (
@@ -245,12 +253,13 @@ export function HomeMobileBar() {
 
 export function HomeMobileNav() {
   const { pathname } = useLocation();
+  const navItems = useNavItems();
   return (
     <nav
       className="app-nav fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 py-2 backdrop-blur-xl lg:hidden"
       aria-label="Primary"
     >
-      {HOME_NAV.map((item) => {
+      {navItems.map((item) => {
         const Icon = item.icon;
         const active = item.match(pathname);
         return (

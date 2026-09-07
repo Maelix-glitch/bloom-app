@@ -2253,3 +2253,78 @@
 .rewards-delivery-page > .rewards-starfield {
   z-index: 1;
 }
+
+/* ------------------------- points · how you earned these ------------------------- */
+/* Today's "1,234 points → Rewards" lands here. Same habit logs, same numbers.        */
+
+.reward-points {
+  margin-top: 34px;
+  padding: 22px 24px;
+  border: 1px solid color-mix(in oklab, var(--gold) 18%, var(--border));
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--surface-2) 45%, transparent);
+  animation: rise-in 0.7s var(--ease-out-expo) both;
+  animation-delay: 80ms;
+}
+.reward-points-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+.reward-points-unit {
+  font-size: 15px;
+  color: var(--faint);
+  letter-spacing: 0.01em;
+}
+.reward-points-week {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.reward-points-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 24px;
+  margin-top: 18px;
+  padding: 0;
+  list-style: none;
+}
+.reward-points-row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  font-size: 13px;
+}
+.reward-points-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.reward-points-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reward-points-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+}
+.reward-points-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+  font-weight: 500;
+}
+.reward-points-empty {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--faint);
+}

@@ -63,6 +63,8 @@ export interface TrackerFacts {
 }
 
 export interface CycleFacts {
+  /** "Not expecting periods right now" — history kept, nothing predicted, never late. */
+  paused?: boolean | undefined;
   daysLogged: number;
   cycleDay: number | null;
   phaseLabel: string | null;
@@ -288,6 +290,13 @@ function periodAnswer(record: CoachRecord): CoachResponse {
     paragraphs.push(
       "There's no cycle logged yet. Log the day your period starts on the Cycle page — one date — and the phase you're in, plus a predicted next start with its confidence, appears immediately.",
     );
+    return { paragraphs, sources, blocks };
+  }
+  if (cycle.paused) {
+    paragraphs.push(
+      "You've told Bloom you're not expecting periods right now, so nothing is predicted and nothing counts as late. Your history is kept; when periods return, switch tracking back on from the Cycle page and the phases and dates come back from your own record.",
+    );
+    sources.push("cycle settings");
     return { paragraphs, sources, blocks };
   }
 

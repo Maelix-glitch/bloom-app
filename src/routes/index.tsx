@@ -109,8 +109,16 @@ function TodayPage() {
         habits: { completedToday: habits.completedToday, dueToday: habits.dueToday },
         mood: moodEntry,
         cycle: cycle.analysis,
+        cycleMode: cycle.mode,
       }),
-    [trackers.analysis, habits.completedToday, habits.dueToday, moodEntry, cycle.analysis],
+    [
+      trackers.analysis,
+      habits.completedToday,
+      habits.dueToday,
+      moodEntry,
+      cycle.analysis,
+      cycle.mode,
+    ],
   );
 
   const score = useMemo(
@@ -137,6 +145,7 @@ function TodayPage() {
         moodDays,
         moodCorrelations: mood.analytics.correlations,
         cycle: cycle.analysis,
+        cycleMode: cycle.mode,
         today,
       }),
     [
@@ -149,6 +158,7 @@ function TodayPage() {
       moodDays,
       mood.analytics.correlations,
       cycle.analysis,
+      cycle.mode,
       today,
     ],
   );
@@ -173,8 +183,9 @@ function TodayPage() {
         mood: moodEntry,
         trackers: trackers.analysis,
         cycle: cycle.analysis,
+        cycleMode: cycle.mode,
       }),
-    [habits.todayHabits, moodEntry, trackers.analysis, cycle.analysis],
+    [habits.todayHabits, moodEntry, trackers.analysis, cycle.analysis, cycle.mode],
   );
 
   const insights = useMemo(

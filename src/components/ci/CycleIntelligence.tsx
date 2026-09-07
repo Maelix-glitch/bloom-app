@@ -27,6 +27,7 @@ import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
 import { HistoryTable } from "./HistoryTable";
 import { CheckIns } from "./CheckIns";
+import { CycleModeCard } from "./CycleModeCard";
 import { UndoToast } from "./UndoToast";
 import { Button, Card, Disclaimer } from "./primitives";
 import { SyncLine } from "./SyncLine";
@@ -56,6 +57,8 @@ export function CycleIntelligence({
   const [logDate, setLogDate] = useState<string>(store.today);
   const formRef = useRef<HTMLDivElement>(null);
   const hasEntries = analysis.entryCount > 0;
+  /* paused / off: history and the daily log stay, everything forward-looking goes quiet */
+  const expecting = store.mode === "tracking";
 
   const focusDayLog = useCallback((date?: string) => {
     if (date) setLogDate(date);
@@ -176,7 +179,17 @@ export function CycleIntelligence({
           </div>
         </header>
 
-        {hydrated && analysis.entryCount > 0 ? (
+        {hydrated ? (
+          <CycleModeCard
+            mode={store.mode}
+            settings={store.settings}
+            today={today}
+            disabled={preview}
+            onChange={store.setMode}
+          />
+        ) : null}
+
+        {hydrated && analysis.entryCount > 0 && expecting ? (
           <div className="mt-6">
             <SignatureStrip analysis={analysis} dayAnalysis={store.dayAnalysis} />
           </div>
@@ -336,50 +349,70 @@ export function CycleIntelligence({
             ) : (
               <>
                 {/* ------------------------- phase overview --------------------- */}
-                <Card className="ci-rise ci-rise-1 mt-8">
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                      <p className="ci-eyebrow">Phase overview</p>
-                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                        Day {analysis.cycleDay} of about {Math.round(analysis.averageLength)}
-                      </h2>
-                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
-                        <span
-                          style={{ color: `var(--ci-${analysis.phase ?? "follicular"})` }}
-                          className="font-medium"
-                        >
-                          {analysis.phaseLabel}
-                        </span>
-                        {analysis.lastStart ? ` · started ${formatDate(analysis.lastStart)}` : null}
-                      </p>
-                    </div>
-                  </div>
+                {expecting ? (
+                  <>
+                    <Card className="ci-rise ci-rise-1 mt-8">
+                      <div className="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                          <p className="ci-eyebrow">Phase overview</p>
+                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                            Day {analysis.cycleDay} of about {Math.round(analysis.averageLength)}
+                          </h2>
+                          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                            <span
+                              style={{ color: `var(--ci-${analysis.phase ?? "follicular"})` }}
+                              className="font-medium"
+                            >
+                              {analysis.phaseLabel}
+                            </span>
+                            {analysis.lastStart
+                              ? ` · started ${formatDate(analysis.lastStart)}`
+                              : null}
+                          </p>
+                        </div>
+                      </div>
 
-                  <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">
-                    <CycleDial analysis={analysis} days={store.days} />
-                    <div>
-                      <PhaseWave analysis={analysis} />
-                      <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
-                        An estimate, not a fact — both assume your next period lands on the
-                        predicted date. Log a new start and they redraw immediately.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+                      <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">
+                        <CycleDial analysis={analysis} days={store.days} />
+                        <div>
+                          <PhaseWave analysis={analysis} />
+                          <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
+                            An estimate, not a fact — both assume your next period lands on the
+                            predicted date. Log a new start and they redraw immediately.
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
 
-                {/* ----------------- predictions · insights · tips -------------- */}
-                <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-                  <div>
-                    <Reveal delay={0}>
-                      <PredictionsCard analysis={analysis} />
-                    </Reveal>
-                  </div>
-                  <div>
-                    <Reveal delay={90}>
-                      <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
-                    </Reveal>
-                  </div>
-                </div>
+                    {/* ----------------- predictions · insights · tips -------------- */}
+                    <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                      <div>
+                        <Reveal delay={0}>
+                          <PredictionsCard analysis={analysis} />
+                        </Reveal>
+                      </div>
+                      <div>
+                        <Reveal delay={90}>
+                          <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
+                        </Reveal>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <Card className="ci-rise ci-rise-1 mt-8" data-testid="cycle-paused-note">
+                    <p className="ci-eyebrow">Predictions paused</p>
+                    <h2 className="ci-display mt-2 text-[19px] leading-tight sm:text-[22px]">
+                      Nothing is due, nothing is late.
+                    </h2>
+                    <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                      Your {analysis.entryCount} logged{" "}
+                      {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and the
+                      daily log still works — log bleeding or symptoms any day. When periods come
+                      back, say so above and the phases, dates and fertile window return from your
+                      own record.
+                    </p>
+                  </Card>
+                )}
 
                 {/* ------------------------ analytics --------------------------- */}
                 <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
@@ -433,33 +466,35 @@ export function CycleIntelligence({
                 </div>
 
                 {/* ------------------- phases + forward look -------------------- */}
-                <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <p className="ci-eyebrow">The four phases</p>
-                    <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                      This cycle, split into phases
-                    </h2>
-                    <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
-                      From your own average, so the dates shift as your record shifts.
-                    </p>
-                    <div className="mt-4">
-                      <PhaseCards analysis={analysis} />
+                {expecting ? (
+                  <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                    <div className="ci-card ci-card--pad ci-lift">
+                      <p className="ci-eyebrow">The four phases</p>
+                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                        This cycle, split into phases
+                      </h2>
+                      <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                        From your own average, so the dates shift as your record shifts.
+                      </p>
+                      <div className="mt-4">
+                        <PhaseCards analysis={analysis} />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <p className="ci-eyebrow">Forward look</p>
-                    <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                      The next three cycles
-                    </h2>
-                    <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
-                      Projected from your average. Useful for planning, never a promise.
-                    </p>
-                    <div className="mt-4">
-                      <ForecastStrip analysis={analysis} />
+                    <div className="ci-card ci-card--pad ci-lift">
+                      <p className="ci-eyebrow">Forward look</p>
+                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                        The next three cycles
+                      </h2>
+                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                        Projected from your average. Useful for planning, never a promise.
+                      </p>
+                      <div className="mt-4">
+                        <ForecastStrip analysis={analysis} />
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : null}
 
                 <div className="mt-4">
                   <Reveal>
@@ -512,7 +547,11 @@ export function CycleIntelligence({
                       note="Each square is a day, coloured by the phase it fell in. Brighter squares carry more logged detail; the outlined square is today."
                     />
                     <div className="mt-4">
-                      <CycleHeatmap days={store.days} analysis={analysis} />
+                      <CycleHeatmap
+                        days={store.days}
+                        analysis={analysis}
+                        onSelectDay={preview ? undefined : focusDayLog}
+                      />
                     </div>
                   </div>
 

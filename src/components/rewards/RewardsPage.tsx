@@ -21,6 +21,7 @@ import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { RewardClaimCinematic, type RewardReveal } from "@/components/rewards/RewardClaimCinematic";
 import { useRewardsSystem, type UserReward } from "@/hooks/useRewardsSystem";
+import { PointsStrip } from "@/components/rewards/PointsStrip";
 import { playRewardSound, setRewardAudioMuted } from "@/lib/rewards/audio";
 import { cn } from "@/lib/utils";
 
@@ -388,6 +389,8 @@ export function RewardsPage() {
             ) : null}
           </div>
         </header>
+
+        <PointsStrip />
 
         {loading ? (
           <div className="reward-loading-state">

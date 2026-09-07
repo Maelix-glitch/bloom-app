@@ -143,6 +143,13 @@ export interface AnalyzeOptions {
   hardMaxPlausible?: number;
   /** Two long gaps within this many days of each other look like a rhythm. */
   longCycleAgreement?: number;
+  /**
+   * `false` when the person has said they're not expecting periods right now
+   * (paused or off). History, averages and stats are still computed; nothing
+   * forward-looking is — no next start, no phase, no fertile window, no
+   * "late", no forecast, no flags about the future.
+   */
+  expecting?: boolean;
 }
 
 export const CYCLE_DEFAULTS = {
@@ -290,6 +297,8 @@ export interface CycleStats {
 }
 
 export interface CycleAnalysis {
+  /** False when tracking is paused or off — see `AnalyzeOptions.expecting`. */
+  expecting: boolean;
   /** Echoed back so callers can assert against a known "today". */
   today: string;
   entryCount: number;
@@ -539,6 +548,7 @@ export function analyzeCycle(
   options: AnalyzeOptions = {},
 ): CycleAnalysis {
   const o = { ...DEFAULTS, ...options };
+  const expecting = options.expecting !== false;
 
   const usable = logs.filter((l) => l && typeof l.start === "string");
   const sorted = [...usable].sort(
@@ -619,7 +629,8 @@ export function analyzeCycle(
   /* A start in the future can't place today anywhere — cycle day 0, "menstrual"
      for a period that hasn't happened. Say "upcoming" instead. */
   const upcomingStart = lastStart && lastStart > today ? lastStart : null;
-  const cycleDay = lastStart && !upcomingStart ? diffDays(lastStart, today) + 1 : null;
+  /* not expecting periods → today isn't "day N of a cycle" at all */
+  const cycleDay = expecting && lastStart && !upcomingStart ? diffDays(lastStart, today) + 1 : null;
 
   /* --- bleed length: logged first, then averaged history, then default --- */
   const loggedDurations = sorted
@@ -638,7 +649,7 @@ export function analyzeCycle(
   );
 
   /* --- predictions ------------------------------------------------------- */
-  const nextStart = lastStart ? addDays(lastStart, cycleLength) : null;
+  const nextStart = expecting && lastStart ? addDays(lastStart, cycleLength) : null;
   const daysUntilNext = nextStart ? diffDays(today, nextStart) : null;
   const lateBy = daysUntilNext !== null && daysUntilNext < 0 ? Math.abs(daysUntilNext) : 0;
   /* "Late" is a claim about this person's rhythm, so it needs one to be late
@@ -732,7 +743,7 @@ export function analyzeCycle(
     }));
   };
 
-  const phaseWindows = lastStart ? layoutPhases(lastStart) : [];
+  const phaseWindows = expecting && lastStart ? layoutPhases(lastStart) : [];
 
   /* --- forecast: the next three cycles, same maths, further out ---------- */
   const forecast: ForecastCycle[] = [];
@@ -793,8 +804,10 @@ export function analyzeCycle(
   /* --- flags (the loopholes, each with its own message) ------------------ */
   const flags: InsightFlag[] = [];
 
-  if (sorted.length === 0) {
+  if (sorted.length === 0 || !expecting) {
     // Edge case 1 — the page hides predictions entirely and prompts instead.
+    // Not expecting periods: the "placeholder" / "still rough" notes are about
+    // predictions that aren't being made, so they stay quiet too.
   } else if (isGeneric) {
     // Edge case 2 — one entry, or none of the gaps are usable.
     flags.push({
@@ -848,7 +861,7 @@ export function analyzeCycle(
   }
 
   // Edge case 5 — meaningfully past the predicted start.
-  if (isLate && lateBy > 0) {
+  if (expecting && isLate && lateBy > 0) {
     flags.push({
       id: "late",
       kind: "late",
@@ -896,6 +909,7 @@ export function analyzeCycle(
   const tips = phase ? PHASE_TIPS[phase] : [];
 
   return {
+    expecting,
     today,
     entryCount: sorted.length,
     logs: sorted,
