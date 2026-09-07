@@ -16,6 +16,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { play } from "@/lib/sound/sound";
 import "@/styles/bloom-sheet.css";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -76,6 +77,20 @@ export function BloomSheet({
 }) {
   const phone = useIsPhone();
   const reduced = useReducedMotion();
+
+  /*
+   * Every sheet in the app gets its open/close cue here rather than at each
+   * call site — one place to change, and no sheet can forget. Fired on the
+   * transition of `open`, not on mount, so a sheet rendered already-open (a
+   * deep link, a restored draft) stays silent.
+   */
+  const wasOpen = React.useRef(open);
+  React.useEffect(() => {
+    if (open !== wasOpen.current) {
+      play(open ? "open" : "close");
+      wasOpen.current = open;
+    }
+  }, [open]);
 
   const panelInitial = reduced
     ? { opacity: 0 }

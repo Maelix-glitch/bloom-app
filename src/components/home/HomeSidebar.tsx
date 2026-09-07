@@ -13,7 +13,7 @@ import {
 
 import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
-import { useCycleMode } from "@/hooks/useCycleMode";
+import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 
 export const HOME_NAV: {
@@ -82,10 +82,14 @@ export function BloomMark({
  * 16px icon slot at the same x, the same gap), so the mark sits on the icon
  * column and the wordmark on the label column.
  */
-/** The primary nav minus "Cycle" when the person has turned cycle tracking off. */
+/**
+ * The primary nav, minus "Cycle" when it doesn't apply — either because
+ * tracking is switched off, or because this person said the cycle isn't part
+ * of their Bloom during setup.
+ */
 function useNavItems() {
-  const mode = useCycleMode();
-  return mode === "off" ? HOME_NAV.filter((i) => i.to !== "/cycle") : HOME_NAV;
+  const { visible } = useCycleVisible();
+  return visible ? HOME_NAV : HOME_NAV.filter((i) => i.to !== "/cycle");
 }
 
 export function HomeSidebar() {

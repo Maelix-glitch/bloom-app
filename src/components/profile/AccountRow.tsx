@@ -21,7 +21,13 @@ import {
   Share2,
   Smartphone,
   Trash2,
+  Droplet,
+  Volume2,
 } from "lucide-react";
+
+import { useCycleVisible } from "@/hooks/useCycleVisible";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { useSound } from "@/hooks/useSound";
 
 import type {
   AccountDetails,
@@ -63,6 +69,88 @@ function Row({
     <button type="button" onClick={onClick} className="pf-row" data-testid={testId}>
       {inner}
     </button>
+  );
+}
+
+/**
+ * A row that flips something rather than opening something. Same grammar as
+ * `Row` — icon, label, value on the right — so the list stays one list, but the
+ * whole row is the hit target and the state is announced properly.
+ */
+function SwitchRow({
+  icon,
+  label,
+  value,
+  on,
+  onToggle,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  on: boolean;
+  onToggle: (next: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={() => onToggle(!on)}
+      className="pf-row"
+    >
+      <span className="pf-row-icon" aria-hidden>
+        {icon}
+      </span>
+      <span className="min-w-0 truncate">{label}</span>
+      <span className="pf-row-value">{value}</span>
+      <span className="pf-switch" data-on={on} aria-hidden>
+        <span className="pf-switch-knob" />
+      </span>
+    </button>
+  );
+}
+
+/**
+ * How Bloom is shaped for this person: whether it includes the cycle, and
+ * whether it makes a sound. Both are answered during setup and both are
+ * reversible here — that promise is the reason the setup flow can be a single
+ * tap per question.
+ */
+function YourBloomSection() {
+  const { optedOut } = useCycleVisible();
+  const { setKind } = useOnboarding();
+  const { enabled, setEnabled, sound } = useSound();
+
+  return (
+    <section aria-label="Your Bloom" className="pf-card overflow-hidden">
+      <p className="pf-eyebrow px-4 pt-3.5 pb-1">Your Bloom</p>
+      <div className="pf-rows">
+        <SwitchRow
+          icon={<Droplet className="size-3.5" />}
+          label="Cycle tracking"
+          value={optedOut ? "hidden" : "included"}
+          on={!optedOut}
+          onToggle={(next) => {
+            sound(next ? "toggleOn" : "toggleOff");
+            /* Turning it off is an explicit opt-out; turning it on is explicit
+               too, rather than reverting to "unspecified". */
+            setKind(next ? "cycle" : "no-cycle");
+          }}
+        />
+        <SwitchRow
+          icon={<Volume2 className="size-3.5" />}
+          label="Sound"
+          value={enabled ? "on" : "off"}
+          on={enabled}
+          onToggle={(next) => {
+            /* setEnabled plays the confirmation itself when switching on —
+               the only way to hear what you just enabled. */
+            if (!next) sound("toggleOff");
+            setEnabled(next);
+          }}
+        />
+      </div>
+    </section>
   );
 }
 
@@ -217,6 +305,8 @@ export function AccountRow({
           )}
         </div>
       </section>
+
+      <YourBloomSection />
 
       <section aria-label="Your data" className="pf-card overflow-hidden">
         <p className="pf-eyebrow px-4 pt-3.5 pb-1">Sharing &amp; data</p>
