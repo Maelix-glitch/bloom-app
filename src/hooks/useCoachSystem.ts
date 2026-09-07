@@ -16,7 +16,7 @@ import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { answer as groundedAnswer } from "@/lib/coach/responder";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
-import { analyzeCycle } from "@/lib/cycle/predict";
+import { analyzeCycle, describeNextPeriod } from "@/lib/cycle/predict";
 import {
   loadLogs as loadPeriodLogs,
   loadDays as loadCycleDays,
@@ -484,6 +484,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
       averageLength: analysis.isGeneric ? null : analysis.averageLength,
       confidence: analysis.confidence === "none" ? null : String(analysis.confidence),
       confidenceReason: analysis.confidenceReason || null,
+      nextPeriod: describeNextPeriod(analysis),
     };
   } catch {
     cycle = null;

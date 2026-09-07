@@ -4,6 +4,7 @@ import {
   ArchiveRestore,
   Check,
   Flame,
+  History,
   Loader2,
   MoreHorizontal,
   PauseCircle,
@@ -19,9 +20,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { HabitToday } from "@/hooks/useHabits";
+import { BACKFILL_DAYS, type HabitToday } from "@/hooks/useHabits";
 import { streakOf, streakUnitOf, type Habit, type HabitLog } from "@/lib/home/habits";
 import { habitColorVar } from "@/lib/home/today";
 import { formatDateShort } from "@/lib/cycle/predict";
@@ -61,7 +65,8 @@ export function HabitsSection({
   today: string;
   loading: boolean;
   points: number | null;
-  onToggle: (id: string) => void;
+  /** Tick/untick. `date` is a local day within the last week; omitted = today. */
+  onToggle: (id: string, date?: string) => void;
   onAdd: () => void;
   paused?: Habit[] | undefined;
   archived?: Habit[] | undefined;
@@ -183,7 +188,9 @@ export function HabitsSection({
             const tone = `var(--${habitColorVar(h.color)})`;
             return (
               <li key={h.id} className="relative">
-                {hasMenu ? <HabitMenu habit={h} today={today} actions={actions} /> : null}
+                {hasMenu ? (
+                  <HabitMenu habit={h} today={today} actions={actions} onToggle={onToggle} />
+                ) : null}
                 <button
                   type="button"
                   onClick={() => onToggle(h.id)}
@@ -250,6 +257,17 @@ export function HabitsSection({
                     {h.done ? <Check className="size-3.5" /> : null}
                   </span>
                 </button>
+                {h.missedYesterday ? (
+                  <button
+                    type="button"
+                    onClick={() => onToggle(h.id, h.missedYesterday!)}
+                    className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                    data-testid={`home-habit-yesterday-${h.id}`}
+                    title="Forgot to tick it before bed? Add yesterday's tick and keep the streak."
+                  >
+                    <History className="size-3" /> Did it yesterday? Tick it — keeps your streak
+                  </button>
+                ) : null}
               </li>
             );
           })}
@@ -350,10 +368,12 @@ function HabitMenu({
   habit,
   today,
   actions,
+  onToggle,
 }: {
   habit: HabitToday;
   today: string;
   actions: HabitActions;
+  onToggle: (id: string, date?: string) => void;
 }) {
   const pauseOptions: { label: string; until: string }[] = [
     { label: "Pause for the rest of today", until: today },
@@ -361,6 +381,16 @@ function HabitMenu({
     { label: "Pause for a week", until: shiftDay(today, 6) },
     { label: "Pause for two weeks", until: shiftDay(today, 13) },
   ];
+  /* the last week, most recent first — the same tick, just dated */
+  const backfill = Array.from({ length: BACKFILL_DAYS - 1 }, (_, i) => shiftDay(today, -(i + 1)));
+  const label = (date: string, i: number) =>
+    i === 0
+      ? "Yesterday"
+      : new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -374,10 +404,29 @@ function HabitMenu({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[230px] border-border bg-surface-2">
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger data-testid={`home-habit-backfill-${habit.id}`}>
+            <History className="size-4" /> Tick a past day
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="min-w-[200px] border-border bg-surface-2">
+            {backfill.map((date, i) => (
+              <DropdownMenuItem
+                key={date}
+                onSelect={() => onToggle(habit.id, date)}
+                data-testid={`home-habit-backfill-${habit.id}-${date}`}
+              >
+                {label(date, i)}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         {actions.onEdit ? (
-          <DropdownMenuItem onSelect={() => actions.onEdit?.(habit.id)}>
-            <Pencil className="size-4" /> Edit habit
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => actions.onEdit?.(habit.id)}>
+              <Pencil className="size-4" /> Edit habit
+            </DropdownMenuItem>
+          </>
         ) : null}
         {actions.onPause ? (
           <>

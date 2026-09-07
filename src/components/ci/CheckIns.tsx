@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CalendarPlus,
   CalendarSearch,
+  CalendarX2,
   Droplets,
   HeartPulse,
   MessageCircleQuestion,
@@ -20,6 +21,8 @@ import {
 import type { CheckIn, CheckInKind } from "@/lib/cycle/reconcile";
 
 const ICON: Record<CheckInKind, LucideIcon> = {
+  "future-start": CalendarX2,
+  "start-day": CalendarSearch,
   "ended-early": CalendarCheck,
   continued: Droplets,
   "same-period": Droplets,

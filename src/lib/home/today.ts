@@ -11,7 +11,7 @@
 
 import type { TrackerAnalysis, TrackerId } from "@/lib/trackers/core";
 import { TRACKERS } from "@/lib/trackers/core";
-import type { CycleAnalysis } from "@/lib/cycle/predict";
+import { describeNextPeriodShort, type CycleAnalysis } from "@/lib/cycle/predict";
 import type {
   Correlation as MoodCorrelation,
   DayAggregate,
@@ -355,13 +355,12 @@ export function connections(input: {
       id: "cycle",
       strength: evidence(Math.min(30, cycleDays * 5), cycle.cycleDay !== null),
       days: cycleDays,
-      note:
-        cycle.cycleDay === null
+      note: cycle.upcomingStart
+        ? `Your latest period entry is dated in the future — fix it on the Cycle page.`
+        : cycle.cycleDay === null
           ? "Log a period start and Bloom places you in your cycle."
           : `Day ${cycle.cycleDay} · ${cycle.phaseLabel.toLowerCase()} phase${
-              cycle.daysUntilNext !== null && cycle.daysUntilNext >= 0
-                ? ` · next in ${cycle.daysUntilNext}d`
-                : ""
+              describeNextPeriodShort(cycle) ? ` · ${describeNextPeriodShort(cycle)}` : ""
             }.`,
     },
     {

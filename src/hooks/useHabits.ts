@@ -40,7 +40,7 @@ import {
   type HabitDraft,
   type HabitLog,
 } from "@/lib/home/habits";
-import { todayLocal } from "@/lib/localDay";
+import { shiftDay, todayLocal } from "@/lib/localDay";
 import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 
 export type HabitsAuth = "checking" | "signed-out" | "signed-in" | "off";
@@ -51,7 +51,18 @@ export interface HabitToday extends Habit {
   due: boolean;
   /** "N× a week" habits: how the week is going. Null for daily/custom. */
   week: { done: number; target: number } | null;
+  /**
+   * Yesterday's date when a streak is at risk: the day before was ticked,
+   * yesterday was due and is NOT ticked — the tick was probably forgotten
+   * before bed. Null otherwise (already ticked, not due, weekly habits, or
+   * no streak to keep). Any day in the last week can still be ticked from
+   * the row menu.
+   */
+  missedYesterday: string | null;
 }
+
+/** How far back a tick can be placed (inclusive of today). */
+export const BACKFILL_DAYS = 7;
 
 export interface HabitsStore {
   auth: HabitsAuth;
@@ -68,7 +79,11 @@ export interface HabitsStore {
   /** 0–1. 0 when nothing is due. */
   completion: number;
   points: number | null;
-  toggle: (habitId: string) => Promise<void>;
+  /**
+   * Tick or untick a habit. `date` defaults to today; any local day within the
+   * last `BACKFILL_DAYS` is accepted — the same insert/delete, just dated.
+   */
+  toggle: (habitId: string, date?: string) => Promise<void>;
   addHabit: (draft: HabitDraft) => Promise<void>;
   /** Change anything about a habit. Id and history are kept. */
   editHabit: (habitId: string, draft: HabitDraft) => Promise<void>;
@@ -289,17 +304,32 @@ export function useHabits(): HabitsStore {
 
   const todayHabits = useMemo<HabitToday[]>(() => {
     const doneMap = new Map<string, string>();
-    for (const l of logs) if (l.date === today) doneMap.set(l.habitId, l.completedAt);
+    const yesterday = shiftDay(today, -1);
+    const dayBefore = shiftDay(today, -2);
+    const doneYesterday = new Set<string>();
+    const doneDayBefore = new Set<string>();
+    for (const l of logs) {
+      if (l.date === today) doneMap.set(l.habitId, l.completedAt);
+      else if (l.date === yesterday) doneYesterday.add(l.habitId);
+      else if (l.date === dayBefore) doneDayBefore.add(l.habitId);
+    }
     return habits
       .filter((h) => isDueOn(h, today, logs))
       .map((h) => {
         const week = isWeekly(h) ? weeklyProgress(h, logs, today) : null;
+        const streakAtRisk =
+          !week &&
+          doneDayBefore.has(h.id) &&
+          !doneYesterday.has(h.id) &&
+          isDueOn(h, yesterday, logs);
+        const missedYesterday = streakAtRisk ? yesterday : null;
         return {
           ...h,
           due: true,
           done: doneMap.has(h.id),
           doneAt: doneMap.get(h.id) ?? null,
           week: week ? { done: week.done, target: week.target } : null,
+          missedYesterday,
         };
       });
   }, [habits, logs, today]);
@@ -314,21 +344,23 @@ export function useHabits(): HabitsStore {
   const dueToday = todayHabits.length;
 
   const toggle = useCallback(
-    async (habitId: string) => {
+    async (habitId: string, date: string = today) => {
       const habit = habits.find((h) => h.id === habitId);
       if (!habit) return;
-      const wasDone = logs.some((l) => l.habitId === habitId && l.date === today);
+      /* only the recent past: never the future, never months back */
+      if (date > today || date < shiftDay(today, -(BACKFILL_DAYS - 1))) return;
+      const wasDone = logs.some((l) => l.habitId === habitId && l.date === date);
       const nowIso = new Date().toISOString();
       const nextLogs = wasDone
-        ? logs.filter((l) => !(l.habitId === habitId && l.date === today))
-        : [...logs, { habitId, date: today, completedAt: nowIso }];
+        ? logs.filter((l) => !(l.habitId === habitId && l.date === date))
+        : [...logs, { habitId, date, completedAt: nowIso }];
       // optimistic — the ring moves before the network does
       setLogs(nextLogs);
       saveLocal(habits, nextLogs);
       if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
       try {
-        if (wasDone) await deleteLog(profileId, habitId, today);
-        else await insertLog(profileId, habitId, today);
+        if (wasDone) await deleteLog(profileId, habitId, date);
+        else await insertLog(profileId, habitId, date);
         const pts = await adjustPoints(profileId, wasDone ? -habit.points : habit.points);
         if (pts !== null) setPoints(pts);
       } catch (e) {

@@ -4,6 +4,8 @@ import {
   addDays,
   analyzeCycle,
   assessLogDraft,
+  describeNextPeriod,
+  describeNextPeriodShort,
   effectiveMaxPlausible,
   MAX_BLEED_DAYS,
   validateLogDraft,
@@ -248,5 +250,69 @@ describe("analyzeCycle — long cycles are a rhythm, not a mistake", () => {
     expect(effectiveMaxPlausible([50, 70], o)).toBe(45); // 20 days apart — not a rhythm
     expect(effectiveMaxPlausible([50, 56], o)).toBe(56);
     expect(effectiveMaxPlausible([95, 96], o)).toBe(45); // beyond the hard ceiling
+  });
+});
+
+describe("describeNextPeriod — one sentence every surface can quote", () => {
+  const steady = (n: number, len: number, lastStartAgo: number): PeriodLog[] =>
+    Array.from({ length: n }, (_, i) => {
+      const s = addDays(TODAY, -lastStartAgo - (n - 1 - i) * len);
+      return { id: `p${i}`, start: s, end: addDays(s, 4), flow: "medium" as const };
+    });
+
+  it("gives a single date only at high confidence", () => {
+    const a = analyzeCycle(steady(6, 28, 10), TODAY);
+    expect(a.confidence).toBe("high");
+    expect(describeNextPeriod(a)).toMatch(/^Next period around .* · in 18 days$/);
+    expect(describeNextPeriodShort(a)).toBe("next in 18d");
+  });
+
+  it("gives a window at medium confidence", () => {
+    /* four periods → three cycles; too few for "high", steady enough for "medium" */
+    const a = analyzeCycle(steady(4, 28, 10), TODAY);
+    expect(a.confidence).toBe("medium");
+    expect(describeNextPeriod(a)).toMatch(/^Next period likely .*–.* · around .*, in 18 days$/);
+  });
+
+  it("calls a low-confidence estimate rough and shows the window", () => {
+    /* the audit's example: 21 / 38 / 26 / 44 — ±9 days, which is "low" */
+    const logs: PeriodLog[] = [
+      { id: "a", start: addDays(TODAY, -139), flow: "medium" },
+      { id: "b", start: addDays(TODAY, -118), flow: "medium" }, // 21
+      { id: "c", start: addDays(TODAY, -80), flow: "medium" }, // 38
+      { id: "d", start: addDays(TODAY, -54), flow: "medium" }, // 26
+      { id: "e", start: addDays(TODAY, -10), flow: "medium" }, // 44
+    ];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.confidence).toBe("low");
+    expect(describeNextPeriod(a)).toMatch(
+      /^Next period roughly .*–.* · a rough estimate, in about \d+ days$/,
+    );
+    expect(describeNextPeriodShort(a)).toMatch(/^~.*–.*$/);
+  });
+
+  it("never dresses the 28-day fallback up as a prediction", () => {
+    const a = analyzeCycle([{ id: "only", start: addDays(TODAY, -10), flow: "medium" }], TODAY);
+    expect(a.confidence).toBe("none");
+    expect(describeNextPeriod(a)).toMatch(/generic 28-day guide, not your pattern yet/);
+    expect(describeNextPeriodShort(a)).toBe("28-day guide only");
+  });
+
+  it("says how late, once the engine calls it late", () => {
+    const a = analyzeCycle(steady(6, 28, 31), TODAY); // 3 days past a high-confidence estimate
+    expect(a.isLate).toBe(true);
+    expect(describeNextPeriod(a)).toMatch(/^3 days later than predicted \(.*\)$/);
+    expect(describeNextPeriodShort(a)).toBe("3d late");
+  });
+
+  it("points at a future-dated entry instead of predicting from it", () => {
+    const a = analyzeCycle([{ id: "z", start: addDays(TODAY, 3), flow: null }], TODAY);
+    expect(describeNextPeriod(a)).toMatch(/starts .* — a date in the future$/);
+    expect(describeNextPeriodShort(a)).toMatch(/^starts /);
+  });
+
+  it("has nothing to say with nothing logged", () => {
+    expect(describeNextPeriod(analyzeCycle([], TODAY))).toBeNull();
+    expect(describeNextPeriodShort(analyzeCycle([], TODAY))).toBeNull();
   });
 });

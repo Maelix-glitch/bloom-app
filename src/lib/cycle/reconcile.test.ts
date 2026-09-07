@@ -358,3 +358,89 @@ describe("helpers", () => {
     expect(Object.keys(pruned.snoozed)).toEqual(["late:d:2026-09-10"]);
   });
 });
+
+describe("reconcile · the start itself is wrong (engine-probe fixes C6/C7)", () => {
+  it('asks "did it really start on that day?" when the start day is logged as no bleeding', () => {
+    const logs = history(3); // started 3 days ago
+    const days = [day(ago(3), "none"), day(ago(2), "heavy"), day(ago(1), "medium")];
+    const out = reconcile({ logs, days, today: TODAY });
+    const q = find(out, "start-day");
+    expect(q).toBeDefined();
+    expect(out[0]!.kind).toBe("start-day"); // asked before anything else
+    expect(q!.title).toContain("really start");
+    const move = q!.actions.find((a) => a.id === "move")!;
+    expect(move.primary).toBe(true);
+    expect(move.resolution).toEqual({ type: "set-start", periodId: "d", start: ago(2) });
+    expect(q!.actions.map((a) => a.id)).toEqual(["move", "edit", "keep", "later"]);
+  });
+
+  it("offers only the date picker when no bleeding follows within three days", () => {
+    const logs = history(1);
+    const days = [day(ago(1), "none")];
+    const q = find(reconcile({ logs, days, today: TODAY }), "start-day");
+    expect(q).toBeDefined();
+    expect(q!.actions.map((a) => a.id)).toEqual(["edit", "keep", "later"]);
+    expect(q!.actions[0]!.primary).toBe(true);
+  });
+
+  it("stays quiet once the person confirms the date is right", () => {
+    const logs = history(3);
+    const days = [day(ago(3), "none"), day(ago(2), "heavy")];
+    const first = find(reconcile({ logs, days, today: TODAY }), "start-day")!;
+    const memory = remember(EMPTY_MEMORY, first.id, "dismiss", TODAY);
+    expect(find(reconcile({ logs, days, today: TODAY, memory }), "start-day")).toBeUndefined();
+  });
+
+  it("does not ask about the start day of a period logged as bleeding on day one", () => {
+    const logs = history(3);
+    const days = [day(ago(3), "heavy")];
+    expect(find(reconcile({ logs, days, today: TODAY }), "start-day")).toBeUndefined();
+  });
+
+  it("flags a start dated in the future and asks for the real day — and asks nothing else", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(60), end: ago(56), flow: "medium" },
+      { id: "b", start: ago(31), end: ago(27), flow: "medium" },
+      { id: "z", start: addDays(TODAY, 4), end: null, flow: null },
+    ];
+    const out = reconcile({ logs, days: [], today: TODAY });
+    expect(kinds(out)).toEqual(["future-start"]);
+    const q = out[0]!;
+    expect(q.tone).toBe("attention");
+    expect(q.periodId).toBe("z");
+    const today = q.actions.find((a) => a.id === "move-today")!;
+    expect(today.primary).toBe(true);
+    expect(today.resolution).toEqual({ type: "set-start", periodId: "z", start: TODAY });
+    expect(q.actions.find((a) => a.id === "remove")!.resolution).toEqual({
+      type: "remove-period",
+      periodId: "z",
+    });
+    expect(q.actions.find((a) => a.id === "edit")!.resolution).toEqual({
+      type: "edit-period",
+      periodId: "z",
+    });
+  });
+
+  it("suggests the last bleed day logged before today as the real start", () => {
+    const logs: PeriodLog[] = [{ id: "z", start: addDays(TODAY, 2), end: null, flow: null }];
+    const days = [day(ago(2), "heavy"), day(ago(1), "medium")];
+    const q = find(reconcile({ logs, days, today: TODAY }), "future-start")!;
+    const move = q.actions.find((a) => a.id === "move-bleed")!;
+    expect(move.primary).toBe(true);
+    expect(move.resolution).toEqual({ type: "set-start", periodId: "z", start: ago(1) });
+    expect(q.actions.find((a) => a.id === "move-today")!.primary).toBeUndefined();
+  });
+
+  it("the analysis behind it reports the future start as upcoming, with no phase or cycle day", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(31), end: ago(27), flow: "medium" },
+      { id: "z", start: addDays(TODAY, 4), end: null, flow: null },
+    ];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.upcomingStart).toBe(addDays(TODAY, 4));
+    expect(a.cycleDay).toBeNull();
+    expect(a.phase).toBeNull();
+    expect(a.phaseLabel).toBe("Unknown");
+    expect(a.isLate).toBe(false);
+  });
+});

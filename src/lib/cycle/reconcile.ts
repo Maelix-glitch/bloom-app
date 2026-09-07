@@ -37,6 +37,8 @@ import type { DayLog } from "./dayLogs";
 /* --------------------------------- types --------------------------------- */
 
 export type CheckInKind =
+  | "future-start" // the latest entry is dated after today — an import or a wrong clock
+  | "start-day" // "no bleeding" logged on the very day the period is said to start
   | "ended-early" // bleeding stopped before the recorded / usual length
   | "continued" // bleeding logged after the recorded last day
   | "same-period" // a bleed day sits right after a period, not a new one
@@ -50,6 +52,10 @@ export type CheckInTone = "calm" | "info" | "attention";
 
 export type CheckInResolution =
   | { type: "set-end"; periodId: string; end: string }
+  /** Move a period's first day (its end, if any, is kept when still valid). */
+  | { type: "set-start"; periodId: string; start: string }
+  /** Remove the entry outright — for a start that never happened. */
+  | { type: "remove-period"; periodId: string }
   | { type: "add-period"; start: string; end: string | null; flow: FlowLevel | null }
   | { type: "focus-form"; date: string; startPeriod: boolean }
   | { type: "edit-period"; periodId: string }
@@ -257,6 +263,8 @@ export interface ReconcileInput {
 }
 
 const ORDER: Record<CheckInKind, number> = {
+  "future-start": -2,
+  "start-day": -1,
   "same-period": 0,
   continued: 1,
   "ended-early": 2,
@@ -287,6 +295,66 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
   const last = logs.length > 0 ? logs[logs.length - 1]! : null;
 
   /* ------------------------------------------------------------------ */
+  /* 0 · a start that can't be right                                     */
+  /* ------------------------------------------------------------------ */
+  if (last && last.start > today) {
+    /* dated AFTER today — an import or a device clock that was wrong. Nothing
+       about "now" follows from it; ask, and offer today or removal. */
+    const lastBleedBeforeToday = (() => {
+      for (let i = 0; i <= 14; i += 1) {
+        const key = addDays(today, -i);
+        if (isBleed(byDate.get(key))) return key;
+      }
+      return null;
+    })();
+    ask({
+      id: `future-start:${last.id}:${last.start}`,
+      kind: "future-start",
+      tone: "attention",
+      periodId: last.id,
+      date: last.start,
+      title: `A period is logged as starting ${formatDateShort(last.start)} — that's in the future`,
+      body: `Bloom can't place today in a cycle that hasn't started. This usually comes from an import or a device whose clock was wrong. Move the start to the right day, or remove the entry.`,
+      actions: [
+        ...(lastBleedBeforeToday
+          ? [
+              {
+                id: "move-bleed",
+                label: `It started ${formatDateShort(lastBleedBeforeToday)}`,
+                primary: true,
+                resolution: {
+                  type: "set-start" as const,
+                  periodId: last.id,
+                  start: lastBleedBeforeToday,
+                },
+              },
+            ]
+          : []),
+        {
+          id: "move-today",
+          label: "It started today",
+          ...(lastBleedBeforeToday ? {} : { primary: true }),
+          resolution: { type: "set-start", periodId: last.id, start: today },
+        },
+        {
+          id: "edit",
+          label: "Pick the date",
+          resolution: { type: "edit-period", periodId: last.id },
+        },
+        {
+          id: "remove",
+          label: "Remove it",
+          resolution: { type: "remove-period", periodId: last.id },
+        },
+        { id: "later", label: "Not now", resolution: { type: "snooze" } },
+      ],
+    });
+    /* the rest of the engine reasons about "today inside this period" and
+       would only add noise on top of a start that isn't real yet */
+    return out.sort((a, b) => ORDER[a.kind] - ORDER[b.kind]);
+  }
+
+  /* ------------------------------------------------------------------ */
   /* 1 · the most recent period — the one still being lived              */
   /* ------------------------------------------------------------------ */
   if (last) {
@@ -295,6 +363,54 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
     const run = bleedRunFrom(last.start, byDate, today);
     const lastBleed = run.length > 0 ? run[run.length - 1]!.date : null;
     const dayOfPeriod = diffDays(last.start, today) + 1; // 1-based
+
+    /* a0) START DAY — "no bleeding" logged on the very day the period is said
+           to begin. The start is probably off by a day or two: point at the
+           first bleed day that follows, or the day the person can pick. */
+    if (isNoBleed(byDate.get(last.start))) {
+      let firstBleed: string | null = null;
+      for (let i = 1; i <= 3; i += 1) {
+        const key = addDays(last.start, i);
+        if (key > today) break;
+        if (isBleed(byDate.get(key))) {
+          firstBleed = key;
+          break;
+        }
+      }
+      ask({
+        id: `start-day:${last.id}:${last.start}`,
+        kind: "start-day",
+        tone: "info",
+        periodId: last.id,
+        date: last.start,
+        title: `Did your period really start on ${formatDateShort(last.start)}?`,
+        body: `That day is logged as no bleeding${
+          firstBleed
+            ? `, and the first bleeding after it is ${formatDate(firstBleed)}. If that's the real first day, the start can move there`
+            : ""
+        }. Nothing changes until you say so.`,
+        actions: [
+          ...(firstBleed
+            ? [
+                {
+                  id: "move",
+                  label: `It started ${formatDateShort(firstBleed)}`,
+                  primary: true,
+                  resolution: { type: "set-start" as const, periodId: last.id, start: firstBleed },
+                },
+              ]
+            : []),
+          {
+            id: "edit",
+            label: firstBleed ? "Pick another day" : "Pick the right day",
+            ...(firstBleed ? {} : { primary: true }),
+            resolution: { type: "edit-period", periodId: last.id },
+          },
+          { id: "keep", label: "The date is right", resolution: { type: "dismiss" } },
+          { id: "later", label: "Not now", resolution: { type: "snooze" } },
+        ],
+      });
+    }
 
     /* a) ENDED (EARLY) — the daily log says "no bleeding" on a day the entry
           still covers (recorded last day, or the usual length while open).

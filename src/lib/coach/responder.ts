@@ -71,6 +71,8 @@ export interface CycleFacts {
   averageLength: number | null;
   confidence: string | null;
   confidenceReason: string | null;
+  /** The engine's own sentence about the next period — window, "late", or "generic guide". */
+  nextPeriod?: string | null | undefined;
 }
 
 export interface CoachRecord {
@@ -292,11 +294,13 @@ function periodAnswer(record: CoachRecord): CoachResponse {
   if (cycle.cycleDay !== null && cycle.phaseLabel) {
     paragraphs.push(
       `You're on day ${cycle.cycleDay} — ${cycle.phaseLabel.toLowerCase()}. ${
-        cycle.nextStart
-          ? cycle.daysUntilNext !== null && cycle.daysUntilNext >= 0
-            ? `The next start is estimated around ${cycle.nextStart}, about ${plural(cycle.daysUntilNext, "day")} out.`
-            : `The next start was estimated around ${cycle.nextStart}.`
-          : ""
+        cycle.nextPeriod
+          ? `${cycle.nextPeriod}.`
+          : cycle.nextStart
+            ? cycle.daysUntilNext !== null && cycle.daysUntilNext >= 0
+              ? `The next start is estimated around ${cycle.nextStart}, about ${plural(cycle.daysUntilNext, "day")} out.`
+              : `The next start was estimated around ${cycle.nextStart}.`
+            : ""
       }`.trim(),
     );
   } else if (cycle.averageLength !== null) {

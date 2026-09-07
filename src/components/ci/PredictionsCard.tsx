@@ -23,6 +23,9 @@ export function PredictionsCard({
 }) {
   const { nextStart, daysUntilNext, nextWindow } = analysis;
   const countdown = describeCountdown(daysUntilNext);
+  /* A start dated after today (import, wrong clock): nothing about "now"
+     follows from it — say so instead of printing "day 0 · menstrual". */
+  const upcoming = analysis.upcomingStart;
   /* "Late" is the engine's call, not a raw sign flip: never against the
      population fallback, and only past a wider margin while the estimate is
      rough. Before that, a passed date is just "around now". */
@@ -51,22 +54,33 @@ export function PredictionsCard({
       >
         <Stat
           emphasis
-          label={showWindow ? "Next period (window)" : "Next period"}
+          label={
+            upcoming
+              ? "Upcoming (dated ahead)"
+              : showWindow
+                ? "Next period (window)"
+                : "Next period"
+          }
           value={
-            !nextStart
-              ? "—"
-              : showWindow && nextWindow
-                ? `${formatDateShort(nextWindow.from)} – ${formatDateShort(nextWindow.to)}`
-                : formatDate(nextStart)
+            upcoming
+              ? formatDate(upcoming)
+              : !nextStart
+                ? "—"
+                : showWindow && nextWindow
+                  ? `${formatDateShort(nextWindow.from)} – ${formatDateShort(nextWindow.to)}`
+                  : formatDate(nextStart)
           }
           sub={
             <span className={late ? "text-[var(--ci-ovulation)]" : undefined}>
-              {!nextStart
-                ? "log a period to start predicting"
-                : showWindow && nextWindow
-                  ? `most likely around ${formatDateShort(nextStart)} · ${countdown}`
-                  : countdown}
-              {analysis.isGeneric ? " · generic estimate" : ""}
+              {upcoming
+                ? "your latest entry starts in the future — check the date"
+                : !nextStart
+                  ? "log a period to start predicting"
+                  : analysis.confidence === "none"
+                    ? `a generic ${Math.round(analysis.averageLength)}-day guide, not your pattern yet · ${countdown}`
+                    : showWindow && nextWindow
+                      ? `${analysis.confidence === "low" ? "a rough estimate — " : ""}most likely around ${formatDateShort(nextStart)} · ${countdown}`
+                      : countdown}
             </span>
           }
           testId="cycle-next-period"
@@ -122,7 +136,13 @@ export function PredictionsCard({
           label="Where you are"
           value={analysis.cycleDay ? `Day ${analysis.cycleDay}` : "—"}
           unit={analysis.cycleDay ? `of ~${Math.round(analysis.averageLength)}` : undefined}
-          sub={analysis.phase ? `${analysis.phaseLabel} — estimated` : "nothing logged yet"}
+          sub={
+            upcoming
+              ? "not placeable — the entry is dated ahead"
+              : analysis.phase
+                ? `${analysis.phaseLabel} — estimated`
+                : "nothing logged yet"
+          }
         />
       </div>
 

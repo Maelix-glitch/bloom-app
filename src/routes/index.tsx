@@ -372,7 +372,7 @@ function TodayPage() {
             today={habits.today}
             loading={habits.loading}
             points={habits.points}
-            onToggle={(id) => void habits.toggle(id)}
+            onToggle={(id, date) => void habits.toggle(id, date)}
             onAdd={openNewHabit}
             paused={habits.pausedHabits}
             archived={habits.archivedHabits}

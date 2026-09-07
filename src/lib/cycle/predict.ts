@@ -339,6 +339,12 @@ export interface CycleAnalysis {
   isLate: boolean;
   /** Days past `nextStart`; 0 when not past it. Informational — see `isLate`. */
   lateBy: number;
+  /**
+   * The latest entry starts AFTER `today` — an import or a wrong device clock.
+   * Nothing about "now" can be derived from it, so `cycleDay`/`phase` are null
+   * and the UI shows the date as upcoming and offers to fix it.
+   */
+  upcomingStart: string | null;
 
   ovulationDate: string | null;
   fertileStart: string | null;
@@ -610,7 +616,10 @@ export function analyzeCycle(
   /* --- anchors ----------------------------------------------------------- */
   const last = sorted.length > 0 ? sorted[sorted.length - 1] : null;
   const lastStart = last ? last.start : null;
-  const cycleDay = lastStart ? diffDays(lastStart, today) + 1 : null;
+  /* A start in the future can't place today anywhere — cycle day 0, "menstrual"
+     for a period that hasn't happened. Say "upcoming" instead. */
+  const upcomingStart = lastStart && lastStart > today ? lastStart : null;
+  const cycleDay = lastStart && !upcomingStart ? diffDays(lastStart, today) + 1 : null;
 
   /* --- bleed length: logged first, then averaged history, then default --- */
   const loggedDurations = sorted
@@ -683,9 +692,6 @@ export function analyzeCycle(
     } else {
       phase = "luteal";
     }
-  } else if (cycleDay !== null) {
-    // A period logged with a future start date — show it as upcoming bleeding.
-    phase = "menstrual";
   }
 
   /* --- trend: earliest half vs most recent half -------------------------- */
@@ -914,6 +920,7 @@ export function analyzeCycle(
     nextWindow,
     isLate,
     lateBy,
+    upcomingStart,
     ovulationDate,
     fertileStart,
     fertileEnd,
@@ -1124,6 +1131,62 @@ export function newLogId(): string {
 }
 
 /** "in 12 days" / "3 days late" / "today" — plain language, no false certainty. */
+/**
+ * One sentence about the next period that every surface (Cycle page, Today,
+ * the coach) can quote — so none of them promises a date the engine can't
+ * vouch for. Returns null when there is nothing to say.
+ *
+ *   high      → "Next period around 12 Oct · in 9 days"
+ *   medium    → "Next period likely 10–14 Oct · around 12 Oct, in 9 days"
+ *   low       → "Next period roughly 8–16 Oct · a rough estimate, in about 9 days"
+ *   none      → "Next period pencilled in for 12 Oct — a generic 28-day guide, not your pattern yet"
+ *   late      → "3 days later than predicted (12 Oct)"
+ *   upcoming  → "Your latest entry starts 12 Oct — a date in the future"
+ */
+export function describeNextPeriod(a: CycleAnalysis): string | null {
+  if (a.upcomingStart) {
+    return `Your latest entry starts ${formatDateShort(a.upcomingStart)} — a date in the future`;
+  }
+  if (!a.nextStart || a.daysUntilNext === null) return null;
+  const date = formatDateShort(a.nextStart);
+  if (a.isLate && a.lateBy > 0) {
+    return `${a.lateBy} ${plural(a.lateBy, "day", "days")} later than predicted (${date})`;
+  }
+  const w = a.nextWindow;
+  const span = w ? `${formatDateShort(w.from)}–${formatDateShort(w.to)}` : date;
+  const d = a.daysUntilNext;
+  const soon = d === 0 ? "due today" : d > 0 ? `in ${d} ${plural(d, "day", "days")}` : null;
+  const passed = d < 0 ? `${-d} ${plural(-d, "day", "days")} past the estimate` : null;
+  switch (a.confidence) {
+    case "high":
+      return `Next period around ${date} · ${soon ?? passed}`;
+    case "medium":
+      return `Next period likely ${span} · around ${date}, ${soon ?? passed}`;
+    case "low":
+      return `Next period roughly ${span} · a rough estimate, ${
+        soon ? `in about ${d} ${plural(d, "day", "days")}` : (passed ?? "")
+      }`.trim();
+    case "none":
+    default:
+      return `Next period pencilled in for ${date} — a generic ${Math.round(a.averageLength)}-day guide, not your pattern yet`;
+  }
+}
+
+/** The short form for chips and subtitles: "in 9d", "3d late", "~8–16 Oct", "guide only". */
+export function describeNextPeriodShort(a: CycleAnalysis): string | null {
+  if (a.upcomingStart) return "starts " + formatDateShort(a.upcomingStart);
+  if (!a.nextStart || a.daysUntilNext === null) return null;
+  if (a.isLate && a.lateBy > 0) return `${a.lateBy}d late`;
+  const d = a.daysUntilNext;
+  if (a.confidence === "none") return "28-day guide only";
+  if (a.confidence === "low") {
+    const w = a.nextWindow;
+    return w ? `~${formatDateShort(w.from)}–${formatDateShort(w.to)}` : `~${d}d`;
+  }
+  if (d === 0) return "due today";
+  return d > 0 ? `next in ${d}d` : `${-d}d past estimate`;
+}
+
 export function describeCountdown(daysUntilNext: number | null): string {
   if (daysUntilNext === null) return "—";
   if (daysUntilNext === 0) return "due today";

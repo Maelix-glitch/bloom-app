@@ -603,6 +603,19 @@ export function usePeriodLog(): PeriodLogStore {
     return { ok: true, id };
   }, []);
 
+  /** Move a period's first day. The recorded end is kept when it still makes sense. */
+  const setPeriodStart = useCallback((id: string, start: string): SaveResult => {
+    const current = loadLogs();
+    const entry = current.find((l) => l.id === id);
+    if (!entry) return { ok: false, errors: { start: "That entry no longer exists." } };
+    const end = entry.end && entry.end >= start ? entry.end : null;
+    const draft: LogDraft = { start, end, flow: entry.flow ?? null, notes: entry.notes ?? null };
+    const errors = validateLogDraft(draft, current, todayKey(), id);
+    if (Object.keys(errors).length > 0) return { ok: false, errors };
+    setLogs((prev) => prev.map((l) => (l.id === id ? { ...l, start, end } : l)));
+    return { ok: true, id };
+  }, []);
+
   const importLegacy = useCallback(() => {
     const candidates = legacyPeriodCandidates();
     if (candidates.length === 0) return 0;
@@ -710,6 +723,23 @@ export function usePeriodLog(): PeriodLogStore {
             message: `Last day recorded as ${formatDate(resolution.end)} — everything below was recalculated.`,
           };
         }
+        case "set-start": {
+          const result = setPeriodStart(resolution.periodId, resolution.start);
+          if (!result.ok) {
+            rememberAnswer(checkIn.id, "snooze");
+            return { type: "edit-period", periodId: resolution.periodId };
+          }
+          rememberAnswer(checkIn.id, "dismiss");
+          return {
+            type: "saved",
+            message: `First day moved to ${formatDate(resolution.start)} — everything below was recalculated.`,
+          };
+        }
+        case "remove-period": {
+          rememberAnswer(checkIn.id, "dismiss");
+          remove(resolution.periodId);
+          return { type: "saved", message: "Entry removed — you can undo this for a few seconds." };
+        }
         case "add-period": {
           const result = add({
             start: resolution.start,
@@ -748,7 +778,7 @@ export function usePeriodLog(): PeriodLogStore {
           return { type: "none" };
       }
     },
-    [acceptLongCycles, add, rememberAnswer, setPeriodEnd],
+    [acceptLongCycles, add, remove, rememberAnswer, setPeriodEnd, setPeriodStart],
   );
 
   return {
