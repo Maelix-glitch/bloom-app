@@ -1,6 +1,6 @@
 # Bloom — Tier B and Tier C (part 1) + the profile redesign
 
-Kit: `docs/tier-b-c/bloom-tier-bc.zip` · branch tip **`54c903b`** · cut against what the
+Kit: `docs/tier-b-c/bloom-tier-bc.zip` · branch tip **`6e6e947`** · cut against what the
 app shipped with (`ce972cf`), so one run brings **any** checkout up to date — the metrics
 modal fix, Today, the shared rail, Mood, the full-width Cycle page with check-ins, all
 of Tier A, everything below, and the new profile.
@@ -123,6 +123,17 @@ A tracker's profile in the grammar of a social profile:
   badge shelf (earned bright, the rest outlined), the next one as a progress bar, "lately".
 - **Account & data** as grouped settings rows: email, tracking since, accent, privacy,
   sign in/out · share, preview, archive, **export JSON** (same payload as before).
+
+**Premium sheets — commit `6e6e947`.** The two pop-ups the profile opens were rebuilt to the
+mockup: the **moment picker** (photographic hero, one picture per kind of moment with a glass
+orb icon, "Every moment matters" strip) and the **profile editor** ("Make it feel like you." hero
+with the live avatar in a gradient ring + camera button, grouped Personal information / Profile
+photo / Appearance rows, Save in the hero and the footer). Both sit on one new primitive,
+`BloomSheet` — a native-feeling bottom sheet on phones, a centred glass card on desktop, backdrop
+fade + panel opacity/translate/scale + staggered content, reduced-motion safe. The **Mood page**
+also received the motion direction (hero fade-up, photo settle + slow drift, staggered sections,
+physical face selection with glow / scale / ripple, self-drawing journey line with sequential
+points, pulsing latest point and hover tooltips, insight glow, lift / press buttons).
 
 **Nothing behind it changed.** `profileService` / `storyService`, the `profiles`,
 `profile_privacy`, `stories`, `story_highlights`, `story_highlight_items` tables and every

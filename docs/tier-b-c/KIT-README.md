@@ -1,6 +1,6 @@
 # Bloom — Tier B/C kit (part 1) + profile redesign
 
-One script brings your checkout up to the branch tip `54c903b` — every phase so far
+One script brings your checkout up to the branch tip `6e6e947` — every phase so far
 (metrics modal fix, Today home + habits + rail, Add-habit dialog, Mood pages, full-width
 /cycle with check-ins, all of Tier A) **plus** Tier B items B1 B2 B3 B5 B10 B11, Tier C
 items C1–C10, and the redesigned Profile. It is safe to run on a checkout that already

@@ -170,6 +170,10 @@ CHECKS = [
     ["src/components/profile/RecordBlock.tsx", "RecordNumbers", "Profile · numbers + grid"],
     ["src/routes/profile.tsx", "pf-tabs", "Profile · redesigned route"],
     ["src/styles/profile.css", ".pf-cover", "Profile · stylesheet"],
+    ["src/components/ui/bloom-sheet.tsx", "export function BloomSheet", "Premium sheets · primitive"],
+    ["src/components/stories/StoryComposer.tsx", "bmoment-tile", "Premium sheets · moment picker"],
+    ["src/components/profile/ProfileEditor.tsx", "Make it feel like you.", "Premium sheets · profile editor"],
+    ["src/styles/mood-motion.css", "mm-draw", "Mood page · motion direction"],
 ]
 
 script = r'''#!/usr/bin/env node
