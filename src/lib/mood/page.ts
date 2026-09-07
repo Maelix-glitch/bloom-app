@@ -126,6 +126,7 @@ export function journeyPoints(days: DayAggregate[], count = 7) {
       color: FACE_COLOR[face],
       mood: d.mood,
       date: d.date,
+      detail: `${(Math.round(d.mood * 10) / 10).toString()} / 10`,
     };
   });
 }

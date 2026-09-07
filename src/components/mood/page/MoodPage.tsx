@@ -69,6 +69,7 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import type { BloomAccent } from "@/lib/profile/types";
 
 import { MOOD_LABELS, MoodBlob } from "./MoodBlob";
+import "@/styles/mood-motion.css";
 import { MoodJourneyChart } from "./MoodJourneyChart";
 import { MoodDonut } from "./MoodDonut";
 import { MoodGraph } from "./MoodGraph";
@@ -137,58 +138,76 @@ export function MoodPage({
 
   return (
     <div className="w-full space-y-10 px-5 pt-6 sm:px-8 sm:pt-7 md:space-y-14 lg:px-10 lg:pt-7">
-      <TopBar identity={identity} />
+      <div className="mm-enter" data-order="0">
+        <TopBar identity={identity} />
+      </div>
 
-      <Hero
-        firstName={firstName}
-        todays={todays}
-        selected={selected}
-        onCompose={onCompose}
-        onEdit={onEdit}
-      />
+      <div className="mm-enter" data-order="0">
+        <Hero
+          firstName={firstName}
+          todays={todays}
+          selected={selected}
+          onCompose={onCompose}
+          onEdit={onEdit}
+        />
+      </div>
 
-      <LogMood
-        selected={selected}
-        saving={saving}
-        disabled={!canSave}
-        sync={sync}
-        onRetry={() => void system.retrySync()}
-        onSelect={(m) => void tap(m)}
-        onCompose={onCompose}
-      />
+      <div className="mm-enter" data-order="1">
+        <LogMood
+          selected={selected}
+          saving={saving}
+          disabled={!canSave}
+          sync={sync}
+          onRetry={() => void system.retrySync()}
+          onSelect={(m) => void tap(m)}
+          onCompose={onCompose}
+        />
+      </div>
 
-      <MoodJourney
-        loading={loading}
-        points={journey}
-        rangeKey={rangeKey}
-        rangeLabel={range.label}
-        onRange={setRangeKey}
-        avg={a.avg}
-        changePct={a.changePct}
-        best={a.bestDay?.date ?? null}
-      />
+      <div className="mm-enter" data-order="2">
+        <MoodJourney
+          loading={loading}
+          points={journey}
+          rangeKey={rangeKey}
+          rangeLabel={range.label}
+          onRange={setRangeKey}
+          avg={a.avg}
+          changePct={a.changePct}
+          best={a.bestDay?.date ?? null}
+        />
+      </div>
 
-      <MoodGraph days={a.allDays} entries={entries} correlations={a.correlations} />
+      <div className="mm-enter" data-order="3">
+        <MoodGraph days={a.allDays} entries={entries} correlations={a.correlations} />
+      </div>
 
-      <MoodDistribution
-        slices={slices}
-        total={a.days.length}
-        note={distributionNote(a.days, range.label)}
-        rangeKey={rangeKey}
-        rangeLabel={range.label}
-        onRange={setRangeKey}
-      />
+      <div className="mm-enter" data-order="4">
+        <MoodDistribution
+          slices={slices}
+          total={a.days.length}
+          note={distributionNote(a.days, range.label)}
+          rangeKey={rangeKey}
+          rangeLabel={range.label}
+          onRange={setRangeKey}
+        />
+      </div>
 
-      <QuickInsights insights={insights} entries={entries.length} />
+      <div className="mm-enter" data-order="5">
+        <QuickInsights insights={insights} entries={entries.length} />
+      </div>
 
-      <Streak
-        streak={a.streak}
-        dots={dots}
-        delta={delta}
-        line={streakLine(a.streak, delta, loggedThisWeek)}
-      />
+      <div className="mm-enter" data-order="6">
+        <Streak
+          streak={a.streak}
+          dots={dots}
+          delta={delta}
+          line={streakLine(a.streak, delta, loggedThisWeek)}
+        />
+      </div>
 
-      <ClosingBanner />
+      <div className="mm-enter" data-order="7">
+        <ClosingBanner />
+      </div>
     </div>
   );
 }
@@ -309,13 +328,14 @@ function Hero({
         alt="Arched window at golden hour with white flowers, books and a candle on the sill"
         width={1376}
         height={768}
-        className="absolute inset-0 h-full w-full object-cover object-center opacity-90"
+        className="mm-hero-img absolute inset-0 h-full w-full object-cover object-center opacity-90"
       />
+      <div className="mm-hero-light" aria-hidden />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
 
       <div className="relative grid gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-12 lg:py-20">
-        <div className="max-w-xl">
+        <div className="mm-hero-copy max-w-xl">
           <p className="mp-eyebrow">Mood tracker · {dateLine}</p>
           <h1 className="mt-6 font-display text-4xl leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">
             {selected ? (
@@ -442,7 +462,7 @@ function LogMood({
             <button
               type="button"
               onClick={onCompose}
-              className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:px-6"
+              className="mm-btn inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-primary-foreground sm:px-6"
               style={{ backgroundImage: "var(--mp-gradient-gold)" }}
             >
               <Plus className="h-4 w-4" strokeWidth={2} />
@@ -453,7 +473,10 @@ function LogMood({
 
         <MoodSyncLine sync={sync} onRetry={onRetry} />
 
-        <div className="mt-10 grid grid-cols-3 gap-x-4 gap-y-9 sm:grid-cols-6 sm:gap-x-6 lg:gap-x-8">
+        <div
+          className="mt-10 grid grid-cols-3 gap-x-4 gap-y-9 sm:grid-cols-6 sm:gap-x-6 lg:gap-x-8"
+          data-has-selection={selected !== null}
+        >
           {PAGE_MOODS.map((mood) => {
             const active = selected === mood;
             const busy = saving === mood;
@@ -463,16 +486,16 @@ function LogMood({
                 type="button"
                 onClick={() => onSelect(mood)}
                 disabled={disabled || saving !== null}
-                className="group flex flex-col items-center gap-4 disabled:cursor-not-allowed"
+                className="mm-face-btn group flex flex-col items-center gap-4 disabled:cursor-not-allowed"
                 aria-pressed={active}
                 aria-label={`I feel ${MOOD_LABELS[mood].toLowerCase()}`}
                 data-testid={`mood-face-${mood}`}
               >
-                <span className={busy ? "animate-pulse" : undefined}>
+                <span className={`mm-face ${busy ? "animate-pulse" : ""}`} data-active={active}>
                   <MoodBlob mood={mood} active={active} size={80} />
                 </span>
                 <span
-                  className={`text-sm transition-colors ${
+                  className={`mm-face-label text-sm ${
                     active ? "text-gold" : "text-muted-foreground group-hover:text-foreground"
                   }`}
                 >
@@ -490,7 +513,7 @@ function LogMood({
           alt=""
           width={1376}
           height={768}
-          className="absolute inset-y-0 right-0 h-full w-2/3 object-cover opacity-30"
+          className="mm-leaves absolute inset-y-0 right-0 h-full w-2/3 object-cover opacity-30"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/90 to-surface/55" />
@@ -746,10 +769,10 @@ function QuickInsights({
               <li key={id}>
                 <Link
                   to="/mood/intelligence"
-                  className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 rounded-2xl border border-border bg-card/70 p-5 text-left transition-colors hover:bg-card sm:p-6"
+                  className="mm-insight grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 rounded-2xl border border-border bg-card/70 p-5 text-left hover:bg-card sm:p-6"
                 >
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary">
-                    <Icon className="h-5 w-5 text-gold" strokeWidth={1.5} />
+                    <Icon className="mm-insight-icon h-5 w-5 text-gold" strokeWidth={1.5} />
                   </span>
                   <span className="min-w-0 text-sm leading-relaxed text-foreground/85 sm:text-base">
                     {text}
@@ -800,6 +823,8 @@ function Streak({
         className="absolute inset-y-0 right-0 h-full w-1/2 object-cover opacity-25"
         loading="lazy"
       />
+      {/* the flame's warmth flickers — a pseudo-element over the photo, never the photo itself */}
+      <div className="mm-candle absolute inset-y-0 right-0 w-1/2" aria-hidden />
       <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/95 to-surface/60" />
 
       <div className="relative p-6 sm:p-9 lg:p-11">
@@ -891,7 +916,7 @@ function ClosingBanner() {
         </div>
         <Link
           to="/mood/intelligence"
-          className="inline-flex items-center justify-center gap-2.5 rounded-full border border-gold/40 px-7 py-4 text-sm text-gold transition-colors hover:bg-gold/10 lg:justify-self-end"
+          className="mm-btn inline-flex items-center justify-center gap-2.5 rounded-full border border-gold/40 px-7 py-4 text-sm text-gold hover:bg-gold/10 lg:justify-self-end"
         >
           Explore your insights
           <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
