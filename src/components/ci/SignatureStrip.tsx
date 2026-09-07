@@ -169,6 +169,19 @@ export function SignatureStrip({
 }
 
 /** Small editorial header used above each major block. */
+/**
+ * The first sentence of a note, for the phone layout.
+ *
+ * Splits on a full stop, an em-dash or a semicolon — the three places these
+ * notes hang a second clause — and trims the trailing punctuation so the short
+ * version doesn't end on a dangling dash.
+ */
+function leadSentence(note: string): string {
+  const cut = note.search(/(?<=\.)\s|\s[—;]\s/u);
+  const lead = cut === -1 ? note : note.slice(0, cut);
+  return lead.replace(/[\s—;,]+$/u, "").replace(/([^.!?])$/u, "$1.");
+}
+
 export function BlockHead({
   index,
   eyebrow,
@@ -191,7 +204,16 @@ export function BlockHead({
         </p>
         <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">{title}</h2>
         {note ? (
-          <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">{note}</p>
+          /*
+           * On a phone the note competes with the thing it describes, so only
+           * the first sentence — the part that actually says what this is —
+           * survives. The full explanation returns at sm and up, where there
+           * is room for it. Written once, read correctly on both.
+           */
+          <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+            <span className="sm:hidden">{leadSentence(note)}</span>
+            <span className="hidden sm:inline">{note}</span>
+          </p>
         ) : null}
       </div>
       {aside ? <div className="shrink-0">{aside}</div> : null}

@@ -268,7 +268,7 @@ export function CycleIntelligence({
                 <Card className="lg:col-span-2">
                   <p className="ci-eyebrow">What appears once you log</p>
                   <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                    Ten views, all computed from your own entries
+                    Ten views, computed from your entries
                   </h2>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {[
@@ -318,7 +318,11 @@ export function CycleIntelligence({
                         className="rounded-[var(--ci-radius-md)] border px-3.5 py-3 ci-hair"
                       >
                         <p className="text-[12.5px] font-medium">{item.name}</p>
-                        <p className="mt-1 text-[11.5px] leading-relaxed ci-muted">{item.body}</p>
+                        {/* The description is the least useful thing on a phone —
+                            the name already says what the view is. Desktop keeps it. */}
+                        <p className="mt-1 hidden text-[11.5px] leading-relaxed ci-muted sm:block">
+                          {item.body}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -647,12 +651,6 @@ export function CycleIntelligence({
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px]">
                   <a href="/cycle-styles" className="ci-link py-1">
                     See the other design directions
-                  </a>
-                  <span aria-hidden className="ci-muted">
-                    ·
-                  </span>
-                  <a href="/cycle-classic" className="ci-link py-1">
-                    Previous version of this page
                   </a>
                 </div>
               ) : null}

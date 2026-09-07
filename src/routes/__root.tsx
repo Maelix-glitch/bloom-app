@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
+import { useSoundBoot } from "@/hooks/useSound";
+import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 
 function NotFoundComponent() {
   return (
@@ -143,10 +145,15 @@ function RootComponent() {
     registerServiceWorker();
   }, []);
 
+  /* Sound: read the preference, and arm the audio context on the first gesture. */
+  useSoundBoot();
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      {/* First run only: covers the app until the person has told us who they are. */}
+      <WelcomeGate />
     </QueryClientProvider>
   );
 }

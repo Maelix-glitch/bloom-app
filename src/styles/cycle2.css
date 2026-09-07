@@ -17,32 +17,41 @@
 }
 
 /* ------------------------------- 1. Nocturne ------------------------------ */
-/* Deep charcoal-teal. Warm off-white ink. Berry / teal / gold. Hairline cards. */
+/*
+ * Ink-plum ground, warm off-white type, amethyst + champagne + rose.
+ *
+ * This is the default, so it sets the tone for the whole feature. The earlier
+ * teal-green read as clinical — closer to a hospital chart than to something
+ * you'd want open on your own phone. Premium here means restraint: a near-black
+ * ground with a violet bias rather than a colour cast, one metal (champagne)
+ * carrying the highlights, and phase hues that are clearly distinct without any
+ * of them shouting. Hairline cards, generous shadow, no neon anywhere.
+ */
 .ci[data-theme="nocturne"] {
-  --ci-bg: #0c1416;
-  --ci-bg-deep: #080f11;
-  --ci-surface: #121c1f;
-  --ci-surface-2: #172327;
-  --ci-line: #1f2c2e;
-  --ci-line-strong: #2d3d3f;
-  --ci-text: #f1ebe0;
-  --ci-text-soft: #cbc5b8;
-  --ci-text-mute: #8c928c;
-  --ci-menstrual: #c4567f;
-  --ci-follicular: #4fb3a0;
-  --ci-luteal: #3f8f93;
-  --ci-ovulation: #e5b45e;
-  --ci-late: #9d8fb5;
-  --ci-accent: #4fb3a0;
-  --ci-accent-soft: rgba(79, 179, 160, 0.14);
-  --ci-focus: #7fd3c3;
-  --ci-ok: #4fb3a0;
-  --ci-warn: #e5b45e;
-  --ci-danger: #e07a5f;
-  --ci-input-bg: #0f191c;
+  --ci-bg: #0d0b12;
+  --ci-bg-deep: #08070c;
+  --ci-surface: #16131e;
+  --ci-surface-2: #1d1927;
+  --ci-line: #241f30;
+  --ci-line-strong: #362f47;
+  --ci-text: #f2ecec;
+  --ci-text-soft: #c9c1d2;
+  --ci-text-mute: #8b849b;
+  --ci-menstrual: #cf6d8f;
+  --ci-follicular: #a58bff;
+  --ci-luteal: #8b74c9;
+  --ci-ovulation: #e3c187;
+  --ci-late: #7f8aa8;
+  --ci-accent: #a58bff;
+  --ci-accent-soft: rgba(165, 139, 255, 0.14);
+  --ci-focus: #c3b1ff;
+  --ci-ok: #8fbfa4;
+  --ci-warn: #e3c187;
+  --ci-danger: #dd7f74;
+  --ci-input-bg: #100d17;
   --ci-veil:
-    radial-gradient(120% 80% at 12% -10%, rgba(79, 179, 160, 0.11), transparent 60%),
-    radial-gradient(90% 70% at 100% 0%, rgba(196, 86, 127, 0.09), transparent 55%);
+    radial-gradient(120% 80% at 12% -10%, rgba(165, 139, 255, 0.13), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(207, 109, 143, 0.09), transparent 55%);
   --ci-radius-lg: 14px;
   --ci-radius-md: 10px;
   --ci-radius-sm: 8px;
@@ -134,19 +143,19 @@
   --ci-text-soft: #c7d0c2;
   --ci-text-mute: #8e9a8c;
   --ci-menstrual: #b4547c;
-  --ci-follicular: #4fb38a;
-  --ci-luteal: #2e8570;
+  --ci-follicular: #7fb8a6;
+  --ci-luteal: #5f8f9d;
   --ci-ovulation: #dfb35c;
   --ci-late: #9aa8b6;
-  --ci-accent: #4fb38a;
-  --ci-accent-soft: rgba(79, 179, 138, 0.15);
-  --ci-focus: #7fd6ae;
-  --ci-ok: #4fb38a;
+  --ci-accent: #c9a86a;
+  --ci-accent-soft: rgba(201, 168, 106, 0.15);
+  --ci-focus: #e0c48c;
+  --ci-ok: #7fb8a6;
   --ci-warn: #dfb35c;
   --ci-danger: #dd7a5c;
   --ci-input-bg: #101a15;
   --ci-veil:
-    radial-gradient(120% 80% at 10% -10%, rgba(79, 179, 138, 0.13), transparent 60%),
+    radial-gradient(120% 80% at 10% -10%, rgba(201, 168, 106, 0.12), transparent 60%),
     radial-gradient(90% 70% at 100% 0%, rgba(180, 84, 124, 0.1), transparent 55%);
   --ci-radius-lg: 18px;
   --ci-radius-md: 13px;
