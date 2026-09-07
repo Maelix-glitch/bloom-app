@@ -28,6 +28,7 @@ import { TipsCard } from "./TipsCard";
 import { HistoryTable } from "./HistoryTable";
 import { CheckIns } from "./CheckIns";
 import { CycleModeCard } from "./CycleModeCard";
+import { ImportPeriods } from "./ImportPeriods";
 import { UndoToast } from "./UndoToast";
 import { Button, Card, Disclaimer } from "./primitives";
 import { SyncLine } from "./SyncLine";
@@ -55,6 +56,8 @@ export function CycleIntelligence({
   /** Survives the panel remounting when the first entry switches the layout. */
   const [notice, setNotice] = useState<string | null>(null);
   const [logDate, setLogDate] = useState<string>(store.today);
+  /* B8 — bring history in from another app */
+  const [importOpen, setImportOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const hasEntries = analysis.entryCount > 0;
   /* paused / off: history and the daily log stay, everything forward-looking goes quiet */
@@ -627,6 +630,7 @@ export function CycleIntelligence({
                         setEditing(null);
                       }}
                       onExport={exportCsv}
+                      onImport={preview ? undefined : () => setImportOpen(true)}
                       storedOn={
                         store.sync.signedIn && !store.sync.periodsOnDevice ? "account" : "device"
                       }
@@ -657,7 +661,16 @@ export function CycleIntelligence({
         )}
       </div>
       {!preview ? (
-        <UndoToast undoable={store.undoable} onUndo={store.undo} onDismiss={store.dismissUndo} />
+        <>
+          <UndoToast undoable={store.undoable} onUndo={store.undo} onDismiss={store.dismissUndo} />
+          <ImportPeriods
+            open={importOpen}
+            onClose={() => setImportOpen(false)}
+            logs={logs}
+            today={today}
+            onAdd={store.add}
+          />
+        </>
       ) : null}
     </div>
   );

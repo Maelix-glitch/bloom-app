@@ -44,6 +44,10 @@ import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/R
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
 import { JourneyCard } from "@/components/profile/JourneyCard";
 import { AccountRow } from "@/components/profile/AccountRow";
+import { EraseSheet, ExportSheet, RemindersSheet } from "@/components/profile/DataSheets";
+import { useExportBundle } from "@/hooks/useExportBundle";
+import { useReminders } from "@/hooks/useReminders";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { StoryComposer } from "@/components/stories/StoryComposer";
@@ -104,6 +108,9 @@ function ProfilePage() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [remindersOpen, setRemindersOpen] = useState(false);
+  const [eraseOpen, setEraseOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
   const [tab, setTab] = useState<ProfileTab>("moments");
@@ -187,6 +194,10 @@ function ProfilePage() {
     [moodBlock],
   );
   const record = useProfileRecord(moodEntries);
+
+  /* Tier B part 2 — reminders, install, one export, one erase */
+  const reminders = useReminders();
+  const install = useInstallPrompt();
 
   /* deep link from Mood: "share as story" */
   const [composerSource, setComposerSource] = useState<{
@@ -357,6 +368,50 @@ function ProfilePage() {
       : null;
 
   const highlights = highlightsBlock?.status === "ready" ? highlightsBlock.data : [];
+
+  /* B7 — the bundle is assembled only when the sheet asks for it */
+  const exportBundle = useExportBundle({
+    ...(identity
+      ? {
+          profile: {
+            displayName: identity.identity.displayName,
+            username: identity.identity.username,
+            bio: identity.identity.bio,
+            accent: identity.identity.accent,
+            email: identity.email,
+            memberSince: identity.memberSince,
+          },
+        }
+      : {}),
+    stories: allStories.map((s) => ({
+      kind: s.kind,
+      title: s.title,
+      body: s.body,
+      createdAt: s.createdAt,
+      expiresAt: s.expiresAt,
+      visibility: s.visibility,
+    })),
+    highlights: highlights.map((h) => ({
+      name: h.name,
+      accent: h.accent,
+      icon: h.icon,
+      stories: h.stories.map((st) => ({ title: st.title, createdAt: st.createdAt })),
+    })),
+    moodEntries,
+  });
+
+  const remindersValue = !reminders.settings.enabled
+    ? "off"
+    : reminders.permission === "granted"
+      ? "on"
+      : "needs permission";
+  const installValue = install.installed
+    ? "installed"
+    : install.canInstall
+      ? "add to home screen"
+      : install.ios
+        ? "share → add to home screen"
+        : null;
 
   /* tapping a day in the grid goes to the page that can show it */
   const openDay = useCallback(
@@ -740,6 +795,12 @@ function ProfilePage() {
                   void space.actions.signOut();
                 }}
                 onSignIn={() => setSignInOpen(true)}
+                onExportAll={() => setExportOpen(true)}
+                onOpenReminders={() => setRemindersOpen(true)}
+                onOpenErase={() => setEraseOpen(true)}
+                {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
+                remindersValue={remindersValue}
+                installValue={installValue}
               />
             </section>
 
@@ -763,6 +824,27 @@ function ProfilePage() {
             onSave={saveIdentity}
             onCommitAvatar={space.actions.commitAvatar}
             onRemoveAvatar={space.actions.clearAvatar}
+          />
+          <ExportSheet
+            open={exportOpen}
+            onClose={() => setExportOpen(false)}
+            build={exportBundle.build}
+          />
+          <RemindersSheet
+            open={remindersOpen}
+            onClose={() => setRemindersOpen(false)}
+            reminders={reminders}
+            install={install}
+          />
+          <EraseSheet
+            open={eraseOpen}
+            onClose={() => setEraseOpen(false)}
+            isSignedIn={authState === "signed-in"}
+            counts={exportBundle.counts}
+            onErased={() => {
+              setEraseOpen(false);
+              window.location.assign("/");
+            }}
           />
           <PrivacySheet
             open={privacyOpen}

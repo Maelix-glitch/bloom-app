@@ -8,6 +8,7 @@
 import { useState } from "react";
 import {
   Archive,
+  Bell,
   ChevronRight,
   Clock,
   Download,
@@ -18,6 +19,8 @@ import {
   Mail,
   Palette,
   Share2,
+  Smartphone,
+  Trash2,
 } from "lucide-react";
 
 import type {
@@ -125,6 +128,12 @@ export function AccountRow({
   onEdit,
   onSignOut,
   onSignIn,
+  onExportAll,
+  onOpenReminders,
+  onOpenErase,
+  onInstall,
+  remindersValue,
+  installValue,
 }: {
   identity: ProfileIdentity;
   account: AccountDetails;
@@ -139,6 +148,16 @@ export function AccountRow({
   onEdit: () => void;
   onSignOut: () => void;
   onSignIn: () => void;
+  /** B7 — one file with the whole record. */
+  onExportAll: () => void;
+  /** B4 — permission and per-kind switches. */
+  onOpenReminders: () => void;
+  /** B9 — typed-confirmation erase. */
+  onOpenErase: () => void;
+  /** B6 — the install prompt, when the browser has one to give. */
+  onInstall?: (() => void) | undefined;
+  remindersValue: string;
+  installValue: string | null;
 }) {
   const [exporting, setExporting] = useState(false);
 
@@ -222,6 +241,13 @@ export function AccountRow({
           />
           <Row
             icon={<Download className="size-3.5" />}
+            label="Download everything"
+            value="json"
+            testId="pf-row-export-all"
+            onClick={onExportAll}
+          />
+          <Row
+            icon={<Download className="size-3.5" />}
             label="Export my profile"
             value={exporting ? "preparing…" : "json"}
             testId="pf-row-export"
@@ -233,6 +259,30 @@ export function AccountRow({
                 window.setTimeout(() => setExporting(false), 600);
               }
             }}
+          />
+          <Row
+            icon={<Bell className="size-3.5" />}
+            label="Remind me"
+            value={remindersValue}
+            testId="pf-row-reminders"
+            onClick={onOpenReminders}
+          />
+          {installValue ? (
+            <Row
+              icon={<Smartphone className="size-3.5" />}
+              label="Install on this device"
+              value={installValue}
+              testId="pf-row-install"
+              {...(onInstall ? { onClick: onInstall } : {})}
+            />
+          ) : null}
+          <Row
+            icon={<Trash2 className="size-3.5" />}
+            label="Erase everything"
+            value="permanent"
+            danger
+            testId="pf-row-erase"
+            onClick={onOpenErase}
           />
         </div>
       </section>

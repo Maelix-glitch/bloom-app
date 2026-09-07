@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import { Download, Pencil, Trash2, TriangleAlert } from "lucide-react";
+import { Download, Pencil, Trash2, TriangleAlert, Upload } from "lucide-react";
 
 import { Button, Card, SectionHead } from "./primitives";
 import {
@@ -23,6 +23,7 @@ export function HistoryTable({
   onDelete,
   onClearAll,
   onExport,
+  onImport,
   storedOn = "device",
 }: {
   analysis: CycleAnalysis;
@@ -32,6 +33,8 @@ export function HistoryTable({
   onDelete: (id: string) => void;
   onClearAll: () => void;
   onExport?: () => void;
+  /** B8 — paste or drop history from another app. */
+  onImport?: (() => void) | undefined;
   /** Where these entries live right now — the footer says so honestly. */
   storedOn?: "device" | "account" | undefined;
 }) {
@@ -48,16 +51,32 @@ export function HistoryTable({
         title="Every entry you've logged"
         note="Lengths marked as not counted were too short or too long to be a real cycle, so they stay out of the average — fix the gap and the average corrects itself."
         aside={
-          onExport ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onExport}
-              disabled={disabled || logs.length === 0}
-            >
-              <Download size={13} aria-hidden />
-              Export CSV
-            </Button>
+          onExport || onImport ? (
+            <span className="flex flex-wrap items-center gap-1.5">
+              {onImport ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onImport}
+                  disabled={disabled}
+                  data-testid="cycle-import-open"
+                >
+                  <Upload size={13} aria-hidden />
+                  Import history
+                </Button>
+              ) : null}
+              {onExport ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onExport}
+                  disabled={disabled || logs.length === 0}
+                >
+                  <Download size={13} aria-hidden />
+                  Export CSV
+                </Button>
+              ) : null}
+            </span>
           ) : null
         }
       />
