@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type { EmotionKey, MoodEntry } from "./types";
+import { localDay } from "@/lib/localDay";
 
 type MoodRow = {
   id: string;
@@ -82,7 +83,8 @@ function toRow(profileId: string, entry: MoodEntry) {
     tags: [...new Set([...entry.tags, ...entry.emotions.slice(1)])],
     note: entry.note?.trim() || null,
     logged_at: entry.timestamp,
-    date: entry.timestamp.slice(0, 10),
+    // the day the person experienced, not the UTC day
+    date: localDay(entry.timestamp),
   };
 }
 

@@ -12,6 +12,7 @@ import {
   calculateMoodTrend,
   calculateVolatility,
   currentStreak,
+  dayKey,
   depthTier,
   detectAnomalies,
   detectPatterns,
@@ -112,7 +113,7 @@ export function useMoodSystem() {
   const analytics = useMemo(() => {
     const inRange = (list: MoodEntry[], start: string, end: string) =>
       list.filter((entry) => {
-        const date = entry.timestamp.slice(0, 10);
+        const date = dayKey(entry.timestamp);
         return date >= start && date <= end;
       });
 

@@ -8,6 +8,9 @@
 
 import { EMOTION_MAP, type DayAggregate, type EmotionKey, type MoodEntry } from "./types";
 import { MOOD_BUCKETS, bucketOf, moodLabel } from "./analytics";
+import { localDay } from "@/lib/localDay";
+
+export { localDay };
 
 export type PageMood = "happy" | "calm" | "neutral" | "sad" | "anxious" | "angry";
 
@@ -70,15 +73,6 @@ export function todayEntry(
   const past = todays.filter((e) => e.timestamp <= nowIso);
   const pool = past.length ? past : todays;
   return pool.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
-}
-
-export function localDay(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso.slice(0, 10);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
 }
 
 /** Build a fresh MoodEntry from a face tap. */

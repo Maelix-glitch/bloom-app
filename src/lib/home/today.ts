@@ -20,6 +20,7 @@ import type {
 } from "@/lib/mood/types";
 import type { HabitLog, Habit } from "@/lib/home/habits";
 import type { HabitToday } from "@/hooks/useHabits";
+import { localDay, localTime } from "@/lib/localDay";
 
 export type SignalId = "mood" | "habits" | "cycle" | "energy" | "study" | "sleep";
 
@@ -146,7 +147,7 @@ export function longDate(d = new Date()): string {
 export function moodToday(entries: readonly MoodEntry[], today: string): MoodEntry | null {
   let latest: MoodEntry | null = null;
   for (const e of entries) {
-    if (e.timestamp.slice(0, 10) !== today) continue;
+    if (localDay(e.timestamp) !== today) continue;
     if (!latest || e.timestamp > latest.timestamp) latest = e;
   }
   return latest;
@@ -318,7 +319,7 @@ export function connections(input: {
 
   const habitDays = new Set(habits.logs.filter((l) => l.date >= monthAgo).map((l) => l.date)).size;
   const moodMonth = moodDays.filter((d) => d.date >= monthAgo);
-  const moodLoggedToday = moodEntries.some((e) => e.timestamp.slice(0, 10) === today);
+  const moodLoggedToday = moodEntries.some((e) => localDay(e.timestamp) === today);
   const cycleDays = cycle.logs.length;
 
   const sleep = trackers.trackers.sleep;
@@ -455,7 +456,7 @@ export function flowOf(input: {
 
   items.push({
     id: "mood-checkin",
-    time: mood ? mood.timestamp.slice(11, 16) : "12:00",
+    time: mood ? localTime(mood.timestamp) : "12:00",
     title: "Mood check-in",
     sub: mood ? `Logged ${Math.round(mood.mood)}/10` : "How are you, really?",
     done: Boolean(mood),

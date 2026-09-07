@@ -9,13 +9,15 @@ import type {
   MoodEntry,
 } from "./types";
 import { EMOTION_MAP, EMOTIONS } from "./types";
+import { localDay, shiftDay, todayLocal } from "@/lib/localDay";
 
 /* ------------------------------------------------------------------ *
  * Pure analytics engine. No DOM, no React — safe to reuse for an AI
  * layer later. Every function tolerates empty / partial data.
  * ------------------------------------------------------------------ */
 
-export const dayKey = (iso: string) => iso.slice(0, 10);
+/** Local calendar day of an entry — never the UTC slice (see lib/localDay). */
+export const dayKey = (iso: string) => localDay(iso);
 const round = (n: number, p = 1) => Math.round(n * 10 ** p) / 10 ** p;
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 
@@ -519,18 +521,16 @@ export function depthTier(entryCount: number) {
   return { current, next, tiers };
 }
 
-export function currentStreak(days: DayAggregate[]): number {
+export function currentStreak(days: DayAggregate[], today: string = todayLocal()): number {
   if (!days.length) return 0;
   const set = new Set(days.map((d) => d.date));
   let streak = 0;
-  const cursor = new Date();
-  // Allow the streak to start today or yesterday.
-  if (!set.has(cursor.toISOString().slice(0, 10))) cursor.setDate(cursor.getDate() - 1);
-  for (;;) {
-    const k = cursor.toISOString().slice(0, 10);
-    if (!set.has(k)) break;
+  // Allow the streak to start today or yesterday — a day isn't "missed"
+  // until it is over.
+  let cursor = set.has(today) ? today : shiftDay(today, -1);
+  while (set.has(cursor)) {
     streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor = shiftDay(cursor, -1);
   }
   return streak;
 }
