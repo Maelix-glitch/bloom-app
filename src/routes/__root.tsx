@@ -16,6 +16,7 @@ import { useSoundBoot } from "@/hooks/useSound";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 import { AdminBar } from "@/components/welcome/AdminBar";
+import { ConnectionNotice } from "@/components/system/ConnectionNotice";
 
 function NotFoundComponent() {
   return (
@@ -160,6 +161,8 @@ function RootComponent() {
       <WelcomeGate />
       {/* Only in admin mode: shows you're in it, and lets you leave. */}
       <AdminBar />
+      {/* Only when there is no database: says so, instead of failing silently. */}
+      <ConnectionNotice />
     </QueryClientProvider>
   );
 }

@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, watchAuth } from "@/lib/supabase";
 import {
   buildContext,
   buildCycleModel,
@@ -106,24 +106,22 @@ export function useCycleSystem() {
   useEffect(() => setToday(localDateKey()), []);
 
   useEffect(() => {
+    /*
+     * Via watchAuth so a missing/broken Supabase config degrades to
+     * "signed out" instead of throwing. The old code called
+     * onAuthStateChange outside the promise's .catch(), so with no project
+     * configured this effect threw on first run and `loading` never cleared —
+     * the cycle page sat spinning and nothing could be saved.
+     */
     let mounted = true;
-    void supabase.auth.getSession().then(({ data }) => {
+    const stop = watchAuth((uid) => {
       if (!mounted) return;
-      const uid = data.session?.user.id ?? null;
-      setUserId(uid);
-      setAuthState(uid ? "signed-in" : "signed-out");
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (!mounted) return;
-      const uid = session?.user.id ?? null;
       setUserId(uid);
       setAuthState(uid ? "signed-in" : "signed-out");
     });
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      stop();
     };
   }, []);
 

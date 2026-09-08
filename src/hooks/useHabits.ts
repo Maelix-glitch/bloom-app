@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, watchAuth } from "@/lib/supabase";
 import {
   HABITS_CHANGED,
   adjustPoints,
@@ -145,29 +145,22 @@ export function useHabits(): HabitsStore {
       setAuth("off");
       return;
     }
+    /*
+     * watchAuth, not a bare supabase.auth call. The previous version put
+     * onAuthStateChange OUTSIDE the .catch(), so with no project configured it
+     * threw synchronously and killed this whole effect — auth never resolved,
+     * habits never loaded, and the page showed "couldn't load your habits"
+     * forever. See src/lib/supabase.ts.
+     */
     let mounted = true;
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        if (!mounted) return;
-        const uid = data.session?.user.id ?? null;
-        setProfileId(uid);
-        setAuth(uid ? "signed-in" : "signed-out");
-      })
-      .catch(() => {
-        if (mounted) setAuth("signed-out");
-      });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const stop = watchAuth((uid) => {
       if (!mounted) return;
-      const uid = session?.user.id ?? null;
       setProfileId(uid);
       setAuth(uid ? "signed-in" : "signed-out");
     });
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      stop();
     };
   }, []);
 

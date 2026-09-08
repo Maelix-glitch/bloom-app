@@ -31,3 +31,7 @@ dist-ssr
 *.sln
 *.sw?
 .shots/
+
+# local environment (never commit real keys)
+.env
+.env.local
