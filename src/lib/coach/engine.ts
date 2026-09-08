@@ -25,6 +25,7 @@ import { budgetFor, fitToBudget, type Budget } from "@/lib/coach/brevity";
 import { detectTopics, isCareTopic, isTrackedTopic, type Topic } from "@/lib/coach/topics";
 import { askEdge, toFacts, type CoachTurn, type EdgeResult } from "@/lib/coach/edge";
 import { pick } from "@/lib/voice/messages";
+import { compose, openHanded } from "@/lib/coach/compose";
 
 export interface AskInput {
   text: string;
@@ -185,6 +186,7 @@ export function answerLocally(input: AskInput): CoachAnswer {
   const { text, mode, record, context } = input;
   const { primary, also } = detectTopics(text);
   const budget = budgetFor(text, { greeting: primary === "greeting" });
+  const seed = text.slice(0, 48).toLowerCase();
 
   /* --- pure conversation ------------------------------------------------- */
   if (primary === "greeting") {
@@ -197,54 +199,82 @@ export function answerLocally(input: AskInput): CoachAnswer {
     return done([pick("coach.who", WHO_I_AM)], primary, budget, "local");
   }
 
-  /* --- things the record can answer -------------------------------------- */
+  /*
+   * --- everything else ----------------------------------------------------
+   *
+   * One path now, for tracked and untracked subjects alike. The old code
+   * branched here: tracked topics went to the responder, and everything else
+   * went to an apology. That branch was the bug — a question the responder
+   * couldn't ground in data produced "your record is empty" instead of an
+   * answer, so any subject without a tracker behind it hit a wall.
+   *
+   * Now the record is treated as *one input among several*. We ask the
+   * responder what it can see, discard its refusals, and hand whatever is left
+   * to the composer alongside what the coach actually knows about the subject.
+   */
+  let fromRecord: string[] = [];
+  let blocks: CoachAnswer["blocks"] = [];
+  let sources: string[] = [];
+
   if (isTrackedTopic(primary) || primary === "general") {
     const base = localAnswer({ text, mode }, context, record);
-    return {
-      ...base,
-      paragraphs: fitToBudget(base.paragraphs, budget),
-      /* A one-line answer with a chart under it is still a long answer. */
-      blocks: budget.allowBlocks ? base.blocks : [],
-      topic: primary,
-      budget,
-      source: "local",
-    };
+    fromRecord = base.paragraphs.filter(isGrounded);
+    blocks = base.blocks;
+    sources = base.sources;
   }
 
-  /* --- everything else --------------------------------------------------- */
-  const paragraphs: string[] = [];
-
-  const opener = CARE_OPENERS[primary];
-  if (opener) paragraphs.push(pick(`coach.care.${primary}`, opener, text.slice(0, 40)));
-
-  const note = UNTRACKED_NOTE[primary];
-  const offer = OFFERS[primary];
-
-  /*
-   * With one paragraph to spend, the useful thing wins over the caveat: an
-   * opener plus an offer says more than an opener plus an apology.
-   */
-  if (budget.maxParagraphs <= 1) {
-    if (paragraphs.length === 0 && offer) paragraphs.push(pick(`coach.offer.${primary}`, offer));
-    else if (paragraphs.length === 0 && note) paragraphs.push(note);
-  } else {
-    if (note) paragraphs.push(note);
-    if (offer) paragraphs.push(pick(`coach.offer.${primary}`, offer));
-  }
-
-  /* A second topic in the same question deserves acknowledgement. */
-  if (budget.maxParagraphs >= 3 && also.length > 0 && isTrackedTopic(also[0]!)) {
+  /* A second tracked subject in the same question is worth a line. */
+  if (budget.maxParagraphs >= 3 && also.length > 0 && isTrackedTopic(also[0]!) && !isTrackedTopic(primary)) {
     const side = localAnswer({ text, mode }, context, record);
-    if (side.paragraphs[0]) paragraphs.push(side.paragraphs[0]);
+    const grounded = side.paragraphs.filter(isGrounded);
+    if (grounded[0]) fromRecord = [...fromRecord, grounded[0]];
   }
 
-  if (paragraphs.length === 0) {
-    paragraphs.push(
-      "I can talk about that, though there's nothing in your record that measures it — so treat this as a conversation rather than an analysis. What's the part that's bothering you most?",
-    );
-  }
+  const paragraphs = compose({
+    topic: primary,
+    budget,
+    fromRecord,
+    recordEmpty: fromRecord.length === 0,
+    seed,
+    question: text,
+  });
 
-  return done(fitToBudget(paragraphs, budget), primary, budget, "local");
+  return {
+    paragraphs: paragraphs.length > 0 ? paragraphs : openHanded(seed),
+    sources,
+    /* A one-line answer with a chart under it is still a long answer. */
+    blocks: budget.allowBlocks && fromRecord.length > 0 ? blocks : [],
+    topic: primary,
+    budget,
+    source: "local",
+  };
+}
+
+/**
+ * Is this paragraph actually about the person, or is it the responder saying
+ * it has nothing?
+ *
+ * The responder emits a fixed apology when the record is empty. Left alone it
+ * becomes the whole answer — which is precisely the "very strict" behaviour
+ * this rebuild exists to remove. We drop those paragraphs and let real content
+ * take their place.
+ *
+ * Matched on distinctive phrases rather than the full strings so that a small
+ * copy edit in the responder doesn't silently reintroduce the bug. Guarded by
+ * a test that feeds the responder an empty record and asserts nothing survives.
+ */
+const NOT_GROUNDED = [
+  /i read from your own logs/i,
+  /that record is empty/i,
+  /rather say nothing than guess/i,
+  /nothing in your record/i,
+  /log one day on the trackers page/i,
+  /ask me about any one of those/i,
+  /that's the whole picture i can honestly speak from/i,
+];
+
+export function isGrounded(paragraph: string): boolean {
+  return !NOT_GROUNDED.some((re) => re.test(paragraph));
 }
 
 function done(

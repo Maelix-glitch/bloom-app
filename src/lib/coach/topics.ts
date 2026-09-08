@@ -115,7 +115,7 @@ export const TOPICS: TopicSpec[] = [
   /* trackers */
   {
     topic: "sleep",
-    pattern: /\b(sleep|slept|sleeping|bedtime|bed|awake|insomnia|nap|napped|rested|restless|wake up|woke|drowsy|snooze|dream\w*|jet ?lag)\b/i,
+    pattern: /\b(sleep|slept|sleeping|bedtime|bed|awake|insomnia|nap|napped|rested|restless|wak(e|ing) up|woke|waking|drowsy|snooze|dream\w*|jet ?lag|3 ?am|4 ?am|middle of the night)\b/i,
     tracked: true,
   },
   {
@@ -133,7 +133,7 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "food",
-    pattern: /\b(food|eat\w*|ate|meal|breakfast|lunch|dinner|snack\w*|diet|nutrition|hungry|appetite|sugar|carbs|protein|cook\w*|skip(ped)? (a )?meal)\b/i,
+    pattern: /\b(food|eat\w*|ate|meal|breakfast|lunch|dinner|snack\w*|diet\w*|nutrition|hungry|appetite|sugar|carbs|protein|cook\w*|skip(ped)? (a )?meal|fasting|intermittent|keto|vegan|vegetarian|supplement\w*|vitamin\w*)\b/i,
   },
   {
     topic: "study",
@@ -147,7 +147,7 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "screen",
-    pattern: /\b(screen ?time|screens?|phone|scroll\w*|doom ?scroll|tiktok|instagram|twitter|youtube|reddit|laptop|tv|netflix|gaming|games?)\b/i,
+    pattern: /\b(screen ?time|screens?|phone|doom\w*|\w*scroll\w*|tiktok|instagram|twitter|youtube|reddit|laptop|tv|netflix|gaming|games?)\b/i,
     tracked: true,
   },
   {
@@ -164,7 +164,7 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "illness",
-    pattern: /\b(ill|sick|unwell|fever|flu|cold|covid|infection|virus|doctor|gp|hospital|medication|prescription|symptom)\b/i,
+    pattern: /\b(ill|sick|unwell|fever|flu|cold|covid|infection|virus|doctor|gp|hospital|medication|prescription|symptom|therapy|therapist|counsell?ing|counsell?or|psychiatrist|psycholog\w+|diagnos\w+)\b/i,
     care: true,
   },
   {
@@ -187,7 +187,7 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "relationships",
-    pattern: /\b(relationship|partner|boyfriend|girlfriend|husband|wife|spouse|friend\w*|family|mum|mom|dad|parents?|sibling|brother|sister|argument|fight|breakup|broke up|dating|lonely in)\b/i,
+    pattern: /\b(relationship|partner|boyfriend|girlfriend|husband|wife|spouse|friend\w*|family|mum|mom|dad|parents?|sibling|brother|sister|argument|fight|breakup|broke up|dating|lonely in|roommate|room ?mate|flatmate|housemate|neighbou?r|colleague|coworker|co-worker|boss|driving me (mad|insane|crazy)|can'?t stand)\b/i,
     care: true,
   },
   {
