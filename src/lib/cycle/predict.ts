@@ -127,9 +127,32 @@ export interface AnalyzeOptions {
   trendThreshold?: number;
   /** Assumed bleed length when nothing has been logged. */
   defaultPeriodLength?: number;
+  /**
+   * Days past a *rough* prediction (fewer than three usable cycles, or a very
+   * variable history) before we call a period "late". Wider than
+   * `lateAfterDays` because the date itself is only a direction.
+   */
+  lateAfterDaysLowConfidence?: number;
+  /**
+   * Long cycles the person has confirmed as real ("no — it really was that
+   * long"), or that the record itself shows as this person's steady rhythm.
+   * Gaps up to this length count as cycles instead of missed logs.
+   */
+  personalMaxPlausible?: number | null;
+  /** The longest gap adaptive plausibility will ever accept as one cycle. */
+  hardMaxPlausible?: number;
+  /** Two long gaps within this many days of each other look like a rhythm. */
+  longCycleAgreement?: number;
+  /**
+   * `false` when the person has said they're not expecting periods right now
+   * (paused or off). History, averages and stats are still computed; nothing
+   * forward-looking is — no next start, no phase, no fertile window, no
+   * "late", no forecast, no flags about the future.
+   */
+  expecting?: boolean;
 }
 
-const DEFAULTS = {
+export const CYCLE_DEFAULTS = {
   minPlausible: 15,
   maxPlausible: 45,
   recentWindow: 6,
@@ -138,11 +161,58 @@ const DEFAULTS = {
   fertileBefore: 5,
   fertileAfter: 1,
   lateAfterDays: 3,
+  lateAfterDaysLowConfidence: 7,
   moderateVariability: 7,
   lowVariability: 3,
   trendThreshold: 3,
   defaultPeriodLength: 5,
+  personalMaxPlausible: null as number | null,
+  hardMaxPlausible: 90,
+  longCycleAgreement: 7,
 } as const;
+
+const DEFAULTS = CYCLE_DEFAULTS;
+
+/**
+ * How long a gap this person's record can vouch for.
+ *
+ * The population ceiling (45 days) is right for most people and wrong for
+ * anyone whose cycles simply run long — PCOS, the years after a first period,
+ * perimenopause, the months after a birth. Their 50-day gaps are not missed
+ * logs, and treating them that way leaves them with a generic 28-day guess and
+ * a "did you forget?" question every single cycle.
+ *
+ * So the ceiling adapts, on evidence only: when at least two *consecutive*
+ * gaps run past 45 days and agree with each other (within a week), that is a
+ * rhythm, not an accident, and the ceiling rises to cover the longest of
+ * them. A single long gap on its own still reads as a probable missed log —
+ * one data point can't tell the two apart, and the person can say "it really
+ * was that long", which sets `personalMaxPlausible` and is honoured here.
+ */
+export function effectiveMaxPlausible(
+  gapDays: readonly number[],
+  o: {
+    maxPlausible: number;
+    hardMaxPlausible: number;
+    longCycleAgreement: number;
+    personalMaxPlausible?: number | null;
+  },
+): number {
+  let ceiling = o.maxPlausible;
+  if (o.personalMaxPlausible && o.personalMaxPlausible > ceiling) {
+    ceiling = Math.min(o.hardMaxPlausible, o.personalMaxPlausible);
+  }
+  for (let i = 1; i < gapDays.length; i += 1) {
+    const a = gapDays[i - 1]!;
+    const b = gapDays[i]!;
+    const bothLong = a > o.maxPlausible && b > o.maxPlausible;
+    const bothReal = a <= o.hardMaxPlausible && b <= o.hardMaxPlausible;
+    if (bothLong && bothReal && Math.abs(a - b) <= o.longCycleAgreement) {
+      ceiling = Math.max(ceiling, Math.max(a, b));
+    }
+  }
+  return Math.min(o.hardMaxPlausible, ceiling);
+}
 
 /* -------------------------------- results -------------------------------- */
 
@@ -162,7 +232,8 @@ export interface CycleGap {
   suggestedMissedDate: string | null;
 }
 
-export type FlagKind = "generic" | "anomaly" | "late" | "variability" | "trend" | "building";
+export type FlagKind =
+  "generic" | "anomaly" | "late" | "variability" | "trend" | "building" | "long-cycles";
 
 export type FlagTone = "calm" | "info" | "attention";
 
@@ -226,6 +297,8 @@ export interface CycleStats {
 }
 
 export interface CycleAnalysis {
+  /** False when tracking is paused or off — see `AnalyzeOptions.expecting`. */
+  expecting: boolean;
   /** Echoed back so callers can assert against a known "today". */
   today: string;
   entryCount: number;
@@ -239,6 +312,10 @@ export interface CycleAnalysis {
   averageLengthRaw: number;
   /** True when no plausible cycle exists yet and the 28-day fallback is used. */
   isGeneric: boolean;
+  /** The longest gap counted as one cycle for this person (45 unless their record says otherwise). */
+  maxPlausible: number;
+  /** True when the ceiling was raised by the person's own long, steady cycles. */
+  longCyclesAccepted: boolean;
   /** Population standard deviation of the plausible cycle lengths. */
   variability: number;
   confidence: Confidence;
@@ -259,8 +336,24 @@ export interface CycleAnalysis {
   nextStart: string | null;
   /** Positive = days until; negative = days late. */
   daysUntilNext: number | null;
+  /**
+   * The honest version of `nextStart`: a window that widens as confidence
+   * falls. Show this, not the single date, whenever confidence isn't high.
+   */
+  nextWindow: { from: string; to: string; spread: number } | null;
+  /**
+   * True only when the record can vouch for it: never from the population
+   * fallback, and only past a wider margin while confidence is low.
+   */
   isLate: boolean;
+  /** Days past `nextStart`; 0 when not past it. Informational — see `isLate`. */
   lateBy: number;
+  /**
+   * The latest entry starts AFTER `today` — an import or a wrong device clock.
+   * Nothing about "now" can be derived from it, so `cycleDay`/`phase` are null
+   * and the UI shows the date as upcoming and offers to fix it.
+   */
+  upcomingStart: string | null;
 
   ovulationDate: string | null;
   fertileStart: string | null;
@@ -455,6 +548,7 @@ export function analyzeCycle(
   options: AnalyzeOptions = {},
 ): CycleAnalysis {
   const o = { ...DEFAULTS, ...options };
+  const expecting = options.expecting !== false;
 
   const usable = logs.filter((l) => l && typeof l.start === "string");
   const sorted = [...usable].sort(
@@ -462,18 +556,29 @@ export function analyzeCycle(
   );
 
   /* --- gaps: the raw cycle-length history -------------------------------- */
+  const rawGapDays: number[] = [];
+  for (let i = 1; i < sorted.length; i += 1) {
+    const prev = sorted[i - 1];
+    const cur = sorted[i];
+    if (prev && cur) rawGapDays.push(diffDays(prev.start, cur.start));
+  }
+  const maxPlausible = effectiveMaxPlausible(rawGapDays, o);
+  const longCyclesAccepted = maxPlausible > o.maxPlausible;
+
   const gaps: CycleGap[] = [];
   for (let i = 1; i < sorted.length; i += 1) {
     const prev = sorted[i - 1];
     const cur = sorted[i];
     if (!prev || !cur) continue;
     const days = diffDays(prev.start, cur.start);
-    const plausible = days >= o.minPlausible && days <= o.maxPlausible;
+    const plausible = days >= o.minPlausible && days <= maxPlausible;
     let reason: string | null = null;
     if (days < o.minPlausible) {
       reason = `${days} ${plural(days, "day", "days")} apart — too short for a cycle. Usually a duplicate or a mistyped date rather than a real cycle.`;
-    } else if (days > o.maxPlausible) {
-      reason = `${days} days apart — longer than a plausible cycle. Almost always a period that went unlogged, not one long cycle.`;
+    } else if (days > maxPlausible) {
+      reason = longCyclesAccepted
+        ? `${days} days apart — longer even than your own long cycles (up to ${maxPlausible} days). Probably a period that went unlogged.`
+        : `${days} days apart — longer than a plausible cycle. Almost always a period that went unlogged, not one long cycle.`;
     }
     gaps.push({
       index: i,
@@ -484,7 +589,7 @@ export function analyzeCycle(
       days,
       plausible,
       reason,
-      suggestedMissedDate: days > o.maxPlausible ? addDays(prev.start, Math.round(days / 2)) : null,
+      suggestedMissedDate: days > maxPlausible ? addDays(prev.start, Math.round(days / 2)) : null,
     });
   }
 
@@ -521,7 +626,11 @@ export function analyzeCycle(
   /* --- anchors ----------------------------------------------------------- */
   const last = sorted.length > 0 ? sorted[sorted.length - 1] : null;
   const lastStart = last ? last.start : null;
-  const cycleDay = lastStart ? diffDays(lastStart, today) + 1 : null;
+  /* A start in the future can't place today anywhere — cycle day 0, "menstrual"
+     for a period that hasn't happened. Say "upcoming" instead. */
+  const upcomingStart = lastStart && lastStart > today ? lastStart : null;
+  /* not expecting periods → today isn't "day N of a cycle" at all */
+  const cycleDay = expecting && lastStart && !upcomingStart ? diffDays(lastStart, today) + 1 : null;
 
   /* --- bleed length: logged first, then averaged history, then default --- */
   const loggedDurations = sorted
@@ -540,10 +649,31 @@ export function analyzeCycle(
   );
 
   /* --- predictions ------------------------------------------------------- */
-  const nextStart = lastStart ? addDays(lastStart, cycleLength) : null;
+  const nextStart = expecting && lastStart ? addDays(lastStart, cycleLength) : null;
   const daysUntilNext = nextStart ? diffDays(today, nextStart) : null;
   const lateBy = daysUntilNext !== null && daysUntilNext < 0 ? Math.abs(daysUntilNext) : 0;
-  const isLate = lateBy >= o.lateAfterDays;
+  /* "Late" is a claim about this person's rhythm, so it needs one to be late
+     against: never from the population fallback, and only after a wider
+     margin while the estimate is still rough. */
+  const lateThreshold =
+    confidence === "none"
+      ? Number.POSITIVE_INFINITY
+      : confidence === "low"
+        ? o.lateAfterDaysLowConfidence
+        : o.lateAfterDays;
+  const isLate = lateBy >= lateThreshold;
+  /* A range, not a date, when the record can't vouch for a single day. */
+  const spread =
+    confidence === "none"
+      ? 4
+      : confidence === "low"
+        ? Math.max(3, Math.round(variability))
+        : confidence === "medium"
+          ? Math.max(2, Math.round(variability))
+          : Math.max(1, Math.round(variability));
+  const nextWindow = nextStart
+    ? { from: addDays(nextStart, -spread), to: addDays(nextStart, spread), spread }
+    : null;
 
   // Ovulation is counted *backwards* from the next period: the luteal phase
   // (ovulation → bleed) is the steadier half, the follicular half is what
@@ -556,8 +686,14 @@ export function analyzeCycle(
   /* --- current phase ----------------------------------------------------- */
   let phase: Phase | null = null;
   if (cycleDay !== null && cycleDay > 0 && lastStart) {
-    if (cycleDay > cycleLength) {
+    if (cycleDay > cycleLength && isLate) {
       phase = "late";
+    } else if (cycleDay > cycleLength) {
+      // Past the estimate but not (yet) late — a generic guess, or a rough
+      // one still inside its own margin. The body is simply in a longer
+      // luteal stretch; calling it "past predicted date" would dress a
+      // population average up as a fact about this person.
+      phase = "luteal";
     } else if (cycleDay <= bleedDays) {
       phase = "menstrual";
     } else if (cycleDay >= ovulationDay - 1 && cycleDay <= ovulationDay + 1) {
@@ -567,9 +703,6 @@ export function analyzeCycle(
     } else {
       phase = "luteal";
     }
-  } else if (cycleDay !== null) {
-    // A period logged with a future start date — show it as upcoming bleeding.
-    phase = "menstrual";
   }
 
   /* --- trend: earliest half vs most recent half -------------------------- */
@@ -610,7 +743,7 @@ export function analyzeCycle(
     }));
   };
 
-  const phaseWindows = lastStart ? layoutPhases(lastStart) : [];
+  const phaseWindows = expecting && lastStart ? layoutPhases(lastStart) : [];
 
   /* --- forecast: the next three cycles, same maths, further out ---------- */
   const forecast: ForecastCycle[] = [];
@@ -671,8 +804,10 @@ export function analyzeCycle(
   /* --- flags (the loopholes, each with its own message) ------------------ */
   const flags: InsightFlag[] = [];
 
-  if (sorted.length === 0) {
+  if (sorted.length === 0 || !expecting) {
     // Edge case 1 — the page hides predictions entirely and prompts instead.
+    // Not expecting periods: the "placeholder" / "still rough" notes are about
+    // predictions that aren't being made, so they stay quiet too.
   } else if (isGeneric) {
     // Edge case 2 — one entry, or none of the gaps are usable.
     flags.push({
@@ -689,6 +824,18 @@ export function analyzeCycle(
       tone: "calm",
       title: `${cycleLengths.length} usable ${plural(cycleLengths.length, "cycle", "cycles")} in — still a rough guide`,
       body: "Predictions get noticeably steadier after three or four logged cycles. Until then the dates below are a direction, not a promise.",
+    });
+  }
+
+  // Long cycles the record itself vouches for — say so, instead of asking
+  // "did you forget?" every month.
+  if (longCyclesAccepted && cycleLengths.length > 0) {
+    flags.push({
+      id: "long-cycles",
+      kind: "long-cycles",
+      tone: "calm",
+      title: "Your cycles run long — and that's what Bloom now expects",
+      body: `Your record shows cycles of up to ${maxPlausible} days that agree with each other, so they count as your rhythm rather than as missed periods. Predictions, phases and the fertile window are built from that. Cycles this long are common and have many ordinary causes; if they're new for you, that's worth a conversation with a clinician — not because a chart flagged it.`,
     });
   }
 
@@ -714,13 +861,20 @@ export function analyzeCycle(
   }
 
   // Edge case 5 — meaningfully past the predicted start.
-  if (isLate && lateBy > 0) {
+  if (expecting && isLate && lateBy > 0) {
     flags.push({
       id: "late",
       kind: "late",
       tone: "attention",
-      title: `Your period is ${lateBy} ${plural(lateBy, "day", "days")} later than predicted`,
-      body: "Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.",
+      title:
+        confidence === "low"
+          ? `Your period is ${lateBy} ${plural(lateBy, "day", "days")} past a rough estimate`
+          : `Your period is ${lateBy} ${plural(lateBy, "day", "days")} later than predicted`,
+      body: `${
+        confidence === "low"
+          ? "That estimate was only a direction — built from a short or uneven record — so a week either side is normal. "
+          : ""
+      }Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.`,
     });
   }
 
@@ -755,6 +909,7 @@ export function analyzeCycle(
   const tips = phase ? PHASE_TIPS[phase] : [];
 
   return {
+    expecting,
     today,
     entryCount: sorted.length,
     logs: sorted,
@@ -763,6 +918,8 @@ export function analyzeCycle(
     averageLength: Math.round(averageLengthRaw * 10) / 10,
     averageLengthRaw,
     isGeneric,
+    maxPlausible,
+    longCyclesAccepted,
     variability: Math.round(variability * 10) / 10,
     confidence,
     confidenceReason,
@@ -774,8 +931,10 @@ export function analyzeCycle(
     phaseLabel: phase ? PHASE_LABEL[phase] : "Unknown",
     nextStart,
     daysUntilNext,
+    nextWindow,
     isLate,
     lateBy,
+    upcomingStart,
     ovulationDate,
     fertileStart,
     fertileEnd,
@@ -828,9 +987,8 @@ export function validateLogDraft(
   } else if (diffDays(today, start) > 0) {
     errors.start =
       "That date is in the future. Log a period that has already started, or use today.";
-  } else if (diffDays(start, today) > 730) {
-    errors.start =
-      "That's more than two years back. It's allowed, but check the year — a typo here skews every average.";
+  } else if (diffDays(start, today) > MAX_YEARS_BACK * 365) {
+    errors.start = `That's more than ${MAX_YEARS_BACK} years back. Check the year — a typo here skews every average.`;
   } else if (others.some((e) => e.start === start)) {
     errors.start = `You already have a period starting ${formatDate(start)}. Edit that entry instead of adding a second one.`;
   } else {
@@ -855,9 +1013,16 @@ export function validateLogDraft(
       errors.end = `The end date is before the start date (${formatDateShort(start)}). Swap them, or clear the end date — it's optional.`;
     } else if (diffDays(today, end) > 0) {
       errors.end = "The end date is in the future. Leave it blank until the bleeding stops.";
-    } else if (start !== "" && isValidDateKey(start) && diffDays(start, end) > 14) {
-      errors.end =
-        "That's longer than 15 days of bleeding. Check the date, or leave the end date blank and we'll estimate it.";
+    } else if (start !== "" && isValidDateKey(start) && diffDays(start, end) + 1 > MAX_BLEED_DAYS) {
+      errors.end = `That's more than ${MAX_BLEED_DAYS} days of bleeding. Check the date, or leave the end date blank and we'll estimate it.`;
+    } else if (start !== "" && isValidDateKey(start)) {
+      /* The last day can't run into the period that came after it. */
+      const following = others
+        .filter((e) => e.start > start)
+        .sort((a, b) => a.start.localeCompare(b.start))[0];
+      if (following && end >= following.start) {
+        errors.end = `That last day runs into the period you logged starting ${formatDate(following.start)}. Pick an earlier day, or edit that entry.`;
+      }
     }
   }
 
@@ -867,6 +1032,106 @@ export function validateLogDraft(
   }
 
   return errors;
+}
+
+/** Hard ceiling for a logged bleed — beyond this it is almost certainly a typo. */
+export const MAX_BLEED_DAYS = 30;
+/** A bleed longer than this is allowed, but worth a gentle note. */
+export const LONG_BLEED_DAYS = 10;
+/** Entries further back than this are refused (a wrong year, not a memory). */
+export const MAX_YEARS_BACK = 10;
+
+export type WarningKey = "start" | "end" | "gap";
+
+export interface LogWarning {
+  key: WarningKey;
+  message: string;
+}
+
+export interface LogAssessment {
+  errors: FieldErrors;
+  /** Non-blocking notes shown next to the fields. The save still goes through. */
+  warnings: LogWarning[];
+  /** Days since the previous logged start, when there is one. */
+  gapBefore: number | null;
+  /** Days until the next logged start, when there is one. */
+  gapAfter: number | null;
+}
+
+/**
+ * Everything the form should say about a draft: hard errors (the save is
+ * refused) plus soft warnings (the save goes through, the person is told).
+ * A cycle is different for every body, so the margins here are wide on
+ * purpose — a warning never blocks a real record.
+ */
+export function assessLogDraft(
+  draft: LogDraft,
+  existing: readonly PeriodLog[],
+  today: string = todayKey(),
+  editingId?: string | null,
+  options: { averageLength?: number | undefined; minPlausible?: number | undefined } = {},
+): LogAssessment {
+  const errors = validateLogDraft(draft, existing, today, editingId);
+  const warnings: LogWarning[] = [];
+  const others = existing.filter((e) => e.id !== editingId);
+  const start = draft.start?.trim() ?? "";
+  const end = draft.end?.trim() ?? "";
+  const minPlausible = options.minPlausible ?? DEFAULTS.minPlausible;
+
+  let gapBefore: number | null = null;
+  let gapAfter: number | null = null;
+
+  if (isValidDateKey(start) && !errors.start) {
+    const before = others
+      .filter((e) => e.start < start)
+      .sort((a, b) => b.start.localeCompare(a.start))[0];
+    const after = others
+      .filter((e) => e.start > start)
+      .sort((a, b) => a.start.localeCompare(b.start))[0];
+    gapBefore = before ? diffDays(before.start, start) : null;
+    gapAfter = after ? diffDays(start, after.start) : null;
+
+    if (diffDays(start, today) > 730) {
+      warnings.push({
+        key: "start",
+        message:
+          "That's more than two years back. Allowed — just check the year, because a typo here skews every average.",
+      });
+    }
+    if (gapBefore !== null && gapBefore < minPlausible) {
+      warnings.push({
+        key: "gap",
+        message: `Only ${gapBefore} ${plural(gapBefore, "day", "days")} after the period that started ${formatDate(before!.start)}. That's too close to count as a new cycle, so this gap will be left out of your average — if it's the same period continuing, extend that entry instead.`,
+      });
+    } else if (
+      gapBefore !== null &&
+      options.averageLength &&
+      gapBefore < Math.round(options.averageLength * 0.75)
+    ) {
+      warnings.push({
+        key: "gap",
+        message: `${gapBefore} days after your last start — noticeably earlier than your usual ${Math.round(options.averageLength)}. If this was spotting rather than a period, untick "first day of a period".`,
+      });
+    }
+    if (gapAfter !== null && gapAfter < minPlausible) {
+      warnings.push({
+        key: "gap",
+        message: `Only ${gapAfter} ${plural(gapAfter, "day", "days")} before the period that started ${formatDate(after!.start)}. One of the two is probably the same period — the gap will be left out of your average.`,
+      });
+    }
+  }
+
+  if (isValidDateKey(start) && isValidDateKey(end) && !errors.end) {
+    const length = diffDays(start, end) + 1;
+    if (length > LONG_BLEED_DAYS) {
+      warnings.push({
+        key: "end",
+        message: `${length} days of bleeding is longer than most periods. It's recorded as you logged it — if bleeds this long are new for you, that's worth mentioning to a doctor or nurse.`,
+      });
+    }
+  }
+
+  return { errors, warnings, gapBefore, gapAfter };
 }
 
 /* --------------------------------- misc ---------------------------------- */
@@ -880,6 +1145,62 @@ export function newLogId(): string {
 }
 
 /** "in 12 days" / "3 days late" / "today" — plain language, no false certainty. */
+/**
+ * One sentence about the next period that every surface (Cycle page, Today,
+ * the coach) can quote — so none of them promises a date the engine can't
+ * vouch for. Returns null when there is nothing to say.
+ *
+ *   high      → "Next period around 12 Oct · in 9 days"
+ *   medium    → "Next period likely 10–14 Oct · around 12 Oct, in 9 days"
+ *   low       → "Next period roughly 8–16 Oct · a rough estimate, in about 9 days"
+ *   none      → "Next period pencilled in for 12 Oct — a generic 28-day guide, not your pattern yet"
+ *   late      → "3 days later than predicted (12 Oct)"
+ *   upcoming  → "Your latest entry starts 12 Oct — a date in the future"
+ */
+export function describeNextPeriod(a: CycleAnalysis): string | null {
+  if (a.upcomingStart) {
+    return `Your latest entry starts ${formatDateShort(a.upcomingStart)} — a date in the future`;
+  }
+  if (!a.nextStart || a.daysUntilNext === null) return null;
+  const date = formatDateShort(a.nextStart);
+  if (a.isLate && a.lateBy > 0) {
+    return `${a.lateBy} ${plural(a.lateBy, "day", "days")} later than predicted (${date})`;
+  }
+  const w = a.nextWindow;
+  const span = w ? `${formatDateShort(w.from)}–${formatDateShort(w.to)}` : date;
+  const d = a.daysUntilNext;
+  const soon = d === 0 ? "due today" : d > 0 ? `in ${d} ${plural(d, "day", "days")}` : null;
+  const passed = d < 0 ? `${-d} ${plural(-d, "day", "days")} past the estimate` : null;
+  switch (a.confidence) {
+    case "high":
+      return `Next period around ${date} · ${soon ?? passed}`;
+    case "medium":
+      return `Next period likely ${span} · around ${date}, ${soon ?? passed}`;
+    case "low":
+      return `Next period roughly ${span} · a rough estimate, ${
+        soon ? `in about ${d} ${plural(d, "day", "days")}` : (passed ?? "")
+      }`.trim();
+    case "none":
+    default:
+      return `Next period pencilled in for ${date} — a generic ${Math.round(a.averageLength)}-day guide, not your pattern yet`;
+  }
+}
+
+/** The short form for chips and subtitles: "in 9d", "3d late", "~8–16 Oct", "guide only". */
+export function describeNextPeriodShort(a: CycleAnalysis): string | null {
+  if (a.upcomingStart) return "starts " + formatDateShort(a.upcomingStart);
+  if (!a.nextStart || a.daysUntilNext === null) return null;
+  if (a.isLate && a.lateBy > 0) return `${a.lateBy}d late`;
+  const d = a.daysUntilNext;
+  if (a.confidence === "none") return "28-day guide only";
+  if (a.confidence === "low") {
+    const w = a.nextWindow;
+    return w ? `~${formatDateShort(w.from)}–${formatDateShort(w.to)}` : `~${d}d`;
+  }
+  if (d === 0) return "due today";
+  return d > 0 ? `next in ${d}d` : `${-d}d past estimate`;
+}
+
 export function describeCountdown(daysUntilNext: number | null): string {
   if (daysUntilNext === null) return "—";
   if (daysUntilNext === 0) return "due today";

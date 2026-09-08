@@ -65,6 +65,11 @@ export interface LogPanelProps {
   disabled?: boolean;
   /** Which tracker the page wants the eye on, set by tapping a dial. */
   focus?: TrackerId | null | undefined;
+  /** Subjects the person typed before — offered as chips next to the built-in ones. */
+  customSubjects?: readonly string[] | undefined;
+  /** Called with a typed subject when a session is added, so it can be remembered. */
+  onRememberSubject?: ((subject: string) => void) | undefined;
+  onForgetSubject?: ((subject: string) => void) | undefined;
 }
 
 export function LogPanel({
@@ -76,6 +81,9 @@ export function LogPanel({
   onDelete,
   disabled = false,
   focus = null,
+  customSubjects = [],
+  onRememberSubject,
+  onForgetSubject,
 }: LogPanelProps) {
   const uid = useId();
   const sleepRef = useRef<HTMLDivElement>(null);
@@ -92,6 +100,9 @@ export function LogPanel({
   const [status, setStatus] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [subject, setSubject] = useState<string>("General");
+  /* "Other…" — a course name, a project, anything; remembered once used */
+  const [otherOpen, setOtherOpen] = useState(false);
+  const [otherText, setOtherText] = useState("");
   const [sessionMinutes, setSessionMinutes] = useState("");
   const [startAt, setStartAt] = useState("");
   const justSaved = useRef(false);
@@ -140,15 +151,29 @@ export function LogPanel({
   const addSession = () => {
     const minutes = Number(sessionMinutes);
     if (!Number.isFinite(minutes) || minutes < 1 || minutes > 960) return;
+    const typed = otherOpen ? otherText.trim().slice(0, 40) : "";
+    const chosen = typed || subject.trim() || "General";
     const next: StudySession = {
-      subject: subject.trim() || "General",
+      subject: chosen,
       minutes: Math.round(minutes),
       startAt: startAt.trim() === "" ? null : startAt.trim(),
     };
     set("sessions", [...draft.sessions, next]);
+    if (typed) {
+      onRememberSubject?.(typed);
+      setSubject(typed);
+      setOtherOpen(false);
+      setOtherText("");
+    }
     setSessionMinutes("");
     setStartAt("");
   };
+
+  const builtIn = SUBJECTS as readonly string[];
+  const subjectOptions = [
+    ...builtIn,
+    ...customSubjects.filter((s) => !builtIn.some((b) => b.toLowerCase() === s.toLowerCase())),
+  ];
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -347,11 +372,63 @@ export function LogPanel({
           </div>
 
           <TagGroup
-            options={SUBJECTS.map((s) => ({ value: s, label: s }))}
-            value={subject}
-            onSelect={setSubject}
+            options={[
+              ...subjectOptions.map((s) => ({ value: s, label: s })),
+              { value: "__other__", label: "Other…" },
+            ]}
+            value={otherOpen ? "__other__" : subject}
+            onSelect={(value) => {
+              if (value === "__other__") {
+                setOtherOpen(true);
+                return;
+              }
+              setOtherOpen(false);
+              setSubject(value);
+            }}
             disabled={disabled}
           />
+          {otherOpen ? (
+            <div className="mt-2 flex flex-wrap items-end gap-2">
+              <div className="ci-field min-w-[180px] flex-1">
+                <label className="ci-label" htmlFor={`${uid}-other-subject`}>
+                  Subject name
+                </label>
+                <input
+                  id={`${uid}-other-subject`}
+                  type="text"
+                  maxLength={40}
+                  className="ci-input"
+                  placeholder="e.g. Organic chemistry"
+                  value={otherText}
+                  disabled={disabled}
+                  autoFocus
+                  onChange={(e) => setOtherText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addSession();
+                    }
+                  }}
+                  data-testid="tk-subject-other"
+                />
+                <p className="ci-hint">Remembered for next time, on every device you sign in to.</p>
+              </div>
+            </div>
+          ) : null}
+          {!otherOpen && customSubjects.includes(subject) && onForgetSubject ? (
+            <p className="ci-hint mt-1">
+              <button
+                type="button"
+                className="underline underline-offset-2"
+                onClick={() => {
+                  onForgetSubject(subject);
+                  setSubject("General");
+                }}
+              >
+                Forget “{subject}”
+              </button>
+            </p>
+          ) : null}
 
           <div className="mt-2 flex flex-wrap items-end gap-2">
             <div className="ci-field min-w-[110px]">

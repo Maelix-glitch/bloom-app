@@ -12,12 +12,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
-import { answer as groundedAnswer } from "@/lib/coach/responder";
+import { supabase, hasSupabaseConfig } from "@/lib/supabase";
+import { ask as askCoach } from "@/lib/coach/engine";
+import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
-import { analyzeCycle } from "@/lib/cycle/predict";
-import { loadLogs as loadPeriodLogs, loadDays as loadCycleDays } from "@/lib/cycle/periodStore";
+import { analyzeCycle, describeNextPeriod } from "@/lib/cycle/predict";
+import {
+  loadLogs as loadPeriodLogs,
+  loadDays as loadCycleDays,
+  effectiveMode,
+  loadCycleSettings,
+} from "@/lib/cycle/periodStore";
 import { todayKey } from "@/lib/cycle/predict";
 
 export type { CoachMode };
@@ -153,6 +159,12 @@ export function useCoachSystem() {
       if (!mounted) return;
       setProfileId(uid);
     };
+    if (!hasSupabaseConfig) {
+      apply(null);
+      return () => {
+        mounted = false;
+      };
+    }
     void supabase.auth.getSession().then(({ data }) => apply(data.session?.user.id ?? null));
     const {
       data: { subscription },
@@ -292,16 +304,57 @@ export function useCoachSystem() {
     [profileId],
   );
 
-  const requestResponse = useCallback(async (request: CoachRequest): Promise<CoachResponse> => {
-    // deterministic + grounded — see the responder's module header. A model
-    // provider can slot in behind this same signature later.
-    const record = readCoachRecord(
-      memories.filter((m) => m.pinned).map((m) => m.text),
-    );
-    const context = request.context;
-    record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
-    return groundedAnswer({ text: request.text, mode: request.mode }, context, record);
-  }, [memories]);
+  /**
+   * One request in flight at a time. Sending a second question abandons the
+   * first — the answer to a question you've moved on from is just noise, and
+   * an edge function on a cold start can easily still be thinking.
+   */
+  const inFlight = useRef<AbortController | null>(null);
+
+  const requestResponse = useCallback(
+    async (request: CoachRequest): Promise<CoachResponse> => {
+      inFlight.current?.abort();
+      const controller = new AbortController();
+      inFlight.current = controller;
+
+      const record = readCoachRecord(memories.filter((m) => m.pinned).map((m) => m.text));
+      const context = request.context;
+      record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
+
+      /*
+       * The engine tries the Supabase edge function and falls back to the
+       * on-device responder by itself, so there is no error path to handle
+       * here — an answer always comes back.
+       */
+      const result = await askCoach({
+        text: request.text,
+        mode: request.mode,
+        record,
+        context,
+        history: request.history
+          .filter((m) => m.paragraphs.length > 0 || m.text)
+          .slice(-8)
+          .map((m) => ({
+            role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
+            content: m.text ?? m.paragraphs.join("\n\n"),
+          })),
+        provider: activeProvider().id,
+        signal: controller.signal,
+      });
+
+      return {
+        paragraphs: result.paragraphs,
+        sources: result.sources,
+        blocks: result.blocks,
+        /* Which brain answered, so the header can be honest about a fallback. */
+        source: result.source,
+      };
+    },
+    [memories],
+  );
+
+  /* Abandon anything still in flight when the page goes away. */
+  useEffect(() => () => inFlight.current?.abort(), []);
 
   return useMemo(
     () => ({
@@ -461,17 +514,29 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
   let cycle: CoachRecord["cycle"] = null;
   try {
     const logs = loadPeriodLogs();
-    const analysis = analyzeCycle(logs, today);
-    cycle = {
-      daysLogged: loadCycleDays().length + logs.length,
-      cycleDay: analysis.cycleDay,
-      phaseLabel: analysis.phaseLabel || null,
-      nextStart: analysis.nextStart,
-      daysUntilNext: analysis.daysUntilNext,
-      averageLength: analysis.isGeneric ? null : analysis.averageLength,
-      confidence: analysis.confidence === "none" ? null : String(analysis.confidence),
-      confidenceReason: analysis.confidenceReason || null,
-    };
+    const settings = loadCycleSettings();
+    const mode = effectiveMode(settings, today);
+    /* same options as the Cycle page, so the coach never contradicts it */
+    const analysis = analyzeCycle(logs, today, {
+      personalMaxPlausible: settings.personalMaxPlausible,
+      expecting: mode === "tracking",
+    });
+    /* cycle tracking turned off → not a topic; the coach neither mentions nor prompts it */
+    cycle =
+      mode === "off"
+        ? null
+        : {
+            paused: mode === "paused",
+            daysLogged: loadCycleDays().length + logs.length,
+            cycleDay: analysis.cycleDay,
+            phaseLabel: analysis.phaseLabel || null,
+            nextStart: analysis.nextStart,
+            daysUntilNext: analysis.daysUntilNext,
+            averageLength: analysis.isGeneric ? null : analysis.averageLength,
+            confidence: analysis.confidence === "none" ? null : String(analysis.confidence),
+            confidenceReason: analysis.confidenceReason || null,
+            nextPeriod: describeNextPeriod(analysis),
+          };
   } catch {
     cycle = null;
   }
@@ -482,6 +547,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
 function readHabitData(): CoachHabitData {
   const empty: CoachHabitData = { available: false, habits: [], logs: [] };
   if (typeof window === "undefined") return empty;
+  const today = todayKey();
   const habits = readJson<Row[] | null>("bloom.habits", null);
   const logs = readJson<Row[] | null>("bloom.habit_logs", null);
   if (!Array.isArray(habits) || habits.length === 0) return empty;
@@ -489,6 +555,13 @@ function readHabitData(): CoachHabitData {
     available: true,
     habits: habits
       .filter((h) => !h["archived"] && !h["completed"])
+      // a paused habit is off the table today — the coach shouldn't nag about it
+      .filter((h) => {
+        const until = typeof h["pausedUntil"] === "string" ? h["pausedUntil"] : null;
+        if (!until) return true;
+        const from = typeof h["pausedFrom"] === "string" ? h["pausedFrom"] : until;
+        return !(today >= from && today <= until);
+      })
       .map((h) => ({
         id: String(h["id"] ?? h["name"]),
         name: String(h["name"] ?? "Habit"),

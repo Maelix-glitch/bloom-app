@@ -16,6 +16,7 @@
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import { normalizeDayLog } from "@/lib/cycle/periodStore";
 import type { DayLog } from "@/lib/cycle/dayLogs";
+import { pageAll } from "@/lib/pageAll";
 
 /** Same table and conflict key as the legacy page. */
 export const CYCLE_TABLE = "cycle_entries";
@@ -136,15 +137,23 @@ export function mergeDayLists(
 
 /** Every row for this profile, oldest first. Throws only on a real failure. */
 export async function pullDays(profileId: string): Promise<DayLog[]> {
-  const { data, error } = await supabase
-    .from(CYCLE_TABLE)
-    .select(COLUMNS)
-    .eq("profile_id", profileId)
-    .order("date", { ascending: true });
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as unknown[];
+  const { data, error } = await pageAll<unknown>((from, to) =>
+    supabase
+      .from(CYCLE_TABLE)
+      .select(COLUMNS)
+      .eq("profile_id", profileId)
+      .order("date", { ascending: true })
+      .range(from, to),
+  );
+  if (error) throw new Error(errorText(error));
+  const rows = data ?? [];
   return rows.map(rowToDay).filter((d): d is DayLog => d !== null);
 }
+
+const errorText = (e: unknown): string =>
+  e && typeof e === "object" && "message" in e
+    ? String((e as { message: unknown }).message)
+    : String(e);
 
 /** Upsert one day. Same conflict target as the legacy page. */
 export async function pushDay(

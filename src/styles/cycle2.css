@@ -17,32 +17,41 @@
 }
 
 /* ------------------------------- 1. Nocturne ------------------------------ */
-/* Deep charcoal-teal. Warm off-white ink. Berry / teal / gold. Hairline cards. */
+/*
+ * Ink-plum ground, warm off-white type, amethyst + champagne + rose.
+ *
+ * This is the default, so it sets the tone for the whole feature. The earlier
+ * teal-green read as clinical — closer to a hospital chart than to something
+ * you'd want open on your own phone. Premium here means restraint: a near-black
+ * ground with a violet bias rather than a colour cast, one metal (champagne)
+ * carrying the highlights, and phase hues that are clearly distinct without any
+ * of them shouting. Hairline cards, generous shadow, no neon anywhere.
+ */
 .ci[data-theme="nocturne"] {
-  --ci-bg: #0c1416;
-  --ci-bg-deep: #080f11;
-  --ci-surface: #121c1f;
-  --ci-surface-2: #172327;
-  --ci-line: #1f2c2e;
-  --ci-line-strong: #2d3d3f;
-  --ci-text: #f1ebe0;
-  --ci-text-soft: #cbc5b8;
-  --ci-text-mute: #8c928c;
-  --ci-menstrual: #c4567f;
-  --ci-follicular: #4fb3a0;
-  --ci-luteal: #3f8f93;
-  --ci-ovulation: #e5b45e;
-  --ci-late: #9d8fb5;
-  --ci-accent: #4fb3a0;
-  --ci-accent-soft: rgba(79, 179, 160, 0.14);
-  --ci-focus: #7fd3c3;
-  --ci-ok: #4fb3a0;
-  --ci-warn: #e5b45e;
-  --ci-danger: #e07a5f;
-  --ci-input-bg: #0f191c;
+  --ci-bg: #0d0b12;
+  --ci-bg-deep: #08070c;
+  --ci-surface: #16131e;
+  --ci-surface-2: #1d1927;
+  --ci-line: #241f30;
+  --ci-line-strong: #362f47;
+  --ci-text: #f2ecec;
+  --ci-text-soft: #c9c1d2;
+  --ci-text-mute: #8b849b;
+  --ci-menstrual: #cf6d8f;
+  --ci-follicular: #a58bff;
+  --ci-luteal: #8b74c9;
+  --ci-ovulation: #e3c187;
+  --ci-late: #7f8aa8;
+  --ci-accent: #a58bff;
+  --ci-accent-soft: rgba(165, 139, 255, 0.14);
+  --ci-focus: #c3b1ff;
+  --ci-ok: #8fbfa4;
+  --ci-warn: #e3c187;
+  --ci-danger: #dd7f74;
+  --ci-input-bg: #100d17;
   --ci-veil:
-    radial-gradient(120% 80% at 12% -10%, rgba(79, 179, 160, 0.11), transparent 60%),
-    radial-gradient(90% 70% at 100% 0%, rgba(196, 86, 127, 0.09), transparent 55%);
+    radial-gradient(120% 80% at 12% -10%, rgba(165, 139, 255, 0.13), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(207, 109, 143, 0.09), transparent 55%);
   --ci-radius-lg: 14px;
   --ci-radius-md: 10px;
   --ci-radius-sm: 8px;
@@ -134,19 +143,19 @@
   --ci-text-soft: #c7d0c2;
   --ci-text-mute: #8e9a8c;
   --ci-menstrual: #b4547c;
-  --ci-follicular: #4fb38a;
-  --ci-luteal: #2e8570;
+  --ci-follicular: #7fb8a6;
+  --ci-luteal: #5f8f9d;
   --ci-ovulation: #dfb35c;
   --ci-late: #9aa8b6;
-  --ci-accent: #4fb38a;
-  --ci-accent-soft: rgba(79, 179, 138, 0.15);
-  --ci-focus: #7fd6ae;
-  --ci-ok: #4fb38a;
+  --ci-accent: #c9a86a;
+  --ci-accent-soft: rgba(201, 168, 106, 0.15);
+  --ci-focus: #e0c48c;
+  --ci-ok: #7fb8a6;
   --ci-warn: #dfb35c;
   --ci-danger: #dd7a5c;
   --ci-input-bg: #101a15;
   --ci-veil:
-    radial-gradient(120% 80% at 10% -10%, rgba(79, 179, 138, 0.13), transparent 60%),
+    radial-gradient(120% 80% at 10% -10%, rgba(201, 168, 106, 0.12), transparent 60%),
     radial-gradient(90% 70% at 100% 0%, rgba(180, 84, 124, 0.1), transparent 55%);
   --ci-radius-lg: 18px;
   --ci-radius-md: 13px;
@@ -220,12 +229,33 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/**
+ * Full width, like Today and Mood: the shell's <main> already sits beside the
+ * rail, so the page runs edge to edge inside it. Side padding mirrors the
+ * app-shell contract (px-5 · sm:px-8 · lg:px-10); the bottom clears the
+ * phone tab bar.
+ */
 .ci-shell {
   position: relative;
   width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px 20px 112px;
+}
+@media (min-width: 640px) {
+  .ci-shell {
+    padding: 28px 32px 112px;
+  }
+}
+@media (min-width: 1024px) {
+  .ci-shell {
+    padding: 28px 40px 96px;
+  }
+}
+/** The design gallery has no rail beside it, so it keeps a centred column. */
+.ci-shell--narrow {
   max-width: 1060px;
   margin: 0 auto;
-  padding: clamp(22px, 4vw, 46px) clamp(16px, 4vw, 30px) 80px;
 }
 
 .ci-display {
@@ -1220,4 +1250,137 @@ textarea.ci-input {
   height: 16px;
   margin-top: 2px;
   accent-color: var(--ci-follicular);
+}
+
+/* ------------------------------- check-ins -------------------------------- */
+/* One question at a time, about the period being lived right now. Never a
+   wall: every check-in has a "Not now" and disappears when the record no
+   longer needs it. */
+
+.ci-checkin {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  padding: 16px 18px 15px;
+  border-radius: var(--ci-radius-md);
+  border: 1px solid var(--c-line, var(--ci-line-strong));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--c-tint, var(--ci-follicular)) 12%, transparent),
+      transparent 62%
+    ),
+    var(--ci-surface-2);
+  animation: ci-unfold 0.36s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+.ci-checkin[data-tone="info"] {
+  --c-tint: var(--ci-follicular);
+  --c-line: color-mix(in oklab, var(--ci-follicular) 36%, transparent);
+}
+.ci-checkin[data-tone="attention"] {
+  --c-tint: var(--ci-ovulation);
+  --c-line: color-mix(in oklab, var(--ci-ovulation) 40%, transparent);
+}
+.ci-checkin[data-tone="calm"] {
+  --c-tint: var(--ci-luteal);
+  --c-line: var(--ci-line-strong);
+}
+.ci-checkin__icon {
+  margin-top: 1px;
+  color: var(--c-tint, var(--ci-text-soft));
+}
+.ci-checkin__title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ci-text);
+}
+.ci-checkin__body {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ci-text-soft);
+}
+.ci-checkin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ci-checkin__more {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+}
+
+/* the undo strip that follows a delete / clear */
+.ci-undo {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(92vw, 480px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line-strong);
+  background: color-mix(in oklab, var(--ci-surface) 92%, var(--ci-text) 8%);
+  box-shadow: var(--ci-shadow);
+  color: var(--ci-text);
+  font-size: 12.5px;
+  transform: translateX(-50%);
+  animation: ci-unfold 0.3s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+@media (min-width: 1024px) {
+  .ci-undo {
+    left: calc(50% + var(--app-rail, 0px) / 2);
+    bottom: 28px;
+  }
+}
+.ci-undo__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ci-follicular);
+  transform-origin: left;
+  animation: ci-drain var(--ci-undo-ms, 8000ms) linear both;
+}
+@keyframes ci-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ci-checkin,
+  .ci-undo {
+    animation: none;
+  }
+}
+
+/* a soft, non-blocking note under a field (a warning that still saves) */
+.ci-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: var(--ci-radius-sm, 8px);
+  border: 1px solid color-mix(in oklab, var(--ci-ovulation) 36%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 8%, transparent);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ci-text-soft);
+}
+.ci-note svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--ci-ovulation);
 }

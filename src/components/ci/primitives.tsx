@@ -104,6 +104,7 @@ export function Stat({
   sub,
   emphasis = false,
   className,
+  testId,
 }: {
   label: string;
   value: ReactNode;
@@ -111,9 +112,10 @@ export function Stat({
   sub?: ReactNode | undefined;
   emphasis?: boolean | undefined;
   className?: string | undefined;
+  testId?: string | undefined;
 }) {
   return (
-    <div className={cn("min-w-0", className)}>
+    <div className={cn("min-w-0", className)} data-testid={testId}>
       <p className="ci-eyebrow">{label}</p>
       <p
         className={cn(

@@ -12,10 +12,10 @@ import type { SyncStatus } from "@/hooks/usePeriodLog";
 const COPY: Record<SyncStatus["state"], string> = {
   off: "stored in this browser only",
   loading: "checking your account…",
-  saved: "saved to your account",
+  saved: "saved to your account — periods, daily log and your answers",
   pending: "saving to your account…",
-  "signed-out": "saved on this device — sign in to sync",
-  error: "saved here, not yet on your account",
+  "signed-out": "saved on this device — sign in to keep it on your account",
+  error: "saved here — not yet on your account",
 };
 
 const TONE: Record<SyncStatus["state"], string> = {
@@ -42,7 +42,11 @@ export function SyncLine({
         className="h-[5px] w-[5px] shrink-0 rounded-full"
         style={{ background: TONE[sync.state] }}
       />
-      <span>{COPY[sync.state]}</span>
+      <span>
+        {sync.state === "saved" && sync.periodsOnDevice
+          ? "daily log saved to your account — period entries wait on this device until the cycle_periods table exists"
+          : COPY[sync.state]}
+      </span>
       {showAction ? (
         <button
           type="button"

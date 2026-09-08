@@ -26,9 +26,23 @@ export function SignedOutProfile({
       return;
     }
     setState("sending");
-    const result = await onSendMagicLink(value);
-    setMessage(result.message);
-    setState(result.ok ? "sent" : "failed");
+    /*
+     * A rejection here used to strand the button on "sending" forever, because
+     * nothing caught it — which is exactly what "the magic link isn't sending"
+     * looked like. The state must always resolve, even when the call explodes.
+     */
+    try {
+      const result = await onSendMagicLink(value);
+      setMessage(result.message);
+      setState(result.ok ? "sent" : "failed");
+    } catch (e) {
+      setMessage(
+        e instanceof Error && e.message
+          ? e.message
+          : "Something went wrong sending that link. Try again in a moment.",
+      );
+      setState("failed");
+    }
   };
 
   return (

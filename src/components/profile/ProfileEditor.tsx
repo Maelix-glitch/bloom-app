@@ -1,14 +1,31 @@
 /**
- * ProfileEditor — one calm form for identity. Draft state lives here; the
- * server sees exactly one save. Name, username (debounced availability),
- * bio, accent, photo crop, and a live hero preview so edits are felt as
- * they're made.
+ * ProfileEditor — "Make it feel like you."
+ *
+ * A photographic hero with the live avatar (gradient ring, camera button),
+ * then grouped settings the way phones do them: Personal information,
+ * Profile photo, Appearance. Draft state lives here; the server sees exactly
+ * one save. Everything the first editor did is intact — name / username with
+ * debounced availability / bio validation, accent, photo crop (zoom + drag)
+ * exported once on Save, remove photo, interrupted-draft restore.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Loader2, X } from "lucide-react";
+import {
+  AtSign,
+  Camera,
+  Check,
+  ImagePlus,
+  ListChecks,
+  Loader2,
+  Palette,
+  Sparkles,
+  User,
+  UserRound,
+  X,
+} from "lucide-react";
 
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
+import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import { profileDraft } from "@/lib/profile/drafts";
 import {
@@ -20,17 +37,32 @@ import {
   validateUsername,
 } from "@/lib/profile/validation";
 import { checkUsername, type UsernameCheck } from "@/lib/profile/profileService";
-import type { BloomAccent, ProfileIdentity } from "@/lib/profile/types";
-import { AccentPicker } from "@/components/stories/StoryComposer";
+import {
+  ACCENT_LABELS,
+  BLOOM_ACCENTS,
+  type BloomAccent,
+  type ProfileIdentity,
+} from "@/lib/profile/types";
 import { AvatarEditor, type PendingAvatar } from "@/components/profile/AvatarEditor";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { PresetPicker } from "@/components/profile/PresetPicker";
 import { toast } from "sonner";
+
+import { saidSaved } from "@/lib/voice/copy";
+
+import heroArt from "@/assets/mood/hero-window.jpg";
 
 export interface ProfileEditorSave {
   displayName: string;
   username: string | null;
   bio: string | null;
   accent: BloomAccent;
+  /**
+   * Only present when the person picked one of the photographs Bloom ships
+   * (a `preset:` path). Uploads still go through `onCommitAvatar`, which owns
+   * the storage write; leaving this undefined means "don't touch the avatar".
+   */
+  avatarPath?: string | null;
 }
 
 export function ProfileEditor({
@@ -53,6 +85,9 @@ export function ProfileEditor({
   const [bio, setBio] = useState(identity.bio ?? "");
   const [accent, setAccent] = useState<BloomAccent>(identity.accent);
   const [pending, setPending] = useState<PendingAvatar | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  /** A `preset:` path chosen this session, not yet saved. */
+  const [preset, setPreset] = useState<string | null>(null);
 
   const [nameError, setNameError] = useState<string | null>(null);
   const [bioError, setBioError] = useState<string | null>(null);
@@ -61,6 +96,7 @@ export function ProfileEditor({
   const [saveError, setSaveError] = useState<string | null>(null);
   const checkToken = useRef(0);
   const debounceRef = useRef<number | undefined>(undefined);
+  const photoRef = useRef<HTMLDivElement | null>(null);
 
   /* open with fresh values, unless a saved draft was interrupted */
   useEffect(() => {
@@ -70,6 +106,8 @@ export function ProfileEditor({
     setBio(identity.bio ?? "");
     setAccent(identity.accent);
     setPending(null);
+    setPhotoOpen(false);
+    setPreset(null);
     setSaveError(null);
     setNameError(null);
     setBioError(null);
@@ -177,16 +215,29 @@ export function ProfileEditor({
         username: trimmed === "" ? null : normalizeUsername(trimmed),
         bio: bio.trim() === "" ? null : bio.trim(),
         accent,
+        /* An upload wins: it has already been committed just above. */
+        ...(preset !== null && !pending ? { avatarPath: preset } : {}),
       });
       profileDraft.clear();
-      toast("Profile updated.");
+      toast(saidSaved());
       onClose();
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Couldn't save that just now.");
     } finally {
       setSaving(false);
     }
-  }, [pending, displayName, username, bio, accent, usernameState, onCommitAvatar, onSave, onClose]);
+  }, [
+    pending,
+    preset,
+    displayName,
+    username,
+    bio,
+    accent,
+    usernameState,
+    onCommitAvatar,
+    onSave,
+    onClose,
+  ]);
 
   const previewIdentity: ProfileIdentity = {
     ...identity,
@@ -194,268 +245,445 @@ export function ProfileEditor({
     username: username.trim() ? normalizeUsername(username) : null,
     bio: bio.trim() || identity.bio,
     accent,
-    avatarPath: pending ? null : identity.avatarPath,
+    /* Live preview: an upload beats a preset, a preset beats what's saved. */
+    avatarPath: pending ? null : (preset ?? identity.avatarPath),
+  };
+
+  const openPhoto = () => {
+    setPhotoOpen(true);
+    window.setTimeout(
+      () => photoRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }),
+      60,
+    );
   };
 
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent
-        side="right"
-        showCloseButton={false}
-        className="w-full gap-0 border-border bg-background p-0 sm:max-w-[540px]"
+    <BloomSheet
+      open={open}
+      onClose={onClose}
+      title="Edit your space"
+      description="Nothing is saved until you press Save."
+      size="md"
+      className="bedit"
+    >
+      <div
+        className="flex min-h-0 flex-1 flex-col"
+        style={{ ["--profile-accent" as string]: accentVar[accent] } as React.CSSProperties}
       >
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <div>
-              <SheetTitle className="display text-[17px]">Edit your space</SheetTitle>
-              <SheetDescription className="mt-0.5 text-[12px] text-muted-foreground">
-                Nothing is saved until you press Save.
-              </SheetDescription>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close editor"
-              className="grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {/* live preview */}
-            <div
-              className="border-b border-border px-5 py-6"
-              style={{
-                background: `radial-gradient(120% 130% at 50% 0%, color-mix(in oklab, var(--profile-accent, var(--violet)) 9%, transparent), transparent 65%)`,
-              }}
-              aria-label="Live preview of your profile"
-            >
-              <div className="flex flex-col items-center text-center">
-                {pending ? (
-                  <img
-                    src={pending.previewUrl}
-                    alt="New photo preview"
-                    className="size-[72px] rounded-full border border-border object-cover"
-                  />
-                ) : (
-                  <ProfileAvatar
-                    name={previewIdentity.displayName}
-                    avatarPath={previewIdentity.avatarPath}
-                    accent={previewIdentity.accent}
-                    size={72}
-                    ring="none"
-                  />
-                )}
-                <p className="display mt-3 text-[20px] leading-tight break-words">
-                  {previewIdentity.displayName}
-                </p>
-                <p className="mono text-[11px] text-muted-foreground">
-                  {previewIdentity.username ? `@${previewIdentity.username}` : "no username yet"}
-                </p>
-                <p
-                  className={cn(
-                    "mt-1.5 max-w-[40ch] text-[12.5px] leading-relaxed",
-                    previewIdentity.bio ? "text-muted-foreground" : "text-faint italic",
-                  )}
-                >
-                  {previewIdentity.bio || "A little about you..."}
-                </p>
+        <div className="bsheet-scroll">
+          <SheetBody>
+            {/* ------------------------------------------------ hero */}
+            <div className="bedit-hero">
+              <div className="bedit-hero-art" aria-hidden>
+                <img src={heroArt} alt="" />
               </div>
+
+              <SheetItem>
+                <div className="bedit-topbar">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Close editor"
+                    className="bsheet-icon"
+                  >
+                    <X className="size-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleSave()}
+                    disabled={saving}
+                    className="bsheet-primary"
+                    data-testid="profile-save"
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="size-3.5 animate-spin" aria-hidden /> Saving…
+                      </>
+                    ) : (
+                      <>
+                        <Check className="size-3.5" aria-hidden /> Save
+                      </>
+                    )}
+                  </button>
+                </div>
+              </SheetItem>
+
+              <SheetItem>
+                <p className="bsheet-eyebrow mt-6">Edit your space</p>
+              </SheetItem>
+              <SheetItem>
+                <h2 className="bsheet-h1 mt-2">Make it feel like you.</h2>
+              </SheetItem>
+              <SheetItem>
+                <p className="bsheet-sub mt-1.5">A more you, for a brighter tomorrow.</p>
+              </SheetItem>
+
+              <SheetItem>
+                <div className="bedit-identity" aria-label="Live preview of your profile">
+                  <div className="bedit-avatar">
+                    {pending ? (
+                      <img src={pending.previewUrl} alt="New photo preview" />
+                    ) : (
+                      <span className="bedit-avatar-inner grid place-items-center overflow-hidden bg-surface">
+                        <ProfileAvatar
+                          name={previewIdentity.displayName}
+                          avatarPath={previewIdentity.avatarPath}
+                          accent={previewIdentity.accent}
+                          size={122}
+                          ring="none"
+                        />
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={openPhoto}
+                      aria-label="Change profile photo"
+                      className="bedit-avatar-cam"
+                    >
+                      <Camera className="size-4" strokeWidth={1.8} />
+                    </button>
+                  </div>
+                  <p className="bedit-name">{previewIdentity.displayName}</p>
+                  <span className="bedit-handle">
+                    {previewIdentity.username ? `@${previewIdentity.username}` : "no username yet"}
+                  </span>
+                </div>
+              </SheetItem>
+
+              <p className="bedit-script" aria-hidden>
+                Same you,
+                <br />
+                brighter days.
+              </p>
             </div>
 
-            <form
-              className="flex flex-col gap-7 px-5 py-6"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void handleSave();
-              }}
-            >
-              <section aria-label="Profile photo">
-                <p className="eyebrow mb-3">Photo</p>
-                <AvatarEditor
-                  onStage={setPending}
-                  {...(identity.avatarPath && !pending
-                    ? {
-                        onRemove: async () => {
+            {/* ---------------------------------- personal information */}
+            <SheetItem>
+              <section className="bedit-group" aria-label="Personal information">
+                <div className="bedit-group-head">
+                  <span className="bedit-group-icon" aria-hidden>
+                    <UserRound className="size-4" strokeWidth={1.7} />
+                  </span>
+                  <div>
+                    <p className="bedit-group-title">Personal information</p>
+                    <p className="bedit-group-sub">Tell us a little about yourself.</p>
+                  </div>
+                </div>
+
+                <label className="bedit-field" data-invalid={Boolean(nameError)}>
+                  <span className="bedit-field-icon" aria-hidden>
+                    <User className="size-4" strokeWidth={1.7} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="bedit-field-label">Name</span>
+                    <input
+                      value={displayName}
+                      onChange={(e) => {
+                        setDisplayName(e.target.value.slice(0, NAME_MAX));
+                        setNameError(null);
+                      }}
+                      onBlur={(e) => setNameError(validateDisplayName(e.target.value))}
+                      placeholder="What should this space be called?"
+                      className="bedit-field-input bedit-field-input--display"
+                      data-testid="profile-name"
+                    />
+                  </span>
+                  <span className="bedit-field-aside">
+                    {displayName.length}/{NAME_MAX}
+                  </span>
+                </label>
+                {nameError ? <FieldNote message={nameError} error /> : null}
+
+                <label
+                  className="bedit-field"
+                  data-invalid={Boolean(usernameProblem) || usernameState === "taken"}
+                >
+                  <span className="bedit-field-icon" aria-hidden>
+                    <AtSign className="size-4" strokeWidth={1.7} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="bedit-field-label">Username</span>
+                    <span className="flex items-baseline gap-1">
+                      <span className="mono text-[14px] text-faint" aria-hidden>
+                        @
+                      </span>
+                      <input
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(normalizeUsername(e.target.value));
+                          setSaveError(null);
+                        }}
+                        placeholder="quiet-lavender"
+                        maxLength={30}
+                        className="bedit-field-input mono mt-0 text-[14px]"
+                        data-testid="profile-username"
+                      />
+                    </span>
+                  </span>
+                  <span className="bedit-field-aside">
+                    {usernameState === "checking" ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="size-3 animate-spin" aria-hidden /> checking
+                      </span>
+                    ) : usernameState === "available" ? (
+                      <span className="flex items-center gap-1 text-sage">
+                        <Check className="size-3" aria-hidden /> free
+                      </span>
+                    ) : usernameState === "taken" ? (
+                      <span className="flex items-center gap-1 text-rose">
+                        <X className="size-3" aria-hidden /> taken
+                      </span>
+                    ) : null}
+                  </span>
+                </label>
+                {usernameProblem ? <FieldNote message={usernameProblem} error /> : null}
+                {usernameState === "unknown" ? (
+                  <FieldNote message="Couldn't check availability right now — we'll confirm on save." />
+                ) : null}
+                {!usernameProblem && !usernameTouched && identity.username ? (
+                  <FieldNote message="Links to your profile use this. Changing it will move your link." />
+                ) : null}
+
+                <label className="bedit-field" data-invalid={Boolean(bioError)}>
+                  <span className="bedit-field-icon self-start pt-1" aria-hidden>
+                    <ListChecks className="size-4" strokeWidth={1.7} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="bedit-field-label">Bio</span>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => {
+                        setBio(e.target.value.slice(0, BIO_MAX));
+                        setBioError(null);
+                      }}
+                      onBlur={(e) => setBioError(validateBio(e.target.value))}
+                      placeholder="A little about you..."
+                      rows={2}
+                      className="bedit-field-input"
+                      data-testid="profile-bio"
+                    />
+                  </span>
+                  <span className="bedit-field-aside">
+                    {bio.length}/{BIO_MAX}
+                  </span>
+                </label>
+                {bioError ? <FieldNote message={bioError} error /> : null}
+              </section>
+            </SheetItem>
+
+            {/* --------------------------------------- profile photo */}
+            <SheetItem>
+              <section className="bedit-group" aria-label="Profile photo" ref={photoRef}>
+                <div className="bedit-group-head">
+                  <span className="bedit-group-icon" aria-hidden>
+                    <Camera className="size-4" strokeWidth={1.7} />
+                  </span>
+                  <div>
+                    <p className="bedit-group-title">Profile photo</p>
+                    <p className="bedit-group-sub">Choose a photo that feels like you.</p>
+                  </div>
+                </div>
+
+                {!photoOpen ? (
+                  <div className="bedit-photos">
+                    <button
+                      type="button"
+                      className="bedit-photo bedit-photo-add"
+                      onClick={openPhoto}
+                    >
+                      <span className="bedit-photo-disc">
+                        <ImagePlus className="size-5" strokeWidth={1.6} aria-hidden />
+                      </span>
+                      {identity.avatarPath ? "Replace" : "Add photo"}
+                    </button>
+                    <div className="bedit-photo" data-selected="true" aria-label="Current photo">
+                      <span className="bedit-photo-disc">
+                        {pending ? (
+                          <img src={pending.previewUrl} alt="" />
+                        ) : (
+                          <ProfileAvatar
+                            name={previewIdentity.displayName}
+                            avatarPath={previewIdentity.avatarPath}
+                            accent={previewIdentity.accent}
+                            size={70}
+                            ring="none"
+                          />
+                        )}
+                      </span>
+                      {pending ? "New" : preset ? "Chosen" : identity.avatarPath ? "Current" : "Initials"}
+                    </div>
+                    {identity.avatarPath && !pending ? (
+                      <button
+                        type="button"
+                        className="bedit-photo"
+                        onClick={async () => {
                           try {
                             await onRemoveAvatar();
                             toast("Photo removed.");
                           } catch {
                             toast.error("Couldn't remove that just now.");
                           }
-                        },
-                      }
-                    : {})}
-                />
-              </section>
-
-              <section className="flex flex-col gap-5" aria-label="Name and details">
-                <label className="flex flex-col gap-1.5">
-                  <span className="eyebrow flex items-center justify-between">
-                    Name
-                    <span
-                      className={cn(
-                        "normal-case",
-                        displayName.length > NAME_MAX - 8 ? "text-muted-foreground" : "text-faint",
-                      )}
-                    >
-                      {displayName.length}/{NAME_MAX}
-                    </span>
-                  </span>
-                  <input
-                    value={displayName}
-                    onChange={(e) => {
-                      setDisplayName(e.target.value.slice(0, NAME_MAX));
-                      setNameError(null);
-                    }}
-                    onBlur={(e) => setNameError(validateDisplayName(e.target.value))}
-                    placeholder="What should this space be called?"
-                    className={cn(
-                      "display w-full rounded-xl border bg-surface/50 px-3.5 py-2.5 text-[17px] outline-none transition-colors placeholder:text-faint/60 focus:bg-surface-2/50",
-                      nameError ? "border-rose/60" : "border-border focus:border-border-strong",
-                    )}
-                  />
-                  {nameError ? <FieldError message={nameError} /> : null}
-                </label>
-
-                <label className="flex flex-col gap-1.5">
-                  <span className="eyebrow">@username</span>
-                  <div className="relative">
-                    <span className="mono pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[14px] text-faint">
-                      @
-                    </span>
-                    <input
-                      value={username}
-                      onChange={(e) => {
-                        setUsername(normalizeUsername(e.target.value));
-                        setSaveError(null);
-                      }}
-                      placeholder="quiet-lavender"
-                      maxLength={30}
-                      className={cn(
-                        "mono w-full rounded-xl border bg-surface/50 py-2.5 pl-8 pr-24 text-[14px] outline-none transition-colors placeholder:text-faint/60 focus:bg-surface-2/50",
-                        usernameProblem || usernameState === "taken"
-                          ? "border-rose/60"
-                          : "border-border focus:border-border-strong",
-                      )}
-                    />
-                    <span className="mono absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-[10px] uppercase tracking-[0.06em]">
-                      {usernameState === "checking" ? (
-                        <span className="flex items-center gap-1 text-faint">
-                          <Loader2 className="size-3 animate-spin" aria-hidden /> checking
+                        }}
+                      >
+                        <span className="bedit-photo-disc">
+                          <X className="size-5 text-rose" strokeWidth={1.6} aria-hidden />
                         </span>
-                      ) : usernameState === "available" ? (
-                        <span className="flex items-center gap-1 text-sage">
-                          <Check className="size-3" aria-hidden /> free
+                        Remove
+                      </button>
+                    ) : null}
+                    {pending ? (
+                      <button
+                        type="button"
+                        className="bedit-photo"
+                        onClick={() => {
+                          setPending(null);
+                          setPhotoOpen(false);
+                        }}
+                      >
+                        <span className="bedit-photo-disc">
+                          <X className="size-5" strokeWidth={1.6} aria-hidden />
                         </span>
-                      ) : usernameState === "taken" ? (
-                        <span className="flex items-center gap-1 text-rose">
-                          <X className="size-3" aria-hidden /> taken
-                        </span>
-                      ) : null}
-                    </span>
+                        Undo
+                      </button>
+                    ) : null}
                   </div>
-                  {usernameProblem ? <FieldError message={usernameProblem} /> : null}
-                  {usernameState === "unknown" ? (
-                    <p className="text-[12px] text-faint">
-                      Couldn't check availability right now — we'll confirm on save.
-                    </p>
-                  ) : null}
-                  {!usernameProblem && !usernameTouched && identity.username ? (
-                    <p className="text-[12px] text-faint">
-                      Links to your profile use this. Changing it will move your link.
-                    </p>
-                  ) : null}
-                </label>
+                ) : null}
 
-                <label className="flex flex-col gap-1.5">
-                  <span className="eyebrow flex items-center justify-between">
-                    Bio{" "}
-                    <span
-                      className={cn(
-                        "normal-case",
-                        bio.length > BIO_MAX - 20 ? "text-muted-foreground" : "text-faint",
-                      )}
-                    >
-                      {bio.length}/{BIO_MAX}
-                    </span>
-                  </span>
-                  <textarea
-                    value={bio}
-                    onChange={(e) => {
-                      setBio(e.target.value.slice(0, BIO_MAX));
-                      setBioError(null);
+                {!photoOpen ? (
+                  <PresetPicker
+                    value={preset}
+                    onPick={(path) => {
+                      /* Choosing one of ours discards a half-cropped upload. */
+                      setPending(null);
+                      setPreset(path);
                     }}
-                    onBlur={(e) => setBioError(validateBio(e.target.value))}
-                    placeholder="A little about you..."
-                    rows={3}
-                    className={cn(
-                      "w-full resize-none rounded-xl border bg-surface/50 px-3.5 py-2.5 text-[14px] leading-relaxed outline-none transition-colors placeholder:text-faint/60 focus:bg-surface-2/50",
-                      bioError ? "border-rose/60" : "border-border focus:border-border-strong",
-                    )}
                   />
-                  {bioError ? <FieldError message={bioError} /> : null}
-                </label>
+                ) : (
+                  <div className="bedit-crop">
+                    <AvatarEditor
+                      onStage={setPending}
+                      {...(identity.avatarPath && !pending
+                        ? {
+                            onRemove: async () => {
+                              try {
+                                await onRemoveAvatar();
+                                toast("Photo removed.");
+                                setPhotoOpen(false);
+                              } catch {
+                                toast.error("Couldn't remove that just now.");
+                              }
+                            },
+                          }
+                        : {})}
+                    />
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        type="button"
+                        className="bsheet-ghost h-8 px-3 text-[12px]"
+                        onClick={() => setPhotoOpen(false)}
+                      >
+                        {pending ? "Done" : "Close"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </section>
+            </SheetItem>
 
-              <section aria-label="Accent">
-                <AccentPicker value={accent} onChange={setAccent} label="Your accent" />
-                <p className="mt-2 text-[12px] text-faint">
-                  One quiet color for your rings, highlights, and small moments.
-                </p>
+            {/* ------------------------------------------ appearance */}
+            <SheetItem>
+              <section className="bedit-group" aria-label="Appearance">
+                <div className="bedit-group-head">
+                  <span className="bedit-group-icon" aria-hidden>
+                    <Palette className="size-4" strokeWidth={1.7} />
+                  </span>
+                  <div>
+                    <p className="bedit-group-title">Appearance</p>
+                    <p className="bedit-group-sub">
+                      One quiet colour for your rings, highlights and small moments.
+                    </p>
+                  </div>
+                </div>
+                <div className="bedit-accents" role="radiogroup" aria-label="Your accent">
+                  {BLOOM_ACCENTS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      role="radio"
+                      aria-checked={accent === a}
+                      aria-label={`${ACCENT_LABELS[a]} accent`}
+                      title={ACCENT_LABELS[a]}
+                      onClick={() => setAccent(a)}
+                      className="bedit-accent"
+                      style={
+                        {
+                          ["--bedit-accent-color" as string]: accentVar[a],
+                          background: `radial-gradient(circle at 35% 30%, color-mix(in oklab, ${accentVar[a]} 70%, #fff), ${accentVar[a]} 70%)`,
+                        } as React.CSSProperties
+                      }
+                      data-testid={`profile-accent-${a}`}
+                    >
+                      {accent === a ? (
+                        <Check className="size-4 text-[#1a1523]" strokeWidth={2.4} aria-hidden />
+                      ) : null}
+                    </button>
+                  ))}
+                  <span className="ml-1 self-center text-[12.5px] text-muted-foreground">
+                    {ACCENT_LABELS[accent]}
+                  </span>
+                </div>
               </section>
+            </SheetItem>
 
-              {saveError ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-rose/40 bg-rose/5 px-4 py-3">
-                  <p className="text-[13px] text-rose">{saveError}</p>
+            {saveError ? (
+              <SheetItem>
+                <div className="bedit-error" role="alert">
+                  <p>{saveError}</p>
                   <button
                     type="button"
                     onClick={() => void handleSave()}
-                    className="mono shrink-0 rounded-full border border-border px-3 py-1 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+                    className="bsheet-ghost h-8 px-3 text-[12px]"
                   >
                     Try again
                   </button>
                 </div>
-              ) : null}
+              </SheetItem>
+            ) : null}
 
-              <div className="flex items-center justify-end gap-2 pb-[env(safe-area-inset-bottom)]">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-full px-4 py-2.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-[13px] font-medium text-[var(--primary-foreground)] transition-transform duration-300 enabled:hover:scale-[1.02] disabled:opacity-60"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, var(--profile-accent, var(--violet)), var(--sky))",
-                  }}
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="size-3.5 animate-spin" aria-hidden /> Saving…
-                    </>
-                  ) : (
-                    "Save changes"
-                  )}
-                </button>
-              </div>
-            </form>
+            <div className="h-2" />
+          </SheetBody>
+        </div>
+
+        {/* footer — the same Save, reachable without scrolling back up */}
+        <div className="bedit-footer">
+          <p className="bedit-footer-note flex items-center gap-2 text-[12px] text-faint">
+            <Sparkles className="size-3.5" aria-hidden /> Nothing is saved until you press Save.
+          </p>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={onClose} className="bsheet-ghost">
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving}
+              className={cn("bsheet-primary", saving && "opacity-60")}
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </BloomSheet>
   );
 }
 
-function FieldError({ message }: { message: string }) {
+function FieldNote({ message, error = false }: { message: string; error?: boolean }) {
   return (
-    <p role="alert" className="text-[12.5px] leading-snug text-rose">
+    <p
+      role={error ? "alert" : undefined}
+      className={cn("bedit-field-note", error && "bedit-field-note--error")}
+    >
       {message}
     </p>
   );

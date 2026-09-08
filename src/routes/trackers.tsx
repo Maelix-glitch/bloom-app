@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import designSystemCss from "../styles/cycle2.css?url";
 import trackersConsoleCss from "../styles/trackers.css?url";
 import trackersCss from "../styles/trackers2.css?url";
-import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
@@ -33,11 +33,11 @@ export const Route = createFileRoute("/trackers")({
 function TrackersRoute() {
   const [theme] = useCycleTheme();
   return (
-    <>
-      <BloomHeader />
-      <main>
+    <div className="app-shell min-h-screen bg-background text-foreground">
+      <AppNav />
+      <main className="min-w-0">
         <TrackersDesign theme={theme} />
       </main>
-    </>
+    </div>
   );
 }

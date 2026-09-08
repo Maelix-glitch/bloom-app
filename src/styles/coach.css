@@ -2517,3 +2517,334 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------- progressive reveal */
+/*
+ * The answer is computed in one shot but revealed word by word (see
+ * useTypewriter). Two things make that read as speech rather than as a
+ * loading state: a caret while it runs, and a way out for fast readers.
+ */
+
+.coach-message-card:has(+ .coach-skip-reveal)::after,
+.coach-message-card .coach-revealing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  opacity: 0.6;
+  animation: coach-caret 1s steps(2, jump-none) infinite;
+}
+
+@keyframes coach-caret {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.coach-skip-reveal {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  color: var(--coach-muted);
+  font: 10px var(--coach-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+.coach-skip-reveal:hover {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+  background: color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
+/*
+ * The thinking indicator and the answer occupy the same spot in the thread.
+ * Fading the indicator out over the same beat the first words fade in stops
+ * the jump between the two states.
+ */
+.coach-thinking {
+  animation:
+    coach-rise 300ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    coach-thinking-out 220ms ease forwards;
+  animation-play-state: running, paused;
+}
+
+@keyframes coach-thinking-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-message-card .coach-revealing::after,
+  .coach-message-card:has(+ .coach-skip-reveal)::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------ provider picker */
+/*
+ * Which brain is answering. Deliberately understated — it sits beside the
+ * ready/thinking pill and should read as a status, not as a feature.
+ */
+
+.coach-provider {
+  position: relative;
+  flex: none;
+}
+
+.coach-provider-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 150px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  color: var(--coach-muted);
+  font: 10px var(--coach-mono);
+  letter-spacing: 0.04em;
+  background: transparent;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+.coach-provider-trigger:hover {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--foreground) 26%, transparent);
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+
+/* amber, not red: falling back is a degradation, not an error */
+.coach-provider-dot {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--coach-amber, #e3c187);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--coach-amber, #e3c187) 22%, transparent);
+}
+
+.coach-provider-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  width: max(240px, 100%);
+  display: grid;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  box-shadow:
+    0 24px 50px -24px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent);
+  animation: coach-rise 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.coach-provider-item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--coach-muted);
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+.coach-provider-item:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+.coach-provider-item.is-on {
+  color: var(--foreground);
+}
+.coach-provider-item-icon {
+  display: grid;
+  place-items: center;
+}
+.coach-provider-item-name {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.coach-provider-item-blurb {
+  display: block;
+  margin-top: 1px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-provider-menu {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Premium detail pass
+   --------------------------------------------------------------------------
+   The small things that separate a chat UI from a product: how a message
+   arrives, what the wait looks like, and how the composer responds to being
+   used. Every animation here is transform/opacity only, and every one of them
+   collapses under prefers-reduced-motion at the end of the file.
+   ========================================================================== */
+
+/* --- arrival -------------------------------------------------------------
+   Messages rise into place rather than appearing. 12px is enough to read as
+   motion without being a slide; the expo curve makes it decelerate hard, which
+   is what reads as "settled" rather than "still moving". */
+
+@keyframes coach-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.coach-message-row {
+  animation: coach-arrive 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Your own message shouldn't animate in — you just typed it, so it should be
+   there the instant you hit send. Only the coach's reply is news. */
+.coach-message-row.coach-message-user {
+  animation-duration: 180ms;
+}
+
+/* --- the wait ------------------------------------------------------------
+   Three dots that breathe is the generic solution. This is a single soft pulse
+   under the avatar plus a travelling sheen on the label — quieter, and it
+   reads as "working" rather than "buffering". */
+
+.coach-thinking-dots span {
+  /* stagger the scale as well as the opacity, so it undulates */
+  animation: coach-breathe 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.coach-avatar-coach.is-thinking {
+  position: relative;
+}
+.coach-avatar-coach.is-thinking::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 1px solid color-mix(in oklab, var(--coach-violet) 45%, transparent);
+  animation: coach-halo 2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes coach-halo {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.06);
+  }
+}
+
+/* --- the composer --------------------------------------------------------
+   A focus ring that grows from the field rather than switching on, and a send
+   button that acknowledges the press. */
+
+.coach-composer-shell {
+  transition:
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 220ms ease;
+}
+.coach-composer-shell:focus-within {
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--coach-violet) 13%, transparent),
+    0 18px 40px -28px rgba(0, 0, 0, 0.9);
+}
+
+/* Press feedback belongs on pointer-down, not on click — it should land when
+   the finger does. :active is the only selector that fires that early. */
+.coach-send:active,
+.coach-lens-button:active,
+.coach-prompt-chip:active {
+  transform: scale(0.97);
+}
+.coach-send,
+.coach-lens-button,
+.coach-prompt-chip {
+  transition:
+    transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+/* --- suggestion chips ----------------------------------------------------
+   Staggered arrival, so the row assembles instead of flashing. */
+
+.coach-prompt-chip {
+  animation: coach-arrive 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.coach-prompt-chip:nth-child(1) { animation-delay: 40ms; }
+.coach-prompt-chip:nth-child(2) { animation-delay: 90ms; }
+.coach-prompt-chip:nth-child(3) { animation-delay: 140ms; }
+.coach-prompt-chip:nth-child(4) { animation-delay: 190ms; }
+
+/* --- text ----------------------------------------------------------------
+   Optical refinements that are invisible individually and obvious together. */
+
+.coach-message-card {
+  /* Stops ragged-right lines from looking accidental on narrow columns. */
+  text-wrap: pretty;
+  /* Proper apostrophes and quotes need slightly looser tracking to breathe. */
+  letter-spacing: 0.002em;
+}
+
+.coach-message-card p + p {
+  /* Paragraph rhythm: a touch more than the line height, so paragraphs read as
+     separate thoughts rather than as one block with gaps. */
+  margin-top: 0.85em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-message-row,
+  .coach-prompt-chip {
+    animation: none;
+  }
+  .coach-avatar-coach.is-thinking::after {
+    animation: none;
+    opacity: 0.3;
+  }
+  .coach-send:active,
+  .coach-lens-button:active,
+  .coach-prompt-chip:active {
+    transform: none;
+  }
+}

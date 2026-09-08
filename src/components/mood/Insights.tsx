@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { BrainCircuit } from "lucide-react";
 
 import type { Insight } from "@/lib/mood/types";
@@ -12,12 +13,16 @@ const kindAccent: Record<Insight["kind"], string> = {
   stability: "text-sky",
 };
 
-export function Insights({
+function InsightsImpl({
   insights,
   tier,
 }: {
   insights: Insight[];
-  tier: { current: { label: string }; next?: { min: number; label: string } | undefined; tiers: readonly { min: number; label: string }[] };
+  tier: {
+    current: { label: string };
+    next?: { min: number; label: string } | undefined;
+    tiers: readonly { min: number; label: string }[];
+  };
 }) {
   return (
     <Panel className="p-6" glow="violet">
@@ -68,3 +73,6 @@ export function Insights({
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Insights = memo(InsightsImpl);

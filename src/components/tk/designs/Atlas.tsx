@@ -105,7 +105,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
   const [notice, setNotice] = useState<string | null>(null);
   const hasDays = analysis.daysLogged > 0;
 
-  const defs = TRACKERS;
+  /* only what this person tracks — switched-off trackers keep their history but leave the page */
+  const defs = TRACKERS.filter((def) => store.active.includes(def.id));
 
   /* the compass: sleep as the night's arc, everything else as a share of its target */
   /**
@@ -137,7 +138,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
       screen: store.goals.screenMinutes || 180,
     };
 
-    return RING_ORDER.map(({ id, r }) => {
+    return RING_ORDER.filter(({ id }) => store.active.includes(id)).map(({ id, r }) => {
       const circumference = 2 * Math.PI * r;
       const share = Math.min(Math.max(values[id] / goals[id], 0), 1);
       return {
@@ -148,7 +149,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
         share,
       };
     });
-  }, [store.days, store.goals, today]);
+  }, [store.active, store.days, store.goals, today]);
 
   /**
    * The night itself, as a hairline outside the rings.
@@ -427,7 +428,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                           <span>{s.subject}</span>
                           <i aria-hidden />
                           <span>
-                            {defs[2]!.format(s.minutes)} · {s.sessions} session
+                            {trackerDef("study").format(s.minutes)} · {s.sessions} session
                             {s.sessions === 1 ? "" : "s"}
                           </span>
                         </li>

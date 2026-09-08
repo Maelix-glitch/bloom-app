@@ -6,6 +6,7 @@
 
 import { aggregateDays, currentStreak } from "@/lib/mood/analytics";
 import type { MoodEntry } from "@/lib/mood/types";
+import { localDay } from "@/lib/localDay";
 import type {
   ActivityEntry,
   HighlightItem,
@@ -30,7 +31,7 @@ export interface JourneyInput {
 }
 
 const DAY = 86_400_000;
-const dayKey = (iso: string) => iso.slice(0, 10);
+const dayKey = (iso: string) => localDay(iso);
 
 export function computeStats(input: JourneyInput): ProfileStats {
   const days = new Set(input.entries.map((e) => dayKey(e.timestamp)));

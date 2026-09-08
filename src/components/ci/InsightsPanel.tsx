@@ -10,6 +10,7 @@ import {
   CalendarPlus,
   Check,
   Info,
+  Repeat,
   TrendingDown,
   TrendingUp,
   type LucideIcon,
@@ -26,6 +27,8 @@ function iconFor(flag: InsightFlag): LucideIcon {
       return CalendarClock;
     case "variability":
       return Activity;
+    case "long-cycles":
+      return Repeat;
     case "trend":
       return flag.title.startsWith("Your cycles have been getting longer")
         ? TrendingUp

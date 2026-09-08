@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig, supabaseConfigProblem } from "@/lib/supabase";
 import { moodStorage } from "@/lib/mood/storage";
 import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
@@ -40,6 +40,7 @@ import {
   computeStats,
   type RewardRecord,
 } from "@/lib/profile/journey";
+import { announceProfileChanged } from "@/hooks/useRailIdentity";
 import {
   isStoryActive,
   type BloomAccent,
@@ -79,6 +80,12 @@ export function useProfileSpace() {
   /* ------------------------------- session ------------------------------- */
   useEffect(() => {
     let mounted = true;
+
+    if (!hasSupabaseConfig) {
+      setUserId(null);
+      setAuthState("signed-out");
+      return;
+    }
 
     void supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
@@ -311,6 +318,7 @@ export function useProfileSpace() {
         accent: patch.accent as BloomAccent,
         featured: patch.featured,
       }));
+      announceProfileChanged();
     },
     [userId, patchIdentity],
   );
@@ -321,6 +329,7 @@ export function useProfileSpace() {
       const identity = currentIdentity();
       await saveProfile(userId, { ...toPatch(identity), accent });
       patchIdentity((i) => ({ ...i, accent }));
+      announceProfileChanged();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId, patchIdentity],
@@ -441,6 +450,7 @@ export function useProfileSpace() {
       const path = await uploadAvatar(userId, blob);
       patchIdentity((i) => ({ ...i, avatarPath: path }));
       await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: path });
+      announceProfileChanged();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId, patchIdentity],
@@ -451,6 +461,7 @@ export function useProfileSpace() {
     patchIdentity((i) => ({ ...i, avatarPath: null }));
     await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: null });
     await removeAvatar(currentIdentity().avatarPath ?? `${userId}/avatar.jpg`);
+    announceProfileChanged();
   }, [userId, patchIdentity]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signOut = useCallback(async () => {
@@ -458,17 +469,56 @@ export function useProfileSpace() {
   }, []);
 
   const sendMagicLink = useCallback(async (email: string) => {
-    const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/profile` : undefined;
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      ...(redirectTo ? { options: { emailRedirectTo: redirectTo } } : {}),
-    });
-    if (error) {
-      report("profile:magic-link", error);
-      return { ok: false, message: "We couldn't send that link right now. Try again soon." };
+    /*
+     * Guarded, and everything inside a try.
+     *
+     * Without the guard this hit the throwing Supabase proxy when no project
+     * is configured. The throw rejected the promise, the caller had no
+     * try/catch, so its `setState` never ran and the button sat on "sending"
+     * forever — the "magic link isn't sending" report, with no error shown.
+     *
+     * Now an unconfigured build says so plainly instead of hanging.
+     */
+    if (!hasSupabaseConfig) {
+      return {
+        ok: false,
+        message:
+          supabaseConfigProblem() ??
+          "This copy of Bloom has no account system connected, so there's no link to send.",
+      };
     }
-    return { ok: true, message: "Check your inbox — a sign-in link is on its way." };
+    try {
+      const redirectTo =
+        typeof window !== "undefined" ? `${window.location.origin}/profile` : undefined;
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        ...(redirectTo ? { options: { emailRedirectTo: redirectTo } } : {}),
+      });
+      if (error) {
+        report("profile:magic-link", error);
+        /*
+         * Supabase's own wording is more useful than a generic apology here:
+         * rate limits and an unconfirmed SMTP setup are the two usual causes
+         * and they need different fixes.
+         */
+        const detail = /rate|limit|too many/i.test(error.message)
+          ? "Too many requests just now — wait a minute and try again."
+          : /smtp|email|sender|provider/i.test(error.message)
+            ? "The project's email sending isn't set up yet, so no link could go out."
+            : error.message;
+        return { ok: false, message: detail };
+      }
+      return { ok: true, message: "Check your inbox — a sign-in link is on its way." };
+    } catch (e) {
+      report("profile:magic-link", e);
+      return {
+        ok: false,
+        message:
+          e instanceof Error && /not connected/i.test(e.message)
+            ? "Bloom isn't connected to a database here, so there's no account to sign in to."
+            : "We couldn't reach the sign-in service. Check your connection and try again.",
+      };
+    }
   }, []);
 
   return {

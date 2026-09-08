@@ -17,10 +17,11 @@ import {
 } from "lucide-react";
 
 import crownCrest from "@/assets/crown-crest.png";
-import { BloomHeader } from "@/components/BloomHeader";
+import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { RewardClaimCinematic, type RewardReveal } from "@/components/rewards/RewardClaimCinematic";
 import { useRewardsSystem, type UserReward } from "@/hooks/useRewardsSystem";
+import { PointsStrip } from "@/components/rewards/PointsStrip";
 import { playRewardSound, setRewardAudioMuted } from "@/lib/rewards/audio";
 import { cn } from "@/lib/utils";
 
@@ -261,7 +262,7 @@ function EmptyRewardsState({ isAdmin, onRetry }: { isAdmin: boolean; onRetry: ()
         <button type="button" onClick={onRetry} className="reward-secondary-button">
           <RefreshCw className="size-3.5" /> Check again
         </button>
-        <Link to="/" className="reward-text-button">
+        <Link to="/mood/intelligence" className="reward-text-button">
           Back to Mood Intelligence <ArrowUpRight className="size-3.5" />
         </Link>
       </div>
@@ -334,8 +335,8 @@ export function RewardsPage() {
   };
 
   return (
-    <div className="rewards-delivery-page relative min-h-screen bg-background text-foreground">
-      <BloomHeader />
+    <div className="rewards-delivery-page app-shell relative min-h-screen bg-background text-foreground">
+      <AppNav />
       <Atmosphere />
       <div className="rewards-starfield" aria-hidden="true">
         {Array.from({ length: 18 }, (_, index) => (
@@ -352,7 +353,7 @@ export function RewardsPage() {
           />
         ))}
       </div>
-      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-24 pt-12 sm:px-8 sm:pt-16">
+      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-28 pt-12 sm:px-8 sm:pt-16 lg:pb-24">
         <header className="reward-page-header">
           <div>
             <p className="eyebrow flex items-center gap-2">
@@ -388,6 +389,8 @@ export function RewardsPage() {
             ) : null}
           </div>
         </header>
+
+        <PointsStrip />
 
         {loading ? (
           <div className="reward-loading-state">

@@ -44,6 +44,12 @@ export interface CoachResponse {
   paragraphs: string[];
   sources: string[];
   blocks: CoachBlock[];
+  /**
+   * Which brain produced this — set by the engine, absent for a bare call to
+   * `answer()`. The UI uses it to admit when a remote choice fell back to the
+   * device rather than quietly degrading.
+   */
+  source?: "edge" | "local";
 }
 
 /** One tracker, as the responder needs to see it. */
@@ -63,6 +69,8 @@ export interface TrackerFacts {
 }
 
 export interface CycleFacts {
+  /** "Not expecting periods right now" — history kept, nothing predicted, never late. */
+  paused?: boolean | undefined;
   daysLogged: number;
   cycleDay: number | null;
   phaseLabel: string | null;
@@ -71,6 +79,8 @@ export interface CycleFacts {
   averageLength: number | null;
   confidence: string | null;
   confidenceReason: string | null;
+  /** The engine's own sentence about the next period — window, "late", or "generic guide". */
+  nextPeriod?: string | null | undefined;
 }
 
 export interface CoachRecord {
@@ -288,15 +298,24 @@ function periodAnswer(record: CoachRecord): CoachResponse {
     );
     return { paragraphs, sources, blocks };
   }
+  if (cycle.paused) {
+    paragraphs.push(
+      "You've told Bloom you're not expecting periods right now, so nothing is predicted and nothing counts as late. Your history is kept; when periods return, switch tracking back on from the Cycle page and the phases and dates come back from your own record.",
+    );
+    sources.push("cycle settings");
+    return { paragraphs, sources, blocks };
+  }
 
   if (cycle.cycleDay !== null && cycle.phaseLabel) {
     paragraphs.push(
       `You're on day ${cycle.cycleDay} — ${cycle.phaseLabel.toLowerCase()}. ${
-        cycle.nextStart
-          ? cycle.daysUntilNext !== null && cycle.daysUntilNext >= 0
-            ? `The next start is estimated around ${cycle.nextStart}, about ${plural(cycle.daysUntilNext, "day")} out.`
-            : `The next start was estimated around ${cycle.nextStart}.`
-          : ""
+        cycle.nextPeriod
+          ? `${cycle.nextPeriod}.`
+          : cycle.nextStart
+            ? cycle.daysUntilNext !== null && cycle.daysUntilNext >= 0
+              ? `The next start is estimated around ${cycle.nextStart}, about ${plural(cycle.daysUntilNext, "day")} out.`
+              : `The next start was estimated around ${cycle.nextStart}.`
+            : ""
       }`.trim(),
     );
   } else if (cycle.averageLength !== null) {

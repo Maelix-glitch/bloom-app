@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Insufficient, Panel, SectionHead, accentVar, type Accent } from "./primitives";
 import { cn } from "@/lib/utils";
 
@@ -11,12 +12,18 @@ export interface DistributionBucket {
   dates: string[];
 }
 
-export function Distribution({
+function DistributionImpl({
   buckets,
   volatility,
 }: {
   buckets: DistributionBucket[];
-  volatility: { avgDelta: number; largest: number; smallest: number; sd: number; stability: number | null };
+  volatility: {
+    avgDelta: number;
+    largest: number;
+    smallest: number;
+    sd: number;
+    stability: number | null;
+  };
 }) {
   const total = buckets.reduce((a, b) => a + b.count, 0);
 
@@ -49,13 +56,20 @@ export function Distribution({
             {buckets.map((b) => (
               <div key={b.key} className="rounded-[12px] border border-border bg-surface-2/40 p-3">
                 <p className="flex items-center gap-2 text-[12px] text-foreground">
-                  <span className="size-1.5 rounded-full" style={{ background: accentVar[b.accent as Accent] }} />
+                  <span
+                    className="size-1.5 rounded-full"
+                    style={{ background: accentVar[b.accent as Accent] }}
+                  />
                   {b.label}
                 </p>
                 <p className="numeric mt-1.5 text-[20px] text-foreground">{b.count}</p>
                 <p className="mono text-[10px] text-faint">
                   {b.share.toFixed(0)}% ·{" "}
-                  <span className={cn(b.delta === 0 ? "text-faint" : b.delta > 0 ? "text-sage" : "text-rose")}>
+                  <span
+                    className={cn(
+                      b.delta === 0 ? "text-faint" : b.delta > 0 ? "text-sage" : "text-rose",
+                    )}
+                  >
                     {b.delta > 0 ? "+" : ""}
                     {b.delta} vs prev
                   </span>
@@ -80,7 +94,8 @@ export function Distribution({
                 />
               </div>
               <p className="mt-3 text-[12px] text-muted-foreground">
-                Derived from average day-to-day mood change. Higher means a steadier emotional baseline.
+                Derived from average day-to-day mood change. Higher means a steadier emotional
+                baseline.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -90,7 +105,10 @@ export function Distribution({
                 { label: "Smallest change", value: volatility.smallest.toFixed(2) },
                 { label: "Std deviation", value: volatility.sd.toFixed(2) },
               ].map((m) => (
-                <div key={m.label} className="rounded-[12px] border border-border bg-surface-2/40 p-4">
+                <div
+                  key={m.label}
+                  className="rounded-[12px] border border-border bg-surface-2/40 p-4"
+                >
                   <p className="eyebrow mb-2">{m.label}</p>
                   <p className="numeric text-[20px] text-foreground">{m.value}</p>
                 </div>
@@ -102,3 +120,6 @@ export function Distribution({
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Distribution = memo(DistributionImpl);

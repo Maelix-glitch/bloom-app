@@ -8,12 +8,22 @@
 
 import type { DayFlow, DayLog, LhValue, MoodValue, MucusValue } from "./dayLogs";
 import { isValidDateKey, type FlowLevel, type PeriodLog } from "./predict";
+import { EMPTY_MEMORY, type CheckInMemory } from "./reconcile";
 import { DEFAULT_THEME_ID } from "./themes";
 
 const KEY = "bloom.cycle.periods.v1";
 /** Advanced daily log — one row per calendar day, keyed by date. */
 const DAY_KEY = "bloom.cycle.days.v1";
 const THEME_KEY = "bloom.cycle.theme.v1";
+/** Answers to the check-in questions — never ask the same thing twice. */
+const CHECKIN_KEY = "bloom.cycle.checkins.v1";
+const SETTINGS_KEY = "bloom.cycle.settings.v1";
+/**
+ * Sync sidecar for the period entries: per id, when it last changed and
+ * whether it was deleted (a tombstone). Readers of the plain list above never
+ * need this; only the sync layer does.
+ */
+const PERIOD_META_KEY = "bloom.cycle.periods.meta.v1";
 /** Legacy day-level log written by the previous version of the cycle page. */
 const LEGACY_KEY = "bloom.cycle.entries.local";
 
@@ -82,7 +92,7 @@ function isLh(v: unknown): v is LhValue {
   return v === "negative" || v === "positive";
 }
 function isDayFlow(v: unknown): v is DayFlow {
-  return v === "none" || v === "light" || v === "medium" || v === "heavy";
+  return v === "none" || v === "spotting" || v === "light" || v === "medium" || v === "heavy";
 }
 const inRange = (v: unknown, lo: number, hi: number): v is number =>
   typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
@@ -166,6 +176,215 @@ export function daysToCsv(days: DayLog[]): string {
   ].join("\n");
 }
 
+/* ------------------------------- check-ins -------------------------------- */
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+function dateMap(v: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!isRecord(v)) return out;
+  for (const [k, val] of Object.entries(v)) {
+    if (typeof val === "string" && isValidDateKey(val)) out[k] = val;
+  }
+  return out;
+}
+
+export function loadCheckInMemory(): CheckInMemory {
+  if (!hasWindow()) return EMPTY_MEMORY;
+  try {
+    const raw = window.localStorage.getItem(CHECKIN_KEY);
+    if (!raw) return EMPTY_MEMORY;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return EMPTY_MEMORY;
+    return { dismissed: dateMap(parsed["dismissed"]), snoozed: dateMap(parsed["snoozed"]) };
+  } catch {
+    return EMPTY_MEMORY;
+  }
+}
+
+export function saveCheckInMemory(memory: CheckInMemory): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(CHECKIN_KEY, JSON.stringify(memory));
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/* ---------------------------- period sync meta ---------------------------- */
+
+export interface PeriodMeta {
+  /** id → ISO time of the last change on any device. */
+  updatedAt: Record<string, string>;
+  /** id → ISO time of deletion; the entry is kept out of the list. */
+  deleted: Record<string, { log: PeriodLog; at: string }>;
+}
+
+export const EMPTY_PERIOD_META: PeriodMeta = { updatedAt: {}, deleted: {} };
+
+const isoMap = (v: unknown): Record<string, string> => {
+  const out: Record<string, string> = {};
+  if (!isRecord(v)) return out;
+  for (const [k, d] of Object.entries(v)) {
+    if (typeof d === "string" && !Number.isNaN(Date.parse(d))) out[k] = d;
+  }
+  return out;
+};
+
+export function loadPeriodMeta(): PeriodMeta {
+  if (!hasWindow()) return EMPTY_PERIOD_META;
+  try {
+    const raw = window.localStorage.getItem(PERIOD_META_KEY);
+    if (!raw) return EMPTY_PERIOD_META;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return EMPTY_PERIOD_META;
+    const deleted: PeriodMeta["deleted"] = {};
+    if (isRecord(parsed["deleted"])) {
+      for (const [id, v] of Object.entries(parsed["deleted"])) {
+        if (!isRecord(v)) continue;
+        const log = normalizeLog(v["log"]);
+        const at =
+          typeof v["at"] === "string" && !Number.isNaN(Date.parse(v["at"])) ? v["at"] : null;
+        if (log && at) deleted[id] = { log: { ...log, id }, at };
+      }
+    }
+    return { updatedAt: isoMap(parsed["updatedAt"]), deleted };
+  } catch {
+    return EMPTY_PERIOD_META;
+  }
+}
+
+export function savePeriodMeta(meta: PeriodMeta): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(PERIOD_META_KEY, JSON.stringify(meta));
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/* ------------------------------- settings -------------------------------- */
+
+/** What the person has told the engine about their own body. */
+/**
+ * Whether Bloom should expect periods right now.
+ *
+ * - `tracking` — the default: predictions, phases, "late" logic.
+ * - `paused`   — pregnancy, postpartum, contraception with no bleed, a
+ *                break: history and the daily log stay, but nothing is
+ *                predicted and nothing is ever "late". Optionally until a
+ *                date, after which tracking resumes on its own.
+ * - `off`      — not tracking a cycle at all: the Cycle ring, focus items,
+ *                nav entry and coach topic disappear. History is kept.
+ */
+export type CycleMode = "tracking" | "paused" | "off";
+
+export interface CyclePause {
+  /** Resume automatically on this day (inclusive); null = until they say. */
+  until: string | null;
+  /** Free text, never required — "pregnant", "on the pill", "just a break". */
+  reason: string | null;
+  /** When they paused, so the page can say "paused since March". */
+  since: string;
+}
+
+export interface CycleSettings {
+  /**
+   * The longest gap they've confirmed as one real cycle ("no — it really was
+   * that long"). Null until they say so. Bounded by the engine's hard ceiling.
+   */
+  personalMaxPlausible: number | null;
+  mode: CycleMode;
+  /** Only meaningful while `mode === "paused"`. */
+  pause: CyclePause | null;
+  /** ISO stamp of the last mode change — lets two devices agree on the later choice. */
+  modeChangedAt?: string | undefined;
+}
+
+export const DEFAULT_CYCLE_SETTINGS: CycleSettings = {
+  personalMaxPlausible: null,
+  mode: "tracking",
+  pause: null,
+};
+
+const MODES: readonly CycleMode[] = ["tracking", "paused", "off"];
+
+export function normalizeMode(v: unknown): CycleMode {
+  return typeof v === "string" && (MODES as readonly string[]).includes(v)
+    ? (v as CycleMode)
+    : "tracking";
+}
+
+export function normalizePause(v: unknown): CyclePause | null {
+  if (!isRecord(v)) return null;
+  const until = v["until"];
+  const reason = v["reason"];
+  const since = v["since"];
+  return {
+    until: typeof until === "string" && isValidDateKey(until) ? until : null,
+    reason: typeof reason === "string" && reason.trim() !== "" ? reason.trim().slice(0, 80) : null,
+    since: typeof since === "string" && isValidDateKey(since) ? since : "1970-01-01",
+  };
+}
+
+/** Whole settings object from anything — storage, a table row, junk. */
+export function normalizeSettings(v: unknown): CycleSettings {
+  if (!isRecord(v)) return { ...DEFAULT_CYCLE_SETTINGS };
+  const pmp = v["personalMaxPlausible"];
+  const mode = normalizeMode(v["mode"]);
+  const out: CycleSettings = {
+    personalMaxPlausible:
+      typeof pmp === "number" && Number.isFinite(pmp) && pmp > 0 ? Math.round(pmp) : null,
+    mode,
+    pause:
+      mode === "paused"
+        ? (normalizePause(v["pause"]) ?? { until: null, reason: null, since: "1970-01-01" })
+        : null,
+  };
+  const stamp = v["modeChangedAt"];
+  if (typeof stamp === "string" && !Number.isNaN(Date.parse(stamp))) out.modeChangedAt = stamp;
+  return out;
+}
+
+/**
+ * The mode as it applies *today*: a pause with an end date that has passed
+ * reads as tracking again — nobody should have to remember to switch back.
+ */
+export function effectiveMode(settings: CycleSettings, today: string): CycleMode {
+  if (settings.mode === "paused" && settings.pause?.until && settings.pause.until < today) {
+    return "tracking";
+  }
+  return settings.mode;
+}
+
+export function loadCycleSettings(): CycleSettings {
+  if (!hasWindow()) return DEFAULT_CYCLE_SETTINGS;
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return DEFAULT_CYCLE_SETTINGS;
+    const parsed: unknown = JSON.parse(raw);
+    return normalizeSettings(parsed);
+  } catch {
+    return DEFAULT_CYCLE_SETTINGS;
+  }
+}
+
+export const CYCLE_SETTINGS_CHANGED = "bloom:cycle-mode-changed";
+
+export function saveCycleSettings(settings: CycleSettings): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    /* non-fatal */
+  }
+  /* the rail and the coach follow the mode live (not PERIODS_CHANGED — that
+     one makes the period store re-read everything) */
+  window.dispatchEvent(new CustomEvent(CYCLE_SETTINGS_CHANGED));
+}
+
 export function loadThemeId(): string {
   if (!hasWindow()) return DEFAULT_THEME_ID;
   try {
@@ -209,7 +428,9 @@ export function legacyPeriodCandidates(): PeriodLog[] {
         typeof row["date"] === "string" && isValidDateKey(row["date"]) ? row["date"] : null;
       const flow = row["flow"];
       if (!date) return null;
-      if (flow === undefined || flow === null || flow === "none") return null;
+      /* spotting is an observation, not a period day — it must not start one */
+      if (flow === undefined || flow === null || flow === "none" || flow === "spotting")
+        return null;
       return {
         date,
         flow: isFlow(flow) ? flow : ("medium" as FlowLevel),

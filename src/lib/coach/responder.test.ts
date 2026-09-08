@@ -32,7 +32,13 @@ const context = (over: Partial<CoachContext["mood"]> = {}): CoachContext => ({
     anomalies: [],
     ...over,
   },
-  habits: { available: false, activeCount: 0, recentCompleted: 0, previousCompleted: 0, selected: [] },
+  habits: {
+    available: false,
+    activeCount: 0,
+    recentCompleted: 0,
+    previousCompleted: 0,
+    selected: [],
+  },
   memory: { available: 0, selected: [] },
   intent: { primary: "REFLECT", mode: "ask" },
   policy: {
@@ -133,6 +139,33 @@ describe("answer — period", () => {
     expect(text).toMatch(/Two cycles logged so far/);
   });
 
+  it("says predictions are paused instead of quoting a stale due date", () => {
+    const record: CoachRecord = {
+      today: "2026-09-07",
+      trackers: [],
+      memories: [],
+      habitsActive: 0,
+      cycle: {
+        paused: true,
+        daysLogged: 12,
+        cycleDay: null,
+        phaseLabel: null,
+        nextStart: null,
+        daysUntilNext: null,
+        averageLength: 29,
+        confidence: null,
+        confidenceReason: null,
+        nextPeriod: null,
+      },
+    };
+    const result = answer({ text: "when is my period due?", mode: "ask" }, context(), record);
+    const text = result.paragraphs.join(" ");
+    expect(text).toMatch(/not expecting periods right now/);
+    expect(text).toMatch(/nothing counts as late/);
+    expect(text).not.toMatch(/average about/);
+    expect(text).not.toMatch(/estimated around/);
+  });
+
   it("names the one log that would change the answer when there's no cycle", () => {
     const result = answer({ text: "when is my period due?", mode: "ask" }, context(), emptyRecord);
     expect(result.paragraphs.join(" ")).toMatch(/no cycle logged yet/i);
@@ -183,7 +216,15 @@ describe("answer — mood", () => {
       previous: window(5.8),
       month: window(6.1),
       change: { mood: 0.6, energy: 0.2, stress: -0.3, direction: "improving" },
-      patterns: [{ title: "Dips midweek", statement: "Wednesdays read lower than the rest of the week", evidence: "moderate", sampleSize: 6, metrics: [] }],
+      patterns: [
+        {
+          title: "Dips midweek",
+          statement: "Wednesdays read lower than the rest of the week",
+          evidence: "moderate",
+          sampleSize: 6,
+          metrics: [],
+        },
+      ],
     });
     const result = answer({ text: "how has my week been?", mode: "reflect" }, ctx, emptyRecord);
     const text = result.paragraphs.join(" ");
@@ -193,7 +234,11 @@ describe("answer — mood", () => {
   });
 
   it("won't invent a mood reading when there are none", () => {
-    const result = answer({ text: "how has my week been?", mode: "reflect" }, context(), emptyRecord);
+    const result = answer(
+      { text: "how has my week been?", mode: "reflect" },
+      context(),
+      emptyRecord,
+    );
     expect(result.paragraphs.join(" ")).toMatch(/no mood check-ins to read yet/i);
   });
 });

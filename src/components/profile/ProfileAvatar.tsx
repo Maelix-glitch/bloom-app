@@ -9,6 +9,7 @@ import { useState } from "react";
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import { objectUrl } from "@/lib/profile/profileService";
+import { resolveAvatar } from "@/lib/profile/presetAvatars";
 import { initialsFor, type BloomAccent } from "@/lib/profile/types";
 
 export type AvatarRing = "none" | "quiet" | "story-unseen" | "story-seen";
@@ -29,7 +30,8 @@ export function ProfileAvatar({
   className?: string;
 }) {
   const [broken, setBroken] = useState(false);
-  const src = objectUrl(avatarPath);
+  /* Handles both a `preset:` photo shipped with the app and an upload. */
+  const src = resolveAvatar(avatarPath, objectUrl);
   const varAccent = accentVar[accent];
 
   const showImage = Boolean(src) && !broken;

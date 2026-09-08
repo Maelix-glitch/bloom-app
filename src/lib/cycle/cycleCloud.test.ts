@@ -50,6 +50,11 @@ describe("rowToDay", () => {
     });
   });
 
+  it("keeps spotting — it's an observation the person made, not noise", () => {
+    expect(rowToDay({ date: "2026-08-30", flow: "spotting" })?.flow).toBe("spotting");
+    expect(dayToRow(day({ flow: "spotting" }), "p1")["flow"]).toBe("spotting");
+  });
+
   it("falls back to logged_at when the row has no updated_at", () => {
     const result = rowToDay({ date: "2026-08-30", logged_at: "2026-08-30T09:00:00.000Z" });
     expect(result?.updatedAt).toBe("2026-08-30T09:00:00.000Z");

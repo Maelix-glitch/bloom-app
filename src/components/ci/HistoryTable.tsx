@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import { Download, Pencil, Trash2, TriangleAlert } from "lucide-react";
+import { Download, Pencil, Trash2, TriangleAlert, Upload } from "lucide-react";
 
 import { Button, Card, SectionHead } from "./primitives";
 import {
@@ -23,6 +23,8 @@ export function HistoryTable({
   onDelete,
   onClearAll,
   onExport,
+  onImport,
+  storedOn = "device",
 }: {
   analysis: CycleAnalysis;
   logs: PeriodLog[];
@@ -31,6 +33,10 @@ export function HistoryTable({
   onDelete: (id: string) => void;
   onClearAll: () => void;
   onExport?: () => void;
+  /** B8 — paste or drop history from another app. */
+  onImport?: (() => void) | undefined;
+  /** Where these entries live right now — the footer says so honestly. */
+  storedOn?: "device" | "account" | undefined;
 }) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -45,16 +51,32 @@ export function HistoryTable({
         title="Every entry you've logged"
         note="Lengths marked as not counted were too short or too long to be a real cycle, so they stay out of the average — fix the gap and the average corrects itself."
         aside={
-          onExport ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onExport}
-              disabled={disabled || logs.length === 0}
-            >
-              <Download size={13} aria-hidden />
-              Export CSV
-            </Button>
+          onExport || onImport ? (
+            <span className="flex flex-wrap items-center gap-1.5">
+              {onImport ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onImport}
+                  disabled={disabled}
+                  data-testid="cycle-import-open"
+                >
+                  <Upload size={13} aria-hidden />
+                  Import history
+                </Button>
+              ) : null}
+              {onExport ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onExport}
+                  disabled={disabled || logs.length === 0}
+                >
+                  <Download size={13} aria-hidden />
+                  Export CSV
+                </Button>
+              ) : null}
+            </span>
           ) : null
         }
       />
@@ -94,7 +116,11 @@ export function HistoryTable({
                           <span className="mt-0.5 block text-[11.5px] ci-muted">
                             {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
                           </span>
-                        ) : null}
+                        ) : (
+                          <span className="mt-0.5 block text-[11.5px] ci-muted">
+                            no last day logged
+                          </span>
+                        )}
                       </td>
                       <td>
                         {isFirst ? (
@@ -210,7 +236,9 @@ export function HistoryTable({
                       <span>
                         {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
                       </span>
-                    ) : null}
+                    ) : (
+                      <span>no last day logged</span>
+                    )}
                     {entry.flow ? <span className="capitalize">{entry.flow}</span> : null}
                     {entry.notes ? (
                       <span className="line-clamp-2 basis-full">{entry.notes}</span>
@@ -265,8 +293,8 @@ export function HistoryTable({
       {ordered.length > 0 ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4 ci-hair">
           <p className="text-[11.5px] ci-muted">
-            {ordered.length} {ordered.length === 1 ? "entry" : "entries"} · stored in this browser
-            only
+            {ordered.length} {ordered.length === 1 ? "entry" : "entries"} ·{" "}
+            {storedOn === "account" ? "on your account" : "stored on this device"}
           </p>
           {confirmClear ? (
             <span className="flex flex-wrap items-center gap-2">

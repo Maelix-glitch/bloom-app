@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export function Calendar({ days }: { days: DayAggregate[] }) {
+function CalendarImpl({ days }: { days: DayAggregate[] }) {
   const [cursor, setCursor] = useState(() => dayjs().startOf("month"));
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -26,7 +26,10 @@ export function Calendar({ days }: { days: DayAggregate[] }) {
     return out;
   }, [cursor]);
 
-  const monthDays = cells.filter((c): c is string => c !== null).map((c) => map.get(c)).filter(Boolean) as DayAggregate[];
+  const monthDays = cells
+    .filter((c): c is string => c !== null)
+    .map((c) => map.get(c))
+    .filter(Boolean) as DayAggregate[];
   const monthAvg = monthDays.length
     ? monthDays.reduce((a, d) => a + d.mood, 0) / monthDays.length
     : null;
@@ -151,7 +154,9 @@ export function Calendar({ days }: { days: DayAggregate[] }) {
           <div className="mt-4 flex flex-col gap-2">
             {active.entries.map((e) => (
               <div key={e.id} className="flex gap-3 text-[12px]">
-                <span className="mono w-14 shrink-0 text-faint">{dayjs(e.timestamp).format("HH:mm")}</span>
+                <span className="mono w-14 shrink-0 text-faint">
+                  {dayjs(e.timestamp).format("HH:mm")}
+                </span>
                 <span className="numeric w-8 shrink-0 text-violet">{e.mood.toFixed(1)}</span>
                 <span className="text-muted-foreground">{e.note ?? e.tags.join(" · ") ?? ""}</span>
               </div>
@@ -162,3 +167,6 @@ export function Calendar({ days }: { days: DayAggregate[] }) {
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Calendar = memo(CalendarImpl);

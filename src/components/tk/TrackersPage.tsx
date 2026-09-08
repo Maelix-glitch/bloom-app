@@ -6,10 +6,12 @@
  * comes from days the person actually logged; an empty day is never filled in.
  */
 
+import { greetingFor } from "@/lib/home/today";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { History, Sparkles, Waypoints } from "lucide-react";
 
 import { Atmosphere } from "@/components/ci/Atmosphere";
+import { UndoToast } from "@/components/ci/UndoToast";
 import { Reveal } from "@/components/ci/motion";
 import { Button, Card } from "@/components/ci/primitives";
 import { AdvancedCard } from "@/components/tk/AdvancedCard";
@@ -50,12 +52,9 @@ const QUICK: Partial<
 const TRACKER_HINT =
   "sleep has a field of its own below, because a night is worth typing out";
 
+/* The shared, rotating hello — see src/lib/voice. */
 function greeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 5) return "Late night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  return greetingFor(new Date().getHours());
 }
 
 function download(name: string, contents: string) {
@@ -102,7 +101,8 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
   }, [store.days, today]);
 
   const hasDays = analysis.daysLogged > 0;
-  const defs = TRACKERS;
+  /* only what this person tracks — switched-off trackers keep their history but leave the page */
+  const defs = TRACKERS.filter((def) => store.active.includes(def.id));
   const todayEntry = store.days.find((d) => d.date === today) ?? emptyDay(today);
 
   /* A tap on a quick-add writes straight to today and saves it. */
@@ -206,7 +206,7 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
                 </span>
                 <span className="tk-head__rule" />
                 <span className="tk-head__aside">
-                  {analysis.goalsMetToday} of {TRACKERS.length} on target
+                  {analysis.goalsMetToday} of {analysis.goalsCounted} on target
                 </span>
               </div>
 
@@ -308,6 +308,9 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
                   onDelete={store.removeDay}
                   disabled={preview}
                   focus={focus}
+                  customSubjects={store.customSubjects}
+                  onRememberSubject={store.rememberSubject}
+                  onForgetSubject={store.forgetSubject}
                 />
               </Reveal>
             </div>
@@ -615,6 +618,14 @@ export function TrackersPage({ theme = "nocturne", preview = false }: { theme?: 
           </>
         )}
       </div>
+      {!preview ? (
+        <UndoToast
+          undoable={store.undoable}
+          onUndo={store.undo}
+          onDismiss={store.dismissUndo}
+          testId="tk-undo"
+        />
+      ) : null}
     </div>
   );
 }

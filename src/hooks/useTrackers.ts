@@ -8,7 +8,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { todayKey } from "@/lib/cycle/predict";
+import { formatDate, todayKey } from "@/lib/cycle/predict";
+import { UNDO_WINDOW_MS, restoreRemoved, type Undoable } from "@/lib/undo";
 import {
   DEFAULT_GOALS,
   analyzeTrackers,
@@ -18,6 +19,7 @@ import {
   type DayFieldErrors,
   type Goals,
   type TrackerAnalysis,
+  type TrackerId,
 } from "@/lib/trackers/core";
 import {
   currentProfileId,
@@ -29,12 +31,18 @@ import {
 } from "@/lib/trackers/trackerCloud";
 import {
   clearDays,
+  forgetSubject,
+  loadActiveTrackers,
+  loadCustomSubjects,
   loadDays,
   loadGoals,
+  rememberSubject,
+  saveActiveTrackers,
   saveDays,
   saveGoals,
   TRACKERS_CHANGED,
 } from "@/lib/trackers/store";
+import { PREFS_CHANGED } from "@/lib/prefs";
 
 export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
@@ -58,15 +66,31 @@ export interface TrackerStore {
   today: string;
   hydrated: boolean;
   saveDay: (draft: DayEntry) => SaveDayResult;
+  /** Removes a day. It can be taken back for a few seconds via `undo`. */
   removeDay: (date: string) => void;
+  /** Removes every day. It can be taken back for a few seconds via `undo`. */
   clearAll: () => void;
   setGoal: (key: keyof Goals, value: number) => void;
   resetGoals: () => void;
+  /** The trackers this person tracks. Everything else is kept but out of the way. */
+  active: TrackerId[];
+  setActive: (ids: readonly TrackerId[]) => void;
+  toggleActive: (id: TrackerId) => void;
+  /** Study subjects the person typed, newest first. */
+  customSubjects: string[];
+  rememberSubject: (subject: string) => void;
+  forgetSubject: (subject: string) => void;
+  /** The last delete / clear, while it can still be taken back. */
+  undoable: Undoable | null;
+  undo: () => void;
+  dismissUndo: () => void;
 }
 
 export function useTrackers(): TrackerStore {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [goals, setGoals] = useState<Goals>(() => ({ ...loadGoals() }));
+  const [active, setActiveState] = useState<TrackerId[]>(() => loadActiveTrackers());
+  const [customSubjects, setCustomSubjects] = useState<string[]>(() => loadCustomSubjects());
   const [today, setToday] = useState<string>(() => todayKey());
   const [hydrated, setHydrated] = useState(false);
   const skipPersist = useRef(true);
@@ -83,6 +107,10 @@ export function useTrackers(): TrackerStore {
   const syncing = useRef(false);
   const daysRef = useRef<DayEntry[]>(days);
   daysRef.current = days;
+  /* a delete keeps the days it removed for a moment */
+  const [undoable, setUndoable] = useState<Undoable | null>(null);
+  const undoSeq = useRef(0);
+  const snapshot = useRef<{ id: number; days: DayEntry[] } | null>(null);
 
   /* read once on mount, then follow other instances of the hook */
   useEffect(() => {
@@ -93,11 +121,23 @@ export function useTrackers(): TrackerStore {
     };
     read();
     const onExternal = () => setDays(loadDays());
+    /* preferences arrive from the account (or another tab) — re-read them */
+    const onPrefs = () => {
+      setActiveState(loadActiveTrackers());
+      setCustomSubjects(loadCustomSubjects());
+      const g = loadGoals();
+      setGoals((prev) =>
+        (Object.keys(g) as (keyof Goals)[]).every((k) => g[k] === prev[k]) ? prev : g,
+      );
+    };
     window.addEventListener(TRACKERS_CHANGED, onExternal);
     window.addEventListener("storage", onExternal);
+    window.addEventListener(PREFS_CHANGED, onPrefs);
+    onPrefs();
     return () => {
       window.removeEventListener(TRACKERS_CHANGED, onExternal);
       window.removeEventListener("storage", onExternal);
+      window.removeEventListener(PREFS_CHANGED, onPrefs);
     };
   }, []);
 
@@ -129,8 +169,33 @@ export function useTrackers(): TrackerStore {
       return;
     }
     if (!hydrated) return;
+    /* only a real change is written — a re-read from the account must not
+       re-stamp the same numbers as "newer" */
+    const stored = loadGoals();
+    if ((Object.keys(goals) as (keyof Goals)[]).every((k) => stored[k] === goals[k])) return;
     saveGoals(goals);
   }, [goals, hydrated]);
+
+  const setActive = useCallback((ids: readonly TrackerId[]) => {
+    saveActiveTrackers(ids);
+    setActiveState(loadActiveTrackers());
+  }, []);
+
+  const toggleActive = useCallback((id: TrackerId) => {
+    const current = loadActiveTrackers();
+    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+    if (next.length === 0) return; // one always stays on
+    saveActiveTrackers(next);
+    setActiveState(loadActiveTrackers());
+  }, []);
+
+  const rememberSubjectCb = useCallback((subject: string) => {
+    setCustomSubjects(rememberSubject(subject));
+  }, []);
+
+  const forgetSubjectCb = useCallback((subject: string) => {
+    setCustomSubjects(forgetSubject(subject));
+  }, []);
 
   const saveDay = useCallback((draft: DayEntry): SaveDayResult => {
     const errors = validateDay(draft, todayKey());
@@ -145,22 +210,75 @@ export function useTrackers(): TrackerStore {
     return { ok: true };
   }, []);
 
-  const removeDay = useCallback((date: string) => {
-    setDays((prev) => {
-      if (prev.some((d) => d.date === date)) deletedDates.current.add(date);
-      return prev.filter((d) => d.date !== date);
-    });
-    dirtyDates.current.delete(date);
+  /* ------------------------------- undo ---------------------------------- */
+
+  /** Keep the days about to disappear, then let the caller remove them. */
+  const keepForUndo = useCallback((removed: DayEntry[], message: string) => {
+    if (removed.length === 0) return;
+    const id = ++undoSeq.current;
+    snapshot.current = { id, days: removed };
+    setUndoable({ id, message, until: Date.now() + UNDO_WINDOW_MS });
   }, []);
 
+  /* the snapshot expires by itself */
+  useEffect(() => {
+    if (!undoable) return;
+    const ms = Math.max(0, undoable.until - Date.now());
+    const t = window.setTimeout(() => {
+      setUndoable((u) => (u && u.id === undoable.id ? null : u));
+      if (snapshot.current?.id === undoable.id) snapshot.current = null;
+    }, ms);
+    return () => window.clearTimeout(t);
+  }, [undoable]);
+
+  const undo = useCallback(() => {
+    const snap = snapshot.current;
+    if (!snap) return;
+    snapshot.current = null;
+    setUndoable(null);
+    setDays((current) => {
+      /* put back what was removed (unless it was re-logged meanwhile) and
+         re-queue it for the account instead of the delete */
+      const { merged, restored } = restoreRemoved(current, snap.days, (d) => d.date);
+      for (const d of restored) {
+        deletedDates.current.delete(d.date);
+        dirtyDates.current.add(d.date);
+      }
+      return merged.sort((a, b) => a.date.localeCompare(b.date));
+    });
+  }, []);
+
+  const dismissUndo = useCallback(() => {
+    snapshot.current = null;
+    setUndoable(null);
+  }, []);
+
+  const removeDay = useCallback(
+    (date: string) => {
+      const gone = daysRef.current.filter((d) => d.date === date);
+      keepForUndo(gone, `Removed ${formatDate(date)} from your record.`);
+      setDays((prev) => {
+        if (prev.some((d) => d.date === date)) deletedDates.current.add(date);
+        return prev.filter((d) => d.date !== date);
+      });
+      dirtyDates.current.delete(date);
+    },
+    [keepForUndo],
+  );
+
   const clearAll = useCallback(() => {
+    const gone = daysRef.current;
+    keepForUndo(
+      gone,
+      `Cleared ${gone.length} ${gone.length === 1 ? "day" : "days"} from your record.`,
+    );
     setDays((prev) => {
       for (const d of prev) deletedDates.current.add(d.date);
       return [];
     });
     dirtyDates.current.clear();
     clearDays();
-  }, []);
+  }, [keepForUndo]);
 
   const setGoal = useCallback((key: keyof Goals, value: number) => {
     setGoals((prev) => ({ ...prev, [key]: value }));
@@ -254,7 +372,10 @@ export function useTrackers(): TrackerStore {
     return () => window.clearTimeout(id);
   }, [days, hydrated, pushPending]);
 
-  const analysis = useMemo(() => analyzeTrackers(days, goals, today), [days, goals, today]);
+  const analysis = useMemo(
+    () => analyzeTrackers(days, goals, today, { active }),
+    [days, goals, today, active],
+  );
 
   return {
     sync,
@@ -269,5 +390,14 @@ export function useTrackers(): TrackerStore {
     clearAll,
     setGoal,
     resetGoals,
+    active,
+    setActive,
+    toggleActive,
+    customSubjects,
+    rememberSubject: rememberSubjectCb,
+    forgetSubject: forgetSubjectCb,
+    undoable,
+    undo,
+    dismissUndo,
   };
 }

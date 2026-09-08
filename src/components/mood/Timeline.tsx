@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Clock3 } from "lucide-react";
 
@@ -7,7 +7,7 @@ import { EMOTION_MAP, type DayAggregate } from "@/lib/mood/types";
 import { Insufficient, Panel, SectionHead, accentVar, type Accent } from "./primitives";
 import { cn } from "@/lib/utils";
 
-export function Timeline({ days }: { days: DayAggregate[] }) {
+function TimelineImpl({ days }: { days: DayAggregate[] }) {
   const [selected, setSelected] = useState<string | null>(null);
 
   const active = useMemo(() => {
@@ -116,3 +116,6 @@ export function Timeline({ days }: { days: DayAggregate[] }) {
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Timeline = memo(TimelineImpl);

@@ -22,7 +22,11 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
   // A state-held node (not a plain ref) so the init effect re-runs when the
   // chart host mounts later — e.g. after the first day of data arrives.
   const [host, setHost] = useState<HTMLDivElement | null>(null);
-  const chartRef = useRef<{ setOption: (o: unknown, b?: boolean) => void; resize: () => void; dispose: () => void } | null>(null);
+  const chartRef = useRef<{
+    setOption: (o: unknown, opts?: { replaceMerge?: string[] }) => void;
+    resize: () => void;
+    dispose: () => void;
+  } | null>(null);
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState<SeriesKey[]>(["mood", "avg7", "energy"]);
 
@@ -95,8 +99,10 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
           width: s.key === "mood" ? 2.4 : 1.4,
           color: line,
           type: s.dashed ? "dashed" : "solid",
-          shadowBlur: s.key === "mood" ? 18 : 0,
-          shadowColor: line,
+          // No canvas shadowBlur: it is re-rasterised on every animation
+          // frame and was the single most expensive part of a range switch.
+          // The soft area fill below gives the mood line its glow instead.
+          shadowBlur: 0,
         },
         emphasis: { focus: "series", lineStyle: { width: s.key === "mood" ? 3 : 2 } },
         areaStyle:
@@ -120,7 +126,8 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
               }
             : undefined,
         data: model[s.key],
-        animationDuration: 900,
+        animationDuration: 420,
+        animationDurationUpdate: 420,
         animationEasing: "cubicOut",
       };
     });
@@ -180,7 +187,9 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
         },
         series,
       },
-      true,
+      // Merge-update instead of tearing the chart down (`notMerge`) on every
+      // range switch; `replaceMerge` still lets toggled-off series disappear.
+      { replaceMerge: ["series"] },
     );
   }, [ready, active, model]);
 

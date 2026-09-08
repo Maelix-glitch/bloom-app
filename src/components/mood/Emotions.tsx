@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Panel, SectionHead, Insufficient, accentText, accentVar, type Accent } from "./primitives";
 import type { EmotionKey } from "@/lib/mood/types";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ export interface EmotionStat {
   trend: number | null;
 }
 
-export function Emotions({
+function EmotionsImpl({
   stats,
   filter,
   onFilter,
@@ -66,7 +67,12 @@ export function Emotions({
                     className="size-1.5 rounded-full transition-transform group-hover:scale-150"
                     style={{ background: accentVar[accent] }}
                   />
-                  <span className={cn("text-[13px] font-medium", on ? accentText[accent] : "text-foreground")}>
+                  <span
+                    className={cn(
+                      "text-[13px] font-medium",
+                      on ? accentText[accent] : "text-foreground",
+                    )}
+                  >
                     {e.label}
                   </span>
                 </span>
@@ -86,8 +92,15 @@ export function Emotions({
                 <span className="mono flex items-center gap-4 justify-self-end text-[11px]">
                   <span className="text-faint">{e.share.toFixed(0)}%</span>
                   <span className="w-9 text-right">{e.count}×</span>
-                  <span className={cn("w-9 text-right", accentText[accent])}>{e.avgMood.toFixed(1)}</span>
-                  <span className={cn("w-12 text-right", e.trend === null ? "text-faint" : e.trend >= 0 ? "text-sage" : "text-rose")}>
+                  <span className={cn("w-9 text-right", accentText[accent])}>
+                    {e.avgMood.toFixed(1)}
+                  </span>
+                  <span
+                    className={cn(
+                      "w-12 text-right",
+                      e.trend === null ? "text-faint" : e.trend >= 0 ? "text-sage" : "text-rose",
+                    )}
+                  >
                     {e.trend === null ? "—" : `${e.trend > 0 ? "+" : ""}${e.trend.toFixed(1)}`}
                   </span>
                 </span>
@@ -105,3 +118,6 @@ export function Emotions({
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Emotions = memo(EmotionsImpl);

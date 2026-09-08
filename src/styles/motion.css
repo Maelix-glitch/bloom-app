@@ -1,0 +1,126 @@
+/*
+ * App-wide motion.
+ *
+ * The rule applied throughout: motion is for *orientation*, not decoration.
+ * Something that moves should be telling you where it came from, that you
+ * touched it, or that it just changed. Anything that moves for its own sake is
+ * a distraction in an app people open twenty times a day.
+ *
+ * Three things live here, all of them things the app was missing rather than
+ * things it was doing badly:
+ *   1. press feedback on every interactive surface,
+ *   2. an entrance for content that arrives after first paint,
+ *   3. a highlight for a value that just changed under the reader's eye.
+ *
+ * Everything collapses to nothing under prefers-reduced-motion. That is not a
+ * nicety — vestibular disorders are real and the whole file is optional.
+ */
+
+/* ------------------------------------------------------------ 1. press */
+
+/*
+ * Buttons already have hover states; what they lacked was the half-millimetre
+ * of give that makes a tap feel received on a touchscreen, where there is no
+ * hover at all. Scoped to controls that don't already animate themselves.
+ */
+.bm-press {
+  transition:
+    transform 200ms var(--ease-out-expo),
+    filter 200ms ease;
+}
+.bm-press:active {
+  transform: scale(0.97);
+  transition-duration: 90ms;
+}
+/* larger targets need less scale, or they look like they're collapsing */
+.bm-press-lg:active {
+  transform: scale(0.99);
+}
+
+/* ------------------------------------------------- 2. arrival */
+
+/*
+ * For content that resolves after paint — a loaded list, a computed panel.
+ * A short rise reads as "this arrived", where a fade alone reads as a flicker.
+ * `--bm-delay` staggers siblings; keep the total under ~250ms or the list
+ * feels slow rather than considered.
+ */
+@keyframes bm-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bm-arrive {
+  animation: bm-arrive 520ms var(--ease-out-expo) both;
+  animation-delay: var(--bm-delay, 0ms);
+}
+
+/* ------------------------------------------------- 3. changed */
+
+/*
+ * When a number updates in place — a streak, an average, a total — nothing
+ * tells the reader it moved. A brief warm wash under the value does, without
+ * moving the layout a pixel.
+ */
+@keyframes bm-changed {
+  0% {
+    background-color: color-mix(in oklab, var(--violet) 30%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.bm-changed {
+  border-radius: 6px;
+  animation: bm-changed 1.1s ease-out both;
+}
+
+/* ------------------------------------------------- 4. pending */
+
+/*
+ * A skeleton shimmer that doesn't crawl. Slow and low-contrast on purpose:
+ * a fast shimmer reads as urgency, and nothing here is urgent.
+ */
+@keyframes bm-shimmer {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+.bm-skeleton {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--foreground) 8%, transparent),
+    transparent
+  );
+  background-size: 180% 100%;
+  animation: bm-shimmer 2.4s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------ opt out */
+
+@media (prefers-reduced-motion: reduce) {
+  .bm-press,
+  .bm-press:active,
+  .bm-press-lg:active {
+    transform: none;
+    transition-duration: 1ms;
+  }
+  .bm-arrive,
+  .bm-changed,
+  .bm-skeleton {
+    animation: none;
+  }
+  /* still show the arrival, just without the movement */
+  .bm-arrive {
+    opacity: 1;
+  }
+}

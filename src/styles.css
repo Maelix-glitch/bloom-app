@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+/* Bloom's own motion primitives: press, arrival, changed, pending. */
+@import "./styles/motion.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -46,6 +48,8 @@
   --color-amber: var(--amber);
   --color-sage: var(--sage);
   --color-rose: var(--rose);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
 
   /* Metrics entry modal tokens → bg-metric-sleep, text-brand, border-danger… */
   --color-metric-sleep: var(--metric-sleep);
@@ -98,6 +102,8 @@
   --violet: oklch(0.7 0.107 297);
   --sky: oklch(0.71 0.073 250);
   --amber: oklch(0.81 0.11 82);
+  --gold: oklch(0.855 0.086 82);
+  --gold-soft: oklch(0.9 0.05 88);
   --sage: oklch(0.71 0.062 155);
   --rose: oklch(0.72 0.083 355);
   --destructive: oklch(0.66 0.16 22);
@@ -356,6 +362,17 @@
   }
 }
 
+/* One-shot entrance for Mood Intelligence sections: starts on mount, ends
+   at full opacity, and is skipped entirely under reduced motion. */
+.mood-reveal {
+  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mood-reveal {
+    animation: none;
+  }
+}
+
 /* One wide band of light that crosses a panel on a slow idle cycle. */
 @utility sheen-band {
   position: absolute;
@@ -402,4 +419,537 @@
 .bloom-nav-link.bloom-nav-active {
   color: #edebe4;
   background: #1f212b;
+}
+
+/* ---------------------------------------------------------------------------
+ * Today / home page — ported from Maelix-glitch/insight-map.
+ * Everything is scoped under .home-page so the six signal colours, the
+ * softer surfaces and the glow/float motion never leak into other routes
+ * (Rewards owns its own --gold, Mood owns the global panel utility).
+ * ------------------------------------------------------------------------- */
+.home-page {
+  --home-surface: color-mix(in oklab, var(--surface) 85%, transparent);
+  --home-surface-2: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  --home-secondary: var(--surface-2);
+  --home-gold: oklch(0.83 0.1 78);
+  --home-mood: oklch(0.78 0.13 20);
+  --home-sleep: oklch(0.72 0.13 255);
+  --home-habits: oklch(0.78 0.14 152);
+  --home-study: oklch(0.75 0.14 285);
+  --home-cycle: oklch(0.7 0.17 8);
+  --home-energy: oklch(0.84 0.13 85);
+  --home-gradient-glow: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--violet) 35%, transparent),
+    transparent 70%
+  );
+  --home-shadow-soft: 0 24px 60px -30px oklch(0 0 0 / 80%);
+}
+
+.home-panel {
+  background: var(--home-surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 8px);
+  box-shadow: var(--home-shadow-soft);
+  backdrop-filter: blur(14px);
+}
+
+.home-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--home-surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.8125rem;
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease;
+}
+.home-chip:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.home-node-glow {
+  box-shadow:
+    0 0 18px -2px currentColor,
+    inset 0 0 12px -6px currentColor;
+}
+
+.home-text-gradient {
+  background: linear-gradient(100deg, oklch(0.95 0.03 90), var(--home-gold));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.home-halo {
+  animation: home-pulse 5s ease-in-out infinite;
+}
+.home-float {
+  animation: home-float 6s ease-in-out infinite;
+}
+.home-rise {
+  animation: home-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.home-dash {
+  animation: home-dash 18s linear infinite;
+}
+
+@keyframes home-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes home-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+@keyframes home-dash {
+  to {
+    stroke-dashoffset: -240;
+  }
+}
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* the undo strip after archiving / deleting a habit — same shape as the
+   Cycle and Trackers pages, in the home tokens */
+.home-page .home-undo {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(92vw, 480px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in oklab, var(--surface) 94%, var(--foreground) 6%);
+  box-shadow: var(--home-shadow-soft);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  transform: translateX(-50%);
+  animation: home-rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 1024px) {
+  .home-page .home-undo {
+    left: calc(50% + var(--app-rail, 0px) / 2);
+    bottom: 28px;
+  }
+}
+.home-page .home-undo__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--home-habits);
+  transform-origin: left;
+  animation: home-drain var(--home-undo-ms, 8000ms) linear both;
+}
+@keyframes home-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page .home-undo,
+  .home-page .home-undo__bar {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Mood page (harmonious-dashboard model). Scoped under `.mood-page` so the
+ * model's gold / mood palette and its `panel` surfaces exist only here and
+ * never leak into the rail or other routes. Utilities the page uses that
+ * Tailwind doesn't know (`text-gold`, `bg-gold/10`, `text-gold-soft`, …) are
+ * registered as real colours in @theme via the --color-gold* tokens below.
+ * ------------------------------------------------------------------------- */
+.mood-page {
+  --mp-happy: oklch(0.86 0.1 85);
+  --mp-calm: oklch(0.76 0.06 145);
+  --mp-neutral: oklch(0.62 0.01 160);
+  --mp-sad: oklch(0.72 0.06 250);
+  --mp-anxious: oklch(0.71 0.08 30);
+  --mp-angry: oklch(0.64 0.12 25);
+  --mp-gradient-gold: linear-gradient(135deg, oklch(0.9 0.06 90), oklch(0.82 0.1 78));
+  --mp-shadow-soft: 0 24px 60px -30px oklch(0 0 0 / 0.75);
+  /* The model's button text sits on a gold fill. */
+  --primary-foreground: oklch(0.19 0.02 150);
+}
+.mp-panel {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--mp-shadow-soft);
+}
+.mp-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------------------------
+ * Mood web — the connection map on /mood (components/mood/page/MoodGraph).
+ * Every continuous motion here is transform/opacity on its own layer, or SMIL
+ * along a fixed path; nothing re-renders per frame.
+ * ------------------------------------------------------------------------- */
+.mood-page .mg-canvas-bg {
+  background:
+    radial-gradient(60% 60% at 50% 45%, color-mix(in oklab, var(--gold) 7%, transparent), transparent 70%),
+    linear-gradient(to right, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    36px 36px,
+    36px 36px;
+  mask-image: radial-gradient(90% 90% at 50% 50%, black 40%, transparent 100%);
+}
+.mood-page .mg-svg {
+  font-family: var(--font-sans);
+  user-select: none;
+}
+.mood-page .mg-svg [role="button"] {
+  cursor: pointer;
+  outline: none;
+}
+.mood-page .mg-orbits ellipse {
+  fill: none;
+  stroke: color-mix(in oklab, var(--foreground) 9%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+}
+
+/* edges */
+.mood-page .mg-edge {
+  transition:
+    opacity 0.35s ease,
+    stroke-width 0.35s ease;
+}
+.mood-page .mg-edge-up {
+  stroke: color-mix(in oklab, var(--gold) 75%, transparent);
+}
+.mood-page .mg-edge-down {
+  stroke: color-mix(in oklab, var(--mp-angry) 75%, transparent);
+}
+.mood-page .mg-edge-weak {
+  stroke: color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+.mood-page .mg-edge[data-state="off"] {
+  opacity: 0.12;
+}
+.mood-page .mg-edge[data-state="on"] {
+  opacity: 1;
+}
+
+/* particles */
+.mood-page .mg-particle {
+  transition: opacity 0.35s ease;
+}
+.mood-page .mg-particle-up {
+  fill: var(--gold-soft);
+}
+.mood-page .mg-particle-down {
+  fill: var(--mp-angry);
+}
+.mood-page .mg-particle[data-state="off"] {
+  opacity: 0;
+}
+
+/* hub */
+.mood-page .mg-hub-glow {
+  animation: mg-breathe 6s ease-in-out infinite;
+}
+.mood-page .mg-hub-ring {
+  fill: none;
+  stroke: color-mix(in oklab, var(--gold) 45%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  animation: mg-spin 48s linear infinite;
+}
+.mood-page .mg-hub-core {
+  stroke: color-mix(in oklab, var(--gold-soft) 60%, transparent);
+  stroke-width: 1;
+}
+.mood-page .mg-hub-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  fill: var(--background);
+  pointer-events: none;
+}
+.mood-page .mg-hub-sub {
+  font-size: 9.5px;
+  fill: color-mix(in oklab, var(--background) 75%, transparent);
+  pointer-events: none;
+}
+.mood-page .mg-hub[data-state="off"] {
+  opacity: 0.55;
+}
+
+/* satellites */
+.mood-page .mg-node {
+  transition: opacity 0.35s ease;
+}
+.mood-page .mg-node[data-state="off"] {
+  opacity: 0.22;
+}
+.mood-page .mg-node-halo {
+  fill: var(--mg-c);
+  opacity: 0;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.mood-page .mg-node:hover .mg-node-halo,
+.mood-page .mg-node:focus-visible .mg-node-halo,
+.mood-page .mg-node[data-state="on"] .mg-node-halo {
+  opacity: 0.18;
+  transform: scale(1.35);
+}
+.mood-page .mg-node-body {
+  fill: color-mix(in oklab, var(--mg-c) 18%, var(--surface));
+  stroke: color-mix(in oklab, var(--mg-c) 70%, transparent);
+  stroke-width: 1.2;
+  transition: fill 0.35s ease;
+}
+.mood-page .mg-node:hover .mg-node-body,
+.mood-page .mg-node[data-state="on"] .mg-node-body {
+  fill: color-mix(in oklab, var(--mg-c) 34%, var(--surface));
+}
+.mood-page .mg-node-emotion .mg-node-body {
+  stroke-dasharray: 2 3;
+}
+.mood-page .mg-node-dot {
+  fill: var(--mg-c);
+}
+.mood-page .mg-label {
+  font-size: 11px;
+  fill: var(--muted-foreground);
+  transition: fill 0.3s ease;
+  pointer-events: none;
+}
+.mood-page .mg-node-emotion .mg-label {
+  font-size: 10px;
+  font-style: italic;
+}
+.mood-page .mg-node:hover .mg-label,
+.mood-page .mg-node[data-state="on"] .mg-label {
+  fill: var(--foreground);
+}
+.mood-page .mg-empty {
+  font-size: 11px;
+  fill: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* the reading column */
+.mood-page .mg-reading {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  padding: 1.5rem;
+}
+
+@keyframes mg-breathe {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+@keyframes mg-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mood-page .mg-hub-glow,
+  .mood-page .mg-hub-ring {
+    animation: none;
+  }
+  .mood-page .mg-particles {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * App shell — the one piece of chrome every main page shares (Today,
+ * Trackers, Cycle, Mood, Rewards, Coach, Profile). A page opts in by adding
+ * `app-shell` to its wrapper and rendering <AppNav /> first; there is no
+ * separate top header any more. At lg the rail is *fixed* to the left edge of
+ * the viewport — exactly one screen tall, so it never scrolls with the page —
+ * and the wrapper pads for its width so the page's own <main> flows beside
+ * it. Below lg the rail is gone: a fixed brand bar sits on top (the wrapper
+ * pads for it too) with the tab bar at the bottom. Fixed rather than sticky
+ * because sticky quietly gives up inside any ancestor that scrolls or clips
+ * (body already hides overflow-x); fixed cannot be pinned to the page that
+ * way. Fixed atmospheres and overlays are out of flow, so they are untouched.
+ * See src/components/home/HomeSidebar.tsx.
+ * ------------------------------------------------------------------------- */
+.app-shell {
+  /* Heights of the phone brand bar and tab bar, and the rail's width; the bars
+     go to 0 once the rail takes over at lg. Anything a page pins to the bottom
+     of the viewport should add --app-bottom-nav to its offset. */
+  --app-top-bar: 60px;
+  --app-bottom-nav: 56px;
+  --app-rail: 0px;
+  padding-top: var(--app-top-bar);
+}
+.app-shell > .app-mobile-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  height: var(--app-top-bar);
+}
+@media (min-width: 64rem) {
+  .app-shell {
+    --app-top-bar: 0px;
+    --app-bottom-nav: 0px;
+    --app-rail: 220px;
+    padding-top: 0;
+    padding-left: var(--app-rail);
+  }
+  /* The rail: pinned to the left edge, top to bottom of the viewport — the
+     brand, the links and the botanical at the foot stay put however long the
+     page is and however far it is scrolled. */
+  .app-shell > .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--app-rail);
+    z-index: 2;
+  }
+  .app-shell > main {
+    min-width: 0;
+  }
+}
+
+/* The rail reads Bloom's base palette on every route — even inside pages
+   that retint the shared tokens (Rewards) — so it is identical everywhere. */
+.app-nav {
+  --background: oklch(0.19 0.021 279);
+  --surface: oklch(0.235 0.023 279);
+  --surface-2: oklch(0.272 0.026 279);
+  --surface-3: oklch(0.305 0.028 279);
+  --border: oklch(0.33 0.026 279);
+  --border-strong: oklch(0.4 0.03 279);
+  --foreground: oklch(0.955 0.008 85);
+  --muted-foreground: oklch(0.66 0.026 285);
+  --primary: oklch(0.7 0.107 297);
+  --radius: 1rem;
+  color: var(--foreground);
+}
+.app-sidebar {
+  background: color-mix(in oklab, var(--surface) 40%, var(--background));
+}
+.app-mobile-bar {
+  background: color-mix(in oklab, var(--surface) 55%, var(--background));
+  backdrop-filter: blur(16px);
+}
+.app-sidebar-rule {
+  background: linear-gradient(90deg, var(--border-strong), transparent);
+  opacity: 0.7;
+}
+/* The short gold hairlines around the rail's quote (from the mood model). */
+.app-sidebar-gold-rule {
+  background: color-mix(in oklab, var(--amber) 50%, transparent);
+}
+/* On short windows the quote gives way first, so the links and the identity
+   row at the foot never collide. */
+@media (max-height: 40rem) {
+  .app-sidebar-quote {
+    display: none;
+  }
+}
+.app-nav-link-active {
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* The botanical spans the whole rail: object-fit: cover keeps the photo's own
+   proportions (never stretched) and anchors it to the foot; at typical
+   viewport heights the 600×1200 source is scaled down, not up, so it stays
+   sharp. It dissolves upward into the panel so there is no seam. */
+.app-sidebar-botanical {
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 100%);
+}
+
+/* Bottom-anchored controls other pages already own sit above the tab bar
+   on phones instead of underneath it. (The trackers dock also sets its
+   offset inline, hence the !important.) */
+.app-shell .premium-action-dock {
+  bottom: calc(32px + var(--app-bottom-nav)) !important;
+}
+.app-shell .reward-toast {
+  bottom: calc(20px + var(--app-bottom-nav));
+}
+
+/* Floating "Add habit" on Today — clears the tab bar on phones. */
+.home-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + var(--app-bottom-nav, 0px));
+  z-index: 30;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
+    0 18px 50px -18px color-mix(in oklab, var(--violet) 80%, transparent);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease;
+}
+.home-fab:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--violet) 60%, transparent),
+    0 22px 56px -16px color-mix(in oklab, var(--violet) 90%, transparent);
+}
+@media (min-width: 40rem) {
+  .home-fab {
+    right: 1.5rem;
+    bottom: calc(1.5rem + var(--app-bottom-nav, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-fab,
+  .home-fab:hover {
+    transition: none;
+    transform: none;
+  }
 }

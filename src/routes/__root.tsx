@@ -11,6 +11,12 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { registerServiceWorker } from "@/hooks/useInstallPrompt";
+import { useSoundBoot } from "@/hooks/useSound";
+import { useAmbientSound } from "@/hooks/useAmbientSound";
+import { WelcomeGate } from "@/components/welcome/WelcomeGate";
+import { AdminBar } from "@/components/welcome/AdminBar";
+import { ConnectionNotice } from "@/components/system/ConnectionNotice";
 
 function NotFoundComponent() {
   return (
@@ -91,6 +97,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      /* B6 — installable: the phone needs a theme colour and a display hint */
+      { name: "theme-color", content: "#14151f" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Bloom" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -104,6 +116,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/bloom/icons/icon-192.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -129,10 +143,26 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  /* B6 — the offline shell. Registered after load, never blocking first paint. */
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
+  /* Sound: read the preference, and arm the audio context on the first gesture. */
+  useSoundBoot();
+  /* One delegated listener gives every control its cue — except on Rewards. */
+  useAmbientSound();
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      {/* First run only: covers the app until the person has told us who they are. */}
+      <WelcomeGate />
+      {/* Only in admin mode: shows you're in it, and lets you leave. */}
+      <AdminBar />
+      {/* Only when there is no database: says so, instead of failing silently. */}
+      <ConnectionNotice />
     </QueryClientProvider>
   );
 }

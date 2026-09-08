@@ -1474,6 +1474,119 @@
 /* the page rather than in a settings screen, because every chart above       */
 /* measures against them.                                                     */
 
+/* "What you track" — six switches above the targets. Off = kept, not counted. */
+.tk2-active {
+  margin: 0 0 1rem;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border: 1px dashed var(--tk2-rule);
+  border-radius: 10px;
+}
+
+.tk2-active-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.6rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.tk2-active-head span {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ci-text-mute);
+  opacity: 0.85;
+}
+
+.tk2-active-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tk2-active-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem 0.35rem 0.5rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ci-text-mute);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.tk2-active-toggle i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.tk2-active-toggle[data-on="true"] {
+  color: var(--ci-text);
+  border-color: var(--ci-text-soft);
+}
+
+.tk2-active-toggle[data-on="true"] i {
+  opacity: 1;
+}
+
+.tk2-active-list li[data-id="sleep"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-sleep);
+}
+.tk2-active-list li[data-id="water"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-water);
+}
+.tk2-active-list li[data-id="study"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-study);
+}
+.tk2-active-list li[data-id="movement"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-movement);
+}
+.tk2-active-list li[data-id="energy"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-energy);
+}
+.tk2-active-list li[data-id="screen"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-screen);
+}
+
+.tk2-active-toggle[data-on="false"] {
+  text-decoration: line-through;
+  text-decoration-color: var(--tk2-rule);
+}
+
+.tk2-active-toggle:hover:not(:disabled) {
+  color: var(--ci-text);
+}
+
+.tk2-active-toggle:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.tk2-active-toggle:focus-visible {
+  outline: 2px solid var(--ci-focus, var(--ci-text-soft));
+  outline-offset: 2px;
+}
+
+
 .tk2-targets-grid,
 .tk2-badges-grid {
   display: grid;

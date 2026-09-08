@@ -1,8 +1,9 @@
+import { memo } from "react";
 import type { Correlation } from "@/lib/mood/types";
 import { EvidencePill, Insufficient, Panel, SectionHead } from "./primitives";
 import { cn } from "@/lib/utils";
 
-export function Correlations({ correlations }: { correlations: Correlation[] }) {
+function CorrelationsImpl({ correlations }: { correlations: Correlation[] }) {
   const usable = correlations.filter((c) => c.evidence !== "insufficient");
 
   return (
@@ -51,7 +52,9 @@ export function Correlations({ correlations }: { correlations: Correlation[] }) 
                     }}
                   />
                 </div>
-                <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{c.statement}</p>
+                <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
+                  {c.statement}
+                </p>
               </div>
             );
           })}
@@ -63,3 +66,6 @@ export function Correlations({ correlations }: { correlations: Correlation[] }) 
     </Panel>
   );
 }
+
+/** Re-renders only when its own props change (not on every range switch). */
+export const Correlations = memo(CorrelationsImpl);
