@@ -14,6 +14,7 @@
  */
 
 import { AnimatePresence, motion } from "motion/react";
+import { useNavigate } from "@tanstack/react-router";
 
 import { Welcome } from "@/components/welcome/Welcome";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -22,6 +23,7 @@ import { setPref } from "@/lib/prefs";
 
 export function WelcomeGate() {
   const { needsWelcome, finish, skipAsAdmin } = useOnboarding();
+  const navigate = useNavigate();
 
   return (
     <AnimatePresence>
@@ -39,7 +41,12 @@ export function WelcomeGate() {
               if (suggested.length > 0) setPref("onboarding.suggestedTrackers", suggested);
               finish(answer);
             }}
-            onAdmin={skipAsAdmin}
+            onAdmin={(to) => {
+              /* Mark the mode first so the gate unmounts, then move — the
+                 other order navigates underneath a full-screen overlay. */
+              skipAsAdmin();
+              if (to !== "/") void navigate({ to });
+            }}
           />
         </motion.div>
       )}

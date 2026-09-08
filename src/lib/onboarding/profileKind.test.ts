@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_ONBOARDING,
+  isAdmin,
   isCycleRoute,
   parseOnboarding,
   suggestedTrackers,
@@ -97,5 +98,27 @@ describe("suggestedTrackers", () => {
   it("suggests nothing when nothing was chosen", () => {
     expect(suggestedTrackers([])).toEqual([]);
     expect(suggestedTrackers(["habits"])).toEqual([]);
+  });
+});
+
+describe("admin mode", () => {
+  it("is off by default", () => {
+    expect(isAdmin(DEFAULT_ONBOARDING)).toBe(false);
+  });
+
+  it("is on only for an explicit flag", () => {
+    expect(isAdmin(state({ admin: true }))).toBe(true);
+    expect(isAdmin(state({ admin: false }))).toBe(false);
+  });
+
+  it("survives a round trip through storage", () => {
+    /* the bar that lets you leave admin mode depends on this persisting */
+    const parsed = parseOnboarding({ done: true, admin: true, kind: "unspecified" });
+    expect(parsed && isAdmin(parsed)).toBe(true);
+  });
+
+  it("is not implied by having finished setup", () => {
+    const parsed = parseOnboarding({ done: true, kind: "cycle" });
+    expect(parsed && isAdmin(parsed)).toBe(false);
   });
 });

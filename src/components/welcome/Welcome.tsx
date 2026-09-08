@@ -28,6 +28,7 @@ import { ArrowLeft, ArrowRight, Check, Shield, Sparkles } from "lucide-react";
 
 import { useSound } from "@/hooks/useSound";
 import { FOCUS_LABEL, type FocusArea, type ProfileKind } from "@/lib/onboarding/profileKind";
+import { AdminPanel } from "@/components/welcome/AdminPanel";
 import heroWindow from "@/assets/mood/hero-window.jpg";
 import flowerBranch from "@/assets/mood/flower-branch.jpg";
 import candle from "@/assets/mood/candle.jpg";
@@ -73,10 +74,14 @@ const FOCUS_SUB: Record<FocusArea, string> = {
 
 export interface WelcomeProps {
   onFinish: (answer: { kind: ProfileKind; focus: FocusArea[]; name: string | null }) => void;
-  onAdmin: () => void;
+  /** Enter admin mode and navigate to `to`. */
+  onAdmin: (to: string) => void;
 }
 
 export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
+  /* The admin door opens a launcher rather than skipping straight in — see
+     AdminPanel for why picking a destination is the whole interaction. */
+  const [adminOpen, setAdminOpen] = useState(false);
   const reduced = useReducedMotion();
   const { sound } = useSound();
 
@@ -172,7 +177,16 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
               />
             ))}
           </div>
-          <button type="button" className="wl-skip" onClick={onAdmin}>
+          <button
+            type="button"
+            className="wl-skip"
+            onClick={() => {
+              sound("open");
+              setAdminOpen(true);
+            }}
+            aria-haspopup="dialog"
+            aria-expanded={adminOpen}
+          >
             <Shield size={12} style={{ display: "inline", marginRight: 6, marginTop: -2 }} />
             Launch as admin
           </button>
@@ -334,6 +348,12 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {adminOpen ? (
+          <AdminPanel onLaunch={onAdmin} onClose={() => setAdminOpen(false)} />
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

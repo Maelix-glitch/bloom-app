@@ -15,6 +15,7 @@ import { registerServiceWorker } from "@/hooks/useInstallPrompt";
 import { useSoundBoot } from "@/hooks/useSound";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
+import { AdminBar } from "@/components/welcome/AdminBar";
 
 function NotFoundComponent() {
   return (
@@ -157,6 +158,8 @@ function RootComponent() {
       <Outlet />
       {/* First run only: covers the app until the person has told us who they are. */}
       <WelcomeGate />
+      {/* Only in admin mode: shows you're in it, and lets you leave. */}
+      <AdminBar />
     </QueryClientProvider>
   );
 }

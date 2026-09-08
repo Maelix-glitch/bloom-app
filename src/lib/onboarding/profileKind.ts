@@ -29,7 +29,12 @@ export interface OnboardingState {
   name: string | null;
   /** ISO timestamp of the answer, so a later change wins across devices. */
   at: string | null;
-  /** Skipped via the admin door — everything on, nothing asked. */
+  /**
+   * Entered through the admin door. This is a *mode*, not a bookkeeping flag:
+   * it keeps the admin bar visible so there is always a way back out, and it
+   * marks that no real answers were given — so `setKind` from settings still
+   * behaves as a first answer rather than a change of mind.
+   */
   admin: boolean;
 }
 
@@ -86,6 +91,16 @@ export function parseOnboarding(raw: unknown): OnboardingState | null {
  * would be the wrong way round.
  */
 export const tracksCycle = (state: OnboardingState): boolean => state.kind !== "no-cycle";
+
+/**
+ * Is the app running in admin mode?
+ *
+ * Deliberately not a permission check — Bloom has no privileged data behind
+ * this, and the real reward admin has its own server-side rules. It only means
+ * "this person came in through the developer door", which the UI uses to keep
+ * an exit visible.
+ */
+export const isAdmin = (state: OnboardingState): boolean => state.admin === true;
 
 /** Routes that only make sense for someone tracking a cycle. */
 export const CYCLE_ROUTES = ["/cycle", "/cycle-classic", "/cycle-styles"];
