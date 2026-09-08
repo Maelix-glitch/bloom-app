@@ -37,3 +37,7 @@ dist-ssr
 .env.local
 .wrangler
 .tanstack
+
+# delivery kits are published as release assets, not committed
+docs/*/
+!docs/cleanup/
