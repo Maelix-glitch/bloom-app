@@ -1,0 +1,14 @@
+# Supabase project config for Bloom.
+#
+# `supabase link --project-ref ...` fills in `project_id` for you.
+# Find the ref in the dashboard: your project -> Settings -> General -> Reference ID.
+# This file holds NO secrets — keys live in Supabase's vault (supabase secrets set),
+# never here.
+project_id = "replace-with-your-project-ref"
+
+[functions.coach]
+# Deployed from supabase/functions/coach/index.ts with:
+#   supabase functions deploy coach
+# No Docker needed for this function (it has no npm dependencies); if the CLI
+# asks "Deploy without Docker? [Y/n]" just answer y.
+enabled = true
