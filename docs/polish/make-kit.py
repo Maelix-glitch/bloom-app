@@ -140,6 +140,10 @@ CHECKS = [
     ["src/hooks/useTypewriter.ts", "useTypewriter", "Coach · progressive reveal"],
     ["src/components/coach/ProviderPicker.tsx", "ProviderPicker", "Coach · model picker"],
     ["src/components/coach/CoachPage.tsx", "QUICK_PROMPT_POOL", "Coach · wider prompts"],
+    ["src/lib/coach/knowledge.ts", "export const KNOWLEDGE", "Coach · knowledge base (25 subjects)"],
+    ["src/lib/coach/compose.ts", "export function compose", "Coach · answer composer"],
+    ["src/lib/coach/engine.ts", "export function isGrounded", "Coach · no more empty-record refusal"],
+    ["src/lib/coach/breadth.test.ts", "breadth", "Coach · breadth regression tests"],
     ["supabase/functions/coach/index.ts", "COACH_MODEL", "Coach · edge function"],
     # the three bug fixes
     ["src/lib/prefsStore.ts", "useSyncExternalStore", "Fix · no flicker on tab change"],
@@ -274,7 +278,7 @@ if (process.exitCode) {
 Done. Next:
   1. Stop the dev server, then: npm run dev   \u2014 hard-refresh once (Ctrl+F5)
   2. No new migrations. No new packages.
-  3. Optional: npx vitest run   (332 tests / 29 files)
+  3. Optional: npx vitest run   (368 tests / 30 files)
 
   Seeing it:
     \u00b7 Welcome flow \u2014 it runs on first load. To see it again later:

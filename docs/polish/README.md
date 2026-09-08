@@ -1,6 +1,6 @@
 # Bloom — premium polish kit
 
-**63 files** (38 new, 25 changed). Everything since the Tier B part 2 kit.
+**66 files** (41 new, 25 changed). Everything since the Tier B part 2 kit.
 No new packages. No new migrations.
 
 ## Run it
@@ -26,9 +26,16 @@ Then: stop the dev server, `npm run dev`, and hard-refresh once (Ctrl+F5).
   (1.0 vs 1.04), so the photo snapped 4% larger at 1400ms. The swaying branch
   had no overscan, so its edge flashed. Both fixed.
 
-**The coach**
-- 30 recognised topics, up from 11. The "strictness" was never refusal logic —
-  it was that anything outside eleven trackers fell to a generic reply.
+**The coach — the strictness is actually fixed now**
+- The real cause: recognition and answering are different layers, and only the
+  first had been widened. A question detected as `study` was still handed to a
+  responder that could only read the study *tracker* — so with nothing logged
+  it replied "your record is empty" instead of answering.
+- It now has a knowledge base of 25 subjects that stand on their own with no
+  data at all: sleep, focus, burnout, food, caffeine, grief, loneliness, money,
+  relationships, motivation, confidence, the app itself, and more.
+- Your own data still leads when it exists; general knowledge becomes the
+  second paragraph rather than a substitute.
 - Answer length now matched to the question's shape.
 - Your Supabase edge function, with the on-device responder as fallback.
 - Model picker in the header; it shows an amber dot when a remote choice fell
@@ -51,7 +58,7 @@ profile photos, and the onboarding gate.
 - Anything you edited yourself is kept as `<name>__BEFORE__`.
 
 Verified by applying to a clean checkout at your last kit's commit: result is
-byte-identical to the branch, 332 tests pass, production build succeeds.
+byte-identical to the branch, 368 tests pass, production build succeeds.
 
 ## Removing it
 
