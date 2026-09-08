@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   AlertCircle,
   ArrowDown,
@@ -51,7 +51,6 @@ import { cn } from "@/lib/utils";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { pickStable } from "@/lib/voice/messages";
 import { todayKey } from "@/lib/cycle/predict";
-import { ProviderPicker } from "@/components/coach/ProviderPicker";
 import { buildCoachContext, type CoachHabitData } from "@/lib/coach/intelligence";
 
 interface Attachment {
@@ -110,7 +109,7 @@ const LENSES: Lens[] = [
 /*
  * The default prompts, and the widest signal the coach sends about what it can
  * talk about. Every one of these used to be about routines and patterns, which
- * taught people the coach only did two or three subjects — the suggestion chips
+ * taught people the coach only did two or three subjects â€” the suggestion chips
  * are read as a menu, not as examples.
  *
  * They now span the actual range: the record, the body, work and study, the
@@ -128,7 +127,7 @@ const QUICK_PROMPT_POOL = [
   "Is my caffeine wrecking my sleep?",
   /* work and study */
   "How do I focus when I can't settle?",
-  "I'm dreading tomorrow — help.",
+  "I'm dreading tomorrow â€” help.",
   /* the harder things */
   "I'm stressed and I don't know why.",
   "I've been feeling low lately.",
@@ -420,7 +419,7 @@ function BlockView({
             <div key={`${change.label}-${index}`}>
               <span>{change.label}</span>
               <small>
-                {change.from || "—"} → {change.to || "—"}
+                {change.from || "â€”"} â†’ {change.to || "â€”"}
               </small>
             </div>
           ))}
@@ -463,7 +462,7 @@ function MessageCard({
   message: CoachMessage;
   previewUrl: string | null | undefined;
   grouped?: boolean;
-  /** The newest coach reply — the only one that reveals itself. */
+  /** The newest coach reply â€” the only one that reveals itself. */
   fresh?: boolean;
   onCopy: () => void;
   onRetry: (() => void) | undefined;
@@ -475,7 +474,7 @@ function MessageCard({
   const reducedMotion = useReducedMotion();
   /*
    * Reveal the newest answer word by word. Scrolling back through the thread
-   * must never re-animate — history is text, not an event — so only `fresh`
+   * must never re-animate â€” history is text, not an event â€” so only `fresh`
    * messages animate, and anyone who asked for reduced motion gets the whole
    * answer at once.
    */
@@ -1233,7 +1232,7 @@ function EmptyConversation({
       <p className="eyebrow">Bloom Coach</p>
       <h2 className="display">Tell me what is on your mind.</h2>
       <p className="coach-empty-copy">
-        Sleep, focus, a rough week, work, the thing you keep putting off — ask about
+        Sleep, focus, a rough week, work, the thing you keep putting off â€” ask about
         any of it. I'll use what you've logged when it's relevant, and say so when
         there's nothing to go on.
       </p>
@@ -1290,8 +1289,6 @@ export function CoachPage() {
   /* Which reply should reveal itself. Set when one arrives, so a reload or a
      scroll back through history renders as plain text. */
   const [freshId, setFreshId] = useState<string | null>(null);
-  /* Which brain answered last, so the picker can admit to a fallback. */
-  const [lastSource, setLastSource] = useState<"edge" | "local" | undefined>(undefined);
   const [commandOpen, setCommandOpen] = useState(false);
   const commandModalRef = useRef<HTMLDivElement | null>(null);
   const commandCloseRef = useRef<HTMLButtonElement | null>(null);
@@ -1654,7 +1651,7 @@ export function CoachPage() {
      * No sign-in gate.
      *
      * This used to `return` when profileId was null, so a signed-out person
-     * pressed send and *nothing happened at all* — no answer, no error, the
+     * pressed send and *nothing happened at all* â€” no answer, no error, the
      * message just sat there. That was the "coach never responds" report.
      *
      * The gate never made sense: the coach answers on-device (engine.ts falls
@@ -1767,7 +1764,7 @@ export function CoachPage() {
       const paragraphs =
         response.paragraphs.length > 0
           ? response.paragraphs
-          : ["Sorry — I lost my train of thought there. Ask me again?"];
+          : ["Sorry â€” I lost my train of thought there. Ask me again?"];
       const coachMessage: CoachMessage = {
         id: `coach-${Date.now()}`,
         role: "coach",
@@ -1779,14 +1776,13 @@ export function CoachPage() {
         status: "sent",
       };
       setFreshId(coachMessage.id);
-      setLastSource(response.source);
       coach.setMessages((current) => [...current, coachMessage]);
       if (retry) {
         setDraft((current) => (current.trim() === text ? "" : current));
       }
       /*
        * Persisting is a bonus, not a precondition. Signed out there is no
-       * account to save to, and saying so on every message would be noise —
+       * account to save to, and saying so on every message would be noise â€”
        * the thread still lives in local storage either way.
        */
       if (coach.profileId) {
@@ -1805,7 +1801,7 @@ export function CoachPage() {
       }
     } catch (error) {
       /*
-       * A superseded request is not a failure — the person asked something
+       * A superseded request is not a failure â€” the person asked something
        * else and this answer is no longer wanted. Showing an error bubble for
        * it would be noise, so it's dropped. `finally` still clears the
        * thinking state, which is what stops the indicator hanging.
@@ -1956,7 +1952,7 @@ export function CoachPage() {
               <span className="coach-gradient-text">for your day.</span>
             </h1>
             <p className="mt-4 max-w-[54ch] text-[14px] leading-relaxed text-muted-foreground">
-              A place to ask, reflect, and decide what comes next — grounded in the signals you
+              A place to ask, reflect, and decide what comes next â€” grounded in the signals you
               choose to bring.
             </p>
           </div>
@@ -2036,12 +2032,11 @@ export function CoachPage() {
                     <span className={cn("coach-online-pill", thinking && "is-thinking")}>
                       <span /> {thinking ? "thinking" : "ready"}
                     </span>
-                    <ProviderPicker lastSource={lastSource} />
                   </div>
                   <p className="mt-0.5 flex min-w-0 items-center gap-1.5 truncate text-[11px] text-muted-foreground">
                     <ActiveLensIcon className="size-3 shrink-0" aria-hidden="true" />
                     <span className="truncate">
-                      {activeLens.label} · {activeLens.description}
+                      {activeLens.label} Â· {activeLens.description}
                     </span>
                   </p>
                 </div>
@@ -2067,7 +2062,7 @@ export function CoachPage() {
                   <div className="coach-loading-orb">
                     <span />
                   </div>
-                  <p className="eyebrow">Opening your private conversation…</p>
+                  <p className="eyebrow">Opening your private conversationâ€¦</p>
                 </div>
               ) : (
                 <>
@@ -2091,7 +2086,7 @@ export function CoachPage() {
                         message={message}
                         grouped={index > 0 && coach.messages[index - 1]?.role === message.role}
                         /* Only the last message, and only if it arrived this
-                           session — reopening the page must not replay it. */
+                           session â€” reopening the page must not replay it. */
                         fresh={index === coach.messages.length - 1 && message.id === freshId}
                         previewUrl={message.attachment ? previews[message.id] : undefined}
                         onCopy={() => void copyMessage(message)}
@@ -2124,7 +2119,7 @@ export function CoachPage() {
                       <span>
                         <Sparkles className="size-3" aria-hidden="true" /> Bloom
                       </span>
-                      <em>{responseSlow ? "taking a little longer…" : "thinking…"}</em>
+                      <em>{responseSlow ? "taking a little longerâ€¦" : "thinkingâ€¦"}</em>
                     </p>
                     <div className="coach-thinking-dots" aria-hidden="true">
                       <span />
@@ -2376,10 +2371,10 @@ export function CoachPage() {
                     </div>
                     <span className="coach-composer-hint" aria-live="polite">
                       {responseSlow
-                        ? "Bloom is taking a little longer…"
+                        ? "Bloom is taking a little longerâ€¦"
                         : thinking
-                          ? "Bloom is responding…"
-                          : "Enter to send · Shift + Enter for a new line"}
+                          ? "Bloom is respondingâ€¦"
+                          : "Enter to send Â· Shift + Enter for a new line"}
                     </span>
                   </div>
                 </form>

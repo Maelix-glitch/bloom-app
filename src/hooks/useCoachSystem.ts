@@ -1,11 +1,11 @@
-/**
- * useCoachSystem — the Coach page's data layer.
+﻿/**
+ * useCoachSystem â€” the Coach page's data layer.
  *
  * Reconstructed (the original never made it into git): session + thread +
  * approved memories persist to Supabase when the coach tables exist and fall
  * back to this device's storage otherwise, surfacing at most one calm notice.
  * `requestResponse` is a deterministic, context-grounded responder built on
- * `buildCoachContext`'s real numbers — it reads what actually happened and
+ * `buildCoachContext`'s real numbers â€” it reads what actually happened and
  * never invents facts, diagnoses, or moods. A model provider can be slotted
  * behind the same signature later without touching the page.
  */
@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { ask as askCoach } from "@/lib/coach/engine";
-import { activeProvider } from "@/lib/coach/providers";
+import { COACH_PROVIDER } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
 import { analyzeCycle, describeNextPeriod } from "@/lib/cycle/predict";
@@ -90,7 +90,7 @@ function writeJson(key: string, value: unknown): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* storage unavailable — state stays in memory */
+    /* storage unavailable â€” state stays in memory */
   }
 }
 
@@ -98,7 +98,7 @@ function writeJson(key: string, value: unknown): void {
  * Message content as text.
  *
  * The `coach_messages.content` column is written as a string here, but rows can
- * also come back as jsonb — a string, an array of parts, or an object with a
+ * also come back as jsonb â€” a string, an array of parts, or an object with a
  * `text` field. `String({})` used to render "[object Object]" in the thread, so
  * every shape is unwrapped here instead.
  */
@@ -130,9 +130,9 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
         ? error.message
         : "";
   if (/fetch|network|failed to fetch/i.test(raw))
-    return "You're offline — this reply stays on the device.";
+    return "You're offline â€” this reply stays on the device.";
   if (/relation|does not exist|schema cache|404/i.test(raw))
-    return "Coach storage isn't set up yet — everything stays on this device.";
+    return "Coach storage isn't set up yet â€” everything stays on this device.";
   return fallback ?? "Something went wrong on our end. Your words are safe on this device.";
 }
 
@@ -306,7 +306,7 @@ export function useCoachSystem() {
 
   /**
    * One request in flight at a time. Sending a second question abandons the
-   * first — the answer to a question you've moved on from is just noise, and
+   * first â€” the answer to a question you've moved on from is just noise, and
    * an edge function on a cold start can easily still be thinking.
    */
   const inFlight = useRef<AbortController | null>(null);
@@ -318,7 +318,7 @@ export function useCoachSystem() {
        * a time, and the answer to a question you have moved on from is noise.
        *
        * The controller is cleared when its own request finishes, so this only
-       * ever aborts a genuinely in-flight call — previously the reference
+       * ever aborts a genuinely in-flight call â€” previously the reference
        * lingered after completion, so under React StrictMode's double-invoke
        * a send could abort itself and come back with an empty answer.
        */
@@ -333,7 +333,7 @@ export function useCoachSystem() {
       /*
        * The engine tries the Supabase edge function and falls back to the
        * on-device responder by itself, so there is no error path to handle
-       * here — an answer always comes back.
+       * here â€” an answer always comes back.
        */
       let result;
       try {
@@ -349,7 +349,7 @@ export function useCoachSystem() {
               role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
               content: m.text ?? m.paragraphs.join("\n\n"),
             })),
-          provider: activeProvider().id,
+          provider: COACH_PROVIDER,
           signal: controller.signal,
         });
       } finally {
@@ -365,7 +365,7 @@ export function useCoachSystem() {
        */
       if (result.paragraphs.length === 0) {
         return {
-          paragraphs: ["Sorry — I lost my train of thought there. Ask me again?"],
+          paragraphs: ["Sorry â€” I lost my train of thought there. Ask me again?"],
           sources: [],
           blocks: [],
           source: result.source,
@@ -416,7 +416,7 @@ export function useCoachSystem() {
 }
 
 /* -------------------------------- the record ------------------------------- */
-/* The trackers page is optional — some installs run the coach without it — so
+/* The trackers page is optional â€” some installs run the coach without it â€” so
  * this reads the same localStorage keys directly rather than importing
  * `lib/trackers/*`. A missing folder then costs the coach a topic, not the
  * page. The formatting below mirrors core.ts so both pages quote a day the
@@ -551,7 +551,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
       personalMaxPlausible: settings.personalMaxPlausible,
       expecting: mode === "tracking",
     });
-    /* cycle tracking turned off → not a topic; the coach neither mentions nor prompts it */
+    /* cycle tracking turned off â†’ not a topic; the coach neither mentions nor prompts it */
     cycle =
       mode === "off"
         ? null
@@ -585,7 +585,7 @@ function readHabitData(): CoachHabitData {
     available: true,
     habits: habits
       .filter((h) => !h["archived"] && !h["completed"])
-      // a paused habit is off the table today — the coach shouldn't nag about it
+      // a paused habit is off the table today â€” the coach shouldn't nag about it
       .filter((h) => {
         const until = typeof h["pausedUntil"] === "string" ? h["pausedUntil"] : null;
         if (!until) return true;

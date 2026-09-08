@@ -1,7 +1,7 @@
-/**
+﻿/**
  * More than one AI, later.
  *
- * The requirement is "so I can add more AIs" — which in practice means the
+ * The requirement is "so I can add more AIs" â€” which in practice means the
  * choice of model must be *data*, not a branch buried in the send handler.
  * Every provider here is the same shape: an id, a name to show, and whether
  * it needs the network. The coach asks the registry which provider is active,
@@ -34,13 +34,13 @@ export const PROVIDERS: CoachProvider[] = [
   },
   {
     id: "apinex",
-    name: "Gemini 3.8 Flash — free",
+    name: "Gemini 3.8 Flash â€” free",
     blurb: "APInex free tier, via your Supabase function.",
     remote: true,
   },
   {
     id: "teamo",
-    name: "DeepSeek V4 Pro — free",
+    name: "DeepSeek V4 Pro â€” free",
     blurb: "TeamoRouter free tier, via your Supabase function.",
     remote: true,
   },
@@ -60,6 +60,9 @@ export const PROVIDERS: CoachProvider[] = [
 
 export const PROVIDER_PREF = "coach.provider";
 export const DEFAULT_PROVIDER = "bloom";
+
+/* The one model the coach always uses. Fixed on purpose - there is no picker. */
+export const COACH_PROVIDER = "apinex";
 
 const BY_ID = new Map(PROVIDERS.map((p) => [p.id, p]));
 
