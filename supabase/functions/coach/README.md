@@ -1,60 +1,77 @@
-# Coach edge function
+# Bloom Coach — Edge Function
 
-The remote brain for Bloom's coach. The app calls it through
-`supabase.functions.invoke("coach", …)` and **falls back to the on-device
-responder** whenever it is missing, cold, slow or erroring — so deploying this
-is an upgrade, never a dependency.
+Turns a question plus a *derived* view of the person's record into an answer.
+Never sees raw entries, stores nothing, and its failure mode is the client
+answering on-device instead.
 
 ## Deploy
 
 ```bash
 supabase functions deploy coach
+```
+
+## Secrets
+
+Set only the keys for the providers you actually want.
+
+```bash
+# APInex — one key, many models (Gemini, GPT, Claude, DeepSeek...)
+supabase secrets set APINEX_API_KEY=sk-apx...
+
+# Optional: OpenAI directly
 supabase secrets set OPENAI_API_KEY=sk-...
 ```
 
-Optional:
+Keys live here and only here. They are never in the client bundle, never in
+`.env`, and never committed — the client sends a provider *id*, and the
+function looks up which secret to read.
+
+## Providers
+
+| Picker entry | id | Secret | Model (override) |
+|---|---|---|---|
+| Gemini 3.8 Flash | `gemini` | `APINEX_API_KEY` | `gemini/3.8-flash` (`COACH_MODEL_GEMINI`) |
+| Gemini 3.8 Flash (free) | `gemini-free` | `APINEX_API_KEY` | `free/gemini-3.8-flash` (`COACH_MODEL_GEMINI_FREE`) |
+| OpenAI | `bloom` | `OPENAI_API_KEY` | `gpt-4o-mini` (`COACH_MODEL`) |
+| On this device | `local` | — | no network |
+
+Model ids are overridable from the Supabase dashboard, so when a gateway
+renames or retires one you can fix it without redeploying:
 
 ```bash
-supabase secrets set COACH_MODEL=gpt-4o-mini   # defaults to gpt-4o-mini
+supabase secrets set COACH_MODEL_GEMINI=gemini/3.1-pro
 ```
 
-If your function is deployed under a different name, point the app at it:
+## Adding another model
 
+APInex models are one entry, since the gateway is OpenAI-compatible:
+
+```ts
+kimi: {
+  env: "APINEX_API_KEY",
+  call: (key, messages) =>
+    openAICompatible(key, messages,
+      "https://api.apinex.bond/v1/chat/completions",
+      Deno.env.get("COACH_MODEL_KIMI") ?? "kimi/k3"),
+},
 ```
-VITE_COACH_FUNCTION=my-coach-name
+
+A different vendor's own API needs a bespoke `call` — the body shape, auth
+header and response parsing all differ.
+
+Either way, add a matching entry to `PROVIDERS` in
+`src/lib/coach/providers.ts` so it appears in the picker.
+`src/lib/coach/providers.test.ts` fails if the two tables disagree.
+
+## Checking it works
+
+```bash
+curl -X POST "https://<project>.supabase.co/functions/v1/coach" \
+  -H "Authorization: Bearer <anon key>" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"why am I tired?","provider":"gemini","register":"brief"}'
 ```
 
-## Contract
+A `200` with `{"paragraphs":[...]}` means it's live. Anything else and the app
+answers on-device — check the function logs in the dashboard.
 
-Request body:
-
-| field      | type                                   | meaning                                     |
-| ---------- | -------------------------------------- | ------------------------------------------- |
-| `message`  | string                                 | what was just asked                          |
-| `history`  | `{role, content}[]`                    | last 8 turns, oldest first                   |
-| `facts`    | object                                 | derived record — averages, streaks, phase    |
-| `provider` | string                                 | which model to use                           |
-| `register` | `terse\|brief\|normal\|full`           | how long the answer may be                   |
-| `topic`    | string                                 | what the client classified it as             |
-
-Response: `{ "paragraphs": string[], "provider": string }`. A plain
-`{ "reply": "…" }` or `{ "text": "…" }` is also accepted — the client splits it
-on blank lines.
-
-Anything non-2xx makes the app answer locally instead.
-
-## Privacy
-
-Only *derived* numbers are sent: per-tracker averages, goals, streaks, day
-counts, cycle phase, and any notes the person explicitly pinned. No raw
-entries, no check-in text, no history beyond the current conversation. Nothing
-is read from or written to the database here.
-
-## Adding another AI
-
-1. Add an entry to `PROVIDERS` in `index.ts` with its `env` key and a `call`
-   that returns plain text.
-2. Set the secret: `supabase secrets set ANTHROPIC_API_KEY=...`
-3. Add the matching entry to `PROVIDERS` in `src/lib/coach/providers.ts`.
-
-The picker in the app renders whatever is registered; no component changes.

@@ -105,33 +105,98 @@ const PROVIDERS: Record<
 > = {
   bloom: {
     env: "OPENAI_API_KEY",
-    call: async (key, messages) => {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-        body: JSON.stringify({
-          model: Deno.env.get("COACH_MODEL") ?? "gpt-4o-mini",
-          messages,
-          temperature: 0.7,
-          max_tokens: 700,
-        }),
-      });
-      if (!res.ok) throw new Error(`model ${res.status}: ${await res.text()}`);
-      const json = await res.json();
-      return json?.choices?.[0]?.message?.content ?? "";
-    },
+    call: (key, messages) =>
+      openAICompatible(
+        key,
+        messages,
+        Deno.env.get("COACH_BASE_URL") ?? "https://api.openai.com/v1/chat/completions",
+        Deno.env.get("COACH_MODEL") ?? "gpt-4o-mini",
+      ),
   },
   /*
-   * A second model is this shape:
+   * APInex — an OpenAI-compatible gateway, so one key reaches many models.
+   *
+   * Because the request and response shapes are identical to OpenAI's, these
+   * entries differ only by base URL and model id. That is the whole reason to
+   * prefer a gateway here: a genuinely new vendor (Anthropic's own API, or
+   * Gemini's) needs a bespoke `call` with a different body shape, different
+   * auth header, and different response parsing. These need none of that.
+   *
+   * The model id is overridable per provider so you can switch models from the
+   * Supabase dashboard without redeploying — useful when a gateway renames or
+   * retires one, which they do.
+   */
+  gemini: {
+    env: "APINEX_API_KEY",
+    call: (key, messages) =>
+      openAICompatible(
+        key,
+        messages,
+        "https://api.apinex.bond/v1/chat/completions",
+        Deno.env.get("COACH_MODEL_GEMINI") ?? "gemini/3.8-flash",
+      ),
+  },
+
+  /*
+   * Free tier on the same gateway and the same key. Worth having registered:
+   * it is the natural thing to fall back to if the paid balance runs dry, and
+   * it costs nothing to offer as a choice.
+   */
+  "gemini-free": {
+    env: "APINEX_API_KEY",
+    call: (key, messages) =>
+      openAICompatible(
+        key,
+        messages,
+        "https://api.apinex.bond/v1/chat/completions",
+        Deno.env.get("COACH_MODEL_GEMINI_FREE") ?? "free/gemini-3.8-flash",
+      ),
+  },
+
+  /*
+   * Adding another APInex model is one entry like the two above — only the id
+   * and the default model string change.
+   *
+   * A model on a DIFFERENT vendor's own API needs a bespoke `call`, because
+   * the body shape and auth differ:
    *
    * claude: {
    *   env: "ANTHROPIC_API_KEY",
    *   call: async (key, messages) => { ... return text; },
    * },
    *
-   * then add { id: "claude", ... } to PROVIDERS in src/lib/coach/providers.ts.
+   * Either way, also add a matching entry to PROVIDERS in
+   * src/lib/coach/providers.ts so it appears in the picker.
    */
 };
+
+/**
+ * One implementation for every OpenAI-compatible endpoint.
+ *
+ * Kept separate so a new gateway is a URL and a model id rather than another
+ * copy of the same fetch. The error text includes the response body because
+ * these gateways report the useful part — wrong model id, no balance, bad key
+ * — in the body, not the status.
+ */
+async function openAICompatible(
+  key: string,
+  messages: unknown[],
+  url: string,
+  model: string,
+): Promise<string> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 700 }),
+  });
+  if (!res.ok) throw new Error(`${model} ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  const json = await res.json();
+  const text = json?.choices?.[0]?.message?.content;
+  if (typeof text !== "string" || text.trim() === "") {
+    throw new Error(`${model} returned no content`);
+  }
+  return text;
+}
 
 /** Render the derived record as something a model reads well. */
 function factsToPrompt(facts: any): string {

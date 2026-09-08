@@ -27,21 +27,39 @@ export interface CoachProvider {
 
 export const PROVIDERS: CoachProvider[] = [
   {
+    id: "gemini",
+    name: "Gemini 3.8 Flash",
+    blurb: "Fast and inexpensive. The default when your function is deployed.",
+    remote: true,
+  },
+  {
+    id: "gemini-free",
+    name: "Gemini 3.8 Flash (free)",
+    blurb: "Same model on the free tier — slower, and rate limited.",
+    remote: true,
+  },
+  {
     id: "bloom",
-    name: "Bloom",
-    blurb: "Bloom's own coach, running on your Supabase function.",
+    name: "OpenAI",
+    blurb: "GPT, if you've set OPENAI_API_KEY on the function.",
     remote: true,
   },
   {
     id: "local",
     name: "On this device",
-    blurb: "No network. Answers only from what you've logged.",
+    blurb: "No network. Answers from what you've logged, plus Bloom's own knowledge.",
     remote: false,
   },
 ];
 
 export const PROVIDER_PREF = "coach.provider";
-export const DEFAULT_PROVIDER = "bloom";
+/*
+ * Gemini by default: it is the cheapest capable option and the one the
+ * function is configured for. If its key is missing the request fails and the
+ * engine answers on-device instead, so a wrong default degrades rather than
+ * breaks.
+ */
+export const DEFAULT_PROVIDER = "gemini";
 
 const BY_ID = new Map(PROVIDERS.map((p) => [p.id, p]));
 
