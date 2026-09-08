@@ -1,6 +1,6 @@
 # Bloom — premium polish kit
 
-**66 files** (41 new, 25 changed). Everything since the Tier B part 2 kit.
+**76 files** (45 new, 31 changed). Everything since the Tier B part 2 kit.
 No new packages. No new migrations.
 
 ## Run it
@@ -13,6 +13,24 @@ node "C:\Users\Windows 11 Pro\OneDrive\Desktop\bloom-polish\bloom-polish\apply-p
 If the folder isn't double-nested, drop one `bloom-polish` level.
 
 Then: stop the dev server, `npm run dev`, and hard-refresh once (Ctrl+F5).
+
+## IMPORTANT — do this too, or nothing will save
+
+Your repo has no `.env`, which is why the magic link never sent and habits
+wouldn't save. This kit ships `.env.example`. Copy it to `.env` and fill in
+the two values from **Supabase Dashboard -> Project Settings -> API**:
+
+```
+VITE_SUPABASE_URL=https://your-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
+```
+
+Then **restart the dev server** — Vite only reads env files at startup, so
+editing one while it runs does nothing.
+
+Also confirm all 10 files in `supabase/migrations/` have run, in filename
+order. A missing `habits` table produces the same "can't load" message for a
+completely different reason.
 
 ## What's in it
 
@@ -58,7 +76,7 @@ profile photos, and the onboarding gate.
 - Anything you edited yourself is kept as `<name>__BEFORE__`.
 
 Verified by applying to a clean checkout at your last kit's commit: result is
-byte-identical to the branch, 368 tests pass, production build succeeds.
+byte-identical to the branch, 377 tests pass, production build succeeds.
 
 ## Removing it
 

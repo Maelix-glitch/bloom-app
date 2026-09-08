@@ -151,6 +151,18 @@ CHECKS = [
     ["src/hooks/useCycleMode.ts", "useSyncExternalStore", "Fix · cycle mode reads the cache"],
     ["src/hooks/useRailIdentity.ts", "cachedIdentity", "Fix · rail identity cached"],
     ["src/styles/mood-motion.css", "scale(1.06)", "Fix · mood image pinch"],
+    # the connection fix — why nothing was saving
+    ["src/lib/supabase.ts", "export function watchAuth", "Fix · safe auth subscription"],
+    ["src/lib/supabase.ts", "supabaseConfigProblem", "Fix · readable reason for no database"],
+    ["src/lib/supabase.ts", "sb-${projectRef", "Fix · session key derived from your project"],
+    ["src/hooks/useHabits.ts", "watchAuth", "Fix · habits load without a crash"],
+    ["src/hooks/useCycleSystem.ts", "watchAuth", "Fix · cycle loads without a crash"],
+    ["src/hooks/useProfileSpace.ts", "supabaseConfigProblem", "Fix · magic link reports the truth"],
+    ["src/components/profile/SignedOutProfile.tsx", "setState(\"failed\")", "Fix · sign-in button never hangs"],
+    ["src/components/system/ConnectionNotice.tsx", "Saving to this device only", "Fix · visible offline notice"],
+    ["src/routes/__root.tsx", "ConnectionNotice", "Fix · notice mounted"],
+    ["src/lib/supabase.guard.test.ts", "onAuthStateChange is never called unguarded", "Fix · guard audit test"],
+    [".env.example", "VITE_SUPABASE_URL", "Setup · env template"],
 ]
 
 script = r'''#!/usr/bin/env node
@@ -278,7 +290,7 @@ if (process.exitCode) {
 Done. Next:
   1. Stop the dev server, then: npm run dev   \u2014 hard-refresh once (Ctrl+F5)
   2. No new migrations. No new packages.
-  3. Optional: npx vitest run   (368 tests / 30 files)
+  3. Optional: npx vitest run   (377 tests / 31 files)
 
   Seeing it:
     \u00b7 Welcome flow \u2014 it runs on first load. To see it again later:
