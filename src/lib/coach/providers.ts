@@ -33,6 +33,24 @@ export const PROVIDERS: CoachProvider[] = [
     remote: true,
   },
   {
+    id: "apinex",
+    name: "Gemini 3.8 Flash — free",
+    blurb: "APInex free tier, via your Supabase function.",
+    remote: true,
+  },
+  {
+    id: "teamo",
+    name: "DeepSeek V4 Pro — free",
+    blurb: "TeamoRouter free tier, via your Supabase function.",
+    remote: true,
+  },
+  {
+    id: "hf",
+    name: "Hugging Face",
+    blurb: "Whatever model you pointed HF_MODEL at.",
+    remote: true,
+  },
+  {
     id: "local",
     name: "On this device",
     blurb: "No network. Answers only from what you've logged.",
