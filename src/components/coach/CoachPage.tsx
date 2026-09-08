@@ -1756,11 +1756,20 @@ export function CoachPage() {
         attachment: filePayload,
       });
       if (!mountedRef.current || profileIdRef.current !== requestProfileId) return;
+      /*
+       * Defence in depth: an empty paragraph list renders as a blank bubble,
+       * which reads exactly like the coach hanging. The hook guarantees this
+       * can't be empty; this makes it impossible.
+       */
+      const paragraphs =
+        response.paragraphs.length > 0
+          ? response.paragraphs
+          : ["Sorry — I lost my train of thought there. Ask me again?"];
       const coachMessage: CoachMessage = {
         id: `coach-${Date.now()}`,
         role: "coach",
         time: new Date().toISOString(),
-        paragraphs: response.paragraphs,
+        paragraphs,
         sources: response.sources,
         blocks: response.blocks,
         attachment: undefined,
@@ -1785,6 +1794,15 @@ export function CoachPage() {
         setComposerNotice("Your conversation couldn't be saved right now.");
       }
     } catch (error) {
+      /*
+       * A superseded request is not a failure — the person asked something
+       * else and this answer is no longer wanted. Showing an error bubble for
+       * it would be noise, so it's dropped. `finally` still clears the
+       * thinking state, which is what stops the indicator hanging.
+       */
+      if (error instanceof Error && error.name === "CoachCancelled") {
+        return;
+      }
       console.error("Coach response failed:", error);
       const userFacingError = coachErrorMessage(
         error,

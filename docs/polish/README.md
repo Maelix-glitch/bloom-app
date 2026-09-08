@@ -1,0 +1,85 @@
+# Bloom — premium polish kit
+
+**76 files** (45 new, 31 changed). Everything since the Tier B part 2 kit.
+No new packages. No new migrations.
+
+## Run it
+
+```powershell
+cd "C:\Users\Windows 11 Pro\Documents\trae_projects\bloom-app\chronos-feel"
+node "C:\Users\Windows 11 Pro\OneDrive\Desktop\bloom-polish\bloom-polish\apply-polish.mjs" .
+```
+
+If the folder isn't double-nested, drop one `bloom-polish` level.
+
+Then: stop the dev server, `npm run dev`, and hard-refresh once (Ctrl+F5).
+
+## IMPORTANT — do this too, or nothing will save
+
+Your repo has no `.env`, which is why the magic link never sent and habits
+wouldn't save. This kit ships `.env.example`. Copy it to `.env` and fill in
+the two values from **Supabase Dashboard -> Project Settings -> API**:
+
+```
+VITE_SUPABASE_URL=https://your-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
+```
+
+Then **restart the dev server** — Vite only reads env files at startup, so
+editing one while it runs does nothing.
+
+Also confirm all 10 files in `supabase/migrations/` have run, in filename
+order. A missing `habits` table produces the same "can't load" message for a
+completely different reason.
+
+## What's in it
+
+**The three bugs you hit**
+- Tab-change flicker with Cycle briefly visible. `AppNav` is mounted per route,
+  so every navigation remounted the sidebar and its hooks restarted from their
+  defaults — painting the wrong nav for one frame. Now cached at module level.
+- The lag itself: that same remount re-ran a session check, a profile query and
+  a full prefs sync on every tab change. Now fetched once and shared.
+- The mood image pinch: two animations disagreed about scale at the handover
+  (1.0 vs 1.04), so the photo snapped 4% larger at 1400ms. The swaying branch
+  had no overscan, so its edge flashed. Both fixed.
+
+**The coach — the strictness is actually fixed now**
+- The real cause: recognition and answering are different layers, and only the
+  first had been widened. A question detected as `study` was still handed to a
+  responder that could only read the study *tracker* — so with nothing logged
+  it replied "your record is empty" instead of answering.
+- It now has a knowledge base of 25 subjects that stand on their own with no
+  data at all: sleep, focus, burnout, food, caffeine, grief, loneliness, money,
+  relationships, motivation, confidence, the app itself, and more.
+- Your own data still leads when it exists; general knowledge becomes the
+  second paragraph rather than a substitute.
+- Answer length now matched to the question's shape.
+- Your Supabase edge function, with the on-device responder as fallback.
+- Model picker in the header; it shows an amber dot when a remote choice fell
+  back to the device rather than degrading silently.
+- Answers reveal progressively instead of landing as a wall of text.
+
+**Launch as admin** — rebuilt from a ghost link into a real launcher. Twelve
+destinations including the design pages nothing links to. Type to filter,
+arrows to move, enter to go. An amber bar bottom-left marks admin mode and
+exits it (which brings the welcome flow back).
+
+**Also** — rotating copy so nothing repeats, app-wide sound (silent on Rewards),
+motion primitives, the premium cycle palette, finished popup edges, preset
+profile photos, and the onboarding gate.
+
+## Safety
+
+- Refuses to run if your checkout is behind, and writes nothing in that case.
+- Idempotent — running twice is a no-op.
+- Anything you edited yourself is kept as `<name>__BEFORE__`.
+
+Verified by applying to a clean checkout at your last kit's commit: result is
+byte-identical to the branch, 377 tests pass, production build succeeds.
+
+## Removing it
+
+Not committed yet: `git checkout -- .` then delete the new files
+(`git clean -fd src supabase`).
+Committed: `git revert` the commit, or `git reset --hard <commit before>`.
