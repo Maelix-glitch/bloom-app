@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   AlertCircle,
   ArrowDown,
@@ -106,22 +106,38 @@ const LENSES: Lens[] = [
   },
 ];
 
+/*
+ * The default prompts, and the widest signal the coach sends about what it can
+ * talk about. Every one of these used to be about routines and patterns, which
+ * taught people the coach only did two or three subjects â€” the suggestion chips
+ * are read as a menu, not as examples.
+ *
+ * They now span the actual range: the record, the body, work and study, the
+ * harder human things, and the app itself. Drawn from a pool so the row isn't
+ * identical every visit.
+ */
 const QUICK_PROMPT_POOL = [
+  /* the record */
   "What should I protect today?",
   "Help me make sense of this week.",
   "What's my sleep actually doing?",
   "Where am I losing consistency?",
+  /* the body */
   "Why do I keep crashing in the afternoon?",
   "Is my caffeine wrecking my sleep?",
+  /* work and study */
   "How do I focus when I can't settle?",
-  "I'm dreading tomorrow — help.",
+  "I'm dreading tomorrow â€” help.",
+  /* the harder things */
   "I'm stressed and I don't know why.",
   "I've been feeling low lately.",
   "Everything feels like too much.",
+  /* the app */
   "What can you actually help with?",
   "How do I export my data?",
 ];
 
+/** Three prompts, rotated so the row isn't the same on every visit. */
 function defaultPrompts(): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -403,7 +419,7 @@ function BlockView({
             <div key={`${change.label}-${index}`}>
               <span>{change.label}</span>
               <small>
-                {change.from || "—"} → {change.to || "—"}
+                {change.from || "â€”"} â†’ {change.to || "â€”"}
               </small>
             </div>
           ))}
@@ -446,6 +462,7 @@ function MessageCard({
   message: CoachMessage;
   previewUrl: string | null | undefined;
   grouped?: boolean;
+  /** The newest coach reply â€” the only one that reveals itself. */
   fresh?: boolean;
   onCopy: () => void;
   onRetry: (() => void) | undefined;
@@ -455,10 +472,15 @@ function MessageCard({
 }) {
   const isCoach = message.role === "coach";
   const reducedMotion = useReducedMotion();
+  /*
+   * Reveal the newest answer word by word. Scrolling back through the thread
+   * must never re-animate â€” history is text, not an event â€” so only `fresh`
+   * messages animate, and anyone who asked for reduced motion gets the whole
+   * answer at once.
+   */
   const typed = useTypewriter(message.paragraphs, isCoach && fresh && !reducedMotion);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [copyState, setCopyState] = useState<"idle" | "copying" | "copied">("idle");
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -479,12 +501,6 @@ function MessageCard({
     };
   }, [moreOpen]);
 
-  const handleCopy = () => {
-    onCopy();
-    setCopyState("copied");
-    window.setTimeout(() => setCopyState("idle"), 2000);
-  };
-
   return (
     <article
       className={cn(
@@ -493,7 +509,7 @@ function MessageCard({
         grouped && "coach-message-grouped",
         message.status === "error" && "coach-message-error",
       )}
-      aria-label={`${isCoach ? "Bloom" : "You"} message`}
+      aria-label={`${isCoach ? "Bloom" : "Your"} message`}
     >
       <div
         className={cn("coach-message-avatar", isCoach ? "coach-avatar-coach" : "coach-avatar-user")}
@@ -522,6 +538,7 @@ function MessageCard({
               ))
             : null}
           {typed.running ? (
+            /* Anyone who reads faster than the reveal can end it. */
             <button
               type="button"
               className="coach-skip-reveal"
@@ -582,21 +599,8 @@ function MessageCard({
         </div>
         {isCoach && message.status !== "error" ? (
           <div className="coach-message-actions">
-            <button
-              type="button"
-              onClick={handleCopy}
-              title="Copy response"
-              className={copyState === "copied" ? "copied" : ""}
-            >
-              {copyState === "copied" ? (
-                <>
-                  <Check className="size-3" aria-hidden="true" /> Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="size-3" aria-hidden="true" /> Copy
-                </>
-              )}
+            <button type="button" onClick={onCopy} title="Copy response">
+              <Copy className="size-3" aria-hidden="true" /> Copy
             </button>
             <button
               type="button"
@@ -1228,8 +1232,9 @@ function EmptyConversation({
       <p className="eyebrow">Bloom Coach</p>
       <h2 className="display">Tell me what is on your mind.</h2>
       <p className="coach-empty-copy">
-        Sleep, focus, a rough week, work, the thing you keep putting off - ask about any of it. I'll
-        use what you've logged when it's relevant, and say so when there's nothing to go on.
+        Sleep, focus, a rough week, work, the thing you keep putting off â€” ask about
+        any of it. I'll use what you've logged when it's relevant, and say so when
+        there's nothing to go on.
       </p>
       <div className="coach-empty-modes" aria-label="Choose how to approach this">
         {LENSES.map((lens) => (
@@ -1259,8 +1264,8 @@ function EmptyConversation({
         ))}
       </div>
       <p className="coach-empty-private">
-        <ShieldCheck className="size-3.5 text-sage" /> Only the context you choose to keep can
-        shape a future response.
+        <ShieldCheck className="size-3.5 text-sage" /> Only the context you choose to keep can shape
+        a future response.
       </p>
     </div>
   );
@@ -1281,6 +1286,8 @@ export function CoachPage() {
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [responseSlow, setResponseSlow] = useState(false);
   const [thinking, setThinking] = useState(false);
+  /* Which reply should reveal itself. Set when one arrives, so a reload or a
+     scroll back through history renders as plain text. */
   const [freshId, setFreshId] = useState<string | null>(null);
   const [commandOpen, setCommandOpen] = useState(false);
   const commandModalRef = useRef<HTMLDivElement | null>(null);
@@ -1640,7 +1647,19 @@ export function CoachPage() {
   const send = async (event?: FormEvent, retry?: FailedRequest) => {
     event?.preventDefault();
     const retryText = retry?.text ?? draft;
-
+    /*
+     * No sign-in gate.
+     *
+     * This used to `return` when profileId was null, so a signed-out person
+     * pressed send and *nothing happened at all* â€” no answer, no error, the
+     * message just sat there. That was the "coach never responds" report.
+     *
+     * The gate never made sense: the coach answers on-device (engine.ts falls
+     * back to the local responder), so an account is only needed to *persist*
+     * the thread. Refusing to think because we can't save the transcript is
+     * backwards. Answering works signed-out; saving is attempted only when
+     * there is somewhere to save to.
+     */
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       setComposerNotice("You're offline right now.");
       return;
@@ -1737,10 +1756,15 @@ export function CoachPage() {
         attachment: filePayload,
       });
       if (!mountedRef.current || profileIdRef.current !== requestProfileId) return;
+      /*
+       * Defence in depth: an empty paragraph list renders as a blank bubble,
+       * which reads exactly like the coach hanging. The hook guarantees this
+       * can't be empty; this makes it impossible.
+       */
       const paragraphs =
         response.paragraphs.length > 0
           ? response.paragraphs
-          : ["Sorry - I lost my train of thought there. Ask me again?"];
+          : ["Sorry â€” I lost my train of thought there. Ask me again?"];
       const coachMessage: CoachMessage = {
         id: `coach-${Date.now()}`,
         role: "coach",
@@ -1756,7 +1780,11 @@ export function CoachPage() {
       if (retry) {
         setDraft((current) => (current.trim() === text ? "" : current));
       }
-
+      /*
+       * Persisting is a bonus, not a precondition. Signed out there is no
+       * account to save to, and saying so on every message would be noise â€”
+       * the thread still lives in local storage either way.
+       */
       if (coach.profileId) {
         try {
           const saved = await Promise.all([
@@ -1772,6 +1800,12 @@ export function CoachPage() {
         }
       }
     } catch (error) {
+      /*
+       * A superseded request is not a failure â€” the person asked something
+       * else and this answer is no longer wanted. Showing an error bubble for
+       * it would be noise, so it's dropped. `finally` still clears the
+       * thinking state, which is what stops the indicator hanging.
+       */
       if (error instanceof Error && error.name === "CoachCancelled") {
         return;
       }
@@ -1823,6 +1857,7 @@ export function CoachPage() {
     const text = message.paragraphs.join("\n\n");
     try {
       await navigator.clipboard.writeText(text);
+      setComposerNotice("Response copied to clipboard.");
     } catch {
       setComposerNotice("Copy is unavailable in this browser.");
     }
@@ -1908,7 +1943,7 @@ export function CoachPage() {
             <p className="eyebrow flex items-center gap-2">
               <span className="coach-live-dot">
                 <span />
-              </span>
+              </span>{" "}
               Bloom Coach
             </p>
             <h1 className="display mt-4 text-[34px] leading-[1] sm:text-[48px]">
@@ -1917,7 +1952,7 @@ export function CoachPage() {
               <span className="coach-gradient-text">for your day.</span>
             </h1>
             <p className="mt-4 max-w-[54ch] text-[14px] leading-relaxed text-muted-foreground">
-              A place to ask, reflect, and decide what comes next - grounded in the signals you
+              A place to ask, reflect, and decide what comes next â€” grounded in the signals you
               choose to bring.
             </p>
           </div>
@@ -2001,7 +2036,7 @@ export function CoachPage() {
                   <p className="mt-0.5 flex min-w-0 items-center gap-1.5 truncate text-[11px] text-muted-foreground">
                     <ActiveLensIcon className="size-3 shrink-0" aria-hidden="true" />
                     <span className="truncate">
-                      {activeLens.label} · {activeLens.description}
+                      {activeLens.label} Â· {activeLens.description}
                     </span>
                   </p>
                 </div>
@@ -2027,7 +2062,7 @@ export function CoachPage() {
                   <div className="coach-loading-orb">
                     <span />
                   </div>
-                  <p className="eyebrow">Opening your private conversation...</p>
+                  <p className="eyebrow">Opening your private conversationâ€¦</p>
                 </div>
               ) : (
                 <>
@@ -2050,6 +2085,8 @@ export function CoachPage() {
                         key={message.id}
                         message={message}
                         grouped={index > 0 && coach.messages[index - 1]?.role === message.role}
+                        /* Only the last message, and only if it arrived this
+                           session â€” reopening the page must not replay it. */
                         fresh={index === coach.messages.length - 1 && message.id === freshId}
                         previewUrl={message.attachment ? previews[message.id] : undefined}
                         onCopy={() => void copyMessage(message)}
@@ -2082,7 +2119,7 @@ export function CoachPage() {
                       <span>
                         <Sparkles className="size-3" aria-hidden="true" /> Bloom
                       </span>
-                      <em>{responseSlow ? "taking a little longer..." : "thinking..."}</em>
+                      <em>{responseSlow ? "taking a little longerâ€¦" : "thinkingâ€¦"}</em>
                     </p>
                     <div className="coach-thinking-dots" aria-hidden="true">
                       <span />
@@ -2334,10 +2371,10 @@ export function CoachPage() {
                     </div>
                     <span className="coach-composer-hint" aria-live="polite">
                       {responseSlow
-                        ? "Bloom is taking a little longer..."
+                        ? "Bloom is taking a little longerâ€¦"
                         : thinking
-                          ? "Bloom is responding..."
-                          : "Enter to send · Shift + Enter for a new line"}
+                          ? "Bloom is respondingâ€¦"
+                          : "Enter to send Â· Shift + Enter for a new line"}
                     </span>
                   </div>
                 </form>
