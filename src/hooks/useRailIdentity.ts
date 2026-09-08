@@ -39,12 +39,47 @@ type Row = {
   bio: string | null;
 };
 
+/*
+ * The rail is rendered by every route rather than by a shared layout, so it
+ * unmounts and remounts on every tab change. Without a cache that meant each
+ * navigation re-ran getSession(), a profiles query and a prefs sync, and the
+ * avatar dropped back to "checking" until they returned — the lag and flicker
+ * on switching tabs.
+ *
+ * One module-level record, shared by every mount and kept between them. The
+ * effect below still runs once per mount to subscribe to auth changes, but it
+ * only *fetches* if nothing has been loaded yet.
+ */
+let cachedIdentity: RailIdentity | null = null;
+/** Which user id the prefs document was last synced for. */
+let syncedFor: string | null | undefined = undefined;
+const identityListeners = new Set<(next: RailIdentity) => void>();
+
+function publishIdentity(next: RailIdentity): void {
+  cachedIdentity = next;
+  for (const l of identityListeners) l(next);
+}
+
+/** Forget the cached rail identity (sign-out, "erase everything", tests). */
+export function resetRailIdentity(): void {
+  cachedIdentity = null;
+  syncedFor = undefined;
+}
+
 export function useRailIdentity(): RailIdentity {
-  const [identity, setIdentity] = useState<RailIdentity>({ ...SIGNED_OUT, status: "checking" });
+  const [identity, setIdentity] = useState<RailIdentity>(
+    () => cachedIdentity ?? { ...SIGNED_OUT, status: "checking" },
+  );
+
+  useEffect(() => {
+    /* Every mount listens, so one fetch updates all of them. */
+    identityListeners.add(setIdentity);
+    return () => void identityListeners.delete(setIdentity);
+  }, []);
 
   useEffect(() => {
     if (!hasSupabaseConfig) {
-      setIdentity(SIGNED_OUT);
+      publishIdentity(SIGNED_OUT);
       return;
     }
 
@@ -59,12 +94,12 @@ export function useRailIdentity(): RailIdentity {
         .maybeSingle();
       if (!alive) return;
       if (error || !data) {
-        setIdentity({ ...SIGNED_OUT, status: "signed-in" });
+        publishIdentity({ ...SIGNED_OUT, status: "signed-in" });
         return;
       }
       const row = data as Row;
       const name = row.display_name?.trim() || null;
-      setIdentity({
+      publishIdentity({
         status: "signed-in",
         displayName: name && name !== "Bloom User" ? name : null,
         avatarPath: row.avatar_path,
@@ -75,19 +110,35 @@ export function useRailIdentity(): RailIdentity {
 
     function apply(uid: string | null) {
       userId = uid;
-      /* the rail is on every page, so this is where device preferences
-         (goals, active trackers, subjects, flow times) meet the account */
-      void syncPrefs(uid);
+      /*
+       * The rail is on every page, so this is where device preferences
+       * (goals, active trackers, subjects, flow times) meet the account.
+       *
+       * Guarded by user id: onAuthStateChange fires on every remount as well
+       * as on real sign-in/out, and re-syncing prefs on each tab change was
+       * pure waste — a round trip and a write for a user who hasn't changed.
+       */
+      if (syncedFor !== uid) {
+        syncedFor = uid;
+        void syncPrefs(uid);
+      }
       if (!uid) {
-        setIdentity(SIGNED_OUT);
+        publishIdentity(SIGNED_OUT);
         return;
       }
       void read(uid);
     }
 
-    void supabase.auth.getSession().then(({ data }) => {
-      if (alive) apply(data.session?.user.id ?? null);
-    });
+    /*
+     * Only reach for the network when we have nothing. A remount with a warm
+     * cache still subscribes to auth changes below, but shows the known
+     * identity immediately instead of blanking to "checking".
+     */
+    if (cachedIdentity === null) {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (alive) apply(data.session?.user.id ?? null);
+      });
+    }
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
