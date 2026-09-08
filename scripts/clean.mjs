@@ -135,15 +135,25 @@ const TARGETS = [
  * Things that LOOK like clutter but are load-bearing. Listed so nobody
  * "tidies" them later, and asserted below so the list can't rot.
  */
+/*
+ * `required: true` means the app genuinely depends on it, so its absence is a
+ * sign the repo isn't what this script expects and we should stop.
+ *
+ * Everything else is merely "don't delete this if you have it". Delivery
+ * folders and working notes fall here: the kits deliberately exclude docs/,
+ * so a checkout that was updated via a kit will not have docs/polish at all.
+ * Treating that as fatal was wrong — it blocked the script on a perfectly
+ * healthy repo.
+ */
 const KEEP = [
-  ["public/bloom/icons", "PWA + notification icons. Referenced by the manifest and useReminders."],
-  ["public/bloom/bloom-add-habit-modal-v3-latest.html", "The reference the React AddHabitModal was ported from; its CSS is quoted in add-habit-modal.css."],
-  ["public/rewards/medals", "30 medal images used by the rewards admin."],
-  ["public/manifest.webmanifest", "The app's real manifest."],
-  ["public/sw.js", "The app's real service worker."],
-  ["public/favicon.ico", "Favicon."],
+  ["public/bloom/icons", "PWA + notification icons. Referenced by the manifest and useReminders.", { required: true }],
+  ["public/bloom/bloom-add-habit-modal-v3-latest.html", "The reference the React AddHabitModal was ported from; its CSS is quoted in add-habit-modal.css.", { required: true }],
+  ["public/rewards/medals", "30 medal images used by the rewards admin.", { required: true }],
+  ["public/manifest.webmanifest", "The app's real manifest.", { required: true }],
+  ["public/sw.js", "The app's real service worker.", { required: true }],
+  ["public/favicon.ico", "Favicon.", { required: true }],
   ["public/robots.txt", "Crawler rules."],
-  ["docs/polish", "The current delivery kit."],
+  ["docs/polish", "The current delivery kit, if you have one."],
   ["README.md", "The repo's readme."],
   ["AGENTS.md", "Working notes for agents on this repo."],
   [".env.example", "Template for the Supabase config."],
@@ -194,9 +204,14 @@ function verify() {
     for (const f of live) console.log(c.dim(`        ${f}`));
   }
 
-  /* Everything on the keep-list must actually exist. */
-  for (const [p] of KEEP) {
-    if (!exists(p)) problems.push(`keep-list entry is missing: ${p}`);
+  /*
+   * Only the load-bearing entries are fatal. A missing optional entry just
+   * means you don't have that folder, which is normal.
+   */
+  for (const [p, , opts] of KEEP) {
+    if (opts?.required && !exists(p)) {
+      problems.push(`something the app needs is already missing: ${p}`);
+    }
   }
 
   return problems;
@@ -291,7 +306,10 @@ for (const t of TARGETS) {
 }
 
 console.log(c.bold(`\n  kept (in use — do not remove)`));
-for (const [p, why] of KEEP) console.log(`  ${c.green("✓")} ${p}\n${c.dim(`      ${why}`)}`);
+for (const [p, why] of KEEP) {
+  if (!exists(p)) continue;
+  console.log(`  ${c.green("✓")} ${p}\n${c.dim(`      ${why}`)}`);
+}
 
 console.log(
   c.bold(`\n${APPLY ? "Removed" : "Would remove"} ${count} item(s), ${human(freed)}.\n`),
