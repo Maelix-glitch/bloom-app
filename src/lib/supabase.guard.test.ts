@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -47,7 +47,12 @@ function walk(dir: string, out: string[] = []): string[] {
 
 const FILES = walk(SRC).map((path) => ({
   path,
-  rel: path.slice(SRC.length + 1),
+  /*
+   * Forward slashes on every platform. path.join gives backslashes on Windows,
+   * so every `rel === "lib/foo.ts"` comparison below silently failed there —
+   * the suite passed on Linux and reported three phantom failures on Windows.
+   */
+  rel: path.slice(SRC.length + 1).split(sep).join("/"),
   text: readFileSync(path, "utf8"),
 }));
 
