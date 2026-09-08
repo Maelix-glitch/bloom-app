@@ -313,6 +313,15 @@ export function useCoachSystem() {
 
   const requestResponse = useCallback(
     async (request: CoachRequest): Promise<CoachResponse> => {
+      /*
+       * Supersede any request still running. Only one answer can be wanted at
+       * a time, and the answer to a question you have moved on from is noise.
+       *
+       * The controller is cleared when its own request finishes, so this only
+       * ever aborts a genuinely in-flight call — previously the reference
+       * lingered after completion, so under React StrictMode's double-invoke
+       * a send could abort itself and come back with an empty answer.
+       */
       inFlight.current?.abort();
       const controller = new AbortController();
       inFlight.current = controller;
@@ -326,21 +335,42 @@ export function useCoachSystem() {
        * on-device responder by itself, so there is no error path to handle
        * here — an answer always comes back.
        */
-      const result = await askCoach({
-        text: request.text,
-        mode: request.mode,
-        record,
-        context,
-        history: request.history
-          .filter((m) => m.paragraphs.length > 0 || m.text)
-          .slice(-8)
-          .map((m) => ({
-            role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
-            content: m.text ?? m.paragraphs.join("\n\n"),
-          })),
-        provider: activeProvider().id,
-        signal: controller.signal,
-      });
+      let result;
+      try {
+        result = await askCoach({
+          text: request.text,
+          mode: request.mode,
+          record,
+          context,
+          history: request.history
+            .filter((m) => m.paragraphs.length > 0 || m.text)
+            .slice(-8)
+            .map((m) => ({
+              role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
+              content: m.text ?? m.paragraphs.join("\n\n"),
+            })),
+          provider: activeProvider().id,
+          signal: controller.signal,
+        });
+      } finally {
+        /* Let go of our own controller so a later send can't abort a request
+           that already finished. */
+        if (inFlight.current === controller) inFlight.current = null;
+      }
+
+      /*
+       * An answer with no paragraphs would render as an empty bubble, which is
+       * indistinguishable from the coach hanging. It should never happen now,
+       * but the UI must not be able to show nothing.
+       */
+      if (result.paragraphs.length === 0) {
+        return {
+          paragraphs: ["Sorry — I lost my train of thought there. Ask me again?"],
+          sources: [],
+          blocks: [],
+          source: result.source,
+        };
+      }
 
       return {
         paragraphs: result.paragraphs,

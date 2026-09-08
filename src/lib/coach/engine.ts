@@ -314,6 +314,17 @@ const FALLBACK_REASON: Record<Exclude<EdgeResult, { ok: true }>["reason"], strin
  * gets an answer either way, and the source is recorded on the result so the
  * UI can be honest about which one they're reading.
  */
+/**
+ * Thrown when a request is superseded by a newer one. Callers should ignore it
+ * — it means the answer is no longer wanted, not that anything failed.
+ */
+export class CoachCancelled extends Error {
+  constructor() {
+    super("cancelled");
+    this.name = "CoachCancelled";
+  }
+}
+
 export async function ask(input: AskInput): Promise<CoachAnswer> {
   const { primary } = detectTopics(input.text);
   const budget = budgetFor(input.text, { greeting: primary === "greeting" });
@@ -351,9 +362,19 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
     };
   }
 
-  /* Cancelled means the person moved on — don't answer a question they left. */
+  /*
+   * Cancelled means the person moved on — but an EMPTY answer is not a safe
+   * way to say that. It used to return done([], ...), and the UI rendered that
+   * as a coach message with zero paragraphs: a blank bubble under a thinking
+   * indicator that had already gone. From the outside it looked like the coach
+   * thought forever and never replied.
+   *
+   * A cancellation is a control-flow signal, not an answer, so it is thrown
+   * and the caller drops it. If a cancellation ever reaches the UI anyway, the
+   * local answer below is a real reply rather than nothing.
+   */
   if (result.reason === "aborted") {
-    return done([], primary, budget, "local", "cancelled");
+    throw new CoachCancelled();
   }
 
   const local = answerLocally(input);
