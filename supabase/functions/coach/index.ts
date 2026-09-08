@@ -25,6 +25,13 @@
  * Deploy:
  *   supabase functions deploy coach
  *   supabase secrets set OPENAI_API_KEY=...
+ *
+ * Other models (each optional — only set the secrets for the ones you use):
+ *   supabase secrets set APINEX_API_KEY=...        # APInex (free Gemini 3.8 Flash)
+ *   supabase secrets set TEAMOROUTER_API_KEY=...   # TeamoRouter (free DeepSeek V4 Pro)
+ *   supabase secrets set HF_API_KEY=...            # Hugging Face (router or serverless)
+ *   supabase secrets set HF_BASE_URL=...           # only for the serverless endpoint
+ *   supabase secrets set HF_MODEL=...              # any HF model id
  */
 
 /* eslint-disable */
@@ -98,6 +105,9 @@ interface Body {
 /**
  * The models this function can call. `call` returns plain text; everything
  * else — prompt assembly, length enforcement, error shape — is shared.
+ *
+ * Adding one is a table entry here (plus a matching entry in the client's
+ * `src/lib/coach/providers.ts` and the API key as a function secret).
  */
 const PROVIDERS: Record<
   string,
@@ -105,33 +115,79 @@ const PROVIDERS: Record<
 > = {
   bloom: {
     env: "OPENAI_API_KEY",
-    call: async (key, messages) => {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-        body: JSON.stringify({
-          model: Deno.env.get("COACH_MODEL") ?? "gpt-4o-mini",
-          messages,
-          temperature: 0.7,
-          max_tokens: 700,
-        }),
-      });
-      if (!res.ok) throw new Error(`model ${res.status}: ${await res.text()}`);
-      const json = await res.json();
-      return json?.choices?.[0]?.message?.content ?? "";
-    },
+    call: (key, messages) =>
+      openaiCompatible(
+        "https://api.openai.com/v1/chat/completions",
+        key,
+        Deno.env.get("COACH_MODEL") ?? "gpt-4o-mini",
+        messages,
+      ),
   },
-  /*
-   * A second model is this shape:
-   *
-   * claude: {
-   *   env: "ANTHROPIC_API_KEY",
-   *   call: async (key, messages) => { ... return text; },
-   * },
-   *
-   * then add { id: "claude", ... } to PROVIDERS in src/lib/coach/providers.ts.
+  /** APInex — free tier gateway; Gemini 3.8 Flash is their free model. */
+  apinex: {
+    env: "APINEX_API_KEY",
+    call: (key, messages) =>
+      openaiCompatible(
+        "https://api.apinex.bond/v1/chat/completions",
+        key,
+        Deno.env.get("APINEX_MODEL") ?? "free/gemini-3.8-flash",
+        messages,
+      ),
+  },
+  /** TeamoRouter — gateway with free DeepSeek V4 tiers. */
+  teamo: {
+    env: "TEAMOROUTER_API_KEY",
+    call: (key, messages) =>
+      openaiCompatible(
+        "https://api.teamorouter.com/v1/chat/completions",
+        key,
+        Deno.env.get("TEAMOROUTER_MODEL") ?? "deepseek-v4-pro-free",
+        messages,
+      ),
+  },
+  /**
+   * Hugging Face Inference Providers (router.huggingface.co/v1) — OpenAI-
+   * compatible; some providers are free. The serverless Inference API
+   * (api-inference.huggingface.co/v1) speaks the same shape, so set
+   * HF_BASE_URL to point at whichever the key belongs to.
    */
+  hf: {
+    env: "HF_API_KEY",
+    call: (key, messages) =>
+      openaiCompatible(
+        Deno.env.get("HF_BASE_URL") ?? "https://router.huggingface.co/v1/chat/completions",
+        key,
+        Deno.env.get("HF_MODEL") ?? "Qwen/Qwen2.5-72B-Instruct",
+        messages,
+      ),
+  },
 };
+
+/**
+ * One call shape for every OpenAI-compatible gateway (APInex, TeamoRouter,
+ * Hugging Face, and OpenAI itself): POST /chat/completions, Bearer key,
+ * `choices[0].message.content` back.
+ */
+async function openaiCompatible(
+  url: string,
+  key: string,
+  model: string,
+  messages: unknown[],
+): Promise<string> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 700,
+    }),
+  });
+  if (!res.ok) throw new Error(`model ${res.status}: ${await res.text()}`);
+  const json = await res.json();
+  return json?.choices?.[0]?.message?.content ?? "";
+}
 
 /** Render the derived record as something a model reads well. */
 function factsToPrompt(facts: any): string {
