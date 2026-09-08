@@ -35,3 +35,5 @@ dist-ssr
 # local environment (never commit real keys)
 .env
 .env.local
+.wrangler
+.tanstack

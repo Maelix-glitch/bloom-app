@@ -34,8 +34,10 @@ const SRC = join(process.cwd(), "src");
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
-    /* _backup holds superseded copies that aren't built or shipped. */
-    if (name === "_backup" || name === "node_modules") continue;
+    /* Superseded copies that aren't built or shipped. Prefix match, because
+       these are dated (e.g. _backup-trackers-20260904-162359) — an exact
+       "_backup" comparison silently scanned them. */
+    if (name.startsWith("_backup") || name === "node_modules") continue;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) walk(full, out);
     else if (/\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name)) out.push(full);

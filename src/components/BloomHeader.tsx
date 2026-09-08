@@ -6,8 +6,7 @@ export function BloomHeader() {
   const todayActive = pathname === "/";
   const moodActive = pathname === "/mood" || pathname.startsWith("/mood/");
   const rewardsActive = pathname === "/rewards" || pathname.startsWith("/admin/rewards");
-  const coachActive =
-    pathname === "/coach" || pathname.startsWith("/coach/") || pathname === "/bloom/coach.html";
+  const coachActive = pathname === "/coach" || pathname.startsWith("/coach/");
   const cycleActive = pathname === "/cycle" || pathname.startsWith("/cycle/");
   const trackersActive = pathname === "/trackers" || pathname.startsWith("/trackers/");
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
