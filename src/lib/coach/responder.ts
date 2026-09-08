@@ -44,6 +44,12 @@ export interface CoachResponse {
   paragraphs: string[];
   sources: string[];
   blocks: CoachBlock[];
+  /**
+   * Which brain produced this — set by the engine, absent for a bare call to
+   * `answer()`. The UI uses it to admit when a remote choice fell back to the
+   * device rather than quietly degrading.
+   */
+  source?: "edge" | "local";
 }
 
 /** One tracker, as the responder needs to see it. */

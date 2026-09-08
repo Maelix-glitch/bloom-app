@@ -346,6 +346,8 @@ export function useCoachSystem() {
         paragraphs: result.paragraphs,
         sources: result.sources,
         blocks: result.blocks,
+        /* Which brain answered, so the header can be honest about a fallback. */
+        source: result.source,
       };
     },
     [memories],

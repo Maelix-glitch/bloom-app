@@ -45,7 +45,13 @@ import {
   type CoachMessage,
   type CoachMode,
 } from "@/hooks/useCoachSystem";
+import { useReducedMotion } from "motion/react";
+
 import { cn } from "@/lib/utils";
+import { useTypewriter } from "@/hooks/useTypewriter";
+import { pickStable } from "@/lib/voice/messages";
+import { todayKey } from "@/lib/cycle/predict";
+import { ProviderPicker } from "@/components/coach/ProviderPicker";
 import { buildCoachContext, type CoachHabitData } from "@/lib/coach/intelligence";
 
 interface Attachment {
@@ -101,11 +107,50 @@ const LENSES: Lens[] = [
   },
 ];
 
-const QUICK_PROMPTS = [
+/*
+ * The default prompts, and the widest signal the coach sends about what it can
+ * talk about. Every one of these used to be about routines and patterns, which
+ * taught people the coach only did two or three subjects — the suggestion chips
+ * are read as a menu, not as examples.
+ *
+ * They now span the actual range: the record, the body, work and study, the
+ * harder human things, and the app itself. Drawn from a pool so the row isn't
+ * identical every visit.
+ */
+const QUICK_PROMPT_POOL = [
+  /* the record */
   "What should I protect today?",
   "Help me make sense of this week.",
-  "Give me one gentle next step.",
+  "What's my sleep actually doing?",
+  "Where am I losing consistency?",
+  /* the body */
+  "Why do I keep crashing in the afternoon?",
+  "Is my caffeine wrecking my sleep?",
+  /* work and study */
+  "How do I focus when I can't settle?",
+  "I'm dreading tomorrow — help.",
+  /* the harder things */
+  "I'm stressed and I don't know why.",
+  "I've been feeling low lately.",
+  "Everything feels like too much.",
+  /* the app */
+  "What can you actually help with?",
+  "How do I export my data?",
 ];
+
+/** Three prompts, rotated so the row isn't the same on every visit. */
+function defaultPrompts(): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (let i = 0; out.length < 3 && i < 40; i += 1) {
+    const choice = pickStable(QUICK_PROMPT_POOL, `coach-prompt-${todayKey()}-${i}`);
+    if (!seen.has(choice)) {
+      seen.add(choice);
+      out.push(choice);
+    }
+  }
+  return out;
+}
 
 const COACH_DRAFT_STORAGE_KEY = "bloom-coach-draft";
 const SIGN_IN_NOTICE = "Sign in to send a private Coach message.";
@@ -134,12 +179,12 @@ function suggestedPromptsFor(
         ? [
             "What would be useful to notice first?",
             "Help me make sense of today.",
-            "What should I pay attention to?",
+            "I just want to think out loud.",
           ]
         : [
+            "What can you actually help with?",
             "How should I get started?",
-            "What should I focus on first?",
-            "Help me build a simple routine.",
+            "I'm not sure what I need.",
           ];
   }
 
@@ -189,7 +234,8 @@ function suggestedPromptsFor(
   if (moodImprovement) {
     return ["What's working?", "How can I keep this going?", "What should I carry into next week?"];
   }
-  return QUICK_PROMPTS;
+
+  return defaultPrompts();
 }
 
 function formatBytes(bytes: number) {
@@ -407,6 +453,7 @@ function MessageCard({
   message,
   previewUrl,
   grouped = false,
+  fresh = false,
   onCopy,
   onRetry,
   onBlockAction,
@@ -416,6 +463,8 @@ function MessageCard({
   message: CoachMessage;
   previewUrl: string | null | undefined;
   grouped?: boolean;
+  /** The newest coach reply — the only one that reveals itself. */
+  fresh?: boolean;
   onCopy: () => void;
   onRetry: (() => void) | undefined;
   onBlockAction: ((action: string) => void) | undefined;
@@ -423,6 +472,14 @@ function MessageCard({
   onPlan: () => void;
 }) {
   const isCoach = message.role === "coach";
+  const reducedMotion = useReducedMotion();
+  /*
+   * Reveal the newest answer word by word. Scrolling back through the thread
+   * must never re-animate — history is text, not an event — so only `fresh`
+   * messages animate, and anyone who asked for reduced motion gets the whole
+   * answer at once.
+   */
+  const typed = useTypewriter(message.paragraphs, isCoach && fresh && !reducedMotion);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
@@ -477,10 +534,21 @@ function MessageCard({
           )}
         >
           {message.status !== "error"
-            ? message.paragraphs.map((paragraph, index) => (
-                <RichParagraph key={`${paragraph}-${index}`} text={paragraph} />
+            ? typed.text.map((paragraph, index) => (
+                <RichParagraph key={index} text={paragraph} />
               ))
             : null}
+          {typed.running ? (
+            /* Anyone who reads faster than the reveal can end it. */
+            <button
+              type="button"
+              className="coach-skip-reveal"
+              onClick={typed.skip}
+              aria-label="Show the whole answer"
+            >
+              Skip
+            </button>
+          ) : null}
           {message.attachment ? (
             <div className="coach-message-attachment">
               {previewUrl && message.attachment.type.startsWith("image/") ? (
@@ -1165,8 +1233,9 @@ function EmptyConversation({
       <p className="eyebrow">Bloom Coach</p>
       <h2 className="display">Tell me what is on your mind.</h2>
       <p className="coach-empty-copy">
-        Bloom can help you ask a question, make space to reflect, or shape a plan from the life you
-        are actually living.
+        Sleep, focus, a rough week, work, the thing you keep putting off — ask about
+        any of it. I'll use what you've logged when it's relevant, and say so when
+        there's nothing to go on.
       </p>
       <div className="coach-empty-modes" aria-label="Choose how to approach this">
         {LENSES.map((lens) => (
@@ -1218,6 +1287,11 @@ export function CoachPage() {
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [responseSlow, setResponseSlow] = useState(false);
   const [thinking, setThinking] = useState(false);
+  /* Which reply should reveal itself. Set when one arrives, so a reload or a
+     scroll back through history renders as plain text. */
+  const [freshId, setFreshId] = useState<string | null>(null);
+  /* Which brain answered last, so the picker can admit to a fallback. */
+  const [lastSource, setLastSource] = useState<"edge" | "local" | undefined>(undefined);
   const [commandOpen, setCommandOpen] = useState(false);
   const commandModalRef = useRef<HTMLDivElement | null>(null);
   const commandCloseRef = useRef<HTMLButtonElement | null>(null);
@@ -1692,6 +1766,8 @@ export function CoachPage() {
         attachment: undefined,
         status: "sent",
       };
+      setFreshId(coachMessage.id);
+      setLastSource(response.source);
       coach.setMessages((current) => [...current, coachMessage]);
       if (retry) {
         setDraft((current) => (current.trim() === text ? "" : current));
@@ -1932,6 +2008,7 @@ export function CoachPage() {
                     <span className={cn("coach-online-pill", thinking && "is-thinking")}>
                       <span /> {thinking ? "thinking" : "ready"}
                     </span>
+                    <ProviderPicker lastSource={lastSource} />
                   </div>
                   <p className="mt-0.5 flex min-w-0 items-center gap-1.5 truncate text-[11px] text-muted-foreground">
                     <ActiveLensIcon className="size-3 shrink-0" aria-hidden="true" />
@@ -1985,6 +2062,9 @@ export function CoachPage() {
                         key={message.id}
                         message={message}
                         grouped={index > 0 && coach.messages[index - 1]?.role === message.role}
+                        /* Only the last message, and only if it arrived this
+                           session — reopening the page must not replay it. */
+                        fresh={index === coach.messages.length - 1 && message.id === freshId}
                         previewUrl={message.attachment ? previews[message.id] : undefined}
                         onCopy={() => void copyMessage(message)}
                         onRetry={
