@@ -35,9 +35,3 @@ dist-ssr
 # local environment (never commit real keys)
 .env
 .env.local
-.wrangler
-.tanstack
-
-# delivery kits are published as release assets, not committed
-docs/*/
-!docs/cleanup/

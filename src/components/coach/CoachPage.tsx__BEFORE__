@@ -1650,19 +1650,16 @@ export function CoachPage() {
   const send = async (event?: FormEvent, retry?: FailedRequest) => {
     event?.preventDefault();
     const retryText = retry?.text ?? draft;
-    /*
-     * No sign-in gate.
-     *
-     * This used to `return` when profileId was null, so a signed-out person
-     * pressed send and *nothing happened at all* — no answer, no error, the
-     * message just sat there. That was the "coach never responds" report.
-     *
-     * The gate never made sense: the coach answers on-device (engine.ts falls
-     * back to the local responder), so an account is only needed to *persist*
-     * the thread. Refusing to think because we can't save the transcript is
-     * backwards. Answering works signed-out; saving is attempted only when
-     * there is somewhere to save to.
-     */
+    if (!coach.profileId) {
+      try {
+        if (retryText.trim()) window.sessionStorage.setItem(COACH_DRAFT_STORAGE_KEY, retryText);
+      } catch {
+        // Keep the in-memory draft even when session storage is unavailable.
+      }
+      setSignInRequired(true);
+      setComposerNotice(SIGN_IN_NOTICE);
+      return;
+    }
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       setComposerNotice("You're offline right now.");
       return;
@@ -1784,24 +1781,17 @@ export function CoachPage() {
       if (retry) {
         setDraft((current) => (current.trim() === text ? "" : current));
       }
-      /*
-       * Persisting is a bonus, not a precondition. Signed out there is no
-       * account to save to, and saying so on every message would be noise —
-       * the thread still lives in local storage either way.
-       */
-      if (coach.profileId) {
-        try {
-          const saved = await Promise.all([
-            coach.saveMessage(userMessage),
-            coach.saveMessage(coachMessage),
-          ]);
-          if (saved.some((result) => !result)) {
-            setComposerNotice("Your conversation couldn't be saved right now.");
-          }
-        } catch (error) {
-          console.error("Coach conversation save failed:", error);
+      try {
+        const saved = await Promise.all([
+          coach.saveMessage(userMessage),
+          coach.saveMessage(coachMessage),
+        ]);
+        if (saved.some((result) => !result)) {
           setComposerNotice("Your conversation couldn't be saved right now.");
         }
+      } catch (error) {
+        console.error("Coach conversation save failed:", error);
+        setComposerNotice("Your conversation couldn't be saved right now.");
       }
     } catch (error) {
       /*
