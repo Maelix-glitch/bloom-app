@@ -27,6 +27,12 @@ export interface CoachProvider {
 
 export const PROVIDERS: CoachProvider[] = [
   {
+    id: "auto",
+    name: "Best available",
+    blurb: "Tries the strongest model you've connected, then the next — automatically.",
+    remote: true,
+  },
+  {
     id: "bloom",
     name: "Bloom",
     blurb: "Bloom's own coach, running on your Supabase function.",
@@ -59,10 +65,14 @@ export const PROVIDERS: CoachProvider[] = [
 ];
 
 export const PROVIDER_PREF = "coach.provider";
-export const DEFAULT_PROVIDER = "bloom";
+export const DEFAULT_PROVIDER = "auto";
 
-/* The one model the coach always uses. Fixed on purpose - there is no picker. */
-export const COACH_PROVIDER = "apinex";
+/*
+ * The model the coach asks for. "auto" means the edge function starts at the
+ * top of its best-first chain (strongest connected model) and walks down it
+ * when a provider fails — see supabase/functions/coach/index.ts.
+ */
+export const COACH_PROVIDER = "auto";
 
 const BY_ID = new Map(PROVIDERS.map((p) => [p.id, p]));
 

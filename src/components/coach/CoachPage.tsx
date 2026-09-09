@@ -12,6 +12,10 @@ import {
   type CoachMode,
 } from "@/hooks/useCoachSystem";
 import { buildCoachContext } from "@/lib/coach/intelligence";
+import type { CoachMedia } from "@/lib/coach/edge";
+import { isVisionType, fileToCoachMedia } from "@/lib/coach/media";
+import { parseSidecars } from "@/lib/coach/sidecar";
+import { executeCoachTool } from "@/lib/coach/tools";
 import { followUpPrompts, starterPrompts, type Starter } from "@/lib/coach/ui-helpers";
 import { todayKey } from "@/lib/cycle/predict";
 
@@ -288,11 +292,20 @@ export function CoachPage() {
       history: CoachMessage[];
       conversationId: string;
       attachment?: AttachmentMeta | null;
+      media?: CoachMedia | null;
       userMessage?: CoachMessage | null;
       replaceMessageId?: string | null;
     }): Promise<boolean> => {
-      const { text, mode, history, conversationId, attachment, userMessage, replaceMessageId } =
-        params;
+      const {
+        text,
+        mode,
+        history,
+        conversationId,
+        attachment,
+        media,
+        userMessage,
+        replaceMessageId,
+      } = params;
       if (inFlightRef.current) {
         if (thinking) setNotice("Bloom is still finishing the last reply — one moment.");
         return false;
@@ -352,17 +365,48 @@ export function CoachPage() {
             attachment?.type,
           ),
           history: pendingHistory,
+          attachment: media
+            ? { fileType: media.mediaType, base64Data: media.dataBase64 }
+            : undefined,
         });
         if (!mountedRef.current || profileAtStart !== coach.profileId) return true;
+
+        /*
+         * Model replies may carry structured sidecars: things to remember,
+         * things to forget, and app actions to run. They are executed here —
+         * after the reply is in hand — and stripped from the text, so the
+         * thread only ever shows prose plus one honest outcome line.
+         */
+        const parsed = parseSidecars(response.paragraphs.join("\n\n"));
+        let paragraphs = parsed.text
+          ? parsed.text
+              .split(/\n{2,}/)
+              .map((part) => part.trim())
+              .filter(Boolean)
+          : [];
+        if (paragraphs.length === 0) {
+          paragraphs = response.paragraphs.length > 0 ? [...response.paragraphs] : [];
+        }
+        for (const memory of parsed.memories.slice(0, 3)) {
+          void coach.rememberMemory(memory.text, memory.category);
+        }
+        for (const forget of parsed.forgets.slice(0, 3)) {
+          void coach.forgetMemoryText(forget.text);
+        }
+        const tool = parsed.tools[0];
+        if (tool) {
+          const outcome = await executeCoachTool(tool, coach.profileId);
+          paragraphs = [...paragraphs, outcome.outcome];
+        }
+        if (paragraphs.length === 0) {
+          paragraphs = ["Sorry — I lost my train of thought there. Ask me again?"];
+        }
 
         const coachMessage: CoachMessage = {
           id: newMessageId("coach"),
           role: "coach",
           time: new Date().toISOString(),
-          paragraphs:
-            response.paragraphs.length > 0
-              ? response.paragraphs
-              : ["Sorry — I lost my train of thought there. Ask me again?"],
+          paragraphs,
           sources: response.sources,
           blocks: response.blocks,
           status: "sent",
@@ -459,6 +503,16 @@ export function CoachPage() {
         ? { name: attachment.name, type: attachment.type, size: attachment.size }
         : null;
 
+      /* Photos (and readable PDFs) become vision input for the online coach. */
+      let media: CoachMedia | null = null;
+      if (attachment?.file && isVisionType(attachment.file.type)) {
+        try {
+          media = await fileToCoachMedia(attachment.file);
+        } catch {
+          media = null;
+        }
+      }
+
       let userMessage: CoachMessage | null = null;
       if (attachment) {
         userMessage = {
@@ -484,6 +538,7 @@ export function CoachPage() {
         history,
         conversationId: conversation?.id ?? "",
         attachment: meta,
+        media,
         userMessage,
       });
       if (ok) {

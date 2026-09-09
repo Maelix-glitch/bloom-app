@@ -13,7 +13,7 @@ import {
 
 import type { CoachMessage } from "@/hooks/useCoachSystem";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { messageTime, noticesFor, TREND_WORD } from "@/lib/coach/ui-helpers";
+import { copyText, messageTime, noticesFor, TREND_WORD } from "@/lib/coach/ui-helpers";
 import { cn } from "@/lib/utils";
 
 import { CoachGlyph, NoticeGlyph } from "./bloom-mark";
@@ -62,7 +62,9 @@ function SourceLine({ message }: { message: CoachMessage }) {
       {message.sources.length > 0 ? (
         <span className="coach-msg-sources-text">
           <span className="coach-src-dot" aria-hidden="true" />
-          From your record — {message.sources.join(" · ")}
+          {message.sources.length === 1 && /^(your|Bloom's|my )/.test(message.sources[0] ?? "")
+            ? `From ${message.sources[0]}`
+            : `From your record — ${message.sources.join(" · ")}`}
         </span>
       ) : null}
       {message.fellBackBecause ? (
@@ -349,11 +351,9 @@ export function BloomMessage({
 
   const handleCopy = async () => {
     const text = message.paragraphs.join("\n\n");
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      /* clipboard blocked — say nothing rather than toast */
-    }
+    const ok = await copyText(text);
+    /* Only claim success when something actually reached the clipboard. */
+    if (!ok) return;
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   };

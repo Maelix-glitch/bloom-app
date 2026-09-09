@@ -23,7 +23,14 @@ import { answer as localAnswer, type CoachRecord, type CoachResponse } from "@/l
 import type { CoachContext, CoachMode } from "@/lib/coach/intelligence";
 import { budgetFor, fitToBudget, type Budget } from "@/lib/coach/brevity";
 import { detectTopics, isCareTopic, isTrackedTopic, type Topic } from "@/lib/coach/topics";
-import { askEdge, toFacts, type CoachTurn, type EdgeResult } from "@/lib/coach/edge";
+import {
+  askEdge,
+  toFacts,
+  type CoachMedia,
+  type CoachTurn,
+  type EdgeResult,
+} from "@/lib/coach/edge";
+import { APP_FACT_SOURCE, appFactFor } from "@/lib/coach/knowledge";
 import { pick } from "@/lib/voice/messages";
 import { compose, openHanded } from "@/lib/coach/compose";
 
@@ -35,6 +42,8 @@ export interface AskInput {
   history: CoachTurn[];
   /** Provider id; "local" skips the network entirely. */
   provider: string;
+  /** A photo or PDF attached to the message — read only by a vision model. */
+  image?: CoachMedia;
   signal?: AbortSignal;
 }
 
@@ -198,6 +207,10 @@ export function answerLocally(input: AskInput): CoachAnswer {
     return done([pick("coach.thanks", YOURE_WELCOME)], primary, budget, "local");
   }
   if (primary === "smalltalk") {
+    /* "What can you do?" is about Bloom's own abilities — the rules answer
+       before the small-talk pool does. */
+    const fromFacts = appFactFor(input.text);
+    if (fromFacts) return factAnswer(fromFacts.paragraphs, budget, primary);
     return done([pick("coach.who", WHO_I_AM)], primary, budget, "local");
   }
 
@@ -214,6 +227,12 @@ export function answerLocally(input: AskInput): CoachAnswer {
    * responder what it can see, discard its refusals, and hand whatever is left
    * to the composer alongside what the coach actually knows about the subject.
    */
+  /* Questions about Bloom itself never consult the record — a points
+     question must not become "your log is empty" because nothing is logged.
+     This branch short-circuits every data-dependent path below it. */
+  const fromFacts = appFactFor(input.text);
+  if (fromFacts) return factAnswer(fromFacts.paragraphs, budget, primary);
+
   let fromRecord: string[] = [];
   let blocks: CoachAnswer["blocks"] = [];
   let sources: string[] = [];
@@ -302,6 +321,27 @@ function done(
   };
 }
 
+/** An answer drawn from APP_FACTS — cited as Bloom's own rules, not the record. */
+function factAnswer(paragraphs: string[], budget: Budget, topic: Topic): CoachAnswer {
+  /*
+   * Definitional questions ("what is bloom?") are short — three words — and
+   * would earn a terse budget that chops the answer to one sentence. Such
+   * questions ask for a definition, so they get at least brief room.
+   */
+  const room =
+    budget.register === "terse"
+      ? { ...budget, register: "brief" as const, maxParagraphs: 1, maxWords: 70 }
+      : budget;
+  return {
+    paragraphs: fitToBudget(paragraphs, room),
+    sources: [APP_FACT_SOURCE],
+    blocks: [],
+    topic,
+    budget,
+    source: "local",
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /*  The public entry point                                                     */
 /* -------------------------------------------------------------------------- */
@@ -342,8 +382,19 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
    */
   const trivial = primary === "greeting" || primary === "thanks";
 
-  if (input.provider === "local" || trivial) {
+  if ((input.provider === "local" || trivial) && !input.image) {
     return answerLocally(input);
+  }
+  if (input.image) {
+    /* A photo needs the vision model; local/trivial paths can't see it. */
+    const local = answerLocally(input);
+    const note =
+      "I can't see the attached photo on this device — reading images needs the online coach, which isn't reachable right now. Here's an answer from words and your record alone; send the photo again in a moment and I'll look properly.";
+    if (primary === "greeting" || primary === "thanks") return local;
+    return {
+      ...local,
+      paragraphs: [note, ...local.paragraphs],
+    };
   }
 
   const result = await askEdge(
@@ -354,6 +405,7 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
       provider: input.provider,
       register: budget.register,
       topic: primary,
+      ...(input.image ? { image: input.image } : {}),
     },
     input.signal,
   );
@@ -385,7 +437,11 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
   }
 
   const local = answerLocally(input);
-  return { ...local, fellBackBecause: FALLBACK_REASON[result.reason] };
+  const fallback = { ...local, fellBackBecause: FALLBACK_REASON[result.reason] };
+  if (!input.image) return fallback;
+  const note =
+    "I can't see the attached photo right now — the online coach that reads images isn't reachable. Here's an answer from words and your record alone; send the photo again in a moment and I'll look properly.";
+  return { ...fallback, paragraphs: [note, ...fallback.paragraphs] };
 }
 
 export { isCareTopic, detectTopics };

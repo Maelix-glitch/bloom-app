@@ -286,3 +286,40 @@ export const TREND_WORD: Record<QuietNotice["trend"], string> = {
   falling: "falling",
   steady: "holding steady",
 };
+
+/**
+ * Copy plain text to the clipboard, honestly.
+ *
+ * `navigator.clipboard` only exists in secure contexts and can still be
+ * refused (permissions, a focused-document requirement inside iframes). When
+ * it fails we fall back to a hidden textarea + execCommand, which works in
+ * more places. The caller learns whether anything was actually copied, so the
+ * UI never shows "Copied" for a copy that never happened.
+ */
+export async function copyText(text: string): Promise<boolean> {
+  if (typeof window === "undefined" || !text) return false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* fall through to the legacy path */
+  }
+  try {
+    const area = window.document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    area.style.opacity = "0";
+    window.document.body.appendChild(area);
+    area.focus();
+    area.select();
+    const ok = window.document.execCommand("copy");
+    window.document.body.removeChild(area);
+    return ok;
+  } catch {
+    return false;
+  }
+}

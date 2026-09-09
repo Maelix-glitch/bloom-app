@@ -12,83 +12,86 @@ supabase functions deploy coach
 supabase secrets set OPENAI_API_KEY=sk-...
 ```
 
-Optional:
+Set whichever of the provider secrets you actually have (all optional —
+providers without a secret are skipped automatically):
 
 ```bash
-supabase secrets set COACH_MODEL=gpt-4o-mini   # defaults to gpt-4o-mini
+supabase secrets set OPENAI_API_KEY=sk-...        # provider: bloom
+supabase secrets set GEMINI_API_KEY=...           # provider: gemini (vision)
+supabase secrets set GROQ_API_KEY=...             # provider: groq
+supabase secrets set APINEX_API_KEY=...           # provider: apinex (free tier)
+supabase secrets set TEAMOROUTER_API_KEY=...      # provider: teamo (free tier)
+supabase secrets set HF_API_KEY=...               # provider: hf (Hugging Face)
 ```
 
-If your function is deployed under a different name, point the app at it:
+### Best model first
 
+The coach answers **auto** (the default) by walking a quality-ordered chain —
+the strongest connected model first, the next one when it fails, and so on.
+Set the order for your keys with:
+
+```bash
+supabase secrets set COACH_CHAIN=gemini,bloom,groq,apinex,teamo,hf
 ```
-VITE_COACH_FUNCTION=my-coach-name
+
+(`bloom,gemini,groq,apinex,teamo,hf` is the default.) Providers whose secret
+is missing are skipped; a specific provider chosen in the app still goes
+first, followed by the rest of the chain.
+
+Optional per-provider model overrides:
+
+```bash
+supabase secrets set COACH_MODEL=gpt-4o-mini        # bloom / OpenAI
+supabase secrets set GEMINI_MODEL=gemini-2.5-flash   # gemini (pick a model your key can reach)
+supabase secrets set GROQ_MODEL=openai/gpt-oss-20b
+supabase secrets set APINEX_MODEL=free/gemini-3.8-flash
+supabase secrets set TEAMOROUTER_MODEL=deepseek-v4-pro-free
+supabase secrets set HF_MODEL=Qwen/Qwen2.5-72B-Instruct
+supabase secrets set HF_BASE_URL=https://router.huggingface.co/v1
 ```
 
 ## Contract
 
 Request body:
 
-| field      | type                                   | meaning                                     |
-| ---------- | -------------------------------------- | ------------------------------------------- |
-| `message`  | string                                 | what was just asked                          |
-| `history`  | `{role, content}[]`                    | last 8 turns, oldest first                   |
-| `facts`    | object                                 | derived record — averages, streaks, phase    |
-| `provider` | string                                 | which model to use                           |
-| `register` | `terse\|brief\|normal\|full`           | how long the answer may be                   |
-| `topic`    | string                                 | what the client classified it as             |
+| field      | type            | meaning                                        |
+| ---------- | --------------- | ---------------------------------------------- |
+| `message`  | string          | what was just asked                            |
+| `history`  | `{role,content}[]` | last 8 turns, oldest first                  |
+| `facts`    | object          | derived record — averages, streaks, phase      |
+| `provider` | string          | "auto", or a specific model id                 |
+| `register` | string          | how long the answer may be                     |
+| `topic`    | string          | what the client classified it as               |
+| `image`    | `{mediaType, dataBase64}` | attached photo/PDF (optional)     |
 
 Response: `{ "paragraphs": string[], "provider": string }`. A plain
-`{ "reply": "…" }` or `{ "text": "…" }` is also accepted — the client splits it
-on blank lines.
+`{ "reply": "…" }` or `{ "text": "…" }` is also accepted. Anything non-2xx
+makes the app answer locally instead.
 
-Anything non-2xx makes the app answer locally instead.
+### Photos (Gemini vision)
+
+When `image` is present the chain narrows to vision-capable providers
+(Gemini) and the photo rides inline with the question. Food photos produce an
+honest calorie/macro estimate; other photos get a useful description; PDFs
+are read as text. Photos are never stored.
+
+### Memory & app actions
+
+The reply can carry structured directives that the app executes:
+
+```text
+[BLOOM_MEMORY]{"category":"preference","text":"the person is vegan"}[/BLOOM_MEMORY]
+[BLOOM_FORGET]{"text":"my old gym"}[/BLOOM_FORGET]
+[BLOOM_TOOL]{"name":"create_habit","args":{"name":"Read","frequency":"daily","reminderTime":"21:00"}}[/BLOOM_TOOL]
+```
+
+The client strips these from the visible prose, saves/removes memories on the
+device (and the account when signed in), and runs supported tools — see
+`src/lib/coach/sidecar.ts` and `src/lib/coach/tools.ts`.
 
 ## Privacy
 
 Only *derived* numbers are sent: per-tracker averages, goals, streaks, day
-counts, cycle phase, and any notes the person explicitly pinned. No raw
-entries, no check-in text, no history beyond the current conversation. Nothing
-is read from or written to the database here.
-
-## Adding another AI
-
-1. Add an entry to `PROVIDERS` in `index.ts` with its `env` key and a `call`
-   that returns plain text (use `openaiCompatible()` for anything OpenAI-style).
-2. Set the secret: `supabase secrets set ANTHROPIC_API_KEY=...`
-3. Add the matching entry to `PROVIDERS` in `src/lib/coach/providers.ts`.
-
-The picker in the app renders whatever is registered; no component changes.
-
-## AIs already wired up
-
-| picker name             | provider id | secret            | default model                       |
-| ----------------------- | ----------- | ----------------- | ----------------------------------- |
-| Bloom                   | `bloom`     | `OPENAI_API_KEY`  | `gpt-4o-mini` (`COACH_MODEL`)       |
-| Gemini 3.8 Flash — free | `apinex`    | `APINEX_API_KEY`  | `free/gemini-3.8-flash` (`APINEX_MODEL`) |
-| DeepSeek V4 Pro — free  | `teamo`     | `TEAMOROUTER_API_KEY` | `deepseek-v4-pro-free` (`TEAMOROUTER_MODEL`) |
-| Hugging Face            | `hf`        | `HF_API_KEY`      | `Qwen/Qwen2.5-72B-Instruct` (`HF_MODEL`) |
-
-Set the secrets with:
-
-```bash
-supabase functions deploy coach
-supabase secrets set OPENAI_API_KEY=sk-...
-supabase secrets set APINEX_API_KEY=...
-supabase secrets set TEAMOROUTER_API_KEY=sk-teamo-...
-supabase secrets set HF_API_KEY=hf_...
-# optional overrides:
-# supabase secrets set APINEX_MODEL=... TEAMOROUTER_MODEL=... HF_MODEL=...
-# supabase secrets set HF_BASE_URL=https://api-inference.huggingface.co/v1/chat/completions
-```
-
-Providers whose secret is missing simply fail that request; the app falls back
-to the on-device responder, so an unset key never breaks the coach.
-
-Hugging Face note: the default endpoint is the Inference Providers router
-(`https://router.huggingface.co/v1`), which is OpenAI-compatible and has some
-free providers. The classic Serverless Inference API
-(`https://api-inference.huggingface.co/v1`) speaks the same request shape —
-point `HF_BASE_URL` at it if that's what your key is for. For serverless,
-pick an actual free model id (e.g. `Qwen/Qwen2.5-72B-Instruct`) rather than a
-placeholder like `gpt2`.
-
+counts, cycle phase, stored memories, and the photo the person just attached.
+No raw entries, no check-in text, no history beyond the current conversation.
+Nothing is read from or written to the database here.

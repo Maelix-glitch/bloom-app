@@ -32,7 +32,19 @@ export const COACH_FUNCTION =
   (import.meta.env["VITE_COACH_FUNCTION"] as string | undefined)?.trim() || "coach";
 
 /** Past this, the local answer wins. Cold starts are real but a wait is worse. */
-export const TIMEOUT_MS = 12_000;
+export const TIMEOUT_MS = 15_000;
+
+/**
+ * A photo or document attached to a message. Bytes go to the edge function,
+ * which routes them to a vision-capable model (Gemini). The image is
+ * downscaled client-side first so the payload stays small; PDFs pass through
+ * as-is when they fit.
+ */
+export interface CoachMedia {
+  mediaType: string;
+  /** Raw base64 — no `data:` prefix. */
+  dataBase64: string;
+}
 
 export interface CoachTurn {
   role: "user" | "assistant";
@@ -50,8 +62,10 @@ export interface EdgeRequest {
    * whole diary to answer a question about their week.
    */
   facts: EdgeFacts;
-  /** Which model to use, when several are configured. */
+  /** Which model to use. "auto" (default) = best-first chain on the function. */
   provider?: string;
+  /** An attached photo or PDF for the vision model. */
+  image?: CoachMedia;
   /** How long the answer should be, decided client-side from the question. */
   register: "terse" | "brief" | "normal" | "full";
   /** What the question is about, so the function needn't re-classify. */

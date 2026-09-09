@@ -22,7 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { ask as askCoach } from "@/lib/coach/engine";
-import { COACH_PROVIDER } from "@/lib/coach/providers";
+import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
 import { analyzeCycle, describeNextPeriod } from "@/lib/cycle/predict";
@@ -203,6 +203,17 @@ export function contentToText(value: unknown): string {
     }
   }
   return "";
+}
+
+/** A coach attachment becomes vision input only when the model can read it. */
+function attachmentToMedia(
+  attachment: CoachFilePayload | undefined,
+): { mediaType: string; dataBase64: string } | undefined {
+  if (!attachment) return undefined;
+  const type = attachment.fileType.toLowerCase();
+  if (!/^(image\/(jpeg|png|webp|gif)|application\/pdf)$/.test(type)) return undefined;
+  if (!attachment.base64Data) return undefined;
+  return { mediaType: type, dataBase64: attachment.base64Data };
 }
 
 export function coachErrorMessage(error: unknown, fallback?: string): string {
@@ -534,6 +545,70 @@ export function useCoachSystem() {
   );
 
   /**
+   * Learn a fact about the person, from conversation. Local first, mirrored
+   * to the account when one is connected; identical facts collapse into one.
+   */
+  const rememberMemory = useCallback(
+    async (text: string, category: CoachMemory["category"] = "context") => {
+      const clean = text.trim().slice(0, 400);
+      if (!clean) return;
+      const already = memories.some((m) => m.text.toLowerCase() === clean.toLowerCase());
+      const max = 48;
+      const next: CoachMemory[] = [
+        {
+          id: `mem-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+          category,
+          text: clean,
+          pinned: false,
+          learnedAt: new Date().toISOString(),
+        },
+        ...(already ? memories : memories),
+      ].slice(0, max);
+      if (!already) {
+        setMemories(next);
+        if (profileId) {
+          try {
+            await supabase.from("coach_memory").insert({
+              profile_id: profileId,
+              category,
+              fact: clean,
+              pinned: false,
+              source: "coach",
+            });
+          } catch {
+            /* local-only — the device copy above is the record of truth */
+          }
+        }
+      }
+    },
+    [memories, profileId],
+  );
+
+  /** Drop every memory whose text mentions `needle`. */
+  const forgetMemoryText = useCallback(
+    async (needle: string) => {
+      const target = needle.trim().toLowerCase();
+      if (!target) return;
+      const gone = memories.filter((m) => m.text.toLowerCase().includes(target));
+      if (gone.length === 0) return;
+      setMemories((prev) => prev.filter((m) => !gone.some((g) => g.id === m.id)));
+      if (!profileId) return;
+      for (const memory of gone) {
+        try {
+          await supabase
+            .from("coach_memory")
+            .delete()
+            .eq("id", memory.id)
+            .eq("profile_id", profileId);
+        } catch {
+          /* local-only */
+        }
+      }
+    },
+    [memories, profileId],
+  );
+
+  /**
    * One request in flight at a time. Sending a second question abandons the
    * first — the answer to a question you've moved on from is just noise, and
    * an edge function on a cold start can easily still be thinking.
@@ -551,7 +626,15 @@ export function useCoachSystem() {
       const controller = new AbortController();
       inFlight.current = controller;
 
-      const record = readCoachRecord(memories.filter((m) => m.pinned).map((m) => m.text));
+      /*
+       * The coach speaks from everything it has learned, pinned memories
+       * first — capped so a long history never crowds out the question.
+       */
+      const remembered = [...memories]
+        .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)))
+        .slice(0, 12)
+        .map((m) => m.text);
+      const record = readCoachRecord(remembered);
       const context = request.context;
       record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
 
@@ -569,7 +652,14 @@ export function useCoachSystem() {
               role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
               content: m.text ?? m.paragraphs.join("\n\n"),
             })),
-          provider: COACH_PROVIDER,
+          /* The picker's choice is honoured; "Best available" (auto) walks
+             the best-first chain on the function. */
+          provider: activeProvider().id,
+          /* Photos and PDFs ride along for the vision model. */
+          ...(() => {
+            const media = attachmentToMedia(request.attachment);
+            return media ? { image: media } : {};
+          })(),
           signal: controller.signal,
         });
       } finally {
@@ -620,6 +710,8 @@ export function useCoachSystem() {
       saveMessage,
       updateMemory,
       forgetMemory,
+      rememberMemory,
+      forgetMemoryText,
       requestResponse,
     }),
     [
@@ -634,6 +726,8 @@ export function useCoachSystem() {
       saveMessage,
       updateMemory,
       forgetMemory,
+      rememberMemory,
+      forgetMemoryText,
       requestResponse,
       openConversation,
       removeConversation,

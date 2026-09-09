@@ -139,7 +139,7 @@ function MemoryView({
   return (
     <div className="coach-panel-body">
       <p className="coach-panel-lede">
-        Things Bloom keeps because you asked it to — each one can be pinned or forgotten here.
+        What Bloom keeps from your conversations — pin the important ones, forget the rest here.
       </p>
       <div className="coach-memory-filters" role="group" aria-label="Filter saved context">
         {(["all", "pattern", "preference", "goal", "context"] as const).map((key) => (

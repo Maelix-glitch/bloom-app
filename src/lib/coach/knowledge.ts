@@ -335,6 +335,81 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
 /** Does the coach have something substantive to say about this? */
 export const hasKnowledge = (topic: Topic): boolean => topic in KNOWLEDGE;
 
+/* -------------------------------------------------------------------------- */
+/*  APP_FACTS — what the coach knows about Bloom itself                        */
+/* -------------------------------------------------------------------------- */
+
+export interface AppFact {
+  key: string;
+  /** Any one matching pattern answers the question from the rules below. */
+  patterns: RegExp[];
+  paragraphs: string[];
+}
+
+/**
+ * Questions about Bloom itself are answered from Bloom's own rules — never by
+ * reading the person's (possibly empty) record. "How do I earn points?" used
+ * to fall into the general responder, which looked at an empty log and
+ * deflected with "your record is empty". Points come from the app's rules,
+ * not from any log, so the app-facts branch answers first and the record is
+ * never consulted. Guarded by app-facts.test.ts.
+ */
+export const APP_FACTS: AppFact[] = [
+  {
+    key: "points",
+    patterns: [
+      /\bhow (do|can|to) .{0,24}(earn|get|win|collect|make) .{0,12}(points?|rewards?)\b/i,
+      /\b(points|rewards?)\b.{0,40}(earn|get|work|tracked|counted)\b/i,
+      /\b(what are|how do) (bloom )?points\b/i,
+      /\bhow (do|does) (i |you |the )?points? (work|add up)\b/i,
+      /\bwhat('| a)?re (the )?rewards?\b/i,
+    ],
+    paragraphs: [
+      "Habit ticks earn points — ten per tick by default — and your running total is on the Rewards page. Points are Bloom's way of making a streak visible, not a currency with hidden rules.",
+      "If you're not earning as you'd expect, check that the habit is still active and unpaused: paused and archived habits don't tick, so they don't earn.",
+    ],
+  },
+  {
+    key: "overview",
+    patterns: [
+      /\bwhat is bloom\b/i,
+      /\bwhat('| i)s this app\b/i,
+      /\bwhat does bloom (do|track|have)\b/i,
+      /\btell me about (bloom|this app)\b/i,
+      /\bwhat can i (do|track|log|use) (in|with|on) bloom\b/i,
+      /\boverview\b.{0,20}bloom\b|\bbloom\b.{0,20}overview\b/i,
+    ],
+    paragraphs: [
+      "Bloom is a private wellbeing companion. You check in with how you feel, log the daily trackers — sleep, water, study, movement, energy, screen time — keep habits with reminders, and track your cycle if you want to. Bloom's coach reads the record and talks with you about your days, and can act inside the app for you: create habits, log a value, set a goal.",
+      "Everything is stored on your device by default and only ever syncs to a database you own. There is no Bloom server holding your data, and Profile has a full export and a complete erase.",
+    ],
+  },
+  {
+    key: "skills",
+    patterns: [
+      /\bwhat can you do\b/i,
+      /\bwhat are your (skills|abilities|capabilities)\b/i,
+      /\bwhat do you (help|do) with\b/i,
+      /\bhow (can|do) you help (me|people)\b/i,
+      /\b(list|tell me) your (skills|abilities|capabilities)\b/i,
+    ],
+    paragraphs: [
+      "Broadly: talk with you about your life, read your Bloom record to keep it grounded, act inside the app, look at photos, and remember what matters to you.",
+      "Concretely — I can discuss sleep, food and nutrition, fitness and training, stress and anxiety, work, study, relationships, money, grief and more; answer from your logs when a question is about your week; create or tick a habit, log sleep, water, movement, screen time or energy, and set a tracker goal; estimate the calories and macros in a food photo; and keep facts you share in mind for later conversations. Anything I do in the app is visible on its own page and can be changed there.",
+    ],
+  },
+];
+
+/** The first fact whose question-patterns match, or null when it's not an app question. */
+export function appFactFor(text: string): AppFact | null {
+  for (const fact of APP_FACTS) {
+    if (fact.patterns.some((re) => re.test(text))) return fact;
+  }
+  return null;
+}
+
+export const APP_FACT_SOURCE = "Bloom's own rules";
+
 /**
  * Topics where the honest answer includes "talk to a person". Used to make
  * sure the coach never buries that under advice.
