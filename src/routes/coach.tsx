@@ -6,19 +6,14 @@ import { CoachPage } from "@/components/coach/CoachPage";
 export const Route = createFileRoute("/coach")({
   head: () => ({
     meta: [
-      { title: "Bloom — Coach" },
+      { title: "Bloom Coach — A second mind for your day" },
       {
         name: "description",
-        content: "A private, structured conversation space for your day.",
+        content:
+          "Bloom's personal AI companion — ask, reflect, plan or simply talk, grounded in what you've actually logged.",
       },
     ],
-    links: [
-      { rel: "stylesheet", href: coachCss },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap",
-      },
-    ],
+    links: [{ rel: "stylesheet", href: coachCss }],
   }),
   component: CoachPage,
 });

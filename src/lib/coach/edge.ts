@@ -138,10 +138,7 @@ function readBody(data: unknown): string[] | null {
  * Ask the edge function. Resolves to `{ ok: false }` rather than rejecting —
  * the caller's job is to answer the person, not to handle transport errors.
  */
-export async function askEdge(
-  request: EdgeRequest,
-  signal?: AbortSignal,
-): Promise<EdgeResult> {
+export async function askEdge(request: EdgeRequest, signal?: AbortSignal): Promise<EdgeResult> {
   if (!hasSupabaseConfig) return { ok: false, reason: "unconfigured" };
   if (signal?.aborted) return { ok: false, reason: "aborted" };
 
@@ -165,9 +162,7 @@ export async function askEdge(
     if (!paragraphs) return { ok: false, reason: "error", detail: "empty response" };
 
     const provider =
-      (data as Record<string, unknown> | null)?.["provider"] ??
-      request.provider ??
-      "edge";
+      (data as Record<string, unknown> | null)?.["provider"] ?? request.provider ?? "edge";
     return { ok: true, paragraphs, provider: String(provider) };
   } catch (err) {
     if (signal?.aborted) return { ok: false, reason: "aborted" };

@@ -1,13 +1,21 @@
-﻿/**
- * useCoachSystem â€” the Coach page's data layer.
+/**
+ * useCoachSystem — the Coach's data layer.
  *
- * Reconstructed (the original never made it into git): session + thread +
- * approved memories persist to Supabase when the coach tables exist and fall
- * back to this device's storage otherwise, surfacing at most one calm notice.
- * `requestResponse` is a deterministic, context-grounded responder built on
- * `buildCoachContext`'s real numbers â€” it reads what actually happened and
- * never invents facts, diagnoses, or moods. A model provider can be slotted
- * behind the same signature later without touching the page.
+ * One device-first conversation store per profile: conversations are small,
+ * private, ordered threads with a title, a mode and a message list. The same
+ * grounded responder (`lib/coach/*`) answers every request; the Supabase edge
+ * function answers when it can and the deterministic on-device responder when
+ * it can't — the architecture of `engine.ts` is untouched.
+ *
+ * Conversations persist locally (per profile id), because grouping is a
+ * device-side view. The signed-in cloud thread keeps working as it always did:
+ * every message is mirrored to `coach_messages` when a profile is connected,
+ * and a device with no local store imports that thread as a single
+ * conversation — so no existing message is ever stranded.
+ *
+ * The legacy API (messages / setMessages / saveMessage / memories / …) is
+ * preserved unchanged for the Today-page CoachPanel and older surfaces; here
+ * `messages` simply means "the active conversation's messages".
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -51,6 +59,10 @@ export interface CoachMessage {
   blocks: CoachBlock[];
   attachment?: CoachAttachmentPayload | undefined;
   status?: "sent" | "local" | "error" | undefined;
+  /** Which brain produced this — shown quietly when it matters. */
+  source?: "edge" | "local" | undefined;
+  /** Why the online brain was skipped, when it was (transient, not stored). */
+  fellBackBecause?: string | undefined;
 }
 
 export type { CoachBlock, CoachResponse } from "@/lib/coach/responder";
@@ -63,6 +75,15 @@ export interface CoachMemory {
   learnedAt: string | null;
 }
 
+export interface CoachConversation {
+  id: string;
+  title: string;
+  mode: CoachMode;
+  createdAt: string;
+  updatedAt: string;
+  messages: CoachMessage[];
+}
+
 export interface CoachRequest {
   text: string;
   mode: CoachMode;
@@ -71,9 +92,34 @@ export interface CoachRequest {
   attachment?: CoachFilePayload | undefined;
 }
 
+export interface CoachReply extends CoachResponse {
+  fellBackBecause?: string | undefined;
+}
 
-const THREAD_KEY = (uid: string | null) => `bloom.coach.thread.${uid ?? "anon"}`;
+/** A compact, human title for a conversation, from its first message. */
+export function titleFor(text: string): string {
+  const clean = text
+    .split("\n")[0]
+    ?.replace(/\s+/g, " ")
+    .replace(/[?#*_~]+/g, "")
+    .trim();
+  if (!clean) return "New conversation";
+  const max = 52;
+  return clean.length > max ? `${clean.slice(0, max - 1).trimEnd()}…` : clean;
+}
+
+const CONVOS_KEY = (uid: string | null) => `bloom.coach.conversations.v1.${uid ?? "anon"}`;
+const LEGACY_THREAD_KEY = (uid: string | null) => `bloom.coach.thread.${uid ?? "anon"}`;
 const MEMORIES_KEY = (uid: string | null) => `bloom.coach.memories.${uid ?? "anon"}`;
+
+const MAX_CONVERSATIONS = 24;
+const MAX_MESSAGES_PER_CONVERSATION = 120;
+
+interface StoredConversations {
+  v: 1;
+  activeId: string | null;
+  conversations: CoachConversation[];
+}
 
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -90,15 +136,52 @@ function writeJson(key: string, value: unknown): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* storage unavailable â€” state stays in memory */
+    /* storage unavailable — state stays in memory */
   }
+}
+
+function readStored(uid: string | null): StoredConversations {
+  const raw = readJson<StoredConversations | null>(CONVOS_KEY(uid), null);
+  if (
+    raw &&
+    typeof raw === "object" &&
+    Array.isArray(raw.conversations) &&
+    raw.conversations.every((c) => c && Array.isArray(c.messages))
+  ) {
+    return { v: 1, activeId: raw.activeId ?? null, conversations: raw.conversations };
+  }
+  return { v: 1, activeId: null, conversations: [] };
+}
+
+function trimConversations(store: StoredConversations): StoredConversations {
+  const byRecency = [...store.conversations].sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
+  const keep: CoachConversation[] = [];
+  for (const conversation of byRecency) {
+    if (keep.length >= MAX_CONVERSATIONS && conversation.id !== store.activeId) continue;
+    keep.push({
+      ...conversation,
+      messages: conversation.messages.slice(-MAX_MESSAGES_PER_CONVERSATION),
+    });
+  }
+  return { v: 1, activeId: store.activeId, conversations: keep };
+}
+
+/** The first sentence or so of a user message becomes the row's title. */
+function maybeRename(messages: CoachMessage[]): string | null {
+  const first = messages.find((m) => m.role === "user" || m.role === "you");
+  if (!first) return null;
+  const text = (first.text ?? first.paragraphs.join(" ")).trim();
+  if (!text) return null;
+  return titleFor(text);
 }
 
 /**
  * Message content as text.
  *
  * The `coach_messages.content` column is written as a string here, but rows can
- * also come back as jsonb â€” a string, an array of parts, or an object with a
+ * also come back as jsonb — a string, an array of parts, or an object with a
  * `text` field. `String({})` used to render "[object Object]" in the thread, so
  * every shape is unwrapped here instead.
  */
@@ -130,24 +213,40 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
         ? error.message
         : "";
   if (/fetch|network|failed to fetch/i.test(raw))
-    return "You're offline â€” this reply stays on the device.";
+    return "You're offline — this reply stays on the device.";
   if (/relation|does not exist|schema cache|404/i.test(raw))
-    return "Coach storage isn't set up yet â€” everything stays on this device.";
+    return "Coach storage isn't set up yet — everything stays on this device.";
   return fallback ?? "Something went wrong on our end. Your words are safe on this device.";
 }
-
-/* --------------------------- the grounded responder --------------------------- */
-
-const fmt = (n: number) => `${Math.round(n * 10) / 10}`;
 
 /* --------------------------------- the hook --------------------------------- */
 
 type Row = Record<string, unknown>;
 
+function rowsToMessage(r: Row, index: number): CoachMessage {
+  const content = contentToText(r["content"]);
+  return {
+    id: String(r["id"] ?? `row-${index}`),
+    role: r["role"] === "user" ? "user" : "coach",
+    time: String(r["created_at"] ?? new Date().toISOString()),
+    text: content || undefined,
+    paragraphs: content
+      .split("\n\n")
+      .map((part) => part.trim())
+      .filter(Boolean),
+    sources: Array.isArray(r["sources"]) ? (r["sources"] as string[]) : [],
+    blocks: [],
+  };
+}
+
 export function useCoachSystem() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState<CoachMessage[]>([]);
+  const [store, setStore] = useState<StoredConversations>({
+    v: 1,
+    activeId: null,
+    conversations: [],
+  });
   const [memories, setMemories] = useState<CoachMemory[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [habitData] = useState<CoachHabitData>(() => readHabitData());
@@ -181,77 +280,207 @@ export function useCoachSystem() {
     let mounted = true;
     setLoading(true);
 
-    setMessages(readJson<CoachMessage[]>(THREAD_KEY(profileId), []));
+    /* Local conversations are the source of truth on this device. */
+    const local = readStored(profileId);
     setMemories(readJson<CoachMemory[]>(MEMORIES_KEY(profileId), []));
-
-    if (profileId) {
-      void (async () => {
-        try {
-          const [{ data: rows }, { data: memRows }] = await Promise.all([
-            supabase
-              .from("coach_messages")
-              .select("id, role, content, sources, created_at")
-              .eq("profile_id", profileId)
-              .order("created_at", { ascending: true })
-              .limit(40),
-            supabase
-              .from("coach_memory")
-              .select("id, category, fact, pinned, updated_at")
-              .eq("profile_id", profileId)
-              .order("updated_at", { ascending: false })
-              .limit(30),
-          ]);
-          if (!mounted) return;
-          if (Array.isArray(rows) && rows.length > 0) {
-            setMessages(
-              (rows as Row[]).map((r) => ({
-                id: String(r["id"]),
-                role: r["role"] === "user" ? "user" : "coach",
-                time: String(r["created_at"] ?? new Date().toISOString()),
-                text: contentToText(r["content"]) || undefined,
-                paragraphs: contentToText(r["content"])
-                  .split("\n\n")
-                  .map((part) => part.trim())
-                  .filter(Boolean),
-                sources: Array.isArray(r["sources"]) ? (r["sources"] as string[]) : [],
-                blocks: [],
-              })),
-            );
-          }
-          if (Array.isArray(memRows) && memRows.length > 0) {
-            setMemories(
-              (memRows as Row[]).map((m) => ({
-                id: String(m["id"]),
-                category: (["pattern", "preference", "goal", "context"].includes(
-                  String(m["category"]),
-                )
-                  ? m["category"]
-                  : "context") as CoachMemory["category"],
-                text: String(m["fact"] ?? ""),
-                pinned: Boolean(m["pinned"]),
-                learnedAt: m["updated_at"]
-                  ? new Date(String(m["updated_at"])).toLocaleDateString()
-                  : null,
-              })),
-            );
-          }
-        } catch (error) {
-          if (!mounted) return;
-          console.warn("[bloom:coach] storage unavailable, using device:", error);
-          setStorageError(coachErrorMessage(error));
-        }
-      })().finally(() => mounted && setLoading(false));
-    } else {
+    if (local.conversations.length > 0) {
+      setStore(local);
       setLoading(false);
+      return () => {
+        mounted = false;
+      };
     }
+
+    /* Nothing local yet: migrate the legacy single thread, then the cloud
+       thread — in that order of preference, both without altering rows. */
+    const legacy = readJson<CoachMessage[]>(LEGACY_THREAD_KEY(profileId), []);
+    const fromLegacy = (): StoredConversations => {
+      if (legacy.length === 0) return { v: 1, activeId: null, conversations: [] };
+      try {
+        window.localStorage.removeItem(LEGACY_THREAD_KEY(profileId));
+      } catch {
+        /* keep going with the copy we already read */
+      }
+      const firstTime = legacy.find((m) => m.time && m.time !== "now")?.time;
+      const opened = firstTime ? new Date(firstTime).toISOString() : new Date().toISOString();
+      const conversation: CoachConversation = {
+        id: `legacy-${profileId ?? "anon"}`,
+        title: maybeRename(legacy) ?? "Earlier with Bloom",
+        mode: "ask",
+        createdAt: opened,
+        updatedAt: new Date().toISOString(),
+        messages: legacy,
+      };
+      return { v: 1, activeId: conversation.id, conversations: [conversation] };
+    };
+
+    if (!profileId) {
+      setStore(fromLegacy());
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    void (async () => {
+      try {
+        const [{ data: rows }, { data: memRows }] = await Promise.all([
+          supabase
+            .from("coach_messages")
+            .select("id, role, content, sources, created_at")
+            .eq("profile_id", profileId)
+            .order("created_at", { ascending: true })
+            .limit(40),
+          supabase
+            .from("coach_memory")
+            .select("id, category, fact, pinned, updated_at")
+            .eq("profile_id", profileId)
+            .order("updated_at", { ascending: false })
+            .limit(30),
+        ]);
+        if (!mounted) return;
+        if (Array.isArray(memRows) && memRows.length > 0) {
+          setMemories(
+            (memRows as Row[]).map((m) => ({
+              id: String(m["id"]),
+              category: (["pattern", "preference", "goal", "context"].includes(
+                String(m["category"]),
+              )
+                ? m["category"]
+                : "context") as CoachMemory["category"],
+              text: String(m["fact"] ?? ""),
+              pinned: Boolean(m["pinned"]),
+              learnedAt: m["updated_at"]
+                ? new Date(String(m["updated_at"])).toLocaleDateString()
+                : null,
+            })),
+          );
+        }
+        if (Array.isArray(rows) && rows.length > 0) {
+          const messages = (rows as Row[]).map(rowsToMessage);
+          const firstTime = messages[0]?.time ?? new Date().toISOString();
+          const conversation: CoachConversation = {
+            id: `cloud-${profileId}`,
+            title: maybeRename(messages) ?? "Earlier with Bloom",
+            mode: "ask",
+            createdAt: firstTime,
+            updatedAt: new Date().toISOString(),
+            messages,
+          };
+          setStore({ v: 1, activeId: conversation.id, conversations: [conversation] });
+        } else {
+          setStore(fromLegacy());
+        }
+      } catch (error) {
+        if (!mounted) return;
+        console.warn("[bloom:coach] storage unavailable, using device:", error);
+        setStorageError(coachErrorMessage(error));
+        setStore(fromLegacy());
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
     return () => {
       mounted = false;
     };
   }, [profileId]);
 
-  // local cache always mirrors the live state
-  useEffect(() => writeJson(THREAD_KEY(profileId), messages.slice(-40)), [messages, profileId]);
+  /* Persist whenever the store changes — a small object, written on change. */
+  useEffect(() => {
+    writeJson(CONVOS_KEY(profileId), trimConversations(store));
+  }, [profileId, store]);
   useEffect(() => writeJson(MEMORIES_KEY(profileId), memories), [memories, profileId]);
+
+  const activeConversation = useMemo(
+    () => store.conversations.find((c) => c.id === store.activeId) ?? null,
+    [store],
+  );
+
+  /* Sorted by recency for lists; never mutates the stored arrays. */
+  const conversations = useMemo(
+    () => [...store.conversations].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1)),
+    [store.conversations],
+  );
+
+  const messages = useMemo(() => activeConversation?.messages ?? [], [activeConversation]);
+
+  const setMessages = useCallback(
+    (next: CoachMessage[] | ((current: CoachMessage[]) => CoachMessage[])) => {
+      setStore((current) => {
+        const base = current.conversations.find((c) => c.id === current.activeId);
+        const applied = typeof next === "function" ? next(base?.messages ?? []) : next;
+        if (!base && applied.length === 0) return current;
+        if (!base) {
+          const now = new Date().toISOString();
+          const title = maybeRename(applied) ?? "New conversation";
+          const conversation: CoachConversation = {
+            id: `conv-${Date.now()}`,
+            title,
+            mode: "ask",
+            createdAt: now,
+            updatedAt: now,
+            messages: applied,
+          };
+          return {
+            v: 1,
+            activeId: conversation.id,
+            conversations: [...current.conversations, conversation],
+          };
+        }
+        const title =
+          !base.title || base.title === "New conversation"
+            ? (maybeRename(applied) ?? base.title)
+            : base.title;
+        const conversation: CoachConversation = {
+          ...base,
+          title,
+          updatedAt: new Date().toISOString(),
+          messages: applied,
+        };
+        return {
+          v: 1,
+          activeId: current.activeId,
+          conversations: current.conversations.map((c) =>
+            c.id === conversation.id ? conversation : c,
+          ),
+        };
+      });
+    },
+    [],
+  );
+
+  const openConversation = useCallback((id: string | null) => {
+    setStore((current) => {
+      if (id !== null && !current.conversations.some((c) => c.id === id)) return current;
+      return { v: 1, activeId: id, conversations: current.conversations };
+    });
+  }, []);
+
+  const removeConversation = useCallback((id: string) => {
+    setStore((current) => {
+      const conversations = current.conversations.filter((c) => c.id !== id);
+      const activeId = current.activeId === id ? null : current.activeId;
+      return { v: 1, activeId, conversations };
+    });
+  }, []);
+
+  const renameConversation = useCallback((id: string, title: string) => {
+    setStore((current) => ({
+      v: 1,
+      activeId: current.activeId,
+      conversations: current.conversations.map((c) =>
+        c.id === id ? { ...c, title: title.trim() || "New conversation" } : c,
+      ),
+    }));
+  }, []);
+
+  const setConversationMode = useCallback((id: string, mode: CoachMode) => {
+    setStore((current) => ({
+      v: 1,
+      activeId: current.activeId,
+      conversations: current.conversations.map((c) => (c.id === id ? { ...c, mode } : c)),
+    }));
+  }, []);
 
   const saveMessage = useCallback(
     async (message: CoachMessage): Promise<boolean> => {
@@ -306,21 +535,17 @@ export function useCoachSystem() {
 
   /**
    * One request in flight at a time. Sending a second question abandons the
-   * first â€” the answer to a question you've moved on from is just noise, and
+   * first — the answer to a question you've moved on from is just noise, and
    * an edge function on a cold start can easily still be thinking.
    */
   const inFlight = useRef<AbortController | null>(null);
 
   const requestResponse = useCallback(
-    async (request: CoachRequest): Promise<CoachResponse> => {
+    async (request: CoachRequest): Promise<CoachReply> => {
       /*
-       * Supersede any request still running. Only one answer can be wanted at
-       * a time, and the answer to a question you have moved on from is noise.
-       *
-       * The controller is cleared when its own request finishes, so this only
-       * ever aborts a genuinely in-flight call â€” previously the reference
-       * lingered after completion, so under React StrictMode's double-invoke
-       * a send could abort itself and come back with an empty answer.
+       * Supersede any request still running. The controller is cleared when its
+       * own request finishes, so this only ever aborts a genuinely in-flight
+       * call (see the history in git for why that ordering matters).
        */
       inFlight.current?.abort();
       const controller = new AbortController();
@@ -330,11 +555,6 @@ export function useCoachSystem() {
       const context = request.context;
       record.habitsActive = context.habits.available ? context.habits.activeCount : 0;
 
-      /*
-       * The engine tries the Supabase edge function and falls back to the
-       * on-device responder by itself, so there is no error path to handle
-       * here â€” an answer always comes back.
-       */
       let result;
       try {
         result = await askCoach({
@@ -358,14 +578,9 @@ export function useCoachSystem() {
         if (inFlight.current === controller) inFlight.current = null;
       }
 
-      /*
-       * An answer with no paragraphs would render as an empty bubble, which is
-       * indistinguishable from the coach hanging. It should never happen now,
-       * but the UI must not be able to show nothing.
-       */
       if (result.paragraphs.length === 0) {
         return {
-          paragraphs: ["Sorry â€” I lost my train of thought there. Ask me again?"],
+          paragraphs: ["Sorry — I lost my train of thought there. Ask me again?"],
           sources: [],
           blocks: [],
           source: result.source,
@@ -376,8 +591,9 @@ export function useCoachSystem() {
         paragraphs: result.paragraphs,
         sources: result.sources,
         blocks: result.blocks,
-        /* Which brain answered, so the header can be honest about a fallback. */
+        /* Which brain answered, so the UI can be honest about a fallback. */
         source: result.source,
+        fellBackBecause: result.fellBackBecause,
       };
     },
     [memories],
@@ -392,6 +608,12 @@ export function useCoachSystem() {
       loading,
       messages,
       setMessages,
+      conversations,
+      activeConversation,
+      openConversation,
+      removeConversation,
+      renameConversation,
+      setConversationMode,
       memories,
       habitData,
       storageError,
@@ -404,6 +626,8 @@ export function useCoachSystem() {
       profileId,
       loading,
       messages,
+      activeConversation,
+      conversations,
       memories,
       habitData,
       storageError,
@@ -411,12 +635,17 @@ export function useCoachSystem() {
       updateMemory,
       forgetMemory,
       requestResponse,
+      openConversation,
+      removeConversation,
+      renameConversation,
+      setConversationMode,
+      setMessages,
     ],
   );
 }
 
 /* -------------------------------- the record ------------------------------- */
-/* The trackers page is optional â€” some installs run the coach without it â€” so
+/* The trackers page is optional — some installs run the coach without it — so
  * this reads the same localStorage keys directly rather than importing
  * `lib/trackers/*`. A missing folder then costs the coach a topic, not the
  * page. The formatting below mirrors core.ts so both pages quote a day the
@@ -551,7 +780,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
       personalMaxPlausible: settings.personalMaxPlausible,
       expecting: mode === "tracking",
     });
-    /* cycle tracking turned off â†’ not a topic; the coach neither mentions nor prompts it */
+    /* cycle tracking turned off → not a topic; the coach neither mentions nor prompts it */
     cycle =
       mode === "off"
         ? null
@@ -585,7 +814,7 @@ function readHabitData(): CoachHabitData {
     available: true,
     habits: habits
       .filter((h) => !h["archived"] && !h["completed"])
-      // a paused habit is off the table today â€” the coach shouldn't nag about it
+      // a paused habit is off the table today — the coach shouldn't nag about it
       .filter((h) => {
         const until = typeof h["pausedUntil"] === "string" ? h["pausedUntil"] : null;
         if (!until) return true;

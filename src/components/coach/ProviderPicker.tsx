@@ -63,7 +63,9 @@ export function ProviderPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        title={degraded ? "Answered on this device — the coach function didn't reply" : current.blurb}
+        title={
+          degraded ? "Answered on this device — the coach function didn't reply" : current.blurb
+        }
       >
         {current.remote ? <Sparkles className="size-3" /> : <Cpu className="size-3" />}
         <span className="truncate">{current.name}</span>

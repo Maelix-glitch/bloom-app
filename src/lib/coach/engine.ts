@@ -99,10 +99,7 @@ const CARE_OPENERS: Partial<Record<Topic, string[]>> = {
     "Pain wears everything else down with it.",
     "That's rough, and it makes every other thing harder.",
   ],
-  illness: [
-    "Sorry you're unwell.",
-    "Being ill takes more out of you than the symptoms suggest.",
-  ],
+  illness: ["Sorry you're unwell.", "Being ill takes more out of you than the symptoms suggest."],
   relationships: [
     "People are the hardest part of most weeks.",
     "That sounds like it's taking up a lot of room.",
@@ -124,14 +121,19 @@ const CARE_OPENERS: Partial<Record<Topic, string[]>> = {
  */
 const UNTRACKED_NOTE: Partial<Record<Topic, string>> = {
   food: "Bloom doesn't track meals, so I can't tell you what you ate — but energy and sleep usually show the shape of it.",
-  caffeine: "Caffeine isn't one of Bloom's trackers, though your sleep log is the place it tends to show up.",
-  alcohol: "Bloom doesn't log drinks, but sleep quality and next-day energy usually tell the story.",
+  caffeine:
+    "Caffeine isn't one of Bloom's trackers, though your sleep log is the place it tends to show up.",
+  alcohol:
+    "Bloom doesn't log drinks, but sleep quality and next-day energy usually tell the story.",
   work: "Work isn't tracked directly, though study minutes, screen time and energy tend to move with it.",
-  money: "That's outside what Bloom tracks, so I'll speak generally rather than pretending to read it in your data.",
-  relationships: "Bloom doesn't track people, only how your days go — so take what I say as general, not as something I've measured.",
+  money:
+    "That's outside what Bloom tracks, so I'll speak generally rather than pretending to read it in your data.",
+  relationships:
+    "Bloom doesn't track people, only how your days go — so take what I say as general, not as something I've measured.",
   grief: "There's nothing in a tracker that measures this, and I won't pretend otherwise.",
   loneliness: "Bloom can't see your social life, only your logs — so this is me talking generally.",
-  illness: "I'm not a clinician and Bloom isn't a medical record. For anything that worries you, a doctor beats an app.",
+  illness:
+    "I'm not a clinician and Bloom isn't a medical record. For anything that worries you, a doctor beats an app.",
   pain: "Bloom doesn't track pain outside the cycle log, and persistent pain is a doctor's question, not an app's.",
   body: "Bloom deliberately doesn't track weight, so there's no number here for me to quote at you.",
 };
@@ -224,7 +226,12 @@ export function answerLocally(input: AskInput): CoachAnswer {
   }
 
   /* A second tracked subject in the same question is worth a line. */
-  if (budget.maxParagraphs >= 3 && also.length > 0 && isTrackedTopic(also[0]!) && !isTrackedTopic(primary)) {
+  if (
+    budget.maxParagraphs >= 3 &&
+    also.length > 0 &&
+    isTrackedTopic(also[0]!) &&
+    !isTrackedTopic(primary)
+  ) {
     const side = localAnswer({ text, mode }, context, record);
     const grounded = side.paragraphs.filter(isGrounded);
     if (grounded[0]) fromRecord = [...fromRecord, grounded[0]];

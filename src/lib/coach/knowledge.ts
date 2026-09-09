@@ -86,7 +86,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Protein at breakfast blunts the mid-morning dip better than the same calories as carbohydrate — it's the most reliable single swap.",
     ],
-    step: ["If afternoons are the problem, make lunch smaller and see if the dip moves. One week is enough to tell."],
+    step: [
+      "If afternoons are the problem, make lunch smaller and see if the dip moves. One week is enough to tell.",
+    ],
   },
   caffeine: {
     core: [
@@ -106,7 +108,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Exercise is one of the few things with a same-day effect on mood and a next-day effect on sleep. It's the fastest feedback loop you have.",
     ],
-    step: ["Make it small enough that a bad day can't stop it — ten minutes, same time, no changing clothes."],
+    step: [
+      "Make it small enough that a bad day can't stop it — ten minutes, same time, no changing clothes.",
+    ],
     reads: "movement",
   },
   water: {
@@ -157,7 +161,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Almost every case comes down to demand exceeding control. Where you can't reduce demand, taking back a small piece of control — over your calendar, the order of work, when you're reachable — does more than it sounds like it should.",
     ],
-    step: ["Pick one boundary you can defend this week and defend it once. One kept boundary beats a plan you abandon."],
+    step: [
+      "Pick one boundary you can defend this week and defend it once. One kept boundary beats a plan you abandon.",
+    ],
   },
   time: {
     core: [
@@ -166,7 +172,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Try tracking where a day actually goes for two days before optimising it. People are reliably wrong about their own time, usually by hours.",
     ],
-    step: ["Choose the one thing that must happen tomorrow and put it first, before the day can take it."],
+    step: [
+      "Choose the one thing that must happen tomorrow and put it first, before the day can take it.",
+    ],
   },
   motivation: {
     core: [
@@ -204,7 +212,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
       "There's a real difference between stress with a cause you can name and anxiety that arrives without one. The first responds to changing the situation, the second to changing how you relate to it — and they need different approaches.",
       "The fastest physiological lever is your breath out. A longer exhale than inhale, for a minute, genuinely shifts the nervous system — it's not a metaphor.",
     ],
-    step: ["Write down the specific worry in one sentence. Vague dread resists solving; a sentence can be answered."],
+    step: [
+      "Write down the specific worry in one sentence. Vague dread resists solving; a sentence can be answered.",
+    ],
     reads: "stress",
   },
   mood: {
@@ -222,7 +232,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
       "Loneliness is about the gap between the connection you have and the connection you want — which is why it happens in a full room.",
       "It also lies to you: it makes reaching out feel more likely to be rejected than it is, so the feeling protects itself.",
     ],
-    step: ["Message one person something specific rather than 'we should catch up'. Specific invitations get answered."],
+    step: [
+      "Message one person something specific rather than 'we should catch up'. Specific invitations get answered.",
+    ],
   },
   grief: {
     core: [
@@ -271,7 +283,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     core: [
       "The problem with screens before bed is usually the content, not the blue light — the light effect is modest, but anything engaging keeps you alert.",
     ],
-    step: ["Choose where the phone sleeps, and make it another room. Willpower loses to proximity."],
+    step: [
+      "Choose where the phone sleeps, and make it another room. Willpower loses to proximity.",
+    ],
     reads: "screen",
   },
   body: {

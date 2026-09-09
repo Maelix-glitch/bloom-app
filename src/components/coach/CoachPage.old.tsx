@@ -533,9 +533,7 @@ function MessageCard({
           )}
         >
           {message.status !== "error"
-            ? typed.text.map((paragraph, index) => (
-                <RichParagraph key={index} text={paragraph} />
-              ))
+            ? typed.text.map((paragraph, index) => <RichParagraph key={index} text={paragraph} />)
             : null}
           {typed.running ? (
             /* Anyone who reads faster than the reveal can end it. */
@@ -1232,9 +1230,8 @@ function EmptyConversation({
       <p className="eyebrow">Bloom Coach</p>
       <h2 className="display">Tell me what is on your mind.</h2>
       <p className="coach-empty-copy">
-        Sleep, focus, a rough week, work, the thing you keep putting off â€” ask about
-        any of it. I'll use what you've logged when it's relevant, and say so when
-        there's nothing to go on.
+        Sleep, focus, a rough week, work, the thing you keep putting off â€” ask about any of it.
+        I'll use what you've logged when it's relevant, and say so when there's nothing to go on.
       </p>
       <div className="coach-empty-modes" aria-label="Choose how to approach this">
         {LENSES.map((lens) => (
