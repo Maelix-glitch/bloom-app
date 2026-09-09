@@ -86,17 +86,14 @@ describe("empty answers are impossible", () => {
   const FALLBACK = "Sorry — I lost my train of thought there. Ask me again?";
 
   /** The guard used in both the hook and the component. */
-  const ensure = (paragraphs: string[]) =>
-    paragraphs.length > 0 ? paragraphs : [FALLBACK];
+  const ensure = (paragraphs: string[]) => (paragraphs.length > 0 ? paragraphs : [FALLBACK]);
 
   it("substitutes a real reply for an empty list", () => {
     expect(ensure([])).toEqual([FALLBACK]);
   });
 
   it("leaves a real answer untouched", () => {
-    expect(ensure(["Your sleep averaged 6.1 hours."])).toEqual([
-      "Your sleep averaged 6.1 hours.",
-    ]);
+    expect(ensure(["Your sleep averaged 6.1 hours."])).toEqual(["Your sleep averaged 6.1 hours."]);
   });
 
   it("never yields a zero-length result", () => {

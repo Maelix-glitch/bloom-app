@@ -81,12 +81,14 @@ export const TOPICS: TopicSpec[] = [
   /* high stakes first — these must never be swallowed by a softer match */
   {
     topic: "grief",
-    pattern: /\b(grief|grieving|bereave|passed away|died|death of|funeral|mourning|lost (my|our) )\b/i,
+    pattern:
+      /\b(grief|grieving|bereave|passed away|died|death of|funeral|mourning|lost (my|our) )\b/i,
     care: true,
   },
   {
     topic: "loneliness",
-    pattern: /\b(lonely|loneliness|isolated|no( |-)one to talk|by myself all|nobody (cares|understands))\b/i,
+    pattern:
+      /\b(lonely|loneliness|isolated|no( |-)one to talk|by myself all|nobody (cares|understands))\b/i,
     care: true,
   },
 
@@ -97,25 +99,28 @@ export const TOPICS: TopicSpec[] = [
    */
   {
     topic: "data",
-    pattern: /\b(my data|export|download|delete|erase|privacy|private|who can see|backup|sync|account)\b/i,
+    pattern:
+      /\b(my data|export|download|delete|erase|privacy|private|who can see|backup|sync|account)\b/i,
   },
   {
     topic: "appHelp",
-    pattern: /\b(how do i (log|add|track|use)|where (is|do i find)|bloom|this app|the app|settings|notification|reminder|widget|install)\b/i,
+    pattern:
+      /\b(how do i (log|add|track|use)|where (is|do i find)|bloom|this app|the app|settings|notification|reminder|widget|install)\b/i,
   },
-
 
   /* the cycle, before "flow"/"cramp" can be read as pain */
   {
     topic: "period",
-    pattern: /\b(period|cramp\w*|bleed\w*|pms|ovulat\w*|menstrua\w*|cycle|luteal|follicular|spotting|tampon|pad|menopaus\w*)\b/i,
+    pattern:
+      /\b(period|cramp\w*|bleed\w*|pms|ovulat\w*|menstrua\w*|cycle|luteal|follicular|spotting|tampon|pad|menopaus\w*)\b/i,
     tracked: true,
   },
 
   /* trackers */
   {
     topic: "sleep",
-    pattern: /\b(sleep|slept|sleeping|bedtime|bed|awake|insomnia|nap|napped|rested|restless|wak(e|ing) up|woke|waking|drowsy|snooze|dream\w*|jet ?lag|3 ?am|4 ?am|middle of the night)\b/i,
+    pattern:
+      /\b(sleep|slept|sleeping|bedtime|bed|awake|insomnia|nap|napped|rested|restless|wak(e|ing) up|woke|waking|drowsy|snooze|dream\w*|jet ?lag|3 ?am|4 ?am|middle of the night)\b/i,
     tracked: true,
   },
   {
@@ -124,7 +129,8 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "water",
-    pattern: /\b(water|hydrat\w*|dehydrat\w*|thirsty|drink(ing)? (more|enough)?|glasses of|fluids)\b/i,
+    pattern:
+      /\b(water|hydrat\w*|dehydrat\w*|thirsty|drink(ing)? (more|enough)?|glasses of|fluids)\b/i,
     tracked: true,
   },
   {
@@ -133,43 +139,51 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "food",
-    pattern: /\b(food|eat\w*|ate|meal|breakfast|lunch|dinner|snack\w*|diet\w*|nutrition|hungry|appetite|sugar|carbs|protein|cook\w*|skip(ped)? (a )?meal|fasting|intermittent|keto|vegan|vegetarian|supplement\w*|vitamin\w*)\b/i,
+    pattern:
+      /\b(food|eat\w*|ate|meal|breakfast|lunch|dinner|snack\w*|diet\w*|nutrition|hungry|appetite|sugar|carbs|protein|cook\w*|skip(ped)? (a )?meal|fasting|intermittent|keto|vegan|vegetarian|supplement\w*|vitamin\w*)\b/i,
   },
   {
     topic: "study",
-    pattern: /\b(study|studied|studying|revis\w*|homework|assignment|exam|test|coursework|lecture|class|deadline|essay|dissertation|thesis|focus|concentrat\w*|deep work|pomodoro)\b/i,
+    pattern:
+      /\b(study|studied|studying|revis\w*|homework|assignment|exam|test|coursework|lecture|class|deadline|essay|dissertation|thesis|focus|concentrat\w*|deep work|pomodoro)\b/i,
     tracked: true,
   },
   {
     topic: "movement",
-    pattern: /\b(move(ment)?|walk\w*|exercise|workout|run(ning)?|ran|gym|steps|stretch\w*|yoga|pilates|swim\w*|cycl(e|ing) (to|home)|lift(ing)?|training|sport)\b/i,
+    pattern:
+      /\b(move(ment)?|walk\w*|exercise|workout|run(ning)?|ran|gym|steps|stretch\w*|yoga|pilates|swim\w*|cycl(e|ing) (to|home)|lift(ing)?|training|sport)\b/i,
     tracked: true,
   },
   {
     topic: "screen",
-    pattern: /\b(screen ?time|screens?|phone|doom\w*|\w*scroll\w*|tiktok|instagram|twitter|youtube|reddit|laptop|tv|netflix|gaming|games?)\b/i,
+    pattern:
+      /\b(screen ?time|screens?|phone|doom\w*|\w*scroll\w*|tiktok|instagram|twitter|youtube|reddit|laptop|tv|netflix|gaming|games?)\b/i,
     tracked: true,
   },
   {
     topic: "energy",
-    pattern: /\b(energy|tired|exhaust\w*|fatigue\w*|drained|weary|knackered|burn(t|ed) out|burnout|sluggish|wired|lethargic)\b/i,
+    pattern:
+      /\b(energy|tired|exhaust\w*|fatigue\w*|drained|weary|knackered|burn(t|ed) out|burnout|sluggish|wired|lethargic)\b/i,
     tracked: true,
   },
 
   /* the body */
   {
     topic: "pain",
-    pattern: /\b(pain|ache|aching|headache|migraine|sore|hurts?|hurting|back ?pain|nausea|stomach)\b/i,
+    pattern:
+      /\b(pain|ache|aching|headache|migraine|sore|hurts?|hurting|back ?pain|nausea|stomach)\b/i,
     care: true,
   },
   {
     topic: "illness",
-    pattern: /\b(ill|sick|unwell|fever|flu|cold|covid|infection|virus|doctor|gp|hospital|medication|prescription|symptom|therapy|therapist|counsell?ing|counsell?or|psychiatrist|psycholog\w+|diagnos\w+)\b/i,
+    pattern:
+      /\b(ill|sick|unwell|fever|flu|cold|covid|infection|virus|doctor|gp|hospital|medication|prescription|symptom|therapy|therapist|counsell?ing|counsell?or|psychiatrist|psycholog\w+|diagnos\w+)\b/i,
     care: true,
   },
   {
     topic: "body",
-    pattern: /\b(weight|body|fat|thin|skinny|mirror|appearance|how i look|ugly|hate my (body|face)|self.?image)\b/i,
+    pattern:
+      /\b(weight|body|fat|thin|skinny|mirror|appearance|how i look|ugly|hate my (body|face)|self.?image)\b/i,
     care: true,
   },
 
@@ -183,41 +197,49 @@ export const TOPICS: TopicSpec[] = [
   /* life */
   {
     topic: "work",
-    pattern: /\b(work|job|boss|manager|colleague|career|shift|office|meeting|interview|promotion|fired|redundan\w*|workload|overtime)\b/i,
+    pattern:
+      /\b(work|job|boss|manager|colleague|career|shift|office|meeting|interview|promotion|fired|redundan\w*|workload|overtime)\b/i,
   },
   {
     topic: "relationships",
-    pattern: /\b(relationship|partner|boyfriend|girlfriend|husband|wife|spouse|friend\w*|family|mum|mom|dad|parents?|sibling|brother|sister|argument|fight|breakup|broke up|dating|lonely in|roommate|room ?mate|flatmate|housemate|neighbou?r|colleague|coworker|co-worker|boss|driving me (mad|insane|crazy)|can'?t stand)\b/i,
+    pattern:
+      /\b(relationship|partner|boyfriend|girlfriend|husband|wife|spouse|friend\w*|family|mum|mom|dad|parents?|sibling|brother|sister|argument|fight|breakup|broke up|dating|lonely in|roommate|room ?mate|flatmate|housemate|neighbou?r|colleague|coworker|co-worker|boss|driving me (mad|insane|crazy)|can'?t stand)\b/i,
     care: true,
   },
   {
     topic: "money",
-    pattern: /\b(money|rent|bills|afford|broke|debt|budget|salary|pay(check|day)?|financial|cost of living|expensive)\b/i,
+    pattern:
+      /\b(money|rent|bills|afford|broke|debt|budget|salary|pay(check|day)?|financial|cost of living|expensive)\b/i,
     care: true,
   },
   {
     topic: "time",
-    pattern: /\b(time|busy|schedule|calendar|no time|overbooked|rushed|balance|juggl\w*|prioriti\w*)\b/i,
+    pattern:
+      /\b(time|busy|schedule|calendar|no time|overbooked|rushed|balance|juggl\w*|prioriti\w*)\b/i,
   },
 
   /* inner weather */
   {
     topic: "stress",
-    pattern: /\b(stress\w*|anxious|anxiety|overwhelm\w*|tense|panic\w*|worry|worried|nervous|dread|on edge|racing thoughts|can'?t switch off)\b/i,
+    pattern:
+      /\b(stress\w*|anxious|anxiety|overwhelm\w*|tense|panic\w*|worry|worried|nervous|dread|on edge|racing thoughts|can'?t switch off)\b/i,
     care: true,
   },
   {
     topic: "confidence",
-    pattern: /\b(confiden\w*|self.?esteem|imposter|not good enough|failure|useless|proud|self.?worth|doubt myself)\b/i,
+    pattern:
+      /\b(confiden\w*|self.?esteem|imposter|not good enough|failure|useless|proud|self.?worth|doubt myself)\b/i,
     care: true,
   },
   {
     topic: "motivation",
-    pattern: /\b(motivat\w*|can'?t be bothered|procrastinat\w*|lazy|stuck|no drive|apathy|apathetic|don'?t want to|put(ting)? off)\b/i,
+    pattern:
+      /\b(motivat\w*|can'?t be bothered|procrastinat\w*|lazy|stuck|no drive|apathy|apathetic|don'?t want to|put(ting)? off)\b/i,
   },
   {
     topic: "mood",
-    pattern: /\b(mood|feel(ing|s)?|felt|sad|down|flat|low|blue|happy|content|joy|irritable|angry|frustrated|numb|emotional|cry(ing)?|tearful)\b/i,
+    pattern:
+      /\b(mood|feel(ing|s)?|felt|sad|down|flat|low|blue|happy|content|joy|irritable|angry|frustrated|numb|emotional|cry(ing)?|tearful)\b/i,
     care: true,
   },
 
@@ -228,7 +250,8 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "habit",
-    pattern: /\b(habit|routine|streak|consisten\w*|discipline|every day|daily|stick to|keep it up)\b/i,
+    pattern:
+      /\b(habit|routine|streak|consisten\w*|discipline|every day|daily|stick to|keep it up)\b/i,
     tracked: true,
   },
 
@@ -243,7 +266,8 @@ export const TOPICS: TopicSpec[] = [
   },
   {
     topic: "smalltalk",
-    pattern: /\b(how are you|who are you|what are you|are you (a )?(real|human|ai|bot)|your name|tell me a joke|bored)\b/i,
+    pattern:
+      /\b(how are you|who are you|what are you|are you (a )?(real|human|ai|bot)|your name|tell me a joke|bored)\b/i,
   },
 ];
 

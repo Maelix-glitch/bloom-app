@@ -126,9 +126,7 @@ describe("brevity — a short question gets a short answer", () => {
 
 describe("relevance — the line chosen answers the question asked", () => {
   it("picks the fasting line for a fasting question", () => {
-    expect(ask("is intermittent fasting worth trying?").paragraphs.join(" ")).toMatch(
-      /fasting/i,
-    );
+    expect(ask("is intermittent fasting worth trying?").paragraphs.join(" ")).toMatch(/fasting/i);
   });
 
   it("picks the pre-exercise line for a pre-run question", () => {

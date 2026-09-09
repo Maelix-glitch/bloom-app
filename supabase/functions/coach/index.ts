@@ -1,43 +1,39 @@
-﻿/**
- * Bloom Coach - Supabase Edge Function.
+/**
+ * Bloom Coach — Supabase Edge Function.
  *
  * The client (`src/lib/coach/edge.ts`) sends the question, a few turns of
- * history, and a *derived* view of the person's record - averages, streaks,
- * the current phase, never raw entries. This function turns that into a
- * prompt, calls whichever model the `provider` asks for, and returns
- * paragraphs.
+ * history, a *derived* view of the person's record, and — when one is
+ * attached — a photo or PDF. This function turns that into a prompt, calls a
+ * model, and returns paragraphs.
  *
  * Design notes:
  *
- *   - **The client decides length.** `register` arrives already computed from
- *     the shape of the question, and is enforced twice - in the prompt, and by
- *     the client trimming the result. A model asked for one line still tends
- *     to write three.
+ *   - **Best first, then the next.** When `provider` is "auto" (or missing),
+ *     the function walks a quality-ordered chain — the strongest configured
+ *     model first, the next when it fails. A provider whose secret isn't set
+ *     is skipped silently. Reorder by setting the `COACH_CHAIN` secret, e.g.
+ *     `COACH_CHAIN=gemini,bloom,groq` (comma-separated ids, best first).
+ *     A specific `provider` id still goes first, then the rest of the chain.
+ *   - **The client decides length.** `register` arrives already computed and
+ *     is enforced in the prompt and by the client trimming the result.
  *   - **Providers are a table.** Adding a model is one entry in `PROVIDERS`
- *     plus its API key in the function's secrets; nothing on the client
- *     changes beyond listing it in `providers.ts`.
- *   - **Failure is the client's fallback, not an error page.** Any problem
- *     returns a non-2xx, and Bloom answers on-device instead. That is why
- *     there is no retry logic here: the user already has a working answer path.
- *   - **Failover chain.** When the requested model fails (rate limit,
- *     provider error, empty reply), the function quietly tries the next model
- *     in `FALLBACK_CHAIN` - only free/owned keys - and reports which one
- *     answered. The client never has to know the first model was down.
- *   - **No storage.** This function reads nothing and writes nothing. The
- *     conversation lives on the device.
+ *     plus its API key in the function's secrets.
+ *   - **Photos route to Gemini.** When `body.image` is present, the message
+ *     carries inline image bytes and the chain is narrowed to vision-capable
+ *     providers (Gemini). Food photos get an honest calorie/macro estimate;
+ *     the photo is used for that one reply and never stored.
+ *   - **Failure surfaces as an error, never a fake answer.** Anything wrong
+ *     here returns a non-2xx and the client shows an honest error with a
+ *     retry — the coach is strictly online by design.
+ *   - **No storage.** This function reads and writes nothing.
  *
  * Deploy:
  *   supabase functions deploy coach
- *   supabase secrets set OPENAI_API_KEY=...
- *
- * Other models (each optional - only set the secrets for the ones you use):
- *   supabase secrets set APINEX_API_KEY=...        # APInex (free Gemini 3.8 Flash)
- *   supabase secrets set TEAMOROUTER_API_KEY=...   # TeamoRouter (free DeepSeek V4 Pro)
- *   supabase secrets set HF_API_KEY=...            # Hugging Face (router or serverless)
- *   supabase secrets set HF_BASE_URL=...           # only for the serverless endpoint
- *   supabase secrets set HF_MODEL=...              # any HF model id
- *   supabase secrets set GROQ_API_KEY=...          # Groq (openai/gpt-oss-20b)
- *   supabase secrets set GEMINI_API_KEY=...        # Google Gemini (gemini-3.6-flash)
+ *   supabase secrets set OPENAI_API_KEY=... APINEX_API_KEY=... \
+ *     TEAMOROUTER_API_KEY=... HF_API_KEY=... GROQ_API_KEY=... GEMINI_API_KEY=...
+ *   # optional: COACH_CHAIN=gemini,bloom,groq,apinex,teamo,hf
+ *   # optional per provider: COACH_MODEL, APINEX_MODEL, TEAMOROUTER_MODEL,
+ *   #   HF_MODEL, HF_BASE_URL, GROQ_MODEL, GEMINI_MODEL
  */
 
 /* eslint-disable */
@@ -60,44 +56,46 @@ const LENGTH_RULE: Record<string, string> = {
   full: "Answer in at most four paragraphs. Under 320 words. Be thorough but do not pad.",
 };
 
-const SYSTEM = `You are the coach inside Bloom, a personal wellbeing tracker.
+const SYSTEM = `You are the coach inside Bloom, a personal wellbeing app.
 
 WHO YOU ARE
-A calm, direct, warm companion. You sound like a thoughtful friend who happens
-to be good with data - never like a wellness brochure, a therapist reading a
-script, or a chatbot performing enthusiasm. No exclamation marks. No "I'm so
-sorry to hear that". No emoji.
+A calm, direct, warm companion. You sound like a thoughtful friend who happens to be good with data — never like a wellness brochure, a therapist reading a script, or a chatbot performing enthusiasm. No exclamation marks. No "I'm so sorry to hear that". No emoji. Plain English, contractions. Never restate the question. Never end with "let me know if you'd like more" — just stop.
 
-WHAT YOU KNOW
-You are given a compact summary of what this person has logged: daily trackers
-(sleep, water, study, movement, energy, screen time) with today's value, their
-goal, a seven-day average and a streak; their cycle position if they track one;
-how many habits are active; and any notes they pinned for you.
+WHAT BLOOM IS
+Bloom is the app this person uses: mood check-ins; six daily trackers (sleep in minutes, water in millilitres, study minutes, movement minutes, energy /5, screen minutes); habits with reminders and points; cycle tracking with predictions; and Profile holding export, import and erase. Data is device-first and only syncs to a database the person owns. Bloom is not a medical device, a therapist, or a calorie database.
 
-GROUNDING - THE ONE HARD RULE
-Never invent a number, a date, a trend or an entry. If the summary does not
-contain something, say plainly that it isn't tracked, then help anyway from
-general knowledge. Being useful without data is fine; pretending to have data
-is not. When you do quote a figure, quote it exactly as given.
+WHAT YOU CAN TALK ABOUT — ESSENTIALLY ANYTHING
+A person should be able to raise anything with you: sleep and insomnia; food, nutrition, cravings, meal planning and eating habits; fitness, workouts, training plans, running, strength, mobility and recovery; stress, anxiety, overthinking and burnout; work, job interviews, career decisions and workload; study, exams, focus and procrastination; relationships, family, friendship, dating and conflict; money worries, budgets and financial dread; grief, loss and loneliness; confidence and self-esteem; alcohol, caffeine and other habits; screen time and digital wellbeing; travel, hobbies, creativity and life planning; or the app itself. NEVER deflect a question back to the trackers because it was not about them. When something is outside Bloom's record, say you're speaking generally — and be genuinely useful from general knowledge.
 
-SCOPE
-You can talk about anything a person would raise with someone who knows their
-week: sleep, food, caffeine, work, study, money worry, relationships, grief,
-loneliness, motivation, confidence, the app itself, or nothing much at all.
-Do not deflect a question back to the trackers because it wasn't about them.
+GROUNDING — THE ONE HARD RULE
+You are given a compact summary of what this person has logged. Never invent a number, a date, a trend or an entry. If the summary does not contain something, say plainly that it isn't tracked, then help anyway from general knowledge. When you quote a figure, quote it exactly as given. Never claim the app has a feature it does not: no social features, no marketplace, no payments, no external integrations, no professional medical advice. For anything medical, say once, briefly, and without alarm that a clinician is the right call. If someone describes being in danger, say clearly that this is beyond what an app should handle and that a crisis line or a person they trust is the right call.
 
-CARE
-For grief, loneliness, pain, illness, body image, money or relationships: lead
-with the person, not the record. One honest sentence beats three sympathetic
-ones. You are not a clinician - for anything medical, say so once, briefly, and
-without alarm. If someone describes being in danger, say clearly that this is
-beyond what an app should handle and that a crisis line or a person they trust
-is the right call.
+MEMORY
+You are told what Bloom already remembers about the person. When they share a clearly durable fact about themselves ("I'm vegan", "my daughter is called Mira", "I run on Tuesdays", "I'm saving for a house", "I'm trying to drink less") — or explicitly ask you to remember something — append AT THE END of your reply exactly one line:
+[BLOOM_MEMORY]{"category":"preference","text":"the fact, written as a statement"}[/BLOOM_MEMORY]
+categories: preference | goal | context | pattern. Store the fact, not the wording ("the person is vegan", never "user said I'm vegan"). Do NOT restate facts you were already told. Do NOT store anything the person did not clearly offer, especially health details, relationships or money — when in doubt, ask first. When they ask you to forget something, append:
+[BLOOM_FORGET]{"text":"a distinctive fragment of what to forget"}[/BLOOM_FORGET]
+At most two memory lines per reply. Never put memory lines inside a tool call.
 
-STYLE
-Plain English. Contractions. No headers unless asked. No bullet lists unless
-the answer really is a sequence. Never restate the question. Never end with
-"let me know if you'd like more" - just stop.`;
+ACTIONS — DOING THINGS IN THE APP
+Bloom can act for the person. When they ask you to DO something (create/tick a habit, log a tracker value, set a goal, list their habits), answer in at most two short sentences and then append EXACTLY ONE line:
+[BLOOM_TOOL]{"name":"<tool>","args":{...}}[/BLOOM_TOOL]
+Never claim in prose that the action already happened — the app performs it after your text and reports the outcome. If you cannot act (unclear request, missing detail), say what you need in prose and do NOT emit a tool line.
+
+Available tools:
+- create_habit — args: name (string, required), note (optional, up to 240 chars), frequency ("daily" | "weekly" | "custom", default "daily"), timesPerWeek (whole number 1–7, required when frequency is "weekly"), days (array of 0–6 where 0=Sunday, required when frequency is "custom"), reminderTime ("HH:MM" 24-hour, optional), goalTarget (positive number, optional), goalUnit (short unit like "minutes", "pages", "ml", optional). Use it when the person asks you to create, add or set up a habit or routine — with everything they specify.
+- tick_habit — args: name (the habit's exact name as shown in Bloom, required), date ("YYYY-MM-DD", omit for today; only today or the past six days are accepted). Use it for "mark X done", "I did X today".
+- list_habits — args: {}. Use it when they ask what habits they have. Do not guess names — list_habits is the only way to know.
+- log_tracker — args: tracker ("sleep" | "water" | "movement" | "screen" | "energy"), value (number; minutes for sleep/movement/screen, millilitres for water, 1–5 for energy), date ("YYYY-MM-DD", omit for today). Use it for "log 7.5 hours of sleep", "add 500ml water".
+- set_goal — args: tracker (same five names), value (number in the same units). Use it for "set my water goal to 2.5 litres" (2500).
+Units of record: sleep/movement/screen = minutes; water = millilitres; energy = /5. Never invent a habit's existence — when unsure whether a habit exists, ask in prose or invite them to create it.
+
+ATTACHED PHOTOS AND PDFS
+The person can attach a photo or PDF, and you can see it.
+- Food or drink photo: your FIRST paragraph must be one line starting with ≈ giving rough totals, e.g. "≈ 540 kcal · 32 g protein · 61 g carbs · 19 g fat". Then one or two short paragraphs: portion sense, what stands out nutritionally, one concrete tweak. Estimates only — round numbers, "roughly", ranges when unsure. If you genuinely cannot estimate, say so plainly instead of guessing.
+- Non-food photo: say what is useful in it (what it is, any readable text, the scene). No invented precision.
+- PDF: read its text and answer (summarise, extract, compare). Say so if the answer needs something the file doesn't contain.
+- Photos are never stored — they exist for this single reply.`;
 
 interface Body {
   message?: string;
@@ -106,18 +104,33 @@ interface Body {
   provider?: string;
   register?: string;
   topic?: string;
+  image?: { mediaType?: string; dataBase64?: string };
+}
+
+/** Optional vision input, validated once. */
+interface Media {
+  mediaType: string;
+  dataBase64: string;
 }
 
 /**
- * The models this function can call. `call` returns plain text; everything
- * else - prompt assembly, length enforcement, error shape - is shared.
+ * The models this function can call. `call` returns plain text; prompt
+ * assembly, length enforcement and error shape are shared.
  *
- * Adding one is a table entry here (plus a matching entry in the client's
- * `src/lib/coach/providers.ts` and the API key as a function secret).
+ * `call` receives optional `media` — only vision-capable providers use it.
  */
 const PROVIDERS: Record<
   string,
-  { env: string; call: (key: string, messages: unknown[], signal?: AbortSignal) => Promise<string> }
+  {
+    env: string;
+    vision?: boolean;
+    call: (
+      key: string,
+      messages: unknown[],
+      signal?: AbortSignal,
+      media?: Media | null,
+    ) => Promise<string>;
+  }
 > = {
   bloom: {
     env: "OPENAI_API_KEY",
@@ -130,7 +143,7 @@ const PROVIDERS: Record<
         signal,
       ),
   },
-  /** APInex - free tier gateway; Gemini 3.8 Flash is their free model. */
+  /** APInex — free tier gateway. */
   apinex: {
     env: "APINEX_API_KEY",
     call: (key, messages, signal) =>
@@ -142,7 +155,7 @@ const PROVIDERS: Record<
         signal,
       ),
   },
-  /** TeamoRouter - gateway with free DeepSeek V4 tiers. */
+  /** TeamoRouter — gateway with free tiers. */
   teamo: {
     env: "TEAMOROUTER_API_KEY",
     call: (key, messages, signal) =>
@@ -154,7 +167,7 @@ const PROVIDERS: Record<
         signal,
       ),
   },
-  /** Groq - fast open models; OpenAI-compatible. */
+  /** Groq — fast open models; OpenAI-compatible. */
   groq: {
     env: "GROQ_API_KEY",
     call: (key, messages, signal) =>
@@ -167,24 +180,32 @@ const PROVIDERS: Record<
       ),
   },
   /**
-   * Google Gemini, official API. Not OpenAI-shaped, so it has its own call:
-   * POST :generateContent with contents/parts, answers in candidates.
+   * Google Gemini, official API — the vision provider. Not OpenAI-shaped, so
+   * it has its own call: POST :generateContent with contents/parts.
    */
   gemini: {
     env: "GEMINI_API_KEY",
-    call: async (key, messages, signal) => {
+    vision: true,
+    call: async (key, messages, signal, media) => {
       const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.6-flash";
       const systemText = messages
         .filter((m: any) => m.role === "system")
         .map((m: any) => String(m.content ?? ""))
         .join("\n\n");
       const turns = messages.filter((m: any) => m.role !== "system");
-      const contents = [
+      const contents: any[] = [
         ...(systemText ? [{ role: "user", parts: [{ text: systemText }] }] : []),
-        ...turns.map((m: any) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: String(m.content ?? "").slice(0, 4000) }],
-        })),
+        ...turns.map((m: any, i: number) => {
+          const isLastUser = i === turns.length - 1 && m.role === "user";
+          const parts: any[] = [];
+          if (isLastUser && media) {
+            parts.push({
+              inline_data: { mime_type: media.mediaType, data: media.dataBase64 },
+            });
+          }
+          parts.push({ text: String(m.content ?? "").slice(0, 4000) });
+          return { role: m.role === "assistant" ? "model" : "user", parts };
+        }),
       ];
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`,
@@ -193,7 +214,7 @@ const PROVIDERS: Record<
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 700 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 900 },
           }),
           signal,
         },
@@ -207,12 +228,7 @@ const PROVIDERS: Record<
         .trim();
     },
   },
-  /**
-   * Hugging Face Inference Providers (router.huggingface.co/v1) - OpenAI-
-   * compatible; some providers are free. The serverless Inference API
-   * (api-inference.huggingface.co/v1) speaks the same shape, so set
-   * HF_BASE_URL to point at whichever the key belongs to.
-   */
+  /** Hugging Face Inference Providers (OpenAI-compatible). */
   hf: {
     env: "HF_API_KEY",
     call: (key, messages, signal) =>
@@ -227,28 +243,36 @@ const PROVIDERS: Record<
 };
 
 /**
- * When the requested model fails - rate limit, provider down, bad reply -
- * the function quietly tries the next entry here instead of making the coach
- * fall back to its on-device answers. Only models whose secret is actually
- * set are tried, and the response says which one answered.
- *
- * Deliberately the free/owned models. `bloom` (paid OpenAI) and `hf` are not
- * in the chain, so a failure can never silently redirect a request onto a
- * paid key. Add ids here to extend the chain.
+ * Best-first order. The first entry whose secret is set is the model the
+ * person's question actually reaches; each later entry is the next fallback.
+ * Override per deployment with the `COACH_CHAIN` secret (comma-separated
+ * provider ids, best first).
  */
-const FALLBACK_CHAIN = ["apinex", "teamo", "groq", "gemini"];
+const DEFAULT_CHAIN = ["bloom", "gemini", "groq", "apinex", "teamo", "hf"];
+
+function chainFor(requested: string | undefined): string[] {
+  const configured =
+    (Deno.env.get("COACH_CHAIN") ?? "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean) || null;
+  const order = configured ?? DEFAULT_CHAIN;
+  if (!requested || requested === "auto") return order;
+  return [requested, ...order.filter((id) => id !== requested)];
+}
 
 /**
  * How long one model gets before the chain moves on. The client gives the
- * whole function about 12s, so a hung provider must not be able to eat the
- * budget the next one needs.
+ * whole function about 15s, so a hung provider must not eat the budget the
+ * next one needs.
  */
 const ATTEMPT_TIMEOUT_MS = 5000;
+/** Hard ceiling for the whole chain — leaves room for the response hop. */
+const CHAIN_DEADLINE_MS = 10_500;
 
 /**
- * One call shape for every OpenAI-compatible gateway (APInex, TeamoRouter,
- * Hugging Face, and OpenAI itself): POST /chat/completions, Bearer key,
- * `choices[0].message.content` back.
+ * One call shape for every OpenAI-compatible endpoint: POST /chat/completions,
+ * Bearer key, `choices[0].message.content` back.
  */
 async function openaiCompatible(
   url: string,
@@ -264,7 +288,7 @@ async function openaiCompatible(
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 700,
+      max_tokens: 900,
     }),
     signal,
   });
@@ -318,7 +342,7 @@ function factsToPrompt(facts: any): string {
 
   if (facts.habitsActive > 0) lines.push(`Habits: ${facts.habitsActive} active.`);
   if (facts.memories?.length) {
-    lines.push(`They asked you to remember: ${facts.memories.join("; ")}`);
+    lines.push(`Bloom remembers about them: ${facts.memories.join("; ")}`);
   }
   return lines.join("\n");
 }
@@ -331,8 +355,17 @@ Deno.serve(async (req: Request) => {
     const message = (body.message ?? "").trim();
     if (!message) return json({ error: "empty message" }, 400);
 
-    const rule = LENGTH_RULE[body.register ?? "normal"] ?? LENGTH_RULE.normal;
+    /* Validate media once: photos and PDFs, raw base64, bounded size. */
+    let media: Media | null = null;
+    if (body.image && typeof body.image.dataBase64 === "string") {
+      const mediaType = String(body.image.mediaType ?? "image/jpeg");
+      if (body.image.dataBase64.length > 7_000_000) {
+        return json({ error: "attached file too large for the model" }, 413);
+      }
+      media = { mediaType, dataBase64: body.image.dataBase64 };
+    }
 
+    const rule = LENGTH_RULE[body.register ?? "normal"] ?? LENGTH_RULE.normal;
     const messages = [
       { role: "system", content: SYSTEM },
       { role: "system", content: `THEIR RECORD\n${factsToPrompt(body.facts)}` },
@@ -348,13 +381,15 @@ Deno.serve(async (req: Request) => {
     ];
 
     /*
-     * The requested model first, then the fallback chain. Each provider gets
-     * one attempt with its own timeout; the first non-empty answer wins. The
-     * person never sees any of this - they just get an answer, and the
-     * response says which model actually produced it.
+     * The best configured model first, then the next. Each provider gets one
+     * attempt with its own timeout; the first non-empty answer wins. The
+     * person never sees any of this — the response just says which model
+     * actually produced the answer.
      */
-    const requested = body.provider && PROVIDERS[body.provider] ? body.provider : "apinex";
-    const chain = Array.from(new Set([requested, ...FALLBACK_CHAIN]));
+    const chain = chainFor(body.provider).filter(
+      (id) => !media || PROVIDERS[id]?.vision,
+    );
+    const deadline = Date.now() + CHAIN_DEADLINE_MS;
 
     let text = "";
     let answeredBy = "";
@@ -364,9 +399,16 @@ Deno.serve(async (req: Request) => {
       const provider = PROVIDERS[id];
       if (!provider) continue;
       const key = Deno.env.get(provider.env);
-      if (!key) continue; /* no secret set - never tried */
+      if (!key) continue; /* no secret set — never tried */
+      const remaining = deadline - Date.now();
+      if (remaining < 1200) break;
       try {
-        const candidate = await provider.call(key, messages, AbortSignal.timeout(ATTEMPT_TIMEOUT_MS));
+        const candidate = await provider.call(
+          key,
+          messages,
+          AbortSignal.timeout(Math.min(ATTEMPT_TIMEOUT_MS, remaining - 700)),
+          media,
+        );
         if (candidate.trim()) {
           text = candidate;
           answeredBy = id;
@@ -379,9 +421,12 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!answeredBy) {
-      /* Every configured model failed - the client falls back to its
-         on-device answer, so this is degraded, never broken. */
-      return json({ error: "all providers failed", detail: lastError }, 502);
+      /* Every configured model failed — the client answers on-device, so
+         this is degraded, never broken. */
+      return json(
+        { error: media ? "no vision provider available" : "all providers failed", detail: lastError },
+        502,
+      );
     }
 
     const paragraphs = String(text)

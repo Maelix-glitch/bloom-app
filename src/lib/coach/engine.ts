@@ -10,9 +10,10 @@
  *      what was asked and hands back a budget; every path here respects it.
  *      "did I sleep enough?" gets a line. "why do I keep crashing at 3pm?"
  *      gets the analysis.
- *   3. **Remote first, local always.** The Supabase edge function answers when
- *      it can; the deterministic on-device responder answers when it can't.
- *      Neither can leave the person without a reply.
+ *   3. **Strictly online.** Every question goes to the Supabase edge function.
+ *      If it can't answer — not deployed, keys missing, models failing — the
+ *      UI shows an honest error with a retry. There is no on-device fallback
+ *      pretending to be the coach.
  *
  * What it will not do: invent a number, diagnose anything, or claim the record
  * says something it doesn't. Grounding is the whole point of a coach attached
@@ -23,7 +24,14 @@ import { answer as localAnswer, type CoachRecord, type CoachResponse } from "@/l
 import type { CoachContext, CoachMode } from "@/lib/coach/intelligence";
 import { budgetFor, fitToBudget, type Budget } from "@/lib/coach/brevity";
 import { detectTopics, isCareTopic, isTrackedTopic, type Topic } from "@/lib/coach/topics";
-import { askEdge, toFacts, type CoachTurn, type EdgeResult } from "@/lib/coach/edge";
+import {
+  askEdge,
+  toFacts,
+  type CoachMedia,
+  type CoachTurn,
+  type EdgeResult,
+} from "@/lib/coach/edge";
+import { APP_FACT_SOURCE, appFactFor } from "@/lib/coach/knowledge";
 import { pick } from "@/lib/voice/messages";
 import { compose, openHanded } from "@/lib/coach/compose";
 
@@ -35,6 +43,8 @@ export interface AskInput {
   history: CoachTurn[];
   /** Provider id; "local" skips the network entirely. */
   provider: string;
+  /** A photo or PDF attached to the message — read only by a vision model. */
+  image?: CoachMedia;
   signal?: AbortSignal;
 }
 
@@ -99,10 +109,7 @@ const CARE_OPENERS: Partial<Record<Topic, string[]>> = {
     "Pain wears everything else down with it.",
     "That's rough, and it makes every other thing harder.",
   ],
-  illness: [
-    "Sorry you're unwell.",
-    "Being ill takes more out of you than the symptoms suggest.",
-  ],
+  illness: ["Sorry you're unwell.", "Being ill takes more out of you than the symptoms suggest."],
   relationships: [
     "People are the hardest part of most weeks.",
     "That sounds like it's taking up a lot of room.",
@@ -124,14 +131,19 @@ const CARE_OPENERS: Partial<Record<Topic, string[]>> = {
  */
 const UNTRACKED_NOTE: Partial<Record<Topic, string>> = {
   food: "Bloom doesn't track meals, so I can't tell you what you ate — but energy and sleep usually show the shape of it.",
-  caffeine: "Caffeine isn't one of Bloom's trackers, though your sleep log is the place it tends to show up.",
-  alcohol: "Bloom doesn't log drinks, but sleep quality and next-day energy usually tell the story.",
+  caffeine:
+    "Caffeine isn't one of Bloom's trackers, though your sleep log is the place it tends to show up.",
+  alcohol:
+    "Bloom doesn't log drinks, but sleep quality and next-day energy usually tell the story.",
   work: "Work isn't tracked directly, though study minutes, screen time and energy tend to move with it.",
-  money: "That's outside what Bloom tracks, so I'll speak generally rather than pretending to read it in your data.",
-  relationships: "Bloom doesn't track people, only how your days go — so take what I say as general, not as something I've measured.",
+  money:
+    "That's outside what Bloom tracks, so I'll speak generally rather than pretending to read it in your data.",
+  relationships:
+    "Bloom doesn't track people, only how your days go — so take what I say as general, not as something I've measured.",
   grief: "There's nothing in a tracker that measures this, and I won't pretend otherwise.",
   loneliness: "Bloom can't see your social life, only your logs — so this is me talking generally.",
-  illness: "I'm not a clinician and Bloom isn't a medical record. For anything that worries you, a doctor beats an app.",
+  illness:
+    "I'm not a clinician and Bloom isn't a medical record. For anything that worries you, a doctor beats an app.",
   pain: "Bloom doesn't track pain outside the cycle log, and persistent pain is a doctor's question, not an app's.",
   body: "Bloom deliberately doesn't track weight, so there's no number here for me to quote at you.",
 };
@@ -196,6 +208,10 @@ export function answerLocally(input: AskInput): CoachAnswer {
     return done([pick("coach.thanks", YOURE_WELCOME)], primary, budget, "local");
   }
   if (primary === "smalltalk") {
+    /* "What can you do?" is about Bloom's own abilities — the rules answer
+       before the small-talk pool does. */
+    const fromFacts = appFactFor(input.text);
+    if (fromFacts) return factAnswer(fromFacts.paragraphs, budget, primary);
     return done([pick("coach.who", WHO_I_AM)], primary, budget, "local");
   }
 
@@ -212,6 +228,12 @@ export function answerLocally(input: AskInput): CoachAnswer {
    * responder what it can see, discard its refusals, and hand whatever is left
    * to the composer alongside what the coach actually knows about the subject.
    */
+  /* Questions about Bloom itself never consult the record — a points
+     question must not become "your log is empty" because nothing is logged.
+     This branch short-circuits every data-dependent path below it. */
+  const fromFacts = appFactFor(input.text);
+  if (fromFacts) return factAnswer(fromFacts.paragraphs, budget, primary);
+
   let fromRecord: string[] = [];
   let blocks: CoachAnswer["blocks"] = [];
   let sources: string[] = [];
@@ -224,7 +246,12 @@ export function answerLocally(input: AskInput): CoachAnswer {
   }
 
   /* A second tracked subject in the same question is worth a line. */
-  if (budget.maxParagraphs >= 3 && also.length > 0 && isTrackedTopic(also[0]!) && !isTrackedTopic(primary)) {
+  if (
+    budget.maxParagraphs >= 3 &&
+    also.length > 0 &&
+    isTrackedTopic(also[0]!) &&
+    !isTrackedTopic(primary)
+  ) {
     const side = localAnswer({ text, mode }, context, record);
     const grounded = side.paragraphs.filter(isGrounded);
     if (grounded[0]) fromRecord = [...fromRecord, grounded[0]];
@@ -295,24 +322,39 @@ function done(
   };
 }
 
+/** An answer drawn from APP_FACTS — cited as Bloom's own rules, not the record. */
+function factAnswer(paragraphs: string[], budget: Budget, topic: Topic): CoachAnswer {
+  /*
+   * Definitional questions ("what is bloom?") are short — three words — and
+   * would earn a terse budget that chops the answer to one sentence. Such
+   * questions ask for a definition, so they get at least brief room.
+   */
+  const room =
+    budget.register === "terse"
+      ? { ...budget, register: "brief" as const, maxParagraphs: 1, maxWords: 70 }
+      : budget;
+  return {
+    paragraphs: fitToBudget(paragraphs, room),
+    sources: [APP_FACT_SOURCE],
+    blocks: [],
+    topic,
+    budget,
+    source: "local",
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /*  The public entry point                                                     */
 /* -------------------------------------------------------------------------- */
 
-const FALLBACK_REASON: Record<Exclude<EdgeResult, { ok: true }>["reason"], string> = {
-  unconfigured: "no coach function configured",
-  timeout: "the coach function timed out",
-  aborted: "cancelled",
-  error: "the coach function couldn't be reached",
-};
-
 /**
- * Ask the coach.
+ * Ask the coach — strictly online.
  *
- * Tries the edge function first (unless the local provider is selected), and
- * falls back to the device without ever surfacing an error state — the person
- * gets an answer either way, and the source is recorded on the result so the
- * UI can be honest about which one they're reading.
+ * Every message, including a plain "hello", goes to the edge function. There
+ * is deliberately NO on-device fallback: if the function is unreachable, not
+ * deployed, or every configured model fails, `ask` throws `CoachUnavailable`
+ * and the UI shows an honest error with a retry — the coach never pretends a
+ * device answer is the real coach.
  */
 /**
  * Thrown when a request is superseded by a newer one. Callers should ignore it
@@ -325,20 +367,27 @@ export class CoachCancelled extends Error {
   }
 }
 
+/**
+ * Thrown when the online coach cannot answer — not configured, timed out, or
+ * every configured model failed. Callers surface this as an error with a
+ * retry; they must never substitute an on-device answer.
+ */
+export class CoachUnavailable extends Error {
+  /** "unconfigured" | "timeout" | "error" */
+  readonly reason: string;
+  constructor(reason: string, detail?: string) {
+    super(detail ? `${reason}: ${detail}` : reason);
+    this.name = "CoachUnavailable";
+    this.reason = reason;
+  }
+}
+
 export async function ask(input: AskInput): Promise<CoachAnswer> {
   const { primary } = detectTopics(input.text);
   const budget = budgetFor(input.text, { greeting: primary === "greeting" });
 
-  /*
-   * Greetings and thanks never touch the network. Waking a cold function to
-   * say "hello" back is slow, costly, and worse than the instant local reply.
-   */
-  const trivial = primary === "greeting" || primary === "thanks";
-
-  if (input.provider === "local" || trivial) {
-    return answerLocally(input);
-  }
-
+  /* Online-only by design: there is no local path here, not even for
+     greetings or a "local" provider id. */
   const result = await askEdge(
     {
       message: input.text,
@@ -347,6 +396,7 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
       provider: input.provider,
       register: budget.register,
       topic: primary,
+      ...(input.image ? { image: input.image } : {}),
     },
     input.signal,
   );
@@ -363,22 +413,19 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
   }
 
   /*
-   * Cancelled means the person moved on — but an EMPTY answer is not a safe
-   * way to say that. It used to return done([], ...), and the UI rendered that
-   * as a coach message with zero paragraphs: a blank bubble under a thinking
-   * indicator that had already gone. From the outside it looked like the coach
-   * thought forever and never replied.
-   *
    * A cancellation is a control-flow signal, not an answer, so it is thrown
-   * and the caller drops it. If a cancellation ever reaches the UI anyway, the
-   * local answer below is a real reply rather than nothing.
+   * and the caller drops it (the person moved on to a newer question).
    */
   if (result.reason === "aborted") {
     throw new CoachCancelled();
   }
 
-  const local = answerLocally(input);
-  return { ...local, fellBackBecause: FALLBACK_REASON[result.reason] };
+  /*
+   * Everything else is the online coach being unavailable. Strictly online:
+   * surface it as an error with a retry — never substitute an on-device
+   * answer that would pretend to be the real coach.
+   */
+  throw new CoachUnavailable(result.reason, result.detail);
 }
 
 export { isCareTopic, detectTopics };

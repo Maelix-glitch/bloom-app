@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, LifeBuoy, Loader2, SendHorizontal } from "lucide-react";
 
@@ -26,7 +26,6 @@ export function CoachPanel({
   const [thinking, setThinking] = useState(false);
   const [reply, setReply] = useState<CoachMessage | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const requested = useRef(false);
 
   /* the coach reads habits from the localStorage mirror at mount; hand it
      the live set instead so the read is never stale */
@@ -64,40 +63,6 @@ export function CoachPanel({
       })),
     [coach.memories],
   );
-
-  /* the opening read: a plan-mode answer built only from the record */
-  useEffect(() => {
-    if (coach.loading || requested.current) return;
-    if (habitsStore.loading) return;
-    requested.current = true;
-    let alive = true;
-    void (async () => {
-      try {
-        const text = "";
-        const response = await coach.requestResponse({
-          text,
-          mode: "plan",
-          context: buildCoachContext(entries, memories, habitData, "plan", text),
-          history: coach.messages,
-        });
-        if (!alive) return;
-        setReply({
-          id: "home-coach-read",
-          role: "coach",
-          time: new Date().toISOString(),
-          paragraphs: response.paragraphs,
-          sources: response.sources,
-          blocks: response.blocks,
-        });
-      } catch (e) {
-        console.warn("[bloom:home] coach read:", e);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [coach.loading, habitsStore.loading]);
 
   const lastCoach = [...coach.messages].reverse().find((m) => m.role === "coach") ?? null;
   const shown = reply ?? lastCoach;

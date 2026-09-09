@@ -86,7 +86,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Protein at breakfast blunts the mid-morning dip better than the same calories as carbohydrate — it's the most reliable single swap.",
     ],
-    step: ["If afternoons are the problem, make lunch smaller and see if the dip moves. One week is enough to tell."],
+    step: [
+      "If afternoons are the problem, make lunch smaller and see if the dip moves. One week is enough to tell.",
+    ],
   },
   caffeine: {
     core: [
@@ -106,7 +108,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Exercise is one of the few things with a same-day effect on mood and a next-day effect on sleep. It's the fastest feedback loop you have.",
     ],
-    step: ["Make it small enough that a bad day can't stop it — ten minutes, same time, no changing clothes."],
+    step: [
+      "Make it small enough that a bad day can't stop it — ten minutes, same time, no changing clothes.",
+    ],
     reads: "movement",
   },
   water: {
@@ -157,7 +161,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Almost every case comes down to demand exceeding control. Where you can't reduce demand, taking back a small piece of control — over your calendar, the order of work, when you're reachable — does more than it sounds like it should.",
     ],
-    step: ["Pick one boundary you can defend this week and defend it once. One kept boundary beats a plan you abandon."],
+    step: [
+      "Pick one boundary you can defend this week and defend it once. One kept boundary beats a plan you abandon.",
+    ],
   },
   time: {
     core: [
@@ -166,7 +172,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     more: [
       "Try tracking where a day actually goes for two days before optimising it. People are reliably wrong about their own time, usually by hours.",
     ],
-    step: ["Choose the one thing that must happen tomorrow and put it first, before the day can take it."],
+    step: [
+      "Choose the one thing that must happen tomorrow and put it first, before the day can take it.",
+    ],
   },
   motivation: {
     core: [
@@ -204,7 +212,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
       "There's a real difference between stress with a cause you can name and anxiety that arrives without one. The first responds to changing the situation, the second to changing how you relate to it — and they need different approaches.",
       "The fastest physiological lever is your breath out. A longer exhale than inhale, for a minute, genuinely shifts the nervous system — it's not a metaphor.",
     ],
-    step: ["Write down the specific worry in one sentence. Vague dread resists solving; a sentence can be answered."],
+    step: [
+      "Write down the specific worry in one sentence. Vague dread resists solving; a sentence can be answered.",
+    ],
     reads: "stress",
   },
   mood: {
@@ -222,7 +232,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
       "Loneliness is about the gap between the connection you have and the connection you want — which is why it happens in a full room.",
       "It also lies to you: it makes reaching out feel more likely to be rejected than it is, so the feeling protects itself.",
     ],
-    step: ["Message one person something specific rather than 'we should catch up'. Specific invitations get answered."],
+    step: [
+      "Message one person something specific rather than 'we should catch up'. Specific invitations get answered.",
+    ],
   },
   grief: {
     core: [
@@ -271,7 +283,9 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
     core: [
       "The problem with screens before bed is usually the content, not the blue light — the light effect is modest, but anything engaging keeps you alert.",
     ],
-    step: ["Choose where the phone sleeps, and make it another room. Willpower loses to proximity."],
+    step: [
+      "Choose where the phone sleeps, and make it another room. Willpower loses to proximity.",
+    ],
     reads: "screen",
   },
   body: {
@@ -320,6 +334,81 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
 
 /** Does the coach have something substantive to say about this? */
 export const hasKnowledge = (topic: Topic): boolean => topic in KNOWLEDGE;
+
+/* -------------------------------------------------------------------------- */
+/*  APP_FACTS — what the coach knows about Bloom itself                        */
+/* -------------------------------------------------------------------------- */
+
+export interface AppFact {
+  key: string;
+  /** Any one matching pattern answers the question from the rules below. */
+  patterns: RegExp[];
+  paragraphs: string[];
+}
+
+/**
+ * Questions about Bloom itself are answered from Bloom's own rules — never by
+ * reading the person's (possibly empty) record. "How do I earn points?" used
+ * to fall into the general responder, which looked at an empty log and
+ * deflected with "your record is empty". Points come from the app's rules,
+ * not from any log, so the app-facts branch answers first and the record is
+ * never consulted. Guarded by app-facts.test.ts.
+ */
+export const APP_FACTS: AppFact[] = [
+  {
+    key: "points",
+    patterns: [
+      /\bhow (do|can|to) .{0,24}(earn|get|win|collect|make) .{0,12}(points?|rewards?)\b/i,
+      /\b(points|rewards?)\b.{0,40}(earn|get|work|tracked|counted)\b/i,
+      /\b(what are|how do) (bloom )?points\b/i,
+      /\bhow (do|does) (i |you |the )?points? (work|add up)\b/i,
+      /\bwhat('| a)?re (the )?rewards?\b/i,
+    ],
+    paragraphs: [
+      "Habit ticks earn points — ten per tick by default — and your running total is on the Rewards page. Points are Bloom's way of making a streak visible, not a currency with hidden rules.",
+      "If you're not earning as you'd expect, check that the habit is still active and unpaused: paused and archived habits don't tick, so they don't earn.",
+    ],
+  },
+  {
+    key: "overview",
+    patterns: [
+      /\bwhat is bloom\b/i,
+      /\bwhat('| i)s this app\b/i,
+      /\bwhat does bloom (do|track|have)\b/i,
+      /\btell me about (bloom|this app)\b/i,
+      /\bwhat can i (do|track|log|use) (in|with|on) bloom\b/i,
+      /\boverview\b.{0,20}bloom\b|\bbloom\b.{0,20}overview\b/i,
+    ],
+    paragraphs: [
+      "Bloom is a private wellbeing companion. You check in with how you feel, log the daily trackers — sleep, water, study, movement, energy, screen time — keep habits with reminders, and track your cycle if you want to. Bloom's coach reads the record and talks with you about your days, and can act inside the app for you: create habits, log a value, set a goal.",
+      "Everything is stored on your device by default and only ever syncs to a database you own. There is no Bloom server holding your data, and Profile has a full export and a complete erase.",
+    ],
+  },
+  {
+    key: "skills",
+    patterns: [
+      /\bwhat can you do\b/i,
+      /\bwhat are your (skills|abilities|capabilities)\b/i,
+      /\bwhat do you (help|do) with\b/i,
+      /\bhow (can|do) you help (me|people)\b/i,
+      /\b(list|tell me) your (skills|abilities|capabilities)\b/i,
+    ],
+    paragraphs: [
+      "Broadly: talk with you about your life, read your Bloom record to keep it grounded, act inside the app, look at photos, and remember what matters to you.",
+      "Concretely — I can discuss sleep, food and nutrition, fitness and training, stress and anxiety, work, study, relationships, money, grief and more; answer from your logs when a question is about your week; create or tick a habit, log sleep, water, movement, screen time or energy, and set a tracker goal; estimate the calories and macros in a food photo; and keep facts you share in mind for later conversations. Anything I do in the app is visible on its own page and can be changed there.",
+    ],
+  },
+];
+
+/** The first fact whose question-patterns match, or null when it's not an app question. */
+export function appFactFor(text: string): AppFact | null {
+  for (const fact of APP_FACTS) {
+    if (fact.patterns.some((re) => re.test(text))) return fact;
+  }
+  return null;
+}
+
+export const APP_FACT_SOURCE = "Bloom's own rules";
 
 /**
  * Topics where the honest answer includes "talk to a person". Used to make
