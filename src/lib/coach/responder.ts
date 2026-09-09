@@ -103,8 +103,7 @@ const fmt = (value: number | null, digits = 1): string => {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits);
 };
 
-const plural = (n: number, word: string): string =>
-  `${n} ${word}${n === 1 ? "" : "s"}`;
+const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 /* --------------------------------- topics --------------------------------- */
 
@@ -191,8 +190,7 @@ function trackerAnswer(topic: Topic, record: CoachRecord): CoachResponse | null 
   /* The trackers page's own seven-day figure when it has one, so the two
      pages never quote different numbers for the same week. */
   const avg7 =
-    stat.avg7 ??
-    (last7.length ? last7.reduce((sum, v) => sum + v, 0) / last7.length : null);
+    stat.avg7 ?? (last7.length ? last7.reduce((sum, v) => sum + v, 0) / last7.length : null);
   const direction =
     last7.length >= 4
       ? (() => {
@@ -203,7 +201,7 @@ function trackerAnswer(topic: Topic, record: CoachRecord): CoachResponse | null 
           const b = second.reduce((s, v) => s + v, 0) / Math.max(second.length, 1);
           const delta = b - a;
           if (Math.abs(delta) < Math.abs(a) * 0.05) return "flat" as const;
-          return delta > 0 ? "up" as const : "down" as const;
+          return delta > 0 ? ("up" as const) : ("down" as const);
         })()
       : ("unknown" as const);
 
@@ -319,9 +317,7 @@ function periodAnswer(record: CoachRecord): CoachResponse {
       }`.trim(),
     );
   } else if (cycle.averageLength !== null) {
-    paragraphs.push(
-      `Your cycles average about ${Math.round(cycle.averageLength)} days so far.`,
-    );
+    paragraphs.push(`Your cycles average about ${Math.round(cycle.averageLength)} days so far.`);
   }
 
   if (cycle.confidence && cycle.confidenceReason) {
@@ -342,11 +338,7 @@ function periodAnswer(record: CoachRecord): CoachResponse {
   return { paragraphs, sources: [...new Set(sources)], blocks };
 }
 
-function moodAnswer(
-  topic: Topic,
-  context: CoachContext,
-  mode: CoachMode,
-): CoachResponse {
+function moodAnswer(topic: Topic, context: CoachContext, mode: CoachMode): CoachResponse {
   const mood = context.mood;
   const paragraphs: string[] = [];
   const sources: string[] = [];
@@ -460,7 +452,10 @@ function planAnswer(record: CoachRecord, context: CoachContext): CoachResponse {
     sources.push("Tracker data");
   }
   if (movement && movement.daysLogged >= 1) {
-    steps.push({ label: `Move for ${movement.format(movement.goal)}`, time: "anywhere in the day" });
+    steps.push({
+      label: `Move for ${movement.format(movement.goal)}`,
+      time: "anywhere in the day",
+    });
     sources.push("Trackers · Movement");
   }
   if (water && water.today !== null && water.goal > 0 && water.today < water.goal) {
@@ -472,7 +467,10 @@ function planAnswer(record: CoachRecord, context: CoachContext): CoachResponse {
   }
   steps.push({ label: "Something small that counts as showing up", time: "afternoon" });
   if (sleep) {
-    steps.push({ label: `Wind down toward ${sleep.format(Math.round(sleep.goal / 60))} of sleep`, time: "evening" });
+    steps.push({
+      label: `Wind down toward ${sleep.format(Math.round(sleep.goal / 60))} of sleep`,
+      time: "evening",
+    });
     sources.push("Trackers · Sleep");
   } else {
     steps.push({ label: "Stop before you're empty", time: "evening" });
@@ -500,7 +498,11 @@ function generalAnswer(record: CoachRecord, context: CoachContext): CoachRespons
   const available = record.trackers.filter((t) => t.daysLogged > 0);
   const moodEntries = context.mood.entries;
 
-  if (available.length === 0 && moodEntries === 0 && (!record.cycle || record.cycle.daysLogged === 0)) {
+  if (
+    available.length === 0 &&
+    moodEntries === 0 &&
+    (!record.cycle || record.cycle.daysLogged === 0)
+  ) {
     paragraphs.push(
       "I read from your own logs — sleep, water, study, movement, energy, screen, cycle and mood — and I'd rather say nothing than guess at something I can't see.",
     );

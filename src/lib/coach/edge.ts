@@ -11,7 +11,7 @@
  *
  *   · **Never throws.** Every failure — no config, no session, a timeout, a
  *     500, a malformed body — comes back as `{ ok: false }` and the caller
- *     falls through to the local responder.
+ *     surfaces an honest error with a retry (the coach is strictly online).
  *   · **Times out.** An edge function on a cold start can take seconds; past
  *     `TIMEOUT_MS` the local answer is better than a spinner.
  *   · **Cancellable.** The caller can abort when the person sends another
@@ -32,7 +32,19 @@ export const COACH_FUNCTION =
   (import.meta.env["VITE_COACH_FUNCTION"] as string | undefined)?.trim() || "coach";
 
 /** Past this, the local answer wins. Cold starts are real but a wait is worse. */
-export const TIMEOUT_MS = 12_000;
+export const TIMEOUT_MS = 15_000;
+
+/**
+ * A photo or document attached to a message. Bytes go to the edge function,
+ * which routes them to a vision-capable model (Gemini). The image is
+ * downscaled client-side first so the payload stays small; PDFs pass through
+ * as-is when they fit.
+ */
+export interface CoachMedia {
+  mediaType: string;
+  /** Raw base64 — no `data:` prefix. */
+  dataBase64: string;
+}
 
 export interface CoachTurn {
   role: "user" | "assistant";
@@ -50,8 +62,10 @@ export interface EdgeRequest {
    * whole diary to answer a question about their week.
    */
   facts: EdgeFacts;
-  /** Which model to use, when several are configured. */
+  /** Which model to use. "auto" (default) = best-first chain on the function. */
   provider?: string;
+  /** An attached photo or PDF for the vision model. */
+  image?: CoachMedia;
   /** How long the answer should be, decided client-side from the question. */
   register: "terse" | "brief" | "normal" | "full";
   /** What the question is about, so the function needn't re-classify. */
@@ -138,10 +152,7 @@ function readBody(data: unknown): string[] | null {
  * Ask the edge function. Resolves to `{ ok: false }` rather than rejecting —
  * the caller's job is to answer the person, not to handle transport errors.
  */
-export async function askEdge(
-  request: EdgeRequest,
-  signal?: AbortSignal,
-): Promise<EdgeResult> {
+export async function askEdge(request: EdgeRequest, signal?: AbortSignal): Promise<EdgeResult> {
   if (!hasSupabaseConfig) return { ok: false, reason: "unconfigured" };
   if (signal?.aborted) return { ok: false, reason: "aborted" };
 
@@ -165,9 +176,7 @@ export async function askEdge(
     if (!paragraphs) return { ok: false, reason: "error", detail: "empty response" };
 
     const provider =
-      (data as Record<string, unknown> | null)?.["provider"] ??
-      request.provider ??
-      "edge";
+      (data as Record<string, unknown> | null)?.["provider"] ?? request.provider ?? "edge";
     return { ok: true, paragraphs, provider: String(provider) };
   } catch (err) {
     if (signal?.aborted) return { ok: false, reason: "aborted" };

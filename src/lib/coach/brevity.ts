@@ -33,13 +33,15 @@ const BUDGETS: Record<Register, Budget> = {
 };
 
 /** "explain", "why", "how do I" — open questions that want room to answer. */
-const OPEN = /\b(why|how (do|should|can|would)|explain|walk me|help me (understand|plan)|what should|advice|plan for|break (it|this) down|in detail|tell me (more|about))\b/i;
+const OPEN =
+  /\b(why|how (do|should|can|would)|explain|walk me|help me (understand|plan)|what should|advice|plan for|break (it|this) down|in detail|tell me (more|about))\b/i;
 
 /** Closed questions: a yes, a number, or a single line is the correct answer. */
 const CLOSED = /^(did|do|does|is|are|was|were|can|should|will|have|has|am)\b/i;
 
 /** Explicit asks, which beat every other signal. */
-const WANTS_SHORT = /\b(short(ly)?|briefly|in a (word|line|sentence)|tl;?dr|quick(ly)?|just tell me|one line)\b/i;
+const WANTS_SHORT =
+  /\b(short(ly)?|briefly|in a (word|line|sentence)|tl;?dr|quick(ly)?|just tell me|one line)\b/i;
 const WANTS_LONG = /\b(in detail|thorough|full|everything|deep dive|at length|elaborate)\b/i;
 
 const wordCount = (s: string): number => s.trim().split(/\s+/).filter(Boolean).length;

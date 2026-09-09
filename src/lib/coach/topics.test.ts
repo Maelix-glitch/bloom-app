@@ -78,7 +78,15 @@ describe("classification", () => {
   });
 
   it("marks what the record can actually answer", () => {
-    for (const t of ["sleep", "water", "study", "movement", "energy", "screen", "period"] as const) {
+    for (const t of [
+      "sleep",
+      "water",
+      "study",
+      "movement",
+      "energy",
+      "screen",
+      "period",
+    ] as const) {
       expect(isTrackedTopic(t)).toBe(true);
     }
     expect(isTrackedTopic("money")).toBe(false);

@@ -1,16 +1,15 @@
 /**
- * Which brain is answering.
+ * Which online model is answering.
  *
- * Small, quiet, and in the header rather than buried in settings — because the
- * honest thing is for the person to be able to see whether they're reading the
- * remote model or the on-device fallback, and to force either one.
- *
- * It renders whatever `providers.ts` registers, so adding a third AI later is
- * a table entry, not a component change.
+ * Small, quiet, and in the header rather than buried in settings — the coach
+ * is strictly online, and this lets the person choose where the request
+ * starts (Best available, or a specific key). It renders whatever
+ * `providers.ts` registers, so adding a model later is a table entry, not a
+ * component change.
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Cpu, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Sparkles } from "lucide-react";
 
 import {
   activeProvider,
@@ -21,12 +20,7 @@ import {
 import { useSound } from "@/hooks/useSound";
 import { cn } from "@/lib/utils";
 
-export function ProviderPicker({
-  /** What actually answered the last message, when it differs from the choice. */
-  lastSource,
-}: {
-  lastSource?: "edge" | "local" | undefined;
-}) {
+export function ProviderPicker() {
   const [current, setCurrent] = useState<CoachProvider>(() => activeProvider());
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -48,13 +42,6 @@ export function ProviderPicker({
     };
   }, [open]);
 
-  /*
-   * If they chose the remote model but the last answer came from the device,
-   * say so. Silently degrading is how people end up mistrusting an assistant:
-   * the answers get shorter and they never learn why.
-   */
-  const degraded = current.remote && lastSource === "local";
-
   return (
     <div className="coach-provider" ref={ref}>
       <button
@@ -63,11 +50,10 @@ export function ProviderPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        title={degraded ? "Answered on this device — the coach function didn't reply" : current.blurb}
+        title={current.blurb}
       >
-        {current.remote ? <Sparkles className="size-3" /> : <Cpu className="size-3" />}
+        <Sparkles className="size-3" />
         <span className="truncate">{current.name}</span>
-        {degraded ? <span className="coach-provider-dot" aria-label="answered offline" /> : null}
         <ChevronDown className="size-3 opacity-60" aria-hidden />
       </button>
 
@@ -88,7 +74,7 @@ export function ProviderPicker({
               }}
             >
               <span className="coach-provider-item-icon">
-                {p.remote ? <Sparkles className="size-3.5" /> : <Cpu className="size-3.5" />}
+                <Sparkles className="size-3.5" />
               </span>
               <span className="min-w-0">
                 <span className="coach-provider-item-name">{p.name}</span>
