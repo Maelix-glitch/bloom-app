@@ -374,7 +374,7 @@ export function BloomMessage({
         <div className="coach-error" role="alert">
           <CoachGlyph size={14} className="coach-error-glyph" />
           <div className="coach-error-copy">
-            <p className="coach-error-title">I couldn&rsquo;t reach Bloom right now.</p>
+            <p className="coach-error-title">Bloom couldn&rsquo;t connect right now.</p>
             <p>{message.paragraphs[0]}</p>
           </div>
           {onRetry ? (

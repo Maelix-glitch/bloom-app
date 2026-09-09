@@ -1,20 +1,18 @@
 ﻿/**
- * More than one AI, later.
+ * Coach provider selection — server-side only.
  *
- * The requirement is "so I can add more AIs" â€” which in practice means the
- * choice of model must be *data*, not a branch buried in the send handler.
- * Every provider here is the same shape: an id, a name to show, and whether
- * it needs the network. The coach asks the registry which provider is active,
- * hands its id to the edge function, and the function decides what to call.
+ * Bloom's coach is one AI: routing happens inside the Supabase edge function
+ * (`supabase/functions/coach/index.ts`), which walks its provider order
+ * (Gemini → Grok → Qwen via Hugging Face) with health-aware failover. The
+ * client never picks a model, never sees a provider name, and never falls
+ * back to an on-device answer.
  *
- * Adding one is a single entry in this array plus a case on the server. No
- * component changes, because the picker renders whatever is registered.
- *
- * `local` is always present and always last-resort: it's the offline
- * responder, so the coach can never be completely mute.
+ * This module exists only to satisfy the one client-side contract that
+ * remains: the send handler forwards a single advisory id (`"auto"`) that the
+ * edge function ignores for routing. There is deliberately no local
+ * provider — the coach is strictly online and surfaces an honest error with a
+ * retry when it cannot answer.
  */
-
-import { getPref, setPref } from "@/lib/prefs";
 
 export interface CoachProvider {
   id: string;
@@ -25,35 +23,15 @@ export interface CoachProvider {
   remote: boolean;
 }
 
+/**
+ * The only client-side option: let the edge function route best-first.
+ * Stored prefs from older builds (named providers, "local") are ignored.
+ */
 export const PROVIDERS: CoachProvider[] = [
   {
     id: "auto",
-    name: "Best available",
-    blurb: "Tries the strongest model you've connected, then the next — automatically.",
-    remote: true,
-  },
-  {
-    id: "bloom",
     name: "Bloom",
-    blurb: "Bloom's own coach, running on your Supabase function.",
-    remote: true,
-  },
-  {
-    id: "apinex",
-    name: "Gemini 3.8 Flash â€” free",
-    blurb: "APInex free tier, via your Supabase function.",
-    remote: true,
-  },
-  {
-    id: "teamo",
-    name: "DeepSeek V4 Pro â€” free",
-    blurb: "TeamoRouter free tier, via your Supabase function.",
-    remote: true,
-  },
-  {
-    id: "hf",
-    name: "Hugging Face",
-    blurb: "Whatever model you pointed HF_MODEL at.",
+    blurb: "Bloom's coach, choosing the best connected model automatically.",
     remote: true,
   },
 ];
@@ -61,29 +39,19 @@ export const PROVIDERS: CoachProvider[] = [
 export const PROVIDER_PREF = "coach.provider";
 export const DEFAULT_PROVIDER = "auto";
 
-/*
- * The model the coach asks for. "auto" means the edge function starts at the
- * top of its best-first chain (strongest connected model) and walks down it
- * when a provider fails — see supabase/functions/coach/index.ts.
- */
+/* The id handed to the edge function with every request. */
 export const COACH_PROVIDER = "auto";
 
 const BY_ID = new Map(PROVIDERS.map((p) => [p.id, p]));
 
-export const providerFor = (id: string): CoachProvider =>
-  BY_ID.get(id) ?? BY_ID.get(DEFAULT_PROVIDER)!;
+export const providerFor = (_id: string): CoachProvider => BY_ID.get(DEFAULT_PROVIDER)!;
 
-/** The chosen provider, falling back cleanly if a stored id was removed. */
+/** Always the auto provider — routing is the edge function's job, not the client's. */
 export function activeProvider(): CoachProvider {
-  const id = getPref<string>(
-    PROVIDER_PREF,
-    (raw) => (typeof raw === "string" && BY_ID.has(raw) ? raw : null),
-    DEFAULT_PROVIDER,
-  );
-  return providerFor(id);
+  return providerFor(DEFAULT_PROVIDER);
 }
 
-export function setActiveProvider(id: string): void {
-  if (!BY_ID.has(id)) return;
-  setPref(PROVIDER_PREF, id);
+/** Kept for API compatibility; the client no longer offers a picker. */
+export function setActiveProvider(_id: string): void {
+  /* no-op — provider selection is server-side by design */
 }

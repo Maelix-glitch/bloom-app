@@ -384,7 +384,11 @@ export function CoachPage() {
               .map((part) => part.trim())
               .filter(Boolean)
           : [];
-        if (paragraphs.length === 0) {
+        /* A reply that is ONLY directives (a native tool call or memory
+           write) has no prose — never let a raw [BLOOM_…] tag render. */
+        const hasDirectives =
+          parsed.tools.length + parsed.memories.length + parsed.forgets.length > 0;
+        if (paragraphs.length === 0 && !hasDirectives) {
           paragraphs = response.paragraphs.length > 0 ? [...response.paragraphs] : [];
         }
         for (const memory of parsed.memories.slice(0, 3)) {
@@ -441,10 +445,7 @@ export function CoachPage() {
         if (error instanceof Error && error.name === "CoachCancelled") return true;
         console.error("Coach response failed:", error);
         if (!mountedRef.current || profileAtStart !== coach.profileId) return true;
-        const userFacingError = coachErrorMessage(
-          error,
-          "Something interrupted Bloom's reply — your words are safe.",
-        );
+        const userFacingError = coachErrorMessage(error);
         const errorMessage: CoachMessage = {
           id: newMessageId("coach-error"),
           role: "coach",

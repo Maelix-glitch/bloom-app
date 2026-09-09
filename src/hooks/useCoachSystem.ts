@@ -217,29 +217,25 @@ function attachmentToMedia(
 }
 
 export function coachErrorMessage(error: unknown, fallback?: string): string {
-  /* Strictly online: these are honest "couldn't reach the coach" states with
-     a retry — there is no on-device substitute. */
-  if (error instanceof CoachUnavailable) {
-    if (error.reason === "unconfigured")
-      return "Bloom's online coach isn't connected yet — add your keys and deploy the function, then try again.";
-    if (error.reason === "timeout")
-      return "The online coach took too long this time. Please try again.";
-    return "Bloom's online coach couldn't be reached. Check your connection and try again.";
-  }
+  /*
+   * Strictly online: every failure to reach the coach is one honest state —
+   * the error bubble's title reads "Bloom couldn't connect right now." and
+   * this line reassures without technical detail: no provider names, no
+   * setup instructions, no "offline" framing, nothing fabricated.
+   */
+  const down =
+    "It didn't go through — your words are safe. Try again and we'll pick it right back up.";
+  if (error instanceof CoachUnavailable) return down;
   const raw =
     error && typeof error === "object" && "message" in error
       ? String((error as { message: unknown }).message ?? "")
       : error instanceof Error
         ? error.message
         : "";
-  if (/fetch|network|failed to fetch/i.test(raw))
-    return "You're offline — Bloom's coach only answers online. Reconnect and try again.";
+  if (/fetch|network|failed to fetch/i.test(raw)) return down;
   if (/relation|does not exist|schema cache|404/i.test(raw))
-    return "Coach storage isn't set up yet.";
-  return (
-    fallback ??
-    "Something went wrong reaching Bloom's online coach. Try again — your words are safe."
-  );
+    return "Your conversation isn't syncing to your account right now — it stays safe on this device.";
+  return fallback ?? down;
 }
 
 /* --------------------------------- the hook --------------------------------- */

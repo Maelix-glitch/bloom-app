@@ -31,8 +31,8 @@ import type { CoachRecord } from "@/lib/coach/responder";
 export const COACH_FUNCTION =
   (import.meta.env["VITE_COACH_FUNCTION"] as string | undefined)?.trim() || "coach";
 
-/** Past this, the local answer wins. Cold starts are real but a wait is worse. */
-export const TIMEOUT_MS = 15_000;
+/** Past this, the request is abandoned and the failure state shows. */
+export const TIMEOUT_MS = 20_000;
 
 /**
  * A photo or document attached to a message. Bytes go to the edge function,
