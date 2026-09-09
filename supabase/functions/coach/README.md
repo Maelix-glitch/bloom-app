@@ -1,9 +1,10 @@
 # Coach edge function
 
 The remote brain for Bloom's coach. The app calls it through
-`supabase.functions.invoke("coach", …)` and **falls back to the on-device
-responder** whenever it is missing, cold, slow or erroring — so deploying this
-is an upgrade, never a dependency.
+`supabase.functions.invoke("coach", …)` for **every** message — the coach is
+strictly online and has no on-device fallback. If the function is missing,
+cold, slow or erroring, the app shows an honest error with a retry, so deploy
+this function and set the keys below before relying on the coach.
 
 ## Deploy
 
@@ -66,7 +67,8 @@ Request body:
 
 Response: `{ "paragraphs": string[], "provider": string }`. A plain
 `{ "reply": "…" }` or `{ "text": "…" }` is also accepted. Anything non-2xx
-makes the app answer locally instead.
+makes the app show an error with a retry — the coach never substitutes an
+on-device answer.
 
 ### Photos (Gemini vision)
 

@@ -11,7 +11,7 @@
  *
  *   · **Never throws.** Every failure — no config, no session, a timeout, a
  *     500, a malformed body — comes back as `{ ok: false }` and the caller
- *     falls through to the local responder.
+ *     surfaces an honest error with a retry (the coach is strictly online).
  *   · **Times out.** An edge function on a cold start can take seconds; past
  *     `TIMEOUT_MS` the local answer is better than a spinner.
  *   · **Cancellable.** The caller can abort when the person sends another

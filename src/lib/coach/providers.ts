@@ -56,12 +56,6 @@ export const PROVIDERS: CoachProvider[] = [
     blurb: "Whatever model you pointed HF_MODEL at.",
     remote: true,
   },
-  {
-    id: "local",
-    name: "On this device",
-    blurb: "No network. Answers only from what you've logged.",
-    remote: false,
-  },
 ];
 
 export const PROVIDER_PREF = "coach.provider";

@@ -22,8 +22,9 @@
  *     carries inline image bytes and the chain is narrowed to vision-capable
  *     providers (Gemini). Food photos get an honest calorie/macro estimate;
  *     the photo is used for that one reply and never stored.
- *   - **Failure falls back on the client, not an error page.** Anything
- *     wrong here returns a non-2xx and Bloom answers on-device instead.
+ *   - **Failure surfaces as an error, never a fake answer.** Anything wrong
+ *     here returns a non-2xx and the client shows an honest error with a
+ *     retry — the coach is strictly online by design.
  *   - **No storage.** This function reads and writes nothing.
  *
  * Deploy:

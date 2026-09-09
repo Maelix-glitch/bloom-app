@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
-import { ask as askCoach } from "@/lib/coach/engine";
+import { ask as askCoach, CoachUnavailable } from "@/lib/coach/engine";
 import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
@@ -217,6 +217,15 @@ function attachmentToMedia(
 }
 
 export function coachErrorMessage(error: unknown, fallback?: string): string {
+  /* Strictly online: these are honest "couldn't reach the coach" states with
+     a retry — there is no on-device substitute. */
+  if (error instanceof CoachUnavailable) {
+    if (error.reason === "unconfigured")
+      return "Bloom's online coach isn't connected yet — add your keys and deploy the function, then try again.";
+    if (error.reason === "timeout")
+      return "The online coach took too long this time. Please try again.";
+    return "Bloom's online coach couldn't be reached. Check your connection and try again.";
+  }
   const raw =
     error && typeof error === "object" && "message" in error
       ? String((error as { message: unknown }).message ?? "")
@@ -224,10 +233,13 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
         ? error.message
         : "";
   if (/fetch|network|failed to fetch/i.test(raw))
-    return "You're offline — this reply stays on the device.";
+    return "You're offline — Bloom's coach only answers online. Reconnect and try again.";
   if (/relation|does not exist|schema cache|404/i.test(raw))
-    return "Coach storage isn't set up yet — everything stays on this device.";
-  return fallback ?? "Something went wrong on our end. Your words are safe on this device.";
+    return "Coach storage isn't set up yet.";
+  return (
+    fallback ??
+    "Something went wrong reaching Bloom's online coach. Try again — your words are safe."
+  );
 }
 
 /* --------------------------------- the hook --------------------------------- */

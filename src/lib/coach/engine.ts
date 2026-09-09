@@ -10,9 +10,10 @@
  *      what was asked and hands back a budget; every path here respects it.
  *      "did I sleep enough?" gets a line. "why do I keep crashing at 3pm?"
  *      gets the analysis.
- *   3. **Remote first, local always.** The Supabase edge function answers when
- *      it can; the deterministic on-device responder answers when it can't.
- *      Neither can leave the person without a reply.
+ *   3. **Strictly online.** Every question goes to the Supabase edge function.
+ *      If it can't answer — not deployed, keys missing, models failing — the
+ *      UI shows an honest error with a retry. There is no on-device fallback
+ *      pretending to be the coach.
  *
  * What it will not do: invent a number, diagnose anything, or claim the record
  * says something it doesn't. Grounding is the whole point of a coach attached
@@ -346,20 +347,14 @@ function factAnswer(paragraphs: string[], budget: Budget, topic: Topic): CoachAn
 /*  The public entry point                                                     */
 /* -------------------------------------------------------------------------- */
 
-const FALLBACK_REASON: Record<Exclude<EdgeResult, { ok: true }>["reason"], string> = {
-  unconfigured: "no coach function configured",
-  timeout: "the coach function timed out",
-  aborted: "cancelled",
-  error: "the coach function couldn't be reached",
-};
-
 /**
- * Ask the coach.
+ * Ask the coach — strictly online.
  *
- * Tries the edge function first (unless the local provider is selected), and
- * falls back to the device without ever surfacing an error state — the person
- * gets an answer either way, and the source is recorded on the result so the
- * UI can be honest about which one they're reading.
+ * Every message, including a plain "hello", goes to the edge function. There
+ * is deliberately NO on-device fallback: if the function is unreachable, not
+ * deployed, or every configured model fails, `ask` throws `CoachUnavailable`
+ * and the UI shows an honest error with a retry — the coach never pretends a
+ * device answer is the real coach.
  */
 /**
  * Thrown when a request is superseded by a newer one. Callers should ignore it
@@ -372,31 +367,27 @@ export class CoachCancelled extends Error {
   }
 }
 
+/**
+ * Thrown when the online coach cannot answer — not configured, timed out, or
+ * every configured model failed. Callers surface this as an error with a
+ * retry; they must never substitute an on-device answer.
+ */
+export class CoachUnavailable extends Error {
+  /** "unconfigured" | "timeout" | "error" */
+  readonly reason: string;
+  constructor(reason: string, detail?: string) {
+    super(detail ? `${reason}: ${detail}` : reason);
+    this.name = "CoachUnavailable";
+    this.reason = reason;
+  }
+}
+
 export async function ask(input: AskInput): Promise<CoachAnswer> {
   const { primary } = detectTopics(input.text);
   const budget = budgetFor(input.text, { greeting: primary === "greeting" });
 
-  /*
-   * Greetings and thanks never touch the network. Waking a cold function to
-   * say "hello" back is slow, costly, and worse than the instant local reply.
-   */
-  const trivial = primary === "greeting" || primary === "thanks";
-
-  if ((input.provider === "local" || trivial) && !input.image) {
-    return answerLocally(input);
-  }
-  if (input.image) {
-    /* A photo needs the vision model; local/trivial paths can't see it. */
-    const local = answerLocally(input);
-    const note =
-      "I can't see the attached photo on this device — reading images needs the online coach, which isn't reachable right now. Here's an answer from words and your record alone; send the photo again in a moment and I'll look properly.";
-    if (primary === "greeting" || primary === "thanks") return local;
-    return {
-      ...local,
-      paragraphs: [note, ...local.paragraphs],
-    };
-  }
-
+  /* Online-only by design: there is no local path here, not even for
+     greetings or a "local" provider id. */
   const result = await askEdge(
     {
       message: input.text,
@@ -422,26 +413,19 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
   }
 
   /*
-   * Cancelled means the person moved on — but an EMPTY answer is not a safe
-   * way to say that. It used to return done([], ...), and the UI rendered that
-   * as a coach message with zero paragraphs: a blank bubble under a thinking
-   * indicator that had already gone. From the outside it looked like the coach
-   * thought forever and never replied.
-   *
    * A cancellation is a control-flow signal, not an answer, so it is thrown
-   * and the caller drops it. If a cancellation ever reaches the UI anyway, the
-   * local answer below is a real reply rather than nothing.
+   * and the caller drops it (the person moved on to a newer question).
    */
   if (result.reason === "aborted") {
     throw new CoachCancelled();
   }
 
-  const local = answerLocally(input);
-  const fallback = { ...local, fellBackBecause: FALLBACK_REASON[result.reason] };
-  if (!input.image) return fallback;
-  const note =
-    "I can't see the attached photo right now — the online coach that reads images isn't reachable. Here's an answer from words and your record alone; send the photo again in a moment and I'll look properly.";
-  return { ...fallback, paragraphs: [note, ...fallback.paragraphs] };
+  /*
+   * Everything else is the online coach being unavailable. Strictly online:
+   * surface it as an error with a retry — never substitute an on-device
+   * answer that would pretend to be the real coach.
+   */
+  throw new CoachUnavailable(result.reason, result.detail);
 }
 
 export { isCareTopic, detectTopics };
