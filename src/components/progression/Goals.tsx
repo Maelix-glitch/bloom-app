@@ -89,76 +89,74 @@ function GoalCard({
   const tone = DOMAIN_TONE[item.goal.domain] ?? "var(--gold)";
   const isClaiming = claimingId === item.goal.id && busy;
 
+  const state = claimed
+    ? "Earned"
+    : complete
+      ? null
+      : item.progress === 0
+        ? "Not started yet"
+        : `${item.remaining} to go`;
+
   return (
     <article
       className="pg-goal"
       style={{ ["--goal-tone" as string]: tone }}
       data-complete={complete && !claimed ? "true" : "false"}
+      data-claimed={claimed ? "true" : "false"}
     >
       <div className="pg-goal-head">
         <span className="pg-goal-domain">{JOURNEY_DOMAIN_LABELS[item.goal.domain]}</span>
-        <span className="pg-goal-length">{item.goal.length}</span>
+        <span className={cn("pg-goal-value", claimed && "is-muted")}>
+          +{formatPoints(item.goal.points)}
+          <small>points</small>
+        </span>
       </div>
 
       <h3 className="pg-goal-title">{item.goal.title}</h3>
       <p className="pg-goal-detail">{item.goal.detail}</p>
 
-      <div>
-        <div className="pg-goal-count">
-          <span>
-            {item.progress} <span className="pg-goal-count-total">/ {shownTarget}</span>
-          </span>
-          <span className="pg-goal-count-total">
-            {claimed
-              ? "Earned"
-              : complete
-                ? "Ready when you are"
-                : item.progress === 0
-                  ? "Not started yet"
-                  : `${item.remaining} to go`}
-          </span>
-        </div>
+      <div className="pg-goal-meter">
         <span
           className="pg-rail"
-          style={{ display: "block", marginTop: "0.5rem" }}
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={shownTarget}
           aria-valuenow={item.progress}
           aria-label={item.goal.title}
         >
-          <span
-            className="pg-rail-fill"
-            style={{ width: `${Math.round(item.ratio * 100)}%` }}
-          />
+          <span className="pg-rail-fill" style={{ width: `${Math.round(item.ratio * 100)}%` }} />
+        </span>
+        <span className="pg-goal-count">
+          {item.progress}
+          <span className="pg-goal-count-total"> / {shownTarget}</span>
         </span>
       </div>
 
       <div className="pg-goal-foot">
-        <span className={cn("pg-points", claimed && "pg-points-muted")}>
-          +{formatPoints(item.goal.points)}
-          <small>points</small>
-        </span>
-
         {claimed ? (
-          <span className="pg-complete-row">
-            <Check width={13} height={13} aria-hidden /> Earned
-          </span>
+          <>
+            <span className="pg-complete-row">
+              <Check width={12} height={12} aria-hidden /> Earned
+            </span>
+            <span className="pg-goal-length">{item.goal.length}</span>
+          </>
         ) : complete ? (
-          <button
-            type="button"
-            className="pg-btn pg-btn-primary"
-            onClick={() => onClaim(item.goal.id)}
-            disabled={isClaiming}
-          >
-            {isClaiming ? "Claiming…" : "Claim points"}
-          </button>
+          <>
+            <span className="pg-goal-length">Ready</span>
+            <button
+              type="button"
+              className="pg-btn pg-btn-primary"
+              onClick={() => onClaim(item.goal.id)}
+              disabled={isClaiming}
+            >
+              {isClaiming ? "Claiming…" : "Claim points"}
+            </button>
+          </>
         ) : (
-          <span className="pg-goal-note">
-            {item.goal.cadence === "one-time" ? "In progress" : `Resets each ${
-              item.goal.cadence === "daily" ? "day" : item.goal.cadence === "weekly" ? "week" : "month"
-            }`}
-          </span>
+          <>
+            <span className="pg-goal-state">{state}</span>
+            <span className="pg-goal-resets">{item.goal.length}</span>
+          </>
         )}
       </div>
     </article>

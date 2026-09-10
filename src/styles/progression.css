@@ -228,16 +228,19 @@
 .pg-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
   gap: clamp(1.5rem, 4vw, 3.5rem);
   align-items: center;
-  padding: clamp(1.6rem, 3.5vw, 3rem);
-  border-radius: 30px;
+  padding: clamp(1.75rem, 4vw, 3.4rem);
+  border-radius: 32px;
   border: 1px solid var(--pg-line-soft);
   background:
-    radial-gradient(120% 130% at 78% 8%, color-mix(in oklab, var(--gold) 9%, transparent), transparent 58%),
-    linear-gradient(180deg, color-mix(in oklab, var(--surface) 62%, transparent), color-mix(in oklab, var(--background) 86%, transparent));
-  box-shadow: var(--pg-shadow);
+    radial-gradient(115% 120% at 82% 4%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 56%),
+    radial-gradient(90% 100% at 6% 100%, color-mix(in oklab, var(--violet) 7%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface) 60%, transparent), color-mix(in oklab, var(--background) 88%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent),
+    var(--pg-shadow);
   overflow: hidden;
 }
 
@@ -265,23 +268,43 @@
 }
 
 .pg-hero-title {
-  font-size: clamp(38px, 6.4vw, 62px);
+  font-size: clamp(42px, 6.6vw, 74px);
+  letter-spacing: -0.025em;
+  background: linear-gradient(
+    170deg,
+    var(--pg-ivory) 12%,
+    color-mix(in oklab, var(--pg-ivory) 78%, var(--gold)) 96%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.pg-hero-sub {
-  max-width: 46ch;
+/* One line about what is ahead — the only sentence in the hero. */
+.pg-hero-line {
   font-family: var(--font-display);
-  font-size: clamp(15px, 1.6vw, 18px);
-  font-style: italic;
-  line-height: 1.5;
-  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+  font-size: clamp(15px, 1.9vw, 19px);
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--gold) 78%, var(--foreground));
 }
 
-.pg-hero-note {
-  max-width: 52ch;
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--faint);
+.pg-hero-micro {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--faint) 88%, transparent);
+}
+
+.pg-hero-micro strong {
+  font-weight: 500;
+  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+  font-variant-numeric: tabular-nums;
 }
 
 /* the luminous emblem + radial progress */
@@ -338,7 +361,7 @@
   position: relative;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 0 26px color-mix(in oklab, var(--gold) 26%, transparent));
+  filter: drop-shadow(0 0 34px color-mix(in oklab, var(--gold) 30%, transparent));
 }
 
 .pg-halo {
@@ -383,47 +406,20 @@
 
 .pg-rank-points {
   font-family: var(--font-display);
-  font-size: clamp(26px, 3.4vw, 34px);
-  letter-spacing: -0.01em;
+  font-size: clamp(30px, 4vw, 42px);
+  letter-spacing: -0.02em;
+  line-height: 1;
   color: var(--pg-ivory);
+  font-variant-numeric: tabular-nums;
 }
 
 .pg-rank-points-label {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-.pg-hero-stat-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.4rem;
   margin-top: 0.35rem;
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--faint);
-}
-
-.pg-hero-stat strong {
-  color: color-mix(in oklab, var(--foreground) 90%, transparent);
-  font-weight: 500;
-}
-
-.pg-to-next {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--pg-line);
-  background: color-mix(in oklab, var(--gold) 7%, transparent);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: color-mix(in oklab, var(--gold) 82%, var(--foreground));
-  width: fit-content;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--faint) 85%, transparent);
 }
 
 /* the count-up number */
@@ -453,55 +449,111 @@
 /* ---------------------------- next milestone ---------------------------- */
 
 .pg-next {
-  margin-top: 1.4rem;
+  grid-column: 1 / -1;
+  margin-top: clamp(0.5rem, 2vw, 1.25rem);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1.4rem;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 240px) auto;
+  gap: clamp(1rem, 3vw, 2.25rem);
   align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-radius: 22px;
-  border: 1px solid color-mix(in oklab, var(--gold) 26%, transparent);
+  padding: 1.15rem 1.4rem;
+  border-radius: 24px;
+  border: 1px solid color-mix(in oklab, var(--gold) 22%, transparent);
   background:
-    radial-gradient(90% 160% at 0% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 62%),
-    color-mix(in oklab, var(--surface) 55%, transparent);
+    radial-gradient(80% 200% at 0% 0%, color-mix(in oklab, var(--gold) 9%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface) 52%, transparent), color-mix(in oklab, var(--background) 82%, transparent));
 }
 
-@media (max-width: 720px) {
+.pg-next-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.pg-next-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.pg-next-meter .pg-rail {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pg-next-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: color-mix(in oklab, var(--foreground) 88%, transparent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pg-next-count-total {
+  color: var(--faint);
+}
+
+.pg-next-pay {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pg-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--pg-line-soft);
+  color: var(--faint);
+  transition:
+    color 0.35s ease,
+    border-color 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.pg-icon-btn:hover {
+  color: color-mix(in oklab, var(--gold) 90%, var(--foreground));
+  border-color: color-mix(in oklab, var(--gold) 40%, transparent);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 860px) {
   .pg-next {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 1rem;
+  }
+  .pg-next-meter {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .pg-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pg-next-pay {
+    justify-content: space-between;
   }
 }
 
 .pg-next-title {
   font-family: var(--font-display);
   font-size: clamp(17px, 2vw, 21px);
-  line-height: 1.3;
-}
-
-.pg-next-detail {
-  margin-top: 0.35rem;
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--faint);
-}
-
-.pg-next-progress {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.9rem;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--faint);
+  line-height: 1.28;
+  letter-spacing: -0.008em;
 }
 
 /* -------------------------------- rails --------------------------------- */
 
 .pg-rail {
   position: relative;
+  display: block;
   height: 3px;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
   overflow: hidden;
 }
 
@@ -509,7 +561,12 @@
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, color-mix(in oklab, var(--gold) 55%, transparent), color-mix(in oklab, var(--gold) 95%, transparent));
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--goal-tone, var(--gold)) 42%, transparent),
+    color-mix(in oklab, var(--goal-tone, var(--gold)) 96%, transparent)
+  );
+  box-shadow: 0 0 12px -2px color-mix(in oklab, var(--goal-tone, var(--gold)) 60%, transparent);
   transition: width 1s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -766,29 +823,60 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  padding: 1.25rem 1.35rem;
-  border-radius: 20px;
+  gap: 0.7rem;
+  padding: 1.3rem 1.4rem 1.15rem;
+  border-radius: 22px;
   border: 1px solid var(--pg-line-soft);
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--surface) 52%, transparent), color-mix(in oklab, var(--background) 78%, transparent));
+    radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--goal-tone, var(--gold)) 5%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface) 50%, transparent), color-mix(in oklab, var(--background) 80%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 4%, transparent);
   transition:
-    border-color 0.45s ease,
-    transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
-    box-shadow 0.45s ease;
+    border-color 0.5s ease,
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.5s ease,
+    background 0.5s ease;
+}
+
+/* A hairline of the goal's own colour, so the grid reads as a set without
+   shouting about it. */
+.pg-goal::before {
+  content: "";
+  position: absolute;
+  left: 1.4rem;
+  right: 1.4rem;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--goal-tone, var(--gold)) 34%, transparent) 22%,
+    transparent 78%
+  );
+  opacity: 0.75;
+  transition: opacity 0.5s ease;
+}
+
+.pg-goal[data-claimed="true"]::before {
+  opacity: 0.28;
 }
 
 .pg-goal:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--goal-tone, var(--gold)) 32%, transparent);
-  box-shadow: 0 26px 60px -40px color-mix(in oklab, var(--goal-tone, var(--gold)) 60%, transparent);
+  transform: translateY(-3px);
+  border-color: color-mix(in oklab, var(--goal-tone, var(--gold)) 28%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent),
+    0 30px 70px -44px color-mix(in oklab, var(--goal-tone, var(--gold)) 70%, transparent);
 }
 
 .pg-goal[data-complete="true"] {
-  border-color: color-mix(in oklab, var(--gold) 38%, transparent);
+  border-color: color-mix(in oklab, var(--gold) 42%, transparent);
   background:
-    radial-gradient(80% 120% at 0% 0%, color-mix(in oklab, var(--gold) 9%, transparent), transparent 60%),
-    linear-gradient(180deg, color-mix(in oklab, var(--surface) 60%, transparent), color-mix(in oklab, var(--background) 80%, transparent));
+    radial-gradient(90% 120% at 0% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 62%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface) 58%, transparent), color-mix(in oklab, var(--background) 80%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--gold) 12%, transparent),
+    0 30px 70px -50px color-mix(in oklab, var(--gold) 65%, transparent);
 }
 
 .pg-goal-head {
@@ -818,11 +906,38 @@
   opacity: 0.9;
 }
 
-.pg-goal-length {
+.pg-goal-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: color-mix(in oklab, var(--gold) 92%, var(--foreground));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pg-goal-value small {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--faint);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--faint) 90%, transparent);
+}
+
+.pg-goal-value.is-muted {
+  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+}
+
+.pg-goal-length,
+.pg-goal-state {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--faint) 88%, transparent);
 }
 
 .pg-goal-title {
@@ -834,23 +949,37 @@
 
 .pg-goal-detail {
   font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--faint);
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--faint) 94%, transparent);
+  /* two lines, always: the card stays a card, never an essay */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pg-goal-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+.pg-goal-meter .pg-rail {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .pg-goal-count {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
   font-family: var(--font-mono);
-  font-size: 12px;
-  color: color-mix(in oklab, var(--foreground) 85%, transparent);
+  font-size: 11px;
+  color: color-mix(in oklab, var(--foreground) 88%, transparent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .pg-goal-count-total {
   color: var(--faint);
-  font-size: 11px;
 }
 
 .pg-goal-foot {
@@ -859,7 +988,15 @@
   justify-content: space-between;
   gap: 1rem;
   margin-top: auto;
-  padding-top: 0.4rem;
+  padding-top: 0.55rem;
+}
+
+.pg-goal-resets {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--faint) 80%, transparent);
 }
 
 .pg-points {
@@ -888,13 +1025,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.15rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 999px;
   border: 1px solid transparent;
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition:
     transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
     background 0.35s ease,
@@ -908,9 +1046,15 @@
 }
 
 .pg-btn-primary {
-  color: oklch(0.2 0.03 85);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--gold) 92%, white), var(--gold));
-  box-shadow: 0 14px 32px -18px color-mix(in oklab, var(--gold) 70%, transparent);
+  color: oklch(0.19 0.03 85);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--gold) 94%, white),
+    color-mix(in oklab, var(--gold) 88%, oklch(0.6 0.09 80))
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 34%, transparent),
+    0 16px 36px -20px color-mix(in oklab, var(--gold) 80%, transparent);
 }
 
 .pg-btn-primary:not(:disabled):hover {
@@ -937,11 +1081,12 @@
 .pg-complete-row {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: color-mix(in oklab, var(--gold) 85%, var(--foreground));
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--gold) 88%, var(--foreground));
 }
 
 .pg-goal-note {
@@ -968,20 +1113,25 @@
   display: flex;
   gap: 0.9rem;
   align-items: flex-start;
-  padding: 1.05rem 1.15rem;
-  border-radius: 18px;
+  padding: 1.1rem 1.2rem;
+  border-radius: 20px;
   border: 1px solid var(--pg-line-soft);
-  background: color-mix(in oklab, var(--surface) 40%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 42%, transparent),
+    color-mix(in oklab, var(--background) 78%, transparent)
+  );
   transition:
-    border-color 0.4s ease,
-    transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    border-color 0.45s ease,
+    transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .pg-ach[data-earned="true"] {
-  border-color: color-mix(in oklab, var(--ach-tone, var(--gold)) 36%, transparent);
+  border-color: color-mix(in oklab, var(--ach-tone, var(--gold)) 34%, transparent);
   background:
-    radial-gradient(70% 120% at 12% 0%, color-mix(in oklab, var(--ach-tone, var(--gold)) 12%, transparent), transparent 62%),
-    color-mix(in oklab, var(--surface) 50%, transparent);
+    radial-gradient(70% 120% at 10% 0%, color-mix(in oklab, var(--ach-tone, var(--gold)) 13%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface) 52%, transparent), color-mix(in oklab, var(--background) 76%, transparent));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--ach-tone, var(--gold)) 10%, transparent);
 }
 
 .pg-ach:not([data-earned="true"]) {

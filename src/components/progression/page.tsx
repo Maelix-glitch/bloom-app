@@ -144,8 +144,7 @@ export function JourneyPage() {
             </div>
             <p className="pg-section-aside">
               {todayCount > 0 ? `${todayCount} for today · ` : ""}
-              wellness first — movement, sleep, water, rest, mood — and every goal verified from
-              your own records
+              wellness first · verified from your own records
             </p>
           </div>
           <GoalsBoard
@@ -170,7 +169,7 @@ export function JourneyPage() {
               </h2>
             </div>
             <p className="pg-section-aside">
-              Ranks are read from your earned points. Nothing is lost when a week is quiet.
+              Read from your earned points. A quiet week costs you nothing.
             </p>
           </div>
           <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
@@ -208,10 +207,7 @@ export function JourneyPage() {
                 How you earn
               </h2>
             </div>
-            <p className="pg-section-aside">
-              Habit ticks pay 5–500 points each, set by you. Verified goals and milestones pay
-              100–10,000 on top.
-            </p>
+            <p className="pg-section-aside">Habit ticks pay 5–500. Goals pay 100–10,000.</p>
           </div>
           {progress.error ? (
             <p className="pg-empty" style={{ marginBottom: "1rem" }}>
@@ -248,8 +244,7 @@ export function JourneyPage() {
 
         <footer className="pg-footer">
           <p className="pg-footer-phrase">
-            There is no final rank and no finished state — the garden keeps opening. Come back when
-            you want to, not because Bloom is counting.
+            No final rank, no finished state. Come back when you want to.
           </p>
           <p className="pg-footer-meta">
             <Check width={11} height={11} aria-hidden />

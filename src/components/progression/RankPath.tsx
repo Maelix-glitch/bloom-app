@@ -11,7 +11,7 @@
 
 import { useMemo } from "react";
 
-import { journeyRanks, rankFor } from "@/lib/progression/ranks";
+import { CYCLE_STEP, journeyRanks, rankFor } from "@/lib/progression/ranks";
 import { formatPoints } from "@/lib/progression/format";
 import { Emblem } from "./Emblem";
 
@@ -56,8 +56,8 @@ export function RankPath({ points, rankTier }: { points: number; rankTier: numbe
         })}
       </ol>
       <p className="pg-path-more">
-        Past {ranks[ranks.length - 1]?.name ?? "the named ranks"} the path keeps going — new seasons
-        open every {formatPoints(6000)} points, for as long as you keep walking.
+        Past {ranks[ranks.length - 1]?.name ?? "the named ranks"} the path keeps going — a new season
+        every {formatPoints(CYCLE_STEP)} points.
       </p>
     </div>
   );

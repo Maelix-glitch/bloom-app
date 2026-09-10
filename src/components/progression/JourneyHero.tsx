@@ -1,16 +1,17 @@
 /**
- * The top of the journey: who you are becoming, how far along, and the one
- * thing worth doing next.
+ * The top of the journey.
  *
- * Order of importance on screen (and in the DOM, so screen readers agree):
- *   1. the current rank — the emblem is the centrepiece
- *   2. Bloom Points, earned for real
- *   3. how close the next rank is
- *   4. your next milestone
+ * Deliberately quiet: a rank, a number, one line about what is next. Everything
+ * else the old hero said — the running commentary, the three-way point
+ * breakdown — now lives where it belongs (Point activity), so the first screen
+ * says one thing at a time.
+ *
+ * Screen-reader order matches visual importance: rank → progress within the
+ * rank → Bloom Points → what is next.
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import type { GoalProgress, RankState } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
@@ -64,9 +65,9 @@ function RankRing({ progress }: { progress: number }) {
     <svg viewBox="0 0 104 104" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="pg-ring-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="color-mix(in oklab, var(--gold) 70%, transparent)" />
+          <stop offset="0%" stopColor="color-mix(in oklab, var(--gold) 55%, transparent)" />
           <stop offset="55%" stopColor="var(--gold)" />
-          <stop offset="100%" stopColor="color-mix(in oklab, var(--violet) 80%, var(--gold))" />
+          <stop offset="100%" stopColor="color-mix(in oklab, var(--violet) 75%, var(--gold))" />
         </linearGradient>
       </defs>
       <circle className="pg-ring-track" cx="52" cy="52" r={radius} />
@@ -88,8 +89,6 @@ export function JourneyHero({
   loading,
   todayPoints,
   weekPoints,
-  awardedTotal,
-  earnedFromHabits,
   nextMilestone,
   onStartGoal,
 }: {
@@ -98,9 +97,10 @@ export function JourneyHero({
   loading: boolean;
   todayPoints: number;
   weekPoints: number;
-  awardedTotal: number;
-  earnedFromHabits: number;
   nextMilestone: GoalProgress | null;
+  /** Kept for callers that still pass the breakdown; no longer shown here. */
+  awardedTotal?: number;
+  earnedFromHabits?: number;
   onStartGoal?: (goalId: string) => void;
 }) {
   const shown = useCountUp(points);
@@ -117,8 +117,11 @@ export function JourneyHero({
     return undefined;
   }, [points]);
 
-  const ringProgress = rank.progress;
   const next = rank.next;
+  const toNext =
+    next && rank.remaining > 0
+      ? `${formatPoints(rank.remaining)} points to ${next.name}`
+      : "The garden keeps growing";
 
   return (
     <section className="pg-hero" aria-labelledby="pg-journey-title">
@@ -130,58 +133,33 @@ export function JourneyHero({
         <h1 id="pg-journey-title" className="pg-title pg-hero-title">
           {rank.rank.name}
         </h1>
-        <p className="pg-hero-sub">
-          Every small step becomes part of the bigger picture — {formatPoints(points)} Bloom Points
-          earned so far.
-        </p>
-        <p className="pg-hero-note">
-          {next && rank.remaining > 0 ? (
-            <>
-              {formatPoints(rank.remaining)} points to {next.name}. Nothing here expires, and a
-              quiet week costs you nothing you have already earned.
-            </>
-          ) : (
-            <>The garden keeps growing — there is always another season ahead.</>
-          )}
-        </p>
-
-        <div className="pg-hero-stat-row">
-          <span className="pg-hero-stat">
-            <strong>{formatPoints(todayPoints)}</strong> earned today
-          </span>
-          <span className="pg-hero-stat">
-            <strong>{formatPoints(weekPoints)}</strong> earned in the last 7 days
-          </span>
-          <span className="pg-hero-stat">
-            <strong>{formatPoints(earnedFromHabits)}</strong> from habits ·{" "}
-            <strong>{formatPoints(awardedTotal)}</strong> from milestones
-          </span>
-        </div>
-
-        {next ? (
-          <p className="pg-to-next">
-            <Sparkles width={12} height={12} aria-hidden />
-            {rank.remaining > 0
-              ? `${formatPoints(rank.remaining)} points to ${next.name}`
-              : `Reaching ${next.name}`}
+        <p className="pg-hero-line">{toNext}</p>
+        {/* Silent when there is nothing to report — no row of zeroes. */}
+        {todayPoints > 0 || weekPoints > 0 ? (
+          <p className="pg-hero-micro">
+            {todayPoints > 0 ? (
+              <span>
+                <strong>+{formatPoints(todayPoints)}</strong> today
+              </span>
+            ) : null}
+            {todayPoints > 0 && weekPoints > 0 ? <span aria-hidden>·</span> : null}
+            {weekPoints > 0 ? (
+              <span>
+                <strong>+{formatPoints(weekPoints)}</strong> this week
+              </span>
+            ) : null}
           </p>
         ) : null}
       </div>
 
       <div className="pg-emblem-stage">
         <div className="pg-emblem-ring">
-          <RankRing progress={ringProgress} />
+          <RankRing progress={rank.progress} />
           <div className="pg-emblem-core">
             <span className="pg-halo" aria-hidden />
             <span className="pg-emblem-mark" style={{ color: rank.rank.tone }}>
-              <Emblem id={rank.rank.emblem} size={92} strokeWidth={1.3} />
+              <Emblem id={rank.rank.emblem} size={88} strokeWidth={1.25} />
             </span>
-            <p className="pg-rank-name">{rank.rank.name}</p>
-            <p className="pg-rank-meta">
-              <span>Rank {rank.rank.tier}</span>
-              <span aria-hidden>·</span>
-              <span>{Math.round(ringProgress * 100)}%</span>
-            </p>
           </div>
         </div>
 
@@ -192,56 +170,49 @@ export function JourneyHero({
         >
           {loading ? "—" : formatPoints(shown)}
         </p>
+        {loading ? <span className="sr-only">Loading your points</span> : null}
         <p className="pg-rank-meta">
-          {loading ? (
-            <span>Loading your points…</span>
-          ) : (
-            <>
-              <span>
-                {formatPoints(rank.rank.threshold)} – {formatPoints(next.threshold)}
-              </span>
-              <span aria-hidden>·</span>
-              <span>
-                {formatPoints(rank.intoRank)} / {formatPoints(rank.span)}
-              </span>
-            </>
-          )}
+          <span>Rank {rank.rank.tier}</span>
+        </p>
+        {/* The ring is the progress; this states it for anyone who cannot see it. */}
+        <p className="sr-only">
+          {rank.intoRank.toLocaleString()} of {rank.span.toLocaleString()} points through{" "}
+          {rank.rank.name}
+          {next && rank.remaining > 0 ? `, ${rank.remaining.toLocaleString()} to ${next.name}` : ""}
         </p>
       </div>
 
       {nextMilestone ? (
-        <div className="pg-next" style={{ gridColumn: "1 / -1" }}>
-          <div>
+        <div className="pg-next">
+          <div className="pg-next-main">
             <p className="pg-eyebrow">
               <span className="pg-eyebrow-rule" aria-hidden />
               Your next milestone
             </p>
-            <p className="pg-next-title" style={{ marginTop: "0.5rem" }}>
-              {nextMilestone.goal.title}
-            </p>
-            <p className="pg-next-detail">{nextMilestone.goal.detail}</p>
-            <div className="pg-next-progress">
-              <span>
-                {nextMilestone.progress} / {nextMilestone.goal.target}
-              </span>
-              <span
-                className="pg-rail"
-                style={{ flex: "1 1 auto", maxWidth: 220 }}
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={nextMilestone.goal.target}
-                aria-valuenow={nextMilestone.progress}
-                aria-label={nextMilestone.goal.title}
-              >
-                <span
-                  className="pg-rail-fill"
-                  style={{ width: `${Math.round(nextMilestone.ratio * 100)}%` }}
-                />
-              </span>
-              <span>{nextMilestone.remaining} to go</span>
-            </div>
+            <p className="pg-next-title">{nextMilestone.goal.title}</p>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.7rem" }}>
+
+          <div className="pg-next-meter">
+            <span
+              className="pg-rail"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={nextMilestone.goal.target}
+              aria-valuenow={nextMilestone.progress}
+              aria-label={nextMilestone.goal.title}
+            >
+              <span
+                className="pg-rail-fill"
+                style={{ width: `${Math.round(nextMilestone.ratio * 100)}%` }}
+              />
+            </span>
+            <span className="pg-next-count">
+              {nextMilestone.progress}
+              <span className="pg-next-count-total"> / {nextMilestone.goal.target}</span>
+            </span>
+          </div>
+
+          <div className="pg-next-pay">
             <span className="pg-points">
               +{formatPoints(nextMilestone.goal.points)}
               <small>points</small>
@@ -249,10 +220,11 @@ export function JourneyHero({
             {onStartGoal ? (
               <button
                 type="button"
-                className="pg-btn pg-btn-quiet"
+                className="pg-icon-btn"
+                aria-label={`Find ${nextMilestone.goal.title} in the goals list`}
                 onClick={() => onStartGoal(nextMilestone.goal.id)}
               >
-                View progress
+                <ArrowUpRight width={14} height={14} aria-hidden />
               </button>
             ) : null}
           </div>
