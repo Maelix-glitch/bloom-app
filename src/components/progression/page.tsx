@@ -34,6 +34,7 @@ import {
 import { PointsFloat, RankCeremony } from "@/components/progression/RankCeremony";
 import { LegacyRewards } from "@/components/progression/LegacyRewards";
 import { PgReveal } from "@/components/progression/Reveal";
+import { CrestHall } from "@/components/progression/CrestHall";
 
 /**
  * The rising gold motes — embers drifting up through the page. Deterministic
@@ -216,6 +217,28 @@ export function JourneyPage() {
               </p>
             </div>
             <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
+          </section>
+        </PgReveal>
+
+        {/* ---------------------------------------------- hall of crests ------ */}
+        <PgReveal>
+          <section className="pg-section" aria-labelledby="pg-hall-title">
+            <div className="pg-section-head">
+              <div className="pg-section-head-left">
+                <p className="pg-eyebrow">
+                  <span className="pg-eyebrow-rule" aria-hidden />
+                  Hall of crests
+                </p>
+                <h2 id="pg-hall-title" className="pg-section-title">
+                  The insignia you carry
+                </h2>
+              </div>
+              <p className="pg-section-aside">
+                Each rank is struck as a crest. The frame itself is earned — it grows more elaborate
+                the further you walk.
+              </p>
+            </div>
+            <CrestHall points={progress.points} rankTier={progress.rank.rank.tier} />
           </section>
         </PgReveal>
 

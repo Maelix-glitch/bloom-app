@@ -16,6 +16,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { GoalProgress, RankState } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
 import { Emblem } from "./Emblem";
+import { RankBanner } from "./RankBadge";
 
 /**
  * Smoothly counts a number from its previous value to the new one. Respects
@@ -178,6 +179,11 @@ export function JourneyHero({
               <Emblem id={rank.rank.emblem} size={88} strokeWidth={1.25} />
             </span>
           </div>
+        </div>
+
+        {/* the rank's banner ribbon — the crest's nameplate, worn under the ring */}
+        <div className="pg-hero-banner" aria-hidden>
+          <RankBanner tone={rank.rank.tone}>{rank.rank.name}</RankBanner>
         </div>
 
         <p className="pg-rank-points-label">Bloom points</p>

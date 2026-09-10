@@ -13,7 +13,7 @@ import { useMemo } from "react";
 
 import { CYCLE_STEP, journeyRanks, rankFor } from "@/lib/progression/ranks";
 import { formatPoints } from "@/lib/progression/format";
-import { Emblem } from "./Emblem";
+import { RankBadge } from "./RankBadge";
 
 export function RankPath({ points, rankTier }: { points: number; rankTier: number }) {
   const ranks = useMemo(() => journeyRanks(points, 2, 3), [points]);
@@ -36,10 +36,8 @@ export function RankPath({ points, rankTier }: { points: number; rankTier: numbe
               aria-current={state === "current" ? "step" : undefined}
             >
               <span className="pg-node-mark">
-                <span className="pg-node-dot" style={{ color: rank.tone }}>
-                  <Emblem id={rank.emblem} size={state === "current" ? 26 : 20} strokeWidth={1.6} />
-                  {state === "current" ? <span className="pg-node-pulse" aria-hidden /> : null}
-                </span>
+                <RankBadge rank={rank} muted={state === "future"} />
+                {state === "current" ? <span className="pg-node-pulse" aria-hidden /> : null}
               </span>
               <span className="pg-node-copy">
                 <span className="pg-node-name">{rank.name}</span>
@@ -56,8 +54,8 @@ export function RankPath({ points, rankTier }: { points: number; rankTier: numbe
         })}
       </ol>
       <p className="pg-path-more">
-        Past {ranks[ranks.length - 1]?.name ?? "the named ranks"} the path keeps going — a new season
-        every {formatPoints(CYCLE_STEP)} points.
+        Past {ranks[ranks.length - 1]?.name ?? "the named ranks"} the path keeps going — a new
+        season every {formatPoints(CYCLE_STEP)} points.
       </p>
     </div>
   );

@@ -14,7 +14,7 @@ import { useEffect } from "react";
 
 import type { RankState } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
-import { Emblem } from "./Emblem";
+import { RankBadge } from "./RankBadge";
 
 /** Deterministic burst of sparks — SSR-safe, no Math.random at render. */
 const CEREMONY_SPARKS = Array.from({ length: 18 }, (_, i) => {
@@ -79,7 +79,7 @@ export function RankCeremony({
       <div className="pg-ceremony-inner">
         <span className="pg-ceremony-mark" style={{ color: rank.rank.tone }} aria-hidden>
           <span className="pg-ceremony-halo" aria-hidden />
-          <Emblem id={rank.rank.emblem} size={132} strokeWidth={1.1} />
+          <RankBadge rank={rank.rank} banner />
         </span>
         <p className="pg-eyebrow pg-ceremony-eyebrow">
           <span className="pg-eyebrow-rule" aria-hidden />
