@@ -20,7 +20,7 @@ export interface TextToolValue {
   color: string;
   background: StoryTextBackground;
   opacity: number;
-  animation: "none" | "fade" | "rise" | "type";
+  animation: "none" | "fade" | "rise" | "type" | "float" | "pulse";
 }
 
 const BACKGROUNDS: { id: StoryTextBackground; label: string }[] = [
@@ -36,6 +36,8 @@ const ANIMATIONS: { id: TextToolValue["animation"]; label: string }[] = [
   { id: "fade", label: "Fade" },
   { id: "rise", label: "Rise" },
   { id: "type", label: "Type" },
+  { id: "float", label: "Float" },
+  { id: "pulse", label: "Pulse" },
 ];
 
 export function TextTool({

@@ -49,12 +49,13 @@ export interface MusicProvider {
 /* Enabled only when a key is provided; otherwise `configured` is false and
  * the tray shows its graceful empty state. https-only, validated URLs. */
 
-const TENOR_KEY =
-  (typeof import.meta !== "undefined" &&
-    (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.[
-      "VITE_TENOR_API_KEY"
-    ]) ||
-  "";
+function envKey(name: string): string {
+  if (typeof import.meta === "undefined") return "";
+  return (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.[name] ?? "";
+}
+
+const TENOR_KEY = envKey("VITE_TENOR_API_KEY");
+const GIPHY_KEY = envKey("VITE_GIPHY_API_KEY");
 
 function isHttps(url: unknown): url is string {
   return typeof url === "string" && url.startsWith("https://") && url.length < 2048;
@@ -82,15 +83,22 @@ function mapTenor(item: TenorResult): GifAsset | null {
   };
 }
 
-class TenorGifProvider implements GifProvider {
+export class TenorGifProvider implements GifProvider {
   readonly id = "tenor";
   readonly label = "GIFs";
-  readonly configured = TENOR_KEY.length > 0;
+  readonly configured: boolean;
+
+  constructor(key = TENOR_KEY) {
+    this.key = key;
+    this.configured = key.length > 0;
+  }
+
+  private key: string;
 
   private async query(endpoint: string, params: Record<string, string>): Promise<GifAsset[]> {
     if (!this.configured) return [];
     const url = new URL(`https://tenor.googleapis.com/v2/${endpoint}`);
-    url.searchParams.set("key", TENOR_KEY);
+    url.searchParams.set("key", this.key);
     url.searchParams.set("client_key", "bloom_app");
     url.searchParams.set("media_filter", "gif,tinygif,nanogif");
     url.searchParams.set("contentfilter", "medium");
@@ -126,7 +134,83 @@ class EmptyGifProvider implements GifProvider {
   }
 }
 
-export const gifProvider: GifProvider = TENOR_KEY ? new TenorGifProvider() : new EmptyGifProvider();
+interface GiphyImage {
+  url?: string;
+}
+
+interface GiphyResult {
+  id: string;
+  title?: string;
+  images?: {
+    fixed_width?: GiphyImage;
+    fixed_width_still?: GiphyImage;
+    original?: GiphyImage;
+    original_still?: GiphyImage;
+  };
+}
+
+function mapGiphy(item: GiphyResult): GifAsset | null {
+  const images = item.images ?? {};
+  const play =
+    images.fixed_width?.url ?? images.original?.url ?? images.fixed_width_still?.url ?? null;
+  if (!isHttps(play)) return null;
+  const still = images.fixed_width_still?.url ?? images.original_still?.url ?? play;
+  return {
+    id: `giphy:${item.id}`,
+    src: play,
+    still: isHttps(still) ? still : play,
+    width: 200,
+    height: 200,
+    title: typeof item.title === "string" && item.title ? item.title.slice(0, 80) : "GIF",
+  };
+}
+
+export class GiphyGifProvider implements GifProvider {
+  readonly id = "giphy";
+  readonly label = "GIFs";
+  readonly configured: boolean;
+
+  constructor(key = GIPHY_KEY) {
+    this.key = key;
+    this.configured = key.length > 0;
+  }
+
+  private key: string;
+
+  private async query(endpoint: string, params: Record<string, string>): Promise<GifAsset[]> {
+    if (!this.configured) return [];
+    const url = new URL(`https://api.giphy.com/v1/gifs/${endpoint}`);
+    url.searchParams.set("api_key", this.key);
+    // Bloom stays gentle: G-rated results only.
+    url.searchParams.set("rating", "g");
+    url.searchParams.set("bundle", "messaging_non_clips");
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(`gif provider ${res.status}`);
+    const data = (await res.json()) as { data?: GiphyResult[] };
+    return (data.data ?? []).map(mapGiphy).filter((g): g is GifAsset => g !== null);
+  }
+
+  trending(limit: number): Promise<GifAsset[]> {
+    return this.query("trending", { limit: String(Math.min(limit, 24)) }).catch(() => []);
+  }
+
+  search(query: string, limit: number): Promise<GifAsset[]> {
+    const q = query.trim();
+    if (!q) return Promise.resolve([]);
+    return this.query("search", {
+      q: q.slice(0, 80),
+      limit: String(Math.min(limit, 24)),
+      lang: "en",
+    }).catch(() => []);
+  }
+}
+
+export const gifProvider: GifProvider = TENOR_KEY
+  ? new TenorGifProvider()
+  : GIPHY_KEY
+    ? new GiphyGifProvider()
+    : new EmptyGifProvider();
 
 /* ------------------------- music: licensed catalog ----------------------- */
 /* No unauthorized streaming: the catalog serves Apple's own 30-second
@@ -191,9 +275,16 @@ class ITunesMusicProvider implements MusicProvider {
     return this.query(q, limit).catch(() => []);
   }
 
-  /** No charts endpoint without a key, so trending blends feel-good searches. */
+  /** No charts endpoint, so trending blends feel-good searches. */
   async trending(limit: number): Promise<MusicTrack[]> {
-    const terms = ["feel good morning", "happy acoustic", "calm piano"];
+    const terms = [
+      "feel good morning",
+      "happy acoustic",
+      "calm piano",
+      "lofi chill",
+      "summer hits",
+      "soft pop",
+    ];
     const settled = await Promise.allSettled(terms.map((t) => this.query(t, 6)));
     const seen = new Set<string>();
     const merged: MusicTrack[] = [];
@@ -209,7 +300,91 @@ class ITunesMusicProvider implements MusicProvider {
   }
 }
 
-export const musicProvider: MusicProvider = new ITunesMusicProvider();
+interface DeezerTrack {
+  id: number;
+  title?: string;
+  preview?: string;
+  explicit_lyrics?: boolean;
+  artist?: { name?: string };
+  album?: { cover_medium?: string };
+}
+
+function mapDeezer(item: DeezerTrack): MusicTrack | null {
+  if (typeof item.title !== "string" || typeof item.id !== "number") return null;
+  const artist = item.artist?.name;
+  if (typeof artist !== "string") return null;
+  const preview =
+    typeof item.preview === "string" && item.preview.startsWith("https://") ? item.preview : null;
+  if (!preview) return null;
+  const cover = item.album?.cover_medium;
+  return {
+    id: `deezer:${item.id}`,
+    title: item.title.slice(0, 120),
+    artist: artist.slice(0, 120),
+    previewUrl: preview,
+    artworkUrl: typeof cover === "string" && cover.startsWith("https://") ? cover : null,
+    durationMs: 30000,
+    explicit: item.explicit_lyrics === true,
+  };
+}
+
+class DeezerMusicProvider implements MusicProvider {
+  readonly id = "deezer";
+  readonly label = "Music";
+  readonly configured = true;
+
+  private async query(path: string, params: Record<string, string>): Promise<MusicTrack[]> {
+    const url = new URL(`https://api.deezer.com${path}`);
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(`music provider ${res.status}`);
+    const data = (await res.json()) as { data?: DeezerTrack[] };
+    return (data.data ?? []).map(mapDeezer).filter((t): t is MusicTrack => t !== null);
+  }
+
+  search(query: string, limit: number): Promise<MusicTrack[]> {
+    const q = query.trim();
+    if (!q) return Promise.resolve([]);
+    return this.query("/search", {
+      q: q.slice(0, 80),
+      limit: String(Math.min(Math.max(limit, 1), 24)),
+    }).catch(() => []);
+  }
+
+  /** Real charts — the week's most-played tracks. */
+  trending(limit: number): Promise<MusicTrack[]> {
+    return this.query("/chart/0/tracks", {
+      limit: String(Math.min(Math.max(limit, 1), 24)),
+    }).catch(() => []);
+  }
+}
+
+/* Two keyless catalogs, one tray: iTunes answers first, Deezer backs it up,
+ * and trending prefers real charts over blended guesses. */
+
+class ChainedMusicProvider implements MusicProvider {
+  readonly id = "chained";
+  readonly label = "Music";
+  readonly configured = true;
+  readonly attribution = "30-second previews · iTunes & Deezer";
+
+  private primary = new ITunesMusicProvider();
+  private fallback = new DeezerMusicProvider();
+
+  async search(query: string, limit: number): Promise<MusicTrack[]> {
+    const first = await this.primary.search(query, limit);
+    if (first.length > 0) return first;
+    return this.fallback.search(query, limit);
+  }
+
+  async trending(limit: number): Promise<MusicTrack[]> {
+    const charts = await this.fallback.trending(limit);
+    if (charts.length > 0) return charts;
+    return this.primary.trending(limit);
+  }
+}
+
+export const musicProvider: MusicProvider = new ChainedMusicProvider();
 
 /** Attach the user's own audio file as story music (their file, their rights). */
 export const OWN_AUDIO = {

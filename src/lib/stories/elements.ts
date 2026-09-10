@@ -358,7 +358,11 @@ function sanitizeOne(
         backgroundColor: isSafeColor(raw["backgroundColor"]) ? raw["backgroundColor"] : undefined,
         opacity: clamp(Number(raw["opacity"] ?? 100), 10, 100),
         animation:
-          raw["animation"] === "fade" || raw["animation"] === "rise" || raw["animation"] === "type"
+          raw["animation"] === "fade" ||
+          raw["animation"] === "rise" ||
+          raw["animation"] === "type" ||
+          raw["animation"] === "float" ||
+          raw["animation"] === "pulse"
             ? raw["animation"]
             : "none",
       };

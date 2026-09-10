@@ -500,6 +500,67 @@
   animation: se-text-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Looping motion — gentle enough to live behind words. Covered by the
+ * reduced-motion kill-switch with the other text animations. */
+@keyframes se-text-float {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes se-text-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+.se-text[data-anim="float"] {
+  animation: se-text-float 3.2s ease-in-out infinite;
+}
+
+.se-text[data-anim="pulse"] {
+  animation: se-text-pulse 2.4s ease-in-out infinite;
+}
+
+/* Bloom Motion tray cells preview the same loops. */
+.motion-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 30px;
+  line-height: 1;
+  transition:
+    border-color 160ms ease,
+    transform 120ms ease;
+}
+
+.motion-cell:hover {
+  border-color: var(--border-strong);
+}
+
+.motion-cell:active {
+  transform: scale(0.92);
+}
+
+.motion-cell[data-anim="float"] > span {
+  animation: se-text-float 3.2s ease-in-out infinite;
+}
+
+.motion-cell[data-anim="pulse"] > span {
+  animation: se-text-pulse 2.4s ease-in-out infinite;
+}
+
 /* --------------------------- interactive stickers ----------------------- */
 
 .sx-poll,
@@ -1075,6 +1136,7 @@
   .ssheet,
   .ssheet-backdrop,
   .se-text[data-anim],
+  .motion-cell > span,
   .sx-music-disc[data-playing="true"],
   .scam-rec-dot,
   .scam-flash {

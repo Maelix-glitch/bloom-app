@@ -388,6 +388,38 @@ export const REACTION_META: Record<StoryReactionKind, ReactionMeta> = {
   moon: { id: "moon", label: "Quiet night", glyph: "🌙" },
 };
 
+/* ------------------------------ bloom motion ------------------------------ */
+/* The always-available motion pack: looping emoji moments that need no
+ * network, no key, and no rights — they place as animated text elements. */
+
+export interface MotionItem {
+  id: string;
+  emoji: string;
+  animation: "float" | "pulse";
+  label: string;
+}
+
+export const MOTION_PACK: MotionItem[] = [
+  { id: "love", emoji: "❤️", animation: "pulse", label: "Love" },
+  { id: "bloom", emoji: "🌸", animation: "float", label: "Bloom" },
+  { id: "sparkle", emoji: "✨", animation: "pulse", label: "Sparkle" },
+  { id: "moon", emoji: "🌙", animation: "float", label: "Moon" },
+  { id: "sun", emoji: "☀️", animation: "pulse", label: "Sun" },
+  { id: "fire", emoji: "🔥", animation: "pulse", label: "Fire" },
+  { id: "party", emoji: "🎉", animation: "pulse", label: "Party" },
+  { id: "balloon", emoji: "🎈", animation: "float", label: "Balloon" },
+  { id: "gift", emoji: "🎁", animation: "pulse", label: "Gift" },
+  { id: "butterfly", emoji: "🦋", animation: "float", label: "Butterfly" },
+  { id: "leaf", emoji: "🍃", animation: "float", label: "Leaf" },
+  { id: "rainbow", emoji: "🌈", animation: "float", label: "Rainbow" },
+  { id: "snow", emoji: "❄️", animation: "float", label: "Snow" },
+  { id: "music", emoji: "🎵", animation: "float", label: "Music" },
+  { id: "star", emoji: "⭐", animation: "pulse", label: "Star" },
+  { id: "diamond", emoji: "💎", animation: "pulse", label: "Diamond" },
+  { id: "bell", emoji: "🔔", animation: "pulse", label: "Bell" },
+  { id: "wave", emoji: "🌊", animation: "float", label: "Wave" },
+];
+
 /* --------------------------------- gifts ---------------------------------- */
 
 export interface GiftMeta {

@@ -21,6 +21,7 @@ import {
   storyAge,
   storyExpiryLeft,
 } from "./time";
+import { MOTION_PACK } from "./catalogs";
 
 describe("sanitizeElements", () => {
   it("drops non-arrays and unknown kinds", () => {
@@ -125,6 +126,28 @@ describe("story time labels", () => {
     expect(parts.days).toBe(1);
     expect(parts.hours).toBe(2);
     expect(countdownParts(new Date(now - 1000).toISOString(), now).done).toBe(true);
+  });
+});
+
+describe("motion pack", () => {
+  it("ships a full shelf of looping moments", () => {
+    expect(MOTION_PACK.length).toBeGreaterThanOrEqual(12);
+    const ids = MOTION_PACK.map((m) => m.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const item of MOTION_PACK) {
+      expect(item.emoji.length).toBeGreaterThan(0);
+      expect(["float", "pulse"]).toContain(item.animation);
+      expect(item.label.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("motion places as a valid animated text element", () => {
+    const item = MOTION_PACK[0]!;
+    const [kept] = sanitizeElements([
+      { kind: "text", text: item.emoji, animation: item.animation },
+    ]);
+    expect(kept!.kind).toBe("text");
+    if (kept!.kind === "text") expect(kept.animation).toBe(item.animation);
   });
 });
 

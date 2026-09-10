@@ -66,7 +66,7 @@ export interface StoryTextElement extends StoryElementBase {
   backgroundColor?: string | undefined;
   /** 0–100 */
   opacity: number;
-  animation?: "none" | "fade" | "rise" | "type" | undefined;
+  animation?: "none" | "fade" | "rise" | "type" | "float" | "pulse" | undefined;
 }
 
 export interface StoryStickerElement extends StoryElementBase {

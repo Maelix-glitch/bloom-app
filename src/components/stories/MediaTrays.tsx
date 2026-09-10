@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Disc3, ImagePlay, Music2, Pause, Play, Search, Upload } from "lucide-react";
+import { Disc3, Music2, Pause, Play, Search, Upload } from "lucide-react";
 
 import { StorySheet } from "./StorySheet";
 import {
@@ -18,6 +18,7 @@ import {
   type MusicTrack,
 } from "@/lib/stories/providers";
 import { probeAudioDuration } from "@/lib/profile/media";
+import { MOTION_PACK, type MotionItem } from "@/lib/stories/catalogs";
 import { cn } from "@/lib/utils";
 
 export interface PickedMusic {
@@ -41,6 +42,17 @@ function useDebounced(value: string, ms = 350): string {
 
 /* --------------------------------- music -------------------------------- */
 
+const MUSIC_MOODS = [
+  "Morning acoustic",
+  "Lo-fi chill",
+  "Soft piano",
+  "Feel good",
+  "Party hits",
+  "Focus",
+  "Love songs",
+  "Rainy day",
+];
+
 export function MusicTray({
   onPick,
   onClose,
@@ -62,7 +74,7 @@ export function MusicTray({
     let alive = true;
     if (!musicProvider.configured) return;
     setLoading(true);
-    const run = debounced.trim() ? musicProvider.search(debounced, 12) : musicProvider.trending(12);
+    const run = debounced.trim() ? musicProvider.search(debounced, 20) : musicProvider.trending(30);
     void run.then((t) => alive && setTracks(t)).finally(() => alive && setLoading(false));
     return () => {
       alive = false;
@@ -113,16 +125,40 @@ export function MusicTray({
       <audio ref={audioRef} preload="none" onEnded={() => setPreviewId(null)} />
       <div className="flex flex-col gap-3 pb-2">
         {musicProvider.configured ? (
-          <label className="flex items-center gap-2.5 rounded-full border border-border bg-surface/60 px-4 py-2.5 transition-colors focus-within:border-border-strong">
-            <Search className="size-4 shrink-0 text-faint" aria-hidden />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search songs and artists…"
-              aria-label="Search music"
-              className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-faint/70"
-            />
-          </label>
+          <>
+            <label className="flex items-center gap-2.5 rounded-full border border-border bg-surface/60 px-4 py-2.5 transition-colors focus-within:border-border-strong">
+              <Search className="size-4 shrink-0 text-faint" aria-hidden />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search songs and artists…"
+                aria-label="Search music"
+                className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-faint/70"
+              />
+            </label>
+            <div
+              className="flex gap-1.5 overflow-x-auto pb-0.5"
+              role="group"
+              aria-label="Browse by mood"
+            >
+              {MUSIC_MOODS.map((mood) => (
+                <button
+                  key={mood}
+                  type="button"
+                  onClick={() => setQuery(mood)}
+                  aria-pressed={query === mood}
+                  className={cn(
+                    "shrink-0 rounded-full border px-3.5 py-1.5 text-[12px] font-medium transition-colors",
+                    query === mood
+                      ? "border-[color:var(--profile-accent-border,var(--border-strong))] bg-[color:var(--profile-accent-soft,var(--surface-2))] text-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {mood}
+                </button>
+              ))}
+            </div>
+          </>
         ) : null}
 
         <button
@@ -255,10 +291,12 @@ export function MusicTray({
 
 export function GifTray({
   onPick,
+  onPickMotion,
   onClose,
 }: {
   /** `file` is set when the GIF comes from the device — uploaded at publish. */
   onPick: (gif: GifAsset, file?: File) => void;
+  onPickMotion: (item: MotionItem) => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -273,7 +311,7 @@ export function GifTray({
     let alive = true;
     if (!gifProvider.configured) return;
     setLoading(true);
-    const run = debounced.trim() ? gifProvider.search(debounced, 18) : gifProvider.trending(18);
+    const run = debounced.trim() ? gifProvider.search(debounced, 24) : gifProvider.trending(24);
     void run.then((g) => alive && setGifs(g)).finally(() => alive && setLoading(false));
     return () => {
       alive = false;
@@ -363,16 +401,10 @@ export function GifTray({
         ) : null}
 
         {!gifProvider.configured ? (
-          <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-surface/40 px-4 py-8 text-center">
-            <ImagePlay className="size-5 text-faint" aria-hidden />
-            <p className="display text-[15px] text-muted-foreground">
-              Your uploads appear on the canvas.
-            </p>
-            <p className="max-w-[32ch] text-[12.5px] text-faint">
-              GIF search lights up when a catalog key is connected — until then, your own motion and
-              Bloom's animated stickers carry the moment.
-            </p>
-          </div>
+          <p className="text-[12px] leading-relaxed text-faint">
+            GIF search lights up when a catalog key is connected — meanwhile your uploads and Bloom
+            Motion below carry the moment.
+          </p>
         ) : loading ? (
           <div className="grid grid-cols-3 gap-2" aria-label="Loading GIFs" role="status">
             {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -407,6 +439,23 @@ export function GifTray({
             </div>
           </>
         )}
+
+        <p className={cn("eyebrow", "pt-1")}>Bloom Motion · always with you</p>
+        <div className="grid grid-cols-6 gap-2" role="group" aria-label="Bloom Motion pack">
+          {MOTION_PACK.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onPickMotion(item)}
+              title={item.label}
+              aria-label={`Add motion: ${item.label}`}
+              data-anim={item.animation}
+              className="motion-cell"
+            >
+              <span aria-hidden>{item.emoji}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </StorySheet>
   );

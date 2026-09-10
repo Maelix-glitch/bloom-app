@@ -22,6 +22,8 @@ import { StoryArchive } from "./StoryArchive";
 import { StorySettings } from "./StorySettings";
 import { ReactionBar } from "./InteractionSheets";
 import { BloomShareCard } from "./ShareCard";
+import { GifTray, MusicTray } from "./MediaTrays";
+import { MOTION_PACK } from "@/lib/stories/catalogs";
 
 beforeAll(() => {
   if (typeof window.requestAnimationFrame !== "function") {
@@ -29,7 +31,10 @@ beforeAll(() => {
     const timers = new Map<number, ReturnType<typeof setTimeout>>();
     window.requestAnimationFrame = (cb: FrameRequestCallback) => {
       id += 1;
-      timers.set(id, setTimeout(() => cb(performance.now()), 0));
+      timers.set(
+        id,
+        setTimeout(() => cb(performance.now()), 0),
+      );
       return id;
     };
     window.cancelAnimationFrame = (handle: number) => {
@@ -230,6 +235,27 @@ describe("InteractionSheets", () => {
     for (const name of ["Love", "Bloom", "Sparkle", "Warm smile", "Cheering", "Quiet night"]) {
       expect(screen.getByRole("button", { name })).toBeTruthy();
     }
+  });
+});
+
+describe("MediaTrays", () => {
+  it("GIF tray always offers upload + the motion pack", () => {
+    const onPickMotion = vi.fn();
+    render(<GifTray onPick={() => {}} onPickMotion={onPickMotion} onClose={() => {}} />);
+    expect(screen.getByRole("button", { name: /upload a gif/i })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: `Add motion: ${MOTION_PACK[0]!.label}` }),
+    ).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /add motion:/i })).toHaveLength(
+      MOTION_PACK.length,
+    );
+  });
+
+  it("music tray offers search, moods, and own audio", () => {
+    render(<MusicTray onPick={() => {}} onClose={() => {}} />);
+    expect(screen.getByRole("textbox", { name: /search music/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Lo-fi chill" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /use your own audio/i })).toBeTruthy();
   });
 });
 

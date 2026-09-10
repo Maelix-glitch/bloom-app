@@ -46,7 +46,12 @@ import {
   sanitizeElements,
   serializeElements,
 } from "@/lib/stories/elements";
-import { DEFAULT_ADJUSTMENTS, STORY_TEMPLATES, backgroundById } from "@/lib/stories/catalogs";
+import {
+  DEFAULT_ADJUSTMENTS,
+  STORY_TEMPLATES,
+  backgroundById,
+  type MotionItem,
+} from "@/lib/stories/catalogs";
 import { recordStickerUse } from "@/lib/stories/stickers";
 import type {
   StoryAdjustments,
@@ -1200,6 +1205,16 @@ export function StoryEditor({
             if (el) addElement(el);
             else toast("That GIF couldn't be used.");
             setTool(null);
+          }}
+          onPickMotion={(item: MotionItem) => {
+            // Stays open — motion is collected, not chosen once.
+            addElement(
+              makeTextElement(item.emoji, {
+                preset: "classic",
+                animation: item.animation,
+                scale: 2.2,
+              }),
+            );
           }}
           onClose={() => setTool(null)}
         />

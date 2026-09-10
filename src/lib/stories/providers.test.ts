@@ -5,7 +5,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { musicProvider, validateGifFile } from "./providers";
+import { GiphyGifProvider, TenorGifProvider, musicProvider, validateGifFile } from "./providers";
 
 const song = (over: Record<string, unknown> = {}) => ({
   trackId: 101,
@@ -69,6 +69,102 @@ describe("iTunes music provider", () => {
     const ids = tracks.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toContain("itunes:101");
+  });
+});
+
+describe("music chain — Deezer backs up iTunes", () => {
+  const deezerTrack = (over: Record<string, unknown> = {}) => ({
+    id: 555,
+    title: "Chart Topper",
+    preview: "https://example.com/preview.mp3",
+    explicit_lyrics: false,
+    artist: { name: "Chart Act" },
+    album: { cover_medium: "https://example.com/cover.jpg" },
+    ...over,
+  });
+
+  it("falls back to Deezer when iTunes answers nothing", async () => {
+    stubFetch({ data: [deezerTrack()] });
+    const tracks = await musicProvider.search("chart", 10);
+    expect(tracks).toHaveLength(1);
+    expect(tracks[0]).toMatchObject({
+      id: "deezer:555",
+      title: "Chart Topper",
+      artist: "Chart Act",
+      previewUrl: "https://example.com/preview.mp3",
+      explicit: false,
+    });
+  });
+
+  it("drops Deezer tracks that can't be previewed", async () => {
+    stubFetch({ data: [deezerTrack({ preview: "http://insecure/x.mp3" })] });
+    expect(await musicProvider.search("chart", 10)).toEqual([]);
+  });
+
+  it("trending prefers real charts over blended guesses", async () => {
+    stubFetch({ results: [song()], data: [deezerTrack()] });
+    const tracks = await musicProvider.trending(10);
+    expect(tracks.length).toBeGreaterThan(0);
+    expect(tracks.every((t) => t.id.startsWith("deezer:"))).toBe(true);
+  });
+
+  it("search prefers iTunes when both answer", async () => {
+    stubFetch({ results: [song()], data: [deezerTrack()] });
+    const tracks = await musicProvider.search("morning", 10);
+    expect(tracks.length).toBeGreaterThan(0);
+    expect(tracks.every((t) => t.id.startsWith("itunes:"))).toBe(true);
+  });
+});
+
+describe("GIF providers — Tenor and GIPHY", () => {
+  it("maps GIPHY results to playable assets", async () => {
+    stubFetch({
+      data: [
+        {
+          id: "abc123",
+          title: "Happy dance",
+          images: {
+            fixed_width: { url: "https://media.giphy.com/media/abc123/200w.gif" },
+            fixed_width_still: { url: "https://media.giphy.com/media/abc123/200w_s.gif" },
+          },
+        },
+        { id: "broken", images: { fixed_width: { url: "http://insecure/x.gif" } } },
+      ],
+    });
+    const provider = new GiphyGifProvider("test-key");
+    const gifs = await provider.search("happy", 10);
+    expect(gifs).toHaveLength(1);
+    expect(gifs[0]).toMatchObject({
+      id: "giphy:abc123",
+      src: "https://media.giphy.com/media/abc123/200w.gif",
+      title: "Happy dance",
+    });
+  });
+
+  it("maps Tenor results to playable assets", async () => {
+    stubFetch({
+      results: [
+        {
+          id: "tenor1",
+          title: "Celebrate",
+          media_formats: {
+            gif: { url: "https://media.tenor.com/x.gif", dims: [220, 220] },
+            tinygif: { url: "https://media.tenor.com/x_tiny.gif", dims: [110, 110] },
+          },
+        },
+      ],
+    });
+    const provider = new TenorGifProvider("test-key");
+    const gifs = await provider.trending(10);
+    expect(gifs).toHaveLength(1);
+    expect(gifs[0]).toMatchObject({ id: "tenor:tenor1", src: "https://media.tenor.com/x.gif" });
+  });
+
+  it("unconfigured providers stay silent", async () => {
+    const fetch = stubFetch({ data: [] });
+    expect(await new GiphyGifProvider("").search("x", 10)).toEqual([]);
+    expect(await new TenorGifProvider("").trending(10)).toEqual([]);
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
