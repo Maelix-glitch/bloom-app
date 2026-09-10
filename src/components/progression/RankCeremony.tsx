@@ -16,6 +16,18 @@ import type { RankState } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
 import { Emblem } from "./Emblem";
 
+/** Deterministic burst of sparks — SSR-safe, no Math.random at render. */
+const CEREMONY_SPARKS = Array.from({ length: 18 }, (_, i) => {
+  const seed = (i * 2654435761) % 1000;
+  return {
+    left: `${(seed % 84) + 8}%`,
+    size: 2 + (seed % 3),
+    delay: `${(seed % 18) / 10}s`,
+    duration: `${2.6 + (seed % 22) / 10}s`,
+    drift: `${((seed % 70) - 35) / 10}vw`,
+  };
+});
+
 export function RankCeremony({
   rank,
   onClose,
@@ -48,8 +60,25 @@ export function RankCeremony({
       }}
     >
       <span className="pg-ceremony-glow" aria-hidden />
+      <span className="pg-ceremony-sparks" aria-hidden>
+        {CEREMONY_SPARKS.map((s, i) => (
+          <i
+            key={i}
+            className="pg-ceremony-spark"
+            style={{
+              left: s.left,
+              width: s.size,
+              height: s.size,
+              animationDelay: s.delay,
+              animationDuration: s.duration,
+              ["--pg-mote-drift" as string]: s.drift,
+            }}
+          />
+        ))}
+      </span>
       <div className="pg-ceremony-inner">
         <span className="pg-ceremony-mark" style={{ color: rank.rank.tone }} aria-hidden>
+          <span className="pg-ceremony-halo" aria-hidden />
           <Emblem id={rank.rank.emblem} size={132} strokeWidth={1.1} />
         </span>
         <p className="pg-eyebrow pg-ceremony-eyebrow">
@@ -65,7 +94,8 @@ export function RankCeremony({
         </p>
         <p className="pg-ceremony-affirm">{rank.rank.affirmation}</p>
         <p className="pg-ceremony-affirm" style={{ fontSize: "13px", opacity: 0.8 }}>
-          {formatPoints(rank.remaining)} points to {rank.next.name}. The journey continues from here.
+          {formatPoints(rank.remaining)} points to {rank.next.name}. The journey continues from
+          here.
         </p>
         <div className="pg-ceremony-actions">
           <button type="button" className="pg-btn pg-btn-primary" onClick={onClose}>

@@ -26,9 +26,29 @@ import { JourneyHero } from "@/components/progression/JourneyHero";
 import { RankPath } from "@/components/progression/RankPath";
 import { GoalsBoard } from "@/components/progression/Goals";
 import { AchievementGallery } from "@/components/progression/Achievements";
-import { PointActivity, MilestoneArchive, AtelierLinkContent } from "@/components/progression/History";
+import {
+  PointActivity,
+  MilestoneArchive,
+  AtelierLinkContent,
+} from "@/components/progression/History";
 import { PointsFloat, RankCeremony } from "@/components/progression/RankCeremony";
 import { LegacyRewards } from "@/components/progression/LegacyRewards";
+import { PgReveal } from "@/components/progression/Reveal";
+
+/**
+ * The rising gold motes — embers drifting up through the page. Deterministic
+ * (no Math.random at render) so SSR and the client always agree.
+ */
+const MOTES = Array.from({ length: 14 }, (_, i) => {
+  const seed = (i * 2654435761) % 1000;
+  return {
+    left: `${(seed % 96) + 2}%`,
+    size: 2 + (seed % 3),
+    delay: `${-((seed % 260) / 10)}s`,
+    duration: `${17 + (seed % 14)}s`,
+    drift: `${((seed % 90) - 45) / 10}vw`,
+  };
+});
 
 export function JourneyPage() {
   const progress = useProgression();
@@ -91,10 +111,30 @@ export function JourneyPage() {
 
       <div className="pg-sky" aria-hidden>
         <span className="pg-sky-wall" />
+        <span className="pg-sky-stars" />
+        <span className="pg-sky-aurora" />
         <span className="pg-sky-orb pg-sky-orb-a" />
         <span className="pg-sky-orb pg-sky-orb-b" />
         <span className="pg-sky-orb pg-sky-orb-c" />
+        <span className="pg-sky-rays" />
         <span className="pg-sky-leaf" />
+        <span className="pg-sky-motes">
+          {MOTES.map((m, i) => (
+            <i
+              key={i}
+              className="pg-mote"
+              style={{
+                left: m.left,
+                width: m.size,
+                height: m.size,
+                animationDelay: m.delay,
+                animationDuration: m.duration,
+                ["--pg-mote-drift" as string]: m.drift,
+              }}
+            />
+          ))}
+        </span>
+        <span className="pg-sky-vignette" />
       </div>
 
       <main className="pg-main">
@@ -131,118 +171,139 @@ export function JourneyPage() {
         ) : null}
 
         {/* ---------------------------------------------------- goals --------- */}
-        <section className="pg-section" id="pg-goals" aria-labelledby="pg-goals-title">
-          <div className="pg-section-head">
-            <div className="pg-section-head-left">
-              <p className="pg-eyebrow">
-                <span className="pg-eyebrow-rule" aria-hidden />
-                Active goals
+        <PgReveal>
+          <section className="pg-section" id="pg-goals" aria-labelledby="pg-goals-title">
+            <div className="pg-section-head">
+              <div className="pg-section-head-left">
+                <p className="pg-eyebrow">
+                  <span className="pg-eyebrow-rule" aria-hidden />
+                  Active goals
+                </p>
+                <h2 id="pg-goals-title" className="pg-section-title">
+                  What is in reach
+                </h2>
+              </div>
+              <p className="pg-section-aside">
+                {todayCount > 0 ? `${todayCount} for today · ` : ""}
+                wellness first · verified from your own records
               </p>
-              <h2 id="pg-goals-title" className="pg-section-title">
-                What is in reach
-              </h2>
             </div>
-            <p className="pg-section-aside">
-              {todayCount > 0 ? `${todayCount} for today · ` : ""}
-              wellness first · verified from your own records
-            </p>
-          </div>
-          <GoalsBoard
-            goals={progress.goals}
-            onClaim={(id) => void claim(id)}
-            busy={progress.busy}
-            claimingId={claimingId}
-            focusGoalId={focusGoalId}
-          />
-        </section>
+            <GoalsBoard
+              goals={progress.goals}
+              onClaim={(id) => void claim(id)}
+              busy={progress.busy}
+              claimingId={claimingId}
+              focusGoalId={focusGoalId}
+            />
+          </section>
+        </PgReveal>
 
         {/* ----------------------------------------------------- path --------- */}
-        <section className="pg-section" aria-labelledby="pg-path-title">
-          <div className="pg-section-head">
-            <div className="pg-section-head-left">
-              <p className="pg-eyebrow">
-                <span className="pg-eyebrow-rule" aria-hidden />
-                The path
+        <PgReveal>
+          <section className="pg-section" aria-labelledby="pg-path-title">
+            <div className="pg-section-head">
+              <div className="pg-section-head-left">
+                <p className="pg-eyebrow">
+                  <span className="pg-eyebrow-rule" aria-hidden />
+                  The path
+                </p>
+                <h2 id="pg-path-title" className="pg-section-title">
+                  Where you are walking
+                </h2>
+              </div>
+              <p className="pg-section-aside">
+                Read from your earned points. A quiet week costs you nothing.
               </p>
-              <h2 id="pg-path-title" className="pg-section-title">
-                Where you are walking
-              </h2>
             </div>
-            <p className="pg-section-aside">
-              Read from your earned points. A quiet week costs you nothing.
-            </p>
-          </div>
-          <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
-        </section>
+            <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
+          </section>
+        </PgReveal>
 
         {/* ----------------------------------------------- achievements ------- */}
-        <section className="pg-section" aria-labelledby="pg-ach-title">
-          <div className="pg-section-head">
-            <div className="pg-section-head-left">
-              <p className="pg-eyebrow">
-                <span className="pg-eyebrow-rule" aria-hidden />
-                Achievements
+        <PgReveal>
+          <section className="pg-section" aria-labelledby="pg-ach-title">
+            <div className="pg-section-head">
+              <div className="pg-section-head-left">
+                <p className="pg-eyebrow">
+                  <span className="pg-eyebrow-rule" aria-hidden />
+                  Achievements
+                </p>
+                <h2 id="pg-ach-title" className="pg-section-title">
+                  What you have done
+                </h2>
+              </div>
+              <p className="pg-section-aside">
+                {progress.achievements.filter((a) => a.unlocked).length} of{" "}
+                {progress.achievements.length} earned — each one tied to a real condition.
               </p>
-              <h2 id="pg-ach-title" className="pg-section-title">
-                What you have done
-              </h2>
             </div>
-            <p className="pg-section-aside">
-              {progress.achievements.filter((a) => a.unlocked).length} of {progress.achievements.length} earned —
-              each one tied to a real condition.
-            </p>
-          </div>
-          <AchievementGallery achievements={progress.achievements} />
-        </section>
+            <AchievementGallery achievements={progress.achievements} />
+          </section>
+        </PgReveal>
 
         {/* ----------------------------------------------- point activity ----- */}
-        <section className="pg-section" aria-labelledby="pg-activity-title">
-          <div className="pg-section-head">
-            <div className="pg-section-head-left">
-              <p className="pg-eyebrow">
-                <span className="pg-eyebrow-rule" aria-hidden />
-                Point activity
-              </p>
-              <h2 id="pg-activity-title" className="pg-section-title">
-                How you earn
-              </h2>
+        <PgReveal>
+          <section className="pg-section" aria-labelledby="pg-activity-title">
+            <div className="pg-section-head">
+              <div className="pg-section-head-left">
+                <p className="pg-eyebrow">
+                  <span className="pg-eyebrow-rule" aria-hidden />
+                  Point activity
+                </p>
+                <h2 id="pg-activity-title" className="pg-section-title">
+                  How you earn
+                </h2>
+              </div>
+              <p className="pg-section-aside">Habit ticks pay 5–500. Goals pay 100–10,000.</p>
             </div>
-            <p className="pg-section-aside">Habit ticks pay 5–500. Goals pay 100–10,000.</p>
-          </div>
-          {progress.error ? (
-            <p className="pg-empty" style={{ marginBottom: "1rem" }}>
-              {progress.error}{" "}
-              <button type="button" className="pg-link" onClick={() => progress.refresh()}>
-                <RefreshCw width={12} height={12} aria-hidden /> Try again
-              </button>
-            </p>
-          ) : null}
-          <PointActivity ledger={progress.ledger} today={progress.today} />
-        </section>
+            {progress.error ? (
+              <p className="pg-empty" style={{ marginBottom: "1rem" }}>
+                {progress.error}{" "}
+                <button type="button" className="pg-link" onClick={() => progress.refresh()}>
+                  <RefreshCw width={12} height={12} aria-hidden /> Try again
+                </button>
+              </p>
+            ) : null}
+            <PointActivity ledger={progress.ledger} today={progress.today} />
+          </section>
+        </PgReveal>
 
         {/* -------------------------------------------- milestone archive ----- */}
-        <section className="pg-section" aria-labelledby="pg-archive-title">
-          <div className="pg-section-head">
-            <div className="pg-section-head-left">
-              <p className="pg-eyebrow">
-                <span className="pg-eyebrow-rule" aria-hidden />
-                Your milestones
+        <PgReveal>
+          <section className="pg-section" aria-labelledby="pg-archive-title">
+            <div className="pg-section-head">
+              <div className="pg-section-head-left">
+                <p className="pg-eyebrow">
+                  <span className="pg-eyebrow-rule" aria-hidden />
+                  Your milestones
+                </p>
+                <h2 id="pg-archive-title" className="pg-section-title">
+                  The journey so far
+                </h2>
+              </div>
+              <p className="pg-section-aside">
+                {formatPoints(progress.points)} points earned · {progress.rank.rank.name}
               </p>
-              <h2 id="pg-archive-title" className="pg-section-title">
-                The journey so far
-              </h2>
             </div>
-            <p className="pg-section-aside">
-              {formatPoints(progress.points)} points earned · {progress.rank.rank.name}
-            </p>
-          </div>
-          <MilestoneArchive ledger={progress.ledger} ranks={progress.rankEvents} today={progress.today} />
-        </section>
+            <MilestoneArchive
+              ledger={progress.ledger}
+              ranks={progress.rankEvents}
+              today={progress.today}
+            />
+          </section>
+        </PgReveal>
 
         {/* ------------------------------------------- personal rewards ------- */}
-        <LegacyRewards />
+        <PgReveal>
+          <LegacyRewards />
+        </PgReveal>
 
         <footer className="pg-footer">
+          <span className="pg-flourish" aria-hidden>
+            <span className="pg-flourish-line" />
+            <span className="pg-flourish-gem" />
+            <span className="pg-flourish-line" />
+          </span>
           <p className="pg-footer-phrase">
             No final rank, no finished state. Come back when you want to.
           </p>
