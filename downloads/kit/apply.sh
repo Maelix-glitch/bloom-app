@@ -25,6 +25,11 @@ BRANCH="arena/01a087e8-bloom-app"
 REPO="https://github.com/Maelix-glitch/bloom-app.git"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
+# Where to look for the project. Your Desktop is included, in both the Git Bash
+# form (/c/...) and the WSL form (/mnt/c/...), along with the project folder on
+# it. Override any time with:  BLOOM_DESKTOP="/some/path" bash apply.sh
+DESKTOP="${BLOOM_DESKTOP:-/c/Users/Windows 11 Pro/OneDrive/Desktop}"
+
 say()  { printf '\n\033[1m%s\033[0m\n' "$1"; }
 ok()   { printf '  \033[32m✓\033[0m %s\n' "$1"; }
 warn() { printf '\033[33m%s\033[0m\n' "$1"; }
@@ -36,31 +41,81 @@ is_project() {
   [ -f "$1/package.json" ] && [ -f "$1/src/routes/rewards.tsx" ]
 }
 
+SEARCHED=()
 TARGET="${1:-}"
-if [ -z "$TARGET" ]; then
-  for candidate in "$HERE/bloom-app" "$HERE/.." "$PWD" "$PWD/.." "$PWD/bloom-app"; do
-    if is_project "$candidate"; then TARGET="$(cd "$candidate" && pwd)"; break; fi
-  done
-fi
 
-if [ -n "$TARGET" ] && ! is_project "$TARGET"; then
-  die "That folder is not a Bloom project (no package.json / src/routes/rewards.tsx): $TARGET"
+# Test one candidate, remember that we looked, and take the first real project.
+consider() {
+  local candidate="$1"
+  [ -n "$candidate" ] || return 0
+  SEARCHED+=("$candidate")
+  if is_project "$candidate"; then
+    TARGET="$(cd "$candidate" && pwd)"
+    return 1
+  fi
+  return 0
+}
+
+if [ -z "$TARGET" ]; then
+  # 1. Your Desktop and the project folder on it.
+  consider "$DESKTOP/bloom-app" || :
+  consider "$DESKTOP" || :
+  consider "$DESKTOP/Bloom" || :
+
+  # 2. Right where this folder was extracted.
+  consider "$HERE/bloom-app" || :
+  consider "$HERE" || :
+
+  # 3. Beside it, walking up a few levels — this is the common case when the
+  #    kit is extracted onto the Desktop and the project is already there.
+  if [ -z "$TARGET" ]; then
+    for base in "$HERE" "$PWD"; do
+      dir="$base"
+      for _ in 1 2 3; do
+        dir="$(cd "$dir" 2>/dev/null && pwd || printf '%s' "$dir")"
+        parent="$(dirname "$dir")"
+        consider "$parent/bloom-app" || break
+        if is_project "$parent"; then TARGET="$parent"; break; fi
+        [ "$parent" = "$dir" ] && break
+        dir="$parent"
+      done
+      [ -n "$TARGET" ] && break
+    done
+  fi
+
+  # 4. Where you are standing.
+  consider "$PWD" || :
+  consider "$PWD/bloom-app" || :
+
+  # 5. The same Desktop path as Windows writes it (Git Bash / WSL).
+  consider "/c/Users/Windows 11 Pro/OneDrive/Desktop/bloom-app" || :
+  consider "/mnt/c/Users/Windows 11 Pro/OneDrive/Desktop/bloom-app" || :
 fi
 
 # ------------------------------------------------------------ clone if new --
 if [ -z "$TARGET" ]; then
-  warn "No Bloom project found near this folder."
-  printf 'Clone Bloom into %s/bloom-app and continue? [Y/n] ' "$HERE"
+  warn "No Bloom project found. Looked in:"
+  for candidate in "${SEARCHED[@]}"; do printf '   %s\n' "$candidate"; done
+
+  # Clone where it is easiest to find again: the Desktop if we can see it,
+  # otherwise right here.
+  if [ -d "$DESKTOP" ] && [ -w "$DESKTOP" ]; then
+    CLONE_INTO="$DESKTOP/bloom-app"
+  else
+    CLONE_INTO="$HERE/bloom-app"
+  fi
+
+  printf '\nClone Bloom into %s and continue? [Y/n] ' "$CLONE_INTO"
   read -r reply
   case "${reply:-y}" in
     [yY]*)
       command -v git >/dev/null 2>&1 || die "git is not installed."
       say "Cloning $BRANCH"
-      git clone --branch "$BRANCH" --single-branch "$REPO" "$HERE/bloom-app"
-      TARGET="$HERE/bloom-app"
+      git clone --branch "$BRANCH" --single-branch "$REPO" "$CLONE_INTO"
+      TARGET="$CLONE_INTO"
       ok "Cloned to $TARGET"
       ;;
-    *) die "Stopped. Re-run with your project path:  bash apply.sh /path/to/bloom-app" ;;
+    *) die "Stopped. Re-run with your project path:  bash apply.sh \"/path/to/bloom-app\"" ;;
   esac
 fi
 

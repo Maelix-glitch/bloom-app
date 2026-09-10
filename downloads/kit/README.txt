@@ -1,10 +1,3 @@
-These three files are the source of ../bloom-rewards-page.zip.
-To rebuild the kit: copy the rewards-page files into a files/ folder here,
-then zip this whole directory. See the branch diff against main for the
-exact file list (55 files).
-
----
-
 BLOOM — REWARDS PAGE
 ====================
 
@@ -36,6 +29,33 @@ That is the whole thing. It will:
   · ask whether to start the app
 
 Then open /rewards — that is the new page.
+
+
+WHERE IT LOOKS FOR YOUR PROJECT
+------------------------------
+
+Your Desktop is already set:
+
+    C:\Users\Windows 11 Pro\OneDrive\Desktop
+
+The script checks there first, then the bloom-app folder on it, then the folder
+you extracted this into, then up to three levels above that (so it finds a
+project sitting next to this folder), then wherever the terminal is open.
+
+If it still cannot find one, it lists everywhere it looked. Then either:
+
+  · answer yes and it clones Bloom into the Desktop for you, or
+  · give it the path yourself:
+
+        bash apply.sh "/c/Users/Windows 11 Pro/OneDrive/Desktop/bloom-app"
+
+    or in PowerShell:
+
+        powershell -ExecutionPolicy Bypass -File apply.ps1 "C:\Users\Windows 11 Pro\OneDrive\Desktop\bloom-app"
+
+If your Desktop ever moves (OneDrive does that), point it anywhere you like:
+
+        $env:BLOOM_DESKTOP = "D:\somewhere"; powershell -File apply.ps1
 
 
 IF YOU DO NOT HAVE BLOOM YET

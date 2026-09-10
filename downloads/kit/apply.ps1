@@ -25,6 +25,12 @@ $Branch = "arena/01a087e8-bloom-app"
 $Repo   = "https://github.com/Maelix-glitch/bloom-app.git"
 $Stamp  = Get-Date -Format "yyyyMMdd-HHmmss"
 
+# Where to look for the project. This is your Desktop — the script checks it,
+# the bloom-app folder on it, and also tries to follow OneDrive to the real
+# Desktop folder in case OneDrive is redirecting it. Override any time with:
+#     $env:BLOOM_DESKTOP = "D:\somewhere"
+$DesktopDefault = "C:\Users\Windows 11 Pro\OneDrive\Desktop"
+
 function Say  ($m) { Write-Host "`n$m" -ForegroundColor White }
 function Ok   ($m) { Write-Host "  [ok] $m" -ForegroundColor Green }
 function Warn ($m) { Write-Host $m -ForegroundColor Yellow }
@@ -35,10 +41,50 @@ function Test-Project ($p) {
 }
 
 # ------------------------------------------------------------- find project --
+$Desktop = if ($env:BLOOM_DESKTOP) { $env:BLOOM_DESKTOP } else { $DesktopDefault }
+
+$Searched = New-Object System.Collections.Generic.List[string]
 $Target = if ($args.Count -ge 1) { $args[0] } else { $null }
+
 if (-not $Target) {
-  foreach ($c in @((Join-Path $Here "bloom-app"), (Split-Path $Here -Parent), (Get-Location).Path, (Join-Path (Get-Location).Path "bloom-app"))) {
-    if ($c -and (Test-Project $c)) { $Target = (Resolve-Path $c).Path; break }
+  $candidates = New-Object System.Collections.Generic.List[string]
+
+  # 1. Your Desktop, and the project folder on it.
+  if ($Desktop) {
+    $candidates.Add((Join-Path $Desktop "bloom-app"))
+    $candidates.Add($Desktop)
+    $candidates.Add((Join-Path $Desktop "Bloom"))
+  }
+
+  # 2. Right where this folder was extracted.
+  $candidates.Add((Join-Path $Here "bloom-app"))
+  $candidates.Add($Here)
+
+  # 3. Beside it, walking up a few levels — the common case when the kit is
+  #    extracted onto the Desktop and the project is already there.
+  foreach ($base in @($Here, (Get-Location).Path)) {
+    $dir = $base
+    for ($i = 0; $i -lt 3; $i++) {
+      $parent = Split-Path $dir -Parent
+      if (-not $parent -or $parent -eq $dir) { break }
+      $candidates.Add((Join-Path $parent "bloom-app"))
+      $candidates.Add($parent)
+      $dir = $parent
+    }
+  }
+
+  # 4. Where you are standing.
+  $candidates.Add((Get-Location).Path)
+  $candidates.Add((Join-Path (Get-Location).Path "bloom-app"))
+
+  # 5. Whatever Windows itself calls the Desktop (OneDrive can redirect it).
+  $real = [Environment]::GetFolderPath("Desktop")
+  if ($real) { $candidates.Add((Join-Path $real "bloom-app")) }
+
+  foreach ($c in $candidates) {
+    if (-not $c) { continue }
+    $Searched.Add($c)
+    if (Test-Project $c) { $Target = (Resolve-Path $c).Path; break }
   }
 }
 
@@ -48,15 +94,26 @@ if ($Target -and -not (Test-Project $Target)) {
 
 # ------------------------------------------------------------ clone if new --
 if (-not $Target) {
-  Warn "No Bloom project found near this folder."
-  $reply = Read-Host "Clone Bloom into $Here\bloom-app and continue? [Y/n]"
+  Warn "No Bloom project found. Looked in:"
+  foreach ($c in $Searched) { Write-Host "   $c" }
+
+  # Clone where it is easiest to find again: the Desktop if we can write to it,
+  # otherwise right here.
+  $cloneInto = if ($Desktop -and (Test-Path $Desktop -PathType Container)) {
+    Join-Path $Desktop "bloom-app"
+  } else {
+    Join-Path $Here "bloom-app"
+  }
+
+  $reply = Read-Host "`nClone Bloom into $cloneInto and continue? [Y/n]"
   if ($reply -notmatch '^[nN]') {
     Say "Cloning $Branch"
-    git clone --branch $Branch --single-branch $Repo (Join-Path $Here "bloom-app")
-    $Target = Join-Path $Here "bloom-app"
+    git clone --branch $Branch --single-branch $Repo $cloneInto
+    if ($LASTEXITCODE -ne 0) { Die "git clone failed. Check your internet and that git is installed." }
+    $Target = $cloneInto
     Ok "Cloned to $Target"
   } else {
-    Die "Stopped. Re-run with your project path:  powershell -File apply.ps1 C:\path\to\bloom-app"
+    Die "Stopped. Re-run with your project path:  powershell -File apply.ps1 `"C:\path\to\bloom-app`""
   }
 }
 
@@ -102,10 +159,14 @@ if (Test-Path $Remove) {
 }
 
 # ---------------------------------------------------------------- deps ------
+# npm and tsc write routine notices to stderr; with ErrorActionPreference=Stop
+# PowerShell 5.1 would treat those as fatal. We check exit codes ourselves.
+$ErrorActionPreference = "Continue"
 Set-Location $Target
 if (-not (Test-Path "node_modules")) {
   Say "Installing dependencies (this can take a minute)"
   npm install
+  if ($LASTEXITCODE -ne 0) { Die "npm install failed. Fix that, then run this again." }
 } else {
   Ok "Dependencies already installed"
 }
@@ -113,7 +174,8 @@ if (-not (Test-Path "node_modules")) {
 # --------------------------------------------------------------- verify -----
 if (Test-Path "node_modules\.bin\tsc.cmd") {
   Say "Checking the code compiles"
-  $out = & node_modules\.bin\tsc.cmd --noEmit 2>&1 | Select-String -NotMatch "BloomCycleAI|ReflectSheet|usePeriodLog|cycle-classic"
+  $out = & node_modules\.bin\tsc.cmd --noEmit 2>&1 |
+    Select-String -NotMatch "BloomCycleAI|ReflectSheet|usePeriodLog|cycle-classic"
   if ($out) { Warn "TypeScript reported issues above. The app may still run." } else { Ok "No type errors in the Rewards feature" }
 }
 
