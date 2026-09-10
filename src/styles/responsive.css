@@ -1,0 +1,457 @@
+/* ==========================================================================
+   Bloom — mobile-first responsive system.
+   --------------------------------------------------------------------------
+   The one place that defines how Bloom behaves on phones. Every route keeps
+   its own visual language; this file owns the *contract* they all share:
+
+     1. design tokens (page padding, section rhythm, nav/header heights,
+        touch targets, radii, type scale)
+     2. the app shell (content boundaries, bottom-nav offset, safe areas)
+     3. the bottom navigation geometry
+     4. the overlay system (dialog / sheet / curtain behaviour on phones)
+     5. responsive typography guards
+     6. media guards (images, svg, charts never force document width)
+     7. keyboard-safe inputs
+     8. compact compositions for known-heavy surfaces (moment picker,
+        snapshot sheet, tracker dock, reward empty states)
+     9. the 320px survival breakpoint
+
+   Desktop rules live with their pages; nothing here changes ≥1024px layout
+   except shared safety (scroll locking, media max-widths). Mobile rules are
+   intentional compositions, not shrunk desktop.
+   ========================================================================== */
+
+/* ------------------------- 1. responsive tokens ------------------------- */
+
+:root {
+  /* page geometry */
+  --bloom-page-px: 20px;            /* mobile page gutter */
+  --bloom-page-px-sm: 32px;         /* ≥640px gutter */
+  --bloom-section-gap: 1.5rem;      /* rhythm between sections on phones */
+  --bloom-card-pad: 1rem;           /* compact card padding on phones */
+  --bloom-content-max: 72rem;       /* widest comfortable reading column */
+
+  /* chrome */
+  --bloom-header-h: 60px;           /* phone brand bar */
+  --bloom-nav-h: 60px;              /* phone tab bar content height */
+  --bloom-nav-label: 10px;          /* tab label size */
+  --bloom-rail-w: 220px;
+
+  /* touch + type */
+  --bloom-touch-min: 44px;          /* minimum touch target */
+  --bloom-touch-comfort: 48px;      /* preferred touch target */
+  --bloom-input-min: 16px;          /* smallest input text on phones (no iOS zoom) */
+
+  /* radii */
+  --bloom-radius-card: 16px;
+  --bloom-radius-sheet: 24px;
+
+  /* overlay layers — one ladder for the whole app */
+  --bloom-z-nav: 20;
+  --bloom-z-fab: 30;
+  --bloom-z-toast: 60;
+  --bloom-z-viewer: 70;
+  --bloom-z-editor: 90;
+  --bloom-z-sheet: 2000;
+  --bloom-z-welcome: 3000;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --bloom-page-px: 32px;
+    --bloom-section-gap: 2rem;
+    --bloom-card-pad: 1.25rem;
+  }
+}
+
+/* ----------------- 2. the app shell: shared page contract ----------------
+   Every main page renders <AppNav /> inside `.app-shell`. The shell owns:
+   top offset (brand bar), bottom offset (tab bar + home indicator + air),
+   and the guarantee that the last control on any page is reachable. */
+
+.app-shell {
+  --app-top-bar: var(--bloom-header-h);
+  --app-bottom-nav: calc(var(--bloom-nav-h) + env(safe-area-inset-bottom, 0px));
+}
+
+.app-shell > main {
+  min-width: 0;
+  min-height: calc(
+    100dvh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px)
+  );
+  scroll-padding-bottom: calc(var(--app-bottom-nav, 0px) + 24px);
+}
+
+/* Pages whose <main> carries no bottom padding of its own get the shared
+   offset — tab bar + home indicator + breathing room. Pages that already
+   pad (pb-24/28, ci-shell, pg-main…) are untouched. */
+@media (max-width: 63.99rem) {
+  .app-shell > main:not([class*="pb-"]):not(.coach-canvas) {
+    padding-bottom: calc(var(--app-bottom-nav, 0px) + 24px);
+  }
+}
+
+@media (min-width: 64rem) {
+  .app-shell {
+    --app-top-bar: 0px;
+    --app-bottom-nav: 0px;
+  }
+}
+
+/* ------------------- 3. bottom navigation, rebuilt -----------------------
+   Six destinations must always fit. Equal flex shares, a guaranteed touch
+   height, labels that shrink gracefully — never clipped, never overflowing. */
+
+.app-shell > nav.app-mobile-nav {
+  display: flex;
+  align-items: stretch;
+  /* the bar's own background fills the home-indicator zone */
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  padding-inline: max(4px, env(safe-area-inset-left, 0px))
+    max(4px, env(safe-area-inset-right, 0px));
+}
+
+.app-mobile-nav > a {
+  flex: 1 1 0%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--bloom-touch-comfort);
+  padding: 7px 2px 5px;
+  border-radius: 12px;
+  font-size: var(--bloom-nav-label);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    transform 140ms ease;
+}
+
+.app-mobile-nav > a:active {
+  transform: scale(0.94);
+}
+
+.app-mobile-nav > a > svg {
+  flex: none;
+}
+
+/* extremely narrow phones: tighter labels, same targets */
+@media (max-width: 359px) {
+  .app-mobile-nav > a {
+    font-size: 9px;
+    gap: 2px;
+    padding-inline: 0;
+  }
+}
+
+/* ------------------- 4. overlay system on phones -------------------------
+   One predictable behaviour: centred dialogs become bottom-anchored cards
+   with a capped height and internal scroll; side sheets become bottom
+   sheets; everything respects the keyboard and the home indicator. */
+
+/* Radix dialog content used across cycle/profile/history surfaces. */
+@media (max-width: 639px) {
+  [data-bloom-dialog="true"] {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    translate: 0 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh;
+    border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0 !important;
+    border-bottom: 0 !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Radix sheet: left/right drawers become bottom sheets on phones. */
+@media (max-width: 639px) {
+  [data-bloom-side="left"],
+  [data-bloom-side="right"] {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 92dvh;
+    border: 0 !important;
+    border-top: 1px solid var(--border) !important;
+    border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* BloomSheet on phones: capped, scrollable, keyboard-aware. */
+@media (max-width: 639px) {
+  .bsheet--phone {
+    max-height: 92dvh;
+  }
+  .bsheet--phone .bsheet-panel {
+    max-height: 92dvh;
+  }
+  /* any direct scroll region inside a phone sheet owns the gesture */
+  .bsheet--phone .bsheet-scroll {
+    max-height: calc(92dvh - 120px);
+  }
+}
+
+/* tracker overlay surfaces live in trackers2.css (route link wins). */
+
+/* ------------------- 5. responsive typography guards ---------------------
+   Editorial serif stays; oversized hero lines get fluid caps so a 320px
+   phone never spends half its screen on one heading. */
+
+@media (max-width: 639px) {
+  /* home greeting */
+  .home-page h1 {
+    font-size: clamp(1.75rem, 8.4vw, 2.5rem);
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+  .home-page header p.font-display {
+    font-size: clamp(1.125rem, 5.4vw, 1.5rem);
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  /* mood hero + intelligence headers */
+  .mood-page h1,
+  .mm-hero-copy h1 {
+    font-size: clamp(1.9rem, 9vw, 2.75rem) !important;
+    line-height: 1.08 !important;
+    text-wrap: balance;
+  }
+  /* long display lines wrap gracefully instead of overflowing */
+  .font-display {
+    overflow-wrap: break-word;
+  }
+}
+
+/* ------------------- 6. media guards -------------------------------------
+   No image, video or svg may ever force the document wider than the
+   viewport. Intentionally scrollable regions opt out with .bloom-hscroll. */
+
+img,
+video {
+  max-width: 100%;
+}
+
+svg {
+  max-width: 100%;
+}
+
+/* chart / svg hosts shrink inside flex and grid instead of pushing out */
+.app-shell main svg,
+.app-shell main canvas,
+.app-shell main figure {
+  min-width: 0;
+}
+
+/* intentional horizontal scroll: momentum, snap-optional, no page spill */
+.bloom-hscroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.bloom-hscroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------- 7. keyboard-safe inputs ------------------------------
+   ≥16px text on phones (no iOS auto-zoom), full-width fields that never
+   escape their card, textareas that grow instead of clipping. */
+
+@media (max-width: 639px) {
+  /* !important: a floor, not a suggestion — page sheets that set 11-15px
+     inputs would otherwise reintroduce the iOS auto-zoom on focus. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: max(var(--bloom-input-min), 1em) !important;
+  }
+}
+
+input,
+select,
+textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+textarea {
+  field-sizing: content;
+  max-height: 40dvh;
+}
+@supports not (field-sizing: content) {
+  textarea {
+    min-height: 88px;
+  }
+}
+
+/* ------------------- 8. page compositions ----------------------------------
+   NOTE on precedence: page stylesheets (trackers2, cycle2, coach, profile,
+   rewards, progression...) load via route <link>s AFTER this global sheet,
+   so page-specific mobile compositions live in those files, where they win.
+   This section keeps only what has no rival elsewhere.
+
+   - tracker dock + ledger rows + atlas/strip density: trackers2.css
+   - coach thread/dock/composer/input: coach.css
+   - cycle shell/panels: cycle2.css
+   - profile cover/numbers/tabs: profile.css
+   - rewards/progression: rewards.css / progression.css
+   - snapshot sheet internals (.metrics-sheet): below (unique classes)
+   - moment picker tiles: below AND bloom-sheet.css (bundled import; the
+     later of the two wins, and both carry the same values) */
+
+/* ------------------- 8d. moment picker: compact action sheet -------------
+   Four photographic tiles stay, but composed for thumbs: shorter, calmer,
+   always scrollable inside short viewports. */
+
+@media (max-width: 639px) {
+  .bmoment-grid {
+    gap: 10px;
+    padding: 10px 14px 4px;
+  }
+  .bmoment-tile {
+    min-height: 128px;
+    padding: 12px 12px 10px;
+    border-radius: 18px;
+  }
+  .bmoment-orb {
+    width: 42px;
+    height: 42px;
+  }
+  .bmoment-orb svg {
+    width: 19px;
+    height: 19px;
+  }
+  .bmoment-title {
+    margin-top: 8px;
+    font-size: 18px;
+  }
+  .bmoment-hint {
+    font-size: 11.5px;
+    padding-right: 20px;
+  }
+  .bmoment-foot {
+    margin: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 12px 10px 10px;
+  }
+  .bmoment-foot-title {
+    font-size: 14px;
+  }
+  .bmoment-foot-sub {
+    font-size: 11.5px;
+  }
+  .bsheet-h1 {
+    font-size: clamp(24px, 7vw, 30px);
+  }
+}
+
+/* ------------------- 8e. snapshot sheet internals ------------------------
+   The gradient header stays pinned; the form beneath it owns the scroll
+   gesture, so short phones and open keyboards never clip the save action. */
+
+@media (max-width: 639px) {
+  .bsheet--phone .metrics-sheet {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 92dvh;
+  }
+  /* header is the first child; every view below it scrolls */
+  .bsheet--phone .metrics-sheet > div:first-child {
+    flex: none;
+  }
+  .bsheet--phone .metrics-sheet > div:not(:first-child) {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* the six-metric grid stays 2-up but compact with room to type */
+  .bsheet--phone .metrics-sheet .grid.grid-cols-2 {
+    gap: 10px;
+  }
+  /* the saved summary wraps 3-up instead of squeezing six across */
+  .bsheet--phone .metrics-saved-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px 8px;
+  }
+}
+
+/* ------------------- 8g. floating actions clear the chrome --------------- */
+
+.home-fab {
+  bottom: calc(1rem + var(--app-bottom-nav, 0px)) !important;
+  max-width: calc(100vw - 2rem);
+}
+
+/* undo strips everywhere clear the tab bar */
+.home-page .home-undo,
+.ci-undo {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bloom-nav-h) + 20px) !important;
+  max-width: calc(100vw - 32px);
+}
+
+/* ------------------- 9. the 320px survival breakpoint --------------------
+   Nothing may break at 320px. Density eases; targets and type floors hold. */
+
+@media (max-width: 359px) {
+  :root {
+    --bloom-page-px: 14px;
+  }
+  .home-page main,
+  .mood-page main {
+    padding-inline: 14px;
+  }
+}
+
+/* ------------------- 10. short-height phones ------------------------------
+   Sheets and dialogs scroll internally; heroes never claim the viewport. */
+
+@media (max-height: 700px) {
+  .bsheet--phone {
+    max-height: 94dvh;
+  }
+  .bmoment-tile {
+    min-height: 112px;
+  }
+  .bmoment-hero {
+    padding-top: 26px;
+  }
+}
+
+/* ------------------- 11. motion discipline on phones --------------------- */
+
+@media (max-width: 639px) {
+  .home-float,
+  .home-halo {
+    animation-duration: 8s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-mobile-nav > a,
+  .app-mobile-nav > a:active {
+    transition: none;
+    transform: none;
+  }
+}

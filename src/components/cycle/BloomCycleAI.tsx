@@ -189,7 +189,7 @@ export function BloomCycleAI({
         onClick={toggle}
         aria-label={open ? "Close Bloom assistant" : "Open the Bloom cycle assistant"}
         aria-expanded={open}
-        className="cy-ai fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[70] sm:right-6 sm:bottom-6"
+        className="cy-ai fixed right-4 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[70] sm:right-6 sm:bottom-6"
       >
         {open ? <X className="size-[18px]" /> : <BloomMark className="size-5" />}
         {showDot && !open ? (

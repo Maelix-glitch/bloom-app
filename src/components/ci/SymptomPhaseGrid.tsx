@@ -30,23 +30,27 @@ export function SymptomPhaseGrid({
 
   return (
     <div>
-      <div
-        className="grid gap-[3px]"
-        style={{ gridTemplateColumns: `minmax(78px, 1.1fr) repeat(4, minmax(0, 1fr))` }}
-      >
-        <span />
-        {PHASES.map((phase) => (
-          <span
-            key={phase}
-            className="pb-1 text-center text-[9.5px] uppercase tracking-[0.08em] ci-muted"
-          >
-            {compact ? PHASE_LABEL[phase].slice(0, 3) : PHASE_LABEL[phase]}
-          </span>
-        ))}
+      {/* narrow phones: the four phase columns keep their readable width and
+          glide sideways instead of crushing the labels. */}
+      <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <div
+          className="grid min-w-[360px] gap-[3px]"
+          style={{ gridTemplateColumns: `minmax(78px, 1.1fr) repeat(4, minmax(0, 1fr))` }}
+        >
+          <span />
+          {PHASES.map((phase) => (
+            <span
+              key={phase}
+              className="pb-1 text-center text-[9.5px] uppercase tracking-[0.08em] ci-muted"
+            >
+              {compact ? PHASE_LABEL[phase].slice(0, 3) : PHASE_LABEL[phase]}
+            </span>
+          ))}
 
-        {rows.map((row, rowIndex) => (
-          <GridRow key={row.key} row={row} index={rowIndex} />
-        ))}
+          {rows.map((row, rowIndex) => (
+            <GridRow key={row.key} row={row} index={rowIndex} />
+          ))}
+        </div>
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-[10.5px] ci-muted">

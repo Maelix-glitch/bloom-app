@@ -544,6 +544,29 @@
   border-width: 0;
 }
 
+/* phones: quick taps and rating pills meet the 44px touch floor, and the
+   goal field stays tappable without widening its card. */
+@media (max-width: 720px) {
+  .tk-row__actions .tk-quick button,
+  .tk-row__actions .tk-pill button {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tk-pill button {
+    min-height: 40px;
+  }
+
+  .tk-goal-input {
+    min-height: 44px;
+    width: 96px;
+    font-size: 16px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tk-bar__fill,
   .tk-circle,

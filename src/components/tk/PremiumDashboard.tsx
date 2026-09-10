@@ -24,7 +24,7 @@ import { Observations } from "./designs/shared";
 import { AddHabitModal } from "./AddHabitModal";
 
 const DASHBOARD_ROOT: CSSProperties = {
-  minHeight: "100vh",
+  minHeight: "100dvh",
   background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 50%, #16213E 100%)",
   padding: "2rem 1rem",
   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",

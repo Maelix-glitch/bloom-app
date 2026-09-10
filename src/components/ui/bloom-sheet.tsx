@@ -77,6 +77,32 @@ export function BloomSheet({
 }) {
   const phone = useIsPhone();
   const reduced = useReducedMotion();
+  const panelRef = React.useRef<HTMLDivElement | null>(null);
+
+  /*
+   * Keyboard: phones don't shrink the layout viewport when it opens, so a
+   * focused field deep in a tall sheet would hide underneath — bring it into
+   * view inside the sheet instead. Runs for every BloomSheet at once.
+   */
+  React.useEffect(() => {
+    if (!open || !phone) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const onFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target || typeof target.scrollIntoView !== "function") return;
+      if (!panel.contains(target)) return;
+      window.setTimeout(() => {
+        try {
+          target.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+        } catch {
+          target.scrollIntoView();
+        }
+      }, 120);
+    };
+    panel.addEventListener("focusin", onFocus);
+    return () => panel.removeEventListener("focusin", onFocus);
+  }, [open, phone, reduced]);
 
   /*
    * Every sheet in the app gets its open/close cue here rather than at each
@@ -126,6 +152,7 @@ export function BloomSheet({
             >
               <motion.div
                 key="panel"
+                ref={panelRef}
                 className={cn(
                   "bsheet",
                   phone ? "bsheet--phone" : "bsheet--card",

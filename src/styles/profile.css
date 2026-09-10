@@ -33,6 +33,23 @@
   }
 }
 
+@media (max-width: 359px) {
+  /* 320px phones: the name holds to two lines, numbers breathe edge to edge */
+  .pf-name {
+    font-size: 26px;
+  }
+  .pf-numbers {
+    padding-inline: 10px;
+    gap: 6px;
+  }
+  .pf-number {
+    padding: 12px 12px 10px;
+  }
+  .pf-section {
+    padding-inline: 10px;
+  }
+}
+
 /* ------------------------------ entrance -------------------------------- */
 
 @keyframes pf-rise {

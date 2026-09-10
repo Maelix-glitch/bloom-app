@@ -946,6 +946,10 @@
 }
 
 .se-tray-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   padding: 7px 14px;
   border-radius: 999px;
   font-size: 12.5px;

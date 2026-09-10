@@ -252,6 +252,12 @@
     padding: 28px 40px 96px;
   }
 }
+/* 320px phones: a narrower gutter keeps cards full-width and readable. */
+@media (max-width: 359px) {
+  .ci-shell {
+    padding-inline: 14px;
+  }
+}
 /** The design gallery has no rail beside it, so it keeps a centred column. */
 .ci-shell--narrow {
   max-width: 1060px;

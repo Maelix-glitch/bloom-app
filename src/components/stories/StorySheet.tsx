@@ -55,6 +55,28 @@ export function StorySheet({
     };
   }, []);
 
+  /* keyboard: iOS doesn't shrink the layout viewport, so a focused field
+     (sticker search, poll options…) would hide under the keyboard — bring
+     it into view inside the sheet's own scroll region instead. */
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const onFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target || typeof target.scrollIntoView !== "function") return;
+      if (!sheet.contains(target)) return;
+      window.setTimeout(() => {
+        try {
+          target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        } catch {
+          target.scrollIntoView();
+        }
+      }, 120);
+    };
+    sheet.addEventListener("focusin", onFocus);
+    return () => sheet.removeEventListener("focusin", onFocus);
+  }, []);
+
   return (
     <div className="bstory" role="dialog" aria-modal="true" aria-label={label ?? title}>
       <div className="ssheet-backdrop" onClick={requestClose} aria-hidden />
