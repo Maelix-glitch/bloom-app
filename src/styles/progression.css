@@ -1819,3 +1819,1171 @@
 .pg-banner-quiet .pg-link {
   margin-left: 0.15rem;
 }
+
+/* ==========================================================================
+   THE MYTHIC LAYER — atmosphere, ceremony and light.
+
+   Everything below is additive: it deepens the reward feeling (starlight,
+   aurora, rising embers, gilded frames, orbiting sparks) without changing
+   what any element *is*. All of it is decorative, so all of it is switched
+   off under prefers-reduced-motion at the bottom of this file.
+   ========================================================================== */
+
+/* ------------------------------ deeper night ----------------------------- */
+
+/* a field of faint stars, drawn as layered radial dots; two layers twinkle
+   out of phase so the sky feels alive without a single asset */
+.pg-sky-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, color-mix(in oklab, var(--pg-ivory) 85%, transparent), transparent 55%),
+    radial-gradient(1.5px 1.5px at 28% 8%, color-mix(in oklab, var(--gold) 80%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 41% 26%, color-mix(in oklab, var(--pg-ivory) 70%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 57% 12%, color-mix(in oklab, var(--pg-lavender) 80%, transparent), transparent 55%),
+    radial-gradient(1.5px 1.5px at 68% 30%, color-mix(in oklab, var(--pg-ivory) 75%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 79% 9%, color-mix(in oklab, var(--gold) 75%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 88% 22%, color-mix(in oklab, var(--pg-ivory) 70%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 8% 44%, color-mix(in oklab, var(--pg-lavender) 65%, transparent), transparent 55%),
+    radial-gradient(1.5px 1.5px at 94% 41%, color-mix(in oklab, var(--pg-ivory) 60%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 22% 34%, color-mix(in oklab, var(--gold) 55%, transparent), transparent 55%);
+  opacity: 0.5;
+  animation: pg-twinkle 7s ease-in-out infinite alternate;
+}
+
+.pg-sky-stars::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 17% 6%, color-mix(in oklab, var(--pg-ivory) 80%, transparent), transparent 55%),
+    radial-gradient(1.5px 1.5px at 34% 20%, color-mix(in oklab, var(--pg-lavender) 75%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 49% 5%, color-mix(in oklab, var(--gold) 70%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 63% 24%, color-mix(in oklab, var(--pg-ivory) 65%, transparent), transparent 55%),
+    radial-gradient(1.5px 1.5px at 75% 16%, color-mix(in oklab, var(--pg-ivory) 78%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 91% 7%, color-mix(in oklab, var(--pg-lavender) 70%, transparent), transparent 55%),
+    radial-gradient(1px 1px at 5% 28%, color-mix(in oklab, var(--gold) 60%, transparent), transparent 55%);
+  animation: pg-twinkle 9s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes pg-twinkle {
+  from { opacity: 0.28; }
+  to   { opacity: 0.85; }
+}
+
+/* a slow aurora ribbon behind the hero */
+.pg-sky-aurora {
+  position: absolute;
+  left: -20vw;
+  right: -20vw;
+  top: -6vh;
+  height: 52vh;
+  background:
+    radial-gradient(52% 68% at 30% 40%, color-mix(in oklab, var(--violet) 11%, transparent), transparent 70%),
+    radial-gradient(46% 62% at 62% 30%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 70%),
+    radial-gradient(40% 56% at 82% 52%, color-mix(in oklab, var(--sage) 8%, transparent), transparent 70%);
+  filter: blur(30px);
+  transform-origin: 50% 0%;
+  animation: pg-aurora-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes pg-aurora-drift {
+  from { transform: translateX(-3%) skewX(-2deg) scaleY(1); opacity: 0.7; }
+  50%  { opacity: 1; }
+  to   { transform: translateX(3%) skewX(2deg) scaleY(1.08); opacity: 0.8; }
+}
+
+/* faint god-rays falling from the top of the page */
+.pg-sky-rays {
+  position: absolute;
+  left: 50%;
+  top: -12vh;
+  width: min(120vw, 1400px);
+  height: 70vh;
+  transform: translateX(-50%);
+  background:
+    conic-gradient(
+      from 178deg at 50% 0%,
+      transparent 0deg,
+      color-mix(in oklab, var(--gold) 5%, transparent) 3deg,
+      transparent 7deg,
+      transparent 10deg,
+      color-mix(in oklab, var(--pg-ivory) 4%, transparent) 13deg,
+      transparent 17deg,
+      transparent 21deg,
+      color-mix(in oklab, var(--gold) 4%, transparent) 24deg,
+      transparent 28deg
+    );
+  mask-image: linear-gradient(180deg, black, transparent 80%);
+  -webkit-mask-image: linear-gradient(180deg, black, transparent 80%);
+  opacity: 0.9;
+  animation: pg-rays 18s ease-in-out infinite alternate;
+}
+
+@keyframes pg-rays {
+  from { opacity: 0.45; transform: translateX(-50%) rotate(-0.6deg); }
+  to   { opacity: 1;    transform: translateX(-50%) rotate(0.6deg); }
+}
+
+/* rising gold motes — embers drifting up the whole page */
+.pg-sky-motes {
+  position: absolute;
+  inset: 0;
+}
+
+.pg-mote {
+  position: absolute;
+  bottom: -2vh;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gold) 88%, white);
+  box-shadow: 0 0 8px 1px color-mix(in oklab, var(--gold) 55%, transparent);
+  opacity: 0;
+  animation-name: pg-mote-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes pg-mote-rise {
+  0%   { transform: translate3d(0, 0, 0) scale(0.8); opacity: 0; }
+  8%   { opacity: 0.7; }
+  55%  { opacity: 0.45; }
+  92%  { opacity: 0; }
+  100% { transform: translate3d(var(--pg-mote-drift, 0vw), -108vh, 0) scale(1.1); opacity: 0; }
+}
+
+/* the edges fall away into the dark — everything centres on the light */
+.pg-sky-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 32%,
+    transparent 55%,
+    color-mix(in oklab, oklch(0.1 0.02 279) 55%, transparent) 100%
+  );
+}
+
+/* ------------------------------ scroll reveal ---------------------------- */
+
+/* Each section now sits inside its own reveal wrapper, which makes every
+   section :first-of-type in its parent — so the vertical rhythm moves to the
+   wrapper itself. */
+.pg-reveal > .pg-section {
+  margin-top: 0;
+}
+
+.pg-reveal {
+  margin-top: 5.5rem;
+}
+
+/* the first section stays close to the hero (or its banner), as before */
+.pg-hero + .pg-reveal,
+.pg-banner + .pg-reveal {
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 620px) {
+  .pg-reveal {
+    margin-top: 4rem;
+  }
+}
+
+.pg-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(5px);
+  transition:
+    opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--pg-reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+
+.pg-reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ------------------------- the hero as a gilded plaque ------------------- */
+
+/* the whole hero breathes in on arrival */
+.pg-hero {
+  animation: pg-hero-arrive 1.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pg-hero-arrive {
+  from { opacity: 0; transform: translateY(18px) scale(0.992); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+/* its border carries a slow moving glint, like light over gold leaf —
+   a masked overlay ring, so the animated gradient only ever paints the 1px
+   edge and never bleeds under the card */
+.pg-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 31px;
+  padding: 1px;
+  z-index: 1;
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in oklab, var(--gold) 34%, transparent),
+      color-mix(in oklab, var(--foreground) 10%, transparent) 30%,
+      color-mix(in oklab, var(--gold) 52%, transparent) 50%,
+      color-mix(in oklab, var(--foreground) 10%, transparent) 70%,
+      color-mix(in oklab, var(--violet) 30%, transparent)
+    );
+  background-size: 300% 300%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: pg-border-glint 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pg-border-glint {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* hairline corner ornaments */
+.pg-hero-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.pg-hero-corner-tl { top: 13px; left: 13px; border-right: none; border-bottom: none; border-top-left-radius: 12px; }
+.pg-hero-corner-tr { top: 13px; right: 13px; border-left: none; border-bottom: none; border-top-right-radius: 12px; }
+.pg-hero-corner-bl { bottom: 13px; left: 13px; border-right: none; border-top: none; border-bottom-left-radius: 12px; }
+.pg-hero-corner-br { bottom: 13px; right: 13px; border-left: none; border-top: none; border-bottom-right-radius: 12px; }
+
+/* an occasional beam of light sweeps across the plaque */
+.pg-hero-beam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pg-hero-beam::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -30%;
+  width: 34%;
+  transform: skewX(-18deg) translateX(-120%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--pg-ivory) 5%, transparent) 40%,
+    color-mix(in oklab, var(--gold) 9%, transparent) 50%,
+    color-mix(in oklab, var(--pg-ivory) 5%, transparent) 60%,
+    transparent
+  );
+  animation: pg-beam 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pg-beam {
+  0%       { transform: skewX(-18deg) translateX(-140%); }
+  32%, 100% { transform: skewX(-18deg) translateX(560%); }
+}
+
+/* the rank name arrives like an inscription, then keeps a slow sheen */
+.pg-hero-title {
+  background: linear-gradient(
+    110deg,
+    var(--pg-ivory) 20%,
+    color-mix(in oklab, var(--gold) 85%, white) 38%,
+    var(--pg-ivory) 56%,
+    color-mix(in oklab, var(--pg-ivory) 78%, var(--gold)) 90%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: pg-title-sheen 8s ease-in-out infinite;
+  text-shadow: none;
+}
+
+@keyframes pg-title-sheen {
+  0%, 100% { background-position: 110% 0; }
+  50%      { background-position: -10% 0; }
+}
+
+/* staggered entrance for the hero copy */
+.pg-hero-copy > * {
+  animation: pg-rise 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.pg-hero-copy > *:nth-child(1) { animation-delay: 0.15s; }
+.pg-hero-copy > *:nth-child(2) { animation-delay: 0.3s; }
+.pg-hero-copy > *:nth-child(3) { animation-delay: 0.48s; }
+.pg-hero-copy > *:nth-child(4) { animation-delay: 0.62s; }
+
+.pg-emblem-stage {
+  animation: pg-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+}
+
+.pg-next {
+  animation: pg-rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+}
+
+/* -------------------- the emblem: orbiting sparks + light ----------------- */
+
+.pg-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: pg-orbit-spin 26s linear infinite;
+  pointer-events: none;
+}
+
+.pg-orbit-reverse {
+  animation: pg-orbit-spin 38s linear infinite reverse;
+}
+
+@keyframes pg-orbit-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.pg-orbit-spark {
+  position: absolute;
+  left: 50%;
+  top: 1.5%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gold) 92%, white);
+  box-shadow: 0 0 10px 2px color-mix(in oklab, var(--gold) 50%, transparent);
+  animation: pg-spark-breathe 3.4s ease-in-out infinite alternate;
+}
+
+.pg-orbit-spark-2 {
+  top: auto;
+  bottom: 10%;
+  left: 8%;
+  width: 3px;
+  height: 3px;
+  animation-delay: -1.2s;
+  background: color-mix(in oklab, var(--pg-lavender) 90%, white);
+  box-shadow: 0 0 9px 2px color-mix(in oklab, var(--violet) 45%, transparent);
+}
+
+.pg-orbit-spark-3 {
+  top: 26%;
+  left: 96%;
+  width: 2.5px;
+  height: 2.5px;
+  animation-delay: -2.1s;
+  opacity: 0.9;
+}
+
+.pg-orbit-spark-4 {
+  top: 62%;
+  left: 0.5%;
+  width: 3px;
+  height: 3px;
+  background: color-mix(in oklab, var(--pg-ivory) 92%, white);
+  box-shadow: 0 0 8px 2px color-mix(in oklab, var(--pg-ivory) 40%, transparent);
+}
+
+@keyframes pg-spark-breathe {
+  from { opacity: 0.5; }
+  to   { opacity: 1; }
+}
+
+/* a soft rotating shimmer behind the mark itself */
+.pg-emblem-shimmer {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in oklab, var(--gold) 10%, transparent) 40deg,
+    transparent 90deg,
+    transparent 180deg,
+    color-mix(in oklab, var(--violet) 8%, transparent) 230deg,
+    transparent 290deg
+  );
+  filter: blur(10px);
+  animation: pg-orbit-spin 21s linear infinite;
+  pointer-events: none;
+}
+
+.pg-emblem-mark {
+  animation: pg-emblem-float 7s ease-in-out infinite alternate;
+}
+
+@keyframes pg-emblem-float {
+  from { transform: translateY(2px); }
+  to   { transform: translateY(-4px); }
+}
+
+/* the points number glows faintly, like something struck in metal */
+.pg-rank-points {
+  text-shadow: 0 0 26px color-mix(in oklab, var(--gold) 26%, transparent);
+}
+
+/* ------------------------- gilded section headers ------------------------ */
+
+.pg-eyebrow-rule {
+  position: relative;
+  width: 34px;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--gold) 65%, transparent), transparent);
+}
+
+.pg-eyebrow-rule::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  transform: translateY(-50%) rotate(45deg);
+  background: color-mix(in oklab, var(--gold) 80%, white);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--gold) 55%, transparent);
+}
+
+.pg-section-title {
+  background: linear-gradient(
+    120deg,
+    var(--foreground) 30%,
+    color-mix(in oklab, var(--pg-ivory) 70%, var(--gold)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ----------------------- goal cards: relic behaviour --------------------- */
+
+/* light sweeps across a card when you hover it */
+.pg-goal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    color-mix(in oklab, var(--pg-ivory) 6%, transparent) 46%,
+    color-mix(in oklab, var(--goal-tone, var(--gold)) 8%, transparent) 52%,
+    transparent 68%
+  );
+  background-size: 240% 100%;
+  background-position: 120% 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .pg-goal:hover::after {
+    opacity: 1;
+    animation: pg-card-sheen 1.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+}
+
+@keyframes pg-card-sheen {
+  from { background-position: 130% 0; }
+  to   { background-position: -30% 0; }
+}
+
+/* a completed, unclaimed goal glows like something waiting to be taken */
+.pg-goal[data-complete="true"] {
+  animation: pg-ready-glow 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes pg-ready-glow {
+  from {
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--gold) 12%, transparent),
+      0 0 0 0 color-mix(in oklab, var(--gold) 0%, transparent),
+      0 30px 70px -50px color-mix(in oklab, var(--gold) 60%, transparent);
+  }
+  to {
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--gold) 16%, transparent),
+      0 0 34px -8px color-mix(in oklab, var(--gold) 32%, transparent),
+      0 30px 70px -44px color-mix(in oklab, var(--gold) 78%, transparent);
+  }
+}
+
+/* the claim button carries its own running glint */
+.pg-btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.pg-btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, white 55%, transparent), transparent);
+  animation: pg-btn-glint 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pg-btn-glint {
+  0%        { left: -60%; }
+  45%, 100% { left: 130%; }
+}
+
+/* progress rails get a travelling glow pulse at their tip */
+.pg-rail-fill::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--goal-tone, var(--gold)) 80%, white),
+    transparent 70%
+  );
+  animation: pg-tip-pulse 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes pg-tip-pulse {
+  from { opacity: 0.35; }
+  to   { opacity: 0.95; }
+}
+
+/* ------------------------- the path, more sacred -------------------------- */
+
+.pg-path-spine {
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--foreground) 6%, transparent),
+    color-mix(in oklab, var(--gold) 55%, transparent) 45%,
+    color-mix(in oklab, var(--foreground) 6%, transparent)
+  );
+  box-shadow: 0 0 14px color-mix(in oklab, var(--gold) 22%, transparent);
+}
+
+.pg-node[data-state="current"] .pg-node-dot {
+  animation: pg-current-breathe 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes pg-current-breathe {
+  from {
+    box-shadow:
+      0 0 0 6px color-mix(in oklab, var(--gold) 8%, transparent),
+      0 0 34px -6px color-mix(in oklab, var(--gold) 55%, transparent);
+  }
+  to {
+    box-shadow:
+      0 0 0 9px color-mix(in oklab, var(--gold) 12%, transparent),
+      0 0 48px -4px color-mix(in oklab, var(--gold) 70%, transparent);
+  }
+}
+
+/* ------------------------- achievements: relics -------------------------- */
+
+.pg-ach[data-earned="true"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.pg-ach[data-earned="true"]::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: -30%;
+  width: 26%;
+  transform: skewX(-18deg) translateX(-140%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--ach-tone, var(--gold)) 12%, transparent),
+    transparent
+  );
+  animation: pg-relic-glint 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--pg-i, 0) * 0.9s);
+  pointer-events: none;
+}
+
+@keyframes pg-relic-glint {
+  0%        { transform: skewX(-18deg) translateX(-160%); }
+  26%, 100% { transform: skewX(-18deg) translateX(620%); }
+}
+
+.pg-ach[data-earned="true"] .pg-ach-mark {
+  box-shadow: 0 0 22px -6px color-mix(in oklab, var(--ach-tone, var(--gold)) 55%, transparent);
+}
+
+/* -------------------------- the closing flourish -------------------------- */
+
+.pg-footer {
+  position: relative;
+  border-top: none;
+  padding-top: 3rem;
+}
+
+.pg-flourish {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.pg-flourish-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold) 40%, transparent));
+}
+
+.pg-flourish-line:last-child {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--gold) 40%, transparent), transparent);
+}
+
+.pg-flourish-gem {
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  background: color-mix(in oklab, var(--gold) 75%, white);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 60%, transparent);
+  animation: pg-spark-breathe 4s ease-in-out infinite alternate;
+}
+
+/* ----------------------- mythic layer: reduced motion --------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-sky-stars,
+  .pg-sky-stars::after,
+  .pg-sky-aurora,
+  .pg-sky-rays,
+  .pg-mote,
+  .pg-hero,
+  .pg-hero::before,
+  .pg-hero-beam::after,
+  .pg-hero-title,
+  .pg-hero-copy > *,
+  .pg-emblem-stage,
+  .pg-next,
+  .pg-orbit,
+  .pg-orbit-reverse,
+  .pg-orbit-spark,
+  .pg-emblem-shimmer,
+  .pg-emblem-mark,
+  .pg-goal[data-complete="true"],
+  .pg-btn-primary::after,
+  .pg-rail-fill::after,
+  .pg-node[data-state="current"] .pg-node-dot,
+  .pg-ach[data-earned="true"]::after,
+  .pg-flourish-gem {
+    animation: none !important;
+  }
+
+  .pg-mote,
+  .pg-btn-primary::after,
+  .pg-rail-fill::after,
+  .pg-ach[data-earned="true"]::after {
+    display: none;
+  }
+
+  .pg-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
+
+/* -------------------- ceremony: sparks and a crowning halo ---------------- */
+
+.pg-ceremony-sparks {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pg-ceremony-spark {
+  position: absolute;
+  bottom: -2vh;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gold) 90%, white);
+  box-shadow: 0 0 10px 2px color-mix(in oklab, var(--gold) 55%, transparent);
+  opacity: 0;
+  animation-name: pg-mote-rise;
+  animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  animation-iteration-count: infinite;
+}
+
+.pg-ceremony-mark {
+  position: relative;
+}
+
+.pg-ceremony-halo {
+  position: absolute;
+  inset: -34%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--gold) 30%, transparent);
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--gold) 14%, transparent), transparent 74%);
+  animation: pg-ceremony-halo 3.2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pg-ceremony-halo {
+  0%   { transform: scale(0.72); opacity: 0; }
+  35%  { opacity: 0.9; }
+  100% { transform: scale(1.22); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-ceremony-spark,
+  .pg-ceremony-halo {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   RANK CRESTS — game-style badges, frames and banners.
+
+   A crest = ornate metallic frame (SVG, band by tier) + the rank's botanical
+   emblem + CSS light (core glow, passing sheen). The notched ribbon carries
+   the rank's name. Bands escalate: Verdant → Gilded → Laurel → Radiant →
+   Mythic, each with its own metal.
+   ========================================================================== */
+
+.pg-crest {
+  --pg-crest-tone: var(--gold);
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+/* the metal, band by band */
+.pg-crest[data-band="1"] {
+  --pg-badge-hi: color-mix(in oklab, var(--sage) 65%, oklch(0.88 0.06 120));
+  --pg-badge-lo: color-mix(in oklab, var(--sage) 80%, oklch(0.45 0.05 140));
+}
+.pg-crest[data-band="2"] {
+  --pg-badge-hi: color-mix(in oklab, var(--gold) 85%, white);
+  --pg-badge-lo: color-mix(in oklab, var(--gold) 75%, oklch(0.5 0.09 70));
+}
+.pg-crest[data-band="3"] {
+  --pg-badge-hi: color-mix(in oklab, var(--rose) 55%, var(--gold));
+  --pg-badge-lo: color-mix(in oklab, var(--rose) 60%, oklch(0.5 0.08 30));
+}
+.pg-crest[data-band="4"] {
+  --pg-badge-hi: color-mix(in oklab, var(--gold) 92%, white);
+  --pg-badge-lo: color-mix(in oklab, var(--gold) 70%, oklch(0.6 0.1 85));
+}
+.pg-crest[data-band="5"] {
+  --pg-badge-hi: color-mix(in oklab, var(--violet) 55%, var(--gold));
+  --pg-badge-lo: color-mix(in oklab, var(--violet) 75%, oklch(0.55 0.12 300));
+}
+
+.pg-crest-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.pg-crest-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 18px color-mix(in oklab, var(--pg-badge-lo) 45%, transparent));
+}
+
+/* higher bands cast more light */
+.pg-crest[data-band="4"] .pg-crest-frame,
+.pg-crest[data-band="5"] .pg-crest-frame {
+  filter:
+    drop-shadow(0 4px 18px color-mix(in oklab, var(--pg-badge-lo) 55%, transparent))
+    drop-shadow(0 0 26px color-mix(in oklab, var(--pg-badge-hi) 26%, transparent));
+}
+
+.pg-crest-emblem {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 16px color-mix(in oklab, var(--pg-crest-tone) 45%, transparent));
+}
+
+.pg-crest-emblem-svg {
+  width: 34%;
+  height: 34%;
+}
+
+/* gems glimmer with the crest's own tone */
+.pg-badge-gem {
+  fill: color-mix(in oklab, var(--pg-crest-tone) 80%, white);
+  stroke: var(--pg-badge-hi);
+  stroke-width: 0.75;
+  animation: pg-gem-glimmer 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes pg-gem-glimmer {
+  from { opacity: 0.55; }
+  to   { opacity: 1; }
+}
+
+/* the mythic orbit ring slowly rotates */
+.pg-crest-orbit-ring {
+  transform-origin: 80px 80px;
+  animation: pg-orbit-spin 40s linear infinite;
+}
+
+/* core glow behind the emblem */
+.pg-crest-glow {
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 42%,
+    color-mix(in oklab, var(--pg-crest-tone) 22%, transparent),
+    transparent 68%
+  );
+  animation: pg-halo 8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* a passing sheen sweeps the whole crest, clipped to a circle */
+.pg-crest-sheen {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pg-crest-sheen::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -40%;
+  width: 34%;
+  transform: skewX(-18deg) translateX(-140%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--pg-badge-hi) 22%, transparent),
+    transparent
+  );
+  animation: pg-relic-glint 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--pg-i, 0) * 1.1s);
+}
+
+/* locked / future: the metal stays, the light goes out */
+.pg-crest-muted {
+  opacity: 0.55;
+  filter: saturate(0.35);
+}
+
+.pg-crest-muted .pg-crest-glow,
+.pg-crest-muted .pg-crest-sheen,
+.pg-crest-muted .pg-badge-gem {
+  animation: none;
+  opacity: 0.25;
+}
+
+.pg-crest-muted .pg-crest-frame {
+  filter: none;
+}
+
+/* ------------------------------ the banner ------------------------------- */
+
+.pg-crest-banner {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: stretch;
+  margin-top: -6%;
+  filter: drop-shadow(0 8px 20px color-mix(in oklab, black 45%, transparent));
+}
+
+.pg-crest-banner-body {
+  position: relative;
+  padding: 0.42rem 1.1rem 0.46rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in oklab, var(--pg-ivory) 92%, var(--pg-crest-tone, var(--gold)));
+  text-shadow: 0 1px 0 color-mix(in oklab, black 40%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 30%, oklch(0.24 0.03 285)),
+      color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 14%, oklch(0.18 0.025 285)) 55%,
+      color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 22%, oklch(0.21 0.03 285))
+    );
+  border-top: 1px solid color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 55%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, black 45%, transparent);
+}
+
+/* the gold thread stitched along the ribbon */
+.pg-crest-banner-body::after {
+  content: "";
+  position: absolute;
+  inset: 3px 4px;
+  border: 1px solid color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 30%, transparent);
+  border-left: none;
+  border-right: none;
+  pointer-events: none;
+}
+
+/* notched tails, folded slightly darker so the ribbon reads as cloth */
+.pg-crest-banner-tail {
+  width: 14px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 22%, oklch(0.2 0.03 285)),
+      color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 10%, oklch(0.15 0.02 285))
+    );
+}
+
+.pg-crest-banner-tail-l {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 45% 50%);
+  margin-right: -1px;
+  transform: translateY(3px);
+}
+
+.pg-crest-banner-tail-r {
+  clip-path: polygon(0 0, 100% 0, 55% 50%, 100% 100%, 0 100%);
+  margin-left: -1px;
+  transform: translateY(3px);
+}
+
+/* ---------------------- crests within the journey ------------------------ */
+
+/* the hero: the crest banner sits beneath the ring, naming the rank */
+.pg-hero-banner {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.9rem;
+}
+
+/* the journey path: each rank walks with its own crest */
+.pg-node .pg-crest {
+  width: 44px;
+}
+
+.pg-node[data-state="current"] .pg-crest {
+  width: 56px;
+}
+
+.pg-node .pg-crest .pg-crest-emblem,
+.pg-node .pg-crest .pg-crest-frame {
+  filter: none; /* tiny sizes: shadows just blur, so switch them off */
+}
+
+.pg-node[data-state="current"] .pg-crest .pg-crest-frame {
+  filter: drop-shadow(0 0 14px color-mix(in oklab, var(--pg-badge-hi) 40%, transparent));
+}
+
+/* the hall of crests — the full ladder, laid out like a trophy case */
+.pg-hall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.pg-hall-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.4rem 0.9rem 1.15rem;
+  border-radius: 20px;
+  border: 1px solid var(--pg-line-soft);
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 7%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface) 46%, transparent), color-mix(in oklab, var(--background) 80%, transparent));
+  transition:
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.pg-hall-item[data-state="earned"] {
+  border-color: color-mix(in oklab, var(--pg-crest-tone, var(--gold)) 26%, transparent);
+}
+
+.pg-hall-item[data-state="current"] {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  box-shadow:
+    0 0 0 5px color-mix(in oklab, var(--gold) 7%, transparent),
+    0 24px 60px -40px color-mix(in oklab, var(--gold) 70%, transparent);
+}
+
+@media (hover: hover) {
+  .pg-hall-item:hover {
+    transform: translateY(-4px);
+  }
+  .pg-hall-item:hover .pg-crest:not(.pg-crest-muted) .pg-crest-art {
+    animation: pg-crest-pop 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+}
+
+@keyframes pg-crest-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.07) rotate(-1.5deg); }
+  100% { transform: scale(1); }
+}
+
+.pg-hall-item .pg-crest {
+  width: min(104px, 70%);
+}
+
+.pg-hall-name {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  line-height: 1.25;
+  text-align: center;
+  color: color-mix(in oklab, var(--foreground) 90%, transparent);
+}
+
+.pg-hall-item[data-state="future"] .pg-hall-name {
+  color: var(--faint);
+}
+
+.pg-hall-meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  text-align: center;
+}
+
+.pg-hall-state {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--gold) 80%, var(--foreground));
+}
+
+.pg-hall-item[data-state="future"] .pg-hall-state {
+  color: var(--faint);
+}
+
+/* frame-band caption under the hall */
+.pg-hall-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.4rem;
+  margin-top: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.pg-hall-legend i {
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pg-hall-legend i::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: var(--legend-tone, var(--gold));
+  box-shadow: 0 0 8px color-mix(in oklab, var(--legend-tone, var(--gold)) 50%, transparent);
+}
+
+/* ceremony: the crest replaces the bare emblem */
+.pg-ceremony .pg-crest {
+  width: min(220px, 56vw);
+  animation: pg-emerge 1.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* ----------------------- crests: reduced motion --------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-badge-gem,
+  .pg-crest-orbit-ring,
+  .pg-crest-glow,
+  .pg-ceremony .pg-crest {
+    animation: none !important;
+  }
+  .pg-crest-sheen {
+    display: none;
+  }
+  .pg-hall-item:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .pg-node .pg-crest {
+    width: 38px;
+  }
+  .pg-node[data-state="current"] .pg-crest {
+    width: 48px;
+  }
+  .pg-hall {
+    grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+    gap: 0.7rem;
+  }
+}
+
+/* ------------------ hero: the crest showcased in the ring ----------------- */
+
+/* The space inside the progress ring now presents the full crest — frame,
+   gems and all — instead of the bare emblem. */
+.pg-emblem-crest {
+  width: 72%;
+  filter: none; /* the crest brings its own light */
+}
+
+.pg-emblem-crest .pg-crest {
+  width: 100%;
+}
+
+/* the ring already glows; let the crest's own drop-shadows do the rest */
+.pg-emblem-crest .pg-crest-frame {
+  filter: drop-shadow(0 0 22px color-mix(in oklab, var(--pg-badge-hi) 30%, transparent));
+}

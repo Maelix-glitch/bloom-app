@@ -15,7 +15,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import type { GoalProgress, RankState } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
-import { Emblem } from "./Emblem";
+import { RankBadge, RankBanner } from "./RankBadge";
 
 /**
  * Smoothly counts a number from its previous value to the new one. Respects
@@ -125,6 +125,13 @@ export function JourneyHero({
 
   return (
     <section className="pg-hero" aria-labelledby="pg-journey-title">
+      {/* ornamental hairline corners — the hero reads as a struck plaque */}
+      <span className="pg-hero-corner pg-hero-corner-tl" aria-hidden />
+      <span className="pg-hero-corner pg-hero-corner-tr" aria-hidden />
+      <span className="pg-hero-corner pg-hero-corner-bl" aria-hidden />
+      <span className="pg-hero-corner pg-hero-corner-br" aria-hidden />
+      <span className="pg-hero-beam" aria-hidden />
+
       <div className="pg-hero-copy">
         <p className="pg-eyebrow">
           <span className="pg-eyebrow-rule" aria-hidden />
@@ -155,12 +162,28 @@ export function JourneyHero({
       <div className="pg-emblem-stage">
         <div className="pg-emblem-ring">
           <RankRing progress={rank.progress} />
+          {/* a slow constellation of sparks orbits the emblem */}
+          <span className="pg-orbit" aria-hidden>
+            <i className="pg-orbit-spark" />
+            <i className="pg-orbit-spark pg-orbit-spark-2" />
+            <i className="pg-orbit-spark pg-orbit-spark-3" />
+          </span>
+          <span className="pg-orbit pg-orbit-reverse" aria-hidden>
+            <i className="pg-orbit-spark pg-orbit-spark-4" />
+          </span>
           <div className="pg-emblem-core">
             <span className="pg-halo" aria-hidden />
-            <span className="pg-emblem-mark" style={{ color: rank.rank.tone }}>
-              <Emblem id={rank.rank.emblem} size={88} strokeWidth={1.25} />
+            <span className="pg-emblem-shimmer" aria-hidden />
+            {/* the full crest — frame and all — showcased inside the ring */}
+            <span className="pg-emblem-mark pg-emblem-crest">
+              <RankBadge rank={rank.rank} />
             </span>
           </div>
+        </div>
+
+        {/* the rank's banner ribbon — the crest's nameplate, worn under the ring */}
+        <div className="pg-hero-banner" aria-hidden>
+          <RankBanner tone={rank.rank.tone}>{rank.rank.name}</RankBanner>
         </div>
 
         <p className="pg-rank-points-label">Bloom points</p>

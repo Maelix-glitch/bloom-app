@@ -26,19 +26,25 @@ export function AchievementGallery({
   const [showAll, setShowAll] = useState(false);
   const ordered = sortByEarned(achievements);
   const earned = ordered.filter((a) => a.unlocked);
-  const list = showAll ? ordered : [...earned, ...ordered.filter((a) => !a.unlocked)].slice(0, Math.max(limit, earned.length));
+  const list = showAll
+    ? ordered
+    : [...earned, ...ordered.filter((a) => !a.unlocked)].slice(0, Math.max(limit, earned.length));
 
   return (
     <div>
       <div className="pg-ach-grid">
-        {list.map((state) => {
+        {list.map((state, index) => {
           const { def } = state;
           return (
             <article
               key={def.id}
               className={cn("pg-ach", RARITY_ORDER.includes(def.rarity) && "pg-ach-tinted")}
               data-earned={state.unlocked ? "true" : "false"}
-              style={{ ["--ach-tone" as string]: def.tone }}
+              style={{
+                ["--ach-tone" as string]: def.tone,
+                /* staggers the passing glint so earned relics don't flash in unison */
+                ["--pg-i" as string]: index % 6,
+              }}
             >
               <span className="pg-ach-mark" aria-hidden>
                 {state.unlocked ? (

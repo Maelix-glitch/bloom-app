@@ -25,6 +25,9 @@ import { MilestoneArchive, PointActivity } from "./History";
 import { RankCeremony } from "./RankCeremony";
 import { Emblem } from "./Emblem";
 import { RankChip } from "./RankChip";
+import { RankBadge, badgeBand } from "./RankBadge";
+import { CrestHall } from "./CrestHall";
+import { LADDER_BASE, cycleRankAt } from "@/lib/progression/ranks";
 
 /** Render a component with props — the repo's test glob only matches .ts. */
 function render(Component: ComponentType<never>, props: Record<string, unknown>): string {
@@ -95,7 +98,16 @@ function stateFor(input: ProgressionInput) {
 describe("JourneyHero", () => {
   it("renders a brand-new account without inventing progress", () => {
     const { goals, rank } = stateFor(empty);
-    const html = render(JourneyHero, { rank: rank, points: 0, loading: false, todayPoints: 0, weekPoints: 0, awardedTotal: 0, earnedFromHabits: 0, nextMilestone: null });
+    const html = render(JourneyHero, {
+      rank: rank,
+      points: 0,
+      loading: false,
+      todayPoints: 0,
+      weekPoints: 0,
+      awardedTotal: 0,
+      earnedFromHabits: 0,
+      nextMilestone: null,
+    });
     expect(html).toContain("Your journey");
     expect(html).toContain("Seedling");
     expect(html).toContain("0");
@@ -106,7 +118,16 @@ describe("JourneyHero", () => {
   it("shows the real rank, points and distance to the next rank", () => {
     const { goals, rank } = stateFor(rich);
     const nextMilestone = goals.find((g) => g.complete === false && g.progress > 0) ?? goals[0];
-    const html = render(JourneyHero, { rank: rank, points: 2_850, loading: false, todayPoints: 600, weekPoints: 1_500, awardedTotal: 1_600, earnedFromHabits: 1_250, nextMilestone: nextMilestone ?? null });
+    const html = render(JourneyHero, {
+      rank: rank,
+      points: 2_850,
+      loading: false,
+      todayPoints: 600,
+      weekPoints: 1_500,
+      awardedTotal: 1_600,
+      earnedFromHabits: 1_250,
+      nextMilestone: nextMilestone ?? null,
+    });
     expect(html).toContain("Budding");
     expect(html).toContain("2,850");
     expect(html).toContain("points to In Bloom");
@@ -116,7 +137,16 @@ describe("JourneyHero", () => {
 
   it("shows a loading state, not a zero, while points are unknown", () => {
     const rank = _rankFor(0);
-    const html = render(JourneyHero, { rank: rank, points: 0, loading: true, todayPoints: 0, weekPoints: 0, awardedTotal: 0, earnedFromHabits: 0, nextMilestone: null });
+    const html = render(JourneyHero, {
+      rank: rank,
+      points: 0,
+      loading: true,
+      todayPoints: 0,
+      weekPoints: 0,
+      awardedTotal: 0,
+      earnedFromHabits: 0,
+      nextMilestone: null,
+    });
     expect(html).toContain("Loading your points");
   });
 });
@@ -146,7 +176,12 @@ describe("GoalsBoard", () => {
   it("lists real goals with their verified progress", () => {
     const { goals } = stateFor(rich);
     const daily = goals.filter((g) => g.goal.cadence === "daily");
-    const html = render(GoalsBoard, { goals: daily, onClaim: () => {}, busy: false, claimingId: null });
+    const html = render(GoalsBoard, {
+      goals: daily,
+      onClaim: () => {},
+      busy: false,
+      claimingId: null,
+    });
     // HTML escapes apostrophes, so compare against the decoded copy
     const text = html.replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
     // the first daily goals are the ones shown; the rest stay behind the pager
@@ -160,7 +195,12 @@ describe("GoalsBoard", () => {
 
   it("summarises the full board instead of printing every card at once", () => {
     const { goals } = stateFor(rich);
-    const html = render(GoalsBoard, { goals: goals, onClaim: () => {}, busy: false, claimingId: null });
+    const html = render(GoalsBoard, {
+      goals: goals,
+      onClaim: () => {},
+      busy: false,
+      claimingId: null,
+    });
     expect(html).toContain("Show");
     expect(html).toContain("goals in this view");
     expect(html.match(/class="pg-goal"/g)?.length ?? 0).toBeLessThanOrEqual(6);
@@ -171,7 +211,12 @@ describe("GoalsBoard", () => {
     const { goals } = stateFor(rich);
     const claimable = goals.filter((g) => g.claimable);
     expect(claimable.length).toBeGreaterThan(0);
-    const html = render(GoalsBoard, { goals: goals, onClaim: () => {}, busy: false, claimingId: null });
+    const html = render(GoalsBoard, {
+      goals: goals,
+      onClaim: () => {},
+      busy: false,
+      claimingId: null,
+    });
     expect(html).toContain("Claim points");
     // nothing shaming anywhere in the copy
     expect(html).not.toMatch(/failed|behind|don't lose|hurry|missed/i);
@@ -210,7 +255,17 @@ describe("GoalsBoard", () => {
 
   it("classifies wellness from the domain, never from the goal's wording", () => {
     // The body-and-mind domains, and only those.
-    for (const domain of ["fitness", "movement", "health", "sleep", "hydration", "recovery", "mood", "mindfulness", "self-care"] as const) {
+    for (const domain of [
+      "fitness",
+      "movement",
+      "health",
+      "sleep",
+      "hydration",
+      "recovery",
+      "mood",
+      "mindfulness",
+      "self-care",
+    ] as const) {
       expect(isWellnessDomain(domain)).toBe(true);
     }
     for (const domain of ["habits", "consistency", "milestones", "study"] as const) {
@@ -220,7 +275,12 @@ describe("GoalsBoard", () => {
 
   it("handles an account with no records calmly", () => {
     const { goals } = stateFor(empty);
-    const html = render(GoalsBoard, { goals: goals, onClaim: () => {}, busy: false, claimingId: null });
+    const html = render(GoalsBoard, {
+      goals: goals,
+      onClaim: () => {},
+      busy: false,
+      claimingId: null,
+    });
     expect(html).toContain("Not started yet");
     expect(html).not.toMatch(/undefined|NaN/);
   });
@@ -298,7 +358,11 @@ describe("history surfaces", () => {
     expect(activity).toContain("+600");
     expect(activity).toContain("Fitness");
 
-    const archive = render(MilestoneArchive, { ledger: ledger, ranks: [{ tier: 5, name: "In Bloom", atPoints: 3_500, at: "2026-09-10T09:00:00.000Z" }], today: TODAY });
+    const archive = render(MilestoneArchive, {
+      ledger: ledger,
+      ranks: [{ tier: 5, name: "In Bloom", atPoints: 3_500, at: "2026-09-10T09:00:00.000Z" }],
+      today: TODAY,
+    });
     expect(archive).toContain("Reached In Bloom");
     expect(archive).toContain("Earned Seven Days Strong");
     expect(archive).not.toMatch(/undefined|NaN/);
@@ -332,7 +396,7 @@ describe("emblems", () => {
   });
 
   it("falls back to a real mark for an unknown id rather than rendering nothing", () => {
-    const html = render(Emblem, { id: 'not-a-real-emblem', size: 20 });
+    const html = render(Emblem, { id: "not-a-real-emblem", size: 20 });
     expect(html).toContain("<svg");
   });
 });
@@ -349,5 +413,54 @@ describe("RankChip (Home)", () => {
   it("stays quiet while points load", () => {
     const html = render(RankChip, { points: null });
     expect(html).toContain("Your journey");
+  });
+});
+
+/* ------------------------------ rank crests ------------------------------ */
+
+describe("RankBadge", () => {
+  it("assigns escalating frame bands across the ladder", () => {
+    expect(badgeBand(1)).toBe(1);
+    expect(badgeBand(3)).toBe(1);
+    expect(badgeBand(4)).toBe(2);
+    expect(badgeBand(7)).toBe(3);
+    expect(badgeBand(10)).toBe(4);
+    expect(badgeBand(12)).toBe(4);
+    expect(badgeBand(13)).toBe(5); // cycle layer is always mythic
+    expect(badgeBand(40)).toBe(5);
+  });
+
+  it("renders every named rank plus a cycle rank without leaking NaN into paths", () => {
+    for (const rank of [...LADDER_BASE, cycleRankAt(0), cycleRankAt(7)]) {
+      const html = render(RankBadge, { rank, banner: true });
+      expect(html).toContain("pg-crest");
+      expect(html).toContain(rank.name);
+      expect(html).not.toMatch(/undefined|NaN/);
+    }
+  });
+
+  it("mutes future crests instead of hiding them", () => {
+    const rank = LADDER_BASE[5]!;
+    const html = render(RankBadge, { rank, muted: true });
+    expect(html).toContain("pg-crest-muted");
+    expect(html).toContain("pg-crest-frame"); // the frame is still visible
+  });
+});
+
+describe("CrestHall", () => {
+  it("marks earned, current and future crests for a mid-journey account", () => {
+    const html = render(CrestHall, { points: 2_850, rankTier: 4 });
+    expect(html).toContain('data-state="earned"');
+    expect(html).toContain('data-state="current"');
+    expect(html).toContain('data-state="future"');
+    expect(html).toContain("You are here");
+    expect(html).not.toMatch(/undefined|NaN/);
+  });
+
+  it("shows the next crests to chase even on a brand-new account", () => {
+    const html = render(CrestHall, { points: 0, rankTier: 1 });
+    expect(html).toContain("Seedling");
+    expect(html).toContain("First Bloom"); // the pull: what is ahead is visible
+    expect(html).toContain("Show all");
   });
 });
