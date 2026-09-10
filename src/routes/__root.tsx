@@ -18,6 +18,7 @@ import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 import { AdminBar } from "@/components/welcome/AdminBar";
 import { ConnectionNotice } from "@/components/system/ConnectionNotice";
 import { BloomToaster } from "@/components/system/BloomToaster";
+import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
 
 function NotFoundComponent() {
@@ -146,6 +147,56 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {/* B8 — instant boot splash. Server-rendered before the JS bundle, so
+            the very first paint is branded Bloom — on the website, the
+            installed PWA and the Capacitor wrapper alike. RootComponent fades
+            it out the moment React has mounted. Everything is inline on
+            purpose: no stylesheet or font may gate the first paint. */}
+        <div id="bloom-boot" role="presentation" aria-hidden="true">
+          <div className="bloom-boot-glow" />
+          <svg
+            className="bloom-boot-mark"
+            width="76"
+            height="76"
+            viewBox="0 0 28 28"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              className="bloom-boot-arc"
+              d="M4 20c3-9 7-14 10-14s7 5 10 14"
+              stroke="url(#bloom-boot-g)"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              pathLength="100"
+            />
+            <defs>
+              <linearGradient
+                id="bloom-boot-g"
+                x1="4"
+                y1="13"
+                x2="24"
+                y2="13"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="#7FA88F" />
+                <stop offset="1" stopColor="#E8B75E" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="bloom-boot-word">Bloom</div>
+        </div>
+        <style>{`#bloom-boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#14151f;transition:opacity .45s ease}
+#bloom-boot.bloom-boot-done{opacity:0;pointer-events:none}
+.bloom-boot-glow{position:absolute;width:300px;height:300px;border-radius:9999px;background:radial-gradient(closest-side,rgba(232,183,94,.13),transparent 70%);animation:bloom-boot-breathe 2.6s ease-in-out infinite}
+.bloom-boot-mark{position:relative}
+.bloom-boot-arc{stroke-dasharray:100;animation:bloom-boot-draw 1.1s ease-out both}
+.bloom-boot-word{position:relative;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;font-weight:500;letter-spacing:.44em;text-indent:.44em;text-transform:uppercase;color:#8b8fa3;animation:bloom-boot-rise .7s ease-out .15s both}
+@keyframes bloom-boot-draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes bloom-boot-breathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes bloom-boot-rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bloom-boot-glow,.bloom-boot-arc,.bloom-boot-word{animation:none}}`}</style>
         {children}
         <Scripts />
       </body>
@@ -164,6 +215,17 @@ function RootComponent() {
   /* B7 — inside the Capacitor wrapper: light status bar on our dark theme. */
   useEffect(() => {
     bootNativeShell();
+  }, []);
+
+  /* B8 — first React paint has landed: fade the boot splash, then remove it. */
+  useEffect(() => {
+    const boot = document.getElementById("bloom-boot");
+    if (!boot) return;
+    const raf = requestAnimationFrame(() => {
+      boot.classList.add("bloom-boot-done");
+      window.setTimeout(() => boot.remove(), 500);
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   /* Sound: read the preference, and arm the audio context on the first gesture. */

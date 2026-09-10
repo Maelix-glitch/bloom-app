@@ -6,11 +6,18 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#14151f",
   "theme_color": "#14151f",
   "orientation": "portrait-primary",
-  "categories": ["health", "lifestyle", "productivity"],
+  "categories": [
+    "health",
+    "lifestyle",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/bloom/icons/icon-192.png",
@@ -19,19 +26,13 @@
       "purpose": "any"
     },
     {
-      "src": "/bloom/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
       "src": "/bloom/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/bloom/icons/icon-512.png",
+      "src": "/bloom/icons/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -44,9 +45,29 @@
     }
   ],
   "shortcuts": [
-    { "name": "Today", "short_name": "Today", "url": "/", "description": "Today's habits, rings and flow" },
-    { "name": "Log a mood", "short_name": "Mood", "url": "/mood", "description": "One check-in, thirty seconds" },
-    { "name": "Cycle", "short_name": "Cycle", "url": "/cycle", "description": "Log a period, see what's predicted" },
-    { "name": "Trackers", "short_name": "Trackers", "url": "/trackers", "description": "Sleep, water, study, movement" }
+    {
+      "name": "Today",
+      "short_name": "Today",
+      "url": "/",
+      "description": "Today's habits, rings and flow"
+    },
+    {
+      "name": "Log a mood",
+      "short_name": "Mood",
+      "url": "/mood",
+      "description": "One check-in, thirty seconds"
+    },
+    {
+      "name": "Cycle",
+      "short_name": "Cycle",
+      "url": "/cycle",
+      "description": "Log a period, see what's predicted"
+    },
+    {
+      "name": "Trackers",
+      "short_name": "Trackers",
+      "url": "/trackers",
+      "description": "Sleep, water, study, movement"
+    }
   ]
 }

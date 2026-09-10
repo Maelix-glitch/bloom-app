@@ -14,7 +14,7 @@
  * A new deploy bumps CACHE and the old one is dropped on activate.
  */
 
-const CACHE = "bloom-shell-v1";
+const CACHE = "bloom-shell-v2"; /* B8 — bumped: shell HTML now carries the boot splash */
 const SHELL = ["/", "/manifest.webmanifest", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
