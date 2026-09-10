@@ -2969,3 +2969,21 @@
     gap: 0.7rem;
   }
 }
+
+/* ------------------ hero: the crest showcased in the ring ----------------- */
+
+/* The space inside the progress ring now presents the full crest — frame,
+   gems and all — instead of the bare emblem. */
+.pg-emblem-crest {
+  width: 72%;
+  filter: none; /* the crest brings its own light */
+}
+
+.pg-emblem-crest .pg-crest {
+  width: 100%;
+}
+
+/* the ring already glows; let the crest's own drop-shadows do the rest */
+.pg-emblem-crest .pg-crest-frame {
+  filter: drop-shadow(0 0 22px color-mix(in oklab, var(--pg-badge-hi) 30%, transparent));
+}
