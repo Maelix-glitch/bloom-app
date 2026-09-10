@@ -10,9 +10,22 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "preview:prod": "npm run build && npx wrangler --cwd .output/server dev",
+    "deploy": "npm run build && npx wrangler --cwd .output/server deploy",
+    "deploy:name": "npm run build && npx wrangler --cwd .output/server deploy --name bloom-app",
+    "splash": "node scripts/pwa-splash.mjs",
+    "app:sync": "npx cap sync",
+    "build:app": "BLOOM_TARGET=capacitor vite build && node scripts/app-postbuild.mjs",
+    "app:build": "npm run build:app && npx cap sync",
+    "app:assets": "node scripts/app-icon-source.mjs && node scripts/app-assets.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/ios": "^8.5.1",
+    "@capacitor/status-bar": "^8.0.3",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -78,6 +91,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.2.0",
-    "vitest": "^2.1.9"
-  }
+    "vitest": "^2.1.9",
+    "wrangler": "^4.130.0"
+  },
+  "version": "1.0.0"
 }

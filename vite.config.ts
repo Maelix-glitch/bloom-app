@@ -15,10 +15,15 @@ import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
   const isDevBuild = command === "build" && mode === "development";
+  // BLOOM_TARGET=capacitor → static single-page build for the native wrapper
+  // (Capacitor bundles dist/ into the iOS/Android app, fully offline-capable).
+  // Anything else → SSR worker build for Cloudflare.
+  const isCapacitor = process.env.BLOOM_TARGET === "capacitor";
 
   // nitro/vite is build-only: skip importing it in dev so `vite dev` stays fast.
+  // Also skipped for Capacitor — a static SPA has no server to deploy.
   const buildPlugins: UserConfig["plugins"] = [];
-  if (command === "build") {
+  if (command === "build" && !isCapacitor) {
     const { nitro } = await import("nitro/vite");
     buildPlugins.push(nitro({ defaultPreset: "cloudflare-module" }));
   }
@@ -74,8 +79,10 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
           },
         },
         // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-        // nitro/vite builds from this
+        // nitro/vite builds from this. Ignored in Capacitor mode (no server).
         server: { entry: "server" },
+        // Capacitor mode: emit a static SPA into dist/ instead of an SSR app.
+        ...(isCapacitor ? { spa: { enabled: true } } : {}),
       }),
       ...buildPlugins,
       viteReact(),

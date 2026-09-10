@@ -1244,3 +1244,33 @@ html[data-bloom-effect="fx-mist"] {
 .pg-rank-pill-link:hover .pg-rank-pill {
   border-color: color-mix(in oklab, var(--rank-tone, var(--gold)) 55%, transparent);
 }
+
+/* ---------------------------------------------------------------------------
+ * App shell — the last 5% that makes the installed PWA / wrapper feel native.
+ * Only affects behaviour, never layout: safe areas are already handled where
+ * the bottom nav and toasts live (see --app-bottom-nav above).
+ * ------------------------------------------------------------------------- */
+html {
+  /* Edge-to-edge (viewport-fit=cover): the page owns the notch area, so the
+     rubber-band background matches the theme instead of flashing white. */
+  background-color: #14151f;
+  /* Kill pull-to-refresh / rubber-banding on the installed app — it reads as
+     "website", not "app". In-page scroll containers are unaffected. */
+  overscroll-behavior-y: none;
+}
+body {
+  /* No grey flash on tap (iOS Safari / Android WebView). */
+  -webkit-tap-highlight-color: transparent;
+  /* No 300ms tap delay / double-tap zoom on buttons and controls. Pinch zoom
+     on content still works — this only disables it on taps. */
+  touch-action: manipulation;
+  overscroll-behavior-y: none;
+}
+/* When launched from the home screen there is no browser chrome to show a
+   loading state, so at least the letterbox matches the theme. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    background-color: #14151f;
+  }
+}
