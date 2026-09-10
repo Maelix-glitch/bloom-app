@@ -516,7 +516,8 @@ function TodayPage() {
         open={moodOpen}
         initial={moodEntry}
         onClose={() => setMoodOpen(false)}
-        onSave={(entry) => void mood.saveEntry(entry)}
+        onSave={mood.saveEntry}
+        onDelete={(entry) => mood.removeEntry(entry.id)}
       />
       <AddHabitModal
         open={habitOpen}

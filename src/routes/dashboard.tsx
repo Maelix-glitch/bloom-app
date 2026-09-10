@@ -6,6 +6,7 @@ import { BloomHeader } from "@/components/BloomHeader";
 import { useTrackers } from "@/hooks/useTrackers";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
+import { useHabits } from "@/hooks/useHabits";
 import { TRACKERS } from "@/lib/trackers/core";
 
 export const Route = createFileRoute("/dashboard")({
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardRoute() {
   const store = useTrackers();
+  const habits = useHabits();
   const [theme] = useCycleTheme();
   const { analysis, hydrated } = store;
   const [addHabitOpen, setAddHabitOpen] = useState(false);
@@ -289,8 +291,8 @@ function DashboardRoute() {
         open={addHabitOpen}
         onClose={() => setAddHabitOpen(false)}
         onSubmit={async (habit) => {
-          console.log("[Dashboard] Habit created:", habit);
-          // TODO: Call API to save habit
+          /* Writes to the same store Today uses — no separate path, no fake success. */
+          await habits.addHabit(habit);
         }}
       />
     </>

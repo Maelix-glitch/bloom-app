@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { BloomHeader } from "@/components/BloomHeader";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import {
   useRewardsSystem,
@@ -163,8 +164,10 @@ export function RewardsAdminPage() {
     }
   };
 
+  /** The reward waiting on its revoke confirmation — `window.confirm` no more. */
+  const [revoking, setRevoking] = useState<AdminReward | null>(null);
+
   const revoke = async (reward: AdminReward) => {
-    if (!window.confirm(`Revoke “${reward.title}” for every recipient?`)) return;
     try {
       await revokeReward(reward.id);
       setMessageKind("success");
@@ -480,7 +483,7 @@ export function RewardsAdminPage() {
                 reward={reward}
                 users={adminUsers}
                 onEdit={() => editReward(reward)}
-                onRevoke={() => void revoke(reward)}
+                onRevoke={() => void setRevoking(reward)}
                 onDeliveryStateChange={async (userId, state) => {
                   try {
                     await setDeliveryState(reward.id, userId, state);
@@ -507,6 +510,20 @@ export function RewardsAdminPage() {
           </div>
         )}
       </section>
+
+      <ConfirmSheet
+        open={revoking !== null}
+        onClose={() => setRevoking(null)}
+        title={revoking ? `Revoke “${revoking.title}”?` : "Revoke this reward?"}
+        description="It is withdrawn from every recipient at once. Nobody can claim it after this."
+        confirmLabel="Revoke reward"
+        busyLabel="Revoking…"
+        onConfirm={async () => {
+          if (!revoking) return;
+          await revoke(revoking);
+          setRevoking(null);
+        }}
+      />
     </AdminShell>
   );
 }

@@ -38,6 +38,10 @@ dist-ssr
 .wrangler
 .tanstack
 
+# Supabase CLI session state — holds the project ref, org id and the DB pooler
+# host. It is local scaffolding, not source, and has no business in the repo.
+supabase/.temp/
+
 # delivery kits are published as release assets, not committed
 docs/*/
 !docs/cleanup/

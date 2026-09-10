@@ -30,14 +30,12 @@ import { PhasesGuide } from "@/components/cycle/PhasesGuide";
 import { CycleCalendar } from "@/components/cycle/CycleCalendar";
 import { InsightCard, RecommendationStack } from "@/components/cycle/Insights";
 import { BloomCycleAI } from "@/components/cycle/BloomCycleAI";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 
 /* the deeper analytics + charts load lazily — never block the story above */
 const CycleHistory = lazy(() =>
   import("@/components/cycle/CycleHistory").then((m) => ({ default: m.CycleHistory })),
-);
-const PatternCharts = lazy(() =>
-  import("@/components/cycle/PatternCharts").then((m) => ({ default: m.PatternCharts })),
 );
 
 export const Route = createFileRoute("/cycle-classic")({
@@ -97,6 +95,7 @@ function CyclePage() {
   const [inspect, setInspect] = useState<{ day: number; date: string } | null>(null);
   const [aiAsk, setAiAsk] = useState<{ q: string; n: number } | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<PhaseKey | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const askBloom = useCallback((q = "") => {
     setAiAsk({ q, n: Date.now() });
@@ -459,20 +458,15 @@ function CyclePage() {
               title="Your personal patterns"
               id="cycle-patterns"
             >
-              <Suspense fallback={<BlockSkeleton h={220} />}>
-                {model ? <PatternCharts model={model} entries={entries} /> : null}
-              </Suspense>
-              <div className="mt-9">
-                {model ? (
-                  <PatternInsights
-                    model={model}
-                    entries={entries}
-                    onOpenMethod={() => setMethodOpen(true)}
-                  />
-                ) : (
-                  <BlockSkeleton h={160} />
-                )}
-              </div>
+              {model ? (
+                <PatternInsights
+                  model={model}
+                  entries={entries}
+                  onOpenMethod={() => setMethodOpen(true)}
+                />
+              ) : (
+                <BlockSkeleton h={160} />
+              )}
             </Chapter>
           </Reveal>
 
@@ -544,11 +538,7 @@ function CyclePage() {
                   toast("Cycle data is already empty.");
                   return;
                 }
-                const ok = window.confirm(
-                  "Reset all cycle entries on this device? This clears the cycle data you entered and recalculates the page from an empty state.",
-                );
-                if (!ok) return;
-                void system.resetAll().then(() => toast("Cycle data reset."));
+                setResetOpen(true);
               }}
               className="underline decoration-[var(--cycle-hair-strong)] underline-offset-4 transition-colors hover:text-foreground"
             >
@@ -556,6 +546,19 @@ function CyclePage() {
             </button>
           </footer>
         </main>
+
+        <ConfirmSheet
+          open={resetOpen}
+          onClose={() => setResetOpen(false)}
+          title="Reset your cycle record?"
+          description="Every cycle entry you logged is cleared and the page recalculates from an empty record. This can't be undone."
+          confirmLabel="Reset cycle data"
+          busyLabel="Resetting…"
+          onConfirm={async () => {
+            await system.resetAll();
+            toast("Cycle data reset.");
+          }}
+        />
 
         {/* overlays — the deep forms; everyday logging lives in the tray */}
         <CycleLengthSheet
@@ -620,16 +623,6 @@ function CyclePage() {
             setQuickOpen(true);
           }}
           external={aiAsk}
-        />
-        <Toaster
-          position="bottom-center"
-          toastOptions={{
-            style: {
-              background: "var(--surface-2)",
-              borderColor: "var(--border)",
-              color: "var(--foreground)",
-            },
-          }}
         />
       </div>
     </MotionConfig>

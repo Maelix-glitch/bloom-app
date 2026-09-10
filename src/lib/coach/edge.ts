@@ -1,11 +1,10 @@
 /**
  * The coach's remote brain — a Supabase Edge Function.
  *
- * Bloom's coach has always been able to answer offline: the local responder
- * reads the person's own record and says something true about it, with no
- * network and no model. That stays, and it stays the *fallback*, because a
- * tracker that goes mute when a function is cold or a key is missing is worse
- * than one that gives a plainer answer.
+ * The coach is strictly online and there is deliberately no on-device answer:
+ * if the function cannot respond, `ask()` throws `CoachUnavailable` and the UI
+ * shows an honest connection error with a retry. A quieter coach is acceptable;
+ * a fabricated one is not.
  *
  * So this module is a thin, well-behaved client:
  *
@@ -13,7 +12,7 @@
  *     500, a malformed body — comes back as `{ ok: false }` and the caller
  *     surfaces an honest error with a retry (the coach is strictly online).
  *   · **Times out.** An edge function on a cold start can take seconds; past
- *     `TIMEOUT_MS` the local answer is better than a spinner.
+ *     `TIMEOUT_MS` the request is abandoned so the UI never spins forever.
  *   · **Cancellable.** The caller can abort when the person sends another
  *     message or leaves the page.
  *   · **Pluggable.** `provider` is passed through to the function, so adding a

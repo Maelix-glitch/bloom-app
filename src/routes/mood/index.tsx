@@ -65,7 +65,8 @@ function MoodRoute() {
         open={composerOpen}
         initial={editing}
         onClose={() => setComposerOpen(false)}
-        onSave={(entry) => void system.saveEntry(entry)}
+        onSave={system.saveEntry}
+        onDelete={(entry) => system.removeEntry(entry.id)}
       />
     </div>
   );

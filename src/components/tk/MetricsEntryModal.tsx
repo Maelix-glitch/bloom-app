@@ -20,7 +20,6 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import {
   X,
   Moon,
@@ -35,6 +34,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { BloomSheet } from "@/components/ui/bloom-sheet";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { readTrackerValue, setTrackerValues } from "@/components/tk/designs/shared";
@@ -145,14 +145,7 @@ export function MetricsEntryModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  if (!open || typeof document === "undefined") return null;
+  if (!open) return null;
 
   const metrics = METRICS.filter((m) => store.active.includes(m.key));
   const filled = (key: MetricKey) => (values[key] ?? "").trim() !== "";
@@ -239,18 +232,15 @@ export function MetricsEntryModal({
               ? `${filledCount} of ${metrics.length} filled — save what you have, or keep going.`
               : "Enter your metrics now";
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Today's snapshot"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+  return (
+    <BloomSheet
+      open={open}
+      onClose={onClose}
+      title="Today's snapshot"
+      description="Log the numbers you actually measured today. Anything left blank stays untouched."
+      panelClassName="p-0"
     >
-      <div
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-border shadow-2xl"
-        style={{ backgroundColor: "var(--metric-surface)" }}
-      >
+      <div className="overflow-hidden" style={{ backgroundColor: "var(--metric-surface)" }}>
         {/* Header */}
         <div
           className="relative px-6 pb-5 pt-4"
@@ -337,7 +327,7 @@ export function MetricsEntryModal({
                   "linear-gradient(90deg, var(--metric-screen), var(--brand), var(--metric-sleep))",
               }}
             >
-              Confirm
+              Save today
             </button>
             <p
               className="mt-3 text-center text-xs text-muted-foreground"
@@ -410,7 +400,7 @@ export function MetricsEntryModal({
                   "linear-gradient(90deg, var(--metric-screen), var(--brand), var(--metric-sleep))",
               }}
             >
-              View My Day
+              Done
             </button>
             <button
               type="button"
@@ -456,7 +446,6 @@ export function MetricsEntryModal({
           </div>
         )}
       </div>
-    </div>,
-    document.body,
+    </BloomSheet>
   );
 }

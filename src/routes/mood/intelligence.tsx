@@ -16,6 +16,7 @@ import { Distribution } from "@/components/mood/Distribution";
 import { Insights } from "@/components/mood/Insights";
 import { History } from "@/components/mood/History";
 import { Composer } from "@/components/mood/Composer";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Reveal } from "@/components/mood/primitives";
 import { AppNav } from "@/components/home/HomeSidebar";
 
@@ -77,6 +78,7 @@ function MoodIntelligencePage() {
 
   const [composerOpen, setComposerOpen] = useState(false);
   const [editing, setEditing] = useState<MoodEntry | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const openNew = useCallback(() => {
     setEditing(null);
@@ -203,11 +205,7 @@ function MoodIntelligencePage() {
 
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm("Erase every recorded Mood entry? This cannot be undone.")) {
-                    void system.resetAll();
-                  }
-                }}
+                onClick={() => setResetOpen(true)}
                 className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[10px] uppercase tracking-[0.08em] text-faint transition-colors hover:border-rose/50 hover:text-rose"
               >
                 <RotateCcw className="size-3" /> Reset all data
@@ -217,11 +215,22 @@ function MoodIntelligencePage() {
         )}
       </main>
 
+      <ConfirmSheet
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        title="Erase every mood entry?"
+        description="Every check-in in your Mood record is removed, from this device and your account. This can't be undone."
+        confirmLabel="Erase everything"
+        busyLabel="Erasing…"
+        onConfirm={() => system.resetAll()}
+      />
+
       <Composer
         open={composerOpen}
         initial={editing}
         onClose={() => setComposerOpen(false)}
-        onSave={(entry) => void system.saveEntry(entry)}
+        onSave={system.saveEntry}
+        onDelete={(entry) => system.removeEntry(entry.id)}
       />
     </div>
   );

@@ -17,7 +17,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Archive, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import profileCss from "../styles/profile.css?url";
@@ -238,11 +238,10 @@ function ProfilePage() {
     } catch (error) {
       if (error && typeof error === "object" && "name" in error && error.name === "AbortError")
         return;
-      try {
-        window.prompt("Copy your profile link:", url);
-      } catch {
-        toast.error("Couldn't copy the link just now.");
-      }
+      toast("Couldn't copy automatically — here's your link", {
+        description: url,
+        duration: 9000,
+      });
     }
   }, [identity]);
 
@@ -972,17 +971,6 @@ function ProfilePage() {
           <SignedOutProfile compact onSendMagicLink={space.actions.sendMagicLink} />
         </DialogContent>
       </Dialog>
-
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: "var(--surface-2)",
-            borderColor: "var(--border)",
-            color: "var(--foreground)",
-          },
-        }}
-      />
     </div>
   );
 }

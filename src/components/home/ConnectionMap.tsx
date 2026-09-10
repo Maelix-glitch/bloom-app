@@ -122,8 +122,10 @@ export function ConnectionMap({
       </header>
 
       <div className="relative mx-auto mt-4 w-full max-w-[560px]">
-        {/* square stage: SVG + nodes share these exact coordinates */}
-        <div className="relative mx-auto" style={{ width: SIZE, height: SIZE, maxWidth: "100%" }}>
+        {/* square stage: SVG + nodes share these exact coordinates. The nodes
+            are placed in percentages of this box so they stay welded to the
+            drawing at any width (see .cm-stage in styles.css). */}
+        <div className="cm-stage">
           <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 size-full" aria-hidden>
             <defs>
               <radialGradient id="cm-hub" cx="50%" cy="50%" r="50%">
@@ -221,21 +223,14 @@ export function ConnectionMap({
           </svg>
 
           {/* center hub */}
-          <div className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: C, top: C }}>
-            <div
-              className="home-halo absolute -inset-8 rounded-full"
-              style={{ background: "var(--home-gradient-glow)" }}
-            />
-            <div
-              className="relative grid size-[80px] place-items-center rounded-full border border-primary/40 bg-surface/80 px-2 text-center font-display text-lg leading-tight tracking-wide text-foreground"
-              title={
-                totalDays === 0 ? "Nothing logged yet" : `${totalDays} logged days behind this map`
-              }
-            >
-              <span className="truncate" style={{ maxWidth: 68 }}>
-                {name ? name.split(" ")[0] : "You"}
-              </span>
-            </div>
+          <div
+            className="cm-hub"
+            title={
+              totalDays === 0 ? "Nothing logged yet" : `${totalDays} logged days behind this map`
+            }
+          >
+            <span className="cm-hub-halo home-halo" aria-hidden />
+            <span className="max-w-full truncate">{name ? name.split(" ")[0] : "You"}</span>
           </div>
 
           {/* nodes */}
@@ -252,26 +247,24 @@ export function ConnectionMap({
                 onFocus={() => setActive(n.id)}
                 onBlur={() => setActive(null)}
                 aria-label={`${SIGNAL_LABEL[n.id]}: ${Math.round(n.strength * 100)}% evidence. ${n.note}`}
-                className="absolute flex flex-col items-center gap-1.5 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                className="cm-node"
                 style={{
-                  left: p.x,
-                  top: p.y,
+                  left: `${(p.x / SIZE) * 100}%`,
+                  top: `${(p.y / SIZE) * 100}%`,
                   transform: `translate(-50%, -50%) scale(${active === n.id ? 1.12 : 1})`,
                   transition: "transform 300ms, opacity 300ms",
                   opacity: dim ? 0.4 : n.strength === 0 ? 0.7 : 1,
                 }}
               >
                 <span
-                  className={`${n.strength > 0 ? "home-node-glow home-float" : ""} grid size-11 place-items-center rounded-full border bg-surface/90`}
-                  style={{ color: SIGNAL_COLOR[n.id], borderColor: "currentColor" }}
+                  className={`cm-node-disc ${n.strength > 0 ? "home-node-glow home-float" : ""}`}
+                  style={{ color: SIGNAL_COLOR[n.id] }}
                 >
-                  <Icon className="size-[18px]" />
+                  <Icon className="cm-node-icon" />
                 </span>
-                <span className="whitespace-nowrap text-[11px] text-muted-foreground">
-                  {SIGNAL_LABEL[n.id]}
-                </span>
+                <span className="cm-node-label">{SIGNAL_LABEL[n.id]}</span>
                 <span
-                  className="text-[10px] tabular-nums"
+                  className="cm-node-value"
                   style={{ color: SIGNAL_COLOR[n.id], opacity: active === n.id ? 1 : 0.55 }}
                 >
                   {Math.round(n.strength * 100)}%

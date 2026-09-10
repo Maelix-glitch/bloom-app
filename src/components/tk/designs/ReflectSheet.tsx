@@ -231,12 +231,28 @@ export function ReflectSheet({
   onClose: () => void;
 }) {
   const [drafts, setDrafts] = useState<Partial<Record<TrackerId, string>>>({});
-  const [fieldErrors, setFieldErrors] = useState<Record<TrackerId, string | null>>({});
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<TrackerId, string | null>>>({});
   const [touched, setTouched] = useState<Set<TrackerId>>(new Set());
   const [state, setState] = useState<ModalState>("editing");
   const [successData, setSuccessData] = useState<{ id: TrackerId; value: number }[]>([]);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const firstRef = useRef<HTMLInputElement>(null);
+  /** Pending "focus the first field" / "close after saving" timers, cleared on unmount. */
+  const timersRef = useRef<number[]>([]);
+
+  const later = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(fn, ms);
+    timersRef.current.push(id);
+    return id;
+  };
+
+  useEffect(
+    () => () => {
+      for (const id of timersRef.current) window.clearTimeout(id);
+      timersRef.current = [];
+    },
+    [],
+  );
 
   /* open on what today already holds */
   useEffect(() => {
@@ -251,8 +267,7 @@ export function ReflectSheet({
     setTouched(new Set());
     setState("editing");
     setShowResetConfirm(false);
-    const id = window.setTimeout(() => firstRef.current?.focus(), 60);
-    return () => window.clearTimeout(id);
+    later(() => firstRef.current?.focus(), 60);
   }, [open, store]);
 
   useEffect(() => {
@@ -320,10 +335,7 @@ export function ReflectSheet({
       // Success - show confirmation and close after 2 seconds
       setSuccessData(changed);
       setState("success");
-      const closeTimer = window.setTimeout(() => {
-        onClose();
-      }, 2000);
-      return () => window.clearTimeout(closeTimer);
+      later(onClose, 2000);
     } catch (err) {
       console.error("[ReflectSheet] Save exception:", err);
       setState("error");
@@ -337,8 +349,7 @@ export function ReflectSheet({
     setTouched(new Set());
     setShowResetConfirm(false);
     setState("editing");
-    const id = window.setTimeout(() => firstRef.current?.focus(), 60);
-    return () => window.clearTimeout(id);
+    later(() => firstRef.current?.focus(), 60);
   };
 
   if (!open) return null;
@@ -516,7 +527,7 @@ export function ReflectSheet({
                       ref={i === 0 ? firstRef : undefined}
                       style={{
                         ...TRACKER_INPUT_STYLE,
-                        borderBottomColor,
+                        borderBottomColor: bottomBorderColor,
                         color: isEmpty ? "rgba(255, 255, 255, 0.6)" : "#ffffff",
                       }}
                       type="number"
