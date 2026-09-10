@@ -33,6 +33,23 @@
   }
 }
 
+@media (max-width: 359px) {
+  /* 320px phones: the name holds to two lines, numbers breathe edge to edge */
+  .pf-name {
+    font-size: 26px;
+  }
+  .pf-numbers {
+    padding-inline: 10px;
+    gap: 6px;
+  }
+  .pf-number {
+    padding: 12px 12px 10px;
+  }
+  .pf-section {
+    padding-inline: 10px;
+  }
+}
+
 /* ------------------------------ entrance -------------------------------- */
 
 @keyframes pf-rise {
@@ -904,6 +921,13 @@ button.pf-row:hover {
   font-family: var(--font-mono);
   font-size: 11.5px;
   color: var(--foreground);
+}
+/* At 320px the 46vw value cap (147px) crushes the row label to ~7px.
+   Cap the value tighter so label and value stay readable together. */
+@media (max-width: 359px) {
+  .pf-row-value {
+    max-width: 84px;
+  }
 }
 .pf-row-value--danger {
   color: var(--rose);

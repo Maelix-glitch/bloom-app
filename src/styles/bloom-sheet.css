@@ -45,7 +45,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  max-height: 94dvh;
+  max-height: 92dvh;
 }
 
 .bsheet-panel {
@@ -217,7 +217,7 @@
 }
 @media (max-width: 640px) {
   .bsheet-h1 {
-    font-size: 30px;
+    font-size: clamp(24px, 7vw, 30px);
   }
 }
 .bsheet-sub {
@@ -339,12 +339,6 @@
     border-color var(--motion-fast) ease,
     box-shadow 420ms var(--ease-out-expo);
 }
-@media (max-width: 640px) {
-  .bmoment-tile {
-    min-height: 156px;
-    padding: 14px 14px 12px;
-  }
-}
 .bmoment-tile img {
   position: absolute;
   inset: 0;
@@ -403,6 +397,31 @@
 .bmoment-tile:focus-visible {
   outline: 2px solid color-mix(in oklab, var(--foreground) 70%, transparent);
   outline-offset: 2px;
+}
+/* phones: the four tiles compose as a compact action sheet — shorter,
+   calmer, always fitting beside the hero and footer on short screens */
+@media (max-width: 640px) {
+  .bmoment-tile {
+    min-height: 128px;
+    padding: 12px 12px 10px;
+    border-radius: 18px;
+  }
+  .bmoment-orb {
+    width: 42px;
+    height: 42px;
+  }
+  .bmoment-orb svg {
+    width: 19px;
+    height: 19px;
+  }
+  .bmoment-title {
+    margin-top: 8px;
+    font-size: 18px;
+  }
+  .bmoment-hint {
+    font-size: 11.5px;
+    padding-right: 20px;
+  }
 }
 
 .bmoment-orb {
@@ -472,7 +491,14 @@
 }
 @media (max-width: 640px) {
   .bmoment-foot {
-    margin: 8px 16px 16px;
+    margin: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 12px 10px 10px;
+  }
+  .bmoment-foot-title {
+    font-size: 14px;
+  }
+  .bmoment-foot-sub {
+    font-size: 11.5px;
   }
 }
 .bmoment-foot-orb {

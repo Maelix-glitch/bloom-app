@@ -12,7 +12,7 @@
  * every later mount has the real answer during render.
  */
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { setPref } from "@/lib/prefs";
 import { usePrefValue } from "@/lib/prefsStore";
@@ -54,7 +54,17 @@ export interface OnboardingStore {
 const UNREAD: OnboardingState = { ...DEFAULT_ONBOARDING, at: "__unread__" };
 
 export function useOnboarding(): OnboardingStore {
-  const state = usePrefValue<OnboardingState>(ONBOARDING_PREF, parseOnboarding, UNREAD);
+  const stored = usePrefValue<OnboardingState>(ONBOARDING_PREF, parseOnboarding, UNREAD);
+  /* A first-run browser has no stored entry, so the client snapshot is the
+     UNREAD fallback too — indistinguishable from "server hasn't read storage".
+     Without this, a fresh user never hydrates and the welcome flow never
+     opens. After mount, an absent entry means "nobody has answered": start
+     from defaults (still UNREAD during SSR/hydration, so no markup flash). */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const state = mounted && stored.at === "__unread__" ? DEFAULT_ONBOARDING : stored;
   const hydrated = state.at !== "__unread__";
 
   const write = useCallback((next: OnboardingState) => {

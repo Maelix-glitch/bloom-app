@@ -73,14 +73,19 @@ const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
  * button and the panel still has to be a panel — not bare words at the foot
  * of the page. The stylesheet keeps the states inline styles cannot carry:
  * hover, press, focus and the reduced-motion preference.
+ *
+ * The dock clears the phone tab bar: the stylesheet offsets it by
+ * --app-bottom-nav, and the inline fallback keeps it reachable even with
+ * no stylesheet at all.
  */
 const DOCK_STYLE: CSSProperties = {
   position: "fixed",
-  bottom: 32,
+  bottom: "calc(16px + 60px + env(safe-area-inset-bottom, 0px))",
   left: "50%",
   transform: "translateX(-50%)",
   zIndex: 9999,
   pointerEvents: "none",
+  maxWidth: "calc(100vw - 32px)",
 };
 
 const CTA_STYLE: CSSProperties = {
@@ -97,6 +102,10 @@ const CTA_STYLE: CSSProperties = {
   boxShadow: "0 0 24px rgba(255, 0, 85, 0.5), 0 12px 32px rgba(255, 0, 85, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
   cursor: "pointer",
   transition: "all 0.3s ease",
+  whiteSpace: "nowrap",
+  maxWidth: "calc(100vw - 32px)",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
 export function Atlas({ theme = "nocturne" }: { theme?: string }) {

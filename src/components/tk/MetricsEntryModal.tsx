@@ -374,7 +374,7 @@ export function MetricsEntryModal({
             </p>
 
             <div
-              className="mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
+              className="metrics-saved-grid mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
               style={{
                 backgroundColor: "var(--metric-surface-raised)",
                 gridTemplateColumns: `repeat(${Math.max(1, metrics.length)}, minmax(0, 1fr))`,

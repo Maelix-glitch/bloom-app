@@ -127,7 +127,10 @@
 .wl-skip {
   font-size: 12.5px;
   color: color-mix(in oklab, var(--foreground) 52%, transparent);
-  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 12px;
   border-radius: 999px;
   transition:
     color 160ms ease,
@@ -143,6 +146,9 @@
   flex: 1;
   flex-direction: column;
   justify-content: center;
+  /* `safe`: when the step is taller than a short screen, the top stays
+     reachable instead of clipping above the scrollport. */
+  justify-content: safe center;
   min-height: 0;
   padding: 28px 0 18px;
   overflow-y: auto;

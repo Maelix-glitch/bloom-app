@@ -55,11 +55,11 @@ function DashboardRoute() {
   return (
     <>
       <BloomHeader />
-      <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 50%, #16213E 100%)" }}>
+      <main style={{ minHeight: "100dvh", background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 50%, #16213E 100%)" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem 1rem" }}>
           {/* Hero Section */}
           <div style={{ marginBottom: "3rem", textAlign: "center" }}>
-            <h1 style={{ fontSize: "3.5rem", fontWeight: 700, color: "#ffffff", margin: 0, letterSpacing: "-0.02em" }}>
+            <h1 style={{ fontSize: "clamp(2rem, 8vw, 3.5rem)", fontWeight: 700, color: "#ffffff", margin: 0, letterSpacing: "-0.02em", lineHeight: 1.1, textWrap: "balance" }}>
               Welcome back
             </h1>
             <p style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.6)", margin: "0.5rem 0 0", fontWeight: 400 }}>
