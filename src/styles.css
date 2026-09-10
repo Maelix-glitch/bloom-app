@@ -953,3 +953,191 @@
     transform: none;
   }
 }
+
+/* ==========================================================================
+   Bloom customization skin — equipped reward components restyle the whole
+   app through the shared tokens. Pages that use var(--background) etc. pick
+   up an equipped theme automatically; palettes restyle the accent; the
+   wallpaper variables feed the ambience layers that opt in (Rewards, Today).
+   Rules are ordered so an explicit palette always wins over the theme's own
+   accent. See src/lib/rewards/customization.ts.
+   ========================================================================== */
+
+:root {
+  --bloom-wallpaper-image: none;
+  --bloom-wallpaper-tint: transparent;
+  --bloom-fx-color: var(--gold);
+}
+
+/* ------------------------------- themes --------------------------------- */
+
+html[data-bloom-theme="th-velvet-night"] {
+  --background: oklch(0.155 0.03 290);
+  --surface: oklch(0.19 0.033 290);
+  --surface-2: oklch(0.225 0.036 290);
+  --surface-3: oklch(0.26 0.038 290);
+  --border: oklch(0.305 0.034 290);
+  --border-strong: oklch(0.38 0.036 290);
+  --violet: oklch(0.78 0.095 299);
+}
+
+html[data-bloom-theme="th-honey-hour"] {
+  --background: oklch(0.165 0.02 55);
+  --surface: oklch(0.205 0.024 55);
+  --surface-2: oklch(0.24 0.027 55);
+  --surface-3: oklch(0.275 0.03 55);
+  --border: oklch(0.315 0.024 55);
+  --border-strong: oklch(0.39 0.026 55);
+  --violet: oklch(0.85 0.1 85);
+}
+
+html[data-bloom-theme="th-moss-rest"] {
+  --background: oklch(0.16 0.018 165);
+  --surface: oklch(0.2 0.021 165);
+  --surface-2: oklch(0.235 0.024 165);
+  --surface-3: oklch(0.27 0.027 165);
+  --border: oklch(0.31 0.022 165);
+  --border-strong: oklch(0.385 0.024 165);
+  --violet: oklch(0.78 0.08 152);
+}
+
+html[data-bloom-theme="th-dusk-rose"] {
+  --background: oklch(0.165 0.022 20);
+  --surface: oklch(0.205 0.026 20);
+  --surface-2: oklch(0.24 0.03 20);
+  --surface-3: oklch(0.275 0.032 20);
+  --border: oklch(0.31 0.026 20);
+  --border-strong: oklch(0.385 0.03 20);
+  --violet: oklch(0.8 0.075 10);
+}
+
+html[data-bloom-theme="th-midnight-tide"] {
+  --background: oklch(0.15 0.025 255);
+  --surface: oklch(0.19 0.029 255);
+  --surface-2: oklch(0.225 0.032 255);
+  --surface-3: oklch(0.26 0.034 255);
+  --border: oklch(0.3 0.028 255);
+  --border-strong: oklch(0.375 0.03 255);
+  --violet: oklch(0.77 0.075 235);
+}
+
+html[data-bloom-theme="th-ink-serenity"] {
+  --background: oklch(0.175 0.01 280);
+  --surface: oklch(0.21 0.012 280);
+  --surface-2: oklch(0.245 0.014 280);
+  --surface-3: oklch(0.275 0.016 280);
+  --border: oklch(0.32 0.013 280);
+  --border-strong: oklch(0.39 0.015 280);
+  --violet: oklch(0.79 0.05 230);
+}
+
+/* ------------------------------- palettes ------------------------------- */
+
+html[data-bloom-palette="pl-lavender-mist"] {
+  --violet: oklch(0.78 0.095 299);
+}
+html[data-bloom-palette="pl-honey-light"] {
+  --violet: oklch(0.85 0.1 85);
+}
+html[data-bloom-palette="pl-sage-glow"] {
+  --violet: oklch(0.78 0.08 152);
+}
+html[data-bloom-palette="pl-rose-dawn"] {
+  --violet: oklch(0.8 0.075 10);
+}
+html[data-bloom-palette="pl-mist-blue"] {
+  --violet: oklch(0.79 0.05 230);
+}
+
+/* ------------------------------ wallpapers ------------------------------ */
+
+html[data-bloom-wallpaper="wp-moonlit-garden"] {
+  --bloom-wallpaper-image: url("/rewards/art/moonlit-garden.jpg");
+  --bloom-wallpaper-tint: oklch(0.72 0.1 295 / 0.35);
+}
+html[data-bloom-wallpaper="wp-first-light"] {
+  --bloom-wallpaper-image: url("/rewards/art/wellness-morning.jpg");
+  --bloom-wallpaper-tint: oklch(0.85 0.1 85 / 0.3);
+}
+html[data-bloom-wallpaper="wp-hushed-dawn"] {
+  --bloom-wallpaper-image: url("/rewards/art/serenity-strength.jpg");
+  --bloom-wallpaper-tint: oklch(0.78 0.08 152 / 0.32);
+}
+html[data-bloom-wallpaper="wp-coastal-mist"] {
+  --bloom-wallpaper-image: url("/rewards/art/move-breathe.jpg");
+  --bloom-wallpaper-tint: oklch(0.75 0.06 230 / 0.32);
+}
+html[data-bloom-wallpaper="wp-rain-glass"] {
+  --bloom-wallpaper-image: url("/rewards/art/recovery-season.jpg");
+  --bloom-wallpaper-tint: oklch(0.72 0.06 255 / 0.34);
+}
+html[data-bloom-wallpaper="wp-candle-glow"] {
+  --bloom-wallpaper-image: url("/rewards/art/soft-reset.jpg");
+  --bloom-wallpaper-tint: oklch(0.8 0.08 30 / 0.32);
+}
+html[data-bloom-wallpaper="wp-still-water"] {
+  --bloom-wallpaper-image: url("/rewards/art/hydration-mist.jpg");
+  --bloom-wallpaper-tint: oklch(0.75 0.08 235 / 0.32);
+}
+html[data-bloom-wallpaper="wp-night-sky"] {
+  --bloom-wallpaper-image: url("/rewards/art/deep-rest.jpg");
+  --bloom-wallpaper-tint: oklch(0.72 0.08 295 / 0.36);
+}
+html[data-bloom-wallpaper="wp-golden-dusk"] {
+  --bloom-wallpaper-image: url("/rewards/art/golden-hour.jpg");
+  --bloom-wallpaper-tint: oklch(0.85 0.09 75 / 0.3);
+}
+
+/* -------------------------------- effects -------------------------------- */
+
+html[data-bloom-effect="fx-petals"] {
+  --bloom-fx-color: oklch(0.8 0.075 10);
+}
+html[data-bloom-effect="fx-ember-light"] {
+  --bloom-fx-color: oklch(0.85 0.1 85);
+}
+html[data-bloom-effect="fx-rain-spark"] {
+  --bloom-fx-color: oklch(0.79 0.05 230);
+}
+html[data-bloom-effect="fx-starlight"] {
+  --bloom-fx-color: oklch(0.78 0.07 295);
+}
+html[data-bloom-effect="fx-mist"] {
+  --bloom-fx-color: oklch(0.78 0.08 152);
+}
+
+/* ==========================================================================
+   Progression rank pill — shown beside a name on Profile and the public
+   profile, where the /rewards stylesheet is not loaded. Uses the rank tone.
+   ========================================================================== */
+
+/* ------------------------------- rank pill ------------------------------- */
+/* Used outside /rewards too (Profile), so it styles itself from the tone. */
+
+.pg-rank-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.6rem;
+  padding: 0.18rem 0.6rem 0.18rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--rank-tone, var(--gold)) 34%, transparent);
+  background: color-mix(in oklab, var(--rank-tone, var(--gold)) 9%, transparent);
+  color: color-mix(in oklab, var(--rank-tone, var(--gold)) 84%, var(--foreground));
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.pg-rank-pill-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pg-rank-pill-link:hover .pg-rank-pill {
+  border-color: color-mix(in oklab, var(--rank-tone, var(--gold)) 55%, transparent);
+}

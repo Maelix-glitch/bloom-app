@@ -365,8 +365,21 @@ export const APP_FACTS: AppFact[] = [
       /\bwhat('| a)?re (the )?rewards?\b/i,
     ],
     paragraphs: [
-      "Habit ticks earn points — ten per tick by default — and your running total is on the Rewards page. Points are Bloom's way of making a streak visible, not a currency with hidden rules.",
-      "If you're not earning as you'd expect, check that the habit is still active and unpaused: paused and archived habits don't tick, so they don't earn.",
+      "Habit ticks earn points — each habit carries its own value (ten by default, and you can set anything from five to five hundred when you create it). On top of that, verified goals pay real milestones: a week of consistency, a batch of movement sessions, thirty days of reflection. Those are worth hundreds to a few thousand points.",
+      "Everything you earn counts towards your rank, and your rank is read from your all-time earned points — so a quiet week never costs you a rank you already hold. Points are confirmed by the database, verified against your own logs, and never change quietly: the Point activity list on the Rewards page shows the date, the source and the amount of every award.",
+    ],
+  },
+  {
+    key: "ranks",
+    patterns: [
+      /\bwhat (are|is) (the )?ranks?\b/i,
+      /\bhow (do|does) (the )?ranks? (work|go|progress)\b/i,
+      /\bmy (current )?rank\b/i,
+      /\bhow (do i|can i) (level up|rank up|get a rank)\b/i,
+    ],
+    paragraphs: [
+      "Ranks are a reading of your earned points, not a separate currency: Seedling, First Bloom, Sprout, Budding, In Bloom, Flourish, Wildflower, Evergreen and on from there. They never expire, and nothing is taken away when life gets busy.",
+      "The ladder does not end at the last named rank — past it, each further stretch of points opens a new season, so there is always something ahead without any pressure to race for it.",
     ],
   },
   {

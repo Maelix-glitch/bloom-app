@@ -21,9 +21,12 @@ import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as TrackersRouteImport } from './routes/trackers'
 import { Route as TrackersPremiumRouteImport } from './routes/trackers-premium'
 import { Route as TrackersStylesRouteImport } from './routes/trackers-styles'
+import { Route as AdminProgressionRouteImport } from './routes/admin/progression'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as MoodIndexRouteImport } from './routes/mood/index'
 import { Route as MoodIntelligenceRouteImport } from './routes/mood/intelligence'
+import { Route as RewardsIndexRouteImport } from './routes/rewards.index'
+import { Route as RewardsAtelierRouteImport } from './routes/rewards.atelier'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,6 +88,11 @@ const TrackersStylesRoute = TrackersStylesRouteImport.update({
   path: '/trackers-styles',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProgressionRoute = AdminProgressionRouteImport.update({
+  id: '/admin/progression',
+  path: '/admin/progression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRewardsRoute = AdminRewardsRouteImport.update({
   id: '/admin/rewards',
   path: '/admin/rewards',
@@ -100,6 +108,16 @@ const MoodIntelligenceRoute = MoodIntelligenceRouteImport.update({
   path: '/mood/intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RewardsIndexRoute = RewardsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RewardsRoute,
+} as any)
+const RewardsAtelierRoute = RewardsAtelierRouteImport.update({
+  id: '/atelier',
+  path: '/atelier',
+  getParentRoute: () => RewardsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,13 +128,16 @@ export interface FileRoutesByFullPath {
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
-  '/rewards': typeof RewardsRoute
+  '/rewards': typeof RewardsRouteWithChildren
   '/trackers': typeof TrackersRoute
   '/trackers-premium': typeof TrackersPremiumRoute
   '/trackers-styles': typeof TrackersStylesRoute
+  '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
+  '/rewards/atelier': typeof RewardsAtelierRoute
   '/mood/': typeof MoodIndexRoute
+  '/rewards/': typeof RewardsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -127,13 +148,15 @@ export interface FileRoutesByTo {
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
-  '/rewards': typeof RewardsRoute
   '/trackers': typeof TrackersRoute
   '/trackers-premium': typeof TrackersPremiumRoute
   '/trackers-styles': typeof TrackersStylesRoute
+  '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
+  '/rewards/atelier': typeof RewardsAtelierRoute
   '/mood': typeof MoodIndexRoute
+  '/rewards': typeof RewardsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -145,13 +168,16 @@ export interface FileRoutesById {
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
-  '/rewards': typeof RewardsRoute
+  '/rewards': typeof RewardsRouteWithChildren
   '/trackers': typeof TrackersRoute
   '/trackers-premium': typeof TrackersPremiumRoute
   '/trackers-styles': typeof TrackersStylesRoute
+  '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
+  '/rewards/atelier': typeof RewardsAtelierRoute
   '/mood/': typeof MoodIndexRoute
+  '/rewards/': typeof RewardsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,9 +194,12 @@ export interface FileRouteTypes {
     | '/trackers'
     | '/trackers-premium'
     | '/trackers-styles'
+    | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
+    | '/rewards/atelier'
     | '/mood/'
+    | '/rewards/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -181,13 +210,15 @@ export interface FileRouteTypes {
     | '/cycle-styles'
     | '/dashboard'
     | '/profile'
-    | '/rewards'
     | '/trackers'
     | '/trackers-premium'
     | '/trackers-styles'
+    | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
+    | '/rewards/atelier'
     | '/mood'
+    | '/rewards'
   id:
     | '__root__'
     | '/'
@@ -202,9 +233,12 @@ export interface FileRouteTypes {
     | '/trackers'
     | '/trackers-premium'
     | '/trackers-styles'
+    | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
+    | '/rewards/atelier'
     | '/mood/'
+    | '/rewards/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -216,10 +250,11 @@ export interface RootRouteChildren {
   CycleStylesRoute: typeof CycleStylesRoute
   DashboardRoute: typeof DashboardRoute
   ProfileRoute: typeof ProfileRoute
-  RewardsRoute: typeof RewardsRoute
+  RewardsRoute: typeof RewardsRouteWithChildren
   TrackersRoute: typeof TrackersRoute
   TrackersPremiumRoute: typeof TrackersPremiumRoute
   TrackersStylesRoute: typeof TrackersStylesRoute
+  AdminProgressionRoute: typeof AdminProgressionRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
   MoodIntelligenceRoute: typeof MoodIntelligenceRoute
   MoodIndexRoute: typeof MoodIndexRoute
@@ -311,6 +346,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackersStylesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/progression': {
+      id: '/admin/progression'
+      path: '/admin/progression'
+      fullPath: '/admin/progression'
+      preLoaderRoute: typeof AdminProgressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/rewards': {
       id: '/admin/rewards'
       path: '/admin/rewards'
@@ -332,8 +374,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoodIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rewards/': {
+      id: '/rewards/'
+      path: '/'
+      fullPath: '/rewards/'
+      preLoaderRoute: typeof RewardsIndexRouteImport
+      parentRoute: typeof RewardsRoute
+    }
+    '/rewards/atelier': {
+      id: '/rewards/atelier'
+      path: '/atelier'
+      fullPath: '/rewards/atelier'
+      preLoaderRoute: typeof RewardsAtelierRouteImport
+      parentRoute: typeof RewardsRoute
+    }
   }
 }
+
+interface RewardsRouteChildren {
+  RewardsAtelierRoute: typeof RewardsAtelierRoute
+  RewardsIndexRoute: typeof RewardsIndexRoute
+}
+
+const RewardsRouteChildren: RewardsRouteChildren = {
+  RewardsAtelierRoute: RewardsAtelierRoute,
+  RewardsIndexRoute: RewardsIndexRoute,
+}
+
+const RewardsRouteWithChildren =
+  RewardsRoute._addFileChildren(RewardsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -344,10 +413,11 @@ const rootRouteChildren: RootRouteChildren = {
   CycleStylesRoute: CycleStylesRoute,
   DashboardRoute: DashboardRoute,
   ProfileRoute: ProfileRoute,
-  RewardsRoute: RewardsRoute,
+  RewardsRoute: RewardsRouteWithChildren,
   TrackersRoute: TrackersRoute,
   TrackersPremiumRoute: TrackersPremiumRoute,
   TrackersStylesRoute: TrackersStylesRoute,
+  AdminProgressionRoute: AdminProgressionRoute,
   AdminRewardsRoute: AdminRewardsRoute,
   MoodIntelligenceRoute: MoodIntelligenceRoute,
   MoodIndexRoute: MoodIndexRoute,

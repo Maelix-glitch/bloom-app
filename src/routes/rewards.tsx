@@ -1,27 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import rewardsCss from "../styles/rewards.css?url";
-import { RewardsPage } from "@/components/rewards/RewardsPage";
+import progressionCss from "../styles/progression.css?url";
 
+/**
+ * /rewards is the journey, and /rewards/atelier is its secondary layer
+ * (looks opened by rank). Both share the progression stylesheet.
+ */
 export const Route = createFileRoute("/rewards")({
   head: () => ({
-    meta: [
-      { title: "Bloom — Rewards" },
-      {
-        name: "description",
-        content: "A private reward delivery space for rewards published to your account.",
-      },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: rewardsCss,
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap",
-      },
-    ],
+    meta: [{ title: "Bloom — Your Journey" }],
+    links: [{ rel: "stylesheet", href: progressionCss }],
   }),
-  component: RewardsPage,
+  component: RewardsLayout,
 });
+
+function RewardsLayout() {
+  return <Outlet />;
+}

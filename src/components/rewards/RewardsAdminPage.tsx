@@ -10,6 +10,7 @@ import {
   LockKeyhole,
   Megaphone,
   RefreshCw,
+  ScrollText,
   ShieldCheck,
   UserRound,
   Users,
@@ -227,6 +228,9 @@ export function RewardsAdminPage() {
           </p>
         </div>
         <div className="reward-admin-header-actions">
+          <Link to="/admin/progression" className="reward-text-button">
+            Point audit <ScrollText className="size-3.5" />
+          </Link>
           <Link to="/rewards" className="reward-text-button">
             Open user view <ExternalLink className="size-3.5" />
           </Link>

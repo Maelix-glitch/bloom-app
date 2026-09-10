@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, Droplet, Gift, Loader2, PenLine, Plus, Smile } from "lucide-react";
+import { Bell, Droplet, Loader2, PenLine, Plus, Smile } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap } from "@/components/home/ConnectionMap";
@@ -42,6 +42,9 @@ import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
 import leafDark from "@/assets/home/leaf-dark.jpg";
+import { RankChip } from "@/components/progression/RankChip";
+import { componentsById } from "@/lib/rewards/catalog";
+import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
 
 const TITLE = "Bloom — Today";
 const DESCRIPTION =
@@ -73,6 +76,38 @@ function useNow(intervalMs = 60_000): Date {
     };
   }, [intervalMs]);
   return now;
+}
+
+/**
+ * The hero ambience on Today. When a wallpaper reward is equipped it becomes
+ * the hero artwork (the same asset the Rewards page shows) — customization is
+ * real, not a preview-only flourish.
+ */
+function WallpaperFigure() {
+  const [art, setArt] = useState<string | null>(null);
+  useEffect(() => {
+    const sync = () => {
+      const equipped = loadRewardsStore().equipped;
+      const wallpaperId = equipped.wallpaperId;
+      setArt(wallpaperId ? (componentsById.get(wallpaperId)?.art ?? null) : null);
+    };
+    sync();
+    return subscribeRewards(sync);
+  }, []);
+  const isCustom = art !== null;
+  return (
+    <img
+      src={art ?? windowDusk}
+      alt={
+        isCustom
+          ? "An equipped Bloom wallpaper brightening the day"
+          : "A journal open on a desk beside a window at dusk"
+      }
+      width={928}
+      height={720}
+      className="h-full w-full object-cover"
+    />
+  );
 }
 
 function TodayPage() {
@@ -343,9 +378,9 @@ function TodayPage() {
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
               </button>
+              {/* Next milestone, not a shop: rank + how far the next one is. */}
               <Link to="/rewards" className="home-chip">
-                <Gift className="size-4" style={{ color: "var(--home-cycle)" }} />
-                {habits.points !== null ? `${habits.points.toLocaleString()} points` : "Rewards"}
+                <RankChip points={habits.points} />
               </Link>
             </div>
             {space.authState === "signed-out" ? (
@@ -365,13 +400,7 @@ function TodayPage() {
           </div>
 
           <figure className="relative hidden overflow-hidden rounded-2xl border border-border lg:block">
-            <img
-              src={windowDusk}
-              alt="A journal open on a desk beside a window at dusk"
-              width={928}
-              height={720}
-              className="h-full w-full object-cover"
-            />
+            <WallpaperFigure />
             <figcaption className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-background/90 via-background/20 to-background/70 p-4">
               <span className="font-display text-sm italic leading-snug text-muted-foreground">
                 Discipline today, freedom tomorrow.
