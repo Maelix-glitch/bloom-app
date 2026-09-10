@@ -33,6 +33,12 @@ import {
   loadCycleSettings,
 } from "@/lib/cycle/periodStore";
 import { todayKey } from "@/lib/cycle/predict";
+import { getPref } from "@/lib/prefs";
+import {
+  ONBOARDING_PREF,
+  parseOnboarding,
+  tracksCycle,
+} from "@/lib/onboarding/profileKind";
 
 export type { CoachMode };
 
@@ -877,18 +883,35 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
     const logs = loadPeriodLogs();
     const settings = loadCycleSettings();
     const mode = effectiveMode(settings, today);
-    /* same options as the Cycle page, so the coach never contradicts it */
+    const cycleDaysLogged = loadCycleDays().length + logs.length;
+    const usingCycle = mode === "tracking" || mode === "paused";
+    /* The profile's "Cycle tracking" switch is the person's own answer about
+       whether Bloom includes a cycle at all (kind "no-cycle"). The coach must
+       match it exactly, so someone who turned the cycle off never has it
+       raised in conversation — no data, no topics, no prompts. */
+    let optedOutOfCycle = false;
+    try {
+      const onboarding = getPref(ONBOARDING_PREF, parseOnboarding, null);
+      optedOutOfCycle = Boolean(onboarding && onboarding.done && !tracksCycle(onboarding));
+    } catch {
+      optedOutOfCycle = false;
+    }
+    /* The coach only speaks about the cycle when the person has actually
+       chosen to track it AND has real entries. The stored default is
+       "tracking", so an untouched or stale install would otherwise leak
+       fabricated cycle facts ("day unknown", leftover test entries) into
+       every prompt — and the coach would keep raising it for people who
+       don't track. No data → not a topic, ever. */
     const analysis = analyzeCycle(logs, today, {
       personalMaxPlausible: settings.personalMaxPlausible,
       expecting: mode === "tracking",
     });
-    /* cycle tracking turned off → not a topic; the coach neither mentions nor prompts it */
     cycle =
-      mode === "off"
+      optedOutOfCycle || !usingCycle || cycleDaysLogged === 0
         ? null
         : {
             paused: mode === "paused",
-            daysLogged: loadCycleDays().length + logs.length,
+            daysLogged: cycleDaysLogged,
             cycleDay: analysis.cycleDay,
             phaseLabel: analysis.phaseLabel || null,
             nextStart: analysis.nextStart,

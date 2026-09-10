@@ -648,7 +648,10 @@ function factsToPrompt(facts: any): string {
       );
     }
   } else {
-    lines.push("Cycle: not tracked by this person - do not raise it.");
+    lines.push(
+      "Cycle: this person does NOT track a cycle. Never mention periods, PMS, " +
+        "ovulation, cycle phases, or period prediction unless they raise it first.",
+    );
   }
 
   if (facts.habitsActive > 0) lines.push(`Habits: ${facts.habitsActive} active.`);
