@@ -130,7 +130,7 @@
   --dim-rose: color-mix(in oklab, var(--rose) 14%, transparent);
 
   /*
-   * Metrics entry modal ("Today's snapshot") — ported from lovable-data-entry.
+   * Metrics entry modal ("Today's snapshot") — ported from the data-entry prototype.
    * Defined on :root because the modal is portalled to <body>, outside any
    * page-scoped token set. Bloom already owns --surface, so the modal's two
    * surfaces are namespaced as --metric-surface / --metric-surface-raised.
