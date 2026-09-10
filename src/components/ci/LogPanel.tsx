@@ -696,13 +696,13 @@ export function LogPanel({
           <span className="ci-adv__icon" aria-hidden>
             <Sparkles size={15} />
           </span>
-          <span className="text-left">
+          <span className="min-w-0 flex-1 text-left">
             <span className="block text-[13px] font-medium leading-tight">Advanced log</span>
             <span className="block text-[11px] leading-snug ci-muted">
               symptoms · mood · energy · pain · sleep
             </span>
           </span>
-          <span className="ci-adv__tag ci-num">Recommended</span>
+          <span className="ci-adv__tag ci-num max-[359px]:hidden">Recommended</span>
           <ChevronDown
             size={16}
             aria-hidden

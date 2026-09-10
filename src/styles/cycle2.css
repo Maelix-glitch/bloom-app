@@ -400,6 +400,9 @@
 .ci-field {
   display: grid;
   gap: 6px;
+  /* Fieldsets default to min-width: min-content, which forces the cycle grid
+     track wider than 320px viewports. Allow shrinking; inner rows wrap. */
+  min-width: 0;
 }
 
 .ci-label {
