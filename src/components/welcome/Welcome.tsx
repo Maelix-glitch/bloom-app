@@ -37,7 +37,6 @@ import flowerBranch from "@/assets/mood/flower-branch.jpg";
 import candle from "@/assets/mood/candle.jpg";
 import mountainLake from "@/assets/mood/mountain-lake.jpg";
 import "@/styles/welcome.css";
-import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
