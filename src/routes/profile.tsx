@@ -24,6 +24,7 @@ import profileCss from "../styles/profile.css?url";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { useProfileRecord } from "@/hooks/useProfileRecord";
+import { useHabits } from "@/hooks/useHabits";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { accentVar } from "@/components/mood/primitives";
@@ -45,6 +46,7 @@ import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/R
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
 import { JourneyCard } from "@/components/profile/JourneyCard";
 import { AccountRow } from "@/components/profile/AccountRow";
+import { RankPill } from "@/components/progression/RankPill";
 import { EraseSheet, ExportSheet, RemindersSheet } from "@/components/profile/DataSheets";
 import { useExportBundle } from "@/hooks/useExportBundle";
 import { useReminders } from "@/hooks/useReminders";
@@ -195,6 +197,7 @@ function ProfilePage() {
     [moodBlock],
   );
   const record = useProfileRecord(moodEntries);
+  const habits = useHabits();
 
   /* Tier B part 2 — reminders, install, one export, one erase */
   const reminders = useReminders();
@@ -489,6 +492,7 @@ function ProfilePage() {
             {/* cover · avatar · name · actions */}
             <ProfileHero
               identity={identity.identity}
+              rankPill={<RankPill points={habits.points} />}
               ambient={ambient}
               pulse={record.pulse}
               tags={record.tags}

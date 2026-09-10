@@ -4,15 +4,43 @@
  * treatment as fallback, never a broken icon.
  */
 
-import { useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import { objectUrl } from "@/lib/profile/profileService";
 import { resolveAvatar } from "@/lib/profile/presetAvatars";
 import { initialsFor, type BloomAccent } from "@/lib/profile/types";
+import { PREFS_CHANGED } from "@/lib/prefs";
 
 export type AvatarRing = "none" | "quiet" | "story-unseen" | "story-seen";
+
+/**
+ * Reward profile frames — equipped frames from the Rewards ecosystem ring the
+ * profile mark everywhere ProfileAvatar renders (rail, profile hero, story
+ * rows). Frames defer to story rings when one is active.
+ */
+const FRAME_RINGS: Record<string, CSSProperties> = {
+  "fr-crescent": {
+    border: `1px solid color-mix(in oklab, var(--violet) 65%, transparent)`,
+    boxShadow: `inset 0 0 0 1px color-mix(in oklab, var(--violet) 22%, transparent)`,
+  },
+  "fr-laurel": {
+    border: `1px solid color-mix(in oklab, var(--sage) 78%, transparent)`,
+    boxShadow: `0 0 0 3px color-mix(in oklab, var(--sage) 12%, transparent)`,
+  },
+  "fr-gold-line": {
+    border: `1.5px solid color-mix(in oklab, var(--gold) 85%, transparent)`,
+  },
+  "fr-soft-bloom": {
+    border: `1px solid color-mix(in oklab, var(--rose) 70%, transparent)`,
+    boxShadow: `0 0 0 3px color-mix(in oklab, var(--rose) 14%, transparent)`,
+  },
+  "fr-halo": {
+    border: `1px solid color-mix(in oklab, var(--sky) 45%, transparent)`,
+    boxShadow: `0 0 0 1px color-mix(in oklab, var(--sky) 20%, transparent), 0 0 18px color-mix(in oklab, var(--sky) 22%, transparent)`,
+  },
+};
 
 export function ProfileAvatar({
   name,
@@ -21,6 +49,7 @@ export function ProfileAvatar({
   size = 96,
   ring = "none",
   className,
+  overrideFrame = null,
 }: {
   name: string;
   avatarPath: string | null;
@@ -28,13 +57,34 @@ export function ProfileAvatar({
   size?: number;
   ring?: AvatarRing;
   className?: string;
+  /** Force a frame id (studio previews); default: the equipped frame. */
+  overrideFrame?: string | null;
 }) {
   const [broken, setBroken] = useState(false);
+  const [frameId, setFrameId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (overrideFrame !== null) return;
+    const sync = () => {
+      const el = typeof document !== "undefined" ? document.documentElement : null;
+      setFrameId(el?.getAttribute("data-bloom-frame") ?? null);
+    };
+    sync();
+    window.addEventListener("bloom:skin-changed", sync);
+    window.addEventListener(PREFS_CHANGED, sync);
+    return () => {
+      window.removeEventListener("bloom:skin-changed", sync);
+      window.removeEventListener(PREFS_CHANGED, sync);
+    };
+  }, [overrideFrame]);
+
   /* Handles both a `preset:` photo shipped with the app and an upload. */
   const src = resolveAvatar(avatarPath, objectUrl);
   const varAccent = accentVar[accent];
 
   const showImage = Boolean(src) && !broken;
+  const activeFrame = overrideFrame !== null ? overrideFrame : frameId;
+  const frameStyle = ring === "none" && activeFrame ? FRAME_RINGS[activeFrame] : null;
 
   return (
     <span
@@ -58,6 +108,13 @@ export function ProfileAvatar({
                 ? { border: `1px solid color-mix(in oklab, ${varAccent} 30%, transparent)` }
                 : { border: `1px solid color-mix(in oklab, ${varAccent} 45%, transparent)` }
           }
+        />
+      ) : null}
+      {frameStyle ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-[6px] rounded-full"
+          style={frameStyle}
         />
       ) : null}
 

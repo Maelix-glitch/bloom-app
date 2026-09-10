@@ -9,7 +9,7 @@
  * story the circle edits the photo and the plus starts one.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Archive,
   Eye,
@@ -126,6 +126,7 @@ export function ProfileHero({
   onCreateStory,
   completion,
   isSignedIn = true,
+  rankPill = null,
 }: {
   identity: ProfileIdentity;
   story: HeroStoryState;
@@ -146,6 +147,8 @@ export function ProfileHero({
   onCreateStory: () => void;
   completion: { done: number; total: number; show: boolean };
   isSignedIn?: boolean;
+  /** The progression rank, shown beside the name (optional, real data only). */
+  rankPill?: ReactNode;
 }) {
   const ringState: "none" | "unseen" | "seen" | "prompt" =
     story.count > 0 ? (story.unseen > 0 ? "unseen" : "seen") : "prompt";
@@ -273,7 +276,10 @@ export function ProfileHero({
 
         <div className="pf-head-main">
           <div className="min-w-0">
-            <h1 className="pf-name">{identity.displayName}</h1>
+            <h1 className="pf-name">
+              {identity.displayName}
+              {rankPill}
+            </h1>
             <div className="pf-handle">
               {identity.username ? (
                 <span>@{identity.username}</span>
