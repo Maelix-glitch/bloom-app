@@ -28,6 +28,8 @@ import { accentVar } from "@/components/mood/primitives";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import type { ProfileViewModel } from "@/components/profile/ProfileView";
 import { parseFeatured } from "@/lib/profile/profileService";
+import { sanitizeAdjustments, sanitizeElements } from "@/lib/stories/elements";
+import { supabase } from "@/lib/supabase";
 
 const HANDLE_RE = /^@?[a-z0-9_]{3,30}$/;
 
@@ -78,6 +80,38 @@ function PublicProfilePage() {
       alive = false;
     };
   }, [handle, state.status]);
+
+  /* A signed-in visitor can react, reply, and gift — their own identity. */
+  const [visitor, setVisitor] = useState<{ id: string; name: string } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const userId = data.session?.user.id;
+        if (!userId) return;
+        const { data: row, error } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", userId)
+          .maybeSingle();
+        if (!alive) return;
+        if (error) return;
+        setVisitor({
+          id: userId,
+          name:
+            row && typeof row === "object" && "display_name" in row
+              ? String((row as { display_name: unknown }).display_name ?? "Someone")
+              : "Someone",
+        });
+      } catch {
+        /* signed-out experience */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const model = useMemo<ProfileViewModel | null>(() => {
     if (state.status !== "done" || !state.payload || state.payload.private) return null;
@@ -144,7 +178,11 @@ function PublicProfilePage() {
             </Link>
           </div>
         ) : (
-          <PublicProfileView model={model} />
+          <PublicProfileView
+            model={model}
+            visitorId={visitor?.id ?? null}
+            visitorName={visitor?.name ?? null}
+          />
         )}
       </main>
     </div>
@@ -157,17 +195,32 @@ type RawStory = {
   title: string | null;
   body: string | null;
   media_url: string | null;
+  media_type?: string | null;
+  duration_ms?: number | null;
+  elements?: unknown;
+  filter_id?: string | null;
+  adjustments?: unknown;
+  background_id?: string | null;
+  music?: unknown;
+  alt_text?: string | null;
+  audience?: string | null;
   accent: string | null;
   created_at: string;
   expires_at: string;
 };
 
 function mapStory(raw: RawStory): Story {
+  const mediaType =
+    raw.media_type === "video" || raw.media_type === "none" || raw.media_type === "image"
+      ? raw.media_type
+      : raw.media_url
+        ? "image"
+        : "none";
   return {
     id: raw.id,
-    kind: (["text", "photo", "mood", "reflection", "win", "reward", "milestone"] as const).includes(
-      raw.kind as Story["kind"],
-    )
+    kind: (
+      ["text", "photo", "video", "mood", "reflection", "win", "reward", "milestone"] as const
+    ).includes(raw.kind as Story["kind"])
       ? (raw.kind as Story["kind"])
       : "text",
     title: raw.title ?? "",
@@ -181,6 +234,33 @@ function mapStory(raw: RawStory): Story {
     expiresAt: raw.expires_at,
     visibility: "public",
     deletedAt: null,
+    mediaType,
+    durationMs: typeof raw.duration_ms === "number" ? raw.duration_ms : null,
+    elements: sanitizeElements(raw.elements),
+    filterId: typeof raw.filter_id === "string" ? raw.filter_id : null,
+    adjustments: sanitizeAdjustments(raw.adjustments),
+    backgroundId: typeof raw.background_id === "string" ? raw.background_id : null,
+    music: parsePublicMusic(raw.music),
+    altText: typeof raw.alt_text === "string" ? raw.alt_text.slice(0, 300) : null,
+    audience: raw.audience === "close" ? "close" : "all",
+  };
+}
+
+function parsePublicMusic(value: unknown): Story["music"] {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Record<string, unknown>;
+  const title = v["title"];
+  const artist = v["artist"];
+  if (typeof title !== "string" || typeof artist !== "string") return null;
+  const trackId = v["trackId"];
+  const src = v["src"];
+  return {
+    trackId: typeof trackId === "string" ? trackId.slice(0, 120) : "catalog",
+    title: title.slice(0, 120),
+    artist: artist.slice(0, 120),
+    startMs: Math.max(0, Number(v["startMs"]) || 0),
+    durationMs: Math.max(1000, Math.min(60000, Number(v["durationMs"]) || 15000)),
+    ...(typeof src === "string" && src ? { src: src.slice(0, 2048) } : {}),
   };
 }
 

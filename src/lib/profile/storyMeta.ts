@@ -3,7 +3,7 @@
  * composer, and archive labels.
  */
 
-import { CloudSun, Flag, Gift, NotebookPen, Sprout, type LucideIcon } from "lucide-react";
+import { Clapperboard, CloudSun, Flag, Gift, NotebookPen, Sprout, type LucideIcon } from "lucide-react";
 
 import type { Story } from "./types";
 import { objectUrl } from "./profileService";
@@ -11,6 +11,7 @@ import { objectUrl } from "./profileService";
 export const STORY_KIND_META: Record<Story["kind"], { label: string; icon: LucideIcon | null }> = {
   text: { label: "A note", icon: null },
   photo: { label: "A photo", icon: null },
+  video: { label: "A video", icon: Clapperboard },
   mood: { label: "Mood", icon: CloudSun },
   reflection: { label: "Reflection", icon: NotebookPen },
   win: { label: "Small win", icon: Sprout },

@@ -56,11 +56,13 @@ export function JourneyCard({
   accent: _accent,
   memberSince: _memberSince,
   storyCount: _storyCount,
+  onShareMilestone,
 }: {
   journey: ProfileSpaceJourney;
   accent: BloomAccent;
   memberSince: string | null;
   storyCount: number;
+  onShareMilestone?: ((milestoneId: string) => void) | undefined;
 }) {
   if (journey.status === "loading") {
     return (
@@ -96,7 +98,39 @@ export function JourneyCard({
             const node = MILESTONE_NODE[m.id] ?? { icon: Star, tint: "var(--violet)" };
             const Icon = node.icon;
             const got = achieved.get(m.id);
-            return (
+            const shareable = Boolean(got && onShareMilestone);
+            const inner = (
+              <>
+                <span className="pf-mile-icon" aria-hidden>
+                  <Icon className="size-[17px]" strokeWidth={1.8} />
+                </span>
+                <span className="pf-mile-label">{m.label}</span>
+                <span className="pf-mile-date">
+                  {shareable
+                    ? "tap to share"
+                    : got?.achievedAt
+                      ? new Date(got.achievedAt).toLocaleDateString(undefined, {
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "not yet"}
+                </span>
+              </>
+            );
+            return shareable ? (
+              <button
+                key={m.id}
+                type="button"
+                role="listitem"
+                className="pf-mile"
+                style={{ ["--pf-mile-color" as string]: node.tint } as React.CSSProperties}
+                title={`Share ${m.label} as a story`}
+                aria-label={`Share ${m.label} as a story`}
+                onClick={() => onShareMilestone?.(m.id)}
+              >
+                {inner}
+              </button>
+            ) : (
               <div
                 key={m.id}
                 role="listitem"
@@ -105,18 +139,7 @@ export function JourneyCard({
                 style={{ ["--pf-mile-color" as string]: node.tint } as React.CSSProperties}
                 title={got?.detail}
               >
-                <span className="pf-mile-icon" aria-hidden>
-                  <Icon className="size-[17px]" strokeWidth={1.8} />
-                </span>
-                <span className="pf-mile-label">{m.label}</span>
-                <span className="pf-mile-date">
-                  {got?.achievedAt
-                    ? new Date(got.achievedAt).toLocaleDateString(undefined, {
-                        day: "numeric",
-                        month: "short",
-                      })
-                    : "not yet"}
-                </span>
+                {inner}
               </div>
             );
           })}

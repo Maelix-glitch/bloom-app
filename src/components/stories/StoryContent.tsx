@@ -11,6 +11,7 @@ import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import type { Story } from "@/lib/profile/types";
 import { STORY_KIND_META, storyMediaUrl } from "@/lib/profile/storyMeta";
+import { StoryCanvas, type CanvasMedia } from "@/components/stories/StoryCanvas";
 
 export function StoryContent({
   story,
@@ -35,6 +36,35 @@ export function StoryContent({
       : atmosphere === "ink"
         ? "var(--surface)"
         : `radial-gradient(120% 90% at 50% 0%, color-mix(in oklab, ${accent} 10%, transparent), transparent 62%), radial-gradient(90% 70% at 50% 110%, color-mix(in oklab, ${accent} 7%, transparent), transparent 55%)`;
+
+  /* Rich stories render through the shared canvas — same pixels everywhere. */
+  const isRich =
+    story.mediaType === "video" ||
+    story.elements.length > 0 ||
+    story.backgroundId != null ||
+    story.filterId != null ||
+    story.music != null;
+  if (isRich) {
+    const media: CanvasMedia =
+      story.mediaType === "video"
+        ? { type: "video", src: storyMediaUrl(story) }
+        : story.mediaType === "image" && story.mediaPath
+          ? { type: "image", src: storyMediaUrl(story) }
+          : { type: "none", src: null };
+    return (
+      <StoryCanvas
+        media={media}
+        backgroundId={story.backgroundId}
+        filterId={story.filterId}
+        adjustments={story.adjustments}
+        elements={story.elements}
+        mode="static"
+        alt={story.altText ?? story.title}
+        createdAt={story.createdAt}
+        className={className}
+      />
+    );
+  }
 
   return (
     <figure

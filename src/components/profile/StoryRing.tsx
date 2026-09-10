@@ -4,11 +4,12 @@
  * never pasted on: constant stroke, constant inset, stable at every size.
  *
  *   none    — no presence; identity stands alone
- *   unseen  — a quiet multi-tone Bloom arc (lavender → soft blue → warm gold)
- *   seen    — the same circle, dimmed to a whisper
+ *   unseen  — the Bloom arc (lavender → rose → champagne)
+ *   seen    — the same circle, dimmed to a whisper (shape + tone, not color alone)
  *   prompt  — dashed invitation to add a story
  *
- * Motion policy: a single slow entrance when the ring appears; nothing loops.
+ *   tone="close" — the sage-mist arc for close-friends stories.
+ *   pulse — a single bloom pulse when a new story lands; never loops.
  */
 
 import { accentVar } from "@/components/mood/primitives";
@@ -22,15 +23,19 @@ export function StoryRing({
   size,
   accent,
   animateIn = false,
+  pulse = false,
+  tone = "bloom",
   children,
   className,
 }: {
   state: StoryRingState;
   size: number;
   accent: BloomAccent;
-  animateIn?: boolean;
+  animateIn?: boolean | undefined;
+  pulse?: boolean | undefined;
+  tone?: "bloom" | "close" | undefined;
   children: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   const stroke = size >= 96 ? 2.5 : 2;
   const inset = size >= 96 ? 6 : 5;
@@ -38,7 +43,7 @@ export function StoryRing({
 
   return (
     <span
-      className={cn("relative inline-grid place-items-center", className)}
+      className={cn("bstory relative inline-grid place-items-center rounded-full", className)}
       style={{ width: size + inset * 2 + stroke * 2, height: size + inset * 2 + stroke * 2 }}
     >
       {state !== "none" ? (
@@ -47,20 +52,20 @@ export function StoryRing({
           className={cn(
             "pointer-events-none absolute inset-0 rounded-full transition-[opacity,transform] duration-[var(--motion-med)]",
             animateIn && "story-ring-enter",
+            pulse && active && "story-ring-bloom",
           )}
           style={
             active
               ? {
                   padding: stroke,
-                  background:
-                    "linear-gradient(135deg, var(--violet), var(--sky) 52%, var(--amber))",
+                  background: tone === "close" ? "var(--story-ring-close)" : "var(--story-ring)",
                   WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
                   WebkitMaskComposite: "xor",
                   maskComposite: "exclude",
                 }
               : state === "seen"
                 ? {
-                    border: `${stroke}px solid color-mix(in oklab, var(--profile-accent, var(--violet)) 32%, transparent)`,
+                    border: `${stroke}px solid var(--story-ring-seen)`,
                   }
                 : {
                     border: `${stroke}px dashed color-mix(in oklab, ${accentVar[accent]} 55%, transparent)`,

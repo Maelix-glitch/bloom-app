@@ -45,6 +45,13 @@ import leafDark from "@/assets/home/leaf-dark.jpg";
 import { RankChip } from "@/components/progression/RankChip";
 import { componentsById } from "@/lib/rewards/catalog";
 import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
+import { StoryRail } from "@/components/stories/StoryRail";
+import { StoryComposer } from "@/components/stories/StoryComposer";
+import { StoryViewer } from "@/components/stories/StoryViewer";
+import { seenStore } from "@/lib/stories/seen";
+import type { CreateStoryInput } from "@/lib/profile/storyService";
+import type { Story } from "@/lib/profile/types";
+import { toast } from "sonner";
 
 const TITLE = "Bloom — Today";
 const DESCRIPTION =
@@ -124,6 +131,58 @@ function TodayPage() {
   /** Which habit the dialog is editing; null = creating a new one. */
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
   const [habitNotice, setHabitNotice] = useState<string | null>(null);
+
+  /* stories — the day begins with the people in it (starting with you) */
+  const [storyComposerOpen, setStoryComposerOpen] = useState(false);
+  const [storyViewer, setStoryViewer] = useState<{
+    stories: Story[];
+    startIndex: number;
+  } | null>(null);
+  const [, setSeenTick] = useState(0);
+  useEffect(() => {
+    const onSeen = () => setSeenTick((t) => t + 1);
+    window.addEventListener("bloom:story-seen", onSeen);
+    return () => window.removeEventListener("bloom:story-seen", onSeen);
+  }, []);
+  const homeStories = useMemo(() => space.storiesByAge?.active ?? [], [space.storiesByAge]);
+  const homeMilestones = useMemo(
+    () => (space.journey.status === "ready" ? space.journey.milestones.achieved : []),
+    [space.journey],
+  );
+  const publishHomeStory = async (input: CreateStoryInput) => {
+    try {
+      await space.actions.publishStory(input);
+      toast(input.visibility === "public" ? "Story published." : "Saved privately.");
+    } catch (error) {
+      throw error instanceof Error && error.message
+        ? error
+        : new Error("Couldn't publish your story.");
+    }
+  };
+  const deleteHomeStory = (story: Story) => {
+    void space.actions
+      .removeStory(story)
+      .then(({ undo }) => {
+        setStoryViewer((v) =>
+          v && v.stories.length <= 1
+            ? null
+            : v
+              ? { ...v, stories: v.stories.filter((s) => s.id !== story.id) }
+              : null,
+        );
+        toast("Story deleted.", {
+          action: {
+            label: "Undo",
+            onClick: () => {
+              void undo().catch(() => toast.error("Couldn't bring that back."));
+            },
+          },
+        });
+      })
+      .catch((error: unknown) =>
+        toast.error(error instanceof Error ? error.message : "Couldn't delete that just now."),
+      );
+  };
 
   const today = trackers.today;
   const identity = space.identity?.identity ?? null;
@@ -413,6 +472,22 @@ function TodayPage() {
           </figure>
         </header>
 
+        {/* stories — a quiet ring row under the greeting, yours first */}
+        {space.authState !== "signed-out" && space.userId ? (
+          <div className="mt-7">
+            <StoryRail
+              name={identity?.displayName ?? "You"}
+              avatarPath={identity?.avatarPath ?? null}
+              accent={identity?.accent ?? "violet"}
+              stories={homeStories}
+              seenIds={new Set(homeStories.filter((s) => seenStore.has(s.id)).map((s) => s.id))}
+              loading={space.storiesByAge == null}
+              onAdd={() => setStoryComposerOpen(true)}
+              onOpen={(index) => setStoryViewer({ stories: homeStories, startIndex: index })}
+            />
+          </div>
+        ) : null}
+
         {/* habits — high on the page, right under the greeting */}
         <div className="mt-8">
           <HabitsSection
@@ -529,6 +604,35 @@ function TodayPage() {
         prefill={habitPrefill}
       />
       <HabitUndo undoable={habits.undoable} onUndo={habits.undo} onDismiss={habits.dismissUndo} />
+
+      {/* stories: today's rings, the creator, and the session */}
+      {space.userId ? (
+        <>
+          <StoryComposer
+            open={storyComposerOpen}
+            userId={space.userId}
+            defaultAccent={identity?.accent ?? "violet"}
+            defaultVisibility={space.identity?.privacy.storyVisibility ?? "private"}
+            moodEntries={mood.entries}
+            rewards={space.rewardsBlock?.status === "ready" ? space.rewardsBlock.data : []}
+            milestones={homeMilestones}
+            onPublish={publishHomeStory}
+            onClose={() => setStoryComposerOpen(false)}
+          />
+          <StoryViewer
+            target={storyViewer}
+            viewerName={identity?.displayName ?? "You"}
+            viewerAvatarPath={identity?.avatarPath ?? null}
+            accent={identity?.accent ?? "violet"}
+            userId={space.userId}
+            userName={identity?.displayName ?? null}
+            ownerId={space.userId}
+            onSeen={(story) => seenStore.mark(story.id)}
+            onDelete={storyViewer ? deleteHomeStory : undefined}
+            onClose={() => setStoryViewer(null)}
+          />
+        </>
+      ) : null}
 
       {!trackers.hydrated ? (
         <div

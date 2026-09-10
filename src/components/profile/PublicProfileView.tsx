@@ -15,18 +15,29 @@ import { StoryRing } from "@/components/profile/StoryRing";
 import { StoryViewer } from "@/components/stories/StoryViewer";
 import { HighlightRail } from "@/components/highlights/HighlightRail";
 import { FeaturedCard } from "@/components/profile/FeaturedMoment";
+import { seenStore } from "@/lib/stories/seen";
 
 export function PublicProfileView({
   model,
   asPreview = false,
+  visitorId = null,
+  visitorName = null,
 }: {
   model: ProfileViewModel;
   asPreview?: boolean;
+  visitorId?: string | null;
+  visitorName?: string | null;
 }) {
   const [viewer, setViewer] = useState<number | null>(null);
   const [highlightViewIndex, setHighlightViewIndex] = useState<number | null>(null);
+  const [, setSeenTick] = useState(0);
 
   const { identity, stories, highlights, featured } = model;
+  const hasUnseen = stories.some((s) => !seenStore.has(s.id));
+  const recordSeen = (id: string) => {
+    seenStore.mark(id);
+    setSeenTick((t) => t + 1);
+  };
   const highlightView =
     highlightViewIndex !== null ? (highlights[highlightViewIndex] ?? null) : null;
   const hasContent = stories.length > 0 || highlights.length > 0 || Boolean(featured);

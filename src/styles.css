@@ -3,6 +3,8 @@
 @import "tw-animate-css";
 /* Bloom's own motion primitives: press, arrival, changed, pending. */
 @import "./styles/motion.css";
+/* Bloom Story Platform: rings, rail, viewer, editor, trays, archive. */
+@import "./styles/stories.css";
 
 @custom-variant dark (&:is(.dark *));
 

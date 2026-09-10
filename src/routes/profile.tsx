@@ -30,11 +30,12 @@ import { Atmosphere } from "@/components/mood/Atmosphere";
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import { EMOTION_MAP } from "@/lib/mood/types";
-import { seenStories } from "@/lib/profile/drafts";
+import { seenStore } from "@/lib/stories/seen";
 import { objectUrl } from "@/lib/profile/profileService";
 import { resolveAvatar } from "@/lib/profile/presetAvatars";
 import { useAvatarAmbient } from "@/lib/profile/ambient";
-import { isStoryActive, type Story } from "@/lib/profile/types";
+import { isStoryActive, type Milestone, type Story } from "@/lib/profile/types";
+import { StorySettings } from "@/components/stories/StorySettings";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
 import { buildViewModel, resolveFeatured } from "@/components/profile/ProfileView";
 import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
@@ -62,6 +63,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const profileSearchSchema = z.object({
   story: z.string().optional(),
+  view: z.string().optional(),
 });
 
 export type ProfileSearch = z.infer<typeof profileSearchSchema>;
@@ -91,7 +93,7 @@ const TABS: { id: ProfileTab; label: string }[] = [
 ];
 
 function ProfilePage() {
-  const { story: storyParam } = Route.useSearch();
+  const { story: storyParam, view: viewParam } = Route.useSearch();
   const navigate = useNavigate();
   const space = useProfileSpace();
   const {
@@ -108,6 +110,7 @@ function ProfilePage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [storySettingsOpen, setStorySettingsOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
@@ -133,10 +136,20 @@ function ProfilePage() {
   // watch/unwatch state hydrates after mount (SSR-safe)
   useEffect(() => {
     const active = storiesByAge?.active ?? [];
-    setSeenIds(new Set(active.filter((s) => seenStories.has(s.id)).map((s) => s.id)));
+    setSeenIds(new Set(active.filter((s) => seenStore.has(s.id)).map((s) => s.id)));
+  }, [storiesByAge]);
+  /* stay in sync with viewers elsewhere on the page (Home rail, public view) */
+  useEffect(() => {
+    const onSeen = () => {
+      setSeenIds(
+        new Set((storiesByAge?.active ?? []).filter((s) => seenStore.has(s.id)).map((s) => s.id)),
+      );
+    };
+    window.addEventListener("bloom:story-seen", onSeen);
+    return () => window.removeEventListener("bloom:story-seen", onSeen);
   }, [storiesByAge]);
   const markSeen = useCallback((story: Story) => {
-    seenStories.mark(story.id);
+    seenStore.mark(story.id);
     setSeenIds((prev) => (prev.has(story.id) ? prev : new Set([...prev, story.id])));
   }, []);
 
@@ -208,6 +221,7 @@ function ProfilePage() {
     kind: "mood" | "reflection";
     id: string;
   } | null>(null);
+  const [composerMilestone, setComposerMilestone] = useState<Milestone | null>(null);
   useEffect(() => {
     if (!storyParam) return;
     const m = /^(mood|reflection):(.+)$/.exec(storyParam);
@@ -215,8 +229,17 @@ function ProfilePage() {
       setComposerSource({ kind: m[1] as "mood" | "reflection", id: m[2]! });
       setComposerOpen(true);
     }
-    void navigate({ to: "/profile", search: {}, replace: true });
+    void navigate({ to: "/profile", search: { view: undefined } as never, replace: true });
   }, [storyParam, navigate]);
+
+  /* deep link to one moment: /profile?view=<story-id> */
+  useEffect(() => {
+    if (!viewParam || !storiesByAge) return;
+    const all = [...storiesByAge.active, ...storiesByAge.archived];
+    const story = all.find((s) => s.id === viewParam);
+    if (story) setViewer({ stories: [story], startIndex: 0 });
+    void navigate({ to: "/profile", search: {}, replace: true });
+  }, [viewParam, storiesByAge, navigate]);
 
   /* profile share */
   const handleShare = useCallback(async () => {
@@ -770,6 +793,12 @@ function ProfilePage() {
                     accent={accent}
                     memberSince={identity.memberSince}
                     storyCount={allStories.length}
+                    onShareMilestone={(milestoneId) => {
+                      const milestone = milestonesList.find((m) => m.id === milestoneId) ?? null;
+                      if (!milestone) return;
+                      setComposerMilestone(milestone);
+                      setComposerOpen(true);
+                    }}
                   />
                 </div>
               </section>
@@ -794,6 +823,7 @@ function ProfilePage() {
                 onShare={() => void handleShare()}
                 onPreview={() => setPreviewOpen(true)}
                 onOpenArchive={() => setArchiveOpen(true)}
+                onOpenStorySettings={() => setStorySettingsOpen(true)}
                 onEdit={() => setEditorOpen(true)}
                 onSignOut={() => {
                   void space.actions.signOut();
@@ -871,10 +901,12 @@ function ProfilePage() {
               rewards={rewardsBlock?.status === "ready" ? rewardsBlock.data : []}
               milestones={milestonesList}
               initialSource={composerSource}
+              initialMilestone={composerMilestone}
               onPublish={publishStory}
               onClose={() => {
                 setComposerOpen(false);
                 setComposerSource(null);
+                setComposerMilestone(null);
               }}
             />
           ) : (
@@ -920,6 +952,9 @@ function ProfilePage() {
             onDelete={space.actions.removeHighlight}
             onClose={() => setHighlightEditor(null)}
           />
+          {storySettingsOpen ? (
+            <StorySettings userId={userId} onClose={() => setStorySettingsOpen(false)} />
+          ) : null}
           <FeaturedPicker
             open={featuredOpen}
             onClose={() => setFeaturedOpen(false)}
@@ -939,7 +974,12 @@ function ProfilePage() {
         viewerName={identity?.identity.displayName ?? "You"}
         viewerAvatarPath={identity?.identity.avatarPath ?? null}
         accent={accent}
+        userId={userId}
+        userName={identity?.identity.displayName ?? null}
+        ownerId={userId}
         onSeen={markSeen}
+        onShareAgain={(story) => void shareAgain(story)}
+        onAddToHighlight={(story) => setHighlightEditor({ id: null, preselect: story.id })}
         onDelete={
           viewer
             ? (story) => {
@@ -961,7 +1001,14 @@ function ProfilePage() {
       <Dialog open={previewOpen} onOpenChange={(o) => !o && setPreviewOpen(false)}>
         <DialogContent className="top-1/2 left-1/2 max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-[680px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border-border bg-background">
           <DialogTitle className="sr-only">Profile preview</DialogTitle>
-          {previewModel ? <PublicProfileView model={previewModel} asPreview /> : null}
+          {previewModel ? (
+            <PublicProfileView
+              model={previewModel}
+              asPreview
+              visitorId={userId}
+              visitorName={identity?.identity.displayName ?? null}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
 

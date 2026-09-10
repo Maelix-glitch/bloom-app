@@ -22,6 +22,7 @@ import {
 const KIND_LABEL: Record<StoryKind, string> = {
   text: "Note",
   photo: "Photo",
+  video: "Video",
   mood: "Mood",
   reflection: "Reflection",
   win: "Win",
