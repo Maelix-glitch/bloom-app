@@ -17,6 +17,7 @@ import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 import { AdminBar } from "@/components/welcome/AdminBar";
 import { ConnectionNotice } from "@/components/system/ConnectionNotice";
+import { BloomToaster } from "@/components/system/BloomToaster";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
 
 function NotFoundComponent() {
@@ -166,6 +167,9 @@ function RootComponent() {
       <ConnectionNotice />
       {/* Equipped Atelier look → app-wide skin (no-op until something is equipped). */}
       <BloomSkin />
+      {/* One toast surface for every route — a confirmation that never renders
+          is a silent failure the person can't tell apart from a real one. */}
+      <BloomToaster />
     </QueryClientProvider>
   );
 }

@@ -3,9 +3,11 @@
  *
  * One device-first conversation store per profile: conversations are small,
  * private, ordered threads with a title, a mode and a message list. The same
- * grounded responder (`lib/coach/*`) answers every request; the Supabase edge
- * function answers when it can and the deterministic on-device responder when
- * it can't — the architecture of `engine.ts` is untouched.
+ * grounded responder (`lib/coach/*`) shapes every request; the Supabase edge
+ * function is the only thing that answers it. There is no on-device answer: if
+ * every configured cloud provider fails, `engine.ts` throws `CoachUnavailable`
+ * and the UI shows an honest connection error with a retry — Bloom never
+ * pretends a fabricated reply came from the coach.
  *
  * Conversations persist locally (per profile id), because grouping is a
  * device-side view. The signed-in cloud thread keeps working as it always did:

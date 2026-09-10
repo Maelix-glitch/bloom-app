@@ -454,6 +454,101 @@
   backdrop-filter: blur(14px);
 }
 
+/* ---------------------------------------------------------------------------
+ * Home — the connection map stage.
+ *
+ * The SVG scales by itself (one viewBox), but the hub and the six signal nodes
+ * are DOM overlays, and they used to be positioned in raw pixels inside a box
+ * that `max-width: 100%` quietly made non-square. On a phone that meant the
+ * drawing shrank and the nodes didn't: they drifted off their spokes and the
+ * top one clipped against the panel edge.
+ *
+ * The stage is now a container, sized `min(340px, 100%)` with a locked 1:1
+ * ratio, and every overlay measurement is in `cqw` — 1cqw = 1% of the stage,
+ * so the hub, the node chips and their labels scale with the drawing as one
+ * unit. No ResizeObserver, no post-paint jump.
+ * ------------------------------------------------------------------------- */
+.cm-stage {
+  position: relative;
+  container-type: inline-size;
+  width: min(340px, 100%);
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+}
+.cm-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 23.5cqw;
+  height: 23.5cqw;
+  padding-inline: 2.35cqw;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  font-family: var(--font-display);
+  font-size: 5.3cqw;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: var(--foreground);
+}
+.cm-hub-halo {
+  position: absolute;
+  inset: -9.4cqw;
+  border-radius: 999px;
+  background: var(--home-gradient-glow);
+}
+.cm-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.76cqw;
+  border-radius: 12px;
+  outline: none;
+}
+.cm-node:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 60%, transparent);
+}
+.cm-node-disc {
+  display: grid;
+  place-items: center;
+  width: 12.94cqw;
+  height: 12.94cqw;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: color-mix(in oklab, var(--surface) 90%, transparent);
+}
+.cm-node-icon {
+  width: 5.3cqw;
+  height: 5.3cqw;
+}
+.cm-node-label {
+  font-size: 3.24cqw;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+}
+.cm-node-value {
+  font-size: 2.94cqw;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* On a 320px phone the map is ~240px wide and the type above drops under 8px,
+   which is unreadable. Below 400px the panel is full width, so the stage is
+   wide enough to hold a legible floor without the nodes colliding. */
+@media (max-width: 400px) {
+  .cm-node-label {
+    font-size: max(3.24cqw, 9px);
+  }
+  .cm-node-value {
+    font-size: max(2.94cqw, 8.5px);
+  }
+}
+
 .home-chip {
   display: inline-flex;
   align-items: center;
@@ -827,7 +922,9 @@
      go to 0 once the rail takes over at lg. Anything a page pins to the bottom
      of the viewport should add --app-bottom-nav to its offset. */
   --app-top-bar: 60px;
-  --app-bottom-nav: 56px;
+  /* 56px of tab bar plus the device's own home-indicator inset, so anything
+     anchored to the bottom of the screen clears the indicator automatically. */
+  --app-bottom-nav: calc(56px + env(safe-area-inset-bottom, 0px));
   --app-rail: 0px;
   padding-top: var(--app-top-bar);
 }
@@ -880,6 +977,12 @@
 .app-mobile-bar {
   background: color-mix(in oklab, var(--surface) 55%, var(--background));
   backdrop-filter: blur(16px);
+}
+/* The phone tab bar: the extra bottom padding is the safe area, and the bar's
+   own background fills it — otherwise the labels sit under the home indicator
+   and the page behind shows through the gap. */
+.app-shell > nav.app-mobile-nav {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 }
 .app-sidebar-rule {
   background: linear-gradient(90deg, var(--border-strong), transparent);

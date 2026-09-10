@@ -260,7 +260,7 @@ export function HomeMobileNav() {
   const navItems = useNavItems();
   return (
     <nav
-      className="app-nav fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 py-2 backdrop-blur-xl lg:hidden"
+      className="app-nav app-mobile-nav fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 py-2 backdrop-blur-xl lg:hidden"
       aria-label="Primary"
     >
       {navItems.map((item) => {

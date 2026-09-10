@@ -1,0 +1,543 @@
+/*
+ * The Mood moment sheet.
+ *
+ * The rule this file exists to enforce: logging a mood is capturing a feeling,
+ * not filling in a form. So the sheet is built from three soft bands with no
+ * boxes around them — a face to choose, a word or two to add, a save — and
+ * every measurement (sleep, steps, screen, stress, …) is behind one quiet
+ * "More detail" line that most people never open.
+ *
+ * Motion is transform + opacity only, and everything collapses under
+ * prefers-reduced-motion. The face states do the emotional work: the unchosen
+ * faces dim, the chosen one lifts, glows in its own colour and settles.
+ */
+
+.bmood {
+  /* The mood palette lives on the sheet itself, not on `.mood-page`, so the
+     faces look identical on Home, Mood and Mood Intelligence. */
+  --mp-happy: oklch(0.86 0.1 85);
+  --mp-calm: oklch(0.76 0.06 145);
+  --mp-neutral: oklch(0.62 0.01 160);
+  --mp-sad: oklch(0.72 0.06 250);
+  --mp-anxious: oklch(0.71 0.08 30);
+  --mp-angry: oklch(0.64 0.12 25);
+
+  --bmood-accent: var(--violet);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------- header */
+
+.bmood-head {
+  position: relative;
+  padding: 26px 26px 4px;
+}
+.bmood-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
+}
+.bmood-title {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 27px;
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.bmood-title em {
+  font-style: italic;
+  color: var(--bmood-accent);
+  transition: color 420ms var(--ease-out-expo);
+}
+.bmood-sub {
+  margin-top: 8px;
+  max-width: 42ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+}
+.bmood-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+/* --------------------------------------------------------------- faces */
+
+.bmood-faces {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  padding: 22px 18px 6px;
+}
+@media (max-width: 420px) {
+  .bmood-faces {
+    gap: 0;
+    padding-inline: 10px;
+  }
+}
+
+.bmood-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 2px 6px;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 420ms var(--ease-out-expo),
+    background-color 300ms ease,
+    opacity 300ms ease;
+}
+.bmood-face:hover {
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+.bmood-face:active {
+  transform: scale(0.94);
+}
+.bmood-face:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--bmood-accent) 70%, transparent);
+}
+
+/* Once something is chosen the rest step back — the selection is the focus. */
+.bmood-faces[data-has="true"] .bmood-face:not([aria-pressed="true"]) {
+  opacity: 0.45;
+}
+.bmood-faces[data-has="true"] .bmood-face:not([aria-pressed="true"]):hover {
+  opacity: 0.8;
+}
+
+.bmood-face-disc {
+  display: grid;
+  place-items: center;
+  transition:
+    transform 520ms var(--ease-out-expo),
+    filter 520ms var(--ease-out-expo);
+}
+.bmood-face[aria-pressed="true"] {
+  opacity: 1;
+}
+.bmood-face[aria-pressed="true"] .bmood-face-disc {
+  transform: scale(1.13);
+}
+/* a soft ring that breathes once on selection, then rests */
+.bmood-face-halo {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 76px;
+  height: 76px;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--bmood-face-color, var(--violet)) 26%, transparent),
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity 520ms var(--ease-out-expo);
+  pointer-events: none;
+}
+.bmood-face[aria-pressed="true"] .bmood-face-halo {
+  opacity: 1;
+}
+.bmood-face-label {
+  font-size: 11.5px;
+  line-height: 1;
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+  transition: color 300ms ease;
+}
+.bmood-face[aria-pressed="true"] .bmood-face-label {
+  color: var(--bmood-face-color, var(--foreground));
+}
+.bmood-face-tick {
+  position: absolute;
+  top: 2px;
+  right: 50%;
+  translate: 34px 0;
+  color: var(--bmood-face-color, var(--foreground));
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity 260ms ease,
+    scale 320ms var(--ease-out-expo);
+}
+.bmood-face[aria-pressed="true"] .bmood-face-tick {
+  opacity: 1;
+  scale: 1;
+}
+
+/* ------------------------------------------------------------ emotions */
+
+.bmood-band {
+  padding: 18px 26px 0;
+}
+.bmood-band-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+}
+
+.bmood-emotions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+.bmood-chip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+  font-size: 12.5px;
+  line-height: 1;
+  color: color-mix(in oklab, var(--foreground) 72%, transparent);
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    background-color 260ms ease,
+    border-color 260ms ease,
+    color 260ms ease;
+}
+.bmood-chip:hover {
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
+  color: var(--foreground);
+}
+.bmood-chip:active {
+  transform: scale(0.95);
+}
+.bmood-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--bmood-accent) 70%, transparent);
+}
+.bmood-chip[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--chip-accent, var(--violet)) 52%, transparent);
+  background: color-mix(in oklab, var(--chip-accent, var(--violet)) 16%, transparent);
+  color: color-mix(in oklab, var(--chip-accent, var(--violet)) 88%, var(--foreground));
+}
+
+/* ---------------------------------------------------------------- note */
+
+.bmood-note {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px 16px;
+  min-height: 74px;
+  border: 0;
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--foreground);
+  resize: none;
+  outline: none;
+  transition:
+    background-color 260ms ease,
+    box-shadow 260ms ease;
+}
+.bmood-note::placeholder {
+  color: color-mix(in oklab, var(--foreground) 34%, transparent);
+}
+.bmood-note:focus {
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--bmood-accent) 45%, transparent);
+}
+
+/* ---------------------------------------------------------- disclosure */
+
+.bmood-more {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 10px 4px;
+  border: 0;
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  background: transparent;
+  font-size: 12.5px;
+  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--motion-fast) ease;
+}
+.bmood-more:hover {
+  color: var(--foreground);
+}
+.bmood-more:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--bmood-accent) 60%, transparent);
+  border-radius: 8px;
+}
+.bmood-more-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+}
+.bmood-more-chevron {
+  transition: rotate 320ms var(--ease-out-expo);
+}
+.bmood-more[aria-expanded="true"] .bmood-more-chevron {
+  rotate: 180deg;
+}
+
+.bmood-detail {
+  display: grid;
+  gap: 20px;
+  padding: 18px 26px 4px;
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.bmood-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (max-width: 460px) {
+  .bmood-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.bmood-field {
+  display: grid;
+  gap: 6px;
+}
+.bmood-field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 46%, transparent);
+}
+.bmood-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+  font-size: 13.5px;
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+.bmood-input::placeholder {
+  color: color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+.bmood-input:focus {
+  border-color: color-mix(in oklab, var(--bmood-accent) 50%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--bmood-accent) 12%, transparent);
+}
+.bmood-input--mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+select.bmood-input {
+  appearance: none;
+  background-image: none;
+}
+.bmood-unit {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: color-mix(in oklab, var(--foreground) 40%, transparent);
+}
+.bmood-slider {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  appearance: none;
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+  outline: none;
+  cursor: pointer;
+}
+.bmood-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--foreground);
+  border: 3px solid var(--surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: scale var(--motion-fast) ease;
+}
+.bmood-slider::-webkit-slider-thumb:active {
+  scale: 1.12;
+}
+.bmood-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--foreground);
+  border: 3px solid var(--surface);
+}
+.bmood-slider:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--bmood-accent) 26%, transparent);
+}
+.bmood-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--foreground);
+}
+
+/* -------------------------------------------------------------- footer */
+
+.bmood-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 26px 22px;
+  margin-top: 6px;
+}
+.bmood-save {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bmood-accent);
+  color: oklch(0.17 0.02 150);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    transform 200ms var(--ease-out-expo),
+    filter 200ms ease,
+    opacity 200ms ease;
+}
+.bmood-save:hover:not(:disabled) {
+  filter: brightness(1.07);
+}
+.bmood-save:active:not(:disabled) {
+  transform: scale(0.975);
+}
+.bmood-save:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--bmood-accent) 34%, transparent);
+}
+.bmood-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.bmood-saved {
+  filter: none;
+  background: color-mix(in oklab, var(--sage) 88%, var(--bmood-accent));
+}
+
+/* Delete, and the calm two-button confirm that replaces it in place. */
+.bmood-danger {
+  flex: none;
+  padding: 10px 4px;
+  border: 0;
+  background: transparent;
+  font-size: 12.5px;
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  cursor: pointer;
+  transition: color var(--motion-fast) ease;
+}
+.bmood-danger:hover {
+  color: var(--rose);
+}
+.bmood-danger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--rose) 55%, transparent);
+  border-radius: 8px;
+}
+.bmood-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--rose) 34%, transparent);
+  background: color-mix(in oklab, var(--rose) 8%, transparent);
+}
+.bmood-confirm-q {
+  padding-left: 8px;
+  font-size: 12.5px;
+  color: color-mix(in oklab, var(--foreground) 74%, transparent);
+  white-space: nowrap;
+}
+.bmood-confirm-btn {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) ease,
+    filter var(--motion-fast) ease;
+}
+.bmood-confirm-btn:active {
+  transform: scale(0.96);
+}
+.bmood-confirm-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--foreground) 40%, transparent);
+}
+.bmood-confirm-keep {
+  background: transparent;
+  color: color-mix(in oklab, var(--foreground) 62%, transparent);
+}
+.bmood-confirm-keep:hover {
+  color: var(--foreground);
+}
+.bmood-confirm-go {
+  background: color-mix(in oklab, var(--rose) 84%, transparent);
+  color: oklch(0.98 0.01 20);
+}
+.bmood-confirm-go:hover {
+  filter: brightness(1.06);
+}
+
+.bmood-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 26px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--rose) 34%, transparent);
+  background: color-mix(in oklab, var(--rose) 8%, transparent);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--rose) 92%, var(--foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bmood-face,
+  .bmood-face-disc,
+  .bmood-face-halo,
+  .bmood-face-tick,
+  .bmood-face-label,
+  .bmood-chip,
+  .bmood-more-chevron,
+  .bmood-save,
+  .bmood-note,
+  .bmood-input {
+    transition-duration: 1ms;
+  }
+  .bmood-face[aria-pressed="true"] .bmood-face-disc {
+    transform: scale(1.06);
+  }
+}

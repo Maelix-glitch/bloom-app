@@ -14,6 +14,7 @@ import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import { BarChart3, TrendingUp, Zap, Calendar, Settings, Plus } from "lucide-react";
 
 import { useTrackers } from "@/hooks/useTrackers";
+import { useHabits } from "@/hooks/useHabits";
 import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
@@ -233,6 +234,7 @@ const INSIGHTS_TITLE: CSSProperties = {
 
 export function PremiumDashboard() {
   const store = useTrackers();
+  const habits = useHabits();
   const [theme] = useCycleTheme();
   const { analysis, hydrated } = store;
 
@@ -422,8 +424,8 @@ export function PremiumDashboard() {
           open={addHabitOpen}
           onClose={() => setAddHabitOpen(false)}
           onSubmit={async (habit) => {
-            console.log("[PremiumDashboard] Habit created:", habit);
-            // TODO: Call API to save habit
+            /* Writes to the same store Today uses — no separate path, no fake success. */
+            await habits.addHabit(habit);
           }}
         />
         {selectedTracker && (
@@ -431,7 +433,6 @@ export function PremiumDashboard() {
             store={store}
             tracker={selectedTracker}
             onClose={() => setSelectedTracker(null)}
-            onSaved={(id) => console.log(`${trackerDef(id).name} logged`)}
           />
         )}
       </div>

@@ -9,7 +9,8 @@
   position: fixed;
   right: 12px;
   bottom: calc(12px + env(safe-area-inset-bottom));
-  z-index: 2300;
+  /* Under the sheet layer (2000+): when a dialog is open it owns the screen. */
+  z-index: 1900;
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr) 22px;
   align-items: start;
