@@ -16,23 +16,43 @@
  * from bookkeeping into a mode.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, Shield } from "lucide-react";
 
 import { AdminPanel } from "@/components/welcome/AdminPanel";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { isAdmin } from "@/lib/onboarding/profileKind";
 import "@/styles/admin-panel.css";
 
 export function AdminBar() {
   const { state, hydrated, reset } = useOnboarding();
+  const adminAccess = useAdminAccess();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
+  /*
+   * The local `admin` flag only records *how someone got in*; whether they may
+   * stay in is the database's answer. Everyone who used the old ungated door
+   * has the flag set, so clearing it here is what puts them back into the real
+   * setup flow instead of leaving them skipping onboarding forever with a mode
+   * they can no longer see.
+   *
+   * Only ever on a settled "denied" — never while the check is still in
+   * flight, or a slow network would throw an admin out of their own app.
+   */
+  const clearedRef = useRef(false);
+  const staleAdminFlag = hydrated && isAdmin(state) && adminAccess.status === "denied";
+  useEffect(() => {
+    if (!staleAdminFlag || clearedRef.current) return;
+    clearedRef.current = true;
+    reset();
+  }, [staleAdminFlag, reset]);
+
   /* `hydrated` guards the server pass, which can't read storage. */
-  if (!hydrated || !isAdmin(state)) return null;
+  if (!hydrated || !isAdmin(state) || adminAccess.status !== "granted") return null;
 
   return (
     <>
@@ -45,7 +65,7 @@ export function AdminBar() {
         <span className="adm-bar-mark" aria-hidden>
           <Shield size={11} />
         </span>
-        <span className="adm-bar-label">Admin</span>
+        <span className="adm-bar-label">{adminAccess.devOnly ? "Dev" : "Admin"}</span>
         <button type="button" className="adm-bar-btn" onClick={() => setOpen(true)}>
           Go to…
         </button>
@@ -66,7 +86,7 @@ export function AdminBar() {
       </motion.div>
 
       <AnimatePresence>
-        {open ? (
+        {open && adminAccess.status === "granted" ? (
           <AdminPanel
             onLaunch={(to) => {
               setOpen(false);

@@ -93,12 +93,16 @@ export function parseOnboarding(raw: unknown): OnboardingState | null {
 export const tracksCycle = (state: OnboardingState): boolean => state.kind !== "no-cycle";
 
 /**
- * Is the app running in admin mode?
+ * Was this session entered through the admin door?
  *
- * Deliberately not a permission check — Bloom has no privileged data behind
- * this, and the real reward admin has its own server-side rules. It only means
- * "this person came in through the developer door", which the UI uses to keep
- * an exit visible.
+ * A **mode**, not a permission. It records how someone got in, which is what
+ * lets the admin bar stay visible so there is a way back out, and marks that
+ * no real setup answers were given.
+ *
+ * Whether someone may *use* the door at all is decided by the database — see
+ * `useAdminAccess`, which asks `public.app_admins`. A stored `admin: true` on
+ * an account that isn't in that table is stale, and the admin bar clears it
+ * rather than honouring it.
  */
 export const isAdmin = (state: OnboardingState): boolean => state.admin === true;
 

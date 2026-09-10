@@ -13,9 +13,11 @@
  *     Picking a destination *is* the confirmation, so there's no extra step.
  *   · **Keyboard first.** Type to filter, arrows to move, enter to go. This is
  *     a developer tool and it should behave like one — the mouse is optional.
- *   · **Honest about what it is.** No fake authentication. Bloom has nothing
- *     privileged behind this door, and pretending otherwise would be theatre;
- *     the reward admin enforces its own rules server-side. The panel says so.
+ *   · **Honest about what it is.** Reaching this panel means the database
+ *     already said yes: `useAdminAccess` asks `public.app_admins` before a
+ *     single caller renders the button. Nothing here invents an identity, and
+ *     the reward admin and point audit still enforce their own rules on the
+ *     server regardless of how you got here. The footer says so.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -211,8 +213,9 @@ export function AdminPanel({
             Sound {soundOn ? "on" : "off"}
           </button>
           <p className="adm-note">
-            No privileged data sits behind this door — it only skips setup. The reward
-            admin enforces its own rules on the server.
+            This door only appears for an account listed in Bloom's admin table. It skips setup and
+            opens surfaces directly — the reward admin and point audit still check your access on
+            the server.
           </p>
         </footer>
       </motion.div>

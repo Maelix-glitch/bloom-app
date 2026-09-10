@@ -17,12 +17,14 @@ import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { Welcome } from "@/components/welcome/Welcome";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { suggestedTrackers } from "@/lib/onboarding/profileKind";
 import { setPref } from "@/lib/prefs";
 
 export function WelcomeGate() {
   const { needsWelcome, finish, skipAsAdmin } = useOnboarding();
+  const adminAccess = useAdminAccess();
   const navigate = useNavigate();
 
   return (
@@ -42,6 +44,13 @@ export function WelcomeGate() {
               finish(answer);
             }}
             onAdmin={(to) => {
+              /*
+               * This is the only place that writes `admin: true`. The button
+               * that reaches it is already hidden unless the database granted
+               * access; checking again here means no future caller can write
+               * the flag without going through the same authority.
+               */
+              if (adminAccess.status !== "granted") return;
               /* Mark the mode first so the gate unmounts, then move — the
                  other order navigates underneath a full-screen overlay. */
               skipAsAdmin();

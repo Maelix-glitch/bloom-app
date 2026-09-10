@@ -15,7 +15,9 @@
  *
  * There is a **Launch as admin** door on every screen: it accepts every default,
  * turns everything on and gets out of the way — for the person building this,
- * not for the person using it.
+ * not for the person using it. It only renders for someone the database lists
+ * in `public.app_admins` (see `useAdminAccess`); for everybody else the button
+ * simply isn't there, rather than being present and refusing.
  *
  * The look follows a phone's own setup: a photograph drifting behind glass,
  * one enormous headline, a progress rail proving how short this is, and
@@ -27,6 +29,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Shield, Sparkles } from "lucide-react";
 
 import { useSound } from "@/hooks/useSound";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { FOCUS_LABEL, type FocusArea, type ProfileKind } from "@/lib/onboarding/profileKind";
 import { AdminPanel } from "@/components/welcome/AdminPanel";
 import heroWindow from "@/assets/mood/hero-window.jpg";
@@ -34,6 +37,7 @@ import flowerBranch from "@/assets/mood/flower-branch.jpg";
 import candle from "@/assets/mood/candle.jpg";
 import mountainLake from "@/assets/mood/mountain-lake.jpg";
 import "@/styles/welcome.css";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -82,6 +86,8 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
   /* The admin door opens a launcher rather than skipping straight in — see
      AdminPanel for why picking a destination is the whole interaction. */
   const [adminOpen, setAdminOpen] = useState(false);
+    /* Server-verified. `"checking"` and `"denied"` both mean "no door". */
+  const adminAccess = useAdminAccess();
   const reduced = useReducedMotion();
   const { sound } = useSound();
 
@@ -177,19 +183,24 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
               />
             ))}
           </div>
-          <button
-            type="button"
-            className="wl-skip"
-            onClick={() => {
-              sound("open");
-              setAdminOpen(true);
-            }}
-            aria-haspopup="dialog"
-            aria-expanded={adminOpen}
-          >
-            <Shield size={12} style={{ display: "inline", marginRight: 6, marginTop: -2 }} />
-            Launch as admin
-          </button>
+                    {/* The admin door exists only for someone Supabase lists as an admin.
+              It is removed rather than disabled: a shield button that is always
+              there and always refuses is a control that lies about itself. */}
+          {adminAccess.status === "granted" && (
+            <button
+              type="button"
+              className="wl-skip"
+              onClick={() => {
+                sound("open");
+                setAdminOpen(true);
+              }}
+              aria-haspopup="dialog"
+              aria-expanded={adminOpen}
+            >
+              <Shield size={12} style={{ display: "inline", marginRight: 6, marginTop: -2 }} />
+              Launch as admin
+            </button>
+          )}
         </div>
 
         <div className="wl-body">
@@ -350,7 +361,7 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
       </div>
 
       <AnimatePresence>
-        {adminOpen ? (
+        {adminOpen && adminAccess.status === "granted" ? (
           <AdminPanel onLaunch={onAdmin} onClose={() => setAdminOpen(false)} />
         ) : null}
       </AnimatePresence>
