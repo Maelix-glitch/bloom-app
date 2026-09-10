@@ -211,7 +211,7 @@ export function AssistantPanel({
             type="submit"
             disabled={!input.trim() || answering}
             aria-label="Send"
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
           >
             <Send className="size-3.5" />
           </button>

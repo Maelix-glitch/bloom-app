@@ -5,6 +5,8 @@
 @import "./styles/motion.css";
 /* Bloom Story Platform: rings, rail, viewer, editor, trays, archive. */
 @import "./styles/stories.css";
+/* Bloom mobile-first responsive system: shell, nav, sheets, type, guards. */
+@import "./styles/responsive.css";
 
 @custom-variant dark (&:is(.dark *));
 

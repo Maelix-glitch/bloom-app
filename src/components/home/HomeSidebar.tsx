@@ -255,12 +255,18 @@ export function HomeMobileBar() {
   );
 }
 
+/**
+ * The phone tab bar. Six destinations share the width equally (flex: 1) so
+ * every label always fits — even on a 320px phone — each item meets the
+ * 48px touch floor, and the bar's own background fills the home-indicator
+ * zone. Geometry lives in src/styles/responsive.css (§3).
+ */
 export function HomeMobileNav() {
   const { pathname } = useLocation();
   const navItems = useNavItems();
   return (
     <nav
-      className="app-nav app-mobile-nav fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 py-2 backdrop-blur-xl lg:hidden"
+      className="app-nav app-mobile-nav fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/92 backdrop-blur-xl lg:hidden"
       aria-label="Primary"
     >
       {navItems.map((item) => {
@@ -271,12 +277,11 @@ export function HomeMobileNav() {
             key={item.label}
             to={item.to}
             aria-current={active ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 rounded-lg px-2 py-1 text-[10px] ${
-              active ? "text-primary" : "text-muted-foreground"
-            }`}
+            aria-label={item.label}
+            className={active ? "text-primary" : "text-muted-foreground"}
           >
-            <Icon className="size-4" />
-            {item.label}
+            <Icon className="size-[22px]" strokeWidth={active ? 2.2 : 1.8} aria-hidden="true" />
+            <span aria-hidden="true">{item.label}</span>
           </Link>
         );
       })}

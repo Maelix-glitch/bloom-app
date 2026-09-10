@@ -1802,12 +1802,19 @@
 
 @media (max-width: 560px) {
   .reward-page-header h1 {
-    font-size: 44px;
+    font-size: clamp(30px, 10vw, 44px);
+    line-height: 1.05;
+    text-wrap: balance;
   }
   .reward-empty-state {
-    min-height: 520px;
-    margin-top: 35px;
-    padding: 54px 18px;
+    min-height: 0;
+    margin-top: 28px;
+    padding: 44px 20px;
+  }
+  .reward-loading-state,
+  .reward-error-state {
+    min-height: 260px;
+    padding: 36px 20px;
   }
   .reward-empty-state::before {
     inset: 13% 5%;

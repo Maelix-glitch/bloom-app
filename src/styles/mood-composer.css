@@ -81,6 +81,27 @@
     gap: 0;
     padding-inline: 10px;
   }
+  /* six faces share ~300px: the discs shrink instead of overflowing */
+  .bmood-face-disc svg {
+    width: 46px;
+    height: 46px;
+  }
+  .bmood-face-label {
+    font-size: 10px;
+  }
+  .bmood-face-halo {
+    width: 60px;
+    height: 60px;
+  }
+}
+@media (max-width: 359px) {
+  .bmood-face-disc svg {
+    width: 42px;
+    height: 42px;
+  }
+  .bmood-band {
+    padding-inline: 18px;
+  }
 }
 
 .bmood-face {
@@ -404,6 +425,12 @@ select.bmood-input {
   gap: 12px;
   padding: 16px 26px 22px;
   margin-top: 6px;
+}
+@media (max-width: 640px) {
+  /* the save action clears the home indicator on phones */
+  .bmood-foot {
+    padding: 12px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
 }
 .bmood-save {
   flex: 1;

@@ -125,10 +125,10 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
                         />
                       ))}
                     </span>
-                    <span className="lg-fig">
+                    <span className="lg-fig" data-label="Avg 7">
                       {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
                     </span>
-                    <span className="lg-fig">{stat.streak > 0 ? `${stat.streak}d` : "—"}</span>
+                    <span className="lg-fig" data-label="Run">{stat.streak > 0 ? `${stat.streak}d` : "—"}</span>
                     <span className="lg-actions">
                       {def.id === "energy"
                         ? [1, 2, 3, 4, 5].map((n) => (
@@ -335,34 +335,12 @@ export function Ledger({ theme = "nocturne" }: { theme?: string }) {
 
             <MetricsEntryModal store={store} open={metricsOpen} onClose={() => setMetricsOpen(false)} />
 
-            <div style={{ position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)", zIndex: 9999, pointerEvents: "none" }}>
+            <div className="premium-action-dock">
               <button
                 type="button"
                 onClick={() => setMetricsOpen(true)}
                 aria-haspopup="dialog"
-                style={{
-                  pointerEvents: "auto",
-                  background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
-                  color: "#ffffff",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.14em",
-                  fontSize: "0.78rem",
-                  padding: "16px 38px",
-                  borderRadius: 40,
-                  border: "1px solid rgba(255, 0, 85, 0.6)",
-                  boxShadow: "0 0 24px rgba(255, 0, 85, 0.5), 0 12px 32px rgba(255, 0, 85, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 0 32px rgba(255, 0, 85, 0.6), 0 16px 40px rgba(255, 0, 85, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 0 24px rgba(255, 0, 85, 0.5), 0 12px 32px rgba(255, 0, 85, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)";
-                }}
+                className="premium-log-cta"
               >
                 Log Metrics Today
               </button>
