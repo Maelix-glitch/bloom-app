@@ -30,6 +30,62 @@ import {
 const DESKTOP = { width: 640, height: 440 };
 const MOBILE = { width: 360, height: 440 };
 
+/**
+ * B9 · Loading twin of the mood web. Same panel, same header, same canvas and
+ * reading-column footprint — only the paint is a pulse. Shown until the mood
+ * record hydrates, so a cold first load reads as "loading" instead of a
+ * hollow, broken-looking web.
+ */
+export function MoodGraphSkeleton() {
+  return (
+    <section className="mp-panel p-6 sm:p-9 lg:p-11" aria-label="Loading mood web">
+      <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex min-w-0 items-start gap-3.5">
+          <span className="mt-1 size-5 shrink-0 animate-pulse rounded-full bg-gold/25" />
+          <div className="min-w-0">
+            <div className="h-7 w-40 animate-pulse rounded-md bg-surface-3" />
+            <div className="mt-2 h-4 w-64 max-w-full animate-pulse rounded-md bg-surface-3" />
+          </div>
+        </div>
+        <span className="h-4 w-36 shrink-0 animate-pulse rounded-md bg-surface-3" />
+      </div>
+
+      <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)] lg:items-stretch lg:gap-12">
+        <div className="relative flex min-h-[380px] flex-col overflow-hidden rounded-2xl border border-border">
+          <div className="mg-canvas-bg absolute inset-0" aria-hidden />
+          <div className="relative grid flex-1 animate-pulse place-items-center" aria-hidden>
+            <span className="absolute size-56 rounded-full border border-gold/25" />
+            <span className="absolute size-40 rounded-full border border-gold/20" />
+            <span className="absolute size-24 rounded-full border border-gold/15" />
+            <span className="size-12 rounded-full bg-gold/25" />
+          </div>
+          <div className="relative flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border px-5 py-3">
+            {[72, 96, 64, 80].map((w) => (
+              <span
+                key={w}
+                className="h-2.5 animate-pulse rounded-full bg-surface-3"
+                style={{ width: w }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <aside className="flex flex-col" aria-hidden>
+          <div className="h-3 w-16 animate-pulse rounded-md bg-surface-3" />
+          <div className="mt-4 h-7 w-48 max-w-full animate-pulse rounded-md bg-surface-3" />
+          <div className="mt-3 h-4 w-full animate-pulse rounded-md bg-surface-3" />
+          <div className="mt-2 h-4 w-5/6 animate-pulse rounded-md bg-surface-3" />
+          <div className="mt-auto pt-8">
+            <span className="block h-px w-10 bg-gold/50" />
+            <div className="mt-6 h-3 w-full animate-pulse rounded-md bg-surface-3" />
+            <div className="mt-2 h-3 w-2/3 animate-pulse rounded-md bg-surface-3" />
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 export function MoodGraph({
   days,
   entries,

@@ -23,6 +23,9 @@ let registered = false;
 export function registerServiceWorker(): void {
   if (registered || typeof window === "undefined") return;
   if (!("serviceWorker" in navigator)) return;
+  // Local dev is never cached: an old worker would serve yesterday's CSS
+  // next to today's JS and the first paint comes out half-styled.
+  if (import.meta.env.DEV) return;
   registered = true;
   const go = () => {
     navigator.serviceWorker.register("/sw.js").catch(() => {

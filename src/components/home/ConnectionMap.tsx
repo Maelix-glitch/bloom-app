@@ -64,6 +64,77 @@ function arcBetween(a: number, b: number) {
   return `M ${p1.x} ${p1.y} Q ${mid.x} ${mid.y} ${p2.x} ${p2.y}`;
 }
 
+/**
+ * B9 · Loading twin of the connection map. Same panel, same header, same
+ * stage box and node coordinates — only the paint is a pulse. Shown until the
+ * stores hydrate (see `useEverReady`), so a cold first load reads as
+ * "loading" instead of a hollow, broken-looking map.
+ */
+export function ConnectionMapSkeleton({ rangeLabel = "Last 30 days" }: { rangeLabel?: string }) {
+  return (
+    <section className="home-panel relative overflow-hidden p-5" aria-label="Loading connection map">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="h-6 w-44 animate-pulse rounded-md bg-surface-3" />
+        </div>
+        <span className="home-chip animate-pulse text-xs text-transparent">{rangeLabel}</span>
+      </header>
+
+      <div className="relative mx-auto mt-4 w-full max-w-[560px]">
+        <div className="cm-stage" aria-hidden>
+          <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 size-full">
+            <g className="text-primary/20" fill="none" stroke="currentColor">
+              <circle cx={C} cy={C} r={R - 26} strokeWidth={0.6} strokeDasharray="2 8" />
+              <circle cx={C} cy={C} r={R - 62} strokeWidth={0.5} opacity={0.6} />
+              <circle
+                cx={C}
+                cy={C}
+                r={R + 14}
+                strokeWidth={0.5}
+                strokeDasharray="1 12"
+                opacity={0.5}
+              />
+            </g>
+          </svg>
+
+          <div className="cm-hub">
+            <span className="size-full animate-pulse rounded-full bg-surface-3" />
+          </div>
+
+          {LAYOUT.map((l) => {
+            const p = pos(l.angle);
+            return (
+              <span
+                key={l.id}
+                className="cm-node"
+                style={{
+                  left: `${(p.x / SIZE) * 100}%`,
+                  top: `${(p.y / SIZE) * 100}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <span
+                  className="cm-node-disc animate-pulse"
+                  style={{ borderColor: "var(--border)", background: "var(--surface-3)" }}
+                />
+                <span
+                  className="h-2 w-10 animate-pulse rounded-full"
+                  style={{ background: "var(--surface-3)" }}
+                />
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      <p className="mt-3 flex min-h-[2.5em] items-center justify-center gap-2 text-center text-[11.5px] text-muted-foreground">
+        <span className="size-3 animate-spin rounded-full border border-border border-t-primary" />
+        Reading your record…
+      </p>
+    </section>
+  );
+}
+
 export function ConnectionMap({
   nodes,
   links,

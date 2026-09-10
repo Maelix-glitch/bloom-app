@@ -14,7 +14,7 @@
  * A new deploy bumps CACHE and the old one is dropped on activate.
  */
 
-const CACHE = "bloom-shell-v2"; /* B8 — bumped: shell HTML now carries the boot splash */
+const CACHE = "bloom-shell-v3"; /* bumped: drops stale story-era CSS/JS caches */
 const SHELL = ["/", "/manifest.webmanifest", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
@@ -46,6 +46,9 @@ const isAsset = (url) =>
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
+
+  // Even a previously-installed worker must never cache local dev.
+  if (self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1") return;
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // Supabase & co. are never cached

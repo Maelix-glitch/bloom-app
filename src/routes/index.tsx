@@ -3,7 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell, Droplet, Loader2, PenLine, Plus, Smile } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
-import { ConnectionMap } from "@/components/home/ConnectionMap";
+import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
+import { useEverReady } from "@/hooks/useEverReady";
 import { CoachPanel } from "@/components/home/CoachPanel";
 import { HabitsSection } from "@/components/home/HabitsSection";
 import { HabitUndo } from "@/components/home/HabitUndo";
@@ -314,6 +315,12 @@ function TodayPage() {
     [habits.habits, habits.logs, mood.entries, trackers.analysis, cycle.analysis],
   );
 
+  /* B9 — the map only draws once its stores have real data (latched: refetches
+  never re-flash the skeleton). */
+  const mapReady = useEverReady(
+    trackers.hydrated && cycle.hydrated && !habits.loading && !mood.loading,
+  );
+
   const openCount = focus.filter((f) => !f.done).length;
   const subline =
     !trackers.hydrated || habits.loading
@@ -520,7 +527,14 @@ function TodayPage() {
                 onLog={() => setMetricsOpen(true)}
                 logging={!trackers.hydrated}
               />
-              <ConnectionMap nodes={map.nodes} links={map.links} name={firstName} />
+              {/* B9 — until every store behind the map has hydrated, show the
+                  loading twin. First paint with empty stores used to draw a
+                  hollow, broken-looking map on cold loads. */}
+              {mapReady ? (
+                <ConnectionMap nodes={map.nodes} links={map.links} name={firstName} />
+              ) : (
+                <ConnectionMapSkeleton />
+              )}
             </div>
             <TrackersPanel readings={signalReadings} />
             <div className="grid gap-5 md:grid-cols-2">

@@ -72,7 +72,8 @@ import { MOOD_LABELS, MoodBlob } from "./MoodBlob";
 import "@/styles/mood-motion.css";
 import { MoodJourneyChart } from "./MoodJourneyChart";
 import { MoodDonut } from "./MoodDonut";
-import { MoodGraph } from "./MoodGraph";
+import { MoodGraph, MoodGraphSkeleton } from "./MoodGraph";
+import { useEverReady } from "@/hooks/useEverReady";
 
 export type MoodPageIdentity = {
   displayName: string | null;
@@ -136,6 +137,9 @@ export function MoodPage({
 
   const firstName = identity.displayName ? identity.displayName.split(" ")[0]! : null;
 
+  /* B9 — latched: background refetches never re-flash the skeleton. */
+  const graphReady = useEverReady(!loading);
+
   return (
     <div className="w-full space-y-10 px-5 pt-6 sm:px-8 sm:pt-7 md:space-y-14 lg:px-10 lg:pt-7">
       <div className="mm-enter" data-order="0">
@@ -178,7 +182,13 @@ export function MoodPage({
       </div>
 
       <div className="mm-enter" data-order="3">
-        <MoodGraph days={a.allDays} entries={entries} correlations={a.correlations} />
+        {/* B9 — the web only draws once the record has real data. First paint
+            with empty stores used to draw a hollow, broken-looking web. */}
+        {graphReady ? (
+          <MoodGraph days={a.allDays} entries={entries} correlations={a.correlations} />
+        ) : (
+          <MoodGraphSkeleton />
+        )}
       </div>
 
       <div className="mm-enter" data-order="4">
