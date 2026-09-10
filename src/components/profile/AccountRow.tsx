@@ -213,6 +213,7 @@ export function AccountRow({
   onShare,
   onPreview,
   onOpenArchive,
+  onOpenStorySettings,
   onEdit,
   onSignOut,
   onSignIn,
@@ -233,6 +234,7 @@ export function AccountRow({
   onShare: () => void;
   onPreview: () => void;
   onOpenArchive: () => void;
+  onOpenStorySettings?: (() => void) | undefined;
   onEdit: () => void;
   onSignOut: () => void;
   onSignIn: () => void;
@@ -329,6 +331,14 @@ export function AccountRow({
             value={`${stories.length} kept`}
             onClick={onOpenArchive}
           />
+          {onOpenStorySettings ? (
+            <Row
+              icon={<Eye className="size-3.5" />}
+              label="Story settings"
+              value="replies · reactions · audience"
+              onClick={onOpenStorySettings}
+            />
+          ) : null}
           <Row
             icon={<Download className="size-3.5" />}
             label="Download everything"

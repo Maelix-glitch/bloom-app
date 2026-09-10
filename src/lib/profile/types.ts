@@ -3,6 +3,14 @@
  * These mirror the shape enforced by supabase/migrations/20260828_profile_identity_stories.sql.
  */
 
+import type {
+  StoryAdjustments,
+  StoryAudience,
+  StoryElement,
+  StoryMediaType,
+  StoryMusicMeta,
+} from "@/lib/stories/types";
+
 export type BloomAccent = "violet" | "sky" | "amber" | "sage" | "rose";
 
 export const BLOOM_ACCENTS: readonly BloomAccent[] = ["violet", "sky", "amber", "sage", "rose"];
@@ -16,7 +24,8 @@ export const ACCENT_LABELS: Record<BloomAccent, string> = {
 };
 
 /** Every story kind we can render. Each maps to a composer mode. */
-export type StoryKind = "text" | "photo" | "mood" | "reflection" | "win" | "reward" | "milestone";
+export type StoryKind =
+  "text" | "photo" | "video" | "mood" | "reflection" | "win" | "reward" | "milestone";
 
 export type StoryVisibility = "private" | "public";
 
@@ -45,6 +54,25 @@ export interface Story {
   deletedAt: string | null;
   /** How much of the dwell time has been watched (0–1). */
   seen?: boolean;
+  /* -------- Story Platform fields (all optional for legacy rows) -------- */
+  /** What the base layer is; `none` for pure text/background stories. */
+  mediaType: StoryMediaType;
+  /** Clip length for video stories, ms. */
+  durationMs: number | null;
+  /** Canvas elements (text, stickers, polls, …), z-ordered. */
+  elements: StoryElement[];
+  /** Photo filter id, if any. */
+  filterId: string | null;
+  /** Manual adjustments layered over the filter. */
+  adjustments: StoryAdjustments | null;
+  /** Curated background id for text-first stories. */
+  backgroundId: string | null;
+  /** Attached music, if any. */
+  music: StoryMusicMeta | null;
+  /** Author-written description for screen readers. */
+  altText: string | null;
+  /** Who may see a public story: everyone or close friends. */
+  audience: StoryAudience;
 }
 
 /** Stories older than the rail but kept privately. */
@@ -176,6 +204,7 @@ export type AsyncState<T> =
 export const STORY_DWELL_MS: Record<StoryKind, number> = {
   text: 7000,
   photo: 6000,
+  video: 15000,
   mood: 7000,
   reflection: 9000,
   win: 6000,
@@ -188,6 +217,7 @@ export const STORY_TTL_HOURS = 24;
 export const STORY_KIND_LABELS: Record<StoryKind, string> = {
   text: "Text",
   photo: "Photo",
+  video: "Video",
   mood: "Mood",
   reflection: "Reflection",
   win: "Small win",

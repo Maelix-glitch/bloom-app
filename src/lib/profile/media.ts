@@ -115,3 +115,115 @@ export async function processStoryPhoto(
 export function storagePathFor(userId: string, suffix: string): string {
   return `${userId}/${suffix}`;
 }
+
+/* ------------------------------ story video ----------------------------- */
+
+export const MAX_VIDEO_BYTES = 60 * 1024 * 1024;
+export const MAX_VIDEO_MS = 60_000;
+export const ACCEPTED_VIDEO = ["video/mp4", "video/webm", "video/quicktime"];
+
+export function validateVideoFile(file: File): string | null {
+  if (!ACCEPTED_VIDEO.includes(file.type)) {
+    return "That video won't play here. Try an MP4.";
+  }
+  if (file.size > MAX_VIDEO_BYTES) {
+    return "That video is too large. Keep it under 60 MB.";
+  }
+  if (file.size < 1024) {
+    return "That video looks empty. Try a different file.";
+  }
+  return null;
+}
+
+export interface VideoProbe {
+  width: number;
+  height: number;
+  durationMs: number;
+  thumbnail: string | null;
+}
+
+/**
+ * Probe a local video file: dimensions, duration, and a poster frame.
+ * Revokes every object URL it creates; callers own `file` only.
+ */
+export function probeVideoFile(file: File): Promise<VideoProbe> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    const cleanup = () => URL.revokeObjectURL(url);
+    video.onerror = () => {
+      cleanup();
+      reject(new MediaError("That video could not be opened."));
+    };
+    video.onloadedmetadata = () => {
+      const width = video.videoWidth || 0;
+      const height = video.videoHeight || 0;
+      const durationMs = Math.round((video.duration || 0) * 1000);
+      if (!width || !height || !Number.isFinite(durationMs) || durationMs < 500) {
+        cleanup();
+        reject(new MediaError("That video looks empty. Try a different file."));
+        return;
+      }
+      if (durationMs > MAX_VIDEO_MS + 1500) {
+        cleanup();
+        reject(new MediaError("Keep videos under a minute for stories."));
+        return;
+      }
+      // Grab a poster frame a beat into the clip.
+      const captureAt = Math.min(1.2, Math.max(0.1, video.duration / 4));
+      const onSeeked = () => {
+        video.removeEventListener("seeked", onSeeked);
+        try {
+          const scale = Math.min(1, 480 / Math.max(width, height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(2, Math.round(width * scale));
+          canvas.height = Math.max(2, Math.round(height * scale));
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new MediaError("Could not prepare that video.");
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const thumbnail = canvas.toDataURL("image/jpeg", 0.7);
+          cleanup();
+          resolve({ width, height, durationMs, thumbnail });
+        } catch (error) {
+          cleanup();
+          reject(error instanceof Error ? error : new MediaError("Could not prepare that video."));
+        }
+      };
+      video.addEventListener("seeked", onSeeked);
+      try {
+        video.currentTime = captureAt;
+      } catch {
+        cleanup();
+        resolve({ width, height, durationMs, thumbnail: null });
+      }
+      // If seeking stalls (odd codec), resolve without a thumbnail.
+      window.setTimeout(() => {
+        video.removeEventListener("seeked", onSeeked);
+      }, 2500);
+    };
+    video.src = url;
+  });
+}
+
+/** Duration of a local audio file, ms. Resolves 0 when unreadable. */
+export function probeAudioDuration(file: File): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const audio = document.createElement("audio");
+    audio.preload = "metadata";
+    const done = (ms: number) => {
+      URL.revokeObjectURL(url);
+      resolve(ms);
+    };
+    audio.onerror = () => done(0);
+    audio.onloadedmetadata = () => {
+      const ms = Math.round((audio.duration || 0) * 1000);
+      done(Number.isFinite(ms) ? ms : 0);
+    };
+    audio.src = url;
+    window.setTimeout(() => done(0), 4000);
+  });
+}
