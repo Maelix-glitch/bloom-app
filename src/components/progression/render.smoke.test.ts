@@ -19,7 +19,7 @@ import { rankFor as _rankFor } from "@/lib/progression/ranks";
 import type { ProgressionInput } from "@/lib/progression/types";
 import { JourneyHero } from "./JourneyHero";
 import { RankPath } from "./RankPath";
-import { GoalsBoard } from "./Goals";
+import { GoalsBoard, isWellnessDomain } from "./Goals";
 import { AchievementGallery } from "./Achievements";
 import { MilestoneArchive, PointActivity } from "./History";
 import { RankCeremony } from "./RankCeremony";
@@ -149,7 +149,11 @@ describe("GoalsBoard", () => {
     const html = render(GoalsBoard, { goals: daily, onClaim: () => {}, busy: false, claimingId: null });
     // HTML escapes apostrophes, so compare against the decoded copy
     const text = html.replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
-    for (const item of daily) expect(text).toContain(item.goal.title);
+    // the first daily goals are the ones shown; the rest stay behind the pager
+    const first = daily[0];
+    expect(first).toBeDefined();
+    expect(text).toContain(first!.goal.title);
+    expect((html.match(/class="pg-goal"/g) ?? []).length).toBeGreaterThan(0);
     expect(html).toContain("points");
     expect(html).not.toMatch(/undefined|NaN/);
   });
@@ -171,6 +175,47 @@ describe("GoalsBoard", () => {
     expect(html).toContain("Claim points");
     // nothing shaming anywhere in the copy
     expect(html).not.toMatch(/failed|behind|don't lose|hurry|missed/i);
+  });
+
+  it("leads with timescales and keeps wellness goals first-class", () => {
+    const { goals } = stateFor(rich);
+    const html = render(GoalsBoard, { goals, onClaim: () => {}, busy: false, claimingId: null });
+    // the cadences a person actually meets, in order
+    const positions = ["Today", "This week", "This month", "Long-term milestones"].map((label) =>
+      html.indexOf(`>${label}<`),
+    );
+    expect(positions.every((p) => p >= 0)).toBe(true);
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+    // wellness is a named way in, not something you have to infer from chips
+    expect(html).toContain("Wellness");
+    expect(html.match(/class="pg-goal"/g)?.length ?? 0).toBeLessThanOrEqual(8);
+
+    // among the goals that are actually shown, the body-and-mind ones with real
+    // progress come before anything without it
+    const rendered = goals.filter((g) => html.includes(g.goal.title));
+    const firstProgress = rendered.findIndex((g) => g.progress > 0);
+    const lastBlank = rendered.map((g) => g.progress > 0).lastIndexOf(false);
+    if (firstProgress >= 0 && lastBlank >= 0 && firstProgress < rendered.length - 1) {
+      expect(firstProgress).toBeLessThan(lastBlank);
+    }
+  });
+
+  it("counts wellness goals on the chip so the number is never a claim", () => {
+    const { goals } = stateFor(rich);
+    const html = render(GoalsBoard, { goals, onClaim: () => {}, busy: false, claimingId: null });
+    const wellness = goals.filter((g) => isWellnessDomain(g.goal.domain)).length;
+    expect(wellness).toBeGreaterThan(0);
+    expect(html).toContain(`pg-chip-count">${wellness}`);
+  });
+
+  it("classifies wellness from the domain, never from the goal's wording", () => {
+    // The body-and-mind domains, and only those.
+    for (const domain of ["fitness", "movement", "health", "sleep", "hydration", "recovery", "mood", "mindfulness", "self-care"] as const) {
+      expect(isWellnessDomain(domain)).toBe(true);
+    }
+    for (const domain of ["habits", "consistency", "milestones", "study"] as const) {
+      expect(isWellnessDomain(domain)).toBe(false);
+    }
   });
 
   it("handles an account with no records calmly", () => {

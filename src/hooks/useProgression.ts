@@ -97,6 +97,12 @@ export interface ProgressionStore {
   refresh: () => void;
   /** True while a claim is in flight. */
   busy: boolean;
+  /**
+   * Signed in, but the account's balance could not be read. The page still
+   * shows everything it knows from real local records — this only says that a
+   * server number is missing, so nothing looks quietly wrong.
+   */
+  serverUnavailable: boolean;
   /** Recent awards from the real ledger, for Point Activity. */
   error: string | null;
 }
@@ -113,6 +119,7 @@ export function useProgression(): ProgressionStore {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cloudPoints, setCloudPoints] = useState<number | null>(null);
+  const [serverUnavailable, setServerUnavailable] = useState(false);
   const [pointsNonce, setPointsNonce] = useState(0);
   const busyRef = useRef(false);
 
@@ -142,11 +149,18 @@ export function useProgression(): ProgressionStore {
     let alive = true;
     async function load() {
       if (!signedIn || !profileId || !hasSupabaseConfig) {
-        if (alive) setCloudPoints(null);
+        if (alive) {
+          setCloudPoints(null);
+          setServerUnavailable(false);
+        }
         return;
       }
       const value = await readPoints(profileId);
-      if (alive) setCloudPoints(value);
+      if (!alive) return;
+      setCloudPoints(value);
+      // `null` means the read failed — it is not the same as zero, and must
+      // never be presented as "you have earned nothing".
+      setServerUnavailable(value === null);
     }
     void load();
     return () => {
@@ -591,5 +605,6 @@ export function useProgression(): ProgressionStore {
     refresh: () => setLedgerVersion((v) => v + 1),
     busy,
     error,
+    serverUnavailable,
   };
 }

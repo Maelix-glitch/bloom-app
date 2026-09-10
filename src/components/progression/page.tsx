@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, RefreshCw, Sparkles } from "lucide-react";
+import { Check, CircleAlert, RefreshCw, Sparkles } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { useProgression } from "@/hooks/useProgression";
@@ -110,6 +110,17 @@ export function JourneyPage() {
           onStartGoal={jumpToGoal}
         />
 
+        {progress.serverUnavailable ? (
+          <div className="pg-banner pg-banner-quiet" role="status">
+            <CircleAlert width={13} height={13} aria-hidden />
+            Your account balance couldn&rsquo;t load right now. Everything below is still here —
+            from your own records.
+            <button type="button" className="pg-link" onClick={() => progress.refreshPoints()}>
+              <RefreshCw width={12} height={12} aria-hidden /> Try again
+            </button>
+          </div>
+        ) : null}
+
         {claimable.length > 0 ? (
           <div className="pg-banner" role="status">
             <Sparkles width={13} height={13} aria-hidden />
@@ -132,9 +143,9 @@ export function JourneyPage() {
               </h2>
             </div>
             <p className="pg-section-aside">
-              {todayCount > 0
-                ? `${todayCount} goals for today · verified from your own records`
-                : "Every goal here is verified from your own records"}
+              {todayCount > 0 ? `${todayCount} for today · ` : ""}
+              wellness first — movement, sleep, water, rest, mood — and every goal verified from
+              your own records
             </p>
           </div>
           <GoalsBoard
@@ -199,7 +210,7 @@ export function JourneyPage() {
             </div>
             <p className="pg-section-aside">
               Habit ticks pay 5–500 points each, set by you. Verified goals and milestones pay
-              50–10,000 on top.
+              100–10,000 on top.
             </p>
           </div>
           {progress.error ? (

@@ -36,8 +36,41 @@ const DOMAIN_TONE: Record<JourneyDomain, string> = {
   milestones: "var(--gold)",
 };
 
-export type GoalFilter = "all" | JourneyDomain;
+export type GoalFilter = "all" | "wellness" | JourneyDomain;
 export type GoalSort = "closest" | "valuable" | "recommended";
+
+/**
+ * The domains whose progress can only ever come from real body-and-mind
+ * records — movement, sleep, water, rest, mood, stillness. Bloom keeps these
+ * first-class: they are the ones a person is most likely to be able to act on,
+ * and they are the ones that suffer first when life gets loud.
+ */
+const WELLNESS_DOMAINS = new Set<JourneyDomain>([
+  "fitness",
+  "movement",
+  "health",
+  "sleep",
+  "hydration",
+  "recovery",
+  "mood",
+  "mindfulness",
+  "self-care",
+]);
+
+/**
+ * Exported so the classification can be tested directly: a goal counts as
+ * wellness because of the domain it reads from, never because of how its
+ * title sounds.
+ */
+export const isWellnessDomain = (domain: JourneyDomain) => WELLNESS_DOMAINS.has(domain);
+
+/** Timescales, in the order a person actually meets them. */
+const CADENCE_ORDER: { cadence: GoalProgress["goal"]["cadence"]; label: string; note: string }[] = [
+  { cadence: "daily", label: "Today", note: "small, and never owed" },
+  { cadence: "weekly", label: "This week", note: "a shape across seven days" },
+  { cadence: "monthly", label: "This month", note: "a rhythm, not a scorecard" },
+  { cadence: "one-time", label: "Long-term milestones", note: "reached once, remembered" },
+];
 
 function GoalCard({
   item,
@@ -156,22 +189,74 @@ export function GoalsBoard({
   }, [goals]);
 
   const visible = useMemo(() => {
-    let list = goals.filter((item) => filter === "all" || item.goal.domain === filter);
+    let list = goals.filter((item) =>
+      filter === "all"
+        ? true
+        : filter === "wellness"
+          ? isWellnessDomain(item.goal.domain)
+          : item.goal.domain === filter,
+    );
     list = [...list].sort((a, b) => {
       // Claimable first, always — that is a completed goal waiting for its points.
       const claimOrder = Number(b.claimable) - Number(a.claimable);
       if (claimOrder !== 0) return claimOrder;
       if (sort === "closest") return b.ratio - a.ratio;
       if (sort === "valuable") return b.goal.points - a.goal.points;
-      // recommended: real progress first, then value
-      return Number(b.progress > 0) - Number(a.progress > 0) || b.ratio - a.ratio;
+      // recommended: something in motion first, then the body-and-mind goals,
+      // then whichever is nearest to paying out
+      return (
+        Number(b.progress > 0) - Number(a.progress > 0) ||
+        Number(isWellnessDomain(b.goal.domain)) - Number(isWellnessDomain(a.goal.domain)) ||
+        b.ratio - a.ratio
+      );
     });
     return list;
   }, [goals, filter, sort]);
 
-  const collapsedLimit = 6;
-  const list = showAll ? visible : visible.slice(0, collapsedLimit);
+  // Timescales lead the default view. As soon as someone filters or sorts, the
+  // board answers that question directly instead of regrouping underneath them.
+  const grouped = filter === "all" && sort === "recommended";
+
+  // Grouped, every timescale gets a couple of cards so the shape of the board
+  // is honest; filtered or sorted, the list answers that one question. Either
+  // way the rest sits behind one quiet disclosure.
+  const list = useMemo(() => {
+    if (showAll) return visible;
+    if (!grouped) return visible.slice(0, 6);
+    // Round-robin across the timescales, so "today" never crowds out the
+    // long view: one from each, then a second pass, and stop.
+    const buckets = CADENCE_ORDER.map(({ cadence }) =>
+      visible.filter((item) => item.goal.cadence === cadence),
+    );
+    const picked: GoalProgress[] = [];
+    for (let round = 0; picked.length < 6; round += 1) {
+      let added = false;
+      for (const bucket of buckets) {
+        const item = bucket[round];
+        if (!item) continue;
+        picked.push(item);
+        added = true;
+        if (picked.length >= 6) break;
+      }
+      if (!added) break;
+    }
+    return picked;
+  }, [showAll, grouped, visible]);
+
   const hidden = visible.length - list.length;
+
+  const cardFor = (item: GoalProgress) => (
+    <div
+      key={item.goal.id}
+      style={
+        focusGoalId === item.goal.id
+          ? { outline: "1px solid color-mix(in oklab, var(--gold) 45%, transparent)", borderRadius: 20 }
+          : undefined
+      }
+    >
+      <GoalCard item={item} onClaim={onClaim} busy={busy} claimingId={claimingId} />
+    </div>
+  );
 
   return (
     <div>
@@ -183,6 +268,17 @@ export function GoalsBoard({
           onClick={() => setFilter("all")}
         >
           Everything
+        </button>
+        <button
+          type="button"
+          className={cn("pg-chip", filter === "wellness" && "is-on")}
+          aria-pressed={filter === "wellness"}
+          onClick={() => setFilter("wellness")}
+        >
+          Wellness
+          <span className="pg-chip-count">
+            {goals.filter((item) => isWellnessDomain(item.goal.domain)).length}
+          </span>
         </button>
         {domains.map((domain) => (
           <button
@@ -220,20 +316,27 @@ export function GoalsBoard({
         </span>
       </div>
 
-      <div className="pg-goals-grid">
-        {list.map((item) => (
-          <div
-            key={item.goal.id}
-            style={
-              focusGoalId === item.goal.id
-                ? { outline: "1px solid color-mix(in oklab, var(--gold) 45%, transparent)", borderRadius: 20 }
-                : undefined
-            }
-          >
-            <GoalCard item={item} onClaim={onClaim} busy={busy} claimingId={claimingId} />
-          </div>
-        ))}
-      </div>
+      {grouped
+        ? CADENCE_ORDER.map(({ cadence, label, note }) => {
+            const items = list.filter((item) => item.goal.cadence === cadence);
+            if (items.length === 0) return null;
+            return (
+              <section className="pg-group" key={cadence} aria-labelledby={`pg-group-${cadence}`}>
+                <div className="pg-group-head">
+                  <h3 id={`pg-group-${cadence}`} className="pg-group-title">
+                    {label}
+                  </h3>
+                  <span className="pg-group-count">
+                    {items.length} {items.length === 1 ? "goal" : "goals"} · {note}
+                  </span>
+                </div>
+                <div className="pg-goals-grid">
+                  {items.map((item) => cardFor(item))}
+                </div>
+              </section>
+            );
+          })
+        : <div className="pg-goals-grid">{list.map((item) => cardFor(item))}</div>}
 
       {visible.length === 0 ? (
         <p className="pg-empty">

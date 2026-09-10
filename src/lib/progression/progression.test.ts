@@ -22,7 +22,7 @@ import {
   resolveSpec,
   windowDays,
 } from "./evaluate";
-import { GOAL_BY_ID, recommendNext } from "./goals";
+import { GOALS, GOAL_BY_ID, recommendNext } from "./goals";
 import { ACHIEVEMENTS } from "./achievements";
 import { CYCLE_STEP, LADDER_BASE, NAMED_RANK_COUNT, cycleRankAt, journeyRanks, rankFor } from "./ranks";
 import type { GoalProgress, ProgressionInput } from "./types";
@@ -314,6 +314,42 @@ describe("ranks", () => {
 });
 
 /* ------------------------------ achievements ----------------------------- */
+
+describe("the economy", () => {
+  it("never pays a trivial amount for a goal", () => {
+    // Bloom Points are meant to feel like progress. A goal award is always at
+    // least an order of magnitude above the smallest habit tick (5), so no goal
+    // can read as a token gesture.
+    for (const goal of GOALS) {
+      expect(goal.points).toBeGreaterThanOrEqual(100);
+      expect(Number.isInteger(goal.points)).toBe(true);
+    }
+  });
+
+  it("keeps repeating cadences honest about what they pay", () => {
+    // A daily goal is available every day, so it must not out-pay a weekly or
+    // one-time goal of comparable work.
+    const daily = GOALS.filter((g) => g.cadence === "daily");
+    const weekly = GOALS.filter((g) => g.cadence === "weekly");
+    const longest = GOALS.filter((g) => g.cadence === "one-time");
+    expect(Math.max(...daily.map((g) => g.points))).toBeLessThan(
+      Math.max(...weekly.map((g) => g.points)),
+    );
+    expect(Math.max(...weekly.map((g) => g.points))).toBeLessThan(
+      Math.max(...longest.map((g) => g.points)),
+    );
+  });
+
+  it("keeps the top of the ladder reachable but never final", () => {
+    const top = Math.max(...GOALS.map((g) => g.points));
+    const lastNamed = LADDER_BASE[LADDER_BASE.length - 1];
+    if (!lastNamed) throw new Error("empty ladder");
+    // the whole catalog could be claimed more than once over and the ladder
+    // would still have somewhere to go
+    expect(cycleRankAt(1).threshold).toBeGreaterThan(lastNamed.threshold);
+    expect(top).toBeGreaterThanOrEqual(10_000);
+  });
+});
 
 describe("achievements", () => {
   const never = { achievedAt: () => null };

@@ -138,8 +138,8 @@ function PointAuditPage() {
         ) : null}
 
         {allowed && rows.length > 0 ? (
-          <div className="overflow-hidden rounded-2xl border border-border">
-            <table className="w-full border-collapse text-left text-[13px]">
+          <div className="overflow-x-auto rounded-2xl border border-border">
+            <table className="w-full min-w-[620px] border-collapse text-left text-[13px]">
               <thead className="bg-surface-2/50 text-[11px] uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-4 py-2.5 font-normal">When</th>
