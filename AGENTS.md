@@ -1,10 +1,9 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+# Bloom
+
+Personal tracker web app — habits, mood, sleep, study and cycle — built with
+TanStack Start, React and Tailwind CSS.
+
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm run test` — unit tests (vitest)
+- `npm run lint` — eslint

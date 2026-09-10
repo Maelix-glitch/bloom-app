@@ -2,7 +2,7 @@
  * MetricsEntryModal — "Today's snapshot".
  *
  * The markup, classes and flow (form → saved / reset) are the design from
- * Maelix-glitch/lovable-data-entry, kept as-is. Only the data layer underneath
+ * the data-entry prototype, kept as-is. Only the data layer underneath
  * was swapped for Bloom's tracker store:
  *
  *   • opens on today's real values (readTrackerValue) instead of blank

@@ -149,7 +149,7 @@ export const moodStorage = {
   },
 
   async put(profileId: string, entry: MoodEntry): Promise<MoodEntry> {
-    // Existing Supabase rows use UUIDs. New Lovable composer entries use a
+    // Existing Supabase rows use UUIDs. New composer entries use a
     // temporary local ID, so let PostgreSQL create the real UUID on insert.
     const isUuid =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(entry.id);
