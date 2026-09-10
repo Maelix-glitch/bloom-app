@@ -241,6 +241,18 @@ describe("AchievementGallery", () => {
     expect(html).not.toMatch(/undefined|NaN/);
   });
 
+  it("calls an unlocked achievement earned even before its date is written", () => {
+    // A rank can be reached without claiming anything, so an achievement can be
+    // unlocked in memory a moment before its date is recorded. It must read
+    // "Earned" — never "still ahead" about something that already happened.
+    const achievements = evaluateAchievements(rich, { achievedAt: () => null });
+    const unlocked = achievements.filter((a) => a.unlocked);
+    expect(unlocked.length).toBeGreaterThan(0);
+    const html = render(AchievementGallery, { achievements });
+    expect(html).toContain("Earned");
+    expect(html).not.toMatch(/undefined|NaN/);
+  });
+
   it("states conditions for locked achievements instead of teasing", () => {
     const achievements = evaluateAchievements(empty, { achievedAt: () => null });
     const html = render(AchievementGallery, { achievements: achievements });

@@ -166,7 +166,9 @@ export function useProgression(): ProgressionStore {
     return () => {
       alive = false;
     };
-  }, [signedIn, profileId, habits.points, pointsNonce]);
+    // `ledgerVersion` is in the list so a nudge from another tab (or a merge
+    // after sign-in) re-reads the authoritative balance, not just the mirror.
+  }, [signedIn, profileId, habits.points, pointsNonce, ledgerVersion]);
 
   const refreshPoints = useCallback(() => setPointsNonce((n) => n + 1), []);
 

@@ -20,7 +20,7 @@
  *   · nothing here invents points: every entry is a real award.
  */
 
-import { PREFS_CHANGED, clearPref, getPref, setPref } from "@/lib/prefs";
+import { PREFS_CHANGED, PREFS_KEY, clearPref, getPref, setPref } from "@/lib/prefs";
 import { todayLocal } from "@/lib/localDay";
 
 import type { LedgerKind, PointEntry, PointSource, RankEvent } from "./types";
@@ -38,14 +38,30 @@ function emit(): void {
   window.dispatchEvent(new Event(PROGRESSION_CHANGED));
 }
 
-/** Store changes plus the prefs mirror (cross-tab + sign-in merges). */
+/**
+ * Store changes plus the prefs mirror, and the same signal arriving from
+ * another tab.
+ *
+ * The `storage` event only ever fires in the tabs that did *not* write, which
+ * is exactly what a second tab needs: a nudge to re-read. Nothing crosses the
+ * boundary as a value — the balance is re-read from the account, so two tabs
+ * can never disagree about points, and a claim in either one is still settled
+ * by the server's unique award key.
+ */
 export function subscribeProgression(listener: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   window.addEventListener(PROGRESSION_CHANGED, listener);
   window.addEventListener(PREFS_CHANGED, listener);
+  const onStorage = (event: Event) => {
+    const key = (event as Event & { key?: string | null }).key;
+    if (key && key !== PREFS_KEY) return;
+    emit();
+  };
+  window.addEventListener("storage", onStorage);
   return () => {
     window.removeEventListener(PROGRESSION_CHANGED, listener);
     window.removeEventListener(PREFS_CHANGED, listener);
+    window.removeEventListener("storage", onStorage);
   };
 }
 

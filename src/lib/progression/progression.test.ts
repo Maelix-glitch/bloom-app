@@ -530,3 +530,92 @@ describe("the award ledger", () => {
     expect(expected).toBeGreaterThanOrEqual(3_000);
   });
 });
+
+/* ------------------------------- cross-tab -------------------------------- */
+
+describe("cross-tab convergence", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    const store = new Map<string, string>();
+    const listeners = new Map<string, Set<(event: { type: string; key?: string }) => void>>();
+    const localStorageMock = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+      key: (i: number) => [...store.keys()][i] ?? null,
+      get length() {
+        return store.size;
+      },
+    };
+    const fakeWindow = {
+      localStorage: localStorageMock,
+      addEventListener: (type: string, fn: (event: { type: string }) => void) => {
+        const set = listeners.get(type) ?? new Set();
+        set.add(fn);
+        listeners.set(type, set);
+      },
+      removeEventListener: (type: string, fn: (event: { type: string }) => void) => {
+        listeners.get(type)?.delete(fn);
+      },
+      dispatchEvent: (event: { type: string; key?: string }) => {
+        for (const fn of listeners.get(event.type) ?? []) fn(event);
+        return true;
+      },
+    };
+    Object.defineProperty(globalThis, "localStorage", { configurable: true, value: localStorageMock });
+    Object.defineProperty(globalThis, "window", { configurable: true, value: fakeWindow });
+  });
+
+  /**
+   * The fake window takes plain event shapes; the DOM types want a real Event.
+   * A storage event carries `key`, which is all the bridge reads.
+   */
+  const fireStorage = (key: string) =>
+    (window as unknown as { dispatchEvent: (e: unknown) => boolean }).dispatchEvent({
+      type: "storage",
+      key,
+    });
+
+  it("re-reads on another tab's write, ignores unrelated keys, and stops on unsubscribe", async () => {
+    const { subscribeProgression } = await import("./store");
+    let reads = 0;
+    const off = subscribeProgression(() => {
+      reads += 1;
+    });
+
+    // A write in another tab arrives as a storage event for the shared mirror.
+    fireStorage("bloom.prefs.v1");
+    expect(reads).toBe(1);
+
+    // Noise from anything else must not wake the page.
+    fireStorage("unrelated-app");
+    expect(reads).toBe(1);
+
+    // The first write already forced a re-read; a *second* real write does too,
+    // so a tab that sat idle while points were earned catches up.
+    fireStorage("bloom.prefs.v1");
+    expect(reads).toBe(2);
+
+    off();
+    fireStorage("bloom.prefs.v1");
+    expect(reads).toBe(2);
+  });
+
+  it("never learns points from the other tab — only that it should re-read", async () => {
+    const { subscribeProgression, recordAward, loadLedger } = await import("./store");
+    // A poisoned mirror from another tab cannot become an award: the record is
+    // only ever written by a real award's result.
+    window.localStorage.setItem("bloom.prefs.v1", JSON.stringify({ "progression.awards.v1": { value: { evil: true }, updatedAt: new Date().toISOString() } }));
+    let reads = 0;
+    const off = subscribeProgression(() => {
+      reads += 1;
+    });
+    fireStorage("bloom.prefs.v1");
+    expect(reads).toBe(1);
+    expect(loadLedger().ledger).toEqual([]);
+    expect(recordAward({ kind: "goal", refId: "x", periodKey: "2026-09-10", title: "t", source: "habits", points: 100 })).not.toBeNull();
+    expect(loadLedger().ledger).toHaveLength(1);
+    off();
+  });
+});
