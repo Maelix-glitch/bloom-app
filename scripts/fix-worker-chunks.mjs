@@ -84,6 +84,30 @@ function main() {
     console.error(`[bloom-chunk-fix] ${SERVER_DIR} missing — run \`npm run build\` first.`);
     process.exit(1);
   }
+
+  // Cloudflare rejects compatibility dates in the future, and Nitro stamps
+  // *today's local date* — ahead of Cloudflare's UTC date for part of each
+  // day (IST is UTC+5:30). Pin the last known-good date so deploys never fail.
+  // Bump it forward manually once in a while if you want newer runtime behavior.
+  const WRANGLER_JSON = join(SERVER_DIR, "wrangler.json");
+  try {
+    const raw = readFileSync(WRANGLER_JSON, "utf8");
+    const next = raw.replace(
+      /"compatibility_date"\s*:\s*"[^"]*"/,
+      '"compatibility_date": "2026-09-10"',
+    );
+    if (next !== raw) {
+      writeFileSync(WRANGLER_JSON, next);
+      console.log(
+        "[bloom-chunk-fix] pinned compatibility_date to 2026-09-10 (Cloudflare rejects future dates).",
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[bloom-chunk-fix] WARNING: could not pin compatibility_date (${error}).`,
+    );
+  }
+
   const chunks = allChunks(SERVER_DIR);
   const codeOf = new Map(chunks.map((f) => [f, readFileSync(f, "utf8")]));
   const exportsOf = new Map(chunks.map((f) => [f, parseExports(codeOf.get(f))]));
