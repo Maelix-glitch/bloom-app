@@ -9,7 +9,8 @@ import { Camera, Settings, X, ChevronDown, Copy, Image as ImageIcon, Music2, Spa
 
 import { StoryEditor, editorDraftStore, type EditorInitialState, type EditorSource } from "./StoryEditor";
 import { CameraCapture } from "./CameraCapture";
-import { STORY_BACKGROUNDS, STORY_TEMPLATES, STORY_FILTERS } from "@/lib/stories/catalogs";
+import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
+import { RestyleTray } from "./RestyleTray";
 import { cn } from "@/lib/utils";
 import { processStoryPhoto, validateImageFile } from "@/lib/profile/media";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
@@ -178,17 +179,31 @@ export function StoryCreator({
         </button>
       </div>
 
-      {/* Mode cards — IG exact 4 dark rounded-20 */}
+      {/* Mode cards — IG exact Drafts / Templates / Effects / Collage from screenshot */}
       <div className="flex gap-3 overflow-x-auto px-3 pb-4 shrink-0 scrollbar-none">
+        <button
+          type="button"
+          onClick={() => {
+            if (pendingDraft) void resumeDraft();
+            else toast("No drafts");
+          }}
+          className="flex h-[92px] w-[92px] shrink-0 flex-col items-center justify-center gap-2 rounded-[18px] bg-[#1c1c1e] border border-[#2c2c2e] active:scale-[0.96] transition-transform"
+        >
+          <span className="grid size-9 place-items-center rounded-lg bg-[#2c2c2e] border border-dashed border-white/20">
+            <span className="text-[20px]">⊕</span>
+          </span>
+          <span className="text-[13px] font-medium">Drafts</span>
+        </button>
+
         <button
           type="button"
           onClick={() => setSheet("templates")}
           className="flex h-[92px] w-[92px] shrink-0 flex-col items-center justify-center gap-2 rounded-[18px] bg-[#1c1c1e] border border-[#2c2c2e] active:scale-[0.96] transition-transform"
         >
           <span className="flex items-center justify-center">
-            <span className="size-7 rounded-full bg-[#feda75] grid place-items-center text-[12px] -mr-1.5 border-2 border-[#1c1c1e]">A</span>
-            <span className="size-7 rounded-full bg-[#fa7e1e] grid place-items-center text-[12px] -mr-1.5 border-2 border-[#1c1c1e]">B</span>
-            <span className="size-7 rounded-full bg-[#d62976] grid place-items-center text-[12px] border-2 border-[#1c1c1e]">C</span>
+            <span className="size-7 rounded-full bg-[#feda75] grid place-items-center text-[10px] -mr-1.5 border-2 border-[#1c1c1e]">A</span>
+            <span className="size-7 rounded-full bg-[#fa7e1e] grid place-items-center text-[10px] -mr-1.5 border-2 border-[#1c1c1e]">B</span>
+            <span className="size-7 rounded-full bg-[#d62976] grid place-items-center text-[10px] border-2 border-[#1c1c1e]">✨</span>
           </span>
           <span className="text-[13px] font-medium">Templates</span>
         </button>
@@ -198,19 +213,10 @@ export function StoryCreator({
           onClick={() => setSheet("effects")}
           className="flex h-[92px] w-[92px] shrink-0 flex-col items-center justify-center gap-2 rounded-[18px] bg-[#1c1c1e] border border-[#2c2c2e] active:scale-[0.96] transition-transform"
         >
-          <span className="relative grid size-9 place-items-center rounded-full bg-[#2c2c2e] text-[20px]">✨</span>
-          <span className="text-[13px] font-medium">Effects</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSheet("music")}
-          className="flex h-[92px] w-[92px] shrink-0 flex-col items-center justify-center gap-2 rounded-[18px] bg-[#1c1c1e] border border-[#2c2c2e] active:scale-[0.96] transition-transform"
-        >
-          <span className="grid size-9 place-items-center rounded-full bg-[#2c2c2e]">
-            <Music2 className="size-5" />
+          <span className="relative grid size-9 place-items-center rounded-lg bg-[#2c2c2e] overflow-hidden">
+            <span className="text-[18px]">🤠</span>
           </span>
-          <span className="text-[13px] font-medium">Music</span>
+          <span className="text-[13px] font-medium">Effects</span>
         </button>
 
         <button
@@ -218,8 +224,8 @@ export function StoryCreator({
           onClick={() => setSheet("collage")}
           className="flex h-[92px] w-[92px] shrink-0 flex-col items-center justify-center gap-2 rounded-[18px] bg-[#1c1c1e] border border-[#2c2c2e] active:scale-[0.96] transition-transform"
         >
-          <span className="grid size-9 place-items-center rounded-lg bg-[#2c2c2e]">
-            <LayoutGrid className="size-5" />
+          <span className="grid size-9 place-items-center rounded-lg bg-[#2c2c2e] overflow-hidden">
+            <span className="text-[18px]">👩‍🎤</span>
           </span>
           <span className="text-[13px] font-medium">Collage</span>
         </button>
@@ -312,25 +318,36 @@ export function StoryCreator({
         </div>
       </div>
 
-      {/* STORY pill */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-[max(18px,env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/70 to-transparent pt-6">
-        <button
-          type="button"
-          onClick={() => {
-            if (selectMode && selectedIds.size > 0) {
-              const first = Array.from(selectedIds)[0]!;
-              setEditorSource({ base: "background", backgroundId: first, storyKind: "text" });
-            } else {
-              setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
-            }
-          }}
-          className="pointer-events-auto rounded-full bg-[#363636] border border-[#4a4a4a] px-8 py-2.5 text-[13px] font-semibold tracking-[0.18em] text-white active:scale-95"
-        >
-          STORY
-        </button>
+      {/* Bottom nav — POST STORY REEL LIVE — IG exact from screenshot */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col items-center gap-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/80 to-transparent pt-8">
+        <div className="pointer-events-auto flex items-center gap-6">
+          <button type="button" className="text-[14px] tracking-[0.15em] text-[#737373] font-medium">
+            POST
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (selectMode && selectedIds.size > 0) {
+                const first = Array.from(selectedIds)[0]!;
+                setEditorSource({ base: "background", backgroundId: first, storyKind: "text" });
+              } else {
+                setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+              }
+            }}
+            className="text-[15px] tracking-[0.15em] text-white font-bold"
+          >
+            STORY
+          </button>
+          <button type="button" className="text-[14px] tracking-[0.15em] text-[#737373] font-medium">
+            REEL
+          </button>
+          <button type="button" className="text-[14px] tracking-[0.15em] text-[#737373] font-medium">
+            LIVE
+          </button>
+        </div>
       </div>
 
-      <button type="button" onClick={() => photoRef.current?.click()} className="fixed bottom-0 left-4 mb-[max(20px,env(safe-area-inset-bottom))] grid size-10 place-items-center rounded-full bg-[#1c1c1e] border border-[#2c2c2e] text-white">
+      <button type="button" onClick={() => photoRef.current?.click()} className="fixed bottom-0 left-4 mb-[max(48px,env(safe-area-inset-bottom))] grid size-10 place-items-center rounded-full bg-[#1c1c1e] border border-[#2c2c2e] text-white">
         <ImageIcon className="size-5" />
       </button>
 
@@ -385,72 +402,55 @@ export function StoryCreator({
         </div>
       )}
 
-      {/* Effects sheet — IG exact filters */}
+      {/* Effects sheet — IG exact Restyle */}
       {sheet === "effects" && (
-        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/70">
-          <div className="flex max-h-[75vh] w-full flex-col rounded-t-[16px] bg-black border-t border-[#262626]">
-            <div className="flex flex-col items-center px-4 py-3 border-b border-[#262626]">
-              <div className="h-1 w-9 rounded-full bg-[#363636] mb-3" />
-              <div className="flex w-full items-center justify-between">
-                <span className="text-[16px] font-semibold">Effects</span>
-                <button type="button" onClick={() => setSheet(null)} className="text-white">
-                  <X className="size-5" />
-                </button>
-              </div>
-            </div>
-            <div className="overflow-y-auto p-4">
-              <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8] mb-3">Filters</p>
-              <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2">
-                {STORY_FILTERS.map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => {
-                      setSheet(null);
-                      setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
-                    }}
-                    className="flex flex-col items-center gap-2 shrink-0 active:scale-95"
-                  >
-                    <span className="size-16 rounded-full bg-[#1c1c1e] border border-[#2c2c2e] grid place-items-center overflow-hidden">
-                      <span className="size-12 rounded-full" style={{ background: f.id === "none" ? "#000" : "linear-gradient(45deg,#feda75,#d62976)", filter: f.css === "none" ? undefined : f.css }} />
-                    </span>
-                    <span className="text-[11px] text-white max-w-[64px] truncate">{f.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <button type="button" className="absolute inset-0 -z-10" onClick={() => setSheet(null)} aria-label="Close" />
-        </div>
+        <RestyleTray
+          onPick={(effect) => {
+            setSheet(null);
+            // Apply restyle effect as filter in editor — use background black and filter id
+            setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+            // Store effect for editor via draft? For now just open editor, filter will be selectable in editor
+            toast(`Restyle: ${effect.name} — apply in editor`);
+          }}
+          onClose={() => setSheet(null)}
+        />
       )}
 
       {/* Music sheet — IG exact */}
       {sheet === "music" && (
         <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/70">
-          <div className="flex max-h-[75vh] w-full flex-col rounded-t-[16px] bg-black border-t border-[#262626]">
+          <div className="flex max-h-[80vh] w-full flex-col rounded-t-[16px] bg-[#121212] border-t border-[#262626]">
             <div className="flex flex-col items-center px-4 py-3 border-b border-[#262626]">
               <div className="h-1 w-9 rounded-full bg-[#363636] mb-3" />
               <div className="flex w-full items-center justify-between">
-                <span className="text-[16px] font-semibold">Music</span>
-                <button type="button" onClick={() => setSheet(null)} className="text-white">
-                  <X className="size-5" />
+                <span className="text-[16px] font-semibold text-white">Music</span>
+                <button type="button" onClick={() => setSheet(null)} className="grid size-8 place-items-center rounded-full bg-[#262626] text-white">
+                  <X className="size-4" />
                 </button>
               </div>
             </div>
-            <div className="p-4">
-              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-3">
-                {["For you", "Trending", "Chill", "Love", "Party", "Focus"].map((c) => (
-                  <span key={c} className="shrink-0 rounded-full bg-white text-black px-4 py-1.5 text-[13px] font-medium">
+            <div className="overflow-y-auto p-4">
+              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-4">
+                {["For you", "Trending", "Chill", "Love", "Party", "Focus"].map((c, i) => (
+                  <span
+                    key={c}
+                    className={cn(
+                      "shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium border",
+                      i === 0 ? "bg-white text-black border-white" : "bg-[#262626] text-white border-[#363636]",
+                    )}
+                  >
                     {c}
                   </span>
                 ))}
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 {[
-                  { title: "Die With A Smile", artist: "Lady Gaga, Bruno Mars" },
-                  { title: "APT.", artist: "ROSE, Bruno Mars" },
-                  { title: "Espresso", artist: "Sabrina Carpenter" },
-                  { title: "Birds of a Feather", artist: "Billie Eilish" },
+                  { title: "Die With A Smile", artist: "Lady Gaga, Bruno Mars", color: "#feda75" },
+                  { title: "APT.", artist: "ROSE, Bruno Mars", color: "#fa7e1e" },
+                  { title: "Espresso", artist: "Sabrina Carpenter", color: "#d62976" },
+                  { title: "Birds of a Feather", artist: "Billie Eilish", color: "#962fbf" },
+                  { title: "West Coast", artist: "Lana Del Rey • 4:16", color: "#4f5bd5" },
+                  { title: "Reflections", artist: "The Neighbourhood • 4:04", color: "#0095f6" },
                 ].map((s) => (
                   <button
                     key={s.title}
@@ -459,14 +459,17 @@ export function StoryCreator({
                       setSheet(null);
                       setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
                     }}
-                    className="flex items-center gap-3 rounded-xl p-2 hover:bg-[#1c1c1e] text-left"
+                    className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#1e1e1e] text-left active:scale-[0.98] transition-transform"
                   >
-                    <span className="size-12 rounded-md bg-[#1c1c1e] border border-[#2c2c2e] grid place-items-center">
-                      <Music2 className="size-5" />
+                    <span className="size-12 rounded-lg grid place-items-center text-white font-bold text-[10px] shrink-0" style={{ background: s.color }}>
+                      ♪
                     </span>
                     <span className="flex-1 min-w-0">
-                      <span className="block truncate text-[14px] font-medium text-white">{s.title}</span>
+                      <span className="block truncate text-[14px] font-semibold text-white">{s.title}</span>
                       <span className="block truncate text-[12px] text-[#a8a8a8]">{s.artist}</span>
+                    </span>
+                    <span className="size-8 rounded-full border border-[#363636] grid place-items-center text-white">
+                      <Music2 className="size-4" />
                     </span>
                   </button>
                 ))}
@@ -480,35 +483,36 @@ export function StoryCreator({
       {/* Collage sheet — IG exact */}
       {sheet === "collage" && (
         <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/70">
-          <div className="flex max-h-[70vh] w-full flex-col rounded-t-[16px] bg-black border-t border-[#262626]">
+          <div className="flex max-h-[75vh] w-full flex-col rounded-t-[16px] bg-[#121212] border-t border-[#262626]">
             <div className="flex flex-col items-center px-4 py-3 border-b border-[#262626]">
               <div className="h-1 w-9 rounded-full bg-[#363636] mb-3" />
               <div className="flex w-full items-center justify-between">
-                <span className="text-[16px] font-semibold">Collage</span>
-                <button type="button" onClick={() => setSheet(null)} className="text-white">
-                  <X className="size-5" />
+                <span className="text-[16px] font-semibold text-white">Collage</span>
+                <button type="button" onClick={() => setSheet(null)} className="grid size-8 place-items-center rounded-full bg-[#262626] text-white">
+                  <X className="size-4" />
                 </button>
               </div>
             </div>
-            <div className="p-4 grid grid-cols-3 gap-3">
+            <div className="p-4 grid grid-cols-2 gap-3 overflow-y-auto">
               {[
-                "M1:1",
-                "M1:2",
-                "M2:1",
-                "M2:2",
-                "M3:1",
-                "M1:3",
+                { id: "2-split", label: "2 vertical", icon: "▥" },
+                { id: "2-horiz", label: "2 horizontal", icon: "▤" },
+                { id: "3-grid", label: "3 grid", icon: "▦" },
+                { id: "4-grid", label: "4 grid", icon: "▩" },
+                { id: "big-small", label: "Big + small", icon: "◧" },
+                { id: "3-vertical", label: "3 vertical", icon: "▧" },
               ].map((l) => (
                 <button
-                  key={l}
+                  key={l.id}
                   type="button"
                   onClick={() => {
                     setSheet(null);
                     setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
                   }}
-                  className="aspect-square rounded-xl bg-[#1c1c1e] border border-[#2c2c2e] grid place-items-center active:scale-95"
+                  className="aspect-[4/3] rounded-[12px] bg-[#1e1e1e] border border-[#2c2c2e] flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform"
                 >
-                  <span className="text-[12px] text-[#a8a8a8]">{l}</span>
+                  <span className="text-[24px] text-white">{l.icon}</span>
+                  <span className="text-[12px] text-[#a8a8a8]">{l.label}</span>
                 </button>
               ))}
             </div>

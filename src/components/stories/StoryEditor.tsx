@@ -32,6 +32,7 @@ import { TextTool, type TextToolValue } from "./TextTool";
 import { StickerTray } from "./StickerTray";
 import { InteractiveTray } from "./InteractiveTray";
 import { FilterTool } from "./FilterTool";
+import { RestyleTray } from "./RestyleTray";
 import { GifTray, MusicTray, type PickedMusic } from "./MediaTrays";
 import { DrawLayer, exportDrawing, type DrawStroke } from "./DrawLayer";
 import { DRAW_COLORS, DRAW_SIZES_ROW } from "./editorBits";
@@ -83,7 +84,7 @@ export interface EditorInitialState {
   altText: string;
 }
 
-type Tool = "sticker" | "interactive" | "filter" | "music" | "gif" | "caption" | null;
+type Tool = "sticker" | "interactive" | "filter" | "restyle" | "music" | "gif" | "caption" | null;
 
 interface Snapshot {
   elements: StoryElement[];
@@ -721,6 +722,7 @@ export function StoryEditor({
     { id: "sticker", label: "Sticker", icon: Sticker },
     { id: "interactive", label: "Interactive", icon: SlidersHorizontal },
     { id: "draw", label: "Draw", icon: Wand2 },
+    { id: "restyle", label: "Restyle", icon: Sparkles },
     { id: "filter", label: "Filter", icon: Sparkles },
     { id: "music", label: "Music", icon: Music2 },
     { id: "gif", label: "GIF", icon: ImagePlay },
@@ -1007,6 +1009,25 @@ export function StoryEditor({
           adjustments={adjustments}
           onFilter={setFilterId}
           onAdjustments={setAdjustments}
+          onClose={() => setTool(null)}
+        />
+      ) : null}
+
+      {tool === "restyle" ? (
+        <RestyleTray
+          onPick={(effect) => {
+            // Apply restyle as filter — map to filter id if exists else use adjustments
+            const mapped = (() => {
+              const name = effect.id.toLowerCase();
+              if (name.includes("bw") || name.includes("b-w")) return "moon";
+              if (name.includes("warm")) return "warm";
+              if (name.includes("dreamy") || name.includes("soft")) return "soft";
+              return effect.id;
+            })();
+            setFilterId(mapped);
+            setTool(null);
+            toast(`Applied ${effect.name}`);
+          }}
           onClose={() => setTool(null)}
         />
       ) : null}

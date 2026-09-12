@@ -458,6 +458,67 @@ export function adjustmentsToCss(a: StoryAdjustments | null | undefined): string
   return parts.join(" ");
 }
 
+/* --------------------------- Instagram Restyle ---------------------------- */
+/* Exact like screenshots: Melted film, Dirty flash, 90s summer etc */
+export type RestyleCategory = "trending" | "film" | "lighting" | "utilities" | "world";
+
+export interface RestyleEffect {
+  id: string;
+  name: string;
+  category: RestyleCategory;
+  css: string;
+  overlay?: string | undefined;
+}
+
+export const RESTYLE_CATEGORIES: { id: RestyleCategory; label: string }[] = [
+  { id: "trending", label: "Trending" },
+  { id: "film", label: "Film Effects" },
+  { id: "lighting", label: "Lighting" },
+  { id: "utilities", label: "Utilities" },
+  { id: "world", label: "World" },
+];
+
+export const RESTYLE_EFFECTS: RestyleEffect[] = [
+  // Film Effects — from screenshot 1
+  { id: "melted-film", name: "Melted film", category: "film", css: "contrast(1.2) saturate(1.4) hue-rotate(-10deg)", overlay: "linear-gradient(45deg, rgba(255,0,128,0.25), rgba(255,200,0,0.15))" },
+  { id: "dirty-flash", name: "Dirty flash", category: "film", css: "contrast(1.1) brightness(1.1) sepia(0.15)", overlay: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.2), transparent 60%)" },
+  { id: "90s-summer", name: "90s summer", category: "film", css: "saturate(1.3) contrast(0.95) sepia(0.1) brightness(1.05)", overlay: "linear-gradient(0deg, rgba(255,180,0,0.12), transparent)" },
+  { id: "dreamy-film", name: "Dreamy film", category: "film", css: "brightness(1.08) contrast(0.9) saturate(1.2) blur(0.3px)", overlay: "linear-gradient(180deg, rgba(255,200,150,0.15), transparent)" },
+  { id: "flash-ii", name: "Flash II", category: "film", css: "contrast(1.15) brightness(1.15) saturate(0.9)", overlay: "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.25), transparent 50%)" },
+  { id: "warm-film", name: "Warm film", category: "film", css: "sepia(0.25) saturate(1.2) brightness(1.05)", overlay: "linear-gradient(45deg, rgba(255,120,0,0.18), transparent)" },
+  { id: "expired-i", name: "Expired I", category: "film", css: "sepia(0.3) contrast(0.9) hue-rotate(-5deg)", overlay: "linear-gradient(90deg, rgba(255,100,100,0.1), rgba(100,255,100,0.05))" },
+  { id: "twilight-film", name: "Twilight film", category: "film", css: "hue-rotate(-15deg) saturate(1.3) brightness(0.95)", overlay: "linear-gradient(180deg, rgba(255,100,150,0.2), rgba(100,150,255,0.15))" },
+  { id: "blue-leak", name: "Blue leak", category: "film", css: "contrast(1.1) saturate(1.2) hue-rotate(10deg)", overlay: "radial-gradient(circle at 80% 80%, rgba(0,100,255,0.35), transparent 50%)" },
+
+  // Trending
+  { id: "flash", name: "Flash", category: "trending", css: "brightness(1.2) contrast(1.1)", overlay: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.3), transparent 60%)" },
+  { id: "lofi-dusk", name: "Lofi dusk", category: "trending", css: "sepia(0.15) contrast(1.05) brightness(1.02) saturate(1.1)", overlay: "linear-gradient(180deg, rgba(255,200,100,0.15), transparent)" },
+  { id: "sketch", name: "Sketch", category: "trending", css: "grayscale(0.3) contrast(1.3) brightness(1.1)", overlay: "none" },
+  { id: "soft-focus", name: "Soft focus", category: "trending", css: "blur(0.4px) brightness(1.08) contrast(0.95)", overlay: "none" },
+  { id: "super-hd", name: "Super HD", category: "trending", css: "contrast(1.25) saturate(1.35) brightness(1.02)", overlay: "none" },
+
+  // Lighting — from screenshots
+  { id: "blue-sky", name: "Blue sky", category: "lighting", css: "saturate(1.3) brightness(1.1) hue-rotate(-5deg)", overlay: "linear-gradient(180deg, rgba(100,180,255,0.25), transparent)" },
+  { id: "lofi-light", name: "Lofi light", category: "lighting", css: "brightness(1.15) contrast(1.05) saturate(1.1)", overlay: "radial-gradient(circle at 50% 20%, rgba(255,100,100,0.3), transparent 60%)" },
+  { id: "dusk", name: "Dusk", category: "lighting", css: "sepia(0.2) hue-rotate(-10deg) brightness(0.95)", overlay: "linear-gradient(180deg, rgba(255,150,100,0.2), rgba(100,100,255,0.15))" },
+  { id: "cloud-aura", name: "Cloud aura", category: "lighting", css: "brightness(1.1) contrast(0.95)", overlay: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4), transparent 70%)" },
+  { id: "iridescent-sky", name: "Iridescent sky", category: "lighting", css: "saturate(1.5) hue-rotate(10deg)", overlay: "linear-gradient(45deg, rgba(255,100,200,0.2), rgba(100,200,255,0.2), rgba(200,255,100,0.15))" },
+  { id: "sparkle-aura", name: "Sparkle aura", category: "lighting", css: "brightness(1.12) contrast(1.05)", overlay: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.35), transparent 60%)" },
+  { id: "dawn-sparkle", name: "Dawn sparkle", category: "lighting", css: "sepia(0.1) brightness(1.1) saturate(1.2)", overlay: "linear-gradient(180deg, rgba(255,200,150,0.2), transparent)" },
+  { id: "backlit", name: "Backlit", category: "lighting", css: "contrast(1.15) brightness(1.08)", overlay: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.4), transparent 50%)" },
+
+  // Utilities / World
+  { id: "graffiti-wall", name: "Graffiti wall", category: "world", css: "saturate(1.4) contrast(1.15)", overlay: "linear-gradient(45deg, rgba(255,0,100,0.15), rgba(0,255,150,0.1))" },
+  { id: "blue-paper", name: "Blue paper", category: "world", css: "sepia(0.05) hue-rotate(10deg) saturate(1.2)", overlay: "linear-gradient(0deg, rgba(0,100,255,0.2), transparent)" },
+  { id: "velvet-drape", name: "Velvet drape", category: "world", css: "contrast(1.1) brightness(0.9) saturate(1.2)", overlay: "linear-gradient(180deg, rgba(150,0,0,0.3), transparent)" },
+  { id: "dark-backdrop", name: "Dark backdrop", category: "utilities", css: "brightness(0.85) contrast(1.2)", overlay: "radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.4) 100%)" },
+  { id: "backdrop", name: "Backdrop", category: "utilities", css: "brightness(0.95) contrast(1.05)", overlay: "none" },
+  { id: "block-world", name: "Block world", category: "world", css: "saturate(0.8) contrast(1.1)", overlay: "none" },
+  { id: "bw-background", name: "B-W background", category: "utilities", css: "grayscale(0.8) contrast(1.1)", overlay: "none" },
+  { id: "dark-stage", name: "Dark stage", category: "utilities", css: "brightness(0.7) contrast(1.3) saturate(0.8)", overlay: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.15), transparent 60%)" },
+  { id: "pixel-farm", name: "Pixel farm", category: "world", css: "saturate(1.2) contrast(1.1)", overlay: "linear-gradient(45deg, rgba(100,200,50,0.15), transparent)" },
+];
+
 /* ------------------------------- reactions -------------------------------- */
 export interface ReactionMeta {
   id: StoryReactionKind;
