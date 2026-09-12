@@ -1,56 +1,40 @@
 /**
- * StoryCreator — Instagram-exact creation entry.
- * Dark full-screen (#000) like Instagram's story creation, with quick modes,
- * backgrounds, templates, and Bloom sources. Everything lands in StoryEditor.
+ * StoryCreator — Instagram-exact "Add to story" screen.
+ * Matches screenshot: X | Add to story | Settings gear
+ * Row: Templates / Effects / Music / Collage dark cards
+ * Recents dropdown + Select pill, 3-col gallery with camera tile first, STORY button bottom.
+ * Templates expanded to 25 IG aesthetic.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
-  ArrowRight,
   Camera,
-  Clapperboard,
-  CloudSun,
-  Flag,
-  Gift,
-  Image as ImageIcon,
-  NotebookPen,
-  Sprout,
-  Trash2,
-  Type,
-  X,
   Settings,
+  X,
+  ChevronDown,
+  Copy,
+  Image as ImageIcon,
+  Music2,
+  Sparkles,
+  LayoutGrid,
+  Trash2,
 } from "lucide-react";
 
-import {
-  StoryEditor,
-  editorDraftStore,
-  type EditorInitialState,
-  type EditorSource,
-} from "./StoryEditor";
+import { StoryEditor, editorDraftStore, type EditorInitialState, type EditorSource } from "./StoryEditor";
 import { CameraCapture } from "./CameraCapture";
-import { BloomShareCard, shareSourceForMilestone, shareSourceForReward } from "./ShareCard";
-import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
-import { EMOTION_MAP } from "@/lib/mood/types";
-import type { MoodEntry } from "@/lib/mood/types";
-import type { RewardRecord } from "@/lib/profile/journey";
+import { STORY_BACKGROUNDS, STORY_TEMPLATES, STORY_FILTERS } from "@/lib/stories/catalogs";
 import { cn } from "@/lib/utils";
-import {
-  processStoryPhoto,
-  probeVideoFile,
-  validateImageFile,
-  validateVideoFile,
-} from "@/lib/profile/media";
+import { processStoryPhoto, probeVideoFile, validateImageFile, validateVideoFile } from "@/lib/profile/media";
 import type { CreateStoryInput, LocalVideo } from "@/lib/profile/storyService";
 import type { BloomAccent, Milestone, StoryKind, StoryVisibility } from "@/lib/profile/types";
 import type { StoryAudience } from "@/lib/stories/types";
-import heroWindow from "@/assets/mood/hero-window.jpg";
-import flowerBranchArt from "@/assets/mood/flower-branch.jpg";
-import mountainLakeArt from "@/assets/mood/mountain-lake.jpg";
-import duskArt from "@/assets/home/window-dusk.jpg";
+import type { MoodEntry } from "@/lib/mood/types";
+import type { RewardRecord } from "@/lib/profile/journey";
+import { EMOTION_MAP } from "@/lib/mood/types";
+import { shareSourceForMilestone, shareSourceForReward } from "./ShareCard";
 import { toast } from "sonner";
 
-const dayLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+const dayLabel = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 
 export function StoryCreator({
   userId,
@@ -82,8 +66,10 @@ export function StoryCreator({
   const [editorSource, setEditorSource] = useState<EditorSource | null>(null);
   const [editorDraft, setEditorDraft] = useState<EditorInitialState | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [backgroundsOpen, setBackgroundsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [sheet, setSheet] = useState<"templates" | "effects" | "music" | "collage" | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
   const [pendingDraft, setPendingDraft] = useState(() => {
     const d = editorDraftStore.read();
     return d && d.userId === userId ? d : null;
@@ -93,19 +79,22 @@ export function StoryCreator({
   const videoRef = useRef<HTMLInputElement | null>(null);
   const sourceApplied = useRef(false);
 
-  const reflections = useMemo(
-    () => moodEntries.filter((e) => e.note && e.note.trim().length > 0),
-    [moodEntries],
-  );
-
   useEffect(() => {
     if (!initialSource || sourceApplied.current) return;
     const entry = moodEntries.find((e) => e.id === initialSource.id);
     if (!entry) return;
     sourceApplied.current = true;
-    if (initialSource.kind === "reflection") openReflection(entry);
-    else openMood(entry);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const primary = entry.emotions[0] ?? "neutral";
+    const meta = EMOTION_MAP[primary];
+    setEditorSource({
+      base: "background",
+      backgroundId: primary === "neutral" ? "ig-black" : "ig-midnight",
+      storyKind: initialSource.kind === "reflection" ? "reflection" : "mood",
+      source: { kind: "mood", id: entry.id },
+      accent: meta.accent,
+      captionTitle: `${initialSource.kind === "reflection" ? "Reflection" : "Mood"} · ${dayLabel(entry.timestamp)}`,
+      captionBody: entry.note?.trim() ?? "",
+    });
   }, [initialSource, moodEntries]);
 
   const shareApplied = useRef(false);
@@ -118,65 +107,18 @@ export function StoryCreator({
       shareApplied.current = true;
       setEditorSource(shareSourceForReward(initialReward));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialMilestone, initialReward]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !editorSource && !cameraOpen) {
+      if (e.key === "Escape" && !editorSource && !cameraOpen && !sheet) {
         e.preventDefault();
         onClose();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [editorSource, cameraOpen, onClose]);
-
-  const openMood = useCallback((entry: MoodEntry) => {
-    const primary = entry.emotions[0] ?? "neutral";
-    const meta = EMOTION_MAP[primary];
-    setEditorSource({
-      base: "background",
-      backgroundId: "moonlight",
-      storyKind: "mood",
-      source: { kind: "mood", id: entry.id },
-      accent: meta.accent,
-      captionTitle: `Mood · ${dayLabel(entry.timestamp)}`,
-      captionBody:
-        entry.note?.trim() || `${Math.round(entry.mood)}/10 — feeling ${meta.label.toLowerCase()}.`,
-    });
-  }, []);
-
-  const openReflection = useCallback((entry: MoodEntry) => {
-    const primary = entry.emotions[0] ?? "neutral";
-    setEditorSource({
-      base: "background",
-      backgroundId: "quiet-room",
-      storyKind: "reflection",
-      source: { kind: "mood", id: entry.id },
-      accent: EMOTION_MAP[primary].accent,
-      captionTitle: `Reflection · ${dayLabel(entry.timestamp)}`,
-      captionBody: entry.note?.trim() ?? "",
-    });
-  }, []);
-
-  const openReward = useCallback((reward: RewardRecord) => {
-    setEditorSource(shareSourceForReward(reward));
-  }, []);
-
-  const openMilestone = useCallback((milestone: Milestone) => {
-    setEditorSource(shareSourceForMilestone(milestone));
-  }, []);
-
-  const openWin = useCallback(() => {
-    setEditorSource({
-      base: "background",
-      backgroundId: "golden-hour",
-      templateId: "little-win",
-      storyKind: "win",
-      accent: "amber",
-    });
-  }, []);
+  }, [editorSource, cameraOpen, sheet, onClose]);
 
   const onPhotoFile = useCallback(async (file: File | null) => {
     if (!file) return;
@@ -199,7 +141,7 @@ export function StoryCreator({
         storyKind: "photo",
       });
     } catch {
-      toast.error("Couldn't use that image. Try another one.");
+      toast.error("Couldn't use that image");
     } finally {
       setBusy(false);
     }
@@ -223,14 +165,9 @@ export function StoryCreator({
         blob: file,
         contentType: file.type,
       };
-      setEditorSource({
-        base: "video",
-        video,
-        videoThumbnail: probe.thumbnail,
-        storyKind: "video",
-      });
+      setEditorSource({ base: "video", video, videoThumbnail: probe.thumbnail, storyKind: "video" });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Couldn't use that video.");
+      toast.error(error instanceof Error ? error.message : "Couldn't use that video");
     } finally {
       setBusy(false);
     }
@@ -265,7 +202,7 @@ export function StoryCreator({
         setPendingDraft(null);
         return;
       } catch {
-        toast.error("That draft's photo is gone — starting fresh.");
+        toast.error("Draft photo gone");
       }
     }
     setEditorSource({
@@ -319,62 +256,120 @@ export function StoryCreator({
     );
   }
 
-  const quickModes: {
-    id: string;
-    label: string;
-    hint: string;
-    icon: typeof Camera;
-    art: string;
-  }[] = [
-    { id: "camera", label: "Camera", hint: "Capture now", icon: Camera, art: heroWindow },
+  // Instagram top mode cards — exactly like screenshot
+  const modeCards = [
     {
-      id: "photo",
-      label: "Photo",
-      hint: "From gallery",
-      icon: ImageIcon,
-      art: flowerBranchArt,
+      id: "templates",
+      label: "Templates",
+      icon: () => (
+        <div className="flex -space-x-1">
+          <span className="grid size-6 place-items-center rounded-full bg-[#feda75] text-[10px]">🌸</span>
+          <span className="grid size-6 place-items-center rounded-full bg-[#fa7e1e] text-[10px]">🔥</span>
+          <span className="grid size-6 place-items-center rounded-full bg-[#d62976] text-[10px]">✨</span>
+        </div>
+      ),
     },
     {
-      id: "video",
-      label: "Video",
-      hint: "Up to 1 min",
-      icon: Clapperboard,
-      art: mountainLakeArt,
+      id: "effects",
+      label: "Effects",
+      icon: () => (
+        <div className="relative">
+          <span className="text-[28px]">🤠</span>
+          <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-[#363636] text-[10px]">✨</span>
+        </div>
+      ),
     },
-    { id: "text", label: "Text", hint: "Aa", icon: Type, art: duskArt },
-  ];
+    {
+      id: "music",
+      label: "Music",
+      icon: () => (
+        <div className="relative">
+          <span className="grid size-8 place-items-center rounded-full bg-[#1a1a1a] border border-[#363636] text-[16px]">💿</span>
+          <span className="absolute -right-1 -top-1 text-[14px]">🎵</span>
+        </div>
+      ),
+    },
+    {
+      id: "collage",
+      label: "Collage",
+      icon: () => (
+        <div className="flex gap-0.5">
+          <span className="text-[20px]">👨‍🎤</span>
+          <span className="text-[20px] -ml-2">🧑‍🎤</span>
+        </div>
+      ),
+    },
+  ] as const;
+
+  // Gallery: first is camera, rest are backgrounds + some mock recents
+  const galleryItems = useMemo(() => {
+    const items: { id: string; type: "camera" | "background"; bg?: (typeof STORY_BACKGROUNDS)[0] }[] = [
+      { id: "camera", type: "camera" },
+    ];
+    // Add 20 backgrounds as recents to fill grid like screenshot
+    const bgs = [...STORY_BACKGROUNDS.filter((b) => b.id.startsWith("ig-")).slice(0, 12), ...STORY_BACKGROUNDS.slice(0, 8)];
+    for (const bg of bgs) {
+      items.push({ id: bg.id, type: "background", bg });
+    }
+    return items;
+  }, []);
 
   return (
-    <div
-      className="fixed inset-0 z-[88] flex flex-col bg-black text-white"
-      role="dialog"
-      aria-label="Create a story"
-    >
-      <div className="mx-auto flex h-full w-full max-w-[560px] flex-col">
-        {/* Instagram top bar */}
-        <div className="flex items-center justify-between px-4 pt-[max(14px,env(safe-area-inset-top))] pb-3 border-b border-[#262626]">
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="grid size-8 place-items-center rounded-full text-white hover:bg-white/10 transition-colors"
-          >
-            <X className="size-6" />
+    <div className="fixed inset-0 z-[88] flex flex-col bg-black text-white" role="dialog" aria-label="Add to story">
+      <div className="flex h-full w-full flex-col">
+        {/* Top bar — Instagram exact from screenshot */}
+        <div className="flex items-center justify-between px-4 pt-[max(12px,env(safe-area-inset-top))] pb-3">
+          <button type="button" onClick={onClose} aria-label="Close" className="grid size-8 place-items-center text-white">
+            <X className="size-7" strokeWidth={2} />
           </button>
-          <h2 className="text-[16px] font-semibold tracking-[0.01em]">New story</h2>
-          <button
-            type="button"
-            aria-label="Settings"
-            className="grid size-8 place-items-center rounded-full text-white hover:bg-white/10 transition-colors"
-          >
-            <Settings className="size-5" />
+          <h2 className="text-[20px] font-semibold tracking-[-0.01em] text-white">Add to story</h2>
+          <button type="button" aria-label="Settings" className="grid size-8 place-items-center text-white">
+            <Settings className="size-7" strokeWidth={1.8} />
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-4 bg-black">
+        {/* Mode cards — Templates / Effects / Music / Collage — screenshot exact */}
+        <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-none">
+          {modeCards.map((card) => (
+            <button
+              key={card.id}
+              type="button"
+              onClick={() => setSheet(card.id as any)}
+              className="flex h-[96px] w-[96px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] bg-[#1e1e1e] border border-[#2a2a2a] active:scale-95 transition-transform"
+            >
+              <span className="grid size-10 place-items-center">
+                <card.icon />
+              </span>
+              <span className="text-[14px] font-medium text-white">{card.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Recents header — screenshot exact */}
+        <div className="flex items-center justify-between px-4 py-3">
+          <button type="button" className="flex items-center gap-1 text-white">
+            <span className="text-[20px] font-semibold">Recents</span>
+            <ChevronDown className="size-5 text-white" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectMode((v) => !v)}
+            className={cn(
+              "flex items-center gap-2 rounded-full bg-[#2a2a2a] px-4 py-2 text-[14px] font-medium text-white border border-[#3a3a3a]",
+              selectMode && "bg-white text-black border-white",
+            )}
+          >
+            <Copy className="size-5" />
+            Select
+          </button>
+        </div>
+
+        {/* Gallery grid — 3 cols, camera first tile like screenshot */}
+        <div className="min-h-0 flex-1 overflow-y-auto bg-black pb-[100px]">
           {pendingDraft ? (
-            <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[#262626] bg-[#121212] px-4 py-3">
-              <p className="text-[13px] text-[#a8a8a8]">Unfinished story draft</p>
+            <div className="mx-4 mb-3 flex items-center justify-between gap-3 rounded-xl border border-[#262626] bg-[#121212] px-4 py-3">
+              <p className="text-[13px] text-[#a8a8a8]">Unfinished draft</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -382,228 +377,263 @@ export function StoryCreator({
                     editorDraftStore.clear();
                     setPendingDraft(null);
                   }}
-                  aria-label="Discard draft"
-                  className="grid size-8 place-items-center rounded-full text-[#a8a8a8] hover:text-white transition-colors"
+                  className="grid size-8 place-items-center rounded-full text-[#a8a8a8]"
                 >
                   <Trash2 className="size-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void resumeDraft()}
-                  className="h-8 rounded-full bg-white px-4 text-[13px] font-semibold text-black"
-                >
+                <button type="button" onClick={() => void resumeDraft()} className="h-8 rounded-full bg-white px-4 text-[13px] font-semibold text-black">
                   Resume
                 </button>
               </div>
             </div>
           ) : null}
 
-          {/* Instagram quick modes - dark cards */}
-          <div className="grid grid-cols-2 gap-3">
-            {quickModes.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  if (m.id === "camera") setCameraOpen(true);
-                  else if (m.id === "photo") photoRef.current?.click();
-                  else if (m.id === "video") videoRef.current?.click();
-                  else setBackgroundsOpen(true);
-                }}
-                className="relative flex min-h-[140px] flex-col justify-end gap-1 overflow-hidden rounded-2xl border border-[#262626] bg-[#121212] p-3 text-left transition-transform active:scale-[0.98] disabled:opacity-60"
-              >
-                <img src={m.art} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-60" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <span className="relative grid size-8 place-items-center rounded-full bg-white/15 text-white backdrop-blur-md">
-                  <m.icon className="size-4" strokeWidth={1.8} aria-hidden />
-                </span>
-                <span className="relative text-[15px] font-semibold text-white">{m.label}</span>
-                <span className="relative text-[12px] text-white/70">{busy ? "Preparing…" : m.hint}</span>
-              </button>
-            ))}
+          <div className="grid grid-cols-3 gap-[2px] bg-black">
+            {galleryItems.map((item) => {
+              if (item.type === "camera") {
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setCameraOpen(true)}
+                    className="relative aspect-[3/4] bg-[#121212] flex items-center justify-center active:opacity-80 transition-opacity"
+                  >
+                    <Camera className="size-8 text-white" strokeWidth={1.5} />
+                  </button>
+                );
+              }
+              const bg = item.bg!;
+              const isSelected = selectedIds.has(bg.id);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    if (selectMode) {
+                      setSelectedIds((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(bg.id)) next.delete(bg.id);
+                        else next.add(bg.id);
+                        return next;
+                      });
+                      return;
+                    }
+                    setEditorSource({ base: "background", backgroundId: bg.id, storyKind: "text" });
+                  }}
+                  className="relative aspect-[3/4] overflow-hidden active:opacity-80 transition-opacity"
+                  style={{ background: bg.css }}
+                >
+                  {selectMode && isSelected ? (
+                    <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-full bg-[#0095f6] border-2 border-white text-white text-[12px] font-bold">
+                      ✓
+                    </span>
+                  ) : null}
+                  {selectMode ? (
+                    <span className="absolute right-2 top-2 size-6 rounded-full border-2 border-white bg-black/20" />
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
 
-          {backgroundsOpen ? (
-            <section className="mt-6" aria-label="Choose a background">
-              <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Background</p>
-              <div className="grid grid-cols-5 gap-2">
-                {STORY_BACKGROUNDS.map((b) => (
+          {/* Mock additional rows to look like screenshot has many images */}
+          <div className="grid grid-cols-3 gap-[2px] mt-[2px]">
+            {STORY_BACKGROUNDS.slice(0, 9).map((bg) => (
+              <button
+                key={`extra-${bg.id}`}
+                type="button"
+                onClick={() => setEditorSource({ base: "background", backgroundId: bg.id, storyKind: "text" })}
+                className="aspect-[3/4] overflow-hidden"
+                style={{ background: bg.css }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom STORY button — screenshot exact centered pill */}
+        <div className="pointer-events-none fixed bottom-0 left-0 right-0 flex justify-center pb-[max(20px,env(safe-area-inset-bottom))] pt-4 bg-gradient-to-t from-black via-black/80 to-transparent">
+          <button
+            type="button"
+            onClick={() => {
+              if (selectMode && selectedIds.size > 0) {
+                const first = Array.from(selectedIds)[0];
+                setEditorSource({ base: "background", backgroundId: first, storyKind: "text" });
+                return;
+              }
+              setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+            }}
+            className="pointer-events-auto rounded-full bg-[#363636] px-8 py-3 text-[14px] font-semibold tracking-[0.15em] text-white border border-[#4a4a4a] active:scale-95 transition-transform"
+          >
+            STORY
+          </button>
+        </div>
+
+        {/* Quick actions bottom left? */}
+        <div className="pointer-events-none fixed bottom-0 left-4 pb-[max(24px,env(safe-area-inset-bottom))]">
+          <button
+            type="button"
+            onClick={() => photoRef.current?.click()}
+            className="pointer-events-auto grid size-10 place-items-center rounded-full bg-[#1a1a1a] border border-[#363636] text-white"
+          >
+            <ImageIcon className="size-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Sheets */}
+      {sheet === "templates" ? (
+        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Templates">
+          <div className="flex max-h-[85vh] w-full flex-col rounded-t-[20px] bg-[#121212] border-t border-[#262626]">
+            <div className="flex flex-col items-center gap-3 border-b border-[#262626] px-4 py-3">
+              <div className="h-1 w-10 rounded-full bg-[#363636]" />
+              <div className="flex w-full items-center justify-between">
+                <h3 className="text-[16px] font-semibold text-white">Templates</h3>
+                <button type="button" onClick={() => setSheet(null)} className="text-[14px] font-medium text-[#0095f6]">
+                  Done
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {STORY_TEMPLATES.map((t) => (
                   <button
-                    key={b.id}
+                    key={t.id}
                     type="button"
-                    onClick={() =>
-                      setEditorSource({ base: "background", backgroundId: b.id, storyKind: "text" })
-                    }
-                    aria-label={`${b.name} background`}
-                    title={b.name}
-                    className="group flex flex-col items-center gap-1.5"
+                    onClick={() => {
+                      setSheet(null);
+                      setEditorSource({ base: "background", backgroundId: t.backgroundId, templateId: t.id, storyKind: "text" });
+                    }}
+                    className="flex flex-col gap-2 text-left active:scale-[0.97] transition-transform"
                   >
                     <span
-                      className="block aspect-[9/14] w-full rounded-xl border border-[#262626] transition-transform group-active:scale-95"
-                      style={{ background: b.css }}
-                    />
-                    <span className="text-[10px] text-[#a8a8a8]">{b.name}</span>
+                      className="flex aspect-[9/12] w-full flex-col justify-between rounded-2xl border border-[#262626] p-3"
+                      style={{ background: STORY_BACKGROUNDS.find((b) => b.id === t.backgroundId)?.css }}
+                    >
+                      <span className="text-[14px] font-bold leading-tight" style={{ color: t.ink }}>
+                        {t.heading}
+                      </span>
+                      <span className="text-[11px]" style={{ color: t.ink, opacity: 0.7 }}>
+                        {t.hint}
+                      </span>
+                    </span>
+                    <span className="px-1 text-[13px] font-medium text-white">{t.name}</span>
                   </button>
                 ))}
               </div>
-            </section>
-          ) : null}
-
-          <section className="mt-6" aria-label="Story templates">
-            <div className="mb-3 flex items-baseline justify-between">
-              <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Templates</p>
-              <button
-                type="button"
-                onClick={openWin}
-                className="inline-flex items-center gap-1 text-[12px] text-[#a8a8a8] hover:text-white transition-colors"
-              >
-                <Sprout className="size-3.5" aria-hidden /> Quick win
-              </button>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-              {STORY_TEMPLATES.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() =>
-                    setEditorSource({
-                      base: "background",
-                      backgroundId: t.backgroundId,
-                      templateId: t.id,
-                      storyKind: "text",
-                    })
-                  }
-                  className="group w-[130px] shrink-0 text-left"
-                >
-                  <span
-                    className="flex aspect-[9/13] w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#262626] p-3 transition-transform group-active:scale-[0.97]"
-                    style={{
-                      background: STORY_BACKGROUNDS.find((b) => b.id === t.backgroundId)?.css,
-                    }}
-                  >
-                    <span className="text-[13px] font-semibold leading-snug" style={{ color: t.ink }}>
-                      {t.heading}
-                    </span>
-                    <span className="text-[10.5px]" style={{ color: t.ink, opacity: 0.75 }}>
-                      {t.hint}
-                    </span>
-                  </span>
-                  <span className="mt-2 block truncate px-1 text-[12px] font-medium text-white">
-                    {t.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="mt-6" aria-label="From your Bloom">
-            <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">From your Bloom</p>
-            <div className="flex flex-col gap-2">
-              {moodEntries.length > 0 ? (
-                <FromBloomRow
-                  icon={CloudSun}
-                  label="Recent check-in"
-                  hint="Only the one you pick"
-                  items={moodEntries
-                    .slice(-4)
-                    .reverse()
-                    .map((e) => ({
-                      id: e.id,
-                      title: `${dayLabel(e.timestamp)} · ${EMOTION_MAP[e.emotions[0] ?? "neutral"].label} · ${Math.round(e.mood)}/10`,
-                    }))}
-                  onPick={(id) => {
-                    const entry = moodEntries.find((e) => e.id === id);
-                    if (entry) openMood(entry);
-                  }}
-                />
-              ) : null}
-              {reflections.length > 0 ? (
-                <FromBloomRow
-                  icon={NotebookPen}
-                  label="Reflection"
-                  hint="Words you already wrote"
-                  items={reflections
-                    .slice(-4)
-                    .reverse()
-                    .map((e) => ({
-                      id: e.id,
-                      title: (e.note ?? "").trim().slice(0, 64) || dayLabel(e.timestamp),
-                    }))}
-                  onPick={(id) => {
-                    const entry = reflections.find((e) => e.id === id);
-                    if (entry) openReflection(entry);
-                  }}
-                />
-              ) : null}
-              {rewards.length > 0 ? (
-                <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-[#a8a8a8]">
-                    <Gift className="size-3.5" aria-hidden /> Rewards
-                  </p>
-                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-                    {rewards.slice(0, 6).map((reward) => (
-                      <button
-                        key={reward.id}
-                        type="button"
-                        onClick={() => openReward(reward)}
-                        aria-label={`Share ${reward.title} as a story`}
-                        className="w-[132px] shrink-0 transition-transform active:scale-[0.97]"
-                      >
-                        <BloomShareCard
-                          eyebrow="Reward"
-                          title={reward.title}
-                          backgroundId="golden-hour"
-                          stickerId="habit.win-1"
-                          compact
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {milestones.length > 0 ? (
-                <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-[#a8a8a8]">
-                    <Flag className="size-3.5" aria-hidden /> Milestones
-                  </p>
-                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-                    {milestones.slice(0, 6).map((milestone) => (
-                      <button
-                        key={milestone.id}
-                        type="button"
-                        onClick={() => openMilestone(milestone)}
-                        aria-label={`Share ${milestone.label} as a story`}
-                        className="w-[132px] shrink-0 transition-transform active:scale-[0.97]"
-                      >
-                        <BloomShareCard
-                          eyebrow="Milestone"
-                          title={milestone.label}
-                          backgroundId="garden"
-                          stickerId="habit.streak-1"
-                          compact
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {moodEntries.length === 0 &&
-              reflections.length === 0 &&
-              rewards.length === 0 &&
-              milestones.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-[#262626] px-4 py-5 text-center text-[13px] text-[#a8a8a8]">
-                  As you log moods and earn rewards, they'll wait here — ready to become stories.
-                </p>
-              ) : null}
-            </div>
-          </section>
-
-          <p className="mt-8 text-center text-[12px] text-[#737373]">
-            Stories disappear after 24 hours
-          </p>
+          </div>
+          <button type="button" onClick={() => setSheet(null)} className="absolute inset-0 -z-10" aria-label="Close" />
         </div>
-      </div>
+      ) : null}
+
+      {sheet === "effects" ? (
+        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Effects">
+          <div className="flex max-h-[70vh] w-full flex-col rounded-t-[20px] bg-[#121212] border-t border-[#262626]">
+            <div className="flex flex-col items-center gap-3 border-b border-[#262626] px-4 py-3">
+              <div className="h-1 w-10 rounded-full bg-[#363636]" />
+              <div className="flex w-full items-center justify-between">
+                <h3 className="text-[16px] font-semibold text-white">Effects</h3>
+                <button type="button" onClick={() => setSheet(null)} className="text-[14px] font-medium text-[#0095f6]">
+                  Done
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto p-4">
+              <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2">
+                {STORY_FILTERS.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      setSheet(null);
+                      setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+                      // filter will be applied in editor via initialState later — for now just open editor
+                    }}
+                    className="flex flex-col items-center gap-2 shrink-0 active:scale-95 transition-transform"
+                  >
+                    <span className="grid size-16 place-items-center rounded-full bg-[#1a1a1a] border border-[#262626] text-white">
+                      <Sparkles className="size-6" />
+                    </span>
+                    <span className="text-[12px] text-white">{f.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button type="button" onClick={() => setSheet(null)} className="absolute inset-0 -z-10" aria-label="Close" />
+        </div>
+      ) : null}
+
+      {sheet === "music" ? (
+        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Music">
+          <div className="flex max-h-[70vh] w-full flex-col rounded-t-[20px] bg-[#121212] border-t border-[#262626]">
+            <div className="flex flex-col items-center gap-3 border-b border-[#262626] px-4 py-3">
+              <div className="h-1 w-10 rounded-full bg-[#363636]" />
+              <div className="flex w-full items-center justify-between">
+                <h3 className="text-[16px] font-semibold text-white">Music</h3>
+                <button type="button" onClick={() => setSheet(null)} className="text-[14px] font-medium text-[#0095f6]">
+                  Done
+                </button>
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-4 gap-3">
+                {["Trending", "Chill", "Love", "Party", "Focus", "Sad", "Happy", "Vibes"].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      setSheet(null);
+                      setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+                    }}
+                    className="flex flex-col items-center gap-2 rounded-xl bg-[#1a1a1a] border border-[#262626] p-3 active:scale-95"
+                  >
+                    <span className="grid size-10 place-items-center rounded-full bg-[#262626] text-white">
+                      <Music2 className="size-5" />
+                    </span>
+                    <span className="text-[12px] text-white">{m}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button type="button" onClick={() => setSheet(null)} className="absolute inset-0 -z-10" aria-label="Close" />
+        </div>
+      ) : null}
+
+      {sheet === "collage" ? (
+        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Collage">
+          <div className="flex max-h-[70vh] w-full flex-col rounded-t-[20px] bg-[#121212] border-t border-[#262626]">
+            <div className="flex flex-col items-center gap-3 border-b border-[#262626] px-4 py-3">
+              <div className="h-1 w-10 rounded-full bg-[#363636]" />
+              <div className="flex w-full items-center justify-between">
+                <h3 className="text-[16px] font-semibold text-white">Collage</h3>
+                <button type="button" onClick={() => setSheet(null)} className="text-[14px] font-medium text-[#0095f6]">
+                  Done
+                </button>
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setSheet(null);
+                      setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+                    }}
+                    className="aspect-[4/3] rounded-xl bg-[#1a1a1a] border border-[#262626] grid place-items-center active:scale-95"
+                  >
+                    <LayoutGrid className="size-8 text-[#a8a8a8]" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button type="button" onClick={() => setSheet(null)} className="absolute inset-0 -z-10" aria-label="Close" />
+        </div>
+      ) : null}
 
       {cameraOpen ? (
         <CameraCapture
@@ -611,12 +641,7 @@ export function StoryCreator({
             setCameraOpen(false);
             setEditorSource({
               base: "photo",
-              photo: {
-                dataUrl: photo.dataUrl,
-                width: photo.width,
-                height: photo.height,
-                blob: photo.blob,
-              },
+              photo: { dataUrl: photo.dataUrl, width: photo.width, height: photo.height, blob: photo.blob },
               storyKind: "photo",
             });
           }}
@@ -650,60 +675,6 @@ export function StoryCreator({
           void onVideoFile(file);
         }}
       />
-    </div>
-  );
-}
-
-function FromBloomRow({
-  icon: Icon,
-  label,
-  hint,
-  items,
-  onPick,
-}: {
-  icon: typeof CloudSun;
-  label: string;
-  hint: string;
-  items: { id: string; title: string }[];
-  onPick: (id: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="overflow-hidden rounded-xl border border-[#262626] bg-[#121212]">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
-      >
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#262626] text-[#a8a8a8]">
-          <Icon className="size-4" strokeWidth={1.8} aria-hidden />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-semibold text-white">{label}</span>
-          <span className="block text-[12px] text-[#a8a8a8]">{hint}</span>
-        </span>
-        <ArrowRight
-          className={cn("size-4 shrink-0 text-[#737373] transition-transform", open && "rotate-90")}
-          aria-hidden
-        />
-      </button>
-      {open ? (
-        <ul className="flex flex-col gap-1 border-t border-[#262626] px-2 py-2">
-          {items.map((item) => (
-            <li key={item.id}>
-              <button
-                type="button"
-                onClick={() => onPick(item.id)}
-                className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-[#262626] transition-colors"
-              >
-                <span className="truncate text-[13px] text-white">{item.title}</span>
-                <ArrowRight className="size-3.5 shrink-0 text-[#737373]" aria-hidden />
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
     </div>
   );
 }

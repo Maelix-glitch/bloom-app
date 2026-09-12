@@ -1,9 +1,9 @@
 /**
  * MediaTrays — Instagram-exact music + GIF pickers.
- * Dark #121212, search #262626, white text, like IG.
+ * Dark #121212, search #262626, no ugly Bloom motion.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Disc3, Music2, Pause, Play, Search, Upload } from "lucide-react";
 
 import {
@@ -15,7 +15,6 @@ import {
   type MusicTrack,
 } from "@/lib/stories/providers";
 import { probeAudioDuration } from "@/lib/profile/media";
-import { MOTION_PACK, type MotionItem } from "@/lib/stories/catalogs";
 import { cn } from "@/lib/utils";
 
 export interface PickedMusic {
@@ -36,7 +35,6 @@ function useDebounced(value: string, ms = 350): string {
   return v;
 }
 
-/* --------------------------------- music -------------------------------- */
 const MUSIC_MOODS = ["Trending", "Chill", "Love", "Party", "Focus", "Sad", "Happy", "Vibes"];
 
 export function MusicTray({
@@ -130,17 +128,15 @@ export function MusicTray({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search music"
-                  aria-label="Search music"
                   className="w-full bg-transparent text-[15px] text-white outline-none placeholder:text-[#a8a8a8]"
                 />
               </label>
-              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1" role="group" aria-label="Browse">
+              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
                 {MUSIC_MOODS.map((mood) => (
                   <button
                     key={mood}
                     type="button"
                     onClick={() => setQuery(mood === "Trending" ? "" : mood)}
-                    aria-pressed={query === mood}
                     className={cn(
                       "shrink-0 rounded-full border px-3.5 py-1.5 text-[13px] font-medium",
                       query === mood || (mood === "Trending" && !query)
@@ -159,15 +155,13 @@ export function MusicTray({
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={audioBusy}
-            className="flex w-full items-center gap-3 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-3.5 text-left active:scale-[0.98] transition-transform"
+            className="flex w-full items-center gap-3 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-3.5 text-left active:scale-[0.98]"
           >
             <span className="grid size-10 place-items-center rounded-full bg-[#262626] text-white">
-              <Upload className="size-5" aria-hidden />
+              <Upload className="size-5" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[15px] font-semibold text-white">
-                {audioBusy ? "Reading…" : "Your audio"}
-              </span>
+              <span className="block text-[15px] font-semibold text-white">{audioBusy ? "Reading…" : "Your audio"}</span>
               <span className="block text-[12px] text-[#a8a8a8]">Upload MP3, up to 12 MB</span>
             </span>
           </button>
@@ -186,9 +180,9 @@ export function MusicTray({
 
           {!musicProvider.configured ? (
             <div className="flex flex-col items-center gap-2 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-10 text-center">
-              <Disc3 className="size-6 text-[#a8a8a8]" aria-hidden />
+              <Disc3 className="size-6 text-[#a8a8a8]" />
               <p className="text-[15px] font-semibold text-white">No catalog</p>
-              <p className="max-w-[32ch] text-[13px] text-[#a8a8a8]">Your own audio above works</p>
+              <p className="text-[13px] text-[#a8a8a8]">Your own audio above works</p>
             </div>
           ) : loading ? (
             <div className="flex flex-col gap-2 py-2">
@@ -197,67 +191,49 @@ export function MusicTray({
               ))}
             </div>
           ) : tracks.length === 0 ? (
-            <p className="py-8 text-center text-[14px] text-[#a8a8a8]">
-              {debounced.trim() ? "No results" : "Nothing trending"}
-            </p>
+            <p className="py-8 text-center text-[14px] text-[#a8a8a8]">{debounced.trim() ? "No results" : "Nothing trending"}</p>
           ) : (
-            <>
-              {musicProvider.attribution ? (
-                <p className="text-center text-[10px] uppercase tracking-[0.1em] text-[#737373]">
-                  {musicProvider.attribution}
-                </p>
-              ) : null}
-              <ul className="flex flex-col gap-1">
-                {tracks.map((track) => (
-                  <li
-                    key={track.id}
-                    className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#1a1a1a] transition-colors"
-                  >
-                    <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#262626] text-white">
-                      {track.artworkUrl ? (
-                        <img src={track.artworkUrl} alt="" className="size-full object-cover" loading="lazy" />
-                      ) : (
-                        <Music2 className="size-5" aria-hidden />
-                      )}
-                    </span>
-                    <span className="min-w-0 flex-1 leading-tight">
-                      <span className="block truncate text-[14px] font-semibold text-white">
-                        {track.title}
-                        {track.explicit ? (
-                          <span className="ml-1.5 rounded border border-[#363636] px-1 text-[9px] text-[#a8a8a8]">E</span>
-                        ) : null}
-                      </span>
-                      <span className="block truncate text-[12px] text-[#a8a8a8]">{track.artist}</span>
-                    </span>
-                    {track.previewUrl ? (
-                      <button
-                        type="button"
-                        onClick={() => togglePreview(track)}
-                        aria-label={previewId === track.id ? "Pause" : "Preview"}
-                        className="grid size-8 place-items-center rounded-full bg-[#262626] text-white"
-                      >
-                        {previewId === track.id ? <Pause className="size-4" /> : <Play className="size-4" />}
-                      </button>
-                    ) : null}
+            <ul className="flex flex-col gap-1">
+              {tracks.map((track) => (
+                <li key={track.id} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#1a1a1a]">
+                  <span className="grid size-12 place-items-center overflow-hidden rounded-lg bg-[#262626] text-white">
+                    {track.artworkUrl ? (
+                      <img src={track.artworkUrl} alt="" className="size-full object-cover" loading="lazy" />
+                    ) : (
+                      <Music2 className="size-5" />
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1 leading-tight">
+                    <span className="block truncate text-[14px] font-semibold text-white">{track.title}</span>
+                    <span className="block truncate text-[12px] text-[#a8a8a8]">{track.artist}</span>
+                  </span>
+                  {track.previewUrl ? (
                     <button
                       type="button"
-                      onClick={() =>
-                        onPick({
-                          trackId: track.id,
-                          title: track.title,
-                          artist: track.artist,
-                          src: track.previewUrl ?? undefined,
-                          durationMs: track.durationMs,
-                        })
-                      }
-                      className="rounded-full bg-white px-4 py-1.5 text-[13px] font-semibold text-black"
+                      onClick={() => togglePreview(track)}
+                      className="grid size-8 place-items-center rounded-full bg-[#262626] text-white"
                     >
-                      Add
+                      {previewId === track.id ? <Pause className="size-4" /> : <Play className="size-4" />}
                     </button>
-                  </li>
-                ))}
-              </ul>
-            </>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onPick({
+                        trackId: track.id,
+                        title: track.title,
+                        artist: track.artist,
+                        src: track.previewUrl ?? undefined,
+                        durationMs: track.durationMs,
+                      })
+                    }
+                    className="rounded-full bg-white px-4 py-1.5 text-[13px] font-semibold text-black"
+                  >
+                    Add
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>
@@ -266,14 +242,12 @@ export function MusicTray({
   );
 }
 
-/* ---------------------------------- GIF ---------------------------------- */
 export function GifTray({
   onPick,
-  onPickMotion,
   onClose,
 }: {
   onPick: (gif: GifAsset, file?: File) => void;
-  onPickMotion: (item: MotionItem) => void;
+  onPickMotion?: (item: any) => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -336,7 +310,7 @@ export function GifTray({
         <div className="flex flex-col gap-3 border-b border-[#262626] px-4 py-3">
           <div className="mx-auto h-1 w-10 rounded-full bg-[#363636]" />
           <div className="flex items-center justify-between">
-            <h2 className="text-[16px] font-semibold text-white">GIFs</h2>
+            <h2 className="text-[16px] font-semibold text-white">GIF</h2>
             <button type="button" onClick={onClose} className="text-[14px] font-medium text-[#0095f6]">
               Done
             </button>
@@ -348,15 +322,13 @@ export function GifTray({
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploadBusy}
-            className="flex w-full items-center gap-3 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-3.5 text-left active:scale-[0.98] transition-transform"
+            className="flex w-full items-center gap-3 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-3.5 text-left active:scale-[0.98]"
           >
             <span className="grid size-10 place-items-center rounded-full bg-[#262626] text-white">
-              <Upload className="size-5" aria-hidden />
+              <Upload className="size-5" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[15px] font-semibold text-white">
-                {uploadBusy ? "Reading…" : "Upload GIF"}
-              </span>
+              <span className="block text-[15px] font-semibold text-white">{uploadBusy ? "Reading…" : "Upload GIF"}</span>
               <span className="block text-[12px] text-[#a8a8a8]">Your .gif or .webp, up to 4 MB</span>
             </span>
           </button>
@@ -375,19 +347,18 @@ export function GifTray({
 
           {gifProvider.configured ? (
             <label className="flex items-center gap-2 rounded-lg bg-[#262626] px-3 py-2.5">
-              <Search className="size-4 shrink-0 text-[#a8a8a8]" aria-hidden />
+              <Search className="size-4 shrink-0 text-[#a8a8a8]" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search GIFs"
-                aria-label="Search GIFs"
                 className="w-full bg-transparent text-[15px] text-white outline-none placeholder:text-[#a8a8a8]"
               />
             </label>
           ) : null}
 
           {!gifProvider.configured ? (
-            <p className="text-[13px] text-[#a8a8a8]">Upload your own GIFs or add motion below</p>
+            <p className="text-[13px] text-[#a8a8a8]">Upload your own GIFs — GIF search needs a key</p>
           ) : loading ? (
             <div className="grid grid-cols-3 gap-2">
               {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -395,9 +366,7 @@ export function GifTray({
               ))}
             </div>
           ) : gifs.length === 0 ? (
-            <p className="py-8 text-center text-[14px] text-[#a8a8a8]">
-              {debounced.trim() ? "No results" : "Nothing trending"}
-            </p>
+            <p className="py-8 text-center text-[14px] text-[#a8a8a8]">{debounced.trim() ? "No results" : "Nothing trending"}</p>
           ) : (
             <>
               <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">{trendingLabel}</p>
@@ -407,32 +376,14 @@ export function GifTray({
                     key={gif.id}
                     type="button"
                     onClick={() => onPick(gif)}
-                    aria-label={`Add ${gif.title}`}
-                    className="overflow-hidden rounded-lg border border-transparent active:scale-95 transition-transform"
+                    className="overflow-hidden rounded-lg active:scale-95 transition-transform"
                   >
-                    <img src={gif.still} alt="" loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
+                    <img src={gif.still} alt="" loading="lazy" className="aspect-square w-full object-cover" />
                   </button>
                 ))}
               </div>
             </>
           )}
-
-          <p className="pt-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Quick Reactions</p>
-          <div className="grid grid-cols-6 gap-2" role="group" aria-label="Motion">
-            {MOTION_PACK.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onPickMotion(item)}
-                title={item.label}
-                aria-label={`Add ${item.label}`}
-                data-anim={item.animation}
-                className="grid aspect-square place-items-center rounded-xl bg-[#1a1a1a] border border-[#262626] text-[22px] active:scale-90 transition-transform"
-              >
-                <span aria-hidden>{item.emoji}</span>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 -z-10" />
