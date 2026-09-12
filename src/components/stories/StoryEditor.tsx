@@ -1,9 +1,8 @@
 /**
- * StoryEditor — the immersive story canvas.
- * Media or a curated background fills the viewport; tools float at the edges.
- * Text, stickers, drawing, filters, music, GIFs, and interactive stickers
- * compose one element list with full undo/redo. Share previews exactly what
- * viewers will see, states who can see it, then publishes once.
+ * StoryEditor — Instagram-exact story editor.
+ * Full-screen black canvas, top bar X + tools (text, sticker, draw, filter, music, gif), bottom Your Story / Close Friends / Send.
+ * Drawing: color palette + brush + eraser like IG.
+ * Share: Instagram share sheet with Your Story / Close Friends.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +23,7 @@ import {
   VolumeX,
   Wand2,
   X,
+  Send,
 } from "lucide-react";
 
 import { StoryCanvas, type CanvasMedia } from "./StoryCanvas";
@@ -34,7 +34,6 @@ import { InteractiveTray } from "./InteractiveTray";
 import { FilterTool } from "./FilterTool";
 import { GifTray, MusicTray, type PickedMusic } from "./MediaTrays";
 import { DrawLayer, exportDrawing, type DrawStroke } from "./DrawLayer";
-import { StorySheet } from "./StorySheet";
 import { DRAW_COLORS, DRAW_SIZES_ROW } from "./editorBits";
 import {
   ELEMENT_LIMITS,
@@ -66,23 +65,19 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export interface EditorSource {
-  /** What the canvas starts from. */
   base: "photo" | "video" | "background";
   photo?: LocalImage | undefined;
   video?: LocalVideo | undefined;
   videoThumbnail?: string | null | undefined;
   backgroundId?: string | undefined;
   templateId?: string | null | undefined;
-  /** Story kind + provenance written at publish. */
   storyKind: StoryKind;
   source?: { kind: string; id: string } | null | undefined;
   captionTitle?: string | undefined;
   captionBody?: string | undefined;
-  /** Per-source accent override (milestones bloom sage, rewards amber). */
   accent?: BloomAccent | undefined;
 }
 
-/** Restored draft state: canvas layers plus the words around them. */
 export interface EditorInitialState {
   elements: StoryElement[];
   strokes: DrawStroke[];
@@ -140,17 +135,13 @@ export const editorDraftStore = {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    } catch {
-      /* storage full — drafts are best-effort */
-    }
+    } catch {}
   },
   clear(): void {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.removeItem(DRAFT_KEY);
-    } catch {
-      /* ignore */
-    }
+    } catch {}
   },
 };
 
@@ -177,13 +168,9 @@ export function StoryEditor({
   onPublish: (input: CreateStoryInput) => Promise<void>;
   onClose: () => void;
 }) {
-  const effectiveAccent = source.accent ?? accent;
-  const template = source.templateId
-    ? (STORY_TEMPLATES.find((t) => t.id === source.templateId) ?? null)
-    : null;
+  const template = source.templateId ? STORY_TEMPLATES.find((t) => t.id === source.templateId) ?? null : null;
 
   const [elements, setElements] = useState<StoryElement[]>(() => {
-    // A resumed draft wins over template/source seeding.
     if (initialState) return sanitizeElements(initialState.elements);
     const els: StoryElement[] = [];
     if (template) {
@@ -204,8 +191,8 @@ export function StoryEditor({
     if (source.captionTitle && !template) {
       els.push(
         makeTextElement(source.captionTitle, {
-          preset: "editorial",
-          color: source.base === "background" ? backgroundById(source.backgroundId).ink : "#f4efe4",
+          preset: "classic",
+          color: source.base === "background" ? backgroundById(source.backgroundId).ink : "#ffffff",
           x: 0.5,
           y: 0.4,
           z: 1,
@@ -215,30 +202,19 @@ export function StoryEditor({
     return els;
   });
   const [strokes, setStrokes] = useState<DrawStroke[]>(() => initialState?.strokes ?? []);
-  const [backgroundId, setBackgroundId] = useState(
-    source.backgroundId ?? template?.backgroundId ?? "moonlight",
-  );
+  const [backgroundId, setBackgroundId] = useState(source.backgroundId ?? template?.backgroundId ?? "ig-black");
   const [filterId, setFilterId] = useState(initialState?.filterId ?? "none");
-  const [adjustments, setAdjustments] = useState<StoryAdjustments>(
-    initialState?.adjustments ?? DEFAULT_ADJUSTMENTS,
-  );
+  const [adjustments, setAdjustments] = useState<StoryAdjustments>(initialState?.adjustments ?? DEFAULT_ADJUSTMENTS);
   const [music, setMusic] = useState<PickedMusic | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tool, setTool] = useState<Tool>(null);
-  const [textEditing, setTextEditing] = useState<{
-    elementId: string | null;
-    initial: TextToolValue | null;
-  } | null>(null);
+  const [textEditing, setTextEditing] = useState<{ elementId: string | null; initial: TextToolValue | null } | null>(null);
   const [drawing, setDrawing] = useState(false);
-  const [drawColor, setDrawColor] = useState("#f4efe4");
+  const [drawColor, setDrawColor] = useState("#ffffff");
   const [drawSize, setDrawSize] = useState(8);
   const [drawEraser, setDrawEraser] = useState(false);
-  const [captionTitle, setCaptionTitle] = useState(
-    initialState?.captionTitle || source.captionTitle || "",
-  );
-  const [captionBody, setCaptionBody] = useState(
-    initialState?.captionBody || source.captionBody || "",
-  );
+  const [captionTitle, setCaptionTitle] = useState(initialState?.captionTitle || source.captionTitle || "");
+  const [captionBody, setCaptionBody] = useState(initialState?.captionBody || source.captionBody || "");
   const [altText, setAltText] = useState(initialState?.altText ?? "");
   const [visibility, setVisibility] = useState<StoryVisibility>(defaultVisibility);
   const [audience, setAudience] = useState<StoryAudience>(defaultAudience);
@@ -251,11 +227,9 @@ export function StoryEditor({
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const deleteRef = useRef<HTMLDivElement | null>(null);
   const draftTimer = useRef<number | undefined>(undefined);
-  /* Device-uploaded GIFs: blob-backed elements + their bytes, uploaded at publish. */
   const gifFiles = useRef(new Map<string, { blob: Blob; contentType: string }>());
   const gifUrls = useRef<string[]>([]);
 
-  /* ------------------------------ history ------------------------------ */
   const past = useRef<Snapshot[]>([]);
   const future = useRef<Snapshot[]>([]);
   const [, setHistoryTick] = useState(0);
@@ -291,13 +265,12 @@ export function StoryEditor({
   const canUndo = past.current.length > 0;
   const canRedo = future.current.length > 0;
 
-  /* ------------------------------ selection ----------------------------- */
   const selected = elements.find((e) => e.id === selectedId) ?? null;
 
   const addElement = useCallback(
     (el: StoryElement) => {
       if (elements.length >= ELEMENT_LIMITS.maxElements) {
-        toast("That's plenty of layers — remove one to add another.");
+        toast("Too many stickers");
         return;
       }
       const placed = { ...el, x: 0.5, y: 0.42, z: nextZ(elements) };
@@ -310,7 +283,6 @@ export function StoryEditor({
     [elements.length, snapshot],
   );
 
-  /* One history entry per gesture: snapshot on first live update. */
   const transformOpen = useRef(false);
   const liveTransform = useCallback(
     (id: string, t: { x: number; y: number; scale: number; rotation: number }) => {
@@ -328,7 +300,6 @@ export function StoryEditor({
   const endTransform = useCallback(() => {
     if (!transformOpen.current) return;
     transformOpen.current = false;
-    setSelectedId((sel) => sel);
     setHistoryTick((t) => t + 1);
   }, []);
 
@@ -343,7 +314,6 @@ export function StoryEditor({
     [snapshot],
   );
 
-  /* ------------------------------ delete zone --------------------------- */
   const onDragState = useCallback((d: { id: string; clientX: number; clientY: number } | null) => {
     setDrag(d);
     if (!d) {
@@ -353,12 +323,6 @@ export function StoryEditor({
     const rect = deleteRef.current?.getBoundingClientRect();
     setDeleteHot(pointInRect(d.clientX, d.clientY, rect, 20));
   }, []);
-
-  useEffect(() => {
-    if (!drag && deleteHot) {
-      /* released over the zone is handled below via ref mirror */
-    }
-  }, [drag, deleteHot]);
 
   const dragRef = useRef(drag);
   dragRef.current = drag;
@@ -376,11 +340,10 @@ export function StoryEditor({
     endTransform();
   }, [deleteElement, endTransform]);
 
-  /* ------------------------------ text ---------------------------------- */
   const openText = useCallback(
     (existing: Extract<StoryElement, { kind: "text" }> | null) => {
       if (!existing && elements.length >= ELEMENT_LIMITS.maxElements) {
-        toast("That's plenty of layers — remove one to add another.");
+        toast("Too many layers");
         return;
       }
       setTextEditing({
@@ -442,7 +405,6 @@ export function StoryEditor({
     [textEditing, snapshot, addElement],
   );
 
-  /* ------------------------------ draw ---------------------------------- */
   const addStroke = useCallback(
     (stroke: DrawStroke) => {
       past.current.push(snapshot());
@@ -453,13 +415,12 @@ export function StoryEditor({
     [snapshot],
   );
 
-  /* ------------------------------ draft --------------------------------- */
   const dirty = elements.length > 0 || strokes.length > 0 || filterId !== "none" || music !== null;
 
   useEffect(() => {
     if (step !== "edit") return;
     if (!dirty) return;
-    if (source.base === "video") return; // files can't be restored; don't pretend
+    if (source.base === "video") return;
     window.clearTimeout(draftTimer.current);
     draftTimer.current = window.setTimeout(() => {
       editorDraftStore.write({
@@ -483,22 +444,8 @@ export function StoryEditor({
       });
     }, 800);
     return () => window.clearTimeout(draftTimer.current);
-  }, [
-    elements,
-    strokes,
-    backgroundId,
-    filterId,
-    adjustments,
-    captionTitle,
-    captionBody,
-    altText,
-    dirty,
-    source,
-    step,
-    userId,
-  ]);
+  }, [elements, strokes, backgroundId, filterId, adjustments, captionTitle, captionBody, altText, dirty, source, step, userId]);
 
-  /* ------------------------------ publish ------------------------------- */
   const media: CanvasMedia = useMemo(() => {
     if (source.base === "video" && source.video) {
       return { type: "video", src: source.video.previewUrl, poster: source.videoThumbnail };
@@ -509,7 +456,6 @@ export function StoryEditor({
     return { type: "none", src: null };
   }, [source]);
 
-  /* Session object URLs are revoked when the editor leaves, published or not. */
   useEffect(
     () => () => {
       for (const url of gifUrls.current) URL.revokeObjectURL(url);
@@ -521,8 +467,6 @@ export function StoryEditor({
 
   const publishElements = useCallback((): StoryElement[] => {
     let els = serializeElements(elements);
-    // serialize() drops blob-backed GIFs by design (stored rows must be https);
-    // carry them through — the service uploads the bytes and rewrites the src.
     const kept = new Set(els.map((e) => e.id));
     for (const e of elements) {
       if (e.kind === "gif" && !kept.has(e.id) && gifFiles.current.has(e.id)) els.push(e);
@@ -587,8 +531,7 @@ export function StoryEditor({
         source: source.source ?? null,
         elements: els,
         filterId: filterId === "none" ? null : filterId,
-        adjustments:
-          JSON.stringify(adjustments) === JSON.stringify(DEFAULT_ADJUSTMENTS) ? null : adjustments,
+        adjustments: JSON.stringify(adjustments) === JSON.stringify(DEFAULT_ADJUSTMENTS) ? null : adjustments,
         backgroundId: source.base === "background" ? backgroundId : null,
         music: music
           ? {
@@ -600,9 +543,7 @@ export function StoryEditor({
               src: music.src,
             }
           : null,
-        audio: music?.file
-          ? { blob: music.file, contentType: music.file.type || "audio/mpeg" }
-          : null,
+        audio: music?.file ? { blob: music.file, contentType: music.file.type || "audio/mpeg" } : null,
         gifFiles: els.flatMap((e) => {
           if (e.kind !== "gif") return [];
           const file = gifFiles.current.get(e.id);
@@ -614,26 +555,11 @@ export function StoryEditor({
       });
       editorDraftStore.clear();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Couldn't post your story.");
+      toast.error(error instanceof Error ? error.message : "Couldn't share story");
     } finally {
       setPublishing(false);
     }
-  }, [
-    publishing,
-    publishElements,
-    onPublish,
-    source,
-    captionTitle,
-    captionBody,
-    effectiveAccent,
-    visibility,
-    filterId,
-    adjustments,
-    backgroundId,
-    music,
-    altText,
-    audience,
-  ]);
+  }, [publishing, publishElements, onPublish, source, captionTitle, captionBody, accent, visibility, filterId, adjustments, backgroundId, music, altText, audience]);
 
   const requestClose = useCallback(() => {
     if (dirty && step === "edit") {
@@ -643,7 +569,6 @@ export function StoryEditor({
     onClose();
   }, [dirty, step, onClose]);
 
-  /* keyboard: undo/redo/escape */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (textEditing || tool) return;
@@ -665,139 +590,105 @@ export function StoryEditor({
     return () => window.removeEventListener("keydown", onKey);
   }, [textEditing, tool, drawing, selectedId, step, undo, redo, requestClose, deleteElement]);
 
-  const ink = source.base === "background" ? backgroundById(backgroundId).ink : "#f4efe4";
+  const ink = source.base === "background" ? backgroundById(backgroundId).ink : "#ffffff";
   const canvasSize = canvasRef.current?.getBoundingClientRect();
-  const [, forceMeasure] = useState(0);
-  useEffect(() => {
-    forceMeasure(1);
-  }, []);
 
-  /* -------------------------------- share -------------------------------- */
+  /* -------------------------------- share - Instagram -------------------------------- */
   if (step === "share") {
     const previewStory = { elements: publishElements() };
     return (
-      <div
-        className="bstory se-root fixed inset-0 z-[90] flex flex-col bg-black"
-        role="dialog"
-        aria-label="Share story"
-      >
-        <div className="flex items-center justify-between px-4 pt-[max(14px,env(safe-area-inset-top))]">
-          <button
-            type="button"
-            onClick={() => setStep("edit")}
-            aria-label="Back to editor"
-            className="sv-icon-btn"
-          >
-            <ArrowLeft className="size-5" />
+      <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-label="Share story">
+        <div className="flex items-center justify-between px-4 pt-[max(12px,env(safe-area-inset-top))] pb-3 border-b border-[#262626]">
+          <button type="button" onClick={() => setStep("edit")} aria-label="Back" className="grid size-8 place-items-center rounded-full text-white">
+            <ArrowLeft className="size-6" />
           </button>
-          <p className="display text-[17px] text-white">Share to story</p>
-          <button
-            type="button"
-            onClick={requestClose}
-            aria-label="Discard story"
-            className="sv-icon-btn"
-          >
+          <p className="text-[16px] font-semibold text-white">Share</p>
+          <button type="button" onClick={requestClose} aria-label="Close" className="grid size-8 place-items-center rounded-full text-white">
             <X className="size-5" />
           </button>
         </div>
 
-        <div className="relative mx-auto mt-3 min-h-0 w-full max-w-[400px] flex-1 overflow-hidden rounded-2xl border border-white/10">
-          <StoryCanvas
-            media={media}
-            backgroundId={backgroundId}
-            filterId={filterId}
-            adjustments={adjustments}
-            elements={previewStory.elements}
-            mode="static"
-          />
-        </div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="relative mx-auto mt-4 aspect-[9/16] w-full max-w-[320px] flex-1 overflow-hidden rounded-xl border border-[#262626] bg-black">
+            <StoryCanvas media={media} backgroundId={backgroundId} filterId={filterId} adjustments={adjustments} elements={previewStory.elements} mode="static" />
+          </div>
 
-        <div className="mx-auto flex w-full max-w-[400px] flex-col gap-3 px-5 py-4 pb-[max(18px,env(safe-area-inset-bottom))]">
-          <div>
-            <p className="eyebrow mb-2 !text-white/50">Visible to</p>
-            <div
-              className="grid grid-cols-2 gap-2"
-              role="radiogroup"
-              aria-label="Who can see this story"
-            >
-              {(
-                [
-                  { key: "private", label: "Just me", hint: "Private archive" },
-                  { key: "public", label: "Public", hint: "On your profile" },
-                ] as const
-              ).map((o) => (
+          <div className="mx-auto flex w-full max-w-[400px] flex-col gap-4 bg-black px-4 py-4 pb-[max(16px,env(safe-area-inset-bottom))]">
+            <div>
+              <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Share to</p>
+              <div className="flex flex-col gap-2">
                 <button
-                  key={o.key}
                   type="button"
-                  role="radio"
-                  aria-checked={visibility === o.key}
-                  onClick={() => setVisibility(o.key)}
+                  onClick={() => {
+                    setVisibility("public");
+                    setAudience("all");
+                  }}
                   className={cn(
-                    "rounded-2xl border px-3.5 py-3 text-left transition-all",
-                    visibility === o.key
-                      ? "border-[rgba(238,217,164,0.6)] bg-[rgba(238,217,164,0.12)]"
-                      : "border-white/12 bg-white/5",
+                    "flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors",
+                    visibility === "public" && audience === "all"
+                      ? "border-white bg-white text-black"
+                      : "border-[#363636] bg-[#121212] text-white",
                   )}
                 >
-                  <span className="flex items-center gap-2 text-[13px] font-semibold text-white">
-                    {visibility === o.key ? <Check className="size-3.5 text-[#eed9a4]" /> : null}
-                    {o.label}
+                  <span>
+                    <span className="block text-[15px] font-semibold">Your story</span>
+                    <span className="block text-[12px] opacity-70">Share to all followers for 24h</span>
                   </span>
-                  <span className="mt-0.5 block text-[11.5px] text-white/55">{o.hint}</span>
+                  {visibility === "public" && audience === "all" ? <Check className="size-5" /> : null}
                 </button>
-              ))}
-            </div>
-            {visibility === "public" ? (
-              <div
-                className="mt-2 grid grid-cols-2 gap-2"
-                role="radiogroup"
-                aria-label="Story audience"
-              >
-                {(
-                  [
-                    { key: "all", label: "Everyone" },
-                    { key: "close", label: "Close friends" },
-                  ] as const
-                ).map((o) => (
-                  <button
-                    key={o.key}
-                    type="button"
-                    role="radio"
-                    aria-checked={audience === o.key}
-                    onClick={() => setAudience(o.key)}
-                    className={cn(
-                      "rounded-full border px-3 py-2 text-[12.5px] font-semibold transition-all",
-                      audience === o.key
-                        ? "border-[rgba(238,217,164,0.6)] bg-[rgba(238,217,164,0.12)] text-white"
-                        : "border-white/12 bg-white/5 text-white/65",
-                    )}
-                  >
-                    {o.label}
-                  </button>
-                ))}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVisibility("public");
+                    setAudience("close");
+                  }}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors",
+                    visibility === "public" && audience === "close"
+                      ? "border-[#1DB954] bg-[#1DB954] text-white"
+                      : "border-[#363636] bg-[#121212] text-white",
+                  )}
+                >
+                  <span>
+                    <span className="block text-[15px] font-semibold">Close friends</span>
+                    <span className="block text-[12px] opacity-70">Only close friends see this</span>
+                  </span>
+                  {visibility === "public" && audience === "close" ? <Check className="size-5" /> : null}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setVisibility("private")}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors",
+                    visibility === "private" ? "border-white bg-white text-black" : "border-[#363636] bg-[#121212] text-white",
+                  )}
+                >
+                  <span>
+                    <span className="block text-[15px] font-semibold">Private</span>
+                    <span className="block text-[12px] opacity-70">Only you, saved to archive</span>
+                  </span>
+                  {visibility === "private" ? <Check className="size-5" /> : null}
+                </button>
               </div>
-            ) : null}
-            <p className="mt-2 text-[11.5px] text-white/45">
-              {visibility === "public"
-                ? audience === "close"
-                  ? "Only your close friends can see this. It expires in 24 hours."
-                  : "Visible wherever your profile is shared. It expires in 24 hours."
-                : "Only you — it rests in your private archive after 24 hours."}
-            </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void publish()}
+              disabled={publishing}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-3 text-[15px] font-semibold text-black disabled:opacity-50"
+            >
+              {publishing ? (
+                "Sharing…"
+              ) : (
+                <>
+                  <Send className="size-4" /> Share
+                </>
+              )}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => void publish()}
-            disabled={publishing}
-            className="se-chip-btn w-full justify-center !py-3 text-[14px] disabled:opacity-50"
-            data-primary="true"
-          >
-            {publishing
-              ? "Sharing…"
-              : visibility === "public"
-                ? "Share to story"
-                : "Save to my story"}
-          </button>
         </div>
       </div>
     );
@@ -805,23 +696,12 @@ export function StoryEditor({
 
   if (step === "confirm-leave") {
     return (
-      <div
-        className="bstory fixed inset-0 z-[95] grid place-items-center bg-black/70 px-6 backdrop-blur-sm"
-        role="alertdialog"
-        aria-label="Discard story draft"
-      >
-        <div className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-[#1c1930] p-6 text-center">
-          <p className="display text-[19px] text-white">Leave the editor?</p>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
-            Your draft is saved on this device — except video, which can't be kept yet.
-          </p>
-          <div className="mt-5 flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => setStep("edit")}
-              className="se-chip-btn justify-center"
-              data-primary="true"
-            >
+      <div className="fixed inset-0 z-[95] grid place-items-center bg-black/80 px-6 backdrop-blur-sm" role="alertdialog" aria-label="Discard">
+        <div className="w-full max-w-[320px] rounded-2xl bg-[#262626] p-6 text-center">
+          <p className="text-[18px] font-semibold text-white">Discard story?</p>
+          <p className="mt-2 text-[14px] leading-relaxed text-[#a8a8a8]">If you leave, your edits won't be saved.</p>
+          <div className="mt-6 flex flex-col gap-2">
+            <button type="button" onClick={() => setStep("edit")} className="rounded-full bg-white py-3 text-[15px] font-semibold text-black">
               Keep editing
             </button>
             <button
@@ -830,9 +710,9 @@ export function StoryEditor({
                 editorDraftStore.clear();
                 onClose();
               }}
-              className="se-chip-btn justify-center"
+              className="rounded-full bg-transparent py-3 text-[15px] font-semibold text-[#ff3040]"
             >
-              <Trash2 className="size-3.5" aria-hidden /> Discard draft
+              Discard
             </button>
           </div>
         </div>
@@ -840,77 +720,94 @@ export function StoryEditor({
     );
   }
 
-  /* --------------------------------- edit --------------------------------- */
-  const tools = [
+  /* --------------------------------- edit - Instagram --------------------------------- */
+  const topTools = [
     { id: "text", label: "Text", icon: Type },
-    { id: "sticker", label: "Stickers", icon: Sticker },
-    { id: "interactive", label: "Polls", icon: SlidersHorizontal },
+    { id: "sticker", label: "Sticker", icon: Sticker },
+    { id: "interactive", label: "Interactive", icon: SlidersHorizontal },
     { id: "draw", label: "Draw", icon: Wand2 },
-    { id: "filter", label: "Look", icon: Sparkles },
+    { id: "filter", label: "Filter", icon: Sparkles },
     { id: "music", label: "Music", icon: Music2 },
-    { id: "gif", label: "GIFs", icon: ImagePlay },
-    { id: "caption", label: "Note", icon: AtSign },
+    { id: "gif", label: "GIF", icon: ImagePlay },
   ] as const;
 
   return (
-    <div
-      className="bstory se-root fixed inset-0 z-[90] flex flex-col bg-black"
-      role="dialog"
-      aria-label="Story editor"
-    >
-      {/* top bar */}
-      <div className="relative z-50 flex items-center justify-between px-3 pt-[max(12px,env(safe-area-inset-top))]">
-        <button
-          type="button"
-          onClick={requestClose}
-          aria-label="Close editor"
-          className="sv-icon-btn"
-        >
-          <X className="size-5" />
+    <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-label="Story editor">
+      {/* Top bar - Instagram */}
+      <div className="relative z-50 flex items-center justify-between px-3 pt-[max(10px,env(safe-area-inset-top))] pb-2">
+        <button type="button" onClick={requestClose} aria-label="Close" className="grid size-8 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md">
+          <X className="size-6" />
         </button>
+
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={undo}
             disabled={!canUndo}
             aria-label="Undo"
-            className="sv-icon-btn disabled:opacity-30"
+            className="grid size-8 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md disabled:opacity-30"
           >
-            <Undo2 className="size-[18px]" />
+            <Undo2 className="size-5" />
           </button>
           <button
             type="button"
             onClick={redo}
             disabled={!canRedo}
             aria-label="Redo"
-            className="sv-icon-btn disabled:opacity-30"
+            className="grid size-8 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md disabled:opacity-30"
           >
-            <Redo2 className="size-[18px]" />
+            <Redo2 className="size-5" />
           </button>
           {source.base === "video" ? (
             <button
               type="button"
               onClick={() => setMuted((m) => !m)}
-              aria-label={muted ? "Unmute preview" : "Mute preview"}
-              className="sv-icon-btn"
+              aria-label={muted ? "Unmute" : "Mute"}
+              className="grid size-8 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md"
             >
-              {muted ? <VolumeX className="size-[18px]" /> : <Volume2 className="size-[18px]" />}
+              {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
             </button>
           ) : null}
         </div>
+
         <button
           type="button"
           onClick={() => setStep("share")}
-          className="se-chip-btn !h-10"
-          data-primary="true"
+          className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-[14px] font-semibold text-black"
         >
-          Share <ArrowLeft className="size-3.5 rotate-180" aria-hidden />
+          Next <ArrowLeft className="size-4 rotate-180" />
         </button>
       </div>
 
-      {/* canvas */}
-      <div className="relative min-h-0 flex-1">
-        <div ref={canvasRef} className="absolute inset-0 overflow-hidden">
+      {/* Top tools - Instagram (sticker, text, draw etc) */}
+      <div className="relative z-40 flex items-center justify-end gap-1 px-3 pb-2">
+        {topTools.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => {
+              if (t.id === "text") {
+                openText(null);
+                return;
+              }
+              if (t.id === "draw") {
+                setDrawing(true);
+                setSelectedId(null);
+                return;
+              }
+              setTool(t.id as Tool);
+            }}
+            aria-label={t.label}
+            className="grid size-9 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md"
+          >
+            <t.icon className="size-5" strokeWidth={2} />
+          </button>
+        ))}
+      </div>
+
+      {/* Canvas */}
+      <div className="relative min-h-0 flex-1 bg-black">
+        <div ref={canvasRef} className="absolute inset-0 overflow-hidden bg-black">
           <ElementLayer
             elements={elements}
             selectedId={drawing ? null : selectedId}
@@ -948,32 +845,27 @@ export function StoryEditor({
             />
           ) : null}
 
-          {/* safe frame while composing */}
-          {drag ? (
-            <>
-              <div className="se-safe" style={{ top: 76, bottom: 150 }} aria-hidden />
-            </>
-          ) : null}
-
-          {/* delete zone */}
+          {/* Delete zone - Instagram trash at bottom when dragging */}
           <div
             ref={deleteRef}
-            className="se-delete-zone"
-            data-visible={Boolean(drag)}
-            data-hot={deleteHot}
+            className={cn(
+              "absolute left-1/2 bottom-[100px] z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#262626] px-5 py-2.5 text-[14px] font-medium text-white transition-all",
+              drag ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none",
+              deleteHot && "bg-[#ff3040] scale-110",
+            )}
             aria-hidden
           >
-            <Trash2 className="size-4" aria-hidden /> Release to delete
+            <Trash2 className="size-5" /> {deleteHot ? "Release to delete" : "Drag here to delete"}
           </div>
 
-          {/* selected element actions */}
+          {/* Selected actions - Instagram style */}
           {selected && !drag && !drawing ? (
-            <div className="absolute left-1/2 top-[86px] z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/12 bg-black/55 p-1 backdrop-blur-md">
+            <div className="absolute left-1/2 top-[80px] z-50 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/60 p-1 backdrop-blur-md border border-white/10">
               {selected.kind === "text" ? (
                 <button
                   type="button"
                   onClick={() => openText(selected)}
-                  className="rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-white/85 transition-colors hover:bg-white/10"
+                  className="rounded-full px-4 py-1.5 text-[13px] font-semibold text-white hover:bg-white/10"
                 >
                   Edit
                 </button>
@@ -983,120 +875,110 @@ export function StoryEditor({
                 onClick={() => {
                   past.current.push(snapshot());
                   future.current = [];
-                  setElements((prev) =>
-                    prev.map((e) => (e.id === selected.id ? { ...e, z: nextZ(prev) } : e)),
-                  );
+                  setElements((prev) => prev.map((e) => (e.id === selected.id ? { ...e, z: nextZ(prev) } : e)));
                   setHistoryTick((t) => t + 1);
                 }}
-                className="rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-white/85 transition-colors hover:bg-white/10"
+                className="rounded-full px-4 py-1.5 text-[13px] font-semibold text-white hover:bg-white/10"
               >
                 Front
               </button>
               <button
                 type="button"
                 onClick={() => deleteElement(selected.id)}
-                aria-label="Delete selected"
-                className="grid size-8 place-items-center rounded-full text-[#ff9d9d] transition-colors hover:bg-white/10"
+                aria-label="Delete"
+                className="grid size-8 place-items-center rounded-full text-[#ff3040] hover:bg-white/10"
               >
-                <Trash2 className="size-3.5" />
+                <Trash2 className="size-4" />
               </button>
             </div>
           ) : null}
         </div>
       </div>
 
-      {/* draw sub-bar */}
+      {/* Bottom bar - Instagram Your Story / Close Friends / Send */}
       {drawing ? (
-        <div className="relative z-50 flex items-center gap-2 overflow-x-auto bg-black/60 px-4 py-3 backdrop-blur-md">
+        <div className="relative z-50 flex items-center gap-2 overflow-x-auto bg-black px-4 py-3 border-t border-[#262626]">
           {DRAW_COLORS.map((c) => (
             <button
               key={c}
               type="button"
-              aria-label={`Draw in ${c}`}
+              aria-label={`Color ${c}`}
               onClick={() => {
                 setDrawColor(c);
                 setDrawEraser(false);
               }}
-              className="se-swatch"
-              data-active={!drawEraser && drawColor === c}
+              className={cn("size-8 shrink-0 rounded-full border-2 transition-transform", !drawEraser && drawColor === c ? "border-white scale-110" : "border-transparent")}
               style={{ background: c }}
             />
           ))}
-          <span className="mx-1 h-6 w-px shrink-0 bg-white/15" aria-hidden />
+          <span className="mx-1 h-6 w-px shrink-0 bg-[#363636]" aria-hidden />
           {DRAW_SIZES_ROW.map((s) => (
             <button
               key={s}
               type="button"
-              aria-label={`Brush size ${s}`}
+              aria-label={`Size ${s}`}
               onClick={() => setDrawSize(s)}
-              className={cn(
-                "grid size-9 shrink-0 place-items-center rounded-full transition-colors",
-                drawSize === s ? "bg-white/15" : "",
-              )}
+              className={cn("grid size-8 shrink-0 place-items-center rounded-full", drawSize === s ? "bg-white/20" : "")}
             >
-              <span
-                className="rounded-full bg-white"
-                style={{ width: Math.min(20, 4 + s / 1.6), height: Math.min(20, 4 + s / 1.6) }}
-              />
+              <span className="rounded-full bg-white" style={{ width: Math.min(18, 3 + s / 1.8), height: Math.min(18, 3 + s / 1.8) }} />
             </button>
           ))}
           <button
             type="button"
             onClick={() => setDrawEraser((v) => !v)}
             aria-pressed={drawEraser}
-            className={cn(
-              "se-chip-btn ml-1 shrink-0 !h-9 text-[12px]",
-              drawEraser && "!bg-white/20",
-            )}
+            className={cn("ml-2 shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium", drawEraser ? "bg-white text-black" : "bg-[#262626] text-white")}
           >
             Eraser
           </button>
           <button
             type="button"
             onClick={() => setDrawing(false)}
-            className="se-chip-btn shrink-0 !h-9 text-[12px]"
-            data-primary="true"
+            className="ml-auto shrink-0 rounded-full bg-white px-4 py-1.5 text-[13px] font-semibold text-black"
           >
-            <Check className="size-3.5" aria-hidden /> Done
+            Done
           </button>
         </div>
       ) : (
-        /* tool rail */
-        <div className="relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
-          {tools.map((t) => (
+        <div className="relative z-50 flex items-center justify-between gap-3 bg-black px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 border-t border-[#262626]">
+          <div className="flex items-center gap-2">
             <button
-              key={t.id}
+              type="button"
+              onClick={() => void publish()}
+              disabled={publishing}
+              className="flex items-center gap-2 rounded-full bg-[#1a1a1a] border border-[#363636] px-3 py-1.5 text-[13px] font-medium text-white disabled:opacity-50"
+            >
+              <span className="size-6 rounded-full bg-[#363636] grid place-items-center text-[10px]">You</span>
+              Your story
+            </button>
+            <button
               type="button"
               onClick={() => {
-                if (t.id === "text") {
-                  openText(null);
-                  return;
-                }
-                if (t.id === "draw") {
-                  setDrawing(true);
-                  setSelectedId(null);
-                  return;
-                }
-                setTool(t.id as Tool);
+                setAudience("close");
+                setVisibility("public");
+                void publish();
               }}
-              className="se-tool-btn"
-              data-active={tool === t.id}
+              disabled={publishing}
+              className="flex items-center gap-1.5 rounded-full bg-[#1DB954] px-3 py-1.5 text-[13px] font-semibold text-white disabled:opacity-50"
             >
-              <t.icon className="size-[22px]" strokeWidth={1.7} aria-hidden />
-              {t.label}
+              <span className="size-4 rounded-full bg-white/20 grid place-items-center">★</span> Close friends
             </button>
-          ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setStep("share")}
+            className="grid size-10 place-items-center rounded-full bg-white text-black"
+            aria-label="Send"
+          >
+            <Send className="size-5" />
+          </button>
         </div>
       )}
 
-      {/* overlays */}
+      {/* Overlays */}
       {textEditing ? (
-        <TextTool
-          initial={textEditing.initial}
-          defaultColor={ink}
-          onSave={saveText}
-          onClose={() => setTextEditing(null)}
-        />
+        <TextTool initial={textEditing.initial} defaultColor={ink} onSave={saveText} onClose={() => setTextEditing(null)} />
       ) : null}
 
       {tool === "sticker" ? (
@@ -1125,11 +1007,7 @@ export function StoryEditor({
 
       {tool === "filter" ? (
         <FilterTool
-          preview={
-            source.base === "photo" && source.photo
-              ? source.photo.dataUrl
-              : (source.videoThumbnail ?? null)
-          }
+          preview={source.base === "photo" && source.photo ? source.photo.dataUrl : source.videoThumbnail ?? null}
           filterId={filterId}
           adjustments={adjustments}
           onFilter={setFilterId}
@@ -1162,7 +1040,7 @@ export function StoryEditor({
             });
             setHistoryTick((t) => t + 1);
             setTool(null);
-            if (picked.file) toast("Your audio will upload when you share.");
+            if (picked.file) toast("Audio will upload when you share");
           }}
           onClose={() => setTool(null)}
         />
@@ -1172,7 +1050,6 @@ export function StoryEditor({
         <GifTray
           onPick={(gif, file) => {
             if (file) {
-              // Device upload: blob-backed for the session, uploaded at publish.
               gifUrls.current.push(gif.src);
               const el: Extract<StoryElement, { kind: "gif" }> = {
                 id: newElementId(),
@@ -1193,21 +1070,14 @@ export function StoryEditor({
               return;
             }
             const el = makeGifElement(
-              {
-                gifId: gif.id,
-                src: gif.src,
-                still: gif.still,
-                width: gif.width,
-                height: gif.height,
-              },
+              { gifId: gif.id, src: gif.src, still: gif.still, width: gif.width, height: gif.height },
               { z: nextZ(elements) },
             );
             if (el) addElement(el);
-            else toast("That GIF couldn't be used.");
+            else toast("Couldn't use that GIF");
             setTool(null);
           }}
           onPickMotion={(item: MotionItem) => {
-            // Stays open — motion is collected, not chosen once.
             addElement(
               makeTextElement(item.emoji, {
                 preset: "classic",
@@ -1221,92 +1091,42 @@ export function StoryEditor({
       ) : null}
 
       {tool === "caption" ? (
-        <CaptionSheet
-          title={captionTitle}
-          body={captionBody}
-          altText={altText}
-          hasMedia={source.base !== "background"}
-          onSave={(t, b, a) => {
-            setCaptionTitle(t);
-            setCaptionBody(b);
-            setAltText(a);
-            setTool(null);
-          }}
-          onClose={() => setTool(null)}
-        />
-      ) : null}
-
-      {music && step === "edit" && !drawing ? (
-        <p className="sr-only" role="status">
-          Music attached: {music.title} by {music.artist}
-        </p>
+        <div className="fixed inset-0 z-[92] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Caption">
+          <div className="rounded-t-[12px] bg-[#121212] border-t border-[#262626] p-4">
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[#363636]" />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[16px] font-semibold text-white">Caption</h2>
+              <button type="button" onClick={() => setTool(null)} className="text-[14px] font-medium text-[#0095f6]">
+                Done
+              </button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <input
+                value={captionTitle}
+                onChange={(e) => setCaptionTitle(e.target.value.slice(0, 120))}
+                placeholder="Add caption…"
+                maxLength={120}
+                className="w-full rounded-lg bg-[#262626] px-4 py-3 text-[15px] text-white outline-none placeholder:text-[#a8a8a8]"
+              />
+              <textarea
+                value={captionBody}
+                onChange={(e) => setCaptionBody(e.target.value.slice(0, 2000))}
+                placeholder="More…"
+                rows={3}
+                maxLength={2000}
+                className="w-full resize-none rounded-lg bg-[#262626] px-4 py-3 text-[15px] text-white outline-none placeholder:text-[#a8a8a8]"
+              />
+              <button
+                type="button"
+                onClick={() => setTool(null)}
+                className="rounded-full bg-white py-3 text-[15px] font-semibold text-black"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
-  );
-}
-
-function CaptionSheet({
-  title,
-  body,
-  altText,
-  hasMedia,
-  onSave,
-  onClose,
-}: {
-  title: string;
-  body: string;
-  altText: string;
-  hasMedia: boolean;
-  onSave: (title: string, body: string, alt: string) => void;
-  onClose: () => void;
-}) {
-  const [t, setT] = useState(title);
-  const [b, setB] = useState(body);
-  const [a, setA] = useState(altText);
-  return (
-    <StorySheet title="Note" subtitle="Words that travel with the story." onClose={onClose}>
-      <div className="flex flex-col gap-4 pb-2">
-        <label className="flex flex-col gap-1.5">
-          <span className="eyebrow">Headline (optional)</span>
-          <input
-            value={t}
-            onChange={(e) => setT(e.target.value.slice(0, 120))}
-            placeholder="A line for the archive…"
-            maxLength={120}
-            className="display w-full rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[17px] outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
-          />
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="eyebrow">A few words (optional)</span>
-          <textarea
-            value={b}
-            onChange={(e) => setB(e.target.value.slice(0, 2000))}
-            placeholder="Say as much or as little as you like."
-            rows={3}
-            maxLength={2000}
-            className="w-full resize-none rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[13.5px] leading-relaxed outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
-          />
-        </label>
-        {hasMedia ? (
-          <label className="flex flex-col gap-1.5">
-            <span className="eyebrow">Alt text (optional)</span>
-            <input
-              value={a}
-              onChange={(e) => setA(e.target.value.slice(0, 300))}
-              placeholder="Describe the image for screen readers…"
-              maxLength={300}
-              className="w-full rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[13px] outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
-            />
-          </label>
-        ) : null}
-        <button
-          type="button"
-          onClick={() => onSave(t, b, a)}
-          className="bsheet-primary w-full justify-center"
-        >
-          Save note
-        </button>
-      </div>
-    </StorySheet>
   );
 }

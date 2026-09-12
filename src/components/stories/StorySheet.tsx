@@ -1,7 +1,6 @@
 /**
- * StorySheet — the polished bottom sheet every story tray shares.
- * Backdrop dismiss, Escape, safe-area padding, spring entrance. One closing
- * animation path so sheets never pop out of existence.
+ * StorySheet — Instagram-exact bottom sheet.
+ * Dark #121212, handle, Done blue, border #262626.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -46,7 +45,6 @@ export function StorySheet({
     return () => window.removeEventListener("keydown", onKey, { capture: true });
   }, [requestClose]);
 
-  /* lock body scroll while a sheet lives */
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -55,9 +53,6 @@ export function StorySheet({
     };
   }, []);
 
-  /* keyboard: iOS doesn't shrink the layout viewport, so a focused field
-     (sticker search, poll options…) would hide under the keyboard — bring
-     it into view inside the sheet's own scroll region instead. */
   useEffect(() => {
     const sheet = sheetRef.current;
     if (!sheet) return;
@@ -78,31 +73,34 @@ export function StorySheet({
   }, []);
 
   return (
-    <div className="bstory" role="dialog" aria-modal="true" aria-label={label ?? title}>
-      <div className="ssheet-backdrop" onClick={requestClose} aria-hidden />
-      <div ref={sheetRef} className="ssheet" data-closing={closing || undefined}>
-        <div className="ssheet-grip" aria-hidden />
-        <div className="flex items-start justify-between gap-3 px-5 pb-2 pt-1">
-          <div className="min-w-0">
-            <h2 className="display text-[18px] leading-tight">{title}</h2>
-            {subtitle ? (
-              <p className="mt-0.5 text-[12.5px] text-muted-foreground">{subtitle}</p>
-            ) : null}
+    <div className="fixed inset-0 z-[91] flex flex-col justify-end bg-black/60" role="dialog" aria-modal="true" aria-label={label ?? title}>
+      <div className="absolute inset-0" onClick={requestClose} aria-hidden />
+      <div
+        ref={sheetRef}
+        className={`relative flex max-h-[80vh] w-full flex-col rounded-t-[12px] bg-[#121212] border-t border-[#262626] transition-transform duration-200 ${
+          closing ? "translate-y-full" : "translate-y-0"
+        }`}
+      >
+        <div className="flex flex-col items-center gap-3 border-b border-[#262626] px-4 py-3">
+          <div className="h-1 w-10 rounded-full bg-[#363636]" />
+          <div className="flex w-full items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-[16px] font-semibold leading-tight text-white">{title}</h2>
+              {subtitle ? <p className="mt-0.5 text-[13px] text-[#a8a8a8]">{subtitle}</p> : null}
+            </div>
+            <button
+              type="button"
+              onClick={requestClose}
+              aria-label={`Close ${title}`}
+              className="grid size-8 shrink-0 place-items-center rounded-full bg-[#262626] text-white"
+            >
+              <X className="size-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={requestClose}
-            aria-label={`Close ${title}`}
-            className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
         </div>
-        <div className="ssheet-scroll min-h-0 flex-1 px-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">{children}</div>
         {footer ? (
-          <div className="border-t border-border px-5 py-3 pb-[max(14px,env(safe-area-inset-bottom))]">
-            {footer}
-          </div>
+          <div className="border-t border-[#262626] px-4 py-3 pb-[max(14px,env(safe-area-inset-bottom))]">{footer}</div>
         ) : null}
       </div>
     </div>

@@ -1,13 +1,11 @@
 /**
- * CameraCapture — a minimal full-screen camera for stories.
- * Photo shutter + short video clips, front/back flip, torch where supported,
- * honest permission states. Every track stops the moment the camera closes.
+ * CameraCapture — Instagram-exact full-screen camera.
+ * Tap shutter = photo, Hold = video (up to 60s), like Instagram.
+ * UI: top X + flash + flip, bottom gallery thumb + shutter + flip, recording indicator.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Aperture, CameraOff, RefreshCcw, SwitchCamera, Video, X, Zap, ZapOff } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import { CameraOff, RefreshCcw, SwitchCamera, X, Zap, ZapOff } from "lucide-react";
 
 export interface CapturedPhoto {
   blob: Blob;
@@ -27,7 +25,7 @@ export interface CapturedVideo {
 
 type PermissionState = "prompting" | "granted" | "denied" | "unavailable";
 
-const MAX_CLIP_MS = 30_000;
+const MAX_CLIP_MS = 60_000; // Instagram allows up to 60s
 
 export function CameraCapture({
   onPhoto,
@@ -44,10 +42,11 @@ export function CameraCapture({
   const chunksRef = useRef<Blob[]>([]);
   const recordTimer = useRef<number | undefined>(undefined);
   const recordStart = useRef(0);
+  const holdTimer = useRef<number | undefined>(undefined);
+  const isHolding = useRef(false);
 
   const [permission, setPermission] = useState<PermissionState>("prompting");
   const [facing, setFacing] = useState<"user" | "environment">("user");
-  const [mode, setMode] = useState<"photo" | "video">("photo");
   const [torch, setTorch] = useState(false);
   const [torchSupported, setTorchSupported] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -58,9 +57,7 @@ export function CameraCapture({
     if (recorderRef.current && recorderRef.current.state !== "inactive") {
       try {
         recorderRef.current.stop();
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     }
     recorderRef.current = null;
     window.clearTimeout(recordTimer.current);
@@ -79,7 +76,7 @@ export function CameraCapture({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 1920 } },
-        audio: mode === "video",
+        audio: true,
       });
       streamRef.current = stream;
       const video = videoRef.current;
@@ -94,18 +91,15 @@ export function CameraCapture({
       setPermission("granted");
     } catch (error) {
       const name = error instanceof Error ? error.name : "";
-      setPermission(
-        name === "NotAllowedError" || name === "SecurityError" ? "denied" : "unavailable",
-      );
+      setPermission(name === "NotAllowedError" || name === "SecurityError" ? "denied" : "unavailable");
     }
-  }, [facing, mode, stopStream]);
+  }, [facing, stopStream]);
 
   useEffect(() => {
     void startStream();
     return () => stopStream();
   }, [startStream, stopStream]);
 
-  /* keep the preview honest when the tab hides */
   useEffect(() => {
     const onHide = () => {
       if (document.hidden && recorderRef.current?.state === "recording") {
@@ -122,9 +116,7 @@ export function CameraCapture({
     try {
       await track.applyConstraints({ advanced: [{ torch: !torch } as MediaTrackConstraintSet] });
       setTorch(!torch);
-    } catch {
-      /* torch is best-effort */
-    }
+    } catch {}
   }, [torch]);
 
   const takePhoto = useCallback(() => {
@@ -136,26 +128,25 @@ export function CameraCapture({
     canvas.height = Math.round(video.videoHeight * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    // Mirror the front camera so the capture matches the preview.
     if (facing === "user") {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     setFlash(true);
-    window.setTimeout(() => setFlash(false), 340);
+    window.setTimeout(() => setFlash(false), 200);
     canvas.toBlob(
       (blob) => {
         if (!blob) return;
         onPhoto({
           blob,
-          dataUrl: canvas.toDataURL("image/jpeg", 0.82),
+          dataUrl: canvas.toDataURL("image/jpeg", 0.9),
           width: canvas.width,
           height: canvas.height,
         });
       },
       "image/jpeg",
-      0.86,
+      0.9,
     );
   }, [facing, onPhoto]);
 
@@ -174,7 +165,7 @@ export function CameraCapture({
     try {
       const recorder = new MediaRecorder(
         stream,
-        mimeType ? { mimeType, videoBitsPerSecond: 4_000_000 } : undefined,
+        mimeType ? { mimeType, videoBitsPerSecond: 5_000_000 } : undefined,
       );
       chunksRef.current = [];
       recordStart.current = Date.now();
@@ -207,10 +198,8 @@ export function CameraCapture({
         const elapsed = Date.now() - recordStart.current;
         setRecordMs(elapsed);
         if (elapsed >= MAX_CLIP_MS) stopRecording();
-      }, 200);
-    } catch {
-      /* recording unsupported — photo mode still works */
-    }
+      }, 100);
+    } catch {}
   }, [onVideo, stopRecording]);
 
   const flip = useCallback(() => {
@@ -218,13 +207,35 @@ export function CameraCapture({
     setFacing((f) => (f === "user" ? "environment" : "user"));
   }, [recording]);
 
+  // Instagram hold-to-record logic
+  const onShutterPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      isHolding.current = false;
+      window.clearTimeout(holdTimer.current);
+      holdTimer.current = window.setTimeout(() => {
+        isHolding.current = true;
+        startRecording();
+      }, 200);
+    },
+    [startRecording],
+  );
+
+  const onShutterPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      window.clearTimeout(holdTimer.current);
+      if (isHolding.current && recording) {
+        stopRecording();
+      } else if (!isHolding.current) {
+        takePhoto();
+      }
+      isHolding.current = false;
+    },
+    [recording, stopRecording, takePhoto],
+  );
+
   return (
-    <div
-      className="bstory fixed inset-0 z-[90] flex flex-col bg-black"
-      role="dialog"
-      aria-label="Story camera"
-    >
-      {/* preview */}
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black" role="dialog" aria-label="Instagram camera">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-black">
         {permission === "granted" ? (
           <video
@@ -236,129 +247,157 @@ export function CameraCapture({
             aria-label="Camera preview"
           />
         ) : (
-          <div className="grid size-full place-items-center px-8 text-center">
+          <div className="grid size-full place-items-center px-8 text-center bg-black">
             {permission === "prompting" ? (
               <div className="flex flex-col items-center gap-3">
-                <span
-                  className="size-10 animate-spin rounded-full border-2 border-white/20 border-t-white/80"
-                  aria-hidden
-                />
-                <p className="text-[13.5px] text-white/70">Opening your camera…</p>
+                <span className="size-8 animate-spin rounded-full border-2 border-white/20 border-t-white" aria-hidden />
+                <p className="text-[15px] text-white/70">Opening camera…</p>
               </div>
             ) : (
-              <div className="flex max-w-[300px] flex-col items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-full bg-white/10 text-white/80">
-                  <CameraOff className="size-5" aria-hidden />
+              <div className="flex max-w-[300px] flex-col items-center gap-4">
+                <span className="grid size-16 place-items-center rounded-full bg-[#262626] text-white/80">
+                  <CameraOff className="size-7" aria-hidden />
                 </span>
-                <p className="display text-[18px] text-white">
-                  {permission === "denied" ? "Camera access is off" : "No camera here"}
+                <p className="text-[20px] font-semibold text-white">
+                  {permission === "denied" ? "Camera access off" : "No camera"}
                 </p>
-                <p className="text-[13px] leading-relaxed text-white/60">
+                <p className="text-[14px] leading-relaxed text-white/60">
                   {permission === "denied"
-                    ? "Bloom needs camera permission to take story photos. You can still share from your gallery."
-                    : "This device doesn't have a camera Bloom can use. Your gallery works beautifully instead."}
+                    ? "Allow camera access in Settings to take photos. You can still share from gallery."
+                    : "This device doesn't have a camera. Use gallery instead."}
                 </p>
                 {permission === "denied" ? (
                   <button
                     type="button"
                     onClick={() => void startStream()}
-                    className="se-chip-btn mt-1"
+                    className="mt-2 flex items-center gap-2 rounded-full bg-white px-5 py-2 text-[14px] font-semibold text-black"
                   >
-                    <RefreshCcw className="size-3.5" aria-hidden /> Try again
+                    <RefreshCcw className="size-4" aria-hidden /> Try again
                   </button>
                 ) : null}
               </div>
             )}
           </div>
         )}
-        {flash ? (
-          <div className="scam-flash pointer-events-none absolute inset-0 bg-white" aria-hidden />
-        ) : null}
 
-        {/* top chrome */}
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-[max(14px,env(safe-area-inset-top))]">
+        {flash ? <div className="pointer-events-none absolute inset-0 bg-white animate-[ig-flash_200ms_ease-out]" aria-hidden /> : null}
+
+        {/* Top bar - Instagram */}
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-[max(12px,env(safe-area-inset-top))]">
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close camera"
-            className="sv-icon-btn bg-black/40"
+            aria-label="Close"
+            className="grid size-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md"
           >
-            <X className="size-5" />
+            <X className="size-6" />
           </button>
-          <div className="flex items-center gap-1 rounded-full bg-black/40 p-1 backdrop-blur-md">
-            {(["photo", "video"] as const).map((m) => (
+
+          <div className="flex items-center gap-3">
+            {torchSupported ? (
               <button
-                key={m}
                 type="button"
-                onClick={() => !recording && setMode(m)}
-                aria-pressed={mode === m}
-                className={cn(
-                  "rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors",
-                  mode === m ? "bg-white text-black" : "text-white/75",
-                )}
+                onClick={() => void toggleTorch()}
+                aria-label={torch ? "Flash off" : "Flash on"}
+                className="grid size-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md"
               >
-                {m === "photo" ? "Photo" : "Video"}
+                {torch ? <Zap className="size-5 fill-white" /> : <ZapOff className="size-5" />}
               </button>
-            ))}
-          </div>
-          {torchSupported ? (
+            ) : null}
             <button
               type="button"
-              onClick={() => void toggleTorch()}
-              aria-label={torch ? "Turn flash off" : "Turn flash on"}
-              aria-pressed={torch}
-              className="sv-icon-btn bg-black/40"
+              onClick={flip}
+              disabled={recording}
+              aria-label="Flip camera"
+              className="grid size-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md disabled:opacity-40"
             >
-              {torch ? <Zap className="size-5" /> : <ZapOff className="size-5" />}
+              <SwitchCamera className="size-5" />
             </button>
-          ) : (
-            <span className="w-[38px]" aria-hidden />
-          )}
+          </div>
         </div>
 
-        {/* recording indicator */}
+        {/* Recording indicator - Instagram */}
         {recording ? (
-          <div className="absolute left-1/2 top-[max(70px,calc(env(safe-area-inset-top)+56px))] flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/50 px-3.5 py-1.5 backdrop-blur-md">
-            <span className="scam-rec-dot size-2 rounded-full bg-[#e0685e]" aria-hidden />
-            <span className="mono text-[11.5px] tracking-wide text-white" role="timer">
-              {(recordMs / 1000).toFixed(1)}s / 30s
+          <div className="absolute left-1/2 top-[max(60px,calc(env(safe-area-inset-top)+48px))] flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/60 px-4 py-1.5 backdrop-blur-md">
+            <span className="size-2 animate-pulse rounded-full bg-[#ff3040]" aria-hidden />
+            <span className="text-[13px] font-medium tracking-wide text-white tabular-nums" role="timer">
+              {Math.floor(recordMs / 1000)}s
             </span>
+          </div>
+        ) : null}
+
+        {/* Instagram mode hint */}
+        {!recording ? (
+          <div className="absolute bottom-[140px] left-1/2 -translate-x-1/2 rounded-full bg-black/40 px-3 py-1 backdrop-blur-md">
+            <span className="text-[12px] font-medium text-white/80">Tap for photo, hold for video</span>
           </div>
         ) : null}
       </div>
 
-      {/* shutter row */}
+      {/* Bottom shutter row - Instagram */}
       {permission === "granted" ? (
-        <div className="flex items-center justify-around px-10 pb-[max(28px,env(safe-area-inset-bottom))] pt-5">
+        <div className="flex items-center justify-between bg-black px-8 pb-[max(32px,env(safe-area-inset-bottom))] pt-6">
+          {/* Gallery thumb - Instagram shows last photo */}
+          <div className="size-8 rounded-lg bg-[#262626] border border-white/20" aria-hidden />
+
+          {/* Shutter - Instagram white circle */}
+          <button
+            type="button"
+            aria-label="Shutter"
+            className="group relative grid place-items-center"
+            onPointerDown={onShutterPointerDown}
+            onPointerUp={onShutterPointerUp}
+            onPointerCancel={() => {
+              window.clearTimeout(holdTimer.current);
+              if (recording) stopRecording();
+              isHolding.current = false;
+            }}
+          >
+            <span className="absolute size-[80px] rounded-full border-[4px] border-white/90 group-active:scale-[0.95] transition-transform" />
+            <span
+              className={`size-[62px] rounded-full bg-white transition-all duration-150 ${
+                recording ? "!size-[32px] !rounded-[6px] !bg-[#ff3040]" : "group-active:scale-[0.9]"
+              }`}
+            />
+            {/* Recording progress ring */}
+            {recording ? (
+              <svg className="absolute size-[84px] -rotate-90" viewBox="0 0 84 84">
+                <circle
+                  cx="42"
+                  cy="42"
+                  r="38"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.3)"
+                  strokeWidth="3"
+                />
+                <circle
+                  cx="42"
+                  cy="42"
+                  r="38"
+                  fill="none"
+                  stroke="#ff3040"
+                  strokeWidth="3"
+                  strokeDasharray={`${(recordMs / MAX_CLIP_MS) * 238} 238`}
+                  className="transition-all duration-100"
+                />
+              </svg>
+            ) : null}
+          </button>
+
+          {/* Flip */}
           <button
             type="button"
             onClick={flip}
             disabled={recording}
-            aria-label="Flip camera"
-            className="sv-icon-btn disabled:opacity-30"
+            aria-label="Switch camera"
+            className="grid size-8 place-items-center rounded-full bg-[#262626] text-white disabled:opacity-30"
           >
-            {mode === "video" ? <Video className="size-5" /> : <SwitchCamera className="size-5" />}
+            <RefreshCcw className="size-5" />
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (mode === "photo") takePhoto();
-              else if (recording) stopRecording();
-              else startRecording();
-            }}
-            aria-label={
-              mode === "photo" ? "Take photo" : recording ? "Stop recording" : "Start recording"
-            }
-            className="scam-shutter"
-            data-recording={recording || undefined}
-          >
-            <span />
-          </button>
-          <span className="grid size-[38px] place-items-center text-white/50" aria-hidden>
-            <Aperture className="size-5" />
-          </span>
         </div>
       ) : null}
+
+      <style>{`@keyframes ig-flash { from { opacity: 1 } to { opacity: 0 } }`}</style>
     </div>
   );
 }

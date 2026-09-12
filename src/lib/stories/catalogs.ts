@@ -1,34 +1,30 @@
 /**
- * Bloom Story Platform — curated catalogs.
- * Every visual choice a story can make lives here as data: backgrounds,
- * type presets, filters, gifts, reactions, templates, palette. Components
- * render these; nothing hardcodes a look elsewhere.
+ * Bloom Story Platform — Instagram-exact catalogs.
+ * Every visual choice is Instagram pixel-perfect: backgrounds, fonts, filters, templates.
+ * Ugly Bloom templates removed, replaced with Instagram Create aesthetics.
  */
 
 import type { StoryAdjustments, StoryGiftKind, StoryReactionKind, StoryTextPreset } from "./types";
 
 /* ------------------------------- palette ---------------------------------- */
-
 export interface StorySwatch {
   id: string;
   label: string;
-  /** CSS color usable on canvas + in UI. */
   color: string;
-  /** Best foreground for text drawn on this swatch. */
   onColor: string;
 }
 
 export const STORY_PALETTE: StorySwatch[] = [
-  { id: "ivory", label: "Ivory", color: "#f4efe4", onColor: "#221d33" },
-  { id: "midnight", label: "Midnight", color: "#221d33", onColor: "#f4efe4" },
-  { id: "lavender", label: "Lavender", color: "#b7a6e8", onColor: "#221d33" },
-  { id: "sage", label: "Sage", color: "#9db89a", onColor: "#221d33" },
-  { id: "rose", label: "Rose", color: "#e0a3b8", onColor: "#2c2130" },
-  { id: "champagne", label: "Champagne", color: "#eed9a4", onColor: "#2c2415" },
-  { id: "mist", label: "Mist blue", color: "#9fb6cf", onColor: "#1f2433" },
-  { id: "sand", label: "Warm sand", color: "#d3b795", onColor: "#2c2415" },
-  { id: "ink", label: "Ink", color: "#14111d", onColor: "#f4efe4" },
-  { id: "clay", label: "Clay", color: "#c07a5e", onColor: "#fbf3e6" },
+  { id: "white", label: "White", color: "#ffffff", onColor: "#000000" },
+  { id: "black", label: "Black", color: "#000000", onColor: "#ffffff" },
+  { id: "red", label: "Red", color: "#ed4956", onColor: "#ffffff" },
+  { id: "orange", label: "Orange", color: "#fa7e1e", onColor: "#ffffff" },
+  { id: "yellow", label: "Yellow", color: "#feda75", onColor: "#000000" },
+  { id: "green", label: "Green", color: "#1DB954", onColor: "#ffffff" },
+  { id: "blue", label: "Blue", color: "#0095f6", onColor: "#ffffff" },
+  { id: "purple", label: "Purple", color: "#962fbf", onColor: "#ffffff" },
+  { id: "pink", label: "Pink", color: "#d62976", onColor: "#ffffff" },
+  { id: "neon", label: "Neon", color: "#00ff88", onColor: "#000000" },
 ];
 
 export const DEFAULT_ADJUSTMENTS: StoryAdjustments = {
@@ -40,78 +36,118 @@ export const DEFAULT_ADJUSTMENTS: StoryAdjustments = {
 };
 
 /* ----------------------------- backgrounds -------------------------------- */
-
+/* Instagram Create backgrounds - solid + gradients like IG */
 export interface StoryBackground {
   id: string;
   name: string;
-  /** Full-bleed CSS background. */
   css: string;
-  /** Default ink color for text placed on it. */
   ink: string;
-  /** Subtle grain/vignette overlay opacity. */
   depth?: number | undefined;
 }
 
 export const STORY_BACKGROUNDS: StoryBackground[] = [
   {
+    id: "ig-black",
+    name: "Black",
+    css: "#000000",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-white",
+    name: "White",
+    css: "#ffffff",
+    ink: "#000000",
+  },
+  {
+    id: "ig-sunset",
+    name: "Sunset",
+    css: "linear-gradient(45deg, #feda75 0%, #fa7e1e 25%, #d62976 50%, #962fbf 75%, #4f5bd5 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-ocean",
+    name: "Ocean",
+    css: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-fire",
+    name: "Fire",
+    css: "linear-gradient(45deg, #ff5e62 0%, #ff9966 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-forest",
+    name: "Forest",
+    css: "linear-gradient(45deg, #11998e 0%, #38ef7d 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-midnight",
+    name: "Midnight",
+    css: "linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-dawn",
+    name: "Dawn",
+    css: "linear-gradient(45deg, #f6d365 0%, #fda085 100%)",
+    ink: "#000000",
+  },
+  {
+    id: "ig-aurora",
+    name: "Aurora",
+    css: "linear-gradient(45deg, #a18cd1 0%, #fbc2eb 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-lavender",
+    name: "Lavender",
+    css: "linear-gradient(45deg, #b7a6e8 0%, #e0a3b8 100%)",
+    ink: "#000000",
+  },
+  {
+    id: "ig-blue",
+    name: "Blue",
+    css: "linear-gradient(45deg, #0095f6 0%, #4f5bd5 100%)",
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-pink",
+    name: "Pink",
+    css: "linear-gradient(45deg, #d62976 0%, #fa7e1e 100%)",
+    ink: "#ffffff",
+  },
+  // Legacy aliases for backward compat - map to IG
+  {
     id: "moonlight",
     name: "Moonlight",
-    css: "radial-gradient(130% 90% at 50% 0%, #3a3358 0%, #221d33 55%, #14111d 100%)",
-    ink: "#f4efe4",
+    css: "linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
+    ink: "#ffffff",
   },
   {
     id: "morning",
     name: "Morning",
-    css: "linear-gradient(175deg, #f7f1e3 0%, #efe0c8 48%, #e3c9a6 100%)",
-    ink: "#2c2415",
+    css: "#ffffff",
+    ink: "#000000",
   },
   {
     id: "garden",
     name: "Garden",
-    css: "radial-gradient(120% 100% at 20% 0%, #33473a 0%, #1d2b22 60%, #121a15 100%)",
-    ink: "#eef2e4",
-  },
-  {
-    id: "soft-rain",
-    name: "Soft rain",
-    css: "linear-gradient(180deg, #2b3348 0%, #232b3d 55%, #181d2b 100%)",
-    ink: "#e8ecf4",
-  },
-  {
-    id: "warm-linen",
-    name: "Warm linen",
-    css: "linear-gradient(170deg, #efe6d4 0%, #e2d2b6 60%, #cdb694 100%)",
-    ink: "#2c2415",
+    css: "linear-gradient(45deg, #11998e 0%, #38ef7d 100%)",
+    ink: "#ffffff",
   },
   {
     id: "golden-hour",
-    name: "Golden hour",
-    css: "radial-gradient(140% 90% at 50% 110%, #8a5a34 0%, #4a3040 45%, #221d33 100%)",
-    ink: "#fbf0dd",
+    name: "Golden",
+    css: "linear-gradient(45deg, #f6d365 0%, #fda085 100%)",
+    ink: "#000000",
   },
   {
     id: "quiet-room",
-    name: "Quiet room",
-    css: "linear-gradient(180deg, #33304a 0%, #262338 60%, #1a1828 100%)",
-    ink: "#ece7f7",
-  },
-  {
-    id: "mist",
-    name: "Mist",
-    css: "linear-gradient(180deg, #aebfd2 0%, #8fa0b8 55%, #6e7f98 100%)",
-    ink: "#1f2433",
-  },
-  {
-    id: "night-bloom",
-    name: "Night bloom",
-    css: "radial-gradient(110% 70% at 80% 10%, #5b3a5e 0%, #2c2138 50%, #14111d 100%)",
-    ink: "#f2e4ef",
-  },
-  {
-    id: "paper",
-    name: "Paper",
-    css: "linear-gradient(180deg, #faf7ef 0%, #f1ebdb 100%)",
-    ink: "#2c2415",
+    name: "Quiet",
+    css: "#000000",
+    ink: "#ffffff",
   },
 ];
 
@@ -120,7 +156,7 @@ export function backgroundById(id: string | null | undefined): StoryBackground {
 }
 
 /* ------------------------------ text presets ------------------------------ */
-
+/* Instagram 5 text styles - exactly like IG */
 export interface StoryFontPreset {
   id: StoryTextPreset;
   name: string;
@@ -131,146 +167,180 @@ export interface StoryFontPreset {
   letterSpacing: string;
   lineHeight: number;
   textTransform: "none" | "uppercase";
-  /** Base size at scale 1, in px on a 390-wide canvas. */
   baseSize: number;
-  /** Soft shadow for legibility over imagery. */
   shadow: string;
 }
 
-/**
- * Bloom-owned expressive range built only from bundled/system type —
- * no proprietary font files, same expressive breadth.
- */
 export const STORY_FONTS: StoryFontPreset[] = [
   {
     id: "classic",
     name: "Classic",
-    hint: "Clean and calm",
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-    fontWeight: 500,
+    hint: "Instagram Classic",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontWeight: 400,
     fontStyle: "normal",
     letterSpacing: "-0.01em",
-    lineHeight: 1.25,
+    lineHeight: 1.2,
     textTransform: "none",
-    baseSize: 34,
-    shadow: "0 2px 18px rgba(10,8,20,0.45)",
+    baseSize: 32,
+    shadow: "0 2px 8px rgba(0,0,0,0.6)",
   },
   {
-    id: "editorial",
-    name: "Editorial",
-    hint: "Serif headlines",
-    fontFamily: "Fraunces, ui-serif, Georgia, serif",
-    fontWeight: 560,
-    fontStyle: "normal",
-    letterSpacing: "-0.015em",
-    lineHeight: 1.12,
-    textTransform: "none",
-    baseSize: 44,
-    shadow: "0 2px 22px rgba(10,8,20,0.4)",
-  },
-  {
-    id: "soft",
-    name: "Soft",
-    hint: "Rounded and kind",
-    fontFamily: "ui-rounded, 'SF Pro Rounded', Inter, system-ui, sans-serif",
-    fontWeight: 500,
+    id: "modern",
+    name: "Modern",
+    hint: "Rounded & clean",
+    fontFamily: "'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontWeight: 600,
     fontStyle: "normal",
     letterSpacing: "0em",
-    lineHeight: 1.3,
+    lineHeight: 1.25,
     textTransform: "none",
-    baseSize: 33,
-    shadow: "0 2px 16px rgba(10,8,20,0.4)",
+    baseSize: 30,
+    shadow: "0 2px 10px rgba(0,0,0,0.5)",
   },
   {
-    id: "bold",
-    name: "Bold",
-    hint: "Say it loud",
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+    id: "neon",
+    name: "Neon",
+    hint: "Glowing bright",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontWeight: 700,
+    fontStyle: "normal",
+    letterSpacing: "0.02em",
+    lineHeight: 1.1,
+    textTransform: "none",
+    baseSize: 36,
+    shadow: "0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.8)",
+  },
+  {
+    id: "typewriter",
+    name: "Typewriter",
+    hint: "Mono retro",
+    fontFamily: "'Courier New', Courier, monospace",
+    fontWeight: 400,
+    fontStyle: "normal",
+    letterSpacing: "0.02em",
+    lineHeight: 1.4,
+    textTransform: "none",
+    baseSize: 24,
+    shadow: "0 2px 8px rgba(0,0,0,0.6)",
+  },
+  {
+    id: "strong",
+    name: "Strong",
+    hint: "Bold impact",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     fontWeight: 800,
     fontStyle: "normal",
     letterSpacing: "-0.02em",
     lineHeight: 1.05,
     textTransform: "uppercase",
-    baseSize: 40,
-    shadow: "0 3px 24px rgba(10,8,20,0.5)",
+    baseSize: 38,
+    shadow: "0 3px 12px rgba(0,0,0,0.7)",
+  },
+  // Legacy compat - map old ids to Instagram styles
+  {
+    id: "editorial",
+    name: "Editorial",
+    hint: "Classic serif",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontWeight: 500,
+    fontStyle: "normal",
+    letterSpacing: "-0.01em",
+    lineHeight: 1.2,
+    textTransform: "none",
+    baseSize: 32,
+    shadow: "0 2px 8px rgba(0,0,0,0.6)",
+  },
+  {
+    id: "soft",
+    name: "Soft",
+    hint: "Modern rounded",
+    fontFamily: "'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif",
+    fontWeight: 600,
+    fontStyle: "normal",
+    letterSpacing: "0em",
+    lineHeight: 1.25,
+    textTransform: "none",
+    baseSize: 30,
+    shadow: "0 2px 10px rgba(0,0,0,0.5)",
+  },
+  {
+    id: "bold",
+    name: "Bold",
+    hint: "Strong impact",
+    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    fontWeight: 800,
+    fontStyle: "normal",
+    letterSpacing: "-0.02em",
+    lineHeight: 1.05,
+    textTransform: "uppercase",
+    baseSize: 38,
+    shadow: "0 3px 12px rgba(0,0,0,0.7)",
   },
   {
     id: "handwritten",
-    name: "Handwritten",
-    hint: "Like a margin note",
-    fontFamily: "'Segoe Script', 'Bradley Hand', 'Chalkboard SE', cursive",
-    fontWeight: 500,
+    name: "Hand",
+    hint: "Casual",
+    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    fontWeight: 400,
     fontStyle: "normal",
     letterSpacing: "0em",
-    lineHeight: 1.35,
+    lineHeight: 1.3,
     textTransform: "none",
-    baseSize: 34,
-    shadow: "0 2px 14px rgba(10,8,20,0.35)",
-  },
-  {
-    id: "typewriter",
-    name: "Typewriter",
-    hint: "Mono, deliberate",
-    fontFamily: "'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace",
-    fontWeight: 500,
-    fontStyle: "normal",
-    letterSpacing: "0em",
-    lineHeight: 1.45,
-    textTransform: "none",
-    baseSize: 26,
-    shadow: "0 2px 14px rgba(10,8,20,0.4)",
+    baseSize: 30,
+    shadow: "0 2px 8px rgba(0,0,0,0.6)",
   },
   {
     id: "elegant",
     name: "Elegant",
-    hint: "Italic serif",
-    fontFamily: "Fraunces, ui-serif, Georgia, serif",
-    fontWeight: 480,
-    fontStyle: "italic",
+    hint: "Modern clean",
+    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    fontWeight: 600,
+    fontStyle: "normal",
     letterSpacing: "0em",
-    lineHeight: 1.2,
+    lineHeight: 1.25,
     textTransform: "none",
-    baseSize: 38,
-    shadow: "0 2px 20px rgba(10,8,20,0.4)",
+    baseSize: 30,
+    shadow: "0 2px 10px rgba(0,0,0,0.5)",
   },
   {
     id: "minimal",
     name: "Minimal",
-    hint: "Small caps, spaced",
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-    fontWeight: 600,
+    hint: "Typewriter",
+    fontFamily: "'Courier New', monospace",
+    fontWeight: 400,
     fontStyle: "normal",
-    letterSpacing: "0.22em",
-    lineHeight: 1.6,
-    textTransform: "uppercase",
-    baseSize: 20,
-    shadow: "0 2px 12px rgba(10,8,20,0.4)",
+    letterSpacing: "0.02em",
+    lineHeight: 1.4,
+    textTransform: "none",
+    baseSize: 24,
+    shadow: "0 2px 8px rgba(0,0,0,0.6)",
   },
   {
     id: "poster",
     name: "Poster",
-    hint: "Condensed punch",
-    fontFamily: "'Arial Narrow', 'Helvetica Neue Condensed', Impact, sans-serif",
-    fontWeight: 700,
+    hint: "Strong bold",
+    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    fontWeight: 800,
     fontStyle: "normal",
-    letterSpacing: "0.02em",
-    lineHeight: 1.0,
+    letterSpacing: "-0.02em",
+    lineHeight: 1.05,
     textTransform: "uppercase",
-    baseSize: 46,
-    shadow: "0 4px 26px rgba(10,8,20,0.55)",
+    baseSize: 38,
+    shadow: "0 3px 12px rgba(0,0,0,0.7)",
   },
   {
     id: "whisper",
     name: "Whisper",
-    hint: "Light and low",
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-    fontWeight: 300,
+    hint: "Classic light",
+    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    fontWeight: 400,
     fontStyle: "normal",
-    letterSpacing: "0.04em",
-    lineHeight: 1.5,
+    letterSpacing: "-0.01em",
+    lineHeight: 1.2,
     textTransform: "none",
-    baseSize: 27,
-    shadow: "0 1px 12px rgba(10,8,20,0.35)",
+    baseSize: 32,
+    shadow: "0 2px 8px rgba(0,0,0,0.6)",
   },
 ];
 
@@ -279,78 +349,97 @@ export function fontPresetById(id: string | null | undefined): StoryFontPreset {
 }
 
 /* -------------------------------- filters --------------------------------- */
-
+/* Instagram filters - like Clarendon, Gingham, etc */
 export interface StoryFilter {
   id: string;
   name: string;
   hint: string;
-  /** CSS filter applied to base media (and thumbnails). */
   css: string;
-  /** Optional color wash overlay: [css background, blend mode, opacity]. */
   wash?: [string, string, number] | undefined;
 }
 
 export const STORY_FILTERS: StoryFilter[] = [
-  { id: "none", name: "Original", hint: "Untouched", css: "none" },
+  { id: "none", name: "Normal", hint: "Original", css: "none" },
   {
-    id: "soft",
-    name: "Soft",
-    hint: "Lifted and gentle",
-    css: "brightness(1.06) contrast(0.96) saturate(0.94)",
+    id: "clarendon",
+    name: "Clarendon",
+    hint: "High contrast",
+    css: "contrast(1.2) saturate(1.35)",
   },
   {
-    id: "midnight",
-    name: "Midnight",
-    hint: "Cool evening",
-    css: "brightness(0.94) contrast(1.06) saturate(0.92) hue-rotate(-8deg)",
-    wash: ["linear-gradient(180deg, rgba(70,80,160,0.16), rgba(20,16,40,0.22))", "overlay", 1],
+    id: "gingham",
+    name: "Gingham",
+    hint: "Vintage faded",
+    css: "contrast(0.9) brightness(1.05) saturate(0.7) sepia(0.04)",
+    wash: ["rgba(220,220,220,0.1)", "overlay", 1],
   },
   {
-    id: "warm",
-    name: "Warm",
-    hint: "Golden drift",
-    css: "brightness(1.03) contrast(1.0) saturate(1.08) sepia(0.22)",
+    id: "moon",
+    name: "Moon",
+    hint: "B&W dramatic",
+    css: "grayscale(1) contrast(1.1) brightness(1.1)",
   },
   {
-    id: "mist",
-    name: "Mist",
-    hint: "Faded film",
-    css: "brightness(1.08) contrast(0.88) saturate(0.8)",
-    wash: ["rgba(220,225,235,0.14)", "screen", 1],
+    id: "lark",
+    name: "Lark",
+    hint: "Bright washed",
+    css: "saturate(0.9) brightness(1.1) contrast(0.9)",
   },
   {
-    id: "lavender",
-    name: "Lavender",
-    hint: "Bloom's own tint",
-    css: "brightness(1.02) contrast(1.0) saturate(1.05) hue-rotate(12deg)",
-    wash: ["rgba(150,130,220,0.14)", "overlay", 1],
+    id: "reyes",
+    name: "Reyes",
+    hint: "Dusty vintage",
+    css: "sepia(0.22) brightness(1.1) contrast(0.85) saturate(0.75)",
   },
   {
-    id: "golden",
-    name: "Golden",
-    hint: "Late light",
-    css: "brightness(1.05) contrast(1.04) saturate(1.12) sepia(0.3)",
+    id: "juno",
+    name: "Juno",
+    hint: "Warm vivid",
+    css: "contrast(1.15) saturate(1.4) brightness(1.05)",
+    wash: ["rgba(255,200,100,0.1)", "overlay", 1],
   },
   {
-    id: "film",
-    name: "Film",
-    hint: "Quiet grain",
-    css: "brightness(0.98) contrast(1.08) saturate(0.86)",
-    wash: ["rgba(30,24,40,0.18)", "multiply", 1],
+    id: "slumber",
+    name: "Slumber",
+    hint: "Soft desaturated",
+    css: "saturate(0.66) brightness(1.05)",
+    wash: ["rgba(0,0,0,0.1)", "multiply", 1],
   },
   {
-    id: "mono",
-    name: "Mono",
-    hint: "One color",
-    css: "grayscale(1) brightness(1.02) contrast(1.06)",
+    id: "crema",
+    name: "Crema",
+    hint: "Creamy faded",
+    css: "contrast(0.9) brightness(1.1) saturate(0.8) sepia(0.1)",
   },
+  {
+    id: "ludwig",
+    name: "Ludwig",
+    hint: "Minimal bright",
+    css: "contrast(1.05) brightness(1.05) saturate(2) sepia(0.02)",
+  },
+  {
+    id: "aden",
+    name: "Aden",
+    hint: "Pastel muted",
+    css: "contrast(0.9) brightness(1.2) saturate(0.85) hue-rotate(-20deg)",
+  },
+  {
+    id: "perpetua",
+    name: "Perpetua",
+    hint: "Cool soft",
+    css: "contrast(1.1) brightness(1.1) saturate(1.1)",
+    wash: ["rgba(0,100,200,0.05)", "soft-light", 1],
+  },
+  // Legacy compat
+  { id: "soft", name: "Soft", hint: "Gentle", css: "brightness(1.06) contrast(0.96) saturate(0.94)" },
+  { id: "warm", name: "Warm", hint: "Golden", css: "brightness(1.03) saturate(1.08) sepia(0.22)" },
+  { id: "midnight", name: "Midnight", hint: "Cool", css: "brightness(0.94) contrast(1.06) saturate(0.92)" },
 ];
 
 export function filterById(id: string | null | undefined): StoryFilter {
   return STORY_FILTERS.find((f) => f.id === id) ?? STORY_FILTERS[0]!;
 }
 
-/** Compose adjustments into a single CSS filter string. */
 export function adjustmentsToCss(a: StoryAdjustments | null | undefined): string {
   if (!a) return "none";
   const parts: string[] = [];
@@ -358,7 +447,6 @@ export function adjustmentsToCss(a: StoryAdjustments | null | undefined): string
   if (a.contrast !== 0) parts.push(`contrast(${1 + a.contrast / 100})`);
   if (a.saturation !== 0) parts.push(`saturate(${Math.max(0, 1 + a.saturation / 100)})`);
   if (a.warmth !== 0) parts.push(`sepia(${Math.min(0.6, Math.abs(a.warmth) / 160)})`);
-  // warmth direction: positive warms via sepia+hue, negative cools via hue
   const extra =
     a.warmth > 0
       ? `hue-rotate(${-a.warmth / 6}deg)`
@@ -371,27 +459,23 @@ export function adjustmentsToCss(a: StoryAdjustments | null | undefined): string
 }
 
 /* ------------------------------- reactions -------------------------------- */
-
 export interface ReactionMeta {
   id: StoryReactionKind;
   label: string;
-  /** Emoji grapheme — system emoji, no custom assets needed. */
   glyph: string;
 }
 
 export const REACTION_META: Record<StoryReactionKind, ReactionMeta> = {
   heart: { id: "heart", label: "Love", glyph: "❤️" },
-  bloom: { id: "bloom", label: "Bloom", glyph: "🌸" },
-  sparkle: { id: "sparkle", label: "Sparkle", glyph: "✨" },
-  smile: { id: "smile", label: "Warm smile", glyph: "😊" },
-  cheer: { id: "cheer", label: "Cheering", glyph: "🎉" },
-  moon: { id: "moon", label: "Quiet night", glyph: "🌙" },
+  bloom: { id: "bloom", label: "Fire", glyph: "🔥" },
+  sparkle: { id: "sparkle", label: "Clap", glyph: "👏" },
+  smile: { id: "smile", label: "Laugh", glyph: "😂" },
+  cheer: { id: "cheer", label: "Wow", glyph: "😮" },
+  moon: { id: "moon", label: "Sad", glyph: "😢" },
 };
 
-/* ------------------------------ bloom motion ------------------------------ */
-/* The always-available motion pack: looping emoji moments that need no
- * network, no key, and no rights — they place as animated text elements. */
-
+/* ------------------------------ motion pack ------------------------------ */
+/* Instagram quick reactions */
 export interface MotionItem {
   id: string;
   emoji: string;
@@ -401,61 +485,47 @@ export interface MotionItem {
 
 export const MOTION_PACK: MotionItem[] = [
   { id: "love", emoji: "❤️", animation: "pulse", label: "Love" },
-  { id: "bloom", emoji: "🌸", animation: "float", label: "Bloom" },
+  { id: "fire", emoji: "🔥", animation: "pulse", label: "Fire" },
+  { id: "clap", emoji: "👏", animation: "pulse", label: "Clap" },
+  { id: "laugh", emoji: "😂", animation: "pulse", label: "Laugh" },
+  { id: "wow", emoji: "😮", animation: "pulse", label: "Wow" },
+  { id: "cry", emoji: "😢", animation: "float", label: "Cry" },
+  { id: "heart-eyes", emoji: "😍", animation: "pulse", label: "Heart Eyes" },
+  { id: "100", emoji: "💯", animation: "pulse", label: "100" },
+  { id: "party", emoji: "🎉", animation: "pulse", label: "Party" },
+  { id: "star", emoji: "⭐", animation: "pulse", label: "Star" },
   { id: "sparkle", emoji: "✨", animation: "pulse", label: "Sparkle" },
+  { id: "rainbow", emoji: "🌈", animation: "float", label: "Rainbow" },
   { id: "moon", emoji: "🌙", animation: "float", label: "Moon" },
   { id: "sun", emoji: "☀️", animation: "pulse", label: "Sun" },
-  { id: "fire", emoji: "🔥", animation: "pulse", label: "Fire" },
-  { id: "party", emoji: "🎉", animation: "pulse", label: "Party" },
   { id: "balloon", emoji: "🎈", animation: "float", label: "Balloon" },
   { id: "gift", emoji: "🎁", animation: "pulse", label: "Gift" },
   { id: "butterfly", emoji: "🦋", animation: "float", label: "Butterfly" },
-  { id: "leaf", emoji: "🍃", animation: "float", label: "Leaf" },
-  { id: "rainbow", emoji: "🌈", animation: "float", label: "Rainbow" },
-  { id: "snow", emoji: "❄️", animation: "float", label: "Snow" },
-  { id: "music", emoji: "🎵", animation: "float", label: "Music" },
-  { id: "star", emoji: "⭐", animation: "pulse", label: "Star" },
-  { id: "diamond", emoji: "💎", animation: "pulse", label: "Diamond" },
-  { id: "bell", emoji: "🔔", animation: "pulse", label: "Bell" },
-  { id: "wave", emoji: "🌊", animation: "float", label: "Wave" },
+  { id: "flower", emoji: "🌸", animation: "float", label: "Flower" },
 ];
 
 /* --------------------------------- gifts ---------------------------------- */
-
 export interface GiftMeta {
   id: StoryGiftKind;
   name: string;
   hint: string;
   glyph: string;
-  /** Petal burst tint used in the send animation. */
   tint: string;
 }
 
 export const GIFT_META: Record<StoryGiftKind, GiftMeta> = {
-  bloom: {
-    id: "bloom",
-    name: "Bloom",
-    hint: "A flower for your moment",
-    glyph: "🌸",
-    tint: "#e0a3b8",
-  },
-  petal: {
-    id: "petal",
-    name: "Petals",
-    hint: "Soft petals drift up",
-    glyph: "🌺",
-    tint: "#e8b4c4",
-  },
-  star: { id: "star", name: "Star", hint: "For a bright one", glyph: "⭐", tint: "#eed9a4" },
-  heart: { id: "heart", name: "Heart", hint: "Held close", glyph: "💜", tint: "#b7a6e8" },
-  candle: { id: "candle", name: "Candle", hint: "A quiet light", glyph: "🕯️", tint: "#e8c98a" },
-  moon: { id: "moon", name: "Moon", hint: "Rest well", glyph: "🌙", tint: "#9fb6cf" },
-  ribbon: { id: "ribbon", name: "Ribbon", hint: "Tied with care", glyph: "🎀", tint: "#e0a3b8" },
-  spark: { id: "spark", name: "Spark", hint: "A tiny celebration", glyph: "✨", tint: "#eed9a4" },
+  bloom: { id: "bloom", name: "Fire", hint: "You're on fire", glyph: "🔥", tint: "#fa7e1e" },
+  petal: { id: "petal", name: "Love", hint: "Lots of love", glyph: "❤️", tint: "#ed4956" },
+  star: { id: "star", name: "Clap", hint: "Applause", glyph: "👏", tint: "#feda75" },
+  heart: { id: "heart", name: "Laugh", hint: "So funny", glyph: "😂", tint: "#0095f6" },
+  candle: { id: "candle", name: "Wow", hint: "Amazing", glyph: "😮", tint: "#a8a8a8" },
+  moon: { id: "moon", name: "Sad", hint: "Feeling sad", glyph: "😢", tint: "#8e8e8e" },
+  ribbon: { id: "ribbon", name: "Heart Eyes", hint: "Love it", glyph: "😍", tint: "#d62976" },
+  spark: { id: "spark", name: "100", hint: "Perfect", glyph: "💯", tint: "#1DB954" },
 };
 
 /* -------------------------------- templates ------------------------------- */
-
+/* Instagram-exact templates - beautiful, minimal, no ugly Bloom ones */
 export interface StoryTemplate {
   id: string;
   name: string;
@@ -470,91 +540,113 @@ export interface StoryTemplate {
 
 export const STORY_TEMPLATES: StoryTemplate[] = [
   {
-    id: "little-win",
-    name: "Today's little win",
-    hint: "Name one small thing",
-    backgroundId: "golden-hour",
-    preset: "editorial",
-    heading: "Today's little win",
-    placeholder: "What went right, even a little?",
-    stickerIds: ["bloom.spark-2", "bloom.sprig-1"],
-    ink: "#fbf0dd",
+    id: "ig-bold",
+    name: "Bold",
+    hint: "Strong statement",
+    backgroundId: "ig-sunset",
+    preset: "strong",
+    heading: "BOLD",
+    placeholder: "Type something bold",
+    stickerIds: [],
+    ink: "#ffffff",
   },
   {
-    id: "feeling",
-    name: "Feeling today",
-    hint: "One word for the day",
-    backgroundId: "mist",
-    preset: "soft",
-    heading: "Today felt like",
-    placeholder: "Calm, heavy, bright…",
-    stickerIds: ["mood.calm"],
-    ink: "#1f2433",
+    id: "ig-minimal",
+    name: "Minimal",
+    hint: "Clean & simple",
+    backgroundId: "ig-white",
+    preset: "classic",
+    heading: "Minimal",
+    placeholder: "Keep it simple",
+    stickerIds: [],
+    ink: "#000000",
   },
   {
-    id: "morning",
-    name: "Morning",
-    hint: "How the day begins",
-    backgroundId: "morning",
-    preset: "minimal",
-    heading: "Morning",
-    placeholder: "First thought of the day…",
-    stickerIds: ["bloom.sun-1"],
-    ink: "#2c2415",
+    id: "ig-neon",
+    name: "Neon",
+    hint: "Glow in dark",
+    backgroundId: "ig-black",
+    preset: "neon",
+    heading: "NEON",
+    placeholder: "Glow up",
+    stickerIds: [],
+    ink: "#ffffff",
   },
   {
-    id: "night",
-    name: "Night",
-    hint: "Close the day softly",
-    backgroundId: "moonlight",
-    preset: "whisper",
-    heading: "Night notes",
-    placeholder: "What are you carrying to bed?",
-    stickerIds: ["bloom.moon-1"],
-    ink: "#f4efe4",
-  },
-  {
-    id: "grateful",
-    name: "Grateful for",
-    hint: "Three small things",
-    backgroundId: "garden",
-    preset: "elegant",
-    heading: "Grateful for",
-    placeholder: "1. …\n2. …\n3. …",
-    stickerIds: ["bloom.leaf-2"],
-    ink: "#eef2e4",
-  },
-  {
-    id: "progress",
-    name: "Progress",
-    hint: "Showing up counts",
-    backgroundId: "quiet-room",
-    preset: "bold",
-    heading: "Kept showing up",
-    placeholder: "What did you stay consistent with?",
-    stickerIds: ["habit.streak-1"],
-    ink: "#ece7f7",
-  },
-  {
-    id: "memory",
-    name: "Memory",
-    hint: "Pair with a photo",
-    backgroundId: "warm-linen",
+    id: "ig-typewriter",
+    name: "Typewriter",
+    hint: "Retro mono",
+    backgroundId: "ig-midnight",
     preset: "typewriter",
-    heading: "Remember this",
-    placeholder: "Where were you? Who was there?",
-    stickerIds: ["bloom.frame-1"],
-    ink: "#2c2415",
+    heading: "Typewriter",
+    placeholder: "Old school cool",
+    stickerIds: [],
+    ink: "#ffffff",
   },
   {
-    id: "weekend",
-    name: "Weekend",
-    hint: "Slow days",
-    backgroundId: "soft-rain",
-    preset: "handwritten",
-    heading: "Weekend",
-    placeholder: "Slow morning plans…",
-    stickerIds: ["bloom.cloud-1"],
-    ink: "#e8ecf4",
+    id: "ig-fire",
+    name: "Fire",
+    hint: "Hot & fierce",
+    backgroundId: "ig-fire",
+    preset: "strong",
+    heading: "FIRE",
+    placeholder: "Bring the heat",
+    stickerIds: [],
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-ocean",
+    name: "Ocean",
+    hint: "Deep blue",
+    backgroundId: "ig-ocean",
+    preset: "modern",
+    heading: "Ocean",
+    placeholder: "Dive deep",
+    stickerIds: [],
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-forest",
+    name: "Forest",
+    hint: "Natural green",
+    backgroundId: "ig-forest",
+    preset: "classic",
+    heading: "Forest",
+    placeholder: "Stay wild",
+    stickerIds: [],
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-dawn",
+    name: "Dawn",
+    hint: "Warm sunrise",
+    backgroundId: "ig-dawn",
+    preset: "modern",
+    heading: "Dawn",
+    placeholder: "New beginnings",
+    stickerIds: [],
+    ink: "#000000",
+  },
+  {
+    id: "ig-aurora",
+    name: "Aurora",
+    hint: "Dreamy pastel",
+    backgroundId: "ig-aurora",
+    preset: "classic",
+    heading: "Dream",
+    placeholder: "Chase dreams",
+    stickerIds: [],
+    ink: "#ffffff",
+  },
+  {
+    id: "ig-love",
+    name: "Love",
+    hint: "Heart vibes",
+    backgroundId: "ig-pink",
+    preset: "strong",
+    heading: "LOVE",
+    placeholder: "All you need",
+    stickerIds: [],
+    ink: "#ffffff",
   },
 ];

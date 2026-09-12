@@ -1,14 +1,11 @@
 /**
- * MediaTrays — music + GIF pickers.
- * Music searches licensed 30-second previews and always accepts your own
- * audio; GIFs search the catalog when a key is connected and always accept
- * your uploads. Creation never breaks because a provider is missing.
+ * MediaTrays — Instagram-exact music + GIF pickers.
+ * Dark #121212, search #262626, white text, like IG.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Disc3, Music2, Pause, Play, Search, Upload } from "lucide-react";
 
-import { StorySheet } from "./StorySheet";
 import {
   gifProvider,
   musicProvider,
@@ -27,7 +24,6 @@ export interface PickedMusic {
   artist: string;
   src?: string | undefined;
   durationMs: number;
-  /** The user's own file, uploaded at publish. */
   file?: File | undefined;
 }
 
@@ -41,17 +37,7 @@ function useDebounced(value: string, ms = 350): string {
 }
 
 /* --------------------------------- music -------------------------------- */
-
-const MUSIC_MOODS = [
-  "Morning acoustic",
-  "Lo-fi chill",
-  "Soft piano",
-  "Feel good",
-  "Party hits",
-  "Focus",
-  "Love songs",
-  "Rainy day",
-];
+const MUSIC_MOODS = ["Trending", "Chill", "Love", "Party", "Focus", "Sad", "Happy", "Vibes"];
 
 export function MusicTray({
   onPick,
@@ -121,180 +107,171 @@ export function MusicTray({
   };
 
   return (
-    <StorySheet title="Music" subtitle="Set the mood — gently." onClose={onClose}>
-      <audio ref={audioRef} preload="none" onEnded={() => setPreviewId(null)} />
-      <div className="flex flex-col gap-3 pb-2">
-        {musicProvider.configured ? (
-          <>
-            <label className="flex items-center gap-2.5 rounded-full border border-border bg-surface/60 px-4 py-2.5 transition-colors focus-within:border-border-strong">
-              <Search className="size-4 shrink-0 text-faint" aria-hidden />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search songs and artists…"
-                aria-label="Search music"
-                className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-faint/70"
-              />
-            </label>
-            <div
-              className="flex gap-1.5 overflow-x-auto pb-0.5"
-              role="group"
-              aria-label="Browse by mood"
-            >
-              {MUSIC_MOODS.map((mood) => (
-                <button
-                  key={mood}
-                  type="button"
-                  onClick={() => setQuery(mood)}
-                  aria-pressed={query === mood}
-                  className={cn(
-                    "shrink-0 rounded-full border px-3.5 py-1.5 text-[12px] font-medium transition-colors",
-                    query === mood
-                      ? "border-[color:var(--profile-accent-border,var(--border-strong))] bg-[color:var(--profile-accent-soft,var(--surface-2))] text-foreground"
-                      : "border-border text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {mood}
-                </button>
+    <div className="fixed inset-0 z-[91] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Music">
+      <div className="flex max-h-[80vh] w-full flex-col rounded-t-[12px] bg-[#121212] border-t border-[#262626]">
+        <div className="flex flex-col gap-3 border-b border-[#262626] px-4 py-3">
+          <div className="mx-auto h-1 w-10 rounded-full bg-[#363636]" />
+          <div className="flex items-center justify-between">
+            <h2 className="text-[16px] font-semibold text-white">Music</h2>
+            <button type="button" onClick={onClose} className="text-[14px] font-medium text-[#0095f6]">
+              Done
+            </button>
+          </div>
+        </div>
+
+        <audio ref={audioRef} preload="none" onEnded={() => setPreviewId(null)} />
+
+        <div className="flex flex-col gap-3 overflow-y-auto px-4 py-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+          {musicProvider.configured ? (
+            <>
+              <label className="flex items-center gap-2 rounded-lg bg-[#262626] px-3 py-2.5">
+                <Search className="size-4 shrink-0 text-[#a8a8a8]" aria-hidden />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search music"
+                  aria-label="Search music"
+                  className="w-full bg-transparent text-[15px] text-white outline-none placeholder:text-[#a8a8a8]"
+                />
+              </label>
+              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1" role="group" aria-label="Browse">
+                {MUSIC_MOODS.map((mood) => (
+                  <button
+                    key={mood}
+                    type="button"
+                    onClick={() => setQuery(mood === "Trending" ? "" : mood)}
+                    aria-pressed={query === mood}
+                    className={cn(
+                      "shrink-0 rounded-full border px-3.5 py-1.5 text-[13px] font-medium",
+                      query === mood || (mood === "Trending" && !query)
+                        ? "border-white bg-white text-black"
+                        : "border-[#363636] bg-[#262626] text-white",
+                    )}
+                  >
+                    {mood}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={audioBusy}
+            className="flex w-full items-center gap-3 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-3.5 text-left active:scale-[0.98] transition-transform"
+          >
+            <span className="grid size-10 place-items-center rounded-full bg-[#262626] text-white">
+              <Upload className="size-5" aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-white">
+                {audioBusy ? "Reading…" : "Your audio"}
+              </span>
+              <span className="block text-[12px] text-[#a8a8a8]">Upload MP3, up to 12 MB</span>
+            </span>
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/webm"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0] ?? null;
+              e.target.value = "";
+              void onAudioFile(file);
+            }}
+          />
+          {audioError ? <p className="text-[13px] text-[#ff3040]">{audioError}</p> : null}
+
+          {!musicProvider.configured ? (
+            <div className="flex flex-col items-center gap-2 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-10 text-center">
+              <Disc3 className="size-6 text-[#a8a8a8]" aria-hidden />
+              <p className="text-[15px] font-semibold text-white">No catalog</p>
+              <p className="max-w-[32ch] text-[13px] text-[#a8a8a8]">Your own audio above works</p>
+            </div>
+          ) : loading ? (
+            <div className="flex flex-col gap-2 py-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-14 animate-pulse rounded-xl bg-[#1a1a1a]" />
               ))}
             </div>
-          </>
-        ) : null}
-
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          disabled={audioBusy}
-          className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border px-4 py-3.5 text-left transition-colors hover:border-border-strong disabled:opacity-50"
-        >
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-3 text-muted-foreground">
-            <Upload className="size-4" aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[13.5px] font-semibold">
-              {audioBusy ? "Reading your audio…" : "Use your own audio"}
-            </span>
-            <span className="block text-[11.5px] text-faint">An MP3 of yours, up to 12 MB.</span>
-          </span>
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/webm"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0] ?? null;
-            e.target.value = "";
-            void onAudioFile(file);
-          }}
-        />
-        {audioError ? <p className="text-[12px] text-rose">{audioError}</p> : null}
-
-        {!musicProvider.configured ? (
-          <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-surface/40 px-4 py-8 text-center">
-            <Disc3 className="size-5 text-faint" aria-hidden />
-            <p className="display text-[15px] text-muted-foreground">No song catalog connected.</p>
-            <p className="max-w-[32ch] text-[12.5px] text-faint">
-              Bloom only plays music it has the rights to. Your own audio above works beautifully.
+          ) : tracks.length === 0 ? (
+            <p className="py-8 text-center text-[14px] text-[#a8a8a8]">
+              {debounced.trim() ? "No results" : "Nothing trending"}
             </p>
-          </div>
-        ) : loading ? (
-          <div className="flex flex-col gap-2 py-2" aria-label="Loading music" role="status">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-14 animate-pulse rounded-2xl bg-surface-2/60" />
-            ))}
-          </div>
-        ) : tracks.length === 0 ? (
-          <p className="py-8 text-center text-[13px] text-faint">
-            {debounced.trim() ? "No songs match that." : "Nothing trending right now."}
-          </p>
-        ) : (
-          <>
-            {musicProvider.attribution ? (
-              <p className="mono text-center text-[10px] uppercase tracking-[0.1em] text-faint">
-                {musicProvider.attribution}
-              </p>
-            ) : null}
-            <ul className="flex flex-col gap-1.5">
-              {tracks.map((track) => (
-                <li
-                  key={track.id}
-                  className="flex items-center gap-3 rounded-2xl border border-transparent px-2 py-2 transition-colors hover:border-border hover:bg-surface/60"
-                >
-                  <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-3 text-muted-foreground">
-                    {track.artworkUrl ? (
-                      <img
-                        src={track.artworkUrl}
-                        alt=""
-                        className="size-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <Music2 className="size-4" aria-hidden />
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1 leading-tight">
-                    <span className="block truncate text-[13.5px] font-semibold">
-                      {track.title}
-                      {track.explicit ? (
-                        <span className="mono ml-1.5 rounded border border-border px-1 text-[9px] text-faint">
-                          E
-                        </span>
-                      ) : null}
+          ) : (
+            <>
+              {musicProvider.attribution ? (
+                <p className="text-center text-[10px] uppercase tracking-[0.1em] text-[#737373]">
+                  {musicProvider.attribution}
+                </p>
+              ) : null}
+              <ul className="flex flex-col gap-1">
+                {tracks.map((track) => (
+                  <li
+                    key={track.id}
+                    className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#1a1a1a] transition-colors"
+                  >
+                    <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#262626] text-white">
+                      {track.artworkUrl ? (
+                        <img src={track.artworkUrl} alt="" className="size-full object-cover" loading="lazy" />
+                      ) : (
+                        <Music2 className="size-5" aria-hidden />
+                      )}
                     </span>
-                    <span className="block truncate text-[12px] text-muted-foreground">
-                      {track.artist}
+                    <span className="min-w-0 flex-1 leading-tight">
+                      <span className="block truncate text-[14px] font-semibold text-white">
+                        {track.title}
+                        {track.explicit ? (
+                          <span className="ml-1.5 rounded border border-[#363636] px-1 text-[9px] text-[#a8a8a8]">E</span>
+                        ) : null}
+                      </span>
+                      <span className="block truncate text-[12px] text-[#a8a8a8]">{track.artist}</span>
                     </span>
-                  </span>
-                  {track.previewUrl ? (
+                    {track.previewUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => togglePreview(track)}
+                        aria-label={previewId === track.id ? "Pause" : "Preview"}
+                        className="grid size-8 place-items-center rounded-full bg-[#262626] text-white"
+                      >
+                        {previewId === track.id ? <Pause className="size-4" /> : <Play className="size-4" />}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
-                      onClick={() => togglePreview(track)}
-                      aria-label={
-                        previewId === track.id ? `Pause ${track.title}` : `Preview ${track.title}`
+                      onClick={() =>
+                        onPick({
+                          trackId: track.id,
+                          title: track.title,
+                          artist: track.artist,
+                          src: track.previewUrl ?? undefined,
+                          durationMs: track.durationMs,
+                        })
                       }
-                      className="grid size-9 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
+                      className="rounded-full bg-white px-4 py-1.5 text-[13px] font-semibold text-black"
                     >
-                      {previewId === track.id ? (
-                        <Pause className="size-3.5" />
-                      ) : (
-                        <Play className="size-3.5" />
-                      )}
+                      Add
                     </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onPick({
-                        trackId: track.id,
-                        title: track.title,
-                        artist: track.artist,
-                        src: track.previewUrl ?? undefined,
-                        durationMs: track.durationMs,
-                      })
-                    }
-                    className="bsheet-primary h-9 shrink-0 px-4 text-[12.5px]"
-                  >
-                    Use
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       </div>
-    </StorySheet>
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 -z-10" />
+    </div>
   );
 }
 
 /* ---------------------------------- GIF ---------------------------------- */
-
 export function GifTray({
   onPick,
   onPickMotion,
   onClose,
 }: {
-  /** `file` is set when the GIF comes from the device — uploaded at publish. */
   onPick: (gif: GifAsset, file?: File) => void;
   onPickMotion: (item: MotionItem) => void;
   onClose: () => void;
@@ -348,115 +325,117 @@ export function GifTray({
     img.onerror = () => {
       URL.revokeObjectURL(url);
       setUploadBusy(false);
-      setUploadError("That file wouldn't open as an image. Try another GIF.");
+      setUploadError("Couldn't open that file");
     };
     img.src = url;
   };
 
   return (
-    <StorySheet title="GIFs" subtitle="A little motion, when words won't do." onClose={onClose}>
-      <div className="flex flex-col gap-3 pb-2">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          disabled={uploadBusy}
-          className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border px-4 py-3.5 text-left transition-colors hover:border-border-strong disabled:opacity-50"
-        >
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-3 text-muted-foreground">
-            <Upload className="size-4" aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[13.5px] font-semibold">
-              {uploadBusy ? "Reading your GIF…" : "Upload a GIF"}
-            </span>
-            <span className="block text-[11.5px] text-faint">
-              A .gif or animated .webp of yours, up to 4 MB.
-            </span>
-          </span>
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/gif,image/webp"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0] ?? null;
-            e.target.value = "";
-            onUploadFile(file);
-          }}
-        />
-        {uploadError ? <p className="text-[12px] text-rose">{uploadError}</p> : null}
-
-        {gifProvider.configured ? (
-          <label className="flex items-center gap-2.5 rounded-full border border-border bg-surface/60 px-4 py-2.5 transition-colors focus-within:border-border-strong">
-            <Search className="size-4 shrink-0 text-faint" aria-hidden />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search GIFs…"
-              aria-label="Search GIFs"
-              className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-faint/70"
-            />
-          </label>
-        ) : null}
-
-        {!gifProvider.configured ? (
-          <p className="text-[12px] leading-relaxed text-faint">
-            GIF search lights up when a catalog key is connected — meanwhile your uploads and Bloom
-            Motion below carry the moment.
-          </p>
-        ) : loading ? (
-          <div className="grid grid-cols-3 gap-2" aria-label="Loading GIFs" role="status">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="aspect-square animate-pulse rounded-xl bg-surface-2/60" />
-            ))}
+    <div className="fixed inset-0 z-[91] flex flex-col justify-end bg-black/60" role="dialog" aria-label="GIFs">
+      <div className="flex max-h-[80vh] w-full flex-col rounded-t-[12px] bg-[#121212] border-t border-[#262626]">
+        <div className="flex flex-col gap-3 border-b border-[#262626] px-4 py-3">
+          <div className="mx-auto h-1 w-10 rounded-full bg-[#363636]" />
+          <div className="flex items-center justify-between">
+            <h2 className="text-[16px] font-semibold text-white">GIFs</h2>
+            <button type="button" onClick={onClose} className="text-[14px] font-medium text-[#0095f6]">
+              Done
+            </button>
           </div>
-        ) : gifs.length === 0 ? (
-          <p className="py-8 text-center text-[13px] text-faint">
-            {debounced.trim() ? "No GIFs match that." : "Nothing here right now."}
-          </p>
-        ) : (
-          <>
-            <p className={cn("eyebrow")}>{trendingLabel}</p>
+        </div>
+
+        <div className="flex flex-col gap-4 overflow-y-auto px-4 py-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploadBusy}
+            className="flex w-full items-center gap-3 rounded-xl bg-[#1a1a1a] border border-[#262626] px-4 py-3.5 text-left active:scale-[0.98] transition-transform"
+          >
+            <span className="grid size-10 place-items-center rounded-full bg-[#262626] text-white">
+              <Upload className="size-5" aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-white">
+                {uploadBusy ? "Reading…" : "Upload GIF"}
+              </span>
+              <span className="block text-[12px] text-[#a8a8a8]">Your .gif or .webp, up to 4 MB</span>
+            </span>
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/gif,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0] ?? null;
+              e.target.value = "";
+              onUploadFile(file);
+            }}
+          />
+          {uploadError ? <p className="text-[13px] text-[#ff3040]">{uploadError}</p> : null}
+
+          {gifProvider.configured ? (
+            <label className="flex items-center gap-2 rounded-lg bg-[#262626] px-3 py-2.5">
+              <Search className="size-4 shrink-0 text-[#a8a8a8]" aria-hidden />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search GIFs"
+                aria-label="Search GIFs"
+                className="w-full bg-transparent text-[15px] text-white outline-none placeholder:text-[#a8a8a8]"
+              />
+            </label>
+          ) : null}
+
+          {!gifProvider.configured ? (
+            <p className="text-[13px] text-[#a8a8a8]">Upload your own GIFs or add motion below</p>
+          ) : loading ? (
             <div className="grid grid-cols-3 gap-2">
-              {gifs.map((gif) => (
-                <button
-                  key={gif.id}
-                  type="button"
-                  onClick={() => onPick(gif)}
-                  aria-label={`Add GIF: ${gif.title}`}
-                  className="overflow-hidden rounded-xl border border-transparent transition-all hover:border-border active:scale-95"
-                >
-                  <img
-                    src={gif.still}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="aspect-square w-full object-cover"
-                  />
-                </button>
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="aspect-square animate-pulse rounded-lg bg-[#1a1a1a]" />
               ))}
             </div>
-          </>
-        )}
+          ) : gifs.length === 0 ? (
+            <p className="py-8 text-center text-[14px] text-[#a8a8a8]">
+              {debounced.trim() ? "No results" : "Nothing trending"}
+            </p>
+          ) : (
+            <>
+              <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">{trendingLabel}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {gifs.map((gif) => (
+                  <button
+                    key={gif.id}
+                    type="button"
+                    onClick={() => onPick(gif)}
+                    aria-label={`Add ${gif.title}`}
+                    className="overflow-hidden rounded-lg border border-transparent active:scale-95 transition-transform"
+                  >
+                    <img src={gif.still} alt="" loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
-        <p className={cn("eyebrow", "pt-1")}>Bloom Motion · always with you</p>
-        <div className="grid grid-cols-6 gap-2" role="group" aria-label="Bloom Motion pack">
-          {MOTION_PACK.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onPickMotion(item)}
-              title={item.label}
-              aria-label={`Add motion: ${item.label}`}
-              data-anim={item.animation}
-              className="motion-cell"
-            >
-              <span aria-hidden>{item.emoji}</span>
-            </button>
-          ))}
+          <p className="pt-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Quick Reactions</p>
+          <div className="grid grid-cols-6 gap-2" role="group" aria-label="Motion">
+            {MOTION_PACK.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onPickMotion(item)}
+                title={item.label}
+                aria-label={`Add ${item.label}`}
+                data-anim={item.animation}
+                className="grid aspect-square place-items-center rounded-xl bg-[#1a1a1a] border border-[#262626] text-[22px] active:scale-90 transition-transform"
+              >
+                <span aria-hidden>{item.emoji}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-    </StorySheet>
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 -z-10" />
+    </div>
   );
 }

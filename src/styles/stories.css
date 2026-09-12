@@ -1264,6 +1264,41 @@
 }
 .scam-flash { animation: scam-flash 320ms ease-out both; }
 
+/* --------------------------- Instagram camera exact ----------------------------- */
+@keyframes ig-flash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.ig-flash {
+  animation: ig-flash 200ms ease-out both;
+}
+
+@keyframes ig-shutter-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Instagram text tool placeholder */
+.ig-text-placeholder::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+/* Instagram scrollbar hide */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Instagram conic gradient fallback */
+.conic-rainbow {
+  background: conic-gradient(from 0deg, #ff0000, #ff7a00, #feda75, #1DB954, #0095f6, #962fbf, #d62976, #ff0000);
+}
+
 /* --------------------------- reduced motion ----------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .ig-ring-enter,
