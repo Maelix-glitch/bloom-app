@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 /* ------------------------------ reaction bar ---------------------------- */
+/* Instagram-exact quick reactions — horizontal pill with emojis like IG */
 
 export function ReactionBar({
   storyId,
@@ -81,7 +82,7 @@ export function ReactionBar({
   if (!enabled) return null;
 
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="React to this story">
+    <div className="flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1" role="group" aria-label="React to this story">
       {STORY_REACTIONS.map((kind) => {
         const meta = REACTION_META[kind];
         const count = state.counts[kind] ?? 0;
@@ -95,17 +96,15 @@ export function ReactionBar({
             aria-label={`${meta.label}${count ? `, ${count}` : ""}`}
             aria-pressed={active}
             title={meta.label}
-            className="sv-react-btn"
-            data-active={active}
+            className={cn(
+              "relative grid size-8 place-items-center rounded-full text-[20px] leading-none transition-all active:scale-90",
+              active ? "bg-white scale-110 ring-2 ring-white" : "hover:bg-white/10",
+            )}
           >
-            <span className="relative" aria-hidden>
-              {meta.glyph}
-              {count > 0 ? (
-                <span className="absolute -right-2 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-white/15 px-1 text-[9px] font-bold text-white">
-                  {count}
-                </span>
-              ) : null}
-            </span>
+            <span aria-hidden>{meta.glyph}</span>
+            {count > 0 ? (
+              <span className="absolute -right-1 -top-1 grid min-w-[14px] place-items-center rounded-full bg-[#ff3040] px-1 text-[8px] font-bold text-white leading-none h-[14px]">{count}</span>
+            ) : null}
           </button>
         );
       })}
@@ -254,6 +253,7 @@ export function ReplySheet({
 }
 
 /* --------------------------------- gifts -------------------------------- */
+/* Instagram-exact GiftSheet — like real IG gifts with stars, gradients, rarity */
 
 export function GiftSheet({
   story,
@@ -271,18 +271,26 @@ export function GiftSheet({
   onSent: (gift: StoryGiftKind) => void;
 }) {
   const [sending, setSending] = useState<StoryGiftKind | null>(null);
+  const [balance] = useState(120); // Mock star balance like IG
+  const [selectedTab, setSelectedTab] = useState<"all" | "common" | "rare" | "epic">("all");
 
   const send = useCallback(
     async (gift: StoryGiftKind) => {
       if (sending) return;
       if (!userId) {
-        toast("Sign in to send a Bloom.");
+        toast("Sign in to send gifts.");
+        return;
+      }
+      const meta = GIFT_META[gift];
+      if (balance < meta.stars) {
+        toast(`Not enough stars. Need ${meta.stars}, you have ${balance}`);
         return;
       }
       setSending(gift);
       try {
         await sendGift(story.id, userId, gift, userName);
         onSent(gift);
+        toast(`${meta.glyph} ${meta.name} sent to ${ownerName}!`);
         onClose();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Couldn't send that gift.");
@@ -290,37 +298,109 @@ export function GiftSheet({
         setSending(null);
       }
     },
-    [sending, userId, story.id, userName, onSent, onClose],
+    [sending, userId, story.id, userName, onSent, onClose, ownerName, balance],
   );
 
+  const filteredGifts = STORY_GIFTS.filter((id) => {
+    if (selectedTab === "all") return true;
+    const meta = GIFT_META[id];
+    if (selectedTab === "common") return meta.rarity === "common";
+    if (selectedTab === "rare") return meta.rarity === "rare";
+    if (selectedTab === "epic") return meta.rarity === "epic" || meta.rarity === "legendary";
+    return true;
+  });
+
   return (
-    <StorySheet
-      title={`Send ${ownerName} a Bloom`}
-      subtitle="Free, always. A little warmth for their moment."
-      onClose={onClose}
-    >
-      <div className="grid grid-cols-4 gap-2 pb-3">
-        {STORY_GIFTS.map((id) => {
-          const meta = GIFT_META[id];
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => void send(id)}
-              disabled={sending !== null}
-              aria-label={`Send ${meta.name}: ${meta.hint}`}
-              title={meta.hint}
-              className="se-sticker-cell flex-col !aspect-auto gap-1 px-2 py-3.5 disabled:opacity-50"
-            >
-              <span className="text-[30px] leading-none" aria-hidden>
-                {sending === id ? "…" : meta.glyph}
+    <div className="fixed inset-0 z-[91] flex flex-col justify-end bg-black/60" role="dialog" aria-label="Send gift">
+      <div className="absolute inset-0" onClick={onClose} aria-hidden />
+      <div className="relative flex max-h-[85vh] w-full flex-col rounded-t-[16px] bg-[#121212] border-t border-[#262626] animate-[ig-slide-up_0.3s_ease-out]">
+        {/* Handle + header — IG exact */}
+        <div className="flex flex-col items-center gap-3 px-4 pt-3 pb-4 border-b border-[#262626] shrink-0">
+          <div className="h-1 w-9 rounded-full bg-[#363636]" />
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h2 className="text-[18px] font-semibold text-white tracking-[-0.01em]">Gifts</h2>
+              <span className="flex items-center gap-1 rounded-full bg-[#262626] px-2.5 py-1 text-[12px] font-medium text-white">
+                <span className="text-[12px]">⭐</span> {balance}
               </span>
-              <span className="text-[11px] font-semibold">{meta.name}</span>
+            </div>
+            <button type="button" onClick={onClose} className="grid size-8 place-items-center rounded-full bg-[#262626] text-white">
+              <span className="text-[18px]">×</span>
             </button>
-          );
-        })}
+          </div>
+          <p className="w-full text-left text-[13px] text-[#a8a8a8]">Send {ownerName} a gift — they earn from your support</p>
+        </div>
+
+        {/* Tabs — Common / Rare / Epic like IG */}
+        <div className="flex gap-2 overflow-x-auto px-4 py-3 shrink-0 scrollbar-none border-b border-[#262626]/50">
+          {[
+            { id: "all", label: "All" },
+            { id: "common", label: "Common" },
+            { id: "rare", label: "Rare" },
+            { id: "epic", label: "Epic" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSelectedTab(tab.id as any)}
+              className={cn(
+                "shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium border transition-all",
+                selectedTab === tab.id ? "bg-white text-black border-white" : "bg-[#262626] text-[#a8a8a8] border-[#363636]",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Gift grid — Instagram 4-col exact */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 pb-[max(16px,env(safe-area-inset-bottom))]">
+          <div className="grid grid-cols-4 gap-2.5">
+            {filteredGifts.map((id) => {
+              const meta = GIFT_META[id];
+              const isSending = sending === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => void send(id)}
+                  disabled={sending !== null}
+                  aria-label={`Send ${meta.name} for ${meta.stars} stars`}
+                  className={cn(
+                    "group relative flex flex-col items-center gap-1.5 rounded-[16px] border bg-[#1c1c1e] p-3 pt-4 pb-3 transition-all active:scale-[0.96] disabled:opacity-50",
+                    meta.rarity === "legendary" ? "border-[#feda75]/50 shadow-[0_0_12px_rgba(254,218,117,0.15)]" : "border-[#2c2c2e]",
+                  )}
+                  style={{ background: meta.gradient }}
+                >
+                  {/* Rarity glow for epic/legendary */}
+                  {meta.rarity === "legendary" ? <div className="absolute inset-0 rounded-[16px] bg-gradient-to-br from-white/20 to-transparent pointer-events-none" /> : null}
+                  {meta.rarity === "epic" ? <div className="absolute inset-0 rounded-[16px] bg-gradient-to-br from-white/10 to-transparent pointer-events-none" /> : null}
+
+                  <span className={cn("relative text-[36px] leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] transition-transform group-active:scale-110", isSending && "animate-pulse")}>
+                    {isSending ? "…" : meta.glyph}
+                  </span>
+                  <span className="relative text-[11px] font-semibold text-white leading-tight text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{meta.name}</span>
+                  <span className="relative flex items-center gap-0.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                    <span className="text-[9px]">⭐</span> {meta.stars}
+                  </span>
+
+                  {/* Legendary crown */}
+                  {meta.rarity === "legendary" ? <span className="absolute -top-1 -right-1 grid size-5 place-items-center rounded-full bg-[#feda75] text-[10px]">👑</span> : null}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Info footer like IG */}
+          <div className="mt-6 rounded-xl bg-[#1c1c1e] border border-[#2c2c2e] p-3">
+            <p className="text-[12px] leading-relaxed text-[#a8a8a8]">
+              <span className="font-semibold text-white">How gifts work:</span> Gifts you send turn into Stars for {ownerName}. They can cash out Stars for money. Your support means a lot! ⭐
+            </p>
+          </div>
+        </div>
       </div>
-    </StorySheet>
+      <style>{`@keyframes ig-slide-up { from { transform: translateY(100%) } to { transform: translateY(0) } }`}</style>
+    </div>
   );
 }
 

@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Eye, MoreHorizontal, Send, X, Heart, Trash2, Volume2, VolumeX } from "lucide-react";
+import { Eye, MoreHorizontal, Send, X, Heart, Trash2, Volume2, VolumeX, Gift } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { isStoryActive, STORY_DWELL_MS, type Story } from "@/lib/profile/types";
@@ -611,10 +611,17 @@ export function StoryViewer({
                 </div>
                 <button
                   type="button"
+                  aria-label="Send gift"
+                  className="ig-footer-icon-btn"
+                  onClick={() => setSheet("gift")}
+                >
+                  <Gift className="size-[22px]" />
+                </button>
+                <button
+                  type="button"
                   aria-label="Like"
                   className="ig-footer-icon-btn"
                   onClick={() => {
-                    // Quick heart reaction
                     toast("❤️ Sent");
                   }}
                 >

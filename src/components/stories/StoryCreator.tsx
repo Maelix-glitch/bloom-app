@@ -11,6 +11,7 @@ import { StoryEditor, editorDraftStore, type EditorInitialState, type EditorSour
 import { CameraCapture } from "./CameraCapture";
 import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
 import { RestyleTray } from "./RestyleTray";
+import { EffectsTray } from "./EffectsTray";
 import { StoryErrorBoundary } from "./ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { processStoryPhoto, validateImageFile } from "@/lib/profile/media";
@@ -418,15 +419,13 @@ export function StoryCreator({
         </div>
       )}
 
-      {/* Effects sheet — IG exact Restyle */}
+      {/* Effects sheet — IG exact Effects (face filters) + Restyle toggle */}
       {sheet === "effects" && (
-        <RestyleTray
+        <EffectsTray
           onPick={(effect) => {
             setSheet(null);
-            // Apply restyle effect as filter in editor — use background black and filter id
             setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
-            // Store effect for editor via draft? For now just open editor, filter will be selectable in editor
-            toast(`Restyle: ${effect.name} — apply in editor`);
+            toast(`Effect: ${effect.name} — try in camera`);
           }}
           onClose={() => setSheet(null)}
         />

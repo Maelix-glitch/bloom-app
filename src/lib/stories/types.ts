@@ -205,9 +205,24 @@ export function normalizeReaction(value: unknown): StoryReactionKind | null {
     : null;
 }
 
-/** Free expressive gifts. Never money, never inventory. */
+/** Instagram-exact gifts — real gifts like Instagram Live/Reels gifts with star values */
 export type StoryGiftKind =
-  "bloom" | "petal" | "star" | "heart" | "candle" | "moon" | "ribbon" | "spark";
+  | "bloom"
+  | "petal"
+  | "star"
+  | "heart"
+  | "candle"
+  | "moon"
+  | "ribbon"
+  | "spark"
+  | "rose"
+  | "crown"
+  | "diamond"
+  | "rocket"
+  | "butterfly"
+  | "rainbow"
+  | "gift"
+  | "party";
 
 export const STORY_GIFTS: readonly StoryGiftKind[] = [
   "bloom",
@@ -218,6 +233,14 @@ export const STORY_GIFTS: readonly StoryGiftKind[] = [
   "moon",
   "ribbon",
   "spark",
+  "rose",
+  "crown",
+  "diamond",
+  "rocket",
+  "butterfly",
+  "rainbow",
+  "gift",
+  "party",
 ];
 
 export function normalizeGift(value: unknown): StoryGiftKind | null {

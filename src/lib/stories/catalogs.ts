@@ -566,23 +566,35 @@ export const MOTION_PACK: MotionItem[] = [
 ];
 
 /* --------------------------------- gifts ---------------------------------- */
+/* Instagram-exact gifts — like real IG gifts with star values, 3D feel, gradients */
 export interface GiftMeta {
   id: StoryGiftKind;
   name: string;
   hint: string;
   glyph: string;
   tint: string;
+  stars: number;
+  gradient: string;
+  rarity: "common" | "rare" | "epic" | "legendary";
 }
 
 export const GIFT_META: Record<StoryGiftKind, GiftMeta> = {
-  bloom: { id: "bloom", name: "Fire", hint: "You're on fire", glyph: "🔥", tint: "#fa7e1e" },
-  petal: { id: "petal", name: "Love", hint: "Lots of love", glyph: "❤️", tint: "#ed4956" },
-  star: { id: "star", name: "Clap", hint: "Applause", glyph: "👏", tint: "#feda75" },
-  heart: { id: "heart", name: "Laugh", hint: "So funny", glyph: "😂", tint: "#0095f6" },
-  candle: { id: "candle", name: "Wow", hint: "Amazing", glyph: "😮", tint: "#a8a8a8" },
-  moon: { id: "moon", name: "Sad", hint: "Feeling sad", glyph: "😢", tint: "#8e8e8e" },
-  ribbon: { id: "ribbon", name: "Heart Eyes", hint: "Love it", glyph: "😍", tint: "#d62976" },
-  spark: { id: "spark", name: "100", hint: "Perfect", glyph: "💯", tint: "#1DB954" },
+  bloom: { id: "bloom", name: "Fire", hint: "You're on fire", glyph: "🔥", tint: "#fa7e1e", stars: 30, gradient: "linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)", rarity: "rare" },
+  petal: { id: "petal", name: "Rose", hint: "A rose for you", glyph: "🌹", tint: "#ed4956", stars: 10, gradient: "linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)", rarity: "common" },
+  star: { id: "star", name: "Star", hint: "You're a star", glyph: "⭐", tint: "#feda75", stars: 40, gradient: "linear-gradient(135deg, #f7971e 0%, #ffd200 100%)", rarity: "rare" },
+  heart: { id: "heart", name: "Love", hint: "Lots of love", glyph: "❤️", tint: "#ed4956", stars: 5, gradient: "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)", rarity: "common" },
+  candle: { id: "candle", name: "Wow", hint: "Amazing", glyph: "😮", tint: "#a8a8a8", stars: 15, gradient: "linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)", rarity: "common" },
+  moon: { id: "moon", name: "Moon", hint: "Moon vibes", glyph: "🌙", tint: "#8e8e8e", stars: 20, gradient: "linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%)", rarity: "common" },
+  ribbon: { id: "ribbon", name: "Heart Eyes", hint: "Love it", glyph: "😍", tint: "#d62976", stars: 25, gradient: "linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%)", rarity: "rare" },
+  spark: { id: "spark", name: "100", hint: "Perfect", glyph: "💯", tint: "#1DB954", stars: 30, gradient: "linear-gradient(135deg, #00b09b 0%, #96c93d 100%)", rarity: "rare" },
+  rose: { id: "rose", name: "Rose Bouquet", hint: "Beautiful bouquet", glyph: "💐", tint: "#ff6b9d", stars: 50, gradient: "linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)", rarity: "epic" },
+  crown: { id: "crown", name: "Crown", hint: "You deserve a crown", glyph: "👑", tint: "#feca57", stars: 100, gradient: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", rarity: "epic" },
+  diamond: { id: "diamond", name: "Diamond", hint: "You're precious", glyph: "💎", tint: "#48dbfb", stars: 200, gradient: "linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%)", rarity: "legendary" },
+  rocket: { id: "rocket", name: "Rocket", hint: "To the moon", glyph: "🚀", tint: "#a29bfe", stars: 300, gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", rarity: "legendary" },
+  butterfly: { id: "butterfly", name: "Butterfly", hint: "Fly high", glyph: "🦋", tint: "#a8edea", stars: 60, gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)", rarity: "epic" },
+  rainbow: { id: "rainbow", name: "Rainbow", hint: "Colorful vibes", glyph: "🌈", tint: "#ff9ff3", stars: 80, gradient: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)", rarity: "epic" },
+  gift: { id: "gift", name: "Gift Box", hint: "Surprise gift", glyph: "🎁", tint: "#f368e0", stars: 45, gradient: "linear-gradient(135deg, #f857a6 0%, #ff5858 100%)", rarity: "rare" },
+  party: { id: "party", name: "Party", hint: "Let's celebrate", glyph: "🎉", tint: "#ff9f43", stars: 35, gradient: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", rarity: "rare" },
 };
 
 /* -------------------------------- templates ------------------------------- */

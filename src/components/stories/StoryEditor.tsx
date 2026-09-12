@@ -33,6 +33,7 @@ import { StickerTray } from "./StickerTray";
 import { InteractiveTray } from "./InteractiveTray";
 import { FilterTool } from "./FilterTool";
 import { RestyleTray } from "./RestyleTray";
+import { EffectsTray } from "./EffectsTray";
 import { GifTray, MusicTray, type PickedMusic } from "./MediaTrays";
 import { DrawLayer, exportDrawing, type DrawStroke } from "./DrawLayer";
 import { DRAW_COLORS, DRAW_SIZES_ROW } from "./editorBits";
@@ -85,7 +86,7 @@ export interface EditorInitialState {
   altText: string;
 }
 
-type Tool = "sticker" | "interactive" | "filter" | "restyle" | "music" | "gif" | "caption" | null;
+type Tool = "sticker" | "interactive" | "filter" | "restyle" | "effects" | "music" | "gif" | "caption" | null;
 
 interface Snapshot {
   elements: StoryElement[];
@@ -752,8 +753,9 @@ export function StoryEditor({
     { id: "sticker", label: "Sticker", icon: Sticker },
     { id: "interactive", label: "Interactive", icon: SlidersHorizontal },
     { id: "draw", label: "Draw", icon: Wand2 },
+    { id: "effects", label: "Effects", icon: Sparkles },
     { id: "restyle", label: "Restyle", icon: Sparkles },
-    { id: "filter", label: "Filter", icon: Sparkles },
+    { id: "filter", label: "Filter", icon: SlidersHorizontal },
     { id: "music", label: "Music", icon: Music2 },
     { id: "gif", label: "GIF", icon: ImagePlay },
   ] as const;
@@ -1044,10 +1046,27 @@ export function StoryEditor({
         />
       ) : null}
 
+      {tool === "effects" ? (
+        <EffectsTray
+          onPick={(effect) => {
+            const mapped = (() => {
+              const name = effect.id.toLowerCase();
+              if (name.includes("bw")) return "moon";
+              if (name.includes("glow")) return "soft";
+              if (name.includes("vintage")) return "reyes";
+              return "clarendon";
+            })();
+            setFilterId(mapped);
+            setTool(null);
+            toast(`Applied ${effect.name} by ${effect.creator}`);
+          }}
+          onClose={() => setTool(null)}
+        />
+      ) : null}
+
       {tool === "restyle" ? (
         <RestyleTray
           onPick={(effect) => {
-            // Apply restyle as filter — map to filter id if exists else use adjustments
             const mapped = (() => {
               const name = effect.id.toLowerCase();
               if (name.includes("bw") || name.includes("b-w")) return "moon";
