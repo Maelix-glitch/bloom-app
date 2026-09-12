@@ -369,19 +369,18 @@ export function StoryCreator({
         <ImageIcon className="size-5" />
       </button>
 
-      {/* Templates sheet — Canva-quality 220+ templates */}
+      {/* Templates sheet — 100% pure CSS fire templates, no unsplash, exact replicas */}
       {sheet === "templates" && (
         <TemplatesTray
           onPick={(template) => {
             setSheet(null);
-            // Create story from canva template - use background + text
             setEditorSource({
               base: "background",
-              backgroundId: template.category === 'festival' ? 'ig-sunset' : template.category === 'birthday' ? 'ig-dawn' : template.category === 'fashion' ? 'ig-black' : 'ig-white',
+              backgroundId: template.category === 'festival' ? 'ig-white' : template.category === 'birthday' ? 'ig-black' : template.category === 'memories' ? 'ig-midnight' : 'ig-white',
               templateId: template.id,
               storyKind: "text",
             });
-            toast(`Template: ${template.name} applied`);
+            toast(`Template: ${template.text} applied`);
           }}
           onClose={() => setSheet(null)}
         />
