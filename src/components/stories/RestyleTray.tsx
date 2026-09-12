@@ -1,6 +1,7 @@
 /**
  * RestyleTray — Instagram-exact Restyle screen.
- * Matches screenshots: title Restyle, pills Trending/Film Effects/Lighting/Utilities/World, 3-col grid with image previews + flower icon + name.
+ * Matches screenshots: title Restyle, pills Trending/Film Effects/Lighting/Utilities/World, 3-col grid with GIRL image previews + flower icon + name.
+ * Girl back there like Instagram — any image okay, we use 3 girl faces.
  */
 
 import { useMemo, useState } from "react";
@@ -8,24 +9,26 @@ import { X } from "lucide-react";
 import { RESTYLE_CATEGORIES, RESTYLE_EFFECTS, type RestyleCategory, type RestyleEffect } from "@/lib/stories/catalogs";
 import { cn } from "@/lib/utils";
 
-const PREVIEW_IMAGE = "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop&crop=face";
+const PREVIEW_IMAGES = [
+  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop&crop=face",
+];
+
+function getPreviewImage(id: string): string {
+  const hash = id.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
+  return PREVIEW_IMAGES[hash % PREVIEW_IMAGES.length]!;
+}
 
 function EffectCard({ effect, onPick }: { effect: RestyleEffect; onPick: (e: RestyleEffect) => void }) {
   return (
     <button type="button" onClick={() => onPick(effect)} className="flex flex-col gap-2 text-left active:scale-[0.97] transition-transform group">
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[16px] bg-[#1c1c1e] border border-[#2c2c2e]">
-        <img
-          src={PREVIEW_IMAGE}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ filter: effect.css }}
-          loading="lazy"
-        />
-        {effect.overlay && effect.overlay !== "none" ? (
-          <div className="absolute inset-0 mix-blend-overlay opacity-80" style={{ background: effect.overlay }} />
-        ) : null}
+        <img src={getPreviewImage(effect.id)} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ filter: effect.css }} loading="lazy" />
+        {effect.overlay && effect.overlay !== "none" ? <div className="absolute inset-0 mix-blend-overlay opacity-80" style={{ background: effect.overlay }} /> : null}
         {/* Flower icon top-left like IG */}
-        <span className="absolute left-2 top-2 grid size-6 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white">
+        <span className="absolute left-2 top-2 grid size-6 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/10">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="white" className="opacity-90">
             <circle cx="12" cy="12" r="2" />
             {[0, 60, 120, 180, 240, 300].map((a) => (
@@ -33,8 +36,10 @@ function EffectCard({ effect, onPick }: { effect: RestyleEffect; onPick: (e: Res
             ))}
           </svg>
         </span>
+        {/* Subtle gradient bottom like IG for legibility */}
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
       </div>
-      <span className="px-1 text-[14px] font-medium leading-tight text-white truncate">{effect.name}</span>
+      <span className="px-1 text-[13px] font-medium leading-tight text-white truncate">{effect.name}</span>
     </button>
   );
 }
@@ -49,13 +54,12 @@ export function RestyleTray({ onPick, onClose }: { onPick: (effect: RestyleEffec
 
   return (
     <div className="fixed inset-0 z-[92] flex flex-col bg-[#121212] text-white" role="dialog" aria-label="Restyle">
-      {/* Handle + title — IG exact */}
       <div className="flex flex-col items-center gap-3 px-4 pt-3 pb-4 shrink-0">
         <div className="h-1 w-9 rounded-full bg-[#363636]" />
         <h2 className="text-[18px] font-semibold tracking-[-0.01em]">Restyle</h2>
+        <p className="text-[13px] text-[#a8a8a8] -mt-2">Choose a style — girl preview with effect</p>
       </div>
 
-      {/* Pills — Trending / Film Effects / Lighting / Utilities / World — IG exact */}
       <div className="flex gap-2 overflow-x-auto px-4 pb-4 shrink-0 scrollbar-none">
         {RESTYLE_CATEGORIES.map((c) => (
           <button
@@ -72,7 +76,6 @@ export function RestyleTray({ onPick, onClose }: { onPick: (effect: RestyleEffec
         ))}
       </div>
 
-      {/* Grid 3 cols — IG exact */}
       <div className="flex-1 overflow-y-auto px-3 pb-6">
         <div className="grid grid-cols-3 gap-3">
           {filtered.map((effect) => (

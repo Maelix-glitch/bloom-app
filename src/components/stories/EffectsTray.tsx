@@ -1,7 +1,7 @@
 /**
  * EffectsTray — Instagram-exact Effects (AR face filters).
- * Dark #121212, handle, search, pills, 3-col grid with circular previews.
- * Like IG: effects have creator name, try button, save.
+ * Dark #121212, handle, search, pills, 3-col grid with girl preview image + effect.
+ * Like IG: effects have creator name, try button, save. Girl back there like Instagram.
  */
 
 import { useMemo, useState } from "react";
@@ -15,27 +15,34 @@ export interface EffectItem {
   category: "trending" | "appearance" | "aesthetic" | "fun" | "world";
   preview: string;
   color: string;
+  css: string;
+  overlay?: string;
 }
 
+// Instagram girl preview — like IG effects show face with filter
+const PREVIEW_GIRL = "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=face";
+const PREVIEW_GIRL_2 = "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=400&fit=crop&crop=face";
+const PREVIEW_GIRL_3 = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face";
+
 const EFFECTS: EffectItem[] = [
-  { id: "soft-glow", name: "Soft Glow", creator: "instagram", category: "appearance", preview: "✨", color: "#feda75" },
-  { id: "golden-hour", name: "Golden Hour", creator: "bloom", category: "aesthetic", preview: "🌅", color: "#fa7e1e" },
-  { id: "bw-mood", name: "B&W Mood", creator: "ig", category: "aesthetic", preview: "🌙", color: "#000000" },
-  { id: "sparkle", name: "Sparkle", creator: "effects", category: "fun", preview: "💫", color: "#d62976" },
-  { id: "vintage", name: "Vintage", creator: "retro", category: "aesthetic", preview: "📼", color: "#8e8e8e" },
-  { id: "heart-eyes", name: "Heart Eyes", creator: "love", category: "fun", preview: "😍", color: "#ed4956" },
-  { id: "freckles", name: "Freckles", creator: "beauty", category: "appearance", preview: "✿", color: "#f5c6a0" },
-  { id: "butterfly", name: "Butterfly", creator: "nature", category: "fun", preview: "🦋", color: "#a8edea" },
-  { id: "rainbow", name: "Rainbow", creator: "color", category: "aesthetic", preview: "🌈", color: "#ff9ff3" },
-  { id: "angel", name: "Angel", creator: "heaven", category: "appearance", preview: "👼", color: "#ffffff" },
-  { id: "devil", name: "Devil", creator: "mischief", category: "fun", preview: "😈", color: "#ff3040" },
-  { id: "crown", name: "Crown", creator: "royal", category: "fun", preview: "👑", color: "#feca57" },
-  { id: "glasses", name: "Glasses", creator: "style", category: "appearance", preview: "👓", color: "#000000" },
-  { id: "flower-crown", name: "Flower Crown", creator: "bloom", category: "appearance", preview: "🌸", color: "#ff6b9d" },
-  { id: "space", name: "Space", creator: "cosmos", category: "world", preview: "🚀", color: "#4f5bd5" },
-  { id: "underwater", name: "Underwater", creator: "ocean", category: "world", preview: "🌊", color: "#0095f6" },
-  { id: "fire", name: "Fire", creator: "hot", category: "fun", preview: "🔥", color: "#fa7e1e" },
-  { id: "ice", name: "Ice", creator: "cold", category: "aesthetic", preview: "❄️", color: "#48dbfb" },
+  { id: "soft-glow", name: "Soft Glow", creator: "instagram", category: "appearance", preview: "✨", color: "#feda75", css: "brightness(1.15) contrast(0.9) saturate(1.1)", overlay: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.25), transparent 60%)" },
+  { id: "golden-hour", name: "Golden Hour", creator: "bloom", category: "aesthetic", preview: "🌅", color: "#fa7e1e", css: "sepia(0.2) saturate(1.3) brightness(1.05) hue-rotate(-10deg)", overlay: "linear-gradient(45deg, rgba(255,180,0,0.2), transparent)" },
+  { id: "bw-mood", name: "B&W Mood", creator: "ig", category: "aesthetic", preview: "🌙", color: "#000000", css: "grayscale(1) contrast(1.1) brightness(1.05)", overlay: "none" },
+  { id: "sparkle", name: "Sparkle", creator: "effects", category: "fun", preview: "💫", color: "#d62976", css: "brightness(1.1) contrast(1.05) saturate(1.2)", overlay: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 50%)" },
+  { id: "vintage", name: "Vintage", creator: "retro", category: "aesthetic", preview: "📼", color: "#8e8e8e", css: "sepia(0.3) contrast(0.9) brightness(1.05) saturate(0.8)", overlay: "linear-gradient(0deg, rgba(255,200,100,0.15), transparent)" },
+  { id: "heart-eyes", name: "Heart Eyes", creator: "love", category: "fun", preview: "😍", color: "#ed4956", css: "saturate(1.4) contrast(1.05)", overlay: "radial-gradient(circle at 50% 50%, rgba(255,100,150,0.15), transparent 60%)" },
+  { id: "freckles", name: "Freckles", creator: "beauty", category: "appearance", preview: "✿", color: "#f5c6a0", css: "contrast(1.05) saturate(1.1) brightness(1.02)", overlay: "none" },
+  { id: "butterfly", name: "Butterfly", creator: "nature", category: "fun", preview: "🦋", color: "#a8edea", css: "saturate(1.2) brightness(1.08) hue-rotate(5deg)", overlay: "none" },
+  { id: "rainbow", name: "Rainbow", creator: "color", category: "aesthetic", preview: "🌈", color: "#ff9ff3", css: "saturate(1.5) hue-rotate(10deg) contrast(1.05)", overlay: "linear-gradient(90deg, rgba(255,0,128,0.12), rgba(0,200,255,0.12), rgba(255,200,0,0.1))" },
+  { id: "angel", name: "Angel", creator: "heaven", category: "appearance", preview: "👼", color: "#ffffff", css: "brightness(1.12) contrast(0.95) saturate(1.1)", overlay: "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.5), transparent 50%)" },
+  { id: "devil", name: "Devil", creator: "mischief", category: "fun", preview: "😈", color: "#ff3040", css: "contrast(1.2) saturate(1.3) hue-rotate(-10deg)", overlay: "linear-gradient(180deg, rgba(255,0,0,0.15), transparent)" },
+  { id: "crown", name: "Crown", creator: "royal", category: "fun", preview: "👑", color: "#feca57", css: "brightness(1.08) contrast(1.1) saturate(1.2)", overlay: "none" },
+  { id: "glasses", name: "Glasses", creator: "style", category: "appearance", preview: "👓", color: "#000000", css: "contrast(1.05) brightness(1.02)", overlay: "none" },
+  { id: "flower-crown", name: "Flower Crown", creator: "bloom", category: "appearance", preview: "🌸", color: "#ff6b9d", css: "saturate(1.3) brightness(1.05) hue-rotate(-5deg)", overlay: "none" },
+  { id: "space", name: "Space", creator: "cosmos", category: "world", preview: "🚀", color: "#4f5bd5", css: "hue-rotate(20deg) saturate(1.3) contrast(1.1)", overlay: "radial-gradient(circle at 50% 50%, rgba(100,100,255,0.2), transparent 60%)" },
+  { id: "underwater", name: "Underwater", creator: "ocean", category: "world", preview: "🌊", color: "#0095f6", css: "hue-rotate(10deg) saturate(1.4) brightness(1.05)", overlay: "linear-gradient(180deg, rgba(0,150,255,0.2), transparent)" },
+  { id: "fire", name: "Fire", creator: "hot", category: "fun", preview: "🔥", color: "#fa7e1e", css: "saturate(1.5) contrast(1.15) brightness(1.02) hue-rotate(-10deg)", overlay: "linear-gradient(45deg, rgba(255,100,0,0.2), transparent)" },
+  { id: "ice", name: "Ice", creator: "cold", category: "aesthetic", preview: "❄️", color: "#48dbfb", css: "saturate(0.7) brightness(1.15) hue-rotate(180deg) contrast(0.95)", overlay: "linear-gradient(180deg, rgba(200,230,255,0.3), transparent)" },
 ];
 
 const CATEGORIES: { id: EffectItem["category"] | "trending"; label: string }[] = [
@@ -45,6 +52,14 @@ const CATEGORIES: { id: EffectItem["category"] | "trending"; label: string }[] =
   { id: "fun", label: "Fun" },
   { id: "world", label: "World" },
 ];
+
+function getPreviewImage(id: string): string {
+  const hash = id.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
+  const idx = hash % 3;
+  if (idx === 0) return PREVIEW_GIRL;
+  if (idx === 1) return PREVIEW_GIRL_2;
+  return PREVIEW_GIRL_3;
+}
 
 export function EffectsTray({ onPick, onClose }: { onPick: (effect: EffectItem) => void; onClose: () => void }) {
   const [tab, setTab] = useState<(typeof CATEGORIES)[0]["id"]>("trending");
@@ -109,13 +124,12 @@ export function EffectsTray({ onPick, onClose }: { onPick: (effect: EffectItem) 
               className="flex flex-col items-center gap-2 text-left active:scale-[0.97] transition-transform group"
             >
               <div className="relative aspect-square w-full">
-                <div
-                  className="absolute inset-0 rounded-full border-2 border-[#2c2c2e] overflow-hidden grid place-items-center text-[32px] group-active:scale-95 transition-transform"
-                  style={{ background: effect.color }}
-                >
-                  {effect.preview}
+                <div className="absolute inset-0 rounded-full border-2 border-[#2c2c2e] overflow-hidden bg-[#1c1c1e] group-active:scale-95 transition-transform">
+                  <img src={getPreviewImage(effect.id)} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ filter: effect.css }} loading="lazy" />
+                  {effect.overlay && effect.overlay !== "none" ? <div className="absolute inset-0 mix-blend-overlay opacity-70" style={{ background: effect.overlay }} /> : null}
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 grid size-6 place-items-center rounded-full bg-black/50 backdrop-blur-md text-[14px] border border-white/20">{effect.preview}</span>
                 </div>
-                <span className="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-[#262626] border border-[#363636] text-white">
+                <span className="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-[#262626] border border-[#363636] text-white z-10">
                   <Bookmark
                     className={cn("size-3", saved.has(effect.id) ? "fill-white" : "")}
                     onClick={(e) => {
