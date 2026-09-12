@@ -48,6 +48,7 @@ import {
   serializeElements,
 } from "@/lib/stories/elements";
 import { DEFAULT_ADJUSTMENTS, STORY_TEMPLATES, backgroundById } from "@/lib/stories/catalogs";
+import { CANVA_TEMPLATES } from "@/lib/stories/canvaTemplates";
 import { recordStickerUse } from "@/lib/stories/stickers";
 import { StoryErrorBoundary } from "./ErrorBoundary";
 import type {
@@ -167,11 +168,40 @@ export function StoryEditor({
   onClose: () => void;
 }) {
   const template = source.templateId ? STORY_TEMPLATES.find((t) => t.id === source.templateId) ?? null : null;
+  const canvaTemplate = source.templateId ? CANVA_TEMPLATES.find((t) => t.id === source.templateId) ?? null : null;
 
   const [elements, setElements] = useState<StoryElement[]>(() => {
     if (initialState) return sanitizeElements(initialState.elements);
     const els: StoryElement[] = [];
-    if (template) {
+    if (canvaTemplate) {
+      // Canva-quality template: heading + subtext with proper styling
+      els.push(
+        makeTextElement(canvaTemplate.text, {
+          preset: "strong",
+          color: canvaTemplate.ink,
+          x: 0.5,
+          y: 0.25,
+          z: 1,
+        }),
+      );
+      if (canvaTemplate.subtext) {
+        els.push(
+          makeTextElement(canvaTemplate.subtext, {
+            preset: "classic",
+            color: canvaTemplate.ink,
+            x: 0.5,
+            y: 0.45,
+            z: 2,
+          }),
+        );
+      }
+      // Add decorative elements based on layout
+      if (canvaTemplate.layout === 'scrapbook' || canvaTemplate.layout === 'polaroid') {
+        // Add a sticker for scrapbook feel
+        const sticker = makeStickerElement("bloom.petal-1", { x: 0.2, y: 0.75, z: 3 });
+        if (sticker) els.push(sticker);
+      }
+    } else if (template) {
       els.push(
         makeTextElement(template.heading, {
           preset: template.preset,
@@ -186,7 +216,7 @@ export function StoryEditor({
         if (s) els.push(s);
       }
     }
-    if (source.captionTitle && !template) {
+    if (source.captionTitle && !template && !canvaTemplate) {
       els.push(
         makeTextElement(source.captionTitle, {
           preset: "classic",
@@ -200,7 +230,7 @@ export function StoryEditor({
     return els;
   });
   const [strokes, setStrokes] = useState<DrawStroke[]>(() => initialState?.strokes ?? []);
-  const [backgroundId, setBackgroundId] = useState(source.backgroundId ?? template?.backgroundId ?? "ig-black");
+  const [backgroundId, setBackgroundId] = useState(source.backgroundId ?? template?.backgroundId ?? (canvaTemplate ? "ig-white" : "ig-black"));
   const [filterId, setFilterId] = useState(initialState?.filterId ?? "none");
   const [adjustments, setAdjustments] = useState<StoryAdjustments>(initialState?.adjustments ?? DEFAULT_ADJUSTMENTS);
   const [music, setMusic] = useState<PickedMusic | null>(null);

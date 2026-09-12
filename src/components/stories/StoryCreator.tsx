@@ -9,9 +9,10 @@ import { Camera, Settings, X, ChevronDown, Copy, Image as ImageIcon, Music2, Spa
 
 import { StoryEditor, editorDraftStore, type EditorInitialState, type EditorSource } from "./StoryEditor";
 import { CameraCapture } from "./CameraCapture";
-import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
-import { RestyleTray } from "./RestyleTray";
+import { STORY_BACKGROUNDS } from "@/lib/stories/catalogs";
+import { TemplatesTray } from "./TemplatesTray";
 import { EffectsTray } from "./EffectsTray";
+import { MusicTray } from "./MediaTrays";
 import { StoryErrorBoundary } from "./ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { processStoryPhoto, validateImageFile } from "@/lib/profile/media";
@@ -368,55 +369,22 @@ export function StoryCreator({
         <ImageIcon className="size-5" />
       </button>
 
-      {/* Templates sheet — IG exact */}
+      {/* Templates sheet — Canva-quality 220+ templates */}
       {sheet === "templates" && (
-        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/70">
-          <div className="flex max-h-[88vh] w-full flex-col rounded-t-[16px] bg-black border-t border-[#262626]">
-            <div className="flex flex-col items-center px-4 py-3 border-b border-[#262626]">
-              <div className="h-1 w-9 rounded-full bg-[#363636] mb-3" />
-              <div className="flex w-full items-center justify-between">
-                <span className="text-[16px] font-semibold">Templates</span>
-                <button type="button" onClick={() => setSheet(null)} className="text-[15px] font-medium text-white">
-                  <X className="size-5" />
-                </button>
-              </div>
-            </div>
-            <div className="overflow-y-auto p-3">
-              <div className="grid grid-cols-2 gap-3">
-                {STORY_TEMPLATES.map((t) => {
-                  const bg = STORY_BACKGROUNDS.find((b) => b.id === t.backgroundId);
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => {
-                        setSheet(null);
-                        setEditorSource({ base: "background", backgroundId: t.backgroundId, templateId: t.id, storyKind: "text" });
-                      }}
-                      className="text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div
-                        className="aspect-[9/12] w-full rounded-[16px] border border-[#262626] p-3 flex flex-col justify-between overflow-hidden"
-                        style={{ background: bg?.css ?? "#000" }}
-                      >
-                        <span className="text-[18px] font-bold leading-tight" style={{ color: t.ink }}>
-                          {t.heading}
-                        </span>
-                        <span className="text-[12px] leading-tight" style={{ color: t.ink, opacity: 0.8 }}>
-                          {t.hint}
-                        </span>
-                      </div>
-                      <div className="mt-2 px-1">
-                        <p className="text-[13px] font-medium text-white leading-tight">{t.name}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          <button type="button" className="absolute inset-0 -z-10" onClick={() => setSheet(null)} aria-label="Close" />
-        </div>
+        <TemplatesTray
+          onPick={(template) => {
+            setSheet(null);
+            // Create story from canva template - use background + text
+            setEditorSource({
+              base: "background",
+              backgroundId: template.category === 'festival' ? 'ig-sunset' : template.category === 'birthday' ? 'ig-dawn' : template.category === 'fashion' ? 'ig-black' : 'ig-white',
+              templateId: template.id,
+              storyKind: "text",
+            });
+            toast(`Template: ${template.name} applied`);
+          }}
+          onClose={() => setSheet(null)}
+        />
       )}
 
       {/* Effects sheet — IG exact Effects (face filters) + Restyle toggle */}
@@ -431,68 +399,16 @@ export function StoryCreator({
         />
       )}
 
-      {/* Music sheet — IG exact */}
+      {/* Music sheet — Instagram-exact from screenshot */}
       {sheet === "music" && (
-        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/70">
-          <div className="flex max-h-[80vh] w-full flex-col rounded-t-[16px] bg-[#121212] border-t border-[#262626]">
-            <div className="flex flex-col items-center px-4 py-3 border-b border-[#262626]">
-              <div className="h-1 w-9 rounded-full bg-[#363636] mb-3" />
-              <div className="flex w-full items-center justify-between">
-                <span className="text-[16px] font-semibold text-white">Music</span>
-                <button type="button" onClick={() => setSheet(null)} className="grid size-8 place-items-center rounded-full bg-[#262626] text-white">
-                  <X className="size-4" />
-                </button>
-              </div>
-            </div>
-            <div className="overflow-y-auto p-4">
-              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-4">
-                {["For you", "Trending", "Chill", "Love", "Party", "Focus"].map((c, i) => (
-                  <span
-                    key={c}
-                    className={cn(
-                      "shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium border",
-                      i === 0 ? "bg-white text-black border-white" : "bg-[#262626] text-white border-[#363636]",
-                    )}
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-col gap-2">
-                {[
-                  { title: "Die With A Smile", artist: "Lady Gaga, Bruno Mars", color: "#feda75" },
-                  { title: "APT.", artist: "ROSE, Bruno Mars", color: "#fa7e1e" },
-                  { title: "Espresso", artist: "Sabrina Carpenter", color: "#d62976" },
-                  { title: "Birds of a Feather", artist: "Billie Eilish", color: "#962fbf" },
-                  { title: "West Coast", artist: "Lana Del Rey • 4:16", color: "#4f5bd5" },
-                  { title: "Reflections", artist: "The Neighbourhood • 4:04", color: "#0095f6" },
-                ].map((s) => (
-                  <button
-                    key={s.title}
-                    type="button"
-                    onClick={() => {
-                      setSheet(null);
-                      setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
-                    }}
-                    className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#1e1e1e] text-left active:scale-[0.98] transition-transform"
-                  >
-                    <span className="size-12 rounded-lg grid place-items-center text-white font-bold text-[10px] shrink-0" style={{ background: s.color }}>
-                      ♪
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block truncate text-[14px] font-semibold text-white">{s.title}</span>
-                      <span className="block truncate text-[12px] text-[#a8a8a8]">{s.artist}</span>
-                    </span>
-                    <span className="size-8 rounded-full border border-[#363636] grid place-items-center text-white">
-                      <Music2 className="size-4" />
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <button type="button" className="absolute inset-0 -z-10" onClick={() => setSheet(null)} aria-label="Close" />
-        </div>
+        <MusicTray
+          onPick={(music) => {
+            setSheet(null);
+            setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+            toast(`Music: ${music.title}`);
+          }}
+          onClose={() => setSheet(null)}
+        />
       )}
 
       {/* Collage sheet — IG exact */}
