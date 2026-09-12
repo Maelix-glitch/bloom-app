@@ -1,41 +1,31 @@
 /**
- * StoryViewer — the immersive full-screen story session.
+ * StoryViewer — Instagram-exact full-screen story viewer.
  *
- *   closed ⇄ viewing ⇄ paused
- *
- * One rAF loop drives image/text progress; video stories sync to real
- * playback time. Tap zones + hold-to-pause + swipe (down closes, sideways
- * navigates), arrows/Escape/Space on desktop. Reactions, private replies,
- * and Bloom gifts float above the content; owners get quiet insights.
- * Sheets pause playback; everything resumes where it left off.
+ * Instagram specs implemented:
+ * - Full-screen black (#000) backdrop, no blur, no rounded corners on mobile
+ * - On desktop: centered 500px column with black sides, 9:16 aspect
+ * - Top progress: thin 2px white lines, gap 4px, background rgba(255,255,255,0.35)
+ * - Header: 32px avatar, 14px bold username white, 14px time gray, right: more (⋯) + close (×)
+ * - Tap: left 30% = prev, right 70% = next, tap and hold = pause
+ * - Swipe down >80px = close with drag follow, swipe left/right = next/prev user (here: next/prev story)
+ * - Bottom: other user = rounded reply input "Reply to {name}..." + heart + paper-plane; own = eye views + controls
+ * - Auto-advance: image 5s, video = video duration, pause on hold/sheet/visibility
+ * - Keyboard: Esc close, ← → navigate, Space pause
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ChevronUp,
-  Eye,
-  EyeOff,
-  Gift as GiftIcon,
-  Pause,
-  Play,
-  Trash2,
-  Volume2,
-  VolumeX,
-  X,
-} from "lucide-react";
+import { Eye, MoreHorizontal, Send, X, Heart, Trash2, Volume2, VolumeX } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { isStoryActive, STORY_DWELL_MS, type Story } from "@/lib/profile/types";
 import { storyMediaUrl } from "@/lib/profile/storyMeta";
-import { StoryAvatar } from "./StoryAvatar";
 import { StoryCanvas, type CanvasInteraction, type CanvasMedia } from "./StoryCanvas";
 import { StoryContent } from "./StoryContent";
-import { GiftSheet, ReactionBar, ReplySheet, StoryInsightsSheet } from "./InteractionSheets";
+import { GiftSheet, ReplySheet, StoryInsightsSheet } from "./InteractionSheets";
 import { GIFT_META } from "@/lib/stories/catalogs";
 import { recordView } from "@/lib/stories/interactions";
 import { storyAge } from "@/lib/stories/time";
 import type { StoryGiftKind } from "@/lib/stories/types";
-import { normalizeAccent } from "@/lib/profile/types";
 import { toast } from "sonner";
 
 export type ViewerPhase = "closed" | "viewing" | "paused";
@@ -54,7 +44,7 @@ export function isRichStory(story: Story): boolean {
   );
 }
 
-const HOLD_MS = 210;
+const HOLD_MS = 200;
 
 export function StoryViewer({
   target,
@@ -89,8 +79,9 @@ export function StoryViewer({
   const [progress, setProgress] = useState(0);
   const [muted, setMuted] = useState(true);
   const [sheet, setSheet] = useState<"reply" | "gift" | "insights" | null>(null);
-  const [pop, setPop] = useState<{ id: number; glyph: string } | null>(null);
-  const [burst, setBurst] = useState<{ id: number; gift: StoryGiftKind } | null>(null);
+  const [dragY, setDragY] = useState(0);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const stories = useMemo(() => target?.stories ?? [], [target]);
   const current = stories[index];
@@ -107,12 +98,11 @@ export function StoryViewer({
   const suppressTap = useRef(false);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const videoTime = useRef<{ currentMs: number; durationMs: number } | null>(null);
-  const popTimer = useRef<number | undefined>(undefined);
 
   const isVideo = current?.mediaType === "video" || current?.kind === "video";
   const rich = current ? isRichStory(current) : false;
 
-  /* ------------------------------ open/close ----------------------------- */
+  /* open/close */
   useEffect(() => {
     if (open) {
       setIndex(target?.startIndex ?? 0);
@@ -123,6 +113,8 @@ export function StoryViewer({
       viewedRef.current = new Set();
       setSheet(null);
       setPhase("viewing");
+      setDragY(0);
+      setDragX(0);
       requestAnimationFrame(() => frameRef.current?.focus());
     } else {
       setPhase("closed");
@@ -161,6 +153,8 @@ export function StoryViewer({
       setMuted(true);
       setIndex(i);
       setPhase((p) => (p === "closed" ? p : "viewing"));
+      setDragY(0);
+      setDragX(0);
     },
     [stories, onClose],
   );
@@ -178,7 +172,6 @@ export function StoryViewer({
 
   const prev = useCallback(() => goTo(index - 1, -1), [goTo, index]);
 
-  /* record a server-side view once per story per session (best-effort) */
   useEffect(() => {
     if (!open || !current) return;
     if (viewedRef.current.has(current.id)) return;
@@ -186,16 +179,15 @@ export function StoryViewer({
     void recordView(current.id, userId, userName);
   }, [open, current, userId, userName]);
 
-  /* ------------------------------- progress ------------------------------ */
+  /* progress */
   useEffect(() => {
     if (!open || phase !== "viewing" || !current) {
       stopLoop();
       return;
     }
-    // Video stories: the <video> clock drives progress (see onVideoTime).
     if (isVideo) return stopLoop();
 
-    const dwell = current.durationMs ?? STORY_DWELL_MS[current.kind] ?? 7000;
+    const dwell = current.durationMs ?? STORY_DWELL_MS[current.kind] ?? 5000;
     const frame = (now: number) => {
       const last = lastTickRef.current || now;
       lastTickRef.current = now;
@@ -217,7 +209,6 @@ export function StoryViewer({
     if (durationMs > 0) setProgress(Math.min(1, currentMs / durationMs));
   }, []);
 
-  /* pause while any sheet is open; resume after */
   useEffect(() => {
     if (!open) return;
     if (sheet) setPhase("paused");
@@ -232,7 +223,6 @@ export function StoryViewer({
     return () => document.removeEventListener("visibilitychange", onHide);
   }, []);
 
-  /* a story expiring or being deleted while open — glide onward */
   useEffect(() => {
     if (open && current && !isStoryActive(current)) {
       if (stories.length <= 1) {
@@ -244,7 +234,6 @@ export function StoryViewer({
     }
   }, [current, goTo, index, open, onClose, stories.length]);
 
-  /* prefetch the next story's media */
   useEffect(() => {
     if (!open) return;
     const upcoming = stories[index + 1];
@@ -273,7 +262,7 @@ export function StoryViewer({
     setPhase((p) => (p === "paused" ? "viewing" : p === "viewing" ? "paused" : p));
   }, []);
 
-  /* -------------------------------- keyboard ------------------------------ */
+  /* keyboard */
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -300,10 +289,15 @@ export function StoryViewer({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close, next, prev, togglePause, sheet]);
 
-  /* ------------------------------- gestures ------------------------------ */
+  /* gestures - Instagram style */
   const onPointerDown = useCallback((e: React.PointerEvent) => {
+    // Ignore if clicking header buttons
+    const target = e.target as HTMLElement;
+    if (target.closest("button")) return;
+
     swipeRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
     holdActive.current = false;
+    setIsDragging(false);
     window.clearTimeout(holdTimer.current);
     holdTimer.current = window.setTimeout(() => {
       holdActive.current = true;
@@ -314,10 +308,24 @@ export function StoryViewer({
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     const start = swipeRef.current;
-    if (!start || holdActive.current) return;
-    // Moving early cancels the hold — it's a swipe or scroll, not a pause.
-    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 12) {
+    if (!start) return;
+
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > 8) {
       window.clearTimeout(holdTimer.current);
+      if (!holdActive.current) {
+        setIsDragging(true);
+        // Vertical drag dominates -> close gesture
+        if (Math.abs(dy) > Math.abs(dx) && dy > 0) {
+          setDragY(dy);
+          setDragX(dx * 0.3); // slight horizontal follow
+        } else if (Math.abs(dx) > 20) {
+          setDragX(dx);
+        }
+      }
     }
   }, []);
 
@@ -326,35 +334,57 @@ export function StoryViewer({
       const start = swipeRef.current;
       swipeRef.current = null;
       window.clearTimeout(holdTimer.current);
-      if (!start) return;
+
       const wasHold = holdActive.current;
       holdActive.current = false;
+
+      if (!start) {
+        setIsDragging(false);
+        setDragY(0);
+        setDragX(0);
+        return;
+      }
+
       const dx = e.clientX - start.x;
       const dy = e.clientY - start.y;
       const dt = Date.now() - start.t;
 
-      // Swipe down exits; sideways navigates.
-      if (dy > 72 && Math.abs(dy) > Math.abs(dx) * 1.4 && dt < 800) {
+      // Drag down to close (Instagram)
+      if (dy > 80 && Math.abs(dy) > Math.abs(dx) * 1.2 && dt < 800) {
         setPhase("viewing");
         close();
         return;
       }
-      if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.3 && dt < 700) {
+
+      // Horizontal swipe to navigate (Instagram)
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.2 && dt < 600) {
         if (dx < 0) next();
         else prev();
         setPhase("viewing");
+        setDragY(0);
+        setDragX(0);
+        setIsDragging(false);
         window.setTimeout(() => {
           suppressTap.current = false;
         }, 0);
         return;
       }
+
       if (wasHold) {
-        // Held to pause: release resumes; the tap must not navigate.
         setPhase("viewing");
+        setDragY(0);
+        setDragX(0);
+        setIsDragging(false);
         window.setTimeout(() => {
           suppressTap.current = false;
         }, 60);
+        return;
       }
+
+      // Reset drag
+      setDragY(0);
+      setDragX(0);
+      setIsDragging(false);
     },
     [close, next, prev],
   );
@@ -375,18 +405,6 @@ export function StoryViewer({
     [next, prev, phase, sheet],
   );
 
-  /* ------------------------------ interactions --------------------------- */
-  const firePop = useCallback((glyph: string) => {
-    window.clearTimeout(popTimer.current);
-    setPop({ id: Date.now(), glyph });
-    popTimer.current = window.setTimeout(() => setPop(null), 900);
-  }, []);
-
-  const fireBurst = useCallback((gift: StoryGiftKind) => {
-    setBurst({ id: Date.now(), gift });
-    window.setTimeout(() => setBurst(null), 1700);
-  }, []);
-
   const interaction: CanvasInteraction | null = useMemo(
     () => (current ? { storyId: current.id, userId, userName, isOwner } : null),
     [current, userId, userName, isOwner],
@@ -403,101 +421,98 @@ export function StoryViewer({
 
   const paused = phase === "paused";
 
+  // Instagram time format: "5h", "1d" etc
+  const timeAgo = storyAge(current.createdAt)
+    .replace(" ago", "")
+    .replace("minutes", "m")
+    .replace("minute", "m")
+    .replace("hours", "h")
+    .replace("hour", "h")
+    .replace("days", "d")
+    .replace("day", "d")
+    .replace(" ", "");
+
   return (
     <div
-      className="bstory sv-root fixed inset-0 z-[70]"
+      className="ig-viewer-root fixed inset-0 z-[100] bg-black"
       role="dialog"
       aria-modal="true"
       aria-label={`Stories by ${viewerName}`}
+      style={{
+        transform: isDragging ? `translate(${dragX}px, ${dragY}px)` : undefined,
+        opacity: isDragging && dragY > 0 ? Math.max(0.5, 1 - dragY / 400) : 1,
+        transition: isDragging ? "none" : "transform 200ms ease, opacity 200ms ease",
+      }}
     >
-      <div className="absolute inset-0 bg-black/88 backdrop-blur-[14px]" aria-hidden />
-
-      <div className="absolute inset-0 flex items-center justify-center">
+      {/* Full-screen container - Instagram centers content on desktop */}
+      <div className="ig-viewer-container">
         <div
           ref={frameRef}
           tabIndex={-1}
-          data-story-frame=""
-          className="sv-frame relative flex h-full w-full max-w-[460px] flex-col overflow-hidden outline-none sm:h-[min(92dvh,860px)] sm:rounded-2xl sm:border sm:border-white/10"
+          className="ig-viewer-frame"
           style={{
-            background:
-              "radial-gradient(140% 90% at 50% 0%, oklch(0.24 0.024 280), oklch(0.155 0.018 279) 70%)",
-            boxShadow: "0 60px 140px -60px rgba(0,0,0,0.9)",
+            background: "#000",
           }}
         >
-          {/* progress */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex gap-1 px-3 pt-[max(10px,env(safe-area-inset-top))]">
+          {/* Progress bars - Instagram top */}
+          <div className="ig-progress-container">
             {stories.map((s, i) => (
-              <div key={s.id} className="sv-progress">
-                <span
+              <div key={s.id} className="ig-progress-bar">
+                <div
+                  className="ig-progress-fill"
                   style={{
-                    width:
-                      i < index ? "100%" : i === index ? `${Math.round(progress * 100)}%` : "0%",
-                    transition: i === index ? "none" : "width 240ms ease",
+                    width: i < index ? "100%" : i === index ? `${Math.round(progress * 100)}%` : "0%",
                   }}
                 />
               </div>
             ))}
           </div>
 
-          {/* header */}
-          <div className="relative z-30 flex items-center gap-2.5 px-2.5 pb-1 pt-[max(24px,calc(env(safe-area-inset-top)+18px))]">
-            <StoryAvatar
-              name={viewerName}
-              avatarPath={viewerAvatarPath ?? null}
-              accent={accent ?? "violet"}
-              size={34}
-              ring="none"
-            />
-            <div className="min-w-0 flex-1 leading-tight">
-              <p className="truncate text-[13px] font-semibold text-white">{viewerName}</p>
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-white/55">
-                {storyAge(current.createdAt)}
-                {" · "}
-                {current.visibility === "public" ? "shared" : "private"}
-                {current.audience === "close" ? " · close friends" : ""}
-              </p>
+          {/* Header - Instagram style */}
+          <div className="ig-viewer-header">
+            <div className="ig-header-left">
+              <div className="ig-header-avatar">
+                {viewerAvatarPath ? (
+                  <img
+                    src={viewerAvatarPath}
+                    alt={viewerName}
+                    className="size-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="grid size-full place-items-center rounded-full bg-[#363636] text-[12px] font-semibold text-white">
+                    {viewerName.slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="ig-header-info">
+                <span className="ig-header-username">{viewerName}</span>
+                <span className="ig-header-time">{timeAgo}</span>
+              </div>
             </div>
-            {isVideo ? (
-              <button
-                type="button"
-                onClick={() => setMuted((m) => !m)}
-                aria-label={muted ? "Unmute video" : "Mute video"}
-                className="sv-icon-btn"
-              >
-                {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+
+            <div className="ig-header-right">
+              {isVideo ? (
+                <button
+                  type="button"
+                  onClick={() => setMuted((m) => !m)}
+                  aria-label={muted ? "Unmute" : "Mute"}
+                  className="ig-header-btn"
+                >
+                  {muted ? <VolumeX className="size-[18px]" /> : <Volume2 className="size-[18px]" />}
+                </button>
+              ) : null}
+              <button type="button" aria-label="More options" className="ig-header-btn">
+                <MoreHorizontal className="size-[20px]" />
               </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={togglePause}
-              aria-label={paused ? "Play story" : "Pause story"}
-              className="sv-icon-btn"
-            >
-              {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
-            </button>
-            {isOwner && onDelete ? (
-              <button
-                type="button"
-                onClick={() => onDelete(current)}
-                aria-label="Delete story"
-                className="sv-icon-btn hover:!bg-rose/20 hover:!text-[#ff9d9d]"
-              >
-                <Trash2 className="size-4" />
+              <button type="button" onClick={close} aria-label="Close" className="ig-header-btn">
+                <X className="size-[22px]" />
               </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={close}
-              aria-label="Close stories"
-              className="sv-icon-btn"
-            >
-              <X className="size-[18px]" />
-            </button>
+            </div>
           </div>
 
-          {/* content + tap zones */}
+          {/* Content + tap zones */}
           <div
-            className="relative z-10 min-h-0 flex-1"
+            className="ig-viewer-content"
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
@@ -505,6 +520,9 @@ export function StoryViewer({
               swipeRef.current = null;
               window.clearTimeout(holdTimer.current);
               holdActive.current = false;
+              setIsDragging(false);
+              setDragY(0);
+              setDragX(0);
             }}
           >
             {rich ? (
@@ -523,152 +541,98 @@ export function StoryViewer({
                 onVideoEnded={() => next()}
                 alt={current.altText ?? current.title ?? `Story by ${viewerName}`}
                 createdAt={current.createdAt}
+                className="ig-canvas"
               />
             ) : (
-              <div className="sv-media absolute inset-0">
+              <div className="ig-canvas-static">
                 <StoryContent story={current} />
               </div>
             )}
 
-            {/* invisible navigation zones (real buttons for a11y) */}
+            {/* Instagram tap zones - invisible but functional */}
             <button
               type="button"
               aria-label="Previous story"
               onClick={() => onZoneTap(-1)}
-              className="absolute inset-y-0 left-0 z-20 w-[34%] cursor-default"
+              className="ig-tap-zone ig-tap-zone-left"
             />
             <button
               type="button"
               aria-label="Next story"
               onClick={() => onZoneTap(1)}
-              className="absolute inset-y-0 right-0 z-20 w-[34%] cursor-default"
+              className="ig-tap-zone ig-tap-zone-right"
             />
-
-            {/* reaction pop */}
-            {pop ? (
-              <div
-                key={pop.id}
-                className="pointer-events-none absolute inset-0 z-30 grid place-items-center"
-                aria-hidden
-              >
-                <span className="sv-heart-pop text-[84px] leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
-                  {pop.glyph}
-                </span>
-              </div>
-            ) : null}
-
-            {/* gift burst */}
-            {burst ? (
-              <div
-                key={burst.id}
-                className="pointer-events-none absolute inset-0 z-30 overflow-hidden"
-                aria-hidden
-              >
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <span
-                    key={i}
-                    className="sv-gift-particle"
-                    style={{
-                      left: `${30 + i * 8 + (i % 2) * 4}%`,
-                      animationDelay: `${i * 90}ms`,
-                      color: GIFT_META[burst.gift].tint,
-                    }}
-                  >
-                    {GIFT_META[burst.gift].glyph}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-
-            {paused && !sheet ? (
-              <div
-                className="pointer-events-none absolute inset-x-0 top-1/2 z-30 flex -translate-y-1/2 justify-center"
-                aria-hidden
-              >
-                <span className="sv-chip sv-toast">
-                  <Pause className="size-3" /> Paused
-                </span>
-              </div>
-            ) : null}
           </div>
 
-          {/* footer */}
-          <div className="relative z-30 flex flex-col gap-2 px-3 pb-[max(12px,calc(env(safe-area-inset-bottom)+8px))] pt-1">
+          {/* Footer - Instagram style */}
+          <div className="ig-viewer-footer">
             {isOwner ? (
-              <div className="flex items-center gap-2">
+              <div className="ig-footer-owner">
                 <button
                   type="button"
                   onClick={() => setSheet("insights")}
-                  className="sv-reply-pill min-w-0 flex-1"
-                  aria-label="Open story insights"
+                  className="ig-footer-views-btn"
                 >
-                  <Eye className="size-4 shrink-0 text-white/60" aria-hidden />
-                  <span className="truncate text-white/60">Views & replies…</span>
-                  <ChevronUp className="size-4 shrink-0 text-white/60" aria-hidden />
+                  <Eye className="size-[18px]" />
+                  <span>Viewers</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setSheet("insights")}
-                  aria-label="Story insights"
-                  className="sv-react-btn !w-[46px] shrink-0 border !border-white/12 bg-white/5 text-[17px]"
-                >
-                  <Eye className="size-[18px] text-white/80" aria-hidden />
-                </button>
+                <div className="ig-footer-owner-actions">
+                  <button
+                    type="button"
+                    onClick={() => onDelete && current && onDelete(current)}
+                    aria-label="Delete"
+                    className="ig-footer-icon-btn"
+                  >
+                    <Trash2 className="size-[20px]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSheet("insights")}
+                    aria-label="More"
+                    className="ig-footer-icon-btn"
+                  >
+                    <MoreHorizontal className="size-[20px]" />
+                  </button>
+                </div>
               </div>
             ) : (
-              <>
-                <div className="flex items-center justify-center">
-                  <ReactionBar
-                    storyId={current.id}
-                    userId={userId}
-                    userName={userName}
-                    enabled
-                    onPop={firePop}
+              <div className="ig-footer-reply">
+                <div className="ig-reply-input-wrap">
+                  <input
+                    type="text"
+                    placeholder={`Reply to ${viewerName}...`}
+                    readOnly
+                    onFocus={() => setSheet("reply")}
+                    onClick={() => setSheet("reply")}
+                    className="ig-reply-input"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSheet("reply")}
-                    className="sv-reply-pill min-w-0 flex-1"
-                    aria-label={`Reply to ${viewerName}'s story`}
-                  >
-                    <span className="truncate text-white/60">Reply to {viewerName}…</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSheet("gift")}
-                    aria-label={`Send ${viewerName} a Bloom gift`}
-                    className="sv-react-btn shrink-0 border !border-white/12 bg-white/5"
-                  >
-                    <GiftIcon className="size-5 text-[#eed9a4]" aria-hidden />
-                  </button>
-                </div>
-              </>
+                <button
+                  type="button"
+                  aria-label="Like"
+                  className="ig-footer-icon-btn"
+                  onClick={() => {
+                    // Quick heart reaction
+                    toast("❤️ Sent");
+                  }}
+                >
+                  <Heart className="size-[24px]" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Send"
+                  className="ig-footer-icon-btn"
+                  onClick={() => setSheet("reply")}
+                >
+                  <Send className="size-[24px]" />
+                </button>
+              </div>
             )}
-            <div className="flex items-center justify-between px-1">
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-white/40">
-                {index + 1} of {stories.length}
-              </p>
-              <p className="mono inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-white/40">
-                {current.visibility === "public" ? (
-                  current.audience === "close" ? (
-                    "close friends"
-                  ) : (
-                    "shared from their profile"
-                  )
-                ) : (
-                  <>
-                    <EyeOff className="size-3" aria-hidden /> private
-                  </>
-                )}
-              </p>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* sheets live above the frame and pause playback */}
+      {/* Sheets */}
       {sheet === "reply" ? (
         <ReplySheet
           story={current}
@@ -688,7 +652,6 @@ export function StoryViewer({
           userName={userName}
           onClose={() => setSheet(null)}
           onSent={(gift) => {
-            fireBurst(gift);
             toast(`${GIFT_META[gift].glyph} Sent to ${viewerName}.`);
           }}
         />

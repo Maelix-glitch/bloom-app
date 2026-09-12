@@ -1,13 +1,18 @@
 /**
- * StoryRail — the compact horizontal story carousel for Home and Profile.
- * Your story first (avatar opens, + creates), then people's rings where the
- * product provides them. Skeletons while loading; a single graceful tile
- * when there is nothing yet — never a giant empty wall.
+ * StoryRail — Instagram-exact horizontal story carousel.
+ *
+ * Instagram specs:
+ * - Horizontal scroll, no scrollbar, snap, gap 12px
+ * - First item: "Your story" with + badge (blue)
+ * - Avatar outer 66px (56px image + ring), name 12px centered below, 74px max-width
+ * - Unseen first, then seen, ordered by recency
+ * - Seen ring: light gray #dbdbdb, Unseen: Instagram gradient
+ * - Close friends: green ring
+ * - Background: transparent (inherits page), border top/bottom subtle
  */
 
 import { StoryAvatar } from "./StoryAvatar";
 import type { BloomAccent, Story } from "@/lib/profile/types";
-import { cn } from "@/lib/utils";
 
 export interface RailGuest {
   userId: string;
@@ -47,37 +52,35 @@ export function StoryRail({
   label?: string;
 }) {
   const unseen = stories.filter((s) => !seenIds.has(s.id)).length;
-  const ring = stories.length === 0 ? "prompt" : unseen > 0 ? "unseen" : "seen";
+  const ring: "prompt" | "unseen" | "seen" = stories.length === 0 ? "prompt" : unseen > 0 ? "unseen" : "seen";
 
   if (loading) {
     return (
-      <div className="srail" aria-label="Loading stories" role="status">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="flex min-w-[76px] flex-col items-center gap-2 px-1 py-1.5"
-            aria-hidden
-          >
-            <div className="size-[64px] animate-pulse rounded-full bg-surface-2/70" />
-            <div className="h-2.5 w-10 animate-pulse rounded-full bg-surface-2/70" />
-          </div>
-        ))}
+      <div className="ig-rail" aria-label="Loading stories" role="status">
+        <div className="ig-rail-inner">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="ig-rail-item" aria-hidden>
+              <div className="ig-rail-skeleton-avatar" />
+              <div className="ig-rail-skeleton-name" />
+            </div>
+          ))}
+        </div>
         <span className="sr-only">Loading stories…</span>
       </div>
     );
   }
 
   return (
-    <div className="srail" role="list" aria-label={label}>
-      {/* your story */}
-      <div role="listitem" className="flex flex-col items-center">
-        <span className={cn("srail-item")} data-unseen={unseen > 0}>
-          <span className="relative">
+    <div className="ig-rail" role="list" aria-label={label}>
+      <div className="ig-rail-inner">
+        {/* your story - Instagram first position */}
+        <div role="listitem" className="ig-rail-item">
+          <div className="ig-rail-avatar-wrap">
             <StoryAvatar
               name={name}
               avatarPath={avatarPath}
               accent={accent}
-              size={62}
+              size={56}
               ring={ring}
               pulse={pulse && unseen > 0}
               showAdd
@@ -91,7 +94,7 @@ export function StoryRail({
                   onOpen(idx);
                 }
               }}
-              label={stories.length === 0 ? "Add a story" : `Open your story, ${unseen} unseen`}
+              label={stories.length === 0 ? "Add to your story" : `Open your story, ${unseen} unseen`}
             />
             {stories.length > 0 ? (
               <button
@@ -101,34 +104,35 @@ export function StoryRail({
                   onAdd();
                 }}
                 aria-label="Add to your story"
-                className="absolute -bottom-0.5 -right-0.5 z-10 grid size-6 place-items-center rounded-full border-2 border-[color:var(--background)] bg-[color:var(--foreground)] text-[13px] font-bold leading-none text-[color:var(--background)]"
+                className="ig-rail-add-overlay"
               >
-                +
+                {/* Invisible overlay - the visible + is inside StoryAvatar, this adds click area for add */}
+                <span className="sr-only">Add to your story</span>
               </button>
             ) : null}
-          </span>
-          <span className="srail-name">Your story</span>
-        </span>
-      </div>
-
-      {/* people's stories, when the product provides them */}
-      {guests.map((guest) => (
-        <div key={guest.userId} role="listitem" className="flex flex-col items-center">
-          <span className="srail-item" data-unseen={guest.unseenCount > 0}>
-            <StoryAvatar
-              name={guest.displayName}
-              avatarPath={guest.avatarPath}
-              accent={guest.accent}
-              size={62}
-              ring={guest.unseenCount > 0 ? "unseen" : "seen"}
-              closeFriends={guest.closeFriends}
-              onClick={() => onOpenGuest?.(guest)}
-              label={`Open ${guest.displayName}'s stories`}
-            />
-            <span className="srail-name">{guest.displayName}</span>
-          </span>
+          </div>
+          <span className="ig-rail-name">Your story</span>
         </div>
-      ))}
+
+        {/* other people's stories */}
+        {guests.map((guest) => (
+          <div key={guest.userId} role="listitem" className="ig-rail-item">
+            <div className="ig-rail-avatar-wrap">
+              <StoryAvatar
+                name={guest.displayName}
+                avatarPath={guest.avatarPath}
+                accent={guest.accent}
+                size={56}
+                ring={guest.unseenCount > 0 ? "unseen" : "seen"}
+                closeFriends={guest.closeFriends}
+                onClick={() => onOpenGuest?.(guest)}
+                label={`Open ${guest.displayName}'s stories`}
+              />
+            </div>
+            <span className="ig-rail-name">{guest.displayName}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

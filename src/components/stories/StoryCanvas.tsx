@@ -671,7 +671,7 @@ export function StoryCanvas({
               ref={videoRef}
               src={media.src}
               poster={media.poster ?? undefined}
-              className="size-full object-contain"
+              className="size-full object-cover"
               style={{ filter: combinedFilter }}
               playsInline
               muted={muted}

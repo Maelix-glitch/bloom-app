@@ -1,11 +1,14 @@
 /**
- * StoryAvatar — the one avatar-with-ring in the story system.
- * The rail, profile hero, viewer header, and highlight covers all share this
- * so the ring never drifts between implementations.
+ * StoryAvatar — Instagram-exact avatar with ring and + badge.
+ *
+ * Instagram specs:
+ * - Avatar 56px (rail) / 32px (viewer header) / 96px+ (profile)
+ * - Ring handled by StoryRing (gradient for unseen, gray for seen)
+ * - Your story + badge: 20px blue circle (#0095f6) with white plus, 2px white border, bottom-right overlap
+ * - For rail: showAdd displays the + badge (Instagram style)
  */
 
 import { Plus } from "lucide-react";
-
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { StoryRing, type StoryRingState } from "@/components/profile/StoryRing";
 import type { BloomAccent } from "@/lib/profile/types";
@@ -38,17 +41,19 @@ export function StoryAvatar({
   label?: string | undefined;
   className?: string | undefined;
 }) {
+  const isRailSize = size <= 70;
+  const badgeSize = isRailSize ? 20 : 22;
+
   const content = (
-    <StoryRing
-      state={ring}
-      size={size}
-      accent={accent}
-      animateIn={animateIn}
-      pulse={pulse}
-      tone={closeFriends ? "close" : "bloom"}
-      className={className}
-    >
-      <span className="relative inline-block">
+    <span className={cn("relative inline-block", className)}>
+      <StoryRing
+        state={ring}
+        size={size}
+        accent={accent}
+        animateIn={animateIn}
+        pulse={pulse}
+        tone={closeFriends ? "close" : "bloom"}
+      >
         <ProfileAvatar
           name={name}
           avatarPath={avatarPath}
@@ -56,22 +61,33 @@ export function StoryAvatar({
           size={size}
           ring="none"
         />
-        {showAdd ? (
-          <span className="srail-add" aria-hidden>
-            <Plus className="size-3.5" strokeWidth={2.6} />
-          </span>
-        ) : null}
-      </span>
-    </StoryRing>
+      </StoryRing>
+
+      {showAdd ? (
+        <span
+          className="ig-add-badge"
+          aria-hidden
+          style={{
+            width: badgeSize,
+            height: badgeSize,
+            bottom: isRailSize ? 2 : 0,
+            right: isRailSize ? 2 : 0,
+          }}
+        >
+          <Plus className="size-[12px]" strokeWidth={3} />
+        </span>
+      ) : null}
+    </span>
   );
 
   if (!onClick) return content;
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label ?? `Open ${name}'s stories`}
-      className={cn("rounded-full outline-none transition-transform active:scale-95")}
+      className="rounded-full outline-none transition-transform active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#0095f6] focus-visible:ring-offset-2"
     >
       {content}
     </button>

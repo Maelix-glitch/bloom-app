@@ -1,22 +1,34 @@
 /**
- * StoryRing — the signature Bloom affordance: "a living moment around your
- * identity." One component owns the geometry so the ring is engineered,
- * never pasted on: constant stroke, constant inset, stable at every size.
+ * StoryRing — Instagram-exact story ring.
  *
- *   none    — no presence; identity stands alone
- *   unseen  — the Bloom arc (lavender → rose → champagne)
- *   seen    — the same circle, dimmed to a whisper (shape + tone, not color alone)
- *   prompt  — dashed invitation to add a story
+ * Instagram specs:
+ * - Unseen: gradient ring #feda75 → #fa7e1e → #d62976 → #962fbf → #4f5bd5
+ *   thickness 2px, with 2px white/black gap between ring and avatar
+ * - Seen: thin 1px light gray #dbdbdb (light) / #363636 (dark) ring, with same gap
+ * - Close friends: green ring #1DB954 / gradient green
+ * - Prompt/none: no ring
  *
- *   tone="close" — the sage-mist arc for close-friends stories.
- *   pulse — a single bloom pulse when a new story lands; never loops.
+ * Structure:
+ * outer (gradient) -> padding 2px -> inner (background gap) -> padding 2px -> avatar
+ * Total outer size = avatar size + 8px
  */
 
-import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import type { BloomAccent } from "@/lib/profile/types";
 
 export type StoryRingState = "none" | "unseen" | "seen" | "prompt";
+
+const INSTAGRAM_GRADIENT = `conic-gradient(from 45deg at 50% 50%,
+  #feda75 0deg,
+  #fa7e1e 60deg,
+  #d62976 130deg,
+  #962fbf 210deg,
+  #4f5bd5 280deg,
+  #feda75 360deg)`;
+
+const INSTAGRAM_GRADIENT_LINEAR = `linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5)`;
+
+const CLOSE_FRIENDS_GRADIENT = `linear-gradient(45deg, #1DB954, #1ED760)`;
 
 export function StoryRing({
   state,
@@ -37,43 +49,74 @@ export function StoryRing({
   children: React.ReactNode;
   className?: string | undefined;
 }) {
-  const stroke = size >= 96 ? 2.5 : 2;
-  const inset = size >= 96 ? 6 : 5;
-  const active = state === "unseen";
+  const isUnseen = state === "unseen";
+  const isSeen = state === "seen";
+  const isPrompt = state === "prompt";
+  const isNone = state === "none";
+
+  // Instagram sizing: avatar + 4px gap (2+2) each side
+  const gap = 2; // white gap between gradient and avatar
+  const ringThickness = isSeen ? 1 : 2;
+  const outerPadding = ringThickness;
+  const totalExtra = (outerPadding + gap) * 2;
+  const outerSize = size + totalExtra;
+
+  if (isNone || isPrompt) {
+    return (
+      <span
+        className={cn("relative inline-grid place-items-center rounded-full", className)}
+        style={{ width: size, height: size }}
+      >
+        {children}
+      </span>
+    );
+  }
 
   return (
     <span
-      className={cn("bstory relative inline-grid place-items-center rounded-full", className)}
-      style={{ width: size + inset * 2 + stroke * 2, height: size + inset * 2 + stroke * 2 }}
+      className={cn(
+        "relative inline-grid place-items-center rounded-full",
+        animateIn && "ig-ring-enter",
+        pulse && isUnseen && "ig-ring-pulse",
+        className
+      )}
+      style={{
+        width: outerSize,
+        height: outerSize,
+        // Outer ring
+        background: isSeen
+          ? undefined
+          : tone === "close"
+            ? CLOSE_FRIENDS_GRADIENT
+            : INSTAGRAM_GRADIENT,
+        border: isSeen ? `${ringThickness}px solid #dbdbdb` : undefined,
+        padding: outerPadding,
+        // For dark mode, seen border should be #363636 - handled via CSS
+      }}
+      data-ring-state={state}
+      data-ring-tone={tone}
     >
-      {state !== "none" ? (
+      {/* Seen ring dark mode override via CSS class */}
+      <span
+        className={cn(
+          "grid place-items-center rounded-full",
+          isSeen && "ig-seen-ring"
+        )}
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "var(--ig-gap-bg, #fff)",
+          padding: gap,
+          borderRadius: "50%",
+        }}
+      >
         <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-0 rounded-full transition-[opacity,transform] duration-[var(--motion-med)]",
-            animateIn && "story-ring-enter",
-            pulse && active && "story-ring-bloom",
-          )}
-          style={
-            active
-              ? {
-                  padding: stroke,
-                  background: tone === "close" ? "var(--story-ring-close)" : "var(--story-ring)",
-                  WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                  WebkitMaskComposite: "xor",
-                  maskComposite: "exclude",
-                }
-              : state === "seen"
-                ? {
-                    border: `${stroke}px solid var(--story-ring-seen)`,
-                  }
-                : {
-                    border: `${stroke}px dashed color-mix(in oklab, ${accentVar[accent]} 55%, transparent)`,
-                  }
-          }
-        />
-      ) : null}
-      {children}
+          className="grid place-items-center rounded-full overflow-hidden"
+          style={{ width: "100%", height: "100%" }}
+        >
+          {children}
+        </span>
+      </span>
     </span>
   );
 }

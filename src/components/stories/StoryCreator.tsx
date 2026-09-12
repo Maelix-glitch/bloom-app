@@ -1,9 +1,7 @@
 /**
- * StoryCreator — the way into a story.
- * Camera, gallery photo/video, text on a curated background, cinematic
- * templates, or a moment drafted from real Bloom data (mood, reflections,
- * rewards, milestones). Everything lands in the StoryEditor; nothing here
- * publishes. Drafts resume; video drafts stay honest about files.
+ * StoryCreator — Instagram-exact creation entry.
+ * Dark full-screen (#000) like Instagram's story creation, with quick modes,
+ * backgrounds, templates, and Bloom sources. Everything lands in StoryEditor.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -20,6 +18,7 @@ import {
   Trash2,
   Type,
   X,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -99,7 +98,6 @@ export function StoryCreator({
     [moodEntries],
   );
 
-  /* deep-link from Mood: "share as story" opens the editor pre-filled */
   useEffect(() => {
     if (!initialSource || sourceApplied.current) return;
     const entry = moodEntries.find((e) => e.id === initialSource.id);
@@ -110,7 +108,6 @@ export function StoryCreator({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSource, moodEntries]);
 
-  /* milestone / reward share shortcuts open the editor pre-filled */
   const shareApplied = useRef(false);
   useEffect(() => {
     if (shareApplied.current || editorSource) return;
@@ -134,8 +131,6 @@ export function StoryCreator({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [editorSource, cameraOpen, onClose]);
-
-  /* ------------------------------- sources ------------------------------ */
 
   const openMood = useCallback((entry: MoodEntry) => {
     const primary = entry.emotions[0] ?? "neutral";
@@ -273,7 +268,6 @@ export function StoryCreator({
         toast.error("That draft's photo is gone — starting fresh.");
       }
     }
-    // Background draft: fully restorable.
     setEditorSource({
       base: "background",
       backgroundId: draft.source.backgroundId,
@@ -294,7 +288,6 @@ export function StoryCreator({
   const publish = useCallback(
     async (input: CreateStoryInput) => {
       await onPublish(input);
-      // Revoke any object URLs we minted for the session.
       if (editorSource?.base === "video" && editorSource.video) {
         URL.revokeObjectURL(editorSource.video.previewUrl);
       }
@@ -305,7 +298,6 @@ export function StoryCreator({
     [onPublish, editorSource, onClose],
   );
 
-  /* ------------------------------ editor -------------------------------- */
   if (editorSource) {
     return (
       <StoryEditor
@@ -327,7 +319,6 @@ export function StoryCreator({
     );
   }
 
-  /* ------------------------------ picker -------------------------------- */
   const quickModes: {
     id: string;
     label: string;
@@ -339,48 +330,51 @@ export function StoryCreator({
     {
       id: "photo",
       label: "Photo",
-      hint: "From your gallery",
+      hint: "From gallery",
       icon: ImageIcon,
       art: flowerBranchArt,
     },
     {
       id: "video",
       label: "Video",
-      hint: "Up to a minute",
+      hint: "Up to 1 min",
       icon: Clapperboard,
       art: mountainLakeArt,
     },
-    { id: "text", label: "Text", hint: "Words, beautifully", icon: Type, art: duskArt },
+    { id: "text", label: "Text", hint: "Aa", icon: Type, art: duskArt },
   ];
 
   return (
     <div
-      className="bstory fixed inset-0 z-[88] flex flex-col bg-background"
+      className="fixed inset-0 z-[88] flex flex-col bg-black text-white"
       role="dialog"
       aria-label="Create a story"
     >
       <div className="mx-auto flex h-full w-full max-w-[560px] flex-col">
-        <div className="flex items-center justify-between px-5 pt-[max(16px,env(safe-area-inset-top))]">
-          <div>
-            <h2 className="display text-[22px]">New story</h2>
-            <p className="mt-0.5 text-[12.5px] text-muted-foreground">
-              A little moment from your life.
-            </p>
-          </div>
+        {/* Instagram top bar */}
+        <div className="flex items-center justify-between px-4 pt-[max(14px,env(safe-area-inset-top))] pb-3 border-b border-[#262626]">
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close story creator"
-            className="grid size-9 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Close"
+            className="grid size-8 place-items-center rounded-full text-white hover:bg-white/10 transition-colors"
           >
-            <X className="size-4" />
+            <X className="size-6" />
+          </button>
+          <h2 className="text-[16px] font-semibold tracking-[0.01em]">New story</h2>
+          <button
+            type="button"
+            aria-label="Settings"
+            className="grid size-8 place-items-center rounded-full text-white hover:bg-white/10 transition-colors"
+          >
+            <Settings className="size-5" />
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-4 bg-black">
           {pendingDraft ? (
-            <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface/60 px-4 py-3">
-              <p className="text-[13px] text-muted-foreground">You have an unfinished story.</p>
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[#262626] bg-[#121212] px-4 py-3">
+              <p className="text-[13px] text-[#a8a8a8]">Unfinished story draft</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -389,14 +383,14 @@ export function StoryCreator({
                     setPendingDraft(null);
                   }}
                   aria-label="Discard draft"
-                  className="grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:text-rose"
+                  className="grid size-8 place-items-center rounded-full text-[#a8a8a8] hover:text-white transition-colors"
                 >
                   <Trash2 className="size-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => void resumeDraft()}
-                  className="bsheet-primary h-9 px-4 text-[12.5px]"
+                  className="h-8 rounded-full bg-white px-4 text-[13px] font-semibold text-black"
                 >
                   Resume
                 </button>
@@ -404,8 +398,8 @@ export function StoryCreator({
             </div>
           ) : null}
 
-          {/* quick modes */}
-          <div className="grid grid-cols-2 gap-2.5">
+          {/* Instagram quick modes - dark cards */}
+          <div className="grid grid-cols-2 gap-3">
             {quickModes.map((m) => (
               <button
                 key={m.id}
@@ -417,22 +411,22 @@ export function StoryCreator({
                   else if (m.id === "video") videoRef.current?.click();
                   else setBackgroundsOpen(true);
                 }}
-                className="sc-mode-tile disabled:opacity-60"
+                className="relative flex min-h-[140px] flex-col justify-end gap-1 overflow-hidden rounded-2xl border border-[#262626] bg-[#121212] p-3 text-left transition-transform active:scale-[0.98] disabled:opacity-60"
               >
-                <img src={m.art} alt="" loading="lazy" decoding="async" />
-                <span className="grid size-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur-md">
+                <img src={m.art} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <span className="relative grid size-8 place-items-center rounded-full bg-white/15 text-white backdrop-blur-md">
                   <m.icon className="size-4" strokeWidth={1.8} aria-hidden />
                 </span>
-                <span className="text-[14px] font-semibold text-white">{m.label}</span>
-                <span className="text-[11.5px] text-white/70">{busy ? "Preparing…" : m.hint}</span>
+                <span className="relative text-[15px] font-semibold text-white">{m.label}</span>
+                <span className="relative text-[12px] text-white/70">{busy ? "Preparing…" : m.hint}</span>
               </button>
             ))}
           </div>
 
-          {/* backgrounds */}
           {backgroundsOpen ? (
             <section className="mt-6" aria-label="Choose a background">
-              <p className="eyebrow mb-2.5">Start with a background</p>
+              <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Background</p>
               <div className="grid grid-cols-5 gap-2">
                 {STORY_BACKGROUNDS.map((b) => (
                   <button
@@ -446,29 +440,28 @@ export function StoryCreator({
                     className="group flex flex-col items-center gap-1.5"
                   >
                     <span
-                      className="block aspect-[9/14] w-full rounded-xl border border-border transition-transform group-active:scale-95"
+                      className="block aspect-[9/14] w-full rounded-xl border border-[#262626] transition-transform group-active:scale-95"
                       style={{ background: b.css }}
                     />
-                    <span className="text-[10px] text-muted-foreground">{b.name}</span>
+                    <span className="text-[10px] text-[#a8a8a8]">{b.name}</span>
                   </button>
                 ))}
               </div>
             </section>
           ) : null}
 
-          {/* templates */}
           <section className="mt-6" aria-label="Story templates">
-            <div className="mb-2.5 flex items-baseline justify-between">
-              <p className="eyebrow">Templates</p>
+            <div className="mb-3 flex items-baseline justify-between">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">Templates</p>
               <button
                 type="button"
                 onClick={openWin}
-                className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-1 text-[12px] text-[#a8a8a8] hover:text-white transition-colors"
               >
                 <Sprout className="size-3.5" aria-hidden /> Quick win
               </button>
             </div>
-            <div className="flex gap-2.5 overflow-x-auto pb-1">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
               {STORY_TEMPLATES.map((t) => (
                 <button
                   key={t.id}
@@ -481,22 +474,22 @@ export function StoryCreator({
                       storyKind: "text",
                     })
                   }
-                  className="group w-[128px] shrink-0 text-left"
+                  className="group w-[130px] shrink-0 text-left"
                 >
                   <span
-                    className="flex aspect-[9/13] w-full flex-col justify-between overflow-hidden rounded-2xl border border-border p-3 transition-transform group-active:scale-[0.97]"
+                    className="flex aspect-[9/13] w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#262626] p-3 transition-transform group-active:scale-[0.97]"
                     style={{
                       background: STORY_BACKGROUNDS.find((b) => b.id === t.backgroundId)?.css,
                     }}
                   >
-                    <span className="display text-[13px] leading-snug" style={{ color: t.ink }}>
+                    <span className="text-[13px] font-semibold leading-snug" style={{ color: t.ink }}>
                       {t.heading}
                     </span>
                     <span className="text-[10.5px]" style={{ color: t.ink, opacity: 0.75 }}>
                       {t.hint}
                     </span>
                   </span>
-                  <span className="mt-1.5 block truncate px-0.5 text-[11.5px] font-medium">
+                  <span className="mt-2 block truncate px-1 text-[12px] font-medium text-white">
                     {t.name}
                   </span>
                 </button>
@@ -504,14 +497,13 @@ export function StoryCreator({
             </div>
           </section>
 
-          {/* from bloom */}
           <section className="mt-6" aria-label="From your Bloom">
-            <p className="eyebrow mb-2.5">From your Bloom</p>
+            <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#a8a8a8]">From your Bloom</p>
             <div className="flex flex-col gap-2">
               {moodEntries.length > 0 ? (
                 <FromBloomRow
                   icon={CloudSun}
-                  label="A recent check-in"
+                  label="Recent check-in"
                   hint="Only the one you pick"
                   items={moodEntries
                     .slice(-4)
@@ -529,7 +521,7 @@ export function StoryCreator({
               {reflections.length > 0 ? (
                 <FromBloomRow
                   icon={NotebookPen}
-                  label="A reflection"
+                  label="Reflection"
                   hint="Words you already wrote"
                   items={reflections
                     .slice(-4)
@@ -546,10 +538,10 @@ export function StoryCreator({
               ) : null}
               {rewards.length > 0 ? (
                 <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
-                    <Gift className="size-3.5" aria-hidden /> Rewards earned
+                  <p className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-[#a8a8a8]">
+                    <Gift className="size-3.5" aria-hidden /> Rewards
                   </p>
-                  <div className="flex gap-2.5 overflow-x-auto pb-1">
+                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
                     {rewards.slice(0, 6).map((reward) => (
                       <button
                         key={reward.id}
@@ -572,10 +564,10 @@ export function StoryCreator({
               ) : null}
               {milestones.length > 0 ? (
                 <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
-                    <Flag className="size-3.5" aria-hidden /> Milestones reached
+                  <p className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-[#a8a8a8]">
+                    <Flag className="size-3.5" aria-hidden /> Milestones
                   </p>
-                  <div className="flex gap-2.5 overflow-x-auto pb-1">
+                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
                     {milestones.slice(0, 6).map((milestone) => (
                       <button
                         key={milestone.id}
@@ -600,16 +592,15 @@ export function StoryCreator({
               reflections.length === 0 &&
               rewards.length === 0 &&
               milestones.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-border px-4 py-5 text-center text-[12.5px] text-muted-foreground">
-                  As you log moods and earn rewards, they'll wait for you here — ready to become
-                  stories, only when you choose.
+                <p className="rounded-xl border border-dashed border-[#262626] px-4 py-5 text-center text-[13px] text-[#a8a8a8]">
+                  As you log moods and earn rewards, they'll wait here — ready to become stories.
                 </p>
               ) : null}
             </div>
           </section>
 
-          <p className="mt-6 text-center text-[11.5px] text-faint">
-            Stories last 24 hours, then rest in your private archive.
+          <p className="mt-8 text-center text-[12px] text-[#737373]">
+            Stories disappear after 24 hours
           </p>
         </div>
       </div>
@@ -678,36 +669,36 @@ function FromBloomRow({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface/60">
+    <div className="overflow-hidden rounded-xl border border-[#262626] bg-[#121212]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
       >
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-surface-3 text-muted-foreground">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#262626] text-[#a8a8a8]">
           <Icon className="size-4" strokeWidth={1.8} aria-hidden />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-semibold">{label}</span>
-          <span className="block text-[11.5px] text-faint">{hint}</span>
+          <span className="block text-[14px] font-semibold text-white">{label}</span>
+          <span className="block text-[12px] text-[#a8a8a8]">{hint}</span>
         </span>
         <ArrowRight
-          className={cn("size-4 shrink-0 text-faint transition-transform", open && "rotate-90")}
+          className={cn("size-4 shrink-0 text-[#737373] transition-transform", open && "rotate-90")}
           aria-hidden
         />
       </button>
       {open ? (
-        <ul className="flex flex-col gap-1 border-t border-border px-2 py-2">
+        <ul className="flex flex-col gap-1 border-t border-[#262626] px-2 py-2">
           {items.map((item) => (
             <li key={item.id}>
               <button
                 type="button"
                 onClick={() => onPick(item.id)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-surface-2"
+                className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-[#262626] transition-colors"
               >
-                <span className="truncate text-[13px]">{item.title}</span>
-                <ArrowRight className="size-3.5 shrink-0 text-faint" aria-hidden />
+                <span className="truncate text-[13px] text-white">{item.title}</span>
+                <ArrowRight className="size-3.5 shrink-0 text-[#737373]" aria-hidden />
               </button>
             </li>
           ))}
