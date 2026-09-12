@@ -14,11 +14,19 @@ const PREVIEW_IMAGES = [
   "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=500&fit=crop&crop=face",
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face",
   "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1526510747491-58f928ec870f?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1512310604669-443f26c35f52?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=500&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=500&fit=crop&crop=face",
 ];
 
 function getPreviewImage(id: string): string {
   const hash = id.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
-  return PREVIEW_IMAGES[hash % PREVIEW_IMAGES.length]!;
+  return PREVIEW_IMAGES[Math.abs(hash) % PREVIEW_IMAGES.length]!;
 }
 
 function EffectCard({ effect, onPick }: { effect: RestyleEffect; onPick: (e: RestyleEffect) => void }) {
