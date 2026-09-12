@@ -14,12 +14,17 @@
  *   • sleep / study / screen are typed in hours (decimal ok) and stored in
  *     minutes; water in ml, movement in minutes, energy on Bloom's 1–5 scale
  *   • portalled to <body> like every other Bloom sheet
+ *   • no keyboard anywhere: every field is a − / + stepper over a read-only
+ *     value, so tapping a field never summons the phone keyboard. Stepping
+ *     below the minimum clears the field back to blank (untouched).
+ *   • roomy steppers: 32px buttons flank a large centred value with its unit
+ *     tucked underneath, so wide values (2200ml) never squeeze.
  *
  * Colour tokens (--metric-*, --brand, --success, --danger, --metric-surface*)
  * live on :root in src/styles.css.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   Moon,
@@ -31,6 +36,8 @@ import {
   Check,
   Trash2,
   CircleAlert,
+  Minus,
+  Plus,
   type LucideIcon,
 } from "lucide-react";
 
@@ -94,6 +101,19 @@ export const METRICS: MetricDef[] = [
   metric("screen", Smartphone, "hrs", "e.g. 4", HOURS),
 ];
 
+/** One tap of − / +, in the unit the field shows (a glass of water, half an hour…). */
+const STEPS: Record<MetricKey, number> = {
+  sleep: 0.5,
+  water: 250,
+  study: 0.5,
+  movement: 5,
+  energy: 1,
+  screen: 0.5,
+};
+
+/** 2dp float arithmetic, printed without trailing zeros ("8", "7.5", never "8.00"). */
+const strip = (v: number): string => String(Math.round(v * 100) / 100);
+
 export type MetricsValues = Record<MetricKey, number>;
 
 type View = "form" | "saved" | "reset";
@@ -127,7 +147,6 @@ export function MetricsEntryModal({
   const [submitted, setSubmitted] = useState(false);
   const [partial, setPartial] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -137,8 +156,6 @@ export function MetricsEntryModal({
       setSubmitted(false);
       setPartial(false);
       setSaveError(null);
-      const id = window.setTimeout(() => firstInputRef.current?.focus(), 80);
-      return () => window.clearTimeout(id);
     }
     return undefined;
     // Re-reading the store on every store change while open would stomp on typing.
@@ -172,6 +189,32 @@ export function MetricsEntryModal({
         return next;
       });
     }
+  };
+
+  /** − / + on a stepper. Blank + plus starts at the first step; stepping below the minimum clears back to blank. */
+  const bump = (def: MetricDef, dir: 1 | -1) => {
+    const raw = (values[def.key] ?? "").trim();
+    const step = STEPS[def.key];
+    if (raw === "") {
+      if (dir < 0) return;
+      setValue(def.key, strip(Math.max(def.min, step)));
+      return;
+    }
+    const cur = Number(raw);
+    if (!Number.isFinite(cur)) {
+      setValue(def.key, strip(Math.max(def.min, step)));
+      return;
+    }
+    const next = Math.round((cur + dir * step) * 100) / 100;
+    if (next < def.min) {
+      setValue(def.key, "");
+      return;
+    }
+    if (next > def.max) {
+      setValue(def.key, strip(def.max));
+      return;
+    }
+    setValue(def.key, strip(next));
   };
 
   const handleConfirm = () => {
@@ -238,7 +281,8 @@ export function MetricsEntryModal({
       onClose={onClose}
       title="Today's snapshot"
       description="Log the numbers you actually measured today. Anything left blank stays untouched."
-      panelClassName="p-0"
+      className="metrics-sheet"
+      panelClassName="metrics-pop"
     >
       <div className="overflow-hidden" style={{ backgroundColor: "var(--metric-surface)" }}>
         {/* Header */}
@@ -264,9 +308,10 @@ export function MetricsEntryModal({
         {view === "form" && (
           <div className="px-5 pb-6 pt-5">
             <div className="grid grid-cols-2 gap-3">
-              {metrics.map((m, i) => {
+              {metrics.map((m) => {
                 const raw = values[m.key] ?? "";
                 const err = errors[m.key];
+                const num = raw.trim() === "" ? null : Number(raw);
                 return (
                   <div
                     key={m.key}
@@ -283,25 +328,43 @@ export function MetricsEntryModal({
                       </span>
                     </div>
                     <div
-                      className="mt-2 flex items-baseline gap-1.5 border-b-2 pb-1.5"
+                      className="mt-2 flex items-center gap-2 border-b-2 pb-2"
                       style={{ borderColor: err ? "var(--danger)" : m.colorVar }}
                     >
-                      <input
-                        ref={i === 0 ? firstInputRef : undefined}
-                        type="number"
-                        inputMode="decimal"
-                        min={m.min}
-                        max={m.max}
-                        step={m.key === "energy" ? 1 : "any"}
-                        value={raw}
-                        onChange={(e) => setValue(m.key, e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleConfirm()}
-                        placeholder={m.placeholder}
-                        aria-label={`${m.label} (${m.unit})`}
-                        aria-invalid={err ? true : undefined}
-                        className="w-full bg-transparent text-lg font-semibold text-foreground outline-none placeholder:text-sm placeholder:font-normal placeholder:text-muted-foreground/60"
-                      />
-                      <span className="text-xs text-muted-foreground">{m.unit}</span>
+                      <button
+                        type="button"
+                        onClick={() => bump(m, -1)}
+                        disabled={num === null}
+                        aria-label={`Decrease ${m.label}`}
+                        className="grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-all hover:text-foreground active:scale-95 disabled:opacity-25"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <div className="min-w-0 flex-1 text-center">
+                        <input
+                          type="text"
+                          readOnly
+                          inputMode="none"
+                          value={raw}
+                          placeholder=""
+                          aria-label={`${m.label} (${m.unit})`}
+                          aria-invalid={err ? true : undefined}
+                          tabIndex={-1}
+                          className="w-full min-w-0 bg-transparent text-center text-xl font-semibold text-foreground outline-none placeholder:text-sm placeholder:font-normal placeholder:text-muted-foreground/60"
+                        />
+                        <span className="mt-0.5 block text-[10px] tabular-nums text-muted-foreground">
+                          {m.unit}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => bump(m, 1)}
+                        disabled={num !== null && num >= m.max}
+                        aria-label={`Increase ${m.label}`}
+                        className="grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-all hover:text-foreground active:scale-95 disabled:opacity-25"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
                     </div>
                     {err && (
                       <p
@@ -374,7 +437,7 @@ export function MetricsEntryModal({
             </p>
 
             <div
-              className="metrics-saved-grid mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
+              className="mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
               style={{
                 backgroundColor: "var(--metric-surface-raised)",
                 gridTemplateColumns: `repeat(${Math.max(1, metrics.length)}, minmax(0, 1fr))`,

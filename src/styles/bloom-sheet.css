@@ -41,11 +41,43 @@
   max-width: 680px;
 }
 
-.bsheet--phone {
+/*
+ * Phones: the sheet hugs its content — a pop, not a page. It settles at the
+ * bottom at whatever height its content needs, capped below full screen so
+ * the page always peeks above it. (Doubled selectors so this geometry wins
+ * over any responsive overrides living elsewhere.)
+ */
+.bsheet.bsheet--phone {
   left: 0;
   right: 0;
   bottom: 0;
-  max-height: 92dvh;
+  top: auto;
+  height: auto;
+  max-height: 88dvh;
+}
+
+/*
+ * Centred pop: a floating card on phones too. Margins on every side, fully
+ * rounded, no grabber — for compact moments that shouldn't own the screen.
+ */
+.bsheet.bsheet--pop {
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: calc(100% - 2.5rem);
+  max-width: 480px;
+  height: auto;
+  max-height: 84dvh;
+}
+.bsheet.bsheet--pop .bsheet-panel {
+  height: auto;
+  max-height: 84dvh;
+}
+.bsheet.bsheet--pop .bsheet-grab {
+  display: none;
+}
+.bsheet.bsheet--pop .bsheet-scroll {
+  min-height: 0;
 }
 
 .bsheet-panel {
@@ -80,16 +112,23 @@
   backdrop-filter: blur(24px) saturate(1.2);
   -webkit-backdrop-filter: blur(24px) saturate(1.2);
 }
-.bsheet--phone .bsheet-panel {
+.bsheet.bsheet--phone .bsheet-panel {
   border-radius: 28px 28px 0 0;
   /* No bottom edge — it sits on the screen edge, and a line there reads as a
      seam rather than a border. The side borders stop with it. */
   border-bottom: 0;
   padding-bottom: env(safe-area-inset-bottom);
+  /* Content-height pop: auto until the cap, then the inner scroll takes over. */
+  height: auto;
+  max-height: 88dvh;
   box-shadow:
     0 -20px 60px -20px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent);
+}
+/* The inner scroll must never force height — it only scrolls past the cap. */
+.bsheet.bsheet--phone .bsheet-scroll {
+  min-height: 0;
 }
 
 .bsheet-grab {
@@ -740,7 +779,7 @@
   display: grid;
   place-items: center;
   width: 36px;
-  height: 36px;
+ height: 36px;
   border-radius: 12px;
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--background) 40%, transparent);

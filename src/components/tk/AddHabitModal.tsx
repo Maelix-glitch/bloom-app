@@ -590,7 +590,7 @@ function AddHabitDialog({ onClose, onSubmit, prefill }: Omit<AddHabitModalProps,
                   type="text"
                   className="icon-search"
                   id="iconSearch"
-                  placeholder="Search icons — try “water”, “run”…"
+                  placeholder="Search icons…"
                   autoComplete="off"
                   value={s.iconQuery}
                   onChange={(e) => set({ iconQuery: e.target.value })}

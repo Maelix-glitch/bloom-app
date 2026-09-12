@@ -16,6 +16,10 @@
  * The model's own sidebar is ignored on purpose: Bloom's shared rail (AppNav)
  * is the chrome here, and the avatar block the model shows under its sidebar
  * lives at the foot of that rail (HomeSidebar → RailProfile).
+ *
+ * Phone scale: type and faces run ~15% smaller than desktop through the base
+ * Tailwind classes, while the roomy padding and gaps stay untouched — small
+ * elements, generous air. The sm:/lg: variants carry full desktop scale.
  */
 
 import { useMemo, useState, type ReactNode } from "react";
@@ -347,7 +351,7 @@ function Hero({
       <div className="relative grid gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-12 lg:py-20">
         <div className="mm-hero-copy max-w-xl">
           <p className="mp-eyebrow">Mood tracker · {dateLine}</p>
-          <h1 className="mt-6 font-display text-4xl leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 font-display text-3xl leading-[1.08] text-foreground sm:text-5xl lg:text-6xl">
             {selected ? (
               <>
                 Today you feel
@@ -397,7 +401,7 @@ function Hero({
         </div>
 
         <div className="lg:pb-2 lg:text-right">
-          <p className="font-display text-xl italic leading-relaxed text-gold-soft/90 sm:text-2xl">
+          <p className="font-display text-lg italic leading-relaxed text-gold-soft/90 sm:text-2xl">
             Feel it.
             <br />
             Understand it.
@@ -429,7 +433,7 @@ function SectionHead({
       <div className="flex min-w-0 items-start gap-3.5">
         <Icon className="mt-1 h-5 w-5 shrink-0 text-gold" strokeWidth={1.5} />
         <div className="min-w-0">
-          <h2 className="font-display text-2xl leading-tight text-foreground sm:text-[1.75rem]">
+          <h2 className="font-display text-xl leading-tight text-foreground sm:text-[1.75rem]">
             {title}
           </h2>
           {subtitle ? (
@@ -501,7 +505,7 @@ function LogMood({
                 aria-label={`I feel ${MOOD_LABELS[mood].toLowerCase()}`}
                 data-testid={`mood-face-${mood}`}
               >
-                <span className={`mm-face ${busy ? "animate-pulse" : ""}`} data-active={active}>
+                <span className={`mm-face ${busy ? "animate-pulse" : ""} [&_svg]:h-[68px] [&_svg]:w-[68px] sm:[&_svg]:h-20 sm:[&_svg]:w-20`} data-active={active}>
                   <MoodBlob mood={mood} active={active} size={80} />
                 </span>
                 <span
@@ -531,13 +535,13 @@ function LogMood({
         <div className="relative grid gap-8 p-6 sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-11">
           <div className="flex min-w-0 items-start gap-4">
             <Quote className="mt-1 h-5 w-5 shrink-0 text-gold/60" strokeWidth={1.5} />
-            <p className="font-display text-xl leading-relaxed text-foreground sm:text-2xl">
+            <p className="font-display text-lg leading-relaxed text-foreground sm:text-2xl">
               Every emotion is valid.
               <br />
               It&rsquo;s part of your story.
             </p>
           </div>
-          <p className="font-display text-lg italic leading-relaxed text-gold-soft/90 sm:text-xl lg:text-right">
+          <p className="font-display text-base italic leading-relaxed text-gold-soft/90 sm:text-xl lg:text-right">
             Same you.
             <br />
             Softer days.
@@ -626,7 +630,7 @@ function MoodJourney({
         </div>
         <div className="min-w-0 flex-1">
           {loading ? (
-            <div className="flex h-44 items-center justify-center gap-3 text-muted-foreground sm:h-56">
+            <div className="flex h-36 items-center justify-center gap-3 text-muted-foreground sm:h-56">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm">Reading your record…</span>
             </div>
@@ -658,7 +662,7 @@ function MoodJourney({
           <div className="min-w-0">
             <div className="flex items-center gap-3">
               <Leaf className="h-4.5 w-4.5 shrink-0 text-gold" strokeWidth={1.5} />
-              <span className="font-display text-xl text-foreground">A small insight</span>
+              <span className="font-display text-lg text-foreground">A small insight</span>
             </div>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-foreground/80 sm:text-base">
               {points.length >= 2
@@ -669,8 +673,8 @@ function MoodJourney({
             </p>
             <span className="mt-5 block h-px w-10 bg-gold/50" />
           </div>
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-gold/30 bg-gold/10 sm:justify-self-end">
-            <Sun className="h-6 w-6 text-gold" strokeWidth={1.5} />
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-gold/30 bg-gold/10 sm:justify-self-end">
+            <Sun className="h-5 w-5 text-gold" strokeWidth={1.5} />
           </span>
         </div>
       </div>
@@ -680,7 +684,7 @@ function MoodJourney({
 
 function EmptyLine({ text }: { text: string }) {
   return (
-    <div className="flex h-44 items-center justify-center rounded-2xl border border-dashed border-border px-6 text-center sm:h-56">
+    <div className="flex h-36 items-center justify-center rounded-2xl border border-dashed border-border px-6 text-center sm:h-56">
       <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{text}</p>
     </div>
   );
@@ -727,7 +731,7 @@ function MoodDistribution({
           />
           <div className="absolute inset-0 bg-gradient-to-br from-card/95 to-card/70" />
           <div className="relative p-7 sm:p-9">
-            <p className="font-display text-2xl leading-snug text-foreground">
+            <p className="font-display text-xl leading-snug text-foreground">
               You feel.
               <br />
               You heal.
@@ -781,13 +785,13 @@ function QuickInsights({
                   to="/mood/intelligence"
                   className="mm-insight grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 rounded-2xl border border-border bg-card/70 p-5 text-left hover:bg-card sm:p-6"
                 >
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary">
                     <Icon className="mm-insight-icon h-5 w-5 text-gold" strokeWidth={1.5} />
                   </span>
                   <span className="min-w-0 text-sm leading-relaxed text-foreground/85 sm:text-base">
                     {text}
                   </span>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border text-muted-foreground">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground">
                     <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
                   </span>
                 </Link>
@@ -848,7 +852,7 @@ function Streak({
           <div className="flex flex-wrap items-center gap-x-8 gap-y-6">
             <div>
               <p
-                className="font-display text-6xl leading-none text-gold"
+                className="font-display text-5xl leading-none text-gold"
                 data-testid="mood-streak-value"
               >
                 {streak}
@@ -861,7 +865,7 @@ function Streak({
               {dots.map((done, i) => (
                 <span
                   key={i}
-                  className={`grid h-8 w-8 place-items-center rounded-full border ${
+                  className={`grid h-7 w-7 place-items-center rounded-full border ${
                     done ? "border-gold/50 bg-gold/15 text-gold" : "border-border text-transparent"
                   }`}
                 >
@@ -917,7 +921,7 @@ function ClosingBanner() {
 
       <div className="relative grid gap-8 p-7 sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-14">
         <div className="min-w-0">
-          <p className="font-display text-2xl leading-snug text-foreground sm:text-3xl">
+          <p className="font-display text-xl leading-snug text-foreground sm:text-3xl">
             A calmer mind
             <br />
             creates a brighter you.
@@ -926,7 +930,7 @@ function ClosingBanner() {
         </div>
         <Link
           to="/mood/intelligence"
-          className="mm-btn inline-flex items-center justify-center gap-2.5 rounded-full border border-gold/40 px-7 py-4 text-sm text-gold hover:bg-gold/10 lg:justify-self-end"
+          className="mm-btn inline-flex items-center justify-center gap-2.5 rounded-full border border-gold/40 px-6 py-3.5 text-sm text-gold hover:bg-gold/10 lg:justify-self-end"
         >
           Explore your insights
           <ArrowRight className="h-4 w-4" strokeWidth={1.5} />

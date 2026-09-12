@@ -128,6 +128,30 @@ export function CoachPage() {
     };
   }, []);
 
+  /* Keep the composer above the phone keyboard. iOS doesn't shrink dvh when
+     the keyboard opens, so the dock would sit behind it: mirror the covered
+     height into --coach-kb (the stylesheet lifts the dock) and flag is-kb so
+     the tab bar ducks out of the way. Android resizes the layout viewport,
+     which makes the delta ~0 there — no double lift. */
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const root = pageRef.current;
+    const vv = window.visualViewport;
+    if (!root || !vv) return;
+    const sync = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty("--coach-kb", `${Math.round(kb)}px`);
+      root.classList.toggle("is-kb", kb > 40);
+    };
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    return () => {
+      vv.removeEventListener("resize", sync);
+      vv.removeEventListener("scroll", sync);
+    };
+  }, []);
+
   const toggleRail = useCallback(() => {
     setRailExpanded((current) => {
       try {
@@ -743,7 +767,7 @@ export function CoachPage() {
   };
 
   return (
-    <div className="coach-page app-shell">
+    <div ref={pageRef} className="coach-page app-shell">
       <AppNav />
       <main className="coach-canvas">
         <CoachSidebar

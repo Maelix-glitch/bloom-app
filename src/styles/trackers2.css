@@ -2929,3 +2929,65 @@
   }
 }
 
+/* ==========================================================================
+   Slice 3 — Atlas phone pass (≤480px only, desktop untouched).
+
+   1. Floating "Reflect & log" button goes smaller (!important beats the
+      inline critical styles Atlas sets in TSX).
+   2. Territory cards: reverted to normal — no card rules (per your call).
+   3. Bottom text shrinks (statement + medical-safety footer, words kept).
+   4. Hero title steps down one notch; compass untouched.
+   5. "Today's snapshot" becomes a centered floating pop like the mood and
+      habit pops — hooked straight onto this sheet's own classes, with
+      !important positioning so it wins against the sheet base styles.
+   ========================================================================== */
+@media (max-width: 480px) {
+  [data-design="atlas"] .at {
+    padding: 2rem 1rem 3rem;
+  }
+
+  [data-design="atlas"] .at-title {
+    font-size: 24px;
+  }
+
+  .premium-log-cta {
+    font-size: 0.68rem !important;
+    padding: 12px 26px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  [data-design="atlas"] .at-statement {
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .tk2-footer {
+    font-size: 10.5px;
+    line-height: 1.6;
+    margin-top: 2rem;
+  }
+
+  .bsheet--phone.metrics-sheet {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    bottom: auto !important;
+    translate: -50% -50% !important;
+    width: calc(100% - 32px) !important;
+    max-width: 480px !important;
+    max-height: 70dvh !important;
+    margin: 0 !important;
+  }
+
+  .bsheet--phone .metrics-pop {
+    border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent) !important;
+    border-radius: 24px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .bsheet--phone .metrics-pop > .bsheet-grab {
+    display: none !important;
+  }
+}

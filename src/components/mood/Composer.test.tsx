@@ -79,7 +79,7 @@ describe("mood composer", () => {
     render(<Composer open initial={null} onClose={() => {}} onSave={onSave} />);
 
     clickFace("anxious");
-    fireEvent.change(screen.getByLabelText("Anything you'd like to remember?"), {
+    fireEvent.change(screen.getByLabelText("Optional note"), {
       target: { value: "Deadline day" },
     });
     await act(async () => {

@@ -10,9 +10,9 @@
  * logged days or it says how far off it is.
  */
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { TRACKERS, type TrackerAnalysis } from "@/lib/trackers/core";
+import { TRACKERS, type TrackerAnalysis, type TrackerId } from "@/lib/trackers/core";
 import type { TrackerStore } from "@/hooks/useTrackers";
 
 const unit = (kind: "duration" | "volume" | "rating") =>
@@ -20,6 +20,48 @@ const unit = (kind: "duration" | "volume" | "rating") =>
 
 const step = (kind: "duration" | "volume" | "rating") =>
   kind === "volume" ? 100 : kind === "rating" ? 1 : 15;
+
+/**
+ * A target field you can actually clear and retype. The draft lives here
+ * while typing; the store only hears about it on blur/Enter (clamped), so
+ * deleting the number no longer snaps it back mid-edit. Leaving it empty
+ * reverts to the saved goal instead of writing zero.
+ */
+function TargetInput({
+  def,
+  value,
+  onCommit,
+}: {
+  def: { id: TrackerId; min: number; max: number };
+  value: number;
+  onCommit: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  useEffect(() => setDraft(null), [value]);
+  return (
+    <input
+      id={`target-${def.id}`}
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      min={def.min}
+      max={def.max}
+      value={draft ?? String(value)}
+      onChange={(event) => {
+        const next = event.target.value;
+        if (/^\d*$/.test(next)) setDraft(next);
+      }}
+      onBlur={() => {
+        if (draft === null) return;
+        if (draft !== "") onCommit(Number(draft));
+        setDraft(null);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") (event.target as HTMLInputElement).blur();
+      }}
+    />
+  );
+}
 
 export function TargetSheet({ store }: { store: TrackerStore }) {
   return (
@@ -68,19 +110,10 @@ export function TargetSheet({ store }: { store: TrackerStore }) {
           <li key={def.id} data-id={def.id}>
             <label htmlFor={`target-${def.id}`}>{def.name}</label>
             <span className="tk2-target-field">
-              <input
-                id={`target-${def.id}`}
-                type="number"
-                inputMode="numeric"
-                min={def.min}
-                max={def.max}
-                step={step(def.kind)}
+              <TargetInput
+                def={def}
                 value={store.goals[def.goalKey]}
-                onChange={(event) => {
-                  const next = Number(event.target.value);
-                  if (!Number.isFinite(next)) return;
-                  store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, next)));
-                }}
+                onCommit={(v) => store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, v)))}
               />
               <span className="tk2-unit">{unit(def.kind)}</span>
             </span>

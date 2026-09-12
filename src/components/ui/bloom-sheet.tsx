@@ -3,6 +3,8 @@
  *
  *   · phones: a native-feeling bottom sheet (grab handle, slides up, safe area)
  *   · desktop: a centred card
+ *   · placement="pop": a centred floating card on phones too, for compact
+ *     moments that shouldn't own the screen (no grabber, card motion)
  *   · backdrop fades; the panel arrives with opacity + translateY + a whisper
  *     of scale; the content inside staggers in ~40–70 ms steps
  *   · closing is symmetric and quick; reduced-motion collapses to plain fades
@@ -59,6 +61,7 @@ export function BloomSheet({
   title,
   description,
   size = "md",
+  placement = "sheet",
   className,
   panelClassName,
   children,
@@ -70,6 +73,8 @@ export function BloomSheet({
   title: string;
   description?: string | undefined;
   size?: "md" | "lg";
+  /** "sheet" slides from the bottom; "pop" floats centred on phones too. */
+  placement?: "sheet" | "pop" | undefined;
   className?: string | undefined;
   panelClassName?: string | undefined;
   children: React.ReactNode;
@@ -78,6 +83,9 @@ export function BloomSheet({
   const phone = useIsPhone();
   const reduced = useReducedMotion();
   const panelRef = React.useRef<HTMLDivElement | null>(null);
+  /** A pop is a phone that chose the centred card — card motion, no grabber. */
+  const pop = phone && placement === "pop";
+  const bottomSheet = phone && !pop;
 
   /*
    * Keyboard: phones don't shrink the layout viewport when it opens, so a
@@ -120,13 +128,13 @@ export function BloomSheet({
 
   const panelInitial = reduced
     ? { opacity: 0 }
-    : phone
+    : bottomSheet
       ? { opacity: 0, y: 48, scale: 1 }
       : { opacity: 0, y: 22, scale: 0.975 };
   const panelShow = { opacity: 1, y: 0, scale: 1 };
   const panelExit = reduced
     ? { opacity: 0, transition: { duration: 0.16 } }
-    : phone
+    : bottomSheet
       ? { opacity: 0, y: 40, transition: { duration: 0.26, ease: EASE } }
       : { opacity: 0, y: 12, scale: 0.985, transition: { duration: 0.22, ease: EASE } };
 
@@ -155,7 +163,7 @@ export function BloomSheet({
                 ref={panelRef}
                 className={cn(
                   "bsheet",
-                  phone ? "bsheet--phone" : "bsheet--card",
+                  pop ? "bsheet--pop" : phone ? "bsheet--phone" : "bsheet--card",
                   `bsheet--${size}`,
                   className,
                 )}
@@ -171,7 +179,7 @@ export function BloomSheet({
                   </DialogPrimitive.Description>
                 ) : null}
                 <div className={cn("bsheet-panel", panelClassName)}>
-                  {phone ? <span className="bsheet-grab" aria-hidden /> : null}
+                  {bottomSheet ? <span className="bsheet-grab" aria-hidden /> : null}
                   {children}
                 </div>
               </motion.div>

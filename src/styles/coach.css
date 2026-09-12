@@ -3402,3 +3402,52 @@
 .coach-page ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ==========================================================================
+   Slice 5 — Coach phone pass (≤480px only, desktop untouched).
+   1. One header: the global brand bar hides on Coach; canvas reclaims 60px.
+   2. Suggestions become an edge-to-edge swipe rail (snap, hidden scrollbar).
+   3. Keyboard: the dock lifts above it (--coach-kb from the page script) and
+      the tab bar ducks out while typing.
+   ========================================================================== */
+@media (max-width: 480px) {
+  .coach-page {
+    --app-top-bar: 0px;
+  }
+
+  .coach-page .app-mobile-bar {
+    display: none;
+  }
+
+  .coach-followups {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    margin: 2px -22px 0;
+    padding: 0 22px 9px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .coach-followups::-webkit-scrollbar {
+    display: none;
+  }
+
+  .coach-followup {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .coach-page.is-kb .coach-dock {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px) + var(--coach-kb, 0px));
+  }
+
+  .coach-page .app-mobile-nav {
+    transition: transform 0.25s ease;
+  }
+
+  .coach-page.is-kb .app-mobile-nav {
+    transform: translateY(110%);
+  }
+}

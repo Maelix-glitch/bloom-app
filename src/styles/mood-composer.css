@@ -2,10 +2,10 @@
  * The Mood moment sheet.
  *
  * The rule this file exists to enforce: logging a mood is capturing a feeling,
- * not filling in a form. So the sheet is built from three soft bands with no
- * boxes around them — a face to choose, a word or two to add, a save — and
- * every measurement (sleep, steps, screen, stress, …) is behind one quiet
- * "More detail" line that most people never open.
+ * not filling in a form. So the sheet is built from soft bands with no boxes
+ * around them — a face to choose, an optional note, a save — while the
+ * emotion words wait behind one quiet "What's behind it?" line and every
+ * measurement (sleep, steps, screen, stress, …) behind "More detail".
  *
  * Motion is transform + opacity only, and everything collapses under
  * prefers-reduced-motion. The face states do the emotional work: the unchosen
@@ -33,7 +33,7 @@
 
 .bmood-head {
   position: relative;
-  padding: 26px 26px 4px;
+  padding: 30px 26px 8px;
 }
 .bmood-eyebrow {
   font-family: var(--font-mono);
@@ -56,7 +56,7 @@
   transition: color 420ms var(--ease-out-expo);
 }
 .bmood-sub {
-  margin-top: 8px;
+  margin-top: 10px;
   max-width: 42ch;
   font-size: 13px;
   line-height: 1.5;
@@ -73,25 +73,25 @@
 .bmood-faces {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 4px;
-  padding: 22px 18px 6px;
+  gap: 6px;
+  padding: 26px 18px 10px;
 }
 @media (max-width: 420px) {
   .bmood-faces {
     gap: 0;
     padding-inline: 10px;
   }
-  /* six faces share ~300px: the discs shrink instead of overflowing */
+  /* six faces share ~330px: big enough to feel, small enough to fit */
   .bmood-face-disc svg {
-    width: 46px;
-    height: 46px;
+    width: 52px;
+    height: 52px;
   }
   .bmood-face-label {
     font-size: 10px;
   }
   .bmood-face-halo {
-    width: 60px;
-    height: 60px;
+    width: 68px;
+    height: 68px;
   }
 }
 @media (max-width: 359px) {
@@ -203,7 +203,7 @@
 /* ------------------------------------------------------------ emotions */
 
 .bmood-band {
-  padding: 18px 26px 0;
+  padding: 22px 26px 0;
 }
 .bmood-band-label {
   font-family: var(--font-mono);
@@ -249,6 +249,15 @@
   border-color: color-mix(in oklab, var(--chip-accent, var(--violet)) 52%, transparent);
   background: color-mix(in oklab, var(--chip-accent, var(--violet)) 16%, transparent);
   color: color-mix(in oklab, var(--chip-accent, var(--violet)) 88%, var(--foreground));
+}
+.bmood-band > .bmood-more:first-child {
+  margin-top: 8px;
+}
+
+/* the unfolded words: the same chips, given their own breath below the toggle */
+.bmood-words-panel {
+  padding: 2px 26px 0;
+  overflow: hidden;
 }
 
 /* ---------------------------------------------------------------- note */
@@ -530,7 +539,7 @@ select.bmood-input {
   color: var(--foreground);
 }
 .bmood-confirm-go {
-  background: color-mix(in oklab, var(--rose) 84%, transparent);
+  background: color-mix(in oklab, var(--rose) 84%, var(--foreground));
   color: oklch(0.98 0.01 20);
 }
 .bmood-confirm-go:hover {

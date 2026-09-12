@@ -1278,3 +1278,130 @@ body {
     background-color: #14151f;
   }
 }
+
+/* Desktop: the phone tab bar must never show — the rail owns nav at lg.
+   Unlayered and explicit, so it holds even where the lg: utility fails. */
+@media (min-width: 64rem) {
+  .app-shell > nav.app-mobile-nav {
+    display: none;
+  }
+}
+
+/* Mood desktop launch polish (P1-P4). Desktop only — phones untouched. */
+@media (min-width: 64rem) {
+  /* P2 — the top date rail reads as a header, not a floating line. */
+  .mood-page main > div > div > header {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* P1+P4 — the "small insight" card: text breathes across the card
+     instead of stranding in 1/3, sun medallion docks right with a glow. */
+  .mood-page [data-testid="mood-journey"] > div.relative > div.relative {
+    gap: 2.5rem;
+    padding: 2.25rem 2.75rem;
+  }
+  .mood-page [data-testid="mood-journey"] > div.relative p {
+    max-width: 46rem;
+    font-size: 1rem;
+  }
+  .mood-page [data-testid="mood-journey"] > div.relative > div.relative > span {
+    box-shadow:
+      0 0 0 6px color-mix(in oklab, var(--gold) 10%, transparent),
+      0 18px 44px -18px color-mix(in oklab, var(--gold) 55%, transparent);
+  }
+
+  /* P2 — the journey chart gets presence on a wide screen. */
+  .mood-page [data-testid="mood-journey"] [data-inview] svg {
+    height: 17rem;
+  }
+  .mood-page [data-testid="mood-journey"] [data-inview] > div:last-child {
+    font-size: 0.8rem;
+  }
+
+  /* P2 — week dots breathe a little on desktop. */
+  .mood-page [data-testid="mood-streak"] [aria-label="Last seven days"] {
+    gap: 0.65rem;
+  }
+  .mood-page [data-testid="mood-streak"] [aria-label="Last seven days"] > span {
+    height: 2.25rem;
+    width: 2.25rem;
+  }
+
+  /* P3 — the mood-web READING column: roomier, balanced vs the canvas. */
+  .mood-page [data-testid="mood-graph"] > div.grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  }
+  .mood-page .mg-reading {
+    padding: 2rem 2.25rem;
+  }
+}
+
+/* Ultra-wide: cap the page so panels never stretch into dead space. */
+@media (min-width: 80rem) {
+  .mood-page main > div {
+    max-width: 76rem;
+    margin-inline: auto;
+  }
+}
+
+/* Mood web hover flicker fix (desktop only) */
+@media (min-width: 64rem) {
+  .mood-page [data-testid="mood-graph"] > div.grid {
+    align-items: start;
+  }
+  .mood-page .mg-reading ul {
+    max-height: 22rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
+/* Mood Intelligence ultra-wide: cap the page (other routes untouched) */
+@media (min-width: 80rem) {
+  .app-shell main:has(#relationships) {
+    max-width: 76rem;
+    margin-inline: auto;
+  }
+}
+
+/* Intelligence pairs: top-pin panels so the shorter one never stretches */
+@media (min-width: 64rem) {
+  .app-shell main:has(#relationships) div.mt-14 > div.grid {
+    align-items: start;
+  }
+}
+
+/* iOS auto-zoom guard (phones only — desktop untouched) */
+@media (max-width: 40rem) {
+  .coach-page .coach-composer-input,
+  .coach-page .coach-conv-rename {
+    font-size: 16px;
+  }
+  textarea.bmood-note,
+  input.bmood-input {
+    font-size: 16px;
+  }
+  .app-shell main:has(#relationships) input[type="search"],
+  .app-shell main:has(#relationships) input[type="date"],
+  .app-shell main:has(#relationships) select {
+    font-size: 16px;
+  }
+}
+
+/* Coach keyboard-open: kill the gap under the composer */
+@media (max-width: 64rem) {
+  .coach-page.is-kb {
+    --app-bottom-nav: 0px;
+  }
+}
+
+/* Coach welcome type: one step smaller on phones */
+@media (max-width: 40rem) {
+  .coach-page .coach-welcome-title {
+    font-size: 30px;
+  }
+  .coach-page .coach-welcome-copy {
+    font-size: 14px;
+  }
+}

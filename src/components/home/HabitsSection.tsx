@@ -47,6 +47,10 @@ export interface HabitActions {
  * and the Coach read from); streaks are computed from the same logs. The "…"
  * on each row edits, pauses, archives or deletes it — nothing about a habit
  * is permanent any more.
+ *
+ * Phone scale: the title sits one step smaller (text-xl) so the hero keeps its
+ * air. Habit icons always show something premium: photo → emoji → monogram,
+ * never a broken-image glyph.
  */
 export function HabitsSection({
   habits,
@@ -108,7 +112,7 @@ export function HabitsSection({
           <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Habits</p>
           <h2
             id="home-habits-title"
-            className="mt-1 font-display text-2xl leading-tight sm:text-3xl"
+            className="mt-1 font-display text-xl leading-tight sm:text-3xl"
           >
             Your habits today
           </h2>
@@ -211,7 +215,7 @@ export function HabitsSection({
                       color: tone,
                     }}
                   >
-                    {h.iconUrl ? <img src={h.iconUrl} alt="" className="size-5 rounded" /> : h.icon}
+                    <HabitIcon habit={h} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span
@@ -302,7 +306,7 @@ export function HabitsSection({
                   className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3 py-2.5 text-sm"
                   data-testid={`home-habit-paused-${h.id}`}
                 >
-                  <span className="text-base opacity-70">{h.icon}</span>
+                  <span className="text-base opacity-70">{asideGlyph(h)}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
                     <span className="block text-[11px] text-muted-foreground">
@@ -327,7 +331,7 @@ export function HabitsSection({
                   className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3 py-2.5 text-sm opacity-80"
                   data-testid={`home-habit-archived-${h.id}`}
                 >
-                  <span className="text-base opacity-60">{h.icon}</span>
+                  <span className="text-base opacity-60">{asideGlyph(h)}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
                     <span className="block text-[11px] text-muted-foreground">
@@ -361,6 +365,49 @@ export function HabitsSection({
       ) : null}
     </section>
   );
+}
+
+/**
+ * The little picture tile on a habit row. Custom photos crop to fill the tile;
+ * if the picture is missing or fails to load, a letter monogram in the habit's
+ * own colour steps in — the row never shows a broken-image glyph.
+ */
+function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconUrl"> }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const src = habit.iconUrl && habit.iconUrl !== failedSrc ? habit.iconUrl : null;
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        className="size-5 rounded object-cover"
+        onError={() => setFailedSrc(src)}
+      />
+    );
+  }
+  if (isMissingIcon(habit.icon)) {
+    return (
+      <span aria-hidden="true" className="font-display text-base font-semibold leading-none">
+        {habitMonogram(habit.name)}
+      </span>
+    );
+  }
+  return <>{habit.icon}</>;
+}
+
+/** True when the saved icon is the "custom picture went missing" placeholder (or nothing). */
+function isMissingIcon(icon: string): boolean {
+  return icon === "" || icon === "🖼️";
+}
+
+/** First letter of the habit's name — the premium fallback when its picture is missing. */
+function habitMonogram(name: string): string {
+  return name.trim().charAt(0).toUpperCase() || "★";
+}
+
+/** Paused/archived rows render the icon as plain text — same "never broken" rule. */
+function asideGlyph(habit: Pick<Habit, "name" | "icon">): string {
+  return isMissingIcon(habit.icon) ? habitMonogram(habit.name) : habit.icon;
 }
 
 /** The "…" on a habit row. Edit, pause (with three sensible lengths), archive, delete. */

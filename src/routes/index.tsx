@@ -420,7 +420,7 @@ function TodayPage() {
         {/* hero */}
         <header className="home-rise mt-7 grid gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div>
-            <h1 className="font-display text-4xl leading-tight sm:text-5xl">
+            <h1 className="font-display text-3xl leading-tight sm:text-5xl">
               {firstName ? (
                 <>
                   {greetingFor(now.getHours())},{" "}
@@ -430,7 +430,7 @@ function TodayPage() {
                 <em className="home-text-gradient italic">{greetingFor(now.getHours())}.</em>
               )}
             </h1>
-            <p className="mt-1 font-display text-2xl text-muted-foreground sm:text-3xl">
+            <p className="mt-1.5 font-display text-xl text-muted-foreground sm:text-3xl">
               {subline}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
@@ -567,7 +567,7 @@ function TodayPage() {
                 height={672}
                 className="h-44 w-full object-cover"
               />
-              <figcaption className="absolute inset-0 flex items-start bg-gradient-to-r from-background/95 via-background/60 to-transparent p-4 font-display text-xl leading-snug">
+              <figcaption className="absolute inset-0 flex items-start bg-gradient-to-r from-background/95 via-background/60 to-transparent p-4 font-display text-lg leading-snug">
                 Small steps every day lead to big changes.
               </figcaption>
             </figure>

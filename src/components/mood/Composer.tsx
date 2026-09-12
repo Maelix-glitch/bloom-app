@@ -11,8 +11,10 @@
  *   How are you feeling?   →  six faces (the same quick check-ins the Mood
  *                             page uses, so a save here and a tap there
  *                             produce exactly the same kind of record)
- *   What's behind it?      →  optional emotion words
- *   Anything to remember?  →  optional note, no box around it
+ *   What's behind it?      →  a quiet line that unfolds the emotion words
+ *                             only when they're wanted (the face already
+ *                             carries one, and the line counts what's on)
+ *   Optional note          →  one soft field, journal-like
  *   Save moment
  *
  * Nothing was removed from the record. Energy, stress, the nine context
@@ -21,9 +23,9 @@
  * day's sleep / movement / study / screen record, so opening the section shows
  * work already done rather than nine empty boxes.
  *
- * Built on BloomSheet, so the phone gets a bottom sheet, the desktop a centred
- * card, and focus trap / escape / scroll lock come from Radix rather than from
- * a hand-rolled overlay.
+ * Built on BloomSheet as a centred pop, so the moment floats over the page
+ * instead of owning the screen — with focus trap / escape / scroll lock from
+ * Radix rather than from a hand-rolled overlay.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -176,6 +178,7 @@ export function Composer({
   /** The tracker prefill currently shown, so a date change can swap it cleanly. */
   const [prefill, setPrefill] = useState<MoodContext>({});
   const [face, setFace] = useState<PageMood | null>(() => (initial ? faceForEntry(initial) : null));
+  const [wordsOpen, setWordsOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -193,6 +196,8 @@ export function Composer({
     setPrefill(fill);
     setDraft({ ...base, ...applyPrefill(base, {}, fill) });
     setFace(initial ? faceForEntry(initial) : null);
+    /* Every open starts calm: the words stay folded (with their count shown). */
+    setWordsOpen(false);
     /* Editing an old record usually means the measurements matter — show them. */
     setDetailOpen(Boolean(initial));
     setSaving(false);
@@ -338,6 +343,7 @@ export function Composer({
       title={editing ? "Refine this mood moment" : "Log a mood moment"}
       description="Choose the face that's closest, add anything you'd like to remember, and save."
       panelClassName="p-0"
+      placement="pop"
     >
       <div className="bmood" style={{ ["--bmood-accent" as string]: accentCss }}>
         <header className="bmood-head">
@@ -348,7 +354,7 @@ export function Composer({
           <p className="bmood-sub">
             {face
               ? `Feeling ${MOOD_LABELS[face].toLowerCase()} — ${moodLabel(draft.mood).toLowerCase()}.`
-              : "Pick the face that's closest. You can add anything else after."}
+              : "Tap the face that fits."}
           </p>
         </header>
 
@@ -388,32 +394,60 @@ export function Composer({
         </div>
 
         <div className="bsheet-scroll">
-          {/* what's behind it */}
+          {/* what's behind it — folded until it's wanted; the face already carries one */}
           <div className="bmood-band">
-            <p className="bmood-band-label">What's behind it?</p>
-            <div className="bmood-emotions">
-              {EMOTIONS.map((e) => {
-                const on = draft.emotions.includes(e.key);
-                return (
-                  <button
-                    key={e.key}
-                    type="button"
-                    onClick={() => toggleEmotion(e.key)}
-                    aria-pressed={on}
-                    className="bmood-chip"
-                    style={{ ["--chip-accent" as string]: accentVar[e.accent] }}
-                  >
-                    {e.label}
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              type="button"
+              className="bmood-more"
+              aria-expanded={wordsOpen}
+              onClick={() => setWordsOpen((v) => !v)}
+              data-testid="mood-composer-words"
+            >
+              <ChevronDown className="bmood-more-chevron size-4" />
+              What's behind it?
+              {draft.emotions.length > 0 ? (
+                <span className="bmood-more-count">
+                  {draft.emotions.length} {draft.emotions.length === 1 ? "word" : "words"}
+                </span>
+              ) : null}
+            </button>
           </div>
+
+          <AnimatePresence initial={false}>
+            {wordsOpen ? (
+              <motion.div
+                key="words"
+                className="bmood-words-panel"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="bmood-emotions">
+                  {EMOTIONS.map((e) => {
+                    const on = draft.emotions.includes(e.key);
+                    return (
+                      <button
+                        key={e.key}
+                        type="button"
+                        onClick={() => toggleEmotion(e.key)}
+                        aria-pressed={on}
+                        className="bmood-chip"
+                        style={{ ["--chip-accent" as string]: accentVar[e.accent] }}
+                      >
+                        {e.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
 
           {/* the note — a line to remember, not an admin textarea */}
           <div className="bmood-band">
             <label className="bmood-band-label" htmlFor="bmood-note">
-              Anything you'd like to remember?
+              Optional note
             </label>
             <textarea
               id="bmood-note"
@@ -476,7 +510,7 @@ export function Composer({
                       className="mt-2 text-[12px] text-muted-foreground"
                       data-testid="mood-context-prefill"
                     >
-                      {describePrefill(fromTrackers)}. Change anything that doesn't feel right.
+                      {describePrefill(fromTrackers)}.
                     </p>
                   ) : null}
                   <div className="bmood-detail-grid" style={{ marginTop: 12 }}>
