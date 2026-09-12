@@ -11,6 +11,7 @@ import { StoryEditor, editorDraftStore, type EditorInitialState, type EditorSour
 import { CameraCapture } from "./CameraCapture";
 import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
 import { RestyleTray } from "./RestyleTray";
+import { StoryErrorBoundary } from "./ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { processStoryPhoto, validateImageFile } from "@/lib/profile/media";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
@@ -144,20 +145,24 @@ export function StoryCreator({
 
   if (editorSource) {
     return (
-      <StoryEditor
-        source={editorSource}
-        initialState={editorDraft}
-        userId={userId}
-        accent={defaultAccent}
-        defaultVisibility={defaultVisibility}
-        defaultAudience={defaultAudience}
-        onPublish={publish}
-        onClose={() => {
-          if (editorSource.base === "video" && editorSource.video) URL.revokeObjectURL(editorSource.video.previewUrl);
-          setEditorSource(null);
-          setEditorDraft(null);
-        }}
-      />
+      <StoryErrorBoundary>
+        <StoryEditor
+          source={editorSource}
+          initialState={editorDraft}
+          userId={userId}
+          accent={defaultAccent}
+          defaultVisibility={defaultVisibility}
+          defaultAudience={defaultAudience}
+          onPublish={publish}
+          onClose={() => {
+            try {
+              if (editorSource.base === "video" && editorSource.video) URL.revokeObjectURL(editorSource.video.previewUrl);
+            } catch {}
+            setEditorSource(null);
+            setEditorDraft(null);
+          }}
+        />
+      </StoryErrorBoundary>
     );
   }
 
@@ -167,7 +172,8 @@ export function StoryCreator({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[88] flex flex-col bg-black text-white" role="dialog" aria-label="Add to story">
+    <StoryErrorBoundary>
+      <div className="fixed inset-0 z-[88] flex flex-col bg-black text-white" role="dialog" aria-label="Add to story">
       {/* Top */}
       <div className="flex items-center justify-between px-4 pt-[max(10px,env(safe-area-inset-top))] pb-3 shrink-0">
         <button type="button" onClick={onClose} className="grid size-8 place-items-center text-white">
@@ -293,15 +299,20 @@ export function StoryCreator({
                 key={bg.id}
                 type="button"
                 onClick={() => {
-                  if (selectMode) {
-                    setSelectedIds((s) => {
-                      const n = new Set(s);
-                      if (n.has(bg.id)) n.delete(bg.id);
-                      else n.add(bg.id);
-                      return n;
-                    });
-                  } else {
-                    setEditorSource({ base: "background", backgroundId: bg.id, storyKind: "text" });
+                  try {
+                    if (selectMode) {
+                      setSelectedIds((s) => {
+                        const n = new Set(s);
+                        if (n.has(bg.id)) n.delete(bg.id);
+                        else n.add(bg.id);
+                        return n;
+                      });
+                    } else {
+                      setEditorSource({ base: "background", backgroundId: bg.id, storyKind: "text" });
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    toast.error("Couldn't open editor");
                   }
                 }}
                 className="relative aspect-[3/4] overflow-hidden"
@@ -327,11 +338,16 @@ export function StoryCreator({
           <button
             type="button"
             onClick={() => {
-              if (selectMode && selectedIds.size > 0) {
-                const first = Array.from(selectedIds)[0]!;
-                setEditorSource({ base: "background", backgroundId: first, storyKind: "text" });
-              } else {
-                setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+              try {
+                if (selectMode && selectedIds.size > 0) {
+                  const arr = Array.from(selectedIds);
+                  const first = arr[0] ?? "ig-black";
+                  setEditorSource({ base: "background", backgroundId: first, storyKind: "text" });
+                } else {
+                  setEditorSource({ base: "background", backgroundId: "ig-black", storyKind: "text" });
+                }
+              } catch {
+                toast.error("Couldn't open editor");
               }
             }}
             className="text-[15px] tracking-[0.15em] text-white font-bold"
@@ -550,7 +566,8 @@ export function StoryCreator({
           void onPhotoFile(file);
         }}
       />
-    </div>
+      </div>
+    </StoryErrorBoundary>
   );
 }
 

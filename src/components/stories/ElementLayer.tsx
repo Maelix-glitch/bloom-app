@@ -97,8 +97,11 @@ export function ElementLayer({
       } else if (pointers.current.size === 2) {
         // Second finger: lock into pinch for the selected element.
         const pts = [...pointers.current.values()];
-        const dx = pts[1]!.x - pts[0]!.x;
-        const dy = pts[1]!.y - pts[0]!.y;
+        const p0 = pts[0];
+        const p1 = pts[1];
+        if (!p0 || !p1) return;
+        const dx = p1.x - p0.x;
+        const dy = p1.y - p0.y;
         const el = elementById(selectedRef.current);
         gesture.current = {
           mode: "touch",
@@ -126,8 +129,11 @@ export function ElementLayer({
       /* two fingers: pinch scale + rotate */
       if (pointers.current.size >= 2 && g.elStart && g.elId) {
         const pts = [...pointers.current.values()];
-        const dx = pts[1]!.x - pts[0]!.x;
-        const dy = pts[1]!.y - pts[0]!.y;
+        const pp0 = pts[0];
+        const pp1 = pts[1];
+        if (!pp0 || !pp1) return;
+        const dx = pp1.x - pp0.x;
+        const dy = pp1.y - pp0.y;
         const dist = Math.max(1, Math.hypot(dx, dy));
         const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
         let rotation = g.elStart.rotation + (angle - g.pinchAngle);
@@ -206,7 +212,8 @@ export function ElementLayer({
       } else if (pointers.current.size === 1) {
         // Dropping from pinch back to one finger: re-anchor the drag.
         const el = elementById(g.elId);
-        const remaining = [...pointers.current.values()][0]!;
+        const remaining = [...pointers.current.values()][0];
+        if (!remaining) return;
         gesture.current = {
           mode: "touch",
           startClient: { x: remaining.x, y: remaining.y },

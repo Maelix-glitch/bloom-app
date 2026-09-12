@@ -48,6 +48,7 @@ import {
 } from "@/lib/stories/elements";
 import { DEFAULT_ADJUSTMENTS, STORY_TEMPLATES, backgroundById } from "@/lib/stories/catalogs";
 import { recordStickerUse } from "@/lib/stories/stickers";
+import { StoryErrorBoundary } from "./ErrorBoundary";
 import type {
   StoryAdjustments,
   StoryAudience,
@@ -231,10 +232,16 @@ export function StoryEditor({
   const [, setHistoryTick] = useState(0);
 
   const snapshot = useCallback(
-    (): Snapshot => ({
-      elements: serializeElements(elements),
-      strokes: JSON.parse(JSON.stringify(strokes)) as DrawStroke[],
-    }),
+    (): Snapshot => {
+      try {
+        return {
+          elements: serializeElements(elements),
+          strokes: JSON.parse(JSON.stringify(strokes)) as DrawStroke[],
+        };
+      } catch {
+        return { elements, strokes };
+      }
+    },
     [elements, strokes],
   );
 
@@ -462,33 +469,44 @@ export function StoryEditor({
   );
 
   const publishElements = useCallback((): StoryElement[] => {
-    let els = serializeElements(elements);
-    const kept = new Set(els.map((e) => e.id));
-    for (const e of elements) {
-      if (e.kind === "gif" && !kept.has(e.id) && gifFiles.current.has(e.id)) els.push(e);
-    }
-    if (strokes.length > 0) {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      const w = Math.min(720, Math.max(360, Math.round((rect?.width ?? 390) * 2)));
-      const h = Math.round(w * ((rect?.height ?? 700) / Math.max(1, rect?.width ?? 390)));
-      const src = exportDrawing(strokes, w, h);
-      if (src) {
-        els = els.filter((e) => e.kind !== "drawing");
-        els.push({
-          id: `drawing-${Date.now().toString(36)}`,
-          kind: "drawing",
-          x: 0.5,
-          y: 0.5,
-          scale: 1,
-          rotation: 0,
-          z: 999,
-          src,
-          width: w,
-          height: h,
-        });
+    try {
+      let els: StoryElement[] = [];
+      try {
+        els = serializeElements(elements);
+      } catch {
+        els = [...elements];
       }
+      const kept = new Set(els.map((e) => e.id));
+      for (const e of elements) {
+        if (e.kind === "gif" && !kept.has(e.id) && gifFiles.current.has(e.id)) els.push(e);
+      }
+      if (strokes.length > 0) {
+        try {
+          const rect = canvasRef.current?.getBoundingClientRect();
+          const w = Math.min(720, Math.max(360, Math.round((rect?.width ?? 390) * 2)));
+          const h = Math.round(w * ((rect?.height ?? 700) / Math.max(1, rect?.width ?? 390)));
+          const src = exportDrawing(strokes, w, h);
+          if (src) {
+            els = els.filter((e) => e.kind !== "drawing");
+            els.push({
+              id: `drawing-${Date.now().toString(36)}`,
+              kind: "drawing",
+              x: 0.5,
+              y: 0.5,
+              scale: 1,
+              rotation: 0,
+              z: 999,
+              src,
+              width: w,
+              height: h,
+            });
+          }
+        } catch {}
+      }
+      return els;
+    } catch {
+      return elements;
     }
-    return els;
   }, [elements, strokes]);
 
   const publish = useCallback(async () => {
@@ -591,9 +609,16 @@ export function StoryEditor({
 
   /* -------------------------------- share - Instagram -------------------------------- */
   if (step === "share") {
-    const previewStory = { elements: publishElements() };
+    let previewElements: StoryElement[] = [];
+    try {
+      previewElements = publishElements();
+    } catch {
+      previewElements = elements;
+    }
+    const previewStory = { elements: previewElements };
     return (
-      <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-label="Share story">
+      <StoryErrorBoundary>
+        <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-label="Share story">
         <div className="flex items-center justify-between px-4 pt-[max(12px,env(safe-area-inset-top))] pb-3 border-b border-[#262626]">
           <button type="button" onClick={() => setStep("edit")} aria-label="Back" className="grid size-8 place-items-center rounded-full text-white">
             <ArrowLeft className="size-6" />
@@ -686,33 +711,38 @@ export function StoryEditor({
             </button>
           </div>
         </div>
-      </div>
+        </div>
+      </StoryErrorBoundary>
     );
   }
 
   if (step === "confirm-leave") {
     return (
-      <div className="fixed inset-0 z-[95] grid place-items-center bg-black/80 px-6 backdrop-blur-sm" role="alertdialog" aria-label="Discard">
-        <div className="w-full max-w-[320px] rounded-2xl bg-[#262626] p-6 text-center">
-          <p className="text-[18px] font-semibold text-white">Discard story?</p>
-          <p className="mt-2 text-[14px] leading-relaxed text-[#a8a8a8]">If you leave, your edits won't be saved.</p>
-          <div className="mt-6 flex flex-col gap-2">
-            <button type="button" onClick={() => setStep("edit")} className="rounded-full bg-white py-3 text-[15px] font-semibold text-black">
-              Keep editing
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                editorDraftStore.clear();
-                onClose();
-              }}
-              className="rounded-full bg-transparent py-3 text-[15px] font-semibold text-[#ff3040]"
-            >
-              Discard
-            </button>
+      <StoryErrorBoundary>
+        <div className="fixed inset-0 z-[95] grid place-items-center bg-black/80 px-6 backdrop-blur-sm" role="alertdialog" aria-label="Discard">
+          <div className="w-full max-w-[320px] rounded-2xl bg-[#262626] p-6 text-center">
+            <p className="text-[18px] font-semibold text-white">Discard story?</p>
+            <p className="mt-2 text-[14px] leading-relaxed text-[#a8a8a8]">If you leave, your edits won't be saved.</p>
+            <div className="mt-6 flex flex-col gap-2">
+              <button type="button" onClick={() => setStep("edit")} className="rounded-full bg-white py-3 text-[15px] font-semibold text-black">
+                Keep editing
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    editorDraftStore.clear();
+                  } catch {}
+                  onClose();
+                }}
+                className="rounded-full bg-transparent py-3 text-[15px] font-semibold text-[#ff3040]"
+              >
+                Discard
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </StoryErrorBoundary>
     );
   }
 
@@ -729,8 +759,9 @@ export function StoryEditor({
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-label="Story editor">
-      {/* Top bar - Instagram */}
+    <StoryErrorBoundary>
+      <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-label="Story editor">
+        {/* Top bar - Instagram */}
       <div className="relative z-50 flex items-center justify-between px-3 pt-[max(10px,env(safe-area-inset-top))] pb-2">
         <button type="button" onClick={requestClose} aria-label="Close" className="grid size-8 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md">
           <X className="size-6" />
@@ -1133,7 +1164,8 @@ export function StoryEditor({
             </div>
           </div>
         </div>
-      ) : null}
-    </div>
+        ) : null}
+      </div>
+    </StoryErrorBoundary>
   );
 }

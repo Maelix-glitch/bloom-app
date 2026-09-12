@@ -25,6 +25,7 @@ import { GiftSheet, ReplySheet, StoryInsightsSheet } from "./InteractionSheets";
 import { GIFT_META } from "@/lib/stories/catalogs";
 import { recordView } from "@/lib/stories/interactions";
 import { storyAge } from "@/lib/stories/time";
+import { StoryErrorBoundary } from "./ErrorBoundary";
 import type { StoryGiftKind } from "@/lib/stories/types";
 import { toast } from "sonner";
 
@@ -433,11 +434,12 @@ export function StoryViewer({
     .replace(" ", "");
 
   return (
-    <div
-      className="ig-viewer-root fixed inset-0 z-[100] bg-black"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Stories by ${viewerName}`}
+    <StoryErrorBoundary>
+      <div
+        className="ig-viewer-root fixed inset-0 z-[100] bg-black"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Stories by ${viewerName}`}
       style={{
         transform: isDragging ? `translate(${dragX}px, ${dragY}px)` : undefined,
         opacity: isDragging && dragY > 0 ? Math.max(0.5, 1 - dragY / 400) : 1,
@@ -683,6 +685,7 @@ export function StoryViewer({
           }
         />
       ) : null}
-    </div>
+      </div>
+    </StoryErrorBoundary>
   );
 }

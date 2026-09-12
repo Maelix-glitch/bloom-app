@@ -39,21 +39,33 @@ function paintStroke(
   ctx.lineWidth = stroke.size;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
+  const first = pts[0];
+  if (!first) {
+    ctx.restore();
+    return;
+  }
   if (pts.length === 1) {
     ctx.beginPath();
-    ctx.arc(pts[0]!.x * width, pts[0]!.y * height, stroke.size / 2, 0, Math.PI * 2);
+    ctx.arc(first.x * width, first.y * height, stroke.size / 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
     return;
   }
   ctx.beginPath();
-  ctx.moveTo(pts[0]!.x * width, pts[0]!.y * height);
+  ctx.moveTo(first.x * width, first.y * height);
   for (let i = 1; i < pts.length - 1; i += 1) {
-    const midX = ((pts[i]!.x + pts[i + 1]!.x) / 2) * width;
-    const midY = ((pts[i]!.y + pts[i + 1]!.y) / 2) * height;
-    ctx.quadraticCurveTo(pts[i]!.x * width, pts[i]!.y * height, midX, midY);
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    if (!p1 || !p2) continue;
+    const midX = ((p1.x + p2.x) / 2) * width;
+    const midY = ((p1.y + p2.y) / 2) * height;
+    ctx.quadraticCurveTo(p1.x * width, p1.y * height, midX, midY);
   }
-  const last = pts[pts.length - 1]!;
+  const last = pts[pts.length - 1];
+  if (!last) {
+    ctx.restore();
+    return;
+  }
   ctx.lineTo(last.x * width, last.y * height);
   ctx.stroke();
   ctx.restore();
@@ -61,14 +73,22 @@ function paintStroke(
 
 /** Flatten strokes to a PNG data URL at the given pixel size. */
 export function exportDrawing(strokes: DrawStroke[], width: number, height: number): string | null {
-  if (strokes.length === 0) return null;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(2, Math.round(width));
-  canvas.height = Math.max(2, Math.round(height));
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-  for (const stroke of strokes) paintStroke(ctx, stroke, canvas.width, canvas.height);
-  return canvas.toDataURL("image/png");
+  try {
+    if (!strokes || strokes.length === 0) return null;
+    if (!width || !height || !Number.isFinite(width) || !Number.isFinite(height)) return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(2, Math.round(width));
+    canvas.height = Math.max(2, Math.round(height));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    for (const stroke of strokes) {
+      if (!stroke?.points?.length) continue;
+      paintStroke(ctx, stroke, canvas.width, canvas.height);
+    }
+    return canvas.toDataURL("image/png");
+  } catch {
+    return null;
+  }
 }
 
 export function DrawLayer({
@@ -106,7 +126,10 @@ export function DrawLayer({
   }, [strokes, canvasSize]);
 
   const pointFromEvent = useCallback((e: React.PointerEvent): DrawPoint => {
-    const rect = canvasRef.current!.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0.5, y: 0.5 };
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return { x: 0.5, y: 0.5 };
     return {
       x: Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)),
       y: Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)),
@@ -143,21 +166,26 @@ export function DrawLayer({
         repaint();
       }}
       onPointerMove={(e) => {
-        const active = activeRef.current;
-        if (!active || e.buttons === 0) return;
-        e.stopPropagation();
-        const events =
-          typeof e.nativeEvent.getCoalescedEvents === "function"
-            ? e.nativeEvent.getCoalescedEvents()
-            : [e.nativeEvent];
-        const rect = canvasRef.current!.getBoundingClientRect();
-        for (const evt of events as PointerEvent[]) {
-          active.points.push({
-            x: Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width)),
-            y: Math.max(0, Math.min(1, (evt.clientY - rect.top) / rect.height)),
-          });
-        }
-        repaint();
+        try {
+          const active = activeRef.current;
+          if (!active || e.buttons === 0) return;
+          e.stopPropagation();
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const rect = canvas.getBoundingClientRect();
+          if (rect.width === 0 || rect.height === 0) return;
+          const events =
+            typeof (e.nativeEvent as any).getCoalescedEvents === "function"
+              ? (e.nativeEvent as any).getCoalescedEvents()
+              : [e.nativeEvent];
+          for (const evt of events as PointerEvent[]) {
+            active.points.push({
+              x: Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width)),
+              y: Math.max(0, Math.min(1, (evt.clientY - rect.top) / rect.height)),
+            });
+          }
+          repaint();
+        } catch {}
       }}
       onPointerUp={(e) => {
         const active = activeRef.current;

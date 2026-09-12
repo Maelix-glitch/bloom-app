@@ -120,34 +120,38 @@ export function CameraCapture({
   }, [torch]);
 
   const takePhoto = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !video.videoWidth) return;
-    const canvas = document.createElement("canvas");
-    const scale = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight));
-    canvas.width = Math.round(video.videoWidth * scale);
-    canvas.height = Math.round(video.videoHeight * scale);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    if (facing === "user") {
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    setFlash(true);
-    window.setTimeout(() => setFlash(false), 200);
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-        onPhoto({
-          blob,
-          dataUrl: canvas.toDataURL("image/jpeg", 0.9),
-          width: canvas.width,
-          height: canvas.height,
-        });
-      },
-      "image/jpeg",
-      0.9,
-    );
+    try {
+      const video = videoRef.current;
+      if (!video || !video.videoWidth || !video.videoHeight) return;
+      const canvas = document.createElement("canvas");
+      const scale = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight, 1));
+      canvas.width = Math.max(2, Math.round(video.videoWidth * scale));
+      canvas.height = Math.max(2, Math.round(video.videoHeight * scale));
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      if (facing === "user") {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      setFlash(true);
+      window.setTimeout(() => setFlash(false), 200);
+      canvas.toBlob(
+        (blob) => {
+          try {
+            if (!blob) return;
+            onPhoto({
+              blob,
+              dataUrl: canvas.toDataURL("image/jpeg", 0.9),
+              width: canvas.width,
+              height: canvas.height,
+            });
+          } catch {}
+        },
+        "image/jpeg",
+        0.9,
+      );
+    } catch {}
   }, [facing, onPhoto]);
 
   const stopRecording = useCallback(() => {

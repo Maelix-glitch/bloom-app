@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils";
 
 function backgroundCss(id: string): { css: string; ink: string } {
   const found = STORY_BACKGROUNDS.find((b) => b.id === id);
-  return { css: found?.css ?? STORY_BACKGROUNDS[0]!.css, ink: found?.ink ?? "#f4efe4" };
+  const fallback = STORY_BACKGROUNDS[0];
+  return { css: found?.css ?? fallback?.css ?? "#000", ink: found?.ink ?? fallback?.ink ?? "#f4efe4" };
 }
 
 export function BloomShareCard({
