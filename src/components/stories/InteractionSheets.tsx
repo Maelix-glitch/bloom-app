@@ -310,7 +310,10 @@ export function GiftSheet({
               disabled={sending !== null}
               aria-label={`Send ${meta.name}: ${meta.hint}`}
               title={meta.hint}
-              className="se-sticker-cell flex-col !aspect-auto gap-1 px-2 py-3.5 disabled:opacity-50"
+              className={cn(
+                "se-sticker-cell flex-col !aspect-auto gap-1 px-2 py-3.5 disabled:opacity-50",
+                sending === id && "animate-pulse-accent",
+              )}
             >
               <span className="text-[30px] leading-none" aria-hidden>
                 {sending === id ? "…" : meta.glyph}
@@ -469,31 +472,109 @@ export function StoryInsightsSheet({
 function ViewersList({ viewers }: { viewers: StoryViewerEntry[] }) {
   if (viewers.length === 0) {
     return (
-      <p className="py-6 text-center text-[13px] text-faint">
-        No views yet — moments take their time.
-      </p>
+      <div className="flex flex-col items-center gap-1.5 py-8 text-center">
+        <span className="grid size-10 place-items-center rounded-full bg-surface-2/70 text-faint" aria-hidden>
+          <Eye className="size-4" />
+        </span>
+        <p className="display text-[15px] text-muted-foreground">No views yet.</p>
+        <p className="max-w-[26ch] text-[12.5px] text-faint">
+          Moments take their time — this quiet page fills as people stop by.
+        </p>
+      </div>
     );
   }
+
+  const now = Date.now();
+  const hourMs = 3_600_000;
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const yesterdayStart = new Date(todayStart);
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+  type ViewerBuckets = {
+    justNow: StoryViewerEntry[];
+    today: StoryViewerEntry[];
+    yesterday: StoryViewerEntry[];
+    earlier: StoryViewerEntry[];
+  };
+  const grouped: ViewerBuckets = { justNow: [], today: [], yesterday: [], earlier: [] };
+  for (const v of viewers) {
+    const viewedMs = new Date(v.viewedAt).getTime();
+    if (viewedMs >= now - hourMs) grouped.justNow.push(v);
+    else if (viewedMs >= todayStart.getTime()) grouped.today.push(v);
+    else if (viewedMs >= yesterdayStart.getTime()) grouped.yesterday.push(v);
+    else grouped.earlier.push(v);
+  }
+
+  const renderSection = (label: string, entries: StoryViewerEntry[]) => {
+    if (entries.length === 0) return null;
+    return (
+      <li
+        key={label}
+        className="flex items-center justify-between gap-3 rounded-xl bg-surface/50 px-3 py-2"
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
+          {label}
+        </span>
+        <span className="text-[11.5px] text-muted-foreground">
+          {entries.length} {entries.length === 1 ? "view" : "views"}
+        </span>
+      </li>
+    );
+  };
+
   return (
-    <ul className="flex flex-col gap-1">
-      {viewers.map((v) => (
-        <li
-          key={v.viewerId}
-          className="flex items-center justify-between gap-3 rounded-xl px-2 py-2"
+    <div className="flex flex-col gap-4">
+      <section aria-label="Viewers just now">
+        <ul className="flex flex-col gap-1">
+          {grouped.justNow.map((v) => (
+            <ViewerRow key={v.viewerId} v={v} />
+          ))}
+        </ul>
+        {renderSection("Just now", grouped.justNow)}
+      </section>
+      <section aria-label="Viewers today">
+        <ul className="flex flex-col gap-1">
+          {grouped.today.map((v) => (
+            <ViewerRow key={v.viewerId} v={v} />
+          ))}
+        </ul>
+        {renderSection("Today", grouped.today)}
+      </section>
+      <section aria-label="Viewers yesterday">
+        <ul className="flex flex-col gap-1">
+          {grouped.yesterday.map((v) => (
+            <ViewerRow key={v.viewerId} v={v} />
+          ))}
+        </ul>
+        {renderSection("Yesterday", grouped.yesterday)}
+      </section>
+      <section aria-label="Earlier viewers">
+        <ul className="flex flex-col gap-1">
+          {grouped.earlier.map((v) => (
+            <ViewerRow key={v.viewerId} v={v} />
+          ))}
+        </ul>
+        {renderSection("Earlier", grouped.earlier)}
+      </section>
+    </div>
+  );
+}
+
+function ViewerRow({ v }: { v: StoryViewerEntry }) {
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-xl px-2 py-2">
+      <span className="flex min-w-0 items-center gap-2.5">
+        <span
+          className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-3 text-[11px] font-bold text-muted-foreground"
+          aria-hidden
         >
-          <span className="flex min-w-0 items-center gap-2.5">
-            <span
-              className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-3 text-[11px] font-bold text-muted-foreground"
-              aria-hidden
-            >
-              {v.name.trim().slice(0, 1).toUpperCase() || "·"}
-            </span>
-            <span className="truncate text-[13.5px]">{v.name}</span>
-          </span>
-          <span className="mono shrink-0 text-[10.5px] text-faint">{storyAge(v.viewedAt)}</span>
-        </li>
-      ))}
-    </ul>
+          {v.name.trim().slice(0, 1).toUpperCase() || "·"}
+        </span>
+        <span className="truncate text-[13.5px]">{v.name}</span>
+      </span>
+      <span className="mono shrink-0 text-[10.5px] text-faint">{storyAge(v.viewedAt)}</span>
+    </li>
   );
 }
 

@@ -46,6 +46,7 @@ import {
   sanitizeElements,
   serializeElements,
 } from "@/lib/stories/elements";
+import { editorDraftStore } from "@/lib/stories/draftStore";
 import {
   DEFAULT_ADJUSTMENTS,
   STORY_TEMPLATES,
@@ -99,60 +100,6 @@ interface Snapshot {
   elements: StoryElement[];
   strokes: DrawStroke[];
 }
-
-const DRAFT_KEY = "bloom.story.editor.draft.v2";
-
-interface EditorDraft {
-  userId: string;
-  savedAt: number;
-  source: {
-    base: "photo" | "background";
-    photoDataUrl: string | null;
-    photoWidth: number;
-    photoHeight: number;
-    backgroundId: string;
-    storyKind: StoryKind;
-  };
-  elements: StoryElement[];
-  strokes: DrawStroke[];
-  filterId: string;
-  adjustments: StoryAdjustments;
-  captionTitle: string;
-  captionBody: string;
-  altText: string;
-}
-
-export const editorDraftStore = {
-  read(): EditorDraft | null {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = window.localStorage.getItem(DRAFT_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as EditorDraft;
-      if (!parsed || typeof parsed !== "object" || !parsed.source) return null;
-      if (Date.now() - (parsed.savedAt || 0) > 7 * 86400000) return null;
-      return parsed;
-    } catch {
-      return null;
-    }
-  },
-  write(draft: EditorDraft): void {
-    if (typeof window === "undefined") return;
-    try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    } catch {
-      /* storage full — drafts are best-effort */
-    }
-  },
-  clear(): void {
-    if (typeof window === "undefined") return;
-    try {
-      window.localStorage.removeItem(DRAFT_KEY);
-    } catch {
-      /* ignore */
-    }
-  },
-};
 
 function nextZ(elements: StoryElement[]): number {
   return elements.reduce((m, e) => Math.max(m, e.z), 0) + 1;
@@ -462,17 +409,28 @@ export function StoryEditor({
     if (source.base === "video") return; // files can't be restored; don't pretend
     window.clearTimeout(draftTimer.current);
     draftTimer.current = window.setTimeout(() => {
-      editorDraftStore.write({
+      void editorDraftStore.write({
         userId,
         savedAt: Date.now(),
-        source: {
-          base: source.base === "photo" ? "photo" : "background",
-          photoDataUrl: source.photo?.dataUrl ?? null,
-          photoWidth: source.photo?.width ?? 0,
-          photoHeight: source.photo?.height ?? 0,
-          backgroundId,
-          storyKind: source.storyKind,
-        },
+        source: source.base === "video"
+          ? {
+              base: "video",
+              videoFile: source.video?.blob ?? null,
+              videoDurationMs: source.video?.durationMs ?? 0,
+              videoWidth: source.video?.width ?? 0,
+              videoHeight: source.video?.height ?? 0,
+              videoThumbnail: source.videoThumbnail ?? null,
+              storyKind: source.storyKind,
+            }
+          : {
+              base: source.base === "photo" ? "photo" : "background",
+              photoFile: source.photo?.blob ?? null,
+              photoDataUrl: source.photo?.dataUrl ?? null,
+              photoWidth: source.photo?.width ?? 0,
+              photoHeight: source.photo?.height ?? 0,
+              backgroundId,
+              storyKind: source.storyKind,
+            },
         elements: serializeElements(elements),
         strokes,
         filterId,

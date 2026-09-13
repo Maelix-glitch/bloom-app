@@ -3,19 +3,21 @@
  * Owns every story look: rings, rail, viewer, editor, trays, stickers,
  * gifts, archive. Scoped to `.bstory` / `sv-` / `se-` prefixes so nothing
  * leaks. Motion obeys prefers-reduced-motion at the bottom.
+ * Editorial-warm palette: soft luminous gradients (lavender→rose→champagne→sage),
+ * warm ivory ink, rounded premium feel.
  */
 
 .bstory {
-  --story-ring: linear-gradient(135deg, #b7a6e8 0%, #e0a3b8 48%, #eed9a4 100%);
-  --story-ring-close: linear-gradient(135deg, #9db89a 0%, #9fb6cf 55%, #b7a6e8 100%);
-  --story-ring-seen: color-mix(in oklab, var(--foreground) 22%, transparent);
+  --story-ring: linear-gradient(135deg, #e0d5f0 0%, #f4e0ec 48%, #ffe8d6 100%);
+  --story-ring-close-friends: linear-gradient(135deg, #d5c5e0 0%, #e0d5f0 50%, #f4e0ec 100%);
+  --story-ring-seen: color-mix(in oklab, var(--foreground) 20%, transparent);
   --story-ink: #f4efe4;
-  --story-ink-dim: rgba(244, 239, 228, 0.66);
-  --story-ink-faint: rgba(244, 239, 228, 0.42);
-  --story-veil: rgba(14, 11, 24, 0.55);
-  --story-chip: rgba(20, 17, 29, 0.62);
-  --story-chip-line: rgba(244, 239, 228, 0.14);
-  --story-radius: 18px;
+  --story-ink-dim: rgba(244, 239, 228, 0.6);
+  --story-ink-faint: rgba(244, 239, 228, 0.38);
+  --story-veil: rgba(12, 8, 20, 0.5);
+  --story-chip: rgba(22, 19, 33, 0.65);
+  --story-chip-line: rgba(244, 239, 228, 0.12);
+  --story-radius: 20px;
   --story-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -80,11 +82,12 @@
 
 .srail {
   display: flex;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 4px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  padding: 2px 2px 6px;
+  padding: 0 2px 2px;
   scroll-padding-inline: 8px;
 }
 
@@ -96,9 +99,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  min-width: 76px;
-  padding: 6px 4px 4px;
+  gap: 8px;
+  min-width: 72px;
+  padding: 4px 6px 2px;
   border-radius: 16px;
   transition: background var(--motion-fast) ease, transform var(--motion-fast) ease;
 }
@@ -130,14 +133,17 @@
   position: absolute;
   right: -1px;
   bottom: -1px;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 22px;
   height: 22px;
+  padding: 0;
   border-radius: 999px;
   background: var(--surface-2);
   border: 2px solid var(--background);
   color: var(--foreground);
+  cursor: pointer;
 }
 
 /* ------------------------------ story viewer ---------------------------- */
@@ -267,6 +273,36 @@
 .sv-react-btn[data-active="true"] {
   background: rgba(238, 217, 164, 0.16);
   border-color: rgba(238, 217, 164, 0.4);
+}
+
+/* Organic "settle" when the reaction lands — a held glyph, not a press. */
+@keyframes sv-react-settle {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+  55% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.sv-react-btn[data-active="true"] > span {
+  animation: sv-react-settle 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.sv-react-btn:hover[data-active="false"],
+.sv-react-btn:focus-visible[data-active="false"] {
+  background: rgba(244, 239, 228, 0.08);
+}
+
+.sv-react-btn:focus-visible {
+  outline: 2px solid rgba(238, 217, 164, 0.6);
+  outline-offset: 2px;
 }
 
 @keyframes sv-heart-pop {
@@ -561,6 +597,73 @@
   animation: se-text-pulse 2.4s ease-in-out infinite;
 }
 
+/* Bloom editorial — soft breathing glow behind story content */
+@keyframes breathe-slow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+/* Subtle ring bloom on new/unseen stories */
+@keyframes ring-bloom-slow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(224, 163, 184, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 16px rgba(224, 163, 184, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(224, 163, 184, 0);
+  }
+}
+
+/* Gentle horizontal drift for tray backgrounds */
+@keyframes drift-slow {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    transform: translateX(8px) scale(1.01);
+  }
+}
+
+/* Pulse accent on interactive element hover */
+@keyframes pulse-accent {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.96);
+  }
+}
+
+/* Bloom motion utilities */
+.animate-breathe-slow {
+  animation: breathe-slow 8s ease-in-out infinite;
+}
+
+.animate-ring-bloom-slow {
+  animation: ring-bloom-slow 1600ms ease-out 1;
+}
+
+.animate-drift-slow {
+  animation: drift-slow 20s ease-in-out infinite;
+}
+
+.animate-pulse-accent {
+  animation: pulse-accent 2s ease-in-out infinite;
+}
+
 /* --------------------------- interactive stickers ----------------------- */
 
 .sx-poll,
@@ -824,6 +927,12 @@
   transform: scale(0.94);
 }
 
+.se-tool-btn:focus-visible,
+.se-chip-btn:focus-visible {
+  outline: 2px solid rgba(238, 217, 164, 0.7);
+  outline-offset: 2px;
+}
+
 .se-tool-btn[data-active="true"] {
   background: rgba(238, 217, 164, 0.16);
   color: #eed9a4;
@@ -844,6 +953,12 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transition: transform var(--motion-fast) ease, background var(--motion-fast) ease;
+}
+
+@media (max-width: 63.99rem) {
+  .se-chip-btn {
+    height: 44px;
+  }
 }
 
 .se-chip-btn:active {
@@ -1071,6 +1186,24 @@
 
 /* ------------------------------ camera ---------------------------------- */
 
+/* Soft luminous scrims behind the camera chrome — Bloom ink tint, not flat
+   black, so the preview stays easy to frame while controls stay legible. */
+.scam-scrim-t {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--story-veil) 72%, transparent) 0%,
+    transparent 46%
+  );
+}
+
+.scam-scrim-b {
+  background: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--story-veil) 78%, transparent) 0%,
+    transparent 52%
+  );
+}
+
 .scam-shutter {
   width: 74px;
   height: 74px;
@@ -1127,6 +1260,55 @@
   animation: scam-flash 320ms ease-out both;
 }
 
+/* --------------------- premium interaction & mobile floor ------------------
+   Two contracts every story control obeys:
+     1. A consistent warm-champagne keyboard focus ring (Bloom's ink) on every
+        reachable control — a11y and polish in one gesture, never a garish
+        default outline.
+     2. A guaranteed 44px touch target on phones. Deceptively small chrome
+        keeps its scrim-you-see size but grows an invisible hit area, so the
+        premium look is never paid for in tap precision. */
+
+.sv-icon-btn,
+.srail-add {
+  position: relative;
+}
+
+.sv-icon-btn:focus-visible,
+.sv-reply-pill:focus-visible,
+.sv-react-btn:focus-visible,
+.srail-item:focus-visible,
+.srail-add:focus-visible,
+.sc-mode-tile:focus-visible,
+.scam-shutter:focus-visible {
+  outline: 2px solid rgba(238, 217, 164, 0.7);
+  outline-offset: 2px;
+}
+
+/* viewer icon buttons: keep the 38px visual, guarantee a 44px tap target */
+.sv-icon-btn::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+}
+
+/* the add-on-ring badge is tiny on purpose; its invisible target is not */
+.srail-add::after {
+  content: "";
+  position: absolute;
+  inset: -11px;
+  border-radius: 999px;
+}
+
+@media (max-width: 63.99rem) {
+  /* reaction + reply rows keep full tap height on phones */
+  .sv-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 /* --------------------------- reduced motion ----------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1136,6 +1318,7 @@
   .sv-frame,
   .sv-media,
   .sv-heart-pop,
+  .sv-react-btn[data-active="true"] > span,
   .sv-toast,
   .ssheet,
   .ssheet-backdrop,
@@ -1143,12 +1326,16 @@
   .motion-cell > span,
   .sx-music-disc[data-playing="true"],
   .scam-rec-dot,
-  .scam-flash {
+  .scam-flash,
+  .animate-breathe-slow,
+  .animate-drift-slow,
+  .animate-pulse-accent {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
   }
 
-  .sv-gift-particle {
+  .sv-gift-particle,
+  .animate-ring-bloom-slow {
     animation-duration: 0.001ms !important;
   }
 

@@ -989,6 +989,120 @@ button.pf-row:hover {
   text-align: center;
 }
 
+/* ==========================================================================
+   Mobile-first profile fixes — mirrors responsive.css contract
+   --------------------------------------------------------------------------
+   The profile borrows the big-app grammar (full-bleed cover, avatar over the
+   edge, sticky tabs) but with Bloom's editorial restraint. These rules make
+   the cover touch the phone's edges, keep every control on the touch floor,
+   and never let a long name or a wide grid push the page sideways.
+   ========================================================================== */
+
+/* 1. full-bleed cover — the cover is the profile's edge, not a card inside a
+   card. The negative margin lets it touch the phone's built-in page gutter,
+   which contracts to 14px at 320px via --bloom-page-px. Tags/actions slide
+   in from the same gutter so nothing sits flush against the screen. */
+@media (max-width: 639px) {
+  .pf-cover {
+    border-radius: 0;
+    margin-inline: calc(-1 * var(--bloom-page-px, 20px));
+    width: auto;
+  }
+  .pf-cover-tags {
+    left: 18px;
+    top: 14px;
+  }
+  .pf-cover-actions {
+    right: 14px;
+    top: 12px;
+  }
+}
+
+/* 2. avatar sits alone on its row on phones — centre it so the row reads as
+   one deliberate beat instead of a lonely 96px circle at the left edge. The
+   name + actions below stay left-aligned (only the avatar-wrap is centered). */
+@media (max-width: 640px) {
+  .pf-head > .pf-avatar-wrap {
+    justify-self: center;
+  }
+}
+
+/* 2b. at 320px the whole hero reads better full-bleed with the cover. */
+@media (max-width: 359px) {
+  .pf-head {
+    padding-inline: max(0px, calc(var(--bloom-page-px, 14px) - 6px));
+  }
+  .pf-name {
+    font-size: 24px;
+  }
+}
+
+/* 3. touch floor for hero chrome — buttons and tabs meet 44px, icon buttons
+   stay ≥36px (the invisible-44 affordance used across story surfaces). */
+@media (max-width: 640px) {
+  .pf-btn {
+    min-height: var(--bloom-touch-min);
+  }
+  .pf-avatar-add {
+    width: 34px;
+    height: 34px;
+  }
+  .pf-tabs {
+    padding-inline: var(--bloom-page-px);
+    /* the fixed 60px top bar (--bloom-header-h) owns the top of the viewport */
+    top: var(--bloom-header-h);
+  }
+  .pf-tab {
+    min-height: var(--bloom-touch-min);
+  }
+  .pf-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* 3b. 320px: icon buttons give back a little so the tags keep breathing room. */
+@media (max-width: 359px) {
+  .pf-cover-tags {
+    left: 12px;
+  }
+  .pf-cover-actions {
+    right: 10px;
+    top: 10px;
+  }
+  .pf-icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* 4. nothing may push the page sideways — seamiest of the grid structures
+   already keep minmax(0,1fr); this is the belt-and-braces for the handful
+   that still use fixed px rows of chips. Overflow is owned by the rail
+   containers (pf-miles, pf-things, moments filter), never the page. */
+@media (max-width: 640px) {
+  .pf-row,
+  .pf-activity-row {
+    min-width: 0;
+  }
+  .pf-section {
+    /* keeps sections curving inside the page gutter on phones */
+    min-width: 0;
+  }
+}
+
+/* 5. journey activity rows — tighten for the narrowest screens so the time
+   stamp never wraps or collides with the text column. */
+@media (max-width: 359px) {
+  .pf-activity-row {
+    gap: 8px;
+  }
+  .pf-activity-icon {
+    width: 26px;
+    height: 26px;
+  }
+}
+
 /* ------------------------------- skeleton -------------------------------- */
 
 .pf-skel {

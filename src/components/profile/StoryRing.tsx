@@ -58,7 +58,7 @@ export function StoryRing({
             active
               ? {
                   padding: stroke,
-                  background: tone === "close" ? "var(--story-ring-close)" : "var(--story-ring)",
+                  background: tone === "close" ? "var(--story-ring-close-friends)" : "var(--story-ring)",
                   WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
                   WebkitMaskComposite: "xor",
                   maskComposite: "exclude",

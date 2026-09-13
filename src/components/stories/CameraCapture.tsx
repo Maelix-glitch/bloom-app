@@ -281,11 +281,11 @@ export function CameraCapture({
             type="button"
             onClick={onClose}
             aria-label="Close camera"
-            className="sv-icon-btn bg-black/40"
+            className="sv-icon-btn scam-scrim-t"
           >
             <X className="size-5" />
           </button>
-          <div className="flex items-center gap-1 rounded-full bg-black/40 p-1 backdrop-blur-md">
+          <div className="flex items-center gap-1 rounded-full scam-scrim-b p-1 backdrop-blur-md">
             {(["photo", "video"] as const).map((m) => (
               <button
                 key={m}
@@ -307,7 +307,7 @@ export function CameraCapture({
               onClick={() => void toggleTorch()}
               aria-label={torch ? "Turn flash off" : "Turn flash on"}
               aria-pressed={torch}
-              className="sv-icon-btn bg-black/40"
+              className="sv-icon-btn scam-scrim-t"
             >
               {torch ? <Zap className="size-5" /> : <ZapOff className="size-5" />}
             </button>
@@ -318,7 +318,7 @@ export function CameraCapture({
 
         {/* recording indicator */}
         {recording ? (
-          <div className="absolute left-1/2 top-[max(70px,calc(env(safe-area-inset-top)+56px))] flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/50 px-3.5 py-1.5 backdrop-blur-md">
+          <div className="absolute left-1/2 top-[max(70px,calc(env(safe-area-inset-top)+56px))] flex -translate-x-1/2 items-center gap-2 rounded-full scam-scrim-b/50 px-3.5 py-1.5 backdrop-blur-md">
             <span className="scam-rec-dot size-2 rounded-full bg-[#e0685e]" aria-hidden />
             <span className="mono text-[11.5px] tracking-wide text-white" role="timer">
               {(recordMs / 1000).toFixed(1)}s / 30s

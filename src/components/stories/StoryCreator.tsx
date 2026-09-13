@@ -24,10 +24,10 @@ import {
 
 import {
   StoryEditor,
-  editorDraftStore,
   type EditorInitialState,
   type EditorSource,
 } from "./StoryEditor";
+import { editorDraftStore } from "@/lib/stories/draftStore";
 import { CameraCapture } from "./CameraCapture";
 import { BloomShareCard, shareSourceForMilestone, shareSourceForReward } from "./ShareCard";
 import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
@@ -85,10 +85,8 @@ export function StoryCreator({
   const [cameraOpen, setCameraOpen] = useState(false);
   const [backgroundsOpen, setBackgroundsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [pendingDraft, setPendingDraft] = useState(() => {
-    const d = editorDraftStore.read();
-    return d && d.userId === userId ? d : null;
-  });
+  const [pendingDraft, setPendingDraft] = useState(false);
+  const [hasLocalDraft, setHasLocalDraft] = useState(false);
 
   const photoRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLInputElement | null>(null);
@@ -98,6 +96,18 @@ export function StoryCreator({
     () => moodEntries.filter((e) => e.note && e.note.trim().length > 0),
     [moodEntries],
   );
+
+  /* Check for local draft on mount */
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const d = await editorDraftStore.read(userId);
+      if (alive && d) setHasLocalDraft(true);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [userId]);
 
   /* deep-link from Mood: "share as story" opens the editor pre-filled */
   useEffect(() => {
@@ -242,44 +252,12 @@ export function StoryCreator({
   }, []);
 
   const resumeDraft = useCallback(async () => {
-    const draft = pendingDraft;
-    if (!draft) return;
-    if (draft.source.base === "photo" && draft.source.photoDataUrl) {
-      try {
-        const res = await fetch(draft.source.photoDataUrl);
-        const blob = await res.blob();
-        setEditorSource({
-          base: "photo",
-          photo: {
-            dataUrl: draft.source.photoDataUrl,
-            width: draft.source.photoWidth,
-            height: draft.source.photoHeight,
-            blob,
-          },
-          storyKind: draft.source.storyKind,
-        });
-        setEditorDraft({
-          elements: draft.elements,
-          strokes: draft.strokes,
-          filterId: draft.filterId,
-          adjustments: draft.adjustments,
-          captionTitle: draft.captionTitle,
-          captionBody: draft.captionBody,
-          altText: draft.altText,
-        });
-        setPendingDraft(null);
-        return;
-      } catch {
-        toast.error("That draft's photo is gone — starting fresh.");
-      }
+    const draft = await editorDraftStore.read(userId);
+    if (!draft) {
+      setHasLocalDraft(false);
+      return;
     }
-    // Background draft: fully restorable.
-    setEditorSource({
-      base: "background",
-      backgroundId: draft.source.backgroundId,
-      storyKind: draft.source.storyKind,
-    });
-    setEditorDraft({
+    const restore: EditorInitialState = {
       elements: draft.elements,
       strokes: draft.strokes,
       filterId: draft.filterId,
@@ -287,9 +265,69 @@ export function StoryCreator({
       captionTitle: draft.captionTitle,
       captionBody: draft.captionBody,
       altText: draft.altText,
+    };
+    if (draft.source.base === "photo") {
+      if (!draft.source.photoFile) {
+        toast.error("That draft's photo is gone — starting fresh.");
+        setHasLocalDraft(false);
+        return;
+      }
+      try {
+        const dataUrl = draft.source.photoDataUrl ?? URL.createObjectURL(draft.source.photoFile);
+        setEditorSource({
+          base: "photo",
+          photo: {
+            dataUrl,
+            width: draft.source.photoWidth ?? 0,
+            height: draft.source.photoHeight ?? 0,
+            blob: draft.source.photoFile,
+          },
+          storyKind: draft.source.storyKind ?? "photo",
+        });
+        setEditorDraft(restore);
+        setHasLocalDraft(false);
+        return;
+      } catch {
+        toast.error("That draft's photo is gone — starting fresh.");
+        setHasLocalDraft(false);
+        return;
+      }
+    }
+    if (draft.source.base === "video" && draft.source.videoFile) {
+      try {
+        const previewUrl = URL.createObjectURL(draft.source.videoFile);
+        const video: LocalVideo = {
+          previewUrl,
+          width: draft.source.videoWidth ?? 0,
+          height: draft.source.videoHeight ?? 0,
+          durationMs: draft.source.videoDurationMs ?? 0,
+          blob: draft.source.videoFile,
+          contentType: "video/mp4",
+        };
+        setEditorSource({
+          base: "video",
+          video,
+          videoThumbnail: draft.source.videoThumbnail ?? null,
+          storyKind: draft.source.storyKind ?? "video",
+        });
+        setEditorDraft(restore);
+        setHasLocalDraft(false);
+        return;
+      } catch {
+        toast.error("That draft's video is gone — starting fresh.");
+        setHasLocalDraft(false);
+        return;
+      }
+    }
+    // Background draft: fully restorable.
+    setEditorSource({
+      base: "background",
+      backgroundId: draft.source.backgroundId,
+      storyKind: draft.source.storyKind ?? "text",
     });
-    setPendingDraft(null);
-  }, [pendingDraft]);
+    setEditorDraft(restore);
+    setHasLocalDraft(false);
+  }, [userId]);
 
   const publish = useCallback(
     async (input: CreateStoryInput) => {
@@ -378,15 +416,14 @@ export function StoryCreator({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-4">
-          {pendingDraft ? (
+          {hasLocalDraft ? (
             <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface/60 px-4 py-3">
               <p className="text-[13px] text-muted-foreground">You have an unfinished story.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
-                    editorDraftStore.clear();
-                    setPendingDraft(null);
+                    void editorDraftStore.clear().then(() => setHasLocalDraft(false));
                   }}
                   aria-label="Discard draft"
                   className="grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:text-rose"

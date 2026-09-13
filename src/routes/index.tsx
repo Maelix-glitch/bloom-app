@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, Droplet, Loader2, PenLine, Plus, Smile } from "lucide-react";
+import { Bell, Droplet, Loader2, Plus, Smile } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
@@ -42,7 +42,6 @@ import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
-import leafDark from "@/assets/home/leaf-dark.jpg";
 import { RankChip } from "@/components/progression/RankChip";
 import { componentsById } from "@/lib/rewards/catalog";
 import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
@@ -192,7 +191,6 @@ function TodayPage() {
       ? identity.displayName
       : null;
   const firstName = displayName ? displayName.split(" ")[0]! : null;
-  const initial = (firstName ?? "B").charAt(0).toUpperCase();
 
   const moodEntry = useMemo(() => moodToday(mood.entries, today), [mood.entries, today]);
   const moodDays = mood.analytics.days;
@@ -374,51 +372,31 @@ function TodayPage() {
       {/* the one shared chrome: rail on desktop, brand bar + tab bar on phones */}
       <AppNav />
 
-      <main className="min-w-0 px-5 pb-28 pt-6 sm:px-8 lg:px-10 lg:pb-24 lg:pt-7">
-        {/* top bar: the date on the left, quick actions on the right */}
-        <div className="flex items-center justify-between gap-4">
+      <main className="home-main min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
+        <div className="home-toolbar">
           <p className="text-xs text-muted-foreground">
             {longDate(now)}
             {syncLine ? (
               <span className="ml-3 hidden text-faint sm:inline">· {syncLine}</span>
             ) : null}
           </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMoodOpen(true)}
-              aria-label="Log your mood"
-              title="Log your mood"
-              className="grid size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <PenLine className="size-4" />
-            </button>
-            <Link
-              to="/rewards"
-              aria-label="Rewards"
-              title="Rewards"
-              className="relative grid size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Bell className="size-4" />
-              {habits.points !== null && habits.points > 0 ? (
-                <span
-                  className="absolute right-2 top-2 size-1.5 rounded-full"
-                  style={{ background: "var(--home-cycle)" }}
-                />
-              ) : null}
-            </Link>
-            <Link
-              to="/profile"
-              aria-label="Your profile"
-              className="hidden size-9 place-items-center rounded-full border border-primary/40 bg-surface-3/60 text-xs lg:grid"
-            >
-              {initial}
-            </Link>
-          </div>
+          <Link
+            to="/rewards"
+            aria-label="Rewards"
+            title="Rewards"
+            className="relative grid size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Bell className="size-4" />
+            {habits.points !== null && habits.points > 0 ? (
+              <span
+                className="absolute right-2 top-2 size-1.5 rounded-full"
+                style={{ background: "var(--home-cycle)" }}
+              />
+            ) : null}
+          </Link>
         </div>
 
-        {/* hero */}
-        <header className="home-rise mt-7 grid gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
             <h1 className="font-display text-3xl leading-tight sm:text-5xl">
               {firstName ? (
@@ -444,7 +422,6 @@ function TodayPage() {
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
               </button>
-              {/* Next milestone, not a shop: rank + how far the next one is. */}
               <Link to="/rewards" className="home-chip">
                 <RankChip points={habits.points} />
               </Link>
@@ -479,24 +456,36 @@ function TodayPage() {
           </figure>
         </header>
 
-        {/* stories — a quiet ring row under the greeting, yours first */}
-        {space.authState !== "signed-out" && space.userId ? (
-          <div className="mt-7">
-            <StoryRail
-              name={identity?.displayName ?? "You"}
-              avatarPath={identity?.avatarPath ?? null}
-              accent={identity?.accent ?? "violet"}
-              stories={homeStories}
-              seenIds={new Set(homeStories.filter((s) => seenStore.has(s.id)).map((s) => s.id))}
-              loading={space.storiesByAge == null}
-              onAdd={() => setStoryComposerOpen(true)}
-              onOpen={(index) => setStoryViewer({ stories: homeStories, startIndex: index })}
-            />
-          </div>
-        ) : null}
+        <div className="home-stack">
+          {space.authState !== "signed-out" && space.userId ? (
+            <section className="home-band" aria-labelledby="home-moments-title">
+              <div className="home-band-head">
+                <div>
+                  <p className="home-eyebrow">Moments</p>
+                  <h2 id="home-moments-title" className="home-band-title">
+                    Today's stories
+                  </h2>
+                </div>
+                <p className="home-band-note hidden sm:block">
+                  {homeStories.length === 0
+                    ? "A quiet ring — add one from the day."
+                    : `${homeStories.length} live · fades in 24 hours`}
+                </p>
+              </div>
+              <StoryRail
+                name={identity?.displayName ?? "You"}
+                avatarPath={identity?.avatarPath ?? null}
+                accent={identity?.accent ?? "violet"}
+                stories={homeStories}
+                seenIds={new Set(homeStories.filter((s) => seenStore.has(s.id)).map((s) => s.id))}
+                loading={space.storiesByAge == null}
+                onAdd={() => setStoryComposerOpen(true)}
+                onOpen={(index) => setStoryViewer({ stories: homeStories, startIndex: index })}
+                label="Today's stories"
+              />
+            </section>
+          ) : null}
 
-        {/* habits — high on the page, right under the greeting */}
-        <div className="mt-8">
           <HabitsSection
             habits={habits.todayHabits}
             logs={habits.logs}
@@ -516,70 +505,53 @@ function TodayPage() {
               onDelete: (id) => void habits.deleteHabit(id),
             }}
           />
-        </div>
 
-        {/* main grid */}
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
-            <div className="grid gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
-              <ProgressPanel
-                score={score}
-                onLog={() => setMetricsOpen(true)}
-                logging={!trackers.hydrated}
-              />
-              {/* B9 — until every store behind the map has hydrated, show the
-                  loading twin. First paint with empty stores used to draw a
-                  hollow, broken-looking map on cold loads. */}
-              {mapReady ? (
-                <ConnectionMap nodes={map.nodes} links={map.links} name={firstName} />
-              ) : (
-                <ConnectionMapSkeleton />
-              )}
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
+              <div className="grid gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
+                <ProgressPanel
+                  score={score}
+                  onLog={() => setMetricsOpen(true)}
+                  logging={!trackers.hydrated}
+                />
+                {mapReady ? (
+                  <ConnectionMap nodes={map.nodes} links={map.links} name={firstName} />
+                ) : (
+                  <ConnectionMapSkeleton />
+                )}
+              </div>
+              <TrackersPanel readings={signalReadings} />
+              <div className="grid gap-5 md:grid-cols-2">
+                <FlowPanel
+                  items={flow}
+                  now={now}
+                  onToggleHabit={(id) => void habits.toggle(id)}
+                  times={flowTimes.times}
+                  onTimeChange={flowTimes.setTime}
+                  onResetTimes={flowTimes.reset}
+                  timesAreDefault={flowTimes.isDefault}
+                />
+                <InsightsPanel items={insights} loading={mood.loading || !trackers.hydrated} />
+              </div>
             </div>
-            <TrackersPanel readings={signalReadings} />
-            <div className="grid gap-5 md:grid-cols-2">
-              <FlowPanel
-                items={flow}
-                now={now}
+
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:content-start">
+              <FocusPanel
+                items={focus}
                 onToggleHabit={(id) => void habits.toggle(id)}
-                times={flowTimes.times}
-                onTimeChange={flowTimes.setTime}
-                onResetTimes={flowTimes.reset}
-                timesAreDefault={flowTimes.isDefault}
+                onAddHabit={openNewHabit}
               />
-              <InsightsPanel items={insights} loading={mood.loading || !trackers.hydrated} />
+              <CoachPanel entries={mood.entries} habitsStore={habits} />
+              <ActivityPanel items={activity} />
             </div>
           </div>
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:content-start">
-            <FocusPanel
-              items={focus}
-              onToggleHabit={(id) => void habits.toggle(id)}
-              onAddHabit={openNewHabit}
-            />
-            <CoachPanel entries={mood.entries} habitsStore={habits} />
-            <figure className="relative overflow-hidden rounded-2xl border border-border">
-              <img
-                src={leafDark}
-                alt="A single green leaf lit against darkness"
-                loading="lazy"
-                width={992}
-                height={672}
-                className="h-44 w-full object-cover"
-              />
-              <figcaption className="absolute inset-0 flex items-start bg-gradient-to-r from-background/95 via-background/60 to-transparent p-4 font-display text-lg leading-snug">
-                Small steps every day lead to big changes.
-              </figcaption>
-            </figure>
-            <ActivityPanel items={activity} />
-          </div>
+          <footer className="hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
+            <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
+            <span className="h-px w-16 bg-border" />
+            <span>A MORE INTENTIONAL DAY, EVERYWHERE</span>
+          </footer>
         </div>
-
-        <footer className="mt-14 hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
-          <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
-          <span className="h-px w-16 bg-border" />
-          <span>A MORE INTENTIONAL DAY, EVERYWHERE</span>
-        </footer>
       </main>
 
       {/* floating add-habit — always in reach, clears the tab bar on phones */}
@@ -589,7 +561,7 @@ function TodayPage() {
         aria-label="Add habit"
         title="Add habit"
         data-testid="home-fab-add-habit"
-        className="home-fab inline-flex h-12 items-center gap-2 rounded-full bg-primary px-3.5 text-sm font-medium text-primary-foreground sm:h-13 sm:pl-4 sm:pr-5"
+        className="home-fab inline-flex h-12 items-center gap-2 rounded-full bg-primary px-3.5 text-sm font-medium text-primary-foreground lg:hidden sm:h-13 sm:pl-4 sm:pr-5"
       >
         <Plus className="size-5" />
         <span className="hidden sm:inline">Add habit</span>

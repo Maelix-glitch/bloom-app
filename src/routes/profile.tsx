@@ -477,7 +477,7 @@ function ProfilePage() {
       <AppNav />
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[1120px] px-3 pb-28 pt-3 sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
+      <main className="relative mx-auto w-full max-w-[1120px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
         {authState === "checking" ? (
           <ProfileSkeleton />
         ) : !identity ? (
