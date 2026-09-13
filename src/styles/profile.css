@@ -1001,11 +1001,14 @@ button.pf-row:hover {
 /* 1. full-bleed cover — the cover is the profile's edge, not a card inside a
    card. The negative margin lets it touch the phone's built-in page gutter,
    which contracts to 14px at 320px via --bloom-page-px. Tags/actions slide
-   in from the same gutter so nothing sits flush against the screen. */
+   in from the same gutter so nothing sits flush against the screen. The
+   negative top margin lets the cover touch the viewport top, rising under the
+   mobile brand bar (--bloom-header-h = 60px on phones). */
 @media (max-width: 639px) {
   .pf-cover {
     border-radius: 0;
     margin-inline: calc(-1 * var(--bloom-page-px, 20px));
+    margin-top: calc(var(--bloom-header-h) * -1);
     width: auto;
   }
   .pf-cover-tags {

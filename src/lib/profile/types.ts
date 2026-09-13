@@ -132,6 +132,8 @@ export interface ProfileIdentity {
   username: string | null;
   bio: string | null;
   avatarPath: string | null;
+  /** Cover banner storage path, if the user set one. */
+  bannerPath: string | null;
   accent: BloomAccent;
   featured: FeaturedMoment | null;
 }

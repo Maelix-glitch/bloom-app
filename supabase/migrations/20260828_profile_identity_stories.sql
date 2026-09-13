@@ -12,6 +12,7 @@ alter table public.profiles
   add column if not exists username text,
   add column if not exists bio text,
   add column if not exists avatar_path text,
+  add column if not exists banner_path text,
   add column if not exists accent text not null default 'violet',
   add column if not exists featured jsonb,
   add column if not exists updated_at timestamptz not null default now();

@@ -14,9 +14,11 @@ import { report } from "@/lib/profile/errors";
 import {
   loadMyProfile,
   removeAvatar,
+  removeBanner,
   savePrivacy,
   saveProfile,
   uploadAvatar,
+  uploadBanner,
   type MyProfileSnapshot,
   type ProfilePatch,
 } from "@/lib/profile/profileService";
@@ -63,6 +65,7 @@ const FALLBACK_IDENTITY_FOR_JOURNEY = {
   username: null,
   bio: null,
   avatarPath: null,
+  bannerPath: null,
   featured: null as null,
 };
 
@@ -122,6 +125,7 @@ export function useProfileSpace() {
             username: null,
             bio: null,
             avatarPath: null,
+            bannerPath: null,
             accent: "violet",
             featured: null,
           },
@@ -302,6 +306,7 @@ export function useProfileSpace() {
       username: null,
       bio: null,
       avatarPath: null,
+      bannerPath: null,
       accent: "violet" as BloomAccent,
       featured: null,
     };
@@ -461,6 +466,25 @@ export function useProfileSpace() {
     patchIdentity((i) => ({ ...i, avatarPath: null }));
     await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: null });
     await removeAvatar(currentIdentity().avatarPath ?? `${userId}/avatar.jpg`);
+    announceProfileChanged();
+  }, [userId, patchIdentity]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const commitBanner = useCallback(
+    async (blob: Blob) => {
+      if (!userId) throw authRequired();
+      const path = await uploadBanner(userId, blob);
+      patchIdentity((i) => ({ ...i, bannerPath: path }));
+      await saveProfile(userId, { ...toPatch(currentIdentity()), bannerPath: path });
+      announceProfileChanged();
+    },
+    [userId, patchIdentity],
+  );
+
+  const clearBanner = useCallback(async () => {
+    if (!userId) throw authRequired();
+    patchIdentity((i) => ({ ...i, bannerPath: null }));
+    await saveProfile(userId, { ...toPatch(currentIdentity()), bannerPath: null });
+    await removeBanner(currentIdentity().bannerPath ?? `${userId}/banner.jpg`);
     announceProfileChanged();
   }, [userId, patchIdentity]); // eslint-disable-line react-hooks/exhaustive-deps
 

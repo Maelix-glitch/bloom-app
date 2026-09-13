@@ -25,6 +25,7 @@ type ProfileRow = {
   username: string | null;
   bio: string | null;
   avatar_path: string | null;
+  banner_path: string | null;
   accent: string | null;
   featured: unknown;
 };
@@ -104,6 +105,7 @@ export async function loadMyProfile(userId: string): Promise<MyProfileSnapshot> 
       username: row.username,
       bio: row.bio?.trim() || null,
       avatarPath: row.avatar_path,
+      bannerPath: row.banner_path,
       accent: normalizeAccent(row.accent),
       featured: parseFeatured(row.featured),
     };
@@ -136,6 +138,8 @@ export interface ProfilePatch {
   featured: FeaturedMoment | null;
   /** Include only when the avatar is set or cleared — never clobber it otherwise. */
   avatarPath?: string | null;
+  /** Include only when the banner is set or cleared — never clobber it otherwise. */
+  bannerPath?: string | null;
 }
 
 export class ProfileSaveError extends Error {}
@@ -151,6 +155,7 @@ export async function saveProfile(userId: string, patch: ProfilePatch): Promise<
   };
 
   if ("avatarPath" in patch) values["avatar_path"] = patch.avatarPath;
+  if ("bannerPath" in patch) values["banner_path"] = patch.bannerPath;
 
   const { data: updated, error: updateError } = await supabase
     .from("profiles")
@@ -226,6 +231,25 @@ export async function removeAvatar(path: string | null): Promise<void> {
   if (!path) return;
   const { error } = await supabase.storage.from(PROFILE_MEDIA_BUCKET).remove([path]);
   if (error) report("profile:avatar-remove", error); // reference is cleared regardless
+}
+
+export async function uploadBanner(userId: string, blob: Blob): Promise<string> {
+  const path = `${userId}/banner.jpg`;
+  const { error } = await supabase.storage
+    .from(PROFILE_MEDIA_BUCKET)
+    .upload(path, blob, { contentType: "image/jpeg", upsert: true });
+
+  if (error) {
+    report("profile:banner-upload", error);
+    throw new ProfileSaveError("Couldn't upload that banner.");
+  }
+  return path;
+}
+
+export async function removeBanner(path: string | null): Promise<void> {
+  if (!path) return;
+  const { error } = await supabase.storage.from(PROFILE_MEDIA_BUCKET).remove([path]);
+  if (error) report("profile:banner-remove", error);
 }
 
 export interface PublicProfileResponse {
