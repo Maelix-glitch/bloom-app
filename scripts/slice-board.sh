@@ -39,9 +39,9 @@ for (( r=0; r<ROWS; r++ )); do
     TW=$(identify -format "%w" "$OUT/.trim-$idx.png" 2>/dev/null || echo 0)
     TH=$(identify -format "%h" "$OUT/.trim-$idx.png" 2>/dev/null || echo 0)
     if [ "$TW" -gt $(( CW * 60 / 100 )) ] && [ "$TH" -gt $(( CH * 60 / 100 )) ]; then
-      convert "$OUT/.trim-$idx.png" -quality 90 "$final"
+      convert "$OUT/.trim-$idx.png" -filter Lanczos -resize 300% -unsharp 0x0.5+0.5+0 -quality 92 "$final"
     else
-      convert "$cell" -quality 90 "$final"
+      convert "$cell" -filter Lanczos -resize 300% -unsharp 0x0.5+0.5+0 -quality 92 "$final"
     fi
     rm -f "$cell" "$OUT/.trim-$idx.png"
     echo "$final"
