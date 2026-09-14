@@ -33,6 +33,47 @@ export const STORY_TEMPLATE_LIBRARY: StoryTemplateDef[] = [
   ...BOARD_TEMPLATES,
   ...MORE_TEMPLATES,
 ];
+/* ------------------- exact reference-board button art ---------------------
+ * Each of these ids shows its precise crop of the user's board as the browser
+ * button image (previewSrc), instead of the live-canvas render.
+ */
+const BOARD_PREVIEW: [string, string][] = [
+  ["morning-arch", "board1-01"],
+  ["todays-focus", "board1-02"],
+  ["a-kinder-me", "board1-03"],
+  ["night-quiet", "board1-04"],
+  ["memory-little-moments", "board1-05"],
+  ["my-mood-today", "board1-06"],
+  ["move-today", "board1-07"],
+  ["water-check", "board1-08"],
+  ["currently-board", "board1-09"],
+  ["travel-somewhere", "board1-10"],
+  ["food-good-mood", "board1-11"],
+  ["my-cycle", "board1-12"],
+  ["self-care-today", "board1-13"],
+  ["a-little-reminder", "board1-14"],
+  ["my-goals", "board1-15"],
+  ["just-a-girl", "board1-16"],
+  ["same-girl-different-dreams", "board1-17"],
+  ["goals-dream-plan", "board1-18"],
+  ["win-little", "board1-19"],
+  ["a-cozy-moment", "board1-20"],
+  ["bloom-in-your-own-time", "board1-21"],
+  ["me-lately", "board1-22"],
+  ["sunsets-soft-thoughts", "board1-23"],
+  ["favourite-places", "board1-24"],
+  ["a-brighter-tomorrow", "board1-25"],
+  ["study-reading", "board1-26"],
+  ["my-happy-place", "board1-27"],
+  ["thats-a-wrap", "board1-28"],
+  ["grateful-for", "board1-29"],
+  ["quote-you-got-this", "board1-30"],
+];
+for (const [id, file] of BOARD_PREVIEW) {
+  const t = STORY_TEMPLATE_LIBRARY.find((x) => x.id === id);
+  if (t) t.previewSrc = `/bloom/templates/board/${file}.jpg`;
+}
+
 
 const BY_ID = new Map(STORY_TEMPLATE_LIBRARY.map((t) => [t.id, t]));
 

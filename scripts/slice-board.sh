@@ -18,7 +18,8 @@ PREFIX="${5:-board}"
 command -v identify >/dev/null || { echo "needs ImageMagick (identify)"; exit 1; }
 command -v convert  >/dev/null || { echo "needs ImageMagick (convert)"; exit 1; }
 
-read -r W H < <(identify -format "%w %h" "$SRC")
+W=$(identify -format "%w" "$SRC")
+H=$(identify -format "%h" "$SRC")
 CW=$(( W / COLS ))
 CH=$(( H / ROWS ))
 mkdir -p "$OUT"
