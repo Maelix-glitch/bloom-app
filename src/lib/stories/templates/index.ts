@@ -13,6 +13,7 @@ import { LIVING_TEMPLATES } from "./library/living";
 import { STYLE_TEMPLATES } from "./library/style";
 import { BOARD_TEMPLATES } from "./library/boards";
 import { MORE_TEMPLATES } from "./library/more";
+import { PREMIUM_TEMPLATES } from "./library/premium";
 import {
   instantiate,
   templateMetrics,
@@ -26,6 +27,7 @@ import {
 export * from "./dsl";
 
 export const STORY_TEMPLATE_LIBRARY: StoryTemplateDef[] = [
+  ...PREMIUM_TEMPLATES,
   ...DAY_TEMPLATES,
   ...BODY_TEMPLATES,
   ...LIVING_TEMPLATES,
