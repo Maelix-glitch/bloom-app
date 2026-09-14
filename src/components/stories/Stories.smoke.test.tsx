@@ -86,6 +86,7 @@ function mockStory(partial: Partial<Story> = {}): Story {
     filterId: null,
     adjustments: null,
     backgroundId: "moonlight",
+    canvas: null,
     music: null,
     altText: null,
     audience: "all",

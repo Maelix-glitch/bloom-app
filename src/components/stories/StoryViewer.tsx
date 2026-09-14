@@ -50,6 +50,7 @@ export function isRichStory(story: Story): boolean {
     story.kind === "video" ||
     story.mediaType === "video" ||
     (story.elements?.length ?? 0) > 0 ||
+    Boolean(story.canvas) ||
     Boolean(story.backgroundId)
   );
 }
@@ -511,6 +512,7 @@ export function StoryViewer({
               <StoryCanvas
                 key={current.id}
                 media={media}
+                background={current.canvas}
                 backgroundId={current.backgroundId}
                 filterId={current.filterId}
                 adjustments={current.adjustments}

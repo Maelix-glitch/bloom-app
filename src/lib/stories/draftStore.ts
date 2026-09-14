@@ -1,9 +1,15 @@
 import { get, set, del } from "idb-keyval";
 import type { StoryElement, StoryAdjustments } from "./types";
+import type { StoryBackgroundState } from "./canvas/backgrounds";
 import type { DrawStroke } from "@/components/stories/DrawLayer";
 import type { StoryKind } from "@/lib/profile/types";
 
-const DRAFT_KEY = "bloom.story.editor.draft.v3";
+/**
+ * v4 carries the full background state (photo, texture, overlay) and the
+ * template the story started from. v3 drafts are simply dropped — a stale
+ * draft is better lost than rendered as a half-composed canvas.
+ */
+const DRAFT_KEY = "bloom.story.editor.draft.v4";
 
 export interface EditorDraft {
   userId: string;
@@ -20,8 +26,11 @@ export interface EditorDraft {
     videoHeight?: number;
     videoThumbnail?: string | null;
     backgroundId?: string;
+    templateId?: string | null;
     storyKind?: StoryKind;
   };
+  /** Full background state; `backgroundId` alone no longer describes it. */
+  background: StoryBackgroundState | null;
   elements: StoryElement[];
   strokes: DrawStroke[];
   filterId: string;

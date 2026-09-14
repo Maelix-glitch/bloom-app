@@ -371,7 +371,18 @@ export function CatalogSearchTray({
         ) : null}
 
         {!provider.configured ? (
-          <p className="py-8 text-center text-[13px] leading-relaxed text-faint">{unconfigured}</p>
+          <div className="py-8 text-center">
+            <p className="text-[13px] leading-relaxed text-faint">{unconfigured}</p>
+            {import.meta.env.DEV ? (
+              <p className="mt-2 text-[11px] leading-relaxed text-faint/80">
+                Add <span className="mono">VITE_SUPABASE_URL</span> and{" "}
+                <span className="mono">VITE_SUPABASE_ANON_KEY</span> to{" "}
+                <span className="mono">.env</span> (copy{" "}
+                <span className="mono">.env.example</span>), deploy the{" "}
+                <span className="mono">giphy</span> Edge Function, then restart the dev server.
+              </p>
+            ) : null}
+          </div>
         ) : loading ? (
           <div className="grid grid-cols-3 gap-2" aria-label={`Loading ${title}`} role="status">
             {[0, 1, 2, 3, 4, 5].map((i) => (
