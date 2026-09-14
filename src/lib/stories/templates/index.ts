@@ -12,6 +12,7 @@ import { BODY_TEMPLATES } from "./library/body";
 import { LIVING_TEMPLATES } from "./library/living";
 import { STYLE_TEMPLATES } from "./library/style";
 import { BOARD_TEMPLATES } from "./library/boards";
+import { MORE_TEMPLATES } from "./library/more";
 import {
   instantiate,
   templateMetrics,
@@ -30,6 +31,7 @@ export const STORY_TEMPLATE_LIBRARY: StoryTemplateDef[] = [
   ...LIVING_TEMPLATES,
   ...STYLE_TEMPLATES,
   ...BOARD_TEMPLATES,
+  ...MORE_TEMPLATES,
 ];
 
 const BY_ID = new Map(STORY_TEMPLATE_LIBRARY.map((t) => [t.id, t]));
