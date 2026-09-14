@@ -69,6 +69,23 @@ export function TemplateThumb({
   const height = Math.round((width * 16) / 9);
   if (!composed) return <span className="stpl-thumb" style={{ width, height }} />;
 
+  // An exact board crop beats the live render on the button — what you see is
+  // the reference art, untouched.
+  if (def.previewSrc) {
+    return (
+      <span className="stpl-thumb" style={{ width, height }} aria-hidden data-tone={def.tone}>
+        <img
+          src={def.previewSrc}
+          alt=""
+          className="stpl-canvas-img"
+          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+          loading="lazy"
+          draggable={false}
+        />
+      </span>
+    );
+  }
+
   return (
     <span
       ref={ref}

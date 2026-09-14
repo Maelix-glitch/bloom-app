@@ -172,6 +172,12 @@ export interface StoryTemplateDef {
   background: StoryBackgroundState;
   seeds: TemplateSeed[];
   storyKind?: StoryKind;
+  /**
+   * Optional static preview image (e.g. an exact crop of a reference board
+   * card). When set, the browser's button shows this image instead of the
+   * live-canvas render. The editable composition is unchanged.
+   */
+  previewSrc?: string;
 }
 
 /* ------------------------------ constructors ----------------------------- */
