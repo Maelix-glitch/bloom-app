@@ -422,13 +422,23 @@ export function TemplatePreview({
       <div className="stpl-preview-backdrop" onClick={onClose} aria-hidden />
       <div className="stpl-preview-body">
         <div className="stpl-preview-frame">
-          <StoryCanvas
-            media={{ type: "none", src: null }}
-            background={composed.composed.background}
-            elements={composed.composed.elements}
-            data={data}
-            mode="static"
-          />
+          {def.previewSrc ? (
+            <img
+              src={def.previewSrc}
+              alt={`${def.name} template preview`}
+              className="stpl-preview-img"
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              draggable={false}
+            />
+          ) : (
+            <StoryCanvas
+              media={{ type: "none", src: null }}
+              background={composed.composed.background}
+              elements={composed.composed.elements}
+              data={data}
+              mode="static"
+            />
+          )}
         </div>
 
         <div className="stpl-preview-info">
