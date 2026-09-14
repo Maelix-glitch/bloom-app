@@ -23,7 +23,7 @@ import { StorySettings } from "./StorySettings";
 import { ReactionBar } from "./InteractionSheets";
 import { BloomShareCard } from "./ShareCard";
 import { GifTray, MusicTray } from "./MediaTrays";
-import { MOTION_PACK } from "@/lib/stories/catalogs";
+import { StickerTray } from "./StickerTray";
 
 beforeAll(() => {
   if (typeof window.requestAnimationFrame !== "function") {
@@ -239,16 +239,17 @@ describe("InteractionSheets", () => {
 });
 
 describe("MediaTrays", () => {
-  it("GIF tray always offers upload + the motion pack", () => {
-    const onPickMotion = vi.fn();
-    render(<GifTray onPick={() => {}} onPickMotion={onPickMotion} onClose={() => {}} />);
-    expect(screen.getByRole("button", { name: /upload a gif/i })).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: `Add motion: ${MOTION_PACK[0]!.label}` }),
-    ).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: /add motion:/i })).toHaveLength(
-      MOTION_PACK.length,
-    );
+  it("GIF tray searches GIPHY only", () => {
+    render(<GifTray onPick={() => {}} onClose={() => {}} />);
+    expect(screen.getByRole("textbox", { name: /search gifs/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /upload a gif/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /add motion:/i })).toBeNull();
+  });
+
+  it("sticker tray searches GIPHY only", () => {
+    render(<StickerTray onPick={() => {}} onClose={() => {}} />);
+    expect(screen.getByRole("textbox", { name: /search stickers/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /favorite/i })).toBeNull();
   });
 
   it("music tray offers search, moods, and own audio", () => {

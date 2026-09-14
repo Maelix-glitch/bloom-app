@@ -12,3 +12,10 @@ project_id = "replace-with-your-project-ref"
 # No Docker needed for this function (it has no npm dependencies); if the CLI
 # asks "Deploy without Docker? [Y/n]" just answer y.
 enabled = true
+
+[functions.giphy]
+# Deployed from supabase/functions/giphy/index.ts with:
+#   supabase functions deploy giphy
+#   supabase secrets set GIPHY_API_KEY=...
+# The GIPHY key is a server secret — never a VITE_ client env.
+enabled = true

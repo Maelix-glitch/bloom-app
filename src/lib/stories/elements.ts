@@ -109,14 +109,36 @@ export function makeTextElement(
 
 export function makeStickerElement(
   stickerId: string,
-  opts: { x?: number; y?: number; z?: number; scale?: number } = {},
+  opts: {
+    x?: number;
+    y?: number;
+    z?: number;
+    scale?: number;
+    src?: string;
+    still?: string;
+    width?: number;
+    height?: number;
+  } = {},
 ): Extract<StoryElement, { kind: "sticker" }> | null {
-  if (!stickerById(stickerId)) return null;
+  const src =
+    opts.src && isSafeHttpUrl(opts.src) ? opts.src.slice(0, ELEMENT_LIMITS.maxUrlChars) : undefined;
+  if (!src && !stickerById(stickerId)) return null;
   return {
     ...placement(opts.x, opts.y, opts.z),
     kind: "sticker",
-    stickerId,
+    stickerId: stickerId.slice(0, 120),
     scale: opts.scale ?? 1,
+    ...(src
+      ? {
+          src,
+          still:
+            opts.still && isSafeHttpUrl(opts.still)
+              ? opts.still.slice(0, ELEMENT_LIMITS.maxUrlChars)
+              : undefined,
+          width: clamp(Math.round(opts.width ?? 200) || 200, 16, 1200),
+          height: clamp(Math.round(opts.height ?? 200) || 200, 16, 1200),
+        }
+      : {}),
   };
 }
 
@@ -368,11 +390,25 @@ function sanitizeOne(
       };
     }
     case "sticker": {
-      if (!stickerById(typeof raw["stickerId"] === "string" ? raw["stickerId"] : "")) return null;
+      const stickerId = text(raw["stickerId"], 120);
+      const src =
+        typeof raw["src"] === "string" && isSafeHttpUrl(raw["src"]) ? raw["src"] : undefined;
+      if (!src && !stickerById(stickerId)) return null;
       return {
         ...base,
         kind,
-        stickerId: raw["stickerId"] as string,
+        stickerId: stickerId || "sticker",
+        ...(src
+          ? {
+              src,
+              still:
+                typeof raw["still"] === "string" && isSafeHttpUrl(raw["still"])
+                  ? raw["still"]
+                  : undefined,
+              width: clamp(Math.round(Number(raw["width"]) || 200), 16, 1200),
+              height: clamp(Math.round(Number(raw["height"]) || 200), 16, 1200),
+            }
+          : {}),
         tint: isSafeColor(raw["tint"]) ? (raw["tint"] as string) : undefined,
         animated: raw["animated"] === true,
       };

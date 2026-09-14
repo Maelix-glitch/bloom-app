@@ -1,5 +1,21 @@
 # Bloom backend setup
 
+## GIPHY catalog — story GIFs and stickers
+
+The story editor's GIF and sticker trays call the `giphy` Edge Function.
+The GIPHY key is a **Supabase secret**, not a Vite `VITE_` env — those are
+inlined into the browser bundle.
+
+```bash
+supabase functions deploy giphy
+supabase secrets set GIPHY_API_KEY=your-giphy-key
+```
+
+`.env.local` only needs `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+Without the function or the secret, both trays stay empty.
+
+---
+
 ## Cycle intelligence — run `20260829_cycle_intelligence.sql`
 
 After the Profile migration, also run
@@ -18,7 +34,6 @@ idempotent and additive:
 
 The React Cycle page (`/cycle`) reads and writes this same table; the
 legacy `public/bloom/cycle.html` remains untouched for compatibility.
-
 
 ## Profile 2.0 — identity, privacy, stories, highlights
 

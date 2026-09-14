@@ -800,7 +800,23 @@ export function StoryCanvas({
             >
               {el.kind === "text" ? <TextPiece el={el} k={k} /> : null}
               {el.kind === "sticker" ? (
-                <StickerArt id={el.stickerId} size={Math.max(28, 96 * k)} tint={el.tint} />
+                el.src ? (
+                  <img
+                    src={reducedMotion && el.still ? el.still : el.src}
+                    alt=""
+                    draggable={false}
+                    style={{
+                      width: Math.min(
+                        180 * k,
+                        ((el.width ?? 200) / Math.max(1, el.height ?? 200)) * 140 * k + 40 * k,
+                      ),
+                      maxWidth: 220 * k,
+                      filter: "drop-shadow(0 8px 18px rgba(8,6,16,0.45))",
+                    }}
+                  />
+                ) : (
+                  <StickerArt id={el.stickerId} size={Math.max(28, 96 * k)} tint={el.tint} />
+                )
               ) : null}
               {el.kind === "gif" ? (
                 <img
