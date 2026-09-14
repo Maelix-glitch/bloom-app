@@ -1117,8 +1117,12 @@ export function StoryEditor({
       </div>
 
       {/* canvas */}
-      <div className="relative min-h-0 flex-1">
-        <div ref={canvasRef} className="absolute inset-0 overflow-hidden">
+      <div className="relative grid min-h-0 flex-1 place-items-center">
+        <div
+          ref={canvasRef}
+          className="relative overflow-hidden"
+          style={{ aspectRatio: "9 / 16", height: "100%", maxWidth: "100%" }}
+        >
           <ElementLayer
             elements={elements}
             selectedId={drawing ? null : selectedId}
