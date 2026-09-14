@@ -45,6 +45,3 @@ supabase/.temp/
 # delivery kits are published as release assets, not committed
 docs/*/
 !docs/cleanup/
-
-# Local artifact: downloadable source bundle (not part of the app)
-public/bloom-app.zip
