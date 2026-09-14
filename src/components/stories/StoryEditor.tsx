@@ -42,18 +42,11 @@ import {
   makeMusicElement,
   makeStickerElement,
   makeTextElement,
-  newElementId,
   sanitizeElements,
   serializeElements,
 } from "@/lib/stories/elements";
 import { editorDraftStore } from "@/lib/stories/draftStore";
-import {
-  DEFAULT_ADJUSTMENTS,
-  STORY_TEMPLATES,
-  backgroundById,
-  type MotionItem,
-} from "@/lib/stories/catalogs";
-import { recordStickerUse } from "@/lib/stories/stickers";
+import { DEFAULT_ADJUSTMENTS, STORY_TEMPLATES, backgroundById } from "@/lib/stories/catalogs";
 import type {
   StoryAdjustments,
   StoryAudience,
@@ -198,9 +191,6 @@ export function StoryEditor({
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const deleteRef = useRef<HTMLDivElement | null>(null);
   const draftTimer = useRef<number | undefined>(undefined);
-  /* Device-uploaded GIFs: blob-backed elements + their bytes, uploaded at publish. */
-  const gifFiles = useRef(new Map<string, { blob: Blob; contentType: string }>());
-  const gifUrls = useRef<string[]>([]);
 
   /* ------------------------------ history ------------------------------ */
   const past = useRef<Snapshot[]>([]);
@@ -412,25 +402,26 @@ export function StoryEditor({
       void editorDraftStore.write({
         userId,
         savedAt: Date.now(),
-        source: source.base === "video"
-          ? {
-              base: "video",
-              videoFile: source.video?.blob ?? null,
-              videoDurationMs: source.video?.durationMs ?? 0,
-              videoWidth: source.video?.width ?? 0,
-              videoHeight: source.video?.height ?? 0,
-              videoThumbnail: source.videoThumbnail ?? null,
-              storyKind: source.storyKind,
-            }
-          : {
-              base: source.base === "photo" ? "photo" : "background",
-              photoFile: source.photo?.blob ?? null,
-              photoDataUrl: source.photo?.dataUrl ?? null,
-              photoWidth: source.photo?.width ?? 0,
-              photoHeight: source.photo?.height ?? 0,
-              backgroundId,
-              storyKind: source.storyKind,
-            },
+        source:
+          source.base === "video"
+            ? {
+                base: "video",
+                videoFile: source.video?.blob ?? null,
+                videoDurationMs: source.video?.durationMs ?? 0,
+                videoWidth: source.video?.width ?? 0,
+                videoHeight: source.video?.height ?? 0,
+                videoThumbnail: source.videoThumbnail ?? null,
+                storyKind: source.storyKind,
+              }
+            : {
+                base: source.base === "photo" ? "photo" : "background",
+                photoFile: source.photo?.blob ?? null,
+                photoDataUrl: source.photo?.dataUrl ?? null,
+                photoWidth: source.photo?.width ?? 0,
+                photoHeight: source.photo?.height ?? 0,
+                backgroundId,
+                storyKind: source.storyKind,
+              },
         elements: serializeElements(elements),
         strokes,
         filterId,
@@ -467,24 +458,8 @@ export function StoryEditor({
     return { type: "none", src: null };
   }, [source]);
 
-  /* Session object URLs are revoked when the editor leaves, published or not. */
-  useEffect(
-    () => () => {
-      for (const url of gifUrls.current) URL.revokeObjectURL(url);
-      gifUrls.current = [];
-      gifFiles.current.clear();
-    },
-    [],
-  );
-
   const publishElements = useCallback((): StoryElement[] => {
     let els = serializeElements(elements);
-    // serialize() drops blob-backed GIFs by design (stored rows must be https);
-    // carry them through — the service uploads the bytes and rewrites the src.
-    const kept = new Set(els.map((e) => e.id));
-    for (const e of elements) {
-      if (e.kind === "gif" && !kept.has(e.id) && gifFiles.current.has(e.id)) els.push(e);
-    }
     if (strokes.length > 0) {
       const rect = canvasRef.current?.getBoundingClientRect();
       const w = Math.min(720, Math.max(360, Math.round((rect?.width ?? 390) * 2)));
@@ -561,12 +536,6 @@ export function StoryEditor({
         audio: music?.file
           ? { blob: music.file, contentType: music.file.type || "audio/mpeg" }
           : null,
-        gifFiles: els.flatMap((e) => {
-          if (e.kind !== "gif") return [];
-          const file = gifFiles.current.get(e.id);
-          if (!file) return [];
-          return [{ elementId: e.id, blob: file.blob, contentType: file.contentType }];
-        }),
         altText: altText.trim() || null,
         audience,
       });
@@ -1059,12 +1028,16 @@ export function StoryEditor({
 
       {tool === "sticker" ? (
         <StickerTray
-          onPick={(id) => {
-            const el = makeStickerElement(id, { z: nextZ(elements) });
-            if (el) {
-              recordStickerUse(id);
-              addElement(el);
-            }
+          onPick={(sticker) => {
+            const el = makeStickerElement(sticker.id, {
+              z: nextZ(elements),
+              src: sticker.src,
+              still: sticker.still,
+              width: sticker.width,
+              height: sticker.height,
+            });
+            if (el) addElement(el);
+            else toast("That sticker couldn't be used.");
             setTool(null);
           }}
           onClose={() => setTool(null)}
@@ -1128,28 +1101,7 @@ export function StoryEditor({
 
       {tool === "gif" ? (
         <GifTray
-          onPick={(gif, file) => {
-            if (file) {
-              // Device upload: blob-backed for the session, uploaded at publish.
-              gifUrls.current.push(gif.src);
-              const el: Extract<StoryElement, { kind: "gif" }> = {
-                id: newElementId(),
-                kind: "gif",
-                x: 0.5,
-                y: 0.42,
-                scale: 1,
-                rotation: 0,
-                z: nextZ(elements),
-                gifId: gif.id.slice(0, 120),
-                src: gif.src,
-                width: Math.min(1200, Math.max(16, Math.round(gif.width) || 200)),
-                height: Math.min(1200, Math.max(16, Math.round(gif.height) || 200)),
-              };
-              gifFiles.current.set(el.id, { blob: file, contentType: file.type || "image/gif" });
-              addElement(el);
-              setTool(null);
-              return;
-            }
+          onPick={(gif) => {
             const el = makeGifElement(
               {
                 gifId: gif.id,
@@ -1163,16 +1115,6 @@ export function StoryEditor({
             if (el) addElement(el);
             else toast("That GIF couldn't be used.");
             setTool(null);
-          }}
-          onPickMotion={(item: MotionItem) => {
-            // Stays open — motion is collected, not chosen once.
-            addElement(
-              makeTextElement(item.emoji, {
-                preset: "classic",
-                animation: item.animation,
-                scale: 2.2,
-              }),
-            );
           }}
           onClose={() => setTool(null)}
         />

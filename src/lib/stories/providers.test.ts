@@ -5,7 +5,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { GiphyGifProvider, TenorGifProvider, musicProvider, validateGifFile } from "./providers";
+import { GiphyGifProvider, GiphyStickerProvider, musicProvider } from "./providers";
 
 const song = (over: Record<string, unknown> = {}) => ({
   trackId: 101,
@@ -116,73 +116,83 @@ describe("music chain — Deezer backs up iTunes", () => {
   });
 });
 
-describe("GIF providers — Tenor and GIPHY", () => {
-  it("maps GIPHY results to playable assets", async () => {
-    stubFetch({
-      data: [
-        {
-          id: "abc123",
-          title: "Happy dance",
-          images: {
-            fixed_width: { url: "https://media.giphy.com/media/abc123/200w.gif" },
-            fixed_width_still: { url: "https://media.giphy.com/media/abc123/200w_s.gif" },
-          },
-        },
-        { id: "broken", images: { fixed_width: { url: "http://insecure/x.gif" } } },
-      ],
-    });
-    const provider = new GiphyGifProvider("test-key");
+describe("GIF + sticker providers — GIPHY", () => {
+  const giphyItem = (id: string, title: string, url: string, still: string) => ({
+    id,
+    title,
+    images: {
+      fixed_width: { url, width: "200", height: id === "abc123" ? "180" : "200" },
+      fixed_width_still: { url: still },
+    },
+  });
+
+  it("maps GIPHY results to playable GIFs", async () => {
+    const query = vi.fn(async () => [
+      giphyItem(
+        "abc123",
+        "Happy dance",
+        "https://media.giphy.com/media/abc123/200w.gif",
+        "https://media.giphy.com/media/abc123/200w_s.gif",
+      ),
+      { id: "broken", images: { fixed_width: { url: "http://insecure/x.gif" } } },
+    ]);
+    const provider = new GiphyGifProvider({ configured: true, query });
     const gifs = await provider.search("happy", 10);
     expect(gifs).toHaveLength(1);
     expect(gifs[0]).toMatchObject({
       id: "giphy:abc123",
       src: "https://media.giphy.com/media/abc123/200w.gif",
       title: "Happy dance",
+      width: 200,
+      height: 180,
     });
+    expect(query).toHaveBeenCalledWith(
+      "gifs",
+      "search",
+      expect.objectContaining({ q: "happy", limit: "10" }),
+    );
   });
 
-  it("maps Tenor results to playable assets", async () => {
-    stubFetch({
-      results: [
-        {
-          id: "tenor1",
-          title: "Celebrate",
-          media_formats: {
-            gif: { url: "https://media.tenor.com/x.gif", dims: [220, 220] },
-            tinygif: { url: "https://media.tenor.com/x_tiny.gif", dims: [110, 110] },
-          },
-        },
-      ],
+  it("maps GIPHY sticker results to playable assets", async () => {
+    const query = vi.fn(async () => [
+      giphyItem(
+        "sticker1",
+        "Celebrate",
+        "https://media.giphy.com/media/sticker1/200w.gif",
+        "https://media.giphy.com/media/sticker1/200w_s.gif",
+      ),
+      { id: "broken", images: { original: { url: "http://insecure/x.gif" } } },
+    ]);
+    const provider = new GiphyStickerProvider({ configured: true, query });
+    const stickers = await provider.trending(10);
+    expect(stickers).toHaveLength(1);
+    expect(stickers[0]).toMatchObject({
+      id: "giphy:sticker1",
+      src: "https://media.giphy.com/media/sticker1/200w.gif",
+      title: "Celebrate",
     });
-    const provider = new TenorGifProvider("test-key");
-    const gifs = await provider.trending(10);
-    expect(gifs).toHaveLength(1);
-    expect(gifs[0]).toMatchObject({ id: "tenor:tenor1", src: "https://media.tenor.com/x.gif" });
+    expect(query).toHaveBeenCalledWith(
+      "stickers",
+      "trending",
+      expect.objectContaining({ limit: "10" }),
+    );
   });
 
   it("unconfigured providers stay silent", async () => {
-    const fetch = stubFetch({ data: [] });
-    expect(await new GiphyGifProvider("").search("x", 10)).toEqual([]);
-    expect(await new TenorGifProvider("").trending(10)).toEqual([]);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-});
-
-describe("validateGifFile", () => {
-  it("accepts GIFs and animated WebP under the cap", () => {
-    const gif = new File([new Uint8Array(2048)], "fun.gif", { type: "image/gif" });
-    expect(validateGifFile(gif)).toBeNull();
-    const webp = new File([new Uint8Array(2048)], "fun.webp", { type: "image/webp" });
-    expect(validateGifFile(webp)).toBeNull();
+    const query = vi.fn(async () => []);
+    expect(await new GiphyGifProvider({ configured: false, query }).search("x", 10)).toEqual([]);
+    expect(await new GiphyStickerProvider({ configured: false, query }).trending(10)).toEqual([]);
+    expect(query).not.toHaveBeenCalled();
   });
 
-  it("rejects the wrong type, the oversized, and the empty", () => {
-    const png = new File([new Uint8Array(2048)], "still.png", { type: "image/png" });
-    expect(validateGifFile(png)).toMatch(/isn't a GIF/);
-    const big = new File([new Uint8Array(8)], "big.gif", { type: "image/gif" });
-    Object.defineProperty(big, "size", { value: 5 * 1024 * 1024 });
-    expect(validateGifFile(big)).toMatch(/too large/);
-    const empty = new File([new Uint8Array(8)], "e.gif", { type: "image/gif" });
-    expect(validateGifFile(empty)).toMatch(/empty/);
+  it("never ships a GIPHY key in the client", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const src = readFileSync(join(process.cwd(), "src/lib/stories/providers.ts"), "utf8");
+    const edge = readFileSync(join(process.cwd(), "src/lib/stories/giphy-edge.ts"), "utf8");
+    const example = readFileSync(join(process.cwd(), ".env.example"), "utf8");
+    expect(src).not.toMatch(/VITE_GIPHY_API_KEY/);
+    expect(edge).not.toMatch(/VITE_GIPHY_API_KEY/);
+    expect(example).not.toMatch(/VITE_GIPHY_API_KEY=/);
   });
 });

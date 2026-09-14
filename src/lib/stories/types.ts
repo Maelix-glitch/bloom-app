@@ -71,9 +71,15 @@ export interface StoryTextElement extends StoryElementBase {
 
 export interface StoryStickerElement extends StoryElementBase {
   kind: "sticker";
-  /** Stable sticker id from the Bloom library (e.g. "bloom.petal-3"). */
+  /** Catalog id (GIPHY `giphy:…`, or a legacy Bloom library id). */
   stickerId: string;
-  /** Optional tint override (oklch/hex). */
+  /** Direct playable URL from GIPHY. Absent on legacy Bloom stickers. */
+  src?: string | undefined;
+  /** Still preview for reduced-motion. */
+  still?: string | undefined;
+  width?: number | undefined;
+  height?: number | undefined;
+  /** Optional tint override (oklch/hex) — Bloom library only. */
   tint?: string | undefined;
   animated?: boolean | undefined;
 }

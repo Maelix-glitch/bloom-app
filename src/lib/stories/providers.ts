@@ -1,10 +1,19 @@
 /**
  * Bloom Story Platform — external content providers, abstracted.
- * GIF and music catalogs plug in here. Nothing in the story UI imports a
- * vendor SDK: trays talk to these interfaces, and when no provider is
- * configured they degrade to honest empty states instead of breaking
- * creation. Only approved sources are ever queried.
+ * GIFs and stickers both come from GIPHY, via Bloom's Edge Function so the
+ * API key never ships in the client. Nothing in the story UI imports a
+ * vendor SDK: trays talk to these interfaces. When Bloom isn't connected
+ * the matching tray is empty — no substitute catalog.
  */
+
+import { hasSupabaseConfig } from "@/lib/supabase";
+import {
+  queryGiphyCatalog,
+  type GiphyCatalog,
+  type GiphyEndpoint,
+  type GiphyQuery,
+  type GiphyResult,
+} from "@/lib/stories/giphy-edge";
 
 export interface GifAsset {
   id: string;
@@ -20,9 +29,14 @@ export interface GifProvider {
   readonly id: string;
   readonly label: string;
   readonly configured: boolean;
+  /** Shown as a footnote so results are credited. */
+  readonly attribution?: string | undefined;
   trending(limit: number): Promise<GifAsset[]>;
   search(query: string, limit: number): Promise<GifAsset[]>;
 }
+
+export type StickerAsset = GifAsset;
+export type StickerProvider = GifProvider;
 
 export interface MusicTrack {
   id: string;
@@ -45,154 +59,81 @@ export interface MusicProvider {
   trending(limit: number): Promise<MusicTrack[]>;
 }
 
-/* ------------------------------ GIF: Tenor ------------------------------ */
-/* Enabled only when a key is provided; otherwise `configured` is false and
- * the tray shows its graceful empty state. https-only, validated URLs. */
-
-function envKey(name: string): string {
-  if (typeof import.meta === "undefined") return "";
-  return (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.[name] ?? "";
-}
-
-const TENOR_KEY = envKey("VITE_TENOR_API_KEY");
-const GIPHY_KEY = envKey("VITE_GIPHY_API_KEY");
+/* ------------------------------ GIPHY only ------------------------------- */
+/* GIFs and stickers share one GIPHY catalog, proxied through Bloom so the
+ * key never ships in the client. No chaining, no empty stand-in, no local
+ * pack. Without a database connection both trays stay empty. https-only. */
 
 function isHttps(url: unknown): url is string {
   return typeof url === "string" && url.startsWith("https://") && url.length < 2048;
 }
 
-interface TenorResult {
-  id: string;
-  title?: string;
-  media_formats?: Record<string, { url?: string; dims?: [number, number] }>;
+function dim(value: unknown, fallback: number): number {
+  const n = typeof value === "string" || typeof value === "number" ? Number(value) : NaN;
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : fallback;
 }
 
-function mapTenor(item: TenorResult): GifAsset | null {
-  const formats = item.media_formats ?? {};
-  const play = formats["gif"]?.url ?? formats["mediumgif"]?.url ?? formats["tinygif"]?.url;
-  const still = formats["tinygif"]?.url ?? formats["nanogif"]?.url ?? play;
-  if (!isHttps(play)) return null;
-  const dims = formats["gif"]?.dims ?? formats["mediumgif"]?.dims ?? [220, 220];
-  return {
-    id: `tenor:${item.id}`,
-    src: play,
-    still: isHttps(still) ? still : play,
-    width: dims[0] || 220,
-    height: dims[1] || 220,
-    title: typeof item.title === "string" ? item.title.slice(0, 80) : "GIF",
-  };
-}
-
-export class TenorGifProvider implements GifProvider {
-  readonly id = "tenor";
-  readonly label = "GIFs";
-  readonly configured: boolean;
-
-  constructor(key = TENOR_KEY) {
-    this.key = key;
-    this.configured = key.length > 0;
-  }
-
-  private key: string;
-
-  private async query(endpoint: string, params: Record<string, string>): Promise<GifAsset[]> {
-    if (!this.configured) return [];
-    const url = new URL(`https://tenor.googleapis.com/v2/${endpoint}`);
-    url.searchParams.set("key", this.key);
-    url.searchParams.set("client_key", "bloom_app");
-    url.searchParams.set("media_filter", "gif,tinygif,nanogif");
-    url.searchParams.set("contentfilter", "medium");
-    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) throw new Error(`gif provider ${res.status}`);
-    const data = (await res.json()) as { results?: TenorResult[] };
-    return (data.results ?? []).map(mapTenor).filter((g): g is GifAsset => g !== null);
-  }
-
-  trending(limit: number): Promise<GifAsset[]> {
-    return this.query("featured", { limit: String(Math.min(limit, 20)) }).catch(() => []);
-  }
-
-  search(query: string, limit: number): Promise<GifAsset[]> {
-    const q = query.trim();
-    if (!q) return Promise.resolve([]);
-    return this.query("search", { q: q.slice(0, 80), limit: String(Math.min(limit, 20)) }).catch(
-      () => [],
-    );
-  }
-}
-
-class EmptyGifProvider implements GifProvider {
-  readonly id = "none";
-  readonly label = "GIFs";
-  readonly configured = false;
-  trending(): Promise<GifAsset[]> {
-    return Promise.resolve([]);
-  }
-  search(): Promise<GifAsset[]> {
-    return Promise.resolve([]);
-  }
-}
-
-interface GiphyImage {
-  url?: string;
-}
-
-interface GiphyResult {
-  id: string;
-  title?: string;
-  images?: {
-    fixed_width?: GiphyImage;
-    fixed_width_still?: GiphyImage;
-    original?: GiphyImage;
-    original_still?: GiphyImage;
-  };
-}
-
-function mapGiphy(item: GiphyResult): GifAsset | null {
+function mapGiphy(item: GiphyResult, kind: GiphyCatalog): GifAsset | null {
   const images = item.images ?? {};
-  const play =
-    images.fixed_width?.url ?? images.original?.url ?? images.fixed_width_still?.url ?? null;
+  const play = images.fixed_width?.url ?? images.original?.url ?? null;
   if (!isHttps(play)) return null;
   const still = images.fixed_width_still?.url ?? images.original_still?.url ?? play;
+  const sized = images.fixed_width ?? images.original;
   return {
     id: `giphy:${item.id}`,
     src: play,
     still: isHttps(still) ? still : play,
-    width: 200,
-    height: 200,
-    title: typeof item.title === "string" && item.title ? item.title.slice(0, 80) : "GIF",
+    width: dim(sized?.width, 200),
+    height: dim(sized?.height, 200),
+    title:
+      typeof item.title === "string" && item.title
+        ? item.title.slice(0, 80)
+        : kind === "stickers"
+          ? "Sticker"
+          : "GIF",
   };
 }
 
-export class GiphyGifProvider implements GifProvider {
+export interface GiphyProviderOptions {
+  /** Override for tests. Production is `hasSupabaseConfig`. */
+  configured?: boolean;
+  /** Override for tests. Production calls the `giphy` Edge Function. */
+  query?: GiphyQuery;
+}
+
+export class GiphyProvider implements GifProvider {
   readonly id = "giphy";
-  readonly label = "GIFs";
+  readonly attribution = "Powered by GIPHY";
   readonly configured: boolean;
 
-  constructor(key = GIPHY_KEY) {
-    this.key = key;
-    this.configured = key.length > 0;
+  constructor(
+    private readonly catalog: GiphyCatalog,
+    readonly label: string,
+    options: GiphyProviderOptions = {},
+  ) {
+    this.runQuery = options.query ?? queryGiphyCatalog;
+    this.configured = options.configured ?? hasSupabaseConfig;
   }
 
-  private key: string;
+  private runQuery: GiphyQuery;
 
-  private async query(endpoint: string, params: Record<string, string>): Promise<GifAsset[]> {
+  private async query(
+    endpoint: GiphyEndpoint,
+    params: Record<string, string>,
+  ): Promise<GifAsset[]> {
     if (!this.configured) return [];
-    const url = new URL(`https://api.giphy.com/v1/gifs/${endpoint}`);
-    url.searchParams.set("api_key", this.key);
-    // Bloom stays gentle: G-rated results only.
-    url.searchParams.set("rating", "g");
-    url.searchParams.set("bundle", "messaging_non_clips");
-    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) throw new Error(`gif provider ${res.status}`);
-    const data = (await res.json()) as { data?: GiphyResult[] };
-    return (data.data ?? []).map(mapGiphy).filter((g): g is GifAsset => g !== null);
+    try {
+      const rows = await this.runQuery(this.catalog, endpoint, params);
+      return rows
+        .map((item) => mapGiphy(item, this.catalog))
+        .filter((g): g is GifAsset => g !== null);
+    } catch {
+      return [];
+    }
   }
 
   trending(limit: number): Promise<GifAsset[]> {
-    return this.query("trending", { limit: String(Math.min(limit, 24)) }).catch(() => []);
+    return this.query("trending", { limit: String(Math.min(limit, 24)) });
   }
 
   search(query: string, limit: number): Promise<GifAsset[]> {
@@ -202,15 +143,24 @@ export class GiphyGifProvider implements GifProvider {
       q: q.slice(0, 80),
       limit: String(Math.min(limit, 24)),
       lang: "en",
-    }).catch(() => []);
+    });
   }
 }
 
-export const gifProvider: GifProvider = TENOR_KEY
-  ? new TenorGifProvider()
-  : GIPHY_KEY
-    ? new GiphyGifProvider()
-    : new EmptyGifProvider();
+export class GiphyGifProvider extends GiphyProvider {
+  constructor(options: GiphyProviderOptions = {}) {
+    super("gifs", "GIFs", options);
+  }
+}
+
+export class GiphyStickerProvider extends GiphyProvider {
+  constructor(options: GiphyProviderOptions = {}) {
+    super("stickers", "Stickers", options);
+  }
+}
+
+export const gifProvider: GifProvider = new GiphyGifProvider();
+export const stickerProvider: StickerProvider = new GiphyStickerProvider();
 
 /* ------------------------- music: licensed catalog ----------------------- */
 /* No unauthorized streaming: the catalog serves Apple's own 30-second
@@ -400,22 +350,5 @@ export function validateAudioFile(file: File): string | null {
     return "That audio is too large. Keep it under 12 MB.";
   }
   if (file.size < 1024) return "That audio looks empty. Try a different file.";
-  return null;
-}
-
-/** A GIF from the user's own device — uploaded to their storage at publish. */
-export const OWN_GIF = {
-  maxBytes: 4 * 1024 * 1024,
-  accepted: ["image/gif", "image/webp"],
-} as const;
-
-export function validateGifFile(file: File): string | null {
-  if (!OWN_GIF.accepted.includes(file.type as (typeof OWN_GIF.accepted)[number])) {
-    return "That isn't a GIF. Pick a .gif or animated .webp file.";
-  }
-  if (file.size > OWN_GIF.maxBytes) {
-    return "That GIF is too large. Keep it under 4 MB.";
-  }
-  if (file.size < 64) return "That file looks empty. Try a different GIF.";
   return null;
 }
