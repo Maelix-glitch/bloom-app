@@ -1,22 +1,38 @@
 /**
  * StoryCanvas — one renderer for "what a story looks like."
- * The viewer (interactive), the editor (selectable), and thumbnails (static)
- * all compose this. Base layer = media or curated background + filter;
- * canvas elements float above in z-order with canvas-relative placement.
+ *
+ * The viewer (interactive), the editor (selectable), thumbnails (static) and
+ * the 1080×1920 exporter all read the same element list. Layers paint in
+ * z-order over a background that is data, not a component: a photo layer can
+ * be cropped, masked, framed and filtered; a shape layer is one normalized
+ * path; a data layer prints only what Bloom actually logged.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link2, Music2 } from "lucide-react";
+import { ImagePlus, Link2, Music2 } from "lucide-react";
 
-import type { StoryAdjustments, StoryElement } from "@/lib/stories/types";
-import {
-  adjustmentsToCss,
-  backgroundById,
-  filterById,
-  fontPresetById,
-} from "@/lib/stories/catalogs";
+import type {
+  BloomStoryData,
+  StoryAdjustments,
+  StoryDataElement,
+  StoryElement,
+  StoryPhotoElement,
+  StoryShapeElement,
+} from "@/lib/stories/types";
+import { adjustmentsToCss, filterById } from "@/lib/stories/catalogs";
 import { StickerArt } from "@/lib/stories/stickers";
 import { countdownParts } from "@/lib/stories/time";
+import {
+  backgroundLayers,
+  defaultBackground,
+  presetBackground,
+  type StoryBackgroundState,
+} from "@/lib/stories/canvas/backgrounds";
+import { frameById, maskById, maskClipPath, maskRadius } from "@/lib/stories/canvas/masks";
+import { coverGeometryPercent } from "@/lib/stories/canvas/photogeom";
+import { shapeById } from "@/lib/stories/canvas/shapes";
+import { resolveText } from "@/lib/stories/canvas/typography";
+import { metricReading, METRIC_LABELS } from "@/lib/stories/data/metrics";
 import {
   castVote,
   getPollTally,
@@ -40,9 +56,16 @@ export interface CanvasInteraction {
 
 const INTERACTIVE_KINDS = new Set(["poll", "question", "slider", "countdown", "music", "mention"]);
 
-function useCanvasScale(ref: React.RefObject<HTMLDivElement | null>): number {
-  const [width, setWidth] = useState(390);
+export function useCanvasScale(
+  ref: React.RefObject<HTMLDivElement | null>,
+  fixed?: number | undefined,
+): number {
+  const [width, setWidth] = useState(fixed ?? 390);
   useEffect(() => {
+    if (typeof fixed === "number") {
+      setWidth(fixed * 390);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     const update = () => setWidth(Math.max(200, el.clientWidth));
@@ -51,7 +74,7 @@ function useCanvasScale(ref: React.RefObject<HTMLDivElement | null>): number {
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [ref]);
+  }, [ref, fixed]);
   return width / 390;
 }
 
@@ -73,6 +96,56 @@ function prefersReducedMotion(): boolean {
   );
 }
 
+/* ------------------------------ photo masks ------------------------------ */
+
+/**
+ * One shared set of `objectBoundingBox` clip paths. Coordinates are 0–1 so a
+ * mask scales with its slot instead of being pinned to pixels.
+ */
+export function PhotoMaskDefs() {
+  const masks = [
+    [
+      "oval",
+      "M0.5 0 C0.776 0 1 0.224 1 0.5 C1 0.776 0.776 1 0.5 1 C0.224 1 0 0.776 0 0.5 C0 0.224 0.224 0 0.5 0 Z",
+    ],
+    ["arch", "M0 1 L0 0.5 A0.5 0.5 0 0 1 1 0.5 L1 1 Z"],
+    ["arch-soft", "M0 1 L0 0.42 C0 0.16 0.22 0 0.5 0 C0.78 0 1 0.16 1 0.42 L1 1 Z"],
+    [
+      "blob",
+      "M0.52 0.03 C0.7 0.08 0.85 0.16 0.92 0.33 C0.98 0.47 0.97 0.66 0.85 0.79 C0.74 0.91 0.58 0.96 0.42 0.97 C0.26 0.98 0.13 0.9 0.07 0.75 C0.01 0.61 0.03 0.44 0.11 0.3 C0.19 0.16 0.36 0.05 0.52 0.03 Z",
+    ],
+    ["leaf", "M0.5 0 C0.86 0.26 0.96 0.6 0.5 1 C0.04 0.6 0.14 0.26 0.5 0 Z"],
+    ["diamond", "M0.5 0 L1 0.5 L0.5 1 L0 0.5 Z"],
+    ["hexagon", "M0.5 0 L1 0.25 L1 0.75 L0.5 1 L0 0.75 L0 0.25 Z"],
+    [
+      "scallop",
+      "M0 0.06 Q0.06 0 0.125 0.05 Q0.19 0 0.25 0.05 Q0.31 0 0.375 0.05 Q0.44 0 0.5 0.05 Q0.56 0 0.625 0.05 Q0.69 0 0.75 0.05 Q0.81 0 0.875 0.05 Q0.94 0 1 0.06 L1 0.94 Q0.94 1 0.875 0.95 Q0.81 1 0.75 0.95 Q0.69 1 0.625 0.95 Q0.56 1 0.5 0.95 Q0.44 1 0.375 0.95 Q0.31 1 0.25 0.95 Q0.19 1 0.125 0.95 Q0.06 1 0 0.94 Z",
+    ],
+    [
+      "torn",
+      "M0.01 0.04 L0.14 0.015 L0.28 0.05 L0.42 0.02 L0.58 0.055 L0.72 0.02 L0.86 0.05 L0.99 0.03 L0.98 0.96 L0.85 0.985 L0.71 0.95 L0.57 0.98 L0.43 0.95 L0.29 0.98 L0.15 0.95 L0.02 0.97 Z",
+    ],
+    ["asym", "M0 0.16 C0 0.07 0.07 0 0.16 0 L1 0 L1 0.84 C1 0.93 0.93 1 0.84 1 L0 1 Z"],
+  ] as const;
+  return (
+    <svg
+      width="0"
+      height="0"
+      aria-hidden
+      focusable="false"
+      className="pointer-events-none absolute"
+    >
+      <defs>
+        {masks.map(([id, d]) => (
+          <clipPath key={id} id={`bloom-pmask-${id}`} clipPathUnits="objectBoundingBox">
+            <path d={d} />
+          </clipPath>
+        ))}
+      </defs>
+    </svg>
+  );
+}
+
 /* --------------------------------- pieces ------------------------------- */
 
 function Placed({
@@ -91,16 +164,24 @@ function Placed({
   children: React.ReactNode;
 }) {
   void k;
+  const sized = typeof el.w === "number" && typeof el.h === "number";
   return (
     <div
       className="scanvas-el"
       data-selected={selected || undefined}
       data-interactive={interactive || undefined}
+      data-locked={el.locked || undefined}
+      data-kind={el.kind}
       style={{
         left: `${el.x * 100}%`,
         top: `${el.y * 100}%`,
+        ...(sized
+          ? { width: `${(el.w as number) * 100}%`, height: `${(el.h as number) * 100}%` }
+          : {}),
         transform: `translate(-50%, -50%) rotate(${el.rotation}deg) scale(${el.scale})`,
         zIndex: 10 + el.z,
+        opacity: typeof el.opacity === "number" ? el.opacity / 100 : undefined,
+        mixBlendMode: (el.blend as React.CSSProperties["mixBlendMode"]) ?? undefined,
         pointerEvents: interactive || onSelect ? "auto" : "none",
       }}
       onPointerDown={
@@ -118,40 +199,482 @@ function Placed({
 }
 
 function TextPiece({ el, k }: { el: Extract<StoryElement, { kind: "text" }>; k: number }) {
-  const preset = fontPresetById(el.preset);
+  const r = resolveText(el.preset, el.style ?? {}, k);
+  const backdrop = el.style?.backdrop ?? legacyBackdrop(el.background);
   const bgColor =
+    el.style?.backdropColor ??
     el.backgroundColor ??
-    (el.background === "pill" || el.background === "highlight"
+    (backdrop === "pill" || backdrop === "highlight"
       ? "rgba(20,17,29,0.62)"
-      : el.background === "veil"
+      : backdrop === "veil"
         ? "rgba(20,17,29,0.4)"
         : "transparent");
   return (
     <div
       className="se-text"
-      data-bg={el.background}
+      data-bg={backdrop}
       data-anim={el.animation && el.animation !== "none" ? el.animation : undefined}
       style={{
-        fontFamily: preset.fontFamily,
-        fontWeight: preset.fontWeight,
-        fontStyle: preset.fontStyle,
-        letterSpacing: preset.letterSpacing,
-        lineHeight: preset.lineHeight,
-        textTransform: preset.textTransform,
-        fontSize: Math.max(10, preset.baseSize * k),
+        fontFamily: r.fontFamily,
+        fontWeight: r.fontWeight,
+        fontStyle: r.fontStyle,
+        letterSpacing: `${r.letterSpacingEm}em`,
+        lineHeight: r.lineHeight,
+        textTransform: r.textTransform,
+        fontSize: r.fontSize,
         color: el.color,
         opacity: el.opacity / 100,
         textAlign: el.align,
-        textShadow: el.background === "none" ? preset.shadow : "none",
-        background:
-          el.background === "none" || el.background === "outline" ? "transparent" : bgColor,
-        maxWidth: 340 * k,
+        textShadow: r.shadow,
+        WebkitTextStroke: r.outline > 0 ? `${r.outline}px ${r.outlineColor}` : undefined,
+        background: backdrop === "none" || backdrop === "outline" ? "transparent" : bgColor,
+        maxWidth: r.maxWidth,
       }}
     >
       {el.text}
     </div>
   );
 }
+
+function legacyBackdrop(
+  value: string,
+): "none" | "pill" | "highlight" | "veil" | "outline" | "card" {
+  return value === "pill" ||
+    value === "highlight" ||
+    value === "veil" ||
+    value === "outline" ||
+    value === "card"
+    ? value
+    : "none";
+}
+
+/* --------------------------------- photo -------------------------------- */
+
+/** Frame chrome padding as a fraction of the box width. */
+function framePadding(el: StoryPhotoElement): { top: number; side: number; bottom: number } {
+  const def = frameById(el.frame);
+  if (def.id === "none" || def.id === "tape") return { top: 0, side: 0, bottom: 0 };
+  return { top: def.pad, side: def.pad, bottom: def.padBottom ?? def.pad };
+}
+
+function PhotoPiece({
+  el,
+  editing,
+  onAddPhoto,
+}: {
+  el: StoryPhotoElement;
+  editing: boolean;
+  onAddPhoto?: ((el: StoryPhotoElement) => void) | undefined;
+}) {
+  const frame = frameById(el.frame);
+  const pad = framePadding(el);
+  const filter = filterById(el.filterId);
+  const adjustments = adjustmentsToCss(null);
+  const clip = maskClipPath(el.mask);
+  const radius = maskRadius(el.mask);
+  const empty = !el.src;
+
+  // Inner box in canonical 9:16 units — the same ratios the exporter uses, so
+  // the crop you see is the crop you get at 1080×1920.
+  const outerW = el.w * 390;
+  const outerH = (el.h * (390 * 16)) / 9;
+  const innerBox = {
+    w: Math.max(1, outerW * (1 - 2 * pad.side)),
+    h: Math.max(1, outerH * (1 - pad.top - pad.bottom)),
+  };
+  const geom = coverGeometryPercent(innerBox, {
+    naturalWidth: el.naturalWidth,
+    naturalHeight: el.naturalHeight,
+    zoom: el.zoom,
+    panX: el.panX,
+    panY: el.panY,
+    flipX: el.flipX,
+    flipY: el.flipY,
+    fit: el.fit,
+  });
+
+  const imgStyle: React.CSSProperties = {
+    position: "absolute",
+    left: `${geom.left}%`,
+    top: `${geom.top}%`,
+    width: `${geom.width}%`,
+    height: `${geom.height}%`,
+    transform: `scaleX(${el.flipX ? -1 : 1}) scaleY(${el.flipY ? -1 : 1})`,
+    filter: [filter.css, adjustments].filter((f) => f !== "none").join(" ") || undefined,
+    backgroundColor: el.letterbox ?? undefined,
+  };
+
+  return (
+    <div
+      className="sphoto"
+      data-empty={empty || undefined}
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        filter: frame.shadow ? "drop-shadow(0 18px 34px rgba(8,6,16,0.38))" : undefined,
+      }}
+    >
+      {/* frame chrome */}
+      {frame.id !== "none" && frame.id !== "tape" ? (
+        <div
+          className="sphoto-frame"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: el.frameColor,
+            borderRadius: el.mask === "circle" ? "50%" : "4px",
+          }}
+          aria-hidden
+        />
+      ) : null}
+
+      {/* the image itself */}
+      <div
+        className="sphoto-inner"
+        style={{
+          position: "absolute",
+          top: `${pad.top * 100}%`,
+          left: `${pad.side * 100}%`,
+          right: `${pad.side * 100}%`,
+          bottom: `${pad.bottom * 100}%`,
+          overflow: "hidden",
+          clipPath: clip,
+          WebkitClipPath: clip,
+          borderRadius: clip ? undefined : radius,
+          background: empty
+            ? "rgba(148,142,168,0.16)"
+            : el.blurFill
+              ? undefined
+              : (el.letterbox ?? undefined),
+          boxShadow: el.border ? `inset 0 0 0 ${el.border.width}px ${el.border.color}` : undefined,
+        }}
+      >
+        {empty ? (
+          editing ? (
+            <button
+              type="button"
+              className="sphoto-empty"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddPhoto?.(el);
+              }}
+              aria-label={el.slot ? `Add photo to ${el.slot}` : "Add photo"}
+            >
+              <ImagePlus className="size-5" strokeWidth={1.6} aria-hidden />
+              <span>Add photo</span>
+            </button>
+          ) : null
+        ) : (
+          <>
+            {el.blurFill ? (
+              <img
+                src={el.src}
+                alt=""
+                aria-hidden
+                draggable={false}
+                className="sphoto-blurfill"
+                style={{
+                  position: "absolute",
+                  inset: "-12%",
+                  width: "124%",
+                  height: "124%",
+                  objectFit: "cover",
+                  filter: "blur(28px) brightness(0.86)",
+                  transform: `scaleX(${el.flipX ? -1 : 1}) scaleY(${el.flipY ? -1 : 1})`,
+                }}
+              />
+            ) : null}
+            <img src={el.src} alt={el.alt || ""} draggable={false} style={imgStyle} />
+            {filter.wash ? (
+              <span
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background: filter.wash[0],
+                  mixBlendMode: filter.wash[1] as React.CSSProperties["mixBlendMode"],
+                  opacity: filter.wash[2],
+                }}
+                aria-hidden
+              />
+            ) : null}
+          </>
+        )}
+      </div>
+
+      {/* tape strips */}
+      {frame.id === "tape" ? (
+        <>
+          <span
+            className="sphoto-tape"
+            style={{ top: "-4%", left: "8%", transform: "rotate(-14deg)" }}
+            aria-hidden
+          />
+          <span
+            className="sphoto-tape"
+            style={{ bottom: "-4%", right: "8%", transform: "rotate(-12deg)" }}
+            aria-hidden
+          />
+        </>
+      ) : null}
+
+      {/* film sprockets */}
+      {frame.id === "film" ? (
+        <>
+          <span className="sphoto-sprockets" style={{ top: "3.5%" }} aria-hidden />
+          <span className="sphoto-sprockets" style={{ bottom: "3.5%" }} aria-hidden />
+        </>
+      ) : null}
+
+      {/* window muntins */}
+      {frame.id === "window" ? (
+        <>
+          <span
+            className="sphoto-muntin"
+            style={{ left: 0, right: 0, top: "50%", height: 3, background: el.frameColor }}
+            aria-hidden
+          />
+          <span
+            className="sphoto-muntin"
+            style={{ top: 0, bottom: 0, left: "50%", width: 3, background: el.frameColor }}
+            aria-hidden
+          />
+        </>
+      ) : null}
+
+      {/* magazine caption strip */}
+      {frame.id === "magazine" ? (
+        <span className="sphoto-caption-strip" style={{ background: el.frameColor }} aria-hidden />
+      ) : null}
+    </div>
+  );
+}
+
+/* --------------------------------- shape -------------------------------- */
+
+function ShapePiece({ el, k }: { el: StoryShapeElement; k: number }) {
+  const def = shapeById(el.shape);
+  if (!def) return null;
+  void k;
+
+  if (def.render.mode === "radial") {
+    const color = el.fill ?? "#ffffff";
+    return (
+      <span
+        className="block size-full"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${color} 0%, ${fade(color)} 72%)`,
+          filter: el.blur > 0 ? `blur(${el.blur}px)` : undefined,
+        }}
+        aria-hidden
+      />
+    );
+  }
+
+  if (def.render.mode === "roundRect") {
+    return (
+      <span
+        className="block size-full"
+        style={{
+          background: el.fill ?? "transparent",
+          border: el.stroke ? `${el.strokeWidth}px solid ${el.stroke}` : undefined,
+          borderRadius: `${def.render.radius * 100}%`,
+          filter: el.blur > 0 ? `blur(${el.blur}px)` : undefined,
+        }}
+        aria-hidden
+      />
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="block size-full"
+      aria-hidden
+      focusable="false"
+      style={{ filter: el.blur > 0 ? `blur(${el.blur}px)` : undefined }}
+    >
+      <path
+        d={def.d}
+        fill={el.fill ?? "none"}
+        stroke={el.stroke ?? "none"}
+        strokeWidth={def.stroke ? (el.strokeWidth * 100) / 100 : el.strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+function fade(color: string): string {
+  if (color.startsWith("#")) {
+    const hex = color.length >= 7 ? color.slice(1, 7) : color.slice(1).padEnd(6, "0");
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, 0)`;
+  }
+  return "rgba(255,255,255,0)";
+}
+
+/* ---------------------------------- data -------------------------------- */
+
+function DataPiece({
+  el,
+  data,
+  k,
+}: {
+  el: StoryDataElement;
+  data: BloomStoryData | null;
+  k: number;
+}) {
+  const reading = metricReading(data, el.metric);
+  const shown =
+    reading ??
+    (el.manualValue
+      ? { value: el.manualValue, sub: METRIC_LABELS[el.metric], progress: null }
+      : null);
+
+  if (!shown) {
+    return el.hideWhenEmpty ? null : (
+      <div className="sdata sdata-empty" style={{ fontSize: 12 * k }}>
+        <span className="sdata-label">{el.label || METRIC_LABELS[el.metric]}</span>
+        <span className="sdata-none">Nothing logged yet</span>
+      </div>
+    );
+  }
+
+  const label = el.label || METRIC_LABELS[el.metric];
+
+  switch (el.variant) {
+    case "inline":
+      return (
+        <span className="sdata sdata-inline" style={{ fontSize: 12.5 * k }}>
+          {el.metric !== "today" ? <span className="sdata-label">{label}</span> : null}
+          <span className="sdata-value" style={{ color: el.accent }}>
+            {shown.value}
+          </span>
+          {shown.sub ? <span className="sdata-sub">{shown.sub}</span> : null}
+        </span>
+      );
+    case "ring": {
+      const pct = shown.progress === null ? 0 : Math.round(shown.progress * 100);
+      const R = 42;
+      const C = 2 * Math.PI * R;
+      return (
+        <div className="sdata sdata-ring" style={{ width: "100%", height: "100%" }}>
+          <svg viewBox="0 0 100 100" className="sdata-ring-svg" aria-hidden focusable="false">
+            <circle
+              cx="50"
+              cy="50"
+              r={R}
+              fill="none"
+              stroke="rgba(255,255,255,0.18)"
+              strokeWidth="6"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r={R}
+              fill="none"
+              stroke={el.accent}
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray={`${(C * pct) / 100} ${C}`}
+              transform="rotate(-90 50 50)"
+            />
+          </svg>
+          <span className="sdata-ring-center">
+            <b style={{ fontSize: 19 * k }}>{shown.value}</b>
+            <span style={{ fontSize: 10 * k }}>{label}</span>
+          </span>
+        </div>
+      );
+    }
+    case "bars": {
+      const pct = shown.progress === null ? null : Math.round(shown.progress * 100);
+      return (
+        <div className="sdata sdata-bars">
+          <span className="sdata-bars-head">
+            <span className="sdata-label">{label}</span>
+            <b style={{ color: el.accent }}>{shown.value}</b>
+          </span>
+          {pct !== null ? (
+            <span className="sdata-bar">
+              <span
+                className="sdata-bar-fill"
+                style={{ width: `${pct}%`, background: el.accent }}
+              />
+            </span>
+          ) : null}
+          {shown.sub ? <span className="sdata-sub">{shown.sub}</span> : null}
+        </div>
+      );
+    }
+    case "list": {
+      const names = data?.habits?.names ?? [];
+      const done = data?.habits?.done ?? 0;
+      return (
+        <div className="sdata sdata-list">
+          <span className="sdata-list-head">
+            <span className="sdata-label">{label}</span>
+            <b style={{ color: el.accent }}>{shown.value}</b>
+          </span>
+          <ul>
+            {(names.length > 0 ? names : [shown.sub]).slice(0, 6).map((name, i) => (
+              <li key={`${name}-${i}`}>
+                <span className="sdata-tick" data-on={i < done || undefined} aria-hidden />
+                <span>{name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+    case "phase": {
+      const cycle = data?.cycle ?? null;
+      const pct = shown.progress === null ? 0 : shown.progress;
+      return (
+        <div className="sdata sdata-phase">
+          <span className="sdata-phase-day" style={{ color: el.accent }}>
+            {shown.value}
+          </span>
+          <span className="sdata-phase-name">{shown.sub}</span>
+          <span className="sdata-phase-track" aria-hidden>
+            <span
+              className="sdata-phase-fill"
+              style={{ width: `${Math.round(pct * 100)}%`, background: el.accent }}
+            />
+          </span>
+          {cycle?.estimated ? (
+            <span className="sdata-sub">estimated from your last logged period</span>
+          ) : null}
+        </div>
+      );
+    }
+    default:
+      return (
+        <div className="sdata sdata-card">
+          <span className="sdata-label">{label}</span>
+          <b className="sdata-big" style={{ color: el.accent }}>
+            {shown.value}
+          </b>
+          {shown.sub ? <span className="sdata-sub">{shown.sub}</span> : null}
+          {shown.progress !== null ? (
+            <span className="sdata-bar">
+              <span
+                className="sdata-bar-fill"
+                style={{ width: `${Math.round(shown.progress * 100)}%`, background: el.accent }}
+              />
+            </span>
+          ) : null}
+        </div>
+      );
+  }
+}
+
+/* ------------------------------ interactions ----------------------------- */
 
 function PollPiece({
   el,
@@ -206,7 +729,7 @@ function PollPiece({
   return (
     <div
       className="sx-poll"
-      style={{ width: 230 * k, ["--sx-accent" as string]: accent } as React.CSSProperties}
+      style={{ width: 230 * k, [stringVar("--sx-accent")]: accent } as React.CSSProperties}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
@@ -244,6 +767,8 @@ function PollPiece({
     </div>
   );
 }
+
+const stringVar = (name: string) => name as unknown as number;
 
 function QuestionPiece({
   el,
@@ -351,7 +876,6 @@ function SliderPiece({
       if (!interaction) return;
       try {
         const s = await castVote(interaction.storyId, el.id, value, interaction.userId);
-        // castVote returns a poll tally; re-read proper slider stats.
         void getSliderStats(interaction.storyId, el.id, interaction.userId).then(setStats);
         setStats((prev) => prev ?? { elementId: el.id, average: s.mine, count: 1, mine: value });
       } catch {
@@ -365,7 +889,7 @@ function SliderPiece({
   return (
     <div
       className="sx-slider"
-      style={{ width: 230 * k, ["--sx-accent" as string]: accent } as React.CSSProperties}
+      style={{ width: 230 * k, [stringVar("--sx-accent")]: accent } as React.CSSProperties}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
@@ -439,7 +963,7 @@ function CountdownPiece({
   return (
     <div
       className="sx-countdown"
-      style={{ width: 230 * k, ["--sx-accent" as string]: accent } as React.CSSProperties}
+      style={{ width: 230 * k, [stringVar("--sx-accent")]: accent } as React.CSSProperties}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
@@ -575,6 +1099,7 @@ function MusicPiece({
 export function StoryCanvas({
   media,
   backgroundId,
+  background,
   filterId,
   adjustments,
   elements = [],
@@ -588,13 +1113,20 @@ export function StoryCanvas({
   onVideoTime,
   onVideoEnded,
   onMediaFail,
+  onAddPhoto,
+  data = null,
   alt,
   createdAt,
   className,
   innerRef,
+  showMaskDefs = true,
+  fixedScale,
 }: {
   media: CanvasMedia;
+  /** Legacy preset id — still honoured when `background` is absent. */
   backgroundId?: string | null | undefined;
+  /** Full background state. Wins over `backgroundId` when present. */
+  background?: StoryBackgroundState | null | undefined;
   filterId?: string | null | undefined;
   adjustments?: StoryAdjustments | null | undefined;
   elements?: StoryElement[] | undefined;
@@ -608,25 +1140,43 @@ export function StoryCanvas({
   onVideoTime?: ((currentMs: number, durationMs: number) => void) | undefined;
   onVideoEnded?: (() => void) | undefined;
   onMediaFail?: (() => void) | undefined;
+  /** Editor only: tapping an empty photo slot opens the picker. */
+  onAddPhoto?: ((el: StoryPhotoElement) => void) | undefined;
+  /** Real Bloom readings for data layers. */
+  data?: BloomStoryData | null | undefined;
   alt?: string | undefined;
   createdAt?: string | undefined;
   className?: string | undefined;
   innerRef?: React.Ref<HTMLDivElement> | undefined;
+  showMaskDefs?: boolean | undefined;
+  /**
+   * Render at a known scale instead of measuring — used by template
+   * thumbnails, where 100+ ResizeObservers would be pure waste.
+   */
+  fixedScale?: number | undefined;
 }) {
   const localRef = useRef<HTMLDivElement | null>(null);
   const ref = (innerRef as React.RefObject<HTMLDivElement | null>) ?? localRef;
-  const k = useCanvasScale(ref);
+  const k = useCanvasScale(ref, fixedScale);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
-  const background = backgroundById(backgroundId);
+  const bg = useMemo<StoryBackgroundState>(
+    () => background ?? (backgroundId ? presetBackground(backgroundId) : defaultBackground()),
+    [background, backgroundId],
+  );
+  const layers = useMemo(() => backgroundLayers(bg), [bg]);
+
   const filter = filterById(filterId);
   const adjustmentsCss = adjustmentsToCss(adjustments);
   const combinedFilter =
     [filter.css, adjustmentsCss].filter((f) => f !== "none").join(" ") || "none";
 
-  const ordered = useMemo(() => [...elements].sort((a, b) => a.z - b.z), [elements]);
+  const ordered = useMemo(
+    () => [...elements].filter((e) => e.visible !== false).sort((a, b) => a.z - b.z),
+    [elements],
+  );
 
   /* video transport follows pause state */
   useEffect(() => {
@@ -641,7 +1191,6 @@ export function StoryCanvas({
     }
   }, [paused, media.src]);
 
-  /* pause any sticker audio when the story pauses or unmounts */
   useEffect(() => {
     if (paused) setPlayingAudio(null);
   }, [paused]);
@@ -653,15 +1202,34 @@ export function StoryCanvas({
   }, [onMediaFail]);
 
   const interactive = mode === "interactive";
+  const editing = mode === "edit";
   const reducedMotion = useMemo(() => prefersReducedMotion(), []);
+  const hasBaseMedia = media.type !== "none" && media.src && !failed;
 
   return (
     <div
       ref={ref}
       className={`scanvas bstory ${className ?? ""}`}
-      style={{ background: media.type === "none" || !media.src ? background.css : "#0c0a14" }}
-      onPointerDown={mode === "edit" && onSelect ? () => onSelect(null) : undefined}
+      style={hasBaseMedia ? { background: "#0c0a14" } : layers.base}
+      onPointerDown={editing && onSelect ? () => onSelect(null) : undefined}
     >
+      {showMaskDefs ? <PhotoMaskDefs /> : null}
+
+      {/* background layers: user photo, overlay, texture */}
+      {!hasBaseMedia ? (
+        <>
+          {layers.photoStyle ? (
+            <div className="scanvas-bg-photo" style={layers.photoStyle} aria-hidden />
+          ) : null}
+          {layers.overlayStyle ? (
+            <div className="scanvas-bg-overlay" style={layers.overlayStyle} aria-hidden />
+          ) : null}
+          {layers.textureStyle ? (
+            <div className="scanvas-bg-texture" style={layers.textureStyle} aria-hidden />
+          ) : null}
+        </>
+      ) : null}
+
       {/* base media */}
       {media.type !== "none" && media.src && !failed ? (
         media.type === "video" ? (
@@ -736,7 +1304,6 @@ export function StoryCanvas({
                 aria-hidden
               />
             ) : null}
-            {/* legibility veils top + bottom */}
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-28"
               style={{ background: "linear-gradient(180deg, rgba(10,8,20,0.5), transparent)" }}
@@ -788,7 +1355,7 @@ export function StoryCanvas({
         .filter((el) => el.kind !== "drawing")
         .map((el) => {
           const canInteract = interactive && INTERACTIVE_KINDS.has(el.kind) && interaction !== null;
-          const selectable = mode === "edit";
+          const selectable = editing;
           return (
             <Placed
               key={el.id}
@@ -799,6 +1366,11 @@ export function StoryCanvas({
               onSelect={selectable ? onSelect : undefined}
             >
               {el.kind === "text" ? <TextPiece el={el} k={k} /> : null}
+              {el.kind === "photo" ? (
+                <PhotoPiece el={el} editing={editing} onAddPhoto={onAddPhoto} />
+              ) : null}
+              {el.kind === "shape" ? <ShapePiece el={el} k={k} /> : null}
+              {el.kind === "data" ? <DataPiece el={el} data={data} k={k} /> : null}
               {el.kind === "sticker" ? (
                 el.src ? (
                   <img
@@ -815,7 +1387,14 @@ export function StoryCanvas({
                     }}
                   />
                 ) : (
-                  <StickerArt id={el.stickerId} size={Math.max(28, 96 * k)} tint={el.tint} />
+                  <StickerArt
+                    id={el.stickerId}
+                    size={Math.max(28, 96 * k)}
+                    tint={el.tint}
+                    style={
+                      typeof el.opacity === "number" ? { opacity: el.opacity / 100 } : undefined
+                    }
+                  />
                 )
               ) : null}
               {el.kind === "gif" ? (
@@ -857,6 +1436,9 @@ export function StoryCanvas({
     </div>
   );
 }
+
+/** Keep the mask catalog importable without pulling the whole canvas in. */
+export { maskById };
 
 export function StoryLinkBadge() {
   return (

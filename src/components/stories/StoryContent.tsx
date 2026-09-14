@@ -41,6 +41,7 @@ export function StoryContent({
   const isRich =
     story.mediaType === "video" ||
     story.elements.length > 0 ||
+    story.canvas != null ||
     story.backgroundId != null ||
     story.filterId != null ||
     story.music != null;
@@ -54,6 +55,7 @@ export function StoryContent({
     return (
       <StoryCanvas
         media={media}
+        background={story.canvas}
         backgroundId={story.backgroundId}
         filterId={story.filterId}
         adjustments={story.adjustments}

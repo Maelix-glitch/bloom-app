@@ -62,6 +62,7 @@ const FALLBACK_IDENTITY: ProfileIdentity = {
   username: null,
   bio: null,
   avatarPath: null,
+  bannerPath: null,
   accent: "violet",
   featured: null,
 };

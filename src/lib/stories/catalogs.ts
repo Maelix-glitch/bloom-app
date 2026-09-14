@@ -293,10 +293,83 @@ export interface StoryFilter {
 export const STORY_FILTERS: StoryFilter[] = [
   { id: "none", name: "Original", hint: "Untouched", css: "none" },
   {
+    id: "warm",
+    name: "Warm",
+    hint: "Golden drift",
+    css: "brightness(1.03) contrast(1.0) saturate(1.08) sepia(0.22)",
+  },
+  {
+    id: "cool",
+    name: "Cool",
+    hint: "Blue-shifted calm",
+    css: "brightness(1.0) contrast(1.03) saturate(0.95) hue-rotate(-12deg)",
+    wash: ["linear-gradient(180deg, rgba(90,120,180,0.1), rgba(30,50,90,0.14))", "overlay", 1],
+  },
+  {
     id: "soft",
     name: "Soft",
     hint: "Lifted and gentle",
     css: "brightness(1.06) contrast(0.96) saturate(0.94)",
+  },
+  {
+    id: "matte",
+    name: "Matte",
+    hint: "Low contrast, filmic blacks",
+    css: "brightness(1.04) contrast(0.86) saturate(0.88)",
+    wash: ["rgba(232,230,240,0.12)", "screen", 1],
+  },
+  {
+    id: "film",
+    name: "Film",
+    hint: "Quiet grain",
+    css: "brightness(0.98) contrast(1.08) saturate(0.86)",
+    wash: ["rgba(30,24,40,0.18)", "multiply", 1],
+  },
+  {
+    id: "fade",
+    name: "Fade",
+    hint: "Washed and distant",
+    css: "brightness(1.1) contrast(0.82) saturate(0.78)",
+    wash: ["rgba(240,238,244,0.18)", "screen", 1],
+  },
+  {
+    id: "vintage",
+    name: "Vintage",
+    hint: "Aged paper warmth",
+    css: "sepia(0.36) brightness(1.02) contrast(0.98) saturate(0.9)",
+    wash: ["rgba(214,178,120,0.14)", "multiply", 1],
+  },
+  {
+    id: "noir",
+    name: "Noir",
+    hint: "High-contrast black and white",
+    css: "grayscale(1) brightness(0.98) contrast(1.22)",
+  },
+  {
+    id: "mono",
+    name: "Mono",
+    hint: "One color, softer",
+    css: "grayscale(1) brightness(1.02) contrast(1.06)",
+  },
+  {
+    id: "dream",
+    name: "Dream",
+    hint: "Soft glow, low clarity",
+    css: "brightness(1.08) contrast(0.9) saturate(1.04) blur(0.3px)",
+    wash: ["rgba(224,196,232,0.14)", "screen", 1],
+  },
+  {
+    id: "golden",
+    name: "Golden",
+    hint: "Late light",
+    css: "brightness(1.05) contrast(1.04) saturate(1.12) sepia(0.3)",
+  },
+  {
+    id: "bloom",
+    name: "Bloom",
+    hint: "Bloom's own tint",
+    css: "brightness(1.03) contrast(1.0) saturate(1.06) hue-rotate(10deg)",
+    wash: ["rgba(183,166,232,0.14)", "overlay", 1],
   },
   {
     id: "midnight",
@@ -304,12 +377,6 @@ export const STORY_FILTERS: StoryFilter[] = [
     hint: "Cool evening",
     css: "brightness(0.94) contrast(1.06) saturate(0.92) hue-rotate(-8deg)",
     wash: ["linear-gradient(180deg, rgba(70,80,160,0.16), rgba(20,16,40,0.22))", "overlay", 1],
-  },
-  {
-    id: "warm",
-    name: "Warm",
-    hint: "Golden drift",
-    css: "brightness(1.03) contrast(1.0) saturate(1.08) sepia(0.22)",
   },
   {
     id: "mist",
@@ -321,28 +388,9 @@ export const STORY_FILTERS: StoryFilter[] = [
   {
     id: "lavender",
     name: "Lavender",
-    hint: "Bloom's own tint",
+    hint: "Violet wash",
     css: "brightness(1.02) contrast(1.0) saturate(1.05) hue-rotate(12deg)",
     wash: ["rgba(150,130,220,0.14)", "overlay", 1],
-  },
-  {
-    id: "golden",
-    name: "Golden",
-    hint: "Late light",
-    css: "brightness(1.05) contrast(1.04) saturate(1.12) sepia(0.3)",
-  },
-  {
-    id: "film",
-    name: "Film",
-    hint: "Quiet grain",
-    css: "brightness(0.98) contrast(1.08) saturate(0.86)",
-    wash: ["rgba(30,24,40,0.18)", "multiply", 1],
-  },
-  {
-    id: "mono",
-    name: "Mono",
-    hint: "One color",
-    css: "grayscale(1) brightness(1.02) contrast(1.06)",
   },
 ];
 

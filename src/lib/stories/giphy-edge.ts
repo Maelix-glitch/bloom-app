@@ -69,7 +69,7 @@ export const queryGiphyCatalog: GiphyQuery = async (catalog, endpoint, params) =
       body: {
         catalog,
         endpoint,
-        q: params["q"],
+        ...(params["q"] ? { q: params["q"] } : {}),
         limit: Number(params["limit"] ?? 24),
       } satisfies GiphyQueryParams,
     });

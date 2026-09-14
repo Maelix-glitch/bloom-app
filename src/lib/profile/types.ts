@@ -6,6 +6,7 @@
 import type {
   StoryAdjustments,
   StoryAudience,
+  StoryCanvasSnapshot,
   StoryElement,
   StoryMediaType,
   StoryMusicMeta,
@@ -67,6 +68,12 @@ export interface Story {
   adjustments: StoryAdjustments | null;
   /** Curated background id for text-first stories. */
   backgroundId: string | null;
+  /**
+   * The composed canvas — background paint, photo, texture and overlay.
+   * Null on stories published before the canvas column existed, which then
+   * render from `backgroundId` alone.
+   */
+  canvas: StoryCanvasSnapshot | null;
   /** Attached music, if any. */
   music: StoryMusicMeta | null;
   /** Author-written description for screen readers. */

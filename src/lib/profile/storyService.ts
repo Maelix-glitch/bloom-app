@@ -20,6 +20,10 @@ import {
   type StoryVisibility,
 } from "./types";
 import { sanitizeAdjustments, sanitizeElements } from "@/lib/stories/elements";
+import { sanitizeBackground, type StoryBackgroundState } from "@/lib/stories/canvas/backgrounds";
+
+/** What the `stories.canvas` column holds. */
+export type StoryCanvasState = StoryBackgroundState;
 import type {
   StoryAdjustments,
   StoryAudience,
@@ -59,6 +63,8 @@ type StoryRow = {
   music?: unknown;
   alt_text?: string | null;
   audience?: string | null;
+  /** Story canvas state — background/texture/overlay/photo. */
+  canvas?: unknown;
 };
 
 const STORY_COLUMNS =
@@ -66,7 +72,7 @@ const STORY_COLUMNS =
 
 const STORY_COLUMNS_LEGACY = STORY_COLUMNS;
 
-const STORY_COLUMNS_FULL = `${STORY_COLUMNS}, media_type, duration_ms, elements, filter_id, adjustments, background_id, music, alt_text, audience`;
+const STORY_COLUMNS_FULL = `${STORY_COLUMNS}, media_type, duration_ms, elements, filter_id, adjustments, background_id, music, alt_text, audience, canvas`;
 
 /** True when PostgREST complains about a column the migration hasn't added yet. */
 function isMissingColumn(error: { code?: string; message?: string }): boolean {
@@ -107,6 +113,19 @@ function duplicatePublishGuard(fingerprint: string): boolean {
   lastFingerprint = fingerprint;
   lastFingerprintAt = now;
   return true;
+}
+
+/**
+ * Defensive: anything malformed falls back to null, which the viewer treats as
+ * "use `backgroundId`". A broken canvas must never blank a published story.
+ */
+function parseRowCanvas(value: unknown): StoryCanvasState | null {
+  if (!value || typeof value !== "object") return null;
+  try {
+    return sanitizeBackground(value);
+  } catch {
+    return null;
+  }
 }
 
 function parseRowMusic(value: unknown): StoryMusicMeta | null {
@@ -156,6 +175,7 @@ function fromRow(row: StoryRow): Story {
     filterId: typeof row.filter_id === "string" ? row.filter_id : null,
     adjustments: sanitizeAdjustments(row.adjustments),
     backgroundId: typeof row.background_id === "string" ? row.background_id : null,
+    canvas: parseRowCanvas(row.canvas),
     music: parseRowMusic(row.music),
     altText: typeof row.alt_text === "string" ? row.alt_text.slice(0, 300) : null,
     audience: row.audience === "close" ? "close" : "all",
@@ -202,6 +222,12 @@ export interface CreateStoryInput {
   filterId?: string | null | undefined;
   adjustments?: StoryAdjustments | null | undefined;
   backgroundId?: string | null | undefined;
+  /**
+   * The whole canvas description — background state, texture, overlay, photo
+   * layer. `backgroundId` alone can only name a preset, so the composed
+   * background travels with the story here.
+   */
+  canvas?: StoryCanvasState | null | undefined;
   music?: StoryMusicMeta | null | undefined;
   /** Own-audio bytes, uploaded at publish time and resolved into music.src. */
   audio?: { blob: Blob; contentType: string } | null | undefined;
@@ -365,6 +391,7 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
     filter_id: input.filterId ?? null,
     adjustments: input.adjustments ?? null,
     background_id: input.backgroundId ?? null,
+    canvas: input.canvas ?? null,
     music: music ?? null,
     alt_text: input.altText?.trim().slice(0, 300) || null,
     audience: input.audience ?? "all",
@@ -401,6 +428,7 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
   story.elements = elements;
   story.filterId = input.filterId ?? null;
   story.backgroundId = input.backgroundId ?? null;
+  story.canvas = input.canvas ?? null;
   story.music = music;
   return story;
 }
