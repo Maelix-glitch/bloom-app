@@ -87,10 +87,7 @@ function GoalCard({
   const claimed = item.claimed;
   const complete = item.complete;
   const tone = DOMAIN_TONE[item.goal.domain] ?? "var(--gold)";
-  // The button should show "Claiming…" and be disabled as soon as this goal is the one being claimed,
-  // regardless of the global busy flag timing. Busy still disables all claim buttons to prevent races.
-  const isClaiming = claimingId === item.goal.id;
-  const isDisabled = busy || isClaiming;
+  const isClaiming = claimingId === item.goal.id && busy;
 
   const state = claimed
     ? "Earned"
@@ -150,7 +147,7 @@ function GoalCard({
               type="button"
               className="pg-btn pg-btn-primary"
               onClick={() => onClaim(item.goal.id)}
-              disabled={isDisabled}
+              disabled={isClaiming}
             >
               {isClaiming ? "Claiming…" : "Claim points"}
             </button>

@@ -268,10 +268,6 @@ export function useProgression(): ProgressionStore {
   /**
    * Server-side award. Returns null when there is no database (the caller
    * falls back to the local ledger), otherwise the server's decision.
-   *
-   * This never throws — any server failure falls back to the verified local
-   * ledger so the claim button never shows a console error for an expected
-   * offline or missing-migration case.
    */
   const awardOnServer = useCallback(
     async (goalId: string): Promise<{ awarded: boolean; points: number; balance: number; reason: string } | null> => {
@@ -284,17 +280,8 @@ export function useProgression(): ProgressionStore {
         if (rpcError) {
           // A server that has not run the progression migration must not stop
           // the journey: fall back to the verified local ledger.
-          // Also treat auth/network errors as fallback — the local ledger is
-          // the source of truth when offline.
-          const code = (rpcError as { code?: string }).code;
-          if (code === "42883" || code === "PGRST202" || code === "42501" || code === "28000" || code === "PGRST301") {
-            return null;
-          }
-          // For any other RPC error, don't throw — just fallback. The UI will
-          // still award locally, and we avoid a console.error that looks like
-          // a broken claim button.
-          console.warn("Progression award fallback to local:", rpcError);
-          return null;
+          if (rpcError.code === "42883" || rpcError.code === "PGRST202") return null;
+          throw rpcError;
         }
         const row = Array.isArray(data) ? data[0] : data;
         if (!row) return null;
@@ -306,8 +293,7 @@ export function useProgression(): ProgressionStore {
           reason: typeof record["reason"] === "string" ? record["reason"] : "",
         };
       } catch (cause) {
-        // Network or unexpected error — fallback to local, no console.error.
-        console.warn("Progression award fallback to local (exception):", cause);
+        console.error("Progression award failed:", cause);
         return null;
       }
     },
@@ -340,38 +326,27 @@ export function useProgression(): ProgressionStore {
             p_achievement_id: achievementId,
           });
           if (rpcError) {
-            const code = (rpcError as { code?: string }).code;
-            // Missing migration or auth errors → fallback to local.
-            if (code !== "42883" && code !== "PGRST202" && code !== "42501" && code !== "28000" && code !== "PGRST301") {
-              console.warn("Achievement award fallback to local:", rpcError);
-            }
+            if (rpcError.code !== "42883" && rpcError.code !== "PGRST202") throw rpcError;
           } else {
             const row = Array.isArray(data) ? data[0] : data;
             const record = (row ?? {}) as Record<string, unknown>;
-            if (record["awarded"] === false) {
-              // Server says not earned yet — respect it.
-              return false;
-            }
-            // If server awarded or returned nothing, continue to local mirror.
+            if (record["awarded"] !== true) return false;
           }
         } catch (cause) {
-          console.warn("Achievement award fallback to local (exception):", cause);
+          console.error("Achievement award failed:", cause);
+          return false;
         }
       }
 
-      try {
-        const recorded = recordAward({
-          kind: "achievement",
-          refId: def.id,
-          periodKey: "once",
-          title: def.title,
-          source: "milestones",
-          points: 0,
-        });
-        return Boolean(recorded);
-      } catch {
-        return false;
-      }
+      const recorded = recordAward({
+        kind: "achievement",
+        refId: def.id,
+        periodKey: "once",
+        title: def.title,
+        source: "milestones",
+        points: 0,
+      });
+      return Boolean(recorded);
     },
     [signedIn],
   );
@@ -498,9 +473,7 @@ export function useProgression(): ProgressionStore {
           message: "Awarded.",
         };
       } catch (cause) {
-        // This should never happen because all inner calls are safe, but if it does,
-        // we must not leave the UI stuck and must not throw to the caller.
-        console.warn("Claim failed, falling back to safe state:", cause);
+        console.error("Claim failed:", cause);
         setError("Goals couldn't be saved right now. Nothing was lost — try again.");
         return { awarded: false, points: 0, rankUp: null, unlocked: [], message: "Nothing was charged. Try again." };
       } finally {

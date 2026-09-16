@@ -58,20 +58,9 @@ export function LegacyRewards() {
                   disabled={claimingId === item.id}
                   onClick={async () => {
                     setClaimingId(item.id);
-                    try {
-                      const result = await claim(item.id);
-                      if (result.ok) {
-                        try {
-                          playRewardSound("claim");
-                        } catch {
-                          // Audio is best-effort — a failure should never block the reward.
-                        }
-                      }
-                    } catch (err) {
-                      console.error("Reward open failed:", err);
-                    } finally {
-                      setClaimingId(null);
-                    }
+                    const result = await claim(item.id);
+                    setClaimingId(null);
+                    if (result.ok) playRewardSound("claim");
                   }}
                 >
                   <Gift width={13} height={13} aria-hidden />
