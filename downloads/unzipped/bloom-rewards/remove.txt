@@ -1,2 +1,0 @@
-src/components/rewards/PointsStrip.tsx
-src/components/rewards/RewardsPage.tsx
