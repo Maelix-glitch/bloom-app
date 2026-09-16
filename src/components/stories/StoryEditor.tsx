@@ -327,6 +327,15 @@ export function StoryEditor({
     setDeleteHot(pointInRect(d.clientX, d.clientY, rect, 20));
   }, []);
 
+  /* ------------------------------ resize --------------------------------
+   * The corner handles are drawn by StoryCanvas; ElementLayer runs the actual
+   * gesture in its capture handler (it reads `data-se-handle`). This just
+   * clears any stale drag state so the delete zone never appears mid-resize. */
+  const beginResize = useCallback(() => {
+    setDrag(null);
+    setDeleteHot(false);
+  }, []);
+
   useEffect(() => {
     if (!drag && deleteHot) {
       /* released over the zone is handled below via ref mirror */
@@ -1120,8 +1129,12 @@ export function StoryEditor({
       <div className="relative grid min-h-0 flex-1 place-items-center">
         <div
           ref={canvasRef}
-          className="relative overflow-hidden"
-          style={{ aspectRatio: "9 / 16", height: "100%", maxWidth: "100%" }}
+          className="se-stage relative overflow-hidden"
+          /* max-height matters on short phones: without it a 9:16 canvas sized
+           * from the available height overflows the space the tool rail left
+           * and gets clipped by overflow-hidden. With both caps the box fits
+           * inside the region and the aspect ratio picks the binding one. */
+          style={{ aspectRatio: "9 / 16", height: "100%", maxWidth: "100%", maxHeight: "100%" }}
         >
           <ElementLayer
             elements={elements}
@@ -1147,6 +1160,8 @@ export function StoryEditor({
               selectedId={selectedId}
               onSelect={(id) => !drawing && setSelectedId(id)}
               onAddPhoto={(el) => requestPhotoFor(el.id)}
+              onResizeStart={beginResize}
+              resizeEnabled={!drawing && textEditing === null && tool === null}
               muted={muted}
             />
           </ElementLayer>
@@ -1277,7 +1292,7 @@ export function StoryEditor({
         </div>
       ) : (
         /* tool rail */
-        <div className="relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+        <div className="se-rail relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
           {tools.map((t) => (
             <button
               key={t.id}

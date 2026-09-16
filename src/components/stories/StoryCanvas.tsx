@@ -56,6 +56,14 @@ export interface CanvasInteraction {
 
 const INTERACTIVE_KINDS = new Set(["poll", "question", "slider", "countdown", "music", "mention"]);
 
+/** The four draggable corners of a selected element. */
+const RESIZE_CORNERS = [
+  { id: "nw", x: "left", y: "top", cursor: "nwse-resize" },
+  { id: "ne", x: "right", y: "top", cursor: "nesw-resize" },
+  { id: "sw", x: "left", y: "bottom", cursor: "nesw-resize" },
+  { id: "se", x: "right", y: "bottom", cursor: "nwse-resize" },
+] as const;
+
 export function useCanvasScale(
   ref: React.RefObject<HTMLDivElement | null>,
   fixed?: number | undefined,
@@ -148,12 +156,62 @@ export function PhotoMaskDefs() {
 
 /* --------------------------------- pieces ------------------------------- */
 
+/**
+ * Corner resize handles. They live *inside* the transformed element, so they
+ * inherit its rotation and scale and stay pinned to its corners. The inverse
+ * scale (1 / scale / k) keeps them a constant size on screen — a handle on a
+ * 4× element is the same touch target as one on a 0.25× element, on any phone.
+ *
+ * The gesture itself is handled by ElementLayer, which reads `data-se-handle`.
+ */
+function ResizeHandles({
+  scale,
+  k,
+  onResizeStart,
+}: {
+  scale: number;
+  k: number;
+  onResizeStart?: ((e: React.PointerEvent, corner: string) => void) | undefined;
+}) {
+  const inv = 1 / Math.max(0.05, scale * k);
+  return (
+    <>
+      {RESIZE_CORNERS.map((c) => (
+        <span
+          key={c.id}
+          className="se-rz"
+          data-se-handle={c.id}
+          data-corner={c.id}
+          aria-hidden
+          style={
+            {
+              [c.y]: 0,
+              [c.x]: 0,
+              "--se-rz-inv": inv,
+              cursor: c.cursor,
+            } as React.CSSProperties
+          }
+          onPointerDown={
+            onResizeStart
+              ? (e) => {
+                  e.stopPropagation();
+                  onResizeStart(e, c.id);
+                }
+              : undefined
+          }
+        />
+      ))}
+    </>
+  );
+}
+
 function Placed({
   el,
   k,
   interactive,
   selected,
   onSelect,
+  onResizeStart,
   children,
 }: {
   el: StoryElement;
@@ -161,6 +219,7 @@ function Placed({
   interactive: boolean;
   selected: boolean;
   onSelect?: ((id: string | null) => void) | undefined;
+  onResizeStart?: ((e: React.PointerEvent, corner: string) => void) | undefined;
   children: React.ReactNode;
 }) {
   void k;
@@ -168,6 +227,7 @@ function Placed({
   return (
     <div
       className="scanvas-el"
+      data-se-el={el.id}
       data-selected={selected || undefined}
       data-interactive={interactive || undefined}
       data-locked={el.locked || undefined}
@@ -194,6 +254,9 @@ function Placed({
       }
     >
       {children}
+      {selected && onResizeStart ? (
+        <ResizeHandles scale={el.scale} k={k} onResizeStart={onResizeStart} />
+      ) : null}
     </div>
   );
 }
@@ -1114,6 +1177,8 @@ export function StoryCanvas({
   onVideoEnded,
   onMediaFail,
   onAddPhoto,
+  onResizeStart,
+  resizeEnabled = true,
   data = null,
   alt,
   createdAt,
@@ -1142,6 +1207,10 @@ export function StoryCanvas({
   onMediaFail?: (() => void) | undefined;
   /** Editor only: tapping an empty photo slot opens the picker. */
   onAddPhoto?: ((el: StoryPhotoElement) => void) | undefined;
+  /** Editor only: dragging a corner handle resizes the selected element. */
+  onResizeStart?: ((e: React.PointerEvent, corner: string) => void) | undefined;
+  /** Editor only: hide the handles while a tool sheet owns the screen. */
+  resizeEnabled?: boolean | undefined;
   /** Real Bloom readings for data layers. */
   data?: BloomStoryData | null | undefined;
   alt?: string | undefined;
@@ -1364,6 +1433,7 @@ export function StoryCanvas({
               interactive={canInteract}
               selected={selectable && selectedId === el.id}
               onSelect={selectable ? onSelect : undefined}
+              onResizeStart={selectable && !el.locked && resizeEnabled ? onResizeStart : undefined}
             >
               {el.kind === "text" ? <TextPiece el={el} k={k} /> : null}
               {el.kind === "photo" ? (

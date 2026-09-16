@@ -103,7 +103,9 @@
   min-width: 72px;
   padding: 4px 6px 2px;
   border-radius: 16px;
-  transition: background var(--motion-fast) ease, transform var(--motion-fast) ease;
+  transition:
+    background var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
 }
 
 .srail-item:hover {
@@ -219,7 +221,9 @@
   height: 38px;
   border-radius: 999px;
   color: rgba(244, 239, 228, 0.85);
-  transition: background var(--motion-fast) ease, transform var(--motion-fast) ease;
+  transition:
+    background var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
 }
 
 .sv-icon-btn:hover {
@@ -259,7 +263,10 @@
   font-size: 21px;
   line-height: 1;
   border: 1px solid transparent;
-  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), background var(--motion-fast) ease, border-color var(--motion-fast) ease;
+  transition:
+    transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
 }
 
 .sv-react-btn:hover {
@@ -470,6 +477,123 @@
   outline: 1.5px dashed rgba(238, 217, 164, 0.85);
   outline-offset: 6px;
   border-radius: 6px;
+}
+
+/* Corner resize handles. Sized in screen pixels via --se-rz-inv, which the
+ * editor sets to 1 / (element scale × canvas scale), so a handle is the same
+ * comfortable touch target whether the element is 4× or 0.25× and whether the
+ * phone is 320px or 900px wide. The hit area is padded well past the dot. */
+.se-rz {
+  position: absolute;
+  z-index: 6;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1.5px solid rgba(238, 217, 164, 0.95);
+  border-radius: 7px;
+  background: rgba(18, 15, 26, 0.92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  touch-action: none;
+  pointer-events: auto;
+}
+
+/* Invisible padding around the dot is what the finger actually lands on, so
+ * small corners stay easy to grab on a phone. */
+.se-rz::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+}
+
+.se-rz[data-corner="nw"] {
+  transform: translate(-50%, -50%) scale(var(--se-rz-inv, 1));
+}
+
+.se-rz[data-corner="ne"] {
+  transform: translate(50%, -50%) scale(var(--se-rz-inv, 1));
+}
+
+.se-rz[data-corner="sw"] {
+  transform: translate(-50%, 50%) scale(var(--se-rz-inv, 1));
+}
+
+.se-rz[data-corner="se"] {
+  transform: translate(50%, 50%) scale(var(--se-rz-inv, 1));
+}
+
+/* ------------------------- editor responsiveness ------------------------- */
+
+/* The 13-tool rail is wider than any phone, so it scrolls. Snap the buttons
+ * and fade the trailing edge so it reads as scrollable, not cut off. */
+.se-tool-btn {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+/* The rail itself: snap gently, and fade the trailing edge so the row reads as
+ * scrollable rather than truncated. */
+.se-rail {
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+}
+
+.se-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.se-root {
+  /* keep the canvas clear of the tool rail on short screens */
+  --se-rail-h: 74px;
+}
+
+.se-stage {
+  /* a touch of breathing room so the canvas never kisses the rail */
+  margin-block: 4px;
+}
+
+/* Small phones: the action bar and delete zone sit closer to the edges of a
+ * canvas that is now genuinely smaller, so pull them in and shrink slightly. */
+@media (max-width: 430px) {
+  .se-root {
+    --se-rail-h: 70px;
+  }
+
+  .se-tool-btn {
+    min-width: 56px;
+    font-size: 10px;
+  }
+
+  .se-delete-zone {
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    padding: 9px 15px;
+    font-size: 12px;
+  }
+}
+
+/* Short viewports (landscape phones, small windows): the canvas is the thing
+ * that must shrink, and the rail should not eat a third of the screen. */
+@media (max-height: 620px) {
+  .se-tool-btn {
+    min-width: 52px;
+    padding: 6px 5px 5px;
+    font-size: 10px;
+    gap: 3px;
+  }
+
+  .se-stage {
+    margin-block: 2px;
+  }
+}
+
+/* Give the resize handles a bigger target when the pointer is a finger and
+ * the screen is narrow — the visual dot stays the same, the hit area grows. */
+@media (max-width: 430px) and (pointer: coarse) {
+  .se-rz::after {
+    inset: -13px;
+  }
 }
 
 .scanvas-el[data-interactive="true"] {
@@ -706,7 +830,9 @@
   padding: 8px 12px;
   margin-top: 6px;
   color: #f4efe4;
-  transition: transform 140ms ease, border-color 140ms ease;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease;
 }
 
 .sx-opt:active {
@@ -843,7 +969,11 @@
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, color-mix(in oklab, var(--sx-accent, #e0a3b8) 45%, transparent), var(--sx-accent, #e0a3b8));
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--sx-accent, #e0a3b8) 45%, transparent),
+    var(--sx-accent, #e0a3b8)
+  );
 }
 
 .sx-slider-knob {
@@ -915,7 +1045,10 @@
   font-weight: 550;
   letter-spacing: 0.01em;
   color: var(--story-ink-dim);
-  transition: background var(--motion-fast) ease, color var(--motion-fast) ease, transform var(--motion-fast) ease;
+  transition:
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
 }
 
 .se-tool-btn:hover {
@@ -952,7 +1085,9 @@
   color: var(--story-ink);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: transform var(--motion-fast) ease, background var(--motion-fast) ease;
+  transition:
+    transform var(--motion-fast) ease,
+    background var(--motion-fast) ease;
 }
 
 @media (max-width: 63.99rem) {
@@ -990,7 +1125,12 @@
   -webkit-backdrop-filter: blur(12px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms ease, transform 200ms var(--story-ease), border-color 200ms ease, color 200ms ease, background 200ms ease;
+  transition:
+    opacity 200ms ease,
+    transform 200ms var(--story-ease),
+    border-color 200ms ease,
+    color 200ms ease,
+    background 200ms ease;
 }
 
 .se-delete-zone[data-visible="true"] {
@@ -1029,7 +1169,9 @@
   border: 2px solid transparent;
   outline: 1.5px solid rgba(244, 239, 228, 0.2);
   outline-offset: 2px;
-  transition: transform 140ms ease, outline-color 140ms ease;
+  transition:
+    transform 140ms ease,
+    outline-color 140ms ease;
   flex-shrink: 0;
 }
 
@@ -1051,7 +1193,9 @@
   border-radius: 14px;
   border: 1px solid transparent;
   color: var(--story-ink-dim);
-  transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease;
+  transition:
+    background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
 }
 
 .se-preset[data-active="true"] {
@@ -1071,7 +1215,9 @@
   font-weight: 550;
   color: var(--muted-foreground);
   white-space: nowrap;
-  transition: background var(--motion-fast) ease, color var(--motion-fast) ease;
+  transition:
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease;
 }
 
 .se-tray-tab[data-active="true"] {
@@ -1087,7 +1233,10 @@
   border-radius: 18px;
   background: color-mix(in oklab, var(--surface-2) 60%, transparent);
   border: 1px solid transparent;
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
 .se-sticker-cell:hover {
@@ -1113,7 +1262,9 @@
   border-radius: 12px;
   overflow: hidden;
   border: 2px solid transparent;
-  transition: border-color 160ms ease, transform 160ms ease;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .se-filter-cell[data-active="true"] .se-filter-thumb {
@@ -1138,7 +1289,9 @@
   overflow: hidden;
   text-align: left;
   border: 1px solid var(--border);
-  transition: transform 160ms ease, border-color 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease;
 }
 
 .sc-mode-tile:active {
@@ -1173,7 +1326,9 @@
   overflow: hidden;
   border: 1px solid var(--border);
   background: var(--surface);
-  transition: transform 180ms var(--story-ease), border-color 180ms ease;
+  transition:
+    transform 180ms var(--story-ease),
+    border-color 180ms ease;
 }
 
 .sarc-card:hover {
@@ -1224,7 +1379,9 @@
   height: 58px;
   border-radius: 999px;
   background: #f4efe4;
-  transition: transform 140ms ease, background 140ms ease;
+  transition:
+    transform 140ms ease,
+    background 140ms ease;
 }
 
 .scam-shutter[data-recording="true"] > span {
@@ -1645,7 +1802,6 @@
   text-align: center;
 }
 
-
 /* ==========================================================================
    Story Editor — trays, sheets and the template browser
    ========================================================================== */
@@ -1904,7 +2060,9 @@
 
 .se-swatch[data-active="true"] {
   border-color: var(--foreground);
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground);
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 3.5px var(--foreground);
 }
 
 .se-swatch-none {
@@ -2033,7 +2191,18 @@
   padding: 3px;
   background: #f7f2e6;
   border-radius: 1px;
-  clip-path: polygon(0 6%, 22% 0, 44% 7%, 68% 1%, 100% 6%, 98% 94%, 74% 100%, 50% 93%, 24% 100%, 2% 95%);
+  clip-path: polygon(
+    0 6%,
+    22% 0,
+    44% 7%,
+    68% 1%,
+    100% 6%,
+    98% 94%,
+    74% 100%,
+    50% 93%,
+    24% 100%,
+    2% 95%
+  );
 }
 
 /* -------------------------------- filters -------------------------------- */
@@ -2170,7 +2339,9 @@
 
 .se-palette-chip[data-active="true"] {
   border-color: var(--foreground);
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground);
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 3.5px var(--foreground);
 }
 
 .se-grad-preview {
@@ -2378,7 +2549,6 @@
   border-color: var(--foreground);
   background: color-mix(in oklab, var(--foreground) 10%, transparent);
 }
-
 
 /* ==========================================================================
    Template browser — the front door to the library
@@ -2668,7 +2838,6 @@
 .stpl-use-btn:active {
   transform: scale(0.98);
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .story-ring-enter,
