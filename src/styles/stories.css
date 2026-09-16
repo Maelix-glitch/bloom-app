@@ -401,7 +401,6 @@
   width: 100%;
   max-width: 480px;
   max-height: 82vh;
-  max-height: 82dvh;
   display: flex;
   flex-direction: column;
   background: color-mix(in oklab, var(--surface) 94%, transparent);
@@ -411,6 +410,11 @@
   box-shadow: 0 -30px 90px -30px rgba(0, 0, 0, 0.8);
   animation: ssheet-up 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
   overflow: hidden;
+}
+@supports (height: 100dvh) {
+  .ssheet {
+    max-height: 82dvh;
+  }
 }
 
 @keyframes ssheet-up {

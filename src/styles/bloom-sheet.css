@@ -57,7 +57,11 @@
   top: auto;
   height: auto;
   max-height: 88vh;
-  max-height: 88dvh;
+}
+@supports (height: 100dvh) {
+  .bsheet.bsheet--phone {
+    max-height: 88dvh;
+  }
 }
 
 /*
@@ -74,13 +78,23 @@
   max-width: 480px;
   height: auto;
   max-height: 84vh;
-  max-height: 84dvh;
 }
+@supports (height: 100dvh) {
+  .bsheet.bsheet--pop {
+    max-height: 84dvh;
+  }
+}
+
 .bsheet.bsheet--pop .bsheet-panel {
   height: auto;
   max-height: 84vh;
-  max-height: 84dvh;
 }
+@supports (height: 100dvh) {
+  .bsheet.bsheet--pop .bsheet-panel {
+    max-height: 84dvh;
+  }
+}
+
 .bsheet.bsheet--pop .bsheet-grab {
   display: none;
 }
@@ -129,12 +143,17 @@
   /* Content-height pop: auto until the cap, then the inner scroll takes over. */
   height: auto;
   max-height: 88vh;
-  max-height: 88dvh;
   box-shadow:
     0 -20px 60px -20px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent);
 }
+@supports (height: 100dvh) {
+  .bsheet.bsheet--phone .bsheet-panel {
+    max-height: 88dvh;
+  }
+}
+
 /* The inner scroll must never force height — it only scrolls past the cap. */
 .bsheet.bsheet--phone .bsheet-scroll {
   min-height: 0;

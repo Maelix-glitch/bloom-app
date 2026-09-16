@@ -176,12 +176,16 @@
     max-width: 100% !important;
     /* vh then dvh — see .coach-canvas. */
     max-height: 92vh;
-    max-height: 92dvh;
     border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0 !important;
     border-bottom: 0 !important;
     padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+  @supports (height: 100dvh) {
+    [data-bloom-dialog="true"] {
+      max-height: 92dvh;
+    }
   }
 }
 
@@ -197,7 +201,6 @@
     max-width: 100% !important;
     height: auto !important;
     max-height: 92vh;
-    max-height: 92dvh;
     border: 0 !important;
     border-top: 1px solid var(--border) !important;
     border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0;
@@ -205,18 +208,34 @@
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+  @supports (height: 100dvh) {
+    [data-bloom-side="left"],
+    [data-bloom-side="right"] {
+      max-height: 92dvh;
+    }
+  }
 }
 
 /* BloomSheet on phones: capped, scrollable, keyboard-aware. */
 @media (max-width: 639px) {
   .bsheet--phone {
     max-height: 92vh;
-    max-height: 92dvh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone {
+      max-height: 92dvh;
+    }
+  }
+
   .bsheet--phone .bsheet-panel {
     max-height: 92vh;
-    max-height: 92dvh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone .bsheet-panel {
+      max-height: 92dvh;
+    }
+  }
+
   /* any direct scroll region inside a phone sheet owns the gesture */
   .bsheet--phone .bsheet-scroll {
     max-height: calc(92vh - 120px);
@@ -312,8 +331,13 @@ textarea {
 textarea {
   field-sizing: content;
   max-height: 40vh;
-  max-height: 40dvh;
 }
+@supports (height: 100dvh) {
+  textarea {
+    max-height: 40dvh;
+  }
+}
+
 @supports not (field-sizing: content) {
   textarea {
     min-height: 88px;
@@ -390,8 +414,13 @@ textarea {
     flex-direction: column;
     min-height: 0;
     max-height: 92vh;
-    max-height: 92dvh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone .metrics-sheet {
+      max-height: 92dvh;
+    }
+  }
+
   /* header is the first child; every view below it scrolls */
   .bsheet--phone .metrics-sheet > div:first-child {
     flex: none;
@@ -447,8 +476,13 @@ textarea {
 @media (max-height: 700px) {
   .bsheet--phone {
     max-height: 94vh;
-    max-height: 94dvh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone {
+      max-height: 94dvh;
+    }
+  }
+
   .bmoment-tile {
     min-height: 112px;
   }
