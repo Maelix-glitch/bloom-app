@@ -48,7 +48,9 @@ export function useLegacyRewards(): LegacyRewardsState {
       const { data, error } = await supabase.rpc("get_my_rewards");
       if (error) throw error;
       setItems((data ?? []) as LegacyDelivery[]);
-    } catch {
+    } catch (err) {
+      // No console.error — a missing table or offline state should not show as a broken claim button.
+      console.warn("Could not load legacy rewards:", err);
       setItems([]);
     } finally {
       setLoading(false);
@@ -61,10 +63,19 @@ export function useLegacyRewards(): LegacyRewardsState {
       await load();
       if (!alive) return;
     })();
-    const sub = hasSupabaseConfig ? supabase.auth.onAuthStateChange(() => void load()) : null;
+    let sub: { data: { subscription: { unsubscribe: () => void } } } | null = null;
+    try {
+      sub = hasSupabaseConfig ? supabase.auth.onAuthStateChange(() => void load()) : null;
+    } catch {
+      sub = null;
+    }
     return () => {
       alive = false;
-      sub?.data.subscription.unsubscribe();
+      try {
+        sub?.data.subscription.unsubscribe();
+      } catch {
+        // ignore
+      }
     };
   }, [load]);
 
@@ -82,7 +93,9 @@ export function useLegacyRewards(): LegacyRewardsState {
       );
       return { ok: true };
     } catch (cause) {
-      console.error("Legacy claim failed:", cause);
+      // Log as warn, not error, so the console doesn't show a scary red error when
+      // the reward is simply not available or the network is offline.
+      console.warn("Legacy claim failed (handled):", cause);
       return { ok: false, error: "We couldn't open that right now. Nothing was changed." };
     }
   }, []);

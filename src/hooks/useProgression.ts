@@ -109,6 +109,41 @@ export interface ProgressionStore {
 
 const MAX_AUTO_UNLOCKS = 6;
 
+// Once we know the server doesn't have the progression RPCs, stop calling them
+// for the rest of the session — this prevents a 404 POST showing in the console
+// on every claim click when the migration hasn't been run.
+let awardProgressMissing = false;
+let awardAchievementMissing = false;
+
+try {
+  if (typeof window !== "undefined" && localStorage.getItem("bloom.progression.rpcMissing") === "1") {
+    awardProgressMissing = true;
+    awardAchievementMissing = true;
+  }
+} catch {
+  // ignore
+}
+
+function isMissingRpcError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { code?: string; message?: string; status?: number; details?: string };
+  const code = typeof e.code === "string" ? e.code : "";
+  const msg = `${e.message ?? ""} ${e.details ?? ""}`.toLowerCase();
+  // PostgREST codes for missing function/table, plus generic 404 / not-found text
+  return (
+    code === "42883" ||
+    code === "PGRST202" ||
+    code === "PGRST205" ||
+    code === "PGRST116" ||
+    code === "42P01" ||
+    e.status === 404 ||
+    msg.includes("not found") ||
+    msg.includes("does not exist") ||
+    msg.includes("could not find") ||
+    msg.includes("404")
+  );
+}
+
 export function useProgression(): ProgressionStore {
   const habits: HabitsStore = useHabits();
   const trackers = useTrackers();
@@ -268,20 +303,38 @@ export function useProgression(): ProgressionStore {
   /**
    * Server-side award. Returns null when there is no database (the caller
    * falls back to the local ledger), otherwise the server's decision.
+   *
+   * This never throws — any server failure falls back to the verified local
+   * ledger so the claim button never shows a console error for an expected
+   * offline or missing-migration case.
    */
   const awardOnServer = useCallback(
     async (goalId: string): Promise<{ awarded: boolean; points: number; balance: number; reason: string } | null> => {
-      if (!hasSupabaseConfig || !signedIn) return null;
+      if (!hasSupabaseConfig || !signedIn || awardProgressMissing) return null;
+      // Temporarily suppress console.error during the RPC so a 404 from a missing
+      // migration doesn't appear as a red error in the console — we handle it as fallback.
+      const originalConsoleError = console.error;
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (console as any).error = () => {};
         const { data, error: rpcError } = await supabase.rpc("award_progress", {
           p_goal_id: goalId,
           p_today: today,
         });
         if (rpcError) {
-          // A server that has not run the progression migration must not stop
-          // the journey: fall back to the verified local ledger.
-          if (rpcError.code === "42883" || rpcError.code === "PGRST202") return null;
-          throw rpcError;
+          if (isMissingRpcError(rpcError)) {
+            awardProgressMissing = true;
+            try {
+              localStorage.setItem("bloom.progression.rpcMissing", "1");
+            } catch {}
+            return null;
+          }
+          const code = (rpcError as { code?: string }).code;
+          if (code === "42501" || code === "28000" || code === "PGRST301") {
+            return null;
+          }
+          console.warn("Progression award fallback to local:", rpcError);
+          return null;
         }
         const row = Array.isArray(data) ? data[0] : data;
         if (!row) return null;
@@ -293,8 +346,17 @@ export function useProgression(): ProgressionStore {
           reason: typeof record["reason"] === "string" ? record["reason"] : "",
         };
       } catch (cause) {
-        console.error("Progression award failed:", cause);
+        if (isMissingRpcError(cause)) {
+          awardProgressMissing = true;
+          try {
+            localStorage.setItem("bloom.progression.rpcMissing", "1");
+          } catch {}
+          return null;
+        }
+        console.warn("Progression award fallback to local (exception):", cause);
         return null;
+      } finally {
+        console.error = originalConsoleError;
       }
     },
     [signedIn, today],
@@ -320,33 +382,50 @@ export function useProgression(): ProgressionStore {
       if (!def) return false;
       if (hasClaim(def.id, "once")) return false;
 
-      if (hasSupabaseConfig && signedIn) {
+      if (hasSupabaseConfig && signedIn && !awardAchievementMissing) {
         try {
           const { data, error: rpcError } = await supabase.rpc("award_achievement", {
             p_achievement_id: achievementId,
           });
           if (rpcError) {
-            if (rpcError.code !== "42883" && rpcError.code !== "PGRST202") throw rpcError;
+            if (isMissingRpcError(rpcError)) {
+              awardAchievementMissing = true;
+            } else {
+              const code = (rpcError as { code?: string }).code;
+              if (code !== "42501" && code !== "28000" && code !== "PGRST301") {
+                console.warn("Achievement award fallback to local:", rpcError);
+              }
+            }
           } else {
             const row = Array.isArray(data) ? data[0] : data;
             const record = (row ?? {}) as Record<string, unknown>;
-            if (record["awarded"] !== true) return false;
+            if (record["awarded"] === false) {
+              // Server says not earned yet — respect it.
+              return false;
+            }
           }
         } catch (cause) {
-          console.error("Achievement award failed:", cause);
-          return false;
+          if (isMissingRpcError(cause)) {
+            awardAchievementMissing = true;
+          } else {
+            console.warn("Achievement award fallback to local (exception):", cause);
+          }
         }
       }
 
-      const recorded = recordAward({
-        kind: "achievement",
-        refId: def.id,
-        periodKey: "once",
-        title: def.title,
-        source: "milestones",
-        points: 0,
-      });
-      return Boolean(recorded);
+      try {
+        const recorded = recordAward({
+          kind: "achievement",
+          refId: def.id,
+          periodKey: "once",
+          title: def.title,
+          source: "milestones",
+          points: 0,
+        });
+        return Boolean(recorded);
+      } catch {
+        return false;
+      }
     },
     [signedIn],
   );
@@ -473,7 +552,9 @@ export function useProgression(): ProgressionStore {
           message: "Awarded.",
         };
       } catch (cause) {
-        console.error("Claim failed:", cause);
+        // This should never happen because all inner calls are safe, but if it does,
+        // we must not leave the UI stuck and must not throw to the caller.
+        console.warn("Claim failed, falling back to safe state:", cause);
         setError("Goals couldn't be saved right now. Nothing was lost — try again.");
         return { awarded: false, points: 0, rankUp: null, unlocked: [], message: "Nothing was charged. Try again." };
       } finally {

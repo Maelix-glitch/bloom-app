@@ -53,13 +53,19 @@ export interface RewardDraftInput {
 
 function messageFrom(error: unknown) {
   if (error && typeof error === "object" && "message" in error) {
-    return String(error.message);
+    return String((error as { message?: unknown }).message ?? "");
   }
   return error instanceof Error ? error.message : "Something went wrong with Rewards.";
 }
 
 function toTimestamp(value: string) {
   return value ? new Date(value).toISOString() : null;
+}
+
+function ensureSupabase() {
+  if (!hasSupabaseConfig) {
+    throw new Error("Bloom isn't connected to a database in this environment, so rewards can't be claimed here.");
+  }
 }
 
 export function useRewardsSystem() {
@@ -117,15 +123,24 @@ export function useRewardsSystem() {
     void loadUserRewards();
     if (!hasSupabaseConfig) return;
 
-    const listener = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id ?? null);
-      void loadUserRewards();
-    });
+    try {
+      const listener = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserId(session?.user?.id ?? null);
+        void loadUserRewards();
+      });
 
-    return () => listener.data.subscription.unsubscribe();
+      return () => listener.data.subscription.unsubscribe();
+    } catch {
+      // No supabase config — already handled above.
+      return;
+    }
   }, [loadUserRewards]);
 
   const checkAdmin = useCallback(async () => {
+    if (!hasSupabaseConfig) {
+      setIsAdmin(false);
+      return false;
+    }
     try {
       const { data, error: rpcError } = await supabase.rpc("is_rewards_admin");
       if (rpcError) throw rpcError;
@@ -145,32 +160,47 @@ export function useRewardsSystem() {
 
   const claimReward = useCallback(async (rewardId: string) => {
     setError(null);
-    const { data, error: rpcError } = await supabase.rpc("claim_reward", {
-      p_reward_id: rewardId,
-    });
-    if (rpcError) {
-      setError(messageFrom(rpcError));
-      throw rpcError;
-    }
+    try {
+      ensureSupabase();
+      const { data, error: rpcError } = await supabase.rpc("claim_reward", {
+        p_reward_id: rewardId,
+      });
+      if (rpcError) {
+        setError(messageFrom(rpcError));
+        throw rpcError;
+      }
 
-    const claimed = Array.isArray(data) ? data[0] : data;
-    setRewards((current) =>
-      current.map((reward) =>
-        reward.id === rewardId
-          ? {
-              ...reward,
-              delivery_state: "claimed",
-              claimed_at: claimed?.claimed_at ?? new Date().toISOString(),
-            }
-          : reward,
-      ),
-    );
-    return claimed as { id: string; title: string; delivery_state: string; claimed_at: string };
+      const claimed = Array.isArray(data) ? data[0] : data;
+      setRewards((current) =>
+        current.map((reward) =>
+          reward.id === rewardId
+            ? {
+                ...reward,
+                delivery_state: "claimed",
+                claimed_at: (claimed as { claimed_at?: string } | null)?.claimed_at ?? new Date().toISOString(),
+              }
+            : reward,
+        ),
+      );
+      return claimed as { id: string; title: string; delivery_state: string; claimed_at: string };
+    } catch (err) {
+      const msg = messageFrom(err);
+      setError(msg);
+      throw err instanceof Error ? err : new Error(msg);
+    }
   }, []);
 
   const loadAdminWorkspace = useCallback(async () => {
     setAdminLoading(true);
     setAdminError(null);
+
+    if (!hasSupabaseConfig) {
+      setAdminRewards([]);
+      setAdminUsers([]);
+      setAdminError("Bloom isn't connected to a database in this environment.");
+      setAdminLoading(false);
+      return;
+    }
 
     try {
       const allowed = await checkAdmin();
@@ -198,6 +228,7 @@ export function useRewardsSystem() {
   }, [checkAdmin]);
 
   const createDraft = useCallback(async (draft: RewardDraftInput) => {
+    ensureSupabase();
     const { data, error: rpcError } = await supabase.rpc("admin_create_reward", {
       p_title: draft.title,
       p_description: draft.description,
@@ -213,6 +244,7 @@ export function useRewardsSystem() {
   }, []);
 
   const updateDraft = useCallback(async (rewardId: string, draft: RewardDraftInput) => {
+    ensureSupabase();
     const { error: rpcError } = await supabase.rpc("admin_update_reward", {
       p_reward_id: rewardId,
       p_title: draft.title,
@@ -229,6 +261,7 @@ export function useRewardsSystem() {
 
   const publishReward = useCallback(
     async (rewardId: string, recipientIds: string[], publishAt: string, expiresAt: string) => {
+      ensureSupabase();
       const { error: rpcError } = await supabase.rpc("admin_publish_reward", {
         p_reward_id: rewardId,
         p_user_ids: recipientIds,
@@ -241,6 +274,7 @@ export function useRewardsSystem() {
   );
 
   const revokeReward = useCallback(async (rewardId: string) => {
+    ensureSupabase();
     const { error: rpcError } = await supabase.rpc("admin_revoke_reward", {
       p_reward_id: rewardId,
     });
@@ -253,6 +287,7 @@ export function useRewardsSystem() {
       recipientId: string,
       state: Extract<RewardStatus, "published" | "claimed" | "expired" | "revoked">,
     ) => {
+      ensureSupabase();
       const { error: rpcError } = await supabase.rpc("admin_set_reward_delivery_state", {
         p_reward_id: rewardId,
         p_user_id: recipientId,

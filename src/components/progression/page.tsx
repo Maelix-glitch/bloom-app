@@ -75,21 +75,27 @@ export function JourneyPage() {
   const claim = useCallback(
     async (goalId: string) => {
       setClaimingId(goalId);
-      const result = await progress.claim(goalId);
-      setClaimingId(null);
-      if (result.awarded) {
-        setFloat({ points: result.points, label: "Bloom Points" });
-        if (result.unlocked.length > 0) {
-          setNote(
-            result.unlocked.length === 1
-              ? `Achievement earned — ${result.unlocked[0]?.title}`
-              : `${result.unlocked.length} achievements earned`,
-          );
+      try {
+        const result = await progress.claim(goalId);
+        if (result.awarded) {
+          setFloat({ points: result.points, label: "Bloom Points" });
+          if (result.unlocked.length > 0) {
+            setNote(
+              result.unlocked.length === 1
+                ? `Achievement earned — ${result.unlocked[0]?.title}`
+                : `${result.unlocked.length} achievements earned`,
+            );
+          }
+          // A rank-up owns the moment: one ceremony, never two animations.
+          if (result.rankUp) setCeremony(result.rankUp);
+        } else {
+          setNote(result.message);
         }
-        // A rank-up owns the moment: one ceremony, never two animations.
-        if (result.rankUp) setCeremony(result.rankUp);
-      } else {
-        setNote(result.message);
+      } catch (err) {
+        console.error("Goal claim UI failed:", err);
+        setNote("That didn't go through — nothing was lost. Try again.");
+      } finally {
+        setClaimingId(null);
       }
     },
     [progress],
@@ -191,7 +197,13 @@ export function JourneyPage() {
             </div>
             <GoalsBoard
               goals={progress.goals}
-              onClaim={(id) => void claim(id)}
+              onClaim={(id) => {
+                // Never let a claim rejection become an unhandled promise rejection
+                // that shows as a red error in the console.
+                void claim(id).catch((err) => {
+                  console.warn("Claim handler caught:", err);
+                });
+              }}
               busy={progress.busy}
               claimingId={claimingId}
               focusGoalId={focusGoalId}
