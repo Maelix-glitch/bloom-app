@@ -483,6 +483,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
+  /* transform fallback for engines without the translate property (Chrome < 104) */
+  transform: translate(-50%, -50%);
   translate: -50% -50%;
   display: grid;
   place-items: center;
@@ -775,9 +777,21 @@
  * ------------------------------------------------------------------------- */
 .mood-page .mg-canvas-bg {
   background:
-    radial-gradient(60% 60% at 50% 45%, color-mix(in oklab, var(--gold) 7%, transparent), transparent 70%),
-    linear-gradient(to right, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px);
+    radial-gradient(
+      60% 60% at 50% 45%,
+      color-mix(in oklab, var(--gold) 7%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border) 45%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border) 45%, transparent) 1px,
+      transparent 1px
+    );
   background-size:
     100% 100%,
     36px 36px,

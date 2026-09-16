@@ -400,6 +400,7 @@
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
+  max-height: 82vh;
   max-height: 82dvh;
   display: flex;
   flex-direction: column;

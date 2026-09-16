@@ -205,6 +205,9 @@
 
 .ci-root {
   position: relative;
+  /* vh then dvh, matching .tk2-root: engines without dynamic viewport units
+   * (Chrome < 108) keep the vh line instead of dropping the height entirely. */
+  min-height: 100vh;
   min-height: 100dvh;
   background: var(--ci-bg);
   color: var(--ci-text);
