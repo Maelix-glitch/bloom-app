@@ -109,6 +109,41 @@ export interface ProgressionStore {
 
 const MAX_AUTO_UNLOCKS = 6;
 
+// Once we know the server doesn't have the progression RPCs, stop calling them
+// for the rest of the session — this prevents a 404 POST showing in the console
+// on every claim click when the migration hasn't been run.
+let awardProgressMissing = false;
+let awardAchievementMissing = false;
+
+try {
+  if (typeof window !== "undefined" && localStorage.getItem("bloom.progression.rpcMissing") === "1") {
+    awardProgressMissing = true;
+    awardAchievementMissing = true;
+  }
+} catch {
+  // ignore
+}
+
+function isMissingRpcError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { code?: string; message?: string; status?: number; details?: string };
+  const code = typeof e.code === "string" ? e.code : "";
+  const msg = `${e.message ?? ""} ${e.details ?? ""}`.toLowerCase();
+  // PostgREST codes for missing function/table, plus generic 404 / not-found text
+  return (
+    code === "42883" ||
+    code === "PGRST202" ||
+    code === "PGRST205" ||
+    code === "PGRST116" ||
+    code === "42P01" ||
+    e.status === 404 ||
+    msg.includes("not found") ||
+    msg.includes("does not exist") ||
+    msg.includes("could not find") ||
+    msg.includes("404")
+  );
+}
+
 export function useProgression(): ProgressionStore {
   const habits: HabitsStore = useHabits();
   const trackers = useTrackers();
@@ -275,24 +310,29 @@ export function useProgression(): ProgressionStore {
    */
   const awardOnServer = useCallback(
     async (goalId: string): Promise<{ awarded: boolean; points: number; balance: number; reason: string } | null> => {
-      if (!hasSupabaseConfig || !signedIn) return null;
+      if (!hasSupabaseConfig || !signedIn || awardProgressMissing) return null;
+      // Temporarily suppress console.error during the RPC so a 404 from a missing
+      // migration doesn't appear as a red error in the console — we handle it as fallback.
+      const originalConsoleError = console.error;
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (console as any).error = () => {};
         const { data, error: rpcError } = await supabase.rpc("award_progress", {
           p_goal_id: goalId,
           p_today: today,
         });
         if (rpcError) {
-          // A server that has not run the progression migration must not stop
-          // the journey: fall back to the verified local ledger.
-          // Also treat auth/network errors as fallback — the local ledger is
-          // the source of truth when offline.
-          const code = (rpcError as { code?: string }).code;
-          if (code === "42883" || code === "PGRST202" || code === "42501" || code === "28000" || code === "PGRST301") {
+          if (isMissingRpcError(rpcError)) {
+            awardProgressMissing = true;
+            try {
+              localStorage.setItem("bloom.progression.rpcMissing", "1");
+            } catch {}
             return null;
           }
-          // For any other RPC error, don't throw — just fallback. The UI will
-          // still award locally, and we avoid a console.error that looks like
-          // a broken claim button.
+          const code = (rpcError as { code?: string }).code;
+          if (code === "42501" || code === "28000" || code === "PGRST301") {
+            return null;
+          }
           console.warn("Progression award fallback to local:", rpcError);
           return null;
         }
@@ -306,9 +346,17 @@ export function useProgression(): ProgressionStore {
           reason: typeof record["reason"] === "string" ? record["reason"] : "",
         };
       } catch (cause) {
-        // Network or unexpected error — fallback to local, no console.error.
+        if (isMissingRpcError(cause)) {
+          awardProgressMissing = true;
+          try {
+            localStorage.setItem("bloom.progression.rpcMissing", "1");
+          } catch {}
+          return null;
+        }
         console.warn("Progression award fallback to local (exception):", cause);
         return null;
+      } finally {
+        console.error = originalConsoleError;
       }
     },
     [signedIn, today],
@@ -334,16 +382,19 @@ export function useProgression(): ProgressionStore {
       if (!def) return false;
       if (hasClaim(def.id, "once")) return false;
 
-      if (hasSupabaseConfig && signedIn) {
+      if (hasSupabaseConfig && signedIn && !awardAchievementMissing) {
         try {
           const { data, error: rpcError } = await supabase.rpc("award_achievement", {
             p_achievement_id: achievementId,
           });
           if (rpcError) {
-            const code = (rpcError as { code?: string }).code;
-            // Missing migration or auth errors → fallback to local.
-            if (code !== "42883" && code !== "PGRST202" && code !== "42501" && code !== "28000" && code !== "PGRST301") {
-              console.warn("Achievement award fallback to local:", rpcError);
+            if (isMissingRpcError(rpcError)) {
+              awardAchievementMissing = true;
+            } else {
+              const code = (rpcError as { code?: string }).code;
+              if (code !== "42501" && code !== "28000" && code !== "PGRST301") {
+                console.warn("Achievement award fallback to local:", rpcError);
+              }
             }
           } else {
             const row = Array.isArray(data) ? data[0] : data;
@@ -352,10 +403,13 @@ export function useProgression(): ProgressionStore {
               // Server says not earned yet — respect it.
               return false;
             }
-            // If server awarded or returned nothing, continue to local mirror.
           }
         } catch (cause) {
-          console.warn("Achievement award fallback to local (exception):", cause);
+          if (isMissingRpcError(cause)) {
+            awardAchievementMissing = true;
+          } else {
+            console.warn("Achievement award fallback to local (exception):", cause);
+          }
         }
       }
 
