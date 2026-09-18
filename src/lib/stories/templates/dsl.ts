@@ -29,61 +29,26 @@ import {
 } from "@/lib/stories/canvas/backgrounds";
 import type { Paint } from "@/lib/stories/canvas/paint";
 
+/**
+ * The curated collections.
+ *
+ * Deliberately few. This library is 50 hand-composed templates, and the
+ * categories exist to help someone find the right one quickly — not to be a
+ * taxonomy. An earlier version carried 26 micro-categories across 294
+ * templates; that made browsing feel like a marketplace rather than a
+ * curated collection, and every category ended up with near-duplicates in it.
+ */
 export type TemplateCategoryId =
-  | "morning"
-  | "night"
-  | "mood"
-  | "selfcare"
-  | "wellness"
-  | "fitness"
-  | "hydration"
-  | "sleep"
-  | "cycle"
-  | "habits"
-  | "goals"
-  | "wins"
-  | "study"
-  | "food"
-  | "travel"
-  | "memories"
-  | "gratitude"
-  | "love"
-  | "nature"
-  | "quotes"
-  | "scrapbook"
-  | "cinematic"
-  | "minimal"
-  | "playful"
-  | "seasonal"
-  | "data";
+  "everyday" | "memories" | "mood" | "progress" | "wellness" | "reflection" | "celebration";
 
 export const TEMPLATE_CATEGORIES: { id: TemplateCategoryId; label: string }[] = [
-  { id: "morning", label: "Morning" },
-  { id: "night", label: "Night" },
-  { id: "mood", label: "Mood" },
-  { id: "selfcare", label: "Self-care" },
-  { id: "wellness", label: "Wellness" },
-  { id: "fitness", label: "Movement" },
-  { id: "hydration", label: "Hydration" },
-  { id: "sleep", label: "Sleep" },
-  { id: "cycle", label: "Cycle" },
-  { id: "habits", label: "Habits" },
-  { id: "goals", label: "Goals" },
-  { id: "wins", label: "Small wins" },
-  { id: "study", label: "Focus" },
-  { id: "food", label: "Food" },
-  { id: "travel", label: "Travel" },
+  { id: "everyday", label: "Everyday" },
   { id: "memories", label: "Memories" },
-  { id: "gratitude", label: "Gratitude" },
-  { id: "love", label: "Love" },
-  { id: "nature", label: "Nature" },
-  { id: "quotes", label: "Quotes" },
-  { id: "scrapbook", label: "Scrapbook" },
-  { id: "cinematic", label: "Cinematic" },
-  { id: "minimal", label: "Minimal" },
-  { id: "playful", label: "Playful" },
-  { id: "seasonal", label: "Seasonal" },
-  { id: "data", label: "Your data" },
+  { id: "mood", label: "Mood" },
+  { id: "progress", label: "Progress" },
+  { id: "wellness", label: "Wellness" },
+  { id: "reflection", label: "Reflection" },
+  { id: "celebration", label: "Celebration" },
 ];
 
 /* --------------------------------- seeds --------------------------------- */
@@ -91,7 +56,12 @@ export const TEMPLATE_CATEGORIES: { id: TemplateCategoryId; label: string }[] = 
 interface SeedBase {
   x: number;
   y: number;
-  z: number;
+  /**
+   * Stack order. Optional when authoring: `instantiate` falls back to the
+   * seed's position in the list, so a template reads top-to-bottom the way it
+   * draws back-to-front. Set it explicitly only to override that.
+   */
+  z?: number;
   rotation?: number;
   opacity?: number;
   name?: string;
@@ -253,7 +223,9 @@ export interface InstantiatedTemplate {
  */
 export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
   const elements: StoryElement[] = [];
-  for (const seed of def.seeds) {
+  def.seeds.forEach((seed, index) => {
+    // Declared order is the stack order unless a seed says otherwise.
+    const z = seed.z ?? index + 1;
     switch (seed.kind) {
       case "text": {
         elements.push(
@@ -263,7 +235,7 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
             align: seed.align ?? "center",
             x: seed.x,
             y: seed.y,
-            z: seed.z,
+            z,
             rotation: seed.rotation ?? 0,
             opacity: seed.opacity ?? 100,
             ...(seed.name ? { name: seed.name } : {}),
@@ -290,7 +262,7 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
             slot: seed.slot,
             x: seed.x,
             y: seed.y,
-            z: seed.z,
+            z,
             w: seed.w,
             h: seed.h,
             mask: seed.mask ?? "rect",
@@ -312,7 +284,7 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
         const el = makeShapeElement(seed.shape, {
           x: seed.x,
           y: seed.y,
-          z: seed.z,
+          z,
           w: seed.w,
           h: seed.h,
           fill: seed.fill,
@@ -331,7 +303,7 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
         const el = makeStickerElement(seed.stickerId, {
           x: seed.x,
           y: seed.y,
-          z: seed.z,
+          z,
           scale: seed.scale,
         });
         if (el) {
@@ -349,7 +321,7 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
         const el = makeDataElement(seed.metric, {
           x: seed.x,
           y: seed.y,
-          z: seed.z,
+          z,
           w: seed.w,
           h: seed.h,
           variant: seed.variant,
@@ -367,7 +339,7 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
         break;
       }
     }
-  }
+  });
   return { background: def.background, elements };
 }
 

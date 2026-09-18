@@ -24,10 +24,6 @@ import {
   TEMPLATES_CHANGED,
   type StoryTemplateDef,
 } from "@/lib/stories/templates";
-import { BOARD_TEMPLATES } from "@/lib/stories/templates/library/boards";
-import { PREMIUM_TEMPLATES } from "@/lib/stories/templates/library/premium";
-import { PREMIUM2_TEMPLATES } from "@/lib/stories/templates/library/premium2";
-import { PREMIUM3_TEMPLATES } from "@/lib/stories/templates/library/premium3";
 import type { BloomStoryData } from "@/lib/stories/types";
 
 /* ------------------------------- thumbnail ------------------------------- */
@@ -282,9 +278,7 @@ export function TemplateBrowser({
     query.trim().length > 0
       ? [{ id: "search", label: `Results for “${query.trim()}”`, items: hits }]
       : [
-          { id: "signature", label: "Signature", items: [...PREMIUM_TEMPLATES, ...PREMIUM2_TEMPLATES, ...PREMIUM3_TEMPLATES] },
           { id: "for-you", label: "For you", items: forYouList },
-          { id: "special", label: "Special Templates", items: BOARD_TEMPLATES },
           ...(recentDefs.length > 0
             ? [{ id: "recent", label: "Recently used", items: recentDefs }]
             : []),

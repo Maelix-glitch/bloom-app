@@ -28,7 +28,6 @@ import { editorDraftStore } from "@/lib/stories/draftStore";
 import { CameraCapture } from "./CameraCapture";
 import { BloomShareCard, shareSourceForMilestone, shareSourceForReward } from "./ShareCard";
 import { STORY_BACKGROUNDS } from "@/lib/stories/catalogs";
-import { BOARD_TEMPLATES } from "@/lib/stories/templates/library/boards";
 import { TemplateBrowser, TemplatePreview, TemplateThumb } from "./TemplateBrowser";
 import {
   STORY_TEMPLATE_LIBRARY,
@@ -169,17 +168,19 @@ export function StoryCreator({
       const def = STORY_TEMPLATE_LIBRARY.find((t) => t.id === id);
       if (def) add(def);
     }
+    // Lead with the shelf that fits the hour, then spread across the rest so a
+    // first glance shows the range of the collection rather than one mood.
     const hour = new Date().getHours();
-    const lead = hour < 6 ? "night" : hour < 12 ? "morning" : hour < 18 ? "wins" : "mood";
+    const lead = hour < 6 ? "mood" : hour < 12 ? "everyday" : hour < 18 ? "progress" : "reflection";
     const cats = [
       lead,
-      "mood",
+      "everyday",
       "memories",
-      "minimal",
-      "scrapbook",
-      "fitness",
-      "gratitude",
-      "love",
+      "mood",
+      "progress",
+      "wellness",
+      "reflection",
+      "celebration",
     ] as const;
     for (const cat of cats) {
       for (const def of STORY_TEMPLATE_LIBRARY.filter((t) => t.category === cat).slice(0, 2)) {
@@ -240,7 +241,7 @@ export function StoryCreator({
     setEditorSource({
       base: "background",
       backgroundId: "golden-hour",
-      templateId: "little-win",
+      templateId: "progress-small-win",
       storyKind: "win",
       accent: "amber",
     });
@@ -563,24 +564,6 @@ export function StoryCreator({
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1">
               {featured.map((def) => (
-                <button
-                  key={def.id}
-                  type="button"
-                  onClick={() => setPreviewTemplate(def)}
-                  className="group shrink-0 text-left"
-                >
-                  <TemplateThumb def={def} width={124} data={null} />
-                  <span className="mt-1.5 block w-[124px] truncate px-0.5 text-[11.5px] font-medium">
-                    {def.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* special templates — the image/board designs, all in one row */}
-            <p className="eyebrow mb-2.5 mt-5">Special Templates</p>
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              {BOARD_TEMPLATES.map((def) => (
                 <button
                   key={def.id}
                   type="button"

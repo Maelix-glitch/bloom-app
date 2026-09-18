@@ -7,15 +7,12 @@
  */
 
 import type { StoryDataMetric } from "@/lib/stories/types";
-import { DAY_TEMPLATES } from "./library/days";
-import { BODY_TEMPLATES } from "./library/body";
-import { LIVING_TEMPLATES } from "./library/living";
-import { STYLE_TEMPLATES } from "./library/style";
-import { BOARD_TEMPLATES } from "./library/boards";
-import { MORE_TEMPLATES } from "./library/more";
-import { PREMIUM_TEMPLATES } from "./library/premium";
-import { PREMIUM2_TEMPLATES } from "./library/premium2";
-import { PREMIUM3_TEMPLATES } from "./library/premium3";
+import {
+  STORY_TEMPLATE_COLLECTION,
+  TEMPLATE_COUNT,
+  assertCollectionIsValid,
+  validateCollection,
+} from "./collection";
 import {
   instantiate,
   templateMetrics,
@@ -28,58 +25,20 @@ import {
 
 export * from "./dsl";
 
-export const STORY_TEMPLATE_LIBRARY: StoryTemplateDef[] = [
-  ...PREMIUM_TEMPLATES,
-  ...PREMIUM2_TEMPLATES,
-  ...PREMIUM3_TEMPLATES,
-  ...DAY_TEMPLATES,
-  ...BODY_TEMPLATES,
-  ...LIVING_TEMPLATES,
-  ...STYLE_TEMPLATES,
-  ...BOARD_TEMPLATES,
-  ...MORE_TEMPLATES,
-];
-/* ------------------- exact reference-board button art ---------------------
- * Each of these ids shows its precise crop of the user's board as the browser
- * button image (previewSrc), instead of the live-canvas render.
+/**
+ * The production template library: exactly fifty curated designs.
+ *
+ * This array is the whole catalogue. There is no second list, no hidden
+ * experimental shelf and no legacy set kept "just in case" — the collection
+ * module is the only place templates are defined, and it asserts its own
+ * count. `STORY_TEMPLATE_LIBRARY.length === 50` is checked in the test suite.
  */
-const BOARD_PREVIEW: [string, string][] = [
-  ["morning-arch", "board1-01"],
-  ["todays-focus", "board1-02"],
-  ["a-kinder-me", "board1-03"],
-  ["night-quiet", "board1-04"],
-  ["memory-little-moments", "board1-05"],
-  ["my-mood-today", "board1-06"],
-  ["move-today", "board1-07"],
-  ["water-check", "board1-08"],
-  ["currently-board", "board1-09"],
-  ["travel-somewhere", "board1-10"],
-  ["food-good-mood", "board1-11"],
-  ["my-cycle", "board1-12"],
-  ["self-care-today", "board1-13"],
-  ["a-little-reminder", "board1-14"],
-  ["my-goals", "board1-15"],
-  ["just-a-girl", "board1-16"],
-  ["same-girl-different-dreams", "board1-17"],
-  ["goals-dream-plan", "board1-18"],
-  ["win-little", "board1-19"],
-  ["a-cozy-moment", "board1-20"],
-  ["bloom-in-your-own-time", "board1-21"],
-  ["me-lately", "board1-22"],
-  ["sunsets-soft-thoughts", "board1-23"],
-  ["favourite-places", "board1-24"],
-  ["a-brighter-tomorrow", "board1-25"],
-  ["study-reading", "board1-26"],
-  ["my-happy-place", "board1-27"],
-  ["thats-a-wrap", "board1-28"],
-  ["grateful-for", "board1-29"],
-  ["quote-you-got-this", "board1-30"],
-];
-for (const [id, file] of BOARD_PREVIEW) {
-  const t = STORY_TEMPLATE_LIBRARY.find((x) => x.id === id);
-  if (t) t.previewSrc = `/bloom/templates/board/${file}.jpg`;
-}
+export const STORY_TEMPLATE_LIBRARY: StoryTemplateDef[] = STORY_TEMPLATE_COLLECTION;
 
+/** The number this library must always hold. */
+export const STORY_TEMPLATE_COUNT = TEMPLATE_COUNT;
+
+export { assertCollectionIsValid, validateCollection };
 
 const BY_ID = new Map(STORY_TEMPLATE_LIBRARY.map((t) => [t.id, t]));
 
@@ -108,136 +67,63 @@ export function templateSections(): {
 /* --------------------------------- search -------------------------------- */
 
 /** Phrases people actually type, mapped to what they mean here. */
+/**
+ * Phrases people actually type, mapped onto the seven collections.
+ *
+ * Kept deliberately small. Search over fifty templates does not need twenty-six
+ * intent rules; it needs the handful of things someone says when they half know
+ * what they want.
+ */
 const INTENTS: { match: RegExp; tags: string[]; categories?: TemplateCategoryId[] }[] = [
   {
-    match: /\b(work ?out|gym|exercise|run|training|fitness)\b/,
-    tags: ["fitness", "movement", "strong"],
-    categories: ["fitness"],
+    match: /\b(morning|sunrise|coffee|wake|today|daily|currently|weekend)\b/,
+    tags: ["morning", "daily", "minimal"],
+    categories: ["everyday"],
   },
   {
-    match: /\b(cute|sweet|adorable|kawaii)\b/,
-    tags: ["playful", "cute", "soft"],
-    categories: ["playful"],
+    match: /\b(night|evening|dark|late|sleep|rest|rested)\b/,
+    tags: ["night", "dark", "sleep"],
+    categories: ["everyday", "wellness"],
   },
   {
-    match: /\b(dark|moody|night|evening|midnight)\b/,
-    tags: ["dark", "night", "moody"],
-    categories: ["night", "cinematic"],
+    match:
+      /\b(memor|remember|moment|nostalg|archive|polaroid|scrapbook|collage|travel|trip|place|somewhere)\b/,
+    tags: ["memory", "archive", "photo", "travel"],
+    categories: ["memories"],
   },
   {
-    match: /\b(birthday|celebrat|party)\b/,
-    tags: ["birthday", "celebrate", "party"],
-    categories: ["seasonal"],
-  },
-  {
-    match: /\b(mood|feeling|emotion)\b/,
-    tags: ["mood", "feeling", "check in"],
+    match: /\b(mood|feeling|feel|emotion|energy|quiet|weather)\b/,
+    tags: ["mood", "feeling", "quiet"],
     categories: ["mood"],
   },
   {
-    match: /\b(travel|holiday|vacation|trip|beach)\b/,
-    tags: ["travel", "beach", "memory"],
-    categories: ["travel"],
+    match:
+      /\b(win|proud|achieve|progress|habit|streak|step|goal|done it|kept going|milestone|showed up)\b/,
+    tags: ["progress", "win", "habits"],
+    categories: ["progress"],
   },
   {
-    match: /\b(minimal|clean|simple|space)\b/,
-    tags: ["minimal", "clean", "space"],
-    categories: ["minimal"],
-  },
-  {
-    match: /\b(romantic|love|partner|us|couple)\b/,
-    tags: ["love", "romantic", "warm"],
-    categories: ["love"],
-  },
-  {
-    match: /\b(good ?night|sleep|bed|rest)\b/,
-    tags: ["night", "sleep", "rest"],
-    categories: ["night", "sleep"],
-  },
-  {
-    match: /\b(morning|sunrise|coffee|wake)\b/,
-    tags: ["morning", "coffee", "light"],
-    categories: ["morning"],
-  },
-  { match: /\b(water|hydrat|drink)\b/, tags: ["hydration", "water"], categories: ["hydration"] },
-  {
-    match: /\b(habit|streak|consistent|routine)\b/,
-    tags: ["habits", "streak", "consistency"],
-    categories: ["habits"],
-  },
-  {
-    match: /\b(goal|dream|plan|future)\b/,
-    tags: ["goals", "plan", "growth"],
-    categories: ["goals"],
-  },
-  {
-    match: /\b(win|proud|achieve|done it)\b/,
-    tags: ["win", "proud", "celebrate"],
-    categories: ["wins"],
-  },
-  {
-    match: /\b(study|focus|read|work|deep work)\b/,
-    tags: ["study", "focus", "reading"],
-    categories: ["study"],
-  },
-  {
-    match: /\b(food|meal|eat|plate|treat|cook)\b/,
-    tags: ["food", "plate", "treat"],
-    categories: ["food"],
-  },
-  {
-    match: /\b(grateful|thankful|gratitude)\b/,
-    tags: ["gratitude", "thankful"],
-    categories: ["gratitude"],
-  },
-  {
-    match: /\b(nature|tree|ocean|sea|outside|green|sky|cloud)\b/,
-    tags: ["nature", "green", "ocean"],
-    categories: ["nature"],
-  },
-  {
-    match: /\b(quote|words|saying|reminder)\b/,
-    tags: ["quote", "typography"],
-    categories: ["quotes"],
-  },
-  {
-    match: /\b(scrapbook|polaroid|tape|paper|collage|dump)\b/,
-    tags: ["scrapbook", "polaroid", "tape"],
-    categories: ["scrapbook"],
-  },
-  {
-    match: /\b(cinema|film|movie|scene|chapter)\b/,
-    tags: ["cinematic", "film"],
-    categories: ["cinematic"],
-  },
-  {
-    match: /\b(self ?care|pamper|reset|me time)\b/,
-    tags: ["self care", "reset", "gentle"],
-    categories: ["selfcare"],
-  },
-  {
-    match: /\b(wellness|health|healthy)\b/,
-    tags: ["wellness", "healthy"],
+    match: /\b(wellness|self ?care|health|hydrat|water|move|movement|work ?out|gym|better)\b/,
+    tags: ["wellness", "self care", "movement", "hydration"],
     categories: ["wellness"],
   },
-  { match: /\b(cycle|period|phase)\b/, tags: ["cycle", "phase", "body"], categories: ["cycle"] },
   {
-    match: /\b(season|spring|summer|autumn|fall|winter|snow|rain|cozy)\b/,
-    tags: ["seasonal"],
-    categories: ["seasonal"],
+    match: /\b(grateful|gratitude|thankful|learn|thought|reflect|journal|study|future me|taught)\b/,
+    tags: ["reflection", "gratitude", "text"],
+    categories: ["reflection"],
   },
   {
-    match: /\b(data|numbers|stats|tracker|logged)\b/,
-    tags: ["data", "tracker"],
-    categories: ["data"],
+    match: /\b(celebrat|birthday|party|we did it|smile|joy|good day|special)\b/,
+    tags: ["celebration", "joy"],
+    categories: ["celebration"],
   },
-  {
-    match: /\b(memor|remember|moment|nostalg)\b/,
-    tags: ["memories", "moment", "keepsake"],
-    categories: ["memories"],
-  },
+  { match: /\b(minimal|clean|simple|space|quiet|empty|airy)\b/, tags: ["minimal", "clean"] },
+  { match: /\b(photo|picture|image|camera)\b/, tags: ["photo"] },
+  { match: /\b(text|quote|words|typing|type|write)\b/, tags: ["text", "typography"] },
+  { match: /\b(editorial|poster|magazine)\b/, tags: ["editorial"] },
+  { match: /\b(cinema|film|movie|cinematic)\b/, tags: ["cinematic", "dark"] },
+  { match: /\b(data|numbers|stats|tracker|logged)\b/, tags: ["data"] },
   { match: /(\d+)\s*photo/, tags: ["__count__"] },
-  { match: /\b(lots of space|empty|airy)\b/, tags: ["space", "minimal"] },
 ];
 
 const countMatch = (query: string): number | null => {
