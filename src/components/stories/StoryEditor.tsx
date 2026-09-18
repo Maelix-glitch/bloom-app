@@ -8,11 +8,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Activity,
   ArrowLeft,
   AtSign,
   Check,
+  Download,
   ImagePlay,
+  Copy,
+  ImagePlus,
+  Plus,
+  Layers,
+  LayoutTemplate,
   Music2,
+  Paintbrush,
   Redo2,
   SlidersHorizontal,
   Sparkles,
@@ -25,16 +33,21 @@ import {
   Wand2,
   X,
 } from "lucide-react";
+import { loadImageElement, validateImageFile } from "@/lib/profile/media";
 
 import { StoryCanvas, type CanvasMedia } from "./StoryCanvas";
 import { ElementLayer, pointInRect } from "./ElementLayer";
+import { BackgroundSheet } from "./editor/BackgroundSheet";
+import { PhotoSheet } from "./editor/PhotoSheet";
+import { DataSheet, LayersSheet, ShapeSheet } from "./editor/ElementSheets";
+import { TemplateBrowser } from "./TemplateBrowser";
+import { StorySheet } from "./StorySheet";
 import { TextTool, type TextToolValue } from "./TextTool";
 import { StickerTray } from "./StickerTray";
 import { InteractiveTray } from "./InteractiveTray";
 import { FilterTool } from "./FilterTool";
 import { GifTray, MusicTray, type PickedMusic } from "./MediaTrays";
 import { DrawLayer, exportDrawing, type DrawStroke } from "./DrawLayer";
-import { StorySheet } from "./StorySheet";
 import { DRAW_COLORS, DRAW_SIZES_ROW } from "./editorBits";
 import {
   ELEMENT_LIMITS,
@@ -46,7 +59,26 @@ import {
   serializeElements,
 } from "@/lib/stories/elements";
 import { editorDraftStore } from "@/lib/stories/draftStore";
-import { DEFAULT_ADJUSTMENTS, STORY_TEMPLATES, backgroundById } from "@/lib/stories/catalogs";
+import {
+  appendComposition,
+  blankComposition,
+  compositionsToSlides,
+  duplicateComposition,
+  removeComposition,
+  writeComposition,
+  type SlideComposition,
+} from "@/lib/stories/slideCompositions";
+import { clearExportCache, exportStory } from "@/lib/stories/exporter";
+import { DEFAULT_ADJUSTMENTS, backgroundById } from "@/lib/stories/catalogs";
+import { presetBackground, type StoryBackgroundState } from "@/lib/stories/canvas/backgrounds";
+import { makeDataElement, makePhotoElement, newElementId } from "@/lib/stories/elements";
+import { readBloomStoryData } from "@/lib/stories/data/metrics";
+import {
+  instantiateTemplate,
+  recordTemplateUse,
+  type StoryTemplateDef,
+} from "@/lib/stories/templates";
+import type { BloomStoryData, StoryPhotoElement } from "@/lib/stories/types";
 import type {
   StoryAdjustments,
   StoryAudience,
@@ -78,6 +110,8 @@ export interface EditorSource {
 
 /** Restored draft state: canvas layers plus the words around them. */
 export interface EditorInitialState {
+  /** Full background state restored with the draft. */
+  background?: StoryBackgroundState | null | undefined;
   elements: StoryElement[];
   strokes: DrawStroke[];
   filterId: string;
@@ -87,7 +121,19 @@ export interface EditorInitialState {
   altText: string;
 }
 
-type Tool = "sticker" | "interactive" | "filter" | "music" | "gif" | "caption" | null;
+type Tool =
+  | "sticker"
+  | "interactive"
+  | "filter"
+  | "music"
+  | "gif"
+  | "caption"
+  | "photo"
+  | "background"
+  | "layers"
+  | "data"
+  | "template"
+  | null;
 
 interface Snapshot {
   elements: StoryElement[];
@@ -97,6 +143,9 @@ interface Snapshot {
 function nextZ(elements: StoryElement[]): number {
   return elements.reduce((m, e) => Math.max(m, e.z), 0) + 1;
 }
+
+/** A slide as the editor holds it — strokes are DrawLayer's own type. */
+type EditorSlide = SlideComposition<DrawStroke>;
 
 export function StoryEditor({
   source,
@@ -118,30 +167,17 @@ export function StoryEditor({
   onClose: () => void;
 }) {
   const effectiveAccent = source.accent ?? accent;
-  const template = source.templateId
-    ? (STORY_TEMPLATES.find((t) => t.id === source.templateId) ?? null)
+  const composedTemplate = source.templateId
+    ? (instantiateTemplate(source.templateId) ?? null)
     : null;
+  /** Real Bloom readings. Data layers print these or an honest empty state. */
+  const bloomData = useMemo<BloomStoryData>(() => readBloomStoryData(), []);
 
   const [elements, setElements] = useState<StoryElement[]>(() => {
     // A resumed draft wins over template/source seeding.
     if (initialState) return sanitizeElements(initialState.elements);
-    const els: StoryElement[] = [];
-    if (template) {
-      els.push(
-        makeTextElement(template.heading, {
-          preset: template.preset,
-          color: template.ink,
-          x: 0.5,
-          y: 0.3,
-          z: 1,
-        }),
-      );
-      for (const [i, stickerId] of template.stickerIds.entries()) {
-        const s = makeStickerElement(stickerId, { x: 0.24 + i * 0.52, y: 0.72, z: 2 + i });
-        if (s) els.push(s);
-      }
-    }
-    if (source.captionTitle && !template) {
+    const els: StoryElement[] = composedTemplate ? [...composedTemplate.composed.elements] : [];
+    if (source.captionTitle && !composedTemplate) {
       els.push(
         makeTextElement(source.captionTitle, {
           preset: "editorial",
@@ -155,8 +191,13 @@ export function StoryEditor({
     return els;
   });
   const [strokes, setStrokes] = useState<DrawStroke[]>(() => initialState?.strokes ?? []);
-  const [backgroundId, setBackgroundId] = useState(
-    source.backgroundId ?? template?.backgroundId ?? "moonlight",
+  const [backgroundId, setBackgroundId] = useState(source.backgroundId ?? "moonlight");
+  const [background, setBackground] = useState<StoryBackgroundState>(
+    () =>
+      initialState?.background ??
+      (composedTemplate
+        ? composedTemplate.composed.background
+        : presetBackground(source.backgroundId ?? "moonlight")),
   );
   const [filterId, setFilterId] = useState(initialState?.filterId ?? "none");
   const [adjustments, setAdjustments] = useState<StoryAdjustments>(
@@ -184,9 +225,98 @@ export function StoryEditor({
   const [audience, setAudience] = useState<StoryAudience>(defaultAudience);
   const [step, setStep] = useState<"edit" | "share" | "confirm-leave">("edit");
   const [publishing, setPublishing] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [muted, setMuted] = useState(true);
   const [drag, setDrag] = useState<{ id: string; clientX: number; clientY: number } | null>(null);
   const [deleteHot, setDeleteHot] = useState(false);
+
+  /* ------------------------------- slides ------------------------------- */
+  /* Slot 0 is the composition already in the state above; the rest are
+     snapshots captured when the user moves between slides. */
+  const [slides, setSlides] = useState<EditorSlide[]>(() => [
+    {
+      id: "slide-1",
+      elements,
+      background,
+      backgroundId,
+      filterId,
+      adjustments,
+      strokes,
+    },
+  ]);
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  /** The editor's live state, in the shape a slide snapshot uses. */
+  const currentComposition = useCallback(
+    (): Omit<EditorSlide, "id"> => ({
+      elements,
+      background,
+      backgroundId,
+      filterId,
+      adjustments,
+      strokes,
+    }),
+    [elements, background, backgroundId, filterId, adjustments, strokes],
+  );
+
+  /** Save what's on screen into its slot before doing anything else. */
+  const commitSlide = useCallback(() => {
+    setSlides((prev) => writeComposition(prev, slideIndex, currentComposition()));
+  }, [currentComposition, slideIndex]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (index === slideIndex || index < 0 || index >= slides.length) return;
+      const saved = writeComposition(slides, slideIndex, currentComposition());
+      const target = saved[index]!;
+      setSlides(saved);
+      setSlideIndex(index);
+      setElements(target.elements);
+      setBackground(target.background);
+      setBackgroundId(target.backgroundId);
+      setFilterId(target.filterId);
+      setAdjustments(target.adjustments);
+      setStrokes(target.strokes);
+      setSelectedId(null);
+      setTool(null);
+      setDrawing(false);
+    },
+    [currentComposition, slideIndex, slides],
+  );
+
+  const addSlide = useCallback(() => {
+    const next = appendComposition(slides, blankComposition(background, backgroundId, adjustments));
+    if (!next) {
+      toast.error("Ten slides is the most a story can hold.");
+      return;
+    }
+    setSlides(next);
+    goToSlide(next.length - 1);
+  }, [adjustments, background, backgroundId, goToSlide, slides]);
+
+  const dupeSlide = useCallback(() => {
+    const saved = writeComposition(slides, slideIndex, currentComposition());
+    const res = duplicateComposition(saved, slideIndex);
+    if (!res) return;
+    setSlides(res.slides);
+    goToSlide(res.index);
+  }, [currentComposition, goToSlide, slideIndex, slides]);
+
+  const dropSlide = useCallback(() => {
+    const saved = writeComposition(slides, slideIndex, currentComposition());
+    const res = removeComposition(saved, slideIndex);
+    if (!res) return;
+    const target = res.slides[res.index]!;
+    setSlides(res.slides);
+    setSlideIndex(res.index);
+    setElements(target.elements);
+    setBackground(target.background);
+    setBackgroundId(target.backgroundId);
+    setFilterId(target.filterId);
+    setAdjustments(target.adjustments);
+    setStrokes(target.strokes);
+    setSelectedId(null);
+  }, [currentComposition, slideIndex, slides]);
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const deleteRef = useRef<HTMLDivElement | null>(null);
@@ -204,6 +334,14 @@ export function StoryEditor({
     }),
     [elements, strokes],
   );
+
+  /** Record the current state before a discrete edit. Cap keeps memory sane. */
+  const pushHistory = useCallback(() => {
+    past.current.push(snapshot());
+    if (past.current.length > 40) past.current.shift();
+    future.current = [];
+    setHistoryTick((t) => t + 1);
+  }, [snapshot]);
 
   const undo = useCallback(() => {
     const prev = past.current.pop();
@@ -289,6 +427,15 @@ export function StoryEditor({
     }
     const rect = deleteRef.current?.getBoundingClientRect();
     setDeleteHot(pointInRect(d.clientX, d.clientY, rect, 20));
+  }, []);
+
+  /* ------------------------------ resize --------------------------------
+   * The corner handles are drawn by StoryCanvas; ElementLayer runs the actual
+   * gesture in its capture handler (it reads `data-se-handle`). This just
+   * clears any stale drag state so the delete zone never appears mid-resize. */
+  const beginResize = useCallback(() => {
+    setDrag(null);
+    setDeleteHot(false);
   }, []);
 
   useEffect(() => {
@@ -420,8 +567,10 @@ export function StoryEditor({
                 photoWidth: source.photo?.width ?? 0,
                 photoHeight: source.photo?.height ?? 0,
                 backgroundId,
+                templateId: source.templateId ?? null,
                 storyKind: source.storyKind,
               },
+        background,
         elements: serializeElements(elements),
         strokes,
         filterId,
@@ -435,6 +584,7 @@ export function StoryEditor({
   }, [
     elements,
     strokes,
+    background,
     backgroundId,
     filterId,
     adjustments,
@@ -484,6 +634,49 @@ export function StoryEditor({
     return els;
   }, [elements, strokes]);
 
+  /**
+   * Render the composition to a real 1080×1920 file and hand it to the OS.
+   * Never a screenshot: type is re-laid out at export scale, so it stays sharp.
+   */
+  const saveImage = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+    let url: string | null = null;
+    try {
+      const result = await exportStory({
+        elements: publishElements(),
+        background: source.base === "background" ? background : null,
+        backgroundId,
+        media: { src: media.src, type: media.type === "video" ? "video" : media.type },
+        filterId: filterId === "none" ? null : filterId,
+        data: bloomData,
+      });
+      url = result.url;
+      const a = document.createElement("a");
+      a.href = result.url;
+      a.download = `bloom-story-${new Date().toISOString().slice(0, 10)}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast("Saved to your device.");
+    } catch {
+      toast.error("Couldn't render that image. Try again.");
+    } finally {
+      if (url) URL.revokeObjectURL(url);
+      clearExportCache();
+      setExporting(false);
+    }
+  }, [
+    exporting,
+    publishElements,
+    source.base,
+    background,
+    backgroundId,
+    media,
+    filterId,
+    bloomData,
+  ]);
+
   const publish = useCallback(async () => {
     if (publishing) return;
     setPublishing(true);
@@ -519,6 +712,17 @@ export function StoryEditor({
             : null,
         source: source.source ?? null,
         elements: els,
+        // The composed background rides with the story; backgroundId alone can
+        // only name a preset, and a template's paint is never just a preset.
+        canvas: source.base === "background" ? background : null,
+        // Multi-slide is offered only for background/text stories. A photo or
+        // video story carries its media in the top-level source, and per-slide
+        // media upload is not built — offering the timeline there would let
+        // someone add a slide that silently loses its photo.
+        slides:
+          source.base === "background"
+            ? compositionsToSlides(writeComposition(slides, slideIndex, currentComposition()))
+            : null,
         filterId: filterId === "none" ? null : filterId,
         adjustments:
           JSON.stringify(adjustments) === JSON.stringify(DEFAULT_ADJUSTMENTS) ? null : adjustments,
@@ -592,7 +796,197 @@ export function StoryEditor({
     return () => window.removeEventListener("keydown", onKey);
   }, [textEditing, tool, drawing, selectedId, step, undo, redo, requestClose, deleteElement]);
 
-  const ink = source.base === "background" ? backgroundById(backgroundId).ink : "#f4efe4";
+  const ink =
+    source.base === "background" ? background.ink || backgroundById(backgroundId).ink : "#f4efe4";
+  /** Narrowed once so the data tray's callbacks can use a non-null id. */
+  const dataSelected = selected?.kind === "data" ? selected : null;
+
+  /* --------------------------- layer operations --------------------------- */
+  const patchElement = useCallback(
+    (id: string, patch: Partial<StoryElement>) => {
+      pushHistory();
+      setElements((prev) =>
+        prev.map((e) => (e.id === id ? ({ ...e, ...patch } as StoryElement) : e)),
+      );
+    },
+    [pushHistory],
+  );
+
+  const moveElement = useCallback(
+    (id: string, delta: number) => {
+      pushHistory();
+      setElements((prev) => {
+        const ordered = [...prev].sort((a, b) => a.z - b.z);
+        const i = ordered.findIndex((e) => e.id === id);
+        if (i < 0) return prev;
+        const j = Math.max(0, Math.min(ordered.length - 1, i + delta));
+        if (i === j) return prev;
+        const [moved] = ordered.splice(i, 1);
+        ordered.splice(j, 0, moved!);
+        return ordered.map((e, index) => ({ ...e, z: index + 1 }));
+      });
+    },
+    [pushHistory],
+  );
+
+  const duplicateElement = useCallback(
+    (id: string) => {
+      const src = elements.find((e) => e.id === id);
+      if (!src) return;
+      if (elements.length >= ELEMENT_LIMITS.maxElements) {
+        toast("That's as many layers as one story can hold.");
+        return;
+      }
+      const copy = { ...src, id: newElementId(), z: nextZ(elements) } as StoryElement;
+      if ("x" in copy) copy.x = Math.min(0.92, copy.x + 0.03);
+      if ("y" in copy) copy.y = Math.min(0.92, copy.y + 0.02);
+      addElement(copy);
+      setSelectedId(copy.id);
+    },
+    [elements, addElement],
+  );
+
+  /* ------------------------------ photo slots ----------------------------- */
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const [fillTarget, setFillTarget] = useState<string | null>(null);
+  const [objectUrls, setObjectUrls] = useState<string[]>([]);
+
+  useEffect(
+    () => () => {
+      for (const url of objectUrls) URL.revokeObjectURL(url);
+    },
+    [objectUrls],
+  );
+
+  const requestPhotoFor = useCallback((id: string) => {
+    setFillTarget(id);
+    window.setTimeout(() => photoInputRef.current?.click(), 60);
+  }, []);
+
+  /** Accent as a real color — data widgets and new layers want a hex. */
+  const accentColor =
+    accent === "amber"
+      ? "#EED9A4"
+      : accent === "rose"
+        ? "#E0A3B8"
+        : accent === "sage"
+          ? "#9DB89A"
+          : accent === "sky"
+            ? "#9FB6CF"
+            : accent === "violet"
+              ? "#B7A6E8"
+              : "#F4EFE4";
+
+  /** Swap the whole composition. Undoable, and it never touches captions. */
+  const applyTemplate = useCallback(
+    (def: StoryTemplateDef) => {
+      const composed = instantiateTemplate(def);
+      if (!composed) return;
+      pushHistory();
+      setElements(composed.composed.elements);
+      setBackground(composed.composed.background);
+      /*
+       * Select the front element immediately.
+       *
+       * Resize handles only exist on the selected element, so opening a
+       * template with nothing selected presented a canvas with no handles
+       * anywhere and no hint that tapping an element would reveal them — the
+       * story looked uneditable. Arriving with something already selected makes
+       * the affordance visible on the first frame.
+       */
+      const front = [...composed.composed.elements].sort((a, b) => b.z - a.z)[0];
+      setSelectedId(front?.id ?? null);
+      recordTemplateUse(def.id);
+      setStep("edit");
+    },
+    [pushHistory],
+  );
+
+  const addEmptyPhoto = useCallback(() => {
+    if (elements.filter((e) => e.kind === "photo").length >= ELEMENT_LIMITS.maxPhotos) {
+      toast("Nine photos is the most one story can carry.");
+      return;
+    }
+    const el = makePhotoElement({
+      x: 0.5,
+      y: 0.5,
+      w: 0.62,
+      h: 0.34,
+      z: nextZ(elements),
+      mask: "rounded",
+    });
+    addElement(el);
+    setSelectedId(el.id);
+    requestPhotoFor(el.id);
+  }, [elements, addElement, requestPhotoFor]);
+
+  const onPhotoPicked = useCallback(
+    async (file: File | null) => {
+      if (!file || !fillTarget) return;
+      const invalid = validateImageFile(file);
+      if (invalid) {
+        toast.error(invalid);
+        return;
+      }
+      try {
+        const img = await loadImageElement(URL.createObjectURL(file));
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = String(reader.result ?? "");
+          const url = URL.createObjectURL(file);
+          setObjectUrls((prev) => [...prev, url]);
+          if (fillTarget === "__background__") {
+            pushHistory();
+            setBackground((bg) => ({
+              ...bg,
+              mode: "photo",
+              photo: {
+                src: dataUrl,
+                fit: "fill",
+                blur: 0,
+                zoom: 1,
+                panX: 0,
+                panY: 0,
+                opacity: 1,
+              },
+            }));
+            setFillTarget(null);
+            if (photoInputRef.current) photoInputRef.current.value = "";
+            return;
+          }
+          const el = elements.find((e) => e.id === fillTarget);
+          const aspect = img.naturalWidth > 0 ? img.naturalHeight / img.naturalWidth : 1.4;
+          const slotW = el?.kind === "photo" ? el.w : undefined;
+          const slotH = el?.kind === "photo" ? el.h : undefined;
+          // A portrait slot stays portrait; a landscape one widens. Never
+          // stretches a photo to fit a shape it was not drawn for.
+          const resized =
+            typeof slotW === "number" && typeof slotH === "number"
+              ? aspect > 1.15 && slotH > slotW
+                ? { h: Math.min(0.92, slotW * aspect) }
+                : aspect < 0.87 && slotW > slotH
+                  ? { w: Math.min(0.94, slotH / aspect) }
+                  : {}
+              : {};
+          const patch: Partial<StoryPhotoElement> = {
+            src: dataUrl,
+            naturalWidth: img.naturalWidth,
+            naturalHeight: img.naturalHeight,
+          };
+          patchElement(fillTarget, { ...patch, ...resized });
+          setTool(null);
+        };
+        reader.onerror = () => toast.error("Couldn't read that photo.");
+        reader.readAsDataURL(file);
+      } catch {
+        toast.error("Couldn't open that photo.");
+      } finally {
+        setFillTarget(null);
+        if (photoInputRef.current) photoInputRef.current.value = "";
+      }
+    },
+    [fillTarget, elements, patchElement, pushHistory],
+  );
   const canvasSize = canvasRef.current?.getBoundingClientRect();
   const [, forceMeasure] = useState(0);
   useEffect(() => {
@@ -631,10 +1025,12 @@ export function StoryEditor({
         <div className="relative mx-auto mt-3 min-h-0 w-full max-w-[400px] flex-1 overflow-hidden rounded-2xl border border-white/10">
           <StoryCanvas
             media={media}
+            background={source.base === "background" ? background : null}
             backgroundId={backgroundId}
             filterId={filterId}
             adjustments={adjustments}
             elements={previewStory.elements}
+            data={bloomData}
             mode="static"
           />
         </div>
@@ -725,6 +1121,15 @@ export function StoryEditor({
                 ? "Share to story"
                 : "Save to my story"}
           </button>
+          <button
+            type="button"
+            onClick={saveImage}
+            disabled={exporting}
+            className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/15 text-[13px] font-semibold text-white/80 transition-colors hover:bg-white/5 disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden />
+            {exporting ? "Rendering…" : "Save as image (1080×1920)"}
+          </button>
         </div>
       </div>
     );
@@ -769,8 +1174,13 @@ export function StoryEditor({
 
   /* --------------------------------- edit --------------------------------- */
   const tools = [
+    { id: "template", label: "Templates", icon: LayoutTemplate },
+    { id: "photo", label: "Photo", icon: ImagePlus },
     { id: "text", label: "Text", icon: Type },
     { id: "sticker", label: "Stickers", icon: Sticker },
+    { id: "background", label: "Back", icon: Paintbrush },
+    { id: "data", label: "Data", icon: Activity },
+    { id: "layers", label: "Layers", icon: Layers },
     { id: "interactive", label: "Polls", icon: SlidersHorizontal },
     { id: "draw", label: "Draw", icon: Wand2 },
     { id: "filter", label: "Look", icon: Sparkles },
@@ -836,8 +1246,16 @@ export function StoryEditor({
       </div>
 
       {/* canvas */}
-      <div className="relative min-h-0 flex-1">
-        <div ref={canvasRef} className="absolute inset-0 overflow-hidden">
+      <div className="relative grid min-h-0 flex-1 place-items-center">
+        <div
+          ref={canvasRef}
+          className="se-stage relative overflow-hidden"
+          /* max-height matters on short phones: without it a 9:16 canvas sized
+           * from the available height overflows the space the tool rail left
+           * and gets clipped by overflow-hidden. With both caps the box fits
+           * inside the region and the aspect ratio picks the binding one. */
+          style={{ aspectRatio: "9 / 16", height: "100%", maxWidth: "100%", maxHeight: "100%" }}
+        >
           <ElementLayer
             elements={elements}
             selectedId={drawing ? null : selectedId}
@@ -852,13 +1270,18 @@ export function StoryEditor({
           >
             <StoryCanvas
               media={media}
+              background={source.base === "background" ? background : null}
               backgroundId={source.base === "background" ? backgroundId : null}
               filterId={filterId}
               adjustments={adjustments}
               elements={elements}
+              data={bloomData}
               mode="edit"
               selectedId={selectedId}
               onSelect={(id) => !drawing && setSelectedId(id)}
+              onAddPhoto={(el) => requestPhotoFor(el.id)}
+              onResizeStart={beginResize}
+              resizeEnabled={!drawing && textEditing === null && tool === null}
               muted={muted}
             />
           </ElementLayer>
@@ -988,32 +1411,98 @@ export function StoryEditor({
           </button>
         </div>
       ) : (
-        /* tool rail */
-        <div className="relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
-          {tools.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => {
-                if (t.id === "text") {
-                  openText(null);
-                  return;
-                }
-                if (t.id === "draw") {
-                  setDrawing(true);
-                  setSelectedId(null);
-                  return;
-                }
-                setTool(t.id as Tool);
-              }}
-              className="se-tool-btn"
-              data-active={tool === t.id}
-            >
-              <t.icon className="size-[22px]" strokeWidth={1.7} aria-hidden />
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <>
+          {/* Slide timeline — only for background/text stories, where a slide is
+            a pure composition. See the note at the publish payload for why
+            photo and video stories don't get one. */}
+          {source.base === "background" ? (
+            <div className="se-slides relative z-50 flex items-center gap-1.5 bg-black/60 px-3 pt-2 backdrop-blur-md">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
+                {slides.map((sl, i) => (
+                  <button
+                    key={sl.id}
+                    type="button"
+                    onClick={() => goToSlide(i)}
+                    aria-current={i === slideIndex ? "true" : undefined}
+                    aria-label={`Slide ${i + 1} of ${slides.length}`}
+                    className={cn(
+                      "se-slide-chip shrink-0",
+                      i === slideIndex && "se-slide-chip--active",
+                    )}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSlide}
+                  aria-label="Add a slide"
+                  className="se-slide-chip se-slide-add shrink-0"
+                >
+                  <Plus className="size-3.5" aria-hidden />
+                </button>
+              </div>
+              {slides.length > 1 ? (
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={dupeSlide}
+                    aria-label="Duplicate this slide"
+                    className="se-slide-btn"
+                  >
+                    <Copy className="size-3.5" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dropSlide}
+                    aria-label="Delete this slide"
+                    className="se-slide-btn hover:!text-[#ff9d9d]"
+                  >
+                    <Trash2 className="size-3.5" aria-hidden />
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          /* tool rail */
+          <div className="se-rail relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+            {tools.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  if (t.id === "text") {
+                    openText(null);
+                    return;
+                  }
+                  if (t.id === "draw") {
+                    setDrawing(true);
+                    setSelectedId(null);
+                    return;
+                  }
+                  if (t.id === "photo") {
+                    const slots = elements.filter((e) => e.kind === "photo");
+                    const empty = slots.find((e) => e.kind === "photo" && !e.src);
+                    if (empty) {
+                      requestPhotoFor(empty.id);
+                      return;
+                    }
+                    if (slots.length === 0) {
+                      addEmptyPhoto();
+                      return;
+                    }
+                  }
+                  setTool(t.id as Tool);
+                }}
+                className="se-tool-btn"
+                data-active={tool === t.id}
+              >
+                <t.icon className="size-[22px]" strokeWidth={1.7} aria-hidden />
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       {/* overlays */}
@@ -1023,6 +1512,134 @@ export function StoryEditor({
           defaultColor={ink}
           onSave={saveText}
           onClose={() => setTextEditing(null)}
+        />
+      ) : null}
+
+      {/* hidden file input feeding the photo slots */}
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => void onPhotoPicked(e.target.files?.[0] ?? null)}
+      />
+
+      {tool === "template" ? (
+        <TemplateBrowser
+          data={bloomData}
+          onClose={() => setTool(null)}
+          onPick={(def) => {
+            applyTemplate(def);
+            setTool(null);
+          }}
+        />
+      ) : null}
+
+      {tool === "background" ? (
+        <BackgroundSheet
+          bg={background}
+          onChange={(next) => {
+            pushHistory();
+            setBackground(next);
+          }}
+          onUsePhoto={() => requestPhotoFor("__background__")}
+          onClose={() => setTool(null)}
+        />
+      ) : null}
+
+      {tool === "layers" ? (
+        <LayersSheet
+          elements={elements}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onMove={moveElement}
+          onPatch={patchElement}
+          onDuplicate={duplicateElement}
+          onDelete={(id) => {
+            deleteElement(id);
+            setSelectedId(null);
+          }}
+          onClose={() => setTool(null)}
+        />
+      ) : null}
+
+      {tool === "data" ? (
+        <DataSheet
+          data={bloomData}
+          selectedId={dataSelected?.id ?? null}
+          onAdd={(metric, variant) => {
+            if (elements.length >= ELEMENT_LIMITS.maxElements) {
+              toast("That's as many layers as one story can hold.");
+              return;
+            }
+            const el = makeDataElement(metric, {
+              x: 0.5,
+              y: 0.72,
+              z: nextZ(elements),
+              variant,
+              accent: accentColor,
+              w: variant === "inline" ? 0.7 : 0.56,
+              h: variant === "ring" ? 0.22 : variant === "inline" ? 0.05 : 0.13,
+            });
+            if (!el) return;
+            addElement(el);
+            setSelectedId(el.id);
+          }}
+          {...(dataSelected
+            ? {
+                onPatch: (patch: Record<string, unknown>) =>
+                  patchElement(dataSelected.id, patch as Partial<StoryElement>),
+                onRemove: () => {
+                  deleteElement(dataSelected.id);
+                  setSelectedId(null);
+                },
+              }
+            : {})}
+          onClose={() => setTool(null)}
+        />
+      ) : null}
+
+      {tool === "photo" && selected?.kind !== "photo" ? (
+        <StorySheet
+          title="Photo"
+          subtitle="Every photo is a slot: drag it, pinch it, or set it exactly."
+          onClose={() => setTool(null)}
+          label="Photo options"
+        >
+          <button type="button" className="se-wide-btn" onClick={addEmptyPhoto}>
+            <ImagePlus className="size-4" aria-hidden /> Add a photo layer
+          </button>
+          <p className="se-hint">
+            Tap any photo already on the canvas to fill it, move it, mask it or filter it. Empty
+            slots show an “Add photo” tile.
+          </p>
+        </StorySheet>
+      ) : null}
+
+      {selected?.kind === "photo" && !tool ? (
+        <PhotoSheet
+          el={selected}
+          onUpdate={(patch) => patchElement(selected.id, patch as Partial<StoryElement>)}
+          onReplace={() => requestPhotoFor(selected.id)}
+          onRemove={() => {
+            deleteElement(selected.id);
+            setSelectedId(null);
+          }}
+          onClose={() => setSelectedId(null)}
+        />
+      ) : null}
+
+      {selected?.kind === "shape" && !tool ? (
+        <ShapeSheet
+          el={selected}
+          onUpdate={(patch) => patchElement(selected.id, patch as Partial<StoryElement>)}
+          onRemove={() => {
+            deleteElement(selected.id);
+            setSelectedId(null);
+          }}
+          onClose={() => setSelectedId(null)}
         />
       ) : null}
 

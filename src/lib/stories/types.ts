@@ -1,8 +1,20 @@
 /**
  * Bloom Story Platform — domain types.
- * This module is dependency-free on purpose: `@/lib/profile/types`
- * imports from here, never the reverse.
+ * Type-only imports keep this module free of runtime dependencies, so
+ * `@/lib/profile/types` can import from here without pulling in the canvas.
  */
+
+import type { PhotoFrame, PhotoMask } from "./canvas/masks";
+import type { ShapeKind } from "./canvas/shapes";
+import type { TextAlign, TextBackdrop, TextStyle, TypePresetId } from "./canvas/typography";
+import type { StoryBackgroundState } from "./canvas/backgrounds";
+
+/**
+ * What a published story carries in `stories.canvas`: the composed background
+ * (paint, photo, texture, overlay, ink). Type-only alias so the profile types
+ * can name it without pulling the canvas runtime into the domain layer.
+ */
+export type StoryCanvasSnapshot = StoryBackgroundState;
 
 /** Where a story's audience ends. `close` = close friends only. */
 export type StoryAudience = "all" | "close";
@@ -22,7 +34,10 @@ export type StoryElementKind =
   | "mention"
   | "date"
   | "music"
-  | "gif";
+  | "gif"
+  | "photo"
+  | "shape"
+  | "data";
 
 /** Placement shared by every canvas element. Coordinates are canvas-relative (0–1). */
 export interface StoryElementBase {
@@ -38,23 +53,114 @@ export interface StoryElementBase {
   rotation: number;
   /** Stack order. */
   z: number;
+  /**
+   * Box size as a fraction of the canvas, for the kinds that own a box
+   * (photo, shape, data). Absent on the free-floating kinds, which size
+   * themselves from their content.
+   */
+  w?: number | undefined;
+  h?: number | undefined;
+  /** 0–100. Absent = fully opaque. */
+  opacity?: number | undefined;
+  /** Hidden layers stay in the document and out of the render. */
+  visible?: boolean | undefined;
+  /** Locked layers ignore gestures; the layer panel still reaches them. */
+  locked?: boolean | undefined;
+  /** Human label shown in the layer panel. */
+  name?: string | undefined;
+  /** CSS blend mode, for light leaks and veils. */
+  blend?: string | undefined;
 }
 
-export type StoryTextPreset =
-  | "classic"
-  | "editorial"
-  | "soft"
-  | "bold"
-  | "handwritten"
-  | "typewriter"
-  | "elegant"
-  | "minimal"
-  | "poster"
-  | "whisper";
+/* ------------------------------ photo layers ----------------------------- */
 
-export type StoryTextAlign = "left" | "center" | "right";
+export type { PhotoFrame, PhotoMask, ShapeKind };
 
-export type StoryTextBackground = "none" | "pill" | "highlight" | "outline" | "veil";
+export interface StoryPhotoElement extends StoryElementBase {
+  kind: "photo";
+  /** Template slot this photo fills, when it came from a template. */
+  slot?: string | undefined;
+  /** data: URL while editing, storage path once published. "" = empty slot. */
+  src: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  w: number;
+  h: number;
+  mask: PhotoMask;
+  frame: PhotoFrame;
+  frameColor: string;
+  /** ≥ 1. How far the photo is pushed into its mask. */
+  zoom: number;
+  /** −0.5..0.5 of the overflow on each axis. */
+  panX: number;
+  panY: number;
+  fit: "cover" | "contain";
+  flipX: boolean;
+  flipY: boolean;
+  filterId: string;
+  border: { color: string; width: number } | null;
+  shadow: boolean;
+  /** Fill the letterbox with a blurred copy of the same photo. */
+  blurFill: boolean;
+  /** Flat letterbox color when `blurFill` is off and `fit` is contain. */
+  letterbox: string | null;
+  alt: string;
+}
+
+/* ------------------------------ shape layers ----------------------------- */
+
+export interface StoryShapeElement extends StoryElementBase {
+  kind: "shape";
+  shape: ShapeKind;
+  w: number;
+  h: number;
+  fill: string | null;
+  stroke: string | null;
+  strokeWidth: number;
+  /** Soft blur in canvas px at export scale. */
+  blur: number;
+  invert: boolean;
+}
+
+/* ------------------------------- data layers ----------------------------- */
+
+/** Real Bloom signals a data layer can surface. Never invented. */
+export type StoryDataMetric =
+  | "mood"
+  | "sleep"
+  | "water"
+  | "movement"
+  | "study"
+  | "energy"
+  | "habits"
+  | "streak"
+  | "points"
+  | "cycle"
+  | "today";
+
+export type StoryDataVariant = "card" | "inline" | "ring" | "bars" | "list" | "phase";
+
+export interface StoryDataElement extends StoryElementBase {
+  kind: "data";
+  metric: StoryDataMetric;
+  variant: StoryDataVariant;
+  label: string;
+  accent: string;
+  w: number;
+  h: number;
+  /** When there is nothing logged, hide rather than show an empty widget. */
+  hideWhenEmpty: boolean;
+  /** The user's own words, used when Bloom has no reading for this metric. */
+  manualValue: string | null;
+}
+
+/** Bloom's type range — see `canvas/typography` for the presets themselves. */
+export type StoryTextPreset = TypePresetId;
+
+export type StoryTextAlign = TextAlign;
+
+/** Legacy backdrop names still stored on older stories. */
+export type StoryTextBackground = TextBackdrop | "none";
 
 export interface StoryTextElement extends StoryElementBase {
   kind: "text";
@@ -67,6 +173,11 @@ export interface StoryTextElement extends StoryElementBase {
   /** 0–100 */
   opacity: number;
   animation?: "none" | "fade" | "rise" | "type" | "float" | "pulse" | undefined;
+  /**
+   * User overrides on top of the preset. Absent on older stories, which then
+   * render exactly as their preset describes.
+   */
+  style?: Partial<TextStyle> | undefined;
 }
 
 export interface StoryStickerElement extends StoryElementBase {
@@ -173,7 +284,52 @@ export type StoryElement =
   | StoryMentionElement
   | StoryDateElement
   | StoryMusicElement
-  | StoryGifElement;
+  | StoryGifElement
+  | StoryPhotoElement
+  | StoryShapeElement
+  | StoryDataElement;
+
+/* --------------------------- real Bloom signals -------------------------- */
+
+/**
+ * What Bloom actually knows today, handed to the canvas so data layers can
+ * show real numbers. `null` everywhere means "nothing logged" — the canvas
+ * hides those layers rather than inventing a figure.
+ */
+export interface BloomStoryData {
+  mood: { value: number; label: string; emotion: string; note: string | null; at: string } | null;
+  sleep: {
+    minutes: number;
+    goal: number;
+    quality: number | null;
+    bed: string | null;
+    wake: string | null;
+  } | null;
+  water: { ml: number; goal: number } | null;
+  movement: { minutes: number; goal: number } | null;
+  study: { minutes: number; goal: number; sessions: number } | null;
+  energy: { level: number; goal: number } | null;
+  habits: { done: number; due: number; names: string[] } | null;
+  streak: { days: number; label: string } | null;
+  points: { total: number; label: string } | null;
+  cycle: { day: number; phase: string; length: number; estimated: boolean } | null;
+  /** The best habit streak on record, for "streak" layers. */
+  today: { date: string; label: string } | null;
+}
+
+export const EMPTY_BLOOM_DATA: BloomStoryData = {
+  mood: null,
+  sleep: null,
+  water: null,
+  movement: null,
+  study: null,
+  energy: null,
+  habits: null,
+  streak: null,
+  points: null,
+  cycle: null,
+  today: null,
+};
 
 /** Non-destructive color adjustments applied over the base media. */
 export interface StoryAdjustments {
@@ -191,6 +347,45 @@ export interface StoryMusicMeta {
   startMs: number;
   durationMs: number;
   src?: string | undefined;
+}
+
+/**
+ * One composition inside a story.
+ *
+ * Every field here is something that used to live directly on the `Story`
+ * record; multi-slide moves them per-slide and leaves the top-level copies in
+ * place as slide one for older rows.
+ *
+ * Music is deliberately *not* per-slide: a track is attached to the whole
+ * story and keeps playing across slides, which is also how existing
+ * single-slide stories behave.
+ *
+ * The runtime helpers that build, clamp and validate these live in
+ * `./slides` — this module stays type-only by design.
+ */
+export interface StorySlide {
+  /** Stable within a story; used for React keys and reordering. */
+  id: string;
+  /** Base layer kind. `none` for text/background-only slides. */
+  mediaType: StoryMediaType;
+  /** Where the media lives. Null for background-only slides. */
+  mediaPath: string | null;
+  mediaWidth: number | null;
+  mediaHeight: number | null;
+  /** Video clip length in ms; null for images and text. */
+  durationMs: number | null;
+  /** Canvas elements, z-ordered. */
+  elements: StoryElement[];
+  /** Photo filter id, if any. */
+  filterId: string | null;
+  /** Manual adjustments layered over the filter. */
+  adjustments: StoryAdjustments | null;
+  /** Curated background id for text-first slides. */
+  backgroundId: string | null;
+  /** Composed canvas — paint, photo, texture, overlay. */
+  canvas: StoryCanvasSnapshot | null;
+  /** Author-written description for screen readers. */
+  altText: string | null;
 }
 
 /** Reactions the platform understands. Fixed set — no spam surface. */

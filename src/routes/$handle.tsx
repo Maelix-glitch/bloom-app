@@ -29,6 +29,8 @@ import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import type { ProfileViewModel } from "@/components/profile/ProfileView";
 import { parseFeatured } from "@/lib/profile/profileService";
 import { sanitizeAdjustments, sanitizeElements } from "@/lib/stories/elements";
+import { sanitizeSlides, type StorySlide } from "@/lib/stories/slides";
+import { sanitizeBackground } from "@/lib/stories/canvas/backgrounds";
 import { supabase } from "@/lib/supabase";
 
 const HANDLE_RE = /^@?[a-z0-9_]{3,30}$/;
@@ -201,6 +203,8 @@ type RawStory = {
   filter_id?: string | null;
   adjustments?: unknown;
   background_id?: string | null;
+  canvas?: unknown;
+  slides?: unknown;
   music?: unknown;
   alt_text?: string | null;
   audience?: string | null;
@@ -240,10 +244,46 @@ function mapStory(raw: RawStory): Story {
     filterId: typeof raw.filter_id === "string" ? raw.filter_id : null,
     adjustments: sanitizeAdjustments(raw.adjustments),
     backgroundId: typeof raw.background_id === "string" ? raw.background_id : null,
+    canvas: parsePublicCanvas(raw.canvas),
     music: parsePublicMusic(raw.music),
     altText: typeof raw.alt_text === "string" ? raw.alt_text.slice(0, 300) : null,
     audience: raw.audience === "close" ? "close" : "all",
+    // Absent when the story has a single slide, which keeps `storySlides()`
+    // on its legacy path — reading the top-level columns above.
+    ...(publicSlides(raw.slides) ? { slides: publicSlides(raw.slides)! } : {}),
   };
+}
+
+/**
+ * Slides from another person's public profile.
+ *
+ * Untrusted input on two counts: it is not ours, and a slide's media path is a
+ * raw storage path that has to be turned into a public URL the same way the
+ * top-level `media_url` is. A payload that does not parse yields null, and the
+ * story degrades to the single slide built from its top-level fields rather
+ * than rendering blank.
+ */
+function publicSlides(value: unknown): StorySlide[] | null {
+  const slides = sanitizeSlides(value);
+  if (!slides || slides.length < 2) return null;
+  return slides.map((slide) => ({
+    ...slide,
+    mediaPath: slide.mediaPath ? slide.mediaPath.replace(/^profile-media\//, "") : null,
+    elements: sanitizeElements(slide.elements),
+  }));
+}
+
+/**
+ * A malformed canvas degrades to null — the story then renders from
+ * background_id, exactly as it did before the column existed.
+ */
+function parsePublicCanvas(value: unknown): Story["canvas"] {
+  if (!value || typeof value !== "object") return null;
+  try {
+    return sanitizeBackground(value);
+  } catch {
+    return null;
+  }
 }
 
 function parsePublicMusic(value: unknown): Story["music"] {
@@ -297,6 +337,7 @@ function mapPublicProfile(payload: PublicProfileResponse, handle: string): Profi
       username: payload.username ?? handle,
       bio: payload.bio ?? null,
       avatarPath: payload.avatar_url ? payload.avatar_url.replace(/^profile-media\//, "") : null,
+      bannerPath: null,
       accent,
       featured,
     },

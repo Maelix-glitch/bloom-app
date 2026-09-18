@@ -15,6 +15,7 @@ import {
   Flag,
   Gift,
   Image as ImageIcon,
+  LayoutTemplate,
   NotebookPen,
   Sprout,
   Trash2,
@@ -22,15 +23,19 @@ import {
   X,
 } from "lucide-react";
 
-import {
-  StoryEditor,
-  type EditorInitialState,
-  type EditorSource,
-} from "./StoryEditor";
+import { StoryEditor, type EditorInitialState, type EditorSource } from "./StoryEditor";
 import { editorDraftStore } from "@/lib/stories/draftStore";
 import { CameraCapture } from "./CameraCapture";
 import { BloomShareCard, shareSourceForMilestone, shareSourceForReward } from "./ShareCard";
-import { STORY_BACKGROUNDS, STORY_TEMPLATES } from "@/lib/stories/catalogs";
+import { STORY_BACKGROUNDS } from "@/lib/stories/catalogs";
+import { TemplateBrowser, TemplatePreview, TemplateThumb } from "./TemplateBrowser";
+import {
+  STORY_TEMPLATE_LIBRARY,
+  favoriteTemplateIds,
+  recordTemplateUse,
+  toggleTemplateFavorite,
+  type StoryTemplateDef,
+} from "@/lib/stories/templates";
 import { EMOTION_MAP } from "@/lib/mood/types";
 import type { MoodEntry } from "@/lib/mood/types";
 import type { RewardRecord } from "@/lib/profile/journey";
@@ -85,6 +90,8 @@ export function StoryCreator({
   const [cameraOpen, setCameraOpen] = useState(false);
   const [backgroundsOpen, setBackgroundsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<StoryTemplateDef | null>(null);
   const [pendingDraft, setPendingDraft] = useState(false);
   const [hasLocalDraft, setHasLocalDraft] = useState(false);
 
@@ -147,6 +154,53 @@ export function StoryCreator({
 
   /* ------------------------------- sources ------------------------------ */
 
+  /** A spread across the library, favourites lifted to the front. */
+  const featured = useMemo(() => {
+    const favs = favoriteTemplateIds();
+    const picked: StoryTemplateDef[] = [];
+    const seen = new Set<string>();
+    const add = (def: StoryTemplateDef) => {
+      if (seen.has(def.id)) return;
+      seen.add(def.id);
+      picked.push(def);
+    };
+    for (const id of favs.slice(0, 3)) {
+      const def = STORY_TEMPLATE_LIBRARY.find((t) => t.id === id);
+      if (def) add(def);
+    }
+    // Lead with the shelf that fits the hour, then spread across the rest so a
+    // first glance shows the range of the collection rather than one mood.
+    const hour = new Date().getHours();
+    const lead = hour < 6 ? "mood" : hour < 12 ? "everyday" : hour < 18 ? "progress" : "reflection";
+    const cats = [
+      lead,
+      "everyday",
+      "memories",
+      "mood",
+      "progress",
+      "wellness",
+      "reflection",
+      "celebration",
+    ] as const;
+    for (const cat of cats) {
+      for (const def of STORY_TEMPLATE_LIBRARY.filter((t) => t.category === cat).slice(0, 2)) {
+        add(def);
+      }
+    }
+    return picked.slice(0, 10);
+  }, []);
+
+  const openTemplate = useCallback((def: StoryTemplateDef) => {
+    recordTemplateUse(def.id);
+    setEditorSource({
+      base: "background",
+      templateId: def.id,
+      storyKind: def.storyKind ?? "text",
+    });
+    setPreviewTemplate(null);
+    setBrowseOpen(false);
+  }, []);
+
   const openMood = useCallback((entry: MoodEntry) => {
     const primary = entry.emotions[0] ?? "neutral";
     const meta = EMOTION_MAP[primary];
@@ -187,7 +241,7 @@ export function StoryCreator({
     setEditorSource({
       base: "background",
       backgroundId: "golden-hour",
-      templateId: "little-win",
+      templateId: "progress-small-win",
       storyKind: "win",
       accent: "amber",
     });
@@ -258,6 +312,7 @@ export function StoryCreator({
       return;
     }
     const restore: EditorInitialState = {
+      background: draft.background ?? null,
       elements: draft.elements,
       strokes: draft.strokes,
       filterId: draft.filterId,
@@ -323,6 +378,7 @@ export function StoryCreator({
     setEditorSource({
       base: "background",
       backgroundId: draft.source.backgroundId,
+      templateId: draft.source.templateId ?? null,
       storyKind: draft.source.storyKind ?? "text",
     });
     setEditorDraft(restore);
@@ -499,46 +555,43 @@ export function StoryCreator({
               <p className="eyebrow">Templates</p>
               <button
                 type="button"
-                onClick={openWin}
+                onClick={() => setBrowseOpen(true)}
                 className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Sprout className="size-3.5" aria-hidden /> Quick win
+                <LayoutTemplate className="size-3.5" aria-hidden /> All{" "}
+                {STORY_TEMPLATE_LIBRARY.length}
               </button>
             </div>
-            <div className="flex gap-2.5 overflow-x-auto pb-1">
-              {STORY_TEMPLATES.map((t) => (
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {featured.map((def) => (
                 <button
-                  key={t.id}
+                  key={def.id}
                   type="button"
-                  onClick={() =>
-                    setEditorSource({
-                      base: "background",
-                      backgroundId: t.backgroundId,
-                      templateId: t.id,
-                      storyKind: "text",
-                    })
-                  }
-                  className="group w-[128px] shrink-0 text-left"
+                  onClick={() => setPreviewTemplate(def)}
+                  className="group shrink-0 text-left"
                 >
-                  <span
-                    className="flex aspect-[9/13] w-full flex-col justify-between overflow-hidden rounded-2xl border border-border p-3 transition-transform group-active:scale-[0.97]"
-                    style={{
-                      background: STORY_BACKGROUNDS.find((b) => b.id === t.backgroundId)?.css,
-                    }}
-                  >
-                    <span className="display text-[13px] leading-snug" style={{ color: t.ink }}>
-                      {t.heading}
-                    </span>
-                    <span className="text-[10.5px]" style={{ color: t.ink, opacity: 0.75 }}>
-                      {t.hint}
-                    </span>
-                  </span>
-                  <span className="mt-1.5 block truncate px-0.5 text-[11.5px] font-medium">
-                    {t.name}
+                  <TemplateThumb def={def} width={124} data={null} />
+                  <span className="mt-1.5 block w-[124px] truncate px-0.5 text-[11.5px] font-medium">
+                    {def.name}
                   </span>
                 </button>
               ))}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setBrowseOpen(true)}
+              className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-[13px] font-semibold transition-colors hover:bg-surface-2"
+            >
+              <LayoutTemplate className="size-4" aria-hidden /> Browse the full library
+            </button>
+            <button
+              type="button"
+              onClick={openWin}
+              className="mx-auto mt-2 inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Sprout className="size-3.5" aria-hidden /> Or start with a quick win
+            </button>
           </section>
 
           {/* from bloom */}
@@ -650,6 +703,24 @@ export function StoryCreator({
           </p>
         </div>
       </div>
+
+      {browseOpen ? (
+        <TemplateBrowser data={null} onClose={() => setBrowseOpen(false)} onPick={openTemplate} />
+      ) : null}
+
+      {previewTemplate ? (
+        <TemplatePreview
+          def={previewTemplate}
+          data={null}
+          favorite={favoriteTemplateIds().includes(previewTemplate.id)}
+          onToggleFavorite={() => {
+            toggleTemplateFavorite(previewTemplate.id);
+            setPreviewTemplate({ ...previewTemplate });
+          }}
+          onUse={() => openTemplate(previewTemplate)}
+          onClose={() => setPreviewTemplate(null)}
+        />
+      ) : null}
 
       {cameraOpen ? (
         <CameraCapture

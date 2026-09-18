@@ -62,6 +62,15 @@ export function ElementLayer({
     pinchAngle: number;
   } | null>(null);
   const lastTap = useRef<{ at: number; x: number; y: number }>({ at: 0, x: 0, y: 0 });
+  /** Active corner-resize. Distance from the element's centre drives scale,
+   *  which keeps the gesture correct at any rotation. */
+  const resize = useRef<{
+    elId: string;
+    centerX: number;
+    centerY: number;
+    startDist: number;
+    startScale: number;
+  } | null>(null);
 
   const elementById = useCallback((id: string | null): StoryElement | null => {
     if (!id) return null;
@@ -83,6 +92,48 @@ export function ElementLayer({
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (disabled) return;
+
+      /* Corner handle? Resize instead of move. The handle carries its element
+       * in `data-se-el`, so this works even before selection has landed. */
+      const handleEl = (e.target as Element | null)?.closest?.("[data-se-handle]");
+      if (handleEl) {
+        const host = handleEl.closest("[data-se-el]");
+        const id = host?.getAttribute("data-se-el") ?? null;
+        const el = elementById(id);
+        if (el) {
+          const rect = canvasRef.current?.getBoundingClientRect();
+          if (rect) {
+            if (selectedRef.current !== el.id) onSelect(el.id);
+            resize.current = {
+              elId: el.id,
+              centerX: rect.left + el.x * rect.width,
+              centerY: rect.top + el.y * rect.height,
+              startDist: Math.max(
+                8,
+                Math.hypot(
+                  e.clientX - (rect.left + el.x * rect.width),
+                  e.clientY - (rect.top + el.y * rect.height),
+                ),
+              ),
+              startScale: el.scale,
+            };
+            pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            gesture.current = {
+              mode: "touch",
+              startClient: { x: e.clientX, y: e.clientY },
+              elStart: { x: el.x, y: el.y, scale: el.scale, rotation: el.rotation },
+              elId: el.id,
+              moved: true, // a handle grab is never a tap
+              pinchDist: 0,
+              pinchAngle: 0,
+            };
+            onDragState(null);
+            setGuides({ v: false, h: false });
+            return;
+          }
+        }
+      }
+
       pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pointers.current.size === 1) {
         gesture.current = {
@@ -96,6 +147,7 @@ export function ElementLayer({
         };
       } else if (pointers.current.size === 2) {
         // Second finger: lock into pinch for the selected element.
+        if (resize.current) return; // never hijack an in-flight resize
         const pts = [...pointers.current.values()];
         const dx = pts[1]!.x - pts[0]!.x;
         const dy = pts[1]!.y - pts[0]!.y;
@@ -113,7 +165,7 @@ export function ElementLayer({
         setGuides({ v: false, h: false });
       }
     },
-    [disabled, elementById, onDragState],
+    [disabled, elementById, onDragState, onSelect, canvasRef],
   );
 
   const onPointerMove = useCallback(
@@ -122,6 +174,24 @@ export function ElementLayer({
       if (!g || disabled) return;
       if (!pointers.current.has(e.pointerId)) return;
       pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      /* corner resize: scale from the distance to the element's centre */
+      const rz = resize.current;
+      if (rz) {
+        const dist = Math.hypot(e.clientX - rz.centerX, e.clientY - rz.centerY);
+        const scale = Math.max(
+          ELEMENT_LIMITS.minScale,
+          Math.min(ELEMENT_LIMITS.maxScale, rz.startScale * (dist / rz.startDist)),
+        );
+        const el = elementById(rz.elId);
+        onTransform(rz.elId, {
+          x: el?.x ?? g.elStart?.x ?? 0.5,
+          y: el?.y ?? g.elStart?.y ?? 0.5,
+          scale,
+          rotation: el?.rotation ?? g.elStart?.rotation ?? 0,
+        });
+        return;
+      }
 
       /* two fingers: pinch scale + rotate */
       if (pointers.current.size >= 2 && g.elStart && g.elId) {
@@ -184,6 +254,7 @@ export function ElementLayer({
 
       if (pointers.current.size === 0) {
         gesture.current = null;
+        resize.current = null;
         setGuides({ v: false, h: false });
         onDragState(null);
         if (g.moved) {

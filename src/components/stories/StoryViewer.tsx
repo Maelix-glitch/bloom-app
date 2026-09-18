@@ -3,11 +3,18 @@
  *
  *   closed ⇄ viewing ⇄ paused
  *
- * One rAF loop drives image/text progress; video stories sync to real
- * playback time. Tap zones + hold-to-pause + swipe (down closes, sideways
- * navigates), arrows/Escape/Space on desktop. Reactions, private replies,
- * and Bloom gifts float above the content; owners get quiet insights.
- * Sheets pause playback; everything resumes where it left off.
+ * One rAF loop drives image/text progress; video syncs to real playback time.
+ * Tap zones + hold-to-pause + swipe (down closes, sideways navigates),
+ * arrows/Escape/Space on desktop. Reactions, private replies, and Bloom gifts
+ * float above the content; owners get quiet insights. Sheets pause playback;
+ * everything resumes where it left off.
+ *
+ * Multi-slide: navigation is over *segments*, not stories. A segment is one
+ * slide of one story, so a three-slide story plays as three progress bars and
+ * three taps, and swiping past its last slide carries into the next story.
+ * Single-slide stories produce exactly one segment, which is why the legacy
+ * behaviour is unchanged — `storySlides()` hands back one synthesised slide
+ * for any story published before multi-slide existed.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +40,8 @@ import { StoryContent } from "./StoryContent";
 import { GiftSheet, ReactionBar, ReplySheet, StoryInsightsSheet } from "./InteractionSheets";
 import { GIFT_META } from "@/lib/stories/catalogs";
 import { recordView } from "@/lib/stories/interactions";
+import { slideDurationMs } from "@/lib/stories/slides";
+import { buildSegments, isRichSlide, segmentForStory, type Segment } from "./segments";
 import { storyAge } from "@/lib/stories/time";
 import type { StoryGiftKind } from "@/lib/stories/types";
 import { normalizeAccent } from "@/lib/profile/types";
@@ -50,6 +59,7 @@ export function isRichStory(story: Story): boolean {
     story.kind === "video" ||
     story.mediaType === "video" ||
     (story.elements?.length ?? 0) > 0 ||
+    Boolean(story.canvas) ||
     Boolean(story.backgroundId)
   );
 }
@@ -84,7 +94,7 @@ export function StoryViewer({
   onAddToHighlight?: ((story: Story) => void) | undefined;
 }) {
   const open = target !== null;
-  const [index, setIndex] = useState(target?.startIndex ?? 0);
+  const [seg, setSeg] = useState(0);
   const [phase, setPhase] = useState<ViewerPhase>("closed");
   const [progress, setProgress] = useState(0);
   const [muted, setMuted] = useState(true);
@@ -93,7 +103,10 @@ export function StoryViewer({
   const [burst, setBurst] = useState<{ id: number; gift: StoryGiftKind } | null>(null);
 
   const stories = useMemo(() => target?.stories ?? [], [target]);
-  const current = stories[index];
+  const segments = useMemo(() => buildSegments(stories), [stories]);
+  const current = segments[seg];
+  const story = current?.story;
+  const slide = current?.slide;
   const isOwner = Boolean(onDelete) || (ownerId !== null && userId !== null && ownerId === userId);
 
   const elapsedRef = useRef(0);
@@ -109,13 +122,16 @@ export function StoryViewer({
   const videoTime = useRef<{ currentMs: number; durationMs: number } | null>(null);
   const popTimer = useRef<number | undefined>(undefined);
 
-  const isVideo = current?.mediaType === "video" || current?.kind === "video";
-  const rich = current ? isRichStory(current) : false;
+  // A slide is only a video if it says so; the `kind === "video"` half is kept
+  // for legacy rows whose slide was synthesised from a video story.
+  const isVideo = slide?.mediaType === "video" || story?.kind === "video";
+  const rich = slide ? isRichSlide(slide) : false;
 
   /* ------------------------------ open/close ----------------------------- */
   useEffect(() => {
     if (open) {
-      setIndex(target?.startIndex ?? 0);
+      const start = segmentForStory(segments, target?.startIndex ?? 0);
+      setSeg(start < 0 ? 0 : start);
       setProgress(0);
       elapsedRef.current = 0;
       videoTime.current = null;
@@ -147,55 +163,74 @@ export function StoryViewer({
 
   useEffect(() => stopLoop, [stopLoop]);
 
+  /**
+   * Move to another segment, skipping stories that expired or were deleted
+   * while the viewer was open. Landing on a story's first slide re-mutes, so a
+   * video does not keep playing audio into the next story.
+   */
   const goTo = useCallback(
-    (nextIndex: number, direction: 1 | -1) => {
-      if (!stories.length) return onClose();
-      let i = nextIndex;
-      while (i >= 0 && i < stories.length && !isStoryActive(stories[i]!)) {
+    (nextSeg: number, direction: 1 | -1) => {
+      if (!segments.length) return onClose();
+      let i = nextSeg;
+      while (i >= 0 && i < segments.length && !isStoryActive(segments[i]!.story)) {
         i += direction;
       }
-      if (i < 0 || i >= stories.length) return onClose();
+      if (i < 0 || i >= segments.length) return onClose();
       elapsedRef.current = 0;
       videoTime.current = null;
       setProgress(0);
-      setMuted(true);
-      setIndex(i);
+      if (segments[i]!.slideIndex === 0) setMuted(true);
+      setSeg(i);
       setPhase((p) => (p === "closed" ? p : "viewing"));
     },
-    [stories, onClose],
+    [segments, onClose],
   );
 
   const markCurrentSeen = useCallback(() => {
-    if (!current || seenRef.current.has(current.id)) return;
-    seenRef.current.add(current.id);
-    onSeen?.(current);
-  }, [current, onSeen]);
+    if (!story || seenRef.current.has(story.id)) return;
+    seenRef.current.add(story.id);
+    onSeen?.(story);
+  }, [story, onSeen]);
 
   const next = useCallback(() => {
     markCurrentSeen();
-    goTo(index + 1, 1);
-  }, [goTo, index, markCurrentSeen]);
+    goTo(seg + 1, 1);
+  }, [goTo, seg, markCurrentSeen]);
 
-  const prev = useCallback(() => goTo(index - 1, -1), [goTo, index]);
+  const prev = useCallback(() => {
+    // Back from a story's first slide goes to the previous story's last slide;
+    // otherwise it steps back one slide.
+    if (current && current.slideIndex > 0) {
+      goTo(seg - 1, -1);
+      return;
+    }
+    for (let i = seg - 1; i >= 0; i -= 1) {
+      if (segments[i]!.storyIndex !== current?.storyIndex) {
+        goTo(i, -1);
+        return;
+      }
+    }
+    goTo(seg - 1, -1);
+  }, [current, goTo, seg, segments]);
 
   /* record a server-side view once per story per session (best-effort) */
   useEffect(() => {
-    if (!open || !current) return;
-    if (viewedRef.current.has(current.id)) return;
-    viewedRef.current.add(current.id);
-    void recordView(current.id, userId, userName);
-  }, [open, current, userId, userName]);
+    if (!open || !story) return;
+    if (viewedRef.current.has(story.id)) return;
+    viewedRef.current.add(story.id);
+    void recordView(story.id, userId, userName);
+  }, [open, story, userId, userName]);
 
   /* ------------------------------- progress ------------------------------ */
   useEffect(() => {
-    if (!open || phase !== "viewing" || !current) {
+    if (!open || phase !== "viewing" || !current || !slide || !story) {
       stopLoop();
       return;
     }
-    // Video stories: the <video> clock drives progress (see onVideoTime).
+    // Video: the <video> clock drives progress (see onVideoTime).
     if (isVideo) return stopLoop();
 
-    const dwell = current.durationMs ?? STORY_DWELL_MS[current.kind] ?? 7000;
+    const dwell = slideDurationMs(slide, STORY_DWELL_MS[story.kind] ?? 7000);
     const frame = (now: number) => {
       const last = lastTickRef.current || now;
       lastTickRef.current = now;
@@ -210,7 +245,7 @@ export function StoryViewer({
     };
     rafRef.current = requestAnimationFrame(frame);
     return stopLoop;
-  }, [open, phase, current, isVideo, next, stopLoop]);
+  }, [open, phase, current, slide, story, isVideo, next, stopLoop]);
 
   const handleVideoTime = useCallback((currentMs: number, durationMs: number) => {
     videoTime.current = { currentMs, durationMs };
@@ -234,24 +269,24 @@ export function StoryViewer({
 
   /* a story expiring or being deleted while open — glide onward */
   useEffect(() => {
-    if (open && current && !isStoryActive(current)) {
-      if (stories.length <= 1) {
+    if (open && story && !isStoryActive(story)) {
+      if (segments.length <= 1) {
         toast("This story has ended.");
         onClose();
       } else {
-        goTo(index + 1, 1);
+        goTo(seg + 1, 1);
       }
     }
-  }, [current, goTo, index, open, onClose, stories.length]);
+  }, [story, goTo, seg, open, onClose, segments.length]);
 
-  /* prefetch the next story's media */
+  /* prefetch the next segment's media */
   useEffect(() => {
     if (!open) return;
-    const upcoming = stories[index + 1];
+    const upcoming = segments[seg + 1]?.slide;
     if (!upcoming?.mediaPath) return;
     const url = storyMediaUrl(upcoming);
     if (!url) return;
-    if (upcoming.mediaType === "video" || upcoming.kind === "video") {
+    if (upcoming.mediaType === "video") {
       const video = document.createElement("video");
       video.preload = "auto";
       video.src = url;
@@ -259,7 +294,7 @@ export function StoryViewer({
       const img = new Image();
       img.src = url;
     }
-  }, [open, stories, index]);
+  }, [open, segments, seg]);
 
   const close = useCallback(() => {
     markCurrentSeen();
@@ -388,17 +423,17 @@ export function StoryViewer({
   }, []);
 
   const interaction: CanvasInteraction | null = useMemo(
-    () => (current ? { storyId: current.id, userId, userName, isOwner } : null),
-    [current, userId, userName, isOwner],
+    () => (story ? { storyId: story.id, userId, userName, isOwner } : null),
+    [story, userId, userName, isOwner],
   );
 
-  if (!open || !current) return null;
+  if (!open || !current || !story || !slide) return null;
 
   const media: CanvasMedia =
-    current.mediaType === "video" || current.kind === "video"
-      ? { type: "video", src: storyMediaUrl(current) }
-      : current.mediaPath
-        ? { type: "image", src: storyMediaUrl(current) }
+    slide.mediaType === "video" || story.kind === "video"
+      ? { type: "video", src: storyMediaUrl(slide) }
+      : slide.mediaPath
+        ? { type: "image", src: storyMediaUrl(slide) }
         : { type: "none", src: null };
 
   const paused = phase === "paused";
@@ -424,15 +459,15 @@ export function StoryViewer({
             boxShadow: "0 60px 140px -60px rgba(0,0,0,0.9)",
           }}
         >
-          {/* progress */}
+          {/* progress — one bar per segment, so a multi-slide story reads as
+              several bars and a single-slide story reads exactly as before */}
           <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex gap-1 px-3 pt-[max(10px,env(safe-area-inset-top))]">
-            {stories.map((s, i) => (
-              <div key={s.id} className="sv-progress">
+            {segments.map((s, i) => (
+              <div key={s.key} className="sv-progress">
                 <span
                   style={{
-                    width:
-                      i < index ? "100%" : i === index ? `${Math.round(progress * 100)}%` : "0%",
-                    transition: i === index ? "none" : "width 240ms ease",
+                    width: i < seg ? "100%" : i === seg ? `${Math.round(progress * 100)}%` : "0%",
+                    transition: i === seg ? "none" : "width 240ms ease",
                   }}
                 />
               </div>
@@ -451,10 +486,10 @@ export function StoryViewer({
             <div className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-[13px] font-semibold text-white">{viewerName}</p>
               <p className="mono text-[10px] uppercase tracking-[0.08em] text-white/55">
-                {storyAge(current.createdAt)}
+                {storyAge(story.createdAt)}
                 {" · "}
-                {current.visibility === "public" ? "shared" : "private"}
-                {current.audience === "close" ? " · close friends" : ""}
+                {story.visibility === "public" ? "shared" : "private"}
+                {story.audience === "close" ? " · close friends" : ""}
               </p>
             </div>
             {isVideo ? (
@@ -478,7 +513,7 @@ export function StoryViewer({
             {isOwner && onDelete ? (
               <button
                 type="button"
-                onClick={() => onDelete(current)}
+                onClick={() => onDelete(story)}
                 aria-label="Delete story"
                 className="sv-icon-btn hover:!bg-rose/20 hover:!text-[#ff9d9d]"
               >
@@ -509,24 +544,25 @@ export function StoryViewer({
           >
             {rich ? (
               <StoryCanvas
-                key={current.id}
+                key={current.key}
                 media={media}
-                backgroundId={current.backgroundId}
-                filterId={current.filterId}
-                adjustments={current.adjustments}
-                elements={current.elements ?? []}
+                background={slide.canvas}
+                backgroundId={slide.backgroundId}
+                filterId={slide.filterId}
+                adjustments={slide.adjustments}
+                elements={slide.elements ?? []}
                 mode="interactive"
                 interaction={interaction}
                 paused={paused}
                 muted={muted}
                 onVideoTime={handleVideoTime}
                 onVideoEnded={() => next()}
-                alt={current.altText ?? current.title ?? `Story by ${viewerName}`}
-                createdAt={current.createdAt}
+                alt={slide.altText ?? story.altText ?? story.title ?? `Story by ${viewerName}`}
+                createdAt={story.createdAt}
               />
             ) : (
               <div className="sv-media absolute inset-0">
-                <StoryContent story={current} />
+                <StoryContent story={story} />
               </div>
             )}
 
@@ -619,7 +655,7 @@ export function StoryViewer({
               <>
                 <div className="flex items-center justify-center">
                   <ReactionBar
-                    storyId={current.id}
+                    storyId={story.id}
                     userId={userId}
                     userName={userName}
                     enabled
@@ -648,11 +684,14 @@ export function StoryViewer({
             )}
             <div className="flex items-center justify-between px-1">
               <p className="mono text-[10px] uppercase tracking-[0.08em] text-white/40">
-                {index + 1} of {stories.length}
+                {current.storyIndex + 1} of {stories.length}
+                {current.slideCount > 1
+                  ? ` · slide ${current.slideIndex + 1}/${current.slideCount}`
+                  : ""}
               </p>
               <p className="mono inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-white/40">
-                {current.visibility === "public" ? (
-                  current.audience === "close" ? (
+                {story.visibility === "public" ? (
+                  story.audience === "close" ? (
                     "close friends"
                   ) : (
                     "shared from their profile"
@@ -671,7 +710,7 @@ export function StoryViewer({
       {/* sheets live above the frame and pause playback */}
       {sheet === "reply" ? (
         <ReplySheet
-          story={current}
+          story={story}
           ownerName={isOwner ? "your story" : viewerName}
           userId={userId}
           userName={userName}
@@ -682,7 +721,7 @@ export function StoryViewer({
       ) : null}
       {sheet === "gift" ? (
         <GiftSheet
-          story={current}
+          story={story}
           ownerName={viewerName}
           userId={userId}
           userName={userName}
@@ -695,18 +734,18 @@ export function StoryViewer({
       ) : null}
       {sheet === "insights" && isOwner ? (
         <StoryInsightsSheet
-          story={current}
+          story={story}
           userId={userId}
           onClose={() => setSheet(null)}
           onDelete={() => {
             setSheet(null);
-            if (onDelete) onDelete(current);
+            if (onDelete) onDelete(story);
           }}
           onShareAgain={
             onShareAgain
               ? () => {
                   setSheet(null);
-                  onShareAgain(current);
+                  onShareAgain(story);
                 }
               : undefined
           }
@@ -714,7 +753,7 @@ export function StoryViewer({
             onAddToHighlight
               ? () => {
                   setSheet(null);
-                  onAddToHighlight(current);
+                  onAddToHighlight(story);
                 }
               : undefined
           }

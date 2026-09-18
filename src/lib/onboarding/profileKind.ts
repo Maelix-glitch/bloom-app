@@ -19,10 +19,33 @@
 
 export type ProfileKind = "cycle" | "no-cycle" | "unspecified";
 
+/**
+ * The sex the person told Bloom, asked once at setup.
+ *
+ * This is recorded separately from `ProfileKind` on purpose. `kind` is the
+ * *capability* the app acts on; `sex` is the answer that was given. Storing
+ * both is what lets Settings show "Female" without ever having to guess the
+ * question back out of the capability — a person who answered "prefer not to
+ * say" and one who said "female" then turned the cycle off would otherwise be
+ * indistinguishable.
+ *
+ * `null` means the question was never answered (an older install, or the admin
+ * door). Nothing may infer a value from it.
+ */
+export type SexAnswer = "female" | "male" | "unspecified" | null;
+
+export const SEX_LABEL: Record<Exclude<SexAnswer, null>, string> = {
+  female: "Female",
+  male: "Male",
+  unspecified: "Prefer not to say",
+};
+
 export interface OnboardingState {
   /** Answered at least once. */
   done: boolean;
   kind: ProfileKind;
+  /** The setup answer the `kind` was derived from. Never inferred. */
+  sex: SexAnswer;
   /** What the person said they wanted from Bloom — shapes the first screen. */
   focus: FocusArea[];
   /** Their name, if they offered one. Used sparingly. */
@@ -54,6 +77,7 @@ export const ONBOARDING_PREF = "onboarding.v1";
 export const DEFAULT_ONBOARDING: OnboardingState = {
   done: false,
   kind: "unspecified",
+  sex: null,
   focus: [],
   name: null,
   at: null,
@@ -61,6 +85,7 @@ export const DEFAULT_ONBOARDING: OnboardingState = {
 };
 
 const KINDS: ProfileKind[] = ["cycle", "no-cycle", "unspecified"];
+const SEXES: Exclude<SexAnswer, null>[] = ["female", "male", "unspecified"];
 const AREAS: FocusArea[] = ["habits", "mood", "sleep", "study", "movement", "cycle"];
 
 /** Tolerates anything on disk: a bad field falls back, never throws. */
@@ -73,11 +98,15 @@ export function parseOnboarding(raw: unknown): OnboardingState | null {
   const focus = Array.isArray(r["focus"])
     ? (r["focus"] as unknown[]).filter((f): f is FocusArea => AREAS.includes(f as FocusArea))
     : [];
+  const sex = SEXES.includes(r["sex"] as Exclude<SexAnswer, null>)
+    ? (r["sex"] as Exclude<SexAnswer, null>)
+    : null;
   const name =
     typeof r["name"] === "string" && r["name"].trim() ? r["name"].trim().slice(0, 48) : null;
   return {
     done: r["done"] === true,
     kind,
+    sex,
     focus,
     name,
     at: typeof r["at"] === "string" ? r["at"] : null,

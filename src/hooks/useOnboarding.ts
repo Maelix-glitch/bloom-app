@@ -24,6 +24,7 @@ import {
   type FocusArea,
   type OnboardingState,
   type ProfileKind,
+  type SexAnswer,
 } from "@/lib/onboarding/profileKind";
 
 export interface OnboardingStore {
@@ -37,7 +38,13 @@ export interface OnboardingStore {
   needsWelcome: boolean;
   /** Does this person's Bloom include the cycle? */
   cycle: boolean;
-  finish: (answer: { kind: ProfileKind; focus: FocusArea[]; name?: string | null }) => void;
+  finish: (answer: {
+    kind: ProfileKind;
+    /** The question that produced `kind`, kept so Settings can show it. */
+    sex?: SexAnswer;
+    focus: FocusArea[];
+    name?: string | null;
+  }) => void;
   /** The admin door: everything on, nothing asked. */
   skipAsAdmin: () => void;
   /** Change the answer later, from settings. */
@@ -74,10 +81,13 @@ export function useOnboarding(): OnboardingStore {
   }, []);
 
   const finish = useCallback<OnboardingStore["finish"]>(
-    ({ kind, focus, name }) =>
+    ({ kind, sex, focus, name }) =>
       write({
         done: true,
         kind,
+        /* Omitted means "not asked" — stored as null rather than guessed from
+           the capability. */
+        sex: sex ?? null,
         focus,
         name: name?.trim() ? name.trim().slice(0, 48) : null,
         at: new Date().toISOString(),
@@ -91,6 +101,8 @@ export function useOnboarding(): OnboardingStore {
       write({
         done: true,
         kind: "unspecified",
+        /* The admin door asks nothing, so there is no answer to record. */
+        sex: null,
         focus: [],
         name: null,
         at: new Date().toISOString(),

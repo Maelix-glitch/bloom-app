@@ -104,6 +104,11 @@
   position: relative;
   z-index: 1;
   display: flex;
+  /* vh first, dvh second: an engine that predates dynamic viewport units
+   * (Chrome < 108 — a 2021 Android WebView still on its factory version)
+   * drops the dvh line and keeps a sane height instead of collapsing this
+   * fixed workspace to its content and letting the page over-scroll. */
+  height: calc(100vh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px));
   height: calc(100dvh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px));
   min-height: 0;
   overflow: hidden;
@@ -3355,12 +3360,10 @@
   }
 }
 
-/* keyboard-safe thread bottom on small phones */
-@supports (height: 100dvh) {
-  .coach-canvas {
-    height: calc(100dvh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px));
-  }
-}
+/* The dvh upgrade lives in the .coach-canvas rule above as a plain
+ * vh-then-dvh cascade, which is what actually protects engines without
+ * dynamic viewport units. A @supports (height: 100dvh) wrapper adds nothing
+ * there — an engine that fails the test simply never reads the dvh line. */
 
 /* ===========================================================================
    Reduced motion — calm is the point; motion is optional.

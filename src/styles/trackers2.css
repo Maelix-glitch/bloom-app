@@ -26,8 +26,8 @@
   --bg-absolute-dark: #000000;
   --panel-glass-bg: rgba(10, 10, 12, 0.85);
   --glass-border-rim: rgba(255, 255, 255, 0.12);
-  --accent-neon-gradient: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
-  --neon-primary: #FF0055;
+  --accent-neon-gradient: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
+  --neon-primary: #ff0055;
   --text-ultra-white: #ffffff;
   --text-cool-silver: #b0b0b8;
   --text-architectural: rgba(255, 255, 255, 0.4);
@@ -44,29 +44,29 @@
   --ci-text-mute: var(--text-cool-silver);
   --ci-accent: var(--neon-primary);
   --ci-accent-soft: rgba(255, 0, 85, 0.16);
-  --ci-focus: #FF0055;
-  --ci-ok: #00E676;
-  --ci-warn: #FFEA00;
-  --ci-danger: #FF0055;
+  --ci-focus: #ff0055;
+  --ci-ok: #00e676;
+  --ci-warn: #ffea00;
+  --ci-danger: #ff0055;
   --ci-input-bg: #050506;
   --ci-veil:
     radial-gradient(120% 80% at 12% -10%, rgba(255, 0, 85, 0.06), transparent 60%),
     radial-gradient(90% 70% at 100% 0%, rgba(0, 240, 255, 0.03), transparent 55%);
 
   /* neon accent marks met states */
-  --ci-follicular: #FF0055;
-  --ci-ovulation: #00F0FF;
+  --ci-follicular: #ff0055;
+  --ci-ovulation: #00f0ff;
   /* the two phase names left over keep their ring colour */
   --ci-late: var(--tk2-ring-sleep);
   --ci-menstrual: var(--tk2-ring-screen);
 
   /* six vibrant neon rings */
-  --tk2-ring-sleep: #AF52FF;
-  --tk2-ring-water: #00F0FF;
-  --tk2-ring-movement: #00E676;
-  --tk2-ring-energy: #FFEA00;
-  --tk2-ring-screen: #FF0055;
-  --tk2-ring-study: #0066FF;
+  --tk2-ring-sleep: #af52ff;
+  --tk2-ring-water: #00f0ff;
+  --tk2-ring-movement: #00e676;
+  --tk2-ring-energy: #ffea00;
+  --tk2-ring-screen: #ff0055;
+  --tk2-ring-study: #0066ff;
 
   --tk2-rule: var(--glass-border-rim);
   --tk2-soft: var(--text-cool-silver);
@@ -89,11 +89,7 @@
   --tk2-neon-glow: rgba(255, 0, 85, 0.8);
   --tk2-glass: var(--panel-glass-bg);
   --tk2-glass-rim: var(--glass-border-rim);
-  --tk2-glass-lift: radial-gradient(
-    120% 120% at 0% 0%,
-    rgba(255, 255, 255, 0.08),
-    transparent 62%
-  );
+  --tk2-glass-lift: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.08), transparent 62%);
 }
 
 /* The canvas itself. Scoped to the trackers page rather than set on <body>,
@@ -106,8 +102,12 @@
     sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  min-height: 100dvh;
   overflow-x: clip;
+}
+@supports (height: 100dvh) {
+  .tk2-root {
+    min-height: 100dvh;
+  }
 }
 
 .tk2-footer {
@@ -271,7 +271,9 @@
   font-size: 10.5px;
   color: var(--ci-text-soft);
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 [data-design="ledger"] .lg-actions button:hover,
@@ -1511,13 +1513,21 @@
   transform: translateY(-2px);
 }
 
-.tk2-sync[data-state="saved"] .tk2-sync-dot { background: var(--ci-accent); }
+.tk2-sync[data-state="saved"] .tk2-sync-dot {
+  background: var(--ci-accent);
+}
 .tk2-sync[data-state="pending"] .tk2-sync-dot {
   background: color-mix(in oklab, var(--ci-accent) 40%, transparent);
 }
-.tk2-sync[data-state="loading"] .tk2-sync-dot { background: var(--ci-text-mute); }
-.tk2-sync[data-state="error"] { color: var(--ci-danger); }
-.tk2-sync[data-state="error"] .tk2-sync-dot { background: var(--ci-danger); }
+.tk2-sync[data-state="loading"] .tk2-sync-dot {
+  background: var(--ci-text-mute);
+}
+.tk2-sync[data-state="error"] {
+  color: var(--ci-danger);
+}
+.tk2-sync[data-state="error"] .tk2-sync-dot {
+  background: var(--ci-danger);
+}
 
 .tk2-sync-retry {
   font: inherit;
@@ -1528,7 +1538,9 @@
   transition: opacity 0.18s ease;
 }
 
-.tk2-sync-retry:hover { opacity: 0.7; }
+.tk2-sync-retry:hover {
+  opacity: 0.7;
+}
 .tk2-sync-retry:focus-visible {
   outline: 1px solid var(--ci-text-soft);
   outline-offset: 2px;
@@ -1650,7 +1662,6 @@
   outline: 2px solid var(--ci-focus, var(--ci-text-soft));
   outline-offset: 2px;
 }
-
 
 .tk2-targets-grid,
 .tk2-badges-grid {
@@ -1801,7 +1812,6 @@
    than as grey boxes, roomier log cards with pill selectors, and a dial that
    still looks like a dial on a day nothing has been logged.
    ========================================================================== */
-
 
 /* ------------------------------- 1. actions ------------------------------ */
 
@@ -1961,12 +1971,24 @@
   filter: drop-shadow(0 0 8px currentcolor);
 }
 
-[data-design="atlas"] .at-cap[data-id="sleep"] { fill: var(--tk2-ring-sleep); }
-[data-design="atlas"] .at-cap[data-id="water"] { fill: var(--tk2-ring-water); }
-[data-design="atlas"] .at-cap[data-id="movement"] { fill: var(--tk2-ring-movement); }
-[data-design="atlas"] .at-cap[data-id="screen"] { fill: var(--tk2-ring-screen); }
-[data-design="atlas"] .at-cap[data-id="study"] { fill: var(--tk2-ring-study); }
-[data-design="atlas"] .at-cap[data-id="energy"] { fill: var(--tk2-ring-energy); }
+[data-design="atlas"] .at-cap[data-id="sleep"] {
+  fill: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-cap[data-id="water"] {
+  fill: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-cap[data-id="movement"] {
+  fill: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-cap[data-id="screen"] {
+  fill: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-cap[data-id="study"] {
+  fill: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-cap[data-id="energy"] {
+  fill: var(--tk2-ring-energy);
+}
 
 /* ==========================================================================
    Haute-horlogerie pass.
@@ -1995,8 +2017,7 @@
 .tk2-root .ci-label,
 .tk2-root .ci-hint,
 .tk2-root .tk-quick button {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 0.68rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2019,13 +2040,6 @@
 /* ------------------ 5. capsule docks and the tracer chip ----------------- */
 /* Multi-option rows become a single capsule with a metal chip that slides
    beneath the active option rather than each button lighting up alone. */
-
-
-
-
-
-
-
 
 /* ------------------------- 7. quick-add counters ------------------------- */
 
@@ -2084,8 +2098,8 @@
 
 .tk2-root .ci-btn--primary,
 .tk2-root .tk-pill button[aria-pressed="true"] {
-  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
-  background-color: #FF0055;
+  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
+  background-color: #ff0055;
   border-color: rgba(255, 0, 85, 0.8);
   color: #ffffff !important;
   font-weight: 700;
@@ -2167,8 +2181,8 @@
 }
 
 .tk2-tag[data-active="true"] {
-  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
-  background-color: #FF0055;
+  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
+  background-color: #ff0055;
   border-color: rgba(255, 0, 85, 0.8);
   color: #ffffff;
   font-weight: 700;
@@ -2212,7 +2226,7 @@
 }
 
 .tk2-number[data-active="true"] {
-  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
   color: #ffffff;
   font-weight: 700;
   box-shadow: 0 0 16px rgba(255, 0, 85, 0.5);
@@ -2260,8 +2274,8 @@
 }
 
 [data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
-  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
-  background-color: #FF0055;
+  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
+  background-color: #ff0055;
   border-color: rgba(255, 0, 85, 0.8);
   color: #ffffff;
   font-weight: 700;
@@ -2365,7 +2379,9 @@
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 .tk2-modal-close:hover {
@@ -2480,7 +2496,9 @@
   text-shadow: none;
   cursor: pointer;
   box-shadow: 0 12px 30px -14px rgba(212, 175, 55, 0.7);
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 .tk2-modal-save:hover {
@@ -2579,7 +2597,7 @@
 
 .premium-log-cta {
   pointer-events: auto;
-  background: linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%);
+  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
   color: #ffffff;
   font-weight: 700;
   text-transform: uppercase;
@@ -2683,7 +2701,9 @@
   padding: 24px;
   border: 1px solid var(--glass-border-rim);
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255, 0, 85, 0.03) 0%, rgba(138, 43, 226, 0.03) 100%), var(--panel-glass-bg);
+  background:
+    linear-gradient(135deg, rgba(255, 0, 85, 0.03) 0%, rgba(138, 43, 226, 0.03) 100%),
+    var(--panel-glass-bg);
   backdrop-filter: blur(24px) saturate(120%);
   -webkit-backdrop-filter: blur(24px) saturate(120%);
   box-shadow:
@@ -2973,9 +2993,12 @@
     right: auto !important;
     top: 50% !important;
     bottom: auto !important;
+    /* transform fallback alongside translate, for engines without it. */
+    transform: translate(-50%, -50%) !important;
     translate: -50% -50% !important;
     width: calc(100% - 32px) !important;
     max-width: 480px !important;
+    max-height: 70vh !important;
     max-height: 70dvh !important;
     margin: 0 !important;
   }

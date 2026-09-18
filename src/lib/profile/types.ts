@@ -6,9 +6,11 @@
 import type {
   StoryAdjustments,
   StoryAudience,
+  StoryCanvasSnapshot,
   StoryElement,
   StoryMediaType,
   StoryMusicMeta,
+  StorySlide,
 } from "@/lib/stories/types";
 
 export type BloomAccent = "violet" | "sky" | "amber" | "sage" | "rose";
@@ -67,12 +69,26 @@ export interface Story {
   adjustments: StoryAdjustments | null;
   /** Curated background id for text-first stories. */
   backgroundId: string | null;
+  /**
+   * The composed canvas — background paint, photo, texture and overlay.
+   * Null on stories published before the canvas column existed, which then
+   * render from `backgroundId` alone.
+   */
+  canvas: StoryCanvasSnapshot | null;
   /** Attached music, if any. */
   music: StoryMusicMeta | null;
   /** Author-written description for screen readers. */
   altText: string | null;
   /** Who may see a public story: everyone or close friends. */
   audience: StoryAudience;
+  /**
+   * Extra compositions, when a story has more than one slide.
+   *
+   * Absent on every story published before multi-slide existed — those read as
+   * a single slide through `storySlides()`. Read that helper, never this field
+   * directly, or legacy stories will look empty.
+   */
+  slides?: StorySlide[];
 }
 
 /** Stories older than the rail but kept privately. */

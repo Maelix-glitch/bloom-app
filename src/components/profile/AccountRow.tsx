@@ -1,8 +1,20 @@
 /**
- * Account & data — the settings list at the bottom of the profile, in the
- * grouped-rows grammar phones use. Every row does something real: nothing
- * is a placeholder. The export payload is unchanged from the first profile
- * (identity, stories, highlights → one JSON file, client-side).
+ * Settings — the grouped-row list at the bottom of the profile.
+ *
+ * The grammar is the one phones use everywhere: a small label floating above a
+ * group of connected rows, quiet hairlines between them, and nothing else. An
+ * earlier version of this wrapped every group in a bordered card on a
+ * two-column grid, which reads as a dashboard of panels rather than a settings
+ * list — the rows stopped feeling like one system and started competing.
+ *
+ * Two rules this file holds to:
+ *
+ *   · **Every row does something real.** Nothing here is a placeholder, and no
+ *     group exists for symmetry. If Bloom grows a notification preference, it
+ *     gets a row then; there is no "Notifications" heading waiting empty.
+ *   · **A capability switch explains its consequence before it takes.** Turning
+ *     cycle tracking off removes the cycle from the whole app — nav, Today,
+ *     coach, profile. That is reversible but it is not small, so it asks first.
  */
 
 import { useState } from "react";
@@ -15,6 +27,7 @@ import {
   Eye,
   Lock,
   LogIn,
+  MessageCircle,
   LogOut,
   Mail,
   Palette,
@@ -22,12 +35,14 @@ import {
   Smartphone,
   Trash2,
   Droplet,
+  UserRound,
   Volume2,
 } from "lucide-react";
 
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useSound } from "@/hooks/useSound";
+import { SEX_LABEL } from "@/lib/onboarding/profileKind";
 
 import type {
   AccountDetails,
@@ -37,9 +52,12 @@ import type {
   ProfileIdentity,
 } from "@/lib/profile/types";
 
+/* ------------------------------- primitives ------------------------------ */
+
 function Row({
   icon,
   label,
+  hint,
   value,
   onClick,
   danger = false,
@@ -47,6 +65,8 @@ function Row({
 }: {
   icon: React.ReactNode;
   label: string;
+  /** A second line, only where the label alone is ambiguous. */
+  hint?: string;
   value?: string;
   onClick?: () => void;
   danger?: boolean;
@@ -57,7 +77,10 @@ function Row({
       <span className="pf-row-icon" aria-hidden>
         {icon}
       </span>
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="pf-row-text">
+        <span className="pf-row-label">{label}</span>
+        {hint ? <span className="pf-row-hint">{hint}</span> : null}
+      </span>
       <span className={danger ? "pf-row-value pf-row-value--danger" : "pf-row-value"}>{value}</span>
       {onClick ? <ChevronRight className="pf-row-chevron size-3.5" aria-hidden /> : <span />}
     </>
@@ -74,8 +97,7 @@ function Row({
 
 /**
  * A row that flips something rather than opening something. Same grammar as
- * `Row` — icon, label, value on the right — so the list stays one list, but the
- * whole row is the hit target and the state is announced properly.
+ * `Row`, but the whole row is the hit target and the state is announced.
  */
 function SwitchRow({
   icon,
@@ -83,12 +105,14 @@ function SwitchRow({
   value,
   on,
   onToggle,
+  testId,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   on: boolean;
   onToggle: (next: boolean) => void;
+  testId?: string;
 }) {
   return (
     <button
@@ -97,11 +121,14 @@ function SwitchRow({
       aria-checked={on}
       onClick={() => onToggle(!on)}
       className="pf-row"
+      data-testid={testId}
     >
       <span className="pf-row-icon" aria-hidden>
         {icon}
       </span>
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="pf-row-text">
+        <span className="pf-row-label">{label}</span>
+      </span>
       <span className="pf-row-value">{value}</span>
       <span className="pf-switch" data-on={on} aria-hidden>
         <span className="pf-switch-knob" />
@@ -111,46 +138,131 @@ function SwitchRow({
 }
 
 /**
- * How Bloom is shaped for this person: whether it includes the cycle, and
- * whether it makes a sound. Both are answered during setup and both are
- * reversible here — that promise is the reason the setup flow can be a single
- * tap per question.
+ * A group: label, then connected rows. No card, no border around the lot — the
+ * hairlines between rows are what hold it together.
  */
-function YourBloomSection() {
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <section aria-label={label} className="pf-group">
+      <h2 className="pf-group-label">{label}</h2>
+      <div className="pf-group-rows">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * The confirmation for switches that remove something from the app.
+ *
+ * Deliberately not a modal with a title, a paragraph and two heavy buttons: it
+ * says the consequence in one line and offers two choices. Inline, where the
+ * switch is, so the question and its context are the same place.
+ */
+function ConfirmRow({
+  open,
+  message,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  message: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="pf-confirm" role="alertdialog" aria-label="Confirm change">
+      <p className="pf-confirm-msg">{message}</p>
+      <div className="pf-confirm-actions">
+        <button type="button" className="pf-confirm-btn" onClick={onCancel}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="pf-confirm-btn pf-confirm-btn--go"
+          onClick={onConfirm}
+          autoFocus
+        >
+          Turn it off
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------- sections ------------------------------- */
+
+/**
+ * Personalization — how Bloom is shaped for this person.
+ *
+ * This is the only place the profile-shape answer lives after onboarding, and
+ * it is a switch rather than a re-run of the setup questions: one decision,
+ * clearly stated, reversible, and the cycle surfaces elsewhere respond to it
+ * rather than duplicating it.
+ */
+function PersonalizationSection() {
   const { optedOut } = useCycleVisible();
-  const { setKind } = useOnboarding();
+  const { setKind, state } = useOnboarding();
   const { enabled, setEnabled, sound } = useSound();
+  const [confirming, setConfirming] = useState(false);
+
+  /* The answer given during setup, stored as it was given. It is shown, never
+     inferred back out of the capability: "female, cycle off" and "prefer not
+     to say" would otherwise look identical here. */
+  const sexValue = state.sex ? SEX_LABEL[state.sex] : "Not answered";
 
   return (
-    <section aria-label="Your Bloom" className="pf-card overflow-hidden">
-      <p className="pf-eyebrow px-4 pt-3.5 pb-1">Your Bloom</p>
-      <div className="pf-rows">
-        <SwitchRow
-          icon={<Droplet className="size-3.5" />}
-          label="Cycle tracking"
-          value={optedOut ? "hidden" : "included"}
-          on={!optedOut}
-          onToggle={(next) => {
-            sound(next ? "toggleOn" : "toggleOff");
-            /* Turning it off is an explicit opt-out; turning it on is explicit
-               too, rather than reverting to "unspecified". */
-            setKind(next ? "cycle" : "no-cycle");
-          }}
-        />
-        <SwitchRow
-          icon={<Volume2 className="size-3.5" />}
-          label="Sound"
-          value={enabled ? "on" : "off"}
-          on={enabled}
-          onToggle={(next) => {
-            /* setEnabled plays the confirmation itself when switching on —
-               the only way to hear what you just enabled. */
-            if (!next) sound("toggleOff");
-            setEnabled(next);
-          }}
-        />
-      </div>
-    </section>
+    <Group label="Personalization">
+      <SwitchRow
+        icon={<Droplet className="size-3.5" />}
+        label="Cycle tracking"
+        value={optedOut ? "off" : "on"}
+        on={!optedOut}
+        testId="pf-row-cycle"
+        onToggle={(next) => {
+          /* Turning it on is immediate. Turning it off takes the cycle out of
+             the whole app, so it asks first. */
+          if (next) {
+            sound("toggleOn");
+            setKind("cycle");
+            return;
+          }
+          setConfirming(true);
+        }}
+      />
+      <ConfirmRow
+        open={confirming}
+        message="Turning off cycle tracking removes Cycle from your Bloom — the nav entry, the Today ring and your coach's cycle context. Nothing you have logged is deleted, and you can turn it back on here."
+        onCancel={() => setConfirming(false)}
+        onConfirm={() => {
+          setConfirming(false);
+          sound("toggleOff");
+          setKind("no-cycle");
+        }}
+      />
+      <SwitchRow
+        icon={<Volume2 className="size-3.5" />}
+        label="Sound"
+        value={enabled ? "on" : "off"}
+        on={enabled}
+        testId="pf-row-sound"
+        onToggle={(next) => {
+          /* setEnabled plays the confirmation itself when switching on — the
+             only way to hear what you just enabled. */
+          if (!next) sound("toggleOff");
+          setEnabled(next);
+        }}
+      />
+      <Row
+        icon={<UserRound className="size-3.5" />}
+        label="You told us"
+        hint={
+          state.sex
+            ? "Asked once at setup. Changing it never deletes anything logged."
+            : "Not asked yet — the switch above is what Bloom is going by."
+        }
+        value={sexValue}
+      />
+    </Group>
   );
 }
 
@@ -238,13 +350,13 @@ export function AccountRow({
   onEdit: () => void;
   onSignOut: () => void;
   onSignIn: () => void;
-  /** B7 — one file with the whole record. */
+  /** One file with the whole record. */
   onExportAll: () => void;
-  /** B4 — permission and per-kind switches. */
+  /** Permission and per-kind switches. */
   onOpenReminders: () => void;
-  /** B9 — typed-confirmation erase. */
+  /** Typed-confirmation erase. */
   onOpenErase: () => void;
-  /** B6 — the install prompt, when the browser has one to give. */
+  /** The install prompt, when the browser has one to give. */
   onInstall?: (() => void) | undefined;
   remindersValue: string;
   installValue: string | null;
@@ -252,140 +364,146 @@ export function AccountRow({
   const [exporting, setExporting] = useState(false);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
-      <section aria-label="Account" className="pf-card overflow-hidden">
-        <p className="pf-eyebrow px-4 pt-3.5 pb-1">Account</p>
-        <div className="pf-rows">
+    <div className="pf-settings">
+      <Group label="Account">
+        <Row
+          icon={<Mail className="size-3.5" />}
+          label="Email"
+          value={account.email ?? "not connected"}
+        />
+        <Row
+          icon={<Clock className="size-3.5" />}
+          label="Tracking since"
+          value={
+            account.memberSince
+              ? new Date(account.memberSince).toLocaleDateString(undefined, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "—"
+          }
+        />
+        {isSignedIn ? (
           <Row
-            icon={<Mail className="size-3.5" />}
-            label="Email"
-            value={account.email ?? "not connected"}
-          />
-          <Row
-            icon={<Clock className="size-3.5" />}
-            label="Tracking since"
-            value={
-              account.memberSince
-                ? new Date(account.memberSince).toLocaleDateString(undefined, {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : "—"
-            }
-          />
-          <Row
-            icon={<Palette className="size-3.5" />}
-            label="Accent"
-            value={ACCENT_LABEL[identity.accent]}
-            onClick={onEdit}
-          />
-          <Row
-            icon={<Lock className="size-3.5" />}
-            label="Privacy"
-            value={privacy.profileVisibility === "public" ? "Shared by choice" : "Private"}
-            onClick={onOpenPrivacy}
-            testId="pf-row-privacy"
-          />
-          {isSignedIn ? (
-            <Row
-              icon={<LogOut className="size-3.5" />}
-              label="Sign out"
-              value="this device"
-              onClick={onSignOut}
-              danger
-              testId="pf-row-signout"
-            />
-          ) : (
-            <Row
-              icon={<LogIn className="size-3.5" />}
-              label="Sign in"
-              value="magic link"
-              onClick={onSignIn}
-              testId="pf-row-signin"
-            />
-          )}
-        </div>
-      </section>
-
-      <YourBloomSection />
-
-      <section aria-label="Your data" className="pf-card overflow-hidden">
-        <p className="pf-eyebrow px-4 pt-3.5 pb-1">Sharing &amp; data</p>
-        <div className="pf-rows">
-          <Row
-            icon={<Share2 className="size-3.5" />}
-            label="Share profile"
-            value={identity.username ? `/@${identity.username}` : "pick a @username"}
-            onClick={onShare}
-          />
-          <Row
-            icon={<Eye className="size-3.5" />}
-            label="Preview as others see it"
-            value="preview"
-            onClick={onPreview}
-          />
-          <Row
-            icon={<Archive className="size-3.5" />}
-            label="Story archive"
-            value={`${stories.length} kept`}
-            onClick={onOpenArchive}
-          />
-          {onOpenStorySettings ? (
-            <Row
-              icon={<Eye className="size-3.5" />}
-              label="Story settings"
-              value="replies · reactions · audience"
-              onClick={onOpenStorySettings}
-            />
-          ) : null}
-          <Row
-            icon={<Download className="size-3.5" />}
-            label="Download everything"
-            value="json"
-            testId="pf-row-export-all"
-            onClick={onExportAll}
-          />
-          <Row
-            icon={<Download className="size-3.5" />}
-            label="Export my profile"
-            value={exporting ? "preparing…" : "json"}
-            testId="pf-row-export"
-            onClick={() => {
-              setExporting(true);
-              try {
-                exportProfile(identity, stories, highlights, account);
-              } finally {
-                window.setTimeout(() => setExporting(false), 600);
-              }
-            }}
-          />
-          <Row
-            icon={<Bell className="size-3.5" />}
-            label="Remind me"
-            value={remindersValue}
-            testId="pf-row-reminders"
-            onClick={onOpenReminders}
-          />
-          {installValue ? (
-            <Row
-              icon={<Smartphone className="size-3.5" />}
-              label="Install on this device"
-              value={installValue}
-              testId="pf-row-install"
-              {...(onInstall ? { onClick: onInstall } : {})}
-            />
-          ) : null}
-          <Row
-            icon={<Trash2 className="size-3.5" />}
-            label="Erase everything"
-            value="permanent"
+            icon={<LogOut className="size-3.5" />}
+            label="Sign out"
+            value="this device"
+            onClick={onSignOut}
             danger
-            testId="pf-row-erase"
-            onClick={onOpenErase}
+            testId="pf-row-signout"
           />
-        </div>
-      </section>
+        ) : (
+          <Row
+            icon={<LogIn className="size-3.5" />}
+            label="Sign in"
+            value="magic link"
+            onClick={onSignIn}
+            testId="pf-row-signin"
+          />
+        )}
+      </Group>
+
+      <PersonalizationSection />
+
+      <Group label="Appearance">
+        <Row
+          icon={<Palette className="size-3.5" />}
+          label="Accent"
+          value={ACCENT_LABEL[identity.accent]}
+          onClick={onEdit}
+          testId="pf-row-accent"
+        />
+      </Group>
+
+      <Group label="Privacy">
+        <Row
+          icon={<Lock className="size-3.5" />}
+          label="Profile visibility"
+          value={privacy.profileVisibility === "public" ? "Public" : "Private"}
+          onClick={onOpenPrivacy}
+          testId="pf-row-privacy"
+        />
+        <Row
+          icon={<Eye className="size-3.5" />}
+          label="Preview as others see it"
+          onClick={onPreview}
+          testId="pf-row-preview"
+        />
+      </Group>
+
+      <Group label="Stories">
+        <Row
+          icon={<Archive className="size-3.5" />}
+          label="Archive"
+          value={`${stories.length} kept`}
+          onClick={onOpenArchive}
+          testId="pf-row-archive"
+        />
+        {onOpenStorySettings ? (
+          <Row
+            icon={<MessageCircle className="size-3.5" />}
+            label="Replies, reactions & audience"
+            onClick={onOpenStorySettings}
+            testId="pf-row-story-settings"
+          />
+        ) : null}
+      </Group>
+
+      <Group label="Sharing & data">
+        <Row
+          icon={<Share2 className="size-3.5" />}
+          label="Share profile"
+          value={identity.username ? `/@${identity.username}` : "pick a @username"}
+          onClick={onShare}
+          testId="pf-row-share"
+        />
+        <Row
+          icon={<Download className="size-3.5" />}
+          label="Download everything"
+          value="json"
+          testId="pf-row-export-all"
+          onClick={onExportAll}
+        />
+        <Row
+          icon={<Download className="size-3.5" />}
+          label="Export my profile"
+          value={exporting ? "preparing…" : "json"}
+          testId="pf-row-export"
+          onClick={() => {
+            setExporting(true);
+            try {
+              exportProfile(identity, stories, highlights, account);
+            } finally {
+              window.setTimeout(() => setExporting(false), 600);
+            }
+          }}
+        />
+        <Row
+          icon={<Bell className="size-3.5" />}
+          label="Reminders"
+          value={remindersValue}
+          testId="pf-row-reminders"
+          onClick={onOpenReminders}
+        />
+        {installValue ? (
+          <Row
+            icon={<Smartphone className="size-3.5" />}
+            label="Install on this device"
+            value={installValue}
+            testId="pf-row-install"
+            {...(onInstall ? { onClick: onInstall } : {})}
+          />
+        ) : null}
+        <Row
+          icon={<Trash2 className="size-3.5" />}
+          label="Erase everything"
+          value="permanent"
+          danger
+          testId="pf-row-erase"
+          onClick={onOpenErase}
+        />
+      </Group>
     </div>
   );
 }

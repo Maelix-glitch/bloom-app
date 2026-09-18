@@ -160,6 +160,8 @@
   left: 50%;
   width: 76px;
   height: 76px;
+  /* transform fallback for engines without the translate property (Chrome < 104) */
+  transform: translate(-50%, 0);
   translate: -50% 0;
   border-radius: 999px;
   background: radial-gradient(
@@ -187,6 +189,8 @@
   position: absolute;
   top: 2px;
   right: 50%;
+  /* transform fallback for engines without the translate property (Chrome < 104) */
+  transform: translate(34px, 0);
   translate: 34px 0;
   color: var(--bmood-face-color, var(--foreground));
   opacity: 0;

@@ -20,6 +20,11 @@ import {
   type StoryVisibility,
 } from "./types";
 import { sanitizeAdjustments, sanitizeElements } from "@/lib/stories/elements";
+import { sanitizeSlides, type StorySlide } from "@/lib/stories/slides";
+import { sanitizeBackground, type StoryBackgroundState } from "@/lib/stories/canvas/backgrounds";
+
+/** What the `stories.canvas` column holds. */
+export type StoryCanvasState = StoryBackgroundState;
 import type {
   StoryAdjustments,
   StoryAudience,
@@ -59,6 +64,10 @@ type StoryRow = {
   music?: unknown;
   alt_text?: string | null;
   audience?: string | null;
+  /** Extra compositions for multi-slide stories. */
+  slides?: unknown;
+  /** Story canvas state — background/texture/overlay/photo. */
+  canvas?: unknown;
 };
 
 const STORY_COLUMNS =
@@ -66,7 +75,9 @@ const STORY_COLUMNS =
 
 const STORY_COLUMNS_LEGACY = STORY_COLUMNS;
 
-const STORY_COLUMNS_FULL = `${STORY_COLUMNS}, media_type, duration_ms, elements, filter_id, adjustments, background_id, music, alt_text, audience`;
+const STORY_COLUMNS_CANVAS = `${STORY_COLUMNS}, media_type, duration_ms, elements, filter_id, adjustments, background_id, music, alt_text, audience, canvas`;
+
+const STORY_COLUMNS_FULL = `${STORY_COLUMNS_CANVAS}, slides`;
 
 /** True when PostgREST complains about a column the migration hasn't added yet. */
 function isMissingColumn(error: { code?: string; message?: string }): boolean {
@@ -109,6 +120,19 @@ function duplicatePublishGuard(fingerprint: string): boolean {
   return true;
 }
 
+/**
+ * Defensive: anything malformed falls back to null, which the viewer treats as
+ * "use `backgroundId`". A broken canvas must never blank a published story.
+ */
+function parseRowCanvas(value: unknown): StoryCanvasState | null {
+  if (!value || typeof value !== "object") return null;
+  try {
+    return sanitizeBackground(value);
+  } catch {
+    return null;
+  }
+}
+
 function parseRowMusic(value: unknown): StoryMusicMeta | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
@@ -122,6 +146,33 @@ function parseRowMusic(value: unknown): StoryMusicMeta | null {
     durationMs: Math.max(1000, Math.min(60000, Number(v["durationMs"]) || 15000)),
     ...(typeof src === "string" && src ? { src: src.slice(0, 2048) } : {}),
   };
+}
+
+/**
+ * Slides on the way in.
+ *
+ * Null means "ordinary single-slide story" — the row then reads back as one
+ * slide from its own top-level columns, so nothing is stored that could
+ * disagree with them.
+ *
+ * Each slide's elements go through the same sanitizer as a top-level story's,
+ * so a slide cannot smuggle in an element the single-slide path would reject.
+ */
+function prepareSlidesForWrite(slides: StorySlide[] | null | undefined): StorySlide[] | null {
+  const clean = sanitizeSlides(slides);
+  if (!clean || clean.length < 2) return null;
+  return clean.map((slide) => ({ ...slide, elements: sanitizeElements(slide.elements) }));
+}
+
+/**
+ * Slides from a jsonb column.
+ *
+ * Returns null for anything that is not a usable array — including the null
+ * that every pre-multi-slide row carries — so the caller omits the key and the
+ * story reads as a single slide.
+ */
+function parseRowSlides(value: unknown): StorySlide[] | null {
+  return sanitizeSlides(value);
 }
 
 function fromRow(row: StoryRow): Story {
@@ -156,9 +207,13 @@ function fromRow(row: StoryRow): Story {
     filterId: typeof row.filter_id === "string" ? row.filter_id : null,
     adjustments: sanitizeAdjustments(row.adjustments),
     backgroundId: typeof row.background_id === "string" ? row.background_id : null,
+    canvas: parseRowCanvas(row.canvas),
     music: parseRowMusic(row.music),
     altText: typeof row.alt_text === "string" ? row.alt_text.slice(0, 300) : null,
     audience: row.audience === "close" ? "close" : "all",
+    // Absent (not null) on rows published before multi-slide existed. Leaving
+    // the key off is what makes `storySlides()` take its legacy path.
+    ...(parseRowSlides(row.slides) ? { slides: parseRowSlides(row.slides)! } : {}),
   };
 }
 
@@ -202,7 +257,19 @@ export interface CreateStoryInput {
   filterId?: string | null | undefined;
   adjustments?: StoryAdjustments | null | undefined;
   backgroundId?: string | null | undefined;
+  /**
+   * The whole canvas description — background state, texture, overlay, photo
+   * layer. `backgroundId` alone can only name a preset, so the composed
+   * background travels with the story here.
+   */
+  canvas?: StoryCanvasState | null | undefined;
   music?: StoryMusicMeta | null | undefined;
+  /**
+   * Extra compositions for a multi-slide story. Omit entirely for a normal
+   * single-slide story — the row then reads back as one slide from its own
+   * top-level fields.
+   */
+  slides?: StorySlide[] | null | undefined;
   /** Own-audio bytes, uploaded at publish time and resolved into music.src. */
   audio?: { blob: Blob; contentType: string } | null | undefined;
   /** Device-uploaded GIF bytes, resolved into their elements' src before save. */
@@ -365,13 +432,27 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
     filter_id: input.filterId ?? null,
     adjustments: input.adjustments ?? null,
     background_id: input.backgroundId ?? null,
+    canvas: input.canvas ?? null,
     music: music ?? null,
     alt_text: input.altText?.trim().slice(0, 300) || null,
     audience: input.audience ?? "all",
+    slides: prepareSlidesForWrite(input.slides),
   };
 
-  // Prefer the full insert; fall back to the legacy shape when the backend
-  // predates the Story Platform migration. Never lose the draft on failure.
+  // Three tiers, because "the backend is behind" is not one state:
+  //
+  //   1. full   — every Story Platform column, multi-slide included
+  //   2. canvas — the backend has the canvas migration but not the slides one
+  //   3. legacy — the backend predates the Story Platform entirely
+  //
+  // Tier 2 exists so that adding `slides` cannot make a backend that was
+  // working yesterday suddenly drop a published story back to the legacy
+  // shape and lose its elements, filter and canvas with it. A backend that
+  // only lacks `slides` keeps everything else and simply reads back as a
+  // single-slide story.
+  const { slides: _slidesColumn, ...canvasPayload } = fullPayload;
+  void _slidesColumn;
+
   const attempt = await supabase
     .from("stories")
     .insert(fullPayload)
@@ -382,6 +463,19 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
 
   if (!isMissingColumn(attempt.error)) {
     report("story:create", attempt.error);
+    throw new StoryServiceError("Couldn't publish your story.");
+  }
+
+  const withoutSlides = await supabase
+    .from("stories")
+    .insert(canvasPayload)
+    .select(STORY_COLUMNS_CANVAS)
+    .single();
+
+  if (!withoutSlides.error) return fromRow(withoutSlides.data as StoryRow);
+
+  if (!isMissingColumn(withoutSlides.error)) {
+    report("story:create", withoutSlides.error);
     throw new StoryServiceError("Couldn't publish your story.");
   }
 
@@ -401,7 +495,10 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
   story.elements = elements;
   story.filterId = input.filterId ?? null;
   story.backgroundId = input.backgroundId ?? null;
+  story.canvas = input.canvas ?? null;
   story.music = music;
+  const localSlides = prepareSlidesForWrite(input.slides);
+  if (localSlides) story.slides = localSlides;
   return story;
 }
 

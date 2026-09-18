@@ -130,7 +130,6 @@ const fmt = (id: TrackerId, v: number) => TRACKERS.find((t) => t.id === id)!.for
 
 /* ------------------------------- greeting -------------------------------- */
 
-
 /**
  * A time-of-day hello, from a pool rather than a constant.
  *
@@ -691,9 +690,12 @@ export function insightsOf(input: {
   moodCorrelations: readonly MoodCorrelation[];
   habits: { habits: readonly Habit[]; logs: readonly HabitLog[] };
   cycle: CycleAnalysis;
+  /** `off` means the cycle isn't part of this person's Bloom at all. */
+  cycleMode?: CycleMode | undefined;
   today: string;
 }): InsightItem[] {
   const { trackers, moodInsights, moodCorrelations, habits, cycle, today } = input;
+  const cycleMode = input.cycleMode ?? "tracking";
   const out: InsightItem[] = [];
 
   for (const c of moodCorrelations) {
@@ -757,7 +759,12 @@ export function insightsOf(input: {
     });
   }
 
-  if (out.length < 3 && cycle.cycleDay !== null && cycle.confidence !== "none") {
+  if (
+    cycleMode !== "off" &&
+    out.length < 3 &&
+    cycle.cycleDay !== null &&
+    cycle.confidence !== "none"
+  ) {
     out.push({
       id: "cycle",
       signal: "cycle",

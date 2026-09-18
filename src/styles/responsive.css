@@ -25,22 +25,22 @@
 
 :root {
   /* page geometry */
-  --bloom-page-px: 20px;            /* mobile page gutter */
-  --bloom-page-px-sm: 32px;         /* ≥640px gutter */
-  --bloom-section-gap: 1.5rem;      /* rhythm between sections on phones */
-  --bloom-card-pad: 1rem;           /* compact card padding on phones */
-  --bloom-content-max: 72rem;       /* widest comfortable reading column */
+  --bloom-page-px: 20px; /* mobile page gutter */
+  --bloom-page-px-sm: 32px; /* ≥640px gutter */
+  --bloom-section-gap: 1.5rem; /* rhythm between sections on phones */
+  --bloom-card-pad: 1rem; /* compact card padding on phones */
+  --bloom-content-max: 72rem; /* widest comfortable reading column */
 
   /* chrome */
-  --bloom-header-h: 60px;           /* phone brand bar */
-  --bloom-nav-h: 60px;              /* phone tab bar content height */
-  --bloom-nav-label: 10px;          /* tab label size */
+  --bloom-header-h: 60px; /* phone brand bar */
+  --bloom-nav-h: 60px; /* phone tab bar content height */
+  --bloom-nav-label: 10px; /* tab label size */
   --bloom-rail-w: 220px;
 
   /* touch + type */
-  --bloom-touch-min: 44px;          /* minimum touch target */
-  --bloom-touch-comfort: 48px;      /* preferred touch target */
-  --bloom-input-min: 16px;          /* smallest input text on phones (no iOS zoom) */
+  --bloom-touch-min: 44px; /* minimum touch target */
+  --bloom-touch-comfort: 48px; /* preferred touch target */
+  --bloom-input-min: 16px; /* smallest input text on phones (no iOS zoom) */
 
   /* radii */
   --bloom-radius-card: 16px;
@@ -76,9 +76,12 @@
 
 .app-shell > main {
   min-width: 0;
-  min-height: calc(
-    100dvh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px)
-  );
+  /* vh then dvh: without the fallback an engine that predates dynamic
+   * viewport units (Chrome < 108) drops the declaration entirely and the
+   * page's content area collapses to its content instead of filling the
+   * space between the header and the tab bar. */
+  min-height: calc(100vh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px));
+  min-height: calc(100dvh - var(--app-top-bar, 0px) - var(--app-bottom-nav, 0px));
   scroll-padding-bottom: calc(var(--app-bottom-nav, 0px) + 24px);
 }
 
@@ -107,8 +110,7 @@
   align-items: stretch;
   /* the bar's own background fills the home-indicator zone */
   padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-  padding-inline: max(4px, env(safe-area-inset-left, 0px))
-    max(4px, env(safe-area-inset-right, 0px));
+  padding-inline: max(4px, env(safe-area-inset-left, 0px)) max(4px, env(safe-area-inset-right, 0px));
 }
 
 .app-mobile-nav > a {
@@ -164,15 +166,26 @@
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
+    /* Must reset transform as well as translate: the dialog's own centering
+     * has a transform fallback for engines without the translate property, so
+     * resetting only `translate` would leave it centered instead of docking
+     * it to the bottom as a sheet. */
+    transform: none !important;
     translate: 0 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 92dvh;
+    /* vh then dvh — see .coach-canvas. */
+    max-height: 92vh;
     border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0 !important;
     border-bottom: 0 !important;
     padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+  @supports (height: 100dvh) {
+    [data-bloom-dialog="true"] {
+      max-height: 92dvh;
+    }
   }
 }
 
@@ -187,7 +200,7 @@
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
-    max-height: 92dvh;
+    max-height: 92vh;
     border: 0 !important;
     border-top: 1px solid var(--border) !important;
     border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0;
@@ -195,18 +208,37 @@
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+  @supports (height: 100dvh) {
+    [data-bloom-side="left"],
+    [data-bloom-side="right"] {
+      max-height: 92dvh;
+    }
+  }
 }
 
 /* BloomSheet on phones: capped, scrollable, keyboard-aware. */
 @media (max-width: 639px) {
   .bsheet--phone {
-    max-height: 92dvh;
+    max-height: 92vh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone {
+      max-height: 92dvh;
+    }
+  }
+
   .bsheet--phone .bsheet-panel {
-    max-height: 92dvh;
+    max-height: 92vh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone .bsheet-panel {
+      max-height: 92dvh;
+    }
+  }
+
   /* any direct scroll region inside a phone sheet owns the gesture */
   .bsheet--phone .bsheet-scroll {
+    max-height: calc(92vh - 120px);
     max-height: calc(92dvh - 120px);
   }
 }
@@ -280,7 +312,9 @@ svg {
 @media (max-width: 639px) {
   /* !important: a floor, not a suggestion — page sheets that set 11-15px
      inputs would otherwise reintroduce the iOS auto-zoom on focus. */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="color"]),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not(
+      [type="file"]
+    ):not([type="color"]),
   select,
   textarea {
     font-size: max(var(--bloom-input-min), 1em) !important;
@@ -296,8 +330,14 @@ textarea {
 
 textarea {
   field-sizing: content;
-  max-height: 40dvh;
+  max-height: 40vh;
 }
+@supports (height: 100dvh) {
+  textarea {
+    max-height: 40dvh;
+  }
+}
+
 @supports not (field-sizing: content) {
   textarea {
     min-height: 88px;
@@ -373,8 +413,14 @@ textarea {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-height: 92dvh;
+    max-height: 92vh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone .metrics-sheet {
+      max-height: 92dvh;
+    }
+  }
+
   /* header is the first child; every view below it scrolls */
   .bsheet--phone .metrics-sheet > div:first-child {
     flex: none;
@@ -429,8 +475,14 @@ textarea {
 
 @media (max-height: 700px) {
   .bsheet--phone {
-    max-height: 94dvh;
+    max-height: 94vh;
   }
+  @supports (height: 100dvh) {
+    .bsheet--phone {
+      max-height: 94dvh;
+    }
+  }
+
   .bmoment-tile {
     min-height: 112px;
   }
