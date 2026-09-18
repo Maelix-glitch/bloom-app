@@ -24,6 +24,8 @@
 import type { Habit } from "@/lib/home/habits";
 import type { CycleMode } from "@/lib/cycle/periodStore";
 
+import { reminderCopy } from "./copy";
+
 export type ReminderKind = "habit" | "period" | "fertile" | "evening";
 
 export interface Reminder {
@@ -137,11 +139,15 @@ export function dueReminders(input: ReminderInput): Reminder[] {
   if (settings.habits) {
     for (const { habit, done } of input.habits) {
       if (done || !habit.reminderTime || !isValidTime(habit.reminderTime)) continue;
+      const key = `habit:${habit.id}:${today}`;
+      /* No streak is plumbed through ReminderInput yet, so the copy engine uses
+         its "fresh" branch rather than inventing a run that isn't in the data. */
+      const copy = reminderCopy({ kind: "habit", habitName: habit.name }, key);
       push({
-        key: `habit:${habit.id}:${today}`,
+        key,
         kind: "habit",
-        title: habit.name,
-        body: "Time for this one — tick it when it's done.",
+        title: copy.title,
+        body: copy.body,
         at: habit.reminderTime,
         url: "/",
       });
@@ -152,31 +158,23 @@ export function dueReminders(input: ReminderInput): Reminder[] {
   if (settings.cycle && cycleOn) {
     const { nextStart, daysLate, fertileStart } = input.cycle;
     if (daysLate !== null && daysLate > 0) {
-      push({
-        key: `period-late:${today}`,
-        kind: "period",
-        title: `${daysLate} ${daysLate === 1 ? "day" : "days"} later than predicted`,
-        body: "If it has started, logging the first day sharpens every prediction.",
-        at: "09:00",
-        url: "/cycle",
-      });
+      const key = `period-late:${today}`;
+      const copy = reminderCopy({ kind: "period", daysLate }, key);
+      push({ key, kind: "period", title: copy.title, body: copy.body, at: "09:00", url: "/cycle" });
     } else if (nextStart && nextStart === dayBefore(today, -PERIOD_LEAD_DAYS)) {
       /* today is PERIOD_LEAD_DAYS before the predicted start */
-      push({
-        key: `period-soon:${today}`,
-        kind: "period",
-        title: "A period is expected in about two days",
-        body: "An estimate from your own record — not a certainty.",
-        at: "09:00",
-        url: "/cycle",
-      });
+      const key = `period-soon:${today}`;
+      const copy = reminderCopy({ kind: "period" }, key);
+      push({ key, kind: "period", title: copy.title, body: copy.body, at: "09:00", url: "/cycle" });
     }
     if (fertileStart && fertileStart === today) {
+      const key = `fertile:${today}`;
+      const copy = reminderCopy({ kind: "fertile" }, key);
       push({
-        key: `fertile:${today}`,
+        key,
         kind: "fertile",
-        title: "Your fertile window opens today",
-        body: "Estimated from your logged cycles.",
+        title: copy.title,
+        body: copy.body,
         at: "09:00",
         url: "/cycle",
       });
@@ -184,11 +182,13 @@ export function dueReminders(input: ReminderInput): Reminder[] {
   }
 
   if (settings.evening && !input.loggedSomethingToday && isValidTime(settings.eveningTime)) {
+    const key = `evening:${today}`;
+    const copy = reminderCopy({ kind: "evening", loggedToday: 0 }, key);
     push({
-      key: `evening:${today}`,
+      key,
       kind: "evening",
-      title: "Nothing logged today",
-      body: "A mood, a habit, a glass of water — thirty seconds keeps the record honest.",
+      title: copy.title,
+      body: copy.body,
       at: settings.eveningTime,
       url: "/",
     });
