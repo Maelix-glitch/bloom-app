@@ -50,7 +50,6 @@ import { toast } from "sonner";
 
 import { saidSaved } from "@/lib/voice/copy";
 
-import heroArt from "@/assets/mood/hero-window.jpg";
 
 export interface ProfileEditorSave {
   displayName: string;
@@ -274,9 +273,13 @@ export function ProfileEditor({
           <SheetBody>
             {/* ------------------------------------------------ hero */}
             <div className="bedit-hero">
-              <div className="bedit-hero-art" aria-hidden>
-                <img src={heroArt} alt="" />
-              </div>
+              {/*
+                The ground is set in CSS rather than with a photograph here.
+                This hero used to carry hero-window.jpg at 0.75 opacity under a
+                gradient wash; the picture fought the text sitting on it and
+                made the whole block read as misaligned even though every box
+                was where it should be.
+              */}
 
               <SheetItem>
                 <div className="bedit-topbar">
