@@ -7,7 +7,9 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+
+import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { Check, Palette } from "lucide-react";
 
 import cycleIntelligenceCss from "../styles/cycle2.css?url";
@@ -202,7 +204,21 @@ function Swatch({ hex, label }: { hex: string; label: string }) {
   );
 }
 
+/**
+ * The cycle isn't part of this person's Bloom, so these routes have no content
+ * to show them. They go to /cycle rather than to a blank screen, because that
+ * page is the one place the feature can be turned back on.
+ *
+ * The guard is a wrapper rather than an early return inside `CycleStylesPage`: an
+ * early return before the other hooks would call them conditionally.
+ */
 function CycleStylesPage() {
+  const { optedOut } = useCycleVisible();
+  if (optedOut) return <Navigate to="/cycle" replace />;
+  return <CycleStylesPageInner />;
+}
+
+function CycleStylesPageInner() {
   const store = usePeriodLog();
   const [applied, setApplied] = useState<string>(DEFAULT_THEME_ID);
   const [previewTheme, setPreviewTheme] = useState<string>(DEFAULT_THEME_ID);
