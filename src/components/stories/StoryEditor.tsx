@@ -14,7 +14,9 @@ import {
   Check,
   Download,
   ImagePlay,
+  Copy,
   ImagePlus,
+  Plus,
   Layers,
   LayoutTemplate,
   Music2,
@@ -57,6 +59,15 @@ import {
   serializeElements,
 } from "@/lib/stories/elements";
 import { editorDraftStore } from "@/lib/stories/draftStore";
+import {
+  appendComposition,
+  blankComposition,
+  compositionsToSlides,
+  duplicateComposition,
+  removeComposition,
+  writeComposition,
+  type SlideComposition,
+} from "@/lib/stories/slideCompositions";
 import { clearExportCache, exportStory } from "@/lib/stories/exporter";
 import { DEFAULT_ADJUSTMENTS, backgroundById } from "@/lib/stories/catalogs";
 import { presetBackground, type StoryBackgroundState } from "@/lib/stories/canvas/backgrounds";
@@ -132,6 +143,9 @@ interface Snapshot {
 function nextZ(elements: StoryElement[]): number {
   return elements.reduce((m, e) => Math.max(m, e.z), 0) + 1;
 }
+
+/** A slide as the editor holds it — strokes are DrawLayer's own type. */
+type EditorSlide = SlideComposition<DrawStroke>;
 
 export function StoryEditor({
   source,
@@ -215,6 +229,94 @@ export function StoryEditor({
   const [muted, setMuted] = useState(true);
   const [drag, setDrag] = useState<{ id: string; clientX: number; clientY: number } | null>(null);
   const [deleteHot, setDeleteHot] = useState(false);
+
+  /* ------------------------------- slides ------------------------------- */
+  /* Slot 0 is the composition already in the state above; the rest are
+     snapshots captured when the user moves between slides. */
+  const [slides, setSlides] = useState<EditorSlide[]>(() => [
+    {
+      id: "slide-1",
+      elements,
+      background,
+      backgroundId,
+      filterId,
+      adjustments,
+      strokes,
+    },
+  ]);
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  /** The editor's live state, in the shape a slide snapshot uses. */
+  const currentComposition = useCallback(
+    (): Omit<EditorSlide, "id"> => ({
+      elements,
+      background,
+      backgroundId,
+      filterId,
+      adjustments,
+      strokes,
+    }),
+    [elements, background, backgroundId, filterId, adjustments, strokes],
+  );
+
+  /** Save what's on screen into its slot before doing anything else. */
+  const commitSlide = useCallback(() => {
+    setSlides((prev) => writeComposition(prev, slideIndex, currentComposition()));
+  }, [currentComposition, slideIndex]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (index === slideIndex || index < 0 || index >= slides.length) return;
+      const saved = writeComposition(slides, slideIndex, currentComposition());
+      const target = saved[index]!;
+      setSlides(saved);
+      setSlideIndex(index);
+      setElements(target.elements);
+      setBackground(target.background);
+      setBackgroundId(target.backgroundId);
+      setFilterId(target.filterId);
+      setAdjustments(target.adjustments);
+      setStrokes(target.strokes);
+      setSelectedId(null);
+      setTool(null);
+      setDrawing(false);
+    },
+    [currentComposition, slideIndex, slides],
+  );
+
+  const addSlide = useCallback(() => {
+    const next = appendComposition(slides, blankComposition(background, backgroundId, adjustments));
+    if (!next) {
+      toast.error("Ten slides is the most a story can hold.");
+      return;
+    }
+    setSlides(next);
+    goToSlide(next.length - 1);
+  }, [adjustments, background, backgroundId, goToSlide, slides]);
+
+  const dupeSlide = useCallback(() => {
+    const saved = writeComposition(slides, slideIndex, currentComposition());
+    const res = duplicateComposition(saved, slideIndex);
+    if (!res) return;
+    setSlides(res.slides);
+    goToSlide(res.index);
+  }, [currentComposition, goToSlide, slideIndex, slides]);
+
+  const dropSlide = useCallback(() => {
+    const saved = writeComposition(slides, slideIndex, currentComposition());
+    const res = removeComposition(saved, slideIndex);
+    if (!res) return;
+    const target = res.slides[res.index]!;
+    setSlides(res.slides);
+    setSlideIndex(res.index);
+    setElements(target.elements);
+    setBackground(target.background);
+    setBackgroundId(target.backgroundId);
+    setFilterId(target.filterId);
+    setAdjustments(target.adjustments);
+    setStrokes(target.strokes);
+    setSelectedId(null);
+  }, [currentComposition, slideIndex, slides]);
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const deleteRef = useRef<HTMLDivElement | null>(null);
@@ -613,6 +715,14 @@ export function StoryEditor({
         // The composed background rides with the story; backgroundId alone can
         // only name a preset, and a template's paint is never just a preset.
         canvas: source.base === "background" ? background : null,
+        // Multi-slide is offered only for background/text stories. A photo or
+        // video story carries its media in the top-level source, and per-slide
+        // media upload is not built — offering the timeline there would let
+        // someone add a slide that silently loses its photo.
+        slides:
+          source.base === "background"
+            ? compositionsToSlides(writeComposition(slides, slideIndex, currentComposition()))
+            : null,
         filterId: filterId === "none" ? null : filterId,
         adjustments:
           JSON.stringify(adjustments) === JSON.stringify(DEFAULT_ADJUSTMENTS) ? null : adjustments,
@@ -1291,44 +1401,98 @@ export function StoryEditor({
           </button>
         </div>
       ) : (
-        /* tool rail */
-        <div className="se-rail relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
-          {tools.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => {
-                if (t.id === "text") {
-                  openText(null);
-                  return;
-                }
-                if (t.id === "draw") {
-                  setDrawing(true);
-                  setSelectedId(null);
-                  return;
-                }
-                if (t.id === "photo") {
-                  const slots = elements.filter((e) => e.kind === "photo");
-                  const empty = slots.find((e) => e.kind === "photo" && !e.src);
-                  if (empty) {
-                    requestPhotoFor(empty.id);
+        <>
+          {/* Slide timeline — only for background/text stories, where a slide is
+            a pure composition. See the note at the publish payload for why
+            photo and video stories don't get one. */}
+          {source.base === "background" ? (
+            <div className="se-slides relative z-50 flex items-center gap-1.5 bg-black/60 px-3 pt-2 backdrop-blur-md">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
+                {slides.map((sl, i) => (
+                  <button
+                    key={sl.id}
+                    type="button"
+                    onClick={() => goToSlide(i)}
+                    aria-current={i === slideIndex ? "true" : undefined}
+                    aria-label={`Slide ${i + 1} of ${slides.length}`}
+                    className={cn(
+                      "se-slide-chip shrink-0",
+                      i === slideIndex && "se-slide-chip--active",
+                    )}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSlide}
+                  aria-label="Add a slide"
+                  className="se-slide-chip se-slide-add shrink-0"
+                >
+                  <Plus className="size-3.5" aria-hidden />
+                </button>
+              </div>
+              {slides.length > 1 ? (
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={dupeSlide}
+                    aria-label="Duplicate this slide"
+                    className="se-slide-btn"
+                  >
+                    <Copy className="size-3.5" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dropSlide}
+                    aria-label="Delete this slide"
+                    className="se-slide-btn hover:!text-[#ff9d9d]"
+                  >
+                    <Trash2 className="size-3.5" aria-hidden />
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          /* tool rail */
+          <div className="se-rail relative z-50 flex gap-0.5 overflow-x-auto bg-black/60 px-3 pb-[max(14px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+            {tools.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  if (t.id === "text") {
+                    openText(null);
                     return;
                   }
-                  if (slots.length === 0) {
-                    addEmptyPhoto();
+                  if (t.id === "draw") {
+                    setDrawing(true);
+                    setSelectedId(null);
                     return;
                   }
-                }
-                setTool(t.id as Tool);
-              }}
-              className="se-tool-btn"
-              data-active={tool === t.id}
-            >
-              <t.icon className="size-[22px]" strokeWidth={1.7} aria-hidden />
-              {t.label}
-            </button>
-          ))}
-        </div>
+                  if (t.id === "photo") {
+                    const slots = elements.filter((e) => e.kind === "photo");
+                    const empty = slots.find((e) => e.kind === "photo" && !e.src);
+                    if (empty) {
+                      requestPhotoFor(empty.id);
+                      return;
+                    }
+                    if (slots.length === 0) {
+                      addEmptyPhoto();
+                      return;
+                    }
+                  }
+                  setTool(t.id as Tool);
+                }}
+                className="se-tool-btn"
+                data-active={tool === t.id}
+              >
+                <t.icon className="size-[22px]" strokeWidth={1.7} aria-hidden />
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       {/* overlays */}

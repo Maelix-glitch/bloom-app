@@ -2889,3 +2889,60 @@
     transform: none !important;
   }
 }
+
+/* ---------------------------- slide timeline ---------------------------- */
+/* The strip above the tool rail. Deliberately small: it is a control, not a
+   feature, and it must not eat vertical space from the canvas on a short
+   phone. */
+.se-slides {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.se-slide-chip {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(247, 241, 227, 0.62);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  transition:
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.se-slide-chip--active {
+  border-color: rgba(238, 217, 164, 0.75);
+  background: rgba(238, 217, 164, 0.16);
+  color: #eed9a4;
+}
+
+.se-slide-add {
+  min-width: 26px;
+  border-style: dashed;
+}
+
+.se-slide-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(247, 241, 227, 0.6);
+  transition: color 140ms ease;
+}
+
+@media (max-width: 430px) {
+  .se-slide-chip {
+    min-width: 28px;
+    height: 24px;
+  }
+}
