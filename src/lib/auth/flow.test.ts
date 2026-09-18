@@ -63,7 +63,12 @@ describe("the happy path", () => {
   it("lands on personalization for a first-time sign-in", () => {
     const s = run(
       [{ type: "authenticated", needsPersonalization: true }],
-      run([{ type: "email", value: "a@b.co" }, { type: "submit" }, { type: "invited" }, { type: "sent", email: "a@b.co" }]),
+      run([
+        { type: "email", value: "a@b.co" },
+        { type: "submit" },
+        { type: "invited" },
+        { type: "sent", email: "a@b.co" },
+      ]),
     );
     expect(s.phase).toBe("personalization");
   });

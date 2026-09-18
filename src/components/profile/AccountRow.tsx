@@ -140,13 +140,7 @@ function SwitchRow({
  * A group: label, then connected rows. No card, no border around the lot — the
  * hairlines between rows are what hold it together.
  */
-function Group({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section aria-label={label} className="pf-group">
       <h2 className="pf-group-label">{label}</h2>

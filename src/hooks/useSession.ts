@@ -58,8 +58,7 @@ export function useSession(): Session {
   return value;
 }
 
-export const isSignedIn = (session: Session): boolean =>
-  session.ready && session.userId !== null;
+export const isSignedIn = (session: Session): boolean => session.ready && session.userId !== null;
 
 /** Test helper: forget what we knew. */
 export function __resetSessionForTests(): void {

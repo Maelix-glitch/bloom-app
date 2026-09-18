@@ -133,9 +133,8 @@ export function AccessGate() {
               </span>
               <h1 className="ag-title">Your Bloom link is on its way.</h1>
               <p className="ag-copy">
-                Open the email we sent to{" "}
-                <span className="ag-email">{state.sentTo}</span> and tap the link
-                to come in.
+                Open the email we sent to <span className="ag-email">{state.sentTo}</span> and tap
+                the link to come in.
               </p>
               <div className="ag-actions">
                 <button
@@ -154,9 +153,7 @@ export function AccessGate() {
                   Use a different email
                 </button>
               </div>
-              <p className="ag-note">
-                Nothing arrived? Check spam, then send it again.
-              </p>
+              <p className="ag-note">Nothing arrived? Check spam, then send it again.</p>
             </motion.div>
           ) : (
             /* ------------------------------ ask ------------------------------ */
@@ -171,8 +168,8 @@ export function AccessGate() {
             >
               <h1 className="ag-title">Bloom is by invitation.</h1>
               <p className="ag-copy">
-                Enter the email you were invited with. If it's on the list, we'll
-                send you a link to sign in.
+                Enter the email you were invited with. If it's on the list, we'll send you a link to
+                sign in.
               </p>
 
               <label className="ag-label" htmlFor="ag-email">
@@ -191,9 +188,7 @@ export function AccessGate() {
                 value={state.email}
                 disabled={busy}
                 aria-invalid={state.phase === "invalid" || state.phase === "rejected"}
-                aria-describedby={
-                  state.message || unavailable ? "ag-message" : undefined
-                }
+                aria-describedby={state.message || unavailable ? "ag-message" : undefined}
                 onChange={(e) => dispatch({ type: "email", value: e.target.value })}
               />
 
