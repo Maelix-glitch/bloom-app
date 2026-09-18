@@ -5,10 +5,10 @@
  *
  *   1. **Hello** — what Bloom is, in one sentence. No question at all; the
  *      first screen of a setup flow should ask for nothing.
- *   2. **Shape** — does your Bloom include a cycle? This is the only question
- *      that changes the app's structure, so it gets its own screen and plain
- *      language: nobody is asked their gender, they're asked what they want to
- *      track. "Prefer not to say" is a real, safe answer.
+ *   2. **You** — Male or Female, with "prefer not to say" alongside. This is
+ *      the only question that changes the app's structure: the answer decides
+ *      whether Bloom's cycle is part of this person's Bloom at all. It is
+ *      asked plainly, in neutral colours, and never asked again.
  *   3. **Focus** — what they came for. Multi-select, entirely optional, used to
  *      pick sensible starting trackers instead of dumping all of them on.
  *   4. **Name** — offered, never required, then a short summary and in.
@@ -30,7 +30,12 @@ import { ArrowLeft, ArrowRight, Check, Shield, Sparkles } from "lucide-react";
 
 import { useSound } from "@/hooks/useSound";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
-import { FOCUS_LABEL, type FocusArea, type ProfileKind } from "@/lib/onboarding/profileKind";
+import {
+  FOCUS_LABEL,
+  type FocusArea,
+  type ProfileKind,
+  type SexAnswer,
+} from "@/lib/onboarding/profileKind";
 import { AdminPanel } from "@/components/welcome/AdminPanel";
 import heroWindow from "@/assets/mood/hero-window.jpg";
 import flowerBranch from "@/assets/mood/flower-branch.jpg";
@@ -48,21 +53,40 @@ const SCENES = [
   { art: mountainLake, accent: "#8fb6d9" },
 ] as const;
 
-const KINDS: Array<{ kind: ProfileKind; title: string; sub: string }> = [
+/**
+ * The first real question: Male or Female.
+ *
+ * Three deliberate choices about how this is presented:
+ *
+ *   · **Both answers get the same icon, the same card and the same accent.**
+ *     A pink card next to a blue one would be the cliché, and it would make
+ *     the choice feel like picking a theme rather than answering a question.
+ *   · **The consequence is stated, not implied.** Someone choosing Male is
+ *     told the cycle won't be there — that is the reason the question exists,
+ *     and hiding it behind "we'll personalise your experience" would be the
+ *     app deciding something on their behalf without saying so.
+ *   · **"Prefer not to say" keeps everything.** Answering nothing is not the
+ *     same as answering no, so it defaults to available and can be changed in
+ *     one tap later.
+ */
+const SEXES: Array<{ sex: SexAnswer; title: string; sub: string; kind: ProfileKind }> = [
   {
+    sex: "female",
+    title: "Female",
+    sub: "Bloom includes cycle tracking. You can turn it off at any time.",
     kind: "cycle",
-    title: "Yes — include my cycle",
-    sub: "Phases, predictions and how they line up with everything else you track.",
   },
   {
+    sex: "male",
+    title: "Male",
+    sub: "Bloom leaves the cycle out entirely — no entry, no widgets, no prompts.",
     kind: "no-cycle",
-    title: "No — leave that out",
-    sub: "Habits, mood, sleep and focus. Cycle features stay hidden.",
   },
   {
-    kind: "unspecified",
+    sex: "unspecified",
     title: "Prefer not to say",
     sub: "Everything stays available. You can change this whenever you like.",
+    kind: "unspecified",
   },
 ];
 
@@ -76,7 +100,13 @@ const FOCUS_SUB: Record<FocusArea, string> = {
 };
 
 export interface WelcomeProps {
-  onFinish: (answer: { kind: ProfileKind; focus: FocusArea[]; name: string | null }) => void;
+  onFinish: (answer: {
+    kind: ProfileKind;
+    /** The question behind `kind`, so Settings can show it without inferring. */
+    sex: SexAnswer;
+    focus: FocusArea[];
+    name: string | null;
+  }) => void;
   /** Enter admin mode and navigate to `to`. */
   onAdmin: (to: string) => void;
 }
@@ -85,7 +115,7 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
   /* The admin door opens a launcher rather than skipping straight in — see
      AdminPanel for why picking a destination is the whole interaction. */
   const [adminOpen, setAdminOpen] = useState(false);
-    /* Server-verified. `"checking"` and `"denied"` both mean "no door". */
+  /* Server-verified. `"checking"` and `"denied"` both mean "no door". */
   const adminAccess = useAdminAccess();
   const reduced = useReducedMotion();
   const { sound } = useSound();
@@ -93,7 +123,9 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
   const [step, setStep] = useState(0);
   /** +1 forward, -1 back — so the slide leaves in the direction you came from. */
   const [dir, setDir] = useState(1);
-  const [kind, setKind] = useState<ProfileKind | null>(null);
+  /* One piece of state, not two: the answer *is* the capability. Deriving
+     `kind` at the point of answering is what stops the two ever disagreeing. */
+  const [answer, setAnswer] = useState<(typeof SEXES)[number] | null>(null);
   const [focus, setFocus] = useState<FocusArea[]>([]);
   const [name, setName] = useState("");
 
@@ -110,15 +142,18 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
   const finish = useCallback(() => {
     sound("celebrate");
-    onFinish({ kind: kind ?? "unspecified", focus, name: name.trim() || null });
-  }, [focus, kind, name, onFinish, sound]);
+    onFinish({
+      kind: answer?.kind ?? "unspecified",
+      sex: answer?.sex ?? null,
+      focus,
+      name: name.trim() || null,
+    });
+  }, [answer, focus, name, onFinish, sound]);
 
   const toggleFocus = useCallback(
     (area: FocusArea) => {
       sound("tap");
-      setFocus((prev) =>
-        prev.includes(area) ? prev.filter((f) => f !== area) : [...prev, area],
-      );
+      setFocus((prev) => (prev.includes(area) ? prev.filter((f) => f !== area) : [...prev, area]));
     },
     [sound],
   );
@@ -126,10 +161,10 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
   /* The cycle option only makes sense to offer if they kept the cycle. */
   const areas = useMemo<FocusArea[]>(() => {
     const base: FocusArea[] = ["habits", "mood", "sleep", "study", "movement"];
-    return kind === "no-cycle" ? base : [...base, "cycle"];
-  }, [kind]);
+    return answer?.kind === "no-cycle" ? base : [...base, "cycle"];
+  }, [answer]);
 
-  const canAdvance = step !== 1 || kind !== null;
+  const canAdvance = step !== 1 || answer !== null;
 
   const slide = reduced
     ? {
@@ -182,7 +217,7 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
               />
             ))}
           </div>
-                    {/* The admin door exists only for someone Supabase lists as an admin.
+          {/* The admin door exists only for someone Supabase lists as an admin.
               It is removed rather than disabled: a shield button that is always
               there and always refuses is a control that lies about itself. */}
           {adminAccess.status === "granted" && (
@@ -214,8 +249,8 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                     You keep living.
                   </h1>
                   <p className="wl-sub">
-                    Log a little each day and Bloom finds what actually moves your energy,
-                    focus and mood. Three quick questions and it's yours.
+                    Log a little each day and Bloom finds what actually moves your energy, focus and
+                    mood. Three quick questions and it's yours.
                   </p>
                 </>
               )}
@@ -223,21 +258,22 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
               {step === 1 && (
                 <>
                   <p className="wl-eyebrow">Step one</p>
-                  <h1 className="wl-title">Should Bloom follow your cycle?</h1>
+                  <h1 className="wl-title">Which best describes you?</h1>
                   <p className="wl-sub">
-                    Bloom can track a menstrual cycle alongside everything else. If that
-                    isn't for you, those parts stay out of your way entirely.
+                    Bloom tracks a menstrual cycle for the people who have one. This answer decides
+                    whether that part of the app is there at all — asked once, and changeable later
+                    from Settings.
                   </p>
                   <div className="wl-choices">
-                    {KINDS.map((opt) => (
+                    {SEXES.map((opt) => (
                       <button
-                        key={opt.kind}
+                        key={opt.title}
                         type="button"
                         className="wl-card"
-                        data-on={kind === opt.kind}
+                        data-on={answer?.sex === opt.sex}
                         onClick={() => {
                           sound("tap");
-                          setKind(opt.kind);
+                          setAnswer(opt);
                         }}
                       >
                         <span className="wl-card-orb">
@@ -263,8 +299,8 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                   <p className="wl-eyebrow">Step two</p>
                   <h1 className="wl-title">What brought you here?</h1>
                   <p className="wl-sub">
-                    Pick any that fit — Bloom switches on the right trackers to start. You
-                    can add or drop them at any time.
+                    Pick any that fit — Bloom switches on the right trackers to start. You can add
+                    or drop them at any time.
                   </p>
                   <div className="wl-choices">
                     {areas.map((area) => (
@@ -319,7 +355,7 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                   <div className="wl-summary">
                     <div className="wl-summary-row">
                       <span>Cycle tracking</span>
-                      <span>{kind === "no-cycle" ? "Hidden" : "Included"}</span>
+                      <span>{answer?.kind === "no-cycle" ? "Left out" : "Included"}</span>
                     </div>
                     <div className="wl-summary-row">
                       <span>Focus</span>

@@ -42,6 +42,7 @@ import {
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useSound } from "@/hooks/useSound";
+import { SEX_LABEL } from "@/lib/onboarding/profileKind";
 
 import type {
   AccountDetails,
@@ -204,6 +205,11 @@ function PersonalizationSection() {
   const { enabled, setEnabled, sound } = useSound();
   const [confirming, setConfirming] = useState(false);
 
+  /* The answer given during setup, stored as it was given. It is shown, never
+     inferred back out of the capability: "female, cycle off" and "prefer not
+     to say" would otherwise look identical here. */
+  const sexValue = state.sex ? SEX_LABEL[state.sex] : "Not answered";
+
   return (
     <Group label="Personalization">
       <SwitchRow
@@ -225,7 +231,7 @@ function PersonalizationSection() {
       />
       <ConfirmRow
         open={confirming}
-        message="Turning off cycle tracking will remove Cycle from your Bloom — the nav entry, the Today ring and your coach's cycle context. Nothing you've logged is deleted."
+        message="Turning off cycle tracking removes Cycle from your Bloom — the nav entry, the Today ring and your coach's cycle context. Nothing you have logged is deleted, and you can turn it back on here."
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
           setConfirming(false);
@@ -248,13 +254,13 @@ function PersonalizationSection() {
       />
       <Row
         icon={<UserRound className="size-3.5" />}
-        label="Setup answers"
+        label="You told us"
         hint={
-          state.done
-            ? `${state.focus.length} focus ${state.focus.length === 1 ? "area" : "areas"} chosen`
-            : "Not completed yet"
+          state.sex
+            ? "Asked once at setup. Changing it never deletes anything logged."
+            : "Not asked yet — the switch above is what Bloom is going by."
         }
-        value="—"
+        value={sexValue}
       />
     </Group>
   );

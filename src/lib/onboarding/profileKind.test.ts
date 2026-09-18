@@ -50,11 +50,34 @@ describe("parseOnboarding", () => {
     expect(parsed).toEqual({
       done: true,
       kind: "no-cycle",
+      /* A pre-change document has no `sex` field. It must come back as null
+         rather than be inferred from `kind` — "no-cycle" is also what someone
+         gets from "prefer not to say" plus an opt-out, and the two must stay
+         distinguishable in Settings. */
+      sex: null,
       focus: ["sleep", "study"],
       name: "Ada",
       at: "2026-09-08T00:00:00.000Z",
       admin: false,
     });
+  });
+
+  it("keeps the sex answer, and falls back to null on a bad one", () => {
+    expect(parseOnboarding({ sex: "male", kind: "no-cycle" })?.sex).toBe("male");
+    expect(parseOnboarding({ sex: "female", kind: "cycle" })?.sex).toBe("female");
+    expect(parseOnboarding({ sex: "unspecified" })?.sex).toBe("unspecified");
+    /* An unknown value is not coerced into one of the three — that would be
+       the app inventing an answer the person never gave. */
+    expect(parseOnboarding({ sex: "other" })?.sex).toBeNull();
+    expect(parseOnboarding({ sex: "" })?.sex).toBeNull();
+  });
+
+  it("never infers a sex answer from the capability", () => {
+    /* The case this guard exists for: capability says no-cycle, but nobody
+       said why. The answer stays unknown. */
+    const parsed = parseOnboarding({ done: true, kind: "no-cycle" });
+    expect(parsed?.kind).toBe("no-cycle");
+    expect(parsed?.sex).toBeNull();
   });
 
   it("falls back rather than throwing on junk fields", () => {

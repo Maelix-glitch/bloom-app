@@ -24,6 +24,7 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
+import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useFlowTimes } from "@/hooks/useFlowTimes";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import {
@@ -122,6 +123,22 @@ function TodayPage() {
   const habits = useHabits();
   const mood = useMoodSystem();
   const cycle = usePeriodLog();
+  const { optedOut } = useCycleVisible();
+  /*
+   * One lever for every cycle surface on this page.
+   *
+   * `optedOut` is the onboarding answer — "the cycle is not part of my Bloom".
+   * For that person the cycle must not appear anywhere: not the Today ring,
+   * not a cycle insight, and not in the record the coach reads. `readings` and
+   * `insightsOf` both already treat mode "off" as "remove it entirely", so
+   * answering with "off" is the honest way to say it once rather than adding a
+   * visibility check at all eight call sites.
+   *
+   * `optedOut` is hydration-aware (it is false until storage has been read), so
+   * this cannot make the ring flash off for someone who does track a cycle —
+   * the same reasoning that keeps the nav stable.
+   */
+  const effectiveCycleMode = optedOut ? "off" : cycle.mode;
   const space = useProfileSpace();
   const now = useNow();
 
@@ -202,7 +219,7 @@ function TodayPage() {
         habits: { completedToday: habits.completedToday, dueToday: habits.dueToday },
         mood: moodEntry,
         cycle: cycle.analysis,
-        cycleMode: cycle.mode,
+        cycleMode: effectiveCycleMode,
       }),
     [
       trackers.analysis,
@@ -210,7 +227,7 @@ function TodayPage() {
       habits.dueToday,
       moodEntry,
       cycle.analysis,
-      cycle.mode,
+      effectiveCycleMode,
     ],
   );
 
@@ -238,7 +255,7 @@ function TodayPage() {
         moodDays,
         moodCorrelations: mood.analytics.correlations,
         cycle: cycle.analysis,
-        cycleMode: cycle.mode,
+        cycleMode: effectiveCycleMode,
         today,
       }),
     [
@@ -251,7 +268,7 @@ function TodayPage() {
       moodDays,
       mood.analytics.correlations,
       cycle.analysis,
-      cycle.mode,
+      effectiveCycleMode,
       today,
     ],
   );
@@ -276,9 +293,9 @@ function TodayPage() {
         mood: moodEntry,
         trackers: trackers.analysis,
         cycle: cycle.analysis,
-        cycleMode: cycle.mode,
+        cycleMode: effectiveCycleMode,
       }),
-    [habits.todayHabits, moodEntry, trackers.analysis, cycle.analysis, cycle.mode],
+    [habits.todayHabits, moodEntry, trackers.analysis, cycle.analysis, effectiveCycleMode],
   );
 
   const insights = useMemo(
@@ -289,6 +306,7 @@ function TodayPage() {
         moodCorrelations: mood.analytics.correlations,
         habits: { habits: habits.habits, logs: habits.logs },
         cycle: cycle.analysis,
+        cycleMode: effectiveCycleMode,
         today,
       }),
     [
@@ -298,6 +316,7 @@ function TodayPage() {
       habits.habits,
       habits.logs,
       cycle.analysis,
+      effectiveCycleMode,
       today,
     ],
   );
