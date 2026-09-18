@@ -406,7 +406,20 @@ function PhotoPiece({
           WebkitClipPath: clip,
           borderRadius: clip ? undefined : radius,
           background: empty
-            ? "rgba(148,142,168,0.16)"
+            ? /*
+               * An unfilled photo slot, tinted from the template's own ink
+               * rather than a fixed grey.
+               *
+               * It used to be a flat `rgba(148,142,168,0.16)` on every template,
+               * which on the ivory ones read as a dirty smudge and on the
+               * obsidian ones as a hole — the single biggest reason a shelf of
+               * templates looked unfinished. Deriving it from `--story-ink`
+               * means a dark template gets a soft light field and a light one a
+               * soft dark field, so the slot reads as a deliberate frame
+               * waiting for a photo. The gradient keeps a large flat area from
+               * banding.
+               */
+              "linear-gradient(150deg, color-mix(in srgb, var(--story-ink, #fff) 13%, transparent), color-mix(in srgb, var(--story-ink, #fff) 5%, transparent))"
             : el.blurFill
               ? undefined
               : (el.letterbox ?? undefined),
@@ -1275,11 +1288,25 @@ export function StoryCanvas({
   const reducedMotion = useMemo(() => prefersReducedMotion(), []);
   const hasBaseMedia = media.type !== "none" && media.src && !failed;
 
+  /*
+   * Publish the template's own ink so descendants can tint against it.
+   *
+   * `--story-ink` was declared once on `.bstory` as a fixed ivory and never
+   * varied, so on the light templates it was the *same colour as the paper* —
+   * anything using it for contrast silently disappeared. Setting it here from
+   * `background.ink` makes it correct per template, and gives empty photo slots
+   * something real to tint from instead of a fixed grey.
+   */
+  const ink = background?.ink ?? null;
+
   return (
     <div
       ref={ref}
       className={`scanvas bstory ${className ?? ""}`}
-      style={hasBaseMedia ? { background: "#0c0a14" } : layers.base}
+      style={{
+        ...(hasBaseMedia ? { background: "#0c0a14" } : layers.base),
+        ...(ink ? ({ ["--story-ink" as string]: ink } as React.CSSProperties) : null),
+      }}
       onPointerDown={editing && onSelect ? () => onSelect(null) : undefined}
     >
       {showMaskDefs ? <PhotoMaskDefs /> : null}

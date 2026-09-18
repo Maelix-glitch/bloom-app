@@ -283,13 +283,24 @@
   transform: scale(0.96);
 }
 
+/*
+ * Identity block, stacked under the avatar.
+ *
+ * This used to be a row — name block on the left, action buttons on the right —
+ * which was correct when the avatar sat to the left of it. Once the avatar
+ * moved above, that row put the buttons beside the name and both ended up off
+ * the avatar's centre line, so nothing on the page lined up. Everything here
+ * now shares one axis.
+ */
 .pf-head-main {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px 16px;
-  padding-top: 12px;
+  gap: 14px;
+  width: 100%;
+  max-width: 460px;
+  padding-top: 14px;
+  text-align: center;
 }
 
 @media (max-width: 640px) {
@@ -314,10 +325,11 @@
 }
 
 .pf-handle {
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 6px 10px;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -366,8 +378,8 @@
 }
 
 .pf-bio {
-  margin-top: 12px;
-  max-width: 56ch;
+  margin: 12px auto 0;
+  max-width: 46ch;
   font-size: 14.5px;
   line-height: 1.55;
   color: var(--muted-foreground);
@@ -383,6 +395,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 

@@ -885,7 +885,17 @@ export function StoryEditor({
       pushHistory();
       setElements(composed.composed.elements);
       setBackground(composed.composed.background);
-      setSelectedId(null);
+      /*
+       * Select the front element immediately.
+       *
+       * Resize handles only exist on the selected element, so opening a
+       * template with nothing selected presented a canvas with no handles
+       * anywhere and no hint that tapping an element would reveal them — the
+       * story looked uneditable. Arriving with something already selected makes
+       * the affordance visible on the first frame.
+       */
+      const front = [...composed.composed.elements].sort((a, b) => b.z - a.z)[0];
+      setSelectedId(front?.id ?? null);
       recordTemplateUse(def.id);
       setStep("edit");
     },
