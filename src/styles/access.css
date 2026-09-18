@@ -1,0 +1,249 @@
+/* -------------------------------------------------------------------------
+   Access — the invite-only door.
+
+   The brief for this screen was that earlier versions became enormous on
+   phones: an email field that ate the viewport, a panel stretched edge to
+   edge, type sized for a poster. So every size here is a floor-and-ceiling
+   pair rather than a single value, and the panel is capped and centred rather
+   than fluid.
+
+   Deliberately no photography and no blur. The atmosphere is two stops of
+   obsidian and a great deal of nothing.
+   ------------------------------------------------------------------------- */
+
+.ag-root {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vh, 28px);
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background:
+    radial-gradient(120% 80% at 50% 0%, oklch(0.235 0.024 285), transparent 62%),
+    oklch(0.155 0.016 280);
+  overflow-y: auto;
+}
+
+/* The composition. Capped, centred, and never touching an edge: the root's
+   padding guarantees the margin, this guarantees the panel stays small on a
+   tablet or a desktop instead of stretching to fill it. */
+.ag-panel {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+  padding: clamp(24px, 5vw, 36px) clamp(20px, 5vw, 32px);
+  border: 1px solid oklch(1 0 0 / 0.07);
+  border-radius: 20px;
+  background: oklch(0.205 0.019 281 / 0.72);
+  box-shadow: 0 30px 80px -50px rgb(0 0 0 / 0.95);
+}
+
+.ag-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto clamp(18px, 3.5vh, 26px);
+  border: 1px solid oklch(1 0 0 / 0.09);
+  border-radius: 14px;
+  background: oklch(1 0 0 / 0.035);
+}
+
+.ag-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The largest type on the screen, and still not large. */
+.ag-title {
+  margin: 0;
+  font-family: var(--font-display, "Fraunces"), Georgia, serif;
+  font-size: clamp(20px, 5.4vw, 24px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: oklch(0.955 0.008 85);
+}
+
+.ag-copy {
+  margin: 10px 0 0;
+  font-size: clamp(12.5px, 3.4vw, 13.5px);
+  line-height: 1.55;
+  text-align: center;
+  color: oklch(0.955 0.008 85 / 0.58);
+}
+
+.ag-email {
+  color: oklch(0.955 0.008 85 / 0.85);
+  word-break: break-all;
+}
+
+.ag-label {
+  display: block;
+  margin: clamp(20px, 4vh, 26px) 0 7px;
+  font-family: var(--font-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: oklch(0.955 0.008 85 / 0.42);
+}
+
+.ag-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid oklch(1 0 0 / 0.12);
+  border-radius: 12px;
+  background: oklch(0.175 0.015 280 / 0.9);
+  color: oklch(0.955 0.008 85);
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+.ag-input::placeholder {
+  color: oklch(0.955 0.008 85 / 0.28);
+}
+
+.ag-input:focus-visible {
+  border-color: oklch(0.81 0.11 82 / 0.6);
+  background: oklch(0.19 0.017 280 / 0.95);
+}
+
+.ag-input[aria-invalid="true"] {
+  border-color: oklch(0.72 0.083 355 / 0.55);
+}
+
+.ag-input:disabled {
+  opacity: 0.6;
+}
+
+/* AnimatePresence measures this, so height has to be animatable — the motion
+   props animate 0 -> auto. */
+.ag-message {
+  margin: 10px 0 0;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: oklch(0.81 0.11 82 / 0.85);
+}
+
+.ag-message[data-tone="reject"] {
+  color: oklch(0.82 0.075 25 / 0.9);
+}
+
+.ag-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  height: 46px;
+  margin-top: 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: oklch(0.87 0.055 88);
+  color: oklch(0.22 0.02 75);
+  font-size: 14px;
+  font-weight: 560;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    opacity 140ms ease;
+}
+
+.ag-btn:hover:not(:disabled) {
+  background: oklch(0.9 0.06 88);
+}
+
+.ag-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ag-btn--quiet {
+  margin-top: 8px;
+  border-color: oklch(1 0 0 / 0.1);
+  background: transparent;
+  color: oklch(0.955 0.008 85 / 0.6);
+  font-weight: 450;
+}
+
+.ag-btn--quiet:hover:not(:disabled) {
+  background: oklch(1 0 0 / 0.045);
+  color: oklch(0.955 0.008 85 / 0.85);
+}
+
+.ag-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.ag-done {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 1px solid oklch(0.81 0.11 82 / 0.4);
+  background: oklch(0.81 0.11 82 / 0.12);
+  color: oklch(0.87 0.09 88);
+}
+
+.ag-note {
+  margin: 16px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: center;
+  color: oklch(0.955 0.008 85 / 0.36);
+}
+
+.ag-foot {
+  max-width: 400px;
+  margin: 0;
+  padding-inline: 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+  color: oklch(0.955 0.008 85 / 0.3);
+}
+
+/* Short screens: the panel must not force a scroll to reach the button. */
+@media (max-height: 620px) {
+  .ag-mark {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 14px;
+  }
+
+  .ag-input,
+  .ag-btn {
+    height: 42px;
+  }
+
+  .ag-label {
+    margin-top: 14px;
+  }
+}
+
+/* Narrow phones: tighten the panel, never the margins. */
+@media (max-width: 360px) {
+  .ag-panel {
+    border-radius: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ag-btn,
+  .ag-input {
+    transition: none;
+  }
+}

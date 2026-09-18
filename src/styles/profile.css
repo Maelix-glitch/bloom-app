@@ -1135,3 +1135,123 @@ button.pf-row:hover {
     transition: none;
   }
 }
+
+/* -------------------------------------------------------------------------
+   Settings groups
+
+   The settings list used to be wrapped in bordered cards on a two-column grid.
+   That reads as a dashboard of panels: each group fought the others for
+   attention and the rows stopped feeling like one system. These rules replace
+   the card with a plain group — a small label, then connected rows held
+   together by hairlines and nothing else.
+
+   One column, always. Settings is scanned top to bottom; two columns of
+   unrelated groups at desktop width just makes the eye travel further.
+   ------------------------------------------------------------------------- */
+.pf-settings {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 4vh, 30px);
+}
+
+.pf-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-group-label {
+  margin: 0 0 7px;
+  padding-inline: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* The connected run of rows. The hairline between rows is the only structure —
+   no border around the group, no background, no shadow. */
+.pf-group-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A two-line row: the label keeps the weight, the hint stays quiet. */
+.pf-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pf-row-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+
+.pf-row-hint {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--faint);
+}
+
+/* The inline consequence-confirmation. Deliberately not a modal: the question
+   belongs next to the switch that raised it, and a dialogue with a title bar
+   would make a reversible preference feel like a demolition. */
+.pf-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px 14px;
+  border-top: 1px solid var(--pf-line);
+  background: color-mix(in oklab, var(--surface-2) 55%, transparent);
+}
+
+.pf-confirm-msg {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.pf-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-confirm-btn {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--pf-line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 12.5px;
+  transition: background-color var(--motion-fast) ease;
+}
+
+.pf-confirm-btn:hover {
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  color: var(--foreground);
+}
+
+.pf-confirm-btn--go {
+  border-color: color-mix(in oklab, var(--rose) 45%, transparent);
+  color: var(--rose);
+}
+
+.pf-confirm-btn--go:hover {
+  background: color-mix(in oklab, var(--rose) 12%, transparent);
+  color: var(--rose);
+}
+
+/* The icon chip had a background and a border, which added a second box inside
+   every row. Settings should be quieter than Home, so the icon is now just an
+   icon — still aligned to a fixed column, so the labels line up. */
+.pf-group .pf-row-icon {
+  background: transparent;
+  border-color: transparent;
+}

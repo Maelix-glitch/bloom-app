@@ -7,6 +7,7 @@
 @import "./styles/stories.css";
 /* Bloom mobile-first responsive system: shell, nav, sheets, type, guards. */
 @import "./styles/responsive.css";
+@import "./styles/access.css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
@@ -15,6 +15,9 @@ import { bootNativeShell } from "@/lib/native-shell";
 import { useSoundBoot } from "@/hooks/useSound";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
+import { AccessGate } from "@/components/auth/AccessGate";
+import { useSession } from "@/hooks/useSession";
+import { hasSupabaseConfig } from "@/lib/supabase";
 import { AdminBar } from "@/components/welcome/AdminBar";
 import { ConnectionNotice } from "@/components/system/ConnectionNotice";
 import { BloomToaster } from "@/components/system/BloomToaster";
@@ -76,6 +79,39 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Invite-only access control.
+ *
+ * Bloom is by invitation, so when an account system is connected an uninvited
+ * or signed-out visitor gets the door instead of the app. The app is *not*
+ * rendered behind it — that would let private routes fetch on someone's behalf
+ * while a panel told them they couldn't come in.
+ *
+ * Two deliberate carve-outs:
+ *
+ *   · **No database means no accounts**, so there is nothing to enforce. A copy
+ *     of Bloom with no project configured stays open, and `ConnectionNotice`
+ *     already explains the situation.
+ *   · **Nothing renders while the session is unknown.** `useSession` cannot see
+ *     localStorage or a session during the server pass, so gating on it
+ *     immediately would flash the door at every signed-in user on first paint.
+ *     The cost is that a signed-out visitor briefly sees the app shell — which
+ *     is the same trade `WelcomeGate` and `useAdminAccess` already make, and
+ *     the lesser evil. The server-side trigger is the real enforcement.
+ */
+function AccessControl({ children }: { children: ReactNode }) {
+  const session = useSession();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!hasSupabaseConfig) return <>{children}</>;
+  if (!mounted || !session.ready) return <>{children}</>;
+  if (session.userId !== null) return <>{children}</>;
+  return <AccessGate />;
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -298,7 +334,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AccessControl>
+        <Outlet />
+      </AccessControl>
       {/* First run only: covers the app until the person has told us who they are. */}
       <WelcomeGate />
       {/* Only in admin mode: shows you're in it, and lets you leave. */}
