@@ -42,8 +42,10 @@ CameraCapture · StorySheet · Stories.smoke.test`
 
 ### Libraries (37 files in `src/lib/stories/`)
 
-- `templates/` — DSL + **294 templates** across 9 library files, 26 categories,
-  78 of them the art-directed "Signature" collection
+- `templates/` — DSL + **exactly 50 curated templates** across 7 collections
+  (everyday 10, memories 8, mood 7, progress 7, wellness 6, reflection 6,
+  celebration 6). *This replaced a 294-template / 26-category catalog in
+  commit `451b337`; the count is now enforced by test.*
 - `canvas/` — `backgrounds, masks, paint, paths, photogeom, shapes, typography`
   (18 type presets — Editorial/Classic/Soft/Bold/Handwritten/Typewriter/Elegant/Minimal/Poster/Whisper and more — 22 mask shapes, 8 photo frames)
 - `exporter.ts` — real **1080×1920 canvas2d** render, not a DOM screenshot
@@ -87,7 +89,7 @@ another person's data.
 | 10 Drawing              | ✅     | `DrawLayer.tsx` — pen, sizes, colours, eraser, undo via history                                                                                                                                                                                                                                                                        |
 | 11 Music                | ✅     | `MusicTray` with honest "not connected" state; `uploadStoryAudio`                                                                                                                                                                                                                                                                      |
 | 12 Interactive stickers | ✅     | poll, question, slider, countdown, mention — creator **and** viewer modes in `InteractionSheets`                                                                                                                                                                                                                                       |
-| 13 Templates            | ✅     | **294** templates, 78 Signature, all editable compositions                                                                                                                                                                                                                                                                             |
+| 13 Templates            | ✅     | **Exactly 50** curated templates in 7 collections, count enforced by test. Replaced a 294-template catalog (`451b337`). |
 | 14 Bloom data stories   | ✅     | `data` element with 11 metrics × 6 variants; reads real `BloomStoryData`                                                                                                                                                                                                                                                               |
 | 15 Filters              | ✅     | `STORY_FILTERS` = **16** filters (`catalogs.ts:293`) + `StoryAdjustments` (brightness/contrast/saturation/warmth/grain/vignette/fade)                                                                                                                                                                                                  |
 | 18 Preview              | ✅     | Editor `share` step renders the true viewer canvas                                                                                                                                                                                                                                                                                     |
