@@ -12,22 +12,22 @@ I checked every table the migrations create against what `public.erase_my_data()
 actually deletes. The function covered **16 tables. Bloom has 31.** Eleven of the
 omitted ones hold rows that belong to a person:
 
-| Table | What it held |
-|---|---|
-| `close_friends` | who they let see their close-friends stories |
-| `story_reactions` | every reaction they left |
-| `story_replies` | every reply they wrote |
-| `story_poll_votes` | how they voted |
-| `story_views` | which stories they opened |
-| `story_gifts` | gifts they sent |
-| `story_settings` | their replies / audience preferences |
-| `point_transactions` | their points ledger |
-| `goal_awards` | goals they completed |
-| `rank_history` | their rank progression |
-| `user_achievements` | achievements they earned |
+| Table                | What it held                                 |
+| -------------------- | -------------------------------------------- |
+| `close_friends`      | who they let see their close-friends stories |
+| `story_reactions`    | every reaction they left                     |
+| `story_replies`      | every reply they wrote                       |
+| `story_poll_votes`   | how they voted                               |
+| `story_views`        | which stories they opened                    |
+| `story_gifts`        | gifts they sent                              |
+| `story_settings`     | their replies / audience preferences         |
+| `point_transactions` | their points ledger                          |
+| `goal_awards`        | goals they completed                         |
+| `rank_history`       | their rank progression                       |
+| `user_achievements`  | achievements they earned                     |
 
-So someone who pressed **Erase everything** and were told *"Everything has been
-erased."* still had their close-friends list, their reply history and their
+So someone who pressed **Erase everything** and were told _"Everything has been
+erased."_ still had their close-friends list, their reply history and their
 viewing history on your server. That is a privacy failure, and both app stores
 require account deletion to actually delete the data.
 
@@ -63,8 +63,8 @@ disabling an animation for an element that no longer exists.
 - **Template previews** — every empty photo slot was a hardcoded
   `rgba(148,142,168,0.16)` grey: a smudge on ivory designs, a hole in obsidian
   ones. Now tinted from the template's own ink. This needed `--story-ink` to
-  actually vary — it was static `#f4efe4`, which on light templates *equals the
-  paper*, so anything using it for contrast vanished.
+  actually vary — it was static `#f4efe4`, which on light templates _equals the
+  paper_, so anything using it for contrast vanished.
 - **Resize handles** — they existed and worked, but render only on the selected
   element, and applying a template set `selectedId` to `null`. Now the front
   element is pre-selected so the handles are visible on the first frame.
@@ -76,14 +76,14 @@ disabling an animation for an element that no longer exists.
 
 ## Verified healthy
 
-| Check | Result |
-|---|---|
-| Row-level security | **Enabled on all 30 tables.** Every single one. |
-| Leaked secrets | None. No hardcoded keys or passwords in `src/` or `supabase/`. |
-| PWA | Real and complete: `manifest.webmanifest` exists and is linked at `__root.tsx:157`; `sw.js` exists and is registered in `useInstallPrompt.ts:31`. |
-| Empty catch blocks | None — all 301 catch blocks handle or report. |
-| Invite enforcement | Server-side trigger on `auth.users`, not client-side filtering. |
-| Cycle data isolation | Gated at all four call sites plus `insightsOf`; 7 tests. |
+| Check                | Result                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Row-level security   | **Enabled on all 30 tables.** Every single one.                                                                                                   |
+| Leaked secrets       | None. No hardcoded keys or passwords in `src/` or `supabase/`.                                                                                    |
+| PWA                  | Real and complete: `manifest.webmanifest` exists and is linked at `__root.tsx:157`; `sw.js` exists and is registered in `useInstallPrompt.ts:31`. |
+| Empty catch blocks   | None — all 301 catch blocks handle or report.                                                                                                     |
+| Invite enforcement   | Server-side trigger on `auth.users`, not client-side filtering.                                                                                   |
+| Cycle data isolation | Gated at all four call sites plus `insightsOf`; 7 tests.                                                                                          |
 
 ## Corrections — three claims I made earlier that were wrong
 
@@ -139,6 +139,7 @@ database in this environment. Confirm an uninvited email is rejected with error
 `28000` before running it on production.
 
 Until these run:
+
 - invite-only is **not enforced** — the app shows the gate but nothing stops a signup
 - story slides/canvas won't save
 - erase still leaves the 11 tables behind
@@ -155,6 +156,7 @@ means no accounts, so the app stays open and local development isn't blocked. Bu
 it also means a deploy without them silently ships a wide-open app with no error.
 
 Optional:
+
 ```
 VITE_COACH_FUNCTION=...    # the AI coach
 VITE_GIPHY_API_KEY=...     # otherwise the GIF tray says "isn't connected"
@@ -217,14 +219,14 @@ supabase functions deploy giphy
 
 # PART 4 — Still missing (not fixed, your call)
 
-| Gap | Why it matters |
-|---|---|
-| **Push notifications** | You have **local** notifications only (`useReminders` → `reg.showNotification`). No VAPID keys, no subscription table, no push sender, no `push` handler in `sw.js`. The 1000+ dynamic notifications you asked for need all of that first. This is a vertical slice — worth its own pass, not a rushed addition. |
-| **Session / device management** | No way to see signed-in devices or revoke one. |
-| **CSV export** | Cycle history has CSV; the whole record is JSON only. |
-| **Offline mutation queue** | The app is device-first, but I did not verify mutations made offline are queued and replayed. Untested. |
-| **Onboarding redesign** | Not touched. Its CSS is already refined; what dates it is the blurred photograph. I won't redesign it blind — say the word and I'll remove the photo. |
-| **Cycle copy** | 86 strings over 90 characters across many files. I cut `CycleNotYours`, but rewriting the rest without seeing them rendered would lose meaning. |
+| Gap                             | Why it matters                                                                                                                                                                                                                                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Push notifications**          | You have **local** notifications only (`useReminders` → `reg.showNotification`). No VAPID keys, no subscription table, no push sender, no `push` handler in `sw.js`. The 1000+ dynamic notifications you asked for need all of that first. This is a vertical slice — worth its own pass, not a rushed addition. |
+| **Session / device management** | No way to see signed-in devices or revoke one.                                                                                                                                                                                                                                                                   |
+| **CSV export**                  | Cycle history has CSV; the whole record is JSON only.                                                                                                                                                                                                                                                            |
+| **Offline mutation queue**      | The app is device-first, but I did not verify mutations made offline are queued and replayed. Untested.                                                                                                                                                                                                          |
+| **Onboarding redesign**         | Not touched. Its CSS is already refined; what dates it is the blurred photograph. I won't redesign it blind — say the word and I'll remove the photo.                                                                                                                                                            |
+| **Cycle copy**                  | 86 strings over 90 characters across many files. I cut `CycleNotYours`, but rewriting the rest without seeing them rendered would lose meaning.                                                                                                                                                                  |
 
 ---
 
