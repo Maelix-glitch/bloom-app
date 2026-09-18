@@ -349,6 +349,45 @@ export interface StoryMusicMeta {
   src?: string | undefined;
 }
 
+/**
+ * One composition inside a story.
+ *
+ * Every field here is something that used to live directly on the `Story`
+ * record; multi-slide moves them per-slide and leaves the top-level copies in
+ * place as slide one for older rows.
+ *
+ * Music is deliberately *not* per-slide: a track is attached to the whole
+ * story and keeps playing across slides, which is also how existing
+ * single-slide stories behave.
+ *
+ * The runtime helpers that build, clamp and validate these live in
+ * `./slides` — this module stays type-only by design.
+ */
+export interface StorySlide {
+  /** Stable within a story; used for React keys and reordering. */
+  id: string;
+  /** Base layer kind. `none` for text/background-only slides. */
+  mediaType: StoryMediaType;
+  /** Where the media lives. Null for background-only slides. */
+  mediaPath: string | null;
+  mediaWidth: number | null;
+  mediaHeight: number | null;
+  /** Video clip length in ms; null for images and text. */
+  durationMs: number | null;
+  /** Canvas elements, z-ordered. */
+  elements: StoryElement[];
+  /** Photo filter id, if any. */
+  filterId: string | null;
+  /** Manual adjustments layered over the filter. */
+  adjustments: StoryAdjustments | null;
+  /** Curated background id for text-first slides. */
+  backgroundId: string | null;
+  /** Composed canvas — paint, photo, texture, overlay. */
+  canvas: StoryCanvasSnapshot | null;
+  /** Author-written description for screen readers. */
+  altText: string | null;
+}
+
 /** Reactions the platform understands. Fixed set — no spam surface. */
 export type StoryReactionKind = "heart" | "bloom" | "sparkle" | "smile" | "cheer" | "moon";
 

@@ -10,6 +10,7 @@ import type {
   StoryElement,
   StoryMediaType,
   StoryMusicMeta,
+  StorySlide,
 } from "@/lib/stories/types";
 
 export type BloomAccent = "violet" | "sky" | "amber" | "sage" | "rose";
@@ -80,6 +81,14 @@ export interface Story {
   altText: string | null;
   /** Who may see a public story: everyone or close friends. */
   audience: StoryAudience;
+  /**
+   * Extra compositions, when a story has more than one slide.
+   *
+   * Absent on every story published before multi-slide existed — those read as
+   * a single slide through `storySlides()`. Read that helper, never this field
+   * directly, or legacy stories will look empty.
+   */
+  slides?: StorySlide[];
 }
 
 /** Stories older than the rail but kept privately. */
