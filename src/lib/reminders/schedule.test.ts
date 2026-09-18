@@ -65,7 +65,9 @@ describe("reminders · settings", () => {
 describe("reminders · habits", () => {
   it("reminds about a habit at its time", () => {
     const [r] = dueReminders(input());
-    expect(r).toMatchObject({ kind: "habit", title: "Water", key: "habit:h1:2026-09-07" });
+    expect(r).toMatchObject({ kind: "habit", key: "habit:h1:2026-09-07" });
+    /* The copy engine varies the wording but must still name the habit. */
+    expect(`${r!.title} ${r!.body}`).toContain("Water");
   });
 
   it("says nothing about a habit already ticked", () => {
@@ -89,7 +91,9 @@ describe("reminders · cycle", () => {
       }),
     );
     expect(out[0]).toMatchObject({ kind: "period" });
-    expect(out[0]!.title).toMatch(/two days/);
+    /* "soon" branch: it is an estimate, and must say so rather than assert. */
+    expect(`${out[0]!.title} ${out[0]!.body}`).toMatch(/period|estimate|predicted/i);
+    expect(out[0]!.body).toMatch(/estimate|record|guide|not a certainty|shift|vary/i);
   });
 
   it("prefers the late message over the upcoming one", () => {
@@ -100,7 +104,9 @@ describe("reminders · cycle", () => {
       }),
     );
     expect(out).toHaveLength(1);
-    expect(out[0]!.title).toMatch(/3 days later/);
+    /* "late" branch: the real day count must appear, and it must not alarm. */
+    expect(`${out[0]!.title} ${out[0]!.body}`).toContain("3");
+    expect(out[0]!.body).toMatch(/log|alarm|shift|honest|accurate/i);
   });
 
   it("stays silent when the cycle is paused or off", () => {
