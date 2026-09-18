@@ -50,7 +50,6 @@ import { toast } from "sonner";
 
 import { saidSaved } from "@/lib/voice/copy";
 
-
 export interface ProfileEditorSave {
   displayName: string;
   username: string | null;
@@ -513,7 +512,13 @@ export function ProfileEditor({
                           />
                         )}
                       </span>
-                      {pending ? "New" : preset ? "Chosen" : identity.avatarPath ? "Current" : "Initials"}
+                      {pending
+                        ? "New"
+                        : preset
+                          ? "Chosen"
+                          : identity.avatarPath
+                            ? "Current"
+                            : "Initials"}
                     </div>
                     {identity.avatarPath && !pending ? (
                       <button
