@@ -126,17 +126,31 @@ export function BloomSheet({
     }
   }, [open]);
 
+  /*
+   * The centre offset lives here, inside Motion's own transform — not in the
+   * stylesheet. Motion writes the whole `transform` property at runtime and
+   * wins the cascade, so the stylesheet's offset was discarded; and because
+   * the panel is positioned with `left/top: 50%`, the card's *top-left* corner
+   * landed on the centre of the screen and the sheet ran down-right, off the
+   * bottom edge. Values handed to Motion through `style` are part of its
+   * transform template, so no animation can drop them.
+   */
+  const centered = !bottomSheet;
+  const panelStyle = centered ? { x: "-50%", y: "-50%" } : undefined;
+
   const panelInitial = reduced
     ? { opacity: 0 }
     : bottomSheet
       ? { opacity: 0, y: 48, scale: 1 }
-      : { opacity: 0, y: 22, scale: 0.975 };
-  const panelShow = { opacity: 1, y: 0, scale: 1 };
+      : { opacity: 0, scale: 0.975 };
+  /* `y` is pinned at −50% for a centred panel, so the slide can only apply to
+     a bottom sheet — animating it here would fight the pinned offset. */
+  const panelShow = bottomSheet ? { opacity: 1, y: 0, scale: 1 } : { opacity: 1, scale: 1 };
   const panelExit = reduced
     ? { opacity: 0, transition: { duration: 0.16 } }
     : bottomSheet
       ? { opacity: 0, y: 40, transition: { duration: 0.26, ease: EASE } }
-      : { opacity: 0, y: 12, scale: 0.985, transition: { duration: 0.22, ease: EASE } };
+      : { opacity: 0, scale: 0.985, transition: { duration: 0.22, ease: EASE } };
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
@@ -171,6 +185,7 @@ export function BloomSheet({
                 animate={panelShow}
                 exit={panelExit}
                 transition={{ duration: reduced ? 0.25 : 0.62, ease: EASE }}
+                {...(panelStyle ? { style: panelStyle } : {})}
               >
                 <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
                 {description ? (

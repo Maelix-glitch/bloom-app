@@ -36,9 +36,13 @@
   max-width: 600px;
   max-height: min(92vh, 820px);
   max-height: min(92dvh, 820px);
-  /* transform fallback for engines without the translate property (Chrome < 104) */
+  /*
+   * No-JS fallback only: Motion writes the offset itself (see the panel's
+   * `style` in bloom-sheet.tsx) because it owns the `transform` property at
+   * runtime. A standalone `translate` here would compose with that transform
+   * and double the offset — down-right by a full panel, off the screen.
+   */
   transform: translate(-50%, -50%);
-  translate: -50% -50%;
 }
 .bsheet--card.bsheet--lg {
   max-width: 680px;
@@ -71,9 +75,9 @@
 .bsheet.bsheet--pop {
   left: 50%;
   top: 50%;
-  /* transform fallback for engines without the translate property (Chrome < 104) */
+  /* No-JS fallback only — Motion owns `transform` at runtime; see
+     .bsheet--card. A standalone `translate` would double the offset. */
   transform: translate(-50%, -50%);
-  translate: -50% -50%;
   width: calc(100% - 2.5rem);
   max-width: 480px;
   height: auto;
@@ -167,9 +171,14 @@
   width: 44px;
   height: 5px;
   border-radius: 999px;
-  /* transform fallback for engines without the translate property (Chrome < 104) */
+  /*
+   * `transform` only — a standalone `translate` alongside it is NOT a harmless
+   * fallback. Lightning CSS folds the pair into the transform at build time
+   * (`translate(-50%)translate(-50%)`), which shifts the grabber a full width
+   * left of centre. Nothing sets an inline transform here, so there is nothing
+   * to override it either.
+   */
   transform: translate(-50%, 0);
-  translate: -50% 0;
   background: color-mix(in oklab, var(--foreground) 28%, transparent);
 }
 
