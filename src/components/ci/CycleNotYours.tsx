@@ -61,8 +61,8 @@ export function CycleNotYours() {
           This part isn't in your Bloom
         </h1>
         <p className="mx-auto mt-3 max-w-[34ch] text-[14px] leading-relaxed text-muted-foreground">
-          Phases, predictions and the cycle log stay hidden because you told us
-          the cycle isn't yours to track.
+          Phases, predictions and the cycle log stay hidden because you told us the cycle isn't
+          yours to track.
         </p>
 
         <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
