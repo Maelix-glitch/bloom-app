@@ -1,11 +1,17 @@
 /*
  * The welcome flow — the first thirty seconds of Bloom.
  *
- * Modelled on the way a good phone sets itself up: one question per screen,
- * an enormous amount of air, a real photograph behind glass, a progress rail
- * that shows how short this is, and motion that carries you forward rather
- * than decorating the wait. Nothing here is reused elsewhere, so it is all
- * scoped under .wl.
+ * This used to be built around photography: a different blurred picture behind
+ * glass on every screen, with the type laid over it. It looked like an app
+ * trying to feel premium by borrowing a mood from a stock image, and the
+ * picture always fought the question sitting on top of it.
+ *
+ * What replaces it is built on typography and space instead. One deep ground,
+ * a single whisper of colour, a hairline or two, and nothing that competes with
+ * the question. The atmosphere comes from one very soft accent bloom that
+ * breathes as you move — not from a scene behind the glass.
+ *
+ * Nothing here is reused elsewhere, so it is all scoped under .wl.
  */
 
 .wl {
@@ -21,58 +27,43 @@
 
 /* ------------------------------------------------------------ atmosphere */
 
-.wl-art {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-.wl-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.5;
-  transform: scale(1.06);
-  filter: saturate(0.92);
-  animation: wl-drift 40s ease-in-out infinite alternate;
-}
-@keyframes wl-drift {
-  from {
-    transform: scale(1.06) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.12) translate3d(-1.4%, -1.6%, 0);
-  }
-}
-.wl-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(120% 80% at 50% 0%, transparent, color-mix(in oklab, var(--background) 72%, transparent) 62%),
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--background) 30%, transparent),
-      color-mix(in oklab, var(--background) 88%, transparent) 58%,
-      var(--background)
-    );
-}
-/* a slow bloom of colour that follows the step */
+/*
+ * One soft bloom of colour near the top, and a hairline of light along the very
+ * edge so the panel separates from the page. Deliberately static in position —
+ * it breathes in intensity, it doesn't wander, because movement here reads as
+ * decoration rather than atmosphere.
+ */
 .wl-glow {
   position: absolute;
-  inset: -20% -10% auto -10%;
-  height: 60%;
-  z-index: 1;
+  inset: -30% -20% auto -20%;
+  height: 70%;
+  z-index: 0;
   pointer-events: none;
   background: radial-gradient(
-    50% 60% at 50% 40%,
-    color-mix(in oklab, var(--wl-accent, var(--violet)) 26%, transparent),
-    transparent 70%
+    46% 56% at 50% 42%,
+    color-mix(in oklab, var(--wl-accent, var(--violet)) 20%, transparent),
+    transparent 72%
   );
-  filter: blur(40px);
-  opacity: 0.7;
-  transition: background 900ms ease;
+  filter: blur(46px);
+  opacity: 0.62;
+  transition: opacity 700ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* A hairline of light along the top edge — the only edge treatment. */
+.wl::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 3;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--foreground) 12%, transparent) 50%,
+    transparent
+  );
 }
 
 /* -------------------------------------------------------------- structure */
@@ -85,9 +76,9 @@
   flex-direction: column;
   min-height: 0;
   width: 100%;
-  max-width: 560px;
+  max-width: 520px;
   margin: 0 auto;
-  padding: max(22px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
 }
 
 .wl-top {
@@ -95,365 +86,413 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 40px;
+  min-height: 36px;
 }
 
-/* progress: one segment per step, filling left to right */
+/* ------------------------------------------------------ the progress rail */
+
+/*
+ * Four hairline segments that fill as you go. Thinner and quieter than a
+ * typical stepper: the point is to prove how short this is, not to add chrome.
+ */
 .wl-rail {
   display: flex;
-  gap: 6px;
   flex: 1;
-  max-width: 200px;
+  gap: 5px;
 }
+
 .wl-seg {
   position: relative;
-  height: 3px;
   flex: 1;
+  height: 2px;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
   overflow: hidden;
 }
+
 .wl-seg::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 85%, #fff);
-  transform-origin: left center;
+  background: var(--wl-accent, var(--violet));
   transform: scaleX(var(--fill, 0));
-  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: left center;
+  transition: transform 520ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
+/* The admin door. Present only for someone the database lists; for everybody
+   else the button isn't there at all rather than being there and refusing. */
 .wl-skip {
-  font-size: 12.5px;
-  color: color-mix(in oklab, var(--foreground) 52%, transparent);
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 6px 12px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   border-radius: 999px;
+  background: transparent;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
   transition:
-    color 160ms ease,
-    background-color 160ms ease;
+    color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
 }
 .wl-skip:hover {
   color: var(--foreground);
-  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 26%, transparent);
 }
 
 .wl-body {
-  display: flex;
   flex: 1;
+  min-height: 0;
+  display: flex;
   flex-direction: column;
   justify-content: center;
-  /* `safe`: when the step is taller than a short screen, the top stays
-     reachable instead of clipping above the scrollport. */
-  justify-content: safe center;
-  min-height: 0;
-  padding: 28px 0 18px;
+  padding: 28px 0 8px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-width: none;
 }
 .wl-body::-webkit-scrollbar {
   display: none;
 }
 
+/* ------------------------------------------------------------- type scale */
+
 .wl-eyebrow {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 52%, transparent);
+  color: color-mix(in oklab, var(--foreground) 46%, transparent);
 }
+
 .wl-title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(30px, 8vw, 44px);
-  line-height: 1.04;
-  letter-spacing: -0.025em;
+  font-size: clamp(29px, 7.6vw, 42px);
+  line-height: 1.06;
+  letter-spacing: -0.026em;
   text-wrap: balance;
-  margin-top: 12px;
-}
-.wl-sub {
-  margin-top: 12px;
-  font-size: 14.5px;
-  line-height: 1.55;
-  color: color-mix(in oklab, var(--foreground) 70%, transparent);
-  text-wrap: pretty;
-  max-width: 44ch;
+  margin-top: 14px;
 }
 
-/* ------------------------------------------------------------- the cards */
+.wl-sub {
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--foreground) 64%, transparent);
+  text-wrap: pretty;
+  max-width: 40ch;
+}
+
+/* ------------------------------------------------------------- the options */
 
 .wl-choices {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-top: 26px;
 }
 
+/*
+ * An option row.
+ *
+ * The earlier version led every row with the same sparkles icon inside a disc,
+ * which added a shape that carried no information — it couldn't distinguish
+ * the options, so it was just noise repeated three times. The indicator is now
+ * a radio dot, which is the one mark that actually says "one of these".
+ */
 .wl-card {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   width: 100%;
-  padding: 16px 18px;
+  padding: 15px 16px;
   text-align: left;
-  border-radius: 20px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 60%),
-    color-mix(in oklab, var(--surface) 62%, transparent);
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
-  box-shadow:
-    0 18px 40px -28px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent);
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  background: color-mix(in oklab, var(--surface) 46%, transparent);
   transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease;
-}
-.wl-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--foreground) 22%, transparent);
-}
-.wl-card:active {
-  transform: scale(0.985);
-}
-.wl-card[data-on="true"] {
-  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 62%, transparent);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--wl-accent, var(--violet)) 18%, transparent),
-      transparent 70%
-    ),
-    color-mix(in oklab, var(--surface) 70%, transparent);
-  box-shadow:
-    0 22px 50px -30px color-mix(in oklab, var(--wl-accent, var(--violet)) 80%, transparent),
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent);
+    background-color 220ms ease;
 }
 
-.wl-card-orb {
+.wl-card:hover {
+  border-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 52%, transparent);
+}
+.wl-card:active {
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+}
+
+.wl-card[data-on="true"] {
+  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 48%, transparent);
+  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 9%, transparent);
+}
+
+/* The radio dot: an empty ring that fills when chosen. */
+.wl-radio {
+  position: relative;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in oklab, var(--foreground) 26%, transparent);
+  transition: border-color 200ms ease;
+}
+
+.wl-radio::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: var(--wl-accent, var(--violet));
+  transform: scale(0);
+  transition: transform 240ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.wl-card[data-on="true"] .wl-radio {
+  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 70%, transparent);
+}
+.wl-card[data-on="true"] .wl-radio::after {
+  transform: scale(1);
+}
+
+/*
+ * The multi-select counterpart to the radio dot, for "what brought you here?".
+ * A square that takes a tick, because several of these can be true at once and
+ * a filled dot would claim otherwise.
+ */
+.wl-check {
   display: grid;
   place-items: center;
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  background: radial-gradient(
-    120% 120% at 30% 20%,
-    color-mix(in oklab, var(--wl-accent, var(--violet)) 40%, transparent),
-    color-mix(in oklab, var(--background) 70%, transparent)
-  );
-  color: var(--foreground);
-  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 6px;
+  border: 1.5px solid color-mix(in oklab, var(--foreground) 26%, transparent);
+  color: var(--primary-foreground);
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
 }
-.wl-card:hover .wl-card-orb {
-  transform: scale(1.06) rotate(-3deg);
+
+.wl-check svg {
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 180ms ease,
+    transform 240ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.wl-card[data-on="true"] .wl-check {
+  border-color: var(--wl-accent, var(--violet));
+  background: var(--wl-accent, var(--violet));
+}
+.wl-card[data-on="true"] .wl-check svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.wl-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
 }
 
 .wl-card-title {
-  font-size: 15px;
-  font-weight: 550;
+  font-size: 14.5px;
+  font-weight: 500;
   letter-spacing: -0.01em;
+  color: var(--foreground);
 }
+
 .wl-card-sub {
-  margin-top: 2px;
   font-size: 12.5px;
-  line-height: 1.45;
-  color: color-mix(in oklab, var(--foreground) 62%, transparent);
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
-.wl-tick {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 24%, transparent);
-  color: #1a1523;
-  opacity: 0;
-  transform: scale(0.7);
-  transition:
-    opacity 200ms ease,
-    transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+/*
+ * "Prefer not to say" is a real answer, but it isn't a third kind of person —
+ * it is declining the question. So it sits apart, quieter, and without a
+ * subtitle competing with the two above it.
+ */
+.wl-choices-divider {
+  height: 1px;
+  margin: 6px 2px 2px;
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
 }
-.wl-card[data-on="true"] .wl-tick {
-  opacity: 1;
-  transform: scale(1);
-  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 70%, #fff);
+
+.wl-card--decline {
+  padding: 13px 16px;
   border-color: transparent;
+  background: transparent;
+}
+.wl-card--decline:hover {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: color-mix(in oklab, var(--surface) 40%, transparent);
+}
+.wl-card--decline .wl-card-title {
+  font-weight: 400;
+  color: color-mix(in oklab, var(--foreground) 72%, transparent);
 }
 
-/* --------------------------------------------------------------- the foot */
+/* ---------------------------------------------------------------- the foot */
 
 .wl-foot {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-top: 14px;
+  padding-top: 18px;
 }
+
 .wl-next {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  flex: 1;
-  height: 52px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--wl-accent, var(--violet)) 58%, #fff),
-    color-mix(in oklab, var(--wl-accent, var(--violet)) 72%, #fff)
-  );
-  color: #1a1523;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-  box-shadow:
-    0 18px 40px -18px color-mix(in oklab, var(--wl-accent, var(--violet)) 85%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  gap: 9px;
+  height: 50px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--wl-accent, var(--violet)) 34%, transparent);
+  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 16%, transparent);
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   transition:
-    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 200ms ease,
-    opacity 200ms ease;
+    background-color 220ms ease,
+    border-color 220ms ease,
+    opacity 220ms ease;
 }
 .wl-next:hover:not(:disabled) {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
+  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 24%, transparent);
+  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 48%, transparent);
 }
 .wl-next:active:not(:disabled) {
-  transform: scale(0.98);
+  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 30%, transparent);
 }
 .wl-next:disabled {
-  opacity: 0.45;
-  box-shadow: none;
+  opacity: 0.38;
+  cursor: not-allowed;
 }
+
 .wl-back {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
   flex: none;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: transparent;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
   transition:
-    color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
+    color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
 }
 .wl-back:hover {
   color: var(--foreground);
-  border-color: color-mix(in oklab, var(--foreground) 28%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 24%, transparent);
 }
 .wl-back:active {
-  transform: scale(0.95);
+  background: color-mix(in oklab, var(--surface-2) 60%, transparent);
 }
 
-/* ------------------------------------------------------------- name input */
+/* ------------------------------------------------------------ name + recap */
 
 .wl-input {
   width: 100%;
-  height: 56px;
-  margin-top: 24px;
-  padding: 0 20px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  background: color-mix(in oklab, var(--surface) 60%, transparent);
-  backdrop-filter: blur(16px);
+  height: 52px;
+  margin-top: 22px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
   color: var(--foreground);
-  font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 16px; /* 16px, not smaller: below this iOS zooms the page on focus */
   letter-spacing: -0.01em;
-  outline: none;
   transition:
     border-color 200ms ease,
-    box-shadow 200ms ease;
+    background-color 200ms ease;
 }
 .wl-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 34%, transparent);
+  color: color-mix(in oklab, var(--foreground) 30%, transparent);
 }
 .wl-input:focus {
-  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 60%, transparent);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--wl-accent, var(--violet)) 16%, transparent);
+  outline: none;
+  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 46%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 58%, transparent);
 }
 
-/* --------------------------------------------------------------- the end */
-
-.wl-seal {
-  display: grid;
-  place-items: center;
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 6px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  background: radial-gradient(
-    120% 120% at 30% 20%,
-    color-mix(in oklab, var(--wl-accent, var(--violet)) 46%, transparent),
-    color-mix(in oklab, var(--background) 60%, transparent)
-  );
-  box-shadow: 0 30px 60px -30px color-mix(in oklab, var(--wl-accent, var(--violet)) 90%, transparent);
-}
-.wl-seal-ring {
-  position: absolute;
-  width: 96px;
-  height: 96px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--wl-accent, var(--violet)) 50%, transparent);
-  animation: wl-pulse 2.6s ease-out infinite;
-}
-@keyframes wl-pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  70% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
+/* The recap before entering: what the answers mean, in two quiet lines. */
 .wl-summary {
-  display: grid;
-  gap: 8px;
-  margin-top: 22px;
-  padding: 16px 18px;
-  border-radius: 20px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
-  background: color-mix(in oklab, var(--surface) 55%, transparent);
-  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 26px;
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
 }
+
 .wl-summary-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  font-size: 13px;
+  padding: 11px 2px;
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 7%, transparent);
+  font-size: 12.5px;
 }
 .wl-summary-row span:first-child {
-  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+}
+.wl-summary-row span:last-child {
+  color: var(--foreground);
+  text-align: right;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wl-art img,
-  .wl-seal-ring {
-    animation: none;
-  }
+  .wl-glow,
+  .wl-seg::after,
+  .wl-radio::after,
   .wl-card,
   .wl-next,
   .wl-back,
-  .wl-seg::after {
+  .wl-input {
     transition-duration: 1ms;
+  }
+}
+
+/* Short screens — a phone in landscape, or a large display-scaling setting.
+   The type and the gaps give way first; the tap targets never do. */
+@media (max-height: 680px) {
+  .wl-body {
+    padding-top: 16px;
+  }
+  .wl-title {
+    font-size: clamp(25px, 6.6vw, 32px);
+    margin-top: 10px;
+  }
+  .wl-choices {
+    margin-top: 18px;
+    gap: 8px;
+  }
+  .wl-card {
+    padding: 12px 14px;
+  }
+  .wl-next,
+  .wl-back {
+    height: 46px;
   }
 }
