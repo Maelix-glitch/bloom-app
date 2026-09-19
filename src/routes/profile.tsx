@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Archive, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -42,6 +42,7 @@ import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
 import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
+import { SessionsSection } from "@/components/profile/SessionsSection";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
@@ -838,10 +839,32 @@ function ProfilePage() {
               />
             </section>
 
+            {/* Launch compliance: where you're signed in, and how to end it. */}
+            <section className="pf-section mt-10" aria-label="Sessions and devices settings">
+              <div className="pf-section-head">
+                <div>
+                  <p className="pf-eyebrow">Control</p>
+                  <h2 className="pf-title">Sessions &amp; devices</h2>
+                </div>
+              </div>
+              <SessionsSection
+                isSignedIn={authState === "signed-in"}
+                onOpenErase={() => setEraseOpen(true)}
+              />
+            </section>
+
             <footer className="pf-footer">
               <p className="display text-[15px] text-muted-foreground">Bloom</p>
               <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
                 Your record. Your story. Your Bloom.
+              </p>
+              <p className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                  Privacy
+                </Link>
+                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
+                  Terms
+                </Link>
               </p>
             </footer>
           </div>

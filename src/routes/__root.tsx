@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -102,13 +103,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
  *     is the same trade `WelcomeGate` and `useAdminAccess` already make, and
  *     the lesser evil. The server-side trigger is the real enforcement.
  */
+/* Legal pages are public in every deployment, configured or not. */
+const PUBLIC_ROUTES = ["/privacy", "/terms"];
+
 function AccessControl({ children }: { children: ReactNode }) {
   const session = useSession();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
+  const isPublicRoute = useRouterState({
+    select: (s) => PUBLIC_ROUTES.includes(s.location.pathname),
+  });
 
+  if (isPublicRoute) return <>{children}</>;
   if (!hasSupabaseConfig) return <>{children}</>;
   if (!mounted || !session.ready) return <>{children}</>;
   if (session.userId !== null) return <>{children}</>;
