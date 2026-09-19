@@ -160,9 +160,14 @@
   left: 50%;
   width: 76px;
   height: 76px;
-  /* transform fallback for engines without the translate property (Chrome < 104) */
+  /*
+   * `transform` only. A standalone `translate` beside it is not a free
+   * fallback: Lightning CSS folds the pair into the transform at build time
+   * (`translate(-50%)translate(-50%)`), which pulls the halo a full width left
+   * of centre. Nothing here is motion- or animation-driven, so nothing would
+   * override it.
+   */
   transform: translate(-50%, 0);
-  translate: -50% 0;
   border-radius: 999px;
   background: radial-gradient(
     circle,
@@ -189,9 +194,11 @@
   position: absolute;
   top: 2px;
   right: 50%;
-  /* transform fallback for engines without the translate property (Chrome < 104) */
+  /*
+   * `transform` only — see .bmood-face-halo. The fold made this a static
+   * +68px displacement instead of +34px, pushing the tick off its ring.
+   */
   transform: translate(34px, 0);
-  translate: 34px 0;
   color: var(--bmood-face-color, var(--foreground));
   opacity: 0;
   scale: 0.6;

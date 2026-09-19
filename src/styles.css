@@ -484,9 +484,14 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  /* transform fallback for engines without the translate property (Chrome < 104) */
+  /*
+   * `transform` only. Lightning CSS folds a standalone `translate` into the
+   * transform at build time, so carrying both emitted
+   * `translate(-50%,-50%)translate(-50%,-50%)` and pushed the hub a full size
+   * down-right — the same symptom the sheets had. Nothing overrides this: the
+   * two `.cm-hub` elements are plain divs with no Motion transform.
+   */
   transform: translate(-50%, -50%);
-  translate: -50% -50%;
   display: grid;
   place-items: center;
   width: 23.5cqw;
