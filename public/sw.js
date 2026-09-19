@@ -99,6 +99,29 @@ self.addEventListener("message", (event) => {
   );
 });
 
+/**
+ * Real push — the `push-send` edge function delivers due reminders here when
+ * the app is closed. Without this handler a delivered push is silently
+ * dropped, which is the exact gap this closes. Payload: {title, body, tag, url}.
+ */
+self.addEventListener("push", (event) => {
+  let payload = { title: "Bloom", body: "Something's waiting for you.", tag: "", url: "/" };
+  try {
+    if (event.data) payload = { ...payload, ...event.data.json() };
+  } catch {
+    /* a malformed push still deserves a notification rather than silence */
+  }
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      tag: payload.tag || undefined,
+      icon: "/bloom/icons/icon-192.png",
+      badge: "/bloom/icons/icon-192.png",
+      data: { url: payload.url || "/" },
+    }),
+  );
+});
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const target = (event.notification.data && event.notification.data.url) || "/";

@@ -2,6 +2,26 @@
 
 Merged to `main` in PR #16 (`c96f47a`).
 
+## Update 2026-09-19 — what landed since this roadmap was written
+
+- **300+ dynamic notifications, honestly counted.** The copy engine now ships
+  315 hand-authored template combinations and **3,501+ rendered messages**,
+  measured by `copy.test.ts` (streaks, counts, greetings, cycle days and habit
+  names all multiply it further). The test asserts ≥300 so it can't quietly
+  shrink.
+- **Real data is plumbed in.** Live per-habit streaks (`lib/reminders/streak.ts`,
+  shared with the edge function), real logged counts (the evening nudge now
+  rounds off lightly-logged days and stays silent at 3+ — `EVENING_SILENT_MIN_LOGS`),
+  hour-of-day greetings, and the cycle day in cycle copy. The old "streak not
+  plumbed" and "boolean not count" gaps are closed.
+- **Closed-app push is fully coded.** `push_subscriptions` migration (RLS +
+  erase coverage), client subscribe/unsubscribe in `lib/reminders/push.ts`
+  (gated on `VITE_VAPID_PUBLIC_KEY`), a `push` handler in `sw.js`, and the
+  `push-send` edge function, which imports the *same* scheduler/copy/streak/
+  cycle-analysis modules the app runs and dedupes per device via `sent_keys`.
+  What remains is yours only: generate VAPID keys, set the secrets, deploy and
+  cron — `supabase/functions/push-send/README.md` has the exact commands.
+
 ## Where notifications stand right now
 
 There are two separate halves to "notifications", and they are at very different
