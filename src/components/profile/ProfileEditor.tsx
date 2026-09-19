@@ -24,6 +24,8 @@ import {
   X,
 } from "lucide-react";
 
+import heroArt from "@/assets/mood/hero-window.jpg";
+
 import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
@@ -273,12 +275,13 @@ export function ProfileEditor({
             {/* ------------------------------------------------ hero */}
             <div className="bedit-hero">
               {/*
-                The ground is set in CSS rather than with a photograph here.
-                This hero used to carry hero-window.jpg at 0.75 opacity under a
-                gradient wash; the picture fought the text sitting on it and
-                made the whole block read as misaligned even though every box
-                was where it should be.
+                The photograph is the ground of this block; the gradient wash
+                in `.bedit-hero-art::after` keeps it behind the text so the
+                eyebrow, heading and avatar stay legible on top of it.
               */}
+              <div className="bedit-hero-art" aria-hidden>
+                <img src={heroArt} alt="" />
+              </div>
 
               <SheetItem>
                 <div className="bedit-topbar">
