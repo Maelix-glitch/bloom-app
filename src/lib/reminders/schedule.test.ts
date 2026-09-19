@@ -43,7 +43,7 @@ const input = (over: Partial<ReminderInput> = {}): ReminderInput => ({
   settings: on,
   habits: [{ habit: habit(), done: false }],
   cycle: { mode: "tracking", nextStart: null, daysLate: null, fertileStart: null },
-  loggedSomethingToday: false,
+  loggedToday: 0,
   ...over,
 });
 
@@ -134,10 +134,34 @@ describe("reminders · cycle", () => {
 });
 
 describe("reminders · the evening nudge", () => {
-  it("fires only when the day is still empty", () => {
+  it("fires on an empty day", () => {
     const base = input({ habits: [], now: "20:35" });
     expect(dueReminders(base)[0]).toMatchObject({ kind: "evening" });
-    expect(dueReminders({ ...base, loggedSomethingToday: true })).toEqual([]);
+  });
+
+  it("rounds off lightly-logged days, stays silent on captured ones", () => {
+    const base = input({ habits: [], now: "20:35" });
+    const one = dueReminders({ ...base, loggedToday: 1 })[0];
+    expect(one).toMatchObject({ kind: "evening" });
+    /* the "some" branch is live now: it acknowledges the real count */
+    expect(one!.title).toMatch(/1/);
+    expect(dueReminders({ ...base, loggedToday: 2 })[0]).toMatchObject({ kind: "evening" });
+    /* three or more entries and the day speaks for itself */
+    expect(dueReminders({ ...base, loggedToday: 3 })).toEqual([]);
+  });
+});
+
+describe("reminders · streaks", () => {
+  it("passes the live streak into the copy", () => {
+    const withStreak = input({
+      now: "09:05",
+      habits: [{ habit: habit(), done: false, streak: 9 }],
+    });
+    const [r] = dueReminders(withStreak);
+    expect(r).toMatchObject({ kind: "habit" });
+    /* deterministic key — with a 9-day run the number can appear; across the
+       pool it must at least never claim a wrong one. */
+    expect(`${r!.title} ${r!.body}`).not.toMatch(/\b[1-8]\b-day|\bday [1-8]\b/);
   });
 });
 

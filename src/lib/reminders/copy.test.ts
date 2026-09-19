@@ -29,10 +29,14 @@ describe("reminder copy", () => {
       ctx({ kind: "habit", habitName: "Stretch", streak: 9 }),
       ctx({ kind: "period" }),
       ctx({ kind: "period", daysLate: 3 }),
+      ctx({ kind: "period", cycleDay: 21 }),
       ctx({ kind: "fertile" }),
+      ctx({ kind: "fertile", cycleDay: 10 }),
       ctx({ kind: "evening" }),
       ctx({ kind: "evening", loggedToday: 1 }),
       ctx({ kind: "evening", loggedToday: 5 }),
+      ctx({ kind: "habit", habitName: "Stretch", streak: 9, hourOfDay: 8 }),
+      ctx({ kind: "evening", loggedToday: 0, hourOfDay: 21 }),
     ];
     for (let i = 0; i < 40; i += 1) {
       for (const c of cases) {
@@ -111,15 +115,16 @@ describe("reminder copy", () => {
   it("reports the real template count and the rendered count", () => {
     /*
      * Two honest numbers, both logged rather than hidden:
-     *  · templates — hand-authored combinations (~118). Padding this to a round
-     *    thousand with near-duplicate lines would be the filler this avoids.
-     *  · rendered — what an account actually sees once the streak/count/name
-     *    slots carry real values. This is the figure the "1000+" ask is really
-     *    about, and it clears a thousand on a single habit alone.
+     *  · templates — hand-authored combinations (300+), every line tonally
+     *    distinct; near-duplicate padding would be the filler this avoids.
+     *  · rendered — what an account actually sees once the streak/count/name/
+     *    greeting/cycle-day slots carry real values. This is the figure the
+     *    "dynamic notifications" ask is really about, and it clears three
+     *    thousand on a single habit alone.
      */
     const templates = distinctMessageCount();
     const rendered = renderedMessageEstimate();
-    expect(templates).toBeGreaterThan(100);
+    expect(templates).toBeGreaterThanOrEqual(300);
     expect(rendered).toBeGreaterThan(1000);
     console.log(`notification copy: ${templates} templates, ${rendered}+ rendered messages`);
   });
