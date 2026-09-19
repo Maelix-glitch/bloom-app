@@ -19,6 +19,7 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { getPref, PREFS_CHANGED, setPref } from "@/lib/prefs";
 import { habitStreak } from "@/lib/reminders/streak";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/reminders/push";
+import { recordNotice } from "@/lib/notifications/center";
 import {
   DEFAULT_REMINDERS,
   loadDelivered,
@@ -161,6 +162,8 @@ export function useReminders(): RemindersStore {
       },
       loggedToday,
     };
+    /* `tick` is an intentional dependency: it re-reads the wall clock. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     today,
     settings,
@@ -169,8 +172,6 @@ export function useReminders(): RemindersStore {
     cycle.mode,
     cycle.analysis,
     loggedToday,
-    // `tick` is intentionally a dependency: it re-reads the wall clock.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     tick,
   ]);
 
@@ -188,6 +189,14 @@ export function useReminders(): RemindersStore {
         try {
           await show(reminder);
           delivered.current = [...delivered.current, reminder.key];
+          /* the bell remembers what fired, even after the toast is gone */
+          recordNotice({
+            key: reminder.key,
+            kind: reminder.kind,
+            title: reminder.title,
+            body: reminder.body,
+            url: reminder.url,
+          });
         } catch {
           /* the browser refused this one — try again next tick */
         }
@@ -231,12 +240,20 @@ export function useReminders(): RemindersStore {
 
   const test = useCallback(async () => {
     if (permissionOf() !== "granted") return;
-    await show({
+    const reminder = {
       key: `test:${Date.now()}`,
-      kind: "evening",
+      kind: "evening" as const,
       title: "This is what a Bloom reminder looks like",
       body: "You can turn any of these off at any time.",
       at: nowTime(),
+      url: "/",
+    };
+    await show(reminder);
+    recordNotice({
+      key: reminder.key,
+      kind: "system",
+      title: reminder.title,
+      body: reminder.body,
       url: "/",
     });
   }, []);

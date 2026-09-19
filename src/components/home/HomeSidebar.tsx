@@ -16,6 +16,7 @@ import { useRailIdentity } from "@/hooks/useRailIdentity";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { BloomLogo } from "@/components/BloomLogo";
+import { NotificationBell } from "@/components/notifications/NotificationCenter";
 
 export const HOME_NAV: {
   label: string;
@@ -202,18 +203,21 @@ export function HomeMobileBar() {
         <BloomLogo size={22} />
         <span className="font-display text-[21px] leading-none tracking-wide">Bloom</span>
       </Link>
-      <Link
-        to="/profile"
-        aria-label="Your profile"
-        aria-current={profileActive ? "page" : undefined}
-        className={`grid size-9 place-items-center rounded-full border transition-colors ${
-          profileActive
-            ? "border-primary/50 text-foreground"
-            : "border-border text-muted-foreground hover:text-foreground"
-        }`}
-      >
-        <UserRound className="size-4" />
-      </Link>
+      <div className="flex items-center gap-2">
+        <NotificationBell />
+        <Link
+          to="/profile"
+          aria-label="Your profile"
+          aria-current={profileActive ? "page" : undefined}
+          className={`grid size-9 place-items-center rounded-full border transition-colors ${
+            profileActive
+              ? "border-primary/50 text-foreground"
+              : "border-border text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <UserRound className="size-4" />
+        </Link>
+      </div>
     </div>
   );
 }
