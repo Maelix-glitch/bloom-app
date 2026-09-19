@@ -25,7 +25,7 @@
 import type { Habit } from "@/lib/home/habits";
 import type { CycleMode } from "@/lib/cycle/periodStore";
 
-import { reminderCopy } from "./copy";
+import { reminderCopy } from "./copy.ts";
 
 export type ReminderKind = "habit" | "period" | "fertile" | "evening";
 
