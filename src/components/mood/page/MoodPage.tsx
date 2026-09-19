@@ -28,10 +28,10 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowDown,
-  Bell,
   ChartNoAxesColumn,
   Check,
   ChevronDown,
+  Gift,
   Leaf,
   Loader2,
   Plus,
@@ -41,6 +41,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import heroWindow from "@/assets/mood/hero-window.jpg";
 import flowerBranch from "@/assets/mood/flower-branch.jpg";
 import flowerDetail from "@/assets/mood/flower-detail.jpg";
@@ -233,13 +234,14 @@ function TopBar({ identity }: { identity: MoodPageIdentity }) {
     <header className="flex items-center justify-between gap-4">
       <p className="text-xs text-muted-foreground">{longDate(new Date())}</p>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <NotificationBell className="border-0 bg-transparent hover:bg-secondary" />
         <Link
           to="/rewards"
           aria-label="Rewards"
           title="Rewards"
           className="relative grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
-          <Bell className="h-4.5 w-4.5" strokeWidth={1.5} />
+          <Gift className="h-4.5 w-4.5" strokeWidth={1.5} />
         </Link>
         <Link
           to="/profile"
@@ -505,7 +507,10 @@ function LogMood({
                 aria-label={`I feel ${MOOD_LABELS[mood].toLowerCase()}`}
                 data-testid={`mood-face-${mood}`}
               >
-                <span className={`mm-face ${busy ? "animate-pulse" : ""} [&_svg]:h-[68px] [&_svg]:w-[68px] sm:[&_svg]:h-20 sm:[&_svg]:w-20`} data-active={active}>
+                <span
+                  className={`mm-face ${busy ? "animate-pulse" : ""} [&_svg]:h-[68px] [&_svg]:w-[68px] sm:[&_svg]:h-20 sm:[&_svg]:w-20`}
+                  data-active={active}
+                >
                   <MoodBlob mood={mood} active={active} size={80} />
                 </span>
                 <span

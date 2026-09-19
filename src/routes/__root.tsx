@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -16,6 +17,7 @@ import { useSoundBoot } from "@/hooks/useSound";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 import { AccessGate } from "@/components/auth/AccessGate";
+import { BloomLogo } from "@/components/BloomLogo";
 import { useSession } from "@/hooks/useSession";
 import { hasSupabaseConfig } from "@/lib/supabase";
 import { AdminBar } from "@/components/welcome/AdminBar";
@@ -101,13 +103,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
  *     is the same trade `WelcomeGate` and `useAdminAccess` already make, and
  *     the lesser evil. The server-side trigger is the real enforcement.
  */
+/* Legal pages are public in every deployment, configured or not. */
+const PUBLIC_ROUTES = ["/privacy", "/terms"];
+
 function AccessControl({ children }: { children: ReactNode }) {
   const session = useSession();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
+  const isPublicRoute = useRouterState({
+    select: (s) => PUBLIC_ROUTES.includes(s.location.pathname),
+  });
 
+  if (isPublicRoute) return <>{children}</>;
   if (!hasSupabaseConfig) return <>{children}</>;
   if (!mounted || !session.ready) return <>{children}</>;
   if (session.userId !== null) return <>{children}</>;
@@ -252,37 +261,8 @@ function RootShell({ children }: { children: ReactNode }) {
             purpose: no stylesheet or font may gate the first paint. */}
         <div id="bloom-boot" role="presentation" aria-hidden="true">
           <div className="bloom-boot-glow" />
-          <svg
-            className="bloom-boot-mark"
-            width="76"
-            height="76"
-            viewBox="0 0 28 28"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              className="bloom-boot-arc"
-              d="M4 20c3-9 7-14 10-14s7 5 10 14"
-              stroke="url(#bloom-boot-g)"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              pathLength="100"
-            />
-            <defs>
-              <linearGradient
-                id="bloom-boot-g"
-                x1="4"
-                y1="13"
-                x2="24"
-                y2="13"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stopColor="#7FA88F" />
-                <stop offset="1" stopColor="#E8B75E" />
-              </linearGradient>
-            </defs>
-          </svg>
+          {/* The favicon's arc, bare on the splash's obsidian — as before. */}
+          <BloomLogo size={76} className="bloom-boot-mark" arcClassName="bloom-boot-arc" />
           <div className="bloom-boot-word">Bloom</div>
         </div>
         <style>{`#bloom-boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#14151f;transition:opacity .45s ease}

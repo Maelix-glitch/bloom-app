@@ -16,8 +16,11 @@ import { Route as CycleRouteImport } from './routes/cycle'
 import { Route as CycleClassicRouteImport } from './routes/cycle-classic'
 import { Route as CycleStylesRouteImport } from './routes/cycle-styles'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackersRouteImport } from './routes/trackers'
 import { Route as TrackersPremiumRouteImport } from './routes/trackers-premium'
 import { Route as TrackersStylesRouteImport } from './routes/trackers-styles'
@@ -63,14 +66,29 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RewardsRoute = RewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackersRoute = TrackersRouteImport.update({
@@ -127,8 +145,11 @@ export interface FileRoutesByFullPath {
   '/cycle-classic': typeof CycleClassicRoute
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
+  '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/trackers-premium': typeof TrackersPremiumRoute
   '/trackers-styles': typeof TrackersStylesRoute
@@ -147,7 +168,10 @@ export interface FileRoutesByTo {
   '/cycle-classic': typeof CycleClassicRoute
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/report': typeof ReportRoute
+  '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/trackers-premium': typeof TrackersPremiumRoute
   '/trackers-styles': typeof TrackersStylesRoute
@@ -167,8 +191,11 @@ export interface FileRoutesById {
   '/cycle-classic': typeof CycleClassicRoute
   '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
+  '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/trackers-premium': typeof TrackersPremiumRoute
   '/trackers-styles': typeof TrackersStylesRoute
@@ -189,8 +216,11 @@ export interface FileRouteTypes {
     | '/cycle-classic'
     | '/cycle-styles'
     | '/dashboard'
+    | '/privacy'
     | '/profile'
+    | '/report'
     | '/rewards'
+    | '/terms'
     | '/trackers'
     | '/trackers-premium'
     | '/trackers-styles'
@@ -209,7 +239,10 @@ export interface FileRouteTypes {
     | '/cycle-classic'
     | '/cycle-styles'
     | '/dashboard'
+    | '/privacy'
     | '/profile'
+    | '/report'
+    | '/terms'
     | '/trackers'
     | '/trackers-premium'
     | '/trackers-styles'
@@ -228,8 +261,11 @@ export interface FileRouteTypes {
     | '/cycle-classic'
     | '/cycle-styles'
     | '/dashboard'
+    | '/privacy'
     | '/profile'
+    | '/report'
     | '/rewards'
+    | '/terms'
     | '/trackers'
     | '/trackers-premium'
     | '/trackers-styles'
@@ -249,8 +285,11 @@ export interface RootRouteChildren {
   CycleClassicRoute: typeof CycleClassicRoute
   CycleStylesRoute: typeof CycleStylesRoute
   DashboardRoute: typeof DashboardRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  ReportRoute: typeof ReportRoute
   RewardsRoute: typeof RewardsRouteWithChildren
+  TermsRoute: typeof TermsRoute
   TrackersRoute: typeof TrackersRoute
   TrackersPremiumRoute: typeof TrackersPremiumRoute
   TrackersStylesRoute: typeof TrackersStylesRoute
@@ -311,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -318,11 +364,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rewards': {
       id: '/rewards'
       path: '/rewards'
       fullPath: '/rewards'
       preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trackers': {
@@ -412,8 +472,11 @@ const rootRouteChildren: RootRouteChildren = {
   CycleClassicRoute: CycleClassicRoute,
   CycleStylesRoute: CycleStylesRoute,
   DashboardRoute: DashboardRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  ReportRoute: ReportRoute,
   RewardsRoute: RewardsRouteWithChildren,
+  TermsRoute: TermsRoute,
   TrackersRoute: TrackersRoute,
   TrackersPremiumRoute: TrackersPremiumRoute,
   TrackersStylesRoute: TrackersStylesRoute,

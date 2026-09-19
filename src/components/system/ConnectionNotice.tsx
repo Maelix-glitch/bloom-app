@@ -23,6 +23,7 @@ const DISMISSED_KEY = "bloom.connection-notice.dismissed.v1";
 
 export function ConnectionNotice() {
   const [show, setShow] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     /* Only after mount — the server can't read localStorage, and rendering
@@ -36,7 +37,29 @@ export function ConnectionNotice() {
     setShow(true);
   }, []);
 
+  /* The promise must stay visible, but it must not sit on the content all
+     day: after a moment it folds into a small chip that reopens on tap. */
+  useEffect(() => {
+    if (!show || collapsed) return;
+    const t = window.setTimeout(() => setCollapsed(true), 7000);
+    return () => window.clearTimeout(t);
+  }, [show, collapsed]);
+
   if (!show) return null;
+
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        className="conn-notice-chip"
+        aria-label="Saving to this device only — show details"
+        title="Saving to this device only"
+        onClick={() => setCollapsed(false)}
+      >
+        <CloudOff size={14} />
+      </button>
+    );
+  }
 
   return (
     <div className="conn-notice" role="status">
@@ -46,8 +69,8 @@ export function ConnectionNotice() {
       <div className="conn-notice-body">
         <p className="conn-notice-title">Saving to this device only</p>
         <p className="conn-notice-text">
-          {supabaseConfigProblem()} Your logs are safe here, but they won't sync or
-          survive clearing your browser data.
+          {supabaseConfigProblem()} Your logs are safe here, but they won't sync or survive clearing
+          your browser data.
         </p>
       </div>
       <button

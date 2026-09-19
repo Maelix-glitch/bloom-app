@@ -15,8 +15,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Archive, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Archive, FileUp, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -42,6 +42,8 @@ import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
 import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
+import { RestoreSheet } from "@/components/profile/RestoreSheet";
+import { SessionsSection } from "@/components/profile/SessionsSection";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
@@ -117,6 +119,7 @@ function ProfilePage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [eraseOpen, setEraseOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
   const [tab, setTab] = useState<ProfileTab>("moments");
@@ -836,12 +839,54 @@ function ProfilePage() {
                 remindersValue={remindersValue}
                 installValue={installValue}
               />
+
+              {/* The other half of "Download everything". */}
+              <section aria-label="Backup" className="pf-group mt-6">
+                <h2 className="pf-group-label">Backup</h2>
+                <div className="pf-group-rows">
+                  <button type="button" className="pf-row" onClick={() => setRestoreOpen(true)}>
+                    <span className="pf-row-icon" aria-hidden>
+                      <FileUp className="size-4" />
+                    </span>
+                    <span className="pf-row-text">
+                      <span className="pf-row-label">Restore from backup</span>
+                      <span className="pf-row-hint">
+                        Reads a “Download everything” file into this browser
+                      </span>
+                    </span>
+                    <span className="pf-row-value">json</span>
+                    <span />
+                  </button>
+                </div>
+              </section>
+            </section>
+
+            {/* Launch compliance: where you're signed in, and how to end it. */}
+            <section className="pf-section mt-10" aria-label="Sessions and devices settings">
+              <div className="pf-section-head">
+                <div>
+                  <p className="pf-eyebrow">Control</p>
+                  <h2 className="pf-title">Sessions &amp; devices</h2>
+                </div>
+              </div>
+              <SessionsSection
+                isSignedIn={authState === "signed-in"}
+                onOpenErase={() => setEraseOpen(true)}
+              />
             </section>
 
             <footer className="pf-footer">
               <p className="display text-[15px] text-muted-foreground">Bloom</p>
               <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
                 Your record. Your story. Your Bloom.
+              </p>
+              <p className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                  Privacy
+                </Link>
+                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
+                  Terms
+                </Link>
               </p>
             </footer>
           </div>
@@ -891,6 +936,7 @@ function ProfilePage() {
               setPreviewOpen(true);
             }}
           />
+          <RestoreSheet open={restoreOpen} onClose={() => setRestoreOpen(false)} />
           {userId ? (
             <StoryComposer
               open={composerOpen}

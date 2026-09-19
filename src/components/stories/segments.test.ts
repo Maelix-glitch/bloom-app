@@ -24,8 +24,10 @@ function story(id: string, overrides: Partial<Story> = {}): Story {
     mediaHeight: 1920,
     accent: "violet",
     atmosphere: "quiet",
-    createdAt: "2026-09-18T09:00:00.000Z",
-    expiresAt: "2026-09-19T09:00:00.000Z",
+    createdAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+    /* Relative, so the suite can't expire under us: stories are active by
+       default; tests that need expiry override with a fixed past date. */
+    expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
     visibility: "public",
     deletedAt: null,
     mediaType: "image",
