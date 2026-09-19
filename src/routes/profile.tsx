@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Archive, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
+import { Archive, FileUp, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -42,6 +42,7 @@ import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
 import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
+import { RestoreSheet } from "@/components/profile/RestoreSheet";
 import { SessionsSection } from "@/components/profile/SessionsSection";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
@@ -118,6 +119,7 @@ function ProfilePage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [eraseOpen, setEraseOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
   const [tab, setTab] = useState<ProfileTab>("moments");
@@ -837,6 +839,26 @@ function ProfilePage() {
                 remindersValue={remindersValue}
                 installValue={installValue}
               />
+
+              {/* The other half of "Download everything". */}
+              <section aria-label="Backup" className="pf-group mt-6">
+                <h2 className="pf-group-label">Backup</h2>
+                <div className="pf-group-rows">
+                  <button type="button" className="pf-row" onClick={() => setRestoreOpen(true)}>
+                    <span className="pf-row-icon" aria-hidden>
+                      <FileUp className="size-4" />
+                    </span>
+                    <span className="pf-row-text">
+                      <span className="pf-row-label">Restore from backup</span>
+                      <span className="pf-row-hint">
+                        Reads a “Download everything” file into this browser
+                      </span>
+                    </span>
+                    <span className="pf-row-value">json</span>
+                    <span />
+                  </button>
+                </div>
+              </section>
             </section>
 
             {/* Launch compliance: where you're signed in, and how to end it. */}
@@ -914,6 +936,7 @@ function ProfilePage() {
               setPreviewOpen(true);
             }}
           />
+          <RestoreSheet open={restoreOpen} onClose={() => setRestoreOpen(false)} />
           {userId ? (
             <StoryComposer
               open={composerOpen}
