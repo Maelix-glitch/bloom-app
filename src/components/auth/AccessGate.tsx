@@ -28,7 +28,7 @@ import { useCallback, useReducer, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 
-import { BloomMark } from "@/components/home/HomeSidebar";
+import { BloomLogo } from "@/components/BloomLogo";
 import { useInviteAccess } from "@/hooks/useInviteAccess";
 import {
   authReducer,
@@ -114,7 +114,8 @@ export function AccessGate() {
     <div className="ag-root">
       <div className="ag-panel">
         <div className="ag-mark">
-          <BloomMark size={26} id="bloomBrandGradientAccess" />
+          {/* The favicon itself — the tile the browser tab shows — at 46px. */}
+          <BloomLogo size={46} />
         </div>
 
         <AnimatePresence mode="wait" initial={false}>

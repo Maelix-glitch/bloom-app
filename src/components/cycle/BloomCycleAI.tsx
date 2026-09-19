@@ -13,6 +13,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 
+import { BloomLogo } from "@/components/BloomLogo";
 import type { CycleContext } from "@/lib/cycle/types";
 import { deterministicProvider, genericAnswer, quickPromptsFor } from "@/lib/cycle/assistant";
 import type { Insight } from "@/lib/cycle/intelligence";
@@ -28,16 +29,9 @@ const AssistantPanel = lazy(() =>
   import("./AssistantPanel").then((m) => ({ default: m.AssistantPanel })),
 );
 
+/** The assistant wears the one brand mark — the favicon tile. */
 export const BloomMark = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden>
-    <path
-      d="M4 17c2.5-7.5 5.5-11.5 8-11.5s5.5 4 8 11.5"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <circle cx="12" cy="17.5" r="1.6" fill="currentColor" />
-  </svg>
+  <BloomLogo className={className} />
 );
 
 export function BloomCycleAI({

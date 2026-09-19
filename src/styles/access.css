@@ -42,15 +42,21 @@
   box-shadow: 0 30px 80px -50px rgb(0 0 0 / 0.95);
 }
 
+/* The mark is BloomLogo — the exact favicon tile — so the wrapper only
+   centres it; no faux border or fill of its own. */
 .ag-mark {
   display: grid;
   place-items: center;
   width: 46px;
   height: 46px;
   margin: 0 auto clamp(18px, 3.5vh, 26px);
-  border: 1px solid oklch(1 0 0 / 0.09);
-  border-radius: 14px;
-  background: oklch(1 0 0 / 0.035);
+}
+
+.ag-mark svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;
+  box-shadow: 0 12px 32px -14px rgb(0 0 0 / 0.8);
 }
 
 .ag-body {

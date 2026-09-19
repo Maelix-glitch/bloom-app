@@ -15,6 +15,7 @@ import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { BloomLogo } from "@/components/BloomLogo";
 
 export const HOME_NAV: {
   label: string;
@@ -29,44 +30,6 @@ export const HOME_NAV: {
   { label: "Rewards", to: "/rewards", icon: Gift, match: (p) => p.startsWith("/rewards") },
   { label: "Coach", to: "/coach", icon: LifeBuoy, match: (p) => p.startsWith("/coach") },
 ];
-
-/**
- * Bloom's brand mark — the same single arc, same gradient as BloomHeader and
- * the legacy shared header, so the home page carries the current logo.
- */
-export function BloomMark({
-  size = 22,
-  id = "bloomBrandGradientHome",
-  className,
-}: {
-  size?: number;
-  id?: string;
-  className?: string;
-}) {
-  return (
-    <svg
-      viewBox="0 0 28 28"
-      fill="none"
-      width={size}
-      height={size}
-      className={className}
-      aria-hidden="true"
-    >
-      <path
-        d="M4 20c3-9 7-14 10-14s7 5 10 14"
-        stroke={`url(#${id})`}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <defs>
-        <linearGradient id={id} x1="4" y1="13" x2="24" y2="13">
-          <stop stopColor="#8FB69C" />
-          <stop offset="1" stopColor="#E0B36B" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
 
 /**
  * The left rail every main page shares (lg and up). Inside an `.app-shell`
@@ -121,10 +84,10 @@ export function HomeSidebar() {
           className="mx-4 flex h-[64px] items-center gap-3 px-3 text-foreground"
           aria-label="Bloom — Today"
         >
-          {/* -3px margins give the 22px arc a 16px box — a nav icon's — so it
+          {/* -4px margins give the 24px tile a 16px box — a nav icon's — so it
               is centred on the icon column and the wordmark starts where the
               labels do. */}
-          <BloomMark size={22} id="bloomBrandGradientSidebar" className="-m-[3px] shrink-0" />
+          <BloomLogo size={24} className="-m-1 shrink-0" />
           <span className="font-display text-[22px] leading-none tracking-wide">Bloom</span>
         </Link>
         <span className="app-sidebar-rule mx-7 block h-px" />
@@ -236,7 +199,7 @@ export function HomeMobileBar() {
   return (
     <div className="app-nav app-mobile-bar fixed inset-x-0 top-0 z-20 flex h-[60px] items-center justify-between border-b border-border px-5 lg:hidden">
       <Link to="/" className="flex items-center gap-2.5 text-foreground" aria-label="Bloom — Today">
-        <BloomMark size={22} id="bloomBrandGradientMobile" />
+        <BloomLogo size={24} />
         <span className="font-display text-[21px] leading-none tracking-wide">Bloom</span>
       </Link>
       <Link

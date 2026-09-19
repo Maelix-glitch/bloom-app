@@ -1,5 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 
+import { BloomLogo } from "@/components/BloomLogo";
+
 export function BloomHeader() {
   const { pathname } = useLocation();
 
@@ -21,21 +23,7 @@ export function BloomHeader() {
     >
       {/* Bloom brand */}
       <div className="flex shrink-0 items-center gap-3">
-        <svg viewBox="0 0 28 28" fill="none" width="22" height="22" aria-hidden="true">
-          <path
-            d="M4 20c3-9 7-14 10-14s7 5 10 14"
-            stroke="url(#bloomBrandGradient)"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          />
-
-          <defs>
-            <linearGradient id="bloomBrandGradient" x1="4" y1="13" x2="24" y2="13">
-              <stop stopColor="#8FB69C" />
-              <stop offset="1" stopColor="#E0B36B" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <BloomLogo size={24} />
 
         <span
           className="text-[16px]"
