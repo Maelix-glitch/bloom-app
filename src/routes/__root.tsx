@@ -253,7 +253,7 @@ function RootShell({ children }: { children: ReactNode }) {
             purpose: no stylesheet or font may gate the first paint. */}
         <div id="bloom-boot" role="presentation" aria-hidden="true">
           <div className="bloom-boot-glow" />
-          {/* The boot splash wears the same tile as the favicon. */}
+          {/* The favicon's arc, bare on the splash's obsidian — as before. */}
           <BloomLogo size={76} className="bloom-boot-mark" arcClassName="bloom-boot-arc" />
           <div className="bloom-boot-word">Bloom</div>
         </div>

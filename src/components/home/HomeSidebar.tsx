@@ -84,10 +84,10 @@ export function HomeSidebar() {
           className="mx-4 flex h-[64px] items-center gap-3 px-3 text-foreground"
           aria-label="Bloom — Today"
         >
-          {/* -4px margins give the 24px tile a 16px box — a nav icon's — so it
+          {/* -3px margins give the 22px arc a 16px box — a nav icon's — so it
               is centred on the icon column and the wordmark starts where the
               labels do. */}
-          <BloomLogo size={24} className="-m-1 shrink-0" />
+          <BloomLogo size={22} className="-m-[3px] shrink-0" />
           <span className="font-display text-[22px] leading-none tracking-wide">Bloom</span>
         </Link>
         <span className="app-sidebar-rule mx-7 block h-px" />
@@ -199,7 +199,7 @@ export function HomeMobileBar() {
   return (
     <div className="app-nav app-mobile-bar fixed inset-x-0 top-0 z-20 flex h-[60px] items-center justify-between border-b border-border px-5 lg:hidden">
       <Link to="/" className="flex items-center gap-2.5 text-foreground" aria-label="Bloom — Today">
-        <BloomLogo size={24} />
+        <BloomLogo size={22} />
         <span className="font-display text-[21px] leading-none tracking-wide">Bloom</span>
       </Link>
       <Link

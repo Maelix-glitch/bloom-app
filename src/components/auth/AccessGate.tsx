@@ -115,7 +115,7 @@ export function AccessGate() {
       <div className="ag-panel">
         <div className="ag-mark">
           {/* The favicon itself — the tile the browser tab shows — at 46px. */}
-          <BloomLogo size={46} />
+          <BloomLogo size={46} tile />
         </div>
 
         <AnimatePresence mode="wait" initial={false}>

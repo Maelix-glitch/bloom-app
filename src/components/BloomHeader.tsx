@@ -23,7 +23,7 @@ export function BloomHeader() {
     >
       {/* Bloom brand */}
       <div className="flex shrink-0 items-center gap-3">
-        <BloomLogo size={24} />
+        <BloomLogo size={22} />
 
         <span
           className="text-[16px]"
