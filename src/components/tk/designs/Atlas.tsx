@@ -87,20 +87,21 @@ const DOCK_STYLE: CSSProperties = {
   pointerEvents: "none",
 };
 
+/* The one loud element the old design had, calmed down: Bloom's primary
+   pill instead of a neon gradient — same action, same prominence. */
 const CTA_STYLE: CSSProperties = {
   pointerEvents: "auto",
-  background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
-  color: "#ffffff",
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: "0.14em",
-  fontSize: "0.78rem",
-  padding: "16px 38px",
-  borderRadius: 40,
-  border: "1px solid rgba(255, 0, 85, 0.6)",
-  boxShadow: "0 0 24px rgba(255, 0, 85, 0.5), 0 12px 32px rgba(255, 0, 85, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+  background: "var(--primary)",
+  color: "var(--primary-foreground)",
+  fontWeight: 550,
+  letterSpacing: "0.01em",
+  fontSize: "0.85rem",
+  padding: "12px 26px",
+  borderRadius: 999,
+  border: "none",
+  boxShadow: "0 14px 30px -16px rgba(0, 0, 0, 0.7)",
   cursor: "pointer",
-  transition: "all 0.3s ease",
+  transition: "opacity 0.2s ease",
 };
 
 export function Atlas({ theme = "nocturne" }: { theme?: string }) {
@@ -174,7 +175,6 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
     return `M ${a.x} ${a.y} A ${r} ${r} 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`;
   }, [store.days, today]);
 
-
   const [openId, setOpenId] = useState<TrackerId | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -196,7 +196,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
           </p>
           <h1 className="at-title">Daily metrics at a glance.</h1>
           <p className="at-lede">
-            Real data only. Six trackers measured against goals you set. No estimates, no filling in blanks.
+            Real data only. Six trackers measured against goals you set. No estimates, no filling in
+            blanks.
           </p>
           <SyncNote sync={store.sync} onRetry={store.syncNow} />
         </header>
@@ -221,9 +222,7 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                   <circle cx={C} cy={C} r={64} className="at-track" />
                   <circle cx={C} cy={C} r={46} className="at-track" />
                   <circle cx={C} cy={C} r={28} className="at-track" />
-                  {nightSpan ? (
-                    <path d={nightSpan} className="at-nightspan" />
-                  ) : null}
+                  {nightSpan ? <path d={nightSpan} className="at-nightspan" /> : null}
                   {Array.from({ length: 24 }, (_, h) => {
                     const a = polar(126, h * 15);
                     const b = polar(h % 6 === 0 ? 120 : 123, h * 15);
@@ -327,7 +326,12 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                             )}
                           </span>
                         </div>
-                        <svg viewBox="0 0 240 54" className="at-contour" role="img" aria-label={`${def.name} contour`}>
+                        <svg
+                          viewBox="0 0 240 54"
+                          className="at-contour"
+                          role="img"
+                          aria-label={`${def.name} contour`}
+                        >
                           {line ? (
                             <>
                               <path d={area} className="at-contour-area" />
@@ -340,7 +344,11 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                         <div className="at-territory-foot">
                           <span>
                             target <Metric value={def.format(stat.goal)} /> · avg{" "}
-                            {stat.avg7 === null ? "—" : <Metric value={def.format(Math.round(stat.avg7))} />}
+                            {stat.avg7 === null ? (
+                              "—"
+                            ) : (
+                              <Metric value={def.format(Math.round(stat.avg7))} />
+                            )}
                           </span>
                           <span className="at-territory-more" aria-hidden>
                             log
@@ -375,33 +383,44 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                 <section className="at-section">
                   <p className="at-sectionhead">The route · fourteen days, six paths</p>
                   <div className="at-route-scroll">
-                    <svg viewBox="0 0 720 230" className="at-route" role="img" aria-label="Fourteen days of all six trackers">
-                    {defs.map((def) => {
-                      const values = analysis.trackers[def.id].series.map((p) => p.value);
-                      const peak = Math.max(...values.map((v) => v ?? 0), 1);
-                      const points = values
-                        .map((v, i) => ({ v, i }))
-                        .filter((p): p is { v: number; i: number } => p.v !== null);
-                      if (points.length < 2) return null;
-                      const y = (v: number) => Math.round(200 - (v / peak) * 170);
-                      let d = `M ${routeX(points[0]!.i)} ${y(points[0]!.v)}`;
-                      for (let i = 1; i < points.length; i += 1) {
-                        const prev = points[i - 1]!;
-                        const cur = points[i]!;
-                        const cx = (routeX(prev.i) + routeX(cur.i)) / 2;
-                        d += ` C ${cx} ${y(prev.v)} ${cx} ${y(cur.v)} ${routeX(cur.i)} ${y(cur.v)}`;
-                      }
-                      return (
-                        <path key={def.id} d={d} className="at-route-line" data-id={def.id} />
-                      );
-                    })}
-                    <line x1={routeX(13)} y1={0} x2={routeX(13)} y2={206} className="at-route-today" />
-                    {analysis.trackers.sleep.series.map((p, i) =>
-                      i % 3 === 0 || i === 13 ? (
-                        <text key={p.date} x={routeX(i)} y={224} className="at-route-date">
-                          {p.date.slice(5)}
-                        </text>
-                      ) : null,
+                    <svg
+                      viewBox="0 0 720 230"
+                      className="at-route"
+                      role="img"
+                      aria-label="Fourteen days of all six trackers"
+                    >
+                      {defs.map((def) => {
+                        const values = analysis.trackers[def.id].series.map((p) => p.value);
+                        const peak = Math.max(...values.map((v) => v ?? 0), 1);
+                        const points = values
+                          .map((v, i) => ({ v, i }))
+                          .filter((p): p is { v: number; i: number } => p.v !== null);
+                        if (points.length < 2) return null;
+                        const y = (v: number) => Math.round(200 - (v / peak) * 170);
+                        let d = `M ${routeX(points[0]!.i)} ${y(points[0]!.v)}`;
+                        for (let i = 1; i < points.length; i += 1) {
+                          const prev = points[i - 1]!;
+                          const cur = points[i]!;
+                          const cx = (routeX(prev.i) + routeX(cur.i)) / 2;
+                          d += ` C ${cx} ${y(prev.v)} ${cx} ${y(cur.v)} ${routeX(cur.i)} ${y(cur.v)}`;
+                        }
+                        return (
+                          <path key={def.id} d={d} className="at-route-line" data-id={def.id} />
+                        );
+                      })}
+                      <line
+                        x1={routeX(13)}
+                        y1={0}
+                        x2={routeX(13)}
+                        y2={206}
+                        className="at-route-today"
+                      />
+                      {analysis.trackers.sleep.series.map((p, i) =>
+                        i % 3 === 0 || i === 13 ? (
+                          <text key={p.date} x={routeX(i)} y={224} className="at-route-date">
+                            {p.date.slice(5)}
+                          </text>
+                        ) : null,
                       )}
                     </svg>
                   </div>
@@ -414,8 +433,8 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                     ))}
                   </ul>
                   <p className="at-fine">
-                    Each path is scaled to its own range — they cross, they don't compete. A break in
-                    a line is a day you didn't log, left empty on purpose.
+                    Each path is scaled to its own range — they cross, they don't compete. A break
+                    in a line is a day you didn't log, left empty on purpose.
                   </p>
                 </section>
 
@@ -452,8 +471,14 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
                         <li key={c.id} data-id={c.id}>
                           <span className="at-place">{def.name}</span>
                           <span className="at-pair">
-                            <i style={{ width: `${Math.round((c.low / top) * 100)}%` }} data-kind="low" />
-                            <i style={{ width: `${Math.round((c.bright / top) * 100)}%` }} data-kind="bright" />
+                            <i
+                              style={{ width: `${Math.round((c.low / top) * 100)}%` }}
+                              data-kind="low"
+                            />
+                            <i
+                              style={{ width: `${Math.round((c.bright / top) * 100)}%` }}
+                              data-kind="bright"
+                            />
                           </span>
                           <span className="at-coord">
                             {def.format(Math.round(c.low))} → {def.format(Math.round(c.bright))}
@@ -504,13 +529,13 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
             )}
 
             <TrackerModal
-            store={store}
-            tracker={openId}
-            onClose={closeModal}
-            onSaved={(id) => setNotice(`${trackerDef(id).name} noted on the map.`)}
-          />
+              store={store}
+              tracker={openId}
+              onClose={closeModal}
+              onSaved={(id) => setNotice(`${trackerDef(id).name} noted on the map.`)}
+            />
 
-          <MetricsEntryModal store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
+            <MetricsEntryModal store={store} open={sheetOpen} onClose={() => setSheetOpen(false)} />
 
             <Footer />
           </>

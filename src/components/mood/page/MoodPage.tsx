@@ -234,12 +234,13 @@ function TopBar({ identity }: { identity: MoodPageIdentity }) {
     <header className="flex items-center justify-between gap-4">
       <p className="text-xs text-muted-foreground">{longDate(new Date())}</p>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <NotificationBell className="border-0 bg-transparent hover:bg-secondary" />
+        {/* Phone shell carries the bell and the rewards tab — desktop pair only. */}
+        <NotificationBell className="hidden border-0 bg-transparent hover:bg-secondary lg:grid" />
         <Link
           to="/rewards"
           aria-label="Rewards"
           title="Rewards"
-          className="relative grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="relative hidden h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:grid"
         >
           <Gift className="h-4.5 w-4.5" strokeWidth={1.5} />
         </Link>
