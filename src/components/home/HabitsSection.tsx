@@ -395,9 +395,14 @@ function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconUrl"> 
   return <>{habit.icon}</>;
 }
 
-/** True when the saved icon is the "custom picture went missing" placeholder (or nothing). */
+/**
+ * True when the saved icon can't be shown as a picture: the "custom picture
+ * went missing" placeholder, nothing at all, or a plain word from an old
+ * import ("droplet") — a word rendered raw over the tile reads as a bug, so
+ * the monogram steps in instead.
+ */
 function isMissingIcon(icon: string): boolean {
-  return icon === "" || icon === "🖼️";
+  return icon === "" || icon === "🖼️" || /^[a-z0-9 _-]+$/i.test(icon);
 }
 
 /** First letter of the habit's name — the premium fallback when its picture is missing. */

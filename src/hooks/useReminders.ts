@@ -17,6 +17,9 @@ import { useHabits } from "@/hooks/useHabits";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { useTrackers } from "@/hooks/useTrackers";
 import { getPref, PREFS_CHANGED, setPref } from "@/lib/prefs";
+import { habitStreak } from "@/lib/reminders/streak";
+import { subscribeToPush, unsubscribeFromPush } from "@/lib/reminders/push";
+import { recordNotice } from "@/lib/notifications/center";
 import {
   DEFAULT_REMINDERS,
   loadDelivered,
@@ -122,39 +125,55 @@ export function useReminders(): RemindersStore {
 
   const today = cycle.today;
 
-  const loggedSomethingToday = useMemo(() => {
-    const habitToday = habitsStore.logs.some((l) => l.date === today);
-    const trackerToday = trackers.days.some((d) => d.date === today);
-    const cycleToday = cycle.days.some((d) => d.date === today);
-    return habitToday || trackerToday || cycleToday;
+  const loggedToday = useMemo(() => {
+    const habitCount = habitsStore.logs.filter((l) => l.date === today).length;
+    const trackerCount = trackers.days.filter((d) => d.date === today).length;
+    const cycleCount = cycle.days.filter((d) => d.date === today).length;
+    return habitCount + trackerCount + cycleCount;
   }, [habitsStore.logs, trackers.days, cycle.days, today]);
 
-  const input = useMemo(
-    () => ({
+  const input = useMemo(() => {
+    /* logged dates per habit, so the copy engine can speak real streaks */
+    const datesByHabit = new Map<string, Set<string>>();
+    for (const l of habitsStore.logs) {
+      let set = datesByHabit.get(l.habitId);
+      if (!set) {
+        set = new Set();
+        datesByHabit.set(l.habitId, set);
+      }
+      set.add(l.date);
+    }
+    const empty = new Set<string>();
+    return {
       today,
       now: nowTime(),
       settings,
-      habits: habitsStore.todayHabits.map((h) => ({ habit: h, done: h.done })),
+      habits: habitsStore.todayHabits.map((h) => ({
+        habit: h,
+        done: h.done,
+        streak: habitStreak(datesByHabit.get(h.id) ?? empty, today),
+      })),
       cycle: {
         mode: cycle.mode,
         nextStart: cycle.analysis.nextStart,
         daysLate: cycle.analysis.isLate ? cycle.analysis.lateBy : null,
         fertileStart: cycle.analysis.fertileStart,
+        cycleDay: cycle.analysis.cycleDay,
       },
-      loggedSomethingToday,
-    }),
-    // `tick` is intentionally a dependency: it re-reads the wall clock.
+      loggedToday,
+    };
+    /* `tick` is an intentional dependency: it re-reads the wall clock. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      today,
-      settings,
-      habitsStore.todayHabits,
-      cycle.mode,
-      cycle.analysis,
-      loggedSomethingToday,
-      tick,
-    ],
-  );
+  }, [
+    today,
+    settings,
+    habitsStore.todayHabits,
+    habitsStore.logs,
+    cycle.mode,
+    cycle.analysis,
+    loggedToday,
+    tick,
+  ]);
 
   const preview = useMemo(() => pendingReminders(input, []), [input]);
 
@@ -170,6 +189,14 @@ export function useReminders(): RemindersStore {
         try {
           await show(reminder);
           delivered.current = [...delivered.current, reminder.key];
+          /* the bell remembers what fired, even after the toast is gone */
+          recordNotice({
+            key: reminder.key,
+            kind: reminder.kind,
+            title: reminder.title,
+            body: reminder.body,
+            url: reminder.url,
+          });
         } catch {
           /* the browser refused this one — try again next tick */
         }
@@ -199,19 +226,34 @@ export function useReminders(): RemindersStore {
     }
     if (state !== "granted") return false;
     set("enabled", true);
+    /* Real push for when the app is closed — best effort, never blocks the
+       toggle. Without a VAPID key or a session it quietly does nothing and
+       the in-app scheduler keeps working as before. */
+    void subscribeToPush();
     return true;
   }, [set]);
 
-  const disable = useCallback(() => set("enabled", false), [set]);
+  const disable = useCallback(() => {
+    set("enabled", false);
+    void unsubscribeFromPush();
+  }, [set]);
 
   const test = useCallback(async () => {
     if (permissionOf() !== "granted") return;
-    await show({
+    const reminder = {
       key: `test:${Date.now()}`,
-      kind: "evening",
+      kind: "evening" as const,
       title: "This is what a Bloom reminder looks like",
       body: "You can turn any of these off at any time.",
       at: nowTime(),
+      url: "/",
+    };
+    await show(reminder);
+    recordNotice({
+      key: reminder.key,
+      kind: "system",
+      title: reminder.title,
+      body: reminder.body,
       url: "/",
     });
   }, []);

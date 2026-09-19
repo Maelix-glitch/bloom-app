@@ -13,7 +13,8 @@
  * Rules that keep reminders from becoming noise:
  *   · one notification per reason per day (`key` carries the day);
  *   · a habit that is already ticked today is never reminded about;
- *   · the evening nudge is silent on a day that already has something on it;
+ *   · the evening nudge is silent once a day holds `EVENING_SILENT_MIN_LOGS`
+ *     or more entries — below that it adapts to the count instead;
  *   · nothing fires while the cycle is off, and nothing cycle-related fires
  *     while it is paused;
  *   · nothing is ever shown for a time still in the future, or more than
@@ -51,6 +52,14 @@ export interface ReminderSettings {
 }
 
 export const REMINDERS_PREF = "reminders.settings";
+
+/**
+ * The evening nudge still fires on lightly-logged days so it can say "you've
+ * logged 2 things — round it off?", but once a day holds this many entries it
+ * stays silent: a captured day doesn't need a comment. The product dial for
+ * "never nag".
+ */
+export const EVENING_SILENT_MIN_LOGS = 3;
 
 export const DEFAULT_REMINDERS: ReminderSettings = {
   enabled: false,
@@ -97,8 +106,9 @@ export interface ReminderInput {
   /** Local `HH:MM` right now. */
   now: string;
   settings: ReminderSettings;
-  /** Habits due today with a reminder time, and whether they're already done. */
-  habits: readonly { habit: Habit; done: boolean }[];
+  /** Habits due today with a reminder time, whether they're done, and the
+      live streak (consecutive days, 0 when there is no run). */
+  habits: readonly { habit: Habit; done: boolean; streak?: number }[];
   cycle: {
     mode: CycleMode;
     /** The engine's predicted next start, when it is confident enough to say. */
@@ -107,9 +117,11 @@ export interface ReminderInput {
     daysLate: number | null;
     /** First day of the fertile window, when there is one. */
     fertileStart: string | null;
+    /** Current cycle day, when the engine knows it. */
+    cycleDay?: number | null;
   };
-  /** True when anything at all has been logged today. */
-  loggedSomethingToday: boolean;
+  /** How many things have been logged today (habits + trackers + cycle). */
+  loggedToday: number;
 }
 
 const dayBefore = (date: string, days: number): string => {
@@ -128,6 +140,7 @@ export function dueReminders(input: ReminderInput): Reminder[] {
   if (!settings.enabled) return [];
 
   const nowMin = minutesOf(now);
+  const hourOfDay = Math.floor(nowMin / 60);
   const out: Reminder[] = [];
   const push = (r: Reminder) => {
     const at = minutesOf(r.at);
@@ -137,12 +150,13 @@ export function dueReminders(input: ReminderInput): Reminder[] {
   };
 
   if (settings.habits) {
-    for (const { habit, done } of input.habits) {
+    for (const { habit, done, streak } of input.habits) {
       if (done || !habit.reminderTime || !isValidTime(habit.reminderTime)) continue;
       const key = `habit:${habit.id}:${today}`;
-      /* No streak is plumbed through ReminderInput yet, so the copy engine uses
-         its "fresh" branch rather than inventing a run that isn't in the data. */
-      const copy = reminderCopy({ kind: "habit", habitName: habit.name }, key);
+      const copy = reminderCopy(
+        { kind: "habit", habitName: habit.name, streak: streak ?? 0, hourOfDay },
+        key,
+      );
       push({
         key,
         kind: "habit",
@@ -156,20 +170,20 @@ export function dueReminders(input: ReminderInput): Reminder[] {
 
   const cycleOn = input.cycle.mode === "tracking";
   if (settings.cycle && cycleOn) {
-    const { nextStart, daysLate, fertileStart } = input.cycle;
+    const { nextStart, daysLate, fertileStart, cycleDay } = input.cycle;
     if (daysLate !== null && daysLate > 0) {
       const key = `period-late:${today}`;
-      const copy = reminderCopy({ kind: "period", daysLate }, key);
+      const copy = reminderCopy({ kind: "period", daysLate, cycleDay: cycleDay ?? undefined }, key);
       push({ key, kind: "period", title: copy.title, body: copy.body, at: "09:00", url: "/cycle" });
     } else if (nextStart && nextStart === dayBefore(today, -PERIOD_LEAD_DAYS)) {
       /* today is PERIOD_LEAD_DAYS before the predicted start */
       const key = `period-soon:${today}`;
-      const copy = reminderCopy({ kind: "period" }, key);
+      const copy = reminderCopy({ kind: "period", cycleDay: cycleDay ?? undefined }, key);
       push({ key, kind: "period", title: copy.title, body: copy.body, at: "09:00", url: "/cycle" });
     }
     if (fertileStart && fertileStart === today) {
       const key = `fertile:${today}`;
-      const copy = reminderCopy({ kind: "fertile" }, key);
+      const copy = reminderCopy({ kind: "fertile", cycleDay: cycleDay ?? undefined }, key);
       push({
         key,
         kind: "fertile",
@@ -181,9 +195,13 @@ export function dueReminders(input: ReminderInput): Reminder[] {
     }
   }
 
-  if (settings.evening && !input.loggedSomethingToday && isValidTime(settings.eveningTime)) {
+  if (
+    settings.evening &&
+    input.loggedToday < EVENING_SILENT_MIN_LOGS &&
+    isValidTime(settings.eveningTime)
+  ) {
     const key = `evening:${today}`;
-    const copy = reminderCopy({ kind: "evening", loggedToday: 0 }, key);
+    const copy = reminderCopy({ kind: "evening", loggedToday: input.loggedToday, hourOfDay }, key);
     push({
       key,
       kind: "evening",

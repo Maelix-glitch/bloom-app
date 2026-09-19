@@ -14,7 +14,7 @@
  */
 
 import { AnimatePresence, motion } from "motion/react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { Welcome } from "@/components/welcome/Welcome";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
@@ -26,10 +26,15 @@ export function WelcomeGate() {
   const { needsWelcome, finish, skipAsAdmin } = useOnboarding();
   const adminAccess = useAdminAccess();
   const navigate = useNavigate();
+  /* Legal pages are public by definition: someone reading the privacy page
+     must never be covered by onboarding first. */
+  const onLegalPage = useRouterState({
+    select: (s) => s.location.pathname === "/privacy" || s.location.pathname === "/terms",
+  });
 
   return (
     <AnimatePresence>
-      {needsWelcome && (
+      {needsWelcome && !onLegalPage && (
         <motion.div
           key="welcome"
           initial={{ opacity: 1 }}

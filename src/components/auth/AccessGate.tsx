@@ -26,9 +26,10 @@
 
 import { useCallback, useReducer, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 
-import { BloomMark } from "@/components/home/HomeSidebar";
+import { BloomLogo } from "@/components/BloomLogo";
 import { useInviteAccess } from "@/hooks/useInviteAccess";
 import {
   authReducer,
@@ -114,7 +115,8 @@ export function AccessGate() {
     <div className="ag-root">
       <div className="ag-panel">
         <div className="ag-mark">
-          <BloomMark size={26} id="bloomBrandGradientAccess" />
+          {/* The favicon itself — the tile the browser tab shows — at 46px. */}
+          <BloomLogo size={46} tile />
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
@@ -233,6 +235,20 @@ export function AccessGate() {
         {hasSupabaseConfig
           ? "Invitations are private. We only use your email to sign you in."
           : "This copy of Bloom has no account system connected."}
+      </p>
+      <p className="ag-foot mt-1 flex justify-center gap-4">
+        <Link
+          to="/privacy"
+          className="underline underline-offset-2 opacity-70 transition-opacity hover:opacity-100"
+        >
+          Privacy
+        </Link>
+        <Link
+          to="/terms"
+          className="underline underline-offset-2 opacity-70 transition-opacity hover:opacity-100"
+        >
+          Terms
+        </Link>
       </p>
     </div>
   );

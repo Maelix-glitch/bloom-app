@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, Droplet, Loader2, Plus, Smile } from "lucide-react";
+import { CalendarRange, Droplet, Gift, Loader2, Plus, Smile } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
+import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { useEverReady } from "@/hooks/useEverReady";
 import { CoachPanel } from "@/components/home/CoachPanel";
 import { HabitsSection } from "@/components/home/HabitsSection";
@@ -399,20 +400,25 @@ function TodayPage() {
               <span className="ml-3 hidden text-faint sm:inline">· {syncLine}</span>
             ) : null}
           </p>
-          <Link
-            to="/rewards"
-            aria-label="Rewards"
-            title="Rewards"
-            className="relative grid size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <Bell className="size-4" />
-            {habits.points !== null && habits.points > 0 ? (
-              <span
-                className="absolute right-2 top-2 size-1.5 rounded-full"
-                style={{ background: "var(--home-cycle)" }}
-              />
-            ) : null}
-          </Link>
+          {/* The phone shell already carries the bell (header) and rewards
+              (tab bar) — the toolbar pair is a desktop affordance. */}
+          <div className="hidden items-center gap-2 lg:flex">
+            <NotificationBell className="hidden lg:grid" />
+            <Link
+              to="/rewards"
+              aria-label="Rewards"
+              title="Rewards"
+              className="relative hidden size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground lg:grid"
+            >
+              <Gift className="size-4" />
+              {habits.points !== null && habits.points > 0 ? (
+                <span
+                  className="absolute right-2 top-2 size-1.5 rounded-full"
+                  style={{ background: "var(--home-cycle)" }}
+                />
+              ) : null}
+            </Link>
+          </div>
         </div>
 
         <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -441,6 +447,10 @@ function TodayPage() {
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
               </button>
+              <Link to="/report" className="home-chip">
+                <CalendarRange className="size-4" style={{ color: "var(--home-mood)" }} />
+                Weekly report
+              </Link>
               <Link to="/rewards" className="home-chip">
                 <RankChip points={habits.points} />
               </Link>

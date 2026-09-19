@@ -61,12 +61,12 @@
   --ci-menstrual: var(--tk2-ring-screen);
 
   /* six vibrant neon rings */
-  --tk2-ring-sleep: #af52ff;
-  --tk2-ring-water: #00f0ff;
-  --tk2-ring-movement: #00e676;
-  --tk2-ring-energy: #ffea00;
-  --tk2-ring-screen: #ff0055;
-  --tk2-ring-study: #0066ff;
+  --tk2-ring-sleep: #8b87d9;
+  --tk2-ring-water: #7fb4d9;
+  --tk2-ring-movement: #7fa88f;
+  --tk2-ring-energy: #e8b75e;
+  --tk2-ring-screen: #c9788c;
+  --tk2-ring-study: #7c93c4;
 
   --tk2-rule: var(--glass-border-rim);
   --tk2-soft: var(--text-cool-silver);
@@ -1942,29 +1942,29 @@
 
 [data-design="atlas"] .at-arc[data-id="sleep"] {
   stroke: var(--tk2-ring-sleep);
-  filter: drop-shadow(0 0 8px var(--tk2-ring-sleep));
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-sleep) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="water"] {
   stroke: var(--tk2-ring-water);
-  filter: drop-shadow(0 0 8px var(--tk2-ring-water));
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-water) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="movement"] {
   stroke: var(--tk2-ring-movement);
-  filter: drop-shadow(0 0 8px var(--tk2-ring-movement));
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-movement) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="screen"] {
   stroke: var(--tk2-ring-screen);
-  filter: drop-shadow(0 0 8px var(--tk2-ring-screen));
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-screen) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="study"] {
   stroke: var(--tk2-ring-study);
   stroke-width: 7;
-  filter: drop-shadow(0 0 8px var(--tk2-ring-study));
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-study) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="energy"] {
   stroke: var(--tk2-ring-energy);
   stroke-width: 6;
-  filter: drop-shadow(0 0 8px var(--tk2-ring-energy));
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-energy) 45%, transparent));
 }
 
 [data-design="atlas"] .at-cap {
@@ -2586,8 +2586,8 @@
 
 @media (max-width: 639px) {
   .premium-log-cta {
-    padding: 14px 26px;
-    font-size: 0.72rem;
+    padding: 12px 22px;
+    font-size: 0.8rem;
     max-width: calc(100dvw - 32px);
     white-space: nowrap;
     overflow: hidden;
@@ -2597,26 +2597,22 @@
 
 .premium-log-cta {
   pointer-events: auto;
-  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
-  color: #ffffff;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.78rem;
-  padding: 16px 38px;
-  border-radius: 40px;
-  border: 1px solid rgba(255, 0, 85, 0.6);
-  box-shadow:
-    0 0 24px rgba(255, 0, 85, 0.5),
-    0 12px 32px rgba(255, 0, 85, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 550;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.85rem;
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .premium-log-cta:hover {
-  transform: scale(1.04);
-  box-shadow: 0 18px 40px rgba(212, 175, 55, 0.35);
+  opacity: 0.92;
 }
 
 .premium-log-cta:active {

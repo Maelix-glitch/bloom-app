@@ -87,3 +87,29 @@
     animation: none;
   }
 }
+
+/* The folded state: the promise stays visible as a quiet chip, never on top
+   of the content. Same amber, same corner, one tap to reopen. */
+.conn-notice-chip {
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 1900;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  color: #e3c187;
+  border: 1px solid color-mix(in oklab, #e3c187 32%, transparent);
+  background: color-mix(in oklab, #14110c 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.9);
+  animation: conn-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (max-width: 1023px) {
+  .conn-notice-chip {
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+}
