@@ -2993,9 +2993,11 @@
     right: auto !important;
     top: 50% !important;
     bottom: auto !important;
-    /* transform fallback alongside translate, for engines without it. */
+    /* `!important` beats Motion's inline transform on this panel, so this rule
+       is the one that actually centres it. A standalone `translate` beside it
+       would be folded into the same transform at build time and double the
+       offset — down-right by a whole sheet. */
     transform: translate(-50%, -50%) !important;
-    translate: -50% -50% !important;
     width: calc(100% - 32px) !important;
     max-width: 480px !important;
     max-height: 70vh !important;
