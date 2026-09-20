@@ -122,7 +122,7 @@ function SectionHead({
 }) {
   return (
     <div className="ncenter-head">
-      <span className="ncenter-head-orb" data-tint={tint} aria-hidden="true">
+      <span className="ncenter-orb ncenter-orb--head" data-tint={tint} aria-hidden="true">
         <Icon />
       </span>
       <h3 id={id} className="ncenter-head-title">
@@ -151,7 +151,7 @@ function Empty({
 }) {
   return (
     <div className="ncenter-empty">
-      <span className="ncenter-empty-orb" data-tint={tint} aria-hidden="true">
+      <span className="ncenter-orb ncenter-orb--empty" data-tint={tint} aria-hidden="true">
         <Icon />
       </span>
       <p className="ncenter-empty-title">{title}</p>
@@ -220,7 +220,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
             </div>
             <div className="ncenter-topbar">
               <span
-                className="bloom-icon-btn bloom-bell ncenter-orb"
+                className="bloom-icon-btn bloom-bell ncenter-hero-orb"
                 data-unread={waiting > 0}
                 aria-hidden="true"
               >
@@ -271,11 +271,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
                     return (
                       <li key={r.key}>
                         <Link to={r.url} onClick={close} className="ncenter-row">
-                          <span
-                            className="ncenter-row-orb"
-                            data-tint={meta.tint}
-                            aria-hidden="true"
-                          >
+                          <span className="ncenter-orb" data-tint={meta.tint} aria-hidden="true">
                             <RowIcon />
                           </span>
                           <span className="ncenter-row-text">
@@ -319,7 +315,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
                   {insights.map((i) => (
                     <li key={i.id}>
                       <Link to="/cycle" onClick={close} className="ncenter-row">
-                        <span className="ncenter-row-orb" data-tint="violet" aria-hidden="true">
+                        <span className="ncenter-orb" data-tint="violet" aria-hidden="true">
                           <Sparkles />
                         </span>
                         <span className="ncenter-row-text">
@@ -383,7 +379,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
                                 data-unread={!n.read}
                               >
                                 <span
-                                  className="ncenter-row-orb"
+                                  className="ncenter-orb"
                                   data-tint={meta.tint}
                                   aria-hidden="true"
                                 >
@@ -468,6 +464,13 @@ export function BellGlyph({ unread }: { unread: boolean }) {
 export function NotificationBell({ className }: { className?: string | undefined }) {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
+  /*
+   * The sheet mounts on first open and stays mounted after — two bells share
+   * every page, so the closed sheet's engines shouldn't run twice from boot.
+   * Staying mounted keeps the close animation intact.
+   */
+  const [everOpen, setEverOpen] = useState(open);
+  if (open && !everOpen) setEverOpen(true);
   /** Bumped on every new arrival so the swing replays exactly once. */
   const [ringKey, setRingKey] = useState(0);
   const prevUnread = useRef(0);
@@ -507,7 +510,7 @@ export function NotificationBell({ className }: { className?: string | undefined
           </span>
         ) : null}
       </span>
-      <NotificationCenter open={open} onClose={() => setOpen(false)} />
+      {everOpen ? <NotificationCenter open={open} onClose={() => setOpen(false)} /> : null}
     </>
   );
 }

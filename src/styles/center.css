@@ -76,11 +76,11 @@
 }
 
 /* the bell, resting — the same glass disc as the header, larger, decorative */
-.ncenter-orb {
+.ncenter-hero-orb {
   --bib-size: 54px;
   pointer-events: none;
 }
-.ncenter-orb .bloom-bell__glyph {
+.ncenter-hero-orb .bloom-bell__glyph {
   width: 26px;
   height: 26px;
 }
@@ -120,24 +120,35 @@
   padding-inline: 4px;
 }
 
-.ncenter-head-orb {
+/* One medallion for every orb in the sheet — head, rows, empties. Size and
+   corner via vars so a tweak lands everywhere at once. */
+.ncenter-orb {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 38%, transparent);
+  flex: none;
+  width: var(--nc-orb, 38px);
+  height: var(--nc-orb, 38px);
+  border-radius: var(--nc-orb-radius, 999px);
+  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 36%, transparent);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent 55%),
-    color-mix(in oklab, var(--nc-tint, var(--gold)) 15%, transparent);
-  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 72%, #fff);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 6px 16px -10px color-mix(in oklab, var(--nc-tint, var(--gold)) 60%, transparent);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 55%),
+    color-mix(in oklab, var(--nc-tint, var(--gold)) 14%, transparent);
+  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 74%, #fff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-.ncenter-head-orb svg {
-  width: 16px;
-  height: 16px;
+.ncenter-orb svg {
+  width: var(--nc-orb-icon, 17px);
+  height: var(--nc-orb-icon, 17px);
+}
+.ncenter-orb--head {
+  --nc-orb: 34px;
+  --nc-orb-radius: 12px;
+  --nc-orb-icon: 16px;
+}
+.ncenter-orb--empty {
+  --nc-orb: 46px;
+  --nc-orb-icon: 20px;
 }
 
 .ncenter-head-title {
@@ -215,27 +226,8 @@ a.ncenter-row:focus-visible {
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent);
 }
 
-.ncenter-row-orb {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 36%, transparent);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 55%),
-    color-mix(in oklab, var(--nc-tint, var(--gold)) 14%, transparent);
-  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 74%, #fff);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-.ncenter-row-orb svg {
-  width: 17px;
-  height: 17px;
-}
-
 /* the bell badge's little sibling — unread rows wear the gold dot */
-.ncenter-row[data-unread="true"] .ncenter-row-orb::after {
+.ncenter-row[data-unread="true"] .ncenter-orb::after {
   content: "";
   position: absolute;
   top: 1px;
@@ -361,23 +353,8 @@ a.ncenter-row:hover .ncenter-go {
   border: 1px dashed color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--surface-2) 38%, transparent);
 }
-.ncenter-empty-orb {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
+.ncenter-empty .ncenter-orb {
   margin-bottom: 4px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 34%, transparent);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 55%),
-    color-mix(in oklab, var(--nc-tint, var(--gold)) 12%, transparent);
-  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 70%, #fff);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-.ncenter-empty-orb svg {
-  width: 20px;
-  height: 20px;
 }
 .ncenter-empty-title {
   font-family: var(--font-display);
@@ -411,34 +388,22 @@ a.ncenter-row:hover .ncenter-go {
 
 /* ------------------------------------------------------------ tints */
 
-.ncenter-head-orb[data-tint="gold"],
-.ncenter-row-orb[data-tint="gold"],
-.ncenter-empty-orb[data-tint="gold"] {
+.ncenter-orb[data-tint="gold"] {
   --nc-tint: var(--gold);
 }
-.ncenter-head-orb[data-tint="violet"],
-.ncenter-row-orb[data-tint="violet"],
-.ncenter-empty-orb[data-tint="violet"] {
+.ncenter-orb[data-tint="violet"] {
   --nc-tint: var(--violet);
 }
-.ncenter-head-orb[data-tint="sage"],
-.ncenter-row-orb[data-tint="sage"],
-.ncenter-empty-orb[data-tint="sage"] {
+.ncenter-orb[data-tint="sage"] {
   --nc-tint: var(--sage);
 }
-.ncenter-head-orb[data-tint="rose"],
-.ncenter-row-orb[data-tint="rose"],
-.ncenter-empty-orb[data-tint="rose"] {
+.ncenter-orb[data-tint="rose"] {
   --nc-tint: var(--rose);
 }
-.ncenter-head-orb[data-tint="amber"],
-.ncenter-row-orb[data-tint="amber"],
-.ncenter-empty-orb[data-tint="amber"] {
+.ncenter-orb[data-tint="amber"] {
   --nc-tint: var(--amber);
 }
-.ncenter-head-orb[data-tint="sky"],
-.ncenter-row-orb[data-tint="sky"],
-.ncenter-empty-orb[data-tint="sky"] {
+.ncenter-orb[data-tint="sky"] {
   --nc-tint: var(--sky);
 }
 
