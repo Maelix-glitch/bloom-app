@@ -235,14 +235,14 @@ function TopBar({ identity }: { identity: MoodPageIdentity }) {
       <p className="text-xs text-muted-foreground">{longDate(new Date())}</p>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {/* Phone shell carries the bell and the rewards tab — desktop pair only. */}
-        <NotificationBell className="hidden border-0 bg-transparent hover:bg-secondary lg:grid" />
+        <NotificationBell className="hidden lg:grid" />
         <Link
           to="/rewards"
           aria-label="Rewards"
           title="Rewards"
-          className="relative hidden h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:grid"
+          className="bloom-icon-btn hidden lg:grid"
         >
-          <Gift className="h-4.5 w-4.5" strokeWidth={1.5} />
+          <Gift className="size-[18px]" strokeWidth={1.75} />
         </Link>
         <Link
           to="/profile"
@@ -254,7 +254,7 @@ function TopBar({ identity }: { identity: MoodPageIdentity }) {
             name={identity.displayName ?? "Bloom"}
             avatarPath={identity.avatarPath}
             accent={identity.accent}
-            size={36}
+            size={40}
           />
         </Link>
       </div>

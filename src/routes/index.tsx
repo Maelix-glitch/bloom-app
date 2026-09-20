@@ -451,14 +451,11 @@ function TodayPage() {
               to="/rewards"
               aria-label="Rewards"
               title="Rewards"
-              className="relative hidden size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground lg:grid"
+              className="bloom-icon-btn hidden lg:grid"
             >
-              <Gift className="size-4" />
+              <Gift className="size-[18px]" strokeWidth={1.75} />
               {habits.points !== null && habits.points > 0 ? (
-                <span
-                  className="absolute right-2 top-2 size-1.5 rounded-full"
-                  style={{ background: "var(--home-cycle)" }}
-                />
+                <span className="bloom-icon-btn__dot" aria-hidden="true" />
               ) : null}
             </Link>
           </div>

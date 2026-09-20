@@ -209,13 +209,10 @@ export function HomeMobileBar() {
           to="/profile"
           aria-label="Your profile"
           aria-current={profileActive ? "page" : undefined}
-          className={`grid size-9 place-items-center rounded-full border transition-colors ${
-            profileActive
-              ? "border-primary/50 text-foreground"
-              : "border-border text-muted-foreground hover:text-foreground"
-          }`}
+          data-active={profileActive}
+          className="bloom-icon-btn"
         >
-          <UserRound className="size-4" />
+          <UserRound className="size-[18px]" strokeWidth={1.75} />
         </Link>
       </div>
     </div>

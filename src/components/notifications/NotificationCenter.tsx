@@ -10,9 +10,9 @@
  * the app on phone and desktop alike.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { AlarmClock, Bell, BellRing, Sparkles, Trash2 } from "lucide-react";
+import { AlarmClock, BellRing, Sparkles, Trash2 } from "lucide-react";
 
 import { BloomSheet, SheetBody } from "@/components/ui/bloom-sheet";
 import { useCycleSystem } from "@/hooks/useCycleSystem";
@@ -198,35 +198,84 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
   );
 }
 
-/** The bell itself — a quiet dot when something is unread. */
+/**
+ * The bell itself — a frosted glass disc with a custom-drawn bell, a glossy
+ * gold count pill while something waits, and a single soft ring each time a
+ * new notification arrives. The one bell every header shares, so it looks
+ * identical on the phone bar, the Today toolbar and the Mood top bar.
+ *
+ * `className` carries layout utilities only (`hidden lg:grid`) — the bell's
+ * own visuals live in src/styles/bell.css and never vary by page.
+ */
 export function NotificationBell({ className }: { className?: string | undefined }) {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
+  /** Bumped on every new arrival so the swing replays exactly once. */
+  const [ringKey, setRingKey] = useState(0);
+  const prevUnread = useRef(0);
+  /* The dome's gold gradient is per-instance — two bells share a page. */
+  const goldId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
 
   useEffect(() => {
-    const sync = () => setUnread(unreadCount());
+    const sync = () => {
+      const next = unreadCount();
+      setUnread(next);
+      if (next > prevUnread.current) setRingKey((k) => k + 1);
+      prevUnread.current = next;
+    };
     sync();
     window.addEventListener(CENTER_CHANGED, sync);
     return () => window.removeEventListener(CENTER_CHANGED, sync);
   }, []);
 
+  const hasUnread = unread > 0;
+
   return (
     <>
-      <button
-        type="button"
-        aria-label="Notifications"
-        title="Notifications"
-        onClick={() => setOpen(true)}
-        className={cn(
-          "relative grid size-9 place-items-center rounded-full border border-border bg-surface-2/50 text-muted-foreground transition-colors hover:text-foreground",
-          className,
-        )}
-      >
-        {unread > 0 ? <BellRing className="size-4" /> : <Bell className="size-4" />}
-        {unread > 0 ? (
-          <span className="absolute right-2 top-2 size-1.5 rounded-full bg-[#E8B75E]" />
+      <span className={cn("bloom-bell-wrap", className)} data-unread={hasUnread}>
+        <button
+          type="button"
+          aria-label={hasUnread ? `Notifications, ${unread} unread` : "Notifications"}
+          title="Notifications"
+          onClick={() => setOpen(true)}
+          data-unread={hasUnread}
+          className="bloom-icon-btn bloom-bell"
+        >
+          <span key={ringKey} data-ring={hasUnread} className="bloom-bell__swing">
+            <svg
+              viewBox="0 0 24 24"
+              className="bloom-bell__glyph"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <defs>
+                <linearGradient id={goldId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#F8E0A4" />
+                  <stop offset="0.45" stopColor="#EFBE60" />
+                  <stop offset="1" stopColor="#D6932B" />
+                </linearGradient>
+              </defs>
+              <g>
+                <circle cx="12" cy="4" r="1.1" className="bloom-bell__knob" />
+                <path
+                  d="M12 5.1c-3.6 0-5.9 2.5-5.9 6.1 0 3.3-1.15 5-2.05 6-.32.36-.02.9.45.9h15c.47 0 .77-.54.45-.9-.9-1-2.05-2.7-2.05-6 0-3.6-2.3-6.1-5.9-6.1Z"
+                  className="bloom-bell__shell"
+                  fill={hasUnread ? `url(#${goldId})` : undefined}
+                />
+              </g>
+              <g className="bloom-bell__clapper">
+                <path d="M12 18.1v.9" className="bloom-bell__stem" />
+                <circle cx="12" cy="20.4" r="1.4" className="bloom-bell__ball" />
+              </g>
+            </svg>
+          </span>
+        </button>
+        {hasUnread ? (
+          <span key={unread} aria-hidden="true" className="bloom-bell__badge">
+            {unread > 99 ? "99+" : unread}
+          </span>
         ) : null}
-      </button>
+      </span>
       <NotificationCenter open={open} onClose={() => setOpen(false)} />
     </>
   );
