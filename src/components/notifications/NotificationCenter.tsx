@@ -204,7 +204,13 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
   const groups = useMemo(() => groupNotices(notices.slice(0, 30)), [notices]);
 
   return (
-    <BloomSheet open={open} onClose={close} title="Notifications" size="md">
+    <BloomSheet
+      open={open}
+      onClose={close}
+      title="Notifications"
+      size="md"
+      className="ncenter-sheet"
+    >
       <div className="bsheet-scroll">
         <SheetBody className="ncenter">
           {/* ---------------------------------------------------------- hero */}

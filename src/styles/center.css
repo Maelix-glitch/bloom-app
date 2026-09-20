@@ -442,6 +442,40 @@ a.ncenter-row:hover .ncenter-go {
   --nc-tint: var(--sky);
 }
 
+/* ------------------------------------------------------------ width */
+
+/*
+ * A notification list wants a narrow column, not a wide card: 440px on
+ * desktop reads like a notification center instead of a stretched dialog.
+ * Phones are untouched — the bottom sheet already owns the width.
+ */
+.bsheet--card.ncenter-sheet {
+  max-width: 440px;
+}
+
+/*
+ * Small phones (320–360px): the rows keep every element, just tightened —
+ * orb, text, time and chevron all stay on one line, nothing escapes the card.
+ */
+@media (max-width: 360px) {
+  .ncenter-hero {
+    padding-inline: 16px;
+  }
+  .ncenter-section {
+    margin-inline: 10px;
+  }
+  .ncenter-row {
+    gap: 10px;
+    padding: 9px 10px 9px 9px;
+  }
+  .ncenter-row-aside {
+    gap: 5px;
+  }
+  .ncenter-foot {
+    margin-inline: 14px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ncenter-art img {
     animation: none;

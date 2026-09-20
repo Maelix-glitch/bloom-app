@@ -125,6 +125,8 @@ describe("NotificationCenter", () => {
     render(<NotificationCenter open onClose={() => {}} />);
     // the visible hero title (Radix also renders an sr-only twin for AT)
     expect(document.querySelector("h2.ncenter-title")?.textContent).toBe("Notifications");
+    // the narrow notification-column panel, not the wide default card
+    expect(document.querySelector(".bsheet.ncenter-sheet")).not.toBeNull();
     expect(screen.getByText("2 waiting for you.")).toBeDefined();
     expect(screen.getByRole("button", { name: "Close notifications" })).toBeDefined();
   });
