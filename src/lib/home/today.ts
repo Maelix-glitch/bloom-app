@@ -599,22 +599,48 @@ export function focusOf(input: {
   trackers: TrackerAnalysis;
   cycle: CycleAnalysis;
   cycleMode?: CycleMode | undefined;
+  /** Their own "ease this week" opt-in — see CycleSettings.easeBeforePeriod. */
+  easeBeforePeriod?: boolean | undefined;
 }): FocusItem[] {
   const { habits, mood, trackers, cycle } = input;
   const cycleMode = input.cycleMode ?? "tracking";
   const out: FocusItem[] = [];
 
+  /* The ease window: the estimated pre-period days. Their preference, their
+     window — off by default, and nothing here touches the record. */
+  const inEaseWindow =
+    cycle.expecting &&
+    cycle.daysUntilNext !== null &&
+    cycle.daysUntilNext >= 0 &&
+    cycle.daysUntilNext <= 2;
+
   const openHabits = [...habits]
     .filter((h) => !h.done)
     .sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
-  for (const h of openHabits.slice(0, 2)) {
+
+  const easing = input.easeBeforePeriod === true && inEaseWindow && openHabits.length >= 2;
+  for (const h of openHabits.slice(0, easing ? 1 : 2)) {
     out.push({
       id: `habit-${h.id}`,
       title: h.name,
-      sub: h.reminderTime ? `Around ${h.reminderTime}` : "Today",
+      sub: h.reminderTime
+        ? `Around ${h.reminderTime}`
+        : easing
+          ? "The one that matters most today"
+          : "Today",
       kind: "habit",
       done: false,
       habitId: h.id,
+    });
+  }
+  if (easing) {
+    out.push({
+      id: "cycle-ease",
+      title: "Ease is on — one habit is enough today",
+      sub: "Pre-period days · change it on the Cycle page",
+      kind: "cycle",
+      done: false,
+      to: "/cycle",
     });
   }
 

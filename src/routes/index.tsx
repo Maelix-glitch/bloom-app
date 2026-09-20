@@ -41,6 +41,7 @@ import {
   scoreOf,
 } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
+import { CYCLE_SETTINGS_CHANGED, loadCycleSettings } from "@/lib/cycle/periodStore";
 import { readPersonalVoice } from "@/lib/voice/personal";
 import { PhaseCard } from "@/components/home/PhaseCard";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
@@ -290,6 +291,15 @@ function TodayPage() {
     [habits.todayHabits, moodEntry, trackers.analysis, now, flowTimes.times],
   );
 
+  /* Their "ease this week" opt-in — live, and re-read when the Cycle page or
+     another tab changes it (the store announces the change). */
+  const [easePref, setEasePref] = useState(() => loadCycleSettings().easeBeforePeriod === true);
+  useEffect(() => {
+    const reread = () => setEasePref(loadCycleSettings().easeBeforePeriod === true);
+    window.addEventListener(CYCLE_SETTINGS_CHANGED, reread);
+    return () => window.removeEventListener(CYCLE_SETTINGS_CHANGED, reread);
+  }, []);
+
   const focus = useMemo(
     () =>
       focusOf({
@@ -298,8 +308,16 @@ function TodayPage() {
         trackers: trackers.analysis,
         cycle: cycle.analysis,
         cycleMode: effectiveCycleMode,
+        easeBeforePeriod: easePref,
       }),
-    [habits.todayHabits, moodEntry, trackers.analysis, cycle.analysis, effectiveCycleMode],
+    [
+      habits.todayHabits,
+      moodEntry,
+      trackers.analysis,
+      cycle.analysis,
+      effectiveCycleMode,
+      easePref,
+    ],
   );
 
   const insights = useMemo(

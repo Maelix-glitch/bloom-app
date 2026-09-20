@@ -55,6 +55,7 @@ export function CoachThread({
   welcomeMemory,
   onStart,
   onRetry,
+  onOfflineAnswer,
   onRegenerate,
   onTellMeMore,
   onMakePlan,
@@ -77,6 +78,8 @@ export function CoachThread({
   welcomeMemory?: string | null | undefined;
   onStart: (starter: Starter) => void;
   onRetry: (message: CoachMessage) => void;
+  /** Offered on failed sends: answer the question from the on-device engine. */
+  onOfflineAnswer?: ((message: CoachMessage) => void) | undefined;
   onRegenerate: (message: CoachMessage) => void;
   onTellMeMore: () => void;
   onMakePlan: () => void;
@@ -177,6 +180,11 @@ export function CoachThread({
                 message={message}
                 fresh={fresh}
                 onRetry={message.status === "error" ? () => onRetry(message) : undefined}
+                onOfflineAnswer={
+                  message.status === "error" && onOfflineAnswer
+                    ? () => onOfflineAnswer(message)
+                    : undefined
+                }
                 onRegenerate={
                   isLastCoachMessage && message.status !== "error"
                     ? () => onRegenerate(message)

@@ -198,8 +198,9 @@ function providerOrder(): ProviderId[] {
   const configured = (Deno.env.get("COACH_PROVIDER_ORDER") ?? "")
     .split(",")
     .map((id) => id.trim())
-    .filter((id): id is ProviderId =>
-      id === "gemini" || id === "grok" || id === "apinex" || id === "huggingface-qwen",
+    .filter(
+      (id): id is ProviderId =>
+        id === "gemini" || id === "grok" || id === "apinex" || id === "huggingface-qwen",
     );
   return configured.length > 0 ? configured : PROVIDER_ORDER_DEFAULT;
 }
@@ -365,7 +366,6 @@ class EmptyError extends Error {
    personality is ever introduced here.
    ========================================================================== */
 
-   
 /** Gemini (Google) — native generateContent, vision-capable, with native
     function declarations mirrored from BLOOM_TOOLS. */
 async function callGemini(
@@ -491,7 +491,8 @@ const BLOOM_TOOLS = [
     type: "function",
     function: {
       name: "log_tracker",
-      description: "Log one numeric value for a daily tracker (sleep/movement/screen minutes, water ml, energy 1-5).",
+      description:
+        "Log one numeric value for a daily tracker (sleep/movement/screen minutes, water ml, energy 1-5).",
       parameters: {
         type: "object",
         properties: {
@@ -686,9 +687,12 @@ function factsToPrompt(facts: any): string {
   }
 
   /* What the phase means — population science, hedged, so the coach can
-     explain a luteal dip or a menstrual fortnight without diagnosing. */
+     explain a luteal dip or a menstrual fortnight without diagnosing. The
+     lookup normalizes the label: clients have spelled the fertile window
+     both "Ovulation" and "Ovulation window", and the science must survive
+     either. */
   if (facts.cycle && !facts.cycle.paused && facts.cycle.phase) {
-    lines.push(PHASE_GUIDANCE[facts.cycle.phase] ?? "");
+    lines.push(phaseGuidanceFor(facts.cycle.phase) ?? "");
   }
   return lines.join("\n");
 }
@@ -697,15 +701,25 @@ function factsToPrompt(facts: any): string {
    phase, phrased the way the evidence supports — real effects on average,
    small and individual in practice, never a diagnosis, never destiny. */
 const PHASE_GUIDANCE: Record<string, string> = {
-  Menstrual:
+  menstrual:
     "PHASE SCIENCE (menstrual): prostaglandin-driven cramps and blood loss commonly lower energy and raise sleep need; iron loss can add mid-cycle tiredness. Rest here does real work. Frame as 'many people', never 'you will'.",
-  Follicular:
+  follicular:
     "PHASE SCIENCE (follicular): rising oestrogen is commonly associated with better energy, focus, mood and recovery. A good stretch for ambitious plans — described as a tendency, not a guarantee.",
-  Ovulation:
+  ovulation:
     "PHASE SCIENCE (ovulation window): oestrogen peaks then falls; some feel a clear lift, others mostly the far-side dip. The calendar window is an estimate, not a promise — useful for awareness only.",
-  Luteal:
+  luteal:
     "PHASE SCIENCE (luteal): progesterone raises core temperature, can fragment sleep slightly, and pulls mood and energy down for many as the period approaches — typical biology first, a concern only if severe or disruptive. Appetite and cravings rising here have a physiological side too. Never suggest a phase explains everything: individual variation is wide, and a bad day can just be a bad day.",
 };
+
+/** "Ovulation window" / "Late luteal" / "Menstrual days" → the guidance key. */
+function phaseGuidanceFor(label: string): string | undefined {
+  const l = label.toLowerCase();
+  if (l.includes("menstru")) return PHASE_GUIDANCE.menstrual;
+  if (l.includes("ovulat")) return PHASE_GUIDANCE.ovulation;
+  if (l.includes("luteal")) return PHASE_GUIDANCE.luteal;
+  if (l.includes("follicul")) return PHASE_GUIDANCE.follicular;
+  return PHASE_GUIDANCE[label] ?? undefined;
+}
 
 /* ============================================================================
    Request assembly — shared, identical for every provider.
@@ -750,7 +764,9 @@ Deno.serve(async (req: Request) => {
     if (body.image && typeof body.image.dataBase64 === "string") {
       const mediaType = String(body.image.mediaType ?? "image/jpeg");
       if (body.image.dataBase64.length > 7_000_000) {
-        console.error(`coach request=${rid} error=attached_too_large bytes=${body.image.dataBase64.length}`);
+        console.error(
+          `coach request=${rid} error=attached_too_large bytes=${body.image.dataBase64.length}`,
+        );
         return json({ error: "attached file too large for the model" }, 413);
       }
       media = { mediaType, dataBase64: body.image.dataBase64 };
@@ -768,7 +784,10 @@ Deno.serve(async (req: Request) => {
       `THEIR RECORD\n${factsToPrompt(body.facts)}`,
       `LENGTH\n${rule}`,
     ].join("\n\n");
-    const turns = [...sanitizeHistory(body.history), { role: "user" as const, content: message.slice(0, 4000) }];
+    const turns = [
+      ...sanitizeHistory(body.history),
+      { role: "user" as const, content: message.slice(0, 4000) },
+    ];
 
     /* Client-sent provider overrides are NOT trusted in production routing.
        Only an explicit dev header matching a server-side secret may pin one. */
@@ -780,7 +799,10 @@ Deno.serve(async (req: Request) => {
 
     /* Vision narrows the chain to providers that can actually see. */
     const order = providerOrder().filter(
-      (id) => (media ? REGISTRY[id].vision : true) && REGISTRY[id].enabled() && Deno.env.get(REGISTRY[id].secret),
+      (id) =>
+        (media ? REGISTRY[id].vision : true) &&
+        REGISTRY[id].enabled() &&
+        Deno.env.get(REGISTRY[id].secret),
     );
     if (devPin && REGISTRY[devPin] && order.includes(devPin)) {
       order.splice(order.indexOf(devPin), 1);
@@ -803,10 +825,13 @@ Deno.serve(async (req: Request) => {
        probe the best one. Auth/model-unavailable cooldowns are never probed. */
     const transientOnly = (id: ProviderId): boolean => {
       const st = stateFor(id);
-      return !st.lastCategory ||
-        (st.lastCategory !== "auth" && st.lastCategory !== "model_unavailable");
+      return (
+        !st.lastCategory || (st.lastCategory !== "auth" && st.lastCategory !== "model_unavailable")
+      );
     };
-    const ready = order.filter((id) => !isCoolingDown(id) || (order.every(isCoolingDown) && transientOnly(id)));
+    const ready = order.filter(
+      (id) => !isCoolingDown(id) || (order.every(isCoolingDown) && transientOnly(id)),
+    );
     for (const id of ready) {
       if (attempted.size >= maxAttempts) break;
       if (attempted.has(id)) continue;
@@ -825,25 +850,38 @@ Deno.serve(async (req: Request) => {
         recordSuccess(id);
         answered = text;
         answeredBy = id;
-        diagnostics.push(`provider=${id} attempt=${attempted.size} result=success latencyMs=${Date.now() - attemptStart}`);
+        diagnostics.push(
+          `provider=${id} attempt=${attempted.size} result=success latencyMs=${Date.now() - attemptStart}`,
+        );
         break;
       } catch (err) {
         const category = classifyError(err);
         recordFailure(id, category);
         const latencyMs = Date.now() - attemptStart;
         const status = err instanceof HttpError ? err.status : "-";
-        const detail = err instanceof HttpError ? err.body.slice(0, 200) : err instanceof Error ? err.message.slice(0, 200) : "";
-        diagnostics.push(`provider=${id} attempt=${attempted.size} result=${category} status=${status} latencyMs=${latencyMs}`);
+        const detail =
+          err instanceof HttpError
+            ? err.body.slice(0, 200)
+            : err instanceof Error
+              ? err.message.slice(0, 200)
+              : "";
+        diagnostics.push(
+          `provider=${id} attempt=${attempted.size} result=${category} status=${status} latencyMs=${latencyMs}`,
+        );
         /* Sanitized log: never prompts, never personal data, never secrets. */
         console.error(
           `coach request=${rid} provider=${id} category=${category} status=${status} latencyMs=${latencyMs}` +
-            (envBool("COACH_LOG_DETAIL", false) ? ` detail=${detail.replace(/[^\x20-\x7e]/g, "?")}` : ""),
+            (envBool("COACH_LOG_DETAIL", false)
+              ? ` detail=${detail.replace(/[^\x20-\x7e]/g, "?")}`
+              : ""),
         );
       }
     }
 
     if (!answeredBy || !answered) {
-      console.error(`coach request=${rid} all_providers_failed attempts=${diagnostics.join(" | ")}`);
+      console.error(
+        `coach request=${rid} all_providers_failed attempts=${diagnostics.join(" | ")}`,
+      );
       return json({ error: "unavailable", requestId: rid }, 502);
     }
 

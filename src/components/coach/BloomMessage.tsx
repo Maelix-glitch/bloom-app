@@ -69,7 +69,9 @@ function SourceLine({ message }: { message: CoachMessage }) {
       ) : null}
       {message.fellBackBecause ? (
         <span className="coach-msg-ondevice" title={message.fellBackBecause}>
-          answered on this device
+          {message.fellBackBecause === "offline"
+            ? "offline — answered from Bloom's own knowledge"
+            : "answered on this device"}
         </span>
       ) : null}
     </p>
@@ -331,6 +333,7 @@ export function BloomMessage({
   message,
   fresh,
   onRetry,
+  onOfflineAnswer,
   onRegenerate,
   onTellMeMore,
   onMakePlan,
@@ -339,6 +342,8 @@ export function BloomMessage({
   message: CoachMessage;
   fresh: boolean;
   onRetry: (() => void) | undefined;
+  /** Offered on failed sends: answer from the on-device knowledge engine. */
+  onOfflineAnswer: (() => void) | undefined;
   onRegenerate: (() => void) | undefined;
   onTellMeMore: () => void;
   onMakePlan: () => void;
@@ -377,11 +382,23 @@ export function BloomMessage({
             <p className="coach-error-title">Bloom couldn&rsquo;t connect right now.</p>
             <p>{message.paragraphs[0]}</p>
           </div>
-          {onRetry ? (
-            <button type="button" className="coach-error-retry" onClick={onRetry}>
-              Try again
-            </button>
-          ) : null}
+          <div className="coach-error-actions">
+            {onRetry ? (
+              <button type="button" className="coach-error-retry" onClick={onRetry}>
+                Try again
+              </button>
+            ) : null}
+            {onOfflineAnswer ? (
+              <button
+                type="button"
+                className="coach-error-knowledge"
+                onClick={onOfflineAnswer}
+                title="Bloom's built-in knowledge, on this device — no connection needed"
+              >
+                Answer from Bloom&rsquo;s own knowledge
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : (
         <>

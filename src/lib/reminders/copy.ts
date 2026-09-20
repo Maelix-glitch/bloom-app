@@ -199,6 +199,9 @@ const PERIOD_SOON_BODY = [
   "Cycle day {day} today — the usual signs may show up.",
   "From your history, not a rulebook. It can move.",
   "Worth keeping an eye on, not a promise.",
+  "Biology, not a certainty: pre-period progesterone falls — a flatter mood here is typical, not a failing.",
+  "Cravings and heavier tiredness before a period have a physical side. The date is an estimate; the rest is up to you.",
+  "Cycle science, lightly: the pre-period dip is one of the most reported shifts there is — it can vary, and so can the date.",
 ];
 
 function periodCopy(ctx: ReminderContext, seed: string): ReminderCopy {
@@ -254,6 +257,7 @@ const EVENING_NOTHING_BODY = [
   "Log something small, or don't. Bloom keeps either way.",
   "A tick, a number, a word — any of them counts.",
   "Skipping is fine. The option is the point.",
+  "Low-energy days count as days too. One word is plenty.",
 ];
 
 const EVENING_SOME_TITLE = [

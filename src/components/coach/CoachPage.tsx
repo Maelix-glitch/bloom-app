@@ -12,6 +12,7 @@ import {
   type CoachMode,
 } from "@/hooks/useCoachSystem";
 import { buildCoachContext } from "@/lib/coach/intelligence";
+import { answerLocally } from "@/lib/coach/engine";
 import type { CoachMedia } from "@/lib/coach/edge";
 import { isVisionType, fileToCoachMedia } from "@/lib/coach/media";
 import { parseSidecars } from "@/lib/coach/sidecar";
@@ -541,6 +542,50 @@ export function CoachPage() {
     [coach, entries, thinking],
   );
 
+  /* The offline knowledge path. When a send fails, the person can ask the
+     deterministic engine on this device instead — clearly labelled as such
+     in the thread, never dressed up as the online coach. No network, no
+     invented numbers: the engine answers from Bloom's built-in topics and
+     the record that lives in this browser. */
+  const answerFromKnowledge = useCallback(
+    (message: CoachMessage) => {
+      const pending = lastFailedRef.current;
+      if (!pending || pending.errorMessageId !== message.id) return;
+      const context = buildCoachContext(
+        entries,
+        memoriesToContext(coach.memories),
+        coach.habitData,
+        pending.mode,
+        pending.text,
+      );
+      const result = answerLocally({
+        text: pending.text,
+        mode: pending.mode,
+        record,
+        context,
+        history: [],
+        provider: "local",
+      });
+      coach.setMessages((current) =>
+        current.map((m) =>
+          m.id === pending.errorMessageId
+            ? {
+                ...m,
+                paragraphs: result.paragraphs.length > 0 ? result.paragraphs : m.paragraphs,
+                sources: result.sources,
+                blocks: result.blocks,
+                status: "sent" as const,
+                source: "local" as const,
+                fellBackBecause: "offline",
+              }
+            : m,
+        ),
+      );
+      lastFailedRef.current = null;
+    },
+    [coach, entries, record],
+  );
+
   /* ------------------------------- send paths ------------------------------ */
   const sendMessage = useCallback(
     async (
@@ -790,6 +835,7 @@ export function CoachPage() {
     welcomeMemory,
     onStart: startStarter,
     onRetry: (message: CoachMessage) => void retryFailed(message),
+    onOfflineAnswer: answerFromKnowledge,
     onRegenerate: (message: CoachMessage) => void regenerateLast(message),
     onTellMeMore: tellMeMore,
     onMakePlan: makePlan,

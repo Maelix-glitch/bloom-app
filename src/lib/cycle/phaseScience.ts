@@ -86,6 +86,28 @@ export function allPhaseLines(): string[] {
   return (Object.keys(PHASE_SCIENCE) as PhaseKey[]).flatMap((k) => PHASE_SCIENCE[k]);
 }
 
+export interface PhaseBriefLine {
+  key: PhaseKey;
+  label: string;
+  line: string;
+}
+
+const PHASE_LABELS: Record<PhaseKey, string> = {
+  menstrual: "Menstrual days",
+  follicular: "Follicular days",
+  ovulation: "Ovulation window",
+  luteal: "Luteal days",
+};
+
+/** The full science, one hedged line per phase — the "in full" view. */
+export function phaseBrief(): PhaseBriefLine[] {
+  return (Object.keys(PHASE_SCIENCE) as PhaseKey[]).map((k) => ({
+    key: k,
+    label: PHASE_LABELS[k],
+    line: PHASE_SCIENCE[k][0]!,
+  }));
+}
+
 /**
  * For someone with no cycle data yet: what the general model honestly is.
  * This is the "0 entries" answer — not a nag to log, but real knowledge.
