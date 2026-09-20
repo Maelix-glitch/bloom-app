@@ -30,6 +30,7 @@ import { CoachContextPanel, type CoachPanelTab } from "./ContextPanel";
 import { CoachSheet } from "./CoachSheet";
 import { QuickPalette } from "./QuickPalette";
 import { CoachCamera } from "./CoachCamera";
+import { TourCard } from "@/components/tour/TourLauncher";
 
 const SESSION_NOTICE = "Your session needs to be refreshed.";
 const DRAFT_MAP_KEY = "bloom.coach.drafts.v2";
@@ -858,7 +859,7 @@ export function CoachPage() {
           onRename={renameConversation}
           onContext={openPanel}
         />
-        <div className="coach-workspace">
+        <div data-tour="coach-lenses" className="coach-workspace">
           <CoachHeader
             ready={thinking}
             contextLabel={contextLabel}
@@ -875,6 +876,7 @@ export function CoachPage() {
             </div>
           ) : null}
 
+          <div className="px-4 py-2"><TourCard tourId="coach" /></div>
           <CoachThread {...thread} />
 
           <div className="coach-dock">
@@ -900,7 +902,7 @@ export function CoachPage() {
                 </button>
               </div>
             ) : null}
-            <Composer
+            <div data-tour="coach-composer"><Composer
               draft={draft}
               onDraftChange={setDraft}
               placeholder={placeholder}
@@ -915,6 +917,7 @@ export function CoachPage() {
               followUps={followUps}
               onFollowUp={handleFollowUp}
             />
+            </div>
           </div>
         </div>
       </main>

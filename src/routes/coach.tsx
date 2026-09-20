@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import coachCss from "../styles/coach.css?url";
 import { CoachPage } from "@/components/coach/CoachPage";
 
+/* tour targets added via CoachPage */
 export const Route = createFileRoute("/coach")({
   head: () => ({
     meta: [

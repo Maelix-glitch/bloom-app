@@ -5,6 +5,7 @@ import trackersConsoleCss from "../styles/trackers.css?url";
 import trackersCss from "../styles/trackers2.css?url";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
+import { TourCard } from "@/components/tour/TourLauncher";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
 const FONTS =
@@ -36,7 +37,8 @@ function TrackersRoute() {
     <div className="app-shell min-h-screen bg-background text-foreground">
       <AppNav />
       <main className="min-w-0">
-        <TrackersDesign theme={theme} />
+        <div className="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8"><TourCard tourId="trackers" /></div>
+        <div data-tour="trackers-compass"><TrackersDesign theme={theme} /></div>
       </main>
     </div>
   );

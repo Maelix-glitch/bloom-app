@@ -185,6 +185,7 @@ export function ProfileHero({
           <button
             type="button"
             onClick={onShare}
+            data-tour="profile-share"
             className="pf-icon-btn"
             aria-label="Share profile"
             title="Share profile"
@@ -237,7 +238,7 @@ export function ProfileHero({
 
       {/* --------------------------- avatar + name row ---------------------- */}
       <div className="pf-head">
-        <div className="pf-avatar-wrap">
+        <div data-tour="profile-avatar" className="pf-avatar-wrap">
           <StoryRing
             state={ringState}
             size={innerSize}
@@ -315,7 +316,7 @@ export function ProfileHero({
             ) : null}
           </div>
           <div className="pf-actions">
-            <button type="button" onClick={onEdit} className="pf-btn pf-btn--primary">
+            <button type="button" onClick={onEdit} data-tour="profile-edit" className="pf-btn pf-btn--primary">
               <Pencil className="size-3.5" aria-hidden /> Edit profile
             </button>
             <button type="button" onClick={onCreateStory} className="pf-btn">

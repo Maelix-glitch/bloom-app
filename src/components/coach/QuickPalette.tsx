@@ -77,7 +77,7 @@ export function QuickPalette({
         >
           <motion.div
             ref={ref}
-            className="coach-palette"
+            data-tour="coach-quick" className="coach-palette"
             role="dialog"
             aria-modal="true"
             aria-label="Quick switch"

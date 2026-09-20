@@ -7,6 +7,7 @@ import { todayKey } from "@/lib/cycle/predict";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
 import type { MoodEntry } from "@/lib/mood/types";
 import { Composer } from "@/components/mood/Composer";
+import { TourCard } from "@/components/tour/TourLauncher";
 import { MoodPage } from "@/components/mood/page/MoodPage";
 import { AppNav } from "@/components/home/HomeSidebar";
 
@@ -51,6 +52,7 @@ function MoodRoute() {
       <AppNav />
 
       <main className="min-w-0 pb-28 lg:pb-16">
+        <div className="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8 lg:px-10"><TourCard tourId="mood" /></div>
         <MoodPage
           system={system}
           identity={{

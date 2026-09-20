@@ -32,6 +32,7 @@ import {
   Mail,
   Palette,
   Share2,
+  BookOpen,
   Smartphone,
   Trash2,
   Droplet,
@@ -66,11 +67,11 @@ function Row({
   icon: React.ReactNode;
   label: string;
   /** A second line, only where the label alone is ambiguous. */
-  hint?: string;
-  value?: string;
-  onClick?: () => void;
-  danger?: boolean;
-  testId?: string;
+  hint?: string | undefined;
+  value?: string | undefined;
+  onClick?: (() => void) | undefined;
+  danger?: boolean | undefined;
+  testId?: string | undefined;
 }) {
   const inner = (
     <>
@@ -89,7 +90,7 @@ function Row({
     return <div className="pf-row">{inner}</div>;
   }
   return (
-    <button type="button" onClick={onClick} className="pf-row" data-testid={testId}>
+    <button type="button" onClick={onClick} className="pf-row" data-testid={testId} data-tour={testId ? `profile-${testId.replace("pf-row-","")}` : undefined}>
       {inner}
     </button>
   );
@@ -333,6 +334,7 @@ export function AccountRow({
   onOpenReminders,
   onOpenErase,
   onInstall,
+  onOpenTour,
   remindersValue,
   installValue,
 }: {
@@ -358,6 +360,7 @@ export function AccountRow({
   onOpenErase: () => void;
   /** The install prompt, when the browser has one to give. */
   onInstall?: (() => void) | undefined;
+  onOpenTour?: (() => void) | undefined;
   remindersValue: string;
   installValue: string | null;
 }) {
@@ -416,10 +419,23 @@ export function AccountRow({
         />
       </Group>
 
+      <Group label="Learn">
+        <Row
+          icon={<BookOpen className="size-3.5" />}
+          label="Tutorial & tips"
+          hint="Small popups with arrows — explains every corner, only what you have"
+          value="take tour"
+          onClick={onOpenTour}
+          testId="pf-row-tour"
+        />
+      </Group>
+
       <Group label="Privacy">
         <Row
           icon={<Lock className="size-3.5" />}
           label="Profile visibility"
+          // data-tour handled via testId wrapper
+
           value={privacy.profileVisibility === "public" ? "Public" : "Private"}
           onClick={onOpenPrivacy}
           testId="pf-row-privacy"

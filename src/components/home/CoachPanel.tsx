@@ -125,7 +125,7 @@ export function CoachPanel({
   };
 
   return (
-    <section className="home-panel p-5" aria-labelledby="home-coach-title">
+    <section data-tour="home-coach" className="home-panel p-5" aria-labelledby="home-coach-title">
       <header className="flex items-center justify-between">
         <h2 id="home-coach-title" className="flex items-center gap-2 font-display text-xl">
           <LifeBuoy className="size-4 text-primary" /> Coach
