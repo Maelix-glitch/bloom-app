@@ -161,6 +161,7 @@ function Empty({
 }
 
 export function NotificationCenter({ open, onClose }: { open: boolean; onClose: () => void }) {
+  /* Readings for "Due now" — delivery itself is owned by RemindersEngine. */
   const reminders = useReminders();
   const cycle = useCycleSystem();
   const [notices, setNotices] = useState<Notice[]>(() => listNotices());

@@ -6,11 +6,37 @@
  *   · a new arrival updates the live bell and replays the swing exactly once;
  *   · two bells on one page never share a gradient id.
  */
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { NotificationBell } from "./NotificationCenter";
 import { CENTER_CHANGED, recordNotice } from "@/lib/notifications/center";
+
+vi.mock("@/hooks/useReminders", () => ({ useReminders: () => ({ preview: [] }) }));
+vi.mock("@/hooks/useCycleSystem", () => ({ useCycleSystem: () => ({ loading: true }) }));
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({
+    to,
+    children,
+    onClick,
+    ...rest
+  }: {
+    to: string;
+    children: React.ReactNode;
+    onClick?: (e: React.MouseEvent) => void;
+  }) => (
+    <a
+      href={to}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick?.(e);
+      }}
+      {...rest}
+    >
+      {children}
+    </a>
+  ),
+}));
 
 afterEach(cleanup);
 
@@ -112,5 +138,21 @@ describe("NotificationBell", () => {
     expect(ids).toHaveLength(2);
     expect(new Set(ids).size).toBe(2);
     expect(screen.getAllByRole("button", { name: "Notifications" })).toHaveLength(2);
+  });
+
+  it("opens the center on click and clears the badge on close", async () => {
+    seedUnread(2);
+    render(<NotificationBell />);
+    const bell = screen.getByRole("button", { name: "Notifications, 2 unread" });
+    fireEvent.click(bell);
+    // the lazily-mounted sheet arrives with its hero and close button
+    expect(await screen.findByRole("button", { name: "Close notifications" })).toBeDefined();
+    expect(document.querySelector("h2.ncenter-title")?.textContent).toBe("Notifications");
+    fireEvent.click(screen.getByRole("button", { name: "Close notifications" }));
+    // closing marks everything read, and the live bell follows
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Notifications" })).toBeDefined(),
+    );
+    expect(document.querySelector(".bloom-bell__badge")).toBeNull();
   });
 });
