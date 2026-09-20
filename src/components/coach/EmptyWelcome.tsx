@@ -9,15 +9,28 @@ import { CoachGlyph } from "./bloom-mark";
  * claim about what Bloom is, then starters that each send a real prompt.
  * When the record has data the starters name the topics it actually holds;
  * when it doesn't, they invite the honest "here's what I can do" read.
+ *
+ * Personalised from minute zero: when onboarding recorded a name (and it
+ * always knows the hour), the welcome opens with the person — the same
+ * greeting shape the Today hero uses — and, when a cycle is tracked, the
+ * phase line says why today might feel the way it does. Nothing here invents:
+ * every optional line is passed in by the page, which reads it from the
+ * person's own answers.
  */
 export function EmptyWelcome({
   starters,
   thinking,
   onStart,
+  greeting,
+  phaseLine,
 }: {
   starters: Starter[];
   thinking: boolean;
   onStart: (starter: Starter) => void;
+  /** "Good evening, Maya." — computed by the page from onboarding + clock. */
+  greeting?: string | null | undefined;
+  /** One hedged science line about the current cycle phase, when tracked. */
+  phaseLine?: string | null | undefined;
 }) {
   return (
     <div className="coach-welcome" aria-hidden={thinking}>
@@ -36,10 +49,21 @@ export function EmptyWelcome({
           <br />
           for your day.
         </h1>
+        {greeting ? (
+          <motion.p
+            className="coach-welcome-greeting"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.08 }}
+          >
+            {greeting}
+          </motion.p>
+        ) : null}
         <p className="coach-welcome-copy">
           Ask, reflect, plan, or simply talk. I&rsquo;ll read what you&rsquo;ve actually logged when
           it helps — and say so plainly when there&rsquo;s nothing to go on.
         </p>
+        {phaseLine ? <p className="coach-welcome-phase">{phaseLine}</p> : null}
         <div className="coach-welcome-starters" aria-label="Ways to begin">
           {starters.map((starter, index) => (
             <motion.button

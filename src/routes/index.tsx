@@ -41,6 +41,7 @@ import {
   scoreOf,
 } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
+import { readPersonalVoice } from "@/lib/voice/personal";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
@@ -204,6 +205,7 @@ function TodayPage() {
 
   const today = trackers.today;
   const identity = space.identity?.identity ?? null;
+  const [personalVoice] = useState(() => readPersonalVoice());
   const displayName =
     identity && identity.displayName && identity.displayName !== "Bloom User"
       ? identity.displayName
@@ -340,14 +342,19 @@ function TodayPage() {
   );
 
   const openCount = focus.filter((f) => !f.done).length;
+  /* Day one gets its own line: the hero greets a person who has just arrived,
+     not a dashboard demanding entries. Derived from the onboarding answer's
+     timestamp — never asserted when it isn't known. */
   const subline =
     !trackers.hydrated || habits.loading
       ? "Reading today's record…"
-      : openCount === 0
-        ? "Everything you track is logged. Enjoy the quiet."
-        : openCount === 1
-          ? "One thing left to shape your day."
-          : `${["Two", "Three"][openCount - 2] ?? openCount} things left to shape your day.`;
+      : personalVoice.firstDay
+        ? "Day one — look around, log one thing when it's natural."
+        : openCount === 0
+          ? "Everything you track is logged. Enjoy the quiet."
+          : openCount === 1
+            ? "One thing left to shape your day."
+            : `${["Two", "Three"][openCount - 2] ?? openCount} things left to shape your day.`;
 
   const syncLine =
     trackers.sync.state === "off"
@@ -608,6 +615,7 @@ function TodayPage() {
         onClose={() => setMoodOpen(false)}
         onSave={mood.saveEntry}
         onDelete={(entry) => mood.removeEntry(entry.id)}
+        firstMoment={mood.entries.length === 0 && !moodEntry}
       />
       <AddHabitModal
         open={habitOpen}

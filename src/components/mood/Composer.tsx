@@ -34,6 +34,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { FIRST_ENTRY } from "@/lib/voice/copy";
+import { pick } from "@/lib/voice/messages";
+
 import { EMOTIONS, type EmotionKey, type MoodEntry, type Weather } from "@/lib/mood/types";
 import { moodLabel } from "@/lib/mood/analytics";
 import {
@@ -165,6 +168,7 @@ export function Composer({
   onClose,
   onSave,
   onDelete,
+  firstMoment = false,
 }: {
   open: boolean;
   initial: MoodEntry | null;
@@ -173,6 +177,9 @@ export function Composer({
   onSave: (entry: MoodEntry) => void | Promise<void>;
   /** When present, editing offers a calm inline delete. */
   onDelete?: ((entry: MoodEntry) => void | Promise<void>) | undefined;
+  /** True when the record has no other entries — the first one gets a warmer
+     send-off than "Moment saved." Fired once by the caller, never persisted. */
+  firstMoment?: boolean | undefined;
 }) {
   const [draft, setDraft] = useState<Draft>(() => toDraft(initial));
   /** The tracker prefill currently shown, so a date change can swap it cleanly. */
@@ -304,7 +311,13 @@ export function Composer({
       await onSave(entry);
       setSaving(false);
       setSaved(true);
-      toast(editing ? "Moment updated." : "Moment saved.");
+      toast(
+        editing
+          ? "Moment updated."
+          : firstMoment
+            ? pick("mood.first-entry", FIRST_ENTRY)
+            : "Moment saved.",
+      );
       /* A beat on the confirmation, then the sheet is out of the way. */
       closeTimer.current = window.setTimeout(onClose, 620);
     } catch {

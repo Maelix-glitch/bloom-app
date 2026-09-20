@@ -14,6 +14,11 @@
  */
 
 import type { CoachContext, CoachMode } from "@/lib/coach/intelligence";
+import { pickStable } from "@/lib/voice/messages";
+import {
+  GENERAL_MODEL_LINES,
+  phaseScienceLine as phaseScienceLineFor,
+} from "@/lib/cycle/phaseScience";
 
 /** The six daily trackers, restated so this module stands on its own. */
 export type TrackerId = "sleep" | "water" | "study" | "movement" | "energy" | "screen";
@@ -83,6 +88,23 @@ export interface CycleFacts {
   nextPeriod?: string | null | undefined;
 }
 
+/**
+ * Who the coach is talking to, as far as Bloom knows without any entry —
+ * name and focus come from onboarding, so they exist from minute zero. This
+ * is what makes a zero-record conversation personal: the greeting can carry
+ * a name and the hour, and general advice can be shaped by what the person
+ * said they wanted from Bloom.
+ */
+export interface PersonalFacts {
+  name: string | null;
+  /** "night" | "morning" | "afternoon" | "evening" where the person is. */
+  daypart: string;
+  /** What they said they wanted from Bloom, empty when not answered. */
+  focusAreas: string[];
+  /** Whole days since they first answered onboarding; null when unknown. */
+  daysWithBloom: number | null;
+}
+
 export interface CoachRecord {
   today: string;
   trackers: TrackerFacts[];
@@ -90,6 +112,8 @@ export interface CoachRecord {
   /** Pinned or recent things the coach was told to keep in view. */
   memories: string[];
   habitsActive: number;
+  /** Present from the first launch — identity without any logged entry. */
+  personal?: PersonalFacts | undefined;
 }
 
 export interface CoachQuestion {
@@ -284,6 +308,15 @@ function trackerAnswer(topic: Topic, record: CoachRecord): CoachResponse | null 
   return { paragraphs, sources: [...new Set(sources)], blocks };
 }
 
+/**
+ * One line about the general cycle model, stable for the day. Used when a
+ * cycle question arrives with nothing behind it — real knowledge instead of
+ * a bare instruction to go and log.
+ */
+function generalModelLine(today: string): string {
+  return pickStable(GENERAL_MODEL_LINES, `cycle-model-${today}`);
+}
+
 function periodAnswer(record: CoachRecord): CoachResponse {
   const paragraphs: string[] = [];
   const sources: string[] = [];
@@ -291,8 +324,16 @@ function periodAnswer(record: CoachRecord): CoachResponse {
   const cycle = record.cycle;
 
   if (!cycle || cycle.daysLogged === 0) {
+    /* No cycle data. The old answer was a single instruction to go log. The
+       companion answer leads with what's actually true and useful right now —
+       the general model, with its science — and leaves the one-tap invite as
+       the closing line, so an empty record still gets a real answer. */
     paragraphs.push(
-      "There's no cycle logged yet. Log the day your period starts on the Cycle page — one date — and the phase you're in, plus a predicted next start with its confidence, appears immediately.",
+      "There's no cycle logged yet, so I'll speak from the general model rather than pretend to see your numbers.",
+    );
+    paragraphs.push(generalModelLine(record.today));
+    paragraphs.push(
+      "When you want it personal: log the day bleeding starts on the Cycle page — one date — and the phase, the predicted window and how much to trust it all appear from your own record.",
     );
     return { paragraphs, sources, blocks };
   }
@@ -305,8 +346,13 @@ function periodAnswer(record: CoachRecord): CoachResponse {
   }
 
   if (cycle.cycleDay !== null && cycle.phaseLabel) {
+    /* An assumed phase (the general pattern, not their logs) says so right in
+       the first line — a terse budget must never hide the honesty. */
+    const assumed = (cycle.confidence ?? "") === "assumed";
     paragraphs.push(
-      `You're on day ${cycle.cycleDay} — ${cycle.phaseLabel.toLowerCase()}. ${
+      `You're on day ${cycle.cycleDay} — ${cycle.phaseLabel.toLowerCase()}${
+        assumed ? " (from the general pattern — your logs will replace it)" : ""
+      }. ${
         cycle.nextPeriod
           ? `${cycle.nextPeriod}.`
           : cycle.nextStart
@@ -316,6 +362,17 @@ function periodAnswer(record: CoachRecord): CoachResponse {
             : ""
       }`.trim(),
     );
+    /* The why behind the phase — one hedged science line, never a diagnosis.
+       Seeded on the day so re-renders don't flicker the line. */
+    const science = phaseScienceLineFor(
+      cycle.phaseLabel,
+      cycle.confidence,
+      `${cycle.phaseLabel}-${record.today}`,
+    );
+    if (science) {
+      paragraphs.push(science);
+      sources.push("Cycle phase research");
+    }
   } else if (cycle.averageLength !== null) {
     paragraphs.push(`Your cycles average about ${Math.round(cycle.averageLength)} days so far.`);
   }
@@ -519,12 +576,37 @@ function generalAnswer(record: CoachRecord, context: CoachContext): CoachRespons
     lines.push(`${stat.name.toLowerCase()} ${stat.format(Math.round(value))}`);
   }
   if (moodEntries > 0) lines.push(`mood ${fmt(context.mood.recent.mood)} of 10`);
-  if (record.cycle?.cycleDay !== null && record.cycle?.cycleDay !== undefined)
-    lines.push(`cycle day ${record.cycle.cycleDay}`);
 
   paragraphs.push(
-    `Here's what your record actually holds: ${lines.join(", ")}. That's the whole picture I can honestly speak from.`,
+    `Here's what your record actually holds: ${lines.length > 0 ? lines.join(", ") : "nothing on the six trackers yet"}. That's the whole picture I can honestly speak from.`,
   );
+
+  /* The cycle state answers the question people ask without cycle words —
+     "am I late?" — so it is part of the general read, not a separate topic. */
+  const cycle = record.cycle;
+  if (cycle && cycle.daysLogged > 0) {
+    if (cycle.paused) {
+      paragraphs.push(
+        "Your cycle tracking is paused, so nothing counts as late right now — history is kept, and predictions resume when you switch tracking back on.",
+      );
+    } else if (cycle.daysUntilNext !== null && cycle.daysUntilNext < 0) {
+      paragraphs.push(
+        cycle.nextPeriod ??
+          `Your period is about ${plural(Math.abs(cycle.daysUntilNext), "day")} past its estimated window — normal in itself; cycles shift.`,
+      );
+      sources.push("Cycle record");
+    } else if (cycle.cycleDay !== null) {
+      paragraphs.push(
+        `Cycle-wise you're on day ${cycle.cycleDay}${cycle.phaseLabel ? `, ${cycle.phaseLabel.toLowerCase()}` : ""}${
+          cycle.daysUntilNext !== null
+            ? `, next period estimated in about ${plural(cycle.daysUntilNext, "day")}`
+            : ""
+        }.`,
+      );
+      sources.push("Cycle record");
+    }
+  }
+
   paragraphs.push(
     "Ask me about any one of those — sleep, water, study, movement, energy, screen, your cycle, or how the week reads — and I'll go into it properly.",
   );
@@ -561,12 +643,53 @@ export function answer(
 
   if (topic === "greeting") {
     const available = record.trackers.filter((t) => t.daysLogged > 0).length;
-    const paragraphs = [
-      available > 0
-        ? `I've got ${plural(available, "tracker")} with entries on them and your cycle record. Ask me about any of it — or say "plan tonight".`
-        : "I've got nothing logged to read from yet, so I'll be blunt rather than comforting: log one day on the Trackers page and I'll have something real to say.",
-    ];
-    return { paragraphs, sources: [], blocks: [] };
+    const name = record.personal?.name ?? null;
+    const daypart = record.personal?.daypart ?? null;
+    const timeWord =
+      daypart === "night"
+        ? "Still up"
+        : daypart === "morning"
+          ? "Morning"
+          : daypart === "afternoon"
+            ? "Afternoon"
+            : daypart === "evening"
+              ? "Evening"
+              : null;
+
+    /* Day one, nothing logged: the honest greeting is a welcome, not a
+       demand for data. They've just arrived — say who this is and what a
+       first day here looks like. */
+    if (available === 0 && name !== null && timeWord !== null) {
+      return {
+        paragraphs: [
+          `${timeWord}, ${name}. I'm Bloom's coach — I read whatever you log and help it make sense.`,
+          "There's nothing on the record yet, which is fine: day one is for looking around, not for perfect entries. Log one number when it's natural — last night's sleep, a glass of water — and ask me anything in the meantime.",
+        ],
+        sources: [],
+        blocks: [],
+      };
+    }
+
+    if (available > 0) {
+      const who = name !== null && timeWord !== null ? `${timeWord}, ${name}. ` : "";
+      return {
+        paragraphs: [
+          `${who}I've got ${plural(available, "tracker")} with entries on them${
+            record.cycle && record.cycle.daysLogged > 0 ? " plus your cycle record" : ""
+          }. Ask me about any of it — or say "plan tonight".`,
+        ],
+        sources: [],
+        blocks: [],
+      };
+    }
+
+    return {
+      paragraphs: [
+        "I've got nothing logged to read from yet, so I'll be blunt rather than comforting: log one day on the Trackers page and I'll have something real to say. Until then, ask me anything general — sleep, stress, the app itself — and I'll answer from knowledge, not from your record.",
+      ],
+      sources: [],
+      blocks: [],
+    };
   }
 
   if (question.mode === "plan" && (topic === "habit" || topic === "general")) {

@@ -1341,6 +1341,22 @@
   color: var(--coach-ink);
 }
 
+.coach-welcome-greeting {
+  margin: 14px auto 0;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--coach-ink-2);
+  font-style: italic;
+}
+
+.coach-welcome-phase {
+  max-width: 52ch;
+  margin: 10px auto 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: color-mix(in oklab, var(--coach-ink-2) 88%, transparent);
+}
+
 .coach-welcome-copy {
   max-width: 46ch;
   margin: 18px auto 0;

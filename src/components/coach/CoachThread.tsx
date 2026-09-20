@@ -50,6 +50,8 @@ export function CoachThread({
   responseSlow,
   showWelcome,
   starters,
+  welcomeGreeting,
+  welcomePhaseLine,
   onStart,
   onRetry,
   onRegenerate,
@@ -66,6 +68,10 @@ export function CoachThread({
   responseSlow: boolean;
   showWelcome: boolean;
   starters: Starter[];
+  /** Personal opener from the page — name + hour, when onboarding knows them. */
+  welcomeGreeting?: string | null | undefined;
+  /** One hedged science line about the current cycle phase, when tracked. */
+  welcomePhaseLine?: string | null | undefined;
   onStart: (starter: Starter) => void;
   onRetry: (message: CoachMessage) => void;
   onRegenerate: (message: CoachMessage) => void;
@@ -137,7 +143,13 @@ export function CoachThread({
             <ThinkingRow slow={responseSlow} />
           </div>
         ) : (
-          <EmptyWelcome starters={starters} thinking={false} onStart={onStart} />
+          <EmptyWelcome
+            starters={starters}
+            thinking={false}
+            onStart={onStart}
+            greeting={welcomeGreeting}
+            phaseLine={welcomePhaseLine}
+          />
         )
       ) : (
         <div className="coach-thread-list">

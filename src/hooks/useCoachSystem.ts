@@ -36,11 +36,8 @@ import {
 } from "@/lib/cycle/periodStore";
 import { todayKey } from "@/lib/cycle/predict";
 import { getPref } from "@/lib/prefs";
-import {
-  ONBOARDING_PREF,
-  parseOnboarding,
-  tracksCycle,
-} from "@/lib/onboarding/profileKind";
+import { ONBOARDING_PREF, parseOnboarding, tracksCycle } from "@/lib/onboarding/profileKind";
+import { readPersonalVoice } from "@/lib/voice/personal";
 
 export type { CoachMode };
 
@@ -873,6 +870,22 @@ function readTrackerFacts(): CoachRecord["trackers"] {
 export function readCoachRecord(memories: string[] = []): CoachRecord {
   const today = todayKey();
 
+  /* Who they are — name, focus, daypart — from the onboarding answer. Read
+     even when every tracker is empty, because "personalised with zero
+     entries" is exactly what this exists to guarantee. */
+  let personal: CoachRecord["personal"] = undefined;
+  try {
+    const voice = readPersonalVoice();
+    personal = {
+      name: voice.name,
+      daypart: voice.daypart,
+      focusAreas: voice.focus.slice(0, 6),
+      daysWithBloom: voice.daysWithBloom,
+    };
+  } catch {
+    personal = undefined;
+  }
+
   let trackers: CoachRecord["trackers"] = [];
   try {
     trackers = readTrackerFacts();
@@ -927,7 +940,7 @@ export function readCoachRecord(memories: string[] = []): CoachRecord {
     cycle = null;
   }
 
-  return { today, trackers, cycle, memories, habitsActive: 0 };
+  return { today, trackers, cycle, memories, habitsActive: 0, personal };
 }
 
 function readHabitData(): CoachHabitData {

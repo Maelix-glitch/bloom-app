@@ -300,15 +300,19 @@ export const KNOWLEDGE: Partial<Record<Topic, Knowledge>> = {
   /* --------------------------------------------------------------- cycle */
   period: {
     core: [
-      "Cycle length varies normally between about 21 and 35 days, and a few days' variation month to month is expected rather than a problem.",
-      "For cramps, heat, movement and anti-inflammatories taken early — before the pain peaks — cover most of it.",
+      "Cycle length varies normally between about 21 and 35 days, and a few days' variation month to month is expected rather than a problem. The textbook 28-day cycle is an average, not a rule.",
+      "For cramps, heat, movement and anti-inflammatories taken early — before the pain peaks — cover most of it. The cramping itself is prostaglandins, the same chemistry that nudges energy down in the first days.",
     ],
     more: [
-      "The luteal phase — after ovulation, before your period — is where most people notice energy and mood dip. It's the most predictable part of the cycle, which makes it the easiest to plan around.",
+      "The luteal phase — after ovulation, before your period — is where most people notice energy and mood dip. Progesterone runs it: slightly higher core temperature, sometimes lighter sleep, appetite up. It's the most predictable part of the cycle, which makes it the easiest to plan around.",
+      "The follicular stretch — after bleeding eases, before ovulation — is where rising oestrogen tends to lift energy, focus and recovery for many people. Ambitious plans usually land easier here than in the week before a period.",
+      "Around ovulation, oestrogen peaks and then falls. Some people feel a clear lift and call these their best days; others mostly feel the dip on the far side. Both are ordinary.",
       "Flow and pain vary a lot between people and across a life. What matters is a change from your own normal, not a comparison with anyone else's.",
+      "Mid-cycle tiredness after a heavy period can be iron loss catching up — one of the quieter, better-documented reasons the following week can feel flatter than it should.",
     ],
     step: [
       "Pain that stops you doing normal things, or that is getting worse over time, isn't something to just manage — that's worth a doctor.",
+      "If you track nothing else, track the first day of bleeding. Two of those turn every general number — phases, predictions, fertile-window estimates — into your own.",
     ],
     reads: "cycle",
   },

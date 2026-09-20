@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Archive,
   ArchiveRestore,
@@ -30,6 +30,18 @@ import { streakOf, streakUnitOf, type Habit, type HabitLog } from "@/lib/home/ha
 import { habitColorVar } from "@/lib/home/today";
 import { formatDateShort } from "@/lib/cycle/predict";
 import { shiftDay } from "@/lib/localDay";
+import { toast } from "sonner";
+import { STREAK_KEPT } from "@/lib/voice/copy";
+import { pick } from "@/lib/voice/messages";
+
+/**
+ * Streak milestones that earn a quiet word of celebration. Deliberately
+ * sparse: a tick that extends a streak to one of these gets a line from the
+ * STREAK_KEPT pool, once — anything more frequent turns encouragement into
+ * noise. Per-habit, remembered, and only fired on a tick made in this
+ * session, never on opening the app with an old streak already standing.
+ */
+const STREAK_MILESTONES = [7, 14, 21, 30, 50, 100, 180, 250, 365];
 
 /** What the "…" menu on a habit row can do. All optional: read-only callers pass nothing. */
 export interface HabitActions {
@@ -88,6 +100,49 @@ export function HabitsSection({
 
   const done = habits.filter((h) => h.done).length;
   const due = habits.length;
+
+  /* Milestone celebrations: watch the streaks, celebrate only a crossing that
+     happened here (previous streaks captured on mount, never toasted), once
+     per habit per milestone, remembered across sessions. */
+  const seenStreaks = useRef<Map<string, number> | null>(null);
+  useEffect(() => {
+    const prev = seenStreaks.current;
+    if (prev === null) {
+      /* First read after mount — baseline only, no celebration for history. */
+      seenStreaks.current = new Map(habits.map((h) => [h.id, streaks.get(h.id) ?? 0]));
+      return;
+    }
+    const next = new Map(prev);
+    for (const habit of habits) {
+      const now = streaks.get(habit.id) ?? 0;
+      const before = prev.get(habit.id) ?? 0;
+      next.set(habit.id, now);
+      const crossed = STREAK_MILESTONES.find((m) => before < m && now >= m);
+      if (crossed === undefined) continue;
+      const storeKey = "bloom.voice.celebrated.v1";
+      let celebrated: Record<string, number> = {};
+      try {
+        celebrated = JSON.parse(window.localStorage.getItem(storeKey) ?? "{}") as Record<
+          string,
+          number
+        >;
+      } catch {
+        celebrated = {};
+      }
+      if ((celebrated[habit.id] ?? 0) >= crossed) continue;
+      celebrated[habit.id] = crossed;
+      try {
+        window.localStorage.setItem(storeKey, JSON.stringify(celebrated));
+      } catch {
+        /* private mode — celebration just repeats after a reload, harmless */
+      }
+      toast(pick("voice.streak-kept", STREAK_KEPT), {
+        description: `${crossed} days of ${habit.name}.`,
+      });
+    }
+    seenStreaks.current = next;
+  }, [habits, streaks]);
+
   const pct = due === 0 ? 0 : Math.round((done / due) * 100);
   const bestStreak = Math.max(0, ...habits.map((h) => streaks.get(h.id) ?? 0));
 

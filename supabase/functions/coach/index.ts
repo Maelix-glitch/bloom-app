@@ -103,6 +103,12 @@ A person should be able to raise anything with you: sleep and insomnia; food, nu
 GROUNDING — THE ONE HARD RULE
 You are given a compact summary of what this person has logged. Never invent a number, a date, a trend or an entry. If the summary does not contain something, say plainly that it isn't tracked, then help anyway from general knowledge. When you quote a figure, quote it exactly as given. Never claim the app has a feature it does not: no social features, no marketplace, no payments, no external integrations, no professional medical advice. For anything medical, say once, briefly, and without alarm that a clinician is the right call. If someone describes being in danger, say clearly that this is beyond what an app should handle and that a crisis line or a person they trust is the right call.
 
+THE PERSON, NOT JUST THE RECORD
+The record section may name them, the time of day where they are, how new they are to Bloom, and what they said they wanted from it. Use it the way a friend would: greet by name when you know it (once — a name in every paragraph reads like a sales script); on their first day, orient and welcome rather than demand entries; when their question touches something they said they wanted from Bloom, go deeper there. With an empty record you are NOT blocked — you are a knowledgeable friend talking before the data exists. Say once, without apologising, that you're speaking generally; then be genuinely useful.
+
+CYCLE SCIENCE — HOW TO TALK ABOUT IT
+When their record includes a cycle phase, you may use the phase science line provided: explain the likely physiology (prostaglandins and cramps in the menstrual days, rising oestrogen through the follicular phase, the luteal progesterone effect on sleep, temperature, mood and appetite) as what research says happens ON AVERAGE — with "many people", "tends to", never "you will". Effects are real but individually small; a bad day can just be a bad day. Connect it to what they asked: energy, sleep, mood, cravings, training. Never claim a phase causes their specific feelings, never diagnose PMS or PMDD, and if cycle symptoms are severe, worsening or disruptive, one calm sentence: that pattern is worth mentioning to a clinician. If they do not track a cycle, the record says so — never raise it.
+
 MEMORY
 You are told what Bloom already remembers about the person. When they share a clearly durable fact about themselves ("I'm vegan", "my daughter is called Mira", "I run on Tuesdays", "I'm saving for a house", "I'm trying to drink less") — or explicitly ask you to remember something — append AT THE END of your reply exactly one line:
 [BLOOM_MEMORY]{"category":"preference","text":"the fact, written as a statement"}[/BLOOM_MEMORY]
@@ -658,8 +664,48 @@ function factsToPrompt(facts: any): string {
   if (facts.memories?.length) {
     lines.push(`Bloom remembers about them: ${facts.memories.join("; ")}`);
   }
+
+  /* Who they are — independent of any entry, so a person with zero logs is
+     still a person the coach knows, not a blank form. */
+  const p = facts.personal;
+  if (p) {
+    const bits: string[] = [];
+    if (p.name) bits.push(`Bloom knows them as ${p.name}`);
+    if (p.daysWithBloom !== null && p.daysWithBloom !== undefined) {
+      bits.push(
+        p.daysWithBloom === 0
+          ? "this is their FIRST DAY on Bloom — welcome them, orient them, never shame the empty record"
+          : `they've been on Bloom about ${p.daysWithBloom} day${p.daysWithBloom === 1 ? "" : "s"}`,
+      );
+    }
+    if (Array.isArray(p.focusAreas) && p.focusAreas.length > 0) {
+      bits.push(`they said they wanted Bloom for: ${p.focusAreas.join(", ")}`);
+    }
+    if (p.daypart) bits.push(`it is ${p.daypart} where they are`);
+    if (bits.length > 0) lines.push(`THIS PERSON: ${bits.join("; ")}.`);
+  }
+
+  /* What the phase means — population science, hedged, so the coach can
+     explain a luteal dip or a menstrual fortnight without diagnosing. */
+  if (facts.cycle && !facts.cycle.paused && facts.cycle.phase) {
+    lines.push(PHASE_GUIDANCE[facts.cycle.phase] ?? "");
+  }
   return lines.join("\n");
 }
+
+/* Cycle-phase context for the coach: the average-pattern physiology of each
+   phase, phrased the way the evidence supports — real effects on average,
+   small and individual in practice, never a diagnosis, never destiny. */
+const PHASE_GUIDANCE: Record<string, string> = {
+  Menstrual:
+    "PHASE SCIENCE (menstrual): prostaglandin-driven cramps and blood loss commonly lower energy and raise sleep need; iron loss can add mid-cycle tiredness. Rest here does real work. Frame as 'many people', never 'you will'.",
+  Follicular:
+    "PHASE SCIENCE (follicular): rising oestrogen is commonly associated with better energy, focus, mood and recovery. A good stretch for ambitious plans — described as a tendency, not a guarantee.",
+  Ovulation:
+    "PHASE SCIENCE (ovulation window): oestrogen peaks then falls; some feel a clear lift, others mostly the far-side dip. The calendar window is an estimate, not a promise — useful for awareness only.",
+  Luteal:
+    "PHASE SCIENCE (luteal): progesterone raises core temperature, can fragment sleep slightly, and pulls mood and energy down for many as the period approaches — typical biology first, a concern only if severe or disruptive. Appetite and cravings rising here have a physiological side too. Never suggest a phase explains everything: individual variation is wide, and a bad day can just be a bad day.",
+};
 
 /* ============================================================================
    Request assembly — shared, identical for every provider.

@@ -18,6 +18,8 @@ import { parseSidecars } from "@/lib/coach/sidecar";
 import { executeCoachTool } from "@/lib/coach/tools";
 import { followUpPrompts, starterPrompts, type Starter } from "@/lib/coach/ui-helpers";
 import { todayKey } from "@/lib/cycle/predict";
+import { phaseScienceLine } from "@/lib/cycle/phaseScience";
+import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 
 import { CoachSidebar, CoachSidebarContent } from "./CoachSidebar";
 import { CoachHeader } from "./CoachHeader";
@@ -97,6 +99,8 @@ export function CoachPage() {
   const [signInRequired, setSignInRequired] = useState(false);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [record, setRecord] = useState(() => readCoachRecord([]));
+  /* Who the page is talking to — read once per mount; refreshes on reload. */
+  const [personalVoice] = useState(() => readPersonalVoice());
   const [railExpanded, setRailExpanded] = useState(true);
 
   const mountedRef = useRef(true);
@@ -257,9 +261,19 @@ export function CoachPage() {
   );
 
   const starters = useMemo(
-    () => starterPrompts(lens, record, entries.length, todayKey()),
-    [lens, record, entries.length],
+    () => starterPrompts(lens, record, entries.length, todayKey(), personalVoice.focus),
+    [lens, record, entries.length, personalVoice.focus],
   );
+
+  /* The welcome speaks to the person before any data exists: their name and
+     the hour from onboarding, and — when a cycle is tracked with a known
+     phase — one hedged science line for right now. Computed once per mount:
+     pick() remembers what it showed, so re-reading it per render would flicker. */
+  const welcomeGreeting = useMemo(() => dayGreeting(personalVoice), [personalVoice]);
+  const welcomePhaseLine = useMemo(() => {
+    if (!record.cycle || record.cycle.daysLogged === 0 || record.cycle.paused) return null;
+    return phaseScienceLine(record.cycle.phaseLabel, record.cycle.confidence, record.today);
+  }, [record]);
 
   const followUps = useMemo(
     () => (activeConversation ? followUpPrompts(lens, activeConversation.messages) : []),
@@ -758,6 +772,8 @@ export function CoachPage() {
     responseSlow,
     showWelcome: coach.messages.length === 0 && !coach.loading,
     starters,
+    welcomeGreeting,
+    welcomePhaseLine,
     onStart: startStarter,
     onRetry: (message: CoachMessage) => void retryFailed(message),
     onRegenerate: (message: CoachMessage) => void regenerateLast(message),

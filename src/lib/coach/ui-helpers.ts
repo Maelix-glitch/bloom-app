@@ -128,6 +128,39 @@ const NO_DATA_STARTERS: Starter[] = [
   { lens: "ask", text: "How should I get started?" },
 ];
 
+/**
+ * Starters for the very first conversation, shaped by what the person told
+ * onboarding they wanted from Bloom. Deliberately framed as *setup and
+ * conversation*, never as data questions — there is no data yet, and a
+ * starter that pretends otherwise starts the relationship with a lie.
+ */
+const FOCUS_STARTERS: Record<string, Starter[]> = {
+  sleep: [
+    { lens: "ask", text: "Help me set up a sleep rhythm that holds" },
+    { lens: "plan", text: "Build me a wind-down routine" },
+  ],
+  mood: [
+    { lens: "reflect", text: "Talk about how I've been feeling" },
+    { lens: "ask", text: "How does mood check-in work here?" },
+  ],
+  habits: [
+    { lens: "plan", text: "Help me pick a first habit that sticks" },
+    { lens: "ask", text: "What makes a habit survive a bad week?" },
+  ],
+  study: [
+    { lens: "plan", text: "Help me make focus easier to start" },
+    { lens: "ask", text: "How do I stop procrastinating on hard work?" },
+  ],
+  movement: [
+    { lens: "plan", text: "Plan movement I'll actually keep" },
+    { lens: "ask", text: "How much movement is enough?" },
+  ],
+  cycle: [
+    { lens: "ask", text: "What should I log on day one of my cycle?" },
+    { lens: "ask", text: "What do cycle phases explain about energy?" },
+  ],
+};
+
 const NO_DATA_MODE_STARTERS: Record<CoachMode, Starter[]> = {
   ask: NO_DATA_STARTERS,
   reflect: [
@@ -197,10 +230,19 @@ export function starterPrompts(
   record: CoachRecord,
   moodEntries: number,
   daySeed: string,
+  /** What onboarding recorded them wanting from Bloom; shapes day one. */
+  focus: readonly string[] = [],
 ): Starter[] {
   const topics = recordedTopics(record, moodEntries);
   if (topics.length === 0) {
-    return rotate(NO_DATA_MODE_STARTERS[mode], `coach-starter-empty-${mode}-${daySeed}`, 3);
+    /* Nothing logged: day-one starters lead with what they came for, then
+       fall back to the honest general set. */
+    const pool: Starter[] = [];
+    for (const area of focus) {
+      for (const starter of FOCUS_STARTERS[area] ?? []) pool.push(starter);
+    }
+    pool.push(...NO_DATA_MODE_STARTERS[mode]);
+    return rotate(pool, `coach-starter-empty-${mode}-${daySeed}`, 3);
   }
   const pool: Starter[] = [];
   for (const topic of topics) {
