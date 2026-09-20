@@ -58,6 +58,7 @@ import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profil
 import { ProfileShareSheet } from "@/components/profile/ProfileShareSheet";
 import { TourCard } from "@/components/tour/TourLauncher";
 import { useTour } from "@/components/tour/TourContext";
+import { hasSupabaseConfig } from "@/lib/supabase";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
@@ -485,16 +486,22 @@ function ProfilePage() {
         ) : (
           <div className="flex flex-col">
             {authState === "signed-out" ? (
-              <p className="mb-2 text-center text-[12px] text-faint">
-                preview — nothing is saved until you{" "}
-                <button
-                  type="button"
-                  onClick={() => setSignInOpen(true)}
-                  className="text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
-                >
-                  sign in
-                </button>
-              </p>
+              hasSupabaseConfig ? (
+                <p className="mb-2 text-center text-[12px] text-faint">
+                  preview — nothing is saved until you{" "}
+                  <button
+                    type="button"
+                    onClick={() => setSignInOpen(true)}
+                    className="text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
+                  >
+                    sign in
+                  </button>
+                </p>
+              ) : (
+                <p className="mb-2 text-center text-[12px] text-faint">
+                  no account connected — your profile is saved on this device
+                </p>
+              )
             ) : null}
 
             {/* cover · avatar · name · actions */}
