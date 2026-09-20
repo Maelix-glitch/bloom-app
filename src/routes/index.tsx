@@ -42,6 +42,7 @@ import {
 } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
 import { CYCLE_SETTINGS_CHANGED, loadCycleSettings } from "@/lib/cycle/periodStore";
+import { usualMood } from "@/lib/smart/usual";
 import { readPersonalVoice } from "@/lib/voice/personal";
 import { PhaseCard } from "@/components/home/PhaseCard";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
@@ -291,6 +292,9 @@ function TodayPage() {
     [habits.todayHabits, moodEntry, trackers.analysis, now, flowTimes.times],
   );
 
+  /* Their usual check-in readings — feeds the composer's honest markers. */
+  const moodUsual = useMemo(() => usualMood(mood.entries, today), [mood.entries, today]);
+
   /* Their "ease this week" opt-in — live, and re-read when the Cycle page or
      another tab changes it (the store announces the change). */
   const [easePref, setEasePref] = useState(() => loadCycleSettings().easeBeforePeriod === true);
@@ -324,6 +328,7 @@ function TodayPage() {
     () =>
       insightsOf({
         trackers: trackers.analysis,
+        days: trackers.days,
         moodInsights: mood.analytics.insights,
         moodCorrelations: mood.analytics.correlations,
         habits: { habits: habits.habits, logs: habits.logs },
@@ -333,6 +338,7 @@ function TodayPage() {
       }),
     [
       trackers.analysis,
+      trackers.days,
       mood.analytics.insights,
       mood.analytics.correlations,
       habits.habits,
@@ -636,6 +642,7 @@ function TodayPage() {
         onSave={mood.saveEntry}
         onDelete={(entry) => mood.removeEntry(entry.id)}
         firstMoment={mood.entries.length === 0 && !moodEntry}
+        usual={moodUsual}
       />
       <AddHabitModal
         open={habitOpen}

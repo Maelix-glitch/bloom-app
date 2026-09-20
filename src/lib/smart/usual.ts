@@ -15,6 +15,8 @@
  */
 
 import type { DayEntry } from "@/lib/trackers/core";
+import { PAGE_MOOD_PRESETS, PAGE_MOODS, type PageMood } from "@/lib/mood/page";
+import type { MoodEntry } from "@/lib/mood/types";
 
 /** Distinct logged days a field needs before "your usual" may speak for it. */
 export const MIN_SAMPLES = 4;
@@ -177,6 +179,76 @@ export function usualDay(
   }
 
   return out;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  The mood check-in                                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Distinct logged days the mood check-in needs before it may suggest. */
+export const MOOD_MIN_SAMPLES = 5;
+
+export interface MoodUsual {
+  mood: number; // 1–10
+  energy: number; // 1–10
+  stress: number; // 1–10
+  /** Distinct days of evidence behind the three readings. */
+  samples: number;
+}
+
+const clamp10 = (v: number) => Math.min(10, Math.max(1, Math.round(v)));
+
+/** The most recent entry per local day — the day's final word. */
+function lastEntryPerDay(entries: readonly MoodEntry[]): MoodEntry[] {
+  const byDay = new Map<string, MoodEntry>();
+  for (const e of entries) {
+    const day = e.timestamp.slice(0, 10);
+    const held = byDay.get(day);
+    if (!held || e.timestamp > held.timestamp) byDay.set(day, e);
+  }
+  return [...byDay.values()];
+}
+
+/**
+ * Their usual check-in readings, from the last two weeks they logged
+ * (excluding `excludeDate` — same rule as the trackers: the day being
+ * filled never predicts itself).
+ */
+export function usualMood(entries: readonly MoodEntry[], excludeDate: string): MoodUsual | null {
+  const recent = lastEntryPerDay(entries)
+    .filter((e) => e.timestamp.slice(0, 10) !== excludeDate)
+    .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
+    .slice(0, USUAL_WINDOW);
+  if (recent.length < MOOD_MIN_SAMPLES) return null;
+  return {
+    mood: clamp10(median(recent.map((e) => e.mood))),
+    energy: clamp10(median(recent.map((e) => e.energy))),
+    stress: clamp10(median(recent.map((e) => e.stress))),
+    samples: recent.length,
+  };
+}
+
+/** The face whose preset sits nearest the usual readings (unique and close). */
+export function usualFaceOf(usual: MoodUsual | null | undefined): PageMood | null {
+  if (!usual) return null;
+  let best: PageMood | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  let tie = false;
+  for (const face of PAGE_MOODS) {
+    const p = PAGE_MOOD_PRESETS[face];
+    const d =
+      Math.abs(p.mood - usual.mood) +
+      Math.abs(p.energy - usual.energy) / 2 +
+      Math.abs(p.stress - usual.stress) / 2;
+    if (d < bestDistance) {
+      best = face;
+      bestDistance = d;
+      tie = false;
+    } else if (d === bestDistance) {
+      tie = true;
+    }
+  }
+  return !tie && best !== null && bestDistance <= 2.5 ? best : null;
 }
 
 /** True when at least one field has enough history to suggest. */

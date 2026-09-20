@@ -271,19 +271,22 @@ computed from the person's own record — nothing invented, nothing guessed —
 and verified in real screenshots (`snapshots/w4/`, script `/tmp/visqa/wave4.cjs`).
 
 ### The engine: `src/lib/smart/usual.ts`
+
 "Your usual day" — medians and recent-modes of the last 14 logged days, per
 field: sleep window (bed/wake/duration/quality), water, movement, energy,
 screen, study total + most-logged subject. Hard rules, each test-locked:
+
 - **MIN_SAMPLES = 4** distinct days or the field doesn't exist — no chip, no guess.
 - The day being filled **never predicts itself**.
 - Medians, not means — one wild night can't become "your usual".
 - 9 unit tests cover past-midnight bedtimes, window exclusion, mode recency.
 
 ### Smart fill, everywhere logging happens
+
 - **Log panel** (Ledger/Strip/console designs): a "Start from your usual day"
   bar with one **Fill my usual** — plus per-field ✦ chips ("Usual 23:30–07:15",
   "Usual 2,050ml") that fill exactly one thing. The usual bar only appears on
-  an *empty* day: an edit means the values are already theirs.
+  an _empty_ day: an edit means the values are already theirs.
 - **Today's snapshot + Atlas reflect sheet** (same `MetricsEntryModal`): a
   "YOUR USUAL · FROM YOUR LAST LOGGED DAYS" tray of chips under the grid;
   a tap fills the field, everything stays editable before saving.
@@ -291,15 +294,65 @@ screen, study total + most-logged subject. Hard rules, each test-locked:
   7h) and filled on tap in both surfaces.
 
 ### The coach reads the week before speaking
+
 `signalStarters()` derives conversation starters from the record's shape and
 puts them at the front of the welcome tiles:
+
 - sleep running below its own recent average 3 nights → "Sleep's been lighter
   than usual lately — why?"
 - energy ≤2 two days running → a gentle talk-it-through starter
 - a streak ≥3 with nothing logged today → "Help me keep my water streak alive"
 - a tracker quiet for a week → a no-guilt catch-up starter
-Every rule needs real history; at most two fire; "lately" framing throughout.
-Verified live with three seeded light nights — the sleep starter appeared.
+  Every rule needs real history; at most two fire; "lately" framing throughout.
+  Verified live with three seeded light nights — the sleep starter appeared.
 
 **Tests: 773 passing** (was 759) · typecheck clean · production build clean ·
 logo untouched.
+
+## 9 · Wave five — merged intelligence wave
+
+Two agent sessions built the intelligence wave in parallel; this commit merges
+them so nothing is lost and no engine is duplicated. The other session's
+`113f79f` (usual engine, LogPanel/MetricsEntryModal smart fill, coach signal
+starters) stays canonical — `src/lib/smart/usual.ts` is the one engine. On top
+of it, this wave adds:
+
+### The engine, extended: `usualMood` + `usualFaceOf`
+
+Same house rules as the tracker engine: medians over the last 14 logged days,
+`MOOD_MIN_SAMPLES = 5`, the day being filled never predicts itself, and the
+day's **last** entry is its final word. `usualFaceOf` maps the usual onto the
+nearest check-in face only when one preset is clearly nearest (≤2.5 distance,
+ties refuse) — an honest "usually" that can stay silent. 6 new tests.
+
+### The mood check-in knows your usual
+
+The composer (all three call sites: Today, Mood, Mood Intelligence) shows a
+quiet **USUALLY** pill under the face their recent check-ins orbit, and ring
+markers on the energy/stress sliders where their usual readings sit. Nothing
+is ever pre-selected — the markers inform, the person still answers.
+Verified in real screenshots (`snapshots/w4-merged/`).
+
+### "Bloom noticed" — the cross-record layer
+
+`src/lib/smart/noticed.ts` reads _across_ records and speaks only when the
+pattern is real: a habit run that is alive today and still open (day N, named),
+the strongest week-over-week tracker drift (this week vs last, evidence cited),
+and the shape of their week (weekday-vs-weekend, three weeks, ≥20% gap).
+Evidence floors everywhere: 4+4 logged days per week for trends, 6 weekday +
+3 weekend days for shape, streak ≥3. Wired in ahead of the single-record
+insights; the Today panel is now titled **Bloom noticed**. Never touches the
+cycle (the phase card owns that voice). 9 tests.
+
+### Atlas logging modal — the usual chip
+
+The design-default Atlas tracker modal (TrackerModal) offers "Your usual ·
+6h 30m — from 14 logs · tap to use" on empty days; a tap fills the field in
+the current unit (hours/minutes convert correctly) and stays editable. Energy
+keeps its 1–5 buttons with the usual number ringed. Same engine as the other
+session's surfaces — one source of "your usual" everywhere.
+Verified: chip computed from the seeded record and filled on tap (6.5 in the
+hours field).
+
+**Tests: 789 passing** (759 → 773 → 789) · typecheck clean · production build
+clean · logo untouched.

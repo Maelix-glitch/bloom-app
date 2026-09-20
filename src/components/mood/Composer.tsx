@@ -50,6 +50,7 @@ import {
 } from "@/lib/mood/context";
 import { loadDays as loadTrackerDays } from "@/lib/trackers/store";
 import { PAGE_MOODS, PAGE_MOOD_PRESETS, faceForEntry, type PageMood } from "@/lib/mood/page";
+import { type MoodUsual, usualFaceOf } from "@/lib/smart/usual";
 import { accentVar, type Accent } from "./primitives";
 import { MoodBlob, MOOD_LABELS } from "./page/MoodBlob";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
@@ -169,6 +170,7 @@ export function Composer({
   onSave,
   onDelete,
   firstMoment = false,
+  usual = null,
 }: {
   open: boolean;
   initial: MoodEntry | null;
@@ -180,7 +182,10 @@ export function Composer({
   /** True when the record has no other entries — the first one gets a warmer
      send-off than "Moment saved." Fired once by the caller, never persisted. */
   firstMoment?: boolean | undefined;
+  /** Their usual check-in readings — shown as markers, never set silently. */
+  usual?: MoodUsual | null | undefined;
 }) {
+  const usualFace = usualFaceOf(usual);
   const [draft, setDraft] = useState<Draft>(() => toDraft(initial));
   /** The tracker prefill currently shown, so a date change can swap it cleanly. */
   const [prefill, setPrefill] = useState<MoodContext>({});
@@ -396,6 +401,14 @@ export function Composer({
                   <MoodBlob mood={m} size={58} active={on} />
                 </span>
                 <span className="bmood-face-label">{MOOD_LABELS[m]}</span>
+                {m === usualFace && !on ? (
+                  <span
+                    className="bmood-face-usual"
+                    title={`Your usual check-in, from ${usual?.samples} entries`}
+                  >
+                    usually
+                  </span>
+                ) : null}
                 {on ? (
                   <span className="bmood-face-tick" aria-hidden>
                     <Check className="size-3.5" strokeWidth={2.5} />
@@ -506,12 +519,14 @@ export function Composer({
                       value={draft.energy}
                       onChange={(v) => set("energy", v)}
                       accent="sage"
+                      usual={usual?.energy}
                     />
                     <ReadingSlider
                       label="Stress"
                       value={draft.stress}
                       onChange={(v) => set("stress", v)}
                       accent="rose"
+                      usual={usual?.stress}
                     />
                   </div>
                 </div>
@@ -730,11 +745,14 @@ function ReadingSlider({
   value,
   onChange,
   accent,
+  usual,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   accent: Accent;
+  /** Where their usual reading sits — a marker, never a value. */
+  usual?: number | undefined;
 }) {
   return (
     <div className="bmood-field">
@@ -745,19 +763,29 @@ function ReadingSlider({
           <span className="bmood-unit">/10</span>
         </span>
       </div>
-      <input
-        type="range"
-        className="bmood-slider"
-        min={1}
-        max={10}
-        step={1}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={label}
-        style={{
-          background: `linear-gradient(90deg, ${accentVar[accent]} ${((value - 1) / 9) * 100}%, color-mix(in oklab, var(--foreground) 14%, transparent) ${((value - 1) / 9) * 100}%)`,
-        }}
-      />
+      <div style={{ position: "relative" }}>
+        <input
+          type="range"
+          className="bmood-slider"
+          min={1}
+          max={10}
+          step={1}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={label}
+          style={{
+            background: `linear-gradient(90deg, ${accentVar[accent]} ${((value - 1) / 9) * 100}%, color-mix(in oklab, var(--foreground) 14%, transparent) ${((value - 1) / 9) * 100}%)`,
+          }}
+        />
+        {typeof usual === "number" ? (
+          <span
+            className="bmood-slider-usual"
+            title={`Your usual ${label.toLowerCase()} — ${usual}/10`}
+            style={{ left: `${((usual - 1) / 9) * 100}%` }}
+            aria-hidden
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

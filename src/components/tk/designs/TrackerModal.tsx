@@ -21,6 +21,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 
 import type { TrackerStore } from "@/hooks/useTrackers";
+import { usualDay } from "@/lib/smart/usual";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 
 import {
@@ -59,6 +60,25 @@ const defaultUnit = (id: TrackerId): Unit => (id === "movement" ? "min" : "hrs")
 
 /** 2dp arithmetic, printed without trailing zeros ("8", "1.5", never "8.00"). */
 const stripNum = (v: number): string => String(Math.round(v * 100) / 100);
+
+/** The "Your usual" suggestion strip — one tap fills the field. */
+const USUAL_STYLE: CSSProperties = {
+  display: "flex",
+  alignItems: "baseline",
+  justifyContent: "space-between",
+  gap: 10,
+  width: "100%",
+  padding: "10px 14px",
+  marginBottom: 12,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.055)",
+  fontSize: 13,
+  fontWeight: 700,
+  letterSpacing: "0.02em",
+  cursor: "pointer",
+  textAlign: "left",
+};
 
 /**
  * The required target, said out loud at the point of logging. Inline like the
@@ -114,7 +134,57 @@ export function TrackerModal({
 
   const def = tracker ? trackerDef(tracker) : null;
   const hasChoice = tracker !== null && UNIT_CHOICE.includes(tracker);
-  const prompt = unit === "hrs" && tracker && PROMPT_HRS[tracker] ? PROMPT_HRS[tracker]! : tracker ? PROMPT[tracker] : "";
+  const prompt =
+    unit === "hrs" && tracker && PROMPT_HRS[tracker]
+      ? PROMPT_HRS[tracker]!
+      : tracker
+        ? PROMPT[tracker]
+        : "";
+
+  /* Their own recent pattern — offered, never imposed (see smart/usual.ts). */
+  const usualDay_ = tracker ? usualDay(store.days, store.today) : null;
+  const usualValue = (() => {
+    if (!tracker || !usualDay_) return null;
+    switch (tracker) {
+      case "sleep":
+        return usualDay_.sleep?.value.minutes ?? null;
+      case "water":
+        return usualDay_.water?.value ?? null;
+      case "study":
+        return usualDay_.study?.value.minutes ?? null;
+      case "movement":
+        return usualDay_.movement?.value ?? null;
+      case "energy":
+        return usualDay_.energy?.value ?? null;
+      default:
+        return usualDay_.screen?.value ?? null;
+    }
+  })();
+  const usualSamples = (() => {
+    if (!tracker || !usualDay_) return 0;
+    switch (tracker) {
+      case "sleep":
+        return usualDay_.sleep?.samples ?? 0;
+      case "water":
+        return usualDay_.water?.samples ?? 0;
+      case "study":
+        return usualDay_.study?.samples ?? 0;
+      case "movement":
+        return usualDay_.movement?.samples ?? 0;
+      case "energy":
+        return usualDay_.energy?.samples ?? 0;
+      default:
+        return usualDay_.screen?.samples ?? 0;
+    }
+  })();
+  const todayValue = tracker ? readTrackerValue(store, tracker) : null;
+  const usualEmpty = todayValue === null || todayValue === 0;
+  const usualDraft =
+    usualValue !== null
+      ? hasChoice && unit === "hrs"
+        ? stripNum(usualValue / 60)
+        : String(usualValue)
+      : "";
 
   /* start from what's already logged, so the field is a correction not a blank */
   useEffect(() => {
@@ -193,9 +263,28 @@ export function TrackerModal({
         <p className="tk2-modal-kicker" id={titleId}>
           Log {def.name}
         </p>
-        <p style={TARGET_STYLE}>
-          Target · {def.format(store.goals[def.goalKey])}
-        </p>
+        <p style={TARGET_STYLE}>Target · {def.format(store.goals[def.goalKey])}</p>
+
+        {usualValue !== null && usualEmpty && tracker !== "energy" ? (
+          <button
+            type="button"
+            className="tk2-usual"
+            style={USUAL_STYLE}
+            onClick={() => {
+              setError(null);
+              setDraft(usualDraft);
+              window.setTimeout(() => inputRef.current?.focus(), 30);
+            }}
+            title={`Your usual ${def.name.toLowerCase()} — from your last ${usualSamples} logs. Tap to fill, then adjust.`}
+          >
+            <span style={{ color: "rgba(255,255,255,0.92)" }}>
+              Your usual · {def.format(usualValue)}
+            </span>
+            <span style={{ opacity: 0.55, fontWeight: 500 }}>
+              from {usualSamples} logs · tap to use
+            </span>
+          </button>
+        ) : null}
 
         {hasChoice ? (
           <div style={TOGGLE_STYLE} role="group" aria-label="Hours or minutes">
@@ -222,6 +311,14 @@ export function TrackerModal({
                 className="tk2-number"
                 data-active={Number(draft) === n ? "true" : "false"}
                 aria-pressed={Number(draft) === n}
+                title={
+                  usualValue !== null && usualEmpty && usualValue === n ? "Your usual" : undefined
+                }
+                style={
+                  usualValue !== null && usualEmpty && usualValue === n
+                    ? { boxShadow: "0 0 0 1.5px rgba(255,255,255,0.45) inset" }
+                    : undefined
+                }
                 onClick={() => {
                   setError(null);
                   setDraft(String(n));
@@ -231,6 +328,12 @@ export function TrackerModal({
               </button>
             ))}
           </div>
+        ) : null}
+
+        {usualValue !== null && usualEmpty && tracker === "energy" ? (
+          <p style={{ margin: "0 0 8px", fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
+            Usually a {usualValue} — from your last {usualSamples} logs.
+          </p>
         ) : null}
 
         <input
