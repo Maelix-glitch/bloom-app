@@ -55,6 +55,7 @@ import { useExportBundle } from "@/hooks/useExportBundle";
 import { useReminders } from "@/hooks/useReminders";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
+import { ProfileShareSheet } from "@/components/profile/ProfileShareSheet";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
@@ -121,6 +122,7 @@ function ProfilePage() {
   const [eraseOpen, setEraseOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
   const [tab, setTab] = useState<ProfileTab>("moments");
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
@@ -244,32 +246,10 @@ function ProfilePage() {
     void navigate({ to: "/profile", search: {}, replace: true });
   }, [viewParam, storiesByAge, navigate]);
 
-  /* profile share */
-  const handleShare = useCallback(async () => {
-    if (!identity?.identity.username) {
-      toast("Pick a @username first.", {
-        description: "It becomes the address of your space.",
-        action: { label: "Add one", onClick: () => setEditorOpen(true) },
-      });
-      return;
-    }
-    const url = `${window.location.origin}/@${identity.identity.username}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: `${identity.identity.displayName} on Bloom`, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast("Profile link copied.");
-    } catch (error) {
-      if (error && typeof error === "object" && "name" in error && error.name === "AbortError")
-        return;
-      toast("Couldn't copy automatically — here's your link", {
-        description: url,
-        duration: 9000,
-      });
-    }
-  }, [identity]);
+  /* profile share — now a Bloom-designed sheet, same entry from hero + settings row */
+  const handleShare = useCallback(() => {
+    setShareSheetOpen(true);
+  }, []);
 
   /* story actions */
   const publishStory = useCallback(
@@ -935,6 +915,14 @@ function ProfilePage() {
               setPrivacyOpen(false);
               setPreviewOpen(true);
             }}
+          />
+          <ProfileShareSheet
+            open={shareSheetOpen}
+            onClose={() => setShareSheetOpen(false)}
+            identity={identity.identity}
+            privacy={identity.privacy}
+            onPreview={() => setPreviewOpen(true)}
+            onEditUsername={() => setEditorOpen(true)}
           />
           <RestoreSheet open={restoreOpen} onClose={() => setRestoreOpen(false)} />
           {userId ? (
