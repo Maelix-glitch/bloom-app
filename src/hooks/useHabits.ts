@@ -9,7 +9,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase, watchAuth } from "@/lib/supabase";
+import { watchAuth } from "@/lib/supabase";
+import { subscribeToHabitChanges } from "@/lib/home/habitRealtime";
 import {
   HABITS_CHANGED,
   adjustPoints,
@@ -253,35 +254,12 @@ export function useHabits(): HabitsStore {
     };
   }, [auth, profileId, reload]);
 
-  /* realtime: another device ticks a habit → this ring moves */
+  /* realtime: another device ticks a habit → this ring moves. Multiple
+     consumers use this hook on the same screen, so the helper shares one
+     Supabase channel instead of adding callbacks after it has subscribed. */
   useEffect(() => {
     if (auth !== "signed-in" || !profileId) return;
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    try {
-      channel = supabase
-        .channel(`bloom-home-habits-${profileId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "habit_logs",
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => setReload((r) => r + 1),
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "habits", filter: `profile_id=eq.${profileId}` },
-          () => setReload((r) => r + 1),
-        )
-        .subscribe();
-    } catch (e) {
-      console.warn("[bloom:habits] realtime unavailable:", e);
-    }
-    return () => {
-      if (channel) void supabase.removeChannel(channel);
-    };
+    return subscribeToHabitChanges(profileId, () => setReload((r) => r + 1));
   }, [auth, profileId]);
 
   /* other tabs / the coach mirror */

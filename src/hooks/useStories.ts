@@ -6,8 +6,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
 import { listMyStories } from "@/lib/profile/storyService";
+import { subscribeToStoryChanges } from "@/lib/profile/storyRealtime";
 import { isStoryActive, type Story } from "@/lib/profile/types";
 import { seenStore } from "@/lib/stories/seen";
 
@@ -46,31 +46,12 @@ export function useStories(userId: string | null) {
   /* rings update the moment anything marks a story seen */
   useEffect(() => seenStore.subscribe(() => setSeenTick((t) => t + 1)), []);
 
-  /* realtime: new stories appear without a refresh (best-effort) */
+  /* realtime: new stories appear without a refresh (best-effort). The shared
+     helper prevents duplicate hook instances from adding callbacks after the
+     Supabase channel has subscribed. */
   useEffect(() => {
     if (!userId) return;
-    let channel: { unsubscribe: () => void } | null = null;
-    try {
-      channel = supabase
-        .channel(`stories:${userId}`)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "stories", filter: `author_id=eq.${userId}` },
-          () => {
-            void refresh();
-          },
-        )
-        .subscribe();
-    } catch {
-      channel = null;
-    }
-    return () => {
-      try {
-        channel?.unsubscribe();
-      } catch {
-        /* ignore */
-      }
-    };
+    return subscribeToStoryChanges(userId, () => void refresh());
   }, [userId, refresh]);
 
   const active = useMemo(() => (stories ?? []).filter((s) => isStoryActive(s)), [stories]);

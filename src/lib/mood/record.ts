@@ -15,7 +15,7 @@
  * offline, Mood keeps working exactly like trackers, cycle and habits do;
  * `sync` says honestly where each entry is.
  */
-import { supabase, hasSupabaseConfig } from "@/lib/supabase";
+import { hasSupabaseConfig, watchAuth } from "@/lib/supabase";
 import { moodStorage } from "@/lib/mood/storage";
 import {
   applyPending,
@@ -241,20 +241,12 @@ function start() {
     return;
   }
 
-  void supabase.auth.getSession().then(({ data: { session } }) => {
-    const user = session?.user;
-    if (!user) return signedOut();
-    set({ profileId: user.id });
-    void load(user.id, { silent: false });
-  });
-
-  supabase.auth.onAuthStateChange((_event, session) => {
-    const user = session?.user;
-    if (!user) return signedOut();
-    if (state.profileId !== user.id) set({ profileId: user.id });
+  watchAuth((profileId) => {
+    if (!profileId) return signedOut();
+    if (state.profileId !== profileId) set({ profileId });
     // Same user already loaded (INITIAL_SESSION / TOKEN_REFRESHED / focus):
     // revalidate quietly instead of dropping the page back to a spinner.
-    void load(user.id, { silent: loadedFor === user.id });
+    void load(profileId, { silent: loadedFor === profileId });
   });
 }
 

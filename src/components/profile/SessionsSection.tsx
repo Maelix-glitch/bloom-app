@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { Eraser, Laptop, LogOut, MonitorSmartphone } from "lucide-react";
 
 import { bloomKeys } from "@/lib/data/erase";
-import { hasSupabaseConfig, supabase } from "@/lib/supabase";
+import { hasSupabaseConfig, supabase, watchAuth } from "@/lib/supabase";
 
 interface SessionInfo {
   email: string | null;
@@ -33,20 +33,22 @@ export function SessionsSection({
   useEffect(() => {
     if (!hasSupabaseConfig) return;
     const load = () => {
-      void supabase.auth.getSession().then(({ data }) => {
-        setSession(
-          data.session
-            ? {
-                email: data.session.user.email ?? null,
-                since: data.session.user.created_at?.slice(0, 10) ?? null,
-              }
-            : null,
-        );
-      });
+      void supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          setSession(
+            data.session
+              ? {
+                  email: data.session.user.email ?? null,
+                  since: data.session.user.created_at?.slice(0, 10) ?? null,
+                }
+              : null,
+          );
+        })
+        .catch(() => setSession(null));
     };
-    load();
-    const { data } = supabase.auth.onAuthStateChange(() => load());
-    return () => data.subscription.unsubscribe();
+    const stop = watchAuth(() => load());
+    return () => stop();
   }, [isSignedIn]);
 
   useEffect(() => {
