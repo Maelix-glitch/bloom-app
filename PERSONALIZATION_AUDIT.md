@@ -263,3 +263,43 @@ the cycle colour. The whole map without leaving Today.
   label had silently orphaned the ovulation hint pool.
 
 **Tests: 759 passing** · typecheck clean · production build clean · logo untouched.
+
+## 8 · Wave four — the app gets genuinely smart
+
+The theme: **Bloom should know you, and act like it.** Everything below is
+computed from the person's own record — nothing invented, nothing guessed —
+and verified in real screenshots (`snapshots/w4/`, script `/tmp/visqa/wave4.cjs`).
+
+### The engine: `src/lib/smart/usual.ts`
+"Your usual day" — medians and recent-modes of the last 14 logged days, per
+field: sleep window (bed/wake/duration/quality), water, movement, energy,
+screen, study total + most-logged subject. Hard rules, each test-locked:
+- **MIN_SAMPLES = 4** distinct days or the field doesn't exist — no chip, no guess.
+- The day being filled **never predicts itself**.
+- Medians, not means — one wild night can't become "your usual".
+- 9 unit tests cover past-midnight bedtimes, window exclusion, mode recency.
+
+### Smart fill, everywhere logging happens
+- **Log panel** (Ledger/Strip/console designs): a "Start from your usual day"
+  bar with one **Fill my usual** — plus per-field ✦ chips ("Usual 23:30–07:15",
+  "Usual 2,050ml") that fill exactly one thing. The usual bar only appears on
+  an *empty* day: an edit means the values are already theirs.
+- **Today's snapshot + Atlas reflect sheet** (same `MetricsEntryModal`): a
+  "YOUR USUAL · FROM YOUR LAST LOGGED DAYS" tray of chips under the grid;
+  a tap fills the field, everything stays editable before saving.
+- Verified live: chips computed from the seeded record (water 2,050ml, sleep
+  7h) and filled on tap in both surfaces.
+
+### The coach reads the week before speaking
+`signalStarters()` derives conversation starters from the record's shape and
+puts them at the front of the welcome tiles:
+- sleep running below its own recent average 3 nights → "Sleep's been lighter
+  than usual lately — why?"
+- energy ≤2 two days running → a gentle talk-it-through starter
+- a streak ≥3 with nothing logged today → "Help me keep my water streak alive"
+- a tracker quiet for a week → a no-guilt catch-up starter
+Every rule needs real history; at most two fire; "lately" framing throughout.
+Verified live with three seeded light nights — the sleep starter appeared.
+
+**Tests: 773 passing** (was 759) · typecheck clean · production build clean ·
+logo untouched.

@@ -501,6 +501,16 @@
   gap: 0.3rem;
 }
 
+/* The one-tap "your usual" chip — the accent colour comes from the block. */
+.tk-usual-chip:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 14%, transparent);
+}
+
+.tk-usual-chip:focus-visible {
+  outline: 2px solid var(--ci-follicular);
+  outline-offset: 1px;
+}
+
 /* ---------------------------------- misc --------------------------------- */
 
 .tk-chip {

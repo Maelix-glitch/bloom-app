@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { AlertCircle, Plus, Trash2, X } from "lucide-react";
+import { AlertCircle, Plus, Sparkles, Trash2, X } from "lucide-react";
 
 import { Button, Card } from "@/components/ci/primitives";
 
@@ -23,10 +23,39 @@ import {
   type TrackerId,
 } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
+import { hasUsual, usualDay } from "@/lib/smart/usual";
 import { Metric, NumberPicker, TagGroup } from "@/components/tk/designs/shared";
 
 const QUALITY_LABEL = ["", "Rough", "Fair", "Okay", "Good", "Deep"];
 const ENERGY_LABEL = ["", "Drained", "Low", "Steady", "Bright", "Wired"];
+
+/** One-tap "your usual" — computed from their own record, always editable. */
+function UsualChip({
+  label,
+  onFill,
+  disabled,
+}: {
+  label: string;
+  onFill: () => void;
+  disabled?: boolean | undefined;
+}) {
+  return (
+    <button
+      type="button"
+      className="tk-usual-chip inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors disabled:opacity-40"
+      style={{
+        borderColor: "color-mix(in oklab, var(--tk-accent, var(--ci-follicular)) 40%, transparent)",
+        color: "var(--tk-accent, var(--ci-follicular))",
+      }}
+      onClick={onFill}
+      disabled={disabled}
+      title="Fills this with what you usually log — change anything afterwards"
+    >
+      <Sparkles size={11} aria-hidden />
+      {label}
+    </button>
+  );
+}
 
 function Field({
   label,
@@ -95,6 +124,12 @@ export function LogPanel({
 
   const existing = useMemo(() => days.find((d) => d.date === date) ?? null, [days, date]);
 
+  /* What a usual day looks like for this person — the day being filled never
+     predicts itself. Only an empty day may be pre-filled: an edit means the
+     values are already theirs. */
+  const usual = useMemo(() => usualDay(days, date), [days, date]);
+  const usualApplies = !existing && !disabled && hasUsual(usual);
+
   const [draft, setDraft] = useState<DayEntry>(() => existing ?? emptyDay(date));
   const [errors, setErrors] = useState<DayFieldErrors>({});
   const [status, setStatus] = useState<string | null>(null);
@@ -141,6 +176,22 @@ export function LogPanel({
   const set = <K extends keyof DayEntry>(key: K, value: DayEntry[K]) => {
     setDraft((prev) => ({ ...prev, [key]: value }));
     setStatus(null);
+  };
+
+  /** Apply the whole usual day to the empty draft — everything stays editable. */
+  const fillUsual = () => {
+    setDraft((prev) => ({
+      ...prev,
+      bedTime: usual.sleep?.value.bedTime ?? prev.bedTime,
+      wakeTime: usual.sleep?.value.wakeTime ?? prev.wakeTime,
+      sleepMinutes: usual.sleep?.value.minutes ?? prev.sleepMinutes,
+      sleepQuality: usual.sleep?.value.quality ?? prev.sleepQuality,
+      waterMl: usual.water?.value ?? prev.waterMl,
+      movementMinutes: usual.movement?.value ?? prev.movementMinutes,
+      energy: usual.energy?.value ?? prev.energy,
+      screenMinutes: usual.screen?.value ?? prev.screenMinutes,
+    }));
+    setStatus("Your usual is in — adjust anything, then save.");
   };
 
   const numField = (value: number | null) => (value === null ? "" : String(value));
@@ -222,6 +273,33 @@ export function LogPanel({
         {existing ? " · already logged — saving updates it" : ""}
       </p>
 
+      {usualApplies ? (
+        <div
+          className="tk-usual mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[var(--ci-radius-md)] border px-3.5 py-3"
+          style={{
+            borderColor: "color-mix(in oklab, var(--ci-follicular) 35%, transparent)",
+            background: "color-mix(in oklab, var(--ci-follicular) 7%, transparent)",
+          }}
+        >
+          <Sparkles
+            size={15}
+            className="shrink-0"
+            style={{ color: "var(--ci-follicular)" }}
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium leading-snug">Start from your usual day</p>
+            <p className="ci-num text-[11px] ci-muted">
+              Computed from your last logged days — you can change anything after.
+            </p>
+          </div>
+          <Button type="button" variant="ghost" size="sm" onClick={fillUsual} disabled={disabled}>
+            <Sparkles size={12} aria-hidden />
+            Fill my usual
+          </Button>
+        </div>
+      ) : null}
+
       <form onSubmit={submit} noValidate className="mt-4">
         {errorCount > 0 ? (
           <div
@@ -243,11 +321,28 @@ export function LogPanel({
         ) : null}
 
         {/* --------------------------------- sleep ---------------------------- */}
-        <div ref={sleepRef} className="tk-block" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.sleep }}>
+        <div
+          ref={sleepRef}
+          className="tk-block"
+          style={{ ["--tk-accent" as string]: TRACKER_ACCENT.sleep }}
+        >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="ci-label flex items-center gap-1.5">
               <TrackerIcon id="sleep" size={13} />
               Sleep
+              {usualApplies && usual.sleep ? (
+                <UsualChip
+                  label={`Usual ${usual.sleep.value.bedTime}–${usual.sleep.value.wakeTime}`}
+                  onFill={() => {
+                    set("bedTime", usual.sleep!.value.bedTime);
+                    set("wakeTime", usual.sleep!.value.wakeTime);
+                    set("sleepMinutes", usual.sleep!.value.minutes);
+                    if (usual.sleep!.value.quality !== null)
+                      set("sleepQuality", usual.sleep!.value.quality);
+                  }}
+                  disabled={disabled}
+                />
+              ) : null}
             </span>
             {sleepPreview !== null ? (
               <span className="ci-num text-[12px]" style={{ color: "var(--ci-luteal)" }}>
@@ -284,7 +379,9 @@ export function LogPanel({
                 className="ci-input"
                 placeholder="7.5"
                 value={
-                  draft.sleepMinutes === null ? "" : String(Math.round(draft.sleepMinutes / 15) * 15 / 60)
+                  draft.sleepMinutes === null
+                    ? ""
+                    : String((Math.round(draft.sleepMinutes / 15) * 15) / 60)
                 }
                 disabled={disabled}
                 onChange={(e) =>
@@ -315,14 +412,27 @@ export function LogPanel({
         </div>
 
         {/* --------------------------------- water ---------------------------- */}
-        <div ref={waterRef} className="mt-3 tk-block" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.water }}>
+        <div
+          ref={waterRef}
+          className="mt-3 tk-block"
+          style={{ ["--tk-accent" as string]: TRACKER_ACCENT.water }}
+        >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="ci-label flex items-center gap-1.5">
               <TrackerIcon id="water" size={13} />
               Water
+              {usualApplies && usual.water ? (
+                <UsualChip
+                  label={`Usual ${trackerDef("water").format(usual.water.value)}`}
+                  onFill={() => set("waterMl", usual.water!.value)}
+                  disabled={disabled}
+                />
+              ) : null}
             </span>
             <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.water" }}>
-              <Metric value={draft.waterMl === null ? "0ml" : trackerDef("water").format(draft.waterMl)} />
+              <Metric
+                value={draft.waterMl === null ? "0ml" : trackerDef("water").format(draft.waterMl)}
+              />
             </span>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -336,7 +446,9 @@ export function LogPanel({
               aria-label="Water in millilitres"
               value={numField(draft.waterMl)}
               disabled={disabled}
-              onChange={(e) => set("waterMl", e.target.value === "" ? null : Number(e.target.value))}
+              onChange={(e) =>
+                set("waterMl", e.target.value === "" ? null : Number(e.target.value))
+              }
             />
             <div className="tk-quick" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.water }}>
               {[250, 500, 1000].map((amount) => (
@@ -360,14 +472,37 @@ export function LogPanel({
         </div>
 
         {/* --------------------------------- study ---------------------------- */}
-        <div ref={studyRef} className="mt-3 tk-block" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.study }}>
+        <div
+          ref={studyRef}
+          className="mt-3 tk-block"
+          style={{ ["--tk-accent" as string]: TRACKER_ACCENT.study }}
+        >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="ci-label flex items-center gap-1.5">
               <TrackerIcon id="study" size={13} />
               Study
+              {usualApplies && usual.study ? (
+                <UsualChip
+                  label={`Usual ${trackerDef("study").format(usual.study.value.minutes)}${usual.study.value.subject ? ` · ${usual.study.value.subject}` : ""}`}
+                  onFill={() => {
+                    set("sessions", [
+                      ...draft.sessions,
+                      {
+                        subject: usual.study!.value.subject ?? "General",
+                        minutes: usual.study!.value.minutes,
+                        startAt: null,
+                      },
+                    ]);
+                    setStatus("Usual session added — edit it however you like.");
+                  }}
+                  disabled={disabled}
+                />
+              ) : null}
             </span>
             <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.study" }}>
-              <Metric value={studyTotal === 0 ? "no sessions" : trackerDef("study").format(studyTotal)} />
+              <Metric
+                value={studyTotal === 0 ? "no sessions" : trackerDef("study").format(studyTotal)}
+              />
             </span>
           </div>
 
@@ -512,16 +647,29 @@ export function LogPanel({
 
         {/* ----------------------- movement · energy · screen ------------------ */}
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          <div ref={movementRef} className="tk-block" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.movement }}>
+          <div
+            ref={movementRef}
+            className="tk-block"
+            style={{ ["--tk-accent" as string]: TRACKER_ACCENT.movement }}
+          >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="ci-label flex items-center gap-1.5">
                 <TrackerIcon id="movement" size={13} />
                 Movement
+                {usualApplies && usual.movement ? (
+                  <UsualChip
+                    label={`Usual ${trackerDef("movement").format(usual.movement.value)}`}
+                    onFill={() => set("movementMinutes", usual.movement!.value)}
+                    disabled={disabled}
+                  />
+                ) : null}
               </span>
               <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.movement" }}>
-                {draft.movementMinutes === null
-                  ? "—"
-                  : <Metric value={trackerDef("movement").format(draft.movementMinutes)} />}
+                {draft.movementMinutes === null ? (
+                  "—"
+                ) : (
+                  <Metric value={trackerDef("movement").format(draft.movementMinutes)} />
+                )}
               </span>
             </div>
             <input
@@ -538,7 +686,10 @@ export function LogPanel({
                 set("movementMinutes", e.target.value === "" ? null : Number(e.target.value))
               }
             />
-            <div className="tk-quick mt-2" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.movement }}>
+            <div
+              className="tk-quick mt-2"
+              style={{ ["--tk-accent" as string]: TRACKER_ACCENT.movement }}
+            >
               {[10, 20, 30].map((amount) => (
                 <button
                   key={amount}
@@ -558,11 +709,22 @@ export function LogPanel({
             ) : null}
           </div>
 
-          <div ref={energyRef} className="tk-block" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.energy }}>
+          <div
+            ref={energyRef}
+            className="tk-block"
+            style={{ ["--tk-accent" as string]: TRACKER_ACCENT.energy }}
+          >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="ci-label flex items-center gap-1.5">
                 <TrackerIcon id="energy" size={13} />
                 Energy
+                {usualApplies && usual.energy ? (
+                  <UsualChip
+                    label={`Usual ${usual.energy.value}`}
+                    onFill={() => set("energy", usual.energy!.value)}
+                    disabled={disabled}
+                  />
+                ) : null}
               </span>
               <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.energy" }}>
                 {draft.energy === null ? "—" : ENERGY_LABEL[draft.energy]}
@@ -582,16 +744,29 @@ export function LogPanel({
             ) : null}
           </div>
 
-          <div ref={screenRef} className="tk-block" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.screen }}>
+          <div
+            ref={screenRef}
+            className="tk-block"
+            style={{ ["--tk-accent" as string]: TRACKER_ACCENT.screen }}
+          >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="ci-label flex items-center gap-1.5">
                 <TrackerIcon id="screen" size={13} />
                 Screen
+                {usualApplies && usual.screen ? (
+                  <UsualChip
+                    label={`Usual ${trackerDef("screen").format(usual.screen.value)}`}
+                    onFill={() => set("screenMinutes", usual.screen!.value)}
+                    disabled={disabled}
+                  />
+                ) : null}
               </span>
               <span className="ci-num text-[12px]" style={{ color: "TRACKER_ACCENT.screen" }}>
-                {draft.screenMinutes === null
-                  ? "—"
-                  : <Metric value={trackerDef("screen").format(draft.screenMinutes)} />}
+                {draft.screenMinutes === null ? (
+                  "—"
+                ) : (
+                  <Metric value={trackerDef("screen").format(draft.screenMinutes)} />
+                )}
               </span>
             </div>
             <input
@@ -609,10 +784,16 @@ export function LogPanel({
               }
               disabled={disabled}
               onChange={(e) =>
-                set("screenMinutes", e.target.value === "" ? null : Math.round(Number(e.target.value) * 60))
+                set(
+                  "screenMinutes",
+                  e.target.value === "" ? null : Math.round(Number(e.target.value) * 60),
+                )
               }
             />
-            <div className="tk-quick mt-2" style={{ ["--tk-accent" as string]: TRACKER_ACCENT.screen }}>
+            <div
+              className="tk-quick mt-2"
+              style={{ ["--tk-accent" as string]: TRACKER_ACCENT.screen }}
+            >
               {[30, 60, 120].map((amount) => (
                 <button
                   key={amount}

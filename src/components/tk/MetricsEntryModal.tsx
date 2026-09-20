@@ -38,12 +38,14 @@ import {
   CircleAlert,
   Minus,
   Plus,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
+import { usualDay } from "@/lib/smart/usual";
 import { readTrackerValue, setTrackerValues } from "@/components/tk/designs/shared";
 
 type MetricKey = TrackerId;
@@ -148,6 +150,10 @@ export function MetricsEntryModal({
   const [partial, setPartial] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  /* Their own typical numbers, so a tap can fill a field. Computed from the
+     record only — never a guess, and today never predicts itself. */
+  const usual = usualDay(store.days, store.today);
+
   useEffect(() => {
     if (open) {
       setView("form");
@@ -175,6 +181,31 @@ export function MetricsEntryModal({
     if (raw.trim() === "" || Number.isNaN(n)) return "Enter a number.";
     return def.validate(n);
   }
+
+  /** The usual value for a metric, in the unit its field is typed in. */
+  function usualFor(key: MetricKey): number | null {
+    switch (key) {
+      case "sleep":
+        return usual.sleep?.value.minutes ?? null;
+      case "water":
+        return usual.water?.value ?? null;
+      case "study":
+        return usual.study?.value.minutes ?? null;
+      case "movement":
+        return usual.movement?.value ?? null;
+      case "energy":
+        return usual.energy?.value ?? null;
+      case "screen":
+        return usual.screen?.value ?? null;
+      default:
+        return null;
+    }
+  }
+
+  /** Fields still blank that their own history can suggest a value for. */
+  const usualChips = metrics
+    .filter((m) => !filled(m.key) && usualFor(m.key) !== null)
+    .map((m) => ({ def: m, value: usualFor(m.key) as number }));
 
   const setValue = (key: MetricKey, v: string) => {
     setValues((p) => ({ ...p, [key]: v }));
@@ -379,6 +410,35 @@ export function MetricsEntryModal({
                 );
               })}
             </div>
+
+            {usualChips.length > 0 ? (
+              <div
+                className="mt-3 rounded-xl border border-dashed p-3"
+                style={{ borderColor: "var(--border)" }}
+              >
+                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+                  Your usual · from your last logged days
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {usualChips.map(({ def, value }) => (
+                    <button
+                      key={`usual-${def.key}`}
+                      type="button"
+                      onClick={() => setValue(def.key, strip(value / def.scale))}
+                      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors"
+                      style={{
+                        borderColor: def.colorVar,
+                        color: def.colorVar,
+                      }}
+                      title={`Fills ${def.label} with what you usually log — ${value} ${def.unit}`}
+                    >
+                      <Sparkles className="h-3 w-3" aria-hidden />
+                      {def.label} · {strip(value / def.scale)} {def.unit}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <button
               type="button"
