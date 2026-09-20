@@ -190,6 +190,38 @@
 .bmood-face[aria-pressed="true"] .bmood-face-label {
   color: var(--bmood-face-color, var(--foreground));
 }
+/* the "usually" tag — their own pattern, marked but never chosen for them */
+.bmood-face-usual {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 1;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  background: color-mix(in oklab, var(--background) 80%, transparent);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  pointer-events: none;
+  white-space: nowrap;
+}
+/* the usual-reading tick on the 1–10 sliders */
+.bmood-slider-usual {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  border-radius: 999px;
+  border: 1.5px solid var(--foreground);
+  background: var(--background);
+  opacity: 0.55;
+  pointer-events: none;
+}
 .bmood-face-tick {
   position: absolute;
   top: 2px;

@@ -1,0 +1,334 @@
+/**
+ * usual.ts — "your usual" computed from the person's own record.
+ *
+ * The engine behind Bloom's smart fill: from the last couple of weeks of
+ * logged days it derives what a typical day looks like — median sleep window,
+ * median water, modal energy — so the log can offer it back with one tap.
+ *
+ * Rules that keep it honest:
+ *  · Nothing is invented. With fewer than MIN_SAMPLES logged days a field is
+ *    simply absent — the UI shows no chip for it, never a guessed number.
+ *  · The day being filled is always excluded, so editing never echoes itself.
+ *  · Medians, not means — one wild night doesn't become "your usual".
+ *  · "Usual" is a starting point, applied only when the person taps it, and
+ *    everything stays editable afterwards.
+ */
+
+import type { DayEntry } from "@/lib/trackers/core";
+import type { HabitLog } from "@/lib/home/habits";
+import { PAGE_MOOD_PRESETS, PAGE_MOODS, type PageMood } from "@/lib/mood/page";
+import type { MoodEntry } from "@/lib/mood/types";
+
+/** Distinct logged days a field needs before "your usual" may speak for it. */
+export const MIN_SAMPLES = 4;
+
+/** How far back the usual is computed from. */
+export const USUAL_WINDOW = 14;
+
+/** A computed usual: the value plus how many days it came from. */
+export interface UsualField<T> {
+  value: T;
+  samples: number;
+}
+
+export interface UsualDay {
+  /** Median sleep window, rounded to 15 min. */
+  sleep?: UsualField<{
+    bedTime: string;
+    wakeTime: string;
+    minutes: number;
+    quality: number | null;
+  }>;
+  water?: UsualField<number>; // ml, rounded to 50
+  movement?: UsualField<number>; // minutes, rounded to 5
+  energy?: UsualField<number>; // 1–5, the most recent mode
+  screen?: UsualField<number>; // minutes, rounded to 15
+  /** Typical daily study total + the subject they log most (sessions stay manual). */
+  study?: UsualField<{ minutes: number; subject: string | null }>;
+}
+
+const roundTo = (value: number, step: number) => Math.round(value / step) * step;
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1
+    ? sorted[mid]!
+    : Math.round(((sorted[mid - 1]! + sorted[mid]!) / 2) * 100) / 100;
+}
+
+/**
+ * "HH:MM" → minutes since the previous noon, so 23:30 and 00:40 sort on one
+ * line instead of wrapping around midnight.
+ */
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  const hour = h ?? 0;
+  return (hour < 12 ? hour + 24 : hour) * 60 + (m ?? 0);
+}
+
+function minutesToTime(total: number): string {
+  const wrapped = total % (24 * 60);
+  const h = Math.floor(wrapped / 60) % 24;
+  const m = wrapped % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** The most common value; the most recent occurrence wins ties. */
+function recentMode(values: Array<{ value: number; order: number }>): number {
+  const counts = new Map<number, { count: number; latest: number }>();
+  for (const { value, order } of values) {
+    const entry = counts.get(value);
+    if (!entry) counts.set(value, { count: 1, latest: order });
+    else counts.set(value, { count: entry.count + 1, latest: Math.max(entry.latest, order) });
+  }
+  let best: { value: number; count: number; latest: number } | null = null;
+  for (const [value, { count, latest }] of counts) {
+    if (best === null || count > best.count || (count === best.count && latest > best.latest)) {
+      best = { value, count, latest };
+    }
+  }
+  return best!.value;
+}
+
+/**
+ * The user's usual day, computed from the last `USUAL_WINDOW` logged days
+ * (excluding `excludeDate` — the day being filled never predicts itself).
+ * Fields without `MIN_SAMPLES` distinct days are left out entirely.
+ */
+export function usualDay(
+  days: readonly DayEntry[],
+  excludeDate: string,
+  options?: { window?: number | undefined; minSamples?: number | undefined },
+): UsualDay {
+  const window = options?.window ?? USUAL_WINDOW;
+  const minSamples = options?.minSamples ?? MIN_SAMPLES;
+
+  const recent = [...days]
+    .filter((d) => d.date !== excludeDate)
+    .sort((a, b) => (a.date < b.date ? 1 : -1)) // newest first
+    .slice(0, window);
+
+  const out: UsualDay = {};
+
+  const sleepDays = recent.filter(
+    (d) => d.bedTime !== null && d.wakeTime !== null && d.sleepMinutes !== null,
+  );
+  if (sleepDays.length >= minSamples) {
+    const beds = sleepDays.map((d) => timeToMinutes(d.bedTime!));
+    const wakes = sleepDays.map((d) => timeToMinutes(d.wakeTime!));
+    const qualities = sleepDays
+      .filter((d) => d.sleepQuality !== null)
+      .map((d, i) => ({ value: d.sleepQuality!, order: i }));
+    out.sleep = {
+      value: {
+        bedTime: minutesToTime(roundTo(median(beds), 15)),
+        wakeTime: minutesToTime(roundTo(median(wakes), 15)),
+        minutes: roundTo(median(sleepDays.map((d) => d.sleepMinutes!)), 15),
+        quality: qualities.length >= minSamples ? recentMode(qualities) : null,
+      },
+      samples: sleepDays.length,
+    };
+  }
+
+  const water = recent.filter((d) => d.waterMl !== null).map((d) => d.waterMl!);
+  if (water.length >= minSamples)
+    out.water = { value: roundTo(median(water), 50), samples: water.length };
+
+  const movement = recent.filter((d) => d.movementMinutes !== null).map((d) => d.movementMinutes!);
+  if (movement.length >= minSamples)
+    out.movement = { value: roundTo(median(movement), 5), samples: movement.length };
+
+  const energyDays = recent
+    .filter((d) => d.energy !== null)
+    .map((d, i) => ({ value: d.energy!, order: i }));
+  if (energyDays.length >= minSamples)
+    out.energy = { value: recentMode(energyDays), samples: energyDays.length };
+
+  const screen = recent.filter((d) => d.screenMinutes !== null).map((d) => d.screenMinutes!);
+  if (screen.length >= minSamples)
+    out.screen = { value: roundTo(median(screen), 15), samples: screen.length };
+
+  const studyTotals = recent
+    .filter((d) => d.sessions.length > 0)
+    .map((d) => ({
+      total: d.sessions.reduce((sum, s) => sum + s.minutes, 0),
+      subjects: d.sessions.map((s) => s.subject),
+    }));
+  if (studyTotals.length >= minSamples) {
+    const subjectCounts = new Map<string, number>();
+    for (const day of studyTotals) {
+      for (const subject of day.subjects) {
+        subjectCounts.set(subject, (subjectCounts.get(subject) ?? 0) + 1);
+      }
+    }
+    let topSubject: string | null = null;
+    let topCount = 0;
+    for (const [subject, count] of subjectCounts) {
+      if (count > topCount) {
+        topSubject = subject;
+        topCount = count;
+      }
+    }
+    out.study = {
+      value: {
+        minutes: roundTo(median(studyTotals.map((d) => d.total)), 15),
+        subject: topSubject,
+      },
+      samples: studyTotals.length,
+    };
+  }
+
+  return out;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  The mood check-in                                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Distinct logged days the mood check-in needs before it may suggest. */
+export const MOOD_MIN_SAMPLES = 5;
+
+export interface MoodUsual {
+  mood: number; // 1–10
+  energy: number; // 1–10
+  stress: number; // 1–10
+  /** Distinct days of evidence behind the three readings. */
+  samples: number;
+}
+
+const clamp10 = (v: number) => Math.min(10, Math.max(1, Math.round(v)));
+
+/** The most recent entry per local day — the day's final word. */
+function lastEntryPerDay(entries: readonly MoodEntry[]): MoodEntry[] {
+  const byDay = new Map<string, MoodEntry>();
+  for (const e of entries) {
+    const day = e.timestamp.slice(0, 10);
+    const held = byDay.get(day);
+    if (!held || e.timestamp > held.timestamp) byDay.set(day, e);
+  }
+  return [...byDay.values()];
+}
+
+/**
+ * Their usual check-in readings, from the last two weeks they logged
+ * (excluding `excludeDate` — same rule as the trackers: the day being
+ * filled never predicts itself).
+ */
+export function usualMood(entries: readonly MoodEntry[], excludeDate: string): MoodUsual | null {
+  const recent = lastEntryPerDay(entries)
+    .filter((e) => e.timestamp.slice(0, 10) !== excludeDate)
+    .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
+    .slice(0, USUAL_WINDOW);
+  if (recent.length < MOOD_MIN_SAMPLES) return null;
+  return {
+    mood: clamp10(median(recent.map((e) => e.mood))),
+    energy: clamp10(median(recent.map((e) => e.energy))),
+    stress: clamp10(median(recent.map((e) => e.stress))),
+    samples: recent.length,
+  };
+}
+
+/** The face whose preset sits nearest the usual readings (unique and close). */
+export function usualFaceOf(usual: MoodUsual | null | undefined): PageMood | null {
+  if (!usual) return null;
+  let best: PageMood | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  let tie = false;
+  for (const face of PAGE_MOODS) {
+    const p = PAGE_MOOD_PRESETS[face];
+    const d =
+      Math.abs(p.mood - usual.mood) +
+      Math.abs(p.energy - usual.energy) / 2 +
+      Math.abs(p.stress - usual.stress) / 2;
+    if (d < bestDistance) {
+      best = face;
+      bestDistance = d;
+      tie = false;
+    } else if (d === bestDistance) {
+      tie = true;
+    }
+  }
+  return !tie && best !== null && bestDistance <= 2.5 ? best : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Habit timing                                                               */
+/* -------------------------------------------------------------------------- */
+
+/** Completions a habit needs before Bloom may speak about its timing. */
+export const HABIT_TIME_MIN_SAMPLES = 3;
+
+export interface HabitTimeUsual {
+  /** Median completion time, minutes since midnight, rounded to 5. */
+  minutes: number;
+  samples: number;
+  /** A gentle nudge 15 minutes before the usual finish — "HH:MM". */
+  reminderTime: string;
+}
+
+function minutesToClock(total: number): string {
+  const wrapped = ((total % 1440) + 1440) % 1440;
+  const h = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** Minutes since midnight → "8:05 PM" / "6:00 AM". */
+export function formatClock(minutes: number): string {
+  const wrapped = ((Math.round(minutes) % 1440) + 1440) % 1440;
+  const h24 = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
+  const period = h24 < 12 ? "AM" : "PM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return m === 0 ? `${h12}:00 ${period}` : `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/**
+ * When this habit usually gets done — the median completion time of its last
+ * fortnight of ticks, offered with a reminder suggestion a quarter hour
+ * before. Fewer than HABIT_TIME_MIN_SAMPLES completions means silence.
+ */
+export function usualHabitTime(logs: readonly HabitLog[], habitId: string): HabitTimeUsual | null {
+  const minutes = logs
+    .filter((l) => l.habitId === habitId)
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, USUAL_WINDOW)
+    .map((l) => {
+      const d = new Date(l.completedAt);
+      return Number.isNaN(d.getTime()) ? null : d.getHours() * 60 + d.getMinutes();
+    })
+    .filter((v): v is number => v !== null);
+  if (minutes.length < HABIT_TIME_MIN_SAMPLES) return null;
+  const usual = roundTo(median(minutes), 5);
+  return {
+    minutes: usual,
+    samples: minutes.length,
+    /* The nudge lands before the habit, not on it. */
+    reminderTime: minutesToClock(usual - 15),
+  };
+}
+
+/** True when at least one field has enough history to suggest. */
+export function hasUsual(us: UsualDay): boolean {
+  return (
+    us.sleep !== undefined ||
+    us.water !== undefined ||
+    us.movement !== undefined ||
+    us.energy !== undefined ||
+    us.screen !== undefined ||
+    us.study !== undefined
+  );
+}
+
+/** The most-recently-logged day count behind the suggestion, for honest labels. */
+export function usualSampleCount(us: UsualDay): number {
+  return Math.max(
+    us.sleep?.samples ?? 0,
+    us.water?.samples ?? 0,
+    us.movement?.samples ?? 0,
+    us.energy?.samples ?? 0,
+    us.screen?.samples ?? 0,
+    us.study?.samples ?? 0,
+  );
+}

@@ -50,8 +50,12 @@ export function CoachThread({
   responseSlow,
   showWelcome,
   starters,
+  welcomeGreeting,
+  welcomePhaseLine,
+  welcomeMemory,
   onStart,
   onRetry,
+  onOfflineAnswer,
   onRegenerate,
   onTellMeMore,
   onMakePlan,
@@ -66,8 +70,16 @@ export function CoachThread({
   responseSlow: boolean;
   showWelcome: boolean;
   starters: Starter[];
+  /** Personal opener from the page — name + hour, when onboarding knows them. */
+  welcomeGreeting?: string | null | undefined;
+  /** One hedged science line about the current cycle phase, when tracked. */
+  welcomePhaseLine?: string | null | undefined;
+  /** The newest remembered fact, so a returning conversation picks up. */
+  welcomeMemory?: string | null | undefined;
   onStart: (starter: Starter) => void;
   onRetry: (message: CoachMessage) => void;
+  /** Offered on failed sends: answer the question from the on-device engine. */
+  onOfflineAnswer?: ((message: CoachMessage) => void) | undefined;
   onRegenerate: (message: CoachMessage) => void;
   onTellMeMore: () => void;
   onMakePlan: () => void;
@@ -137,7 +149,14 @@ export function CoachThread({
             <ThinkingRow slow={responseSlow} />
           </div>
         ) : (
-          <EmptyWelcome starters={starters} thinking={false} onStart={onStart} />
+          <EmptyWelcome
+            starters={starters}
+            thinking={false}
+            onStart={onStart}
+            greeting={welcomeGreeting}
+            phaseLine={welcomePhaseLine}
+            lastMemory={welcomeMemory}
+          />
         )
       ) : (
         <div className="coach-thread-list">
@@ -161,6 +180,11 @@ export function CoachThread({
                 message={message}
                 fresh={fresh}
                 onRetry={message.status === "error" ? () => onRetry(message) : undefined}
+                onOfflineAnswer={
+                  message.status === "error" && onOfflineAnswer
+                    ? () => onOfflineAnswer(message)
+                    : undefined
+                }
                 onRegenerate={
                   isLastCoachMessage && message.status !== "error"
                     ? () => onRegenerate(message)

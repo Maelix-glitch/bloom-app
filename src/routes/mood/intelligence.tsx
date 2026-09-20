@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
 
 import { useMoodSystem } from "@/hooks/useMoodSystem";
+import { usualMood } from "@/lib/smart/usual";
+import { todayKey } from "@/lib/cycle/predict";
 import type { MoodEntry } from "@/lib/mood/types";
 import { Hero } from "@/components/mood/Hero";
 import { MoodChart } from "@/components/mood/MoodChart";
@@ -74,6 +76,7 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
 function MoodIntelligencePage() {
   const navigate = useNavigate();
   const system = useMoodSystem();
+  const usual = useMemo(() => usualMood(system.entries, todayKey()), [system.entries]);
   const { loading, entries, analytics: a, emotionFilter, setEmotionFilter, authError } = system;
 
   const [composerOpen, setComposerOpen] = useState(false);
@@ -144,7 +147,7 @@ function MoodIntelligencePage() {
         ) : (
           <div className="mt-14 flex flex-col gap-6">
             <Reveal delay={80}>
-              <MoodChart days={a.days} />
+              <MoodChart days={a.days} usualMood={usual?.mood ?? null} />
             </Reveal>
 
             <div className="grid gap-6 lg:grid-cols-2">
@@ -231,6 +234,7 @@ function MoodIntelligencePage() {
         onClose={() => setComposerOpen(false)}
         onSave={system.saveEntry}
         onDelete={(entry) => system.removeEntry(entry.id)}
+        usual={usual}
       />
     </div>
   );

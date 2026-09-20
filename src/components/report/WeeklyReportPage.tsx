@@ -27,6 +27,7 @@ import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { useTrackers } from "@/hooks/useTrackers";
 import { buildWeeklyReport } from "@/lib/report/weekly";
+import { readPersonalVoice } from "@/lib/voice/personal";
 
 function Delta({ now, prev, unit }: { now: number | null; prev: number | null; unit?: string }) {
   if (now === null || prev === null) return null;
@@ -103,6 +104,48 @@ export function WeeklyReportPage() {
   const fmtHours = (min: number | null): string =>
     min === null ? "—" : `${Math.round((min / 60) * 10) / 10}h`;
 
+  /* "Against your usual" — the week read against their own pre-week
+     baseline. Only fields with real history on both sides appear. */
+  const usualBodyLine = useMemo(() => {
+    const u = report.usual;
+    if (!u) return null;
+    const parts: string[] = [];
+    if (u.sleepMinutes !== null && report.trackers.sleepAvg !== null) {
+      const delta = Math.round(report.trackers.sleepAvg - u.sleepMinutes);
+      parts.push(
+        `sleep ${delta === 0 ? "level with" : `${delta > 0 ? "+" : "−"}${fmtHours(Math.abs(delta))}`}`,
+      );
+    }
+    if (u.waterMl !== null && report.trackers.waterAvg !== null) {
+      const delta = Math.round((report.trackers.waterAvg - u.waterMl) / 50) * 50;
+      parts.push(
+        `water ${delta === 0 ? "level" : `${delta > 0 ? "+" : "−"}${Math.abs(delta) / 1000}L`}`,
+      );
+    }
+    if (u.movementMinutes !== null && report.trackers.movementAvg !== null) {
+      const delta = Math.round(report.trackers.movementAvg - u.movementMinutes);
+      parts.push(
+        `movement ${delta === 0 ? "level" : `${delta > 0 ? "+" : "−"}${Math.abs(delta)}m`}`,
+      );
+    }
+    return parts.length > 0 ? `Against your usual — ${parts.join(" · ")}` : null;
+  }, [
+    report.usual,
+    report.trackers.sleepAvg,
+    report.trackers.waterAvg,
+    report.trackers.movementAvg,
+  ]);
+
+  /* Who the report is addressed to — name and honest tenure from onboarding,
+     computed once. Absent an answer the header stays as it was. */
+  const intro = useMemo(() => {
+    const voice = readPersonalVoice();
+    return {
+      name: voice.name,
+      tenureWeeks: voice.daysWithBloom === null ? null : Math.floor(voice.daysWithBloom / 7) + 1,
+    };
+  }, []);
+
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
       <AppNav />
@@ -119,8 +162,16 @@ export function WeeklyReportPage() {
             Weekly report · {report.weekStart} → {report.weekEnd}
           </p>
           <h1 className="mt-2 font-display text-[clamp(28px,5vw,44px)] italic leading-tight">
-            Your week, read back to you.
+            {intro.name
+              ? `Your week, ${intro.name} — read back to you.`
+              : "Your week, read back to you."}
           </h1>
+          {intro.tenureWeeks !== null ? (
+            <p className="mt-2 text-[12.5px] text-muted-foreground">
+              Week {intro.tenureWeeks.toLocaleString()} of your Bloom record
+              {report.insight ? " — one thing stands out below." : "."}
+            </p>
+          ) : null}
         </header>
 
         {report.insight ? (
@@ -161,6 +212,15 @@ export function WeeklyReportPage() {
               </div>
               <div className="mt-4 space-y-1.5">
                 <Delta now={report.mood.avgMood} prev={report.mood.prevAvgMood} />
+                {report.usual?.avgMood !== null &&
+                report.usual?.avgMood !== undefined &&
+                report.mood.avgMood !== null ? (
+                  <p className="text-[12px] text-muted-foreground">
+                    Against your usual check-in:{" "}
+                    <span className="text-foreground">{report.mood.avgMood}</span> vs{" "}
+                    {report.usual.avgMood} usually
+                  </p>
+                ) : null}
                 {report.mood.dominant ? (
                   <p className="text-[12px] text-muted-foreground">
                     Most present feeling:{" "}
@@ -245,6 +305,9 @@ export function WeeklyReportPage() {
                   prev={report.trackers.sleepPrevAvg}
                   unit="m"
                 />
+                {usualBodyLine ? (
+                  <p className="text-[12px] text-muted-foreground">{usualBodyLine}</p>
+                ) : null}
                 {report.trackers.sleepGoalShare !== null ? (
                   <p className="text-[12px] text-muted-foreground">
                     Sleep goal met on{" "}

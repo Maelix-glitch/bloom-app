@@ -389,13 +389,13 @@ export function InsightsPanel({
   return (
     <section className="home-panel p-5" aria-labelledby="home-insights-title">
       <h2 id="home-insights-title" className="font-display text-xl">
-        Insights for you
+        Bloom noticed
       </h2>
       {items.length === 0 ? (
         <p className="mt-4 text-sm leading-snug text-muted-foreground">
           {loading
             ? "Reading your record…"
-            : "Insights appear once a few days of mood and tracker logs overlap. Nothing here is ever a guess."}
+            : "Patterns surface once a few days of logs overlap — runs, drifts, the shape of your week. Nothing here is ever a guess."}
         </p>
       ) : (
         <ul className="mt-4 space-y-3">

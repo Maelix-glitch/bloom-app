@@ -19,8 +19,18 @@ export function RankPath({ points, rankTier }: { points: number; rankTier: numbe
   const ranks = useMemo(() => journeyRanks(points, 2, 3), [points]);
   const current = useMemo(() => rankFor(points), [points]);
 
+  /* How far along the *shown* stretch of the path the person stands — the
+     spine fills in gold up to the held position, the way a game map inks the
+     road you've walked. */
+  const pathProgress = useMemo(() => {
+    const index = ranks.findIndex((r) => r.tier === current.rank.tier);
+    if (index < 0) return 0;
+    const span = Math.max(ranks.length - 1, 1);
+    return Math.round((index / span) * 100);
+  }, [ranks, current.rank.tier]);
+
   return (
-    <div className="pg-path">
+    <div className="pg-path" style={{ ["--pg-path-progress" as string]: `${pathProgress}%` }}>
       <span className="pg-path-spine" aria-hidden />
       <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
         {ranks.map((rank) => {

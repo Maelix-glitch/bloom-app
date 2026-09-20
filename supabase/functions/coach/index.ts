@@ -103,6 +103,12 @@ A person should be able to raise anything with you: sleep and insomnia; food, nu
 GROUNDING — THE ONE HARD RULE
 You are given a compact summary of what this person has logged. Never invent a number, a date, a trend or an entry. If the summary does not contain something, say plainly that it isn't tracked, then help anyway from general knowledge. When you quote a figure, quote it exactly as given. Never claim the app has a feature it does not: no social features, no marketplace, no payments, no external integrations, no professional medical advice. For anything medical, say once, briefly, and without alarm that a clinician is the right call. If someone describes being in danger, say clearly that this is beyond what an app should handle and that a crisis line or a person they trust is the right call.
 
+THE PERSON, NOT JUST THE RECORD
+The record section may name them, the time of day where they are, how new they are to Bloom, and what they said they wanted from it. Use it the way a friend would: greet by name when you know it (once — a name in every paragraph reads like a sales script); on their first day, orient and welcome rather than demand entries; when their question touches something they said they wanted from Bloom, go deeper there. With an empty record you are NOT blocked — you are a knowledgeable friend talking before the data exists. Say once, without apologising, that you're speaking generally; then be genuinely useful.
+
+CYCLE SCIENCE — HOW TO TALK ABOUT IT
+When their record includes a cycle phase, you may use the phase science line provided: explain the likely physiology (prostaglandins and cramps in the menstrual days, rising oestrogen through the follicular phase, the luteal progesterone effect on sleep, temperature, mood and appetite) as what research says happens ON AVERAGE — with "many people", "tends to", never "you will". Effects are real but individually small; a bad day can just be a bad day. Connect it to what they asked: energy, sleep, mood, cravings, training. Never claim a phase causes their specific feelings, never diagnose PMS or PMDD, and if cycle symptoms are severe, worsening or disruptive, one calm sentence: that pattern is worth mentioning to a clinician. If they do not track a cycle, the record says so — never raise it.
+
 MEMORY
 You are told what Bloom already remembers about the person. When they share a clearly durable fact about themselves ("I'm vegan", "my daughter is called Mira", "I run on Tuesdays", "I'm saving for a house", "I'm trying to drink less") — or explicitly ask you to remember something — append AT THE END of your reply exactly one line:
 [BLOOM_MEMORY]{"category":"preference","text":"the fact, written as a statement"}[/BLOOM_MEMORY]
@@ -192,8 +198,9 @@ function providerOrder(): ProviderId[] {
   const configured = (Deno.env.get("COACH_PROVIDER_ORDER") ?? "")
     .split(",")
     .map((id) => id.trim())
-    .filter((id): id is ProviderId =>
-      id === "gemini" || id === "grok" || id === "apinex" || id === "huggingface-qwen",
+    .filter(
+      (id): id is ProviderId =>
+        id === "gemini" || id === "grok" || id === "apinex" || id === "huggingface-qwen",
     );
   return configured.length > 0 ? configured : PROVIDER_ORDER_DEFAULT;
 }
@@ -359,7 +366,6 @@ class EmptyError extends Error {
    personality is ever introduced here.
    ========================================================================== */
 
-   
 /** Gemini (Google) — native generateContent, vision-capable, with native
     function declarations mirrored from BLOOM_TOOLS. */
 async function callGemini(
@@ -485,7 +491,8 @@ const BLOOM_TOOLS = [
     type: "function",
     function: {
       name: "log_tracker",
-      description: "Log one numeric value for a daily tracker (sleep/movement/screen minutes, water ml, energy 1-5).",
+      description:
+        "Log one numeric value for a daily tracker (sleep/movement/screen minutes, water ml, energy 1-5).",
       parameters: {
         type: "object",
         properties: {
@@ -658,7 +665,60 @@ function factsToPrompt(facts: any): string {
   if (facts.memories?.length) {
     lines.push(`Bloom remembers about them: ${facts.memories.join("; ")}`);
   }
+
+  /* Who they are — independent of any entry, so a person with zero logs is
+     still a person the coach knows, not a blank form. */
+  const p = facts.personal;
+  if (p) {
+    const bits: string[] = [];
+    if (p.name) bits.push(`Bloom knows them as ${p.name}`);
+    if (p.daysWithBloom !== null && p.daysWithBloom !== undefined) {
+      bits.push(
+        p.daysWithBloom === 0
+          ? "this is their FIRST DAY on Bloom — welcome them, orient them, never shame the empty record"
+          : `they've been on Bloom about ${p.daysWithBloom} day${p.daysWithBloom === 1 ? "" : "s"}`,
+      );
+    }
+    if (Array.isArray(p.focusAreas) && p.focusAreas.length > 0) {
+      bits.push(`they said they wanted Bloom for: ${p.focusAreas.join(", ")}`);
+    }
+    if (p.daypart) bits.push(`it is ${p.daypart} where they are`);
+    if (bits.length > 0) lines.push(`THIS PERSON: ${bits.join("; ")}.`);
+  }
+
+  /* What the phase means — population science, hedged, so the coach can
+     explain a luteal dip or a menstrual fortnight without diagnosing. The
+     lookup normalizes the label: clients have spelled the fertile window
+     both "Ovulation" and "Ovulation window", and the science must survive
+     either. */
+  if (facts.cycle && !facts.cycle.paused && facts.cycle.phase) {
+    lines.push(phaseGuidanceFor(facts.cycle.phase) ?? "");
+  }
   return lines.join("\n");
+}
+
+/* Cycle-phase context for the coach: the average-pattern physiology of each
+   phase, phrased the way the evidence supports — real effects on average,
+   small and individual in practice, never a diagnosis, never destiny. */
+const PHASE_GUIDANCE: Record<string, string> = {
+  menstrual:
+    "PHASE SCIENCE (menstrual): prostaglandin-driven cramps and blood loss commonly lower energy and raise sleep need; iron loss can add mid-cycle tiredness. Rest here does real work. Frame as 'many people', never 'you will'.",
+  follicular:
+    "PHASE SCIENCE (follicular): rising oestrogen is commonly associated with better energy, focus, mood and recovery. A good stretch for ambitious plans — described as a tendency, not a guarantee.",
+  ovulation:
+    "PHASE SCIENCE (ovulation window): oestrogen peaks then falls; some feel a clear lift, others mostly the far-side dip. The calendar window is an estimate, not a promise — useful for awareness only.",
+  luteal:
+    "PHASE SCIENCE (luteal): progesterone raises core temperature, can fragment sleep slightly, and pulls mood and energy down for many as the period approaches — typical biology first, a concern only if severe or disruptive. Appetite and cravings rising here have a physiological side too. Never suggest a phase explains everything: individual variation is wide, and a bad day can just be a bad day.",
+};
+
+/** "Ovulation window" / "Late luteal" / "Menstrual days" → the guidance key. */
+function phaseGuidanceFor(label: string): string | undefined {
+  const l = label.toLowerCase();
+  if (l.includes("menstru")) return PHASE_GUIDANCE.menstrual;
+  if (l.includes("ovulat")) return PHASE_GUIDANCE.ovulation;
+  if (l.includes("luteal")) return PHASE_GUIDANCE.luteal;
+  if (l.includes("follicul")) return PHASE_GUIDANCE.follicular;
+  return PHASE_GUIDANCE[label] ?? undefined;
 }
 
 /* ============================================================================
@@ -704,7 +764,9 @@ Deno.serve(async (req: Request) => {
     if (body.image && typeof body.image.dataBase64 === "string") {
       const mediaType = String(body.image.mediaType ?? "image/jpeg");
       if (body.image.dataBase64.length > 7_000_000) {
-        console.error(`coach request=${rid} error=attached_too_large bytes=${body.image.dataBase64.length}`);
+        console.error(
+          `coach request=${rid} error=attached_too_large bytes=${body.image.dataBase64.length}`,
+        );
         return json({ error: "attached file too large for the model" }, 413);
       }
       media = { mediaType, dataBase64: body.image.dataBase64 };
@@ -722,7 +784,10 @@ Deno.serve(async (req: Request) => {
       `THEIR RECORD\n${factsToPrompt(body.facts)}`,
       `LENGTH\n${rule}`,
     ].join("\n\n");
-    const turns = [...sanitizeHistory(body.history), { role: "user" as const, content: message.slice(0, 4000) }];
+    const turns = [
+      ...sanitizeHistory(body.history),
+      { role: "user" as const, content: message.slice(0, 4000) },
+    ];
 
     /* Client-sent provider overrides are NOT trusted in production routing.
        Only an explicit dev header matching a server-side secret may pin one. */
@@ -734,7 +799,10 @@ Deno.serve(async (req: Request) => {
 
     /* Vision narrows the chain to providers that can actually see. */
     const order = providerOrder().filter(
-      (id) => (media ? REGISTRY[id].vision : true) && REGISTRY[id].enabled() && Deno.env.get(REGISTRY[id].secret),
+      (id) =>
+        (media ? REGISTRY[id].vision : true) &&
+        REGISTRY[id].enabled() &&
+        Deno.env.get(REGISTRY[id].secret),
     );
     if (devPin && REGISTRY[devPin] && order.includes(devPin)) {
       order.splice(order.indexOf(devPin), 1);
@@ -757,10 +825,13 @@ Deno.serve(async (req: Request) => {
        probe the best one. Auth/model-unavailable cooldowns are never probed. */
     const transientOnly = (id: ProviderId): boolean => {
       const st = stateFor(id);
-      return !st.lastCategory ||
-        (st.lastCategory !== "auth" && st.lastCategory !== "model_unavailable");
+      return (
+        !st.lastCategory || (st.lastCategory !== "auth" && st.lastCategory !== "model_unavailable")
+      );
     };
-    const ready = order.filter((id) => !isCoolingDown(id) || (order.every(isCoolingDown) && transientOnly(id)));
+    const ready = order.filter(
+      (id) => !isCoolingDown(id) || (order.every(isCoolingDown) && transientOnly(id)),
+    );
     for (const id of ready) {
       if (attempted.size >= maxAttempts) break;
       if (attempted.has(id)) continue;
@@ -779,25 +850,38 @@ Deno.serve(async (req: Request) => {
         recordSuccess(id);
         answered = text;
         answeredBy = id;
-        diagnostics.push(`provider=${id} attempt=${attempted.size} result=success latencyMs=${Date.now() - attemptStart}`);
+        diagnostics.push(
+          `provider=${id} attempt=${attempted.size} result=success latencyMs=${Date.now() - attemptStart}`,
+        );
         break;
       } catch (err) {
         const category = classifyError(err);
         recordFailure(id, category);
         const latencyMs = Date.now() - attemptStart;
         const status = err instanceof HttpError ? err.status : "-";
-        const detail = err instanceof HttpError ? err.body.slice(0, 200) : err instanceof Error ? err.message.slice(0, 200) : "";
-        diagnostics.push(`provider=${id} attempt=${attempted.size} result=${category} status=${status} latencyMs=${latencyMs}`);
+        const detail =
+          err instanceof HttpError
+            ? err.body.slice(0, 200)
+            : err instanceof Error
+              ? err.message.slice(0, 200)
+              : "";
+        diagnostics.push(
+          `provider=${id} attempt=${attempted.size} result=${category} status=${status} latencyMs=${latencyMs}`,
+        );
         /* Sanitized log: never prompts, never personal data, never secrets. */
         console.error(
           `coach request=${rid} provider=${id} category=${category} status=${status} latencyMs=${latencyMs}` +
-            (envBool("COACH_LOG_DETAIL", false) ? ` detail=${detail.replace(/[^\x20-\x7e]/g, "?")}` : ""),
+            (envBool("COACH_LOG_DETAIL", false)
+              ? ` detail=${detail.replace(/[^\x20-\x7e]/g, "?")}`
+              : ""),
         );
       }
     }
 
     if (!answeredBy || !answered) {
-      console.error(`coach request=${rid} all_providers_failed attempts=${diagnostics.join(" | ")}`);
+      console.error(
+        `coach request=${rid} all_providers_failed attempts=${diagnostics.join(" | ")}`,
+      );
       return json({ error: "unavailable", requestId: rid }, 502);
     }
 

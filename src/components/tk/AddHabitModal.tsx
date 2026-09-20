@@ -23,6 +23,7 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { formatClock } from "@/lib/smart/usual";
 import { createPortal } from "react-dom";
 
 import "@/styles/add-habit-modal.css";
@@ -78,6 +79,8 @@ export interface AddHabitModalProps {
   onClose: () => void;
   onSubmit?: ((habit: AddHabitPayload) => Promise<void> | void) | undefined;
   prefill?: AddHabitPrefill | undefined;
+  /** When their tick history knows a usual time, offer a reminder before it. */
+  suggestReminder?: { time: string; around: string; samples: number } | null | undefined;
 }
 
 /* --- ICON CATALOGUE ---------------------------------------------------------
@@ -255,11 +258,22 @@ function buildPayload(s: State): AddHabitPayload {
  * Renders nothing while closed. Each opening mounts a fresh dialog (state is
  * initialised from `prefill`), which is what `BloomAddHabit.open()` did.
  */
-export function AddHabitModal({ open, onClose, onSubmit, prefill }: AddHabitModalProps) {
+export function AddHabitModal({
+  open,
+  onClose,
+  onSubmit,
+  prefill,
+  suggestReminder = null,
+}: AddHabitModalProps) {
   if (!open || typeof document === "undefined") return null;
   return createPortal(
     <div className="bloom-add-habit">
-      <AddHabitDialog onClose={onClose} onSubmit={onSubmit} prefill={prefill} />
+      <AddHabitDialog
+        onClose={onClose}
+        onSubmit={onSubmit}
+        prefill={prefill}
+        suggestReminder={suggestReminder}
+      />
     </div>,
     document.body,
   );
@@ -269,7 +283,12 @@ export function AddHabitModal({ open, onClose, onSubmit, prefill }: AddHabitModa
 
 const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(" ");
 
-function AddHabitDialog({ onClose, onSubmit, prefill }: Omit<AddHabitModalProps, "open">) {
+function AddHabitDialog({
+  onClose,
+  onSubmit,
+  prefill,
+  suggestReminder = null,
+}: Omit<AddHabitModalProps, "open">) {
   const [s, setS] = useState<State>(() => initialState(prefill));
   const [iconTab, setIconTab] = useState<"preset" | "custom">("preset");
   const [upload, setUpload] = useState<{ name: string; url: string } | null>(null);
@@ -941,6 +960,23 @@ function AddHabitDialog({ onClose, onSubmit, prefill }: Omit<AddHabitModalProps,
                   onChange={(e) => set({ reminder: { ...s.reminder, time: e.target.value } })}
                 />
               </div>
+              {suggestReminder && (!s.reminder.enabled || !s.reminder.time) ? (
+                <button
+                  type="button"
+                  className="usual-reminder-chip"
+                  onClick={() => set({ reminder: { enabled: true, time: suggestReminder.time } })}
+                >
+                  You usually finish this around {suggestReminder.around} — remind you{" "}
+                  {formatClock(
+                    Number(suggestReminder.time.slice(0, 2)) * 60 +
+                      Number(suggestReminder.time.slice(3, 5)),
+                  )}
+                  ?
+                  <span className="usual-reminder-evidence">
+                    from {suggestReminder.samples} ticks
+                  </span>
+                </button>
+              ) : null}
             </div>
 
             <div>

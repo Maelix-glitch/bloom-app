@@ -301,6 +301,13 @@ export interface CycleSettings {
   pause: CyclePause | null;
   /** ISO stamp of the last mode change — lets two devices agree on the later choice. */
   modeChangedAt?: string | undefined;
+  /**
+   * "Ease this week" — the person's own opt-in. On the estimated pre-period
+   * days, Today's focus suggests one habit instead of two and says so. A
+   * preference, never a rule: nothing is removed from the record, and the
+   * habits page is unchanged.
+   */
+  easeBeforePeriod?: boolean | undefined;
 }
 
 export const DEFAULT_CYCLE_SETTINGS: CycleSettings = {
@@ -345,6 +352,7 @@ export function normalizeSettings(v: unknown): CycleSettings {
   };
   const stamp = v["modeChangedAt"];
   if (typeof stamp === "string" && !Number.isNaN(Date.parse(stamp))) out.modeChangedAt = stamp;
+  if (v["easeBeforePeriod"] === true) out.easeBeforePeriod = true;
   return out;
 }
 

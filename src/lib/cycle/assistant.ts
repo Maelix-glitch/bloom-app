@@ -66,6 +66,12 @@ const QUICK_PROMPTS: QuickPrompt[] = [
     question: "What do you need from me before your predictions become personal?",
     available: (c) => c.completedCount < 2,
   },
+  {
+    id: "science",
+    label: "What does the science say about phases?",
+    question: "What does the science say about cycle phases and how I might feel?",
+    available: () => true,
+  },
 ];
 
 /* ------------------------------ deterministic ------------------------------ */
@@ -249,6 +255,26 @@ function patterns(ctx: CycleContext): string {
   return `From your own logs (last 30 days, ${ctx.recentSymptoms.length} entries):\n${lines.join("\n")}\n\nThat's frequency, not causation — I won't claim a phase 'causes' anything.`;
 }
 
+/**
+ * What the research actually supports, phrased the way the evidence does:
+ * average effects, wide individual variation, no cause-and-effect promises.
+ * Available from day one — this is general knowledge, it needs no logs.
+ */
+function phaseScienceAnswer(ctx: CycleContext): string {
+  const lines = [
+    "The honest version: phase effects are real on average and modest in practice. Large day-level studies find differences in energy, mood and sleep across the cycle that are genuine but smaller than the 'cycle coaching' industry claims — and they vary a lot person to person.",
+    "\u00b7 Menstrual days \u2014 prostaglandins drive cramps and commonly lower energy; sleep need often rises. Rest here does real work.",
+    "\u00b7 Follicular days \u2014 rising oestrogen is associated with better energy, focus and recovery for many people.",
+    "\u00b7 Ovulation window \u2014 oestrogen peaks, then falls; some feel a clear lift, others mostly the far-side dip.",
+    "\u00b7 Luteal days \u2014 progesterone raises core temperature, can fragment sleep slightly, and pulls mood and energy down for many as the period approaches. Appetite rising here has a physiological side too.",
+    "Two cautions Bloom holds onto: none of this is a diagnosis, and a phase never explains everything \u2014 a bad day can just be a bad day. If symptoms are severe, worsening or disruptive, that specific pattern is worth mentioning to a clinician.",
+    ctx.completedCount >= 2
+      ? "Your own logs are the study that matters: the patterns section counts what repeats across your cycles, which is stronger evidence for you than any population average."
+      : "Once a couple of cycles are logged, the patterns section counts what repeats across yours \u2014 for you, that beats any population average.",
+  ];
+  return lines.join("\n");
+}
+
 export function genericAnswer(question: string): string {
   const q = question.toLowerCase();
   const topic = /pattern/.test(q)
@@ -297,6 +323,7 @@ export const deterministicProvider: AssistantProvider = async (ctx, question) =>
       : `Two completed cycles, at minimum — that means the first day of your next period after this one. With that, estimates stop leaning on the general 28-day pattern and start following your own average and variability. Everything logged in between (flow, mood, energy) feeds patterns, not predictions — no field is required.`;
   if (/log|track|record|today/.test(q) && !/pattern/.test(q)) return whatToLog(ctx);
   if (/pattern|symptom|recurr/.test(q)) return patterns(ctx);
+  if (/science|research|studies|evidence/.test(q)) return phaseScienceAnswer(ctx);
   if (/accur|confiden|sure/.test(q))
     return `I never print an accuracy number — without validated ground truth, a percentage would be decoration. What I can tell you honestly: ${ctx.confidence === "strong" ? `your ${ctx.completedCount}-cycle history puts estimates on solid personal ground` : "more cycles logged mean narrower ranges, that's it"}.`;
   return `I answer from your logged Cycle data — phase, estimates and why they move, cycle comparisons, patterns in your logs, and what's worth logging. Ask something along those lines and I'll answer straight.${"\n\n(Anything outside that: the Cycle page itself is built to show you the numbers — I'm here to explain them.)"}`;

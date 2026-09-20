@@ -7,7 +7,7 @@
 
 import type { CoachConversation, CoachMessage } from "@/hooks/useCoachSystem";
 import type { CoachMode } from "@/lib/coach/intelligence";
-import type { CoachRecord } from "@/lib/coach/responder";
+import type { CoachRecord, TrackerFacts } from "@/lib/coach/responder";
 import { detectTopics } from "@/lib/coach/topics";
 import { hashSeed } from "@/lib/voice/messages";
 
@@ -128,6 +128,39 @@ const NO_DATA_STARTERS: Starter[] = [
   { lens: "ask", text: "How should I get started?" },
 ];
 
+/**
+ * Starters for the very first conversation, shaped by what the person told
+ * onboarding they wanted from Bloom. Deliberately framed as *setup and
+ * conversation*, never as data questions — there is no data yet, and a
+ * starter that pretends otherwise starts the relationship with a lie.
+ */
+const FOCUS_STARTERS: Record<string, Starter[]> = {
+  sleep: [
+    { lens: "ask", text: "Help me set up a sleep rhythm that holds" },
+    { lens: "plan", text: "Build me a wind-down routine" },
+  ],
+  mood: [
+    { lens: "reflect", text: "Talk about how I've been feeling" },
+    { lens: "ask", text: "How does mood check-in work here?" },
+  ],
+  habits: [
+    { lens: "plan", text: "Help me pick a first habit that sticks" },
+    { lens: "ask", text: "What makes a habit survive a bad week?" },
+  ],
+  study: [
+    { lens: "plan", text: "Help me make focus easier to start" },
+    { lens: "ask", text: "How do I stop procrastinating on hard work?" },
+  ],
+  movement: [
+    { lens: "plan", text: "Plan movement I'll actually keep" },
+    { lens: "ask", text: "How much movement is enough?" },
+  ],
+  cycle: [
+    { lens: "ask", text: "What should I log on day one of my cycle?" },
+    { lens: "ask", text: "What do cycle phases explain about energy?" },
+  ],
+};
+
 const NO_DATA_MODE_STARTERS: Record<CoachMode, Starter[]> = {
   ask: NO_DATA_STARTERS,
   reflect: [
@@ -191,21 +224,86 @@ function rotate<T>(pool: T[], seed: string, count: number): T[] {
   return out;
 }
 
+/**
+ * Starters only this person could get: honest reads of the last fortnight
+ * that name a real pattern and invite them to work on it. Every rule needs
+ * actual history (never a single day), and says "lately" — a tendency, not
+ * a diagnosis. At most two, so the tiles stay a menu, not a report card.
+ */
+export function signalStarters(record: CoachRecord): Starter[] {
+  const out: Starter[] = [];
+  const tracker = (id: string) => record.trackers.find((t) => t.id === id);
+
+  const lastLogged = (t: TrackerFacts): number[] => t.series.filter((v): v is number => v !== null);
+
+  /* Sleep running below their own fortnight average — three logged nights
+     is a stretch, not an anomaly. */
+  const sleep = tracker("sleep");
+  if (sleep && sleep.avg7 !== null) {
+    const recent = lastLogged(sleep).slice(-3);
+    if (recent.length === 3 && recent.every((v) => v < sleep.avg7! - 30)) {
+      out.push({ lens: "ask", text: "Sleep's been lighter than usual lately — why?" });
+    }
+  }
+
+  /* Energy low two days running — worth a conversation, gently framed. */
+  const energy = tracker("energy");
+  if (energy) {
+    const recent = lastLogged(energy).slice(-2);
+    if (recent.length === 2 && recent.every((v) => v <= 2)) {
+      out.push({ lens: "reflect", text: "Energy's been low two days straight — talk it through" });
+    }
+  }
+
+  /* A live streak with nothing logged today — the nudge is the streak's,
+     not Bloom's demand. */
+  const waiting = record.trackers.find((t) => t.streak >= 3 && t.today === null);
+  if (waiting && record.today !== undefined) {
+    out.push({ lens: "plan", text: `Help me keep my ${waiting.name.toLowerCase()} streak alive` });
+  }
+
+  /* A tracker gone quiet for a week — invite it back without guilt. */
+  const quiet = record.trackers.find(
+    (t) => t.daysLogged > 0 && t.series.slice(-4).every((v) => v === null),
+  );
+  if (quiet) {
+    out.push({
+      lens: "ask",
+      text: `It's been a bit since ${quiet.name.toLowerCase()} — catch me up`,
+    });
+  }
+
+  return out.slice(0, 2);
+}
+
 /** The empty-state tile set — grounded in which topics have data. */
 export function starterPrompts(
   mode: CoachMode,
   record: CoachRecord,
   moodEntries: number,
   daySeed: string,
+  /** What onboarding recorded them wanting from Bloom; shapes day one. */
+  focus: readonly string[] = [],
 ): Starter[] {
   const topics = recordedTopics(record, moodEntries);
   if (topics.length === 0) {
-    return rotate(NO_DATA_MODE_STARTERS[mode], `coach-starter-empty-${mode}-${daySeed}`, 3);
+    /* Nothing logged: day-one starters lead with what they came for, then
+       fall back to the honest general set. */
+    const pool: Starter[] = [];
+    for (const area of focus) {
+      for (const starter of FOCUS_STARTERS[area] ?? []) pool.push(starter);
+    }
+    pool.push(...NO_DATA_MODE_STARTERS[mode]);
+    return rotate(pool, `coach-starter-empty-${mode}-${daySeed}`, 3);
   }
   const pool: Starter[] = [];
   for (const topic of topics) {
     for (const starter of DATA_STARTERS[topic] ?? []) pool.push(starter);
   }
+  /* Signal-driven starters: reads of the actual week (sleep sliding, a streak
+     waiting, a tracker gone quiet) go to the front, because a starter that
+     could only have been written to *this* person is the one they'll tap. */
+  const signals = signalStarters(record);
   if (mode === "plan") {
     pool.push(
       { lens: "plan", text: "Make tomorrow easier" },
@@ -218,7 +316,8 @@ export function starterPrompts(
       { lens: "reflect", text: "What should I carry forward?" },
     );
   }
-  return rotate(pool, `coach-starter-${mode}-${daySeed}`, 4).slice(0, mode === "ask" ? 4 : 3);
+  const mixed = [...signals, ...pool];
+  return rotate(mixed, `coach-starter-${mode}-${daySeed}`, 4).slice(0, mode === "ask" ? 4 : 3);
 }
 
 /** Contextual chips beneath the latest exchange. */

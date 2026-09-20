@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { useMoodSystem } from "@/hooks/useMoodSystem";
+import { usualMood } from "@/lib/smart/usual";
+import { todayKey } from "@/lib/cycle/predict";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
 import type { MoodEntry } from "@/lib/mood/types";
 import { Composer } from "@/components/mood/Composer";
@@ -30,6 +32,7 @@ export const Route = createFileRoute("/mood/")({
 function MoodRoute() {
   const system = useMoodSystem();
   const identity = useRailIdentity();
+  const usual = useMemo(() => usualMood(system.entries, todayKey()), [system.entries]);
 
   const [composerOpen, setComposerOpen] = useState(false);
   const [editing, setEditing] = useState<MoodEntry | null>(null);
@@ -67,6 +70,7 @@ function MoodRoute() {
         onClose={() => setComposerOpen(false)}
         onSave={system.saveEntry}
         onDelete={(entry) => system.removeEntry(entry.id)}
+        usual={usual}
       />
     </div>
   );

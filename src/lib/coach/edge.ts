@@ -91,6 +91,18 @@ export interface EdgeFacts {
   } | null;
   habitsActive: number;
   memories: string[];
+  /**
+   * Who the person is, independent of any entry — name (when offered at
+   * onboarding), the part of day where they are, what they said they wanted
+   * from Bloom, and how long they've been here. Present from minute zero, so
+   * a record with nothing logged still produces a personal conversation.
+   */
+  personal?: {
+    name: string | null;
+    daypart: string;
+    focusAreas: string[];
+    daysWithBloom: number | null;
+  } | null;
 }
 
 export type EdgeResult =
@@ -122,6 +134,14 @@ export function toFacts(record: CoachRecord): EdgeFacts {
     habitsActive: record.habitsActive,
     /* Memories are user-written; cap them so one long note can't dominate. */
     memories: record.memories.slice(0, 8).map((m) => m.slice(0, 240)),
+    personal: record.personal
+      ? {
+          name: record.personal.name,
+          daypart: record.personal.daypart,
+          focusAreas: record.personal.focusAreas.slice(0, 6),
+          daysWithBloom: record.personal.daysWithBloom,
+        }
+      : null,
   };
 }
 

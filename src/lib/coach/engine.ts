@@ -69,6 +69,45 @@ const HELLO = [
   "Hello. Ask me anything about your record, or just think out loud.",
 ];
 
+/** Time-of-day hellos for when we know the hour but not the name. */
+const HELLO_DAYPART: Record<string, string[]> = {
+  night: [
+    "Still up. What's on your mind?",
+    "The quiet hours. Where shall we start?",
+    "Late one — what are we looking at?",
+  ],
+  morning: [
+    "Morning. What's on your mind?",
+    "Morning. Where shall we start?",
+    "A new day — what are we looking at?",
+  ],
+  afternoon: [
+    "Afternoon. What's on your mind?",
+    "Afternoon. Where shall we start?",
+    "Midway through the day — what's up?",
+  ],
+  evening: [
+    "Evening. What's on your mind?",
+    "Evening. Where shall we start?",
+    "Day's end — what are we looking at?",
+  ],
+};
+
+/** Named hellos — the coach and this person have met. */
+const HELLO_NAMED: Record<string, string[]> = {
+  night: ["Still up, {name}. What's on your mind?", "Late one, {name}. What are we looking at?"],
+  morning: [
+    "Morning, {name}. What's on your mind?",
+    "Morning, {name}. Where shall we start?",
+    "Hi {name} — what are we looking at today?",
+  ],
+  afternoon: [
+    "Afternoon, {name}. What's on your mind?",
+    "Afternoon, {name}. Where shall we start?",
+  ],
+  evening: ["Evening, {name}. What's on your mind?", "Evening, {name}. How did today go?"],
+};
+
 const YOURE_WELCOME = [
   "Any time.",
   "Of course.",
@@ -202,6 +241,27 @@ export function answerLocally(input: AskInput): CoachAnswer {
 
   /* --- pure conversation ------------------------------------------------- */
   if (primary === "greeting") {
+    /* The greeting knows who it's meeting — their name and the hour where
+       they are, from onboarding. Personal from minute zero, with no entry
+       logged anywhere. */
+    const who = input.record.personal;
+    if (who?.name) {
+      const pool = HELLO_NAMED[who.daypart] ?? HELLO;
+      return done(
+        [pick("coach.hello.named", pool).replace("{name}", who.name)],
+        primary,
+        budget,
+        "local",
+      );
+    }
+    if (who && HELLO_DAYPART[who.daypart]) {
+      return done(
+        [pick("coach.hello.daypart", HELLO_DAYPART[who.daypart]!)],
+        primary,
+        budget,
+        "local",
+      );
+    }
     return done([pick("coach.hello", HELLO)], primary, budget, "local");
   }
   if (primary === "thanks") {

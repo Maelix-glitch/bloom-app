@@ -1246,6 +1246,7 @@
 /* error */
 .coach-error {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
@@ -1260,8 +1261,11 @@
   margin-top: 2px;
 }
 
+/* A fixed-ish basis (not auto) keeps the copy from being squeezed into a
+   one-word column when the actions can't fit beside it — instead the whole
+   actions row drops neatly beneath the text. */
 .coach-error-copy {
-  flex: 1;
+  flex: 1 1 240px;
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--coach-ink-2);
@@ -1297,6 +1301,43 @@
 .coach-error-retry:hover {
   background: rgb(224 138 128 / 0.12);
   color: #f2c1b9;
+}
+
+/* The offline escape hatch sits beside "Try again" — quieter, so retrying
+   stays the first choice and the local answer reads as the honest fallback. */
+.coach-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  /* Always a full row beneath the copy — the two actions never fight the
+     text for width on a narrow phone. */
+  flex: 1 1 100%;
+}
+
+.coach-error-knowledge {
+  height: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.35;
+  padding: 5px 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, rgb(160 154 148));
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgb(160 154 148 / 0.4);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.coach-error-knowledge:hover {
+  color: var(--gold, #d4a95c);
+  text-decoration-color: currentColor;
 }
 
 /* welcome / empty state */
@@ -1339,6 +1380,31 @@
   line-height: 1.06;
   letter-spacing: -0.018em;
   color: var(--coach-ink);
+}
+
+.coach-welcome-greeting {
+  margin: 14px auto 0;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--coach-ink-2);
+  font-style: italic;
+}
+
+.coach-welcome-memory {
+  max-width: 52ch;
+  margin: 12px auto 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-style: italic;
+  color: color-mix(in oklab, var(--coach-ink-2) 78%, transparent);
+}
+
+.coach-welcome-phase {
+  max-width: 52ch;
+  margin: 10px auto 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: color-mix(in oklab, var(--coach-ink-2) 88%, transparent);
 }
 
 .coach-welcome-copy {

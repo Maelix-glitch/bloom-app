@@ -12,12 +12,15 @@ import {
   type CoachMode,
 } from "@/hooks/useCoachSystem";
 import { buildCoachContext } from "@/lib/coach/intelligence";
+import { answerLocally } from "@/lib/coach/engine";
 import type { CoachMedia } from "@/lib/coach/edge";
 import { isVisionType, fileToCoachMedia } from "@/lib/coach/media";
 import { parseSidecars } from "@/lib/coach/sidecar";
 import { executeCoachTool } from "@/lib/coach/tools";
 import { followUpPrompts, starterPrompts, type Starter } from "@/lib/coach/ui-helpers";
 import { todayKey } from "@/lib/cycle/predict";
+import { phaseScienceLine } from "@/lib/cycle/phaseScience";
+import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 
 import { CoachSidebar, CoachSidebarContent } from "./CoachSidebar";
 import { CoachHeader } from "./CoachHeader";
@@ -97,6 +100,8 @@ export function CoachPage() {
   const [signInRequired, setSignInRequired] = useState(false);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [record, setRecord] = useState(() => readCoachRecord([]));
+  /* Who the page is talking to — read once per mount; refreshes on reload. */
+  const [personalVoice] = useState(() => readPersonalVoice());
   const [railExpanded, setRailExpanded] = useState(true);
 
   const mountedRef = useRef(true);
@@ -257,9 +262,32 @@ export function CoachPage() {
   );
 
   const starters = useMemo(
-    () => starterPrompts(lens, record, entries.length, todayKey()),
-    [lens, record, entries.length],
+    () => starterPrompts(lens, record, entries.length, todayKey(), personalVoice.focus),
+    [lens, record, entries.length, personalVoice.focus],
   );
+
+  /* The welcome speaks to the person before any data exists: their name and
+     the hour from onboarding, and — when a cycle is tracked with a known
+     phase — one hedged science line for right now. Computed once per mount:
+     pick() remembers what it showed, so re-reading it per render would flicker. */
+  const welcomeGreeting = useMemo(() => dayGreeting(personalVoice), [personalVoice]);
+  const welcomePhaseLine = useMemo(() => {
+    if (!record.cycle || record.cycle.daysLogged === 0 || record.cycle.paused) return null;
+    return phaseScienceLine(record.cycle.phaseLabel, record.cycle.confidence, record.today);
+  }, [record]);
+
+  /* The newest thing they told Bloom to keep — pinned first, then recency.
+     One line, only on the empty conversation: a returning thread should
+     feel picked up, not restarted. */
+  const welcomeMemory = useMemo(() => {
+    const pickable = coach.memories.filter((m) => m.text.trim().length > 0);
+    if (pickable.length === 0) return null;
+    const sorted = [...pickable].sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return (b.learnedAt ?? "").localeCompare(a.learnedAt ?? "");
+    });
+    return sorted[0]?.text ?? null;
+  }, [coach.memories]);
 
   const followUps = useMemo(
     () => (activeConversation ? followUpPrompts(lens, activeConversation.messages) : []),
@@ -514,6 +542,50 @@ export function CoachPage() {
     [coach, entries, thinking],
   );
 
+  /* The offline knowledge path. When a send fails, the person can ask the
+     deterministic engine on this device instead — clearly labelled as such
+     in the thread, never dressed up as the online coach. No network, no
+     invented numbers: the engine answers from Bloom's built-in topics and
+     the record that lives in this browser. */
+  const answerFromKnowledge = useCallback(
+    (message: CoachMessage) => {
+      const pending = lastFailedRef.current;
+      if (!pending || pending.errorMessageId !== message.id) return;
+      const context = buildCoachContext(
+        entries,
+        memoriesToContext(coach.memories),
+        coach.habitData,
+        pending.mode,
+        pending.text,
+      );
+      const result = answerLocally({
+        text: pending.text,
+        mode: pending.mode,
+        record,
+        context,
+        history: [],
+        provider: "local",
+      });
+      coach.setMessages((current) =>
+        current.map((m) =>
+          m.id === pending.errorMessageId
+            ? {
+                ...m,
+                paragraphs: result.paragraphs.length > 0 ? result.paragraphs : m.paragraphs,
+                sources: result.sources,
+                blocks: result.blocks,
+                status: "sent" as const,
+                source: "local" as const,
+                fellBackBecause: "offline",
+              }
+            : m,
+        ),
+      );
+      lastFailedRef.current = null;
+    },
+    [coach, entries, record],
+  );
+
   /* ------------------------------- send paths ------------------------------ */
   const sendMessage = useCallback(
     async (
@@ -758,8 +830,12 @@ export function CoachPage() {
     responseSlow,
     showWelcome: coach.messages.length === 0 && !coach.loading,
     starters,
+    welcomeGreeting,
+    welcomePhaseLine,
+    welcomeMemory,
     onStart: startStarter,
     onRetry: (message: CoachMessage) => void retryFailed(message),
+    onOfflineAnswer: answerFromKnowledge,
     onRegenerate: (message: CoachMessage) => void regenerateLast(message),
     onTellMeMore: tellMeMore,
     onMakePlan: makePlan,

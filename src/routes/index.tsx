@@ -41,6 +41,10 @@ import {
   scoreOf,
 } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
+import { CYCLE_SETTINGS_CHANGED, loadCycleSettings } from "@/lib/cycle/periodStore";
+import { formatClock, usualHabitTime, usualMood } from "@/lib/smart/usual";
+import { readPersonalVoice } from "@/lib/voice/personal";
+import { PhaseCard } from "@/components/home/PhaseCard";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
@@ -204,6 +208,7 @@ function TodayPage() {
 
   const today = trackers.today;
   const identity = space.identity?.identity ?? null;
+  const [personalVoice] = useState(() => readPersonalVoice());
   const displayName =
     identity && identity.displayName && identity.displayName !== "Bloom User"
       ? identity.displayName
@@ -287,6 +292,29 @@ function TodayPage() {
     [habits.todayHabits, moodEntry, trackers.analysis, now, flowTimes.times],
   );
 
+  /* When editing a habit, its tick history may know a usual finish time —
+     offered once as a reminder suggestion, never set silently. */
+  const habitUsualReminder = useMemo(() => {
+    if (!editingHabitId || !habitOpen) return null;
+    const time = usualHabitTime(habits.logs, editingHabitId);
+    if (!time) return null;
+    const existing = habits.habits.find((h) => h.id === editingHabitId);
+    if (existing?.reminderTime) return null; // a reminder already lives there
+    return { time: time.reminderTime, around: formatClock(time.minutes), samples: time.samples };
+  }, [editingHabitId, habitOpen, habits.logs, habits.habits]);
+
+  /* Their usual check-in readings — feeds the composer's honest markers. */
+  const moodUsual = useMemo(() => usualMood(mood.entries, today), [mood.entries, today]);
+
+  /* Their "ease this week" opt-in — live, and re-read when the Cycle page or
+     another tab changes it (the store announces the change). */
+  const [easePref, setEasePref] = useState(() => loadCycleSettings().easeBeforePeriod === true);
+  useEffect(() => {
+    const reread = () => setEasePref(loadCycleSettings().easeBeforePeriod === true);
+    window.addEventListener(CYCLE_SETTINGS_CHANGED, reread);
+    return () => window.removeEventListener(CYCLE_SETTINGS_CHANGED, reread);
+  }, []);
+
   const focus = useMemo(
     () =>
       focusOf({
@@ -295,14 +323,23 @@ function TodayPage() {
         trackers: trackers.analysis,
         cycle: cycle.analysis,
         cycleMode: effectiveCycleMode,
+        easeBeforePeriod: easePref,
       }),
-    [habits.todayHabits, moodEntry, trackers.analysis, cycle.analysis, effectiveCycleMode],
+    [
+      habits.todayHabits,
+      moodEntry,
+      trackers.analysis,
+      cycle.analysis,
+      effectiveCycleMode,
+      easePref,
+    ],
   );
 
   const insights = useMemo(
     () =>
       insightsOf({
         trackers: trackers.analysis,
+        days: trackers.days,
         moodInsights: mood.analytics.insights,
         moodCorrelations: mood.analytics.correlations,
         habits: { habits: habits.habits, logs: habits.logs },
@@ -312,6 +349,7 @@ function TodayPage() {
       }),
     [
       trackers.analysis,
+      trackers.days,
       mood.analytics.insights,
       mood.analytics.correlations,
       habits.habits,
@@ -340,14 +378,19 @@ function TodayPage() {
   );
 
   const openCount = focus.filter((f) => !f.done).length;
+  /* Day one gets its own line: the hero greets a person who has just arrived,
+     not a dashboard demanding entries. Derived from the onboarding answer's
+     timestamp — never asserted when it isn't known. */
   const subline =
     !trackers.hydrated || habits.loading
       ? "Reading today's record…"
-      : openCount === 0
-        ? "Everything you track is logged. Enjoy the quiet."
-        : openCount === 1
-          ? "One thing left to shape your day."
-          : `${["Two", "Three"][openCount - 2] ?? openCount} things left to shape your day.`;
+      : personalVoice.firstDay
+        ? "Day one — look around, log one thing when it's natural."
+        : openCount === 0
+          ? "Everything you track is logged. Enjoy the quiet."
+          : openCount === 1
+            ? "One thing left to shape your day."
+            : `${["Two", "Three"][openCount - 2] ?? openCount} things left to shape your day.`;
 
   const syncLine =
     trackers.sync.state === "off"
@@ -570,6 +613,7 @@ function TodayPage() {
                 onToggleHabit={(id) => void habits.toggle(id)}
                 onAddHabit={openNewHabit}
               />
+              <PhaseCard analysis={cycle.analysis} today={today} />
               <CoachPanel entries={mood.entries} habitsStore={habits} />
               <ActivityPanel items={activity} />
             </div>
@@ -608,6 +652,8 @@ function TodayPage() {
         onClose={() => setMoodOpen(false)}
         onSave={mood.saveEntry}
         onDelete={(entry) => mood.removeEntry(entry.id)}
+        firstMoment={mood.entries.length === 0 && !moodEntry}
+        usual={moodUsual}
       />
       <AddHabitModal
         open={habitOpen}
@@ -617,6 +663,7 @@ function TodayPage() {
         }}
         onSubmit={addHabit}
         prefill={habitPrefill}
+        suggestReminder={habitUsualReminder}
       />
       <HabitUndo undoable={habits.undoable} onUndo={habits.undo} onDismiss={habits.dismissUndo} />
 

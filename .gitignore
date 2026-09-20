@@ -45,3 +45,6 @@ supabase/.temp/
 # delivery kits are published as release assets, not committed
 docs/*/
 !docs/cleanup/
+
+# visual-QA screenshots — generated artifacts, not source
+snapshots/

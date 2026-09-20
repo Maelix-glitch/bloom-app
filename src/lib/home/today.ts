@@ -9,7 +9,7 @@
  *  - anything shown as a percentage says what it is a percentage of.
  */
 
-import type { TrackerAnalysis, TrackerId } from "@/lib/trackers/core";
+import type { DayEntry, TrackerAnalysis, TrackerId } from "@/lib/trackers/core";
 import { TRACKERS } from "@/lib/trackers/core";
 import { describeNextPeriodShort, type CycleAnalysis } from "@/lib/cycle/predict";
 import type { CycleMode } from "@/lib/cycle/periodStore";
@@ -20,6 +20,7 @@ import type {
   MoodEntry,
 } from "@/lib/mood/types";
 import type { HabitLog, Habit } from "@/lib/home/habits";
+import { noticedOf } from "@/lib/smart/noticed";
 import type { HabitToday } from "@/hooks/useHabits";
 import { localDay, localTime } from "@/lib/localDay";
 
@@ -599,22 +600,48 @@ export function focusOf(input: {
   trackers: TrackerAnalysis;
   cycle: CycleAnalysis;
   cycleMode?: CycleMode | undefined;
+  /** Their own "ease this week" opt-in — see CycleSettings.easeBeforePeriod. */
+  easeBeforePeriod?: boolean | undefined;
 }): FocusItem[] {
   const { habits, mood, trackers, cycle } = input;
   const cycleMode = input.cycleMode ?? "tracking";
   const out: FocusItem[] = [];
 
+  /* The ease window: the estimated pre-period days. Their preference, their
+     window — off by default, and nothing here touches the record. */
+  const inEaseWindow =
+    cycle.expecting &&
+    cycle.daysUntilNext !== null &&
+    cycle.daysUntilNext >= 0 &&
+    cycle.daysUntilNext <= 2;
+
   const openHabits = [...habits]
     .filter((h) => !h.done)
     .sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
-  for (const h of openHabits.slice(0, 2)) {
+
+  const easing = input.easeBeforePeriod === true && inEaseWindow && openHabits.length >= 2;
+  for (const h of openHabits.slice(0, easing ? 1 : 2)) {
     out.push({
       id: `habit-${h.id}`,
       title: h.name,
-      sub: h.reminderTime ? `Around ${h.reminderTime}` : "Today",
+      sub: h.reminderTime
+        ? `Around ${h.reminderTime}`
+        : easing
+          ? "The one that matters most today"
+          : "Today",
       kind: "habit",
       done: false,
       habitId: h.id,
+    });
+  }
+  if (easing) {
+    out.push({
+      id: "cycle-ease",
+      title: "Ease is on — one habit is enough today",
+      sub: "Pre-period days · change it on the Cycle page",
+      kind: "cycle",
+      done: false,
+      to: "/cycle",
     });
   }
 
@@ -692,11 +719,27 @@ export function insightsOf(input: {
   cycle: CycleAnalysis;
   /** `off` means the cycle isn't part of this person's Bloom at all. */
   cycleMode?: CycleMode | undefined;
+  /** Raw tracker days — unlocks the cross-record "Bloom noticed" generators. */
+  days?: readonly DayEntry[] | undefined;
   today: string;
 }): InsightItem[] {
   const { trackers, moodInsights, moodCorrelations, habits, cycle, today } = input;
   const cycleMode = input.cycleMode ?? "tracking";
   const out: InsightItem[] = [];
+
+  /* "Bloom noticed" — the cross-record layer, always first when it has
+     something alive to say (an open run, a drift, the shape of the week). */
+  if (input.days) {
+    for (const n of noticedOf({
+      days: input.days,
+      habits: habits.habits,
+      logs: habits.logs,
+      today,
+      limit: 2,
+    })) {
+      out.push({ id: n.id, signal: n.signal, title: n.title, sub: n.sub });
+    }
+  }
 
   for (const c of moodCorrelations) {
     if (c.evidence === "insufficient" || c.evidence === "low") continue;

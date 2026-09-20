@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { TrendingUp, Zap, Plus, Calendar, Target, Award } from "lucide-react";
+import { Check, Flame, Plus, Sparkles, Target, TrendingUp, CalendarDays } from "lucide-react";
 
 import { BloomHeader } from "@/components/BloomHeader";
 import { useTrackers } from "@/hooks/useTrackers";
-import { useCycleTheme } from "@/hooks/usePeriodLog";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
 import { useHabits } from "@/hooks/useHabits";
 import { TRACKERS } from "@/lib/trackers/core";
+import { greetingFor } from "@/lib/home/today";
+import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -19,227 +20,169 @@ export const Route = createFileRoute("/dashboard")({
           "Your personal wellness dashboard. Track habits, sleep, energy, study, movement, and more. Premium analytics and insights powered by your data.",
       },
     ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
-      },
-    ],
   }),
   component: DashboardRoute,
 });
 
+/**
+ * The analytics overview behind the admin door.
+ *
+ * This page had been left behind by two design generations — emoji stat
+ * tiles, a hot-pink gradient button, hardcoded hexes and a Google Fonts
+ * request of its own — while everything around it moved to the token
+ * system. It now speaks the same language as Today: the same greeting shape
+ * (time of day + name, from the person's own onboarding answer), the same
+ * panels, chips and accents, no third-party fonts, no emoji. The numbers and
+ * the actions are unchanged.
+ */
 function DashboardRoute() {
   const store = useTrackers();
   const habits = useHabits();
-  const [theme] = useCycleTheme();
   const { analysis, hydrated } = store;
   const [addHabitOpen, setAddHabitOpen] = useState(false);
 
+  /* Who the page is talking to — same source the coach uses. */
+  const [voice] = useState(() => readPersonalVoice());
+
   if (!hydrated) {
     return (
-      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.1rem" }}>Loading your dashboard...</p>
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Reading your record…</p>
       </div>
     );
   }
 
   const completion = Math.round(analysis.completion * 100);
   const stats = [
-    { label: "Completion", value: `${completion}%`, icon: "📊", color: "#00E676" },
-    { label: "Streak", value: `${analysis.streak}d`, icon: "🔥", color: "#FF0055" },
-    { label: "Days Logged", value: `${analysis.daysLogged}`, icon: "📅", color: "#7FA0C9" },
-    { label: "Best Streak", value: `${analysis.bestStreak}d`, icon: "🏆", color: "#E8B75E" },
+    { label: "Completion", value: `${completion}%`, icon: Target, color: "var(--home-movement)" },
+    { label: "Streak", value: `${analysis.streak}d`, icon: Flame, color: "var(--home-energy)" },
+    {
+      label: "Days logged",
+      value: `${analysis.daysLogged}`,
+      icon: CalendarDays,
+      color: "var(--home-sleep)",
+    },
+    {
+      label: "Best streak",
+      value: `${analysis.bestStreak}d`,
+      icon: Sparkles,
+      color: "var(--home-gold)",
+    },
   ];
 
   return (
     <>
       <BloomHeader />
-      <main style={{ minHeight: "100dvh", background: "linear-gradient(135deg, #0F0F15 0%, #1A1A2E 50%, #16213E 100%)" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem 1rem" }}>
-          {/* Hero Section */}
-          <div style={{ marginBottom: "3rem", textAlign: "center" }}>
-            <h1 style={{ fontSize: "clamp(2rem, 8vw, 3.5rem)", fontWeight: 700, color: "#ffffff", margin: 0, letterSpacing: "-0.02em", lineHeight: 1.1, textWrap: "balance" }}>
-              Welcome back
+      <main className="min-h-dvh bg-background">
+        <div className="mx-auto max-w-6xl px-4 py-10">
+          {/* Hero — the same greeting shape as Today */}
+          <header className="mb-10 text-center">
+            <h1 className="font-display text-3xl leading-tight text-foreground sm:text-5xl">
+              {dayGreeting(voice)}
             </h1>
-            <p style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.6)", margin: "0.5rem 0 0", fontWeight: 400 }}>
+            <p className="mt-2 text-lg text-muted-foreground">
               {completion}% of your goals met today
             </p>
-          </div>
+          </header>
 
-          {/* Stats Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+          {/* Stats */}
+          <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {stats.map((stat) => (
-              <div
-                key={stat.label}
-                style={{
-                  padding: "1.5rem",
-                  borderRadius: "16px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  backdropFilter: "blur(20px)",
-                  transition: "all 0.3s ease",
-                  cursor: "pointer",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>{stat.icon}</div>
-                <div style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+              <div key={stat.label} className="home-panel p-5">
+                <stat.icon className="size-5" style={{ color: stat.color }} aria-hidden="true" />
+                <div className="mt-3 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   {stat.label}
                 </div>
-                <div style={{ fontSize: "2rem", fontWeight: 700, color: stat.color, fontFamily: "'IBM Plex Mono', monospace" }}>
+                <div className="mt-1 font-display text-3xl tabular-nums text-foreground">
                   {stat.value}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div style={{ display: "flex", gap: "1rem", marginBottom: "3rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={() => setAddHabitOpen(true)}
-              style={{
-                padding: "14px 32px",
-                borderRadius: "12px",
-                border: "none",
-                background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
-                color: "#ffffff",
-                fontWeight: 700,
-                fontSize: "1rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 12px 26px -12px rgba(255,0,85,0.4)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <Plus size={18} />
-              Add New Habit
+          {/* Actions */}
+          <div className="mb-10 flex flex-wrap justify-center gap-3">
+            <button type="button" onClick={() => setAddHabitOpen(true)} className="home-chip">
+              <Plus className="size-4" aria-hidden="true" />
+              Add a habit
             </button>
-            <a
-              href="/trackers-premium"
-              style={{
-                padding: "14px 32px",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.2)",
-                background: "transparent",
-                color: "#ffffff",
-                fontWeight: 600,
-                fontSize: "1rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                textDecoration: "none",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-              }}
-            >
-              <TrendingUp size={18} />
-              View Full Dashboard
+            <a href="/trackers" className="home-chip">
+              <TrendingUp className="size-4" aria-hidden="true" />
+              Open the trackers
             </a>
           </div>
 
-          {/* Trackers Showcase Grid */}
-          <div style={{ marginBottom: "3rem" }}>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 600, color: "#ffffff", marginBottom: "1.5rem" }}>Your Trackers</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+          {/* Trackers */}
+          <section aria-labelledby="dash-trackers-title" className="mb-10">
+            <h2
+              id="dash-trackers-title"
+              className="mb-4 font-display text-xl text-foreground sm:text-2xl"
+            >
+              Your trackers
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {TRACKERS.map((def) => {
                 const stat = analysis.trackers[def.id];
                 const progress = Math.min(Math.max(stat.progress * 100, 0), 100);
                 const isMet = stat.met === true;
 
                 return (
-                  <div
-                    key={def.id}
-                    style={{
-                      padding: "1.5rem",
-                      borderRadius: "16px",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      backdropFilter: "blur(20px)",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                      e.currentTarget.style.transform = "translateY(0)";
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                      <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#ffffff" }}>{def.name}</h3>
-                      {isMet && (
-                        <div style={{ padding: "4px 12px", borderRadius: "999px", background: "rgba(0,230,118,0.15)", border: "1px solid rgba(0,230,118,0.3)", fontSize: "0.75rem", fontWeight: 600, color: "#00E676" }}>
-                          ✓ Met
-                        </div>
-                      )}
+                  <div key={def.id} className="home-panel p-5">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <h3 className="text-[15px] font-medium text-foreground">{def.name}</h3>
+                      {isMet ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px]"
+                          style={{
+                            borderColor:
+                              "color-mix(in oklab, var(--home-movement) 35%, transparent)",
+                            color: "var(--home-movement)",
+                          }}
+                        >
+                          <Check className="size-3" aria-hidden="true" />
+                          Met
+                        </span>
+                      ) : null}
                     </div>
 
-                    {/* Progress Bar */}
-                    <div style={{ width: "100%", height: "8px", borderRadius: "999px", background: "rgba(255,255,255,0.1)", overflow: "hidden", marginBottom: "1rem" }}>
+                    <div
+                      className="mb-4 h-1.5 overflow-hidden rounded-full"
+                      style={{
+                        background: "color-mix(in oklab, var(--foreground) 10%, transparent)",
+                      }}
+                    >
                       <div
+                        className="h-full rounded-full"
                         style={{
-                          height: "100%",
-                          background: "linear-gradient(90deg, #00E676, #00D9A3)",
                           width: `${progress}%`,
-                          transition: "width 0.3s ease",
-                          borderRadius: "999px",
+                          background: def.accent,
+                          transition: "width 0.4s ease",
                         }}
                       />
                     </div>
 
-                    {/* Stats */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem" }}>
-                      <div style={{ padding: "0.75rem", borderRadius: "8px", background: "rgba(255,255,255,0.03)", textAlign: "center" }}>
-                        <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "#00E676", fontFamily: "'IBM Plex Mono', monospace" }}>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-lg bg-muted/40 px-2 py-2">
+                        <div className="text-sm font-semibold tabular-nums text-foreground">
                           {stat.today === null ? "—" : def.format(Math.round(stat.today))}
                         </div>
-                        <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                           Today
                         </div>
                       </div>
-                      <div style={{ padding: "0.75rem", borderRadius: "8px", background: "rgba(255,255,255,0.03)", textAlign: "center" }}>
-                        <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "#00E676", fontFamily: "'IBM Plex Mono', monospace" }}>
+                      <div className="rounded-lg bg-muted/40 px-2 py-2">
+                        <div className="text-sm font-semibold tabular-nums text-foreground">
                           {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
                         </div>
-                        <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                           7-day avg
                         </div>
                       </div>
-                      <div style={{ padding: "0.75rem", borderRadius: "8px", background: "rgba(255,255,255,0.03)", textAlign: "center" }}>
-                        <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "#00E676", fontFamily: "'IBM Plex Mono', monospace" }}>
+                      <div className="rounded-lg bg-muted/40 px-2 py-2">
+                        <div className="text-sm font-semibold tabular-nums text-foreground">
                           {def.format(stat.goal)}
                         </div>
-                        <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                           Target
                         </div>
                       </div>
@@ -248,41 +191,34 @@ function DashboardRoute() {
                 );
               })}
             </div>
-          </div>
+          </section>
 
           {/* Insights */}
-          {analysis.observations.length > 0 && (
-            <div
-              style={{
-                padding: "1.5rem",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                backdropFilter: "blur(20px)",
-              }}
-            >
-              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#ffffff", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem", margin: "0 0 1rem 0" }}>
-                <TrendingUp size={20} />
+          {analysis.observations.length > 0 ? (
+            <section className="home-panel p-5 sm:p-7" aria-labelledby="dash-insights-title">
+              <h2
+                id="dash-insights-title"
+                className="mb-3 flex items-center gap-2 font-display text-xl text-foreground"
+              >
+                <TrendingUp
+                  className="size-5"
+                  style={{ color: "var(--home-mood)" }}
+                  aria-hidden="true"
+                />
                 Insights
               </h2>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              <ul>
                 {analysis.observations.slice(0, 3).map((obs, i) => (
                   <li
                     key={i}
-                    style={{
-                      padding: "0.75rem 0",
-                      fontSize: "0.95rem",
-                      color: "rgba(255,255,255,0.7)",
-                      borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                      paddingBottom: i < 2 ? "0.75rem" : "0",
-                    }}
+                    className="py-2.5 text-sm leading-relaxed text-muted-foreground odd:border-b odd:border-border/50"
                   >
                     {obs}
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            </section>
+          ) : null}
         </div>
       </main>
 
