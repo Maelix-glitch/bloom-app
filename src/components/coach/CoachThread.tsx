@@ -52,6 +52,7 @@ export function CoachThread({
   starters,
   welcomeGreeting,
   welcomePhaseLine,
+  welcomeMemory,
   onStart,
   onRetry,
   onRegenerate,
@@ -72,6 +73,8 @@ export function CoachThread({
   welcomeGreeting?: string | null | undefined;
   /** One hedged science line about the current cycle phase, when tracked. */
   welcomePhaseLine?: string | null | undefined;
+  /** The newest remembered fact, so a returning conversation picks up. */
+  welcomeMemory?: string | null | undefined;
   onStart: (starter: Starter) => void;
   onRetry: (message: CoachMessage) => void;
   onRegenerate: (message: CoachMessage) => void;
@@ -149,6 +152,7 @@ export function CoachThread({
             onStart={onStart}
             greeting={welcomeGreeting}
             phaseLine={welcomePhaseLine}
+            lastMemory={welcomeMemory}
           />
         )
       ) : (

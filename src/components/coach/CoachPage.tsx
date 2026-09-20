@@ -275,6 +275,19 @@ export function CoachPage() {
     return phaseScienceLine(record.cycle.phaseLabel, record.cycle.confidence, record.today);
   }, [record]);
 
+  /* The newest thing they told Bloom to keep — pinned first, then recency.
+     One line, only on the empty conversation: a returning thread should
+     feel picked up, not restarted. */
+  const welcomeMemory = useMemo(() => {
+    const pickable = coach.memories.filter((m) => m.text.trim().length > 0);
+    if (pickable.length === 0) return null;
+    const sorted = [...pickable].sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return (b.learnedAt ?? "").localeCompare(a.learnedAt ?? "");
+    });
+    return sorted[0]?.text ?? null;
+  }, [coach.memories]);
+
   const followUps = useMemo(
     () => (activeConversation ? followUpPrompts(lens, activeConversation.messages) : []),
     [activeConversation, lens],
@@ -774,6 +787,7 @@ export function CoachPage() {
     starters,
     welcomeGreeting,
     welcomePhaseLine,
+    welcomeMemory,
     onStart: startStarter,
     onRetry: (message: CoachMessage) => void retryFailed(message),
     onRegenerate: (message: CoachMessage) => void regenerateLast(message),

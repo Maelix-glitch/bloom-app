@@ -147,3 +147,51 @@ personalization guarantees, assumed-phase caveat, the F3 loophole), `edge.test.t
   personalization was added *inside* the pipeline, not by reintroducing an offline pretender.
 - **Onboarding copy and flow** — already excellent; only its stored answers are now put to work.
 - **Existing toast/sheet system** — verified consistent; no change needed.
+
+---
+
+## 6. Addendum — the game layer & visual QA (same session, pass two)
+
+**A real browser joined the audit.** Chromium was bootstrapped in the sandbox and every
+main route was screenshot at phone (390×844) and desktop (1440×900) sizes with a seeded,
+realistic record — the Journey/Rewards page section by section.
+
+### The Rewards page, rebuilt as a game — visually
+Verified in-sandbox (screenshots reviewed, not imagined):
+
+- **The hero title plate** — "YOUR JOURNEY" now sits on a heraldic plate with gold
+  flank rules ending in glowing diamond terminals; the rank name is engraved metal
+  (gradient + baseline hairline), not flat display type.
+- **The engraved dial** — a slow-turning tick ring (60 dashed marks) around the
+  progress arc, with a gold spotlight behind the medallion. Reads like a game rank
+  dial on both phone and desktop.
+- **Achievements became trophy medallions** — cut-corner plates with corner rivets, a
+  large emblem coin (double-struck edge) on top, centered copy, and a rarity strip
+  running the full base of the plate (gold for rare, violet for signature). Earned
+  plates carry a per-tone glow and a slow staggered glint; locked ones sit desaturated
+  in fog. All original copy unchanged.
+- **The rank ladder** — the spine now inks gold up to "YOU ARE HERE" and glows;
+  the held rank's name is gradient-lit; state labels ("Kept"/"Ahead") are mono caps.
+- **The rank-up ceremony** — slow conic god-rays now turn behind the emerging emblem
+  (masked, reduced-motion safe), riding the existing glow layer.
+- **Section titles** gained a gold rule + diamond flourish, tying the page together.
+
+### The recommendations — shipped
+1. **Today phase card** (`PhaseCard.tsx`) — day, phase, one hedged science line, the
+   honest prediction window, a phase-matched planning hint, and an Open Cycle link.
+   Only renders for a live, evidenced cycle; verified rendering in the browser.
+2. **Coach "last time" memory** — the empty conversation now opens with "Last time you
+   mentioned — …" (pinned first, then newest).
+3. **Weekly report intro** — "Your week, {name} — read back to you." plus an honest
+   "Week N of your Bloom record" line.
+4. (Items 3/5–7 from the original list remain designed and ready; the phase card was
+   the keystone and it is now in.)
+
+### Visual QA caught a real bug
+The phase card's science line silently vanished for some dates: the local hash in
+`phaseScience.ts` could go **negative** (`h | 0`), indexing the pool at `-1` and
+producing `undefined`. Fixed with an unsigned shift (`>>> 0`) and locked with a
+regression test feeding every phase × seven seeds, including the exact seed that
+exposed it live. **This is why the visual pass exists.**
+
+**Tests: 759 passing** · typecheck clean · production build clean · logo untouched.

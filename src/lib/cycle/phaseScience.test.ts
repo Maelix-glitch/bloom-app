@@ -73,3 +73,26 @@ describe("the population-framing rules — nothing here diagnoses or promises", 
     }
   });
 });
+
+describe("the hash never indexes a pool out of range", () => {
+  it("every phase label with arbitrary seeds yields a real line — visual QA regression", () => {
+    const labels = ["Menstrual", "Follicular", "Ovulation window", "Luteal"];
+    const seeds = [
+      "Luteal-2026-09-20", // the seed that exposed the negative-hash bug live
+      "Menstrual-2026-02-11",
+      "Follicular-2026-12-31",
+      "Ovulation window-2026-07-04",
+      "x",
+      "",
+      "一句话",
+    ];
+    for (const label of labels) {
+      for (const seed of seeds) {
+        const line = phaseScienceLine(label, "strong", seed);
+        expect(line).toBeTruthy();
+        expect(line).not.toMatch(/undefined/i);
+        expect(line!.length).toBeGreaterThan(40);
+      }
+    }
+  });
+});

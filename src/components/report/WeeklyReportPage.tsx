@@ -27,6 +27,7 @@ import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { useTrackers } from "@/hooks/useTrackers";
 import { buildWeeklyReport } from "@/lib/report/weekly";
+import { readPersonalVoice } from "@/lib/voice/personal";
 
 function Delta({ now, prev, unit }: { now: number | null; prev: number | null; unit?: string }) {
   if (now === null || prev === null) return null;
@@ -103,6 +104,16 @@ export function WeeklyReportPage() {
   const fmtHours = (min: number | null): string =>
     min === null ? "—" : `${Math.round((min / 60) * 10) / 10}h`;
 
+  /* Who the report is addressed to — name and honest tenure from onboarding,
+     computed once. Absent an answer the header stays as it was. */
+  const intro = useMemo(() => {
+    const voice = readPersonalVoice();
+    return {
+      name: voice.name,
+      tenureWeeks: voice.daysWithBloom === null ? null : Math.floor(voice.daysWithBloom / 7) + 1,
+    };
+  }, []);
+
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
       <AppNav />
@@ -119,8 +130,16 @@ export function WeeklyReportPage() {
             Weekly report · {report.weekStart} → {report.weekEnd}
           </p>
           <h1 className="mt-2 font-display text-[clamp(28px,5vw,44px)] italic leading-tight">
-            Your week, read back to you.
+            {intro.name
+              ? `Your week, ${intro.name} — read back to you.`
+              : "Your week, read back to you."}
           </h1>
+          {intro.tenureWeeks !== null ? (
+            <p className="mt-2 text-[12.5px] text-muted-foreground">
+              Week {intro.tenureWeeks.toLocaleString()} of your Bloom record
+              {report.insight ? " — one thing stands out below." : "."}
+            </p>
+          ) : null}
         </header>
 
         {report.insight ? (

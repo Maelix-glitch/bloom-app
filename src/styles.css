@@ -1475,3 +1475,8 @@ body {
     font-size: 14px;
   }
 }
+
+/* PhaseCard — Today's cycle read. Same panel language, one droplet accent. */
+.home-phase-sep {
+  color: color-mix(in oklab, var(--foreground) 30%, transparent);
+}

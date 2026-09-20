@@ -61,6 +61,10 @@ function RankRing({ progress }: { progress: number }) {
   const radius = 48;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.max(0, Math.min(1, progress));
+  /* Engraved tick marks — the game-rank dial. Drawn as a dashed circle so it
+     stays crisp at any size and costs one element. */
+  const ticks = 60;
+  const tickLen = 2 * Math.PI * 56 * (0.55 / ticks);
   return (
     <svg viewBox="0 0 104 104" aria-hidden="true" focusable="false">
       <defs>
@@ -70,6 +74,17 @@ function RankRing({ progress }: { progress: number }) {
           <stop offset="100%" stopColor="color-mix(in oklab, var(--violet) 75%, var(--gold))" />
         </linearGradient>
       </defs>
+      <g className="pg-ring-ticks">
+        <circle
+          cx="52"
+          cy="52"
+          r="56"
+          fill="none"
+          stroke="color-mix(in oklab, var(--gold) 30%, transparent)"
+          strokeWidth="3.2"
+          strokeDasharray={`${tickLen.toFixed(3)} ${((2 * Math.PI * 56) / ticks - tickLen).toFixed(3)}`}
+        />
+      </g>
       <circle className="pg-ring-track" cx="52" cy="52" r={radius} />
       <circle
         className="pg-ring-value"
@@ -133,10 +148,12 @@ export function JourneyHero({
       <span className="pg-hero-beam" aria-hidden />
 
       <div className="pg-hero-copy">
-        <p className="pg-eyebrow">
-          <span className="pg-eyebrow-rule" aria-hidden />
-          Your journey
-        </p>
+        <div className="pg-plate">
+          <span className="pg-plate-flank" aria-hidden />
+          <span className="pg-plate-gem" aria-hidden />
+          <p className="pg-eyebrow pg-plate-eyebrow">Your journey</p>
+          <span className="pg-plate-flank pg-plate-flank-r" aria-hidden />
+        </div>
         <h1 id="pg-journey-title" className="pg-title pg-hero-title">
           {rank.rank.name}
         </h1>

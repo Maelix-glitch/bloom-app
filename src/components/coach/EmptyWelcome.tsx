@@ -23,6 +23,7 @@ export function EmptyWelcome({
   onStart,
   greeting,
   phaseLine,
+  lastMemory,
 }: {
   starters: Starter[];
   thinking: boolean;
@@ -31,6 +32,8 @@ export function EmptyWelcome({
   greeting?: string | null | undefined;
   /** One hedged science line about the current cycle phase, when tracked. */
   phaseLine?: string | null | undefined;
+  /** "Last time you mentioned …" — the newest thing Bloom was told. */
+  lastMemory?: string | null | undefined;
 }) {
   return (
     <div className="coach-welcome" aria-hidden={thinking}>
@@ -64,6 +67,9 @@ export function EmptyWelcome({
           it helps — and say so plainly when there&rsquo;s nothing to go on.
         </p>
         {phaseLine ? <p className="coach-welcome-phase">{phaseLine}</p> : null}
+        {lastMemory ? (
+          <p className="coach-welcome-memory">Last time you mentioned — {lastMemory}</p>
+        ) : null}
         <div className="coach-welcome-starters" aria-label="Ways to begin">
           {starters.map((starter, index) => (
             <motion.button

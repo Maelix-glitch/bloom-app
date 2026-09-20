@@ -42,6 +42,7 @@ import {
 } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
 import { readPersonalVoice } from "@/lib/voice/personal";
+import { PhaseCard } from "@/components/home/PhaseCard";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
@@ -577,6 +578,7 @@ function TodayPage() {
                 onToggleHabit={(id) => void habits.toggle(id)}
                 onAddHabit={openNewHabit}
               />
+              <PhaseCard analysis={cycle.analysis} today={today} />
               <CoachPanel entries={mood.entries} habitsStore={habits} />
               <ActivityPanel items={activity} />
             </div>

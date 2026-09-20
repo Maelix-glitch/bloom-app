@@ -97,12 +97,13 @@ export const GENERAL_MODEL_LINES = [
 ];
 
 /** Small stable string hash — same role as voice/messages.hashSeed, kept local
- *  so this module has no imports at all. */
+ *  so this module has no imports at all. Unsigned, so a modulo of it can never
+ *  go negative and index a pool with -1. */
 function hash(text: string): number {
   let h = 2166136261;
   for (let i = 0; i < text.length; i += 1) {
     h ^= text.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
-  return h | 0;
+  return (h | 0) >>> 0;
 }

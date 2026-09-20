@@ -1349,6 +1349,15 @@
   font-style: italic;
 }
 
+.coach-welcome-memory {
+  max-width: 52ch;
+  margin: 12px auto 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-style: italic;
+  color: color-mix(in oklab, var(--coach-ink-2) 78%, transparent);
+}
+
 .coach-welcome-phase {
   max-width: 52ch;
   margin: 10px auto 0;

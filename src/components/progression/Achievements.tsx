@@ -1,7 +1,13 @@
 /**
- * Achievements — the collectible layer. Earned ones glow and carry their real
- * date; the rest state their condition plainly and how close they are. Rarity
- * appears only where it means something (a month of work, a signature feat).
+ * Achievements — the trophy shelf.
+ *
+ * The content is unchanged — title, condition, progress, earned date, the
+ * earned line — but each achievement now presents as a medallion, the way a
+ * game presents a collectible: a large emblem coin on top, the name beneath,
+ * and a rarity flag running the full width of the plate's base. Earned
+ * medallions are lit metal with a slow glint; locked ones sit in fog with
+ * their condition plainly stated. Rarity appears only where it means
+ * something (a month of work, a signature feat).
  */
 
 import { useState } from "react";
@@ -40,6 +46,7 @@ export function AchievementGallery({
               key={def.id}
               className={cn("pg-ach", RARITY_ORDER.includes(def.rarity) && "pg-ach-tinted")}
               data-earned={state.unlocked ? "true" : "false"}
+              data-rarity={def.rarity}
               style={{
                 ["--ach-tone" as string]: def.tone,
                 /* staggers the passing glint so earned relics don't flash in unison */
@@ -47,21 +54,16 @@ export function AchievementGallery({
               }}
             >
               <span className="pg-ach-mark" aria-hidden>
-                {state.unlocked ? (
-                  <Emblem id={def.emblem} size={26} strokeWidth={1.5} />
-                ) : (
-                  <Lock width={16} height={16} strokeWidth={1.5} />
-                )}
+                <span className="pg-ach-coin">
+                  {state.unlocked ? (
+                    <Emblem id={def.emblem} size={30} strokeWidth={1.4} />
+                  ) : (
+                    <Lock width={18} height={18} strokeWidth={1.5} />
+                  )}
+                </span>
               </span>
               <span className="pg-ach-copy">
-                <span className="pg-ach-title">
-                  {def.title}
-                  {def.rarity !== "notable" ? (
-                    <span className="pg-rarity" data-rarity={def.rarity}>
-                      {ACHIEVEMENT_RARITY_LABELS[def.rarity]}
-                    </span>
-                  ) : null}
-                </span>
+                <span className="pg-ach-title">{def.title}</span>
                 <span className="pg-ach-condition">{def.condition}</span>
                 {state.unlocked && state.achievedAt ? (
                   <span className="pg-ach-date">
@@ -92,6 +94,11 @@ export function AchievementGallery({
                 ) : null}
                 {state.unlocked ? <span className="pg-ach-line">{def.earnedLine}</span> : null}
               </span>
+              {def.rarity !== "notable" ? (
+                <span className="pg-rarity" data-rarity={def.rarity}>
+                  {ACHIEVEMENT_RARITY_LABELS[def.rarity]}
+                </span>
+              ) : null}
             </article>
           );
         })}
