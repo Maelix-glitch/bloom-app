@@ -54,6 +54,7 @@ import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
 import { StoryRail } from "@/components/stories/StoryRail";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
+import { TourCard } from "@/components/tour/TourLauncher";
 import { seenStore } from "@/lib/stories/seen";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
 import type { Story } from "@/lib/profile/types";
@@ -463,7 +464,7 @@ function TodayPage() {
 
         <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
-            <h1 className="font-display text-3xl leading-tight sm:text-5xl">
+            <h1 data-tour="home-greeting" className="font-display text-3xl leading-tight sm:text-5xl">
               {firstName ? (
                 <>
                   {greetingFor(now.getHours())},{" "}
@@ -477,11 +478,11 @@ function TodayPage() {
               {subline}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setMoodOpen(true)} className="home-chip">
+              <button type="button" onClick={() => setMoodOpen(true)} data-tour="home-chip-mood" className="home-chip">
                 <Smile className="size-4" style={{ color: "var(--home-habits)" }} />
                 {moodEntry ? `Mood ${Math.round(moodEntry.mood)}/10 logged` : "Log today's mood"}
               </button>
-              <button type="button" onClick={() => setMetricsOpen(true)} className="home-chip">
+              <button type="button" onClick={() => setMetricsOpen(true)} data-tour="home-chip-metrics" className="home-chip">
                 <Droplet className="size-4" style={{ color: "var(--home-sleep)" }} />
                 {trackers.analysis.goalsMetToday > 0
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
@@ -527,7 +528,7 @@ function TodayPage() {
 
         <div className="home-stack">
           {space.authState !== "signed-out" && space.userId ? (
-            <section className="home-band" aria-labelledby="home-moments-title">
+            <section data-tour="home-stories" className="home-band" aria-labelledby="home-moments-title">
               <div className="home-band-head">
                 <div>
                   <p className="home-eyebrow">Moments</p>
@@ -616,6 +617,8 @@ function TodayPage() {
             </div>
           </div>
 
+          <div data-tour="tour-start-home" className="home-band"><TourCard tourId="home" /></div>
+
           <footer className="hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
             <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
             <span className="h-px w-16 bg-border" />
@@ -630,6 +633,7 @@ function TodayPage() {
         onClick={openNewHabit}
         aria-label="Add habit"
         title="Add habit"
+        data-tour="home-fab"
         data-testid="home-fab-add-habit"
         className="home-fab inline-flex h-12 items-center gap-2 rounded-full bg-primary px-3.5 text-sm font-medium text-primary-foreground lg:hidden sm:h-13 sm:pl-4 sm:pr-5"
       >

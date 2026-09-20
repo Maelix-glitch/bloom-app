@@ -55,6 +55,9 @@ import { useExportBundle } from "@/hooks/useExportBundle";
 import { useReminders } from "@/hooks/useReminders";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
+import { ProfileShareSheet } from "@/components/profile/ProfileShareSheet";
+import { TourCard } from "@/components/tour/TourLauncher";
+import { useTour } from "@/components/tour/TourContext";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
@@ -121,6 +124,7 @@ function ProfilePage() {
   const [eraseOpen, setEraseOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
   const [tab, setTab] = useState<ProfileTab>("moments");
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
@@ -130,6 +134,7 @@ function ProfilePage() {
   } | null>(null);
   const [seenIds, setSeenIds] = useState<ReadonlySet<string>>(() => new Set());
   const online = useOnlineStatus();
+  const tour = useTour();
 
   // after a magic-link sign-in resolves, the dialog steps aside on its own
   useEffect(() => {
@@ -244,32 +249,10 @@ function ProfilePage() {
     void navigate({ to: "/profile", search: {}, replace: true });
   }, [viewParam, storiesByAge, navigate]);
 
-  /* profile share */
-  const handleShare = useCallback(async () => {
-    if (!identity?.identity.username) {
-      toast("Pick a @username first.", {
-        description: "It becomes the address of your space.",
-        action: { label: "Add one", onClick: () => setEditorOpen(true) },
-      });
-      return;
-    }
-    const url = `${window.location.origin}/@${identity.identity.username}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: `${identity.identity.displayName} on Bloom`, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast("Profile link copied.");
-    } catch (error) {
-      if (error && typeof error === "object" && "name" in error && error.name === "AbortError")
-        return;
-      toast("Couldn't copy automatically — here's your link", {
-        description: url,
-        duration: 9000,
-      });
-    }
-  }, [identity]);
+  /* profile share — now a Bloom-designed sheet, same entry from hero + settings row */
+  const handleShare = useCallback(() => {
+    setShareSheetOpen(true);
+  }, []);
 
   /* story actions */
   const publishStory = useCallback(
@@ -547,6 +530,8 @@ function ProfilePage() {
               }}
             />
 
+            <div data-tour="tour-start-profile" className="pf-section"><TourCard tourId="profile" /></div>
+
             {/* numbers only logging can move */}
             <RecordNumbers
               totals={record.hydrated ? record.totals : null}
@@ -555,7 +540,7 @@ function ProfilePage() {
             />
 
             {/* the record: 12 weeks + what's being tracked */}
-            <section className="pf-section pf-rise pf-rise-2" aria-labelledby="pf-record-title">
+            <section data-tour="profile-record" className="pf-section pf-rise pf-rise-2" aria-labelledby="pf-record-title">
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
                 <div className="pf-card pf-card--pad">
                   <div className="pf-section-head">
@@ -586,7 +571,7 @@ function ProfilePage() {
             </section>
 
             {/* featured — the pinned post */}
-            <section className="pf-section pf-rise pf-rise-3" aria-labelledby="pf-featured-title">
+            <section data-tour="profile-featured" className="pf-section pf-rise pf-rise-3" aria-labelledby="pf-featured-title">
               <div className="pf-section-head">
                 <div>
                   <p className="pf-eyebrow inline-flex items-center gap-1.5">
@@ -641,7 +626,7 @@ function ProfilePage() {
             </section>
 
             {/* tabs — moments / highlights / journey */}
-            <div className="pf-tabs pf-rise pf-rise-4" role="tablist" aria-label="Profile sections">
+            <div data-tour="profile-tabs" className="pf-tabs pf-rise pf-rise-4" role="tablist" aria-label="Profile sections">
               {TABS.map((t) => (
                 <button
                   key={t.id}
@@ -808,7 +793,7 @@ function ProfilePage() {
             ) : null}
 
             {/* account + data — settings rows */}
-            <section className="pf-section mt-10" aria-label="Account and data">
+            <section data-tour="profile-data" className="pf-section mt-10" aria-label="Account and data">
               <div className="pf-section-head">
                 <div>
                   <p className="pf-eyebrow">Settings</p>
@@ -836,6 +821,7 @@ function ProfilePage() {
                 onOpenReminders={() => setRemindersOpen(true)}
                 onOpenErase={() => setEraseOpen(true)}
                 {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
+                {...(tour ? { onOpenTour: () => tour.startTour("global") } : {})}
                 remindersValue={remindersValue}
                 installValue={installValue}
               />
@@ -935,6 +921,14 @@ function ProfilePage() {
               setPrivacyOpen(false);
               setPreviewOpen(true);
             }}
+          />
+          <ProfileShareSheet
+            open={shareSheetOpen}
+            onClose={() => setShareSheetOpen(false)}
+            identity={identity.identity}
+            privacy={identity.privacy}
+            onPreview={() => setPreviewOpen(true)}
+            onEditUsername={() => setEditorOpen(true)}
           />
           <RestoreSheet open={restoreOpen} onClose={() => setRestoreOpen(false)} />
           {userId ? (

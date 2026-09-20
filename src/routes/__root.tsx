@@ -11,6 +11,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import tourCss from "../styles/tour.css?url";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
 import { bootNativeShell } from "@/lib/native-shell";
 import { useSoundBoot } from "@/hooks/useSound";
@@ -26,6 +27,8 @@ import { BloomToaster } from "@/components/system/BloomToaster";
 import { RemindersEngine } from "@/components/system/RemindersEngine";
 import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
+import { TourProvider } from "@/components/tour/TourContext";
+import { TourFab } from "@/components/tour/TourLauncher";
 
 function NotFoundComponent() {
   return (
@@ -162,6 +165,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "stylesheet",
+        href: tourCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -314,23 +321,27 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <AccessControl>
-        <Outlet />
-      </AccessControl>
-      {/* First run only: covers the app until the person has told us who they are. */}
-      <WelcomeGate />
-      {/* Only in admin mode: shows you're in it, and lets you leave. */}
-      <AdminBar />
-      {/* Only when there is no database: says so, instead of failing silently. */}
-      <ConnectionNotice />
-      {/* Equipped Atelier look → app-wide skin (no-op until something is equipped). */}
-      <BloomSkin />
-      {/* Reminder delivery: fires due nudges from boot on every route. */}
-      <RemindersEngine />
-      {/* One toast surface for every route — a confirmation that never renders
-          is a silent failure the person can't tell apart from a real one. */}
-      <BloomToaster />
+      <TourProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <AccessControl>
+          <Outlet />
+        </AccessControl>
+        {/* First run only: covers the app until the person has told us who they are. */}
+        <WelcomeGate />
+        {/* Only in admin mode: shows you're in it, and lets you leave. */}
+        <AdminBar />
+        {/* Only when there is no database: says so, instead of failing silently. */}
+        <ConnectionNotice />
+        {/* Equipped Atelier look → app-wide skin (no-op until something is equipped). */}
+        <BloomSkin />
+        {/* Reminder delivery: fires due nudges from boot on every route. */}
+        <RemindersEngine />
+        {/* One toast surface for every route — a confirmation that never renders
+            is a silent failure the person can't tell apart from a real one. */}
+        <BloomToaster />
+        {/* Global tour FAB + auto-prompt for new users */}
+        <TourFab />
+      </TourProvider>
     </QueryClientProvider>
   );
 }

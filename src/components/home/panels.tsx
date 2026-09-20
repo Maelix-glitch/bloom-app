@@ -35,7 +35,7 @@ export function ProgressPanel({
   logging?: boolean | undefined;
 }) {
   return (
-    <section className="home-panel flex flex-col gap-4 p-5" aria-labelledby="home-progress-title">
+    <section data-tour="home-progress" className="home-panel flex flex-col gap-4 p-5" aria-labelledby="home-progress-title">
       <h2 id="home-progress-title" className="font-display text-xl">
         Today's progress
       </h2>
@@ -92,7 +92,7 @@ export function FocusPanel({
   onAddHabit: () => void;
 }) {
   return (
-    <section className="home-panel p-5" aria-labelledby="home-focus-title">
+    <section data-tour="home-focus" className="home-panel p-5" aria-labelledby="home-focus-title">
       <header className="flex items-center justify-between">
         <h2 id="home-focus-title" className="font-display text-xl">
           Today's focus
@@ -179,7 +179,7 @@ export function FocusPanel({
 
 export function TrackersPanel({ readings }: { readings: SignalReading[] }) {
   return (
-    <section className="home-panel p-5" aria-labelledby="home-trackers-title">
+    <section data-tour="home-trackers" className="home-panel p-5" aria-labelledby="home-trackers-title">
       <header className="flex items-center justify-between">
         <h2 id="home-trackers-title" className="font-display text-xl">
           Trackers at a glance
@@ -272,7 +272,7 @@ export function FlowPanel({
   const [editing, setEditing] = useState(false);
   const editable = Boolean(times && onTimeChange);
   return (
-    <section className="home-panel p-5" aria-labelledby="home-flow-title">
+    <section data-tour="home-flow" className="home-panel p-5" aria-labelledby="home-flow-title">
       <header className="flex items-center justify-between gap-3">
         <h2 id="home-flow-title" className="font-display text-xl">
           Today's flow
@@ -387,7 +387,7 @@ export function InsightsPanel({
   loading?: boolean | undefined;
 }) {
   return (
-    <section className="home-panel p-5" aria-labelledby="home-insights-title">
+    <section data-tour="home-insights" className="home-panel p-5" aria-labelledby="home-insights-title">
       <h2 id="home-insights-title" className="font-display text-xl">
         Bloom noticed
       </h2>
@@ -431,7 +431,7 @@ export function InsightsPanel({
 
 export function ActivityPanel({ items }: { items: ActivityItem[] }) {
   return (
-    <section className="home-panel p-5" aria-labelledby="home-activity-title">
+    <section data-tour="home-activity" className="home-panel p-5" aria-labelledby="home-activity-title">
       <header className="flex items-center justify-between">
         <h2 id="home-activity-title" className="font-display text-xl">
           Recent activity
