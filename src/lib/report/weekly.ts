@@ -12,6 +12,7 @@
  */
 
 import { localDay, shiftDay } from "@/lib/localDay";
+import { hasUsual, usualDay, usualMood } from "@/lib/smart/usual";
 import { EMOTION_MAP, type MoodEntry } from "@/lib/mood/types";
 import { habitStreak } from "@/lib/reminders/streak";
 import type { DayEntry, Goals } from "@/lib/trackers/core";
@@ -51,12 +52,22 @@ export interface WeekTrackers {
   sleepGoalShare: number | null; // days that met the sleep goal, 0..1
 }
 
+/** The person's baseline before this week — the "usual" the week is read against. */
+export interface ReportUsual {
+  sleepMinutes: number | null;
+  waterMl: number | null;
+  movementMinutes: number | null;
+  avgMood: number | null;
+}
+
 export interface WeeklyReport {
   weekStart: string;
   weekEnd: string;
   mood: WeekMood;
   habits: WeekHabits;
   trackers: WeekTrackers;
+  /** Their pre-week baseline, or null when there isn't enough history yet. */
+  usual: ReportUsual | null;
   cycle: WeeklyReportInput["cycle"];
   /** One grounded sentence, or null when the week is too quiet to say anything. */
   insight: string | null;
@@ -155,6 +166,25 @@ export function buildWeeklyReport(input: WeeklyReportInput): WeeklyReport {
     sleepGoalShare: daysThis.length > 0 ? sleepGoalDays / daysThis.length : null,
   };
 
+  /* ------------------------------------------------------- usual */
+  /* The baseline is everything logged BEFORE this week — the week must
+     never be compared against a "usual" it is itself part of. */
+  const baselineDays = input.trackerDays.filter((d) => d.date < weekStart);
+  const baselineUsual = usualDay(baselineDays, today);
+  const baselineMood = usualMood(
+    input.moodEntries.filter((e) => moodDay(e) < weekStart),
+    today,
+  );
+  const usual: ReportUsual | null =
+    hasUsual(baselineUsual) || baselineMood !== null
+      ? {
+          sleepMinutes: baselineUsual.sleep?.value.minutes ?? null,
+          waterMl: baselineUsual.water?.value ?? null,
+          movementMinutes: baselineUsual.movement?.value ?? null,
+          avgMood: baselineMood?.mood ?? null,
+        }
+      : null;
+
   /* ----------------------------------------------------- insight */
   const insight = pickInsight(input, { weekStart, today, mood });
 
@@ -164,6 +194,7 @@ export function buildWeeklyReport(input: WeeklyReportInput): WeeklyReport {
     mood,
     habits,
     trackers,
+    usual,
     cycle: input.cycle,
     insight,
     empty:

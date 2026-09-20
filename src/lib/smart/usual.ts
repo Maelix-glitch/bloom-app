@@ -15,6 +15,7 @@
  */
 
 import type { DayEntry } from "@/lib/trackers/core";
+import type { HabitLog } from "@/lib/home/habits";
 import { PAGE_MOOD_PRESETS, PAGE_MOODS, type PageMood } from "@/lib/mood/page";
 import type { MoodEntry } from "@/lib/mood/types";
 
@@ -249,6 +250,63 @@ export function usualFaceOf(usual: MoodUsual | null | undefined): PageMood | nul
     }
   }
   return !tie && best !== null && bestDistance <= 2.5 ? best : null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Habit timing                                                               */
+/* -------------------------------------------------------------------------- */
+
+/** Completions a habit needs before Bloom may speak about its timing. */
+export const HABIT_TIME_MIN_SAMPLES = 3;
+
+export interface HabitTimeUsual {
+  /** Median completion time, minutes since midnight, rounded to 5. */
+  minutes: number;
+  samples: number;
+  /** A gentle nudge 15 minutes before the usual finish — "HH:MM". */
+  reminderTime: string;
+}
+
+function minutesToClock(total: number): string {
+  const wrapped = ((total % 1440) + 1440) % 1440;
+  const h = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** Minutes since midnight → "8:05 PM" / "6:00 AM". */
+export function formatClock(minutes: number): string {
+  const wrapped = ((Math.round(minutes) % 1440) + 1440) % 1440;
+  const h24 = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
+  const period = h24 < 12 ? "AM" : "PM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return m === 0 ? `${h12}:00 ${period}` : `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/**
+ * When this habit usually gets done — the median completion time of its last
+ * fortnight of ticks, offered with a reminder suggestion a quarter hour
+ * before. Fewer than HABIT_TIME_MIN_SAMPLES completions means silence.
+ */
+export function usualHabitTime(logs: readonly HabitLog[], habitId: string): HabitTimeUsual | null {
+  const minutes = logs
+    .filter((l) => l.habitId === habitId)
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, USUAL_WINDOW)
+    .map((l) => {
+      const d = new Date(l.completedAt);
+      return Number.isNaN(d.getTime()) ? null : d.getHours() * 60 + d.getMinutes();
+    })
+    .filter((v): v is number => v !== null);
+  if (minutes.length < HABIT_TIME_MIN_SAMPLES) return null;
+  const usual = roundTo(median(minutes), 5);
+  return {
+    minutes: usual,
+    samples: minutes.length,
+    /* The nudge lands before the habit, not on it. */
+    reminderTime: minutesToClock(usual - 15),
+  };
 }
 
 /** True when at least one field has enough history to suggest. */

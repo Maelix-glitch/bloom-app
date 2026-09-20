@@ -42,7 +42,7 @@ import {
 } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
 import { CYCLE_SETTINGS_CHANGED, loadCycleSettings } from "@/lib/cycle/periodStore";
-import { usualMood } from "@/lib/smart/usual";
+import { formatClock, usualHabitTime, usualMood } from "@/lib/smart/usual";
 import { readPersonalVoice } from "@/lib/voice/personal";
 import { PhaseCard } from "@/components/home/PhaseCard";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
@@ -291,6 +291,17 @@ function TodayPage() {
       }),
     [habits.todayHabits, moodEntry, trackers.analysis, now, flowTimes.times],
   );
+
+  /* When editing a habit, its tick history may know a usual finish time —
+     offered once as a reminder suggestion, never set silently. */
+  const habitUsualReminder = useMemo(() => {
+    if (!editingHabitId || !habitOpen) return null;
+    const time = usualHabitTime(habits.logs, editingHabitId);
+    if (!time) return null;
+    const existing = habits.habits.find((h) => h.id === editingHabitId);
+    if (existing?.reminderTime) return null; // a reminder already lives there
+    return { time: time.reminderTime, around: formatClock(time.minutes), samples: time.samples };
+  }, [editingHabitId, habitOpen, habits.logs, habits.habits]);
 
   /* Their usual check-in readings — feeds the composer's honest markers. */
   const moodUsual = useMemo(() => usualMood(mood.entries, today), [mood.entries, today]);
@@ -652,6 +663,7 @@ function TodayPage() {
         }}
         onSubmit={addHabit}
         prefill={habitPrefill}
+        suggestReminder={habitUsualReminder}
       />
       <HabitUndo undoable={habits.undoable} onUndo={habits.undo} onDismiss={habits.dismissUndo} />
 

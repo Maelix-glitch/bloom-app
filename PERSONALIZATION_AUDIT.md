@@ -356,3 +356,46 @@ hours field).
 
 **Tests: 789 passing** (759 → 773 → 789) · typecheck clean · production build
 clean · logo untouched.
+
+## 10 · Wave six — the record argues with itself, politely
+
+Everything here reuses the one engine (`src/lib/smart/usual.ts`) — extended,
+not duplicated — and each surface was verified live in the browser
+(`snapshots/w6/`, script `/tmp/visqa/wave6.cjs`).
+
+### The engine, extended again
+
+- **`usualHabitTime()`** — a habit's median finish over its last fortnight of
+  ticks (`HABIT_TIME_MIN_SAMPLES = 3`, round-5, other habits ignored) plus a
+  reminder suggestion 15 minutes _before_ the usual finish. `formatClock()`
+  reads like a person: "9:05 PM". Tested with outliers and other-habit noise.
+- **`usualMood` in the report** — the pre-week baseline as a first-class part
+  of `WeeklyReport.usual` (sleep/water/movement from `usualDay`, mood from
+  `usualMood`), computed strictly from days **before** the report window —
+  the week is never compared against a baseline it is itself part of. 4 tests.
+
+### Weekly report vs your usual
+
+Mood card: "Against your usual check-in: 6.3 vs 6 usually." Body card:
+"Against your usual — sleep +1.2h · water −0.15L · movement +3m" — only the
+fields with real history on both sides appear; a week-old record gets no line
+at all. Verified live: the seeded fortnight produced exactly the expected
+deltas against its own pre-week baseline.
+
+### Mood chart: the usual line
+
+`MoodChart` takes `usualMood` and draws one dashed, 45%-opacity mark line at
+their baseline mood, labelled "usual" — a fact about them, never a target
+(no target framing, silent to the tooltip, hidden when the baseline is absent).
+
+### The habit modal suggests its own reminder
+
+Edit a habit and, if its ticks know a usual time and no reminder lives there
+yet, a dashed chip asks: "You usually finish this around 9:05 PM — remind you
+8:50 PM? · from 14 ticks." One tap sets 8:50 PM and flips the reminder on;
+ignore it and it never nags. Never fires on creation (no history to read).
+Verified live: chip computed 9:05 PM from the seeded 21:05 ticks, and the tap
+set `20:50` in the time field.
+
+**Tests: 798 passing** · typecheck clean · production build clean · logo
+untouched.

@@ -147,7 +147,7 @@ function MoodIntelligencePage() {
         ) : (
           <div className="mt-14 flex flex-col gap-6">
             <Reveal delay={80}>
-              <MoodChart days={a.days} />
+              <MoodChart days={a.days} usualMood={usual?.mood ?? null} />
             </Reveal>
 
             <div className="grid gap-6 lg:grid-cols-2">

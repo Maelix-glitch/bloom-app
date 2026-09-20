@@ -18,7 +18,14 @@ const SERIES: { key: SeriesKey; label: string; color: string; type: "line"; dash
 ];
 
 /** ECharts is loaded lazily on the client only — keeps SSR clean and TTI fast. */
-export function MoodChart({ days }: { days: DayAggregate[] }) {
+export function MoodChart({
+  days,
+  usualMood,
+}: {
+  days: DayAggregate[];
+  /** Their usual check-in mood — a quiet dashed reference, never a target. */
+  usualMood?: number | null | undefined;
+}) {
   // A state-held node (not a plain ref) so the init effect re-runs when the
   // chart host mounts later — e.g. after the first day of data arrives.
   const [host, setHost] = useState<HTMLDivElement | null>(null);
@@ -29,7 +36,6 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
   } | null>(null);
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState<SeriesKey[]>(["mood", "avg7", "energy"]);
-
 
   const model = useMemo(() => {
     const dates = days.map((d) => d.date);
@@ -54,13 +60,23 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
     let disposed = false;
     if (!host) return;
     import("echarts/core").then(async (echarts) => {
-      const [{ LineChart }, { GridComponent, TooltipComponent, AxisPointerComponent }, { CanvasRenderer }] =
-        await Promise.all([
-          import("echarts/charts"),
-          import("echarts/components"),
-          import("echarts/renderers"),
-        ]);
-      echarts.use([LineChart, GridComponent, TooltipComponent, AxisPointerComponent, CanvasRenderer]);
+      const [
+        { LineChart },
+        { GridComponent, TooltipComponent, AxisPointerComponent, MarkLineComponent },
+        { CanvasRenderer },
+      ] = await Promise.all([
+        import("echarts/charts"),
+        import("echarts/components"),
+        import("echarts/renderers"),
+      ]);
+      echarts.use([
+        LineChart,
+        GridComponent,
+        TooltipComponent,
+        AxisPointerComponent,
+        MarkLineComponent,
+        CanvasRenderer,
+      ]);
       if (disposed) return;
       chartRef.current = echarts.init(host, undefined, { renderer: "canvas" }) as never;
       setReady(true);
@@ -72,7 +88,6 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
       chartRef.current = null;
     };
   }, [host]);
-
 
   useEffect(() => {
     if (!ready) return;
@@ -129,6 +144,26 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
         animationDuration: 420,
         animationDurationUpdate: 420,
         animationEasing: "cubicOut",
+        /* Their usual mood rides on the mood series as a quiet dashed
+           reference — a fact about them, not a goal. */
+        markLine:
+          s.key === "mood" && typeof usualMood === "number" && Number.isFinite(usualMood)
+            ? {
+                silent: true,
+                symbol: "none",
+                animation: false,
+                lineStyle: { type: "dashed", color: line, opacity: 0.45, width: 1 },
+                label: {
+                  show: true,
+                  position: "insideEndTop",
+                  formatter: "usual",
+                  fontSize: 9,
+                  color: line,
+                  opacity: 0.8,
+                },
+                data: [{ yAxis: usualMood }],
+              }
+            : undefined,
       };
     });
 
@@ -143,8 +178,12 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
           borderColor: "oklch(0.4 0.03 279)",
           borderWidth: 1,
           padding: 0,
-          extraCssText: "border-radius:12px;box-shadow:0 24px 50px -28px rgba(0,0,0,.9);backdrop-filter:blur(6px)",
-          axisPointer: { type: "line", lineStyle: { color: "oklch(0.4 0.03 279)", type: "dashed" } },
+          extraCssText:
+            "border-radius:12px;box-shadow:0 24px 50px -28px rgba(0,0,0,.9);backdrop-filter:blur(6px)",
+          axisPointer: {
+            type: "line",
+            lineStyle: { color: "oklch(0.4 0.03 279)", type: "dashed" },
+          },
           formatter: (params: unknown) => {
             const list = params as { dataIndex: number }[];
             const idx = list?.[0]?.dataIndex ?? 0;
@@ -191,7 +230,7 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
       // range switch; `replaceMerge` still lets toggled-off series disappear.
       { replaceMerge: ["series"] },
     );
-  }, [ready, active, model]);
+  }, [ready, active, model, usualMood]);
 
   if (days.length < 2)
     return (
@@ -237,7 +276,12 @@ export function MoodChart({ days }: { days: DayAggregate[] }) {
           </div>
         }
       />
-      <div ref={setHost} className="h-[340px] w-full" role="img" aria-label="Mood trajectory chart" />
+      <div
+        ref={setHost}
+        className="h-[340px] w-full"
+        role="img"
+        aria-label="Mood trajectory chart"
+      />
     </Panel>
   );
 }
