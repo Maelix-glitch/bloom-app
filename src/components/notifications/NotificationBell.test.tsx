@@ -57,7 +57,7 @@ describe("NotificationBell", () => {
     const { container } = render(<NotificationBell />);
     const button = bellOf(container);
     expect(button.getAttribute("aria-label")).toBe("Notifications");
-    expect(button.dataset.unread).toBe("false");
+    expect(button.dataset["unread"]).toBe("false");
     expect(container.querySelector(".bloom-bell__badge")).toBeNull();
   });
 
@@ -66,7 +66,7 @@ describe("NotificationBell", () => {
     const { container } = render(<NotificationBell />);
     const button = bellOf(container);
     expect(button.getAttribute("aria-label")).toBe("Notifications, 3 unread");
-    expect(button.dataset.unread).toBe("true");
+    expect(button.dataset["unread"]).toBe("true");
     expect(container.querySelector(".bloom-bell__badge")?.textContent).toBe("3");
   });
 

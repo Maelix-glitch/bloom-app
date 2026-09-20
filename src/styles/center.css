@@ -1,0 +1,453 @@
+/*
+ * Notification Center — the sheet behind the bell.
+ *
+ * An Apple-grade notification list in Bloom's dark-glass language: a calm
+ * photographic hero (candlelight, faded into the glass), grouped cards with
+ * tinted icon medallions, day-grouped history, and honest empty states.
+ * Scoped under .ncenter so nothing leaks. Follows the bsheet patterns
+ * (color-mix hairlines, orbs, phone breakpoints, reduced-motion guards).
+ */
+
+/* ------------------------------------------------------------ hero */
+
+.ncenter-hero {
+  position: relative;
+  padding: 26px 26px 6px;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+}
+@media (max-width: 640px) {
+  .ncenter-hero {
+    padding: 36px 20px 4px;
+  }
+}
+
+/* candlelight behind the header, dissolved into the glass below */
+.ncenter-art {
+  position: absolute;
+  inset: 1px 1px -70px;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: 27px 27px 0 0;
+  pointer-events: none;
+}
+/* the light catch along the top curve, over the photo rather than under it */
+.ncenter-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 22%, transparent);
+  pointer-events: none;
+}
+.ncenter-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  opacity: 0.55;
+  filter: saturate(0.9);
+  transform: scale(1.03);
+  animation: bsheet-settle 1.6s var(--ease-out-expo) both;
+}
+.ncenter-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--surface) 18%, transparent) 0%,
+      color-mix(in oklab, var(--surface) 52%, transparent) 55%,
+      var(--surface) 100%
+    ),
+    linear-gradient(90deg, color-mix(in oklab, var(--surface) 45%, transparent), transparent 60%);
+}
+
+.ncenter-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* the bell, resting — the same glass disc as the header, larger, decorative */
+.ncenter-orb {
+  --bib-size: 54px;
+  pointer-events: none;
+}
+.ncenter-orb .bloom-bell__glyph {
+  width: 26px;
+  height: 26px;
+}
+
+.ncenter-eyebrow {
+  margin-top: 16px;
+}
+.ncenter-title {
+  margin-top: 6px;
+}
+.ncenter-sub {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+.ncenter-sub[data-waiting="true"] {
+  color: var(--gold-soft);
+}
+
+/* ------------------------------------------------------------ sections */
+
+.ncenter-section {
+  margin: 20px 26px 0;
+}
+@media (max-width: 640px) {
+  .ncenter-section {
+    margin: 18px 14px 0;
+  }
+}
+
+.ncenter-head {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-inline: 4px;
+}
+
+.ncenter-head-orb {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 38%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent 55%),
+    color-mix(in oklab, var(--nc-tint, var(--gold)) 15%, transparent);
+  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 72%, #fff);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 6px 16px -10px color-mix(in oklab, var(--nc-tint, var(--gold)) 60%, transparent);
+}
+.ncenter-head-orb svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ncenter-head-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+
+.ncenter-count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+  color: color-mix(in oklab, var(--foreground) 68%, transparent);
+  white-space: nowrap;
+}
+
+/* a quieter ghost for the section header row */
+.ncenter-clear {
+  height: 32px;
+  padding-inline: 13px;
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------ rows */
+
+.ncenter-group {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent),
+    0 10px 26px -22px rgba(0, 0, 0, 0.9);
+}
+.ncenter-group > li + li {
+  margin-top: 2px;
+}
+
+.ncenter-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 15px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+a.ncenter-row:hover {
+  background: color-mix(in oklab, var(--background) 48%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+a.ncenter-row:active {
+  transform: scale(0.99);
+}
+a.ncenter-row:focus-visible {
+  outline: none;
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent);
+}
+
+.ncenter-row-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 36%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 55%),
+    color-mix(in oklab, var(--nc-tint, var(--gold)) 14%, transparent);
+  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 74%, #fff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.ncenter-row-orb svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* the bell badge's little sibling — unread rows wear the gold dot */
+.ncenter-row[data-unread="true"] .ncenter-row-orb::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f7dc9a, #d99b34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 0 2px color-mix(in oklab, var(--surface) 88%, black),
+    0 0 8px rgba(217, 155, 52, 0.7);
+}
+
+.ncenter-row-text {
+  min-width: 0;
+}
+.ncenter-row-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ncenter-row[data-unread="true"] .ncenter-row-title {
+  font-weight: 600;
+}
+.ncenter-row-body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.42;
+  color: color-mix(in oklab, var(--foreground) 62%, transparent);
+  text-wrap: pretty;
+}
+.ncenter-row-why {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ncenter-row-aside {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+}
+.ncenter-time {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  white-space: nowrap;
+}
+.ncenter-row[data-unread="true"] .ncenter-time {
+  color: var(--gold-soft);
+}
+.ncenter-go {
+  width: 15px;
+  height: 15px;
+  color: color-mix(in oklab, var(--foreground) 38%, transparent);
+  transition:
+    transform 300ms var(--ease-out-expo),
+    color var(--motion-fast) ease;
+}
+a.ncenter-row:hover .ncenter-go {
+  transform: translateX(2px);
+  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+}
+
+/* ------------------------------------------------------------ day groups */
+
+.ncenter-days {
+  display: grid;
+  gap: 16px;
+}
+.ncenter-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+}
+.ncenter-day::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--foreground) 16%, transparent),
+    transparent
+  );
+}
+
+/* ------------------------------------------------------------ empty states */
+
+.ncenter-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 7px;
+  margin-inline: 4px;
+  padding: 22px 18px;
+  border-radius: 20px;
+  border: 1px dashed color-mix(in oklab, var(--foreground) 16%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 38%, transparent);
+}
+.ncenter-empty-orb {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 34%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 55%),
+    color-mix(in oklab, var(--nc-tint, var(--gold)) 12%, transparent);
+  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 70%, #fff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.ncenter-empty-orb svg {
+  width: 20px;
+  height: 20px;
+}
+.ncenter-empty-title {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+.ncenter-empty-sub {
+  max-width: 32ch;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------ footer */
+
+.ncenter-foot {
+  margin: 22px 26px 26px;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  text-wrap: pretty;
+}
+@media (max-width: 640px) {
+  .ncenter-foot {
+    margin: 20px 18px 24px;
+  }
+}
+
+/* ------------------------------------------------------------ tints */
+
+.ncenter-head-orb[data-tint="gold"],
+.ncenter-row-orb[data-tint="gold"],
+.ncenter-empty-orb[data-tint="gold"] {
+  --nc-tint: var(--gold);
+}
+.ncenter-head-orb[data-tint="violet"],
+.ncenter-row-orb[data-tint="violet"],
+.ncenter-empty-orb[data-tint="violet"] {
+  --nc-tint: var(--violet);
+}
+.ncenter-head-orb[data-tint="sage"],
+.ncenter-row-orb[data-tint="sage"],
+.ncenter-empty-orb[data-tint="sage"] {
+  --nc-tint: var(--sage);
+}
+.ncenter-head-orb[data-tint="rose"],
+.ncenter-row-orb[data-tint="rose"],
+.ncenter-empty-orb[data-tint="rose"] {
+  --nc-tint: var(--rose);
+}
+.ncenter-head-orb[data-tint="amber"],
+.ncenter-row-orb[data-tint="amber"],
+.ncenter-empty-orb[data-tint="amber"] {
+  --nc-tint: var(--amber);
+}
+.ncenter-head-orb[data-tint="sky"],
+.ncenter-row-orb[data-tint="sky"],
+.ncenter-empty-orb[data-tint="sky"] {
+  --nc-tint: var(--sky);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ncenter-art img {
+    animation: none;
+  }
+  .ncenter-row,
+  .ncenter-go {
+    transition: none;
+  }
+}

@@ -5,6 +5,8 @@
 @import "./styles/motion.css";
 /* Premium header icon system: the notification bell and its siblings. */
 @import "./styles/bell.css";
+/* Notification Center — the sheet behind the bell. */
+@import "./styles/center.css";
 /* Bloom Story Platform: rings, rail, viewer, editor, trays, archive. */
 @import "./styles/stories.css";
 /* Bloom mobile-first responsive system: shell, nav, sheets, type, guards. */
