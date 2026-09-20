@@ -72,9 +72,15 @@ const FALLBACK_PRIVACY: ProfilePrivacy = {
   storyVisibility: "private",
 };
 
+/** Raised when the profile row itself cannot be read (network, RLS, migration). */
+export class ProfileLoadError extends Error {}
+
 /**
- * Load my profile. Never fails: missing rows/columns (a project that hasn't
- * run the Profile migration yet) degrade to defaults, logged for developers.
+ * Load my profile. A missing row is not an error — accounts created before
+ * the profile trigger simply get defaults until their first save. A failed
+ * read, however, throws: silently degrading to the default identity made a
+ * network error or an un-migrated project look exactly like "Bloom forgot
+ * my profile" (and invited overwriting real data from the fake defaults).
  */
 export async function loadMyProfile(userId: string): Promise<MyProfileSnapshot> {
   const { data: authData } = await supabase.auth.getUser();
@@ -90,13 +96,13 @@ export async function loadMyProfile(userId: string): Promise<MyProfileSnapshot> 
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, username, bio, avatar_path, accent, featured")
+    .select("id, display_name, username, bio, avatar_path, banner_path, accent, featured")
     .eq("id", userId)
     .maybeSingle();
 
   if (error) {
     report("profile:load", error);
-    return snapshot;
+    throw new ProfileLoadError("Your profile couldn't be read just now.");
   }
 
   if (data) {

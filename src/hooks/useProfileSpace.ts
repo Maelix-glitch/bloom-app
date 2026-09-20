@@ -13,6 +13,7 @@ import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
 import {
   loadMyProfile,
+  ProfileSaveError,
   removeAvatar,
   removeBanner,
   savePrivacy,
@@ -22,6 +23,7 @@ import {
   type MyProfileSnapshot,
   type ProfilePatch,
 } from "@/lib/profile/profileService";
+import { localIdentity } from "@/lib/profile/localIdentity";
 import {
   createHighlight,
   createStory,
@@ -105,18 +107,23 @@ export function useProfileSpace() {
   /* ----------------------------- parallel load ---------------------------- */
   useEffect(() => {
     if (authState === "signed-out") {
-      // Preview mode: the full Profile renders without an account, backed by
-      // real empty state — never invented data.
+      // No account connected. With a configured project this is the preview:
+      // the full Profile renders against a real empty state — never invented
+      // data. Without a project (a device-only build) the identity comes from
+      // this device — the same local-first rule mood, trackers and habits
+      // already follow — so a saved name/@username/bio survives revisits
+      // instead of snapping back to "Bloom User".
+      const local = hasSupabaseConfig ? null : localIdentity.read();
       setIdentityBlock({
         status: "ready",
         data: {
           identity: {
-            displayName: "Bloom User",
-            username: null,
-            bio: null,
-            avatarPath: null,
+            displayName: local?.displayName ?? "Bloom User",
+            username: local?.username ?? null,
+            bio: local?.bio ?? null,
+            avatarPath: local?.avatarPath ?? null,
             bannerPath: null,
-            accent: "violet",
+            accent: local?.accent ?? "violet",
             featured: null,
           },
           privacy: { profileVisibility: "private", storyVisibility: "private" },
@@ -303,6 +310,26 @@ export function useProfileSpace() {
 
   const saveIdentity = useCallback(
     async (patch: ProfilePatch) => {
+      if (!hasSupabaseConfig) {
+        /* Device-only build: identity saves on this device (see localIdentity). */
+        const saved = localIdentity.write({
+          displayName: patch.displayName,
+          username: patch.username,
+          bio: patch.bio,
+          accent: patch.accent as BloomAccent,
+          ...(patch.avatarPath !== undefined ? { avatarPath: patch.avatarPath } : {}),
+        });
+        patchIdentity((identity) => ({
+          ...identity,
+          displayName: saved.displayName,
+          username: saved.username,
+          bio: saved.bio,
+          accent: saved.accent,
+          avatarPath: saved.avatarPath,
+          featured: patch.featured,
+        }));
+        return;
+      }
       if (!userId) throw authRequired();
       await saveProfile(userId, patch);
       patchIdentity((identity) => ({
@@ -320,6 +347,11 @@ export function useProfileSpace() {
 
   const updateAccent = useCallback(
     async (accent: BloomAccent) => {
+      if (!hasSupabaseConfig) {
+        const saved = localIdentity.write({ accent });
+        patchIdentity((i) => ({ ...i, accent: saved.accent }));
+        return;
+      }
       if (!userId) throw authRequired();
       const identity = currentIdentity();
       await saveProfile(userId, { ...toPatch(identity), accent });
@@ -439,6 +471,14 @@ export function useProfileSpace() {
 
   const commitAvatar = useCallback(
     async (blob: Blob) => {
+      if (!hasSupabaseConfig) {
+        // Uploads need cloud storage, which needs an account. The bundled
+        // `preset:` photographs save on-device through saveIdentity instead —
+        // say so plainly rather than failing with a raw connection error.
+        throw new ProfileSaveError(
+          "Uploading a photo needs an account. One of Bloom's own pictures saves on this device.",
+        );
+      }
       if (!userId) throw authRequired();
       // The object path is stable (uid/avatar.jpg), so uploading overwrites
       // cleanly — no orphaned files to sweep.
@@ -452,6 +492,11 @@ export function useProfileSpace() {
   );
 
   const clearAvatar = useCallback(async () => {
+    if (!hasSupabaseConfig) {
+      const saved = localIdentity.write({ avatarPath: null });
+      patchIdentity((i) => ({ ...i, avatarPath: saved.avatarPath }));
+      return;
+    }
     if (!userId) throw authRequired();
     patchIdentity((i) => ({ ...i, avatarPath: null }));
     await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: null });
