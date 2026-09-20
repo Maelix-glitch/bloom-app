@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { supabase, hasSupabaseConfig, supabaseConfigProblem } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig, supabaseConfigProblem, watchAuth } from "@/lib/supabase";
 import { moodStorage } from "@/lib/mood/storage";
 import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
@@ -90,25 +90,15 @@ export function useProfileSpace() {
       return;
     }
 
-    void supabase.auth.getSession().then(({ data }) => {
+    const stop = watchAuth((uid) => {
       if (!mounted) return;
-      const uid = data.session?.user.id ?? null;
-      setUserId(uid);
-      setAuthState(uid ? "signed-in" : "signed-out");
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      const uid = session?.user.id ?? null;
       setUserId(uid);
       setAuthState(uid ? "signed-in" : "signed-out");
     });
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      stop();
     };
   }, []);
 

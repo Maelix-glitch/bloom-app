@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { supabase, hasSupabaseConfig } from "@/lib/supabase";
+import { supabase, hasSupabaseConfig, watchAuth } from "@/lib/supabase";
 import { ask as askCoach, CoachUnavailable } from "@/lib/coach/engine";
 import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
@@ -288,13 +288,10 @@ export function useCoachSystem() {
         mounted = false;
       };
     }
-    void supabase.auth.getSession().then(({ data }) => apply(data.session?.user.id ?? null));
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_e, session) => apply(session?.user.id ?? null));
+    const stop = watchAuth((uid) => apply(uid));
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      stop();
     };
   }, []);
 

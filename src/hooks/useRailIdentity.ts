@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from "react";
 
-import { hasSupabaseConfig, supabase } from "@/lib/supabase";
+import { hasSupabaseConfig, supabase, watchAuth } from "@/lib/supabase";
 import { normalizeAccent, type BloomAccent } from "@/lib/profile/types";
 import { syncPrefs } from "@/lib/prefs";
 
@@ -129,20 +129,11 @@ export function useRailIdentity(): RailIdentity {
       void read(uid);
     }
 
-    /*
-     * Only reach for the network when we have nothing. A remount with a warm
-     * cache still subscribes to auth changes below, but shows the known
-     * identity immediately instead of blanking to "checking".
-     */
-    if (cachedIdentity === null) {
-      void supabase.auth.getSession().then(({ data }) => {
-        if (alive) apply(data.session?.user.id ?? null);
-      });
-    }
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (alive) apply(session?.user.id ?? null);
+    /* watchAuth handles both the initial session read and auth changes. It
+       also catches rejected/invalid auth clients so a rail remount cannot
+       create an unhandled promise rejection in the console. */
+    const stop = watchAuth((uid) => {
+      if (alive) apply(uid);
     });
 
     const onChanged = () => {
@@ -152,7 +143,7 @@ export function useRailIdentity(): RailIdentity {
 
     return () => {
       alive = false;
-      subscription.unsubscribe();
+      stop();
       window.removeEventListener(PROFILE_CHANGED_EVENT, onChanged);
     };
   }, []);
