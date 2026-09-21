@@ -7,7 +7,16 @@
  * - Auto-starts global tour for new users (once) unless dismissed
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { toast } from "sonner";
 import type { TourDefinition, TourId, TourStep } from "@/lib/tour/types";
 import { TOURS, getTour } from "./tours";
 import { loadTourSync, saveTourSync, loadTourPersist, saveTourPersist } from "@/lib/tour/storage";
@@ -33,6 +42,9 @@ interface TourContextValue {
   showPrompt: boolean;
 }
 
+/** Matches the fade-out in tour.css: long enough to read as motion, not wait. */
+const LEAVE_MS = 260;
+
 const TourContext = createContext<TourContextValue | null>(null);
 
 export function useTour(): TourContextValue {
@@ -47,8 +59,28 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
 
   const [activeId, setActiveId] = useState<TourId | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
-  const [completed, setCompleted] = useState<Record<string, boolean>>(() => loadTourSync().completed);
-  const [dismissedGlobal, setDismissedGlobal] = useState<boolean>(() => Boolean(loadTourSync().dismissedGlobal));
+  /** Which way the last step change travelled — the card slides in from there. */
+  const [direction, setDirection] = useState<1 | -1>(1);
+  /**
+   * True for the beat between "the tour is over" and the overlay unmounting.
+   * Unmounting a full-screen dim in one frame is a pop, and a pop at the end of
+   * something smooth is the part people remember — so the spotlight fades out
+   * first and only then goes away.
+   */
+  const [leaving, setLeaving] = useState(false);
+  const leavingTimer = useRef<number | null>(null);
+  /**
+   * Any tour started this session. Without it, closing (say) the Mood tour put
+   * the "New to Bloom?" prompt straight back on screen — the one moment where
+   * the tutorial undoes the tutorial.
+   */
+  const [startedAny, setStartedAny] = useState(false);
+  const [completed, setCompleted] = useState<Record<string, boolean>>(
+    () => loadTourSync().completed,
+  );
+  const [dismissedGlobal, setDismissedGlobal] = useState<boolean>(() =>
+    Boolean(loadTourSync().dismissedGlobal),
+  );
   const [hydrated, setHydrated] = useState(false);
 
   // load async persist (idb) on mount
@@ -91,10 +123,35 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const currentStep = visibleSteps[stepIndex] ?? null;
   const totalSteps = visibleSteps.length;
 
+  /** Fade the spotlight out, then drop it. Every ending goes through here. */
+  const dismiss = useCallback(() => {
+    if (leavingTimer.current !== null) window.clearTimeout(leavingTimer.current);
+    setLeaving(true);
+    leavingTimer.current = window.setTimeout(() => {
+      leavingTimer.current = null;
+      setLeaving(false);
+      setActiveId(null);
+      setStepIndex(0);
+    }, LEAVE_MS);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (leavingTimer.current !== null) window.clearTimeout(leavingTimer.current);
+    },
+    [],
+  );
+
   const startTour = useCallback(
     (id: TourId) => {
       const def = getTour(id);
       if (!def) return;
+      /* Starting again mid-fade: cancel the exit so the new tour doesn't blink. */
+      if (leavingTimer.current !== null) {
+        window.clearTimeout(leavingTimer.current);
+        leavingTimer.current = null;
+      }
+      setLeaving(false);
       // filter first to know if any steps
       const steps = def.steps.filter((s) => {
         if (s.target === "nav-cycle" && !cycleVisible) return false;
@@ -102,8 +159,10 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         return true;
       });
       if (steps.length === 0) return;
+      setStartedAny(true);
       setActiveId(id);
       setStepIndex(0);
+      setDirection(1);
       // announce
       window.dispatchEvent(new CustomEvent("bloom:tour-start", { detail: { id } }));
     },
@@ -117,15 +176,21 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       const nextCompleted = { ...completed, [activeDef.id]: true };
       setCompleted(nextCompleted);
       persist(nextCompleted);
-      setActiveId(null);
-      setStepIndex(0);
-      window.dispatchEvent(new CustomEvent("bloom:tour-complete", { detail: { id: activeDef.id } }));
+      dismiss();
+      window.dispatchEvent(
+        new CustomEvent("bloom:tour-complete", { detail: { id: activeDef.id } }),
+      );
+      toast("That's the tour.", {
+        description: "The ? button replays it any time — and each page has its own.",
+      });
     } else {
+      setDirection(1);
       setStepIndex((i) => i + 1);
     }
-  }, [activeDef, stepIndex, totalSteps, completed, persist]);
+  }, [activeDef, stepIndex, totalSteps, completed, persist, dismiss]);
 
   const prev = useCallback(() => {
+    setDirection(-1);
     setStepIndex((i) => Math.max(0, i - 1));
   }, []);
 
@@ -135,28 +200,25 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       setDismissedGlobal(true);
       persist(completed, true);
     }
-    setActiveId(null);
-    setStepIndex(0);
+    dismiss();
     window.dispatchEvent(new CustomEvent("bloom:tour-skip", { detail: { id: activeDef?.id } }));
-  }, [activeDef, completed, persist]);
+  }, [activeDef, completed, persist, dismiss]);
 
   const close = useCallback(() => {
     if (activeDef?.id === "global") {
       setDismissedGlobal(true);
       persist(completed, true);
     }
-    setActiveId(null);
-    setStepIndex(0);
-  }, [activeDef, completed, persist]);
+    dismiss();
+  }, [activeDef, completed, persist, dismiss]);
 
   const resetTours = useCallback(() => {
     const cleared: Record<string, boolean> = {};
     setCompleted(cleared);
     setDismissedGlobal(false);
     persist(cleared, false);
-    setActiveId(null);
-    setStepIndex(0);
-  }, [persist]);
+    dismiss();
+  }, [persist, dismiss]);
 
   // auto-start global tour for first-time users (once, after onboarding)
   useEffect(() => {
@@ -171,6 +233,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       if (Object.keys(completed).length > 0) return;
       // check if nav exists
       if (typeof document !== "undefined" && document.querySelector('[data-tour="nav-today"]')) {
+        setStartedAny(true);
         setActiveId("global");
         setStepIndex(0);
       }
@@ -192,7 +255,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     skip,
     close,
     resetTours,
-    showPrompt: !dismissedGlobal && !completed["global"] && hydrated && !activeId,
+    showPrompt: !dismissedGlobal && !completed["global"] && hydrated && !activeId && !startedAny,
   };
 
   return (
@@ -203,6 +266,8 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
           step={currentStep}
           index={stepIndex}
           total={totalSteps}
+          direction={direction}
+          leaving={leaving}
           onNext={next}
           onPrev={prev}
           onSkip={skip}

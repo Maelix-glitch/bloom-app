@@ -1,62 +1,655 @@
-/* Bloom Tour — premium, editorial, not cartoonish */
+/* -------------------------------------------------------------------------
+   Bloom Tour — the spotlight and its card.
+
+   Two rules keep this smooth, and both are easy to break by accident:
+
+   1. **Nothing here transitions geometry.** `TourOverlay` writes the hole's
+      position, size and radius once per frame from a spring. A CSS transition
+      on `transform`/`width` would fight that loop and reintroduce the lag the
+      rewrite removed. Transitions in this file are for *discrete* things only:
+      opacity, colour, the height morph of the card, the progress hairline.
+   2. **The dim is one element whose border box is the hole.** Its box-shadow
+      paints the veil around it, so the cutout wears the target's own radius
+      (a pill button gets a pill hole) and moves as a single thing. No
+      `will-change` on it: promoting a 100vmax shadow to its own layer asks
+      the browser to allocate a texture the size of four screens.
+
+   The look: deep veil, one accent, hairlines, a card that reads like an iOS
+   sheet — display face for the title, mono for the eyebrow, nothing cartoonish.
+   ------------------------------------------------------------------------- */
 
 .tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  pointer-events: none;
   font-family: var(--font-sans, system-ui);
+  --tour-veil: color-mix(in oklab, var(--background) 82%, transparent);
+  --tour-accent: var(--violet);
+  --tour-card: color-mix(in oklab, var(--surface) 88%, transparent);
+  --tour-line: color-mix(in oklab, var(--border) 92%, transparent);
+}
+
+/* --------------------------------- the dim -------------------------------- */
+
+.tour-veil {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3000;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 0 100vmax var(--tour-veil);
+  /* Fades in *after* the frame loop has put the hole in place, so the veil
+     never opens out of the top-left corner. */
+  transition: opacity 340ms var(--ease-out-expo);
+}
+.tour-veil.is-up {
+  opacity: 1;
+}
+
+/* The ring lives inside the hole and inherits its radius. Its glow is the only
+   thing that animates on a timer, and it animates opacity — never geometry. */
+.tour-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  will-change: opacity;
+  box-shadow:
+    0 0 0 1.5px color-mix(in oklab, var(--tour-accent) 62%, transparent),
+    0 0 0 8px color-mix(in oklab, var(--tour-accent) 9%, transparent),
+    0 26px 60px -30px rgba(0, 0, 0, 0.9);
+  animation: tour-breathe 4.2s ease-in-out 500ms infinite;
+}
+.tour-ring::after {
+  /* A whisper of light on the top edge of the highlight — the thing that makes
+     it read as glass rather than a selection rectangle. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--foreground) 7%, transparent),
+    transparent 34%
+  );
+  opacity: 0.7;
+}
+
+@keyframes tour-breathe {
+  0%,
+  100% {
+    opacity: 0.86;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Tap outside the highlight to leave the tour. Four transparent panes tile the
+   veil so the highlighted control itself stays tappable. */
+.tour-catcher {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3001;
+  width: 0;
+  height: 0;
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* --------------------------------- the card -------------------------------- */
+
+.tour-slot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3002;
+  pointer-events: auto;
+  touch-action: pan-y;
+  will-change: transform;
+  transition: opacity 240ms var(--ease-out-expo);
+}
+/* Hunting for a control that hasn't mounted yet: hold the card, don't flash it. */
+.tour-slot.is-seeking {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .tour-card {
-  animation: tour-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  border: 1px solid var(--tour-line);
+  background: var(--tour-card);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    0 34px 72px -32px rgba(0, 0, 0, 0.85),
+    0 2px 10px -4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 11%, transparent);
+  outline: none;
+  animation: tour-card-in 520ms var(--ease-out-expo) both;
+}
+.tour-card:focus-visible {
+  border-color: color-mix(in oklab, var(--tour-accent) 55%, transparent);
+  box-shadow:
+    0 34px 72px -32px rgba(0, 0, 0, 0.85),
+    0 0 0 3px color-mix(in oklab, var(--tour-accent) 22%, transparent);
 }
 
-@keyframes tour-in {
+@keyframes tour-card-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.98);
+    transform: translateY(14px) scale(0.965);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 }
 
+/* The leader line from the card to the control it is talking about. Its offset
+   along the facing edge is written per frame as `--tour-arrow`. */
 .tour-arrow {
-  /* arrow already positioned via inline style */
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
+  position: absolute;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--tour-accent) 12%, transparent),
+    color-mix(in oklab, var(--tour-accent) 78%, transparent)
+  );
 }
+.tour-arrow::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--tour-accent);
+  box-shadow: 0 0 10px color-mix(in oklab, var(--tour-accent) 70%, transparent);
+}
+/* card below the control → the leader points up */
+.tour-arrow[data-side="bottom"],
+.tour-arrow[data-side="sheet"] {
+  width: 1px;
+  height: 15px;
+  top: -15px;
+  left: calc(var(--tour-arrow, 50%) - 0.5px);
+}
+.tour-arrow[data-side="bottom"]::after,
+.tour-arrow[data-side="sheet"]::after {
+  top: -2px;
+  left: -2px;
+}
+/* card above → points down */
+.tour-arrow[data-side="top"] {
+  width: 1px;
+  height: 15px;
+  bottom: -15px;
+  left: calc(var(--tour-arrow, 50%) - 0.5px);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--tour-accent) 12%, transparent),
+    color-mix(in oklab, var(--tour-accent) 78%, transparent)
+  );
+}
+.tour-arrow[data-side="top"]::after {
+  bottom: -2px;
+  left: -2px;
+}
+/* card to the right → points left */
+.tour-arrow[data-side="right"] {
+  width: 15px;
+  height: 1px;
+  left: -15px;
+  top: calc(var(--tour-arrow, 50%) - 0.5px);
+  background: linear-gradient(
+    to left,
+    color-mix(in oklab, var(--tour-accent) 12%, transparent),
+    color-mix(in oklab, var(--tour-accent) 78%, transparent)
+  );
+}
+.tour-arrow[data-side="right"]::after {
+  left: -2px;
+  top: -2px;
+}
+/* card to the left → points right */
+.tour-arrow[data-side="left"] {
+  width: 15px;
+  height: 1px;
+  right: -15px;
+  top: calc(var(--tour-arrow, 50%) - 0.5px);
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--tour-accent) 12%, transparent),
+    color-mix(in oklab, var(--tour-accent) 78%, transparent)
+  );
+}
+.tour-arrow[data-side="left"]::after {
+  right: -2px;
+  top: -2px;
+}
+/* A bottom sheet under a control that is nowhere near it: no leader, the
+   highlight and the card are both obvious enough. */
+.tour-card[data-placement="sheet"] .tour-arrow {
+  opacity: 0;
+}
+
+/* Progress: the hairline across the top edge is the bar. */
+.tour-progress {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  overflow: hidden;
+  border-radius: 22px 22px 0 0;
+}
+.tour-progress-fill {
+  display: block;
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--tour-accent) 55%, transparent),
+    var(--tour-accent)
+  );
+  transition: transform 520ms var(--ease-out-expo);
+}
+
+/* ------------------------------- the swap -------------------------------- */
+
+/*
+ * Both panes are absolutely positioned inside the stack, so the card's height
+ * is driven by JS (`TourTooltip` measures the incoming step) and can therefore
+ * *transition*: the card morphs from one step's length to the next instead of
+ * snapping, and the overlay's ResizeObserver glides it to its new place.
+ */
+.tour-stack {
+  position: relative;
+  overflow: hidden;
+  transition: height var(--motion-med) var(--ease-out-expo);
+}
+.tour-pane {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  padding: 18px 18px 15px;
+}
+.tour-pane[data-dir="1"] {
+  --tour-dir: 1;
+}
+.tour-pane[data-dir="-1"] {
+  --tour-dir: -1;
+}
+.tour-pane.is-live {
+  animation: tour-pane-in 420ms var(--ease-out-expo) both;
+}
+.tour-pane.is-ghost {
+  pointer-events: none;
+  animation: tour-pane-out 300ms var(--ease-out-expo) both;
+}
+
+@keyframes tour-pane-in {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--tour-dir, 1) * 18px), 0, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes tour-pane-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(calc(var(--tour-dir, 1) * -14px), 0, 0) scale(0.99);
+  }
+}
+
+/* -------------------------------- the copy -------------------------------- */
+
+.tour-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 34px; /* the close button lives over this corner */
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.tour-eyebrow svg {
+  color: color-mix(in oklab, var(--tour-accent) 80%, transparent);
+}
+
+.tour-title {
+  margin-top: 7px;
+  font-family: var(--font-display, ui-serif);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  color: var(--foreground);
+}
+
+.tour-body {
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.tour-tip {
+  display: flex;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--amber) 20%, transparent);
+  background: color-mix(in oklab, var(--amber) 8%, transparent);
+  font-size: 12px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+}
+.tour-tip svg {
+  color: var(--amber);
+}
+.tour-tip strong,
+.tour-do strong {
+  font-weight: 600;
+  margin-right: 5px;
+  color: var(--foreground);
+}
+.tour-tip strong::after,
+.tour-do strong::after {
+  content: "·";
+  margin-left: 5px;
+  color: var(--faint);
+}
+
+.tour-dos {
+  display: grid;
+  gap: 7px;
+  margin-top: 11px;
+}
+.tour-do {
+  display: flex;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+.tour-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 19px;
+  height: 19px;
+  margin-top: 1px;
+  border-radius: 999px;
+}
+.tour-mark--good {
+  background: color-mix(in oklab, var(--sage) 18%, transparent);
+  color: var(--sage);
+}
+.tour-mark--bad {
+  background: color-mix(in oklab, var(--rose) 16%, transparent);
+  color: var(--rose);
+}
+.tour-do:has(.tour-mark--good) strong {
+  color: var(--sage);
+}
+.tour-do:has(.tour-mark--bad) strong {
+  color: var(--rose);
+}
+
+/* -------------------------------- the foot -------------------------------- */
+
+.tour-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px 11px;
+  border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 34%, transparent);
+  /* The card cannot clip (the leader line lives outside it), so the footer
+     carries the bottom corners itself — minus the card's hairline. */
+  border-radius: 0 0 21px 21px;
+}
+
+.tour-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tour-dot {
+  height: 4px;
+  border-radius: 999px;
+  transition:
+    width 420ms var(--ease-out-expo),
+    background-color 420ms var(--ease-out-expo);
+}
+.tour-dot[data-state="current"] {
+  width: 20px;
+  background: var(--foreground);
+}
+.tour-dot[data-state="done"] {
+  width: 8px;
+  background: color-mix(in oklab, var(--sage) 62%, transparent);
+}
+.tour-dot[data-state="todo"] {
+  width: 4px;
+  background: color-mix(in oklab, var(--border-strong) 90%, transparent);
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tour-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  transition:
+    transform var(--motion-fast) var(--ease-out-expo),
+    background-color var(--motion-fast) linear,
+    border-color var(--motion-fast) linear,
+    color var(--motion-fast) linear,
+    opacity var(--motion-fast) linear;
+}
+.tour-btn:active {
+  transform: scale(0.965);
+}
+.tour-btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--tour-accent) 60%, transparent);
+  outline-offset: 2px;
+}
+.tour-btn--quiet {
+  padding: 0 9px;
+  font-family: var(--font-mono, ui-monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.tour-btn--quiet:hover {
+  color: var(--foreground);
+}
+.tour-btn--ghost {
+  border-color: var(--tour-line);
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  color: var(--muted-foreground);
+}
+.tour-btn--ghost:hover {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+}
+.tour-btn--primary {
+  background: var(--foreground);
+  color: var(--background);
+}
+.tour-btn--primary:hover {
+  background: color-mix(in oklab, var(--foreground) 88%, var(--tour-accent));
+}
+.tour-btn--primary svg {
+  transition: transform var(--motion-med) var(--ease-out-expo);
+}
+.tour-btn--primary:hover svg {
+  transform: translateX(2px);
+}
+
+.tour-close {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--tour-line);
+  background: color-mix(in oklab, var(--surface-2) 80%, transparent);
+  color: var(--faint);
+  transition:
+    color var(--motion-fast) linear,
+    border-color var(--motion-fast) linear,
+    transform var(--motion-fast) var(--ease-out-expo);
+}
+.tour-close:hover {
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+.tour-close:active {
+  transform: scale(0.92);
+}
+
+/* --------------------------------- leaving --------------------------------- */
+
+/*
+ * The tour ending. Unmounting a full-screen dim in a single frame is a pop, and
+ * a pop at the end of something this smooth is the part people remember — so
+ * `TourContext` holds the overlay for LEAVE_MS (260ms) while it lifts: the dim
+ * thins out, the card settles down and away, and nothing under it is clickable
+ * in the meantime. All of it is opacity/transform, so it stays on the
+ * compositor and can't drop a frame on the way out.
+ */
+.tour-overlay.is-leaving .tour-veil {
+  opacity: 0;
+  transition-duration: 260ms;
+}
+.tour-overlay.is-leaving .tour-ring {
+  animation: none;
+}
+.tour-overlay.is-leaving .tour-slot {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: 200ms;
+}
+.tour-overlay.is-leaving .tour-card {
+  /* The entrance animation's fill would otherwise hold the card in place and
+     swallow the exit. */
+  animation: none;
+  transform: translateY(10px) scale(0.985);
+  transition: transform 240ms var(--ease-out-expo);
+}
+.tour-overlay.is-leaving .tour-catcher {
+  pointer-events: none;
+}
+
+/* -------------------------------- launcher -------------------------------- */
 
 .tour-fab {
-  animation: tour-fab-in 0.6s 1s cubic-bezier(0.16,1,0.3,1) both;
+  animation: tour-fab-in 620ms 900ms var(--ease-out-expo) both;
 }
-
 @keyframes tour-fab-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.92); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .tour-prompt {
-  animation: tour-prompt-in 0.5s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+  animation: tour-prompt-in 540ms 280ms var(--ease-out-expo) both;
 }
-
 @keyframes tour-prompt-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tour-card,
-  .tour-fab,
-  .tour-prompt {
-    animation: none;
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* spotlight focus — ensure target is above dim */
+/* Small screens: the card is a sheet above the tab bar, edge to edge-ish, and
+   the type gives up a little of its air so a step fits without scrolling. */
+@media (max-width: 480px) {
+  .tour-pane {
+    padding: 16px 15px 13px;
+  }
+  .tour-title {
+    font-size: 17px;
+  }
+  .tour-dos {
+    gap: 6px;
+  }
+}
+
+/* Anything a step can point at is a positioning context, so a highlight's
+   leader line and the target's own absolutely-positioned children agree about
+   where "here" is. (This predates the rewrite and pages lean on it.) */
 [data-tour] {
   position: relative;
 }
 
-/* when tour active, make target pop a bit */
-.tour-overlay ~ * [data-tour].tour-target-active,
-.tour-overlay [data-tour].tour-target-active {
-  z-index: 3001;
+@media (prefers-reduced-motion: reduce) {
+  .tour-veil,
+  .tour-slot,
+  .tour-stack,
+  .tour-progress-fill,
+  .tour-dot,
+  .tour-btn,
+  .tour-close {
+    transition: none;
+  }
+  .tour-ring,
+  .tour-card,
+  .tour-pane.is-live,
+  .tour-pane.is-ghost,
+  .tour-fab,
+  .tour-prompt {
+    animation: none;
+  }
+  .tour-overlay.is-leaving .tour-card {
+    transform: none;
+    transition: none;
+  }
 }

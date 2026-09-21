@@ -5,14 +5,17 @@
  * fail quietly without taking the rest of the page down.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig, supabaseConfigProblem, watchAuth } from "@/lib/supabase";
 import { moodStorage } from "@/lib/mood/storage";
 import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
+import { classifyError, type ProfileProblem } from "@/lib/profile/problems";
+import { clearSnapshot, readSnapshot, writeSnapshot } from "@/lib/profile/identityCache";
 import {
   loadMyProfile,
+  ProfileLoadError,
   ProfileSaveError,
   removeAvatar,
   removeBanner,
@@ -62,6 +65,13 @@ type Block<T> =
 
 const GENTLE = "Couldn't load that just now.";
 
+/**
+ * Quiet retries for an identity read that failed for a reason that repairs
+ * itself (no network yet, a session mid-refresh). Short enough that nobody
+ * waits on them, long enough that a real blip has cleared.
+ */
+const RETRY_DELAYS = [700, 2_400];
+
 const FALLBACK_IDENTITY_FOR_JOURNEY = {
   displayName: "Bloom User",
   username: null,
@@ -81,6 +91,25 @@ export function useProfileSpace() {
   const [moodBlock, setMoodBlock] = useState<Block<MoodEntry[]> | null>(null);
   const [rewardsBlock, setRewardsBlock] = useState<Block<RewardRecord[]> | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  /* What went wrong with the identity read, once retries are exhausted. */
+  const [profileProblem, setProfileProblem] = useState<ProfileProblem | null>(null);
+  /** True while the identity on screen is this device's copy, not a fresh read. */
+  const [identityStale, setIdentityStale] = useState(false);
+  /** True while a read is in flight — the hero's quiet "syncing" dot. */
+  const [identitySyncing, setIdentitySyncing] = useState(false);
+  /** Bumped to ask for another identity read without reloading the rest. */
+  const [identityNonce, setIdentityNonce] = useState(0);
+
+  /* Refs so the recovery listeners below never re-subscribe on a state change. */
+  const problemRef = useRef<ProfileProblem | null>(null);
+  const syncingRef = useRef(false);
+  useEffect(() => {
+    problemRef.current = profileProblem;
+    syncingRef.current = identitySyncing;
+  }, [profileProblem, identitySyncing]);
+
+  const retryIdentity = useCallback(() => setIdentityNonce((n) => n + 1), []);
 
   /* ------------------------------- session ------------------------------- */
   useEffect(() => {
@@ -104,7 +133,27 @@ export function useProfileSpace() {
     };
   }, []);
 
-  /* ----------------------------- parallel load ---------------------------- */
+  /* --------------------------- the identity read --------------------------- */
+  /*
+   * Stale-while-revalidate, with a floor under it.
+   *
+   * This used to be: set `loading`, await the network, and on any failure set
+   * `error` — so a tracker with a perfectly good profile saw an empty room
+   * whenever the read hiccuped. A laptop waking from sleep, an access token
+   * that expired overnight, a project missing one identity column: all of them
+   * produced the same dead end, "Your profile couldn't be read just now", with
+   * nothing on the page and no way to tell what would fix it.
+   *
+   * Now:
+   *   1. the last good snapshot for this account paints immediately, before a
+   *      single request goes out, so the page is never an empty room;
+   *   2. the read runs behind it and replaces it when it lands;
+   *   3. failures that fix themselves (offline, a stale session) are retried
+   *      twice, quietly, before anyone is told anything;
+   *   4. if it still fails, the page keeps the real copy from this device and
+   *      says why, with a way to try again — the full-screen "couldn't load"
+   *      card only appears when there is genuinely nothing to show.
+   */
   useEffect(() => {
     if (authState === "signed-out") {
       // No account connected. With a configured project this is the preview:
@@ -131,6 +180,130 @@ export function useProfileSpace() {
           email: null,
         },
       });
+      setProfileProblem(null);
+      setIdentityStale(false);
+      setIdentitySyncing(false);
+      return undefined;
+    }
+    if (authState !== "signed-in" || !userId) return undefined;
+
+    let alive = true;
+    const timers: number[] = [];
+    const cached = readSnapshot(userId);
+
+    /* 1. Paint what this device already knows, straight away. */
+    if (cached) {
+      setIdentityBlock({ status: "ready", data: cached });
+      setIdentityStale(true);
+    } else {
+      setIdentityBlock((block) => (block?.status === "ready" ? block : { status: "loading" }));
+      setIdentityStale(false);
+    }
+    setProfileProblem(null);
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timers.push(window.setTimeout(resolve, ms));
+      });
+
+    /* Something real to show while the cloud is unreachable: the last good
+       read for this account, or an identity this device remembers. Both are
+       the person's own data — never invented defaults. */
+    const bridge = (): MyProfileSnapshot | null => {
+      const last = readSnapshot(userId);
+      if (last) return last;
+      const local = localIdentity.read();
+      if (local && (local.username || local.avatarPath || local.displayName !== "Bloom User")) {
+        return {
+          identity: {
+            displayName: local.displayName,
+            username: local.username,
+            bio: local.bio,
+            avatarPath: local.avatarPath,
+            bannerPath: null,
+            accent: local.accent,
+            featured: null,
+          },
+          privacy: { profileVisibility: "private", storyVisibility: "private" },
+          memberSince: null,
+          email: null,
+        };
+      }
+      return null;
+    };
+
+    const run = async (attempt: number): Promise<void> => {
+      if (!alive) return;
+      setIdentitySyncing(true);
+      try {
+        const snapshot = await loadMyProfile(userId);
+        if (!alive) return;
+        writeSnapshot(userId, snapshot);
+        setIdentityBlock({ status: "ready", data: snapshot });
+        setProfileProblem(null);
+        setIdentityStale(false);
+        setIdentitySyncing(false);
+        return;
+      } catch (error) {
+        if (!alive) return;
+        const problem = error instanceof ProfileLoadError ? error.problem : classifyError(error);
+        report("profile:identity", error);
+
+        /* 3. Quiet retries for the kinds that repair themselves. */
+        const delay = problem.retryable ? RETRY_DELAYS[attempt] : undefined;
+        if (delay !== undefined) {
+          await wait(delay);
+          if (!alive) return;
+          await run(attempt + 1);
+          return;
+        }
+
+        /* 4. Out of attempts: keep the page alive on the device's copy. */
+        setIdentitySyncing(false);
+        setProfileProblem(problem);
+        const fallback = bridge();
+        if (fallback) {
+          setIdentityBlock({ status: "ready", data: fallback });
+          setIdentityStale(true);
+        } else {
+          setIdentityBlock({ status: "error", message: problem.message });
+        }
+      }
+    };
+
+    void run(0);
+
+    return () => {
+      alive = false;
+      for (const timer of timers) window.clearTimeout(timer);
+    };
+  }, [authState, userId, reloadKey, identityNonce]);
+
+  /*
+   * Come back on its own. The retries above cover a momentary blip; these cover
+   * the long ones — the train entering a tunnel, a laptop closing for the
+   * night. Nothing fires unless the last read actually failed, so a healthy
+   * profile is never re-requested for switching tabs.
+   */
+  useEffect(() => {
+    if (authState !== "signed-in" || !userId) return undefined;
+    const recover = () => {
+      if (problemRef.current && !syncingRef.current) setIdentityNonce((n) => n + 1);
+    };
+    const onVisible = () => {
+      if (typeof document !== "undefined" && !document.hidden) recover();
+    };
+    window.addEventListener("online", recover);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("online", recover);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [authState, userId]);
+
+  /* -------------------- the rest of the space, in parallel ------------------ */
+  useEffect(() => {
+    if (authState === "signed-out") {
       setStoriesBlock({ status: "ready", data: [] });
       setHighlightsBlock({ status: "ready", data: [] });
       setMoodBlock({ status: "ready", data: [] });
@@ -140,18 +313,10 @@ export function useProfileSpace() {
     if (authState !== "signed-in" || !userId) return;
     let alive = true;
 
-    setIdentityBlock({ status: "loading" });
     setStoriesBlock({ status: "loading" });
     setHighlightsBlock({ status: "loading" });
     setMoodBlock({ status: "loading" });
     setRewardsBlock({ status: "loading" });
-
-    void loadMyProfile(userId)
-      .then((snapshot) => alive && setIdentityBlock({ status: "ready", data: snapshot }))
-      .catch((error) => {
-        report("profile:identity", error);
-        if (alive) setIdentityBlock({ status: "error", message: GENTLE });
-      });
 
     void listMyStories(userId)
       .then((rows) => alive && setStoriesBlock({ status: "ready", data: rows }))
@@ -524,8 +689,11 @@ export function useProfileSpace() {
   }, [userId, patchIdentity]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signOut = useCallback(async () => {
+    /* Drop this account's cached snapshot: the next person on this device
+       should never see the last person's name while a read is in flight. */
+    clearSnapshot(userId);
     await supabase.auth.signOut();
-  }, []);
+  }, [userId]);
 
   const sendMagicLink = useCallback(async (email: string) => {
     /*
@@ -585,6 +753,13 @@ export function useProfileSpace() {
     userId,
     identityBlock,
     identity,
+    /** Why the identity read failed, or null when it didn't. */
+    profileProblem,
+    /** The identity on screen is a device copy, not a fresh read. */
+    identityStale,
+    /** A read is in flight behind what's on screen. */
+    identitySyncing,
+    retryIdentity,
     storiesBlock,
     storiesByAge,
     highlightsBlock,
@@ -594,6 +769,7 @@ export function useProfileSpace() {
     refresh,
     actions: {
       refresh,
+      retryIdentity,
       saveIdentity,
       updateAccent,
       setFeatured,

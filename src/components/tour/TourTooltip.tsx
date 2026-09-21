@@ -1,243 +1,203 @@
 /**
- * TourTooltip — small popup with arrow pointing at feature.
+ * TourTooltip — the card that explains each step.
  *
- * Premium, not cartoonish: rounded 20px, soft border, accent hairline,
- * display font for title, mono eyebrow, good/bad with icons.
- * Arrow is a real CSS triangle that points at the target, with auto placement.
+ * Purely presentational: `TourOverlay` owns every bit of geometry and writes
+ * this card's position directly to the DOM, so nothing here re-renders while
+ * the highlight moves. What it does own is the *content* transition — the card
+ * morphs its height and cross-fades its copy in the direction you travelled,
+ * which is the half of "smooth" you actually look at.
+ *
+ * Shape of a step: an eyebrow (where you are), a title in the display face,
+ * one or two sentences, an efficiency tip, and a do / don't pair. Premium
+ * means restraint: hairlines, no cartoons, one accent.
  */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Check, Sparkles, X, AlertTriangle, ArrowRight, Lightbulb } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, Lightbulb, Sparkles, X } from "lucide-react";
+
 import type { TourStep } from "@/lib/tour/types";
+import type { Placement } from "@/lib/tour/placement";
 
 interface Props {
   step: TourStep;
   index: number;
   total: number;
-  targetRect: DOMRect | null;
-  placement: "top" | "bottom" | "left" | "right";
+  placement: Placement;
+  /** 1 = travelling forward, -1 = back. The copy slides in from that side. */
+  direction: 1 | -1;
   onNext: () => void;
   onPrev: () => void;
   onSkip: () => void;
   onClose: () => void;
 }
 
-export function TourTooltip({ step, index, total, targetRect, placement, onNext, onPrev, onSkip, onClose }: Props) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [style, setStyle] = useState<React.CSSProperties>({});
+/** How long the outgoing step stays on screen while it fades. */
+const GHOST_MS = 340;
 
-  useLayoutEffect(() => {
-    if (!targetRect || !cardRef.current) return;
-    const card = cardRef.current;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const margin = 12;
-    const gap = 14; // gap between target and card (arrow space)
+function StepCopy({ step }: { step: TourStep }) {
+  return (
+    <div className="tour-copy">
+      <p className="tour-eyebrow">
+        <Sparkles className="size-3" aria-hidden="true" />
+        {step.target.replace(/-/g, " ")}
+      </p>
+      <h3 className="tour-title" id="tour-step-title">
+        {step.title}
+      </h3>
+      <p className="tour-body">{step.body}</p>
 
-    const cw = Math.min(360, vw - margin * 2);
-    const ch = card.offsetHeight || 280;
+      {step.tip ? (
+        <p className="tour-tip">
+          <Lightbulb className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <span>
+            <strong>Efficient</strong> {step.tip}
+          </span>
+        </p>
+      ) : null}
 
-    let top = 0;
-    let left = 0;
+      {step.good || step.bad ? (
+        <div className="tour-dos">
+          {step.good ? (
+            <p className="tour-do">
+              <span className="tour-mark tour-mark--good" aria-hidden="true">
+                <Check className="size-3" strokeWidth={2.75} />
+              </span>
+              <span>
+                <strong>Do</strong> {step.good}
+              </span>
+            </p>
+          ) : null}
+          {step.bad ? (
+            <p className="tour-do">
+              <span className="tour-mark tour-mark--bad" aria-hidden="true">
+                <AlertTriangle className="size-3" />
+              </span>
+              <span>
+                <strong>Don't</strong> {step.bad}
+              </span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
-    switch (placement) {
-      case "bottom":
-        top = targetRect.bottom + gap;
-        left = targetRect.left + targetRect.width / 2 - cw / 2;
-        break;
-      case "top":
-        top = targetRect.top - ch - gap;
-        left = targetRect.left + targetRect.width / 2 - cw / 2;
-        break;
-      case "right":
-        top = targetRect.top + targetRect.height / 2 - ch / 2;
-        left = targetRect.right + gap;
-        break;
-      case "left":
-        top = targetRect.top + targetRect.height / 2 - ch / 2;
-        left = targetRect.left - cw - gap;
-        break;
-    }
+export function TourTooltip({
+  step,
+  index,
+  total,
+  placement,
+  direction,
+  onNext,
+  onPrev,
+  onSkip,
+  onClose,
+}: Props) {
+  const stackRef = useRef<HTMLDivElement>(null);
+  const liveRef = useRef<HTMLDivElement>(null);
+  const previous = useRef<TourStep | null>(null);
+  const [ghost, setGhost] = useState<TourStep | null>(null);
 
-    // clamp
-    left = Math.max(margin, Math.min(left, vw - cw - margin));
-    top = Math.max(margin + 8, Math.min(top, vh - ch - margin - 20));
-
-    // if still off-screen, flip to bottom
-    if (placement === "top" && top < margin) {
-      top = targetRect.bottom + gap;
-    }
-    if (placement === "bottom" && top + ch > vh - margin) {
-      top = targetRect.top - ch - gap;
-    }
-
-    setStyle({ top, left, width: cw });
-  }, [targetRect, placement]);
-
-  // close on esc
+  /* Keep the outgoing step around for one cross-fade. */
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") onNext();
-      if (e.key === "ArrowLeft" && index > 0) onPrev();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose, onNext, onPrev, index]);
+    const prev = previous.current;
+    previous.current = step;
+    if (!prev || prev.id === step.id) return undefined;
+    setGhost(prev);
+    const timer = window.setTimeout(() => setGhost(null), GHOST_MS);
+    return () => window.clearTimeout(timer);
+  }, [step]);
 
-  const arrowStyle: React.CSSProperties = {};
-  if (targetRect) {
-    const centerX = targetRect.left + targetRect.width / 2;
-    const centerY = targetRect.top + targetRect.height / 2;
-    if (placement === "bottom") {
-      arrowStyle.left = Math.max(16, Math.min(centerX - (style.left as number || 0), 320));
-      arrowStyle.top = -6;
-    } else if (placement === "top") {
-      arrowStyle.left = Math.max(16, Math.min(centerX - (style.left as number || 0), 320));
-      arrowStyle.bottom = -6;
-    } else if (placement === "right") {
-      arrowStyle.top = Math.max(16, Math.min(centerY - (style.top as number || 0), 400));
-      arrowStyle.left = -6;
-    } else if (placement === "left") {
-      arrowStyle.top = Math.max(16, Math.min(centerY - (style.top as number || 0), 400));
-      arrowStyle.right = -6;
-    }
-  }
+  /*
+   * Drive the stack's height from the live pane. Both panes are absolutely
+   * positioned inside it, so the card's height is ours to animate: it morphs
+   * from one step's length to the next instead of jumping, and the overlay's
+   * ResizeObserver picks the change up and glides the card to its new place.
+   * (`height: auto` never transitions, which is exactly what the first paint
+   * wants.)
+   */
+  useLayoutEffect(() => {
+    const stack = stackRef.current;
+    const live = liveRef.current;
+    if (!stack || !live) return;
+    stack.style.height = `${live.offsetHeight}px`;
+  }, [step.id, ghost]);
+
+  const last = index === total - 1;
 
   return (
     <div
-      ref={cardRef}
+      className="tour-card"
+      data-tour-card=""
+      data-placement={placement}
+      tabIndex={-1}
       role="dialog"
-      aria-label={step.title}
-      className={cn(
-        "tour-card pointer-events-auto fixed z-[3002] flex flex-col overflow-hidden rounded-[20px] border bg-[color-mix(in_oklab,var(--surface)_88%,transparent)] shadow-[0_24px_64px_-24px_rgba(0,0,0,0.7),0_0_0_1px_rgba(0,0,0,0.4),inset_0_1px_0_color-mix(in_oklab,var(--foreground)_12%,transparent)] backdrop-blur-[20px]",
-      )}
-      style={style}
+      aria-modal="true"
+      aria-labelledby="tour-step-title"
     >
-      {/* arrow */}
-      <span
-        aria-hidden
-        className={cn(
-          "tour-arrow absolute size-3 rotate-45 border bg-[var(--surface)]",
-          placement === "bottom" && "border-b-0 border-r-0",
-          placement === "top" && "border-l-0 border-t-0",
-          placement === "right" && "border-b-0 border-l-0",
-          placement === "left" && "border-r-0 border-t-0",
-        )}
-        style={{
-          ...arrowStyle,
-          borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-        }}
-      />
+      <span className="tour-arrow" data-side={placement} aria-hidden="true" />
+      {/* the hairline at the top edge is the progress bar: one glance tells you
+          how much tour is left, without a number competing with the title */}
+      <span className="tour-progress" aria-hidden="true">
+        <span
+          className="tour-progress-fill"
+          style={{ transform: `scaleX(${total > 0 ? (index + 1) / total : 0})` }}
+        />
+      </span>
 
-      {/* top hairline accent */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px"
-        style={{
-          background: "linear-gradient(90deg, transparent, color-mix(in oklab, var(--violet) 32%, transparent) 50%, transparent)",
-        }}
-      />
-
-      <div className="p-[18px]">
-        {/* header */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="mono flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-faint">
-              <Sparkles className="size-3" aria-hidden />
-              Step {index + 1} of {total} · {step.target.replace(/-/g, " ")}
-            </p>
-            <h3 className="display mt-1.5 text-[17px] leading-tight tracking-tight">{step.title}</h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close tutorial"
-            className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-surface-2 text-faint transition-colors hover:text-foreground"
-          >
-            <X className="size-3.5" />
-          </button>
-        </div>
-
-        <p className="mt-2.5 text-[13px] leading-relaxed text-muted-foreground">{step.body}</p>
-
-        {step.tip ? (
-          <div className="mt-3 flex gap-2.5 rounded-xl border border-[color-mix(in_oklab,var(--amber)_22%,transparent)] bg-[color-mix(in_oklab,var(--amber)_8%,transparent)] px-3 py-2.5">
-            <Lightbulb className="mt-0.5 size-3.5 shrink-0 text-amber" aria-hidden />
-            <p className="text-[12px] leading-snug text-[color-mix(in_oklab,var(--foreground)_78%,transparent)]">
-              <span className="font-medium">Efficient:</span> {step.tip}
-            </p>
+      <div className="tour-stack" ref={stackRef}>
+        {ghost ? (
+          <div className="tour-pane is-ghost" data-dir={-direction} aria-hidden="true">
+            <StepCopy step={ghost} />
           </div>
         ) : null}
-
-        {(step.good || step.bad) && (
-          <div className="mt-3 grid gap-2">
-            {step.good ? (
-              <div className="flex gap-2">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--sage)_18%,transparent)] text-sage">
-                  <Check className="size-3" strokeWidth={2.5} />
-                </span>
-                <p className="text-[12px] leading-snug text-muted-foreground">
-                  <span className="font-medium text-sage">Do:</span> {step.good}
-                </p>
-              </div>
-            ) : null}
-            {step.bad ? (
-              <div className="flex gap-2">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--rose)_16%,transparent)] text-rose">
-                  <AlertTriangle className="size-3" />
-                </span>
-                <p className="text-[12px] leading-snug text-muted-foreground">
-                  <span className="font-medium text-rose">Don't:</span> {step.bad}
-                </p>
-              </div>
-            ) : null}
-          </div>
-        )}
+        <div key={step.id} className="tour-pane is-live" data-dir={direction} ref={liveRef}>
+          <StepCopy step={step} />
+        </div>
       </div>
 
-      {/* footer */}
-      <div className="flex items-center justify-between gap-3 border-t border-border bg-surface/50 px-3 py-2.5">
-        <div className="flex items-center gap-1.5">
-          {Array.from({ length: total }).map((_, i) => (
+      <div className="tour-foot">
+        <div className="tour-dots" aria-hidden="true">
+          {Array.from({ length: total }).map((_, dot) => (
             <span
-              key={i}
-              aria-hidden
-              className={cn(
-                "h-1 rounded-full transition-all",
-                i === index ? "w-6 bg-foreground" : i < index ? "w-3 bg-sage/60" : "w-1.5 bg-border",
-              )}
+              key={dot}
+              className="tour-dot"
+              data-state={dot === index ? "current" : dot < index ? "done" : "todo"}
             />
           ))}
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={onSkip}
-            className="mono rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.06em] text-faint transition-colors hover:text-foreground"
-          >
+
+        <div className="tour-actions">
+          <button type="button" className="tour-btn tour-btn--quiet" onClick={onSkip}>
             Skip
           </button>
           {index > 0 ? (
-            <button
-              type="button"
-              onClick={onPrev}
-              className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-surface-2 px-3 text-[12.5px] transition-colors hover:border-border-strong"
-            >
+            <button type="button" className="tour-btn tour-btn--ghost" onClick={onPrev}>
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
               Back
             </button>
           ) : null}
-          <button
-            type="button"
-            onClick={onNext}
-            className="inline-flex h-8 items-center justify-center gap-1 rounded-full bg-foreground px-4 text-[12.5px] font-medium text-background transition-transform active:scale-[0.98]"
-          >
-            {index === total - 1 ? "Done" : "Next"}
-            <ArrowRight className="size-3.5" />
+          <button type="button" className="tour-btn tour-btn--primary" onClick={onNext}>
+            {last ? "Finish" : "Next"}
+            {last ? (
+              <Check className="size-3.5" aria-hidden="true" />
+            ) : (
+              <ArrowRight className="size-3.5" aria-hidden="true" />
+            )}
           </button>
         </div>
       </div>
+
+      <button
+        type="button"
+        className="tour-close"
+        onClick={onClose}
+        aria-label="Close the tour"
+        title="Close (Esc)"
+      >
+        <X className="size-3.5" aria-hidden="true" />
+      </button>
     </div>
   );
 }

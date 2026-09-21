@@ -6,12 +6,12 @@
  * - Global prompt when new user arrives
  */
 
-import { useTour } from "./TourContext";
+import { useState } from "react";
 import { HelpCircle, Map, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TourId } from "@/lib/tour/types";
 import { TOURS } from "./tours";
-import { useState } from "react";
+import { useTour } from "./TourContext";
 
 export function TourFab() {
   const { isActive, startTour, showPrompt, close } = useTour();
@@ -29,9 +29,12 @@ export function TourFab() {
               <p className="mono flex items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] text-faint">
                 <Sparkles className="size-3" /> New to Bloom?
               </p>
-              <h4 className="display mt-1 text-[15px] leading-tight">Take a 60-second tour — only what you have.</h4>
+              <h4 className="display mt-1 text-[15px] leading-tight">
+                Take a 60-second tour — only what you have.
+              </h4>
               <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
-                Small popups, arrows pointing at real buttons, dos & don'ts, and how to be efficient.
+                Small popups, arrows pointing at real buttons, dos & don'ts, and how to be
+                efficient.
               </p>
             </div>
             <button
@@ -78,13 +81,24 @@ export function TourFab() {
   );
 }
 
-export function TourCard({ tourId, className }: { tourId: TourId; className?: string }) {
+export function TourCard({
+  tourId,
+  className,
+  containerClassName,
+}: {
+  tourId: TourId;
+  className?: string;
+  containerClassName?: string;
+}) {
   const { startTour, completed } = useTour();
   const def = TOURS[tourId];
   if (!def) return null;
   const done = Boolean(completed[tourId]);
 
-  return (
+  /* Once the tutorial is over on a section, remove it completely from the page. */
+  if (done) return null;
+
+  const card = (
     <div
       className={cn(
         "group relative overflow-hidden rounded-[18px] border bg-[color-mix(in_oklab,var(--surface)_84%,transparent)] p-4 backdrop-blur",
@@ -98,7 +112,7 @@ export function TourCard({ tourId, className }: { tourId: TourId; className?: st
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="mono flex items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] text-faint">
-            <Map className="size-3" /> {done ? "Completed" : `${def.steps.length} steps`} · {def.label}
+            <Map className="size-3" /> {def.steps.length} steps · {def.label}
           </p>
           <h4 className="display mt-1 text-[15px] leading-tight">{def.description}</h4>
           <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
@@ -112,27 +126,22 @@ export function TourCard({ tourId, className }: { tourId: TourId; className?: st
             {tourId === "global" && "Bloom in 60 seconds — only what you have."}
           </p>
         </div>
-        {done ? (
-          <span className="grid size-7 place-items-center rounded-full bg-sage/15 text-sage">
-            <Sparkles className="size-3.5" />
-          </span>
-        ) : null}
       </div>
       <button
         type="button"
         onClick={() => startTour(tourId)}
         data-tour={`tour-start-${tourId}`}
-        className={cn(
-          "mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-medium transition-colors",
-          done
-            ? "border border-border bg-surface-2 text-muted-foreground hover:text-foreground"
-            : "bg-foreground text-background",
-        )}
+        className="mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-full bg-foreground px-3.5 text-[12.5px] font-medium text-background transition-opacity hover:opacity-90"
       >
-        {done ? "Replay tour" : "Take tour"} <Map className="size-3.5" />
+        Take tour <Map className="size-3.5" />
       </button>
     </div>
   );
+
+  if (containerClassName) {
+    return <div className={containerClassName}>{card}</div>;
+  }
+  return card;
 }
 
 export function TourInlineList({ ids, className }: { ids: TourId[]; className?: string }) {

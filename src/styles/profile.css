@@ -1264,3 +1264,513 @@ button.pf-row:hover {
   background: transparent;
   border-color: transparent;
 }
+
+/* -------------------------------------------------------------------------
+   Waiting states — the profile loading screen, and what shows when the cloud
+   doesn't answer.
+
+   The rule for all of it: the wait is shaped like the page it becomes, so
+   nothing jumps when the data lands. No spinner — a spinner says "no idea how
+   long this takes"; a skeleton that breathes says "here it comes". Motion is
+   slow, staggered, and only ever on opacity/transform, so it stays on the
+   compositor while the network does its work.
+   ------------------------------------------------------------------------- */
+
+/* Skeleton and page share one grid cell: the swap has no layout shift, and the
+   page (always taller) decides the height the whole time. */
+.pf-swap {
+  display: grid;
+}
+.pf-swap > .pf-swap-pane {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.pf-load {
+  position: relative;
+  padding-top: 4px;
+}
+
+/* Staggered arrival: cover, head, numbers, record — the order the eye reads
+   the real page in. */
+.pf-load > * {
+  animation: pf-load-in 720ms var(--ease-out-expo) both;
+}
+.pf-load > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.pf-load > *:nth-child(3) {
+  animation-delay: 130ms;
+}
+.pf-load > *:nth-child(4) {
+  animation-delay: 200ms;
+}
+.pf-load > *:nth-child(5) {
+  animation-delay: 270ms;
+}
+.pf-load > *:nth-child(6) {
+  animation-delay: 340ms;
+}
+.pf-load > *:nth-child(7) {
+  animation-delay: 410ms;
+}
+
+@keyframes pf-load-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* One hairline of indeterminate progress. Nothing else on the screen claims to
+   know how far along the load is, because it doesn't. */
+.pf-load-progress {
+  position: relative;
+  display: block;
+  width: min(180px, 46%);
+  height: 2px;
+  margin: 6px auto 24px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.pf-load-progress-run {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--pf-accent), transparent);
+  animation: pf-load-run 1.7s var(--ease-out-expo) infinite;
+}
+@keyframes pf-load-run {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+
+/* The cover, with one slow specular pass instead of a hard shimmer. */
+.pf-load-cover {
+  position: relative;
+  height: var(--pf-cover-h);
+  overflow: hidden;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-line);
+  background: linear-gradient(
+    168deg,
+    color-mix(in oklab, var(--pf-accent) 13%, var(--surface)) 0%,
+    color-mix(in oklab, var(--surface-2) 78%, transparent) 58%,
+    color-mix(in oklab, var(--surface) 70%, transparent) 100%
+  );
+}
+.pf-load-sheen {
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(
+    102deg,
+    transparent 34%,
+    color-mix(in oklab, var(--foreground) 6%, transparent) 50%,
+    transparent 66%
+  );
+  animation: pf-load-sheen 3.4s ease-in-out infinite;
+}
+@keyframes pf-load-sheen {
+  0% {
+    transform: translate3d(-38%, 0, 0);
+  }
+  60%,
+  100% {
+    transform: translate3d(38%, 0, 0);
+  }
+}
+
+/* The avatar: the brand arc drawing itself inside a breathing ring — Bloom
+   saying "still me, still loading", not a grey circle. */
+.pf-load-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: radial-gradient(
+    118% 108% at 50% -8%,
+    color-mix(in oklab, var(--pf-accent) 16%, var(--surface-2)),
+    var(--surface) 64%
+  );
+}
+.pf-load-avatar-ring {
+  position: absolute;
+  inset: -7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--pf-accent) 46%, transparent);
+  animation: pf-load-breathe 3s ease-in-out infinite;
+}
+@keyframes pf-load-breathe {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.982);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+}
+.pf-load-arc {
+  stroke-dasharray: 100;
+  animation: pf-load-draw 2.9s var(--ease-out-expo) infinite;
+}
+@keyframes pf-load-draw {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0.45;
+  }
+  42% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  72% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0.45;
+  }
+}
+
+/* Text bars. Widths echo the real thing: a name, a @handle, two lines of bio. */
+.pf-load-line {
+  display: block;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface-3) 78%, transparent);
+  animation: pf-load-pulse 2.4s ease-in-out infinite;
+}
+.pf-load-line--name {
+  width: min(220px, 62%);
+  height: 30px;
+  margin-inline: auto;
+  border-radius: 12px;
+}
+.pf-load-line--handle {
+  width: min(122px, 38%);
+  height: 12px;
+  margin: 12px auto 0;
+  animation-delay: 120ms;
+}
+.pf-load-line--bio {
+  width: min(268px, 78%);
+  height: 11px;
+  margin: 16px auto 0;
+  opacity: 0.72;
+  animation-delay: 220ms;
+}
+.pf-load-line--short {
+  width: min(172px, 52%);
+  margin-top: 8px;
+  opacity: 0.5;
+  animation-delay: 320ms;
+}
+.pf-load-line--label {
+  width: 88px;
+  height: 9px;
+}
+.pf-load-line--title {
+  width: min(196px, 60%);
+  height: 18px;
+  margin-top: 9px;
+  border-radius: 8px;
+  animation-delay: 140ms;
+}
+
+@keyframes pf-load-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.pf-load-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.pf-load-pill {
+  width: 128px;
+  height: 38px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface-3) 70%, transparent);
+  animation: pf-load-pulse 2.4s ease-in-out 120ms infinite;
+}
+.pf-load-pill--narrow {
+  width: 92px;
+  animation-delay: 240ms;
+}
+
+.pf-load-tile {
+  position: relative;
+  display: block;
+  height: 84px;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--pf-line);
+  background: color-mix(in oklab, var(--surface-2) 58%, transparent);
+  animation: pf-load-pulse 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--pf-i, 0) * 110ms);
+}
+
+.pf-load-card {
+  padding: 18px;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-line);
+  background: var(--pf-card);
+}
+.pf-load-card-head {
+  display: grid;
+  justify-items: start;
+}
+
+/* The twelve weeks, filling in from the left like the record it stands for. */
+.pf-load-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 13px);
+  gap: 3px;
+  margin-top: 18px;
+}
+.pf-load-cell {
+  width: 100%;
+  height: 13px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--surface-3) 68%, transparent);
+  animation: pf-load-pulse 2.2s ease-in-out infinite;
+  animation-delay: calc(var(--pf-i, 0) * 65ms + var(--pf-j, 0) * 22ms);
+}
+
+.pf-load-caption {
+  margin-top: 30px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faint);
+  animation: pf-load-caption 3.4s ease-in-out infinite;
+}
+@keyframes pf-load-caption {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.88;
+  }
+}
+
+/* ------------------------- the cloud didn't answer ------------------------- */
+
+/* A note, not a state: the page still works on the device's own copy, so this
+   stays slim and dismissible and says exactly why. */
+.pf-note {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 720px;
+  margin: 0 auto 16px;
+  padding: 11px 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--amber) 22%, transparent);
+  background: color-mix(in oklab, var(--amber) 8%, transparent);
+}
+.pf-note-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 27px;
+  height: 27px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--amber) 14%, transparent);
+  color: var(--amber);
+}
+.pf-note-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+}
+.pf-note-copy strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.pf-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--pf-line);
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  font-size: 12px;
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-fast) linear,
+    border-color var(--motion-fast) linear,
+    opacity var(--motion-fast) linear;
+}
+.pf-note-btn:hover:not(:disabled) {
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+.pf-note-btn:disabled {
+  opacity: 0.55;
+}
+.pf-note-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  color: var(--faint);
+  transition: color var(--motion-fast) linear;
+}
+.pf-note-close:hover {
+  color: var(--foreground);
+}
+.pf-note-spin {
+  animation: pf-load-spin 1.15s linear infinite;
+}
+@keyframes pf-load-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 560px) {
+  .pf-note {
+    flex-wrap: wrap;
+    padding-right: 34px;
+  }
+  .pf-note-copy {
+    flex: 1 1 150px;
+  }
+  .pf-note-btn {
+    flex: 1 0 100%;
+    justify-content: center;
+    height: 34px;
+  }
+  .pf-note-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+}
+
+/* The rare nothing-to-show case: calm, centred, one sentence, one button. */
+.pf-out {
+  max-width: 430px;
+  margin: max(10vh, 48px) auto 0;
+  padding: 34px 28px 30px;
+  text-align: center;
+  border-radius: 26px;
+  border: 1px solid var(--pf-line);
+  background: color-mix(in oklab, var(--surface) 74%, transparent);
+  box-shadow: 0 44px 84px -54px rgba(0, 0, 0, 0.92);
+  animation: pf-load-in 720ms var(--ease-out-expo) both;
+}
+.pf-out-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--pf-accent) 34%, transparent);
+  background: radial-gradient(
+    120% 110% at 50% -10%,
+    color-mix(in oklab, var(--pf-accent) 20%, var(--surface-2)),
+    var(--surface) 66%
+  );
+  color: var(--pf-accent);
+}
+.pf-out-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--foreground);
+}
+.pf-out-copy {
+  margin-top: 9px;
+  font-size: 13px;
+  line-height: 1.62;
+  color: var(--muted-foreground);
+}
+.pf-out-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  margin-top: 22px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition:
+    transform var(--motion-fast) var(--ease-out-expo),
+    opacity var(--motion-fast) linear;
+}
+.pf-out-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.pf-out-btn:active:not(:disabled) {
+  transform: scale(0.975);
+}
+.pf-out-btn:disabled {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-load > *,
+  .pf-load-progress-run,
+  .pf-load-sheen,
+  .pf-load-avatar-ring,
+  .pf-load-arc,
+  .pf-load-line,
+  .pf-load-pill,
+  .pf-load-tile,
+  .pf-load-cell,
+  .pf-load-caption,
+  .pf-note-spin,
+  .pf-out {
+    animation: none;
+  }
+  /* With no motion the skeleton still has to read as "waiting", so it holds a
+     single quiet opacity instead of a pulse. */
+  .pf-load-line,
+  .pf-load-pill,
+  .pf-load-tile,
+  .pf-load-cell {
+    opacity: 0.62;
+  }
+  .pf-load-caption {
+    opacity: 0.7;
+  }
+}
