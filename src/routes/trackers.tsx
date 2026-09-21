@@ -37,7 +37,10 @@ function TrackersRoute() {
     <div className="app-shell min-h-screen bg-background text-foreground">
       <AppNav />
       <main className="min-w-0">
-        <div className="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8"><TourCard tourId="trackers" /></div>
+        <TourCard
+          tourId="trackers"
+          containerClassName="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8"
+        />
         <div data-tour="trackers-compass"><TrackersDesign theme={theme} /></div>
       </main>
     </div>

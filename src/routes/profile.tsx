@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Archive, FileUp, Pin, Plus, RefreshCcw, Sparkles } from "lucide-react";
+import { Archive, FileUp, Pin, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -40,6 +40,11 @@ import type { CreateStoryInput } from "@/lib/profile/storyService";
 import { buildViewModel, resolveFeatured } from "@/components/profile/ProfileView";
 import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
 import { ProfileHero } from "@/components/profile/ProfileHero";
+import {
+  ProfileProblemNotice,
+  ProfileSwap,
+  ProfileUnavailable,
+} from "@/components/profile/ProfileLoading";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
 import { RestoreSheet } from "@/components/profile/RestoreSheet";
@@ -210,6 +215,12 @@ function ProfilePage() {
     }
     return undefined;
   }, [activeStories.length]);
+  /* Nothing to show yet — no cached copy, no device copy, read still in flight. */
+  const profileLoading =
+    authState === "checking" ||
+    space.identityBlock === null ||
+    space.identityBlock.status === "loading";
+
   const avatarSrc = identity ? resolveAvatar(identity.identity.avatarPath, objectUrl) : null;
   const ambient = useAvatarAmbient(avatarSrc);
 
@@ -465,425 +476,449 @@ function ProfilePage() {
       <Atmosphere />
 
       <main className="relative mx-auto w-full max-w-[1120px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
-        {authState === "checking" ? (
-          <ProfileSkeleton />
-        ) : !identity ? (
-          <div className="panel mx-auto mt-14 max-w-[560px] p-8 text-center">
-            <p className="display text-[20px]">Your space is quiet right now.</p>
-            <p className="mt-2 text-[13.5px] text-muted-foreground">
-              {space.identityBlock?.status === "error"
-                ? space.identityBlock.message
-                : "Reading your profile…"}
-            </p>
-            <button
-              type="button"
-              onClick={space.actions.refresh}
-              className="mono mt-5 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
-            >
-              <RefreshCcw className="size-3" aria-hidden /> Try again
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col">
-            {authState === "signed-out" ? (
-              hasSupabaseConfig ? (
-                <p className="mb-2 text-center text-[12px] text-faint">
-                  preview — nothing is saved until you{" "}
-                  <button
-                    type="button"
-                    onClick={() => setSignInOpen(true)}
-                    className="text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
-                  >
-                    sign in
-                  </button>
-                </p>
-              ) : (
-                <p className="mb-2 text-center text-[12px] text-faint">
-                  no account connected — your profile is saved on this device
-                </p>
-              )
-            ) : null}
-
-            {/* cover · avatar · name · actions */}
-            <ProfileHero
-              identity={identity.identity}
-              rankPill={<RankPill points={habits.points} />}
-              ambient={ambient}
-              pulse={record.pulse}
-              tags={record.tags}
-              memberSince={identity.memberSince}
-              story={{
-                count: activeStories.length,
-                unseen: unseenCount,
-                nextExpiry,
-                animateIn: ringAnimate,
-              }}
-              onOpenStory={openStoryFromHero}
-              onCreateStory={() => setComposerOpen(true)}
-              isSignedIn={authState === "signed-in"}
-              onSignIn={() => setSignInOpen(true)}
-              completion={
-                journey.status === "ready"
-                  ? journey.completeness
-                  : { done: 0, total: 5, show: false }
-              }
-              onEdit={() => setEditorOpen(true)}
-              onShare={() => void handleShare()}
-              onPreview={() => setPreviewOpen(true)}
-              onOpenArchive={() => setArchiveOpen(true)}
-              onOpenPrivacy={() => setPrivacyOpen(true)}
-              onSignOut={() => {
-                void space.actions.signOut();
-              }}
+        {/*
+          The wait and the page share one grid cell, so the swap between them
+          has no layout shift: the skeleton blurs out while the profile blurs
+          in. `profileLoading` is only true while there is genuinely nothing to
+          show — a cached or on-device identity renders the real page at once,
+          with a note if the cloud read behind it failed.
+        */}
+        <ProfileSwap loading={profileLoading}>
+          {!identity ? (
+            <ProfileUnavailable
+              problem={space.profileProblem}
+              syncing={space.identitySyncing}
+              onRetry={space.retryIdentity}
             />
-
-            <div data-tour="tour-start-profile" className="pf-section"><TourCard tourId="profile" /></div>
-
-            {/* numbers only logging can move */}
-            <RecordNumbers
-              totals={record.hydrated ? record.totals : null}
-              stats={journey.status === "ready" ? journey.stats : null}
-              loading={!record.hydrated}
-            />
-
-            {/* the record: 12 weeks + what's being tracked */}
-            <section data-tour="profile-record" className="pf-section pf-rise pf-rise-2" aria-labelledby="pf-record-title">
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-                <div className="pf-card pf-card--pad">
-                  <div className="pf-section-head">
-                    <div>
-                      <p className="pf-eyebrow">The record</p>
-                      <h2 id="pf-record-title" className="pf-title">
-                        Last twelve weeks
-                      </h2>
-                    </div>
-                    <p className="text-[12px] text-faint">
-                      {record.totals.last30} of the last 30 days
-                    </p>
-                  </div>
-                  <RecordGrid days={record.grid} today={record.today} onSelectDay={openDay} />
-                </div>
-                <div className="pf-card pf-card--pad">
-                  <div className="pf-section-head">
-                    <div>
-                      <p className="pf-eyebrow">Tracking now</p>
-                      <h2 className="pf-title">
-                        {record.things.filter((t) => t.on).length} things
-                      </h2>
-                    </div>
-                  </div>
-                  <TrackedThings things={record.things} />
-                </div>
-              </div>
-            </section>
-
-            {/* featured — the pinned post */}
-            <section data-tour="profile-featured" className="pf-section pf-rise pf-rise-3" aria-labelledby="pf-featured-title">
-              <div className="pf-section-head">
-                <div>
-                  <p className="pf-eyebrow inline-flex items-center gap-1.5">
-                    <Pin className="size-3" aria-hidden /> Pinned
-                  </p>
-                  <h2 id="pf-featured-title" className="pf-title">
-                    Featured moment
-                  </h2>
-                </div>
-                {featuredContent ? (
-                  <FeaturePrompt
-                    hasFeatured
-                    onPick={() => setFeaturedOpen(true)}
-                    onClear={() =>
-                      void space.actions
-                        .setFeatured(null)
-                        .then(() => toast("Removed from your profile."))
-                    }
-                  />
-                ) : null}
-              </div>
-              {featuredContent ? (
-                <FeaturedCard content={featuredContent} accent={accent} />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setFeaturedOpen(true)}
-                  className="pf-card group flex w-full items-center gap-3 border-dashed px-4 py-4 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
-                >
-                  <span
-                    aria-hidden
-                    className="grid size-10 shrink-0 place-items-center rounded-full"
-                    style={{
-                      background:
-                        "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
-                      color: "var(--profile-accent,var(--violet))",
-                    }}
-                  >
-                    <Sparkles className="size-4" strokeWidth={1.8} />
-                  </span>
-                  <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
-                    <span className="font-medium text-foreground">
-                      Pin one moment that feels like you.
-                    </span>{" "}
-                    A story, a reflection, a reward, a milestone — only one.
-                  </span>
-                  <span className="mono hidden shrink-0 text-[9.5px] tracking-[0.08em] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
-                    Choose
-                  </span>
-                </button>
-              )}
-            </section>
-
-            {/* tabs — moments / highlights / journey */}
-            <div data-tour="profile-tabs" className="pf-tabs pf-rise pf-rise-4" role="tablist" aria-label="Profile sections">
-              {TABS.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  id={`pf-tab-${t.id}`}
-                  aria-selected={tab === t.id}
-                  aria-controls={`pf-panel-${t.id}`}
-                  className="pf-tab"
-                  onClick={() => setTab(t.id)}
-                  data-testid={`pf-tab-${t.id}`}
-                >
-                  {t.label}
-                  {tabCounts[t.id] > 0 ? (
-                    <span className="pf-tab-count">{tabCounts[t.id]}</span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-
-            {tab === "moments" ? (
-              <section
-                id="pf-panel-moments"
-                role="tabpanel"
-                aria-labelledby="pf-tab-moments"
-                className="pf-section"
-              >
-                <div className="pf-section-head">
-                  <div>
-                    <p className="pf-eyebrow">Stories · 24 hours, then kept</p>
-                    <h2 className="pf-title">Bloom moments</h2>
-                  </div>
-                  <div className="pf-section-right">
+          ) : (
+            <div className="flex flex-col">
+              {space.profileProblem ? (
+                <ProfileProblemNotice
+                  problem={space.profileProblem}
+                  syncing={space.identitySyncing}
+                  onRetry={space.retryIdentity}
+                />
+              ) : null}
+              {authState === "signed-out" ? (
+                hasSupabaseConfig ? (
+                  <p className="mb-2 text-center text-[12px] text-faint">
+                    preview — nothing is saved until you{" "}
                     <button
                       type="button"
-                      onClick={() => setArchiveOpen(true)}
-                      className="pf-btn pf-btn--ghost h-8 px-3 text-[12px]"
+                      onClick={() => setSignInOpen(true)}
+                      className="text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
                     >
-                      <Archive className="size-3.5" aria-hidden /> Archive
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setComposerOpen(true)}
-                      className="pf-btn h-8 px-3 text-[12px]"
-                    >
-                      <Plus className="size-3.5" aria-hidden /> New
-                    </button>
-                  </div>
-                </div>
-                {space.storiesBlock?.status === "error" ? (
-                  <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[12.5px] text-muted-foreground">
-                    {space.storiesBlock.message}{" "}
-                    <button
-                      type="button"
-                      onClick={space.actions.refresh}
-                      className="underline underline-offset-2 hover:text-foreground"
-                    >
-                      Try again
+                      sign in
                     </button>
                   </p>
                 ) : (
-                  <MomentsGrid
-                    stories={allStories}
-                    onOpenAt={(index) => setViewer({ stories: allStories, startIndex: index })}
-                    onDelete={(story) => void deleteStory(story)}
-                    onAddToHighlight={(story) =>
-                      setHighlightEditor({ id: null, preselect: story.id })
-                    }
-                    onShareAgain={(story) => void shareAgain(story)}
-                    onCreate={() => setComposerOpen(true)}
-                  />
-                )}
-              </section>
-            ) : null}
-
-            {tab === "highlights" ? (
-              <section
-                id="pf-panel-highlights"
-                role="tabpanel"
-                aria-labelledby="pf-tab-highlights"
-                className="pf-section"
-              >
-                <div className="pf-section-head">
-                  <div>
-                    <p className="pf-eyebrow">Kept circles</p>
-                    <h2 className="pf-title">Highlights</h2>
-                  </div>
-                  <div className="pf-section-right">
-                    {highlights.length > 4 ? (
-                      <button
-                        type="button"
-                        onClick={() => setHighlightsAll((v) => !v)}
-                        className="pf-link"
-                      >
-                        {highlightsAll ? "Less" : "See all"}
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => setHighlightEditor({ id: null, preselect: null })}
-                      className="pf-btn h-8 px-3 text-[12px]"
-                    >
-                      <Plus className="size-3.5" aria-hidden /> New highlight
-                    </button>
-                  </div>
-                </div>
-                {highlightsBlock?.status === "ready" ? (
-                  <HighlightRail
-                    highlights={highlights}
-                    showAll={highlightsAll}
-                    onOpen={(i) => {
-                      const h = highlights[i];
-                      if (h && h.stories.length > 0)
-                        setViewer({ stories: h.stories, startIndex: 0 });
-                    }}
-                    onCreate={() => setHighlightEditor({ id: null, preselect: null })}
-                    onEdit={(h) => setHighlightEditor({ id: h.id, preselect: null })}
-                  />
-                ) : highlightsBlock?.status === "error" ? (
-                  <p className="text-[12.5px] text-faint">
-                    {highlightsBlock.message}{" "}
-                    <button
-                      type="button"
-                      onClick={space.actions.refresh}
-                      className="underline underline-offset-2 hover:text-foreground"
-                    >
-                      Try again
-                    </button>
+                  <p className="mb-2 text-center text-[12px] text-faint">
+                    no account connected — your profile is saved on this device
                   </p>
-                ) : (
-                  <RailSkeleton />
-                )}
-              </section>
-            ) : null}
+                )
+              ) : null}
 
-            {tab === "journey" ? (
-              <section
-                id="pf-panel-journey"
-                role="tabpanel"
-                aria-labelledby="pf-tab-journey"
-                className="pf-section"
-              >
-                <div className="pf-section-head">
-                  <div>
-                    <p className="pf-eyebrow">Milestones &amp; lately</p>
-                    <h2 className="pf-title">Your Bloom journey</h2>
-                  </div>
-                </div>
-                <div className="pf-card pf-card--pad">
-                  <JourneyCard
-                    journey={journey}
-                    accent={accent}
-                    memberSince={identity.memberSince}
-                    storyCount={allStories.length}
-                    onShareMilestone={(milestoneId) => {
-                      const milestone = milestonesList.find((m) => m.id === milestoneId) ?? null;
-                      if (!milestone) return;
-                      setComposerMilestone(milestone);
-                      setComposerOpen(true);
-                    }}
-                  />
-                </div>
-              </section>
-            ) : null}
-
-            {/* account + data — settings rows */}
-            <section data-tour="profile-data" className="pf-section mt-10" aria-label="Account and data">
-              <div className="pf-section-head">
-                <div>
-                  <p className="pf-eyebrow">Settings</p>
-                  <h2 className="pf-title">Account &amp; data</h2>
-                </div>
-              </div>
-              <AccountRow
+              {/* cover · avatar · name · actions */}
+              <ProfileHero
                 identity={identity.identity}
-                account={{ email: identity.email, memberSince: identity.memberSince }}
-                privacy={identity.privacy}
-                stories={allStories}
-                highlights={highlights}
+                rankPill={<RankPill points={habits.points} />}
+                ambient={ambient}
+                pulse={record.pulse}
+                tags={record.tags}
+                memberSince={identity.memberSince}
+                story={{
+                  count: activeStories.length,
+                  unseen: unseenCount,
+                  nextExpiry,
+                  animateIn: ringAnimate,
+                }}
+                onOpenStory={openStoryFromHero}
+                onCreateStory={() => setComposerOpen(true)}
                 isSignedIn={authState === "signed-in"}
-                onOpenPrivacy={() => setPrivacyOpen(true)}
+                onSignIn={() => setSignInOpen(true)}
+                completion={
+                  journey.status === "ready"
+                    ? journey.completeness
+                    : { done: 0, total: 5, show: false }
+                }
+                onEdit={() => setEditorOpen(true)}
                 onShare={() => void handleShare()}
                 onPreview={() => setPreviewOpen(true)}
                 onOpenArchive={() => setArchiveOpen(true)}
-                onOpenStorySettings={() => setStorySettingsOpen(true)}
-                onEdit={() => setEditorOpen(true)}
+                onOpenPrivacy={() => setPrivacyOpen(true)}
                 onSignOut={() => {
                   void space.actions.signOut();
                 }}
-                onSignIn={() => setSignInOpen(true)}
-                onExportAll={() => setExportOpen(true)}
-                onOpenReminders={() => setRemindersOpen(true)}
-                onOpenErase={() => setEraseOpen(true)}
-                {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
-                {...(tour ? { onOpenTour: () => tour.startTour("global") } : {})}
-                remindersValue={remindersValue}
-                installValue={installValue}
               />
 
-              {/* The other half of "Download everything". */}
-              <section aria-label="Backup" className="pf-group mt-6">
-                <h2 className="pf-group-label">Backup</h2>
-                <div className="pf-group-rows">
-                  <button type="button" className="pf-row" onClick={() => setRestoreOpen(true)}>
-                    <span className="pf-row-icon" aria-hidden>
-                      <FileUp className="size-4" />
-                    </span>
-                    <span className="pf-row-text">
-                      <span className="pf-row-label">Restore from backup</span>
-                      <span className="pf-row-hint">
-                        Reads a “Download everything” file into this browser
-                      </span>
-                    </span>
-                    <span className="pf-row-value">json</span>
-                    <span />
-                  </button>
+              <TourCard tourId="profile" containerClassName="pf-section" />
+
+              {/* numbers only logging can move */}
+              <RecordNumbers
+                totals={record.hydrated ? record.totals : null}
+                stats={journey.status === "ready" ? journey.stats : null}
+                loading={!record.hydrated}
+              />
+
+              {/* the record: 12 weeks + what's being tracked */}
+              <section
+                data-tour="profile-record"
+                className="pf-section pf-rise pf-rise-2"
+                aria-labelledby="pf-record-title"
+              >
+                <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+                  <div className="pf-card pf-card--pad">
+                    <div className="pf-section-head">
+                      <div>
+                        <p className="pf-eyebrow">The record</p>
+                        <h2 id="pf-record-title" className="pf-title">
+                          Last twelve weeks
+                        </h2>
+                      </div>
+                      <p className="text-[12px] text-faint">
+                        {record.totals.last30} of the last 30 days
+                      </p>
+                    </div>
+                    <RecordGrid days={record.grid} today={record.today} onSelectDay={openDay} />
+                  </div>
+                  <div className="pf-card pf-card--pad">
+                    <div className="pf-section-head">
+                      <div>
+                        <p className="pf-eyebrow">Tracking now</p>
+                        <h2 className="pf-title">
+                          {record.things.filter((t) => t.on).length} things
+                        </h2>
+                      </div>
+                    </div>
+                    <TrackedThings things={record.things} />
+                  </div>
                 </div>
               </section>
-            </section>
 
-            {/* Launch compliance: where you're signed in, and how to end it. */}
-            <section className="pf-section mt-10" aria-label="Sessions and devices settings">
-              <div className="pf-section-head">
-                <div>
-                  <p className="pf-eyebrow">Control</p>
-                  <h2 className="pf-title">Sessions &amp; devices</h2>
+              {/* featured — the pinned post */}
+              <section
+                data-tour="profile-featured"
+                className="pf-section pf-rise pf-rise-3"
+                aria-labelledby="pf-featured-title"
+              >
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow inline-flex items-center gap-1.5">
+                      <Pin className="size-3" aria-hidden /> Pinned
+                    </p>
+                    <h2 id="pf-featured-title" className="pf-title">
+                      Featured moment
+                    </h2>
+                  </div>
+                  {featuredContent ? (
+                    <FeaturePrompt
+                      hasFeatured
+                      onPick={() => setFeaturedOpen(true)}
+                      onClear={() =>
+                        void space.actions
+                          .setFeatured(null)
+                          .then(() => toast("Removed from your profile."))
+                      }
+                    />
+                  ) : null}
                 </div>
-              </div>
-              <SessionsSection
-                isSignedIn={authState === "signed-in"}
-                onOpenErase={() => setEraseOpen(true)}
-              />
-            </section>
+                {featuredContent ? (
+                  <FeaturedCard content={featuredContent} accent={accent} />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setFeaturedOpen(true)}
+                    className="pf-card group flex w-full items-center gap-3 border-dashed px-4 py-4 text-left transition-colors hover:border-[color:var(--profile-accent-border)]"
+                  >
+                    <span
+                      aria-hidden
+                      className="grid size-10 shrink-0 place-items-center rounded-full"
+                      style={{
+                        background:
+                          "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
+                        color: "var(--profile-accent,var(--violet))",
+                      }}
+                    >
+                      <Sparkles className="size-4" strokeWidth={1.8} />
+                    </span>
+                    <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        Pin one moment that feels like you.
+                      </span>{" "}
+                      A story, a reflection, a reward, a milestone — only one.
+                    </span>
+                    <span className="mono hidden shrink-0 text-[9.5px] tracking-[0.08em] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
+                      Choose
+                    </span>
+                  </button>
+                )}
+              </section>
 
-            <footer className="pf-footer">
-              <p className="display text-[15px] text-muted-foreground">Bloom</p>
-              <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
-                Your record. Your story. Your Bloom.
-              </p>
-              <p className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
-                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
-                  Privacy
-                </Link>
-                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
-                  Terms
-                </Link>
-              </p>
-            </footer>
-          </div>
-        )}
+              {/* tabs — moments / highlights / journey */}
+              <div
+                data-tour="profile-tabs"
+                className="pf-tabs pf-rise pf-rise-4"
+                role="tablist"
+                aria-label="Profile sections"
+              >
+                {TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    role="tab"
+                    id={`pf-tab-${t.id}`}
+                    aria-selected={tab === t.id}
+                    aria-controls={`pf-panel-${t.id}`}
+                    className="pf-tab"
+                    onClick={() => setTab(t.id)}
+                    data-testid={`pf-tab-${t.id}`}
+                  >
+                    {t.label}
+                    {tabCounts[t.id] > 0 ? (
+                      <span className="pf-tab-count">{tabCounts[t.id]}</span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+
+              {tab === "moments" ? (
+                <section
+                  id="pf-panel-moments"
+                  role="tabpanel"
+                  aria-labelledby="pf-tab-moments"
+                  className="pf-section"
+                >
+                  <div className="pf-section-head">
+                    <div>
+                      <p className="pf-eyebrow">Stories · 24 hours, then kept</p>
+                      <h2 className="pf-title">Bloom moments</h2>
+                    </div>
+                    <div className="pf-section-right">
+                      <button
+                        type="button"
+                        onClick={() => setArchiveOpen(true)}
+                        className="pf-btn pf-btn--ghost h-8 px-3 text-[12px]"
+                      >
+                        <Archive className="size-3.5" aria-hidden /> Archive
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setComposerOpen(true)}
+                        className="pf-btn h-8 px-3 text-[12px]"
+                      >
+                        <Plus className="size-3.5" aria-hidden /> New
+                      </button>
+                    </div>
+                  </div>
+                  {space.storiesBlock?.status === "error" ? (
+                    <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[12.5px] text-muted-foreground">
+                      {space.storiesBlock.message}{" "}
+                      <button
+                        type="button"
+                        onClick={space.actions.refresh}
+                        className="underline underline-offset-2 hover:text-foreground"
+                      >
+                        Try again
+                      </button>
+                    </p>
+                  ) : (
+                    <MomentsGrid
+                      stories={allStories}
+                      onOpenAt={(index) => setViewer({ stories: allStories, startIndex: index })}
+                      onDelete={(story) => void deleteStory(story)}
+                      onAddToHighlight={(story) =>
+                        setHighlightEditor({ id: null, preselect: story.id })
+                      }
+                      onShareAgain={(story) => void shareAgain(story)}
+                      onCreate={() => setComposerOpen(true)}
+                    />
+                  )}
+                </section>
+              ) : null}
+
+              {tab === "highlights" ? (
+                <section
+                  id="pf-panel-highlights"
+                  role="tabpanel"
+                  aria-labelledby="pf-tab-highlights"
+                  className="pf-section"
+                >
+                  <div className="pf-section-head">
+                    <div>
+                      <p className="pf-eyebrow">Kept circles</p>
+                      <h2 className="pf-title">Highlights</h2>
+                    </div>
+                    <div className="pf-section-right">
+                      {highlights.length > 4 ? (
+                        <button
+                          type="button"
+                          onClick={() => setHighlightsAll((v) => !v)}
+                          className="pf-link"
+                        >
+                          {highlightsAll ? "Less" : "See all"}
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => setHighlightEditor({ id: null, preselect: null })}
+                        className="pf-btn h-8 px-3 text-[12px]"
+                      >
+                        <Plus className="size-3.5" aria-hidden /> New highlight
+                      </button>
+                    </div>
+                  </div>
+                  {highlightsBlock?.status === "ready" ? (
+                    <HighlightRail
+                      highlights={highlights}
+                      showAll={highlightsAll}
+                      onOpen={(i) => {
+                        const h = highlights[i];
+                        if (h && h.stories.length > 0)
+                          setViewer({ stories: h.stories, startIndex: 0 });
+                      }}
+                      onCreate={() => setHighlightEditor({ id: null, preselect: null })}
+                      onEdit={(h) => setHighlightEditor({ id: h.id, preselect: null })}
+                    />
+                  ) : highlightsBlock?.status === "error" ? (
+                    <p className="text-[12.5px] text-faint">
+                      {highlightsBlock.message}{" "}
+                      <button
+                        type="button"
+                        onClick={space.actions.refresh}
+                        className="underline underline-offset-2 hover:text-foreground"
+                      >
+                        Try again
+                      </button>
+                    </p>
+                  ) : (
+                    <RailSkeleton />
+                  )}
+                </section>
+              ) : null}
+
+              {tab === "journey" ? (
+                <section
+                  id="pf-panel-journey"
+                  role="tabpanel"
+                  aria-labelledby="pf-tab-journey"
+                  className="pf-section"
+                >
+                  <div className="pf-section-head">
+                    <div>
+                      <p className="pf-eyebrow">Milestones &amp; lately</p>
+                      <h2 className="pf-title">Your Bloom journey</h2>
+                    </div>
+                  </div>
+                  <div className="pf-card pf-card--pad">
+                    <JourneyCard
+                      journey={journey}
+                      accent={accent}
+                      memberSince={identity.memberSince}
+                      storyCount={allStories.length}
+                      onShareMilestone={(milestoneId) => {
+                        const milestone = milestonesList.find((m) => m.id === milestoneId) ?? null;
+                        if (!milestone) return;
+                        setComposerMilestone(milestone);
+                        setComposerOpen(true);
+                      }}
+                    />
+                  </div>
+                </section>
+              ) : null}
+
+              {/* account + data — settings rows */}
+              <section
+                data-tour="profile-data"
+                className="pf-section mt-10"
+                aria-label="Account and data"
+              >
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Settings</p>
+                    <h2 className="pf-title">Account &amp; data</h2>
+                  </div>
+                </div>
+                <AccountRow
+                  identity={identity.identity}
+                  account={{ email: identity.email, memberSince: identity.memberSince }}
+                  privacy={identity.privacy}
+                  stories={allStories}
+                  highlights={highlights}
+                  isSignedIn={authState === "signed-in"}
+                  onOpenPrivacy={() => setPrivacyOpen(true)}
+                  onShare={() => void handleShare()}
+                  onPreview={() => setPreviewOpen(true)}
+                  onOpenArchive={() => setArchiveOpen(true)}
+                  onOpenStorySettings={() => setStorySettingsOpen(true)}
+                  onEdit={() => setEditorOpen(true)}
+                  onSignOut={() => {
+                    void space.actions.signOut();
+                  }}
+                  onSignIn={() => setSignInOpen(true)}
+                  onExportAll={() => setExportOpen(true)}
+                  onOpenReminders={() => setRemindersOpen(true)}
+                  onOpenErase={() => setEraseOpen(true)}
+                  {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
+                  {...(tour ? { onOpenTour: () => tour.startTour("global") } : {})}
+                  remindersValue={remindersValue}
+                  installValue={installValue}
+                />
+
+                {/* The other half of "Download everything". */}
+                <section aria-label="Backup" className="pf-group mt-6">
+                  <h2 className="pf-group-label">Backup</h2>
+                  <div className="pf-group-rows">
+                    <button type="button" className="pf-row" onClick={() => setRestoreOpen(true)}>
+                      <span className="pf-row-icon" aria-hidden>
+                        <FileUp className="size-4" />
+                      </span>
+                      <span className="pf-row-text">
+                        <span className="pf-row-label">Restore from backup</span>
+                        <span className="pf-row-hint">
+                          Reads a “Download everything” file into this browser
+                        </span>
+                      </span>
+                      <span className="pf-row-value">json</span>
+                      <span />
+                    </button>
+                  </div>
+                </section>
+              </section>
+
+              {/* Launch compliance: where you're signed in, and how to end it. */}
+              <section className="pf-section mt-10" aria-label="Sessions and devices settings">
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Control</p>
+                    <h2 className="pf-title">Sessions &amp; devices</h2>
+                  </div>
+                </div>
+                <SessionsSection
+                  isSignedIn={authState === "signed-in"}
+                  onOpenErase={() => setEraseOpen(true)}
+                />
+              </section>
+
+              <footer className="pf-footer">
+                <p className="display text-[15px] text-muted-foreground">Bloom</p>
+                <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
+                  Your record. Your story. Your Bloom.
+                </p>
+                <p className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
+                  <Link
+                    to="/privacy"
+                    className="underline underline-offset-2 hover:text-foreground"
+                  >
+                    Privacy
+                  </Link>
+                  <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
+                    Terms
+                  </Link>
+                </p>
+              </footer>
+            </div>
+          )}
+        </ProfileSwap>
       </main>
 
       {/* overlays */}
@@ -1083,36 +1118,6 @@ function useOnlineStatus(): boolean {
     };
   }, []);
   return status;
-}
-
-function ProfileSkeleton() {
-  return (
-    <div className="pt-1" aria-label="Loading your profile" role="status">
-      <div className="pf-skel" style={{ height: "var(--pf-cover-h)", borderRadius: 22 }} />
-      <div className="pf-head">
-        <div className="pf-avatar-wrap">
-          <div className="pf-skel size-full rounded-full" />
-        </div>
-        <div className="pf-head-main">
-          <div>
-            <div className="pf-skel h-8 w-52" />
-            <div className="pf-skel mt-2 h-3.5 w-28" />
-            <div className="pf-skel mt-3 h-3.5 w-64" />
-          </div>
-          <div className="flex gap-2">
-            <div className="pf-skel h-[38px] w-32 rounded-full" />
-            <div className="pf-skel h-[38px] w-24 rounded-full" />
-          </div>
-        </div>
-      </div>
-      <div className="pf-numbers">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="pf-skel h-[82px] rounded-2xl" />
-        ))}
-      </div>
-      <p className="sr-only">Loading your profile…</p>
-    </div>
-  );
 }
 
 function RailSkeleton() {

@@ -876,7 +876,7 @@ export function CoachPage() {
             </div>
           ) : null}
 
-          <div className="px-4 py-2"><TourCard tourId="coach" /></div>
+          <TourCard tourId="coach" containerClassName="px-4 py-2" />
           <CoachThread {...thread} />
 
           <div className="coach-dock">

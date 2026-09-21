@@ -52,7 +52,10 @@ function MoodRoute() {
       <AppNav />
 
       <main className="min-w-0 pb-28 lg:pb-16">
-        <div className="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8 lg:px-10"><TourCard tourId="mood" /></div>
+        <TourCard
+          tourId="mood"
+          containerClassName="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8 lg:px-10"
+        />
         <MoodPage
           system={system}
           identity={{

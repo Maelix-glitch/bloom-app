@@ -617,7 +617,7 @@ function TodayPage() {
             </div>
           </div>
 
-          <div data-tour="tour-start-home" className="home-band"><TourCard tourId="home" /></div>
+          <TourCard tourId="home" containerClassName="home-band" />
 
           <footer className="hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
             <span className="font-display text-base tracking-[0.5em]">BLOOM</span>

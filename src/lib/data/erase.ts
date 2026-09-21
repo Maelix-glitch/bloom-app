@@ -16,6 +16,7 @@
  */
 
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
+import { clearSnapshot } from "@/lib/profile/identityCache";
 
 export const ERASE_RPC = "erase_my_data";
 
@@ -46,6 +47,10 @@ export function bloomKeys(storage: Storage): string[] {
 /** Wipes this device's copy. Returns how many keys were removed. */
 export function eraseDevice(storage?: Storage): number {
   const store = storage ?? (typeof window === "undefined" ? null : window.localStorage);
+  /* The profile snapshot keeps an in-memory copy so a route change doesn't
+     re-read storage — that copy has to go too, or "erase everything" leaves the
+     name and avatar on screen until a reload. */
+  clearSnapshot();
   if (!store) return 0;
   const keys = bloomKeys(store);
   for (const key of keys) {
