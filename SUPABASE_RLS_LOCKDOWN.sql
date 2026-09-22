@@ -184,20 +184,10 @@ create policy "cycle state owner update" on public.cycle_state for update using 
 drop policy if exists "cycle state owner delete" on public.cycle_state;
 create policy "cycle state owner delete" on public.cycle_state for delete using (profile_id = auth.uid());
 
--- stories + story_settings / views / reactions / highlights
-drop policy if exists "stories owner select" on public.stories;
-create policy "stories owner select" on public.stories for select using (profile_id = auth.uid());
-drop policy if exists "stories owner insert" on public.stories;
-create policy "stories owner insert" on public.stories for insert with check (profile_id = auth.uid());
-drop policy if exists "stories owner delete" on public.stories;
-create policy "stories owner delete" on public.stories for delete using (profile_id = auth.uid());
-
-drop policy if exists "story_settings owner select" on public.story_settings;
-create policy "story_settings owner select" on public.story_settings for select using (profile_id = auth.uid());
-drop policy if exists "story_settings owner insert" on public.story_settings;
-create policy "story_settings owner insert" on public.story_settings for insert with check (profile_id = auth.uid());
-drop policy if exists "story_settings owner update" on public.story_settings;
-create policy "story_settings owner update" on public.story_settings for update using (profile_id = auth.uid()) with check (profile_id = auth.uid());
+-- stories + story_settings (correct owner columns: stories.author_id, story_settings.user_id)
+-- Skipped here — already correctly locked by migrations 20260828 + 20260915.
+-- They use author_id / user_id / owner_id, not profile_id, so we leave them as-is.
+-- Enabling RLS above is enough; do NOT overwrite their policies or you'll get column errors.
 
 -- allow public read for stories that are marked public (if your stories table has is_public)
 -- This is safe: private stories stay owner-only. If you don't have is_public, the owner-only above is enough.
@@ -205,13 +195,7 @@ create policy "story_settings owner update" on public.story_settings for update 
 -- drop policy if exists "stories public read" on public.stories;
 -- create policy "stories public read" on public.stories for select using (is_public = true);
 
--- push_subscriptions, profile_privacy, close_friends
-drop policy if exists "push_subscriptions owner select" on public.push_subscriptions;
-create policy "push_subscriptions owner select" on public.push_subscriptions for select using (profile_id = auth.uid());
-drop policy if exists "push_subscriptions owner insert" on public.push_subscriptions;
-create policy "push_subscriptions owner insert" on public.push_subscriptions for insert with check (profile_id = auth.uid());
-drop policy if exists "push_subscriptions owner delete" on public.push_subscriptions;
-create policy "push_subscriptions owner delete" on public.push_subscriptions for delete using (profile_id = auth.uid());
+-- push_subscriptions (user_id, not profile_id) — already correctly locked by its own migration, skip here
 
 -- ============================================================
 -- 4) VERIFY — run this after and screenshot the result
