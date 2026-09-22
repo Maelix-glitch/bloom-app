@@ -13,7 +13,7 @@
 -- ============================================================
 -- 1) ENABLE RLS ON EVERY BLOOM TABLE (idempotent)
 -- ============================================================
-do $$ begin
+do $$ declare r record; begin
   -- core
   execute 'alter table if exists public.profiles enable row level security';
   execute 'alter table if exists public.mood_entries enable row level security';
@@ -54,8 +54,8 @@ do $$ begin
   execute 'alter table if exists public.reward_items enable row level security';
   execute 'alter table if exists public.reward_assignments enable row level security';
   -- future-proof: enable on ANY public table that is missing it
-  for t in select tablename from pg_tables where schemaname='public' and not rowsecurity loop
-    execute format('alter table public.%I enable row level security', t.tablename);
+  for r in select tablename from pg_tables where schemaname='public' and not rowsecurity loop
+    execute format('alter table public.%I enable row level security', r.tablename);
   end loop;
 end $$;
 
@@ -63,13 +63,13 @@ end $$;
 -- 2) BLOCK anon (public key) FROM EVERY USER TABLE
 --    The anon key is public by design — this is the fix.
 -- ============================================================
-do $$ declare t text; begin
-  for t in select tablename from pg_tables where schemaname='public' loop
+do $$ declare r record; begin
+  for r in select tablename from pg_tables where schemaname='public' loop
     -- keep storage, realtime, etc. untouched — only Bloom data tables
-    if t not in ('spatial_ref_sys','geography_columns','geometry_columns') then
-      execute format('revoke all on public.%I from anon', t);
+    if r.tablename not in ('spatial_ref_sys','geography_columns','geometry_columns') then
+      execute format('revoke all on public.%I from anon', r.tablename);
       -- keep authenticated able to use policies
-      execute format('grant all on public.%I to authenticated', t);
+      execute format('grant all on public.%I to authenticated', r.tablename);
     end if;
   end loop;
 end $$;
