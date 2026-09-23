@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   Settings,
   UserRound,
+  Ghost,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ export const HOME_NAV: {
   { label: "Trackers", to: "/trackers", icon: GitBranch, match: (p) => p.startsWith("/trackers") },
   { label: "Cycle", to: "/cycle", icon: Droplet, match: (p) => p.startsWith("/cycle") },
   { label: "Mood", to: "/mood", icon: Smile, match: (p) => p.startsWith("/mood") },
+  { label: "Ghosts", to: "/ghosts", icon: Ghost, match: (p) => p.startsWith("/ghosts") || p.startsWith("/duel") },
   { label: "Rewards", to: "/rewards", icon: Gift, match: (p) => p.startsWith("/rewards") },
   { label: "Coach", to: "/coach", icon: LifeBuoy, match: (p) => p.startsWith("/coach") },
 ];
