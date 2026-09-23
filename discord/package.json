@@ -1,0 +1,26 @@
+{
+  "name": "bloom-discord",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "The Bloom Discord companion — provisions the Bloom world and runs its bot.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "setup": "node --env-file-if-exists=.env src/setup.ts",
+    "setup:dry": "node --env-file-if-exists=.env src/setup.ts --dry-run",
+    "commands": "node --env-file-if-exists=.env src/register-commands.ts",
+    "start": "node --env-file-if-exists=.env src/bot.ts",
+    "preview": "node src/preview.ts",
+    "typecheck": "tsc -p .",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "5.8"
+  }
+}
