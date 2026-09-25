@@ -1,0 +1,48 @@
+import type { Database } from '../client.js';
+import { PostgresAuditEventRepository, type AuditEventRepository } from './audit.js';
+import { PostgresCooldownRepository, type CooldownRepository } from './cooldowns.js';
+import { PostgresIdentityRepository, type IdentityRepository } from './identity.js';
+import {
+  PostgresIdempotencyRepository,
+  type IdempotencyRepository,
+} from './idempotency.js';
+import { PostgresJobRunRepository, type JobRunRepository } from './jobs.js';
+import { PostgresSettingsRepository, type SettingsRepository } from './settings.js';
+import { PostgresTelemetryRepository, type TelemetryRepository } from './telemetry.js';
+
+export * from './audit.js';
+export * from './cooldowns.js';
+export * from './identity.js';
+export * from './idempotency.js';
+export * from './jobs.js';
+export * from './settings.js';
+export * from './telemetry.js';
+
+/**
+ * The repository set handed to services via dependency injection.
+ *
+ * Services depend on this interface, never on `Database`. That is what allows a
+ * service test to pass fakes and run in milliseconds with no Postgres — and it
+ * keeps every SQL statement in one layer that can be reviewed as a unit.
+ */
+export interface Repositories {
+  readonly audit: AuditEventRepository;
+  readonly cooldowns: CooldownRepository;
+  readonly identity: IdentityRepository;
+  readonly idempotency: IdempotencyRepository;
+  readonly jobs: JobRunRepository;
+  readonly settings: SettingsRepository;
+  readonly telemetry: TelemetryRepository;
+}
+
+export function createRepositories(database: Database): Repositories {
+  return {
+    audit: new PostgresAuditEventRepository(database),
+    cooldowns: new PostgresCooldownRepository(database),
+    identity: new PostgresIdentityRepository(database),
+    idempotency: new PostgresIdempotencyRepository(database),
+    jobs: new PostgresJobRunRepository(database),
+    settings: new PostgresSettingsRepository(database),
+    telemetry: new PostgresTelemetryRepository(database),
+  };
+}

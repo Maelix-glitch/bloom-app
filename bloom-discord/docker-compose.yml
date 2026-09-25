@@ -1,0 +1,117 @@
+# Local development stack.
+#
+#   docker compose up postgres        # just the database
+#   docker compose run --rm migrate   # apply migrations
+#   docker compose up                 # everything
+#
+# Production note: the three bots are deliberately separate services rather than
+# one process running three clients. A crash in Guardian must not take the
+# community bot offline with it, and they scale and deploy independently.
+
+name: bloom-discord
+
+x-bot-common: &bot-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  env_file: .env
+  depends_on:
+    postgres:
+      condition: service_healthy
+    migrate:
+      condition: service_completed_successfully
+  environment:
+    DATABASE_URL: postgresql://bloom:bloom@postgres:5432/bloom_discord
+    BLOOM_ENVIRONMENT: development
+    NODE_ENV: production
+    LOG_LEVEL: debug
+  # Bots hold tokens and talk to one database. Nothing here needs to write to
+  # its own filesystem, so it does not get to.
+  read_only: true
+  tmpfs:
+    - /tmp
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options: { max-size: '10m', max-file: '3' }
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bloom
+      POSTGRES_PASSWORD: bloom
+      POSTGRES_DB: bloom_discord
+    ports:
+      # Bound to loopback: a database on 0.0.0.0 with a development password is
+      # a database someone else can reach.
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready, not a sleep. The bots refuse to start without a database, so
+      # "probably up by now" turns into a restart loop.
+      test: ['CMD-SHELL', 'pg_isready -U bloom -d bloom_discord']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Runs once per `up`, before the bots. Migrations are idempotent and take an
+  # advisory lock, so a repeat run is a no-op rather than a conflict.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://bloom:bloom@postgres:5432/bloom_discord
+      BLOOM_ENVIRONMENT: development
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ['/usr/bin/tini', '--']
+    command: ['npx', 'tsx', 'packages/database/src/cli/migrate.ts']
+    restart: 'no'
+
+  guardian:
+    <<: *bot-common
+    environment:
+      BOT: guardian
+      HEALTH_PORT: '8080'
+      DATABASE_URL: postgresql://bloom:bloom@postgres:5432/bloom_discord
+      BLOOM_ENVIRONMENT: development
+      NODE_ENV: production
+      LOG_LEVEL: debug
+    ports:
+      - '127.0.0.1:8080:8080'
+
+  companion:
+    <<: *bot-common
+    environment:
+      BOT: companion
+      HEALTH_PORT: '8081'
+      DATABASE_URL: postgresql://bloom:bloom@postgres:5432/bloom_discord
+      BLOOM_ENVIRONMENT: development
+      NODE_ENV: production
+      LOG_LEVEL: debug
+    ports:
+      - '127.0.0.1:8081:8081'
+
+  labs:
+    <<: *bot-common
+    environment:
+      BOT: labs
+      HEALTH_PORT: '8082'
+      DATABASE_URL: postgresql://bloom:bloom@postgres:5432/bloom_discord
+      BLOOM_ENVIRONMENT: development
+      NODE_ENV: production
+      LOG_LEVEL: debug
+    ports:
+      - '127.0.0.1:8082:8082'
+
+volumes:
+  postgres-data:

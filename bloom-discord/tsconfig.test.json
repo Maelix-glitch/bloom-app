@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    /* Tests are typechecked but never emitted, so they stay out of dist/ while
+       still being held to exactly the same strictness as production code. */
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": false,
+    "types": ["node"],
+
+    /* Resolve @bloom/* to source here too, matching the Vitest aliases. Without
+       this, typechecking a test would use each package's .d.ts and disagree
+       with what actually runs. */
+    "paths": {
+      "@bloom/shared-types": ["./packages/shared-types/src/index.ts"],
+      "@bloom/utils": ["./packages/utils/src/index.ts"],
+      "@bloom/validation": ["./packages/validation/src/index.ts"],
+      "@bloom/logging": ["./packages/logging/src/index.ts"],
+      "@bloom/config": ["./packages/config/src/index.ts"],
+      "@bloom/database": ["./packages/database/src/index.ts"],
+      "@bloom/security": ["./packages/security/src/index.ts"],
+      "@bloom/permissions": ["./packages/permissions/src/index.ts"],
+      "@bloom/embeds": ["./packages/embeds/src/index.ts"],
+      "@bloom/commands": ["./packages/commands/src/index.ts"],
+      "@bloom/events": ["./packages/events/src/index.ts"],
+      "@bloom/discord": ["./packages/discord/src/index.ts"],
+      "@bloom/testing": ["./packages/testing/src/index.ts"]
+    }
+  },
+  "include": [
+    "vitest.config.ts",
+    "eslint.config.js",
+    "packages/**/*.test.ts",
+    "apps/**/*.test.ts",
+    "scripts/**/*.ts"
+  ]
+}
