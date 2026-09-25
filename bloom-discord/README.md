@@ -4,13 +4,15 @@ Three Discord applications — **Guardian**, **Companion** and **Labs** — shar
 one Supabase PostgreSQL database and a common set of packages, in a pnpm
 workspace of strict TypeScript ESM targeting Node 24.
 
-> **Status: Phase 6.** Bloom Guardian is functionally complete for verification,
+> **Status: Phase 7.** Bloom Guardian is functionally complete for verification,
 > the role lifecycle, moderation, reports and cases. Bloom Companion runs the
 > community loop: the daily prompt, `/checkin`, `/win`, the Bloom Rewards ledger
 > with its nine-rank ladder, and milestones and achievements that recognise
-> participation without paying for it. Bloom Labs still has no commands and
-> **refuses to start rather than appear online doing nothing** — a deliberate
-> choice, explained in [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md).
+> participation without paying for it. Bloom Labs is now online with its intake
+> spine — `/feedback`, `/labs bug report`, `/labs bug show`, `/labs bug queue`
+> and `/labs admin triage`. Cohorts, voting, feature status and release notes
+> are **not built**; see [`docs/PHASE-7-REPORT.md`](docs/PHASE-7-REPORT.md) for
+> what that leaves undone.
 >
 > The platform has never connected to Discord from this environment
 > (`discord.com` is unreachable here), so the discord.js adapters are compiled
@@ -169,6 +171,7 @@ pnpm dev:guardian | dev:companion | dev:labs
 | [Phase 4 report](docs/PHASE-4-REPORT.md)                                    | Companion online: check-in prompt, job switches     |
 | [Phase 5 report](docs/PHASE-5-REPORT.md)                                    | The rewards ledger, `/checkin` and `/win`           |
 | [Phase 6 report](docs/PHASE-6-REPORT.md)                                    | Milestones, achievements and manual awards          |
+| [Phase 7 report](docs/PHASE-7-REPORT.md)                                    | Bloom Labs: feedback and bug intake                 |
 
 ---
 

@@ -331,6 +331,100 @@ check-in dates: `point_events` stores an instant and `check_ins` stores a
 calendar date, and comparing them raw would file an evening win under the
 following day for half the world.
 
+### `feedback` — Phase 7
+
+`id`, `guild_id`, `user_id`, `category`, `summary`, `detail`, `message_id`,
+`correlation_id`, `created_at`.
+
+**There is no status column, on purpose.** A status implies somebody is obliged
+to move it, and an inbox where every row reads `NEW` for a year is a promise the
+team never made. Feedback is recorded, posted to `#feedback`, and dealt with by
+humans the way humans deal with things.
+
+`category` is CHECKed to `('feature','improvement','content','other')` rather
+than left free text, so the channel can be filtered and two people describing
+the same kind of thing use the same word for it.
+
+`summary` is CHECKed `char_length(btrim(summary)) BETWEEN 8 AND 200`. The
+`btrim` is load-bearing: without it a summary of twelve spaces passes a length
+floor. The bounds equal the modal's own `minLength`/`maxLength`, so anything the
+form accepts the table accepts — a mismatch turns a member's paragraph into a
+database error _after_ they press submit, with the text gone.
+
+`message_id` is nullable because "no feedback channel configured" is a real
+state, not an error.
+
+### `bug_counters` — Phase 7
+
+`guild_id` PK, `next_number`, `updated_at`. The allocator from `case_counters`,
+reused: `INSERT … ON CONFLICT (guild_id) DO UPDATE SET next_number = next_number
+
+- 1 RETURNING next_number - 1`. One statement, so the row lock is held by
+Postgres for its duration and ten concurrent filings get ten distinct numbers.
+An integration test files ten at once and asserts exactly `[1..10]`; replacing
+the counter with `max(bug_number) + 1` makes it fail.
+
+Separate from `case_counters` deliberately. Bug 12 and case 12 are different
+things people quote at each other, and a shared allocator would make bug numbers
+jump every time a moderation case was opened.
+
+### `bug_reports` — Phase 7
+
+`bug_status` is an enum: `NEW`, `TRIAGED`, `FIXED`, `WONT_FIX`, `DUPLICATE`. The
+three terminal states are kept distinct because they mean different things to
+the person who reported it — "you were right and it is gone", "you were right
+and we are choosing to live with it", "you were right and someone said it
+first". Collapsing them into `CLOSED` makes all three read as a shrug.
+
+Four CHECK constraints carry rules the application must not be the only place to
+know:
+
+| Constraint                   | Rule                                                      |
+| ---------------------------- | --------------------------------------------------------- |
+| `terminal_needs_resolution`  | Anything past `TRIAGED` must say why, non-blank           |
+| `triaged_needs_actor`        | Anything not `NEW` records who moved it and when          |
+| `duplicate_points_somewhere` | `status = 'DUPLICATE'` **iff** `duplicate_of IS NOT NULL` |
+| `duplicate_is_another_bug`   | A bug cannot duplicate itself                             |
+
+`duplicate_points_somewhere` is written as an equality of two booleans so it
+catches both halves: a `DUPLICATE` with no target, and a target hung off a
+`FIXED` row where nothing would ever read it.
+
+`UNIQUE (guild_id, bug_number)` scopes numbering per guild. A partial index on
+`(guild_id, created_at) WHERE status IN ('NEW','TRIAGED')` serves the triage
+queue, because the open set stays small while the closed set grows forever.
+
+### `bug_events` — Phase 7
+
+`bug_id`, `from_status` (null for the filing itself), `to_status`, `actor_id`,
+`note`, `created_at`. Append-only.
+
+`bug_reports.status` is where a bug is; this is how it got there. The current
+state alone cannot answer "who closed this, and when" — the exact question asked
+when a member says their report was dismissed. The filing and its first event
+are written in one transaction, so a bug with no history is not a state that can
+exist.
+
+`triage` re-reads the row `FOR UPDATE` before writing. Two moderators pressing
+the same button produce one transition and one event; the second is answered
+`unchanged`, not a second row. Removing `FOR UPDATE` makes an integration test
+fail.
+
+### Member-authored text
+
+`feedback` and `bug_reports` hold prose a member wrote, which nothing else in
+this schema does except `moderation_cases.summary`. Stored text is **not**
+markdown-escaped — escaping is applied when composing a Discord payload, never
+before the insert. A row saved as `check\-in` is corrupt for every non-Discord
+reader and gains a backslash on each round trip. `storableUserText()` (strip
+control characters, trim, truncate) guards the write; `sanitiseUserText()` and
+`escapeMarkdown()` guard the render.
+
+No attachments, no links, no email, no app-account link, no device information.
+A bug report is about software. `guilds` cascades, so removing the guild removes
+the submissions. There is no automatic expiry yet — how long a defect stays
+useful is a product decision, not something to guess at in a migration.
+
 ---
 
 ## The transition contract

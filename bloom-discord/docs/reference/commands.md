@@ -329,21 +329,63 @@ asserted in a test so it is not re-added as an oversight.
 
 ## BLOOM LABS
 
-| Command                                | Policy        | Description                             | Phase |
-| -------------------------------------- | ------------- | --------------------------------------- | :---: |
-| `/feedback <summary>`                  | Bloom Member  | Submit feedback (opens a modal)         |   5   |
-| `/labs bug report`                     | Bloom Member  | File a bug (modal, optional attachment) |   5   |
-| `/labs feature status [name]`          | Bloom Member  | Where a feature is in the pipeline      |   5   |
-| `/labs vote <feature>`                 | Beta Tester   | Vote on a candidate feature             |   5   |
-| `/labs cohort join <id>`               | Beta Tester   | Join a testing cohort                   |   5   |
-| `/labs cohort leave <id>`              | Beta Tester   | Leave one                               |   5   |
-| `/labs release latest`                 | Bloom Member  | Latest release notes                    |   5   |
-| `/labs admin cohort create <name>`     | Administrator | Open a cohort                           |   5   |
-| `/labs admin experiment start <name>`  | Administrator | Start an experiment                     |   5   |
-| `/labs admin triage <bug-id> <status>` | Moderator     | Move a bug through triage               |   5   |
+### Shipped
 
-Labs never grants `◌ Beta Tester`. `/labs cohort join` records cohort membership
-in the database; channel access is a manual staff grant.
+| Command                                         | Policy       | Description                          | Phase |
+| ----------------------------------------------- | ------------ | ------------------------------------ | :---: |
+| `/feedback <category>`                          | Bloom Member | Share feedback — opens a modal       |   7   |
+| `/labs bug report <area>`                       | Bloom Member | Report a defect — opens a modal      |   7   |
+| `/labs bug show <number>`                       | Bloom Member | Look up a bug and its triage history |   7   |
+| `/labs bug queue [status]`                      | Moderator    | Bugs still waiting on someone        |   7   |
+| `/labs admin triage <number> <status> [reason]` | Moderator    | Move a bug through triage            |   7   |
+
+Both submission commands open a modal, which is why neither defers: a modal may
+only be an interaction's _initial_ response, so deferring first makes opening one
+impossible. `shouldDefer()` resolves this per branch rather than per command.
+
+`/feedback` is top-level rather than `/labs feedback` because it is the one
+thing in this bot aimed at every member rather than at testers, and burying the
+invitation to speak two levels deep gets less of it. It is one of the seven
+names Labs owns outright (`RESERVED_TOP_LEVEL.labs`).
+
+**Submission limits.** Five feedback submissions and ten bug reports per member
+per rolling 24 hours, counted in the database rather than in memory so a
+restart does not reset them. Hitting one is answered plainly, not silently
+dropped.
+
+**Where things are posted.** Feedback goes to `#feedback`, bugs to
+`#bug-reports`. If the channel is unset or the bot cannot post there, the
+submission is still recorded and the failure is logged as
+`intake.channel_unset` / `intake.announce_failed` — losing a member's carefully
+typed report because a channel id is missing would be the worse failure.
+
+**Triage.** `NEW → TRIAGED → FIXED | WONT_FIX | DUPLICATE`. Every terminal
+status requires a reason, `DUPLICATE` requires the bug it duplicates, and the
+reporter is DMed only when their bug reaches a terminal state — not on every
+move, which would make filing a bug a subscription to notifications.
+
+`/labs bug show` is open to any member: bug numbers get quoted in channels, and
+a number nobody outside staff can resolve is a worse conversation than no
+number. It shows the report, its status and its history — never the operator
+hint attached to any error.
+
+### Not built yet
+
+Phase 7 covered intake only. These were specified and are deliberately absent
+rather than stubbed:
+
+| Command                        | Why it is not here                                                          |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `/labs feature status [name]`  | Needs a feature pipeline table; nothing to read yet                         |
+| `/labs vote <feature>`         | Needs the candidate list `feature status` reads                             |
+| `/labs cohort join \| leave`   | Needs cohorts, and a staff answer on how channel access is granted          |
+| `/labs release latest`         | Release notes are posted by hand today; a command implies a source of truth |
+| `/labs admin cohort create`    | Same dependency as `cohort join`                                            |
+| `/labs admin experiment start` | Candidate to **drop**: an experiment with no measurement is an announcement |
+
+Labs never grants `◌ Beta Tester`, and will not when cohorts land. Cohort
+membership is a database fact; channel access stays a manual staff grant, so a
+bug in Labs can never widen anyone's access.
 
 ---
 

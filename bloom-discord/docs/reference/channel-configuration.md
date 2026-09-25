@@ -77,6 +77,14 @@ yet.
 | `#bug-reports` | `CHANNEL_BUG_REPORTS` | Labs       |
 | `#support`     | `CHANNEL_SUPPORT`     | Labs       |
 
+**Written to today:** `CHANNEL_FEEDBACK` receives `/feedback` submissions and
+`CHANNEL_BUG_REPORTS` receives `/labs bug report` filings. Both are optional.
+If either is unset, or Labs cannot post there, the submission is still recorded
+and the bot logs `intake.channel_unset` or `intake.announce_failed` — a member's
+report is never discarded because a channel id is missing. The other Labs
+channels are reserved for cohorts, voting, feature status and release notes,
+none of which are built yet.
+
 ### 🔒 BLOOM TEAM — private
 
 | Channel       | Variable             | Posts here | Access |
