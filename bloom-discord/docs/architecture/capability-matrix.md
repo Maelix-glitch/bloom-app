@@ -75,6 +75,27 @@ dormant for weeks while the docs claimed otherwise.
 
 ---
 
+## Live validation status
+
+Separate from the build status above, because a passing test suite is not
+evidence of a live integration and the two must not be conflated.
+
+| Surface                                     | Validated                                     |
+| ------------------------------------------- | --------------------------------------------- |
+| Config, database, migrations                | ✅ Real PostgreSQL, 8 migrations, idempotent  |
+| Process startup, feature registration       | ✅ All three, independently                   |
+| Structured logging and secret redaction     | ✅ Real processes, raw token absent from logs |
+| Health reporting and cross-bot heartbeat    | ✅ Live HTTP capture, three heartbeat rows    |
+| Bot independence                            | ✅ Broken Guardian, other two unaffected      |
+| Production dependency tree (`prune --prod`) | ✅ All three start; migrate CLI runs          |
+| **Container image**                         | ❌ Rehearsed only — no runtime available      |
+| **Gateway connection**                      | ❌ `discord.com` unreachable here             |
+| **Command registration**                    | ❌ Needs a live token                         |
+| **A real interaction and its mutation**     | ❌ Needs a live token                         |
+
+Details and reproduction: [staging validation](../operations/staging-validation.md).
+The blocked rows have a runbook: [staging runbook](../operations/staging-runbook.md).
+
 ## The rows that need explaining
 
 ### D — Auto-moderation was marked "owns" and does not exist
@@ -106,6 +127,16 @@ have — its permission integer has bit 5 clear. That is a real least-privilege
 decision, not a formality, and it belongs in the design note rather than in a
 quiet permission bump.
 
+### D (continued) — the permission question is now written up
+
+[Design note 002](./design-notes/002-manage-guild-permission.md) answers the
+four questions asked of it: Manage Guild is required because Discord delivers
+AutoMod events only to apps that hold it; it additionally grants server
+settings, invite and integration control; AutoMod rules **can** be authored by
+hand, which removes half the requirement but not the event half; and the
+minimum practical model is to hold the bit for event delivery only and never
+call the rule API. Awaiting a decision — no code until then.
+
 ### G — Verification works but has no button
 
 `/verify` performs the real transition with hierarchy checks, attempt records and
@@ -127,7 +158,17 @@ points for message volume. A parallel reputation score would be a second
 currency competing with the first, and would reintroduce exactly the farming
 incentive §10 warns against. Recorded as a decision rather than left as a gap.
 
-### AE — Beta cohorts are blocked on a decision, not on code
+### AE — Beta cohorts: options written, awaiting approval
+
+[Design note 003](./design-notes/003-beta-cohorts.md) compares Guardian-owned
+role assignment (A), channel overwrites (B) and three explicit alternatives (C).
+Recommendation: start with cohorts as a tracked list with no access control,
+because nobody yet knows whether a private beta _space_ is needed or whether a
+list of testers is enough — and Option A remains available later against the
+same schema. Option B is recommended for outright rejection: it would give Labs
+Manage Channels, trading an architectural guarantee for convenience.
+
+### AE (background) — why it was blocked
 
 The schema could carry cohorts tomorrow. What is missing is a staff answer to:
 when someone joins a cohort, how do they get access? If the answer is "a role",

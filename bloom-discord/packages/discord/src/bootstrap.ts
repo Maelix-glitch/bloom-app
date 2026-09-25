@@ -367,21 +367,21 @@ export async function startBotProcess<TDeps>(
 
     installSignalHandlers(shutdown, logger);
 
-    // 6. Gateway.
-    await runtime.login();
-
     /*
-     * 7. Jobs, once the gateway is actually usable.
+     * 6. Health, before the gateway.
      *
-     * After login, because a job that posts a message would otherwise fire
-     * against a client that has not connected, and "failed because it started
-     * too early" is a confusing thing to find in `job_runs`.
+     * This used to start last, after login, on the reasoning that readiness
+     * should mean the bot is genuinely usable. That reasoning was right about
+     * `/ready` and wrong about the server: a bot that cannot reach Discord
+     * served no endpoint at all, so the one moment an operator most needs to
+     * ask "what is wrong" was the one moment nothing answered. Connection
+     * refused is not a diagnosis.
+     *
+     * Starting here changes no status semantics. The gateway check reports
+     * `down` until the connection is up, so `/ready` still returns 503 until
+     * the bot is genuinely usable — it just says so out loud instead of
+     * refusing the connection.
      */
-    scheduler.start();
-
-    heartbeat.start();
-
-    // 8. Health, last — readiness now means the bot is genuinely usable.
     const healthPort = Number.parseInt(process.env['HEALTH_PORT'] ?? '0', 10);
     if (healthPort > 0) {
       healthServer = startHealthServer({
@@ -414,6 +414,30 @@ export async function startBotProcess<TDeps>(
         }),
       });
     }
+
+    /*
+     * 7. Heartbeat, also before the gateway.
+     *
+     * Same reasoning as the health server. A process that is running but
+     * cannot reach Discord should say so in `system_health` — a row reading
+     * "alive, gateway down" is the single most useful thing another bot's
+     * `/health` can show during an incident, and it is exactly what starting
+     * this after login would throw away. Absent and disconnected are different
+     * problems with different fixes.
+     */
+    heartbeat.start();
+
+    // 8. Gateway.
+    await runtime.login();
+
+    /*
+     * 9. Jobs, once the gateway is actually usable.
+     *
+     * After login, because a job that posts a message would otherwise fire
+     * against a client that has not connected, and "failed because it started
+     * too early" is a confusing thing to find in `job_runs`.
+     */
+    scheduler.start();
 
     return { context, runtime, shutdown };
   }, newCorrelationId());
