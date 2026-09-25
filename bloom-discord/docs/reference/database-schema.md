@@ -425,6 +425,32 @@ A bug report is about software. `guilds` cascades, so removing the guild removes
 the submissions. There is no automatic expiry yet — how long a defect stays
 useful is a product decision, not something to guess at in a migration.
 
+### Retention and erasure
+
+No table is added for either. Retention is a nightly job over an explicit
+allowlist — `idempotency_keys`, `message_cooldowns`, `job_runs`, `command_usage`,
+`verification_attempts`, `audit_events` — deleting in bounded batches of 5,000
+per table per run.
+
+An allowlist rather than a denylist because the failure modes are not
+symmetrical: forgetting to add a table means it grows, which is visible and
+recoverable; forgetting to exclude one means a scheduled job quietly deletes the
+rewards ledger one morning. An integration test sets every window to zero and
+asserts the ledger and the submissions survive.
+
+`idempotency_keys.expires_at` finally does something. The column and its "keys
+are pruned after this" comment shipped in `0003`; nothing pruned them until the
+retention job existed, so the table grew by one row per guarded operation
+forever.
+
+**Erasure redacts.** Member prose is overwritten with a tombstone long enough to
+satisfy the columns' own length CHECKs; the rows stay. `bug_reports` keeps its
+number, status and history because other bugs reference it as a duplicate target
+and members quote it in channels. `point_events.reason` is cleared only for
+`check_in` and `small_win` — a CHECK requires `manual_award` and `adjustment` to
+keep their reason, and that reason is staff-authored. Full table:
+[data retention](../operations/data-retention.md).
+
 ---
 
 ## The transition contract

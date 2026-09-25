@@ -154,6 +154,23 @@ export function duplicateWinMessage(): BloomMessage {
   };
 }
 
+/**
+ * Says which ladder this is.
+ *
+ * The Bloom app has its own progression — twelve ranks, with seasons — and this
+ * server has nine. They share a vocabulary and count completely different
+ * things: this one counts what a member does *here*. A member who sees
+ * "Sprout" in Discord and something else in the app will otherwise reasonably
+ * conclude that one of them is broken, and the honest fix is one restrained
+ * line rather than a number that pretends to be a total.
+ *
+ * Linking the two would mean connecting a Discord account to a Bloom account —
+ * OAuth, consent, a privacy review — which is a project, not a label. Until
+ * that exists, saying so is the only truthful option. See
+ * docs/architecture/decisions.md.
+ */
+const SCOPE_NOTE = 'Counts activity in this server. Bloom app progress is separate.';
+
 export function profileMessage(
   profile: MemberProfile,
   options: { readonly self: boolean },
@@ -191,13 +208,15 @@ export function profileMessage(
 
   return {
     ephemeral: true,
-    embeds: [bloomEmbed({ title: who, description: lines.join('\n') })],
+    embeds: [
+      bloomEmbed({ title: who, description: lines.join('\n'), footer: SCOPE_NOTE }),
+    ],
   };
 }
 
 export function rankMessage(profile: MemberProfile): BloomMessage {
   const lines = [
-    `You are **${rankName(profile.rank)}** with ${String(profile.balance)} points.`,
+    `You are **${rankName(profile.rank)}** with ${String(profile.balance)} points in this server.`,
   ];
 
   if (profile.next) {
@@ -210,7 +229,13 @@ export function rankMessage(profile: MemberProfile): BloomMessage {
 
   return {
     ephemeral: true,
-    embeds: [bloomEmbed({ title: 'Rank', description: lines.join('\n') })],
+    embeds: [
+      bloomEmbed({
+        title: 'Server rank',
+        description: lines.join('\n'),
+        footer: SCOPE_NOTE,
+      }),
+    ],
   };
 }
 

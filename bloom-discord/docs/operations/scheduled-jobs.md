@@ -114,6 +114,15 @@ expects nothing at 09:00, and a design that needed a redeploy to honour that
 would be, from their side, simply broken. The cost is one small query per job per
 fire, which is the cheapest thing in the whole path.
 
+**A platform-wide job has no guild, and still has a switch.**
+`platform.retention.prune` deletes rows belonging to no guild at all, so giving
+it a guild id would make `job_runs` lie about what it touched. But the gate
+originally answered `enabled: true` for any job with a null guild, which meant
+the one job that destroys data could not be stopped without a redeployment. The
+gate now takes a **home guild** and records a global job's switch there — see
+[D6](../architecture/decisions.md). `/guardian jobs disable
+platform.retention.prune` works exactly like any other job.
+
 The per-guild switch lives in `bot_settings` under `job.<job key>`, with a value
 of `{"enabled": true|false}`. No migration was needed: the table already carried
 `(guild_id, bot_name, key, value, updated_by)`, which is exactly a per-guild,
@@ -151,6 +160,25 @@ purpose" from "not deployed". Register it and report it as disabled — and say
 _which_ of the four switches is responsible, because "disabled" alone sends
 people to the wrong place.
 
+## The registered jobs
+
+| Key                              | Bot       | Schedule     | What it does                                         |
+| -------------------------------- | --------- | ------------ | ---------------------------------------------------- |
+| `companion.checkin.daily_prompt` | Companion | `0 9 * * *`  | Posts the daily check-in prompt                      |
+| `guardian.cases.stale_sweep`     | Guardian  | `0 9 * * *`  | Digest of cases untouched for 3+ days                |
+| `platform.retention.prune`       | Guardian  | `20 4 * * *` | Deletes operational rows past their retention window |
+
+`platform.retention.prune` is the only job that destroys data, and it is the
+only one that is platform-wide rather than guild-scoped. It is owned by Guardian
+rather than shared: the work is platform-level, and running it in all three bots
+would mean three processes contending nightly for one table's worth of deletes.
+The lock makes that safe, not sensible. Its schedule is deliberately off the
+hour — everything else in the world runs at :00, and a nightly delete landing
+alongside a backup and a log rotation turns a quiet window into a latency spike.
+
+Full detail, including the retention windows and how to read its logs:
+[data retention](data-retention.md).
+
 ## Silence is a feature
 
 `guardian.cases.stale_sweep` posts nothing when no case is stale. A digest that
@@ -158,6 +186,12 @@ arrives every morning saying "0 stale cases" teaches staff to skim past the
 mornings when the number is not zero, which costs more than the reassurance is
 worth. The same reasoning applies to anything added later: if a scheduled
 message has nothing to say, it should not say it.
+
+`platform.retention.prune` applies the same rule to the audit log rather than to
+a channel: a night with nothing to delete writes no audit row, because a log
+that gains an identical "deleted 0 rows" entry every morning is a log people
+stop reading. That the job ran is already recorded in `job_runs`, which is where
+that question belongs.
 
 ## Operating it
 

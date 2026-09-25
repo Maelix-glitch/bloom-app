@@ -374,14 +374,19 @@ hint attached to any error.
 Phase 7 covered intake only. These were specified and are deliberately absent
 rather than stubbed:
 
-| Command                        | Why it is not here                                                          |
-| ------------------------------ | --------------------------------------------------------------------------- |
-| `/labs feature status [name]`  | Needs a feature pipeline table; nothing to read yet                         |
-| `/labs vote <feature>`         | Needs the candidate list `feature status` reads                             |
-| `/labs cohort join \| leave`   | Needs cohorts, and a staff answer on how channel access is granted          |
-| `/labs release latest`         | Release notes are posted by hand today; a command implies a source of truth |
-| `/labs admin cohort create`    | Same dependency as `cohort join`                                            |
-| `/labs admin experiment start` | Candidate to **drop**: an experiment with no measurement is an announcement |
+| Command                       | Why it is not here                                                          |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `/labs feature status [name]` | Needs a feature pipeline table; nothing to read yet                         |
+| `/labs vote <feature>`        | Needs the candidate list `feature status` reads                             |
+| `/labs cohort join \| leave`  | Needs cohorts, and a staff answer on how channel access is granted          |
+| `/labs release latest`        | Release notes are posted by hand today; a command implies a source of truth |
+| `/labs admin cohort create`   | Same dependency as `cohort join`                                            |
+
+`/labs admin experiment start` has been **dropped**, not deferred. An experiment
+that announces itself and records a row is an announcement with extra steps, and
+`#development-updates` already does announcements with more context than a slash
+command will collect. If experiments become real they arrive with measurement
+attached — see [D2](../architecture/decisions.md).
 
 Labs never grants `◌ Beta Tester`, and will not when cohorts land. Cohort
 membership is a database fact; channel access stays a manual staff grant, so a

@@ -493,3 +493,59 @@ describe('/companion leaderboard', () => {
     expect(values).toEqual(['week', 'month']);
   });
 });
+
+describe('the two ladders', () => {
+  /*
+   * Bloom has two progression systems: this server's nine ranks, and the Bloom
+   * app's twelve with seasons. They are deliberately separate — linking them
+   * needs account linking, consent and a privacy review — so every surface that
+   * shows a rank has to say which ladder it is talking about. A member who sees
+   * two different ranks with no explanation concludes one of them is broken.
+   */
+  it('says which ladder the profile is showing', async () => {
+    await h.dispatch({ commandName: 'checkin', actor: asMember() });
+
+    const result = await h.dispatch({
+      commandName: 'companion',
+      subcommand: 'profile',
+      actor: asMember(),
+    });
+
+    const embed = result.responder.messages.at(-1)?.embeds?.[0];
+    expect(embed?.footer).toContain('this server');
+    expect(embed?.footer).toContain('separate');
+  });
+
+  it('scopes the rank card to the server, in its title and its numbers', async () => {
+    await h.dispatch({ commandName: 'checkin', actor: asMember() });
+
+    const result = await h.dispatch({
+      commandName: 'companion',
+      subcommand: 'rank',
+      actor: asMember(),
+    });
+
+    const embed = result.responder.messages.at(-1)?.embeds?.[0];
+    expect(embed?.title).toBe('Server rank');
+    expect(embed?.description).toContain('in this server');
+    expect(embed?.footer).toContain('separate');
+  });
+
+  it('claims nothing about the Bloom app beyond that it is separate', async () => {
+    await h.dispatch({ commandName: 'checkin', actor: asMember() });
+
+    const result = await h.dispatch({
+      commandName: 'companion',
+      subcommand: 'profile',
+      actor: asMember(),
+    });
+
+    // No implied sync, no total, no promise that one feeds the other. Those
+    // would all be claims the platform cannot back: there is no link between a
+    // Discord account and a Bloom account.
+    const text = result.responder.visibleText.toLowerCase();
+    for (const claim of ['synced', 'combined', 'total across', 'app rank']) {
+      expect(text).not.toContain(claim);
+    }
+  });
+});

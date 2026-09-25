@@ -4,8 +4,9 @@ Three Discord applications — **Guardian**, **Companion** and **Labs** — shar
 one Supabase PostgreSQL database and a common set of packages, in a pnpm
 workspace of strict TypeScript ESM targeting Node 24.
 
-> **Status: Phase 7.** Bloom Guardian is functionally complete for verification,
-> the role lifecycle, moderation, reports and cases. Bloom Companion runs the
+> **Status: Phase 7 complete, production hardening done.** Bloom Guardian is
+> functionally complete for verification, the role lifecycle, moderation,
+> reports and cases. Bloom Companion runs the
 > community loop: the daily prompt, `/checkin`, `/win`, the Bloom Rewards ledger
 > with its nine-rank ladder, and milestones and achievements that recognise
 > participation without paying for it. Bloom Labs is now online with its intake
@@ -13,6 +14,11 @@ workspace of strict TypeScript ESM targeting Node 24.
 > and `/labs admin triage`. Cohorts, voting, feature status and release notes
 > are **not built**; see [`docs/PHASE-7-REPORT.md`](docs/PHASE-7-REPORT.md) for
 > what that leaves undone.
+>
+> The platform prunes its own operational tables nightly, can erase a member's
+> content on request, and ships a CI pipeline. Before deploying, read
+> [`docs/operations/production-readiness.md`](docs/operations/production-readiness.md):
+> it lists what has been verified and — more usefully — what has not.
 >
 > The platform has never connected to Discord from this environment
 > (`discord.com` is unreachable here), so the discord.js adapters are compiled
@@ -161,6 +167,9 @@ pnpm dev:guardian | dev:companion | dev:labs
 | [Channel configuration](docs/reference/channel-configuration.md)            | Channel map and per-channel permissions             |
 | [Scheduled jobs](docs/operations/scheduled-jobs.md)                         | The scheduler, leases, and what every job needs     |
 | [Bloom Rewards](docs/operations/bloom-rewards.md)                           | The points economy, and everything it refuses to do |
+| [Production readiness](docs/operations/production-readiness.md)             | Go-live checklist, and what is genuinely unverified |
+| [Data retention](docs/operations/data-retention.md)                         | What is kept, for how long, and how to erase it     |
+| [Decisions](docs/architecture/decisions.md)                                 | Decisions that are expensive to reverse, and why    |
 | [Troubleshooting](docs/operations/troubleshooting.md)                       | Symptom → cause → fix                               |
 | [Security](docs/security/security.md)                                       | Trust boundaries, secrets, abuse resistance         |
 | [Development workflow](docs/development/workflow.md)                        | Day-to-day                                          |
