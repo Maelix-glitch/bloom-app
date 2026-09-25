@@ -25,7 +25,6 @@ export interface CooldownRepository {
   ): Promise<CooldownResult>;
 
   clear(guildId: GuildId, scope: string, subject: string): Promise<void>;
-  pruneExpired(limit?: number): Promise<number>;
 }
 
 /**
@@ -95,24 +94,6 @@ export class PostgresCooldownRepository
         DELETE FROM ${sql(this.schema)}.message_cooldowns
         WHERE guild_id = ${guildId} AND scope = ${scope} AND subject = ${subject}
       `;
-    } catch (error) {
-      throw toDatabaseError(error);
-    }
-  }
-
-  public async pruneExpired(limit = 5000): Promise<number> {
-    const sql = this.conn();
-    try {
-      const rows = await sql<{ subject: string }[]>`
-        DELETE FROM ${sql(this.schema)}.message_cooldowns
-        WHERE ctid IN (
-          SELECT ctid FROM ${sql(this.schema)}.message_cooldowns
-          WHERE expires_at < now() - interval '1 day'
-          LIMIT ${Math.min(Math.max(Math.trunc(limit), 1), 50_000)}
-        )
-        RETURNING subject
-      `;
-      return rows.length;
     } catch (error) {
       throw toDatabaseError(error);
     }

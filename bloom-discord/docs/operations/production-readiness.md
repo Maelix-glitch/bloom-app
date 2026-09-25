@@ -170,18 +170,24 @@ These are real, and none of them are hidden elsewhere:
 3. **Single-guild assumptions in operations.** The schema is per-guild
    throughout, but the platform's configuration binds one guild, and a global
    job's off switch resolves against it.
-4. **Cross-bot health is only as fresh as the last heartbeat.** 30-second
+4. **Channel and role configuration is environment-only.** `channel_settings`
+   and `role_settings` exist as tables and have repository methods, but nothing
+   reads them. Changing a channel means changing `CHANNEL_*` and restarting.
+   This is a real constraint on staff self-service, and it is called out in the
+   [schema reference](../reference/database-schema.md) rather than left to be
+   discovered.
+5. **Cross-bot health is only as fresh as the last heartbeat.** 30-second
    interval, 90-second staleness window. It answers "was Companion alive a
    minute ago", not "is Companion alive right now" — and it says which of those
    it is answering.
-5. **No metrics endpoint.** Health is a status, not a time series. If this needs
+6. **No metrics endpoint.** Health is a status, not a time series. If this needs
    dashboards, that is a Prometheus endpoint and a decision about cardinality,
    not a quick addition.
-6. **No alerting.** Logs are structured for it; nothing is wired to a pager.
-7. **Labs is intake only.** Cohorts, voting, feature status and release notes are
+7. **No alerting.** Logs are structured for it; nothing is wired to a pager.
+8. **Labs is intake only.** Cohorts, voting, feature status and release notes are
    not built. [Commands reference](../reference/commands.md) lists what is
    missing and why.
-8. **Retention has never run against a large table.** Batching is tested for
+9. **Retention has never run against a large table.** Batching is tested for
    correctness against thousands of rows, not for duration against millions.
 
 ---

@@ -59,9 +59,10 @@ pnpm db:seed       # development fixtures; refuses to run in production
 The servers the platform knows. Effectively one row, but keyed properly so a
 staging guild does not need a separate database.
 
-### `members`
+### `users` and `guild_members`
 
-One row per (guild, user). Holds `onboarding_state`, `joined_at`, `left_at`.
+`users` is the global row per Discord account; `guild_members` is one row per
+(guild, user) and holds `onboarding_state`, `joined_at`, `left_at`.
 
 Rejoining clears `left_at` but **preserves** `onboarding_state` — someone who
 verified, left and came back should not have to verify again.
@@ -107,7 +108,7 @@ replica holds a job at a time. `lease_expires_at` means a crashed process
 releases its claim rather than blocking the job forever;
 `reclaimExpired` marks lapsed runs `timed_out`.
 
-### `cooldowns`
+### `message_cooldowns`
 
 Durable rate limiting for things where "twice" is a real problem — a welcome
 message, a daily check-in, a reward.
@@ -116,12 +117,24 @@ message, a daily check-in, a reward.
 acquired`. Checking and then setting would be a race, and the losing side would
 be a duplicate reward.
 
-### `settings`
+### `bot_settings`, `channel_settings`, `role_settings`
 
-Per-guild key/value configuration that must be changeable without a deploy:
-feature toggles, channel overrides, scheduled-message enable/disable.
+Per-guild configuration that can change without a deploy. Three tables, and
+only one of them is currently read:
 
-### `command_telemetry`
+- **`bot_settings`** — PK `(guild_id, bot_name, key)`, JSON value. **In use.**
+  This is where the per-guild scheduled-job switches live, under
+  `job.<job key>`, and where a platform-wide job's switch is recorded against
+  the home guild. `bot_name` is in the key so Guardian's copy of a setting and
+  Companion's are different rows.
+- **`channel_settings`** and **`role_settings`** — **not read by anything
+  today.** Channel and role ids come from the environment, and that is the
+  only source the running code consults. The repository methods and the tables
+  exist; no caller does. They are reserved for runtime overrides, and saying so
+  is better than implying a feature that is not wired up. Until it is, changing
+  a channel means changing `CHANNEL_*` and restarting.
+
+### `command_usage`
 
 One row per command invocation: command path, actor, outcome, error code,
 duration, correlation id.

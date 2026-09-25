@@ -404,10 +404,6 @@ export class FakeIdempotencyRepository implements IdempotencyRepository {
     this.claims.set(key, result);
     return Promise.resolve();
   }
-
-  public pruneExpired(): Promise<number> {
-    return Promise.resolve(0);
-  }
 }
 
 export class FakeCooldownRepository implements CooldownRepository {
@@ -444,10 +440,6 @@ export class FakeCooldownRepository implements CooldownRepository {
   public clear(guildId: GuildId, scope: string, subject: string): Promise<void> {
     this.held.delete(`${guildId}:${scope}:${subject}`);
     return Promise.resolve();
-  }
-
-  public pruneExpired(): Promise<number> {
-    return Promise.resolve(0);
   }
 }
 

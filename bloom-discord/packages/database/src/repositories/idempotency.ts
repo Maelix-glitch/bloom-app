@@ -33,9 +33,6 @@ export interface IdempotencyRepository {
     result: JsonObject,
     tx?: TransactionSql,
   ): Promise<void>;
-
-  /** Housekeeping. Returns how many expired keys were removed. */
-  pruneExpired(limit?: number): Promise<number>;
 }
 
 /**
@@ -109,24 +106,6 @@ export class PostgresIdempotencyRepository
         SET result = ${sql.json(result)}
         WHERE key = ${key}
       `;
-    } catch (error) {
-      throw toDatabaseError(error);
-    }
-  }
-
-  public async pruneExpired(limit = 1000): Promise<number> {
-    const sql = this.conn();
-    try {
-      const rows = await sql<{ key: string }[]>`
-        DELETE FROM ${sql(this.schema)}.idempotency_keys
-        WHERE key IN (
-          SELECT key FROM ${sql(this.schema)}.idempotency_keys
-          WHERE expires_at < now()
-          LIMIT ${Math.min(Math.max(Math.trunc(limit), 1), 10_000)}
-        )
-        RETURNING key
-      `;
-      return rows.length;
     } catch (error) {
       throw toDatabaseError(error);
     }
