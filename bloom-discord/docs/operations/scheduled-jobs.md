@@ -179,6 +179,30 @@ alongside a backup and a log rotation turns a quiet window into a latency spike.
 Full detail, including the retention windows and how to read its logs:
 [data retention](data-retention.md).
 
+## The one thing that is not a scheduled job
+
+Each process writes a `system_health` row every 30 seconds saying it is alive.
+That is an interval, and it is deliberately not a scheduled job.
+
+A scheduled job takes a lease, and a lease means exactly one process runs it —
+right for a nightly prune, wrong here. One process writing all three rows would
+be one bot asserting that the other two are alive, which is a fabricated status
+of precisely the kind the platform refuses to produce elsewhere. Each process
+has to speak for itself, so each keeps its own timer.
+
+It is owned by one object with a `stop()`, it is unref'd so it can never be the
+reason a process stays alive, and it is stopped on shutdown. Write failures are
+logged at debug and swallowed: a bot serving members perfectly well must not
+fall over because it could not write a row saying so, and the resulting stale
+row is itself the signal.
+
+Readers get `lastSeenSecondsAgo` and `stale`, never `online` — see
+`readPeers()`. A row saying the gateway was connected is a statement about a
+moment in the past, and rendering it as a present-tense claim is the exact
+mistake the table's comment warns about. `/health` includes peers but never
+folds them into its own status: one crashed bot must not fail the other two's
+readiness probes and manufacture an outage out of monitoring.
+
 ## Silence is a feature
 
 `guardian.cases.stale_sweep` posts nothing when no case is stale. A digest that

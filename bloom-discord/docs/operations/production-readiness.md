@@ -113,6 +113,12 @@ Full list: [environment variables](../reference/environment-variables.md).
 Each bot serves `/health` and `/ready` on its own port (8080/8081/8082 in the
 compose file).
 
+Each process also writes a `system_health` heartbeat every 30 seconds, so every
+bot's `/health` reports a `peers` section: what the other two last said about
+themselves, with `lastSeenSecondsAgo` and `stale`. Peers never affect the
+reporting bot's own status — a crashed Companion must not fail Guardian's
+readiness probe.
+
 - `/health` — 200 when up or degraded, 503 when down. Use for liveness.
 - `/ready` — 200 only when everything is up. Use for readiness gating.
 
@@ -164,14 +170,18 @@ These are real, and none of them are hidden elsewhere:
 3. **Single-guild assumptions in operations.** The schema is per-guild
    throughout, but the platform's configuration binds one guild, and a global
    job's off switch resolves against it.
-4. **No metrics endpoint.** Health is a status, not a time series. If this needs
+4. **Cross-bot health is only as fresh as the last heartbeat.** 30-second
+   interval, 90-second staleness window. It answers "was Companion alive a
+   minute ago", not "is Companion alive right now" — and it says which of those
+   it is answering.
+5. **No metrics endpoint.** Health is a status, not a time series. If this needs
    dashboards, that is a Prometheus endpoint and a decision about cardinality,
    not a quick addition.
-5. **No alerting.** Logs are structured for it; nothing is wired to a pager.
-6. **Labs is intake only.** Cohorts, voting, feature status and release notes are
+6. **No alerting.** Logs are structured for it; nothing is wired to a pager.
+7. **Labs is intake only.** Cohorts, voting, feature status and release notes are
    not built. [Commands reference](../reference/commands.md) lists what is
    missing and why.
-7. **Retention has never run against a large table.** Batching is tested for
+8. **Retention has never run against a large table.** Batching is tested for
    correctness against thousands of rows, not for duration against millions.
 
 ---

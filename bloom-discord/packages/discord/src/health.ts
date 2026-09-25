@@ -2,6 +2,7 @@ import { createServer, type Server } from 'node:http';
 import type { BotName } from '@bloom/shared-types';
 import type { Logger } from '@bloom/logging';
 import type { GatewayStatus } from './ports.js';
+import type { PeerHealth } from './heartbeat.js';
 
 /**
  * Health reporting.
@@ -177,6 +178,14 @@ export interface HealthServerOptions {
   readonly port: number;
   readonly reporter: HealthReporter;
   readonly logger: Logger;
+  /**
+   * What the other bots last said about themselves, if anything.
+   *
+   * Reported alongside this process's own status and never folded into it: a
+   * peer being down is information, not a reason to fail this bot's readiness
+   * probe and pull a working process out of service.
+   */
+  readonly peers?: () => Promise<readonly PeerHealth[]>;
 }
 
 /**
@@ -203,11 +212,24 @@ export function startHealthServer(options: HealthServerOptions): Server {
       const healthy =
         path === '/ready' ? snapshot.status === 'up' : snapshot.status !== 'down';
 
+      /*
+       * Peers are best-effort. If reading them fails, this endpoint still
+       * answers about the thing it is actually responsible for.
+       */
+      let peers: readonly PeerHealth[] | null = null;
+      if (options.peers) {
+        try {
+          peers = await options.peers();
+        } catch {
+          peers = null;
+        }
+      }
+
       response.writeHead(healthy ? 200 : 503, {
         'content-type': 'application/json',
         'cache-control': 'no-store',
       });
-      response.end(JSON.stringify(snapshot, null, 2));
+      response.end(JSON.stringify({ ...snapshot, peers }, null, 2));
     })().catch((error: unknown) => {
       options.logger.error('health.server_error', 'Health endpoint failed.', { error });
       if (!response.headersSent) {

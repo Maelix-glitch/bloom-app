@@ -52,6 +52,7 @@ import {
   startHealthServer,
   type HealthCheck,
 } from './health.js';
+import { Heartbeat, readPeers } from './heartbeat.js';
 
 /**
  * The shared bot process.
@@ -324,6 +325,21 @@ export async function startBotProcess<TDeps>(
 
     // 5. Signals first, so a stop during startup is still clean.
     let healthServer: Server | null = null;
+    /*
+     * Each process states that it is alive, every 30 seconds, in its own row.
+     *
+     * Not a scheduled job: a lease would mean one process writing all three
+     * rows, i.e. one bot asserting the other two are up. See heartbeat.ts.
+     */
+    const heartbeat = new Heartbeat({
+      bot: options.bot,
+      version: platform.runtime.version,
+      environment: platform.runtime.environment,
+      telemetry: repositories.telemetry,
+      logger,
+      gatewayStatus: () => runtime.status(),
+      databaseOk: async () => (await database.ping()).ok,
+    });
     const runtime = new BotRuntime({
       bot: options.bot,
       config: platform,
@@ -335,6 +351,7 @@ export async function startBotProcess<TDeps>(
       ...(features.events ? { events: features.events } : {}),
       ...(options.onReady ? { onReady: () => onReadyHook(options, context, deps) } : {}),
       onShutdown: async () => {
+        heartbeat.stop();
         healthServer?.close();
         // Before the database closes: stopping waits for in-flight runs to
         // finish releasing their leases, and releasing a lease is a write.
@@ -362,12 +379,23 @@ export async function startBotProcess<TDeps>(
      */
     scheduler.start();
 
+    heartbeat.start();
+
     // 8. Health, last — readiness now means the bot is genuinely usable.
     const healthPort = Number.parseInt(process.env['HEALTH_PORT'] ?? '0', 10);
     if (healthPort > 0) {
       healthServer = startHealthServer({
         port: healthPort,
         logger,
+        /*
+         * The other two bots, as observations.
+         *
+         * Deliberately outside `checks`: a peer being down must never make
+         * this process report itself unhealthy. They are separate containers
+         * with separate failure modes, and one crashed bot taking the other
+         * two out of a load balancer is an outage manufactured by monitoring.
+         */
+        peers: () => readPeers(repositories.telemetry, options.bot),
         reporter: new HealthReporter({
           bot: options.bot,
           version: platform.runtime.version,

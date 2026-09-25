@@ -82,6 +82,7 @@ import type {
   TriageInput,
   TriageOutcome,
   RetentionRepository,
+  HealthSnapshot,
   PruneOptions,
   PruneResult,
   ErasureResult,
@@ -468,16 +469,29 @@ export class FakeTelemetryRepository implements TelemetryRepository {
     return Promise.resolve({ total: this.commands.length, errors: 0, lastErrorAt: null });
   }
 
-  public writeHealth(): Promise<void> {
+  /**
+   * Heartbeat rows, keyed by bot, upserted exactly as the real table is.
+   *
+   * These three used to return a constant — `undefined`, `null`, `[]` — which
+   * made every test that touched cross-bot health pass regardless of what the
+   * code did. Storing the snapshots is the difference between a fake and a
+   * stub that agrees with everything.
+   */
+  public readonly health = new Map<BotName, HealthSnapshot>();
+
+  public writeHealth(snapshot: Omit<HealthSnapshot, 'observedAt'>): Promise<void> {
+    this.health.set(snapshot.botName, { ...snapshot, observedAt: new Date() });
     return Promise.resolve();
   }
 
-  public readHealth(): Promise<null> {
-    return Promise.resolve(null);
+  public readHealth(botName: BotName): Promise<HealthSnapshot | null> {
+    return Promise.resolve(this.health.get(botName) ?? null);
   }
 
-  public readAllHealth(): Promise<readonly never[]> {
-    return Promise.resolve([]);
+  public readAllHealth(): Promise<readonly HealthSnapshot[]> {
+    return Promise.resolve(
+      [...this.health.values()].sort((a, b) => a.botName.localeCompare(b.botName)),
+    );
   }
 }
 
