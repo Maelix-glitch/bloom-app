@@ -273,7 +273,7 @@ describe('Scheduler', () => {
       await vi.advanceTimersByTimeAsync(1);
 
       // The other replica reclaims it: the lease this run holds is gone.
-      await lock.reclaimExpired('companion');
+      await lock.reclaimExpired();
       lock.forceRelease();
 
       await vi.advanceTimersByTimeAsync(30_000);

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { BloomError } from '@bloom/shared-types';
-import { allowAnyone } from '@bloom/permissions';
-import { fakeInvocation } from '@bloom/testing';
+import { allowAnyone, type AuthorizationContext } from '@bloom/permissions';
+import { fakeInvocation, testConfig } from '@bloom/testing';
+import type { CommandInvocation } from './invocation.js';
 import { namespaceCommand, type SubcommandContribution } from './namespace-command.js';
 
 /**
@@ -39,6 +40,22 @@ function build(
   });
 }
 
+/**
+ * The authorization context the dispatcher builds before calling a command.
+ *
+ * Constructed here rather than passed as `undefined` because a namespace
+ * command hands it to each contribution's own policy — a test that skipped it
+ * would be exercising a path production never takes.
+ */
+function authContext(invocation: CommandInvocation): AuthorizationContext {
+  return {
+    subject: invocation.actor,
+    channelId: invocation.channelId,
+    config: testConfig(),
+    command: invocation.commandPath,
+  };
+}
+
 describe('spec derivation', () => {
   it('derives the spec from the contributions, with no second list', () => {
     const command = build(
@@ -66,7 +83,11 @@ describe('spec derivation', () => {
       subcommand: 'view',
     });
 
-    const message = await command.execute(invocation, { marker: 'ok' });
+    const message = await command.execute(
+      invocation,
+      { marker: 'ok' },
+      authContext(invocation),
+    );
     expect(message).toMatchObject({ content: 'case/view:ok' });
   });
 
@@ -87,10 +108,22 @@ describe('spec derivation', () => {
       subcommand: 'overview',
     });
 
-    expect(await command.execute(bare.invocation, { marker: 'x' })).toMatchObject({
+    expect(
+      await command.execute(
+        bare.invocation,
+        { marker: 'x' },
+        authContext(bare.invocation),
+      ),
+    ).toMatchObject({
       content: '-/overview:x',
     });
-    expect(await command.execute(grouped.invocation, { marker: 'x' })).toMatchObject({
+    expect(
+      await command.execute(
+        grouped.invocation,
+        { marker: 'x' },
+        authContext(grouped.invocation),
+      ),
+    ).toMatchObject({
       content: 'case/overview:x',
     });
   });
@@ -152,7 +185,9 @@ describe('routing failures', () => {
       subcommand: 'removed-last-release',
     });
 
-    await expect(command.execute(invocation, { marker: 'x' })).rejects.toSatisfy(
+    await expect(
+      command.execute(invocation, { marker: 'x' }, authContext(invocation)),
+    ).rejects.toSatisfy(
       (error: unknown) =>
         BloomError.isCode(error, 'NOT_IMPLEMENTED') &&
         error.operatorHint.includes('re-run the registrar'),

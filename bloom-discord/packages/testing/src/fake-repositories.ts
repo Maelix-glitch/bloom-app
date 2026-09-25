@@ -15,12 +15,21 @@ import {
   type IdempotencyKey,
   type JsonValue,
   type OnboardingState,
+  type PointKind,
   type RoleId,
   type RoleKey,
   type UserId,
 } from '@bloom/shared-types';
+import type { LocalDate } from '@bloom/utils';
 import type {
   AuditEventInput,
+  AwardInput,
+  AwardOutcome,
+  CheckInInput,
+  CheckInOutcome,
+  LeaderboardEntry,
+  PointEvent,
+  RewardsRepository,
   AuditEventRepository,
   AuditEventRow,
   CaseEventRow,
@@ -1086,6 +1095,217 @@ export class FakeCaseRepository implements CaseRepository {
   }
 }
 
+/**
+ * The Bloom Rewards ledger, in memory.
+ *
+ * Every constraint migration 0006 enforces is enforced here too: the
+ * idempotency key is unique per guild, a check-in is unique per member per
+ * local day, an automatic award may not name an actor, a manual one must, a
+ * zero-point entry is rejected, and a correction cannot overdraw.
+ *
+ * That duplication is the point. A fake that accepts what the table would
+ * reject makes its tests agree with each other and disagree with production —
+ * this project has already shipped two fakes that did exactly that.
+ */
+export class FakeRewardsRepository implements RewardsRepository {
+  public readonly events: FakePointEvent[] = [];
+  /** Keyed `guildId:userId:localDate`, mirroring the real primary key. */
+  public readonly checkIns = new Map<string, { event: PointEvent | null; at: Date }>();
+
+  private sequence = 0;
+
+  public constructor(private readonly now: () => Date = () => new Date()) {}
+
+  public award(input: AwardInput): Promise<AwardOutcome> {
+    if (input.points === 0) {
+      throw new Error('point_events.points CHECK: a ledger entry cannot be zero.');
+    }
+
+    const manual = input.kind === 'manual_award' || input.kind === 'adjustment';
+    const hasActor = (input.awardedBy ?? null) !== null;
+    if (manual !== hasActor) {
+      throw new Error(
+        'point_events_actor_matches_kind: manual entries require awarded_by, ' +
+          'automatic entries forbid it.',
+      );
+    }
+    if (manual && (input.reason ?? '').trim() === '') {
+      throw new Error(
+        'point_events_manual_needs_reason: manual entries require a reason.',
+      );
+    }
+
+    const existing = this.events.find(
+      (event) =>
+        event.guildId === input.guildId && event.idempotencyKey === input.idempotencyKey,
+    );
+    if (existing) {
+      return Promise.resolve({
+        kind: 'duplicate',
+        event: existing,
+        balance: this.sumFor(input.guildId, input.userId),
+      });
+    }
+
+    const balance = this.sumFor(input.guildId, input.userId);
+    if (input.points < 0 && balance + input.points < 0) {
+      return Promise.resolve({ kind: 'insufficient', balance });
+    }
+
+    this.sequence += 1;
+    const event: FakePointEvent = {
+      id: `evt-${String(this.sequence)}`,
+      guildId: input.guildId,
+      userId: input.userId,
+      kind: input.kind,
+      points: input.points,
+      reason: input.reason ?? null,
+      awardedBy: input.awardedBy ?? null,
+      createdAt: this.now(),
+      idempotencyKey: input.idempotencyKey,
+    };
+    this.events.push(event);
+
+    return Promise.resolve({
+      kind: 'recorded',
+      event,
+      balance: balance + input.points,
+    });
+  }
+
+  public balance(guildId: GuildId, userId: UserId): Promise<number> {
+    return Promise.resolve(this.sumFor(guildId, userId));
+  }
+
+  public async recordCheckIn(input: CheckInInput): Promise<CheckInOutcome> {
+    const key = `${input.guildId}:${input.userId}:${input.localDate}`;
+    if (this.checkIns.has(key)) {
+      return { kind: 'already_today', localDate: input.localDate };
+    }
+
+    const points = input.points ?? 0;
+    if (points === 0) {
+      this.checkIns.set(key, { event: null, at: this.now() });
+      return {
+        kind: 'recorded',
+        localDate: input.localDate,
+        event: null,
+        balance: this.sumFor(input.guildId, input.userId),
+      };
+    }
+
+    const outcome = await this.award({
+      guildId: input.guildId,
+      userId: input.userId,
+      kind: 'check_in',
+      points,
+      idempotencyKey: `check_in:${input.guildId}:${input.userId}:${input.localDate}`,
+      ...(input.correlationId ? { correlationId: input.correlationId } : {}),
+    });
+
+    if (outcome.kind === 'insufficient') {
+      throw new Error('A check-in award must be positive.');
+    }
+
+    this.checkIns.set(key, { event: outcome.event, at: this.now() });
+    return {
+      kind: 'recorded',
+      localDate: input.localDate,
+      event: outcome.event,
+      balance: outcome.balance,
+    };
+  }
+
+  public checkInDates(
+    guildId: GuildId,
+    userId: UserId,
+    since: LocalDate,
+  ): Promise<readonly LocalDate[]> {
+    const prefix = `${guildId}:${userId}:`;
+    const dates = [...this.checkIns.keys()]
+      .filter((key) => key.startsWith(prefix))
+      .map((key) => key.slice(prefix.length) as LocalDate)
+      .filter((date) => date >= since)
+      .sort()
+      .reverse();
+    return Promise.resolve(dates);
+  }
+
+  public countKindSince(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    since: Date,
+  ): Promise<number> {
+    const count = this.events.filter(
+      (event) =>
+        event.guildId === guildId &&
+        event.userId === userId &&
+        event.kind === kind &&
+        event.createdAt.getTime() >= since.getTime(),
+    ).length;
+    return Promise.resolve(count);
+  }
+
+  public leaderboard(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly LeaderboardEntry[]> {
+    const limit = Math.min(Math.max(options.limit ?? 10, 1), 25);
+    const totals = new Map<UserId, { points: number; events: number; first: number }>();
+
+    for (const event of this.events) {
+      if (event.guildId !== guildId) continue;
+      if (options.since && event.createdAt.getTime() < options.since.getTime()) continue;
+      const current = totals.get(event.userId) ?? {
+        points: 0,
+        events: 0,
+        first: event.createdAt.getTime(),
+      };
+      totals.set(event.userId, {
+        points: current.points + event.points,
+        events: current.events + 1,
+        first: Math.min(current.first, event.createdAt.getTime()),
+      });
+    }
+
+    const entries = [...totals.entries()]
+      .filter(([, value]) => value.points > 0)
+      .sort((a, b) => b[1].points - a[1].points || a[1].first - b[1].first)
+      .slice(0, limit)
+      .map(([userId, value]) => ({
+        userId,
+        points: value.points,
+        events: value.events,
+      }));
+
+    return Promise.resolve(entries);
+  }
+
+  public recentEvents(
+    guildId: GuildId,
+    userId: UserId,
+    limit = 10,
+  ): Promise<readonly PointEvent[]> {
+    const rows = this.events
+      .filter((event) => event.guildId === guildId && event.userId === userId)
+      .slice()
+      .reverse()
+      .slice(0, Math.min(Math.max(limit, 1), 50));
+    return Promise.resolve(rows);
+  }
+
+  private sumFor(guildId: GuildId, userId: UserId): number {
+    return this.events
+      .filter((event) => event.guildId === guildId && event.userId === userId)
+      .reduce((total, event) => total + event.points, 0);
+  }
+}
+
+interface FakePointEvent extends PointEvent {
+  readonly idempotencyKey: string;
+}
+
 export interface FakeRepositories extends Repositories {
   readonly identity: FakeIdentityRepository;
   readonly moderation: FakeModerationRepository;
@@ -1097,6 +1317,7 @@ export interface FakeRepositories extends Repositories {
   readonly telemetry: FakeTelemetryRepository;
   readonly jobs: FakeJobRunRepository;
   readonly settings: FakeSettingsRepository;
+  readonly rewards: FakeRewardsRepository;
 }
 
 /**
@@ -1122,6 +1343,7 @@ export function fakeRepositories(
     settings: new FakeSettingsRepository(),
     moderation: new FakeModerationRepository(now),
     cases: new FakeCaseRepository(now),
+    rewards: new FakeRewardsRepository(now),
   };
 }
 

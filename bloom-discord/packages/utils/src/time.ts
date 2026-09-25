@@ -118,3 +118,88 @@ export function discordTimestamp(
   const ms = typeof date === 'number' ? date : date.getTime();
   return `<t:${String(Math.floor(ms / 1000))}:${style}>`;
 }
+
+/* -----------------------------------------------------------------------------
+ * Calendar days
+ * ---------------------------------------------------------------------------*/
+
+/**
+ * A calendar date in a community's own timezone, as `YYYY-MM-DD`.
+ *
+ * Distinct from an instant, and deliberately so. "Have you checked in today?"
+ * is a question about a calendar day in a particular place, not about a
+ * 24-hour window: a member in Europe/London who checks in at 23:50 and again at
+ * 00:10 has checked in on two days, and one who checks in at 09:00 and 17:00
+ * has checked in on one.
+ *
+ * Storing the resolved local date rather than recomputing it from a timestamp
+ * also means the record does not change meaning if `BLOOM_TIMEZONE` is later
+ * edited — yesterday's check-in stays on the day it was made.
+ */
+export type LocalDate = string & { readonly __localDate: unique symbol };
+
+const LOCAL_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * The calendar date `instant` falls on in `timeZone`.
+ *
+ * `Intl` does the work because it is the only thing in the runtime that knows
+ * about daylight saving. Hand-rolled offset arithmetic gets this wrong twice a
+ * year, in the direction that awards someone two check-ins for one day.
+ */
+export function localDateIn(instant: Date | number, timeZone: string): LocalDate {
+  const date = typeof instant === 'number' ? new Date(instant) : instant;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+
+  const get = (type: 'year' | 'month' | 'day'): string =>
+    parts.find((part) => part.type === type)?.value ?? '';
+
+  const formatted = `${get('year')}-${get('month')}-${get('day')}`;
+  if (!LOCAL_DATE_PATTERN.test(formatted)) {
+    throw bloomError('CONFIGURATION_ERROR', {
+      operatorHint:
+        `Could not resolve a calendar date in timezone "${timeZone}". ` +
+        'BLOOM_TIMEZONE must be an IANA name such as "Europe/London".',
+      details: { timeZone },
+    });
+  }
+  return formatted as LocalDate;
+}
+
+/** Parse a `YYYY-MM-DD`, rejecting anything else. */
+export function parseLocalDate(value: string): LocalDate {
+  if (!LOCAL_DATE_PATTERN.test(value)) {
+    throw bloomError('INVALID_INPUT', {
+      operatorHint: `Expected a calendar date as YYYY-MM-DD, received "${value}".`,
+    });
+  }
+  return value as LocalDate;
+}
+
+/**
+ * Shift a calendar date by whole days.
+ *
+ * Arithmetic happens at midday UTC. A calendar date has no timezone, so the
+ * only hazard here is a date that lands on a DST boundary when interpreted as
+ * an instant; midday is twelve hours clear of every such shift in use.
+ */
+export function shiftLocalDate(date: LocalDate, days: number): LocalDate {
+  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);
+  const shifted = new Date(Date.UTC(year, month - 1, day, 12));
+  shifted.setUTCDate(shifted.getUTCDate() + days);
+  return localDateIn(shifted, 'UTC');
+}
+
+/** Whole days from `from` to `to`; negative when `to` is earlier. */
+export function localDaysBetween(from: LocalDate, to: LocalDate): number {
+  const at = (value: LocalDate): number => {
+    const [year = 0, month = 1, day = 1] = value.split('-').map(Number);
+    return Date.UTC(year, month - 1, day, 12);
+  };
+  return Math.round((at(to) - at(from)) / DAY_MS);
+}

@@ -6,7 +6,7 @@ import {
   testSubject,
   type RecordingResponder,
 } from '@bloom/testing';
-import type { SubcommandGroupSpec, SubcommandSpec } from '@bloom/commands';
+import { isSlashCommandSpec } from '@bloom/commands';
 import { companionHarness, type CompanionHarness } from './companion.harness.js';
 import { companionCommandSpecs } from './commands.js';
 
@@ -49,19 +49,29 @@ beforeEach(() => {
 });
 
 describe('Companion’s namespace', () => {
-  it('publishes exactly one top-level command', () => {
-    // Three bots in one server must not produce a wall of commands. Companion
-    // earns top-level names by need, not by default.
-    expect(companionCommandSpecs.map((spec) => spec.name)).toEqual(['companion']);
+  it('publishes three top-level commands, and no more', () => {
+    /*
+     * Three bots in one server must not produce a wall of commands. Companion
+     * earns top-level names by need: `/checkin` and `/win` are things a member
+     * does most days, and typing `/companion checkin` every morning is the kind
+     * of friction that quietly kills a habit feature. Everything else lives
+     * under the namespace.
+     */
+    expect(companionCommandSpecs.map((spec) => spec.name).sort()).toEqual([
+      'checkin',
+      'companion',
+      'win',
+    ]);
   });
 
   it('owns no moderation or role command', () => {
     const everySubcommand = companionCommandSpecs.flatMap((spec) => {
-      const subcommands: readonly SubcommandSpec[] = spec.subcommands ?? [];
-      const groups: readonly SubcommandGroupSpec[] = spec.groups ?? [];
+      // A context-menu entry has neither, and narrowing is how the compiler
+      // knows that — `?? []` on a union reads as defensive but types as `any`.
+      if (!isSlashCommandSpec(spec)) return [];
       return [
-        ...subcommands.map((sub) => sub.name),
-        ...groups.map((group) => group.name),
+        ...(spec.subcommands ?? []).map((sub) => sub.name),
+        ...(spec.groups ?? []).map((group) => group.name),
       ];
     });
 

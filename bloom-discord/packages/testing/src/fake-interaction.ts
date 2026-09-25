@@ -147,8 +147,21 @@ export class FakeOptions implements InteractionOptions {
   }
 }
 
+/**
+ * Interaction ids must differ between invocations.
+ *
+ * Discord issues a fresh id for every interaction, and code that keys
+ * idempotency on one — as the small-win award does — is only exercised
+ * correctly if the fake does the same. A constant id here made three separate
+ * commands look like one replayed command, which is a failure that would have
+ * shipped as "the daily cap works".
+ */
+let nextInteraction = 5001;
+
 export interface FakeInvocationOptions {
   readonly commandName: string;
+  /** Pin the id to replay one interaction deliberately, e.g. a Discord retry. */
+  readonly interactionId?: InteractionId;
   readonly subcommand?: string;
   readonly subcommandGroup?: string;
   readonly actor?: AuthorizationSubject;
@@ -181,7 +194,11 @@ export function fakeInvocation(options: FakeInvocationOptions): FakeInvocation {
   return {
     responder,
     invocation: {
-      interactionId: unsafeSnowflake<InteractionId>('900000000000005001'),
+      interactionId:
+        options.interactionId ??
+        unsafeSnowflake<InteractionId>(
+          `9000000000000${String(nextInteraction++).padStart(5, '0')}`,
+        ),
       commandName: options.commandName,
       commandPath,
       guildId: options.guildId === undefined ? TEST_GUILD_ID : options.guildId,

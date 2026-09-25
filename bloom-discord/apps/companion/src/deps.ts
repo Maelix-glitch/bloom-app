@@ -8,6 +8,7 @@ import type {
 } from '@bloom/discord';
 import type { Scheduler } from '@bloom/events';
 import type { Logger } from '@bloom/logging';
+import type { RewardsService } from './features/rewards/service.js';
 
 /**
  * Everything Companion's commands and jobs are given.
@@ -32,4 +33,7 @@ export interface CompanionDeps extends JobAdminDeps {
   readonly scheduler: Scheduler;
   /** Reads and writes the per-guild off switch for each job. */
   readonly jobSettings: JobSettingsService;
+
+  /** Check-ins, small wins, points, ranks — the whole rewards economy. */
+  readonly rewards: RewardsService;
 }

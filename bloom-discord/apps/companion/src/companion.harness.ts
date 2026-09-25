@@ -13,9 +13,20 @@ import {
   testConfig,
   type FakeRepositories,
 } from '@bloom/testing';
+import type { Clock } from '@bloom/utils';
 import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
+import { RewardsService } from './features/rewards/service.js';
+
+/**
+ * The harness clock, unless a test supplies its own.
+ *
+ * A Thursday, mid-afternoon in Europe/London, deliberately not near midnight:
+ * a default that sat at 23:55 would make every date-sensitive test pass or fail
+ * depending on which side of the day boundary the runner happened to land on.
+ */
+const HARNESS_NOW = new Date('2026-03-12T14:00:00.000Z');
 
 /**
  * A whole Companion, in memory.
@@ -42,6 +53,7 @@ export interface CompanionHarness {
   readonly scheduler: Scheduler;
   readonly lock: FakeJobLock;
   readonly jobSettings: JobSettingsService;
+  readonly rewards: RewardsService;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
 }
 
@@ -54,6 +66,15 @@ export interface CompanionHarnessOptions {
   readonly checkInChannel?: null;
   /** Turn FEATURE_SCHEDULED_MESSAGES off. Defaults to on inside the harness. */
   readonly scheduledMessages?: false;
+  /**
+   * Turn FEATURE_REWARDS off. Defaults to on, because a harness that silently
+   * awarded nothing would make every points assertion vacuously true.
+   */
+  readonly rewards?: false;
+  /** Unset the small-wins channel, so a shared win has nowhere to go. */
+  readonly smallWinsChannel?: null;
+  /** Fix the clock. Rewards are date-sensitive, so tests need to own "today". */
+  readonly now?: () => Date;
 }
 
 export function companionHarness(
@@ -65,20 +86,31 @@ export function companionHarness(
     channels: {
       ...base.channels,
       ...(options.checkInChannel === null ? { dailyCheckIn: null } : {}),
+      ...(options.smallWinsChannel === null
+        ? { smallWins: null }
+        : { smallWins: TEST_CHANNEL_IDS.smallWins }),
     },
     // On by default: a harness where every job is switched off would make the
     // job tests pass without running anything.
     features: {
       ...base.features,
       scheduledMessages: options.scheduledMessages !== false,
+      rewards: options.rewards !== false,
     },
   };
 
   const guild = new FakeGuild().withStandardRoles();
-  guild.withChannels(TEST_CHANNEL_IDS.dailyCheckIn, TEST_CHANNEL_IDS.welcome);
+  guild.withChannels(
+    TEST_CHANNEL_IDS.dailyCheckIn,
+    TEST_CHANNEL_IDS.welcome,
+    TEST_CHANNEL_IDS.smallWins,
+  );
 
   const messaging = new FakeMessaging(guild);
-  const repositories = fakeRepositories();
+  const clock: Clock = options.now
+    ? { now: () => options.now!().getTime(), date: () => options.now!() }
+    : { now: () => HARNESS_NOW.getTime(), date: () => HARNESS_NOW };
+  const repositories = fakeRepositories({ now: () => clock.date() });
   const { logger, sink } = createTestLogger();
 
   const lock = new FakeJobLock();
@@ -94,6 +126,14 @@ export function companionHarness(
     ...(config.features.scheduledMessages ? {} : { globallyDisabled: true }),
   });
 
+  const rewards = new RewardsService({
+    config,
+    repositories,
+    messaging,
+    logger,
+    clock,
+  });
+
   const deps: CompanionDeps = {
     bot: 'companion',
     config,
@@ -103,6 +143,7 @@ export function companionHarness(
     messaging,
     scheduler,
     jobSettings,
+    rewards,
   };
 
   // The same registration `main.ts` performs, so the command tests inspect the
@@ -135,6 +176,7 @@ export function companionHarness(
     scheduler,
     lock,
     jobSettings,
+    rewards,
     logs: sink,
   };
 }

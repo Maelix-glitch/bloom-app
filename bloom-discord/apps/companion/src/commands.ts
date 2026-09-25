@@ -5,8 +5,9 @@ import {
   type CommandSpec,
 } from '@bloom/commands';
 import { JOBS_GROUP_DESCRIPTION, jobSubcommands } from '@bloom/discord';
-import { allOf, requireModerator } from '@bloom/permissions';
+import { allOf, requireBloomMember } from '@bloom/permissions';
 import type { CompanionDeps } from './deps.js';
+import { rewardsCommands, rewardsSubcommands } from './features/rewards/commands.js';
 
 /**
  * The `/companion` namespace.
@@ -16,23 +17,36 @@ import type { CompanionDeps } from './deps.js';
  * second copy of the job surface would drift the first time one bot gained a
  * field the other did not.
  *
- * Staff-facing for now. Companion's member-facing surface arrives with the
- * features that need it; a namespace gated at Moderator is the safe default to
- * grow from, since widening a policy later is a deliberate act and narrowing
- * one is a breaking change nobody notices.
+ * ## Who can see it
+ *
+ * The namespace is gated at ❋ Bloom Member, not at Moderator. Most of what
+ * `/companion` does is a member reading their own progress, and a namespace
+ * that refused them would make the feature pointless.
+ *
+ * That widening is safe because every branch under `jobs` states its own floor
+ * — Moderator to read, Administrator to change — and a contribution's policy is
+ * evaluated after the namespace's, so it can only narrow. The operator surface
+ * did not move when the member surface arrived.
+ *
+ * Bloom Member rather than "anyone": these commands read and write a member's
+ * standing in the community, and onboarding is what makes someone a member of
+ * it. Guardian's `/verify` is the way in, and it requires no roles at all.
  */
 export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceCommand({
   bot: 'companion',
   name: 'companion',
-  description: 'Bloom Companion administration.',
-  // A client-side hint only. An administrator can override it per role and per
-  // channel, so `policy` below is the actual boundary.
-  defaultMemberPermissions: 'none',
-  policy: allOf(requireModerator()),
+  description: 'Bloom Companion: progress, rewards and administration.',
+  /*
+   * Deliberately no `defaultMemberPermissions`. This command is for members, so
+   * hiding it by default would be wrong — and the client-side hint was never
+   * the boundary in either direction. `policy`, and the per-branch policies
+   * under it, are what actually decide.
+   */
+  policy: allOf(requireBloomMember()),
   groupDescriptions: {
     jobs: JOBS_GROUP_DESCRIPTION,
   },
-  contributions: [...jobSubcommands<CompanionDeps>()],
+  contributions: [...rewardsSubcommands, ...jobSubcommands<CompanionDeps>()],
 });
 
 /**
@@ -45,6 +59,7 @@ export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceC
  */
 export const companionCommands: readonly BloomCommand<CompanionDeps>[] = [
   companionNamespaceCommand,
+  ...rewardsCommands,
 ];
 
 export const companionCommandSpecs: readonly CommandSpec[] = companionCommands.map(

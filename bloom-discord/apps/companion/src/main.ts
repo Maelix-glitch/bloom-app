@@ -18,12 +18,20 @@ import { commandTelemetry, runBotMain, startBotProcess } from '@bloom/discord';
 import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
+import { RewardsService } from './features/rewards/service.js';
 
 await runBotMain(() =>
   startBotProcess<CompanionDeps>({
     bot: 'companion',
 
     createDeps(context) {
+      const rewards = new RewardsService({
+        config: context.platform,
+        repositories: context.repositories,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+      });
+
       return {
         bot: 'companion',
         config: context.platform,
@@ -33,6 +41,7 @@ await runBotMain(() =>
         messaging: context.discord.messaging,
         scheduler: context.scheduler,
         jobSettings: context.jobSettings,
+        rewards,
       };
     },
 

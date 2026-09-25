@@ -1,7 +1,7 @@
 import { bloomError, type BotName, type GuildId } from '@bloom/shared-types';
 import type { PlatformConfig } from '@bloom/config';
 import type { AuditEventRepository, JobRunRepository } from '@bloom/database';
-import { requireAdministrator } from '@bloom/permissions';
+import { requireAdministrator, requireModerator } from '@bloom/permissions';
 import { staffEmbed, type BloomMessage } from '@bloom/embeds';
 import { discordTimestamp, pluralise } from '@bloom/utils';
 import type { JobStatus, Scheduler } from '@bloom/events';
@@ -378,10 +378,17 @@ const jobOption = {
 /**
  * The `jobs` subcommand group, for any bot that schedules work.
  *
- * `list` and `history` inherit the namespace's policy — read-only diagnosis is
- * moderator-level. The three that change something demand Administrator: they
- * can make the bot post on demand, or silence a job the community relies on,
- * and neither is a moderation action.
+ * Every branch states its own floor rather than inheriting one. `list` and
+ * `history` require Moderator; the three that change something require
+ * Administrator, because they can make the bot post on demand or silence a job
+ * the community relies on, and neither is a moderation action.
+ *
+ * Stating the floor is what makes this surface safe to mount anywhere. It first
+ * mattered in Phase 5, when `/companion` widened to Bloom Member so that
+ * members could read their own rewards profile: had `list` still inherited the
+ * namespace policy, widening one branch would have quietly opened the operator
+ * diagnostics to the whole server. A contribution's policy can only narrow the
+ * namespace's, so declaring it here cannot loosen anything either.
  */
 export function jobSubcommands<
   TDeps extends JobAdminDeps,
@@ -399,6 +406,7 @@ export function jobSubcommands<
         name: 'list',
         description: 'Show every scheduled job and when it next runs.',
       },
+      policy: requireModerator(),
       execute: listJobs,
     },
     {
@@ -408,6 +416,7 @@ export function jobSubcommands<
         description: 'Show the last recorded run of a job, including failures.',
         options: [jobOption],
       },
+      policy: requireModerator(),
       execute: jobHistory,
     },
     {
