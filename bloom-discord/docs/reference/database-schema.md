@@ -236,6 +236,64 @@ description does not appear in either.
 meaning without its case and no reason to outlive it — the opposite of a ban
 record. Deleting the case is how the content gets deleted.
 
+### `point_events` — Phase 5
+
+The Bloom Rewards ledger. `guild_id`, `user_id`, `kind`
+(`check_in` | `small_win` | `manual_award` | `adjustment`), `points` (signed,
+never zero), `reason`, `awarded_by`, `idempotency_key`, `correlation_id`,
+`created_at`.
+
+**Append-only, and there is no balance column.** A balance is `SUM(points)`,
+computed on read. That is a deliberate trade of a little query cost for a
+property worth more than it: a stored total is a second source of truth, and a
+second source of truth about someone's points is a support ticket waiting to
+happen. Corrections are negative `adjustment` rows; nothing is ever edited or
+deleted.
+
+Three constraints carry rules the application would otherwise have to remember:
+
+| Constraint                           | What it prevents                                                    |
+| ------------------------------------ | ------------------------------------------------------------------- |
+| `UNIQUE (guild_id, idempotency_key)` | A replayed interaction paying twice                                 |
+| `point_events_actor_matches_kind`    | A job attributing itself to a moderator, or an unattributable grant |
+| `point_events_manual_needs_reason`   | Staff discretion with no record of why                              |
+
+`idempotency_key` also carries a length floor of 8. A one-character key is
+almost always a caller that has not thought about what makes the operation
+unique, and the collisions it would cause are silent — two unrelated awards
+sharing the key `a` look exactly like a correctly-prevented duplicate.
+
+Balances cannot go negative, but no constraint can say so: there is no row to
+constrain. `award()` takes a transaction-scoped advisory lock keyed on the
+member before any negative entry, checks the sum, and refuses to overdraw.
+Positive awards skip the lock — they are the hot path and cannot overdraw.
+
+### `check_ins` — Phase 5
+
+`PRIMARY KEY (guild_id, user_id, local_date)`, plus `point_event_id` and
+`created_at`.
+
+**The primary key is the once-a-day rule.** Not a `SELECT` then an `INSERT`,
+which races with itself under a double-tap.
+
+`local_date` is the calendar date in `BLOOM_TIMEZONE`, resolved by the
+application and stored. Not derived from `created_at`, for two reasons:
+`now()::date` is UTC and would roll the day over at midnight UTC, handing a
+member in Australia two check-ins for one evening; and storing the resolved date
+means editing `BLOOM_TIMEZONE` later cannot rewrite the meaning of check-ins
+already recorded.
+
+`point_event_id` is nullable, and NULL is a real state rather than a missing
+one: the check-in was recorded while `FEATURE_REWARDS` was off. The
+participation happened and earned nothing, and back-filling points for it later
+would be inventing history.
+
+**No column stores what anybody wrote.** `/checkin` takes no text at all, and
+the description a member gives `/win` goes to the small-wins channel and nowhere
+else — not the ledger, not the audit row, not the logs. A daily record of how
+everyone in the community is feeling is sensitive data with no operational
+purpose, and the safest way to hold it is not to.
+
 ---
 
 ## The transition contract
@@ -294,11 +352,18 @@ rather than shown an error suggesting something is broken.
 
 ## What is not here yet
 
-Phases 0–2 ship the base, onboarding and moderation: identity, audit,
+Phases 0–5 ship the base, onboarding, moderation and rewards: identity, audit,
 idempotency, jobs, cooldowns, settings, telemetry, transitions, verification
-attempts, cases, case events, case counters, moderation actions and reports.
-Feature tables arrive with the phase that owns them — rewards ledgers in Phase
-4, cohorts and feedback in Phase 5.
+attempts, cases, case events, case counters, moderation actions, reports, point
+events and check-ins.
+
+Still to come, each with the phase that owns it: challenges and milestones
+(Companion), cohorts, feedback, votes and bug intake (Labs).
+
+Two tables that were expected and are **not** here. The per-guild job switch
+needed no table of its own — `bot_settings` already was a per-guild, per-bot
+setting with an author. And there is no `member_points` aggregate: see
+`point_events` above for why a stored balance was rejected.
 
 Adding them later is a new numbered migration. Existing migrations are immutable
 once applied.
@@ -308,11 +373,11 @@ once applied.
 ## Verification status
 
 The schema **has been executed against a live PostgreSQL 18.4 instance** as of
-Phase 2. All five migrations apply cleanly from empty, re-running is a no-op,
+Phase 5. All six migrations apply cleanly from empty, re-running is a no-op,
 the seed loads, and the drift guard was confirmed by deliberately editing an
 applied file and watching the migrator refuse with `CONFIGURATION_ERROR`.
 
-Twenty-two integration tests exercise the repositories against that database,
+Forty-nine integration tests exercise the repositories against that database,
 covering the behaviour unit tests with fakes cannot reach:
 
 - Two simultaneous `transition()` calls on the same member produce exactly one
@@ -324,6 +389,13 @@ covering the behaviour unit tests with fakes cannot reach:
 - Deleting a case leaves its `moderation_actions` rows behind with a null
   `case_id`.
 - The Postgres enums and the TypeScript unions contain exactly the same values.
+- Ten workers replaying one award insert exactly one ledger row between them.
+- Two concurrent −50 corrections against a balance of 60 apply once, not twice:
+  the advisory lock serialises them where no constraint could.
+- Two simultaneous check-ins on the same local day produce one `recorded` and
+  one `already_today`.
+- `bot_settings` accepts `job.` + an 80-character job key, and `bot_name`
+  really does keep Guardian's rows out of Companion's reads.
 
 ```bash
 set -a && . ./.env && set +a

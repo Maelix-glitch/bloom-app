@@ -1,7 +1,7 @@
 # Command reference
 
-**Live as of Phase 4: verification, onboarding, moderation, reports and cases,
-scheduled work, and Companion's daily check-in prompt.**
+**Live as of Phase 5: verification, onboarding, moderation, reports and cases,
+scheduled work, and Companion's check-in, small wins and Bloom Rewards.**
 Everything else in this document is planned, not built, and is marked with the
 phase that delivers it.
 The platform does not pretend otherwise — the registrar publishes only what the
@@ -225,35 +225,57 @@ worth doing, but they are additive rather than enabling.
 
 ## BLOOM COMPANION
 
-Companion has exactly one top-level command. It holds no roles, no moderation,
-and — as of Phase 4 — one scheduled surface.
+Companion holds no roles and no moderation. It has three top-level commands and
+one namespace.
 
 ### Built
 
-| Command                         | Policy            | Description                                   |  Phase   |
-| ------------------------------- | ----------------- | --------------------------------------------- | :------: |
-| `/companion jobs list`          | Moderator         | Companion's jobs, schedules and next runs     | **4 ✅** |
-| `/companion jobs history <job>` | Moderator         | The last recorded runs, including the failure | **4 ✅** |
-| `/companion jobs run <job>`     | **Administrator** | Run a job now, without waiting for its cron   | **4 ✅** |
-| `/companion jobs enable <job>`  | **Administrator** | Switch a job on for this server               | **4 ✅** |
-| `/companion jobs disable <job>` | **Administrator** | Switch a job off for this server              | **4 ✅** |
+| Command                           | Policy            | Description                                   |  Phase   |
+| --------------------------------- | ----------------- | --------------------------------------------- | :------: |
+| `/checkin`                        | Bloom Member      | Check in for today                            | **5 ✅** |
+| `/win <description>`              | Bloom Member      | Share something that went well                | **5 ✅** |
+| `/companion profile [member]`     | Bloom Member      | Points, rank, streak and recent activity      | **5 ✅** |
+| `/companion rank`                 | Bloom Member      | Your rank and what is next                    | **5 ✅** |
+| `/companion leaderboard [period]` | Bloom Member      | Who earned the most in the last 7 or 30 days  | **5 ✅** |
+| `/companion jobs list`            | Moderator         | Companion's jobs, schedules and next runs     | **4 ✅** |
+| `/companion jobs history <job>`   | Moderator         | The last recorded runs, including the failure | **4 ✅** |
+| `/companion jobs run <job>`       | **Administrator** | Run a job now, without waiting for its cron   | **4 ✅** |
+| `/companion jobs enable <job>`    | **Administrator** | Switch a job on for this server               | **4 ✅** |
+| `/companion jobs disable <job>`   | **Administrator** | Switch a job off for this server              | **4 ✅** |
 
-The one job behind them is `companion.checkin.daily_prompt`: a short prompt
-posted to `CHANNEL_DAILY_CHECK_IN` at 09:00 in `BLOOM_TIMEZONE`. It posts a
-conversation starter and nothing else — **it does not record or reward a
-check-in**, because nothing yet does. `/checkin` below is the command that will,
-and it is not built.
+`/checkin` and `/win` are top-level because they are things a member does most
+days, and `/companion checkin` every morning is the kind of friction that
+quietly kills a habit feature. Everything else is under the namespace.
+
+**`/checkin` deliberately takes no text.** The obvious design is a mood field,
+and it is the wrong one: it would make this platform the custodian of a daily
+record of how everybody is feeling — sensitive data, no operational use, and
+real consequences if it leaked. Members who want to say how they are can reply
+in the channel, where their words stay theirs. `/win` does take text, and that
+text goes to the small-wins channel and nowhere else; the ledger records that a
+win was shared, never what it said.
+
+Every one of these replies **ephemerally**. Points are personal, and a public
+reply to `/checkin` would turn a quiet daily habit into a performance. The one
+thing that goes public is a shared win, because sharing it is the point.
+
+The namespace is gated at ❋ Bloom Member rather than Moderator. That widening
+is safe because each `jobs` branch states its own floor, and a contribution's
+policy is evaluated after the namespace's, so it can only narrow.
+
+Behind them: `companion.checkin.daily_prompt` posts a prompt to
+`CHANNEL_DAILY_CHECK_IN` at 09:00 in `BLOOM_TIMEZONE`. It is a conversation
+starter and nothing more — replying to it in the channel does not check anyone
+in. `/checkin` is what records the day.
+
+Full detail on what each action pays and why: [Bloom Rewards](../operations/bloom-rewards.md).
 
 ### Planned
 
 | Command                                             | Policy        | Description                  | Phase |
 | --------------------------------------------------- | ------------- | ---------------------------- | :---: |
-| `/checkin`                                          | Bloom Member  | Daily check-in               |   3   |
-| `/win <description>`                                | Bloom Member  | Share a small win            |   3   |
-| `/companion profile [member]`                       | Bloom Member  | Points, rank, streak         |   3   |
-| `/companion rank`                                   | Bloom Member  | Your rank and what is next   |   3   |
-| `/companion leaderboard`                            | Bloom Member  | Top members this period      |   3   |
-| `/companion milestones`                             | Bloom Member  | Milestones reached           |   3   |
+| `/companion milestones`                             | Bloom Member  | Milestones reached           |   6   |
+| `/companion achievements`                           | Bloom Member  | Achievements earned          |   6   |
 | `/challenge list`                                   | Bloom Member  | Active challenges            |   4   |
 | `/challenge join <id>`                              | Bloom Member  | Join one                     |   4   |
 | `/companion admin award <member> <points> <reason>` | Administrator | Manual award, always audited |   3   |
@@ -262,8 +284,11 @@ and it is not built.
 `jobs` group does that job for every bot, and a second way to toggle the same
 setting would eventually disagree with the first.
 
-Leaderboards are period-scoped and show a small number of entries. An
-all-time-ranked list of every member is a status game, not a wellbeing feature.
+Leaderboards are period-scoped — last 7 or 30 days — and show ten entries. There
+is deliberately **no all-time board**: it ranks how long someone has been here,
+which nobody can change, it never changes at the top, and the only thing it
+tells a member who joined last week is that they cannot win. The absence is
+asserted in a test so it is not re-added as an oversight.
 
 ---
 

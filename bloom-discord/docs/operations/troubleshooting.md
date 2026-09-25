@@ -209,6 +209,59 @@ after.
 
 ---
 
+## Bloom Rewards
+
+Most of this section is answered by one query, because the ledger is
+append-only and every point has a row:
+
+```sql
+SELECT created_at, kind, points, reason, awarded_by
+FROM bloom_discord.point_events
+WHERE guild_id = '<guild>' AND user_id = '<member>'
+ORDER BY created_at DESC;
+```
+
+### A member earned no points
+
+- `FEATURE_REWARDS` defaults to **false**. Check-ins and wins still work and
+  still say so; they simply pay nothing, and `/companion profile` says that
+  plainly rather than showing an empty economy.
+- The daily small-win cap is three. The fourth win still posts and still does
+  not pay — that is the design, not a fault.
+- `/checkin` pays once per calendar day in `BLOOM_TIMEZONE`, not once per 24
+  hours.
+
+### `/win` posted but the member says they got nothing
+
+Read the ledger. A `small_win` row exists or it does not, and if it does not,
+the cap or the feature flag explains it. The one case worth escalating is a
+posted win with no row **and** a count below the cap, which would mean the award
+threw after the post — look for the correlation id in the logs.
+
+### A balance looks wrong
+
+It is a `SUM` over the rows above, so it cannot disagree with them. Correct it
+by **appending** a negative `adjustment` with a reason and an actor; never
+`UPDATE` or `DELETE`. The CHECK constraints refuse an unattributed or
+unexplained correction on purpose. See
+[Bloom Rewards](bloom-rewards.md#operating-it).
+
+### A correction was refused
+
+`award()` returns `insufficient` rather than taking a balance below zero. Two
+staff correcting the same mistake at the same moment is the usual cause — an
+advisory lock serialises them, so the second one sees the first one's result and
+declines.
+
+### A streak looks short
+
+Streaks count consecutive calendar days in `BLOOM_TIMEZONE`, ending today or
+yesterday. A member who checks in at 00:10 and then not until 23:50 two nights
+later has missed a day, correctly. Check `BLOOM_TIMEZONE` matches the community
+rather than the server's location.
+
+---
+
 ## Database
 
 ### `Checksum drift in …`
