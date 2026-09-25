@@ -17,6 +17,15 @@ export interface RuntimeConfig {
   readonly environment: BloomEnvironment;
   /** Reported by /health and stamped on every log line. */
   readonly version: string;
+  /**
+   * IANA zone every schedule is evaluated in.
+   *
+   * A single community-wide zone rather than per-member: "the check-in prompt
+   * appears at 09:00" has to mean one time, or it is not a shared moment. It
+   * must be a named zone, not an offset, so that 09:00 stays 09:00 across
+   * daylight saving rather than drifting by an hour twice a year.
+   */
+  readonly timezone: string;
 }
 
 export interface LoggingConfig {

@@ -23,7 +23,9 @@ import {
 } from '@bloom/database';
 import { newCorrelationId, withCorrelation } from '@bloom/utils';
 import { hasCapability } from '@bloom/shared-types';
+import { Scheduler } from '@bloom/events';
 import { createBotClient } from './client.js';
+import { DatabaseJobLock } from './scheduler-lock.js';
 import { DiscordGuildQueryService } from './services/guild-query.js';
 import { DiscordMessagingService } from './services/messaging.js';
 import { DiscordRoleService } from './services/role-service.js';
@@ -128,6 +130,20 @@ export interface BotBootstrapContext {
   readonly database: Database;
   readonly repositories: Repositories;
   readonly discord: DiscordServices;
+  /**
+   * The one scheduler in this process.
+   *
+   * Handed to features to register into, rather than each feature owning a
+   * timer. The brief forbids scattered `setInterval`, and the reason is not
+   * tidiness: a job outside this object has no lease, so two replicas both run
+   * it; no `job_runs` row, so nobody can tell whether it fired; and no off
+   * switch. Registering here buys all three.
+   *
+   * Constructed before the features so that dependency containers can hold it
+   * — `/guardian jobs` needs to ask it what is scheduled — but not started
+   * until after the gateway is up.
+   */
+  readonly scheduler: Scheduler;
 }
 
 export interface RunningBotProcess {
@@ -207,6 +223,22 @@ export async function startBotProcess<TDeps>(
       ? new DiscordChannelModerationService(client, logger, options.bot)
       : null;
 
+    /*
+     * The scheduler, empty until features register into it.
+     *
+     * `globallyDisabled` mirrors FEATURE_SCHEDULED_MESSAGES. Jobs still
+     * register when it is off, so `/guardian jobs list` can show what exists
+     * and report it as disabled — an empty list would look like a deployment
+     * problem rather than a deliberate switch.
+     */
+    const scheduler = new Scheduler({
+      bot: options.bot,
+      logger,
+      timezone: platform.runtime.timezone,
+      lock: new DatabaseJobLock(repositories.jobs),
+      ...(platform.features.scheduledMessages ? {} : { globallyDisabled: true }),
+    });
+
     const context: BotBootstrapContext = {
       bot: options.bot,
       config,
@@ -215,6 +247,7 @@ export async function startBotProcess<TDeps>(
       database,
       repositories,
       discord: { guilds, messaging, roles, moderation, channelModeration },
+      scheduler,
     };
 
     const deps = options.createDeps(context);
@@ -230,7 +263,8 @@ export async function startBotProcess<TDeps>(
      */
     const commandCount = features.commandCount ?? (features.commands ? 1 : 0);
     const handlerCount = features.events?.registeredEvents().length ?? 0;
-    if (commandCount === 0 && handlerCount === 0) {
+    const jobCount = scheduler.status().length;
+    if (commandCount === 0 && handlerCount === 0 && jobCount === 0) {
       await database.close();
       throw bloomError('NOT_IMPLEMENTED', {
         operatorHint:
@@ -243,14 +277,22 @@ export async function startBotProcess<TDeps>(
 
     logger.info(
       'startup.features_ready',
-      `${String(commandCount)} command(s), ${String(handlerCount)} gateway event(s).`,
+      `${String(commandCount)} command(s), ${String(handlerCount)} gateway event(s), ${String(jobCount)} scheduled job(s).`,
       {
         context: {
           command_count: commandCount,
+          job_count: jobCount,
           events: [...(features.events?.registeredEvents() ?? [])],
         },
       },
     );
+
+    if (jobCount > 0 && !platform.features.scheduledMessages) {
+      logger.warn(
+        'scheduler.globally_disabled',
+        `FEATURE_SCHEDULED_MESSAGES is off, so all ${String(jobCount)} registered job(s) will stay idle.`,
+      );
+    }
 
     // 5. Signals first, so a stop during startup is still clean.
     let healthServer: Server | null = null;
@@ -265,6 +307,9 @@ export async function startBotProcess<TDeps>(
       ...(options.onReady ? { onReady: () => onReadyHook(options, context, deps) } : {}),
       onShutdown: async () => {
         healthServer?.close();
+        // Before the database closes: stopping waits for in-flight runs to
+        // finish releasing their leases, and releasing a lease is a write.
+        await scheduler.stop();
         await database.close();
       },
     });
@@ -279,7 +324,16 @@ export async function startBotProcess<TDeps>(
     // 6. Gateway.
     await runtime.login();
 
-    // 7. Health, last — readiness now means the bot is genuinely usable.
+    /*
+     * 7. Jobs, once the gateway is actually usable.
+     *
+     * After login, because a job that posts a message would otherwise fire
+     * against a client that has not connected, and "failed because it started
+     * too early" is a confusing thing to find in `job_runs`.
+     */
+    scheduler.start();
+
+    // 8. Health, last — readiness now means the bot is genuinely usable.
     const healthPort = Number.parseInt(process.env['HEALTH_PORT'] ?? '0', 10);
     if (healthPort > 0) {
       healthServer = startHealthServer({

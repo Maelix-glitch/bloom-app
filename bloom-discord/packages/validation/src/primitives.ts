@@ -63,6 +63,32 @@ export const envBooleanSchema = z
   .transform((value) => ['true', '1', 'yes', 'on'].includes(value));
 
 /** Positive integer from an env string, with bounds. */
+/**
+ * An IANA time zone name.
+ *
+ * Validated by asking the platform's own tz database rather than matching a
+ * pattern — `Europe/Londen` is correctly shaped and does not exist, and the
+ * failure would otherwise surface as a job silently running at the wrong hour.
+ * Node 24 ships full ICU, so this is a real lookup.
+ */
+export const timezoneSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => {
+      try {
+        new Intl.DateTimeFormat('en-GB', { timeZone: value });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message:
+        'Not a recognised IANA time zone. Use a name like "Europe/London" or "Asia/Kolkata", not an offset like "GMT+1" — an offset cannot know about daylight saving.',
+    },
+  );
+
 export function envIntSchema(min: number, max: number) {
   return z
     .string()

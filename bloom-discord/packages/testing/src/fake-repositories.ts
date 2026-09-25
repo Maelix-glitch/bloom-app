@@ -45,6 +45,7 @@ import type {
   JobLease,
   JobRunRepository,
   JobRunSummary,
+  JobStatus,
   MemberRecord,
   OnboardingRepository,
   OnboardingTransitionInput,
@@ -450,21 +451,159 @@ export class FakeTelemetryRepository implements TelemetryRepository {
   }
 }
 
-class FakeJobRunRepository implements JobRunRepository {
-  public acquire(): Promise<JobLease | null> {
-    return Promise.resolve(null);
+interface StoredJobRun {
+  runId: string;
+  jobKey: string;
+  guildId: GuildId | null;
+  status: JobStatus;
+  runnerId: string;
+  attempt: number;
+  startedAt: Date;
+  finishedAt: Date | null;
+  leaseExpiresAt: Date;
+  errorCode: string | null;
+  errorMessage: string | null;
+}
+
+/**
+ * In-memory `job_runs`.
+ *
+ * A real implementation rather than a set of stubs returning `null`: a fake
+ * whose `lastRun` always answers "nothing" makes every test of job history pass
+ * without asserting anything. This one enforces the property the real table
+ * enforces with a partial unique index — one live run per (jobKey, guildId) —
+ * so tests of the lock are testing the same rule production is.
+ */
+export class FakeJobRunRepository implements JobRunRepository {
+  public readonly runs: StoredJobRun[] = [];
+  private nextId = 1;
+
+  public constructor(private readonly now: () => Date = () => new Date()) {}
+
+  public acquire(input: {
+    readonly jobKey: string;
+    readonly botName: BotName;
+    readonly guildId?: GuildId | null;
+    readonly runnerId: string;
+    readonly leaseSeconds: number;
+  }): Promise<JobLease | null> {
+    const guildId = input.guildId ?? null;
+    const at = this.now();
+
+    // Mirrors the repository, which reclaims lapsed leases before trying.
+    this.reclaim(at);
+
+    const live = this.runs.find(
+      (run) =>
+        run.status === 'running' &&
+        run.jobKey === input.jobKey &&
+        run.guildId === guildId,
+    );
+    if (live) return Promise.resolve(null);
+
+    const previous = this.runs.filter(
+      (run) => run.jobKey === input.jobKey && run.guildId === guildId,
+    ).length;
+
+    const lease = Math.min(Math.max(input.leaseSeconds, 5), 3600);
+    const run: StoredJobRun = {
+      runId: `run-${String(this.nextId++)}`,
+      jobKey: input.jobKey,
+      guildId,
+      status: 'running',
+      runnerId: input.runnerId,
+      attempt: previous + 1,
+      startedAt: at,
+      finishedAt: null,
+      leaseExpiresAt: new Date(at.getTime() + lease * 1000),
+      errorCode: null,
+      errorMessage: null,
+    };
+    this.runs.push(run);
+
+    return Promise.resolve({
+      runId: run.runId,
+      jobKey: run.jobKey,
+      attempt: run.attempt,
+      leaseExpiresAt: run.leaseExpiresAt,
+    });
   }
-  public renew(): Promise<boolean> {
+
+  public renew(runId: string, leaseSeconds: number): Promise<boolean> {
+    const run = this.runs.find((entry) => entry.runId === runId);
+    if (run?.status !== 'running') return Promise.resolve(false);
+    run.leaseExpiresAt = new Date(this.now().getTime() + leaseSeconds * 1000);
     return Promise.resolve(true);
   }
-  public complete(): Promise<void> {
+
+  public complete(
+    runId: string,
+    status: Exclude<JobStatus, 'running'>,
+    outcome?: {
+      readonly errorCode?: string | null;
+      readonly errorMessage?: string | null;
+    },
+  ): Promise<void> {
+    const run = this.runs.find((entry) => entry.runId === runId);
+    if (run) {
+      run.status = status;
+      run.finishedAt = this.now();
+      run.errorCode = outcome?.errorCode ?? null;
+      run.errorMessage = outcome?.errorMessage ?? null;
+    }
     return Promise.resolve();
   }
+
   public reclaimExpired(): Promise<number> {
-    return Promise.resolve(0);
+    return Promise.resolve(this.reclaim(this.now()));
   }
-  public lastRun(): Promise<JobRunSummary | null> {
-    return Promise.resolve(null);
+
+  /**
+   * A lapsed lease becomes `timed_out`, not `failed`.
+   *
+   * The distinction is the one the real schema draws and it carries real
+   * information: `failed` means the job ran and raised, `timed_out` means
+   * nobody ever heard back. They point at different problems.
+   */
+  private reclaim(at: Date): number {
+    let reclaimed = 0;
+    for (const run of this.runs) {
+      if (run.status === 'running' && run.leaseExpiresAt <= at) {
+        run.status = 'timed_out';
+        run.finishedAt = at;
+        run.errorCode = 'INTERNAL_ERROR';
+        run.errorMessage = 'Lease expired before the run reported back.';
+        reclaimed += 1;
+      }
+    }
+    return reclaimed;
+  }
+
+  public lastRun(
+    jobKey: string,
+    guildId?: GuildId | null,
+  ): Promise<JobRunSummary | null> {
+    const wanted = guildId ?? null;
+    const run = [...this.runs]
+      .reverse()
+      .find((entry) => entry.jobKey === jobKey && entry.guildId === wanted);
+    if (!run) return Promise.resolve(null);
+
+    return Promise.resolve({
+      runId: run.runId,
+      jobKey: run.jobKey,
+      status: run.status,
+      startedAt: run.startedAt,
+      finishedAt: run.finishedAt,
+      durationMs:
+        run.finishedAt === null
+          ? null
+          : run.finishedAt.getTime() - run.startedAt.getTime(),
+      errorCode: run.errorCode,
+      errorMessage: run.errorMessage,
+      runnerId: run.runnerId,
+      attempt: run.attempt,
+    });
   }
 }
 
@@ -902,6 +1041,7 @@ export interface FakeRepositories extends Repositories {
   readonly idempotency: FakeIdempotencyRepository;
   readonly cooldowns: FakeCooldownRepository;
   readonly telemetry: FakeTelemetryRepository;
+  readonly jobs: FakeJobRunRepository;
 }
 
 /**
@@ -923,7 +1063,7 @@ export function fakeRepositories(
     idempotency: new FakeIdempotencyRepository(),
     cooldowns: new FakeCooldownRepository(() => now().getTime()),
     telemetry: new FakeTelemetryRepository(),
-    jobs: new FakeJobRunRepository(),
+    jobs: new FakeJobRunRepository(now),
     settings: new FakeSettingsRepository(),
     moderation: new FakeModerationRepository(now),
     cases: new FakeCaseRepository(now),

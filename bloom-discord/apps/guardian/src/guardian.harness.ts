@@ -1,4 +1,6 @@
+import type { PlatformConfig } from '@bloom/config';
 import { CommandDispatcher, CommandRegistry } from '@bloom/commands';
+import { Scheduler } from '@bloom/events';
 import { DatabaseRateLimiter, TokenBucketRateLimiter } from '@bloom/security';
 import {
   createTestLogger,
@@ -6,6 +8,7 @@ import {
   fakeRepositories,
   FakeChannelModerationService,
   FakeGuild,
+  FakeJobLock,
   FakeMessaging,
   FakeModerationService,
   FakeRoleService,
@@ -19,6 +22,7 @@ import { OnboardingService } from './features/onboarding/service.js';
 import { ModerationActionService } from './features/moderation/service.js';
 import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
+import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
 
 /**
  * A whole Guardian, in memory.
@@ -45,6 +49,9 @@ export interface GuardianHarness {
   readonly moderation: FakeModerationService;
   readonly channels: FakeChannelModerationService;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
+  /** The scheduler the harness built, with Guardian's real jobs registered. */
+  readonly scheduler: Scheduler;
+  readonly lock: FakeJobLock;
 }
 
 export interface GuardianHarnessOptions {
@@ -54,17 +61,38 @@ export interface GuardianHarnessOptions {
    * real consequences, so a test has to ask for it.
    */
   readonly reportsChannel?: null;
+  /**
+   * Unset the moderation channel, so the stale-case job has nowhere to post.
+   * Exercises the "registered but disabled" path.
+   */
+  readonly moderationChannel?: null;
+  /** Turn FEATURE_SCHEDULED_MESSAGES off. Defaults to on inside the harness. */
+  readonly scheduledMessages?: false;
 }
 
 export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianHarness {
   // testConfig() already configures every channel, reports included.
   const base = testConfig();
-  const config =
-    options.reportsChannel === null
-      ? { ...base, channels: { ...base.channels, reports: null } }
-      : base;
+  const config: PlatformConfig = {
+    ...base,
+    channels: {
+      ...base.channels,
+      ...(options.reportsChannel === null ? { reports: null } : {}),
+      ...(options.moderationChannel === null ? { moderation: null } : {}),
+    },
+    // On by default: a harness where every job is switched off would make the
+    // job tests pass without running anything.
+    features: {
+      ...base.features,
+      scheduledMessages: options.scheduledMessages !== false,
+    },
+  };
   const guild = new FakeGuild().withStandardRoles();
-  guild.withChannels(TEST_CHANNEL_IDS.welcome, TEST_CHANNEL_IDS.reports);
+  guild.withChannels(
+    TEST_CHANNEL_IDS.welcome,
+    TEST_CHANNEL_IDS.reports,
+    TEST_CHANNEL_IDS.moderation,
+  );
 
   const roles = new FakeRoleService(guild);
   const messaging = new FakeMessaging(guild);
@@ -73,10 +101,20 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
   const repositories = fakeRepositories();
   const { logger, sink } = createTestLogger();
 
+  const lock = new FakeJobLock();
+  const scheduler = new Scheduler({
+    bot: 'guardian',
+    logger,
+    timezone: config.runtime.timezone,
+    lock,
+    ...(config.features.scheduledMessages ? {} : { globallyDisabled: true }),
+  });
+
   const deps: GuardianDeps = {
     config,
     logger,
     repositories,
+    scheduler,
     guilds: guild,
     roles,
     messaging,
@@ -118,6 +156,12 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
     ),
   };
 
+  /*
+   * The same registration `main.ts` performs, so the command tests inspect the
+   * real job list rather than a fixture that can drift from it.
+   */
+  scheduler.register(createStaleCaseSweepJob(deps));
+
   const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
     guardianCommands,
   );
@@ -145,5 +189,7 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
     moderation,
     channels,
     logs: sink,
+    scheduler,
+    lock,
   };
 }

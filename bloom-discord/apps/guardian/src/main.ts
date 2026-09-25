@@ -26,6 +26,7 @@ import { ModerationActionService } from './features/moderation/service.js';
 import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
 import { memberJoinHandler, memberLeaveHandler } from './features/onboarding/handlers.js';
+import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
 
 /**
  * Advisories from the most recent role audit.
@@ -103,6 +104,7 @@ await runBotMain(() =>
         config: context.platform,
         logger: context.logger,
         repositories: context.repositories,
+        scheduler: context.scheduler,
         guilds: context.discord.guilds,
         roles,
         messaging: context.discord.messaging,
@@ -157,6 +159,17 @@ await runBotMain(() =>
     },
 
     createFeatures(deps, context) {
+      /*
+       * Scheduled work, registered into the process's one scheduler.
+       *
+       * Registration is unconditional; whether a job fires is decided by its
+       * own `enabled` flag and the global FEATURE_SCHEDULED_MESSAGES switch.
+       * Registering even when disabled is what lets `/guardian jobs list` show
+       * an operator a job that exists and is switched off, rather than an empty
+       * list that looks like a broken deployment.
+       */
+      context.scheduler.register(createStaleCaseSweepJob(deps));
+
       const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
         guardianCommands,
       );

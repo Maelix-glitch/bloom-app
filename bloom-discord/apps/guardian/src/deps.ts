@@ -7,6 +7,7 @@ import type {
   ModerationService,
   RoleService,
 } from '@bloom/discord';
+import type { Scheduler } from '@bloom/events';
 import type { Logger } from '@bloom/logging';
 import type { RateLimiter } from '@bloom/security';
 import type { OnboardingService } from './features/onboarding/service.js';
@@ -35,6 +36,12 @@ export interface GuardianDeps {
   readonly messaging: MessagingService;
   readonly discordModeration: ModerationService;
   readonly channelModeration: ChannelModerationService;
+
+  /**
+   * The process's one scheduler, so `/guardian jobs` can report what is
+   * actually registered rather than a hard-coded list that drifts.
+   */
+  readonly scheduler: Scheduler;
 
   readonly onboarding: OnboardingService;
   readonly moderation: ModerationActionService;

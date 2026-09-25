@@ -86,7 +86,14 @@ function allChannels(): ChannelIdMap {
  */
 export function testConfig(overrides: Partial<PlatformConfig> = {}): PlatformConfig {
   return {
-    runtime: { nodeEnv: 'test', environment: 'development', version: '0.0.0-test' },
+    runtime: {
+      nodeEnv: 'test',
+      environment: 'development',
+      version: '0.0.0-test',
+      // Not UTC: a fixture in UTC makes "forgot to apply the configured zone"
+      // bugs invisible, because the wrong answer and the right one agree.
+      timezone: 'Europe/London',
+    },
     logging: { level: 'trace', pretty: false },
     database: {
       url: 'postgresql://bloom:not-a-real-password@localhost:5432/bloom_test',

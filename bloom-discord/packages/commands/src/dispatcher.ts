@@ -114,7 +114,7 @@ export class CommandDispatcher<TDeps> {
       }
 
       // 4. Execute.
-      const result = await command.execute(invocation, this.options.deps);
+      const result = await command.execute(invocation, this.options.deps, authContext);
 
       // 5. Respond.
       if (result) {

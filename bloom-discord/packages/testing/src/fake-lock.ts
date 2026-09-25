@@ -45,6 +45,20 @@ export class FakeJobLock implements JobLock {
     return Promise.resolve({ runId });
   }
 
+  /** Records every renewal, so a test can prove the heartbeat actually fired. */
+  public readonly renewals: string[] = [];
+
+  public renew(runId: string, leaseSeconds: number): Promise<boolean> {
+    for (const lease of this.held.values()) {
+      if (lease.runId === runId) {
+        lease.expiresAt = this.clock.now() + leaseSeconds * 1000;
+        this.renewals.push(runId);
+        return Promise.resolve(true);
+      }
+    }
+    return Promise.resolve(false);
+  }
+
   public complete(runId: string): Promise<void> {
     this.release(runId, 'succeeded', null);
     return Promise.resolve();
@@ -64,6 +78,17 @@ export class FakeJobLock implements JobLock {
       }
     }
     return Promise.resolve(reclaimed);
+  }
+
+  /**
+   * Drop every lease without recording an outcome.
+   *
+   * Models the one case the normal API cannot: another process reclaiming a
+   * lapsed lease out from under a run that is still going. Only a test of the
+   * heartbeat needs this.
+   */
+  public forceRelease(): void {
+    this.held.clear();
   }
 
   private release(

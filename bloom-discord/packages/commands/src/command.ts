@@ -1,5 +1,5 @@
 import { BOT_DISPLAY_NAMES, bloomError, type BotName } from '@bloom/shared-types';
-import type { AuthorizationPolicy } from '@bloom/permissions';
+import type { AuthorizationContext, AuthorizationPolicy } from '@bloom/permissions';
 import type { BloomMessage } from '@bloom/embeds';
 import type { CommandInvocation } from './invocation.js';
 import type { SlashCommandSpec } from './spec.js';
@@ -48,8 +48,20 @@ export interface BloomCommand<TDeps = unknown> {
    * itself and returns nothing. Modelling that as `| undefined` would force
    * every handler to write an explicit `return undefined`.
    */
-  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-  execute(invocation: CommandInvocation, deps: TDeps): Promise<BloomMessage | void>;
+  /**
+   * `authContext` is the very context this command's `policy` was already
+   * evaluated against.
+   *
+   * Passed down rather than rebuilt so that a composed command can apply a
+   * narrower policy to one branch — see `namespaceCommand` — without being
+   * handed the platform configuration separately. Most handlers ignore it.
+   */
+  execute(
+    invocation: CommandInvocation,
+    deps: TDeps,
+    authContext: AuthorizationContext,
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  ): Promise<BloomMessage | void>;
 }
 
 /**

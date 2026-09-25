@@ -19,6 +19,16 @@ export interface JobRunSummary {
   readonly finishedAt: Date | null;
   readonly durationMs: number | null;
   readonly errorCode: string | null;
+  /**
+   * The stored operator hint from the failure.
+   *
+   * Staff-facing only. It is written from `BloomError.operatorHint`, never from
+   * `userMessage`, because a diagnostic record that says "something went wrong"
+   * is not a diagnostic record.
+   */
+  readonly errorMessage: string | null;
+  /** Which process ran it — the answer to "why did only one replica fail". */
+  readonly runnerId: string;
   readonly attempt: number;
 }
 
@@ -185,10 +195,13 @@ export class PostgresJobRunRepository extends BaseRepository implements JobRunRe
           finished_at: Date | null;
           duration_ms: number | null;
           error_code: string | null;
+          error_message: string | null;
+          runner_id: string;
           attempt: number;
         }[]
       >`
-        SELECT id, job_key, status, started_at, finished_at, duration_ms, error_code, attempt
+        SELECT id, job_key, status, started_at, finished_at, duration_ms,
+               error_code, error_message, runner_id, attempt
         FROM ${sql(this.schema)}.job_runs
         WHERE job_key = ${jobKey}
           AND guild_id IS NOT DISTINCT FROM ${guildId ?? null}
@@ -205,6 +218,8 @@ export class PostgresJobRunRepository extends BaseRepository implements JobRunRe
         finishedAt: row.finished_at,
         durationMs: row.duration_ms,
         errorCode: row.error_code,
+        errorMessage: row.error_message,
+        runnerId: row.runner_id,
         attempt: row.attempt,
       };
     } catch (error) {

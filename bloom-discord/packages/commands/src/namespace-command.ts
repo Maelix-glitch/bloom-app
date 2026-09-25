@@ -29,6 +29,22 @@ export interface SubcommandContribution<TDeps> {
   /** Subcommand group, e.g. `case`. Omit for a bare subcommand like `overview`. */
   readonly group?: string;
   readonly spec: SubcommandSpec;
+  /**
+   * An additional requirement, checked after the namespace policy.
+   *
+   * Strictly narrowing: the namespace policy always runs first and this cannot
+   * widen it, so a subcommand can demand Administrator inside a moderator-gated
+   * namespace but cannot open a branch to everyone. That direction is the whole
+   * safety property — inheritance stays the default, and the exception has to
+   * be written down.
+   *
+   * Discord cannot express per-subcommand permissions, so this has no client
+   * side counterpart: the branch is visible to anyone who can see the parent
+   * and refuses when invoked. That is the same trust model as every other
+   * policy here, where `defaultMemberPermissions` is a hint and the server-side
+   * check is the boundary.
+   */
+  readonly policy?: AuthorizationPolicy;
   execute(invocation: CommandInvocation, deps: TDeps): Promise<BloomMessage>;
 }
 
@@ -73,7 +89,6 @@ export function namespaceCommand<TDeps>(
       });
     }
     routes.set(path, contribution);
-
     if (contribution.group === undefined) {
       bare.push(contribution.spec);
     } else {
@@ -125,7 +140,7 @@ export function namespaceCommand<TDeps>(
       ...(groups.length > 0 ? { groups } : {}),
     },
 
-    async execute(invocation, deps): Promise<BloomMessage> {
+    async execute(invocation, deps, authContext): Promise<BloomMessage> {
       const group = invocation.options.getSubcommandGroup() ?? undefined;
       const name = invocation.options.getSubcommand();
 
@@ -143,6 +158,19 @@ export function namespaceCommand<TDeps>(
             'The command spec and the handler table are built from the same contributions, so this means a stale command registration in the guild — re-run the registrar.',
           details: { command: options.name, group: group ?? null, subcommand: name },
         });
+      }
+
+      /*
+       * The branch's own requirement, on top of the namespace policy the
+       * dispatcher has already enforced. Evaluated against the same context, so
+       * the two checks cannot disagree about who the caller is.
+       */
+      if (route.policy) {
+        const authorised = route.policy({
+          ...authContext,
+          command: invocation.commandPath,
+        });
+        if (!authorised.ok) throw authorised.error;
       }
 
       return await route.execute(invocation, deps);

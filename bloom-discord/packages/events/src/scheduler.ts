@@ -37,6 +37,15 @@ export interface JobLock {
     readonly leaseSeconds: number;
   }): Promise<{ readonly runId: string } | null>;
 
+  /**
+   * Push the lease expiry back while a job is still working.
+   *
+   * Returns `false` if the lease is already gone — reclaimed after an overrun,
+   * or completed by something else. The caller cannot safely keep going at that
+   * point, because another process is now entitled to take the job.
+   */
+  renew(runId: string, leaseSeconds: number): Promise<boolean>;
+
   complete(runId: string, detail?: Record<string, unknown>): Promise<void>;
   fail(runId: string, error: BloomError): Promise<void>;
   /** Re-mark runs whose lease expired, so a crashed process does not block a job forever. */
@@ -57,7 +66,14 @@ export interface ScheduledJob {
    * on top of it.
    */
   readonly enabled: boolean;
-  /** How long the lease is held. Set it above the job's realistic worst case. */
+  /**
+   * How long the lease is held.
+   *
+   * Set it above the job's realistic worst case. The scheduler also renews the
+   * lease every `leaseSeconds / 2` while the job runs, so an occasional overrun
+   * does not hand the job to a second process — but the lease still has to be
+   * long enough that one missed renewal is not fatal.
+   */
   readonly leaseSeconds: number;
   readonly guildId: GuildId | null;
   run(context: JobRunContext): Promise<void>;
@@ -132,10 +148,16 @@ export class Scheduler {
      * validated and its next run reported, but nothing fires until start().
      * `protect` is croner's overlap guard; the database lease is the real
      * defence, this just avoids a pointless round trip.
+     *
+     * Deliberately unnamed. Croner's `name` option enrols the job in a
+     * module-level registry shared by everything in the process, and throws if
+     * a name is reused — so two Scheduler instances, or one constructed twice,
+     * collide on a global we never read. `this.jobs` is the registry that
+     * matters, and it is scoped to the instance that owns it.
      */
     const cron = new Cron(
       job.schedule,
-      { timezone: this.options.timezone, paused: true, protect: true, name: job.key },
+      { timezone: this.options.timezone, paused: true, protect: true },
       () => {
         void this.execute(job.key);
       },
@@ -212,6 +234,48 @@ export class Scheduler {
     await this.execute(key);
   }
 
+  /**
+   * Keep a running job's lease alive.
+   *
+   * `unref()` so a pending renewal cannot hold the process open during
+   * shutdown — the lease lapsing is the correct outcome for a job whose process
+   * is going away.
+   */
+  private startHeartbeat(
+    key: string,
+    runId: string,
+    leaseSeconds: number,
+  ): NodeJS.Timeout {
+    const intervalMs = Math.max(1000, (leaseSeconds / 2) * 1000);
+
+    const timer = setInterval(() => {
+      void this.options.lock
+        .renew(runId, leaseSeconds)
+        .then((renewed) => {
+          if (!renewed) {
+            // Not fatal here — the job keeps going and `complete` will find
+            // nothing to close. Worth an error, because it means the lease was
+            // stolen and this run may have been duplicated elsewhere.
+            this.options.logger.error(
+              'scheduler.lease_lost',
+              `Job "${key}" lost its lease while running. Another process may have started the same job; consider raising leaseSeconds.`,
+              { context: { job: key, run_id: runId } },
+            );
+          }
+        })
+        .catch((error: unknown) => {
+          this.options.logger.warn(
+            'scheduler.renew_failed',
+            `Could not renew the lease for job "${key}".`,
+            { context: { job: key }, error },
+          );
+        });
+    }, intervalMs);
+
+    timer.unref();
+    return timer;
+  }
+
   private async execute(key: string): Promise<void> {
     const state = this.jobs.get(key);
     if (!state) return;
@@ -252,15 +316,32 @@ export class Scheduler {
           return;
         }
 
-        const done = logger.startTimer(`job.${key}`);
-        await state.job.run({
-          jobKey: key,
-          guildId: state.job.guildId,
-          runId: lease.runId,
-          logger,
-          scheduledFor,
-        });
-        done(`Job "${key}" completed.`);
+        /*
+         * Hold the lease open for as long as the job actually runs.
+         *
+         * Without this, a job that overruns its lease keeps working while
+         * another process is entitled to start the same job — the exact
+         * double-post the lease exists to prevent, and the one that only shows
+         * up under load when a job is unusually slow.
+         *
+         * Renewing at half the lease means a single failed renewal still leaves
+         * a full half-lease of headroom before anything can steal it.
+         */
+        const heartbeat = this.startHeartbeat(key, lease.runId, state.job.leaseSeconds);
+
+        try {
+          const done = logger.startTimer(`job.${key}`);
+          await state.job.run({
+            jobKey: key,
+            guildId: state.job.guildId,
+            runId: lease.runId,
+            logger,
+            scheduledFor,
+          });
+          done(`Job "${key}" completed.`);
+        } finally {
+          clearInterval(heartbeat);
+        }
 
         await this.options.lock.complete(lease.runId);
         state.lastOutcome = 'success';

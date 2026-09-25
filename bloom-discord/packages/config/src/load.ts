@@ -21,6 +21,7 @@ import {
   postgresSchemaNameSchema,
   postgresUrlSchema,
   snowflakeSchema,
+  timezoneSchema,
   z,
 } from '@bloom/validation';
 import { BOT_REQUIREMENTS } from './requirements.js';
@@ -218,6 +219,8 @@ export function loadPlatformConfig(
     environment === 'production' ? 'global' : 'guild',
   );
 
+  const timezone = collector.withDefault(env, 'BLOOM_TIMEZONE', timezoneSchema, 'UTC');
+
   const roles = readRoles(env, collector);
   const channels = readChannels(env, collector);
   const bots = readBots(env, collector);
@@ -254,6 +257,7 @@ export function loadPlatformConfig(
       nodeEnv,
       environment,
       version: options.version ?? env['BLOOM_VERSION'] ?? '0.1.0',
+      timezone,
     },
     logging: { level, pretty },
     database: {

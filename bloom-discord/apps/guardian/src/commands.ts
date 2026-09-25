@@ -14,6 +14,7 @@ import {
   moderationSubcommands,
   reportCommand,
 } from './features/moderation/commands.js';
+import { jobSubcommands } from './features/jobs/commands.js';
 import type { GuardianDeps } from './deps.js';
 
 /**
@@ -47,8 +48,9 @@ export const guardianNamespaceCommand: BloomCommand<GuardianDeps> = namespaceCom
     case: 'Open, work and close moderation cases.',
     member: 'A member’s moderation record.',
     channel: 'Slowmode and channel locking.',
+    jobs: 'Inspect and trigger scheduled work.',
   },
-  contributions: [...onboardingSubcommands, ...moderationSubcommands],
+  contributions: [...onboardingSubcommands, ...moderationSubcommands, ...jobSubcommands],
 });
 
 /**

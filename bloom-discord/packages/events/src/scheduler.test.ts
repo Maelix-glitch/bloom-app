@@ -1,6 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FakeClock, FakeJobLock, createTestLogger } from '@bloom/testing';
 import { Scheduler, type ScheduledJob } from './scheduler.js';
+
+/** Placeholder until the promise executor hands over the real resolver. */
+const noop = (): void => undefined;
 
 function job(overrides: Partial<ScheduledJob> = {}): ScheduledJob {
   return {
@@ -46,6 +49,20 @@ describe('Scheduler', () => {
     const { scheduler } = make();
     scheduler.register(job());
     expect(() => scheduler.register(job())).toThrow(/same key|duplicate/i);
+  });
+
+  /*
+   * Regression: croner's `name` option enrols a job in a module-level registry
+   * and throws on reuse, so naming jobs made a second Scheduler in the same
+   * process fail on a global we never read. Two bots in one process, or a test
+   * suite building a harness per test, both hit it.
+   */
+  it('allows two schedulers in one process to use the same job key', () => {
+    const first = make();
+    const second = make();
+
+    first.scheduler.register(job());
+    expect(() => second.scheduler.register(job())).not.toThrow();
   });
 
   it('refuses registration after start, so the job list stays inspectable', () => {
@@ -175,6 +192,96 @@ describe('Scheduler', () => {
     expect(lock.runs[0]?.status).toBe('failed');
     expect(scheduler.status()[0]?.lastOutcome).toBe('failed');
     expect(sink.serialised()).toContain('job.test-job.failed');
+  });
+
+  /*
+   * The heartbeat.
+   *
+   * A job that outlives its lease is the subtle failure mode: the lease lapses,
+   * a second process legitimately acquires it, and the job runs twice with
+   * neither replica doing anything wrong. Renewing while the work is in flight
+   * is what prevents that, so these tests use fake timers to prove the renewal
+   * actually happens rather than trusting that a `setInterval` was created.
+   */
+  describe('lease renewal', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('renews the lease every half-lease while the job is still running', async () => {
+      const { scheduler, lock } = make();
+      let finish: () => void = noop;
+      const running = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+
+      scheduler.register(job({ leaseSeconds: 60, run: () => running }));
+
+      const run = scheduler.runNow('test-job');
+
+      // Two half-leases with the job still in flight.
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(lock.renewals).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(lock.renewals).toHaveLength(2);
+
+      finish();
+      await run;
+    });
+
+    it('stops renewing once the job returns', async () => {
+      const { scheduler, lock } = make();
+      scheduler.register(job({ leaseSeconds: 60, run: () => Promise.resolve() }));
+
+      await scheduler.runNow('test-job');
+      await vi.advanceTimersByTimeAsync(300_000);
+
+      // Five minutes of wall clock after a job that finished immediately: a
+      // heartbeat left running would have renewed a released lease ten times.
+      expect(lock.renewals).toHaveLength(0);
+    });
+
+    it('stops renewing when the job throws', async () => {
+      const { scheduler, lock } = make();
+      scheduler.register(
+        job({ leaseSeconds: 60, run: () => Promise.reject(new Error('x')) }),
+      );
+
+      await scheduler.runNow('test-job');
+      await vi.advanceTimersByTimeAsync(300_000);
+
+      expect(lock.renewals).toHaveLength(0);
+    });
+
+    /*
+     * Losing the lease mid-run means another process may already be running the
+     * same job. The scheduler cannot undo that, but it must say so loudly —
+     * silent duplicate execution is the thing nobody ever debugs.
+     */
+    it('logs an error when a renewal is refused', async () => {
+      const { scheduler, lock, sink } = make();
+      let finish: () => void = noop;
+      const running = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      scheduler.register(job({ leaseSeconds: 60, run: () => running }));
+
+      const run = scheduler.runNow('test-job');
+      await vi.advanceTimersByTimeAsync(1);
+
+      // The other replica reclaims it: the lease this run holds is gone.
+      await lock.reclaimExpired('companion');
+      lock.forceRelease();
+
+      await vi.advanceTimersByTimeAsync(30_000);
+
+      expect(sink.serialised()).toContain('scheduler.lease_lost');
+      finish();
+      await run;
+    });
   });
 
   it('a failing job never rejects out of the scheduler', async () => {
