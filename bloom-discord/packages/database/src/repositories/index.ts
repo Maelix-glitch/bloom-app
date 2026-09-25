@@ -8,6 +8,7 @@ import {
   type IdempotencyRepository,
 } from './idempotency.js';
 import { PostgresJobRunRepository, type JobRunRepository } from './jobs.js';
+import { PostgresLabsRepository, type LabsRepository } from './labs.js';
 import { PostgresOnboardingRepository, type OnboardingRepository } from './onboarding.js';
 import { PostgresRewardsRepository, type RewardsRepository } from './rewards.js';
 import { PostgresModerationRepository, type ModerationRepository } from './moderation.js';
@@ -21,6 +22,7 @@ export * from './cooldowns.js';
 export * from './identity.js';
 export * from './idempotency.js';
 export * from './jobs.js';
+export * from './labs.js';
 export * from './onboarding.js';
 export * from './rewards.js';
 export * from './moderation.js';
@@ -41,6 +43,7 @@ export interface Repositories {
   readonly identity: IdentityRepository;
   readonly idempotency: IdempotencyRepository;
   readonly jobs: JobRunRepository;
+  readonly labs: LabsRepository;
   readonly onboarding: OnboardingRepository;
   readonly rewards: RewardsRepository;
   readonly awards: AwardsRepository;
@@ -57,6 +60,7 @@ export function createRepositories(database: Database): Repositories {
     identity: new PostgresIdentityRepository(database),
     idempotency: new PostgresIdempotencyRepository(database),
     jobs: new PostgresJobRunRepository(database),
+    labs: new PostgresLabsRepository(database),
     onboarding: new PostgresOnboardingRepository(database),
     rewards: new PostgresRewardsRepository(database),
     awards: new PostgresAwardsRepository(database),

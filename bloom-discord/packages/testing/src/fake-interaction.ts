@@ -10,6 +10,7 @@ import type { AuthorizationSubject } from '@bloom/permissions';
 import type {
   CommandInvocation,
   InteractionOptions,
+  ModalInvocation,
   InteractionResponder,
   ResolvedChannel,
   ResolvedRole,
@@ -208,6 +209,56 @@ export function fakeInvocation(options: FakeInvocationOptions): FakeInvocation {
           : options.channelId,
       actor: options.actor ?? testSubject(),
       options: new FakeOptions(optionValues),
+      respond: responder,
+      correlationId: options.correlationId ?? ('test-correlation-id' as CorrelationId),
+      createdAt: options.createdAt ?? new Date('2026-01-01T09:00:00.000Z'),
+    },
+  };
+}
+
+/**
+ * A submitted modal.
+ *
+ * Separate ids from the command sequence, and still sequential: a modal
+ * submission is its own interaction with its own id, and a fake that reused the
+ * opening command's id would make a replayed submission indistinguishable from
+ * a fresh one.
+ */
+let nextModal = 7001;
+
+export interface FakeModalOptions {
+  readonly customId: string;
+  /** Field values, keyed by the field's custom id. */
+  readonly fields?: Readonly<Record<string, string>>;
+  readonly actor?: AuthorizationSubject;
+  readonly guildId?: GuildId | null;
+  readonly channelId?: ChannelId | null;
+  readonly correlationId?: CorrelationId;
+  readonly createdAt?: Date;
+}
+
+export interface FakeModalSubmission {
+  readonly invocation: ModalInvocation;
+  readonly responder: RecordingResponder;
+}
+
+export function fakeModalSubmission(options: FakeModalOptions): FakeModalSubmission {
+  const responder = new RecordingResponder();
+
+  return {
+    responder,
+    invocation: {
+      interactionId: unsafeSnowflake<InteractionId>(
+        `9100000000000${String(nextModal++).padStart(5, '0')}`,
+      ),
+      customId: options.customId,
+      guildId: options.guildId === undefined ? TEST_GUILD_ID : options.guildId,
+      channelId:
+        options.channelId === undefined
+          ? TEST_CHANNEL_IDS.introductions
+          : options.channelId,
+      actor: options.actor ?? testSubject(),
+      fields: new Map(Object.entries(options.fields ?? {})),
       respond: responder,
       correlationId: options.correlationId ?? ('test-correlation-id' as CorrelationId),
       createdAt: options.createdAt ?? new Date('2026-01-01T09:00:00.000Z'),

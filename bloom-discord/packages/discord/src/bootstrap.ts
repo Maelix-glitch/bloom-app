@@ -41,6 +41,7 @@ import type {
 } from './ports.js';
 import {
   BotRuntime,
+  type ComponentRouter,
   type GatewayEventRouter,
   type InteractionRouter,
 } from './runtime.js';
@@ -100,9 +101,13 @@ export interface BotProcessOptions<TDeps> {
 
 export interface BotFeatures {
   readonly commands?: InteractionRouter;
+  /** Buttons, select menus and modal submissions. */
+  readonly interactions?: ComponentRouter;
   readonly events?: GatewayEventRouter;
   /** Used only for the "is this bot worth starting" check and for logging. */
   readonly commandCount?: number;
+  /** Registered component and modal handlers, for the same check. */
+  readonly interactionCount?: number;
 }
 
 /**
@@ -279,6 +284,12 @@ export async function startBotProcess<TDeps>(
     const commandCount = features.commandCount ?? (features.commands ? 1 : 0);
     const handlerCount = features.events?.registeredEvents().length ?? 0;
     const jobCount = scheduler.status().length;
+    /*
+     * Deliberately not part of the emptiness check. A bot with only component
+     * handlers has no way for anyone to produce a component in the first
+     * place, so it is still a bot that does nothing.
+     */
+    const interactionCount = features.interactionCount ?? 0;
     if (commandCount === 0 && handlerCount === 0 && jobCount === 0) {
       await database.close();
       throw bloomError('NOT_IMPLEMENTED', {
@@ -292,10 +303,12 @@ export async function startBotProcess<TDeps>(
 
     logger.info(
       'startup.features_ready',
-      `${String(commandCount)} command(s), ${String(handlerCount)} gateway event(s), ${String(jobCount)} scheduled job(s).`,
+      `${String(commandCount)} command(s), ${String(interactionCount)} component handler(s), ` +
+        `${String(handlerCount)} gateway event(s), ${String(jobCount)} scheduled job(s).`,
       {
         context: {
           command_count: commandCount,
+          interaction_count: interactionCount,
           job_count: jobCount,
           events: [...(features.events?.registeredEvents() ?? [])],
         },
@@ -318,6 +331,7 @@ export async function startBotProcess<TDeps>(
       token: config.credentials.token,
       client,
       ...(features.commands ? { commands: features.commands } : {}),
+      ...(features.interactions ? { interactions: features.interactions } : {}),
       ...(features.events ? { events: features.events } : {}),
       ...(options.onReady ? { onReady: () => onReadyHook(options, context, deps) } : {}),
       onShutdown: async () => {

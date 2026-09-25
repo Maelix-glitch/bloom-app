@@ -14,6 +14,7 @@ import {
   type GuildId,
   type IdempotencyKey,
   type JsonValue,
+  type MessageId,
   type OnboardingState,
   type PointKind,
   type RoleId,
@@ -70,6 +71,16 @@ import type {
   TelemetryRepository,
   TransitionOutcome,
   VerificationAttemptInput,
+  LabsRepository,
+  FeedbackEntry,
+  SubmitFeedbackInput,
+  BugReport,
+  BugEvent,
+  BugStatus,
+  BugQueueOptions,
+  FileBugInput,
+  TriageInput,
+  TriageOutcome,
 } from '@bloom/database';
 
 /**
@@ -1422,6 +1433,188 @@ export class FakeAwardsRepository implements AwardsRepository {
   }
 }
 
+/**
+ * Feedback and bug intake, in memory.
+ *
+ * The bug number allocator is modelled rather than stubbed: a fake that always
+ * returned 1 would make every "quote the bug number back" assertion pass while
+ * the real allocator was broken. It increments per guild, exactly like the
+ * counter table.
+ */
+export class FakeLabsRepository implements LabsRepository {
+  public readonly feedback: FeedbackEntry[] = [];
+  public readonly bugs: BugReport[] = [];
+  public readonly events: BugEvent[] = [];
+
+  private readonly counters = new Map<string, number>();
+  private sequence = 0;
+
+  public constructor(private readonly now: () => Date = () => new Date()) {}
+
+  private nextId(): string {
+    this.sequence += 1;
+    return `fake-${String(this.sequence)}`;
+  }
+
+  public submitFeedback(input: SubmitFeedbackInput): Promise<FeedbackEntry> {
+    const entry: FeedbackEntry = {
+      id: this.nextId(),
+      guildId: input.guildId,
+      userId: input.userId,
+      category: input.category,
+      summary: input.summary,
+      detail: input.detail ?? null,
+      messageId: null,
+      createdAt: this.now(),
+    };
+    this.feedback.push(entry);
+    return Promise.resolve(entry);
+  }
+
+  public attachFeedbackMessage(id: string, messageId: MessageId): Promise<void> {
+    const index = this.feedback.findIndex((entry) => entry.id === id);
+    const entry = this.feedback[index];
+    if (entry) this.feedback[index] = { ...entry, messageId };
+    return Promise.resolve();
+  }
+
+  public recentFeedback(guildId: GuildId, limit = 10): Promise<readonly FeedbackEntry[]> {
+    return Promise.resolve(
+      this.feedback
+        .filter((entry) => entry.guildId === guildId)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, limit),
+    );
+  }
+
+  public countFeedbackSince(
+    guildId: GuildId,
+    userId: UserId,
+    since: Date,
+  ): Promise<number> {
+    return Promise.resolve(
+      this.feedback.filter(
+        (entry) =>
+          entry.guildId === guildId &&
+          entry.userId === userId &&
+          entry.createdAt.getTime() >= since.getTime(),
+      ).length,
+    );
+  }
+
+  public fileBug(input: FileBugInput): Promise<BugReport> {
+    const bugNumber = (this.counters.get(input.guildId) ?? 0) + 1;
+    this.counters.set(input.guildId, bugNumber);
+
+    const bug: BugReport = {
+      id: this.nextId(),
+      guildId: input.guildId,
+      bugNumber,
+      reporterId: input.reporterId,
+      status: 'NEW',
+      area: input.area,
+      summary: input.summary,
+      steps: input.steps,
+      expected: input.expected ?? null,
+      triagedBy: null,
+      triagedAt: null,
+      resolution: null,
+      duplicateOf: null,
+      messageId: null,
+      createdAt: this.now(),
+      updatedAt: this.now(),
+    };
+    this.bugs.push(bug);
+    this.events.push({
+      id: this.nextId(),
+      bugId: bug.id,
+      fromStatus: null,
+      toStatus: 'NEW',
+      actorId: input.reporterId,
+      note: null,
+      createdAt: this.now(),
+    });
+    return Promise.resolve(bug);
+  }
+
+  public attachBugMessage(id: string, messageId: MessageId): Promise<void> {
+    const index = this.bugs.findIndex((bug) => bug.id === id);
+    const bug = this.bugs[index];
+    if (bug) this.bugs[index] = { ...bug, messageId };
+    return Promise.resolve();
+  }
+
+  public findBug(guildId: GuildId, bugNumber: number): Promise<BugReport | null> {
+    return Promise.resolve(
+      this.bugs.find((bug) => bug.guildId === guildId && bug.bugNumber === bugNumber) ??
+        null,
+    );
+  }
+
+  public triage(input: TriageInput): Promise<TriageOutcome> {
+    const index = this.bugs.findIndex(
+      (bug) => bug.guildId === input.guildId && bug.bugNumber === input.bugNumber,
+    );
+    const current = this.bugs[index];
+    if (!current) return Promise.resolve({ kind: 'not_found' });
+    if (current.status === input.status) {
+      return Promise.resolve({ kind: 'unchanged', bug: current });
+    }
+
+    const moved: BugReport = {
+      ...current,
+      status: input.status,
+      triagedBy: input.actorId,
+      triagedAt: this.now(),
+      resolution: input.resolution ?? null,
+      duplicateOf: input.duplicateOf ?? null,
+      updatedAt: this.now(),
+    };
+    this.bugs[index] = moved;
+    this.events.push({
+      id: this.nextId(),
+      bugId: moved.id,
+      fromStatus: current.status,
+      toStatus: input.status,
+      actorId: input.actorId,
+      note: input.resolution ?? null,
+      createdAt: this.now(),
+    });
+    return Promise.resolve({ kind: 'moved', bug: moved, from: current.status });
+  }
+
+  public bugQueue(
+    guildId: GuildId,
+    options: BugQueueOptions = {},
+  ): Promise<readonly BugReport[]> {
+    const open: readonly BugStatus[] = ['NEW', 'TRIAGED'];
+    return Promise.resolve(
+      this.bugs
+        .filter((bug) => bug.guildId === guildId)
+        .filter((bug) =>
+          options.status ? bug.status === options.status : open.includes(bug.status),
+        )
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        .slice(0, options.limit ?? 10),
+    );
+  }
+
+  public bugHistory(bugId: string): Promise<readonly BugEvent[]> {
+    return Promise.resolve(this.events.filter((event) => event.bugId === bugId));
+  }
+
+  public countBugsSince(guildId: GuildId, userId: UserId, since: Date): Promise<number> {
+    return Promise.resolve(
+      this.bugs.filter(
+        (bug) =>
+          bug.guildId === guildId &&
+          bug.reporterId === userId &&
+          bug.createdAt.getTime() >= since.getTime(),
+      ).length,
+    );
+  }
+}
+
 export type { AwardKind };
 
 export interface FakeRepositories extends Repositories {
@@ -1437,6 +1630,7 @@ export interface FakeRepositories extends Repositories {
   readonly settings: FakeSettingsRepository;
   readonly rewards: FakeRewardsRepository;
   readonly awards: FakeAwardsRepository;
+  readonly labs: FakeLabsRepository;
 }
 
 /**
@@ -1464,6 +1658,7 @@ export function fakeRepositories(
     cases: new FakeCaseRepository(now),
     rewards: new FakeRewardsRepository(now),
     awards: new FakeAwardsRepository(now),
+    labs: new FakeLabsRepository(now),
   };
 }
 

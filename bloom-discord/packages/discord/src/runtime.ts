@@ -10,9 +10,17 @@ import {
 import type { Logger } from '@bloom/logging';
 import type { PlatformConfig } from '@bloom/config';
 import { newCorrelationId, withCorrelation } from '@bloom/utils';
-import type { CommandInvocation } from '@bloom/commands';
+import type {
+  CommandInvocation,
+  ComponentInvocation,
+  ModalInvocation,
+} from '@bloom/commands';
 import type { GatewayEventName } from '@bloom/events';
-import { toCommandInvocation } from './adapters/interaction.js';
+import {
+  toCommandInvocation,
+  toComponentInvocation,
+  toModalInvocation,
+} from './adapters/interaction.js';
 import {
   toMemberJoinPayload,
   toMemberLeavePayload,
@@ -30,6 +38,18 @@ import type { GatewayClient, GatewayStatus } from './ports.js';
  */
 export interface InteractionRouter {
   dispatch(invocation: CommandInvocation): Promise<void>;
+}
+
+/**
+ * What the runtime needs to route buttons, select menus and modal submissions.
+ *
+ * Separate from `InteractionRouter` and optional, because a bot can perfectly
+ * well have commands and no components — Guardian and Companion did for six
+ * phases — and an empty router would be a thing to remember to pass.
+ */
+export interface ComponentRouter {
+  dispatchComponent(invocation: ComponentInvocation): Promise<void>;
+  dispatchModal(invocation: ModalInvocation): Promise<void>;
 }
 
 /**
@@ -56,6 +76,8 @@ export interface BotRuntimeOptions {
   readonly client: Client;
   /** Wired by the app. Absent for a bot with no commands yet. */
   readonly commands?: InteractionRouter;
+  /** Buttons, select menus and modals. Absent for a bot that uses none. */
+  readonly interactions?: ComponentRouter;
   /** Gateway event handlers. Only events this bot owns are subscribed. */
   readonly events?: GatewayEventRouter;
   /** Called once the client is ready and the guild is reachable. */
@@ -202,7 +224,7 @@ export class BotRuntime implements GatewayClient {
       );
     });
 
-    if (this.options.commands) {
+    if (this.options.commands ?? this.options.interactions) {
       this.client.on(Events.InteractionCreate, (interaction) => {
         void this.routeInteraction(interaction);
       });
@@ -255,15 +277,19 @@ export class BotRuntime implements GatewayClient {
   }
 
   /**
-   * Route a chat-input interaction.
+   * Route an interaction to whichever dispatcher owns its kind.
    *
-   * Everything past this point is the dispatcher's problem; this method's only
+   * Everything past this point is a dispatcher's problem; this method's only
    * responsibilities are establishing a correlation id and refusing anything
    * that did not arrive from a guild member.
+   *
+   * Autocomplete and ping interactions fall through deliberately. Neither is
+   * used yet, and answering one with "unknown command" would be worse than
+   * Discord's own timeout.
    */
   private async routeInteraction(interaction: Interaction): Promise<void> {
-    const dispatcher = this.options.commands;
-    if (!dispatcher || !interaction.isChatInputCommand()) return;
+    const kind = this.interactionKind(interaction);
+    if (!kind) return;
 
     await withCorrelation(async () => {
       const correlationId = newCorrelationId();
@@ -273,25 +299,63 @@ export class BotRuntime implements GatewayClient {
        * a missing guild member means something unexpected — an integration
        * type we did not intend, or a command registered globally by accident.
        * Refuse rather than fabricate a subject.
+       *
+       * This matters more for components than for commands: a component's
+       * authorization is re-checked on use, and that check reads roles off the
+       * member. No member, no check, so there is nothing safe to do here.
        */
       const member = interaction.inCachedGuild() ? interaction.member : null;
       if (!member) {
         this.logger.warn(
           'interaction.no_member',
-          `"/${interaction.commandName}" arrived without guild member context; refused.`,
-          { context: { command: interaction.commandName } },
+          `A ${kind} interaction arrived without guild member context; refused.`,
+          { context: { kind } },
         );
-        await interaction
-          .reply({
-            content: 'This command only works inside the Bloom Labs server.',
-            flags: 64,
-          })
-          .catch(() => undefined);
+        if (interaction.isRepliable()) {
+          await interaction
+            .reply({
+              content: 'This only works inside the Bloom Labs server.',
+              flags: 64,
+            })
+            .catch(() => undefined);
+        }
         return;
       }
 
-      await dispatcher.dispatch(toCommandInvocation(interaction, member, correlationId));
+      if (interaction.isChatInputCommand()) {
+        await this.options.commands?.dispatch(
+          toCommandInvocation(interaction, member, correlationId),
+        );
+        return;
+      }
+
+      if (interaction.isModalSubmit()) {
+        await this.options.interactions?.dispatchModal(
+          toModalInvocation(interaction, member, correlationId),
+        );
+        return;
+      }
+
+      if (interaction.isMessageComponent()) {
+        await this.options.interactions?.dispatchComponent(
+          toComponentInvocation(interaction, member, correlationId),
+        );
+      }
     }, newCorrelationId());
+  }
+
+  /** Which dispatcher, if any, is wired for this interaction's kind. */
+  private interactionKind(interaction: Interaction): string | null {
+    if (interaction.isChatInputCommand()) {
+      return this.options.commands ? 'command' : null;
+    }
+    if (interaction.isModalSubmit()) {
+      return this.options.interactions ? 'modal' : null;
+    }
+    if (interaction.isMessageComponent()) {
+      return this.options.interactions ? 'component' : null;
+    }
+    return null;
   }
 
   /**

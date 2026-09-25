@@ -40,8 +40,16 @@ export interface BloomCommand<TDeps = unknown> {
    * Set this on anything that touches the database or the Discord API more than
    * trivially. Discord's acknowledgement budget is 3 seconds and a cold pooler
    * connection can eat most of it.
+   *
+   * A predicate, rather than a plain boolean, for one specific reason: a modal
+   * may only be sent as the *initial* response to an interaction, so a command
+   * that shows one must not defer — and a namespace command is a single command
+   * whose branches disagree about that. `/labs bug show` wants deferring;
+   * `/labs bug report` opens a form and must not. Deciding per invocation is
+   * what lets both live under one namespace, which is the whole point of
+   * namespacing.
    */
-  readonly defer?: boolean;
+  readonly defer?: boolean | ((invocation: CommandInvocation) => boolean);
 
   /*
    * A handler either returns a message for the dispatcher to send, or responds
@@ -62,6 +70,23 @@ export interface BloomCommand<TDeps = unknown> {
     authContext: AuthorizationContext,
     // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   ): Promise<BloomMessage | void>;
+}
+
+/**
+ * Whether this invocation should be deferred.
+ *
+ * One function, used by the dispatcher and by the tests that assert a bot's
+ * commands acknowledge before doing slow work. Resolving the predicate in two
+ * places would let those two disagree, and the test would be the one that was
+ * wrong.
+ */
+export function shouldDefer<TDeps>(
+  command: BloomCommand<TDeps>,
+  invocation: CommandInvocation,
+): boolean {
+  return typeof command.defer === 'function'
+    ? command.defer(invocation)
+    : command.defer === true;
 }
 
 /**

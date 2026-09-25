@@ -1,5 +1,9 @@
 import { bloomError, type BotName } from '@bloom/shared-types';
-import type { AuthorizationPolicy, DiscordPermissionName } from '@bloom/permissions';
+import type {
+  AuthorizationContext,
+  AuthorizationPolicy,
+  DiscordPermissionName,
+} from '@bloom/permissions';
 import type { BloomMessage } from '@bloom/embeds';
 import type { BloomCommand } from './command.js';
 import type { CommandInvocation } from './invocation.js';
@@ -45,7 +49,29 @@ export interface SubcommandContribution<TDeps> {
    * check is the boundary.
    */
   readonly policy?: AuthorizationPolicy;
-  execute(invocation: CommandInvocation, deps: TDeps): Promise<BloomMessage>;
+  /**
+   * Set `false` on a branch that shows a modal.
+   *
+   * Discord accepts a modal only as the initial response to an interaction, so
+   * deferring first makes it impossible. Defaults to the namespace's own
+   * setting, which is to defer — the safe choice for anything that reads the
+   * database.
+   */
+  readonly defer?: false;
+  /**
+   * Returns a message, or responds itself and returns nothing.
+   *
+   * `authContext` is the context both the namespace policy and this branch's
+   * policy were evaluated against, so a handler can ask a further question
+   * about the caller — "is this a moderator?" — without re-deriving it and
+   * risking a different answer.
+   */
+  execute(
+    invocation: CommandInvocation,
+    deps: TDeps,
+    authContext: AuthorizationContext,
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  ): Promise<BloomMessage | void>;
 }
 
 export interface NamespaceCommandOptions<TDeps> {
@@ -127,7 +153,20 @@ export function namespaceCommand<TDeps>(
   return {
     bot: options.bot,
     policy: options.policy,
-    defer: options.defer ?? true,
+    /*
+     * Resolved per invocation by routing first. A branch that opens a modal
+     * declares `defer: false`, and the alternative — making the whole namespace
+     * non-deferring — would put every database-backed branch back inside the
+     * three-second budget.
+     */
+    defer: (invocation): boolean => {
+      const group = invocation.options.getSubcommandGroup() ?? undefined;
+      const name = invocation.options.getSubcommand();
+      if (name === null) return options.defer ?? true;
+      const route = routes.get(pathOf(group, name));
+      if (route?.defer === false) return false;
+      return options.defer ?? true;
+    },
     ephemeral: options.ephemeral ?? true,
     spec: {
       name: options.name,
@@ -140,7 +179,8 @@ export function namespaceCommand<TDeps>(
       ...(groups.length > 0 ? { groups } : {}),
     },
 
-    async execute(invocation, deps, authContext): Promise<BloomMessage> {
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+    async execute(invocation, deps, authContext): Promise<BloomMessage | void> {
       const group = invocation.options.getSubcommandGroup() ?? undefined;
       const name = invocation.options.getSubcommand();
 
@@ -173,7 +213,10 @@ export function namespaceCommand<TDeps>(
         if (!authorised.ok) throw authorised.error;
       }
 
-      return await route.execute(invocation, deps);
+      return await route.execute(invocation, deps, {
+        ...authContext,
+        command: invocation.commandPath,
+      });
     },
   };
 }

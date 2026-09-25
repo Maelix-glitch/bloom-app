@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CommandRegistry, RESERVED_TOP_LEVEL } from '@bloom/commands';
+import { CommandRegistry, RESERVED_TOP_LEVEL, shouldDefer } from '@bloom/commands';
+import { fakeInvocation } from '@bloom/testing';
 import { toDiscordCommand } from '@bloom/discord';
 import type { GuardianDeps } from './deps.js';
 import {
@@ -62,8 +63,15 @@ describe('Guardian command set', () => {
   });
 
   it('defers every command, because all of them touch the database', () => {
+    /*
+     * Resolved rather than compared to `true`: a namespace command decides per
+     * invocation, so that a branch opening a modal can skip the deferral
+     * Discord would otherwise refuse. Guardian has no such branch, and this is
+     * what says so.
+     */
     for (const command of guardianCommands) {
-      expect(command.defer).toBe(true);
+      const { invocation } = fakeInvocation({ commandName: command.spec.name });
+      expect(shouldDefer(command, invocation)).toBe(true);
     }
   });
 

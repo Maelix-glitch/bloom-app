@@ -67,6 +67,24 @@ export function sanitiseUserText(input: string, maxLength: number): string {
   return truncate(cleaned, maxLength);
 }
 
+/**
+ * Sanitisation for free text that is about to be **stored**.
+ *
+ * Deliberately different from {@link sanitiseUserText}, and the difference is
+ * the point. Markdown escaping is a rendering concern for one specific
+ * renderer: a bug report saved as `check\-in fails` is corrupted for every
+ * other reader — a SQL query, an export, a dashboard — and would grow a second
+ * backslash every time it passed through again.
+ *
+ * So storage keeps what the member wrote, minus the things that are unsafe
+ * anywhere: control characters that break log parsing, and surrounding
+ * whitespace. Escaping happens at the edge, when the text is composed into a
+ * Discord message, which is where it belongs and where it can be done once.
+ */
+export function storableUserText(input: string, maxLength: number): string {
+  return truncate(stripControlCharacters(input).trim(), maxLength);
+}
+
 /** Truncate on a character budget, with an ellipsis that fits inside it. */
 export function truncate(input: string, maxLength: number): string {
   if (input.length <= maxLength) return input;

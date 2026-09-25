@@ -4,7 +4,7 @@ import type { PlatformConfig } from '@bloom/config';
 import { errorMessage } from '@bloom/embeds';
 import { requireConfiguredGuild, type AuthorizationContext } from '@bloom/permissions';
 import { systemClock, type Clock } from '@bloom/utils';
-import type { CommandRegistry } from './command.js';
+import { shouldDefer, type CommandRegistry } from './command.js';
 import type { CommandInvocation } from './invocation.js';
 
 export type CommandOutcome =
@@ -109,7 +109,7 @@ export class CommandDispatcher<TDeps> {
       // 3. Acknowledge before doing slow work, so the 3-second budget is not at
       //    the mercy of a cold database connection.
       const ephemeral = command.ephemeral ?? true;
-      if (command.defer === true) {
+      if (shouldDefer(command, invocation)) {
         await invocation.respond.defer({ ephemeral });
       }
 
