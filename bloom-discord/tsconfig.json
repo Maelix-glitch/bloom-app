@@ -1,0 +1,22 @@
+{
+  "//": "Solution file. Holds no sources of its own; `tsc --build` walks the graph.",
+  "files": [],
+  "references": [
+    { "path": "./packages/shared-types" },
+    { "path": "./packages/utils" },
+    { "path": "./packages/validation" },
+    { "path": "./packages/logging" },
+    { "path": "./packages/config" },
+    { "path": "./packages/database" },
+    { "path": "./packages/security" },
+    { "path": "./packages/permissions" },
+    { "path": "./packages/embeds" },
+    { "path": "./packages/commands" },
+    { "path": "./packages/events" },
+    { "path": "./packages/discord" },
+    { "path": "./packages/testing" },
+    { "path": "./apps/guardian" },
+    { "path": "./apps/companion" },
+    { "path": "./apps/labs" }
+  ]
+}

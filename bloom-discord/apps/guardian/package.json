@@ -1,0 +1,27 @@
+{
+  "name": "@bloom/app-guardian",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bloom Guardian \u2014 security, verification, onboarding, role transitions, moderation, reports.",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "start": "node dist/main.js",
+    "dev": "tsx watch src/main.ts"
+  },
+  "dependencies": {
+    "@bloom/shared-types": "workspace:*",
+    "@bloom/utils": "workspace:*",
+    "@bloom/config": "workspace:*",
+    "@bloom/logging": "workspace:*",
+    "@bloom/database": "workspace:*",
+    "@bloom/permissions": "workspace:*",
+    "@bloom/security": "workspace:*",
+    "@bloom/embeds": "workspace:*",
+    "@bloom/commands": "workspace:*",
+    "@bloom/events": "workspace:*",
+    "@bloom/discord": "workspace:*"
+  }
+}

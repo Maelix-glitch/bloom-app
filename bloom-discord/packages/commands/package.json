@@ -1,0 +1,32 @@
+{
+  "name": "@bloom/commands",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Command contract, registry, guard composition and error boundary.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
+  "dependencies": {
+    "@bloom/shared-types": "workspace:*",
+    "@bloom/utils": "workspace:*",
+    "@bloom/validation": "workspace:*",
+    "@bloom/logging": "workspace:*",
+    "@bloom/permissions": "workspace:*",
+    "@bloom/embeds": "workspace:*",
+    "@bloom/config": "workspace:*",
+    "zod": "catalog:"
+  }
+}

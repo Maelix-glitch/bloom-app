@@ -1,0 +1,17 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Keep the three bots on byte-identical Discord libraries. A version skew between
+# Guardian and Companion would mean two different serialisations of the same
+# interaction payload, which is the kind of bug that only shows up in production.
+catalog:
+  discord.js: 14.27.0
+  postgres: 3.4.9
+  zod: 4.6.5
+
+# Install scripts are arbitrary code execution at install time, so they are
+# blocked by default and allowed one package at a time. esbuild only unpacks its
+# own prebuilt binary, and tsx needs it.
+allowBuilds:
+  esbuild: true

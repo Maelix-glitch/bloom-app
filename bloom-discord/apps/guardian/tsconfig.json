@@ -1,0 +1,44 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.harness.ts", "dist"],
+  "references": [
+    {
+      "path": "../../packages/shared-types"
+    },
+    {
+      "path": "../../packages/utils"
+    },
+    {
+      "path": "../../packages/config"
+    },
+    {
+      "path": "../../packages/logging"
+    },
+    {
+      "path": "../../packages/database"
+    },
+    {
+      "path": "../../packages/permissions"
+    },
+    {
+      "path": "../../packages/security"
+    },
+    {
+      "path": "../../packages/embeds"
+    },
+    {
+      "path": "../../packages/commands"
+    },
+    {
+      "path": "../../packages/events"
+    },
+    {
+      "path": "../../packages/discord"
+    }
+  ]
+}

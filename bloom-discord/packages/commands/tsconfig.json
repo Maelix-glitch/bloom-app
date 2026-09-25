@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "dist"],
+  "references": [
+    {
+      "path": "../shared-types"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../validation"
+    },
+    {
+      "path": "../logging"
+    },
+    {
+      "path": "../permissions"
+    },
+    {
+      "path": "../embeds"
+    },
+    {
+      "path": "../config"
+    }
+  ]
+}
