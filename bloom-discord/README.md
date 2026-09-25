@@ -4,11 +4,16 @@ Three Discord applications — **Guardian**, **Companion** and **Labs** — shar
 one Supabase PostgreSQL database and a common set of packages, in a pnpm
 workspace of strict TypeScript ESM targeting Node 24.
 
-> **Status: Phase 0.** Architecture, monorepo, configuration, database base,
-> logging and the testing framework are complete and verified. **No bot has any
-> commands yet, and each one refuses to start rather than appear online doing
-> nothing.** That refusal is deliberate — see
+> **Status: Phase 2.** Bloom Guardian is functionally complete for verification,
+> the role lifecycle, moderation, reports and cases. Companion and Labs have no
+> commands yet and **refuse to start rather than appear online doing nothing** —
+> a deliberate choice, explained in
 > [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md).
+>
+> The platform has never connected to Discord from this environment
+> (`discord.com` is unreachable here), so the discord.js adapters are compiled
+> and type-checked but have not round-tripped a live API response. That is the
+> largest untested surface and is tracked in every phase report.
 
 ---
 
@@ -138,22 +143,24 @@ pnpm dev:guardian | dev:companion | dev:labs
 
 ## Documentation
 
-|                                                                             |                                               |
-| --------------------------------------------------------------------------- | --------------------------------------------- |
-| [Architecture plan](docs/architecture/ARCHITECTURE-PLAN.md)                 | Layering, boundaries, the full Phase 0 design |
-| [Bot responsibilities](docs/architecture/bot-responsibilities.md)           | Who owns what, and how it is enforced         |
-| [Permission matrix](docs/permissions/bloom-bot-permission-matrix.md)        | Every permission, justified per bot           |
-| [Role hierarchy](docs/permissions/role-hierarchy.md)                        | The ordering, and what breaks without it      |
-| [Developer Portal setup](docs/deployment/discord-developer-portal-setup.md) | Applications, intents, OAuth2 install         |
-| [Deployment](docs/deployment/deployment.md)                                 | Docker, health, rollout, monitoring           |
-| [Environment variables](docs/reference/environment-variables.md)            | Every variable                                |
-| [Database schema](docs/reference/database-schema.md)                        | Tables, migrations, conventions               |
-| [Commands](docs/reference/commands.md)                                      | Planned command tree and namespacing          |
-| [Channel configuration](docs/reference/channel-configuration.md)            | Channel map and per-channel permissions       |
-| [Troubleshooting](docs/operations/troubleshooting.md)                       | Symptom → cause → fix                         |
-| [Security](docs/security/security.md)                                       | Trust boundaries, secrets, abuse resistance   |
-| [Development workflow](docs/development/workflow.md)                        | Day-to-day                                    |
-| [Phase 0 report](docs/PHASE-0-REPORT.md)                                    | What was built, what is missing, what is next |
+|                                                                             |                                                  |
+| --------------------------------------------------------------------------- | ------------------------------------------------ |
+| [Architecture plan](docs/architecture/ARCHITECTURE-PLAN.md)                 | Layering, boundaries, the full Phase 0 design    |
+| [Bot responsibilities](docs/architecture/bot-responsibilities.md)           | Who owns what, and how it is enforced            |
+| [Permission matrix](docs/permissions/bloom-bot-permission-matrix.md)        | Every permission, justified per bot              |
+| [Role hierarchy](docs/permissions/role-hierarchy.md)                        | The ordering, and what breaks without it         |
+| [Developer Portal setup](docs/deployment/discord-developer-portal-setup.md) | Applications, intents, OAuth2 install            |
+| [Deployment](docs/deployment/deployment.md)                                 | Docker, health, rollout, monitoring              |
+| [Environment variables](docs/reference/environment-variables.md)            | Every variable                                   |
+| [Database schema](docs/reference/database-schema.md)                        | Tables, migrations, conventions                  |
+| [Commands](docs/reference/commands.md)                                      | The command tree, live and planned               |
+| [Channel configuration](docs/reference/channel-configuration.md)            | Channel map and per-channel permissions          |
+| [Troubleshooting](docs/operations/troubleshooting.md)                       | Symptom → cause → fix                            |
+| [Security](docs/security/security.md)                                       | Trust boundaries, secrets, abuse resistance      |
+| [Development workflow](docs/development/workflow.md)                        | Day-to-day                                       |
+| [Phase 0 report](docs/PHASE-0-REPORT.md)                                    | Foundations: monorepo, config, database, logging |
+| [Phase 1 report](docs/PHASE-1-REPORT.md)                                    | Verification and the role lifecycle              |
+| [Phase 2 report](docs/PHASE-2-REPORT.md)                                    | Moderation, reports and cases                    |
 
 ---
 
