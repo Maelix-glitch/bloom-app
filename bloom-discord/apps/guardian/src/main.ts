@@ -27,6 +27,7 @@ import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
 import { memberJoinHandler, memberLeaveHandler } from './features/onboarding/handlers.js';
 import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
+import { createRetentionSweepJob } from './features/jobs/retention-sweep.js';
 
 /**
  * Advisories from the most recent role audit.
@@ -170,7 +171,9 @@ await runBotMain(() =>
        * an operator a job that exists and is switched off, rather than an empty
        * list that looks like a broken deployment.
        */
-      context.scheduler.register(createStaleCaseSweepJob(deps));
+      context.scheduler
+        .register(createStaleCaseSweepJob(deps))
+        .register(createRetentionSweepJob(deps));
 
       const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
         guardianCommands,

@@ -24,6 +24,8 @@
     "db:migrate": "tsx packages/database/src/cli/migrate.ts",
     "db:status": "tsx packages/database/src/cli/migrate.ts --status",
     "db:seed": "tsx packages/database/src/cli/seed.ts",
+    "db:migrate:prod": "node packages/database/dist/cli/migrate.js",
+    "data:erase": "tsx packages/database/src/cli/erase.ts",
     "diagnostics": "tsx scripts/diagnostics/index.ts",
     "health": "tsx scripts/health-check/index.ts",
     "commands:register": "tsx scripts/register-commands/index.ts",

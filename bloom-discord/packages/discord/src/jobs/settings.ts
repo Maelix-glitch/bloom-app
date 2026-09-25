@@ -102,18 +102,41 @@ export class JobSettingsService {
  * checked first, at registration, and a paused cron never reaches here.
  */
 export class DatabaseJobGate implements JobGate {
-  public constructor(private readonly settings: JobSettingsService) {}
+  /**
+   * @param homeGuildId Where a *global* job's switch is recorded.
+   *
+   * Platform-wide jobs carry no guild — `platform.retention.prune` deletes
+   * rows that belong to no guild at all, so pretending it is guild-scoped
+   * would make `job_runs` lie about what it touched. But `bot_settings` is
+   * keyed `(guild_id, bot_name, key)` with a non-null guild, so a global job
+   * with nowhere to record a decision had no off switch whatsoever: the only
+   * way to stop it was a redeployment.
+   *
+   * That is not acceptable for the one job that destroys data. An operator who
+   * suspects a retention window is wrong needs to stop the deletes in seconds,
+   * not at the next release. So a global job's switch lives under the
+   * platform's home guild — Bloom runs one guild, and the alternative is a
+   * nullable column in a primary key, which makes every other lookup ambiguous
+   * to save one row.
+   */
+  public constructor(
+    private readonly settings: JobSettingsService,
+    private readonly homeGuildId: GuildId | null = null,
+  ) {}
 
   public async isEnabled(job: {
     readonly key: string;
     readonly guildId: GuildId | null;
   }): Promise<JobGateDecision> {
-    if (job.guildId === null) {
-      // A global job has no guild whose administrators could have an opinion.
+    const scope = job.guildId ?? this.homeGuildId;
+
+    if (scope === null) {
+      // No guild, and no home guild configured: nowhere a decision could have
+      // been recorded, so there is none to honour.
       return { enabled: true };
     }
 
-    const { enabled } = await this.settings.read(job.guildId, job.key);
+    const { enabled } = await this.settings.read(scope, job.key);
     if (enabled === false) {
       return {
         enabled: false,

@@ -24,6 +24,7 @@ import { ModerationActionService } from './features/moderation/service.js';
 import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
 import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
+import { createRetentionSweepJob } from './features/jobs/retention-sweep.js';
 
 /**
  * A whole Guardian, in memory.
@@ -112,7 +113,7 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
     lock,
     // The real gate over the fake settings repository, so a test that disables
     // a job exercises the same path production does.
-    gate: new DatabaseJobGate(jobSettings),
+    gate: new DatabaseJobGate(jobSettings, TEST_GUILD_ID),
     ...(config.features.scheduledMessages ? {} : { globallyDisabled: true }),
   });
 
@@ -168,7 +169,9 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
    * The same registration `main.ts` performs, so the command tests inspect the
    * real job list rather than a fixture that can drift from it.
    */
-  scheduler.register(createStaleCaseSweepJob(deps));
+  scheduler
+    .register(createStaleCaseSweepJob(deps))
+    .register(createRetentionSweepJob(deps));
 
   const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
     guardianCommands,

@@ -254,7 +254,7 @@ export async function startBotProcess<TDeps>(
       lock: new DatabaseJobLock(repositories.jobs),
       // Consulted on every tick, so an administrator's `jobs disable` takes
       // effect at the next run rather than at the next deployment.
-      gate: new DatabaseJobGate(jobSettings),
+      gate: new DatabaseJobGate(jobSettings, platform.discord.guildId),
       ...(platform.features.scheduledMessages ? {} : { globallyDisabled: true }),
     });
 

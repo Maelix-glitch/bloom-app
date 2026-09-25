@@ -74,7 +74,11 @@ services:
       postgres:
         condition: service_healthy
     entrypoint: ['/usr/bin/tini', '--']
-    command: ['npx', 'tsx', 'packages/database/src/cli/migrate.ts']
+    # The compiled CLI, not `npx tsx`. The runtime image prunes dev
+    # dependencies, so tsx is not installed in it — `npx` would have tried to
+    # download it from the network on every start, which fails in any locked-
+    # down environment and silently changes versions in the ones where it works.
+    command: ['node', 'packages/database/dist/cli/migrate.js']
     restart: 'no'
 
   guardian:

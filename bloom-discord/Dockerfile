@@ -67,6 +67,15 @@ ENV NODE_ENV=production
 ENV BLOOM_ENVIRONMENT=production
 ENV HEALTH_PORT=8080
 
+# Stamped at build time, surfaced by /health and every log line.
+#
+# Without this the platform reports the version hard-coded in package.json,
+# which is the same string for every build ever made — so the one question an
+# incident always starts with, "which build is actually running", could not be
+# answered from the running system. CI passes the commit SHA.
+ARG BLOOM_VERSION=unknown
+ENV BLOOM_VERSION=${BLOOM_VERSION}
+
 # tini reaps zombies and, more importantly, forwards SIGTERM to the process so
 # the graceful shutdown path actually runs. Without an init, PID 1 ignores
 # SIGTERM by default and the container is killed after the grace period.

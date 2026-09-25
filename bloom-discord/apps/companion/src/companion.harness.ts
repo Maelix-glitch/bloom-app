@@ -10,6 +10,7 @@ import {
   FakeJobLock,
   FakeMessaging,
   TEST_CHANNEL_IDS,
+  TEST_GUILD_ID,
   testConfig,
   type FakeRepositories,
 } from '@bloom/testing';
@@ -131,7 +132,7 @@ export function companionHarness(
     lock,
     // The real gate over the fake settings repository, so a test that disables
     // a job exercises the same path production does.
-    gate: new DatabaseJobGate(jobSettings),
+    gate: new DatabaseJobGate(jobSettings, TEST_GUILD_ID),
     ...(config.features.scheduledMessages ? {} : { globallyDisabled: true }),
   });
 

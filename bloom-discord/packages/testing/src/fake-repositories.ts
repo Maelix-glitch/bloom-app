@@ -81,6 +81,10 @@ import type {
   FileBugInput,
   TriageInput,
   TriageOutcome,
+  RetentionRepository,
+  PruneOptions,
+  PruneResult,
+  ErasureResult,
 } from '@bloom/database';
 
 /**
@@ -1441,6 +1445,63 @@ export class FakeAwardsRepository implements AwardsRepository {
  * the real allocator was broken. It increments per guild, exactly like the
  * counter table.
  */
+/**
+ * In-memory retention repository.
+ *
+ * It records the calls rather than simulating the deletes. What a retention
+ * *job* has to get right is the decision — did it run, was it gated, what did
+ * it report, did a failure surface — and none of that needs rows to disappear.
+ * Whether the SQL actually deletes the right rows is a claim about PostgreSQL,
+ * and it is tested against PostgreSQL in `retention.integration.test.ts`.
+ *
+ * `nextResult` and `failWith` exist so a test can drive the job through its
+ * interesting paths: a quiet night, a backlog that needs another pass, and a
+ * database that is refusing.
+ */
+export class FakeRetentionRepository implements RetentionRepository {
+  public readonly pruneCalls: PruneOptions[] = [];
+  public readonly erasures: { guildId: GuildId; userId: UserId }[] = [];
+
+  public nextResult: PruneResult | null = null;
+  public failWith: Error | null = null;
+
+  public prune(options: PruneOptions = {}): Promise<PruneResult> {
+    this.pruneCalls.push(options);
+    if (this.failWith) return Promise.reject(this.failWith);
+    return Promise.resolve(this.nextResult ?? emptyPruneResult());
+  }
+
+  public eraseMember(guildId: GuildId, userId: UserId): Promise<ErasureResult> {
+    this.erasures.push({ guildId, userId });
+    if (this.failWith) return Promise.reject(this.failWith);
+    return Promise.resolve({
+      guildId,
+      userId,
+      feedbackRedacted: 0,
+      bugReportsRedacted: 0,
+      ledgerNotesRedacted: 0,
+      reportsRedacted: 0,
+      auditActorRows: 0,
+      total: 0,
+    });
+  }
+}
+
+function emptyPruneResult(): PruneResult {
+  return {
+    deleted: {
+      idempotency_keys: 0,
+      message_cooldowns: 0,
+      job_runs: 0,
+      command_usage: 0,
+      verification_attempts: 0,
+      audit_events: 0,
+    },
+    total: 0,
+    more: false,
+  };
+}
+
 export class FakeLabsRepository implements LabsRepository {
   public readonly feedback: FeedbackEntry[] = [];
   public readonly bugs: BugReport[] = [];
@@ -1631,6 +1692,7 @@ export interface FakeRepositories extends Repositories {
   readonly rewards: FakeRewardsRepository;
   readonly awards: FakeAwardsRepository;
   readonly labs: FakeLabsRepository;
+  readonly retention: FakeRetentionRepository;
 }
 
 /**
@@ -1658,6 +1720,7 @@ export function fakeRepositories(
     cases: new FakeCaseRepository(now),
     rewards: new FakeRewardsRepository(now),
     awards: new FakeAwardsRepository(now),
+    retention: new FakeRetentionRepository(),
     labs: new FakeLabsRepository(now),
   };
 }
