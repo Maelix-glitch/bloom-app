@@ -7,7 +7,11 @@ export type {
   TimeoutRequest,
 } from './service.js';
 export { CaseService } from './case-service.js';
-export type { CaseDetail, CaseServiceOptions, SubmitReportResult } from './case-service.js';
+export type {
+  CaseDetail,
+  CaseServiceOptions,
+  SubmitReportResult,
+} from './case-service.js';
 export {
   moderationCommands,
   moderationSubcommands,

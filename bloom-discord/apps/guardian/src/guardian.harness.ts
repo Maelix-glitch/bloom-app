@@ -56,9 +56,7 @@ export interface GuardianHarnessOptions {
   readonly reportsChannel?: null;
 }
 
-export function guardianHarness(
-  options: GuardianHarnessOptions = {},
-): GuardianHarness {
+export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianHarness {
   // testConfig() already configures every channel, reports included.
   const base = testConfig();
   const config =

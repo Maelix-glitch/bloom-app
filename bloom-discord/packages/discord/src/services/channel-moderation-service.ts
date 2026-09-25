@@ -188,7 +188,11 @@ export class DiscordChannelModerationService implements ChannelModerationService
     readonly authorId?: UserId;
     readonly reason: string;
   }): Promise<PurgeResult> {
-    if (!Number.isInteger(input.limit) || input.limit < 1 || input.limit > BULK_DELETE_MAX) {
+    if (
+      !Number.isInteger(input.limit) ||
+      input.limit < 1 ||
+      input.limit > BULK_DELETE_MAX
+    ) {
       throw bloomError('INVALID_INPUT', {
         userMessage: `Purge can remove between 1 and ${String(BULK_DELETE_MAX)} messages at a time.`,
         operatorHint:
@@ -227,7 +231,7 @@ export class DiscordChannelModerationService implements ChannelModerationService
       return { requested: input.limit, deleted: 0, skippedTooOld };
     }
 
-    let deleted = 0;
+    let deleted: number;
     try {
       const removed = await channel.bulkDelete(deletable, true);
       deleted = removed.size;
@@ -274,7 +278,8 @@ function translate(error: unknown, action: string): unknown {
       return bloomError('INVALID_INPUT', {
         userMessage:
           'Those messages are too old to delete in bulk. Discord only allows this for messages under 14 days old.',
-        operatorHint: 'Discord returned 50034. The pre-filter should normally prevent this; a message aged past the cutoff between fetch and delete.',
+        operatorHint:
+          'Discord returned 50034. The pre-filter should normally prevent this; a message aged past the cutoff between fetch and delete.',
         cause: error,
       });
 

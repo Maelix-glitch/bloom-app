@@ -1,10 +1,10 @@
-import { DiscordAPIError, PermissionFlagsBits, type Client, type Guild } from 'discord.js';
 import {
-  bloomError,
-  type BotName,
-  type GuildId,
-  type UserId,
-} from '@bloom/shared-types';
+  DiscordAPIError,
+  PermissionFlagsBits,
+  type Client,
+  type Guild,
+} from 'discord.js';
+import { bloomError, type BotName, type GuildId, type UserId } from '@bloom/shared-types';
 import { MAX_TIMEOUT_MS } from '@bloom/utils';
 import type { Logger } from '@bloom/logging';
 import { assertCapability } from '@bloom/permissions';
@@ -237,7 +237,8 @@ function translate(error: unknown, action: string): unknown {
     case 30035:
       return bloomError('INVALID_INPUT', {
         userMessage: 'That ban could not be added — the server has hit its ban limit.',
-        operatorHint: 'Discord returned 30035 "Maximum number of bans for non-guild members have been exceeded".',
+        operatorHint:
+          'Discord returned 30035 "Maximum number of bans for non-guild members have been exceeded".',
         cause: error,
       });
 

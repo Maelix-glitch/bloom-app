@@ -3,9 +3,9 @@ import { unsafeSnowflake, type UserId } from '@bloom/shared-types';
 import { EventDispatcher, type MemberJoinPayload } from '@bloom/events';
 import {
   createTestLogger,
-  FakeMessaging,
   TEST_GUILD_ID,
   TEST_USER_IDS,
+  type FakeMessaging,
   type FakeRepositories,
 } from '@bloom/testing';
 import type { GuardianDeps } from '../../deps.js';

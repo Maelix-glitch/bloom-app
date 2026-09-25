@@ -17,7 +17,10 @@ function expectAllowed(responder: RecordingResponder): void {
 }
 
 /** A resolved user option, as Discord would hand it to us. */
-function user(id: UserId, isBot = false): { id: UserId; username: string; isBot: boolean } {
+function user(
+  id: UserId,
+  isBot = false,
+): { id: UserId; username: string; isBot: boolean } {
   return { id, username: `member-${id.slice(-4)}`, isBot };
 }
 
@@ -154,8 +157,7 @@ describe('who may run what', () => {
         users: { member: user(MEMBER) },
         strings: {
           category: 'member_conduct',
-          description:
-            'They followed me into three channels repeating the same insult.',
+          description: 'They followed me into three channels repeating the same insult.',
         },
       },
     });
@@ -178,7 +180,10 @@ describe('input handling', () => {
 
     expect(responder.visibleText.toLowerCase()).toContain('bot');
     expect(
-      await h.repositories.moderation.countActiveWarnings(TEST_GUILD_ID, TEST_USER_IDS.bot),
+      await h.repositories.moderation.countActiveWarnings(
+        TEST_GUILD_ID,
+        TEST_USER_IDS.bot,
+      ),
     ).toBe(0);
   });
 
@@ -290,18 +295,24 @@ describe('parseMessageLink', () => {
       'https://canary.discord.com',
       'https://ptb.discord.com',
     ]) {
-      expect(parseMessageLink(`${host}/channels/${guild}/${channel}/${message}`)).not.toBeNull();
+      expect(
+        parseMessageLink(`${host}/channels/${guild}/${channel}/${message}`),
+      ).not.toBeNull();
     }
   });
 
   it('rejects a link that is not Discord', () => {
     expect(
-      parseMessageLink(`https://discord.com.example.net/channels/${guild}/${channel}/${message}`),
+      parseMessageLink(
+        `https://discord.com.example.net/channels/${guild}/${channel}/${message}`,
+      ),
     ).toBeNull();
   });
 
   it('rejects a truncated link', () => {
-    expect(parseMessageLink(`https://discord.com/channels/${guild}/${channel}`)).toBeNull();
+    expect(
+      parseMessageLink(`https://discord.com/channels/${guild}/${channel}`),
+    ).toBeNull();
   });
 
   it('rejects free text', () => {

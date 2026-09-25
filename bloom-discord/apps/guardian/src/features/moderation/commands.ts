@@ -756,9 +756,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
     spec: {
       name: 'history',
       description: 'Show a member’s moderation history.',
-      options: [
-        { name: 'member', description: 'Who.', type: 'user', required: true },
-      ],
+      options: [{ name: 'member', description: 'Who.', type: 'user', required: true }],
     },
     execute: memberHistory,
   },
@@ -1093,7 +1091,9 @@ async function unban(
     memberNotified: false,
     ...(outcome.wasBanned
       ? {}
-      : { extra: 'That user was not banned, so nothing changed. The check is recorded.' }),
+      : {
+          extra: 'That user was not banned, so nothing changed. The check is recorded.',
+        }),
   });
 }
 

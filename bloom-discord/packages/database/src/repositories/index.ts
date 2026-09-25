@@ -8,10 +8,7 @@ import {
 } from './idempotency.js';
 import { PostgresJobRunRepository, type JobRunRepository } from './jobs.js';
 import { PostgresOnboardingRepository, type OnboardingRepository } from './onboarding.js';
-import {
-  PostgresModerationRepository,
-  type ModerationRepository,
-} from './moderation.js';
+import { PostgresModerationRepository, type ModerationRepository } from './moderation.js';
 import { PostgresCaseRepository, type CaseRepository } from './cases.js';
 import { PostgresSettingsRepository, type SettingsRepository } from './settings.js';
 import { PostgresTelemetryRepository, type TelemetryRepository } from './telemetry.js';

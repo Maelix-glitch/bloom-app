@@ -288,11 +288,10 @@ export class ModerationActionService {
       caseId,
     });
 
-    const activeWarnings =
-      await this.options.repositories.moderation.countActiveWarnings(
-        request.guildId,
-        request.targetId,
-      );
+    const activeWarnings = await this.options.repositories.moderation.countActiveWarnings(
+      request.guildId,
+      request.targetId,
+    );
 
     const guildName = await this.options.guilds.getGuildName(request.guildId);
     const memberNotified = await this.notify(
@@ -460,12 +459,7 @@ export class ModerationActionService {
      * someone why they were removed is the difference between moderation and
      * an unexplained disappearance.
      */
-    const memberNotified = await this.notify(
-      request.targetId,
-      'kick',
-      guildName,
-      reason,
-    );
+    const memberNotified = await this.notify(request.targetId, 'kick', guildName, reason);
 
     await this.options.discord.kickMember({
       guildId: request.guildId,
@@ -605,7 +599,7 @@ export class ModerationActionService {
       reason: staffReason(request.actor.userId, reason),
     });
 
-    return this.record({
+    return await this.record({
       action: 'slowmode',
       guildId: request.guildId,
       actor: request.actor,

@@ -64,7 +64,10 @@ export function memberNotice(
     ban: `You have been banned from ${guildName}.`,
   };
 
-  const lines = [headline[action] ?? `A moderation action was taken in ${guildName}.`, ''];
+  const lines = [
+    headline[action] ?? `A moderation action was taken in ${guildName}.`,
+    '',
+  ];
   /*
    * Escape here, not at storage time. The stored reason is plain text so it
    * reads correctly in exports and in Discord's audit log; this is the one
@@ -116,13 +119,13 @@ export function actionConfirmed(input: {
   readonly caseNumber?: number | null;
   readonly extra?: string;
 }): BloomMessage {
-  const lines = [`${MODERATION_ACTION_LABELS[input.action]} — ${mention(input.targetId)}`];
+  const lines = [
+    `${MODERATION_ACTION_LABELS[input.action]} — ${mention(input.targetId)}`,
+  ];
   lines.push(`**Reason** — ${input.reason}`);
 
   if (input.activeWarnings !== undefined) {
-    lines.push(
-      `**Active warnings** — ${String(input.activeWarnings)}`,
-    );
+    lines.push(`**Active warnings** — ${String(input.activeWarnings)}`);
   }
   if (input.extra) lines.push(input.extra);
   if (input.caseNumber) lines.push(`**Case** — #${String(input.caseNumber)}`);
@@ -142,7 +145,9 @@ export function actionConfirmed(input: {
 }
 
 function dmRelevant(action: ModerationAction): boolean {
-  return action === 'warn' || action === 'timeout' || action === 'kick' || action === 'ban';
+  return (
+    action === 'warn' || action === 'timeout' || action === 'kick' || action === 'ban'
+  );
 }
 
 export function warningsCleared(targetId: UserId, cleared: number): BloomMessage {
@@ -372,7 +377,10 @@ export function staffReportMessage(
   }
 
   lines.push('', '**What was reported**', description);
-  lines.push('', `Use \`/guardian case view ${String(caseRow.caseNumber)}\` to work this.`);
+  lines.push(
+    '',
+    `Use \`/guardian case view ${String(caseRow.caseNumber)}\` to work this.`,
+  );
 
   return {
     embeds: [
@@ -434,7 +442,10 @@ export function caseDetail(input: {
   return {
     ephemeral: true,
     embeds: [
-      staffEmbed({ title: `Case #${String(c.caseNumber)}`, description: sections.join('\n') }),
+      staffEmbed({
+        title: `Case #${String(c.caseNumber)}`,
+        description: sections.join('\n'),
+      }),
     ],
   };
 }
@@ -484,9 +495,7 @@ export function caseList(
 export function caseNotFound(caseNumber: number): BloomMessage {
   return {
     ephemeral: true,
-    embeds: [
-      neutralEmbed({ description: `There is no case #${String(caseNumber)}.` }),
-    ],
+    embeds: [neutralEmbed({ description: `There is no case #${String(caseNumber)}.` })],
   };
 }
 
@@ -509,7 +518,11 @@ export function caseStatusRefused(
   caseNumber: number,
   outcome:
     | { readonly kind: 'already_in_state'; readonly status: CaseStatus }
-    | { readonly kind: 'conflict'; readonly actual: CaseStatus; readonly expected: CaseStatus }
+    | {
+        readonly kind: 'conflict';
+        readonly actual: CaseStatus;
+        readonly expected: CaseStatus;
+      }
     | { readonly kind: 'terminal'; readonly status: CaseStatus },
 ): BloomMessage {
   const description = ((): string => {
@@ -542,8 +555,6 @@ export function caseAssigned(caseNumber: number, assignee: UserId | null): Bloom
 export function noteAdded(caseNumber: number): BloomMessage {
   return {
     ephemeral: true,
-    embeds: [
-      successEmbed({ description: `Note added to case #${String(caseNumber)}.` }),
-    ],
+    embeds: [successEmbed({ description: `Note added to case #${String(caseNumber)}.` })],
   };
 }

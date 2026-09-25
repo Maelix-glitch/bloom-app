@@ -40,7 +40,7 @@ function moderator(): ReturnType<typeof testSubject> {
 async function fileReport(
   overrides: Partial<Parameters<typeof h.deps.cases.submitReport>[0]> = {},
 ): Promise<Awaited<ReturnType<typeof h.deps.cases.submitReport>>> {
-  return h.deps.cases.submitReport({
+  return await h.deps.cases.submitReport({
     guildId: TEST_GUILD_ID,
     reporter: reporter(),
     category: 'member_conduct',
@@ -132,14 +132,14 @@ describe('submitReport', () => {
   });
 
   it('refuses a one-word description', async () => {
-    await expect(fileReport({ description: 'bad' })).rejects.toSatisfy(
-      (e: unknown) => BloomError.isCode(e, 'INVALID_INPUT'),
+    await expect(fileReport({ description: 'bad' })).rejects.toSatisfy((e: unknown) =>
+      BloomError.isCode(e, 'INVALID_INPUT'),
     );
   });
 
   it('refuses a self-report, which is almost always a mis-click', async () => {
-    await expect(fileReport({ targetUserId: REPORTER })).rejects.toSatisfy(
-      (e: unknown) => BloomError.isCode(e, 'INVALID_INPUT'),
+    await expect(fileReport({ targetUserId: REPORTER })).rejects.toSatisfy((e: unknown) =>
+      BloomError.isCode(e, 'INVALID_INPUT'),
     );
   });
 });

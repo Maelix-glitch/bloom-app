@@ -313,10 +313,7 @@ describe('timeout', () => {
       }),
     ).rejects.toBeInstanceOf(Error);
 
-    const history = await h.repositories.moderation.listForSubject(
-      TEST_GUILD_ID,
-      MEMBER,
-    );
+    const history = await h.repositories.moderation.listForSubject(TEST_GUILD_ID, MEMBER);
     expect(history).toHaveLength(0);
   });
 });
@@ -402,10 +399,7 @@ describe('clear warnings', () => {
     });
 
     expect(outcome.cleared).toBe(0);
-    const history = await h.repositories.moderation.listForSubject(
-      TEST_GUILD_ID,
-      MEMBER,
-    );
+    const history = await h.repositories.moderation.listForSubject(TEST_GUILD_ID, MEMBER);
     expect(history.map((row) => row.action)).toContain('clear_warnings');
   });
 
@@ -430,10 +424,7 @@ describe('clear warnings', () => {
       correlationId,
     });
 
-    const history = await h.repositories.moderation.listForSubject(
-      TEST_GUILD_ID,
-      MEMBER,
-    );
+    const history = await h.repositories.moderation.listForSubject(TEST_GUILD_ID, MEMBER);
     const warning = history.find((row) => row.action === 'warn');
     expect(warning?.revokedAt).not.toBeNull();
   });

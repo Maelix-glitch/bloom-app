@@ -498,7 +498,6 @@ class FakeSettingsRepository implements SettingsRepository {
   }
 }
 
-
 // -----------------------------------------------------------------------------
 // Moderation
 // -----------------------------------------------------------------------------
@@ -591,8 +590,7 @@ export class FakeModerationRepository implements ModerationRepository {
     for (let i = 0; i < this.actions.length; i += 1) {
       const row = this.actions[i];
       if (
-        row &&
-        row.guildId === input.guildId &&
+        row?.guildId === input.guildId &&
         row.subjectId === input.subjectId &&
         row.action === 'warn' &&
         row.revokedAt === null
@@ -616,7 +614,8 @@ export class FakeModerationRepository implements ModerationRepository {
     readonly reason: string;
   }): Promise<boolean> {
     const index = this.actions.findIndex(
-      (row) => row.id === input.id && row.guildId === input.guildId && row.revokedAt === null,
+      (row) =>
+        row.id === input.id && row.guildId === input.guildId && row.revokedAt === null,
     );
     const row = this.actions[index];
     if (!row) return Promise.resolve(false);
@@ -638,7 +637,8 @@ export class FakeModerationRepository implements ModerationRepository {
     const times = mine.map((row) => row.createdAt.getTime());
 
     return Promise.resolve({
-      activeWarnings: mine.filter((r) => r.action === 'warn' && r.revokedAt === null).length,
+      activeWarnings: mine.filter((r) => r.action === 'warn' && r.revokedAt === null)
+        .length,
       totalWarnings: count('warn'),
       timeouts: count('timeout'),
       kicks: count('kick'),
@@ -745,7 +745,8 @@ export class FakeCaseRepository implements CaseRepository {
 
   public findByNumber(guildId: GuildId, caseNumber: number): Promise<CaseRow | null> {
     return Promise.resolve(
-      this.cases.find((c) => c.guildId === guildId && c.caseNumber === caseNumber) ?? null,
+      this.cases.find((c) => c.guildId === guildId && c.caseNumber === caseNumber) ??
+        null,
     );
   }
 
@@ -764,7 +765,8 @@ export class FakeCaseRepository implements CaseRepository {
       .filter((c) => !filter?.subjectId || c.subjectId === filter.subjectId)
       .sort(
         (a, b) =>
-          order[a.status] - order[b.status] || a.openedAt.getTime() - b.openedAt.getTime(),
+          order[a.status] - order[b.status] ||
+          a.openedAt.getTime() - b.openedAt.getTime(),
       )
       .slice(0, filter?.limit ?? 20);
     return Promise.resolve(rows);
@@ -800,7 +802,11 @@ export class FakeCaseRepository implements CaseRepository {
       return Promise.resolve({ kind: 'terminal', status: row.status });
     }
     if (!canTransitionCase(row.status, input.to)) {
-      return Promise.resolve({ kind: 'conflict', actual: row.status, expected: input.to });
+      return Promise.resolve({
+        kind: 'conflict',
+        actual: row.status,
+        expected: input.to,
+      });
     }
 
     const from = row.status;
@@ -808,7 +814,8 @@ export class FakeCaseRepository implements CaseRepository {
       ...row,
       status: input.to,
       resolution: input.resolution ?? row.resolution,
-      resolvedAt: input.to === 'RESOLVED' ? (row.resolvedAt ?? this.now()) : row.resolvedAt,
+      resolvedAt:
+        input.to === 'RESOLVED' ? (row.resolvedAt ?? this.now()) : row.resolvedAt,
       closedAt: input.to === 'CLOSED' ? (row.closedAt ?? this.now()) : row.closedAt,
       updatedAt: this.now(),
     };
@@ -836,7 +843,11 @@ export class FakeCaseRepository implements CaseRepository {
     const row = this.cases[index];
     if (!row) return Promise.resolve(null);
 
-    const updated: CaseRow = { ...row, assignedTo: input.assignee, updatedAt: this.now() };
+    const updated: CaseRow = {
+      ...row,
+      assignedTo: input.assignee,
+      updatedAt: this.now(),
+    };
     this.cases[index] = updated;
     this.pushEvent(
       row.id,
@@ -858,7 +869,12 @@ export class FakeCaseRepository implements CaseRepository {
         operatorHint: 'Status changes must go through transitionStatus().',
       });
     }
-    this.pushEvent(input.caseId, input.eventType, input.actorId ?? null, input.body ?? null);
+    this.pushEvent(
+      input.caseId,
+      input.eventType,
+      input.actorId ?? null,
+      input.body ?? null,
+    );
     return Promise.resolve();
   }
 

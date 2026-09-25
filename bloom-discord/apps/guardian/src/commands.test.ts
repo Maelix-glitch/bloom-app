@@ -89,7 +89,7 @@ describe('Guardian command set', () => {
    * is the one command that grows without anybody watching it — and the
    * failure mode is a 400 from the registration script, after a deploy.
    */
-  it('keeps /guardian within Discord\'s subcommand limits', () => {
+  it("keeps /guardian within Discord's subcommand limits", () => {
     const spec = guardianNamespaceCommand.spec;
     const groups = spec.groups ?? [];
     const bare = spec.subcommands ?? [];

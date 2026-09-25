@@ -77,8 +77,7 @@ export function isCaseStatus(value: unknown): value is CaseStatus {
 
 export function isReportCategory(value: unknown): value is ReportCategory {
   return (
-    typeof value === 'string' &&
-    (REPORT_CATEGORIES as readonly string[]).includes(value)
+    typeof value === 'string' && (REPORT_CATEGORIES as readonly string[]).includes(value)
   );
 }
 
@@ -123,13 +122,14 @@ export function requiresResolution(status: CaseStatus): boolean {
  * `clear_warnings` reverses `warn` and does not follow it, and a convention
  * with one exception is a convention that will be got wrong.
  */
-export const REVERSING_ACTIONS: Readonly<Partial<Record<ModerationAction, ModerationAction>>> =
-  {
-    untimeout: 'timeout',
-    unban: 'ban',
-    unlock: 'lock',
-    clear_warnings: 'warn',
-  };
+export const REVERSING_ACTIONS: Readonly<
+  Partial<Record<ModerationAction, ModerationAction>>
+> = {
+  untimeout: 'timeout',
+  unban: 'ban',
+  unlock: 'lock',
+  clear_warnings: 'warn',
+};
 
 /**
  * Actions that need the target to currently be in the guild.

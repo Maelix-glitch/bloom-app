@@ -283,10 +283,7 @@ export class PostgresModerationRepository
     }
   }
 
-  public async countActiveWarnings(
-    guildId: GuildId,
-    subjectId: UserId,
-  ): Promise<number> {
+  public async countActiveWarnings(guildId: GuildId, subjectId: UserId): Promise<number> {
     const sql = this.conn();
     try {
       const rows = await sql<{ count: number }[]>`

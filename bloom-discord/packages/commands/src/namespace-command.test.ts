@@ -16,10 +16,7 @@ interface Deps {
   readonly marker: string;
 }
 
-function contribution(
-  name: string,
-  group?: string,
-): SubcommandContribution<Deps> {
+function contribution(name: string, group?: string): SubcommandContribution<Deps> {
   return {
     ...(group === undefined ? {} : { group }),
     spec: { name, description: `The ${name} subcommand.` },
@@ -79,10 +76,9 @@ describe('spec derivation', () => {
    * them unreachable.
    */
   it('treats a bare subcommand and a grouped one of the same name as distinct', async () => {
-    const command = build(
-      [contribution('overview'), contribution('overview', 'case')],
-      { case: 'Cases.' },
-    );
+    const command = build([contribution('overview'), contribution('overview', 'case')], {
+      case: 'Cases.',
+    });
 
     const bare = fakeInvocation({ commandName: 'guardian', subcommand: 'overview' });
     const grouped = fakeInvocation({
@@ -138,9 +134,7 @@ describe('construction-time failures', () => {
     );
 
     expect(() => build(many, { case: 'Cases.' })).toThrow(BloomError);
-    expect(() =>
-      build(many.slice(0, 25), { case: 'Cases.' }),
-    ).not.toThrow();
+    expect(() => build(many.slice(0, 25), { case: 'Cases.' })).not.toThrow();
   });
 });
 
@@ -161,7 +155,7 @@ describe('routing failures', () => {
     await expect(command.execute(invocation, { marker: 'x' })).rejects.toSatisfy(
       (error: unknown) =>
         BloomError.isCode(error, 'NOT_IMPLEMENTED') &&
-        (error as BloomError).operatorHint?.includes('re-run the registrar') === true,
+        error.operatorHint.includes('re-run the registrar'),
     );
   });
 });

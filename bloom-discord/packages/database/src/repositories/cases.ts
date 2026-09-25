@@ -499,7 +499,9 @@ export class PostgresCaseRepository extends BaseRepository implements CaseReposi
         SET status = ${input.to},
             resolution = ${input.resolution ?? conn`resolution`},
             resolved_at = ${
-              input.to === 'RESOLVED' ? conn`COALESCE(resolved_at, now())` : conn`resolved_at`
+              input.to === 'RESOLVED'
+                ? conn`COALESCE(resolved_at, now())`
+                : conn`resolved_at`
             },
             closed_at = ${
               input.to === 'CLOSED' ? conn`COALESCE(closed_at, now())` : conn`closed_at`

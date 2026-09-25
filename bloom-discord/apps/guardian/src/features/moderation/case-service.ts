@@ -71,9 +71,7 @@ export class CaseService {
   // Reports
   // ---------------------------------------------------------------------------
 
-  public async submitReport(
-    request: SubmitReportRequest,
-  ): Promise<SubmitReportResult> {
+  public async submitReport(request: SubmitReportRequest): Promise<SubmitReportResult> {
     const description = sanitiseUserText(request.description, 1800);
     if (description.length < 10) {
       throw bloomError('INVALID_INPUT', {
@@ -265,9 +263,7 @@ export class CaseService {
     readonly to: CaseStatus;
     readonly note?: string | null;
     readonly correlationId: CorrelationId;
-  }): Promise<
-    Awaited<ReturnType<Repositories['cases']['transitionStatus']>>
-  > {
+  }): Promise<Awaited<ReturnType<Repositories['cases']['transitionStatus']>>> {
     const note = request.note ? sanitiseUserText(request.note, 1000) : null;
 
     /*
