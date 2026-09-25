@@ -133,6 +133,25 @@ context into a confrontation, which stops people writing them.
 | `/guardian roles audit`                  | Moderator     | Re-run the hierarchy audit on demand | **1 ✅** |
 | `/guardian onboarding reset <member>`    | Administrator | Reset someone's onboarding           |    3     |
 
+### Scheduled work
+
+| Command                        | Policy            | Description                                  |  Phase   |
+| ------------------------------ | ----------------- | -------------------------------------------- | :------: |
+| `/guardian jobs list`          | Moderator         | Every registered job, its schedule, next run | **3 ✅** |
+| `/guardian jobs history <job>` | Moderator         | The last recorded run, including the failure | **3 ✅** |
+| `/guardian jobs run <job>`     | **Administrator** | Run a job now, without waiting for its cron  | **3 ✅** |
+
+`jobs list` reads the live scheduler, and `jobs history` reads the `job_runs`
+table rather than process memory — after a deployment the scheduler has no
+recollection of yesterday, and a command that answered "never run" for a job
+that has run daily for a year would be worse than having no command.
+
+`jobs run` is the one `/guardian` branch that demands more than Moderator.
+Triggering a job can make the bot post publicly on demand, which is an
+administrative capability rather than a moderation one. It bypasses the cron
+schedule but **not** the lock and **not** the job's own duplicate suppression:
+triggering the stale-case digest twice in one morning still posts once.
+
 ### How `/guardian` is assembled
 
 `/guardian` is not owned by any one feature. Each feature exports a list of
@@ -151,9 +170,19 @@ Three mistakes fail at construction rather than in production: two features
 claiming the same path, a group with no description, and a group exceeding
 Discord's 25-subcommand limit.
 
-All `/guardian` subcommands share one policy — Moderator or above — rather than
+`/guardian` subcommands share one policy — Moderator or above — rather than
 declaring a policy each. The failure mode of per-subcommand policies is the one
 somebody forgets, so a new subcommand inherits the gate automatically.
+
+A contribution may still declare its own `policy`, which is checked **after**
+the namespace policy and can therefore only narrow it. `jobs run` is the first
+use: Administrator inside a Moderator-gated namespace. The direction is the
+safety property — a subcommand can demand more than its namespace, never less,
+so the inherited gate cannot be accidentally opened. Discord has no
+per-subcommand permission model, so the branch stays visible to anyone who can
+see `/guardian` and refuses when invoked; as everywhere else here,
+`defaultMemberPermissions` is a client hint and the server-side check is the
+boundary.
 
 `/guardian status` is Moderator-gated even when a member asks about themselves.
 Members do not need it: `/verify` already tells them everything their own state

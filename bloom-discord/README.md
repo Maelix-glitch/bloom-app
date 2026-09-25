@@ -155,12 +155,14 @@ pnpm dev:guardian | dev:companion | dev:labs
 | [Database schema](docs/reference/database-schema.md)                        | Tables, migrations, conventions                  |
 | [Commands](docs/reference/commands.md)                                      | The command tree, live and planned               |
 | [Channel configuration](docs/reference/channel-configuration.md)            | Channel map and per-channel permissions          |
+| [Scheduled jobs](docs/operations/scheduled-jobs.md)                         | The scheduler, leases, and what every job needs  |
 | [Troubleshooting](docs/operations/troubleshooting.md)                       | Symptom → cause → fix                            |
 | [Security](docs/security/security.md)                                       | Trust boundaries, secrets, abuse resistance      |
 | [Development workflow](docs/development/workflow.md)                        | Day-to-day                                       |
 | [Phase 0 report](docs/PHASE-0-REPORT.md)                                    | Foundations: monorepo, config, database, logging |
 | [Phase 1 report](docs/PHASE-1-REPORT.md)                                    | Verification and the role lifecycle              |
 | [Phase 2 report](docs/PHASE-2-REPORT.md)                                    | Moderation, reports and cases                    |
+| [Phase 3 report](docs/PHASE-3-REPORT.md)                                    | The locked job scheduler, wired end to end       |
 
 ---
 

@@ -144,10 +144,19 @@ channel-based fallback.
 
 ## Scheduled jobs
 
+Start with `/guardian jobs list` and `/guardian jobs history <job>`; between them
+they answer most of this section without touching a log aggregator. Full detail:
+[Scheduled jobs](scheduled-jobs.md).
+
 ### A job never runs
 
-- `FEATURE_SCHEDULED_MESSAGES` defaults to **false**.
-- The individual job may be disabled.
+- `FEATURE_SCHEDULED_MESSAGES` defaults to **false**. `/guardian jobs list` says
+  so explicitly when it is off.
+- The individual job may be disabled — most often because the channel it posts
+  to is unconfigured. The listing distinguishes "disabled globally" from
+  "disabled for this job" for exactly this reason.
+- Check `BLOOM_TIMEZONE`. A job scheduled for `0 9 * * *` in the wrong zone has
+  run, just not when you were watching.
 - Check `scheduler.started` in the logs for the enabled count.
 
 ### A job logs `scheduler.lock_held` and skips
@@ -159,7 +168,24 @@ what the lock is for.
 
 A process crashed while holding a lease. The lease expires on its own; until
 then the job is blocked. `reclaimExpired` marks lapsed runs `timed_out` on the
-next cycle.
+next cycle — `timed_out` rather than `failed`, because the job never reported
+back at all, which points at a kill rather than a bug.
+
+### `scheduler.lease_lost` in the logs
+
+A renewal was refused while the job was still running, meaning another process
+may already have picked the job up. The job took longer than its lease and the
+heartbeat could not keep ahead of it. Raise that job's `leaseSeconds` above its
+realistic worst case; the heartbeat renews at half the lease, so a lease of 120s
+tolerates one missed renewal but not a 10-minute run.
+
+### The same message was posted twice
+
+The lock prevents two _concurrent_ runs, not two sequential ones. A redeploy near
+the scheduled minute, a reclaimed lease, or a manual `/guardian jobs run` can all
+produce a second run, and the job's own cooldown claim is what makes it post
+once. Check that the job claims its cooldown **before** sending rather than
+after.
 
 ---
 

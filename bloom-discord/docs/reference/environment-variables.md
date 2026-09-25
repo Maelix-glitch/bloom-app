@@ -21,6 +21,7 @@ supplies real environment variables and no `.env` exists.
 | `BLOOM_ENVIRONMENT` |    no    | derived from `NODE_ENV` | `development` \| `staging` \| `production`. Appears on every log line and in `/health`.                                                                                     |
 | `BLOOM_VERSION`     |    no    | `0.1.0`                 | Stamped on every log line. Set it to the build SHA in CI so a log line identifies the exact code that produced it.                                                          |
 | `LOG_LEVEL`         |    no    | `info`                  | `trace` \| `debug` \| `info` \| `warn` \| `error` \| `fatal`                                                                                                                |
+| `BLOOM_TIMEZONE`    |    no    | `UTC`                   | IANA zone every scheduled job is evaluated in, e.g. `Europe/London`. Validated against the platform tz database at startup — a typo fails the boot, not the 09:00 run.      |
 | `LOG_PRETTY`        |    no    | `false`                 | Human-readable output. **Rejected when `BLOOM_ENVIRONMENT=production`** — pretty logs are logs the aggregator cannot parse, discovered during the incident that needs them. |
 | `HEALTH_PORT`       |    no    | unset                   | Port for `/health` and `/ready`. Unset means no HTTP surface, which is correct for local development.                                                                       |
 
