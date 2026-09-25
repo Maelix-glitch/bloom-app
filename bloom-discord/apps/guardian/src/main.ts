@@ -2,7 +2,10 @@
  * BLOOM GUARDIAN — entry point.
  *
  * Guardian is the highest-trust application: verification and onboarding, the
- * role lifecycle, moderation, reports and cases, audit logging and anti-spam.
+ * role lifecycle, moderation, reports and cases, and audit logging.
+ *
+ * Not anti-spam: that is Guardian's to own and is not implemented. See
+ * docs/architecture/design-notes/001-auto-moderation.md.
  * It is the only bot with Manage Roles, and the only one holding the privileged
  * GuildMembers intent.
  *

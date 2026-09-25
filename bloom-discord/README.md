@@ -153,34 +153,37 @@ pnpm dev:guardian | dev:companion | dev:labs
 
 ## Documentation
 
-|                                                                             |                                                     |
-| --------------------------------------------------------------------------- | --------------------------------------------------- |
-| [Architecture plan](docs/architecture/ARCHITECTURE-PLAN.md)                 | Layering, boundaries, the full Phase 0 design       |
-| [Bot responsibilities](docs/architecture/bot-responsibilities.md)           | Who owns what, and how it is enforced               |
-| [Permission matrix](docs/permissions/bloom-bot-permission-matrix.md)        | Every permission, justified per bot                 |
-| [Role hierarchy](docs/permissions/role-hierarchy.md)                        | The ordering, and what breaks without it            |
-| [Developer Portal setup](docs/deployment/discord-developer-portal-setup.md) | Applications, intents, OAuth2 install               |
-| [Deployment](docs/deployment/deployment.md)                                 | Docker, health, rollout, monitoring                 |
-| [Environment variables](docs/reference/environment-variables.md)            | Every variable                                      |
-| [Database schema](docs/reference/database-schema.md)                        | Tables, migrations, conventions                     |
-| [Commands](docs/reference/commands.md)                                      | The command tree, live and planned                  |
-| [Channel configuration](docs/reference/channel-configuration.md)            | Channel map and per-channel permissions             |
-| [Scheduled jobs](docs/operations/scheduled-jobs.md)                         | The scheduler, leases, and what every job needs     |
-| [Bloom Rewards](docs/operations/bloom-rewards.md)                           | The points economy, and everything it refuses to do |
-| [Production readiness](docs/operations/production-readiness.md)             | Go-live checklist, and what is genuinely unverified |
-| [Data retention](docs/operations/data-retention.md)                         | What is kept, for how long, and how to erase it     |
-| [Decisions](docs/architecture/decisions.md)                                 | Decisions that are expensive to reverse, and why    |
-| [Troubleshooting](docs/operations/troubleshooting.md)                       | Symptom → cause → fix                               |
-| [Security](docs/security/security.md)                                       | Trust boundaries, secrets, abuse resistance         |
-| [Development workflow](docs/development/workflow.md)                        | Day-to-day                                          |
-| [Phase 0 report](docs/PHASE-0-REPORT.md)                                    | Foundations: monorepo, config, database, logging    |
-| [Phase 1 report](docs/PHASE-1-REPORT.md)                                    | Verification and the role lifecycle                 |
-| [Phase 2 report](docs/PHASE-2-REPORT.md)                                    | Moderation, reports and cases                       |
-| [Phase 3 report](docs/PHASE-3-REPORT.md)                                    | The locked job scheduler, wired end to end          |
-| [Phase 4 report](docs/PHASE-4-REPORT.md)                                    | Companion online: check-in prompt, job switches     |
-| [Phase 5 report](docs/PHASE-5-REPORT.md)                                    | The rewards ledger, `/checkin` and `/win`           |
-| [Phase 6 report](docs/PHASE-6-REPORT.md)                                    | Milestones, achievements and manual awards          |
-| [Phase 7 report](docs/PHASE-7-REPORT.md)                                    | Bloom Labs: feedback and bug intake                 |
+|                                                                             |                                                      |
+| --------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [Architecture plan](docs/architecture/ARCHITECTURE-PLAN.md)                 | Layering, boundaries, the full Phase 0 design        |
+| [Bot responsibilities](docs/architecture/bot-responsibilities.md)           | Who owns what, and how it is enforced                |
+| [Permission matrix](docs/permissions/bloom-bot-permission-matrix.md)        | Every permission, justified per bot                  |
+| [Role hierarchy](docs/permissions/role-hierarchy.md)                        | The ordering, and what breaks without it             |
+| [Developer Portal setup](docs/deployment/discord-developer-portal-setup.md) | Applications, intents, OAuth2 install                |
+| [Deployment](docs/deployment/deployment.md)                                 | Docker, health, rollout, monitoring                  |
+| [Environment variables](docs/reference/environment-variables.md)            | Every variable                                       |
+| [Database schema](docs/reference/database-schema.md)                        | Tables, migrations, conventions                      |
+| [Commands](docs/reference/commands.md)                                      | The command tree, live and planned                   |
+| [Channel configuration](docs/reference/channel-configuration.md)            | Channel map and per-channel permissions              |
+| [Scheduled jobs](docs/operations/scheduled-jobs.md)                         | The scheduler, leases, and what every job needs      |
+| [Bloom Rewards](docs/operations/bloom-rewards.md)                           | The points economy, and everything it refuses to do  |
+| [Production readiness](docs/operations/production-readiness.md)             | Go-live checklist, and what is genuinely unverified  |
+| [Data retention](docs/operations/data-retention.md)                         | What is kept, for how long, and how to erase it      |
+| [Decisions](docs/architecture/decisions.md)                                 | Decisions that are expensive to reverse, and why     |
+| [Capability matrix](docs/architecture/capability-matrix.md)                 | Every capability A–Z: built, partial, planned, never |
+| [Expansion roadmap](docs/architecture/expansion-roadmap.md)                 | What gets built next, in priority order              |
+| [Design notes](docs/architecture/design-notes/)                             | One note per substantial subsystem, before the code  |
+| [Troubleshooting](docs/operations/troubleshooting.md)                       | Symptom → cause → fix                                |
+| [Security](docs/security/security.md)                                       | Trust boundaries, secrets, abuse resistance          |
+| [Development workflow](docs/development/workflow.md)                        | Day-to-day                                           |
+| [Phase 0 report](docs/PHASE-0-REPORT.md)                                    | Foundations: monorepo, config, database, logging     |
+| [Phase 1 report](docs/PHASE-1-REPORT.md)                                    | Verification and the role lifecycle                  |
+| [Phase 2 report](docs/PHASE-2-REPORT.md)                                    | Moderation, reports and cases                        |
+| [Phase 3 report](docs/PHASE-3-REPORT.md)                                    | The locked job scheduler, wired end to end           |
+| [Phase 4 report](docs/PHASE-4-REPORT.md)                                    | Companion online: check-in prompt, job switches      |
+| [Phase 5 report](docs/PHASE-5-REPORT.md)                                    | The rewards ledger, `/checkin` and `/win`            |
+| [Phase 6 report](docs/PHASE-6-REPORT.md)                                    | Milestones, achievements and manual awards           |
+| [Phase 7 report](docs/PHASE-7-REPORT.md)                                    | Bloom Labs: feedback and bug intake                  |
 
 ---
 

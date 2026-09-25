@@ -6,25 +6,29 @@ construction time and by an event-ownership map checked at registration.
 
 ## At a glance
 
-| Area                               |  Guardian   | Companion  |    Labs    |
-| ---------------------------------- | :---------: | :--------: | :--------: |
-| Verification & onboarding          |   ✅ owns   |   reads    |   reads    |
-| Role assignment                    | ✅ **only** |     ❌     |     ❌     |
-| Moderation (warn/timeout/kick/ban) | ✅ **only** |     ❌     |     ❌     |
-| Purge / slowmode / lock            | ✅ **only** |     ❌     |     ❌     |
-| Reports & cases                    |   ✅ owns   |     ❌     |     ❌     |
-| Audit logging                      |   ✅ owns   | writes own | writes own |
-| Anti-spam                          |   ✅ owns   |     ❌     |     ❌     |
-| Welcome & introductions            |     ❌      |  ✅ owns   |     ❌     |
-| Daily check-ins, small wins        |     ❌      |  ✅ owns   |     ❌     |
-| Achievements & milestones          |     ❌      |  ✅ owns   |     ❌     |
-| Bloom Rewards points & ranks       |     ❌      |  ✅ owns   |     ❌     |
-| Challenges & community events      |     ❌      |  ✅ owns   |     ❌     |
-| Beta cohorts & testing access      |     ❌      |     ❌     |  ✅ owns   |
-| Feature feedback & voting          |     ❌      |     ❌     |  ✅ owns   |
-| Bug intake & triage                |     ❌      |     ❌     |  ✅ owns   |
-| Release notes, sneak peeks, status |     ❌      |     ❌     |  ✅ owns   |
-| Experiments                        |     ❌      |     ❌     |  ✅ owns   |
+This table assigns **ownership**. Ownership is not existence: a row can be
+Guardian's and still be unbuilt. The `Built` column says which is which, and
+[the capability matrix](./capability-matrix.md) is the detailed version.
+
+| Area                               |  Guardian   | Companion  |    Labs    |  Built  |
+| ---------------------------------- | :---------: | :--------: | :--------: | :-----: |
+| Verification & onboarding          |   ✅ owns   |   reads    |   reads    | partial |
+| Role assignment                    | ✅ **only** |     ❌     |     ❌     |   yes   |
+| Moderation (warn/timeout/kick/ban) | ✅ **only** |     ❌     |     ❌     |   yes   |
+| Purge / slowmode / lock            | ✅ **only** |     ❌     |     ❌     |   yes   |
+| Reports & cases                    |   ✅ owns   |     ❌     |     ❌     |   yes   |
+| Audit logging                      |   ✅ owns   | writes own | writes own |   yes   |
+| Anti-spam                          |   ✅ owns   |     ❌     |     ❌     | **no**  |
+| Welcome & introductions            |     ❌      |  ✅ owns   |     ❌     | **no**  |
+| Daily check-ins, small wins        |     ❌      |  ✅ owns   |     ❌     |   yes   |
+| Achievements & milestones          |     ❌      |  ✅ owns   |     ❌     | partial |
+| Bloom Rewards points & ranks       |     ❌      |  ✅ owns   |     ❌     |   yes   |
+| Challenges & community events      |     ❌      |  ✅ owns   |     ❌     | **no**  |
+| Beta cohorts & testing access      |     ❌      |     ❌     |  ✅ owns   | blocked |
+| Feature feedback & voting          |     ❌      |     ❌     |  ✅ owns   | partial |
+| Bug intake & triage                |     ❌      |     ❌     |  ✅ owns   | partial |
+| Release notes, sneak peeks, status |     ❌      |     ❌     |  ✅ owns   | **no**  |
+| Experiments                        |     ❌      |     ❌     |  ✅ owns   | dropped |
 
 ---
 
@@ -41,7 +45,11 @@ Owns the member lifecycle from arrival to departure:
 - **Reports and cases.** `OPEN → IN_REVIEW → ESCALATED → RESOLVED → CLOSED`.
 - **Audit logging.** Append-only, with the actor, target, reason and correlation
   id for every state-changing action.
-- **Anti-spam.** Detection and proportionate, reversible response.
+- **Anti-spam.** Guardian's to own — and **not implemented**. No message intent
+  is requested and no message event is handled today. The planned approach reacts
+  to Discord's native Auto Moderation rather than reading messages, which keeps
+  the Message Content intent unnecessary; see
+  [design note 001](./design-notes/001-auto-moderation.md).
 
 Intents: `Guilds`, `GuildMembers` (privileged), `GuildModeration`.
 
