@@ -13,5 +13,6 @@ export * from './clock.js';
 export * from './log-capture.js';
 export * from './fixtures.js';
 export * from './fake-discord.js';
+export * from './fake-repositories.js';
 export * from './fake-interaction.js';
 export * from './fake-lock.js';

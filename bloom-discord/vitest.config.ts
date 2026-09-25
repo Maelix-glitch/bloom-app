@@ -58,7 +58,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       reportsDirectory: './coverage',
-      include: ['packages/*/src/**/*.ts'],
+      // Apps are measured too. Feature logic lives in `apps/*/src/features`,
+      // and leaving it out would report coverage for the plumbing while the
+      // behaviour members actually touch went unmeasured.
+      include: ['packages/*/src/**/*.ts', 'apps/*/src/**/*.ts'],
       exclude: [
         '**/index.ts',
         '**/*.test.ts',
@@ -67,6 +70,11 @@ export default defineConfig({
         'packages/testing/src/**',
         // CLI entry points are covered by the scripts' own smoke tests.
         'packages/database/src/cli/**',
+        // Composition roots: process entry points and the dependency container.
+        // They are a list of constructor calls with no branching to cover, and
+        // they are verified by starting the process, not by a unit test.
+        'apps/*/src/main.ts',
+        'apps/*/src/deps.ts',
       ],
     },
   },

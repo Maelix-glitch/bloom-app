@@ -1,4 +1,4 @@
-import { Client, Events, Status, type Interaction } from 'discord.js';
+import { Events, Status, type Client, type Interaction } from 'discord.js';
 import {
   BloomError,
   bloomError,
@@ -11,8 +11,14 @@ import type { Logger } from '@bloom/logging';
 import type { PlatformConfig } from '@bloom/config';
 import { newCorrelationId, withCorrelation } from '@bloom/utils';
 import type { CommandInvocation } from '@bloom/commands';
+import type { GatewayEventName } from '@bloom/events';
 import { toCommandInvocation } from './adapters/interaction.js';
-import { intentsFor, partialsFor, privilegedIntentsFor } from './intents.js';
+import {
+  toMemberJoinPayload,
+  toMemberLeavePayload,
+  toMemberUpdatePayload,
+} from './adapters/member.js';
+import { privilegedIntentsFor } from './intents.js';
 import type { GatewayClient, GatewayStatus } from './ports.js';
 
 /**
@@ -26,13 +32,32 @@ export interface InteractionRouter {
   dispatch(invocation: CommandInvocation): Promise<void>;
 }
 
+/**
+ * What the runtime needs from the event layer.
+ *
+ * Structural for the same reason as `InteractionRouter`: `EventDispatcher<TDeps>`
+ * would drag a feature-specific generic through the process lifecycle.
+ */
+export interface GatewayEventRouter {
+  dispatch(event: GatewayEventName, payload: unknown): Promise<void>;
+  registeredEvents(): readonly GatewayEventName[];
+}
+
 export interface BotRuntimeOptions {
   readonly bot: BotName;
   readonly config: PlatformConfig;
   readonly logger: Logger;
   readonly token: string;
-  /** Wired by the app. Absent in Phase 0, where no bot has commands yet. */
+  /**
+   * The client, built by `createBotClient` before the feature services that
+   * depend on it. Injected rather than constructed here so the runtime is not
+   * forced to exist before the dispatcher it routes to.
+   */
+  readonly client: Client;
+  /** Wired by the app. Absent for a bot with no commands yet. */
   readonly commands?: InteractionRouter;
+  /** Gateway event handlers. Only events this bot owns are subscribed. */
+  readonly events?: GatewayEventRouter;
   /** Called once the client is ready and the guild is reachable. */
   readonly onReady?: (client: Client<true>) => Promise<void>;
   /** Called during shutdown, before the gateway connection is closed. */
@@ -55,16 +80,10 @@ export class BotRuntime implements GatewayClient {
 
   public constructor(private readonly options: BotRuntimeOptions) {
     this.logger = options.logger.child({ context: { component: 'runtime' } });
-
-    this.client = new Client({
-      intents: intentsFor(options.bot),
-      partials: [...partialsFor(options.bot)],
-      // The bot never needs to be told about its own messages, and replying to
-      // one would be the first step towards a loop.
-      allowedMentions: { parse: [] },
-    });
+    this.client = options.client;
 
     this.attachLifecycleListeners();
+    this.attachEventListeners();
   }
 
   public async login(): Promise<void> {
@@ -188,6 +207,51 @@ export class BotRuntime implements GatewayClient {
         void this.routeInteraction(interaction);
       });
     }
+  }
+
+  /**
+   * Subscribe to gateway events.
+   *
+   * Only events the router actually has handlers for are subscribed. Attaching
+   * a listener that does nothing is not free: with the GuildMembers intent a
+   * busy guild delivers a steady stream of member updates, and each one would
+   * be adapted into a payload object and then dropped.
+   *
+   * Every listener is `void`-ed into the dispatcher, which never rejects — an
+   * unhandled rejection inside a discord.js listener terminates the process.
+   */
+  private attachEventListeners(): void {
+    const router = this.options.events;
+    if (!router) return;
+
+    const subscribed = new Set(router.registeredEvents());
+
+    if (subscribed.has('guildMemberAdd')) {
+      this.client.on(Events.GuildMemberAdd, (member) => {
+        void router.dispatch('guildMemberAdd', toMemberJoinPayload(member));
+      });
+    }
+
+    if (subscribed.has('guildMemberRemove')) {
+      this.client.on(Events.GuildMemberRemove, (member) => {
+        void router.dispatch(
+          'guildMemberRemove',
+          toMemberLeavePayload(member, new Date()),
+        );
+      });
+    }
+
+    if (subscribed.has('guildMemberUpdate')) {
+      this.client.on(Events.GuildMemberUpdate, (previous, next) => {
+        void router.dispatch('guildMemberUpdate', toMemberUpdatePayload(previous, next));
+      });
+    }
+
+    this.logger.info(
+      'runtime.events_subscribed',
+      `Subscribed to ${String(subscribed.size)} gateway event(s).`,
+      { context: { events: [...subscribed] } },
+    );
   }
 
   /**

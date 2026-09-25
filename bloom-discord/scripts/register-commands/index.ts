@@ -26,16 +26,22 @@ import { createLogger, PrettyLogSink } from '@bloom/logging';
 import { loadEnvFile, loadPlatformConfig, resolveBotConfig } from '@bloom/config';
 import { CommandRegistrar, type RegistrationScope } from '@bloom/discord';
 import type { CommandSpec } from '@bloom/commands';
+import { guardianCommandSpecs } from '../../apps/guardian/src/commands.js';
 
 /**
  * Command sets, per bot.
  *
- * Empty at Phase 0. The registrar deliberately refuses an empty set unless
- * `--allow-empty` is passed, so running this now reports the refusal rather
- * than quietly deleting every command an application has.
+ * Imported from the feature modules rather than restated here, so the specs
+ * Discord is told about are literally the same objects the dispatcher routes.
+ * A hand-maintained copy in this script is how a command gets registered that
+ * nothing handles, which members experience as "this interaction failed".
+ *
+ * Companion and Labs are still empty. The registrar refuses an empty set unless
+ * `--allow-empty` is passed, so running this for them reports the refusal
+ * rather than quietly deleting every command the application has.
  */
 const COMMAND_SETS: Readonly<Record<BotName, readonly CommandSpec[]>> = {
-  guardian: [],
+  guardian: guardianCommandSpecs,
   companion: [],
   labs: [],
 };

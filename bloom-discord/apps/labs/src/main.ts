@@ -7,7 +7,7 @@
  * Labs never assigns roles — including ◌ Beta Tester, which stays a deliberate
  * manual grant — and never moderates.
  *
- * Phase 0 registers nothing, so the process refuses to present itself as online.
+ * It still registers nothing, so the process refuses to present itself as online.
  * Phase 5 adds the testing feature set here.
  */
 import { runBotMain, startBotProcess } from '@bloom/discord';
@@ -15,8 +15,11 @@ import { runBotMain, startBotProcess } from '@bloom/discord';
 await runBotMain(() =>
   startBotProcess({
     bot: 'labs',
-    features: {
+    // See the note in Companion's entry point: no features means the bootstrap
+    // deliberately refuses to bring the bot online.
+    createDeps: () => ({}),
+    createFeatures: () => ({
       // Phase 5: cohorts, feedback intake, voting, bug reports.
-    },
+    }),
   }),
 );

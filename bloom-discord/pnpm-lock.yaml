@@ -178,6 +178,45 @@ importers:
 
   .:
     devDependencies:
+      '@bloom/commands':
+        specifier: workspace:*
+        version: link:packages/commands
+      '@bloom/config':
+        specifier: workspace:*
+        version: link:packages/config
+      '@bloom/database':
+        specifier: workspace:*
+        version: link:packages/database
+      '@bloom/discord':
+        specifier: workspace:*
+        version: link:packages/discord
+      '@bloom/embeds':
+        specifier: workspace:*
+        version: link:packages/embeds
+      '@bloom/events':
+        specifier: workspace:*
+        version: link:packages/events
+      '@bloom/logging':
+        specifier: workspace:*
+        version: link:packages/logging
+      '@bloom/permissions':
+        specifier: workspace:*
+        version: link:packages/permissions
+      '@bloom/security':
+        specifier: workspace:*
+        version: link:packages/security
+      '@bloom/shared-types':
+        specifier: workspace:*
+        version: link:packages/shared-types
+      '@bloom/testing':
+        specifier: workspace:*
+        version: link:packages/testing
+      '@bloom/utils':
+        specifier: workspace:*
+        version: link:packages/utils
+      '@bloom/validation':
+        specifier: workspace:*
+        version: link:packages/validation
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.11.0)
@@ -265,6 +304,9 @@ importers:
       '@bloom/permissions':
         specifier: workspace:*
         version: link:../../packages/permissions
+      '@bloom/security':
+        specifier: workspace:*
+        version: link:../../packages/security
       '@bloom/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types

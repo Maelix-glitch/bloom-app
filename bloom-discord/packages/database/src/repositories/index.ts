@@ -7,6 +7,7 @@ import {
   type IdempotencyRepository,
 } from './idempotency.js';
 import { PostgresJobRunRepository, type JobRunRepository } from './jobs.js';
+import { PostgresOnboardingRepository, type OnboardingRepository } from './onboarding.js';
 import { PostgresSettingsRepository, type SettingsRepository } from './settings.js';
 import { PostgresTelemetryRepository, type TelemetryRepository } from './telemetry.js';
 
@@ -15,6 +16,7 @@ export * from './cooldowns.js';
 export * from './identity.js';
 export * from './idempotency.js';
 export * from './jobs.js';
+export * from './onboarding.js';
 export * from './settings.js';
 export * from './telemetry.js';
 
@@ -31,6 +33,7 @@ export interface Repositories {
   readonly identity: IdentityRepository;
   readonly idempotency: IdempotencyRepository;
   readonly jobs: JobRunRepository;
+  readonly onboarding: OnboardingRepository;
   readonly settings: SettingsRepository;
   readonly telemetry: TelemetryRepository;
 }
@@ -42,6 +45,7 @@ export function createRepositories(database: Database): Repositories {
     identity: new PostgresIdentityRepository(database),
     idempotency: new PostgresIdempotencyRepository(database),
     jobs: new PostgresJobRunRepository(database),
+    onboarding: new PostgresOnboardingRepository(database),
     settings: new PostgresSettingsRepository(database),
     telemetry: new PostgresTelemetryRepository(database),
   };

@@ -1,8 +1,10 @@
 # Command reference
 
-**Phase 0 registers no commands.** This document is the plan the command
-contract was built to support, and it is what the registrar will publish as each
-phase lands. Nothing here is live yet; the platform does not pretend otherwise.
+**Live as of Phase 1: `/verify` and `/guardian`.** Everything else in this
+document is planned, not built, and is marked with the phase that delivers it.
+The platform does not pretend otherwise — the registrar publishes only what the
+dispatcher can actually route, and `apps/guardian/src/commands.test.ts` asserts
+those two lists match.
 
 ## Namespacing
 
@@ -41,32 +43,48 @@ not the same as omitting it.
 
 ### Member-facing
 
-| Command            | Policy       | Description                                    | Phase |
-| ------------------ | ------------ | ---------------------------------------------- | :---: |
-| `/verify`          | any member   | Begin or resume onboarding                     |   1   |
-| `/report`          | Bloom Member | Report a member or message to staff, privately |   2   |
-| `/guardian status` | any member   | Your own onboarding state                      |   1   |
+| Command   | Policy       | Description                                    |  Phase   |
+| --------- | ------------ | ---------------------------------------------- | :------: |
+| `/verify` | any member   | Verify yourself; grants ✧ Early Bloom          | **1 ✅** |
+| `/report` | Bloom Member | Report a member or message to staff, privately |    2     |
+
+`/verify` carries no role requirement, because an unverified member holds no
+Bloom role by definition — requiring one would make verification impossible. It
+is rate limited to one attempt per member per 30 seconds, durably, so the budget
+is shared across processes and survives a restart.
 
 ### Staff
 
-| Command                                 | Policy        | Description                          | Phase |
-| --------------------------------------- | ------------- | ------------------------------------ | :---: |
-| `/warn <member> <reason>`               | Moderator     | Record a warning                     |   2   |
-| `/warnings <member>`                    | Moderator     | List a member's warnings             |   2   |
-| `/timeout <member> <duration> <reason>` | Moderator     | Apply a Discord timeout (max 28d)    |   2   |
-| `/untimeout <member>`                   | Moderator     | Lift a timeout                       |   2   |
-| `/kick <member> <reason>`               | Moderator     | Remove a member                      |   2   |
-| `/ban <member> <reason> [delete-days]`  | Administrator | Ban                                  |   2   |
-| `/unban <user-id> <reason>`             | Administrator | Lift a ban                           |   2   |
-| `/purge <count> [member]`               | Administrator | Bulk-delete recent messages          |   2   |
-| `/slowmode <seconds>`                   | Moderator     | Set channel rate limit               |   2   |
-| `/lock` / `/unlock`                     | Moderator     | Lock a channel during an incident    |   2   |
-| `/guardian case view <id>`              | Moderator     | Case detail                          |   2   |
-| `/guardian case assign <id> <member>`   | Moderator     | Take ownership                       |   2   |
-| `/guardian case resolve <id> <outcome>` | Moderator     | Close a case                         |   2   |
-| `/guardian note add <member> <note>`    | Moderator     | Private mod note                     |   2   |
-| `/guardian roles audit`                 | Administrator | Re-run the hierarchy audit on demand |   1   |
-| `/guardian onboarding reset <member>`   | Administrator | Reset someone's onboarding           |   1   |
+| Command                                  | Policy        | Description                          |  Phase   |
+| ---------------------------------------- | ------------- | ------------------------------------ | :------: |
+| `/warn <member> <reason>`                | Moderator     | Record a warning                     |    2     |
+| `/warnings <member>`                     | Moderator     | List a member's warnings             |    2     |
+| `/timeout <member> <duration> <reason>`  | Moderator     | Apply a Discord timeout (max 28d)    |    2     |
+| `/untimeout <member>`                    | Moderator     | Lift a timeout                       |    2     |
+| `/kick <member> <reason>`                | Moderator     | Remove a member                      |    2     |
+| `/ban <member> <reason> [delete-days]`   | Administrator | Ban                                  |    2     |
+| `/unban <user-id> <reason>`              | Administrator | Lift a ban                           |    2     |
+| `/purge <count> [member]`                | Administrator | Bulk-delete recent messages          |    2     |
+| `/slowmode <seconds>`                    | Moderator     | Set channel rate limit               |    2     |
+| `/lock` / `/unlock`                      | Moderator     | Lock a channel during an incident    |    2     |
+| `/guardian case view <id>`               | Moderator     | Case detail                          |    2     |
+| `/guardian case assign <id> <member>`    | Moderator     | Take ownership                       |    2     |
+| `/guardian case resolve <id> <outcome>`  | Moderator     | Close a case                         |    2     |
+| `/guardian note add <member> <note>`     | Moderator     | Private mod note                     |    2     |
+| `/guardian roles audit`                  | Moderator     | Re-run the hierarchy audit on demand | **1 ✅** |
+| `/guardian status [member]`              | Moderator     | A member's onboarding state          | **1 ✅** |
+| `/guardian overview`                     | Moderator     | Counts per onboarding state          | **1 ✅** |
+| `/guardian onboarding complete <member>` | Moderator     | Move ✧ Early Bloom → ❋ Bloom Member  | **1 ✅** |
+| `/guardian onboarding history <member>`  | Moderator     | A member's lifecycle history         | **1 ✅** |
+| `/guardian onboarding reset <member>`    | Administrator | Reset someone's onboarding           |    2     |
+
+All `/guardian` subcommands share one policy — Moderator or above — rather than
+declaring a policy each. The failure mode of per-subcommand policies is the one
+somebody forgets to add, so a new subcommand inherits the gate automatically.
+
+`/guardian status` is Moderator-gated even when a member asks about themselves.
+Members do not need it: `/verify` already tells them everything their own state
+would.
 
 ### Context menus
 

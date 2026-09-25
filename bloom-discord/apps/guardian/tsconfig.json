@@ -26,6 +26,9 @@
       "path": "../../packages/permissions"
     },
     {
+      "path": "../../packages/security"
+    },
+    {
       "path": "../../packages/embeds"
     },
     {

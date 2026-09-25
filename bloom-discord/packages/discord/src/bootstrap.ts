@@ -13,6 +13,7 @@ import {
   resolveBotConfig,
   summariseConfig,
   type BotConfig,
+  type PlatformConfig,
 } from '@bloom/config';
 import {
   createDatabase,
@@ -21,8 +22,17 @@ import {
   type Repositories,
 } from '@bloom/database';
 import { newCorrelationId, withCorrelation } from '@bloom/utils';
-import type { CommandDispatcher } from '@bloom/commands';
-import { BotRuntime } from './runtime.js';
+import { hasCapability } from '@bloom/shared-types';
+import { createBotClient } from './client.js';
+import { DiscordGuildQueryService } from './services/guild-query.js';
+import { DiscordMessagingService } from './services/messaging.js';
+import { DiscordRoleService } from './services/role-service.js';
+import type { GuildQueryService, MessagingService, RoleService } from './ports.js';
+import {
+  BotRuntime,
+  type GatewayEventRouter,
+  type InteractionRouter,
+} from './runtime.js';
 import {
   HealthReporter,
   databaseCheck,
@@ -52,23 +62,60 @@ import {
  */
 export interface BotProcessOptions<TDeps> {
   readonly bot: BotName;
-  /** Everything the bot can do. Empty means the bot has nothing to serve yet. */
-  readonly features: {
-    readonly commands?: CommandDispatcher<TDeps>;
-    readonly eventHandlerCount?: number;
-  };
-  /** Build whatever the features need. Runs after the database is proven reachable. */
-  readonly createDeps?: (context: BotBootstrapContext) => TDeps;
-  readonly onReady?: (context: BotBootstrapContext) => Promise<void>;
-  readonly healthChecks?: (context: BotBootstrapContext) => readonly HealthCheck[];
+
+  /**
+   * Build the feature dependencies.
+   *
+   * Runs after the database is proven reachable and after the Discord services
+   * exist, so anything it constructs can fail fast at boot rather than on the
+   * first interaction that needs it.
+   */
+  readonly createDeps: (context: BotBootstrapContext) => TDeps;
+
+  /**
+   * Everything the bot can do, built from the dependencies.
+   *
+   * Returning empty for both is what makes a bot refuse to start — see the
+   * check below.
+   */
+  readonly createFeatures: (deps: TDeps, context: BotBootstrapContext) => BotFeatures;
+
+  readonly onReady?: (context: BotBootstrapContext, deps: TDeps) => Promise<void>;
+  readonly healthChecks?: (
+    context: BotBootstrapContext,
+    deps: TDeps,
+  ) => readonly HealthCheck[];
+}
+
+export interface BotFeatures {
+  readonly commands?: InteractionRouter;
+  readonly events?: GatewayEventRouter;
+  /** Used only for the "is this bot worth starting" check and for logging. */
+  readonly commandCount?: number;
+}
+
+/**
+ * The Discord services available to every feature.
+ *
+ * `roles` is present only for bots whose capability manifest includes
+ * `role:write` — in practice, Guardian. It is `null` rather than a throwing
+ * stub so that wiring a role write into Companion is a type error at the call
+ * site instead of a runtime surprise.
+ */
+export interface DiscordServices {
+  readonly guilds: GuildQueryService;
+  readonly messaging: MessagingService;
+  readonly roles: RoleService | null;
 }
 
 export interface BotBootstrapContext {
   readonly bot: BotName;
   readonly config: BotConfig;
+  readonly platform: PlatformConfig;
   readonly logger: Logger;
   readonly database: Database;
   readonly repositories: Repositories;
+  readonly discord: DiscordServices;
 }
 
 export interface RunningBotProcess {
@@ -127,24 +174,44 @@ export async function startBotProcess<TDeps>(
     );
 
     const repositories = createRepositories(database);
+
+    /*
+     * 4. The Discord client, and the services built on it.
+     *
+     * The client is created here rather than inside the runtime because the
+     * feature dependencies need it, and the runtime needs the features. Nothing
+     * connects yet — a discord.js client is inert until `login()`.
+     */
+    const client = createBotClient(options.bot);
+    const guilds = new DiscordGuildQueryService(client);
+    const messaging = new DiscordMessagingService(client, logger);
+    const roles = hasCapability(options.bot, 'role:write')
+      ? new DiscordRoleService(client, guilds, platform, logger, options.bot)
+      : null;
+
     const context: BotBootstrapContext = {
       bot: options.bot,
       config,
+      platform,
       logger,
       database,
       repositories,
+      discord: { guilds, messaging, roles },
     };
+
+    const deps = options.createDeps(context);
+    const features = options.createFeatures(deps, context);
 
     /*
      * Refuse to run an empty bot.
      *
      * A process that connects to Discord, shows as online and responds to
      * nothing is the exact "fake functionality" the brief forbids — it looks
-     * healthy to everyone watching. Phase 0 ships no commands, so every bot
-     * stops here, loudly, with the reason.
+     * healthy to everyone watching. A bot with no commands and no event
+     * handlers stops here, loudly, with the reason.
      */
-    const commandCount = options.features.commands ? 1 : 0;
-    const handlerCount = options.features.eventHandlerCount ?? 0;
+    const commandCount = features.commandCount ?? (features.commands ? 1 : 0);
+    const handlerCount = features.events?.registeredEvents().length ?? 0;
     if (commandCount === 0 && handlerCount === 0) {
       await database.close();
       throw bloomError('NOT_IMPLEMENTED', {
@@ -156,19 +223,28 @@ export async function startBotProcess<TDeps>(
       });
     }
 
-    // Built here so a feature's dependencies fail fast at startup rather than
-    // on the first interaction that needs them.
-    options.createDeps?.(context);
+    logger.info(
+      'startup.features_ready',
+      `${String(commandCount)} command(s), ${String(handlerCount)} gateway event(s).`,
+      {
+        context: {
+          command_count: commandCount,
+          events: [...(features.events?.registeredEvents() ?? [])],
+        },
+      },
+    );
 
-    // 4. Signals first, so a stop during startup is still clean.
+    // 5. Signals first, so a stop during startup is still clean.
     let healthServer: Server | null = null;
     const runtime = new BotRuntime({
       bot: options.bot,
       config: platform,
       logger,
       token: config.credentials.token,
-      ...(options.features.commands ? { commands: options.features.commands } : {}),
-      ...(options.onReady ? { onReady: () => onReadyHook(options, context) } : {}),
+      client,
+      ...(features.commands ? { commands: features.commands } : {}),
+      ...(features.events ? { events: features.events } : {}),
+      ...(options.onReady ? { onReady: () => onReadyHook(options, context, deps) } : {}),
       onShutdown: async () => {
         healthServer?.close();
         await database.close();
@@ -182,10 +258,10 @@ export async function startBotProcess<TDeps>(
 
     installSignalHandlers(shutdown, logger);
 
-    // 5. Gateway.
+    // 6. Gateway.
     await runtime.login();
 
-    // 6. Health, last — readiness now means the bot is genuinely usable.
+    // 7. Health, last — readiness now means the bot is genuinely usable.
     const healthPort = Number.parseInt(process.env['HEALTH_PORT'] ?? '0', 10);
     if (healthPort > 0) {
       healthServer = startHealthServer({
@@ -204,7 +280,7 @@ export async function startBotProcess<TDeps>(
               }
               return result.latencyMs;
             }),
-            ...(options.healthChecks?.(context) ?? []),
+            ...(options.healthChecks?.(context, deps) ?? []),
           ],
         }),
       });
@@ -218,8 +294,9 @@ export async function startBotProcess<TDeps>(
 async function onReadyHook<TDeps>(
   options: BotProcessOptions<TDeps>,
   context: BotBootstrapContext,
+  deps: TDeps,
 ): Promise<void> {
-  await options.onReady?.(context);
+  await options.onReady?.(context, deps);
 }
 
 /**

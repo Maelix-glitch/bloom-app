@@ -10,14 +10,17 @@
  * change instead of a rewrite.
  */
 export * from './intents.js';
+export * from './client.js';
 export * from './ports.js';
 export * from './adapters/message.js';
 export * from './adapters/command-spec.js';
 export * from './adapters/interaction.js';
+export * from './adapters/member.js';
 export * from './services/guild-query.js';
 export * from './services/role-service.js';
 export * from './services/messaging.js';
 export * from './registrar.js';
 export * from './runtime.js';
+export * from './telemetry.js';
 export * from './health.js';
 export * from './bootstrap.js';
