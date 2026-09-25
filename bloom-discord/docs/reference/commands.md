@@ -237,6 +237,9 @@ one namespace.
 | `/companion profile [member]`     | Bloom Member      | Points, rank, streak and recent activity      | **5 ✅** |
 | `/companion rank`                 | Bloom Member      | Your rank and what is next                    | **5 ✅** |
 | `/companion leaderboard [period]` | Bloom Member      | Who earned the most in the last 7 or 30 days  | **5 ✅** |
+| `/companion milestones`           | Bloom Member      | Milestones reached, and the next one          | **6 ✅** |
+| `/companion achievements`         | Bloom Member      | Achievements earned                           | **6 ✅** |
+| `/companion admin award`          | **Administrator** | Adjust a member's points, with a reason       | **6 ✅** |
 | `/companion jobs list`            | Moderator         | Companion's jobs, schedules and next runs     | **4 ✅** |
 | `/companion jobs history <job>`   | Moderator         | The last recorded runs, including the failure | **4 ✅** |
 | `/companion jobs run <job>`       | **Administrator** | Run a job now, without waiting for its cron   | **4 ✅** |
@@ -270,15 +273,47 @@ in. `/checkin` is what records the day.
 
 Full detail on what each action pays and why: [Bloom Rewards](../operations/bloom-rewards.md).
 
+#### Milestones and achievements
+
+`/companion milestones` and `/companion achievements` both list everything —
+earned and unearned, with the condition spelled out for the ones still ahead. A
+hidden award is a guessing game, and a guessing game is a thing to optimise.
+
+**No award grants points.** They are two separate systems on purpose: points
+measure recent participation and decay in relevance, awards are a permanent
+record of something that happened. Paying for a milestone would close a loop
+where participation earns points, points earn a milestone, and the milestone
+earns more points — which is XP farming with better typography.
+
+There is no award for a perfect run, and that is a deliberate divergence from
+the Bloom app, which has "Seven Days Strong" and is right to. The difference is
+visibility: an app badge is between a member and themselves, while a Discord
+award is announced to the server. Phase 5 established that missing a day costs
+nothing; a public streak badge would hand that cost straight back.
+`achievement.returned` — earned by coming back after a month away — is the
+intentional inversion of it. A test asserts that no definition mentions streaks
+so this cannot be reintroduced casually.
+
+Evaluation happens in the command, after the action, against freshly counted
+records. Neither service knows the other exists: rewards has never heard of
+milestones, awards has never heard of a check-in. Adding another action that
+should trigger an evaluation is one line, not a dependency.
+
+#### `/companion admin award`
+
+Administrator only, not Moderator: changing a member's standing in a shared
+economy is not a moderation action. It requires a reason, is capped at ±500 per
+use, refuses a correction that would take a balance below zero, and writes an
+audit row at **warn** severity — quiet, unilateral, and it changes how a member
+appears to everyone else. A negative amount is recorded as an `adjustment`
+rather than a `manual_award`, so a correction never reads as a gift.
+
 ### Planned
 
-| Command                                             | Policy        | Description                  | Phase |
-| --------------------------------------------------- | ------------- | ---------------------------- | :---: |
-| `/companion milestones`                             | Bloom Member  | Milestones reached           |   6   |
-| `/companion achievements`                           | Bloom Member  | Achievements earned          |   6   |
-| `/challenge list`                                   | Bloom Member  | Active challenges            |   4   |
-| `/challenge join <id>`                              | Bloom Member  | Join one                     |   4   |
-| `/companion admin award <member> <points> <reason>` | Administrator | Manual award, always audited |   3   |
+| Command                | Policy       | Description       | Phase |
+| ---------------------- | ------------ | ----------------- | :---: |
+| `/challenge list`      | Bloom Member | Active challenges |   7   |
+| `/challenge join <id>` | Bloom Member | Join one          |   7   |
 
 `/companion admin schedule` was planned here and has been **dropped**: the shared
 `jobs` group does that job for every bot, and a second way to toggle the same

@@ -46,6 +46,14 @@ The category names are Discord's; only the channel ids matter to the platform.
 | `#bloom-rewards` | `CHANNEL_BLOOM_REWARDS` | Companion  |
 | `#challenges`    | `CHANNEL_CHALLENGES`    | Companion  |
 
+Companion announces an earned award in `#milestones` or `#achievements`
+according to its kind. Both are optional: leaving one unset means awards of
+that kind are still granted and the member is still told in their own reply,
+but nothing is posted to the server. Neither channel needs to be writable by
+members — everything Companion posts there is a short announcement, and a
+channel members can post in becomes a place to ask why they have not got one
+yet.
+
 ### 🛠️ BLOOM LAB
 
 | Channel            | Variable                  | Posts here | Access        |

@@ -131,6 +131,26 @@ not the ledger, not the audit row, not the logs. A member's own words belong in
 the place they chose to put them. A test asserts a phrase given to `/win` cannot
 be found anywhere in the ledger, the audit trail or the captured logs.
 
+## Awards are not points
+
+Milestones and achievements ([`member_awards`](../reference/database-schema.md))
+run alongside this economy and never touch it. **No award grants points.**
+
+That separation is the point of having both. Points measure recent
+participation and are meant to lose relevance; an award is a permanent record
+that something happened. If milestones paid, the loop would close — participate
+to earn points, earn points to hit a milestone, hit a milestone to earn more
+points — and a loop that feeds itself is the definition of the XP farming this
+platform refuses to build.
+
+Awards are also counted from actions rather than from balances, so they are
+unaffected by `FEATURE_REWARDS`. A member who checked in fifty times did that
+whether or not the server was paying for it.
+
+Awards are announced in `CHANNEL_MILESTONES`; if that channel is unset the award
+is still granted and the member is still told in their own reply. The server
+simply is not.
+
 ## Turning it off
 
 `FEATURE_REWARDS=false` — the default — switches off the economy without
@@ -146,9 +166,16 @@ history, and the platform does not do that.
 
 ## Operating it
 
-There is no administrator command for points yet — `/companion admin award` is
-planned, not built. Until it exists, a correction means a SQL insert, and it
-must be an insert:
+`/companion admin award <member> <points> <reason>` is the supported way to
+correct a balance. Administrator only — changing a member's standing in a shared
+economy is not a moderation action — capped at ±500 per use, a reason is
+mandatory, and it refuses anything that would take a balance below zero. A
+negative amount is recorded as an `adjustment` rather than a `manual_award`, so
+a correction never reads as a gift. Every use writes an audit row at **warn**
+severity.
+
+For a correction larger than the cap, or one made without a Discord client, the
+equivalent is a SQL insert — and it must be an insert:
 
 ```sql
 -- Correct a double award. Never UPDATE or DELETE a point_events row.
@@ -174,6 +201,16 @@ their kinds, which usually answers it in one look.
 **"Two people have the same total but different ranks."** They do not; rank is a
 pure function of the balance. What differs is when they last looked, since the
 profile is read live.
+
+**"I earned a milestone twice."** You did not: the primary key on
+`member_awards` makes that impossible. Two announcements would mean the same
+award row was announced twice, which is a bug worth reporting — check
+`announced` on the row.
+
+**"Why is there no award for a streak?"** Because a public badge for an unbroken
+run reintroduces the cost of missing a day that this economy deliberately
+removes. The Bloom app has streak achievements and is right to; the difference
+is that an app badge is private and a Discord award is announced to the server.
 
 **"The leaderboard is empty."** It is period-scoped. An empty board means nobody
 has earned anything in the last 7 days, which in a quiet week is correct.

@@ -294,6 +294,43 @@ else — not the ledger, not the audit row, not the logs. A daily record of how
 everyone in the community is feeling is sensitive data with no operational
 purpose, and the safest way to hold it is not to.
 
+### `member_awards` — Phase 6
+
+`PRIMARY KEY (guild_id, user_id, award_key)`, plus `kind`, `evidence jsonb`,
+`earned_at` and `announced`.
+
+**The primary key is the whole once-only rule.** A check-in and a shared win
+seconds apart both trigger an evaluation; if both saw the same fresh count and
+both inserted, the member would get two rows and two public announcements for
+one milestone. `ON CONFLICT DO NOTHING` plus the key means exactly one caller is
+told `granted` and therefore exactly one caller announces. An integration test
+races three grants to prove it.
+
+`award_key` is CHECKed against `^[a-z][a-z0-9_.]{2,60}$`. These keys end up in
+audit rows and operator queries, so `Milestone 1!` getting in would make them
+unqueryable a year from now. `kind` is CHECKed to `('milestone','achievement')`.
+
+`evidence` records **counts only** — `{"checkIns": 10, "threshold": 10}` — never
+member-authored text. It exists so a grant stays explicable after a threshold is
+retuned: without it, a milestone awarded at ten check-ins under an old rule is
+indistinguishable from a bug once the rule says fifty.
+
+`announced` is separate from the grant because they are different effects with
+different failure modes. Discord being unreachable must not stop an award being
+earned, and the flag is what stops the announcement being posted twice on the
+next evaluation.
+
+**Nothing in this table stores points.** Awards and points are separate systems;
+see [Bloom Rewards](../operations/bloom-rewards.md) for why.
+
+The counts the definitions evaluate against are not stored anywhere. They come
+from one CTE over `check_ins` and `point_events` — `participation()` — computed
+on read, so an award can never be granted on a number nothing can reproduce.
+That query converts win timestamps with `AT TIME ZONE` before comparing them to
+check-in dates: `point_events` stores an instant and `check_ins` stores a
+calendar date, and comparing them raw would file an evening win under the
+following day for half the world.
+
 ---
 
 ## The transition contract
@@ -352,12 +389,12 @@ rather than shown an error suggesting something is broken.
 
 ## What is not here yet
 
-Phases 0–5 ship the base, onboarding, moderation and rewards: identity, audit,
-idempotency, jobs, cooldowns, settings, telemetry, transitions, verification
-attempts, cases, case events, case counters, moderation actions, reports, point
-events and check-ins.
+Phases 0–6 ship the base, onboarding, moderation, rewards and awards: identity,
+audit, idempotency, jobs, cooldowns, settings, telemetry, transitions,
+verification attempts, cases, case events, case counters, moderation actions,
+reports, point events, check-ins and member awards.
 
-Still to come, each with the phase that owns it: challenges and milestones
+Still to come, each with the phase that owns it: challenges and events
 (Companion), cohorts, feedback, votes and bug intake (Labs).
 
 Two tables that were expected and are **not** here. The per-guild job switch
@@ -373,11 +410,11 @@ once applied.
 ## Verification status
 
 The schema **has been executed against a live PostgreSQL 18.4 instance** as of
-Phase 5. All six migrations apply cleanly from empty, re-running is a no-op,
+Phase 6. All seven migrations apply cleanly from empty, re-running is a no-op,
 the seed loads, and the drift guard was confirmed by deliberately editing an
 applied file and watching the migrator refuse with `CONFIGURATION_ERROR`.
 
-Forty-nine integration tests exercise the repositories against that database,
+Sixty-eight integration tests exercise the repositories against that database,
 covering the behaviour unit tests with fakes cannot reach:
 
 - Two simultaneous `transition()` calls on the same member produce exactly one
@@ -396,6 +433,12 @@ covering the behaviour unit tests with fakes cannot reach:
   one `already_today`.
 - `bot_settings` accepts `job.` + an 80-character job key, and `bot_name`
   really does keep Guardian's rows out of Companion's reads.
+- Three concurrent grants of one award produce a single row and a single
+  `granted`, so a milestone is announced once.
+- A win logged at 22:00 UTC pairs with the next day's check-in under
+  `Australia/Sydney`, and stops pairing if the timezone conversion is removed.
+- The longest-gap window function returns 54 days across a real absence, and 0
+  rather than NULL for a member with a single check-in.
 
 ```bash
 set -a && . ./.env && set +a
