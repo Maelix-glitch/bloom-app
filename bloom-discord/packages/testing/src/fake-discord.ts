@@ -9,11 +9,16 @@ import {
 } from '@bloom/shared-types';
 import type { BloomMessage } from '@bloom/embeds';
 import type { RoleSnapshot } from '@bloom/permissions';
+import { MAX_TIMEOUT_MS } from '@bloom/utils';
 import type {
   BotSelfSnapshot,
+  ChannelModerationService,
+  ChannelSendPermission,
   GuildQueryService,
   MemberSnapshot,
   MessagingService,
+  ModerationService,
+  PurgeResult,
   RoleService,
 } from '@bloom/discord';
 import {
@@ -293,5 +298,214 @@ export class FakeMessaging implements MessagingService {
   public clear(): void {
     this.sent.length = 0;
     this.directMessages.length = 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Moderation
+// -----------------------------------------------------------------------------
+
+export interface RecordedModerationCall {
+  readonly action: 'timeout' | 'untimeout' | 'kick' | 'ban' | 'unban';
+  readonly userId: UserId;
+  readonly reason: string;
+  readonly until?: Date;
+  readonly deleteMessageSeconds?: number;
+}
+
+/**
+ * In-memory member moderation.
+ *
+ * Models the behaviours a test can get wrong by assuming: a timeout longer than
+ * 28 days is refused, unbanning someone who is not banned returns `false`
+ * rather than throwing, and a member who is not in the guild cannot be kicked
+ * but *can* be banned.
+ */
+export class FakeModerationService implements ModerationService {
+  public readonly calls: RecordedModerationCall[] = [];
+  public readonly bans = new Set<UserId>();
+  /** Set to make the next call fail, e.g. to test partial-failure handling. */
+  public failNext: Error | null = null;
+
+  public constructor(private readonly guild: FakeGuild) {}
+
+  private check(): void {
+    if (this.failNext) {
+      const error = this.failNext;
+      this.failNext = null;
+      throw error;
+    }
+  }
+
+  private requireMember(userId: UserId): void {
+    if (!this.guild.members.has(userId)) {
+      throw bloomError('MEMBER_NOT_FOUND', {
+        operatorHint: `Fake guild has no member ${userId}.`,
+      });
+    }
+  }
+
+  public timeoutMember(input: {
+    guildId: GuildId;
+    userId: UserId;
+    until: Date;
+    reason: string;
+  }): Promise<void> {
+    this.check();
+    this.requireMember(input.userId);
+    if (input.until.getTime() - Date.now() > MAX_TIMEOUT_MS) {
+      throw bloomError('INVALID_INPUT', {
+        userMessage: 'Timeouts cannot be longer than 28 days.',
+      });
+    }
+    this.calls.push({
+      action: 'timeout',
+      userId: input.userId,
+      reason: input.reason,
+      until: input.until,
+    });
+    return Promise.resolve();
+  }
+
+  public removeTimeout(input: {
+    guildId: GuildId;
+    userId: UserId;
+    reason: string;
+  }): Promise<void> {
+    this.check();
+    this.requireMember(input.userId);
+    this.calls.push({
+      action: 'untimeout',
+      userId: input.userId,
+      reason: input.reason,
+    });
+    return Promise.resolve();
+  }
+
+  public kickMember(input: {
+    guildId: GuildId;
+    userId: UserId;
+    reason: string;
+  }): Promise<void> {
+    this.check();
+    this.requireMember(input.userId);
+    this.guild.members.delete(input.userId);
+    this.calls.push({ action: 'kick', userId: input.userId, reason: input.reason });
+    return Promise.resolve();
+  }
+
+  public banMember(input: {
+    guildId: GuildId;
+    userId: UserId;
+    reason: string;
+    deleteMessageSeconds?: number;
+  }): Promise<void> {
+    this.check();
+    // Deliberately no membership check: banning an id that never joined is a
+    // supported workflow and the fake has to allow a test to prove it.
+    this.guild.members.delete(input.userId);
+    this.bans.add(input.userId);
+    this.calls.push({
+      action: 'ban',
+      userId: input.userId,
+      reason: input.reason,
+      ...(input.deleteMessageSeconds === undefined
+        ? {}
+        : { deleteMessageSeconds: input.deleteMessageSeconds }),
+    });
+    return Promise.resolve();
+  }
+
+  public unbanMember(input: {
+    guildId: GuildId;
+    userId: UserId;
+    reason: string;
+  }): Promise<boolean> {
+    this.check();
+    this.calls.push({ action: 'unban', userId: input.userId, reason: input.reason });
+    return Promise.resolve(this.bans.delete(input.userId));
+  }
+}
+
+export interface RecordedChannelCall {
+  readonly action: 'slowmode' | 'send_permission' | 'purge';
+  readonly channelId: ChannelId;
+  readonly reason: string;
+  readonly seconds?: number;
+  readonly state?: ChannelSendPermission;
+}
+
+/** In-memory channel moderation, including the 14-day bulk-delete cutoff. */
+export class FakeChannelModerationService implements ChannelModerationService {
+  public readonly calls: RecordedChannelCall[] = [];
+  public readonly slowmode = new Map<ChannelId, number>();
+  public readonly sendPermission = new Map<ChannelId, ChannelSendPermission>();
+  /** Messages available to purge, newest first. */
+  public messages: { readonly authorId: UserId; readonly createdAt: Date }[] = [];
+
+  public setSlowmode(input: {
+    guildId: GuildId;
+    channelId: ChannelId;
+    seconds: number;
+    reason: string;
+  }): Promise<void> {
+    this.slowmode.set(input.channelId, input.seconds);
+    this.calls.push({
+      action: 'slowmode',
+      channelId: input.channelId,
+      reason: input.reason,
+      seconds: input.seconds,
+    });
+    return Promise.resolve();
+  }
+
+  public getSendPermission(
+    _guildId: GuildId,
+    channelId: ChannelId,
+  ): Promise<ChannelSendPermission> {
+    return Promise.resolve(this.sendPermission.get(channelId) ?? 'inherited');
+  }
+
+  public setSendPermission(input: {
+    guildId: GuildId;
+    channelId: ChannelId;
+    state: ChannelSendPermission;
+    reason: string;
+  }): Promise<void> {
+    this.sendPermission.set(input.channelId, input.state);
+    this.calls.push({
+      action: 'send_permission',
+      channelId: input.channelId,
+      reason: input.reason,
+      state: input.state,
+    });
+    return Promise.resolve();
+  }
+
+  public purgeMessages(input: {
+    guildId: GuildId;
+    channelId: ChannelId;
+    limit: number;
+    authorId?: UserId;
+    reason: string;
+  }): Promise<PurgeResult> {
+    const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const candidates = this.messages
+      .filter((m) => !input.authorId || m.authorId === input.authorId)
+      .slice(0, input.limit);
+    const deletable = candidates.filter((m) => m.createdAt.getTime() > cutoff);
+
+    this.calls.push({
+      action: 'purge',
+      channelId: input.channelId,
+      reason: input.reason,
+    });
+    this.messages = this.messages.filter((m) => !deletable.includes(m));
+
+    return Promise.resolve({
+      requested: input.limit,
+      deleted: deletable.length,
+      skippedTooOld: candidates.length - deletable.length,
+    });
   }
 }

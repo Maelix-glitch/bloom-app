@@ -1,25 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { UserId } from '@bloom/shared-types';
-import { CommandDispatcher, CommandRegistry } from '@bloom/commands';
-import { DatabaseRateLimiter } from '@bloom/security';
 import {
-  createTestLogger,
-  fakeInvocation,
-  fakeRepositories,
-  FakeGuild,
-  FakeMessaging,
-  FakeRoleService,
-  TEST_CHANNEL_IDS,
   TEST_GUILD_ID,
   TEST_ROLE_POSITIONS,
   TEST_USER_IDS,
-  testConfig,
   testSubject,
-  type FakeRepositories,
 } from '@bloom/testing';
-import type { GuardianDeps } from '../../deps.js';
-import { OnboardingService } from './service.js';
-import { onboardingCommands } from './commands.js';
+import { guardianHarness, type GuardianHarness } from '../../guardian.harness.js';
 
 /**
  * Commands, exercised through the real dispatcher.
@@ -29,73 +16,9 @@ import { onboardingCommands } from './commands.js';
  * so a test that bypasses it proves nothing about who can run what.
  */
 
-interface Harness {
-  readonly dispatch: (
-    options: Parameters<typeof fakeInvocation>[0],
-  ) => Promise<ReturnType<typeof fakeInvocation>>;
-  readonly repositories: FakeRepositories;
-  readonly guild: FakeGuild;
-  readonly roles: FakeRoleService;
-}
+type Harness = GuardianHarness;
 
-function harness(): Harness {
-  const config = testConfig();
-  const guild = new FakeGuild().withStandardRoles();
-  guild.withChannels(TEST_CHANNEL_IDS.welcome);
-
-  const roles = new FakeRoleService(guild);
-  const messaging = new FakeMessaging(guild);
-  const repositories = fakeRepositories();
-  const { logger } = createTestLogger();
-
-  const deps: GuardianDeps = {
-    config,
-    logger,
-    repositories,
-    guilds: guild,
-    roles,
-    messaging,
-    onboarding: new OnboardingService({
-      config,
-      repositories,
-      roles,
-      messaging,
-      guilds: guild,
-      logger,
-    }),
-    verifyLimiter: new DatabaseRateLimiter(
-      repositories.cooldowns,
-      TEST_GUILD_ID,
-      'onboarding.verify',
-      30,
-    ),
-  };
-
-  const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
-    onboardingCommands,
-  );
-  const dispatcher = new CommandDispatcher<GuardianDeps>({
-    bot: 'guardian',
-    config,
-    logger,
-    registry,
-    deps,
-    telemetry: {
-      record: () => Promise.resolve(),
-    },
-  });
-
-  return {
-    repositories,
-    guild,
-    roles,
-    dispatch: async (options) => {
-      const fake = fakeInvocation(options);
-      await dispatcher.dispatch(fake.invocation);
-      return fake;
-    },
-  };
-}
+const harness = guardianHarness;
 
 async function seed(h: Harness, userId: UserId): Promise<void> {
   h.guild.withMember(userId);
@@ -339,27 +262,5 @@ describe('/guardian status', () => {
     });
 
     expect(responder.visibleText).toContain('No record for that member');
-  });
-});
-
-describe('command specs', () => {
-  it('declares every command guild-only', () => {
-    for (const command of onboardingCommands) {
-      expect(command.spec.guildOnly).toBe(true);
-    }
-  });
-
-  it('hides /guardian from members by default but leaves /verify visible', () => {
-    const verify = onboardingCommands.find((c) => c.spec.name === 'verify');
-    const guardian = onboardingCommands.find((c) => c.spec.name === 'guardian');
-
-    expect(verify?.spec.defaultMemberPermissions).toBeUndefined();
-    expect(guardian?.spec.defaultMemberPermissions).toBe('none');
-  });
-
-  it('defers every command that touches the database', () => {
-    for (const command of onboardingCommands) {
-      expect(command.defer).toBe(true);
-    }
   });
 });

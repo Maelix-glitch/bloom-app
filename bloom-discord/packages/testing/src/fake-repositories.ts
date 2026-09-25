@@ -1,8 +1,14 @@
 import {
   bloomError,
   canTransition,
+  canTransitionCase,
+  CASE_TRANSITIONS,
   ONBOARDING_TRANSITIONS,
+  requiresResolution,
   type BotName,
+  type CaseEventType,
+  type CaseStatus,
+  type ModerationAction,
   type ChannelId,
   type ChannelKey,
   type GuildId,
@@ -17,7 +23,20 @@ import type {
   AuditEventInput,
   AuditEventRepository,
   AuditEventRow,
+  CaseEventRow,
+  CaseListFilter,
+  CaseRepository,
+  CaseRow,
+  CaseTransitionOutcome,
   CooldownRepository,
+  MemberRecordSummary,
+  ModerationActionRow,
+  ModerationRepository,
+  OpenCaseInput,
+  RecordActionInput,
+  ReportInput,
+  ReportRow,
+  TransitionCaseInput,
   CooldownResult,
   GuildRecord,
   IdempotencyClaim,
@@ -442,8 +461,389 @@ class FakeSettingsRepository implements SettingsRepository {
   }
 }
 
+
+// -----------------------------------------------------------------------------
+// Moderation
+// -----------------------------------------------------------------------------
+
+/**
+ * In-memory moderation log.
+ *
+ * Models the two behaviours that decide correctness: revocation is an update
+ * rather than a delete, and `revokeActiveWarnings` only touches rows that are
+ * still active. A fake that removed rows would let a test pass while production
+ * kept the history — the opposite of the property the schema exists to provide.
+ */
+export class FakeModerationRepository implements ModerationRepository {
+  public readonly actions: ModerationActionRow[] = [];
+  private nextId = 1;
+
+  public constructor(private readonly now: () => Date) {}
+
+  public record(input: RecordActionInput): Promise<ModerationActionRow> {
+    const row: ModerationActionRow = {
+      id: String(this.nextId++),
+      guildId: input.guildId,
+      caseId: input.caseId ?? null,
+      action: input.action,
+      subjectId: input.subjectId ?? null,
+      channelId: input.channelId ?? null,
+      actorId: input.actorId,
+      reason: input.reason,
+      durationSeconds: input.durationSeconds ?? null,
+      expiresAt: input.expiresAt ?? null,
+      revokedAt: null,
+      revokedBy: null,
+      revokedReason: null,
+      metadata: input.metadata ?? {},
+      createdAt: this.now(),
+    };
+    this.actions.push(row);
+    return Promise.resolve(row);
+  }
+
+  public listForSubject(
+    guildId: GuildId,
+    subjectId: UserId,
+    options?: { readonly limit?: number; readonly actions?: readonly ModerationAction[] },
+  ): Promise<readonly ModerationActionRow[]> {
+    const filtered = this.actions
+      .filter((row) => row.guildId === guildId && row.subjectId === subjectId)
+      .filter((row) => !options?.actions || options.actions.includes(row.action))
+      .reverse()
+      .slice(0, options?.limit ?? 25);
+    return Promise.resolve(filtered);
+  }
+
+  public listForChannel(
+    guildId: GuildId,
+    channelId: ChannelId,
+    options?: { readonly limit?: number; readonly actions?: readonly ModerationAction[] },
+  ): Promise<readonly ModerationActionRow[]> {
+    const filtered = this.actions
+      .filter((row) => row.guildId === guildId && row.channelId === channelId)
+      .filter((row) => !options?.actions || options.actions.includes(row.action))
+      .reverse()
+      .slice(0, options?.limit ?? 25);
+    return Promise.resolve(filtered);
+  }
+
+  public listForCase(caseId: string): Promise<readonly ModerationActionRow[]> {
+    return Promise.resolve(this.actions.filter((row) => row.caseId === caseId));
+  }
+
+  public countActiveWarnings(guildId: GuildId, subjectId: UserId): Promise<number> {
+    return Promise.resolve(
+      this.actions.filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.subjectId === subjectId &&
+          row.action === 'warn' &&
+          row.revokedAt === null,
+      ).length,
+    );
+  }
+
+  public revokeActiveWarnings(input: {
+    readonly guildId: GuildId;
+    readonly subjectId: UserId;
+    readonly revokedBy: UserId;
+    readonly reason: string;
+  }): Promise<number> {
+    let cleared = 0;
+    for (let i = 0; i < this.actions.length; i += 1) {
+      const row = this.actions[i];
+      if (
+        row &&
+        row.guildId === input.guildId &&
+        row.subjectId === input.subjectId &&
+        row.action === 'warn' &&
+        row.revokedAt === null
+      ) {
+        this.actions[i] = {
+          ...row,
+          revokedAt: this.now(),
+          revokedBy: input.revokedBy,
+          revokedReason: input.reason,
+        };
+        cleared += 1;
+      }
+    }
+    return Promise.resolve(cleared);
+  }
+
+  public revokeAction(input: {
+    readonly id: string;
+    readonly guildId: GuildId;
+    readonly revokedBy: UserId;
+    readonly reason: string;
+  }): Promise<boolean> {
+    const index = this.actions.findIndex(
+      (row) => row.id === input.id && row.guildId === input.guildId && row.revokedAt === null,
+    );
+    const row = this.actions[index];
+    if (!row) return Promise.resolve(false);
+    this.actions[index] = {
+      ...row,
+      revokedAt: this.now(),
+      revokedBy: input.revokedBy,
+      revokedReason: input.reason,
+    };
+    return Promise.resolve(true);
+  }
+
+  public summarise(guildId: GuildId, subjectId: UserId): Promise<MemberRecordSummary> {
+    const mine = this.actions.filter(
+      (row) => row.guildId === guildId && row.subjectId === subjectId,
+    );
+    const count = (action: ModerationAction): number =>
+      mine.filter((row) => row.action === action).length;
+    const times = mine.map((row) => row.createdAt.getTime());
+
+    return Promise.resolve({
+      activeWarnings: mine.filter((r) => r.action === 'warn' && r.revokedAt === null).length,
+      totalWarnings: count('warn'),
+      timeouts: count('timeout'),
+      kicks: count('kick'),
+      bans: count('ban'),
+      notes: count('note'),
+      lastActionAt: times.length > 0 ? new Date(Math.max(...times)) : null,
+    });
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Cases
+// -----------------------------------------------------------------------------
+
+/**
+ * In-memory case file.
+ *
+ * Enforces the real transition table, the terminal-CLOSED rule and the
+ * "RESOLVED needs a resolution" constraint that Postgres enforces with a CHECK.
+ * Case numbers increment per guild, so a test can assert on "#1" meaningfully.
+ */
+export class FakeCaseRepository implements CaseRepository {
+  public readonly cases: CaseRow[] = [];
+  public readonly events: CaseEventRow[] = [];
+  public readonly reports: ReportRow[] = [];
+  private nextId = 1;
+  private nextEventId = 1;
+  private readonly counters = new Map<GuildId, number>();
+
+  public constructor(private readonly now: () => Date) {}
+
+  public open(
+    input: OpenCaseInput,
+    report?: ReportInput,
+  ): Promise<{ readonly case: CaseRow; readonly report: ReportRow | null }> {
+    const status = input.status ?? 'OPEN';
+    if (status === 'RESOLVED' || status === 'CLOSED') {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `A case cannot be opened directly into "${status}".`,
+      });
+    }
+
+    const caseNumber = (this.counters.get(input.guildId) ?? 0) + 1;
+    this.counters.set(input.guildId, caseNumber);
+
+    const row: CaseRow = {
+      id: String(this.nextId++),
+      guildId: input.guildId,
+      caseNumber,
+      status,
+      origin: input.origin,
+      category: input.category ?? null,
+      subjectId: input.subjectId ?? null,
+      openedBy: input.openedBy,
+      assignedTo: null,
+      summary: input.summary,
+      resolution: null,
+      openedAt: this.now(),
+      updatedAt: this.now(),
+      resolvedAt: null,
+      closedAt: null,
+    };
+    this.cases.push(row);
+    this.pushEvent(row.id, 'opened', input.openedBy, input.summary);
+
+    let reportRow: ReportRow | null = null;
+    if (report) {
+      reportRow = {
+        id: String(this.reports.length + 1),
+        caseId: row.id,
+        reporterId: report.reporterId,
+        category: report.category,
+        targetUserId: report.targetUserId ?? null,
+        targetChannelId: report.targetChannelId ?? null,
+        targetMessageId: report.targetMessageId ?? null,
+        description: report.description,
+        createdAt: this.now(),
+      };
+      this.reports.push(reportRow);
+    }
+
+    return Promise.resolve({ case: row, report: reportRow });
+  }
+
+  private pushEvent(
+    caseId: string,
+    eventType: CaseEventType,
+    actorId: UserId | null,
+    body: string | null,
+    fromStatus: CaseStatus | null = null,
+    toStatus: CaseStatus | null = null,
+  ): void {
+    this.events.push({
+      id: String(this.nextEventId++),
+      caseId,
+      eventType,
+      fromStatus,
+      toStatus,
+      actorId,
+      body,
+      createdAt: this.now(),
+    });
+  }
+
+  public findByNumber(guildId: GuildId, caseNumber: number): Promise<CaseRow | null> {
+    return Promise.resolve(
+      this.cases.find((c) => c.guildId === guildId && c.caseNumber === caseNumber) ?? null,
+    );
+  }
+
+  public list(guildId: GuildId, filter?: CaseListFilter): Promise<readonly CaseRow[]> {
+    const order: Readonly<Record<CaseStatus, number>> = {
+      ESCALATED: 0,
+      OPEN: 1,
+      IN_REVIEW: 2,
+      RESOLVED: 3,
+      CLOSED: 4,
+    };
+    const rows = this.cases
+      .filter((c) => c.guildId === guildId)
+      .filter((c) => !filter?.status || c.status === filter.status)
+      .filter((c) => !filter?.assignedTo || c.assignedTo === filter.assignedTo)
+      .filter((c) => !filter?.subjectId || c.subjectId === filter.subjectId)
+      .sort(
+        (a, b) =>
+          order[a.status] - order[b.status] || a.openedAt.getTime() - b.openedAt.getTime(),
+      )
+      .slice(0, filter?.limit ?? 20);
+    return Promise.resolve(rows);
+  }
+
+  public listEvents(caseId: string, limit = 50): Promise<readonly CaseEventRow[]> {
+    return Promise.resolve(
+      this.events.filter((e) => e.caseId === caseId).slice(0, limit),
+    );
+  }
+
+  public findReport(caseId: string): Promise<ReportRow | null> {
+    return Promise.resolve(this.reports.find((r) => r.caseId === caseId) ?? null);
+  }
+
+  public transitionStatus(input: TransitionCaseInput): Promise<CaseTransitionOutcome> {
+    if (requiresResolution(input.to) && !input.resolution) {
+      throw bloomError('INVALID_INPUT', {
+        userMessage: 'Resolving a case needs a short note on what was decided.',
+      });
+    }
+
+    const index = this.cases.findIndex(
+      (c) => c.guildId === input.guildId && c.caseNumber === input.caseNumber,
+    );
+    const row = this.cases[index];
+    if (!row) return Promise.resolve({ kind: 'not_found' });
+
+    if (row.status === input.to) {
+      return Promise.resolve({ kind: 'already_in_state', status: row.status });
+    }
+    if (CASE_TRANSITIONS[row.status].length === 0) {
+      return Promise.resolve({ kind: 'terminal', status: row.status });
+    }
+    if (!canTransitionCase(row.status, input.to)) {
+      return Promise.resolve({ kind: 'conflict', actual: row.status, expected: input.to });
+    }
+
+    const from = row.status;
+    this.cases[index] = {
+      ...row,
+      status: input.to,
+      resolution: input.resolution ?? row.resolution,
+      resolvedAt: input.to === 'RESOLVED' ? (row.resolvedAt ?? this.now()) : row.resolvedAt,
+      closedAt: input.to === 'CLOSED' ? (row.closedAt ?? this.now()) : row.closedAt,
+      updatedAt: this.now(),
+    };
+    this.pushEvent(
+      row.id,
+      'status_changed',
+      input.actorId,
+      input.note ?? input.resolution ?? null,
+      from,
+      input.to,
+    );
+
+    return Promise.resolve({ kind: 'applied', from, to: input.to });
+  }
+
+  public assign(input: {
+    readonly guildId: GuildId;
+    readonly caseNumber: number;
+    readonly assignee: UserId | null;
+    readonly actorId: UserId;
+  }): Promise<CaseRow | null> {
+    const index = this.cases.findIndex(
+      (c) => c.guildId === input.guildId && c.caseNumber === input.caseNumber,
+    );
+    const row = this.cases[index];
+    if (!row) return Promise.resolve(null);
+
+    const updated: CaseRow = { ...row, assignedTo: input.assignee, updatedAt: this.now() };
+    this.cases[index] = updated;
+    this.pushEvent(
+      row.id,
+      input.assignee === null ? 'unassigned' : 'assigned',
+      input.actorId,
+      input.assignee,
+    );
+    return Promise.resolve(updated);
+  }
+
+  public appendEvent(input: {
+    readonly caseId: string;
+    readonly eventType: CaseEventType;
+    readonly actorId?: UserId | null;
+    readonly body?: string | null;
+  }): Promise<void> {
+    if (input.eventType === 'status_changed') {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: 'Status changes must go through transitionStatus().',
+      });
+    }
+    this.pushEvent(input.caseId, input.eventType, input.actorId ?? null, input.body ?? null);
+    return Promise.resolve();
+  }
+
+  public countByStatus(guildId: GuildId): Promise<Readonly<Record<CaseStatus, number>>> {
+    const counts: Record<CaseStatus, number> = {
+      OPEN: 0,
+      IN_REVIEW: 0,
+      ESCALATED: 0,
+      RESOLVED: 0,
+      CLOSED: 0,
+    };
+    for (const row of this.cases) {
+      if (row.guildId === guildId) counts[row.status] += 1;
+    }
+    return Promise.resolve(counts);
+  }
+}
+
 export interface FakeRepositories extends Repositories {
   readonly identity: FakeIdentityRepository;
+  readonly moderation: FakeModerationRepository;
+  readonly cases: FakeCaseRepository;
   readonly onboarding: FakeOnboardingRepository;
   readonly audit: FakeAuditRepository;
   readonly idempotency: FakeIdempotencyRepository;
@@ -472,6 +872,8 @@ export function fakeRepositories(
     telemetry: new FakeTelemetryRepository(),
     jobs: new FakeJobRunRepository(),
     settings: new FakeSettingsRepository(),
+    moderation: new FakeModerationRepository(now),
+    cases: new FakeCaseRepository(now),
   };
 }
 

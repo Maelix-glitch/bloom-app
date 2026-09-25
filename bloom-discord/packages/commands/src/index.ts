@@ -10,5 +10,6 @@
 export * from './spec.js';
 export * from './invocation.js';
 export * from './command.js';
+export * from './namespace-command.js';
 export * from './dispatcher.js';
 export * from './namespace.js';

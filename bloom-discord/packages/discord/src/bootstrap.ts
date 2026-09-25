@@ -27,7 +27,15 @@ import { createBotClient } from './client.js';
 import { DiscordGuildQueryService } from './services/guild-query.js';
 import { DiscordMessagingService } from './services/messaging.js';
 import { DiscordRoleService } from './services/role-service.js';
-import type { GuildQueryService, MessagingService, RoleService } from './ports.js';
+import { DiscordModerationService } from './services/moderation-service.js';
+import { DiscordChannelModerationService } from './services/channel-moderation-service.js';
+import type {
+  ChannelModerationService,
+  GuildQueryService,
+  MessagingService,
+  ModerationService,
+  RoleService,
+} from './ports.js';
 import {
   BotRuntime,
   type GatewayEventRouter,
@@ -97,15 +105,19 @@ export interface BotFeatures {
 /**
  * The Discord services available to every feature.
  *
- * `roles` is present only for bots whose capability manifest includes
- * `role:write` — in practice, Guardian. It is `null` rather than a throwing
- * stub so that wiring a role write into Companion is a type error at the call
- * site instead of a runtime surprise.
+ * The privileged ones are `null` for bots whose capability manifest does not
+ * include them — in practice everything but Guardian. `null` rather than a
+ * throwing stub, so wiring a role write or a ban into Companion is a type error
+ * at the call site instead of a runtime surprise.
  */
 export interface DiscordServices {
   readonly guilds: GuildQueryService;
   readonly messaging: MessagingService;
   readonly roles: RoleService | null;
+  /** Timeout, kick, ban. Requires `moderation:execute`. */
+  readonly moderation: ModerationService | null;
+  /** Slowmode, locking, purges. Requires `message:manage`. */
+  readonly channelModeration: ChannelModerationService | null;
 }
 
 export interface BotBootstrapContext {
@@ -188,6 +200,12 @@ export async function startBotProcess<TDeps>(
     const roles = hasCapability(options.bot, 'role:write')
       ? new DiscordRoleService(client, guilds, platform, logger, options.bot)
       : null;
+    const moderation = hasCapability(options.bot, 'moderation:execute')
+      ? new DiscordModerationService(client, logger, options.bot)
+      : null;
+    const channelModeration = hasCapability(options.bot, 'message:manage')
+      ? new DiscordChannelModerationService(client, logger, options.bot)
+      : null;
 
     const context: BotBootstrapContext = {
       bot: options.bot,
@@ -196,7 +214,7 @@ export async function startBotProcess<TDeps>(
       logger,
       database,
       repositories,
-      discord: { guilds, messaging, roles },
+      discord: { guilds, messaging, roles, moderation, channelModeration },
     };
 
     const deps = options.createDeps(context);

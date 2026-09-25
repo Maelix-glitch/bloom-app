@@ -35,6 +35,7 @@
     "eslint.config.js",
     "packages/**/*.test.ts",
     "apps/**/*.test.ts",
+    "apps/**/*.harness.ts",
     "scripts/**/*.ts"
   ]
 }

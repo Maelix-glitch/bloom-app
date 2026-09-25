@@ -6,8 +6,8 @@
  * It is the only bot with Manage Roles, and the only one holding the privileged
  * GuildMembers intent.
  *
- * Phase 1 gives it the onboarding feature set, so this is the first bot that
- * actually starts. Phase 2 adds moderation, reports and cases.
+ * Phase 1 gave it onboarding, so this became the first bot that actually
+ * starts. Phase 2 adds moderation actions, reports and cases.
  */
 import { bloomError } from '@bloom/shared-types';
 import { CommandDispatcher, CommandRegistry } from '@bloom/commands';
@@ -22,7 +22,9 @@ import {
 } from '@bloom/discord';
 import type { GuardianDeps } from './deps.js';
 import { OnboardingService } from './features/onboarding/service.js';
-import { onboardingCommands } from './features/onboarding/commands.js';
+import { ModerationActionService } from './features/moderation/service.js';
+import { CaseService } from './features/moderation/case-service.js';
+import { guardianCommands } from './commands.js';
 import { memberJoinHandler, memberLeaveHandler } from './features/onboarding/handlers.js';
 
 /**
@@ -58,12 +60,42 @@ await runBotMain(() =>
         });
       }
 
+      const discordModeration = context.discord.moderation;
+      const channelModeration = context.discord.channelModeration;
+      if (!discordModeration || !channelModeration) {
+        // Same reasoning as the role service above: Guardian's manifest
+        // includes `moderation:execute` and `message:manage`, so these are
+        // always built. Asserting rather than non-null-asserting keeps the
+        // failure legible if the manifest is ever edited.
+        throw bloomError('CAPABILITY_DENIED', {
+          operatorHint:
+            'Guardian started without the moderation services. Its capability manifest must include "moderation:execute" and "message:manage".',
+        });
+      }
+
       const onboarding = new OnboardingService({
         config: context.platform,
         repositories: context.repositories,
         roles,
         messaging: context.discord.messaging,
         guilds: context.discord.guilds,
+        logger: context.logger,
+      });
+
+      const moderation = new ModerationActionService({
+        config: context.platform,
+        repositories: context.repositories,
+        guilds: context.discord.guilds,
+        discord: discordModeration,
+        channels: channelModeration,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+      });
+
+      const cases = new CaseService({
+        config: context.platform,
+        repositories: context.repositories,
+        messaging: context.discord.messaging,
         logger: context.logger,
       });
 
@@ -74,7 +106,11 @@ await runBotMain(() =>
         guilds: context.discord.guilds,
         roles,
         messaging: context.discord.messaging,
+        discordModeration,
+        channelModeration,
         onboarding,
+        moderation,
+        cases,
         /*
          * One verification attempt per member per 30 seconds.
          *
@@ -88,12 +124,37 @@ await runBotMain(() =>
           'onboarding.verify',
           30,
         ),
+        /*
+         * Destructive staff commands: one per moderator every 3 seconds.
+         *
+         * Not aimed at legitimate use — clearing a raid means several actions
+         * in quick succession, and 3 seconds does not obstruct that. It bounds
+         * the damage a compromised staff account or a stuck client can do
+         * before somebody notices.
+         */
+        moderationLimiter: new DatabaseRateLimiter(
+          context.repositories.cooldowns,
+          context.platform.discord.guildId,
+          'moderation.action',
+          3,
+        ),
+        /*
+         * `/report` is reachable by any member, including a brand-new account,
+         * so it gets the tightest budget: one report per member per 60 seconds.
+         * Flooding the staff queue is itself a form of abuse.
+         */
+        reportLimiter: new DatabaseRateLimiter(
+          context.repositories.cooldowns,
+          context.platform.discord.guildId,
+          'moderation.report',
+          60,
+        ),
       };
     },
 
     createFeatures(deps, context) {
       const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
-        onboardingCommands,
+        guardianCommands,
       );
 
       const commands = new CommandDispatcher<GuardianDeps>({

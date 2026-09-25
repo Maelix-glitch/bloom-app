@@ -86,6 +86,109 @@ export interface MessagingService {
   sendDirectMessage(userId: UserId, message: BloomMessage): Promise<boolean>;
 }
 
+/**
+ * Member moderation.
+ *
+ * Guardian only. The implementation asserts `moderation:execute` in its
+ * constructor, so wiring it into Companion or Labs fails at boot rather than at
+ * the moment it would have banned somebody.
+ *
+ * Every method takes a `reason`, which is written to Discord's own audit log.
+ * That is not decoration: it is what lets a server owner reconcile Bloom's
+ * record against Discord's without trusting Bloom.
+ */
+export interface ModerationService {
+  /** Discord caps timeouts at 28 days; the adapter rejects anything longer. */
+  timeoutMember(input: {
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly until: Date;
+    readonly reason: string;
+  }): Promise<void>;
+
+  removeTimeout(input: {
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly reason: string;
+  }): Promise<void>;
+
+  kickMember(input: {
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly reason: string;
+  }): Promise<void>;
+
+  banMember(input: {
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly reason: string;
+    /** Message history to delete, in seconds. Discord's maximum is 7 days. */
+    readonly deleteMessageSeconds?: number;
+  }): Promise<void>;
+
+  /** Returns `false` when the user was not banned — a no-op, not an error. */
+  unbanMember(input: {
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly reason: string;
+  }): Promise<boolean>;
+}
+
+/**
+ * Whether `@everyone` may send in a channel.
+ *
+ * Three states, not two. `inherited` means the channel carries no explicit
+ * overwrite and takes its permission from the category or role defaults —
+ * which is different from an explicit allow, and collapsing the two is how an
+ * unlock silently grants send access to a channel that never had it.
+ */
+export type ChannelSendPermission = 'allowed' | 'denied' | 'inherited';
+
+export interface PurgeResult {
+  readonly requested: number;
+  readonly deleted: number;
+  /**
+   * Messages that matched but could not be bulk-deleted.
+   *
+   * Discord refuses to bulk-delete anything older than 14 days. Reporting this
+   * separately is what stops `/purge 100` claiming it removed 100 messages when
+   * it removed 12.
+   */
+  readonly skippedTooOld: number;
+}
+
+/** Channel-level moderation: slowmode, locking, and message purges. */
+export interface ChannelModerationService {
+  setSlowmode(input: {
+    readonly guildId: GuildId;
+    readonly channelId: ChannelId;
+    /** Seconds between messages per member. 0 disables. Discord's max is 21600. */
+    readonly seconds: number;
+    readonly reason: string;
+  }): Promise<void>;
+
+  getSendPermission(
+    guildId: GuildId,
+    channelId: ChannelId,
+  ): Promise<ChannelSendPermission>;
+
+  setSendPermission(input: {
+    readonly guildId: GuildId;
+    readonly channelId: ChannelId;
+    readonly state: ChannelSendPermission;
+    readonly reason: string;
+  }): Promise<void>;
+
+  purgeMessages(input: {
+    readonly guildId: GuildId;
+    readonly channelId: ChannelId;
+    readonly limit: number;
+    /** Restrict the purge to one member's messages. */
+    readonly authorId?: UserId;
+    readonly reason: string;
+  }): Promise<PurgeResult>;
+}
+
 export interface GatewayStatus {
   readonly connected: boolean;
   /** Websocket heartbeat round trip. `null` before the first heartbeat completes. */

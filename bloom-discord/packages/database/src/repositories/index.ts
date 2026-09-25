@@ -8,6 +8,11 @@ import {
 } from './idempotency.js';
 import { PostgresJobRunRepository, type JobRunRepository } from './jobs.js';
 import { PostgresOnboardingRepository, type OnboardingRepository } from './onboarding.js';
+import {
+  PostgresModerationRepository,
+  type ModerationRepository,
+} from './moderation.js';
+import { PostgresCaseRepository, type CaseRepository } from './cases.js';
 import { PostgresSettingsRepository, type SettingsRepository } from './settings.js';
 import { PostgresTelemetryRepository, type TelemetryRepository } from './telemetry.js';
 
@@ -17,6 +22,8 @@ export * from './identity.js';
 export * from './idempotency.js';
 export * from './jobs.js';
 export * from './onboarding.js';
+export * from './moderation.js';
+export * from './cases.js';
 export * from './settings.js';
 export * from './telemetry.js';
 
@@ -34,6 +41,8 @@ export interface Repositories {
   readonly idempotency: IdempotencyRepository;
   readonly jobs: JobRunRepository;
   readonly onboarding: OnboardingRepository;
+  readonly moderation: ModerationRepository;
+  readonly cases: CaseRepository;
   readonly settings: SettingsRepository;
   readonly telemetry: TelemetryRepository;
 }
@@ -46,6 +55,8 @@ export function createRepositories(database: Database): Repositories {
     idempotency: new PostgresIdempotencyRepository(database),
     jobs: new PostgresJobRunRepository(database),
     onboarding: new PostgresOnboardingRepository(database),
+    moderation: new PostgresModerationRepository(database),
+    cases: new PostgresCaseRepository(database),
     settings: new PostgresSettingsRepository(database),
     telemetry: new PostgresTelemetryRepository(database),
   };

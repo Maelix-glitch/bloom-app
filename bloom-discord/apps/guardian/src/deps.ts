@@ -1,9 +1,17 @@
 import type { PlatformConfig } from '@bloom/config';
 import type { Repositories } from '@bloom/database';
-import type { GuildQueryService, MessagingService, RoleService } from '@bloom/discord';
+import type {
+  ChannelModerationService,
+  GuildQueryService,
+  MessagingService,
+  ModerationService,
+  RoleService,
+} from '@bloom/discord';
 import type { Logger } from '@bloom/logging';
 import type { RateLimiter } from '@bloom/security';
 import type { OnboardingService } from './features/onboarding/service.js';
+import type { ModerationActionService } from './features/moderation/service.js';
+import type { CaseService } from './features/moderation/case-service.js';
 
 /**
  * Everything Guardian's commands and handlers are given.
@@ -25,9 +33,17 @@ export interface GuardianDeps {
   readonly guilds: GuildQueryService;
   readonly roles: RoleService;
   readonly messaging: MessagingService;
+  readonly discordModeration: ModerationService;
+  readonly channelModeration: ChannelModerationService;
 
   readonly onboarding: OnboardingService;
+  readonly moderation: ModerationActionService;
+  readonly cases: CaseService;
 
   /** Durable, cross-process limit on verification attempts. */
   readonly verifyLimiter: RateLimiter;
+  /** Budget for destructive staff commands. Guards a compromised staff account. */
+  readonly moderationLimiter: RateLimiter;
+  /** Budget for `/report`, which any member can reach. */
+  readonly reportLimiter: RateLimiter;
 }

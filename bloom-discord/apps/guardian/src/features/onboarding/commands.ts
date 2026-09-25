@@ -7,7 +7,11 @@ import {
 } from '@bloom/permissions';
 import { staffEmbed, type BloomMessage } from '@bloom/embeds';
 import { rateLimitError } from '@bloom/security';
-import type { BloomCommand, CommandInvocation } from '@bloom/commands';
+import type {
+  BloomCommand,
+  CommandInvocation,
+  SubcommandContribution,
+} from '@bloom/commands';
 import type { GuardianDeps } from '../../deps.js';
 import * as copy from './messages.js';
 
@@ -127,118 +131,81 @@ export const verifyCommand: BloomCommand<GuardianDeps> = {
 // /guardian
 // -----------------------------------------------------------------------------
 
-const staffOnly: AuthorizationPolicy = allOf(requireModerator());
+export const onboardingStaffPolicy: AuthorizationPolicy = allOf(requireModerator());
 
-export const guardianCommand: BloomCommand<GuardianDeps> = {
-  bot: 'guardian',
-  defer: true,
-  ephemeral: true,
-
-  spec: {
-    name: 'guardian',
-    description: 'Bloom Guardian administration.',
-    guildOnly: true,
-    // Hidden by default in the client. The server-side policy is what actually
-    // enforces this; the hint just keeps the command list clean for members.
-    defaultMemberPermissions: 'none',
-    subcommands: [
-      {
-        name: 'status',
-        description: 'Show a member’s onboarding status.',
-        options: [
-          {
-            name: 'member',
-            description: 'Whose status to show. Defaults to you.',
-            type: 'user',
-            required: false,
-          },
-        ],
-      },
-      {
-        name: 'overview',
-        description: 'Show how many members are in each onboarding state.',
-      },
-    ],
-    groups: [
-      {
-        name: 'onboarding',
-        description: 'Move members through the onboarding lifecycle.',
-        subcommands: [
-          {
-            name: 'complete',
-            description: 'Move a verified member to ❋ Bloom Member.',
-            options: [
-              {
-                name: 'member',
-                description: 'The member who has finished onboarding.',
-                type: 'user',
-                required: true,
-              },
-            ],
-          },
-          {
-            name: 'history',
-            description: 'Show a member’s lifecycle history.',
-            options: [
-              {
-                name: 'member',
-                description: 'Whose history to show.',
-                type: 'user',
-                required: true,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: 'roles',
-        description: 'Role configuration diagnostics.',
-        subcommands: [
-          {
-            name: 'audit',
-            description: 'Check that the bot role is positioned correctly.',
-          },
-        ],
-      },
-    ],
+/**
+ * Onboarding's branches of `/guardian`.
+ *
+ * Contributed rather than owned. The `/guardian` root is assembled in
+ * `apps/guardian/src/commands.ts` from every feature's contributions, so adding
+ * a moderation subcommand in Phase 2 did not require editing this file — and
+ * neither feature can silently shadow the other, because duplicate paths throw
+ * at construction.
+ */
+export const onboardingSubcommands: readonly SubcommandContribution<GuardianDeps>[] = [
+  {
+    spec: {
+      name: 'status',
+      description: 'Show a member’s onboarding status.',
+      options: [
+        {
+          name: 'member',
+          description: 'Whose status to show. Defaults to you.',
+          type: 'user',
+          required: false,
+        },
+      ],
+    },
+    execute: showStatus,
   },
-
-  /*
-   * One policy for the whole command tree.
-   *
-   * `/guardian status` on yourself is the only thing here a non-moderator might
-   * reasonably want, and `/verify` already tells them what they need. Keeping a
-   * single gate means there is no subcommand that can be added later without
-   * inheriting it — the failure mode of per-subcommand policies is the one
-   * somebody forgets.
-   */
-  policy: staffOnly,
-
-  async execute(invocation, deps): Promise<BloomMessage> {
-    const group = invocation.options.getSubcommandGroup();
-    const sub = invocation.options.getSubcommand();
-
-    if (group === 'onboarding' && sub === 'complete') {
-      return await completeOnboarding(invocation, deps);
-    }
-    if (group === 'onboarding' && sub === 'history') {
-      return await showHistory(invocation, deps);
-    }
-    if (group === 'roles' && sub === 'audit') {
-      return await auditRoles(invocation, deps);
-    }
-    if (group === null && sub === 'status') {
-      return await showStatus(invocation, deps);
-    }
-    if (group === null && sub === 'overview') {
-      return await showOverview(invocation, deps);
-    }
-
-    throw bloomError('NOT_IMPLEMENTED', {
-      operatorHint: `Unrouted subcommand: group=${group ?? 'none'} sub=${sub ?? 'none'}.`,
-    });
+  {
+    spec: {
+      name: 'overview',
+      description: 'Show how many members are in each onboarding state.',
+    },
+    execute: showOverview,
   },
-};
+  {
+    group: 'onboarding',
+    spec: {
+      name: 'complete',
+      description: 'Move a verified member to ❋ Bloom Member.',
+      options: [
+        {
+          name: 'member',
+          description: 'The member who has finished onboarding.',
+          type: 'user',
+          required: true,
+        },
+      ],
+    },
+    execute: completeOnboarding,
+  },
+  {
+    group: 'onboarding',
+    spec: {
+      name: 'history',
+      description: 'Show a member’s lifecycle history.',
+      options: [
+        {
+          name: 'member',
+          description: 'Whose history to show.',
+          type: 'user',
+          required: true,
+        },
+      ],
+    },
+    execute: showHistory,
+  },
+  {
+    group: 'roles',
+    spec: {
+      name: 'audit',
+      description: 'Check that the bot role is positioned correctly.',
+    },
+    execute: auditRoles,
+  },
+];
 
 async function showStatus(
   invocation: CommandInvocation,
@@ -420,7 +387,5 @@ async function auditRoles(
   };
 }
 
-export const onboardingCommands: readonly BloomCommand<GuardianDeps>[] = [
-  verifyCommand,
-  guardianCommand,
-];
+/** Top-level commands owned by onboarding. `/guardian` is assembled elsewhere. */
+export const onboardingCommands: readonly BloomCommand<GuardianDeps>[] = [verifyCommand];

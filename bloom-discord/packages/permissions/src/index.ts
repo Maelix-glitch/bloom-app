@@ -9,4 +9,5 @@ export * from './discord-permissions.js';
 export * from './context.js';
 export * from './policies.js';
 export * from './role-hierarchy.js';
+export * from './moderation-target.js';
 export * from './capabilities.js';

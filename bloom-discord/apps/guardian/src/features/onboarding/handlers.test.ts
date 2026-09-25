@@ -3,18 +3,13 @@ import { unsafeSnowflake, type UserId } from '@bloom/shared-types';
 import { EventDispatcher, type MemberJoinPayload } from '@bloom/events';
 import {
   createTestLogger,
-  fakeRepositories,
-  FakeGuild,
   FakeMessaging,
-  FakeRoleService,
-  TEST_CHANNEL_IDS,
   TEST_GUILD_ID,
   TEST_USER_IDS,
-  testConfig,
   type FakeRepositories,
 } from '@bloom/testing';
 import type { GuardianDeps } from '../../deps.js';
-import { OnboardingService } from './service.js';
+import { guardianHarness } from '../../guardian.harness.js';
 import { memberJoinHandler, memberLeaveHandler } from './handlers.js';
 
 /**
@@ -33,38 +28,20 @@ interface Harness {
 }
 
 function harness(options: { readonly withDedupe?: boolean } = {}): Harness {
-  const config = testConfig();
-  const guild = new FakeGuild().withStandardRoles();
-  guild.withChannels(TEST_CHANNEL_IDS.welcome);
-
-  const roles = new FakeRoleService(guild);
-  const messaging = new FakeMessaging(guild);
-  const repositories = fakeRepositories();
+  /*
+   * Deps come from the shared harness so this test cannot drift from what the
+   * bot actually wires up — the event handlers reach into `deps.onboarding`,
+   * and a stub built here would happily keep passing after the real
+   * construction changed.
+   */
+  const { deps, repositories, messaging } = guardianHarness();
   const logs = createTestLogger();
-
-  const deps: GuardianDeps = {
-    config,
-    logger: logs.logger,
-    repositories,
-    guilds: guild,
-    roles,
-    messaging,
-    onboarding: new OnboardingService({
-      config,
-      repositories,
-      roles,
-      messaging,
-      guilds: guild,
-      logger: logs.logger,
-    }),
-    verifyLimiter: { consume: () => Promise.resolve({ allowed: true, retryAfterMs: 0 }) },
-  };
 
   const seen = new Set<string>();
   const dispatcher = new EventDispatcher<GuardianDeps>({
     bot: 'guardian',
     logger: logs.logger,
-    deps,
+    deps: { ...deps, logger: logs.logger },
     ...(options.withDedupe === false
       ? {}
       : {
