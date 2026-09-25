@@ -22,7 +22,10 @@ export function sanitiseForStorage(input: string, maxLength: number): string {
 /** Clean free text for display in Discord: escaped, mentions neutralised, truncated. */
 export function sanitiseForDisplay(
   input: string,
-  maxLength = DISCORD_LIMITS.embedDescription,
+  // Annotated `number` deliberately: `DISCORD_LIMITS` is `as const`, so an
+  // inferred default would fix the parameter's type at the literal 4096 and
+  // reject every other budget a caller might have.
+  maxLength: number = DISCORD_LIMITS.embedDescription,
 ): string {
   return sanitiseUserText(input, maxLength);
 }

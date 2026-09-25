@@ -8,7 +8,7 @@ import {
   type UserId,
 } from '@bloom/shared-types';
 import type { BloomMessage } from '@bloom/embeds';
-import type { RoleSnapshot } from '@bloom/permissions';
+import { DiscordPermission, type RoleSnapshot } from '@bloom/permissions';
 import { MAX_TIMEOUT_MS } from '@bloom/utils';
 import type {
   BotSelfSnapshot,
@@ -27,6 +27,31 @@ import {
   TEST_ROLE_POSITIONS,
   TEST_USER_IDS,
 } from './fixtures.js';
+
+/**
+ * What Guardian is actually invited with.
+ *
+ * The default rather than a per-test opt-in, because the alternative is every
+ * moderation test beginning with a line granting the permission it is about to
+ * use — at which point the permission checks are being configured away rather
+ * than exercised. Tests that care about a *missing* permission remove one with
+ * `withBotPermissions`, which is the interesting direction.
+ *
+ * Kept in terms of the named bits so it stays readable next to
+ * docs/permissions/bloom-bot-permission-matrix.md.
+ */
+export const GUARDIAN_TEST_PERMISSIONS: bigint =
+  DiscordPermission.ViewChannel |
+  DiscordPermission.SendMessages |
+  DiscordPermission.EmbedLinks |
+  DiscordPermission.ReadMessageHistory |
+  DiscordPermission.ManageRoles |
+  DiscordPermission.ManageMessages |
+  DiscordPermission.ManageChannels |
+  DiscordPermission.ModerateMembers |
+  DiscordPermission.KickMembers |
+  DiscordPermission.BanMembers |
+  DiscordPermission.ViewAuditLog;
 
 /**
  * An in-memory Discord.
@@ -53,8 +78,7 @@ export class FakeGuild implements GuildQueryService {
     applicationId: '900000000000009001',
     highestRolePosition: TEST_ROLE_POSITIONS.bloomBot,
     highestRoleName: '◉ Bloom Bot',
-    // Manage Roles | View Channel | Send Messages | Embed Links
-    permissions: (1n << 28n) | (1n << 10n) | (1n << 11n) | (1n << 14n),
+    permissions: GUARDIAN_TEST_PERMISSIONS,
   };
 
   public constructor(public readonly guildId: GuildId = TEST_GUILD_ID) {}

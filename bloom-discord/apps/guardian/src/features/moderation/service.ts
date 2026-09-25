@@ -27,7 +27,8 @@ import {
   type AuthorizationTarget,
   type BotRoleContext,
 } from '@bloom/permissions';
-import { sanitiseUserText, systemClock, type Clock } from '@bloom/utils';
+import { systemClock, type Clock } from '@bloom/utils';
+import { sanitiseReason } from '@bloom/security';
 import * as copy from './messages.js';
 
 /**
@@ -728,12 +729,19 @@ export class ModerationActionService {
 /**
  * Normalise a moderator-supplied reason.
  *
- * Reasons reach Discord's audit log, a DM to the member, and the staff channel.
- * Neutralising mentions stops `/warn @x "stop pinging @everyone"` from doing the
- * very thing it is complaining about.
+ * Stored close to what was typed — control characters out, bounded to the 512
+ * characters Discord's audit log accepts — and deliberately *not*
+ * markdown-escaped. The reason's main destinations are the database, an export,
+ * a staff review and Discord's own audit-log reason header, and that header is
+ * plain text: an escaped reason shows up there as literal backslashes, so
+ * `off-topic posting` would be recorded forever as `off\-topic posting`.
+ *
+ * Escaping and mention-neutralising belong at the render edge instead, which is
+ * where `memberNotice` and the staff embeds apply them. That keeps one stored
+ * truth and lets each destination present it correctly.
  */
 function cleanReason(reason: string): string {
-  const cleaned = sanitiseUserText(reason, 480);
+  const cleaned = sanitiseReason(reason);
   if (cleaned.length === 0) {
     throw bloomError('INVALID_INPUT', {
       userMessage: 'A reason is required.',

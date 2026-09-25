@@ -288,19 +288,56 @@ export class FakeOnboardingRepository implements OnboardingRepository {
 
 export class FakeAuditRepository implements AuditEventRepository {
   public readonly events: AuditEventInput[] = [];
+  private readonly rows: AuditEventRow[] = [];
   private nextId = 1;
 
   public append(input: AuditEventInput): Promise<string> {
+    const id = String(this.nextId++);
     this.events.push(input);
-    return Promise.resolve(String(this.nextId++));
+    this.rows.push({
+      id,
+      guildId: input.guildId,
+      botName: input.botName,
+      event: input.event,
+      severity: input.severity ?? 'info',
+      actorId: input.actorId ?? null,
+      targetId: input.targetId ?? null,
+      channelId: input.channelId ?? null,
+      source: input.source ?? null,
+      correlationId: input.correlationId ?? null,
+      details: input.details ?? {},
+      createdAt: new Date(),
+    });
+    return Promise.resolve(id);
   }
 
-  public listForTarget(): Promise<readonly AuditEventRow[]> {
-    return Promise.resolve([]);
+  /*
+   * These read back what was appended rather than returning an empty array.
+   *
+   * A stub returning `[]` makes every "this must never appear in the audit
+   * trail" assertion vacuously true — the test passes, the guarantee is
+   * untested, and the leak ships.
+   */
+  public listForTarget(
+    guildId: GuildId,
+    targetId: UserId,
+    limit = 50,
+  ): Promise<readonly AuditEventRow[]> {
+    return Promise.resolve(
+      this.rows
+        .filter((row) => row.guildId === guildId && row.targetId === targetId)
+        .reverse()
+        .slice(0, limit),
+    );
   }
 
-  public listRecent(): Promise<readonly AuditEventRow[]> {
-    return Promise.resolve([]);
+  public listRecent(guildId: GuildId, limit = 50): Promise<readonly AuditEventRow[]> {
+    return Promise.resolve(
+      this.rows
+        .filter((row) => row.guildId === guildId)
+        .reverse()
+        .slice(0, limit),
+    );
   }
 
   /** Assertion helper: did this exact event get recorded? */

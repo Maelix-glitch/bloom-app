@@ -47,9 +47,24 @@ export interface GuardianHarness {
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
 }
 
-export function guardianHarness(): GuardianHarness {
+export interface GuardianHarnessOptions {
+  /**
+   * Unset the reports channel, to exercise the "stored but nobody was alerted"
+   * path. Explicit rather than inferred: it is a configuration mistake with
+   * real consequences, so a test has to ask for it.
+   */
+  readonly reportsChannel?: null;
+}
+
+export function guardianHarness(
+  options: GuardianHarnessOptions = {},
+): GuardianHarness {
   // testConfig() already configures every channel, reports included.
-  const config = testConfig();
+  const base = testConfig();
+  const config =
+    options.reportsChannel === null
+      ? { ...base, channels: { ...base.channels, reports: null } }
+      : base;
   const guild = new FakeGuild().withStandardRoles();
   guild.withChannels(TEST_CHANNEL_IDS.welcome, TEST_CHANNEL_IDS.reports);
 

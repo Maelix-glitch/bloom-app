@@ -537,8 +537,17 @@ export const reportCommand: BloomCommand<GuardianDeps> = {
       });
     }
 
+    const guildId = guildOf(invocation);
+    if (reference && reference.guildId !== guildId) {
+      throw bloomError('INVALID_INPUT', {
+        userMessage:
+          'That message link points at a different server. Bloom moderators can only act on messages posted here.',
+        details: { link_guild_id: reference.guildId },
+      });
+    }
+
     const result = await deps.cases.submitReport({
-      guildId: guildOf(invocation),
+      guildId,
       reporter: invocation.actor,
       category,
       description,
@@ -558,21 +567,32 @@ export const reportCommand: BloomCommand<GuardianDeps> = {
  * Validated with a strict pattern rather than string splitting: this is
  * untrusted input that becomes a database reference, and the ids are what a
  * moderator will later click. A malformed link is refused, not stored.
+ *
+ * The guild id is returned rather than discarded so the caller can reject a
+ * link from somewhere else. Discord links carry their origin, and a report
+ * referencing a message in another server would send staff chasing a channel
+ * that does not exist here.
  */
+export interface ParsedMessageLink {
+  readonly guildId: GuildId;
+  readonly channelId: ChannelId;
+  readonly messageId: MessageId;
+}
+
 const MESSAGE_LINK =
   /^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/channels\/(\d{17,20})\/(\d{17,20})\/(\d{17,20})$/;
 
-export function parseMessageLink(
-  link: string,
-): { readonly channelId: ChannelId; readonly messageId: MessageId } | null {
+export function parseMessageLink(link: string): ParsedMessageLink | null {
   const match = MESSAGE_LINK.exec(link.trim());
   if (!match) return null;
 
+  const guildId = match[1];
   const channelId = match[2];
   const messageId = match[3];
-  if (!channelId || !messageId) return null;
+  if (!guildId || !channelId || !messageId) return null;
 
   return {
+    guildId: guildId as GuildId,
     channelId: channelId as ChannelId,
     messageId: messageId as MessageId,
   };

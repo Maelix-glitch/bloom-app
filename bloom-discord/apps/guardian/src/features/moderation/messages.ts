@@ -1,3 +1,4 @@
+import { sanitiseForDisplay } from '@bloom/security';
 import {
   CASE_STATUS_LABELS,
   MODERATION_ACTION_LABELS,
@@ -64,7 +65,12 @@ export function memberNotice(
   };
 
   const lines = [headline[action] ?? `A moderation action was taken in ${guildName}.`, ''];
-  lines.push(`**Reason** — ${reason}`);
+  /*
+   * Escape here, not at storage time. The stored reason is plain text so it
+   * reads correctly in exports and in Discord's audit log; this is the one
+   * destination that renders markdown, so it is the one that has to escape.
+   */
+  lines.push(`**Reason** — ${sanitiseForDisplay(reason, 480)}`);
   if (extra) lines.push('', extra);
 
   if (action === 'kick') {
