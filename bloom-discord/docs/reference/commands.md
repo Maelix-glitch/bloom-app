@@ -1,6 +1,7 @@
 # Command reference
 
-**Live as of Phase 2: verification, onboarding, moderation, reports and cases.**
+**Live as of Phase 4: verification, onboarding, moderation, reports and cases,
+scheduled work, and Companion's daily check-in prompt.**
 Everything else in this document is planned, not built, and is marked with the
 phase that delivers it.
 The platform does not pretend otherwise — the registrar publishes only what the
@@ -135,11 +136,19 @@ context into a confrontation, which stops people writing them.
 
 ### Scheduled work
 
-| Command                        | Policy            | Description                                  |  Phase   |
-| ------------------------------ | ----------------- | -------------------------------------------- | :------: |
-| `/guardian jobs list`          | Moderator         | Every registered job, its schedule, next run | **3 ✅** |
-| `/guardian jobs history <job>` | Moderator         | The last recorded run, including the failure | **3 ✅** |
-| `/guardian jobs run <job>`     | **Administrator** | Run a job now, without waiting for its cron  | **3 ✅** |
+| Command                        | Policy            | Description                                   |  Phase   |
+| ------------------------------ | ----------------- | --------------------------------------------- | :------: |
+| `/guardian jobs list`          | Moderator         | Every registered job, its schedule, next run  | **3 ✅** |
+| `/guardian jobs history <job>` | Moderator         | The last recorded runs, including the failure | **3 ✅** |
+| `/guardian jobs run <job>`     | **Administrator** | Run a job now, without waiting for its cron   | **3 ✅** |
+| `/guardian jobs enable <job>`  | **Administrator** | Switch a job on for this server               | **4 ✅** |
+| `/guardian jobs disable <job>` | **Administrator** | Switch a job off for this server              | **4 ✅** |
+
+This whole group is shared. It is defined once in `@bloom/discord` and mounted by
+every bot that runs jobs, so `/companion jobs list` is the same code with a
+different container — the brief's "no duplicated code between bots" applied to
+the surface most likely to be copy-pasted. Each mount only ever sees its own
+bot's scheduler and its own bot's settings rows.
 
 `jobs list` reads the live scheduler, and `jobs history` reads the `job_runs`
 table rather than process memory — after a deployment the scheduler has no
@@ -151,6 +160,18 @@ Triggering a job can make the bot post publicly on demand, which is an
 administrative capability rather than a moderation one. It bypasses the cron
 schedule but **not** the lock and **not** the job's own duplicate suppression:
 triggering the stale-case digest twice in one morning still posts once.
+
+`enable` and `disable` write a per-server switch that the scheduler re-reads on
+every tick, so a disable takes effect at the next run rather than the next
+deployment. Both are audited at **warn** severity: switching off a community's
+daily prompt is invisible until someone notices the silence, and the record of
+who did it should outlive the memory of it.
+
+`enable` reports honestly when it cannot deliver what was asked. If the process
+has `FEATURE_SCHEDULED_MESSAGES=false`, or the job is disabled by configuration
+(typically an unset channel), the reply says the switch is on **and** that the
+job still will not run. `jobs list` draws the same distinction, naming which of
+the four layers is responsible rather than saying "disabled".
 
 ### How `/guardian` is assembled
 
@@ -204,18 +225,42 @@ worth doing, but they are additive rather than enabling.
 
 ## BLOOM COMPANION
 
-| Command                                             | Policy        | Description                          | Phase |
-| --------------------------------------------------- | ------------- | ------------------------------------ | :---: |
-| `/checkin`                                          | Bloom Member  | Daily check-in                       |   3   |
-| `/win <description>`                                | Bloom Member  | Share a small win                    |   3   |
-| `/companion profile [member]`                       | Bloom Member  | Points, rank, streak                 |   3   |
-| `/companion rank`                                   | Bloom Member  | Your rank and what is next           |   3   |
-| `/companion leaderboard`                            | Bloom Member  | Top members this period              |   3   |
-| `/companion milestones`                             | Bloom Member  | Milestones reached                   |   3   |
-| `/challenge list`                                   | Bloom Member  | Active challenges                    |   4   |
-| `/challenge join <id>`                              | Bloom Member  | Join one                             |   4   |
-| `/companion admin award <member> <points> <reason>` | Administrator | Manual award, always audited         |   3   |
-| `/companion admin schedule`                         | Administrator | Inspect and toggle scheduled prompts |   4   |
+Companion has exactly one top-level command. It holds no roles, no moderation,
+and — as of Phase 4 — one scheduled surface.
+
+### Built
+
+| Command                         | Policy            | Description                                   |  Phase   |
+| ------------------------------- | ----------------- | --------------------------------------------- | :------: |
+| `/companion jobs list`          | Moderator         | Companion's jobs, schedules and next runs     | **4 ✅** |
+| `/companion jobs history <job>` | Moderator         | The last recorded runs, including the failure | **4 ✅** |
+| `/companion jobs run <job>`     | **Administrator** | Run a job now, without waiting for its cron   | **4 ✅** |
+| `/companion jobs enable <job>`  | **Administrator** | Switch a job on for this server               | **4 ✅** |
+| `/companion jobs disable <job>` | **Administrator** | Switch a job off for this server              | **4 ✅** |
+
+The one job behind them is `companion.checkin.daily_prompt`: a short prompt
+posted to `CHANNEL_DAILY_CHECK_IN` at 09:00 in `BLOOM_TIMEZONE`. It posts a
+conversation starter and nothing else — **it does not record or reward a
+check-in**, because nothing yet does. `/checkin` below is the command that will,
+and it is not built.
+
+### Planned
+
+| Command                                             | Policy        | Description                  | Phase |
+| --------------------------------------------------- | ------------- | ---------------------------- | :---: |
+| `/checkin`                                          | Bloom Member  | Daily check-in               |   3   |
+| `/win <description>`                                | Bloom Member  | Share a small win            |   3   |
+| `/companion profile [member]`                       | Bloom Member  | Points, rank, streak         |   3   |
+| `/companion rank`                                   | Bloom Member  | Your rank and what is next   |   3   |
+| `/companion leaderboard`                            | Bloom Member  | Top members this period      |   3   |
+| `/companion milestones`                             | Bloom Member  | Milestones reached           |   3   |
+| `/challenge list`                                   | Bloom Member  | Active challenges            |   4   |
+| `/challenge join <id>`                              | Bloom Member  | Join one                     |   4   |
+| `/companion admin award <member> <points> <reason>` | Administrator | Manual award, always audited |   3   |
+
+`/companion admin schedule` was planned here and has been **dropped**: the shared
+`jobs` group does that job for every bot, and a second way to toggle the same
+setting would eventually disagree with the first.
 
 Leaderboards are period-scoped and show a small number of entries. An
 all-time-ranked list of every member is a status game, not a wellbeing feature.

@@ -4,9 +4,11 @@ Three Discord applications — **Guardian**, **Companion** and **Labs** — shar
 one Supabase PostgreSQL database and a common set of packages, in a pnpm
 workspace of strict TypeScript ESM targeting Node 24.
 
-> **Status: Phase 2.** Bloom Guardian is functionally complete for verification,
-> the role lifecycle, moderation, reports and cases. Companion and Labs have no
-> commands yet and **refuse to start rather than appear online doing nothing** —
+> **Status: Phase 4.** Bloom Guardian is functionally complete for verification,
+> the role lifecycle, moderation, reports and cases. Bloom Companion is online
+> with one scheduled surface — a daily check-in prompt — and the shared `jobs`
+> admin group; it does not yet record or reward a check-in. Bloom Labs still has
+> no commands and **refuses to start rather than appear online doing nothing** —
 > a deliberate choice, explained in
 > [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md).
 >
@@ -163,6 +165,7 @@ pnpm dev:guardian | dev:companion | dev:labs
 | [Phase 1 report](docs/PHASE-1-REPORT.md)                                    | Verification and the role lifecycle              |
 | [Phase 2 report](docs/PHASE-2-REPORT.md)                                    | Moderation, reports and cases                    |
 | [Phase 3 report](docs/PHASE-3-REPORT.md)                                    | The locked job scheduler, wired end to end       |
+| [Phase 4 report](docs/PHASE-4-REPORT.md)                                    | Companion online: check-in prompt, job switches  |
 
 ---
 

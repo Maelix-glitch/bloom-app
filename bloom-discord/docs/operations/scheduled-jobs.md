@@ -14,11 +14,10 @@ three things, and a job that bypasses it gets all three problems back.
 ## How it fits together
 
 ```
-ScheduledJob  ──registered into──▶  Scheduler  ──asks──▶  JobLock
-  (a feature)                     (one/process)              │
-                                                     DatabaseJobLock
-                                                             │
-                                                    job_runs (Postgres)
+ScheduledJob  ──registered into──▶  Scheduler  ──asks──▶  JobGate ──▶ bot_settings
+  (a feature)                     (one/process)     │      (may this guild?)
+                                                    └──▶  JobLock ──▶ job_runs
+                                                          (is anyone else on it?)
 ```
 
 - **`Scheduler`** (`@bloom/events`) owns the cron expressions and the lifecycle.
@@ -28,6 +27,9 @@ ScheduledJob  ──registered into──▶  Scheduler  ──asks──▶  Jo
   that interface. It lives in `@bloom/discord` because that is the first package
   that depends on both halves; putting it in `@bloom/events` would drag a
   Postgres driver into a package that should not need one.
+- **`DatabaseJobGate`** (`@bloom/discord`) answers "has an administrator of this
+  particular server switched this job off?" from `bot_settings`, behind the same
+  kind of interface for the same reason.
 - **`job_runs`** is where the mutual exclusion actually happens.
 
 The bootstrap constructs the scheduler, puts it on `BotBootstrapContext`, and
@@ -88,12 +90,51 @@ cooldown, and an audit trail. Concretely:
 
 | Requirement          | Where it lives                                                                |
 | -------------------- | ----------------------------------------------------------------------------- |
-| Enable/disable       | `ScheduledJob.enabled`, plus the global `FEATURE_SCHEDULED_MESSAGES`          |
+| Enable/disable       | Four layers, below — from a deploy-wide flag down to one server's switch      |
 | Channel config       | A `CHANNEL_*` id; a job whose channel is unset registers as **disabled**      |
 | Timezone             | `BLOOM_TIMEZONE`, an IANA name, applied to every cron expression              |
 | Duplicate prevention | The lock for concurrent runs; a `message_cooldowns` claim for sequential ones |
 | Cooldown             | Claimed **before** posting, so two runners cannot both get past it            |
 | Audit log            | An `audit_events` row with `actor_id = NULL` and `source = <job key>`         |
+
+### The four off switches
+
+They are deliberately separate, because they answer to different people:
+
+| Layer                        | Who owns it           | Scope             | Changing it needs   |
+| ---------------------------- | --------------------- | ----------------- | ------------------- |
+| `FEATURE_SCHEDULED_MESSAGES` | whoever deploys       | the whole process | a restart           |
+| `ScheduledJob.enabled`       | configuration         | the whole process | a restart           |
+| The per-guild switch         | a guild administrator | one server        | nothing — next tick |
+| The job's own logic          | the job               | one run           | nothing             |
+
+The first two are read once at registration; the third is read on **every tick**.
+That difference is the point. An administrator who switches a job off at 08:58
+expects nothing at 09:00, and a design that needed a redeploy to honour that
+would be, from their side, simply broken. The cost is one small query per job per
+fire, which is the cheapest thing in the whole path.
+
+The per-guild switch lives in `bot_settings` under `job.<job key>`, with a value
+of `{"enabled": true|false}`. No migration was needed: the table already carried
+`(guild_id, bot_name, key, value, updated_by)`, which is exactly a per-guild,
+per-bot setting with an author. An **absent row means no decision has been made**
+— not "off" — so a new job behaves the same in a server that has never touched
+its settings as in one that has.
+
+`bot_name` is part of the primary key, so Guardian's copy of a setting and
+Companion's are different rows. Two bots that happened to share a job key would
+otherwise switch each other off, and that failure would be very hard to see.
+
+**The gate is consulted before the lock.** A job that is switched off for a
+server therefore writes no `job_runs` row at all, which keeps that table an
+honest record of work rather than a log of attempts. The run is reported as
+`skipped` and logged as `scheduler.job_disabled`.
+
+**A gate that throws fails closed.** If the database is unreachable, the job does
+not run, and the scheduler logs `scheduler.gate_unavailable` at warn. The
+alternative — running on the assumption that it was probably allowed — means an
+outage can re-enable a job somebody deliberately switched off, and posting into a
+community that asked you not to is worse than missing a day.
 
 Two of those are easy to get subtly wrong.
 
@@ -105,8 +146,10 @@ must be taken before the message is sent, not after — claiming afterwards leav
 a window in which both runs have already posted.
 
 **A disabled job should still register.** If a job disappears from
-`/guardian jobs list` when it is switched off, an operator cannot tell "disabled
-on purpose" from "not deployed". Register it and report it as disabled.
+`jobs list` when it is switched off, an operator cannot tell "disabled on
+purpose" from "not deployed". Register it and report it as disabled — and say
+_which_ of the four switches is responsible, because "disabled" alone sends
+people to the wrong place.
 
 ## Silence is a feature
 
@@ -118,15 +161,34 @@ message has nothing to say, it should not say it.
 
 ## Operating it
 
+The same five subcommands exist under every bot that has jobs — they are one
+implementation in `@bloom/discord`, mounted by each namespace, so `/companion
+jobs list` and `/guardian jobs list` cannot drift apart. Each only ever shows its
+own bot's jobs.
+
 ```
-/guardian jobs list           # what exists, when it next runs, in which timezone
-/guardian jobs history <job>  # the last durable run, with the failure detail
-/guardian jobs run <job>      # trigger now (Administrator)
+/guardian jobs list             # what exists, when it next runs, why it does not
+/guardian jobs history <job>    # the last durable runs, with the failure detail
+/guardian jobs run <job>        # trigger now (Administrator)
+/guardian jobs disable <job>    # switch off for this server (Administrator)
+/guardian jobs enable <job>     # switch back on for this server (Administrator)
 ```
 
 `jobs history` reads `job_runs`, not process memory, so it still answers
 correctly after a deployment. `jobs run` bypasses the schedule but neither the
-lock nor the job's cooldown, so it cannot be used to force a duplicate post.
+lock, the gate, nor the job's cooldown, so it cannot be used to force a duplicate
+post — if the job is switched off for the server, a manual run reports `skipped`
+rather than quietly overriding the administrator who switched it off.
+
+`enable` and `disable` are Administrator-only even where the namespace admits
+moderators, and both write an audit row at **warn** severity. Turning off a
+community's daily prompt is a quiet change with a visible effect; it should be
+attributable months later.
+
+`enable` will tell you when it has not achieved what you asked. If
+`FEATURE_SCHEDULED_MESSAGES` is off, or the job is disabled by configuration, the
+per-guild switch is now on and the job still will not run — and the reply says
+so, rather than reporting a success it cannot deliver.
 
 `FEATURE_SCHEDULED_MESSAGES` defaults to **false**. Development environments
 share a production database more often than anyone admits, and the default that
@@ -134,9 +196,9 @@ prevents a developer's laptop from posting into the live server is the right one
 
 ### When a job has not run
 
-1. `/guardian jobs list` — is it `disabled`? Then it is either
-   `FEATURE_SCHEDULED_MESSAGES` or an unconfigured channel, and the reply
-   distinguishes the two.
+1. `jobs list` — is it running? The reply distinguishes all four reasons it
+   might not be: the global feature flag, configuration (usually an unset
+   channel), this server's own switch, or the fact that it is running right now.
 2. `/guardian jobs history <job>` — a `timed_out` run means the process died
    mid-job; a `failed` run carries the error code and the operator hint.
 3. Still nothing? Check the container actually started, and check
@@ -150,7 +212,8 @@ prevents a developer's laptop from posting into the live server is the right one
    — changing it on a live job means the old and new names no longer exclude
    each other, and both can run.
 3. Set `leaseSeconds` above the realistic worst case, not the happy path.
-4. Register it in the app's `createFeatures`.
+4. Register it in the app's `createFeatures`. It is gateable and listable the
+   moment it is registered — there is nothing per-job to write for that.
 5. Test it: that it posts, that it stays quiet when it should, that a second run
-   inside the cooldown is suppressed, and that it writes an audit row with no
-   actor.
+   inside the cooldown is suppressed, that it writes an audit row with no actor,
+   and that switching it off for a guild stops it.

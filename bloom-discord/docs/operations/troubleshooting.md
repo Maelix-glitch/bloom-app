@@ -150,14 +150,25 @@ they answer most of this section without touching a log aggregator. Full detail:
 
 ### A job never runs
 
-- `FEATURE_SCHEDULED_MESSAGES` defaults to **false**. `/guardian jobs list` says
-  so explicitly when it is off.
-- The individual job may be disabled — most often because the channel it posts
-  to is unconfigured. The listing distinguishes "disabled globally" from
-  "disabled for this job" for exactly this reason.
+- `FEATURE_SCHEDULED_MESSAGES` defaults to **false**. `jobs list` says so
+  explicitly when it is off.
+- The individual job may be disabled by configuration — most often because the
+  channel it posts to is unconfigured.
+- Somebody may have run `jobs disable` for this server. The listing names which
+  of the four layers is responsible, so read the reason rather than the word
+  "disabled"; `jobs enable <job>` reverses only the last of them, and says so
+  when one of the others still blocks the job.
 - Check `BLOOM_TIMEZONE`. A job scheduled for `0 9 * * *` in the wrong zone has
   run, just not when you were watching.
 - Check `scheduler.started` in the logs for the enabled count.
+
+### `scheduler.gate_unavailable` in the logs, and nothing ran
+
+The per-server switch could not be read, so the job **failed closed** and did not
+run. This is a database problem, not a scheduler problem — look for
+`DATABASE_UNAVAILABLE` around the same correlation id. Running on the assumption
+that the job was probably allowed would let an outage re-enable something an
+administrator switched off, which is why it skips instead.
 
 ### A job logs `scheduler.lock_held` and skips
 
@@ -179,10 +190,19 @@ heartbeat could not keep ahead of it. Raise that job's `leaseSeconds` above its
 realistic worst case; the heartbeat renews at half the lease, so a lease of 120s
 tolerates one missed renewal but not a 10-minute run.
 
+### `jobs disable` succeeded but the job ran anyway
+
+It should not, and the switch is re-read on every tick rather than cached, so a
+stale process is not the explanation. Check that you disabled it on the right
+bot: `bot_settings` is keyed by `(guild_id, bot_name, key)`, and disabling
+`companion.checkin.daily_prompt` through `/guardian jobs disable` would write a
+Guardian row that Companion never reads. Guardian's listing only shows Guardian's
+jobs, so this is hard to do by accident, but a direct database write can.
+
 ### The same message was posted twice
 
 The lock prevents two _concurrent_ runs, not two sequential ones. A redeploy near
-the scheduled minute, a reclaimed lease, or a manual `/guardian jobs run` can all
+the scheduled minute, a reclaimed lease, or a manual `jobs run` can all
 produce a second run, and the job's own cooldown claim is what makes it post
 once. Check that the job claims its cooldown **before** sending rather than
 after.
