@@ -2,9 +2,11 @@ import type { PlatformConfig } from '@bloom/config';
 import type { Repositories } from '@bloom/database';
 import type {
   ChannelModerationService,
+  JobAdminDeps,
   GuildQueryService,
   MessagingService,
   ModerationService,
+  JobSettingsService,
   RoleService,
 } from '@bloom/discord';
 import type { Scheduler } from '@bloom/events';
@@ -26,7 +28,7 @@ import type { CaseService } from './features/moderation/case-service.js';
  * It stays small on purpose. When it stops being small, that is the signal to
  * split Guardian's features rather than to grow this type.
  */
-export interface GuardianDeps {
+export interface GuardianDeps extends JobAdminDeps {
   readonly config: PlatformConfig;
   readonly logger: Logger;
   readonly repositories: Repositories;
@@ -42,6 +44,8 @@ export interface GuardianDeps {
    * actually registered rather than a hard-coded list that drifts.
    */
   readonly scheduler: Scheduler;
+  /** Reads and writes the per-guild off switch for each job. */
+  readonly jobSettings: JobSettingsService;
 
   readonly onboarding: OnboardingService;
   readonly moderation: ModerationActionService;

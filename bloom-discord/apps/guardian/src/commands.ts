@@ -14,7 +14,7 @@ import {
   moderationSubcommands,
   reportCommand,
 } from './features/moderation/commands.js';
-import { jobSubcommands } from './features/jobs/commands.js';
+import { JOBS_GROUP_DESCRIPTION, jobSubcommands } from '@bloom/discord';
 import type { GuardianDeps } from './deps.js';
 
 /**
@@ -48,9 +48,15 @@ export const guardianNamespaceCommand: BloomCommand<GuardianDeps> = namespaceCom
     case: 'Open, work and close moderation cases.',
     member: 'A member’s moderation record.',
     channel: 'Slowmode and channel locking.',
-    jobs: 'Inspect and trigger scheduled work.',
+    jobs: JOBS_GROUP_DESCRIPTION,
   },
-  contributions: [...onboardingSubcommands, ...moderationSubcommands, ...jobSubcommands],
+  contributions: [
+    ...onboardingSubcommands,
+    ...moderationSubcommands,
+    // Shared with Companion and Labs: one implementation of the job surface,
+    // parameterised by deps, rather than a copy per bot.
+    ...jobSubcommands<GuardianDeps>(),
+  ],
 });
 
 /**

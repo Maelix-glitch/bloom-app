@@ -1,6 +1,7 @@
 import type { PlatformConfig } from '@bloom/config';
 import { CommandDispatcher, CommandRegistry } from '@bloom/commands';
 import { Scheduler } from '@bloom/events';
+import { DatabaseJobGate, JobSettingsService } from '@bloom/discord';
 import { DatabaseRateLimiter, TokenBucketRateLimiter } from '@bloom/security';
 import {
   createTestLogger,
@@ -52,6 +53,7 @@ export interface GuardianHarness {
   /** The scheduler the harness built, with Guardian's real jobs registered. */
   readonly scheduler: Scheduler;
   readonly lock: FakeJobLock;
+  readonly jobSettings: JobSettingsService;
 }
 
 export interface GuardianHarnessOptions {
@@ -102,19 +104,25 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
   const { logger, sink } = createTestLogger();
 
   const lock = new FakeJobLock();
+  const jobSettings = new JobSettingsService(repositories.settings, 'guardian');
   const scheduler = new Scheduler({
     bot: 'guardian',
     logger,
     timezone: config.runtime.timezone,
     lock,
+    // The real gate over the fake settings repository, so a test that disables
+    // a job exercises the same path production does.
+    gate: new DatabaseJobGate(jobSettings),
     ...(config.features.scheduledMessages ? {} : { globallyDisabled: true }),
   });
 
   const deps: GuardianDeps = {
+    bot: 'guardian',
     config,
     logger,
     repositories,
     scheduler,
+    jobSettings,
     guilds: guild,
     roles,
     messaging,
@@ -191,5 +199,6 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
     logs: sink,
     scheduler,
     lock,
+    jobSettings,
   };
 }

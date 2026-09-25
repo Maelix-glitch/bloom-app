@@ -26,6 +26,7 @@ import { hasCapability } from '@bloom/shared-types';
 import { Scheduler } from '@bloom/events';
 import { createBotClient } from './client.js';
 import { DatabaseJobLock } from './scheduler-lock.js';
+import { DatabaseJobGate, JobSettingsService } from './jobs/settings.js';
 import { DiscordGuildQueryService } from './services/guild-query.js';
 import { DiscordMessagingService } from './services/messaging.js';
 import { DiscordRoleService } from './services/role-service.js';
@@ -144,6 +145,14 @@ export interface BotBootstrapContext {
    * until after the gateway is up.
    */
   readonly scheduler: Scheduler;
+  /**
+   * The per-guild off switch behind the scheduler's gate.
+   *
+   * Exposed so a bot's `jobs` commands can read and write the same setting the
+   * gate consults — one source of truth, rather than a command that reports a
+   * switch position the scheduler does not act on.
+   */
+  readonly jobSettings: JobSettingsService;
 }
 
 export interface RunningBotProcess {
@@ -231,11 +240,16 @@ export async function startBotProcess<TDeps>(
      * and report it as disabled — an empty list would look like a deployment
      * problem rather than a deliberate switch.
      */
+    const jobSettings = new JobSettingsService(repositories.settings, options.bot);
+
     const scheduler = new Scheduler({
       bot: options.bot,
       logger,
       timezone: platform.runtime.timezone,
       lock: new DatabaseJobLock(repositories.jobs),
+      // Consulted on every tick, so an administrator's `jobs disable` takes
+      // effect at the next run rather than at the next deployment.
+      gate: new DatabaseJobGate(jobSettings),
       ...(platform.features.scheduledMessages ? {} : { globallyDisabled: true }),
     });
 
@@ -248,6 +262,7 @@ export async function startBotProcess<TDeps>(
       repositories,
       discord: { guilds, messaging, roles, moderation, channelModeration },
       scheduler,
+      jobSettings,
     };
 
     const deps = options.createDeps(context);

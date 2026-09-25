@@ -27,6 +27,7 @@ import { loadEnvFile, loadPlatformConfig, resolveBotConfig } from '@bloom/config
 import { CommandRegistrar, type RegistrationScope } from '@bloom/discord';
 import type { CommandSpec } from '@bloom/commands';
 import { guardianCommandSpecs } from '../../apps/guardian/src/commands.js';
+import { companionCommandSpecs } from '../../apps/companion/src/commands.js';
 
 /**
  * Command sets, per bot.
@@ -36,13 +37,13 @@ import { guardianCommandSpecs } from '../../apps/guardian/src/commands.js';
  * A hand-maintained copy in this script is how a command gets registered that
  * nothing handles, which members experience as "this interaction failed".
  *
- * Companion and Labs are still empty. The registrar refuses an empty set unless
- * `--allow-empty` is passed, so running this for them reports the refusal
- * rather than quietly deleting every command the application has.
+ * Labs is still empty. The registrar refuses an empty set unless `--allow-empty`
+ * is passed, so running this for it reports the refusal rather than quietly
+ * deleting every command the application has.
  */
 const COMMAND_SETS: Readonly<Record<BotName, readonly CommandSpec[]>> = {
   guardian: guardianCommandSpecs,
-  companion: [],
+  companion: companionCommandSpecs,
   labs: [],
 };
 

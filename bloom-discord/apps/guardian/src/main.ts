@@ -101,10 +101,12 @@ await runBotMain(() =>
       });
 
       return {
+        bot: 'guardian',
         config: context.platform,
         logger: context.logger,
         repositories: context.repositories,
         scheduler: context.scheduler,
+        jobSettings: context.jobSettings,
         guilds: context.discord.guilds,
         roles,
         messaging: context.discord.messaging,

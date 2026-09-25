@@ -25,4 +25,6 @@ export * from './registrar.js';
 export * from './runtime.js';
 export * from './telemetry.js';
 export * from './health.js';
+export * from './scheduler-lock.js';
+export * from './jobs/index.js';
 export * from './bootstrap.js';

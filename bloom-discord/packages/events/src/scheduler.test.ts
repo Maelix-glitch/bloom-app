@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FakeClock, FakeJobLock, createTestLogger } from '@bloom/testing';
-import { Scheduler, type ScheduledJob } from './scheduler.js';
+import { Scheduler, type JobGate, type ScheduledJob } from './scheduler.js';
 
 /** Placeholder until the promise executor hands over the real resolver. */
 const noop = (): void => undefined;
@@ -281,6 +281,88 @@ describe('Scheduler', () => {
       expect(sink.serialised()).toContain('scheduler.lease_lost');
       finish();
       await run;
+    });
+  });
+
+  /*
+   * The per-guild gate. Distinct from `enabled`, which is boot-time
+   * configuration: this is the switch an administrator flips at runtime, so it
+   * has to be consulted on every tick rather than cached.
+   */
+  describe('the per-guild gate', () => {
+    function gated(
+      isEnabled: JobGate['isEnabled'],
+    ): ReturnType<typeof make> & { ran: () => number } {
+      let ran = 0;
+      const logging = createTestLogger();
+      const lock = new FakeJobLock();
+      const scheduler = new Scheduler({
+        bot: 'companion',
+        logger: logging.logger,
+        timezone: 'Europe/London',
+        lock,
+        gate: { isEnabled },
+      });
+      schedulers.push(scheduler);
+      scheduler.register(
+        job({
+          run: () => {
+            ran += 1;
+            return Promise.resolve();
+          },
+        }),
+      );
+      return { scheduler, lock, sink: logging.sink, ran: () => ran };
+    }
+
+    it('runs the job when the gate allows it', async () => {
+      const g = gated(() => Promise.resolve({ enabled: true }));
+      await g.scheduler.runNow('test-job');
+      expect(g.ran()).toBe(1);
+    });
+
+    it('skips the job when the gate refuses', async () => {
+      const g = gated(() => Promise.resolve({ enabled: false, reason: 'switched off' }));
+      await g.scheduler.runNow('test-job');
+
+      expect(g.ran()).toBe(0);
+      expect(g.scheduler.status()[0]?.lastOutcome).toBe('skipped');
+      expect(g.sink.serialised()).toContain('scheduler.job_disabled');
+    });
+
+    it('takes no lease for a job the gate refuses', async () => {
+      const g = gated(() => Promise.resolve({ enabled: false }));
+      await g.scheduler.runNow('test-job');
+
+      // A job_runs row for work that never happened would make the table lie
+      // about how often the job ran.
+      expect(g.lock.runs).toHaveLength(0);
+    });
+
+    /*
+     * Fails closed. A gate that throws means the database is unreachable, and
+     * an outage must not silently re-enable every job an administrator has
+     * switched off.
+     */
+    it('skips rather than guesses when the gate cannot answer', async () => {
+      const g = gated(() => Promise.reject(new Error('database is down')));
+      await g.scheduler.runNow('test-job');
+
+      expect(g.ran()).toBe(0);
+      expect(g.sink.serialised()).toContain('scheduler.gate_unavailable');
+    });
+
+    it('asks the gate again on every run, so a change takes effect immediately', async () => {
+      let enabled = true;
+      const g = gated(() => Promise.resolve({ enabled }));
+
+      await g.scheduler.runNow('test-job');
+      enabled = false;
+      await g.scheduler.runNow('test-job');
+      enabled = true;
+      await g.scheduler.runNow('test-job');
+
+      expect(g.ran()).toBe(2);
     });
   });
 

@@ -607,33 +607,87 @@ export class FakeJobRunRepository implements JobRunRepository {
   }
 }
 
-class FakeSettingsRepository implements SettingsRepository {
+/**
+ * In-memory runtime overrides.
+ *
+ * A real store rather than a set of no-ops. The previous version accepted every
+ * write and returned `null` for every read, which meant any test of "disable
+ * this, then confirm it is disabled" passed while asserting nothing — the same
+ * vacuous-fake trap this codebase has hit before. Writes are now observable,
+ * which is the entire point of a settings repository.
+ */
+export class FakeSettingsRepository implements SettingsRepository {
+  public readonly channels = new Map<ChannelKey, ChannelId>();
+  public readonly roles = new Map<RoleKey, RoleId>();
+  /** Keyed `guildId:bot:key`, mirroring the real primary key. */
+  public readonly botSettings = new Map<string, JsonValue>();
+  /** Every write, so a test can assert who changed a setting. */
+  public readonly writes: { key: string; value: JsonValue; updatedBy: UserId }[] = [];
+
   public getChannelOverrides(): Promise<ReadonlyMap<ChannelKey, ChannelId>> {
-    return Promise.resolve(new Map());
+    return Promise.resolve(new Map(this.channels));
   }
-  public setChannelOverride(): Promise<void> {
+
+  public setChannelOverride(
+    _guildId: GuildId,
+    key: ChannelKey,
+    channelId: ChannelId,
+  ): Promise<void> {
+    this.channels.set(key, channelId);
     return Promise.resolve();
   }
-  public clearChannelOverride(): Promise<void> {
+
+  public clearChannelOverride(_guildId: GuildId, key: ChannelKey): Promise<void> {
+    this.channels.delete(key);
     return Promise.resolve();
   }
+
   public getRoleOverrides(): Promise<ReadonlyMap<RoleKey, RoleId>> {
-    return Promise.resolve(new Map());
+    return Promise.resolve(new Map(this.roles));
   }
-  public setRoleOverride(): Promise<void> {
+
+  public setRoleOverride(_guildId: GuildId, key: RoleKey, roleId: RoleId): Promise<void> {
+    this.roles.set(key, roleId);
     return Promise.resolve();
   }
-  public clearRoleOverride(): Promise<void> {
+
+  public clearRoleOverride(_guildId: GuildId, key: RoleKey): Promise<void> {
+    this.roles.delete(key);
     return Promise.resolve();
   }
-  public getBotSetting(): Promise<JsonValue | null> {
-    return Promise.resolve(null);
+
+  public getBotSetting(
+    guildId: GuildId,
+    bot: BotName,
+    key: string,
+  ): Promise<JsonValue | null> {
+    return Promise.resolve(this.botSettings.get(`${guildId}:${bot}:${key}`) ?? null);
   }
-  public setBotSetting(): Promise<void> {
+
+  public setBotSetting(
+    guildId: GuildId,
+    bot: BotName,
+    key: string,
+    value: JsonValue,
+    updatedBy: UserId,
+  ): Promise<void> {
+    this.botSettings.set(`${guildId}:${bot}:${key}`, value);
+    this.writes.push({ key, value, updatedBy });
     return Promise.resolve();
   }
-  public getAllBotSettings(): Promise<ReadonlyMap<string, JsonValue>> {
-    return Promise.resolve(new Map());
+
+  public getAllBotSettings(
+    guildId: GuildId,
+    bot: BotName,
+  ): Promise<ReadonlyMap<string, JsonValue>> {
+    const prefix = `${guildId}:${bot}:`;
+    return Promise.resolve(
+      new Map(
+        [...this.botSettings.entries()]
+          .filter(([storedKey]) => storedKey.startsWith(prefix))
+          .map(([storedKey, value]) => [storedKey.slice(prefix.length), value]),
+      ),
+    );
   }
 }
 
@@ -1042,6 +1096,7 @@ export interface FakeRepositories extends Repositories {
   readonly cooldowns: FakeCooldownRepository;
   readonly telemetry: FakeTelemetryRepository;
   readonly jobs: FakeJobRunRepository;
+  readonly settings: FakeSettingsRepository;
 }
 
 /**

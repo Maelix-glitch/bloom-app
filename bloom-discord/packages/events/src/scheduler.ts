@@ -87,11 +87,40 @@ export interface JobRunContext {
   readonly scheduledFor: Date;
 }
 
+/**
+ * The per-guild answer to "should this job run right now".
+ *
+ * Separate from `ScheduledJob.enabled`, which is static configuration read at
+ * boot. This is the switch an administrator flips at runtime, and it is
+ * consulted on every tick rather than cached — a disable that takes effect at
+ * the next deployment is not an off switch, it is a code change.
+ *
+ * An interface, like `JobLock`, so the scheduler stays free of a database
+ * driver and remains unit-testable without one.
+ */
+export interface JobGate {
+  isEnabled(job: {
+    readonly key: string;
+    readonly guildId: GuildId | null;
+  }): Promise<JobGateDecision>;
+}
+
+export interface JobGateDecision {
+  readonly enabled: boolean;
+  /** Shown to operators when a job is off. Never shown to members. */
+  readonly reason?: string;
+}
+
 export interface SchedulerOptions {
   readonly bot: BotName;
   readonly logger: Logger;
   readonly timezone: string;
   readonly lock: JobLock;
+  /**
+   * Runtime, per-guild enablement. Optional: a scheduler without one runs
+   * whatever static configuration allows.
+   */
+  readonly gate?: JobGate;
   /**
    * Turns every job off without removing it.
    *
@@ -235,6 +264,32 @@ export class Scheduler {
   }
 
   /**
+   * Ask the gate, and fail closed if it cannot answer.
+   *
+   * A gate that throws means the database is unreachable, and the honest
+   * response is to not run. Failing open would mean an outage silently
+   * re-enables every job an administrator has switched off — the one moment
+   * where guessing is least acceptable.
+   */
+  private async gateDecision(
+    gate: JobGate,
+    key: string,
+    guildId: GuildId | null,
+    logger: Logger,
+  ): Promise<JobGateDecision> {
+    try {
+      return await gate.isEnabled({ key, guildId });
+    } catch (error) {
+      logger.warn(
+        'scheduler.gate_unavailable',
+        `Could not read the per-guild switch for "${key}"; skipping this run rather than guessing.`,
+        { error: error instanceof Error ? error : new Error(String(error)) },
+      );
+      return { enabled: false, reason: 'The enablement setting could not be read.' };
+    }
+  }
+
+  /**
    * Keep a running job's lease alive.
    *
    * `unref()` so a pending renewal cannot hold the process open during
@@ -298,6 +353,27 @@ export class Scheduler {
       let lease: { readonly runId: string } | null = null;
 
       try {
+        /*
+         * The per-guild switch, checked before the lock.
+         *
+         * Before, because taking a lease for a job that is switched off writes
+         * a `job_runs` row for work that never happens — which makes the table
+         * lie about how often the job ran.
+         */
+        const gate = this.options.gate;
+        if (gate) {
+          const decision = await this.gateDecision(gate, key, state.job.guildId, logger);
+          if (!decision.enabled) {
+            state.lastOutcome = 'skipped';
+            logger.info(
+              'scheduler.job_disabled',
+              `Job "${key}" is switched off for this guild; skipping.`,
+              { context: { job: key, reason: decision.reason ?? null } },
+            );
+            return;
+          }
+        }
+
         lease = await this.options.lock.acquire({
           jobKey: key,
           guildId: state.job.guildId,
