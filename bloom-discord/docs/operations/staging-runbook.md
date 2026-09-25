@@ -120,7 +120,31 @@ pnpm diagnostics     # every id, checked, before anything connects
 
 ---
 
-## 4. Connect Guardian — **step 6 of the validation**
+## 4. One command for steps 6 to 9
+
+Once the tokens and ids are in `.env`, most of what follows is automated:
+
+```bash
+pnpm staging:gateway
+```
+
+It connects Guardian, checks the readiness lifecycle, audits the permissions
+Discord _actually_ granted against the ones required, audits role hierarchy
+placement live, registers the commands and proves re-registering changes
+nothing, then waits while you run one command in Discord and verifies the rows
+it wrote.
+
+It refuses to run when `BLOOM_ENVIRONMENT=production`, and it stops at the first
+step that fails rather than reporting on things it could not reach.
+
+Useful flags: `--no-register`, `--watch-only`, `--timeout 300`.
+
+The rest of this section is the same sequence done by hand, which is worth
+reading once so the output means something.
+
+---
+
+## 5. Connect Guardian — **step 6 of the validation**
 
 ```bash
 HEALTH_PORT=8080 node apps/guardian/dist/main.js
@@ -145,7 +169,7 @@ reports.
 
 ---
 
-## 5. Readiness lifecycle — **step 7**
+## 6. Readiness lifecycle — **step 7**
 
 With the bot running, in another shell:
 
@@ -166,7 +190,7 @@ released.
 
 ---
 
-## 6. Register commands — **step 8**
+## 7. Register commands — **step 8**
 
 ```bash
 pnpm commands:register -- --bot guardian
@@ -182,7 +206,7 @@ Confirm in Discord that `/verify`, `/warn`, `/timeout`, `/kick`, `/ban`,
 
 ---
 
-## 7. Execute a real command — **step 9**
+## 8. Execute a real command — **step 9**
 
 The safest first command mutates nothing a member can see:
 
@@ -199,7 +223,7 @@ Watch the log. One interaction produces a run of lines sharing a
 
 ---
 
-## 8. Verify the database mutation — **step 10**
+## 9. Verify the database mutation — **step 10**
 
 ```bash
 psql "$DATABASE_URL" -c "
@@ -226,7 +250,7 @@ transition — the idempotency guard should make it a no-op with a calm message.
 
 ---
 
-## 9. All three at once — **step 12, the live half**
+## 10. All three at once — **step 12, the live half**
 
 ```bash
 HEALTH_PORT=8080 node apps/guardian/dist/main.js  &

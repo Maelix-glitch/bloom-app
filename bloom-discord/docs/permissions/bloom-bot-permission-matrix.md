@@ -23,6 +23,7 @@ position or a channel overwrite.
 | Use Application Commands           | `1 << 31` |    ✅    |    ✅     |  ✅  |
 | Add Reactions                      | `1 << 6`  |    ✅    |    ✅     |  ✅  |
 | Manage Roles                       | `1 << 28` |    ✅    |    ❌     |  ❌  |
+| Manage Guild                       | `1 << 5`  |  ✅ \*   |    ❌     |  ❌  |
 | Kick Members                       | `1 << 1`  |    ✅    |    ❌     |  ❌  |
 | Ban Members                        | `1 << 2`  |    ✅    |    ❌     |  ❌  |
 | Timeout Members (Moderate Members) | `1 << 40` |    ✅    |    ❌     |  ❌  |
@@ -36,7 +37,6 @@ position or a channel overwrite.
 | Manage Events                      | `1 << 33` |    ❌    |    ✅     |  ❌  |
 | Mention Everyone                   | `1 << 17` |    ❌    |    ❌     |  ❌  |
 | Manage Webhooks                    | `1 << 29` |    ❌    |    ❌     |  ❌  |
-| Manage Guild                       | `1 << 5`  |    ❌    |    ❌     |  ❌  |
 | Administrator                      | `1 << 3`  |    ❌    |    ❌     |  ❌  |
 
 Discord serialises permissions as decimal **strings** in API v8 and later.
@@ -66,8 +66,11 @@ Notably **not** in the baseline:
 - **Manage Webhooks.** No feature uses webhooks. It would let a compromised bot
   create a persistent, un-attributed posting channel that survives token
   rotation.
-- **Manage Guild.** Would allow editing server settings, invites and
-  integrations. No feature needs it.
+- **Manage Guild.** Not in the baseline, and refused for Companion and Labs
+  outright. Guardian is the single exception, approved under
+  [D8](../architecture/decisions.md) solely because Discord delivers AutoMod
+  events to nothing else — see the section below, which also lists everything
+  the bit grants that Bloom does not use.
 
 ---
 
@@ -110,9 +113,45 @@ nothing else in the system would flag.
 | Permission                 | Why not                                                                                                                                                                                                                                                               |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Administrator**          | See below. Never, on any bot.                                                                                                                                                                                                                                         |
-| **Manage Guild**           | Nothing Bloom does changes server-level settings. It would also grant invite management and integration control.                                                                                                                                                      |
+| **Manage Guild**           | Refused for Companion and Labs. Held by Guardian only, as a documented exception, because AutoMod events are delivered to no application without it. Bloom changes no server-level setting and manages no invite or integration.                                      |
 | **Mention Everyone**       | No Bloom message ever needs `@everyone`. Withholding it means a compromised token cannot mass-ping, independent of any application-side check.                                                                                                                        |
 | **Message Content** intent | Not a permission but the same reasoning: Bloom parses no message text. Anti-spam is not implemented; when it is, it reacts to Discord's native Auto Moderation events, which carry the rule and the matched keyword but never the member's text. See design note 001. |
+
+### Manage Guild — an intentional least-privilege exception
+
+**\* Approved under [D8](../architecture/decisions.md), for one reason, with a
+written boundary.** This is the only permission in this document that grants
+Bloom capabilities it does not use, so it gets its own section rather than a row.
+
+**Why it is required.** Auto-moderation reacts to Discord's native AutoMod
+instead of reading messages. Discord delivers
+`AUTO_MODERATION_ACTION_EXECUTION` **only** to applications holding Manage
+Guild. There is no narrower scope — Discord does not offer a per-event
+permission — so the choice is this bit or no reaction to AutoMod at all.
+
+**What it additionally grants.** All of it unused, all of it real:
+
+| Also permitted by Manage Guild                        | Bloom's use               |
+| ----------------------------------------------------- | ------------------------- |
+| Edit server settings — name, icon, verification level | none                      |
+| View, create and delete **invites**                   | none                      |
+| Manage **integrations** and other apps' webhooks      | none                      |
+| Vanity URL, banner and splash                         | none                      |
+| Read and write **AutoMod rules**                      | **forbidden** — see below |
+
+**The boundary.** Guardian consumes AutoMod events and must **not** manage
+AutoMod rules through the API. Rules are authored by hand in Server Settings →
+AutoMod, where they keep working whether or not any bot is connected. A test
+asserts that no code path calls a rule-management endpoint; if that test ever
+fails, this exception has been exceeded.
+
+**Why not the alternative.** Guardian could instead read the channel where
+AutoMod posts its alerts and parse them. That needs the **Message Content**
+privileged intent — every message in that channel, as text, in Bloom's process.
+Manage Guild is the smaller exposure, and it is the one chosen.
+
+**Isolation.** Companion and Labs must never hold this permission. Their
+integers are unchanged.
 
 ### Why Guardian does not get Administrator
 
@@ -192,7 +231,12 @@ Generated from the table above. Replace `YOUR_CLIENT_ID` with each application's
 own client id — the three bots have three different ids and three different
 permission integers.
 
-**Guardian** — `1497064631510` (baseline + Manage Roles, Kick, Ban, Timeout, Manage Messages, Manage Channels, View Audit Log, threads)
+**Guardian** — `1497064631542` (baseline + Manage Roles, Kick, Ban, Timeout, Manage Messages, Manage Channels, View Audit Log, threads, **Manage Guild**)
+
+> Before auto-moderation ships, `1497064631510` — the same set without Manage
+> Guild — is correct and is what the staging runbook uses. Manage Guild buys
+> exactly one thing: delivery of AutoMod events. Until Guardian consumes them,
+> granting it early is permission without purpose.
 
 Unchanged by Phase 2. Every permission moderation needs was already in the
 Phase 0 baseline, so existing installs do not need re-inviting — which is the
@@ -201,6 +245,7 @@ feature.
 
 ```
 https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=1497064631510&scope=bot+applications.commands
+# with auto-moderation: permissions=1497064631542
 ```
 
 **Companion** — `319975148608` (baseline + Manage Events)

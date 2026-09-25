@@ -31,7 +31,11 @@
     "commands:register": "tsx scripts/register-commands/index.ts",
     "dev:guardian": "tsx watch apps/guardian/src/main.ts",
     "dev:companion": "tsx watch apps/companion/src/main.ts",
-    "dev:labs": "tsx watch apps/labs/src/main.ts"
+    "dev:labs": "tsx watch apps/labs/src/main.ts",
+    "staging:gateway": "tsx scripts/staging/validate-gateway.ts",
+    "staging:setup": "./scripts/staging/setup-staging.sh",
+    "staging:validate": "./scripts/staging/validate-staging.sh",
+    "staging:rehearse-image": "./scripts/staging/rehearse-image-build.sh"
   },
   "devDependencies": {
     "@bloom/shared-types": "workspace:*",

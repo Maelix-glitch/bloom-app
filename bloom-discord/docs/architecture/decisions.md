@@ -194,3 +194,56 @@ code with the repository's credentials.
 **Decision: ship it where it can be pushed, and document the one command that
 installs it**, rather than quietly omitting CI or pretending the branch is
 covered by checks that do not exist.
+
+---
+
+## D8 — Guardian holds Manage Guild, for event delivery only
+
+**Status:** approved · [design note 002](./design-notes/002-manage-guild-permission.md)
+
+Auto-moderation reacts to Discord's native AutoMod rather than reading messages.
+Discord delivers `AUTO_MODERATION_ACTION_EXECUTION` **only** to applications
+holding Manage Guild, so the permission is not optional for that design.
+
+**Decision: take the permission, and treat it as an intentional
+least-privilege exception with a written boundary.**
+
+- Guardian **must not** manage AutoMod rules through the API. Rules are authored
+  by hand in Discord for now, and a test asserts no rule-management endpoint is
+  ever called.
+- Guardian consumes events and does the Bloom-specific part: escalation, case
+  creation, logging, controlled reversal.
+- **No message-content ingestion.** Message Content stays unrequested by every
+  bot. The event carries the rule, the channel and the matched keyword without
+  it, and Bloom wants nothing more.
+- Companion and Labs must never hold this permission.
+
+Manage Guild additionally grants server settings, invite management, integration
+management, and vanity URL and banner control. None of it is used. The
+alternative that avoids it — parsing the AutoMod alert channel — needs the
+privileged Message Content intent and is strictly worse.
+
+Guardian's permission integer moves from `1497064631510` to `1497064631542`.
+
+---
+
+## D9 — Beta cohorts are a tracked list, with no access control
+
+**Status:** approved · [design note 003](./design-notes/003-beta-cohorts.md)
+
+**Decision: implement cohorts as membership and eligibility only.** No role
+assignment, no private channel, no reconciliation job.
+
+- Labs stores cohort membership and status, and uses it for testing eligibility
+  and notifications.
+- Labs gets **neither Manage Roles nor Manage Channels**. Its permission set is
+  unchanged.
+- The schema stays extensible so a role-based model can be added later without
+  redesigning it.
+
+Channel-based access (giving Labs Manage Channels) is **rejected**, not
+deferred: it would trade the architectural guarantee that only Guardian touches
+access for a saved reconciliation job. Guardian-granted roles remain available
+if a later product decision establishes that beta testers genuinely need a
+private Discord space — and the cohort schema is what that model would
+reconcile against.
