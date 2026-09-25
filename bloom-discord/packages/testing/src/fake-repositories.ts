@@ -20,13 +20,19 @@ import {
   type RoleKey,
   type UserId,
 } from '@bloom/shared-types';
-import type { LocalDate } from '@bloom/utils';
+import { localDateIn, localDaysBetween, type LocalDate } from '@bloom/utils';
 import type {
   AuditEventInput,
   AwardInput,
   AwardOutcome,
+  AwardKind,
+  AwardsRepository,
   CheckInInput,
   CheckInOutcome,
+  GrantAwardInput,
+  GrantOutcome,
+  MemberAward,
+  ParticipationSummary,
   LeaderboardEntry,
   PointEvent,
   RewardsRepository,
@@ -1295,6 +1301,55 @@ export class FakeRewardsRepository implements RewardsRepository {
     return Promise.resolve(rows);
   }
 
+  public participation(
+    guildId: GuildId,
+    userId: UserId,
+    timeZone: string,
+  ): Promise<ParticipationSummary> {
+    const prefix = `${guildId}:${userId}:`;
+    const dates = [...this.checkIns.keys()]
+      .filter((key) => key.startsWith(prefix))
+      .map((key) => key.slice(prefix.length))
+      .sort();
+
+    const winDays = new Set(
+      this.events
+        .filter(
+          (event) =>
+            event.guildId === guildId &&
+            event.userId === userId &&
+            event.kind === 'small_win',
+        )
+        // Same conversion the SQL does: a win's instant becomes the calendar
+        // day it happened on in the community's zone.
+        .map((event) => localDateIn(event.createdAt, timeZone) as string),
+    );
+
+    let longestGapDays = 0;
+    for (let index = 1; index < dates.length; index += 1) {
+      const previous = dates[index - 1];
+      const current = dates[index];
+      if (!previous || !current) continue;
+      longestGapDays = Math.max(
+        longestGapDays,
+        localDaysBetween(previous as LocalDate, current as LocalDate),
+      );
+    }
+
+    return Promise.resolve({
+      checkIns: dates.length,
+      wins: this.events.filter(
+        (event) =>
+          event.guildId === guildId &&
+          event.userId === userId &&
+          event.kind === 'small_win',
+      ).length,
+      months: new Set(dates.map((date) => date.slice(0, 7))).size,
+      daysWithBoth: dates.filter((date) => winDays.has(date)).length,
+      longestGapDays,
+    });
+  }
+
   private sumFor(guildId: GuildId, userId: UserId): number {
     return this.events
       .filter((event) => event.guildId === guildId && event.userId === userId)
@@ -1305,6 +1360,69 @@ export class FakeRewardsRepository implements RewardsRepository {
 interface FakePointEvent extends PointEvent {
   readonly idempotencyKey: string;
 }
+
+/**
+ * Milestones and achievements, in memory.
+ *
+ * Enforces the one invariant that matters: an award is granted once. A fake
+ * that happily granted twice would make the announcement tests pass while
+ * production posted "you reached 50 check-ins" every morning.
+ */
+export class FakeAwardsRepository implements AwardsRepository {
+  /** Keyed `guildId:userId:awardKey`, mirroring the real primary key. */
+  public readonly awards = new Map<string, MemberAward>();
+
+  public constructor(private readonly now: () => Date = () => new Date()) {}
+
+  public grant(input: GrantAwardInput): Promise<GrantOutcome> {
+    const key = `${input.guildId}:${input.userId}:${input.awardKey}`;
+    const existing = this.awards.get(key);
+    if (existing) return Promise.resolve({ kind: 'already_held', award: existing });
+
+    const award: MemberAward = {
+      guildId: input.guildId,
+      userId: input.userId,
+      awardKey: input.awardKey,
+      kind: input.kind,
+      evidence: input.evidence ?? {},
+      earnedAt: this.now(),
+      announced: false,
+    };
+    this.awards.set(key, award);
+    return Promise.resolve({ kind: 'granted', award });
+  }
+
+  public list(guildId: GuildId, userId: UserId): Promise<readonly MemberAward[]> {
+    return Promise.resolve(
+      [...this.awards.values()]
+        .filter((award) => award.guildId === guildId && award.userId === userId)
+        .sort((a, b) => b.earnedAt.getTime() - a.earnedAt.getTime()),
+    );
+  }
+
+  public heldKeys(guildId: GuildId, userId: UserId): Promise<ReadonlySet<string>> {
+    return Promise.resolve(
+      new Set(
+        [...this.awards.values()]
+          .filter((award) => award.guildId === guildId && award.userId === userId)
+          .map((award) => award.awardKey),
+      ),
+    );
+  }
+
+  public markAnnounced(
+    guildId: GuildId,
+    userId: UserId,
+    awardKey: string,
+  ): Promise<void> {
+    const key = `${guildId}:${userId}:${awardKey}`;
+    const award = this.awards.get(key);
+    if (award) this.awards.set(key, { ...award, announced: true });
+    return Promise.resolve();
+  }
+}
+
+export type { AwardKind };
 
 export interface FakeRepositories extends Repositories {
   readonly identity: FakeIdentityRepository;
@@ -1318,6 +1436,7 @@ export interface FakeRepositories extends Repositories {
   readonly jobs: FakeJobRunRepository;
   readonly settings: FakeSettingsRepository;
   readonly rewards: FakeRewardsRepository;
+  readonly awards: FakeAwardsRepository;
 }
 
 /**
@@ -1344,6 +1463,7 @@ export function fakeRepositories(
     moderation: new FakeModerationRepository(now),
     cases: new FakeCaseRepository(now),
     rewards: new FakeRewardsRepository(now),
+    awards: new FakeAwardsRepository(now),
   };
 }
 

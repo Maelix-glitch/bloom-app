@@ -1,5 +1,6 @@
 import type { Database } from '../client.js';
 import { PostgresAuditEventRepository, type AuditEventRepository } from './audit.js';
+import { PostgresAwardsRepository, type AwardsRepository } from './awards.js';
 import { PostgresCooldownRepository, type CooldownRepository } from './cooldowns.js';
 import { PostgresIdentityRepository, type IdentityRepository } from './identity.js';
 import {
@@ -15,6 +16,7 @@ import { PostgresSettingsRepository, type SettingsRepository } from './settings.
 import { PostgresTelemetryRepository, type TelemetryRepository } from './telemetry.js';
 
 export * from './audit.js';
+export * from './awards.js';
 export * from './cooldowns.js';
 export * from './identity.js';
 export * from './idempotency.js';
@@ -41,6 +43,7 @@ export interface Repositories {
   readonly jobs: JobRunRepository;
   readonly onboarding: OnboardingRepository;
   readonly rewards: RewardsRepository;
+  readonly awards: AwardsRepository;
   readonly moderation: ModerationRepository;
   readonly cases: CaseRepository;
   readonly settings: SettingsRepository;
@@ -56,6 +59,7 @@ export function createRepositories(database: Database): Repositories {
     jobs: new PostgresJobRunRepository(database),
     onboarding: new PostgresOnboardingRepository(database),
     rewards: new PostgresRewardsRepository(database),
+    awards: new PostgresAwardsRepository(database),
     moderation: new PostgresModerationRepository(database),
     cases: new PostgresCaseRepository(database),
     settings: new PostgresSettingsRepository(database),

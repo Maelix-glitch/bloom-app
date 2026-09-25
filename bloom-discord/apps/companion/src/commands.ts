@@ -7,6 +7,7 @@ import {
 import { JOBS_GROUP_DESCRIPTION, jobSubcommands } from '@bloom/discord';
 import { allOf, requireBloomMember } from '@bloom/permissions';
 import type { CompanionDeps } from './deps.js';
+import { awardsSubcommands } from './features/awards/commands.js';
 import { rewardsCommands, rewardsSubcommands } from './features/rewards/commands.js';
 
 /**
@@ -45,8 +46,13 @@ export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceC
   policy: allOf(requireBloomMember()),
   groupDescriptions: {
     jobs: JOBS_GROUP_DESCRIPTION,
+    admin: 'Staff actions that change a member’s standing. Always audited.',
   },
-  contributions: [...rewardsSubcommands, ...jobSubcommands<CompanionDeps>()],
+  contributions: [
+    ...rewardsSubcommands,
+    ...awardsSubcommands,
+    ...jobSubcommands<CompanionDeps>(),
+  ],
 });
 
 /**

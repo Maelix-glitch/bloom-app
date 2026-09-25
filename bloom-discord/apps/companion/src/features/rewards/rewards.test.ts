@@ -185,8 +185,11 @@ describe('/win', () => {
       },
     });
 
-    const posted = h.messaging.sent.at(-1);
-    expect(posted?.channelId).toBe(TEST_CHANNEL_IDS.smallWins);
+    // Looked up by channel rather than by position: a first win also earns a
+    // milestone, and the announcement for that is posted after it.
+    const posted = h.messaging.sent.find(
+      (sent) => sent.channelId === TEST_CHANNEL_IDS.smallWins,
+    );
     expect(posted?.message.content).toContain('Finished the migration');
     expect(result.responder.deferredEphemeral).toBe(true);
   });
@@ -220,7 +223,9 @@ describe('/win', () => {
       options: { strings: { description: 'shipped it @everyone @here' } },
     });
 
-    const posted = h.messaging.sent.at(-1);
+    const posted = h.messaging.sent.find(
+      (sent) => sent.channelId === TEST_CHANNEL_IDS.smallWins,
+    );
     expect(posted?.message.content).not.toContain('@everyone');
     expect(posted?.message.content).not.toContain('@here');
   });
@@ -244,7 +249,9 @@ describe('/win', () => {
       POINT_AWARDS.small_win * DAILY_SMALL_WIN_LIMIT,
     );
     // Still posted. The cap is on the reward, never on the participation.
-    expect(h.messaging.sent.at(-1)?.message.content).toContain('one more');
+    expect(
+      h.messaging.sent.some((sent) => sent.message.content?.includes('one more')),
+    ).toBe(true);
     expect(overCap.responder.visibleText).toContain('Share as many as you like');
   });
 

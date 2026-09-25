@@ -8,6 +8,7 @@ import type {
 } from '@bloom/discord';
 import type { Scheduler } from '@bloom/events';
 import type { Logger } from '@bloom/logging';
+import type { AwardsService } from './features/awards/service.js';
 import type { RewardsService } from './features/rewards/service.js';
 
 /**
@@ -36,4 +37,7 @@ export interface CompanionDeps extends JobAdminDeps {
 
   /** Check-ins, small wins, points, ranks — the whole rewards economy. */
   readonly rewards: RewardsService;
+
+  /** Milestones and achievements, derived from the same records. */
+  readonly awards: AwardsService;
 }

@@ -103,6 +103,22 @@ export type ShareWinResult =
     }
   | { readonly kind: 'duplicate' };
 
+export interface ManualAwardRequest {
+  readonly guildId: GuildId;
+  readonly userId: UserId;
+  /** Signed. Positive is an award, negative is a correction. */
+  readonly points: number;
+  readonly reason: string;
+  readonly actorId: UserId;
+  readonly interactionId: string;
+  readonly correlationId: CorrelationId;
+}
+
+export type ManualAwardResult =
+  | { readonly kind: 'applied'; readonly balance: number }
+  | { readonly kind: 'insufficient'; readonly balance: number }
+  | { readonly kind: 'duplicate'; readonly balance: number };
+
 export interface MemberProfile {
   readonly userId: UserId;
   readonly balance: number;
@@ -298,6 +314,53 @@ export class RewardsService {
       rankMove: rankMove(before, outcome.balance),
       posted,
     };
+  }
+
+  /**
+   * A staff award or correction.
+   *
+   * Lives here rather than in the command because the ledger rules are the
+   * service's job: the sign decides the kind, the reason and the actor are
+   * mandatory in both directions, and the audit row is written at **warn**
+   * severity. Changing a member's standing in a shared economy by hand should
+   * be as findable a year later as a timeout is.
+   */
+  public async manualAward(request: ManualAwardRequest): Promise<ManualAwardResult> {
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.userId,
+      // The sign is the intent: a correction is not a negative award, it is an
+      // adjustment, and the ledger says which it was.
+      kind: request.points >= 0 ? 'manual_award' : 'adjustment',
+      points: request.points,
+      reason: request.reason,
+      awardedBy: request.actorId,
+      idempotencyKey: `manual:${request.guildId}:${request.interactionId}`,
+      correlationId: request.correlationId,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      return { kind: 'insufficient', balance: outcome.balance };
+    }
+    if (outcome.kind === 'duplicate') {
+      return { kind: 'duplicate', balance: outcome.balance };
+    }
+
+    await this.options.repositories.audit.append({
+      guildId: request.guildId,
+      botName: 'companion',
+      event: request.points >= 0 ? 'rewards.manual_award' : 'rewards.adjustment',
+      actorId: request.actorId,
+      targetId: request.userId,
+      // Warn, like every other discretionary staff action. This is quiet,
+      // unilateral, and affects how a member is seen by everyone else.
+      severity: 'warn',
+      source: 'companion admin award',
+      correlationId: request.correlationId,
+      details: { points: request.points, reason: request.reason },
+    });
+
+    return { kind: 'applied', balance: outcome.balance };
   }
 
   public async profile(guildId: GuildId, userId: UserId): Promise<MemberProfile> {

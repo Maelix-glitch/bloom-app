@@ -71,6 +71,25 @@ export type CheckInOutcome =
     }
   | { readonly kind: 'already_today'; readonly localDate: LocalDate };
 
+/**
+ * Everything the award definitions need, in one round trip.
+ *
+ * Computed rather than stored. Every number here is derived from the ledger and
+ * the check-in table on read, so a milestone can never be granted on a count
+ * that nothing can reproduce — which is the difference between a milestone and
+ * a fake stat.
+ */
+export interface ParticipationSummary {
+  readonly checkIns: number;
+  readonly wins: number;
+  /** Distinct calendar months containing at least one check-in. */
+  readonly months: number;
+  /** Days with both a check-in and a shared win. */
+  readonly daysWithBoth: number;
+  /** The longest gap, in days, between two consecutive check-ins. */
+  readonly longestGapDays: number;
+}
+
 export interface LeaderboardEntry {
   readonly userId: UserId;
   readonly points: number;
@@ -113,6 +132,20 @@ export interface RewardsRepository {
     guildId: GuildId,
     options?: { readonly since?: Date; readonly limit?: number },
   ): Promise<readonly LeaderboardEntry[]>;
+
+  /**
+   * The counts the award definitions evaluate against.
+   *
+   * Takes the community timezone because a win's day has to be the same kind of
+   * day as a check-in's: `point_events` stores an instant, `check_ins` stores a
+   * calendar date, and comparing them without converting would put an evening
+   * win on the following day for half the world.
+   */
+  participation(
+    guildId: GuildId,
+    userId: UserId,
+    timeZone: string,
+  ): Promise<ParticipationSummary>;
 
   /** A member's most recent ledger entries, newest first. */
   recentEvents(
@@ -434,6 +467,62 @@ export class PostgresRewardsRepository
         LIMIT ${capped}
       `;
       return rows.map(toEvent);
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async participation(
+    guildId: GuildId,
+    userId: UserId,
+    timeZone: string,
+  ): Promise<ParticipationSummary> {
+    try {
+      const sql = this.db.sql;
+      const rows = await sql<
+        {
+          check_ins: string;
+          wins: string;
+          months: string;
+          days_with_both: string;
+          longest_gap_days: string;
+        }[]
+      >`
+        WITH days AS (
+          SELECT local_date
+          FROM ${sql(this.schema)}.check_ins
+          WHERE guild_id = ${guildId} AND user_id = ${userId}
+        ),
+        gaps AS (
+          SELECT local_date - lag(local_date) OVER (ORDER BY local_date) AS gap
+          FROM days
+        ),
+        win_days AS (
+          SELECT DISTINCT (created_at AT TIME ZONE ${timeZone})::date AS day
+          FROM ${sql(this.schema)}.point_events
+          WHERE guild_id = ${guildId}
+            AND user_id = ${userId}
+            AND kind = 'small_win'
+        )
+        SELECT
+          (SELECT count(*) FROM days)::text AS check_ins,
+          (SELECT count(*) FROM ${sql(this.schema)}.point_events
+             WHERE guild_id = ${guildId} AND user_id = ${userId}
+               AND kind = 'small_win')::text AS wins,
+          (SELECT count(DISTINCT to_char(local_date, 'YYYY-MM')) FROM days)::text AS months,
+          (SELECT count(*) FROM days d
+             JOIN win_days w ON w.day = d.local_date)::text AS days_with_both,
+          (SELECT COALESCE(max(gap), 0) FROM gaps)::text AS longest_gap_days
+      `;
+
+      const row = rows[0];
+      return {
+        checkIns: Number(row?.check_ins ?? '0'),
+        wins: Number(row?.wins ?? '0'),
+        months: Number(row?.months ?? '0'),
+        daysWithBoth: Number(row?.days_with_both ?? '0'),
+        longestGapDays: Number(row?.longest_gap_days ?? '0'),
+      };
     } catch (error) {
       throw toDatabaseError(error);
     }

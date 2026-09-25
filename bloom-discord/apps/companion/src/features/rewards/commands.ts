@@ -78,11 +78,27 @@ export const checkInCommand: BloomCommand<CompanionDeps> = {
       return copy.alreadyCheckedInMessage(result.streak);
     }
 
+    /*
+     * Awards are evaluated by the command, not by the rewards service.
+     *
+     * Neither service knows about the other: rewards does not know milestones
+     * exist, and awards does not know what a check-in is — it re-derives counts
+     * from the records either way. Composing them here is what keeps that true,
+     * and means a new action that should trigger an evaluation adds one line
+     * rather than a dependency.
+     */
+    const granted = await deps.awards.evaluate({
+      guildId: requireGuild(invocation),
+      userId: invocation.actor.userId,
+      correlationId: invocation.correlationId,
+    });
+
     return copy.checkedInMessage({
       pointsAwarded: result.pointsAwarded,
       balance: result.balance,
       streak: result.streak,
       rankMove: result.rankMove,
+      granted,
     });
   },
 };
@@ -150,13 +166,21 @@ export const winCommand: BloomCommand<CompanionDeps> = {
           dailyLimit: DAILY_SMALL_WIN_LIMIT,
         });
 
-      case 'shared':
+      case 'shared': {
+        const granted = await deps.awards.evaluate({
+          guildId: requireGuild(invocation),
+          userId: invocation.actor.userId,
+          correlationId: invocation.correlationId,
+        });
+
         return copy.winSharedMessage({
           pointsAwarded: result.pointsAwarded,
           balance: result.balance,
           rankMove: result.rankMove,
           posted: result.posted,
+          granted,
         });
+      }
     }
   },
 };

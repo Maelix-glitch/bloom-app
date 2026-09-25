@@ -17,6 +17,7 @@ import type { Clock } from '@bloom/utils';
 import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
+import { AwardsService } from './features/awards/service.js';
 import { RewardsService } from './features/rewards/service.js';
 
 /**
@@ -54,6 +55,7 @@ export interface CompanionHarness {
   readonly lock: FakeJobLock;
   readonly jobSettings: JobSettingsService;
   readonly rewards: RewardsService;
+  readonly awards: AwardsService;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
 }
 
@@ -73,6 +75,8 @@ export interface CompanionHarnessOptions {
   readonly rewards?: false;
   /** Unset the small-wins channel, so a shared win has nowhere to go. */
   readonly smallWinsChannel?: null;
+  /** Unset the milestones channel, so an earned award has nowhere to go. */
+  readonly milestonesChannel?: null;
   /** Fix the clock. Rewards are date-sensitive, so tests need to own "today". */
   readonly now?: () => Date;
 }
@@ -89,6 +93,9 @@ export function companionHarness(
       ...(options.smallWinsChannel === null
         ? { smallWins: null }
         : { smallWins: TEST_CHANNEL_IDS.smallWins }),
+      ...(options.milestonesChannel === null
+        ? { milestones: null }
+        : { milestones: TEST_CHANNEL_IDS.milestones }),
     },
     // On by default: a harness where every job is switched off would make the
     // job tests pass without running anything.
@@ -104,6 +111,8 @@ export function companionHarness(
     TEST_CHANNEL_IDS.dailyCheckIn,
     TEST_CHANNEL_IDS.welcome,
     TEST_CHANNEL_IDS.smallWins,
+    TEST_CHANNEL_IDS.milestones,
+    TEST_CHANNEL_IDS.achievements,
   );
 
   const messaging = new FakeMessaging(guild);
@@ -134,6 +143,13 @@ export function companionHarness(
     clock,
   });
 
+  const awards = new AwardsService({
+    config,
+    repositories,
+    messaging,
+    logger,
+  });
+
   const deps: CompanionDeps = {
     bot: 'companion',
     config,
@@ -144,6 +160,7 @@ export function companionHarness(
     scheduler,
     jobSettings,
     rewards,
+    awards,
   };
 
   // The same registration `main.ts` performs, so the command tests inspect the
@@ -177,6 +194,7 @@ export function companionHarness(
     lock,
     jobSettings,
     rewards,
+    awards,
     logs: sink,
   };
 }
