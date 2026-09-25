@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { UserId } from '@bloom/shared-types';
+import { unsafeSnowflake, type UserId } from '@bloom/shared-types';
 import type { RecordingResponder } from '@bloom/testing';
-import { TEST_GUILD_ID, TEST_ROLE_IDS, TEST_USER_IDS, testSubject } from '@bloom/testing';
+import { newCorrelationId } from '@bloom/utils';
+import {
+  TEST_CHANNEL_IDS,
+  TEST_GUILD_ID,
+  TEST_ROLE_IDS,
+  TEST_USER_IDS,
+  testSubject,
+} from '@bloom/testing';
 import { guardianHarness, type GuardianHarness } from '../../guardian.harness.js';
 import { parseMessageLink } from './commands.js';
 
@@ -235,6 +242,52 @@ describe('input handling', () => {
   });
 });
 
+/**
+ * The rate limit's shape, not just its presence.
+ *
+ * A flat cooldown would pass a test that only checks "the eleventh action is
+ * refused" while quietly breaking raid response — six kicks in ten seconds is
+ * the scenario staff most need to work. Both halves are asserted.
+ */
+describe('moderation rate limiting', () => {
+  const victim = (n: number): UserId =>
+    unsafeSnowflake<UserId>(`90000000000002${String(n).padStart(4, '0')}`);
+
+  it('permits a rapid burst, then throttles', async () => {
+    for (let i = 0; i < 10; i += 1) {
+      h.guild.withMember(victim(i));
+    }
+
+    const results: boolean[] = [];
+    for (let i = 0; i < 10; i += 1) {
+      const { responder } = await h.dispatch({
+        commandName: 'warn',
+        actor: asModerator(),
+        options: {
+          users: { member: user(victim(i)) },
+          strings: { reason: 'Raid participant.' },
+        },
+      });
+      results.push(!responder.visibleText.includes('too quickly'));
+    }
+
+    // The whole burst lands — this is the half a cooldown would break.
+    expect(results.every(Boolean)).toBe(true);
+
+    h.guild.withMember(victim(99));
+    const eleventh = await h.dispatch({
+      commandName: 'warn',
+      actor: asModerator(),
+      options: {
+        users: { member: user(victim(99)) },
+        strings: { reason: 'One too many.' },
+      },
+    });
+
+    expect(eleventh.responder.visibleText).toContain('too quickly');
+  });
+});
+
 describe('error surfaces', () => {
   /**
    * Operator hints name roles, permission integers and internal state. A member
@@ -364,5 +417,284 @@ describe('cross-guild message links', () => {
 
     expect(responder.visibleText).not.toContain('different server');
     expect(await h.deps.cases.counts(TEST_GUILD_ID)).toMatchObject({ OPEN: 1 });
+  });
+});
+
+/**
+ * The `/guardian` branches.
+ *
+ * Covered through the dispatcher for the same reason as the bare verbs: these
+ * are staff tools where "the wrong person could run it" and "it silently did
+ * nothing" are the two failures that matter, and only the dispatcher path
+ * exercises both.
+ */
+describe('/guardian case', () => {
+  async function openCase(summary = 'Something happened.'): Promise<number> {
+    const { case: row } = await h.repositories.cases.open({
+      guildId: TEST_GUILD_ID,
+      origin: 'moderator',
+      openedBy: MODERATOR,
+      summary,
+      subjectId: MEMBER,
+      category: null,
+      status: 'OPEN',
+      correlationId: newCorrelationId(),
+    });
+    return row.caseNumber;
+  }
+
+  it('opens a case and reports its number', async () => {
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'open',
+      actor: asModerator(),
+      options: { strings: { summary: 'Escalating a pattern of behaviour.' } },
+    });
+
+    expectAllowed(responder);
+    expect(responder.visibleText).toContain('1');
+    expect(await h.deps.cases.counts(TEST_GUILD_ID)).toMatchObject({ OPEN: 1 });
+  });
+
+  it('shows a case', async () => {
+    const number = await openCase('A specific summary line.');
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'view',
+      actor: asModerator(),
+      options: { integers: { number } },
+    });
+
+    expect(responder.visibleText).toContain('A specific summary line.');
+  });
+
+  /**
+   * A mistyped case number must say so. Rendering an empty case instead would
+   * read as "this case exists and is blank", which is a different and much
+   * more alarming thing.
+   */
+  it('says so when the case does not exist', async () => {
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'view',
+      actor: asModerator(),
+      options: { integers: { number: 404 } },
+    });
+
+    expect(responder.visibleText.toLowerCase()).toContain('no case');
+  });
+
+  it('lists the queue', async () => {
+    await openCase('First.');
+    await openCase('Second.');
+
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'list',
+      actor: asModerator(),
+      options: {},
+    });
+
+    expect(responder.visibleText).toContain('First.');
+    expect(responder.visibleText).toContain('Second.');
+  });
+
+  it('moves a case through its statuses', async () => {
+    const number = await openCase();
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'status',
+      actor: asModerator(),
+      options: { integers: { number }, strings: { to: 'IN_REVIEW' } },
+    });
+
+    expectAllowed(responder);
+    const detail = await h.deps.cases.detail(TEST_GUILD_ID, number);
+    expect(detail?.case.status).toBe('IN_REVIEW');
+  });
+
+  it('assigns a case', async () => {
+    const number = await openCase();
+    await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'assign',
+      actor: asModerator(),
+      options: { integers: { number }, users: { member: user(MODERATOR) } },
+    });
+
+    const detail = await h.deps.cases.detail(TEST_GUILD_ID, number);
+    expect(detail?.case.assignedTo).toBe(MODERATOR);
+  });
+
+  it('appends a note to the case history', async () => {
+    const number = await openCase();
+    await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'case',
+      subcommand: 'note',
+      actor: asModerator(),
+      options: { integers: { number }, strings: { note: 'Spoke to both parties.' } },
+    });
+
+    const detail = await h.deps.cases.detail(TEST_GUILD_ID, number);
+    expect(detail?.events.some((event) => event.eventType === 'note')).toBe(true);
+  });
+
+  it('refuses a plain member on every case branch', async () => {
+    for (const subcommand of ['view', 'list', 'open', 'status', 'note'] as const) {
+      const { responder } = await h.dispatch({
+        commandName: 'guardian',
+        subcommandGroup: 'case',
+        subcommand,
+        actor: asMember(),
+        options: {
+          integers: { number: 1 },
+          strings: { summary: 'x', to: 'IN_REVIEW', note: 'x' },
+        },
+      });
+      expectRefused(responder);
+    }
+  });
+});
+
+describe('/guardian member', () => {
+  it('shows a member’s record', async () => {
+    await h.dispatch({
+      commandName: 'warn',
+      actor: asModerator(),
+      options: { users: { member: user(MEMBER) }, strings: { reason: 'Noted.' } },
+    });
+
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'member',
+      subcommand: 'history',
+      actor: asModerator(),
+      options: { users: { member: user(MEMBER) } },
+    });
+
+    expect(responder.visibleText).toContain('Noted.');
+  });
+
+  /**
+   * A staff note must not reach the member. Notifying would turn every piece of
+   * recorded context into a confrontation, and people stop writing notes.
+   */
+  it('records a staff note without DMing the member', async () => {
+    await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'member',
+      subcommand: 'note',
+      actor: asModerator(),
+      options: {
+        users: { member: user(MEMBER) },
+        strings: { note: 'Handled informally last month.' },
+      },
+    });
+
+    expect(h.messaging.directMessages).toHaveLength(0);
+    const history = await h.repositories.moderation.listForSubject(TEST_GUILD_ID, MEMBER);
+    expect(history.map((row) => row.action)).toContain('note');
+  });
+
+  it('clears warnings and reports how many', async () => {
+    for (const reason of ['One.', 'Two.']) {
+      await h.dispatch({
+        commandName: 'warn',
+        actor: asModerator(),
+        options: { users: { member: user(MEMBER) }, strings: { reason } },
+      });
+    }
+
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'member',
+      subcommand: 'clear-warnings',
+      actor: asModerator(),
+      options: {
+        users: { member: user(MEMBER) },
+        strings: { reason: 'Six months clean.' },
+      },
+    });
+
+    expect(responder.visibleText).toContain('2');
+    expect(
+      await h.repositories.moderation.countActiveWarnings(TEST_GUILD_ID, MEMBER),
+    ).toBe(0);
+  });
+
+  /**
+   * Unbanning someone who is not banned has to say so. "Done" when nothing
+   * happened stops the moderator looking for the real ban.
+   */
+  it('is honest when the user was not banned', async () => {
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'member',
+      subcommand: 'unban',
+      actor: asModerator(),
+      options: {
+        strings: { 'user-id': '900000000000009999', reason: 'Appeal granted.' },
+      },
+    });
+
+    expect(responder.visibleText.toLowerCase()).toMatch(/not banned|no ban/);
+  });
+});
+
+describe('/guardian channel', () => {
+  const CHANNEL = { id: TEST_CHANNEL_IDS.support, name: 'support', type: 0 };
+
+  it('sets slowmode', async () => {
+    await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'channel',
+      subcommand: 'slowmode',
+      actor: asModerator(),
+      options: { integers: { seconds: 30 }, channels: { channel: CHANNEL } },
+    });
+
+    expect(h.channels.slowmode.get(CHANNEL.id)).toBe(30);
+  });
+
+  it('locks and then restores the prior permission on unlock', async () => {
+    h.channels.sendPermission.set(CHANNEL.id, 'denied');
+
+    await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'channel',
+      subcommand: 'lock',
+      actor: asModerator(),
+      options: { strings: { reason: 'Raid.' }, channels: { channel: CHANNEL } },
+    });
+    await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'channel',
+      subcommand: 'unlock',
+      actor: asModerator(),
+      options: { strings: { reason: 'Over.' }, channels: { channel: CHANNEL } },
+    });
+
+    // It was restricted before the lock, so it stays restricted after.
+    expect(h.channels.sendPermission.get(CHANNEL.id)).toBe('denied');
+  });
+
+  it('refuses a plain member', async () => {
+    const { responder } = await h.dispatch({
+      commandName: 'guardian',
+      subcommandGroup: 'channel',
+      subcommand: 'lock',
+      actor: asMember(),
+      options: { strings: { reason: 'I want quiet.' }, channels: { channel: CHANNEL } },
+    });
+
+    expectRefused(responder);
+    expect(h.channels.calls).toHaveLength(0);
   });
 });

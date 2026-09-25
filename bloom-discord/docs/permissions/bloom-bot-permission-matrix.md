@@ -75,16 +75,44 @@ Notably **not** in the baseline:
 
 The highest-trust application, and the only one with elevated permissions.
 
-| Permission                                              | Feature                                                            | Why it is required                                                                                                                                             | Risk if abused                                                                                                                                                                                            |
-| ------------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Manage Roles**                                        | Onboarding lifecycle: `@everyone → ✧ Early Bloom → ❋ Bloom Member` | The only way to assign a role. **Guardian is the only bot granted this.**                                                                                      | Role manipulation. Mitigated by three layers: the `role:write` capability manifest, an allow-list restricting writes to Early Bloom and Bloom Member only, and a live hierarchy check before every write. |
-| **Kick Members**                                        | `/kick`                                                            | Removes a member without a ban.                                                                                                                                | Mass removal. Mitigated by moderator-or-above policy, per-target protection checks, and a full audit trail.                                                                                               |
-| **Ban Members**                                         | `/ban`, `/unban`, and reconciling bans applied in the client       | Issues and lifts bans. Also required to _read_ the ban list.                                                                                                   | Mass banning. Same mitigations, plus staff and owner targets are never actionable.                                                                                                                        |
-| **Moderate Members** (Timeout)                          | `/timeout`, `/untimeout`, automated anti-spam response             | Applies Discord's native timeout. Preferred over kick or ban: reversible, proportionate, and visible to the member.                                            | Silencing members. Timeout is capped at Discord's 28-day maximum and every application is audited.                                                                                                        |
-| **Manage Messages**                                     | `/purge`, removing spam, pinning the verification prompt           | Deletes messages in bulk and pins.                                                                                                                             | Evidence destruction. `/purge` is administrator-gated, bounded, and records what it removed before removing it.                                                                                           |
-| **Manage Channels**                                     | `/slowmode`, `/lock`, `/unlock`                                    | Edits the rate limit and permission overwrites on a channel during an incident.                                                                                | Channel lockout. Restricted to moderators; every change is audited and reversible.                                                                                                                        |
-| **View Audit Log**                                      | Reconciling out-of-band moderation                                 | Lets actions taken directly in the Discord client be attributed in the Bloom audit trail, so history is complete rather than only covering bot-issued actions. | Read-only. Low risk.                                                                                                                                                                                      |
-| **Create Public / Private Threads**, **Manage Threads** | Report and case handling                                           | Cases run in private threads in the staff channel; managing them means archiving a resolved case.                                                              | Thread manipulation in staff channels only.                                                                                                                                                               |
+| Permission                                              | Feature                                                            | Why it is required                                                                                                                                                                                   | Risk if abused                                                                                                                                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Manage Roles**                                        | Onboarding lifecycle: `@everyone → ✧ Early Bloom → ❋ Bloom Member` | The only way to assign a role. **Guardian is the only bot granted this.**                                                                                                                            | Role manipulation. Mitigated by three layers: the `role:write` capability manifest, an allow-list restricting writes to Early Bloom and Bloom Member only, and a live hierarchy check before every write. |
+| **Kick Members**                                        | `/kick`                                                            | Removes a member without a ban.                                                                                                                                                                      | Mass removal. Mitigated by moderator-or-above policy, per-target protection checks, and a full audit trail.                                                                                               |
+| **Ban Members**                                         | `/ban`, `/unban`, and reconciling bans applied in the client       | Issues and lifts bans. Also required to _read_ the ban list.                                                                                                                                         | Mass banning. Same mitigations, plus staff and owner targets are never actionable.                                                                                                                        |
+| **Moderate Members** (Timeout)                          | `/timeout`, `/untimeout`, automated anti-spam response             | Applies Discord's native timeout. Preferred over kick or ban: reversible, proportionate, and visible to the member.                                                                                  | Silencing members. Timeout is capped at Discord's 28-day maximum and every application is audited.                                                                                                        |
+| **Manage Messages**                                     | `/purge`, removing spam, pinning the verification prompt           | Deletes messages in bulk and pins.                                                                                                                                                                   | Evidence destruction. `/purge` is administrator-gated, bounded, and records what it removed before removing it.                                                                                           |
+| **Manage Channels**                                     | `/guardian channel slowmode` **only**                              | Slowmode is a channel property, not a permission overwrite, so Manage Roles cannot set it. Lock and unlock deliberately do **not** use this — see below.                                             | Channel reconfiguration. Restricted to moderators, audited, and the adapter caps slowmode at Discord's 21,600-second maximum.                                                                             |
+| **View Audit Log**                                      | Reconciling out-of-band moderation                                 | Lets actions taken directly in the Discord client be attributed in the Bloom audit trail, so history is complete rather than only covering bot-issued actions.                                       | Read-only. Low risk.                                                                                                                                                                                      |
+| **Create Public / Private Threads**, **Manage Threads** | Report and case handling                                           | Held for case threads in the staff channel. **Not yet exercised** — Phase 2 posts cases as messages, not threads. Kept in the invite so the later change does not require re-inviting every install. | Thread manipulation in staff channels only.                                                                                                                                                               |
+
+#### Why lock and unlock do not use Manage Channels
+
+Locking a channel edits the `@everyone` **Send Messages permission overwrite**
+on that channel. That is an overwrite edit, which **Manage Roles** already
+covers — and Guardian holds Manage Roles for the onboarding lifecycle regardless.
+
+Manage Channels would also have worked, and using it for all three commands
+would have been the obvious choice. It is deliberately not: Manage Channels is
+the broader permission, and routing two of the three commands through the
+narrower one means a compromised Guardian token cannot rename, reconfigure or
+delete channels through the lock path. Only slowmode needs the broader grant, so
+only slowmode gets it.
+
+`unlock` restores the permission state recorded when the channel was locked,
+read back from that lock's own row. The naive implementation — unlock sets
+"allowed" — would silently open a channel that had been restricted to a role
+before the incident: a permission escalation disguised as a convenience, and one
+nothing else in the system would flag.
+
+#### Permissions Guardian deliberately does not hold
+
+| Permission                 | Why not                                                                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Administrator**          | See below. Never, on any bot.                                                                                                                  |
+| **Manage Guild**           | Nothing Bloom does changes server-level settings. It would also grant invite management and integration control.                               |
+| **Mention Everyone**       | No Bloom message ever needs `@everyone`. Withholding it means a compromised token cannot mass-ping, independent of any application-side check. |
+| **Message Content** intent | Not a permission but the same reasoning: Bloom parses no message text. Anti-spam works from message _metadata_ — rate, not content.            |
 
 ### Why Guardian does not get Administrator
 
@@ -165,6 +193,11 @@ own client id — the three bots have three different ids and three different
 permission integers.
 
 **Guardian** — `1497064631510` (baseline + Manage Roles, Kick, Ban, Timeout, Manage Messages, Manage Channels, View Audit Log, threads)
+
+Unchanged by Phase 2. Every permission moderation needs was already in the
+Phase 0 baseline, so existing installs do not need re-inviting — which is the
+point of deciding the permission set up front rather than growing it per
+feature.
 
 ```
 https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=1497064631510&scope=bot+applications.commands

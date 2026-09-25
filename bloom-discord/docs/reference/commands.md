@@ -1,7 +1,8 @@
 # Command reference
 
-**Live as of Phase 1: `/verify` and `/guardian`.** Everything else in this
-document is planned, not built, and is marked with the phase that delivers it.
+**Live as of Phase 2: verification, onboarding, moderation, reports and cases.**
+Everything else in this document is planned, not built, and is marked with the
+phase that delivers it.
 The platform does not pretend otherwise — the registrar publishes only what the
 dispatcher can actually route, and `apps/guardian/src/commands.test.ts` asserts
 those two lists match.
@@ -43,44 +44,116 @@ not the same as omitting it.
 
 ### Member-facing
 
-| Command   | Policy       | Description                                    |  Phase   |
-| --------- | ------------ | ---------------------------------------------- | :------: |
-| `/verify` | any member   | Verify yourself; grants ✧ Early Bloom          | **1 ✅** |
-| `/report` | Bloom Member | Report a member or message to staff, privately |    2     |
+| Command   | Policy     | Description                                    |  Phase   |
+| --------- | ---------- | ---------------------------------------------- | :------: |
+| `/verify` | any member | Verify yourself; grants ✧ Early Bloom          | **1 ✅** |
+| `/report` | any member | Report a member or message to staff, privately | **2 ✅** |
 
-`/verify` carries no role requirement, because an unverified member holds no
-Bloom role by definition — requiring one would make verification impossible. It
-is rate limited to one attempt per member per 30 seconds, durably, so the budget
-is shared across processes and survives a restart.
+Neither carries a role requirement, and both are deliberate.
 
-### Staff
+`/verify` cannot: an unverified member holds no Bloom role by definition, so
+requiring one would make verification impossible.
+
+`/report` deliberately does not require ❋ Bloom Member either. Someone part-way
+through onboarding is _more_ likely to be targeted, not less, and a reporting
+tool that excludes the newest accounts excludes exactly the people who need it.
+It is instead rate limited to one report per member per 60 seconds — flooding
+the staff queue is itself a form of abuse.
+
+`/verify` is limited to one attempt per member per 30 seconds. Both budgets are
+database-backed, so they are shared across processes and survive a restart.
+
+### Incident response
+
+Six bare verbs, against the general rule that everything staff-facing lives
+under `/guardian`. The exception is narrow and deliberate: these are the
+commands typed while something is actively going wrong, and `/guardian moderation
+timeout @user 10m` is four words of ceremony in front of an urgent action.
+Review-time operations stay namespaced, which is why `/unban` is
+`/guardian member unban` — nobody unbans anyone during an emergency.
+
+| Command                                        | Policy        | Description                           |  Phase   |
+| ---------------------------------------------- | ------------- | ------------------------------------- | :------: |
+| `/warn <member> <reason> [case]`               | Moderator     | Record a warning; DMs the member      | **2 ✅** |
+| `/timeout <member> <duration> <reason> [case]` | Moderator     | Discord timeout, max 28 days          | **2 ✅** |
+| `/untimeout <member> <reason>`                 | Moderator     | Lift a timeout                        | **2 ✅** |
+| `/kick <member> <reason> [case]`               | Moderator     | Remove a member                       | **2 ✅** |
+| `/ban <member> <reason> [delete-hours] [case]` | Administrator | Ban, including users not in the guild | **2 ✅** |
+| `/purge <count> [member] <reason>`             | Administrator | Bulk-delete recent messages           | **2 ✅** |
+
+`/ban` and `/purge` sit above the moderator line. Both are effectively
+irreversible — a ban erases someone's presence, a purge destroys evidence — so
+they take a second person. That is a deliberate speed bump, not an oversight.
+
+`duration` accepts `10m`, `2h`, `7d`. Anything Discord will not accept, and
+anything over its 28-day maximum, is refused with the reason rather than passed
+through to become a raw API error.
+
+### Cases and review
+
+| Command                                             | Policy    | Description                       |  Phase   |
+| --------------------------------------------------- | --------- | --------------------------------- | :------: |
+| `/guardian case view <number>`                      | Moderator | Full case, with its history       | **2 ✅** |
+| `/guardian case list [status]`                      | Moderator | The queue, escalated first        | **2 ✅** |
+| `/guardian case open <summary> [member]`            | Moderator | Open a case directly              | **2 ✅** |
+| `/guardian case assign <number> [member]`           | Moderator | Take or hand over ownership       | **2 ✅** |
+| `/guardian case status <number> <status> [note]`    | Moderator | Move a case through its states    | **2 ✅** |
+| `/guardian case note <number> <note>`               | Moderator | Append to the case history        | **2 ✅** |
+| `/guardian member history <member>`                 | Moderator | A member's full moderation record | **2 ✅** |
+| `/guardian member note <member> <note>`             | Moderator | Private staff note; no DM sent    | **2 ✅** |
+| `/guardian member clear-warnings <member> <reason>` | Moderator | Revoke active warnings            | **2 ✅** |
+| `/guardian member unban <user-id> <reason>`         | Moderator | Lift a ban                        | **2 ✅** |
+| `/guardian channel slowmode <seconds> [channel]`    | Moderator | Set a channel rate limit          | **2 ✅** |
+| `/guardian channel lock [channel] <reason>`         | Moderator | Lock a channel during an incident | **2 ✅** |
+| `/guardian channel unlock [channel] <reason>`       | Moderator | Restore the prior permission      | **2 ✅** |
+
+Case statuses are `OPEN → IN_REVIEW → ESCALATED → RESOLVED → CLOSED`. RESOLVED
+and CLOSED are terminal; a case cannot be quietly reopened, because a case
+resolved twice with two different outcomes has no answer to "what did we
+decide". `RESOLVED` requires an outcome — the database enforces it with a CHECK
+constraint, and the command passes the moderator's note through so it is typed
+once.
+
+`unlock` restores the permission the channel had _before_ the lock, read from
+the lock's own record. The obvious implementation — unlock means "allow" —
+would silently open a channel that was previously restricted to a role.
+
+A staff note is deliberately not sent to the member. A note is context ("this
+came up before", "handled informally"), and notifying would turn every piece of
+context into a confrontation, which stops people writing them.
+
+### Onboarding
 
 | Command                                  | Policy        | Description                          |  Phase   |
 | ---------------------------------------- | ------------- | ------------------------------------ | :------: |
-| `/warn <member> <reason>`                | Moderator     | Record a warning                     |    2     |
-| `/warnings <member>`                     | Moderator     | List a member's warnings             |    2     |
-| `/timeout <member> <duration> <reason>`  | Moderator     | Apply a Discord timeout (max 28d)    |    2     |
-| `/untimeout <member>`                    | Moderator     | Lift a timeout                       |    2     |
-| `/kick <member> <reason>`                | Moderator     | Remove a member                      |    2     |
-| `/ban <member> <reason> [delete-days]`   | Administrator | Ban                                  |    2     |
-| `/unban <user-id> <reason>`              | Administrator | Lift a ban                           |    2     |
-| `/purge <count> [member]`                | Administrator | Bulk-delete recent messages          |    2     |
-| `/slowmode <seconds>`                    | Moderator     | Set channel rate limit               |    2     |
-| `/lock` / `/unlock`                      | Moderator     | Lock a channel during an incident    |    2     |
-| `/guardian case view <id>`               | Moderator     | Case detail                          |    2     |
-| `/guardian case assign <id> <member>`    | Moderator     | Take ownership                       |    2     |
-| `/guardian case resolve <id> <outcome>`  | Moderator     | Close a case                         |    2     |
-| `/guardian note add <member> <note>`     | Moderator     | Private mod note                     |    2     |
-| `/guardian roles audit`                  | Moderator     | Re-run the hierarchy audit on demand | **1 ✅** |
 | `/guardian status [member]`              | Moderator     | A member's onboarding state          | **1 ✅** |
 | `/guardian overview`                     | Moderator     | Counts per onboarding state          | **1 ✅** |
 | `/guardian onboarding complete <member>` | Moderator     | Move ✧ Early Bloom → ❋ Bloom Member  | **1 ✅** |
 | `/guardian onboarding history <member>`  | Moderator     | A member's lifecycle history         | **1 ✅** |
-| `/guardian onboarding reset <member>`    | Administrator | Reset someone's onboarding           |    2     |
+| `/guardian roles audit`                  | Moderator     | Re-run the hierarchy audit on demand | **1 ✅** |
+| `/guardian onboarding reset <member>`    | Administrator | Reset someone's onboarding           |    3     |
+
+### How `/guardian` is assembled
+
+`/guardian` is not owned by any one feature. Each feature exports a list of
+subcommand _contributions_, and `namespaceCommand()` derives the published
+Discord spec **and** the routing table from that single list. Onboarding brings
+`status`, `overview`, `onboarding …` and `roles audit`; moderation brings
+`case …`, `member …` and `channel …`.
+
+This matters for two reasons. Adding a feature no longer means editing another
+feature's file to add a branch to a growing `if (group === … && sub === …)`
+chain. And because the spec and the handler table come from the same list, they
+cannot drift — a subcommand cannot be published without a handler, or handled
+without being published.
+
+Three mistakes fail at construction rather than in production: two features
+claiming the same path, a group with no description, and a group exceeding
+Discord's 25-subcommand limit.
 
 All `/guardian` subcommands share one policy — Moderator or above — rather than
 declaring a policy each. The failure mode of per-subcommand policies is the one
-somebody forgets to add, so a new subcommand inherits the gate automatically.
+somebody forgets, so a new subcommand inherits the gate automatically.
 
 `/guardian status` is Moderator-gated even when a member asks about themselves.
 Members do not need it: `/verify` already tells them everything their own state
@@ -88,11 +161,15 @@ would.
 
 ### Context menus
 
-| Entry               | Target  | Policy       | Phase |
-| ------------------- | ------- | ------------ | :---: |
-| Report message      | message | Bloom Member |   2   |
-| Report member       | user    | Bloom Member |   2   |
-| View member history | user    | Moderator    |   2   |
+| Entry               | Target  | Policy     | Phase |
+| ------------------- | ------- | ---------- | :---: |
+| Report message      | message | any member |   3   |
+| Report member       | user    | any member |   3   |
+| View member history | user    | Moderator  |   3   |
+
+Not built. `/report` accepts a message link in the meantime, which covers the
+same need with one extra paste. Context menus are the better ergonomics and are
+worth doing, but they are additive rather than enabling.
 
 ---
 

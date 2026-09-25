@@ -13,7 +13,7 @@ import { bloomError } from '@bloom/shared-types';
 import { CommandDispatcher, CommandRegistry } from '@bloom/commands';
 import { EventDispatcher } from '@bloom/events';
 import { auditGuardianRolePlacement } from '@bloom/permissions';
-import { DatabaseRateLimiter } from '@bloom/security';
+import { DatabaseRateLimiter, TokenBucketRateLimiter } from '@bloom/security';
 import {
   commandTelemetry,
   runBotMain,
@@ -125,19 +125,23 @@ await runBotMain(() =>
           30,
         ),
         /*
-         * Destructive staff commands: one per moderator every 3 seconds.
+         * Staff moderation: a burst of 10, refilling at one every two seconds.
          *
-         * Not aimed at legitimate use — clearing a raid means several actions
-         * in quick succession, and 3 seconds does not obstruct that. It bounds
-         * the damage a compromised staff account or a stuck client can do
-         * before somebody notices.
+         * A token bucket rather than a cooldown, because the shapes differ in
+         * exactly the case that matters. A flat "one action per N seconds"
+         * throttles the legitimate burst — clearing a raid is six kicks in ten
+         * seconds — while barely inconveniencing an automated abuser, who is
+         * happy to pace itself. A bucket permits the burst and then bites.
+         *
+         * In-process, unlike the durable limiters below. Guardian is a single
+         * process, and a restart resetting the bucket errs in the moderator's
+         * favour rather than the attacker's — restarts are not something an
+         * abuser can trigger.
          */
-        moderationLimiter: new DatabaseRateLimiter(
-          context.repositories.cooldowns,
-          context.platform.discord.guildId,
-          'moderation.action',
-          3,
-        ),
+        moderationLimiter: new TokenBucketRateLimiter({
+          capacity: 10,
+          refillPerSecond: 0.5,
+        }),
         /*
          * `/report` is reachable by any member, including a brand-new account,
          * so it gets the tightest budget: one report per member per 60 seconds.

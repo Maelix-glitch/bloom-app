@@ -99,7 +99,7 @@ export function memberNotice(
 export function warningCount(active: number): string {
   return active === 1
     ? 'This is your first active warning.'
-    : `You now have ${String(active)} active ${pluralise(active, 'warning', 'warnings')}.`;
+    : `You now have ${pluralise(active, 'active warning', 'active warnings')}.`;
 }
 
 export function until(date: Date): string {
@@ -159,7 +159,7 @@ export function warningsCleared(targetId: UserId, cleared: number): BloomMessage
             description: `${mention(targetId)} had no active warnings. Nothing was cleared, and that is recorded.`,
           })
         : successEmbed({
-            description: `Cleared ${String(cleared)} ${pluralise(cleared, 'warning', 'warnings')} for ${mention(targetId)}. The warnings remain in the history, marked as cleared.`,
+            description: `Cleared ${pluralise(cleared, 'warning', 'warnings')} for ${mention(targetId)}. The warnings remain in the history, marked as cleared.`,
           }),
     ],
   };
@@ -173,7 +173,7 @@ export function purgeResult(input: {
   readonly authorId?: UserId | null;
 }): BloomMessage {
   const lines = [
-    `Deleted ${String(input.deleted)} ${pluralise(input.deleted, 'message', 'messages')} in ${channelMention(input.channelId)}.`,
+    `Deleted ${pluralise(input.deleted, 'message', 'messages')} in ${channelMention(input.channelId)}.`,
   ];
 
   if (input.authorId) {
@@ -190,7 +190,7 @@ export function purgeResult(input: {
   if (input.skippedTooOld > 0) {
     lines.push(
       '',
-      `${String(input.skippedTooOld)} ${pluralise(input.skippedTooOld, 'message was', 'messages were')} older than 14 days and could not be bulk-deleted. Discord does not allow it; they have to be removed by hand.`,
+      `${pluralise(input.skippedTooOld, 'message was', 'messages were')} older than 14 days and could not be bulk-deleted. Discord does not allow it; they have to be removed by hand.`,
     );
   }
 

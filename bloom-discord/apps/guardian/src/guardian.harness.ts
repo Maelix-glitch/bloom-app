@@ -1,5 +1,5 @@
 import { CommandDispatcher, CommandRegistry } from '@bloom/commands';
-import { DatabaseRateLimiter } from '@bloom/security';
+import { DatabaseRateLimiter, TokenBucketRateLimiter } from '@bloom/security';
 import {
   createTestLogger,
   fakeInvocation,
@@ -106,12 +106,10 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
       'onboarding.verify',
       30,
     ),
-    moderationLimiter: new DatabaseRateLimiter(
-      repositories.cooldowns,
-      TEST_GUILD_ID,
-      'moderation.action',
-      3,
-    ),
+    moderationLimiter: new TokenBucketRateLimiter({
+      capacity: 10,
+      refillPerSecond: 0.5,
+    }),
     reportLimiter: new DatabaseRateLimiter(
       repositories.cooldowns,
       TEST_GUILD_ID,

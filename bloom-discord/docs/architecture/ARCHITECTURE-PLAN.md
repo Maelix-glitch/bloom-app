@@ -328,10 +328,20 @@ table is created before there is code that reads it.
 | `idempotency_keys`  | generic exactly-once guard for interactions and jobs                  |
 | `system_health`     | last observed health snapshot per bot                                 |
 
+### Added since
+
+Phase 1 created `guild_members` and `onboarding_transitions`; Phase 2 created
+`moderation_cases`, `case_events`, `case_counters`, `moderation_actions` and
+`reports`. See `docs/reference/database-schema.md` for the live schema.
+
+Warnings are **not** a separate table, contrary to the plan above: a warning is
+`moderation_actions` with `action = 'warn'`, counted through a partial index on
+unrevoked rows. A parallel `warnings` table would have duplicated the actor,
+reason, case link and revocation columns, and left two places to look for "what
+has happened to this member".
+
 ### Deferred (documented, not created)
 
-`onboarding`, `verification_events` (Phase 1) · `moderation_cases`,
-`moderation_actions`, `warnings`, `reports`, `report_messages` (Phase 2) ·
 `scheduled_messages` (Phase 3) · `achievements`, `milestones`, `reward_balances`,
 `reward_transactions`, `challenges`, `challenge_members` (Phase 4) · `beta_users`,
 `beta_cohorts`, `features`, `feature_tests`, `test_results`, `feedback`,
@@ -353,32 +363,43 @@ table is created before there is code that reads it.
 Validated against the current permission list. Full justification per permission in
 `docs/permissions/bloom-bot-permission-matrix.md`.
 
-| Permission               | Guardian       | Companion            | Labs      |
-| ------------------------ | -------------- | -------------------- | --------- |
-| View Channels            | ✔              | ✔                    | ✔         |
-| Send Messages            | ✔              | ✔                    | ✔         |
-| Send Messages in Threads | ✔              | ✔                    | ✔         |
-| Read Message History     | ✔              | ✔                    | ✔         |
-| Embed Links              | ✔              | ✔                    | ✔         |
-| Attach Files             | ✔              | ✖ _(Phase 3 review)_ | ✔         |
-| Add Reactions            | ✖              | ✔                    | ✔         |
-| Use Application Commands | ✔              | ✔                    | ✔         |
-| Manage Messages          | ✔ `/purge`     | ✖                    | ✖         |
-| Manage Threads           | ✔              | ✖                    | ✖         |
-| Create Public Threads    | ✖              | ✖                    | ✔         |
-| Manage Events            | ✖              | ✔ _(Phase 3)_        | ✖         |
-| Kick Members             | ✔              | ✖                    | ✖         |
-| Ban Members              | ✔              | ✖                    | ✖         |
-| Moderate Members         | ✔ (timeout)    | ✖                    | ✖         |
-| Manage Roles             | ✔ **only bot** | ✖                    | ✖         |
-| Manage Channels          | ✖ _(see note)_ | ✖                    | ✖         |
-| **Administrator**        | **never**      | **never**            | **never** |
+| Permission               | Guardian                       | Companion            | Labs      |
+| ------------------------ | ------------------------------ | -------------------- | --------- |
+| View Channels            | ✔                              | ✔                    | ✔         |
+| Send Messages            | ✔                              | ✔                    | ✔         |
+| Send Messages in Threads | ✔                              | ✔                    | ✔         |
+| Read Message History     | ✔                              | ✔                    | ✔         |
+| Embed Links              | ✔                              | ✔                    | ✔         |
+| Attach Files             | ✔                              | ✖ _(Phase 3 review)_ | ✔         |
+| Add Reactions            | ✖                              | ✔                    | ✔         |
+| Use Application Commands | ✔                              | ✔                    | ✔         |
+| Manage Messages          | ✔ `/purge`                     | ✖                    | ✖         |
+| Manage Threads           | ✔                              | ✖                    | ✖         |
+| Create Public Threads    | ✖                              | ✖                    | ✔         |
+| Manage Events            | ✖                              | ✔ _(Phase 3)_        | ✖         |
+| Kick Members             | ✔                              | ✖                    | ✖         |
+| Ban Members              | ✔                              | ✖                    | ✖         |
+| Moderate Members         | ✔ (timeout)                    | ✖                    | ✖         |
+| Manage Roles             | ✔ **only bot**                 | ✖                    | ✖         |
+| Manage Channels          | ✔ `/guardian channel slowmode` | ✖                    | ✖         |
+| **Administrator**        | **never**                      | **never**            | **never** |
 
-Note: `/lock`, `/unlock` and `/slowmode` are implemented in Phase 2 via **channel
-permission overwrites and rate-limit edits on specific configured channels**, which
-`Manage Roles` + `Manage Channels` would normally cover. The permission decision for
-those three commands is deliberately deferred to Phase 2 so we grant the narrowest
-option that actually works, rather than pre-granting `Manage Channels` now.
+Note (settled in Phase 2): the three channel commands split across two
+permissions rather than taking the broader one for both.
+
+- **`/guardian channel lock` and `unlock`** edit the `@everyone` Send Messages
+  overwrite on one channel. That is a permission-overwrite edit, which **Manage
+  Roles** already covers — Guardian holds it for the onboarding lifecycle, so
+  these two commands need nothing new.
+- **`/guardian channel slowmode`** edits the channel's rate limit, which is a
+  channel property rather than an overwrite. That genuinely requires **Manage
+  Channels**, so it is granted, and it is the only reason Guardian holds it.
+
+Manage Channels would also have covered lock and unlock. It is deliberately not
+used for them: it is the broader permission, and routing two of the three
+commands through the narrower one keeps the blast radius of a compromised bot
+token smaller. Guardian's invite integer is unchanged by Phase 2 — Manage
+Channels was already in the baseline granted at Phase 0.
 
 ### Role hierarchy requirement
 
