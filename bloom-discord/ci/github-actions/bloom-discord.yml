@@ -1,0 +1,211 @@
+# Bloom Discord — continuous integration.
+#
+# NOT ACTIVE UNTIL INSTALLED. Copy this file to .github/workflows/ to enable it;
+# see the README beside it for why it is not already there.
+#
+# Scoped to `bloom-discord/**` by path filter. The Bloom app at the repository
+# root is a separate project with its own toolchain (npm/bun, Vite), and running
+# this pipeline on a change to a React component would be noise that teaches
+# people to ignore a red tick.
+#
+# The pipeline mirrors the local verification loop exactly — format, lint,
+# build, typecheck tests, unit tests, integration tests — because a CI that
+# checks a different set of things than a developer can run locally is a CI
+# that fails for reasons nobody can reproduce.
+
+name: Bloom Discord
+
+on:
+  push:
+    # Only the trunk. Branch pushes are covered by the pull_request trigger, and
+    # running both means every push to an open PR burns two identical runs.
+    branches: [main]
+    paths:
+      - 'bloom-discord/**'
+      - '.github/workflows/bloom-discord.yml'
+  pull_request:
+    paths:
+      - 'bloom-discord/**'
+      - '.github/workflows/bloom-discord.yml'
+
+# A new push supersedes an in-flight run on the same ref. Queuing five runs of
+# the same branch to all report on stale code wastes minutes and tells nobody
+# anything.
+concurrency:
+  group: bloom-discord-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only by default. Nothing in this pipeline writes to the repository, and
+# a token that can is a token that can be abused by a malicious dependency.
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: bloom-discord
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      # A real PostgreSQL, because the integration tests make claims about what
+      # PostgreSQL does — row locks, CHECK constraints, concurrent counter
+      # allocation. Those cannot be verified against a mock, which is the whole
+      # reason they are separated from the unit tests.
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: bloom
+          POSTGRES_PASSWORD: bloom
+          POSTGRES_DB: bloom_discord_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bloom -d bloom_discord_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      # Placeholders. The platform config refuses to load without all three bot
+      # tokens, and these satisfy its shape check without being credentials:
+      # they are literal filler, they are public, and they cannot authenticate
+      # against anything. Nothing in CI connects to Discord.
+      DISCORD_GUARDIAN_TOKEN: MTAwMDAwMDAwMDAwMDAwMDAx.CIONLY.notarealtokennotarealtokennotarealtoken1
+      DISCORD_COMPANION_TOKEN: MTAwMDAwMDAwMDAwMDAwMDAy.CIONLY.notarealtokennotarealtokennotarealtoken2
+      DISCORD_LABS_TOKEN: MTAwMDAwMDAwMDAwMDAwMDAz.CIONLY.notarealtokennotarealtokennotarealtoken3
+      DISCORD_GUARDIAN_CLIENT_ID: '100000000000000001'
+      DISCORD_COMPANION_CLIENT_ID: '100000000000000002'
+      DISCORD_LABS_CLIENT_ID: '100000000000000003'
+      DISCORD_GUILD_ID: '100000000000000009'
+
+      DATABASE_URL: postgresql://bloom:bloom@localhost:5432/bloom_discord_test
+      DATABASE_SCHEMA: bloom_discord
+
+      NODE_ENV: test
+      BLOOM_ENVIRONMENT: development
+      LOG_LEVEL: error
+      LOG_PRETTY: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.6.0
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          # Matches `engines.node`. Pinned rather than `lts/*` so a new Node
+          # release cannot turn a green branch red overnight.
+          node-version: 24.x
+          cache: pnpm
+          cache-dependency-path: bloom-discord/pnpm-lock.yaml
+
+      - name: Install dependencies
+        # --frozen-lockfile: a CI run that silently resolves a different tree
+        # than the committed lockfile is not verifying what will be deployed.
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm run format:check
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Build
+        run: pnpm exec tsc --build
+
+      - name: Typecheck tests
+        # Separate from the build on purpose. Test files are not in the build's
+        # project graph, so a type error in a test is invisible to both `tsc
+        # --build` and Vitest — which strips types rather than checking them.
+        run: pnpm exec tsc -p tsconfig.test.json
+
+      - name: Unit tests
+        # Fast feedback before the database is involved. Integration tests are
+        # opt-in and do not run without BLOOM_INTEGRATION_TESTS.
+        run: pnpm exec vitest run
+
+      - name: Apply migrations
+        # The compiled CLI, not tsx — the same command production runs, so a
+        # migration path that only works under a dev-dependency fails here
+        # rather than during a deploy.
+        run: node packages/database/dist/cli/migrate.js
+
+      - name: Verify migrations are idempotent
+        # Re-running must be a no-op. A migration that is not safe to re-apply
+        # will eventually be re-applied — by a retried deploy, by two replicas
+        # starting together — and finding that out here is free.
+        run: node packages/database/dist/cli/migrate.js
+
+      - name: Integration tests
+        env:
+          BLOOM_INTEGRATION_TESTS: '1'
+        run: pnpm exec vitest run
+
+  image:
+    name: Container image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Only after the code is known good. Spending four minutes building an
+    # image for a branch that does not compile helps nobody.
+    needs: verify
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: bloom-discord
+          # Built, never pushed. This job answers "does the Dockerfile still
+          # work" — publishing is a release decision, not a CI side effect.
+          push: false
+          load: true
+          tags: bloom-discord:ci
+          build-args: |
+            BLOOM_VERSION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Inspect the image
+        # Deliberately not a "does the bot start" test: starting it requires a
+        # Discord token and a database, and a smoke test that needs credentials
+        # is a smoke test that gets disabled. These are the things that can
+        # silently break in a Dockerfile and pass every other check in this
+        # pipeline — a build stage that compiled nothing, a COPY that missed a
+        # workspace, or a base image change that reintroduces root.
+        run: |
+          set -euo pipefail
+
+          for bot in guardian companion labs; do
+            docker run --rm --entrypoint test bloom-discord:ci \
+              -f "/app/apps/$bot/dist/main.js"
+            echo "entry point present: $bot"
+          done
+
+          docker run --rm --entrypoint test bloom-discord:ci \
+            -f /app/packages/database/dist/cli/migrate.js
+          echo "migration CLI present"
+
+          user=$(docker run --rm --entrypoint id bloom-discord:ci -un)
+          if [ "$user" != "node" ]; then
+            echo "Image runs as '$user'; it must run as the unprivileged node user." >&2
+            exit 1
+          fi
+          echo "runs as: $user"
+
+          major=$(docker run --rm --entrypoint node bloom-discord:ci -p 'process.versions.node.split(".")[0]')
+          if [ "$major" -lt 24 ]; then
+            echo "Image ships Node $major; engines.node requires >= 24.17." >&2
+            exit 1
+          fi
+          echo "node major: $major"

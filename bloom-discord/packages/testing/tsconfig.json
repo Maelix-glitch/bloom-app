@@ -1,0 +1,41 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "dist"],
+  "references": [
+    {
+      "path": "../shared-types"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../logging"
+    },
+    {
+      "path": "../config"
+    },
+    {
+      "path": "../database"
+    },
+    {
+      "path": "../permissions"
+    },
+    {
+      "path": "../embeds"
+    },
+    {
+      "path": "../commands"
+    },
+    {
+      "path": "../events"
+    },
+    {
+      "path": "../discord"
+    }
+  ]
+}
