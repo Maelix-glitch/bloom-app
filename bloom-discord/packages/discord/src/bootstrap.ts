@@ -17,7 +17,7 @@ import {
 } from '@bloom/config';
 import {
   createDatabase,
-  createRepositories,
+  createRepositoriesFor,
   type Database,
   type Repositories,
 } from '@bloom/database';
@@ -216,7 +216,14 @@ export async function startBotProcess<TDeps>(
       `Database reachable in ${String(ping.latencyMs)}ms.`,
     );
 
-    const repositories = createRepositories(database);
+    /*
+     * Repositories are constructed for this specific bot. Every one of them is
+     * still built — they are stateless wrappers over the shared connection —
+     * but the caller receives a view narrowed to the bot's capabilities, so an
+     * app that reaches outside its lane fails to compile rather than silently
+     * writing another bot's tables.
+     */
+    const repositories = createRepositoriesFor(options.bot, database);
 
     /*
      * 4. The Discord client, and the services built on it.
