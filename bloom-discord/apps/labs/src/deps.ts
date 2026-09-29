@@ -1,5 +1,5 @@
 import type { PlatformConfig } from '@bloom/config';
-import type { Repositories } from '@bloom/database';
+import type { LabsRepositories } from '@bloom/database';
 import type { GuildQueryService, MessagingService } from '@bloom/discord';
 import type { Logger } from '@bloom/logging';
 import type { IntakeService } from './features/intake/service.js';
@@ -20,7 +20,13 @@ export interface LabsDeps {
   readonly bot: 'labs';
   readonly config: PlatformConfig;
   readonly logger: Logger;
-  readonly repositories: Repositories;
+  /**
+   * Narrowed to Labs' capabilities: the labs repository, plus the universal
+   * audit, jobs, settings and telemetry. Identity, rewards, awards, moderation,
+   * cases, onboarding and retention are absent — Labs runs the beta programme
+   * and nothing else.
+   */
+  readonly repositories: LabsRepositories;
 
   readonly guilds: GuildQueryService;
   readonly messaging: MessagingService;
