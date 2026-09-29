@@ -1,5 +1,5 @@
 import type { PlatformConfig } from '@bloom/config';
-import type { Repositories } from '@bloom/database';
+import type { CompanionRepositories } from '@bloom/database';
 import type {
   GuildQueryService,
   JobAdminDeps,
@@ -25,7 +25,14 @@ import type { RewardsService } from './features/rewards/service.js';
 export interface CompanionDeps extends JobAdminDeps {
   readonly config: PlatformConfig;
   readonly logger: Logger;
-  readonly repositories: Repositories;
+  /**
+   * Narrowed to Companion's capabilities: rewards, awards, cooldowns,
+   * idempotency, plus the universal audit, jobs, settings and telemetry. The
+   * onboarding repository is deliberately absent — Companion reads onboarding
+   * state through Guardian's published surface and can no longer write it even
+   * by accident. Moderation, cases, identity and retention are absent too.
+   */
+  readonly repositories: CompanionRepositories;
 
   readonly guilds: GuildQueryService;
   readonly messaging: MessagingService;

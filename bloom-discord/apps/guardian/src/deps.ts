@@ -1,5 +1,5 @@
 import type { PlatformConfig } from '@bloom/config';
-import type { Repositories } from '@bloom/database';
+import type { GuardianRepositories } from '@bloom/database';
 import type {
   ChannelModerationService,
   JobAdminDeps,
@@ -31,7 +31,13 @@ import type { CaseService } from './features/moderation/case-service.js';
 export interface GuardianDeps extends JobAdminDeps {
   readonly config: PlatformConfig;
   readonly logger: Logger;
-  readonly repositories: Repositories;
+  /**
+   * Narrowed to Guardian's capabilities: identity, onboarding, moderation,
+   * cases, retention, cooldowns, idempotency, plus the universal audit, jobs,
+   * settings and telemetry. Rewards, awards and labs are absent — Guardian
+   * enforces the rules, it does not run the economy or the beta programme.
+   */
+  readonly repositories: GuardianRepositories;
 
   readonly guilds: GuildQueryService;
   readonly roles: RoleService;
