@@ -93,6 +93,41 @@ export interface ReportRow {
   readonly createdAt: Date;
 }
 
+/**
+ * A report in a list, deliberately without its text.
+ *
+ * `ReportRow.description` is private: it is the reporter's account of what
+ * happened, often naming people. A queue view is skim-read, screenshotted and
+ * pasted into staff channels, so the safest design is one where the text is not
+ * in the row at all — reading it requires asking for a single report by case
+ * number, which is a separate, deliberate act. This is the privacy rule
+ * enforced by the schema of the result rather than by reviewer discipline.
+ */
+export interface ReportSummaryRow {
+  readonly id: string;
+  readonly caseId: string;
+  readonly caseNumber: number;
+  readonly caseStatus: CaseStatus;
+  readonly reporterId: UserId;
+  readonly category: ReportCategory;
+  readonly targetUserId: UserId | null;
+  readonly assignedTo: UserId | null;
+  readonly createdAt: Date;
+}
+
+/** Statuses a report is still waiting on. The default view for staff. */
+export const ACTIVE_CASE_STATUSES: readonly CaseStatus[] = [
+  'ESCALATED',
+  'OPEN',
+  'IN_REVIEW',
+];
+
+export interface ReportListFilter {
+  /** Restrict to one case status. Omitted means every unresolved status. */
+  readonly status?: CaseStatus | null;
+  readonly limit?: number;
+}
+
 export type CaseTransitionOutcome =
   | { readonly kind: 'applied'; readonly from: CaseStatus; readonly to: CaseStatus }
   | { readonly kind: 'already_in_state'; readonly status: CaseStatus }
@@ -116,9 +151,21 @@ export interface TransitionCaseInput {
   readonly correlationId?: CorrelationId | null;
 }
 
+/**
+ * Whether a case has an owner.
+ *
+ * Separate from {@link CaseListFilter.assignedTo} because that field is
+ * truthy-checked: passing `null` means "do not filter", so it cannot ask for
+ * cases with nobody assigned — which is the single most useful triage question
+ * staff have. A distinct field says it without changing what `assignedTo`
+ * already means to existing callers.
+ */
+export type CaseAssignmentFilter = 'assigned' | 'unassigned';
+
 export interface CaseListFilter {
   readonly status?: CaseStatus | null;
   readonly assignedTo?: UserId | null;
+  readonly assignment?: CaseAssignmentFilter | null;
   readonly subjectId?: UserId | null;
   readonly limit?: number;
 }
@@ -134,6 +181,16 @@ export interface CaseRepository {
   list(guildId: GuildId, filter?: CaseListFilter): Promise<readonly CaseRow[]>;
   listEvents(caseId: string, limit?: number): Promise<readonly CaseEventRow[]>;
   findReport(caseId: string): Promise<ReportRow | null>;
+
+  /**
+   * Reports awaiting staff attention, newest-urgent first.
+   *
+   * Returns summaries, never the report text — see {@link ReportSummaryRow}.
+   */
+  listReports(
+    guildId: GuildId,
+    filter?: ReportListFilter,
+  ): Promise<readonly ReportSummaryRow[]>;
 
   transitionStatus(
     input: TransitionCaseInput,
@@ -360,6 +417,13 @@ export class PostgresCaseRepository extends BaseRepository implements CaseReposi
         WHERE guild_id = ${guildId}
           ${filter?.status ? sql`AND status = ${filter.status}` : sql``}
           ${filter?.assignedTo ? sql`AND assigned_to = ${filter.assignedTo}` : sql``}
+          ${
+            filter?.assignment === 'assigned'
+              ? sql`AND assigned_to IS NOT NULL`
+              : filter?.assignment === 'unassigned'
+                ? sql`AND assigned_to IS NULL`
+                : sql``
+          }
           ${filter?.subjectId ? sql`AND subject_id = ${filter.subjectId}` : sql``}
         ORDER BY
           -- Open work first, oldest at the top; everything settled after it.
@@ -408,6 +472,60 @@ export class PostgresCaseRepository extends BaseRepository implements CaseReposi
         toStatus: row.to_status,
         actorId: row.actor_id,
         body: row.body,
+        createdAt: row.created_at,
+      }));
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async listReports(
+    guildId: GuildId,
+    filter?: ReportListFilter,
+  ): Promise<readonly ReportSummaryRow[]> {
+    const sql = this.conn();
+    const limit = Math.min(Math.max(filter?.limit ?? 20, 1), 100);
+    const statuses = filter?.status ? [filter.status] : ACTIVE_CASE_STATUSES;
+    try {
+      const rows = await sql<
+        {
+          id: string;
+          case_id: string;
+          case_number: number;
+          status: CaseStatus;
+          reporter_id: UserId;
+          category: ReportCategory;
+          target_user_id: UserId | null;
+          assigned_to: UserId | null;
+          created_at: Date;
+        }[]
+      >`
+        SELECT r.id, r.case_id, r.reporter_id, r.category, r.target_user_id,
+               r.created_at, c.case_number, c.status, c.assigned_to
+        FROM ${sql(this.schema)}.reports r
+        JOIN ${sql(this.schema)}.moderation_cases c ON c.id = r.case_id
+        WHERE c.guild_id = ${guildId}
+          AND c.status = ANY(${statuses as string[]})
+        ORDER BY
+          CASE c.status
+            WHEN 'ESCALATED' THEN 0
+            WHEN 'OPEN' THEN 1
+            WHEN 'IN_REVIEW' THEN 2
+            WHEN 'RESOLVED' THEN 3
+            ELSE 4
+          END,
+          r.created_at ASC
+        LIMIT ${limit}
+      `;
+      return rows.map((row) => ({
+        id: row.id,
+        caseId: row.case_id,
+        caseNumber: row.case_number,
+        caseStatus: row.status,
+        reporterId: row.reporter_id,
+        category: row.category,
+        targetUserId: row.target_user_id,
+        assignedTo: row.assigned_to,
         createdAt: row.created_at,
       }));
     } catch (error) {

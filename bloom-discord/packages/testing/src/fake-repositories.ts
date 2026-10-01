@@ -22,6 +22,7 @@ import {
   type UserId,
 } from '@bloom/shared-types';
 import { localDateIn, localDaysBetween, type LocalDate } from '@bloom/utils';
+import { ACTIVE_CASE_STATUSES } from '@bloom/database';
 import type {
   AuditEventInput,
   AwardInput,
@@ -51,7 +52,9 @@ import type {
   OpenCaseInput,
   RecordActionInput,
   ReportInput,
+  ReportListFilter,
   ReportRow,
+  ReportSummaryRow,
   TransitionCaseInput,
   CooldownResult,
   GuildRecord,
@@ -899,6 +902,49 @@ export class FakeCaseRepository implements CaseRepository {
 
   public constructor(private readonly now: () => Date) {}
 
+  public listReports(
+    guildId: GuildId,
+    filter?: ReportListFilter,
+  ): Promise<readonly ReportSummaryRow[]> {
+    const statuses = filter?.status ? [filter.status] : ACTIVE_CASE_STATUSES;
+    const limit = Math.min(Math.max(filter?.limit ?? 20, 1), 100);
+    const rank: Readonly<Record<CaseStatus, number>> = {
+      ESCALATED: 0,
+      OPEN: 1,
+      IN_REVIEW: 2,
+      RESOLVED: 3,
+      CLOSED: 4,
+    };
+
+    const summaries = this.reports
+      .flatMap((report) => {
+        const parent = this.cases.find((row) => row.id === report.caseId);
+        if (parent?.guildId !== guildId) return [];
+        if (!statuses.includes(parent.status)) return [];
+        return [
+          {
+            id: report.id,
+            caseId: report.caseId,
+            caseNumber: parent.caseNumber,
+            caseStatus: parent.status,
+            reporterId: report.reporterId,
+            category: report.category,
+            targetUserId: report.targetUserId,
+            assignedTo: parent.assignedTo,
+            createdAt: report.createdAt,
+          } satisfies ReportSummaryRow,
+        ];
+      })
+      .sort(
+        (a, b) =>
+          rank[a.caseStatus] - rank[b.caseStatus] ||
+          a.createdAt.getTime() - b.createdAt.getTime(),
+      )
+      .slice(0, limit);
+
+    return Promise.resolve(summaries);
+  }
+
   public open(
     input: OpenCaseInput,
     report?: ReportInput,
@@ -991,6 +1037,11 @@ export class FakeCaseRepository implements CaseRepository {
       .filter((c) => c.guildId === guildId)
       .filter((c) => !filter?.status || c.status === filter.status)
       .filter((c) => !filter?.assignedTo || c.assignedTo === filter.assignedTo)
+      .filter((c) => {
+        if (filter?.assignment === 'assigned') return c.assignedTo !== null;
+        if (filter?.assignment === 'unassigned') return c.assignedTo === null;
+        return true;
+      })
       .filter((c) => !filter?.subjectId || c.subjectId === filter.subjectId)
       .sort(
         (a, b) =>

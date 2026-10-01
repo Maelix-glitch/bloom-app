@@ -15,6 +15,7 @@ import {
   reportCommand,
 } from './features/moderation/commands.js';
 import { JOBS_GROUP_DESCRIPTION, jobSubcommands } from '@bloom/discord';
+import { STAFF_GROUP_DESCRIPTION, staffSubcommands } from './features/staff/commands.js';
 import type { GuardianDeps } from './deps.js';
 
 /**
@@ -29,10 +30,12 @@ import type { GuardianDeps } from './deps.js';
  * they cannot drift, and two features contributing the same path throws at
  * import rather than silently shadowing.
  *
- * The single policy is deliberate. Every branch of `/guardian` is staff-facing,
- * and a per-subcommand policy is one somebody eventually forgets — inheritance
- * makes the safe thing the default. Individual handlers may still demand more:
- * `/ban` and `/purge` are Administrator-only on their own commands.
+ * The namespace policy is the floor, not the ceiling. Every branch of
+ * `/guardian` is staff-facing, so `requireModerator()` is inherited and a
+ * branch that forgets to think about authorization still cannot be reached by a
+ * member. On top of that, the case, member and staff branches name the
+ * StaffCapability they need, which is strictly narrowing: a branch may demand
+ * more than the namespace, never less.
  */
 export const guardianNamespaceCommand: BloomCommand<GuardianDeps> = namespaceCommand({
   bot: 'guardian',
@@ -48,11 +51,13 @@ export const guardianNamespaceCommand: BloomCommand<GuardianDeps> = namespaceCom
     case: 'Open, work and close moderation cases.',
     member: 'A member’s moderation record.',
     channel: 'Slowmode and channel locking.',
+    staff: STAFF_GROUP_DESCRIPTION,
     jobs: JOBS_GROUP_DESCRIPTION,
   },
   contributions: [
     ...onboardingSubcommands,
     ...moderationSubcommands,
+    ...staffSubcommands,
     // Shared with Companion and Labs: one implementation of the job surface,
     // parameterised by deps, rather than a copy per bot.
     ...jobSubcommands<GuardianDeps>(),
