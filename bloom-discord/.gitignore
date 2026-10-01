@@ -7,10 +7,17 @@ dist/
 *.tsbuildinfo
 coverage/
 
-# Secrets — never commit. `.env.example` is the only env file in git.
+# Secrets — never commit. Only `.example` templates are tracked.
 .env
 .env.*
 !.env.example
+
+# Per-service production environment files (docker-compose.prod.yml).
+# `.env` above does not cover these: a gitignore pattern with no slash matches
+# a basename, and `guardian.env` is not `.env`. Without this line the file
+# holding Guardian's token would be committable.
+deploy/env/*.env
+!deploy/env/*.env.example
 
 # Logs
 *.log

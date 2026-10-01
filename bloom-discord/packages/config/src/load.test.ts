@@ -163,6 +163,48 @@ describe('resolveBotConfig', () => {
     expect(guardian.credentials.clientId).toBe('900000000000009001');
   });
 
+  it('hands a bot its own credentials and no other bot\u2019s', () => {
+    /*
+     * A running process should not be able to read a credential for a bot it
+     * is isolated from. Guardian is the worst case: it is the only bot with
+     * Manage Roles, so a crash dump or a careless diagnostic in Guardian
+     * leaking Companion's token would hand an attacker the quieter bot to
+     * move through.
+     *
+     * The loader still reads all three from one environment -- the
+     * diagnostics CLI legitimately reports on all of them -- so the
+     * narrowing happens at `resolveBotConfig`, which is the boundary where a
+     * process stops being "the platform" and starts being one bot.
+     */
+    const config = loadPlatformConfig(
+      baseEnv({
+        ...GUARDIAN_ROLES,
+        DISCORD_COMPANION_TOKEN:
+          'MTIzNDU2Nzg5MDEyMzQ1Njc5.GaBcDf.companion-token-value-here',
+        DISCORD_COMPANION_CLIENT_ID: '900000000000009002',
+        DISCORD_LABS_TOKEN: 'MTIzNDU2Nzg5MDEyMzQ1Njgw.GaBcDg.labs-token-value-here',
+        DISCORD_LABS_CLIENT_ID: '900000000000009003',
+      }),
+    );
+
+    // The platform-wide view still has all three; that is what the CLI reads.
+    expect(config.bots.guardian).not.toBeNull();
+    expect(config.bots.companion).not.toBeNull();
+    expect(config.bots.labs).not.toBeNull();
+
+    const guardian = resolveBotConfig('guardian', config);
+
+    expect(guardian.credentials.token).toContain('guardian-token-value-here');
+    expect(guardian.platform.bots.guardian).not.toBeNull();
+    expect(guardian.platform.bots.companion).toBeNull();
+    expect(guardian.platform.bots.labs).toBeNull();
+
+    // Nothing reachable from the bot's config mentions another bot's token.
+    const reachable = JSON.stringify(guardian);
+    expect(reachable).not.toContain('companion-token-value-here');
+    expect(reachable).not.toContain('labs-token-value-here');
+  });
+
   it('fails clearly for a bot with no token', () => {
     const config = loadPlatformConfig(baseEnv(GUARDIAN_ROLES));
     expect(() => resolveBotConfig('companion', config)).toThrow(

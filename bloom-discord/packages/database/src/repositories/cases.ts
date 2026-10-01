@@ -561,6 +561,11 @@ export class PostgresCaseRepository extends BaseRepository implements CaseReposi
                target_channel_id, target_message_id, description, created_at
         FROM ${sql(this.schema)}.reports
         WHERE case_id = ${caseId}
+        -- Only the first row is read. A case is opened from one report, but
+        -- the schema does not forbid a second, and fetching every row to
+        -- discard all but one is a scan waiting to matter.
+        ORDER BY created_at ASC, id ASC
+        LIMIT 1
       `;
       const row = rows[0];
       if (!row) return null;

@@ -3,6 +3,7 @@ import type { AuthorizationContext, AuthorizationPolicy } from '@bloom/permissio
 import type { BloomMessage } from '@bloom/embeds';
 import type { CommandInvocation } from './invocation.js';
 import type { SlashCommandSpec } from './spec.js';
+import type { SubcommandContribution } from './namespace-command.js';
 
 /**
  * A command.
@@ -24,6 +25,16 @@ export interface BloomCommand<TDeps = unknown> {
   /** Which bot owns this command. Used to prevent cross-bot registration mistakes. */
   readonly bot: BotName;
   readonly policy: AuthorizationPolicy;
+
+  /**
+   * The subcommands this command routes to, when it is a namespace command.
+   *
+   * Exposed for auditing, not for dispatch — routing uses the internal map.
+   * The command-surface census walks this to prove that every branch of
+   * every bot has an authorization decision recorded against it, which is
+   * only possible if the branches can be enumerated from outside.
+   */
+  readonly contributions?: readonly SubcommandContribution<TDeps>[];
 
   /**
    * Whether the response is visible only to the caller.

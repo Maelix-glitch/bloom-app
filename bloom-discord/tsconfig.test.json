@@ -36,6 +36,7 @@
     "packages/**/*.test.ts",
     "apps/**/*.test.ts",
     "apps/**/*.harness.ts",
+    "tests/**/*.test.ts",
     "scripts/**/*.ts"
   ]
 }

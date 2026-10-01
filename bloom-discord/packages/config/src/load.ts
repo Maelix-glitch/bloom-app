@@ -435,5 +435,28 @@ export function resolveBotConfig(botName: BotName, platform: PlatformConfig): Bo
 
   collector.throwIfFailed(`Bloom ${botName} configuration`);
 
-  return { botName, credentials: credentials!, platform };
+  /*
+   * Hand back a platform config that knows about this bot's credentials and
+   * no others.
+   *
+   * `PlatformConfig.bots` is the full set, because the loader reads one
+   * environment and the diagnostics CLI legitimately reports on all three.
+   * A running bot is different: Guardian holding Companion's token means a
+   * bug, a dependency, or a crash dump in Guardian can leak the credential
+   * for a bot it is supposed to be isolated from — and Guardian is the only
+   * bot with Manage Roles, so it is the worst one to widen.
+   *
+   * Nothing at runtime needs another bot's token. Command registration runs
+   * per bot as a separate process, and the diagnostics CLI takes a
+   * `PlatformConfig` rather than a `BotConfig`. So the narrowing costs
+   * nothing and removes two credentials from each process's reach.
+   */
+  const isolated: PlatformConfig = {
+    ...platform,
+    bots: Object.fromEntries(
+      BOT_NAMES.map((name) => [name, name === botName ? credentials! : null]),
+    ) as PlatformConfig['bots'],
+  };
+
+  return { botName, credentials: credentials!, platform: isolated };
 }

@@ -9,6 +9,9 @@ import type {
 import { BaseRepository } from '../repository.js';
 import { toDatabaseError, type Database, type TransactionSql } from '../client.js';
 
+/** Actions shown for one case. Beyond this the view would be unreadable anyway. */
+const MAX_ACTIONS_PER_CASE = 200;
+
 /**
  * The moderation action log.
  *
@@ -276,6 +279,9 @@ export class PostgresModerationRepository
         FROM ${sql(this.schema)}.moderation_actions
         WHERE case_id = ${caseId}
         ORDER BY created_at ASC, id ASC
+        -- A case accumulates actions over its life. Small in practice, but
+        -- the detail view renders all of them and nothing else caps it.
+        LIMIT ${MAX_ACTIONS_PER_CASE}
       `;
       return rows.map(mapAction);
     } catch (error) {

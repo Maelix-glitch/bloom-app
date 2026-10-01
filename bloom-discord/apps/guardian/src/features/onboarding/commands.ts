@@ -3,6 +3,7 @@ import {
   allOf,
   auditGuardianRolePlacement,
   requireModerator,
+  requireStaffCapability,
   type AuthorizationPolicy,
 } from '@bloom/permissions';
 import { staffEmbed, type BloomMessage } from '@bloom/embeds';
@@ -179,6 +180,23 @@ export const onboardingSubcommands: readonly SubcommandContribution<GuardianDeps
         },
       ],
     },
+    /*
+     * Stated rather than inherited.
+     *
+     * Promoting a member to ❋ Bloom Member is a role transition — the single
+     * highest-trust thing the platform does, and the reason Guardian is the
+     * only bot with Manage Roles. It was reachable by anyone the `/guardian`
+     * namespace admitted, which is moderators, and that is still who should
+     * be doing it: the capability named here is one moderators already hold,
+     * so nothing about who can run this changes today.
+     *
+     * What changes is that it no longer moves when the namespace moves. The
+     * namespace policy is the kind of thing that gets widened for a read —
+     * someone wants `/guardian status` visible to a new helper role — and
+     * every inherited branch widens silently with it. A role transition must
+     * not be one of those branches.
+     */
+    policy: requireStaffCapability('staff.moderation.execute'),
     execute: completeOnboarding,
   },
   {

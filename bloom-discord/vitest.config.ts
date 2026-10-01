@@ -37,7 +37,14 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: false,
-    include: ['packages/**/*.test.ts', 'apps/**/*.test.ts', 'scripts/**/*.test.ts'],
+    include: [
+      'packages/**/*.test.ts',
+      'apps/**/*.test.ts',
+      'scripts/**/*.test.ts',
+      // Cross-cutting audits that span all three bots and therefore belong to
+      // none of them. See tests/README.md.
+      'tests/**/*.test.ts',
+    ],
     exclude: ['**/node_modules/**', '**/dist/**'],
 
     /*
