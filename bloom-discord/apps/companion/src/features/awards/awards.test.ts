@@ -116,8 +116,12 @@ describe('the definitions themselves', () => {
     // Nothing is granted to someone who has done nothing, and nothing is
     // unreachable for someone who has done everything.
     for (const definition of AWARD_DEFINITIONS) {
-      expect(definition.earned(empty)).toBe(false);
-      expect(definition.earned(everything)).toBe(true);
+      expect(definition.earned({ participation: empty, qualifiedReferrals: 0 })).toBe(
+        false,
+      );
+      expect(
+        definition.earned({ participation: everything, qualifiedReferrals: 1_000 }),
+      ).toBe(true);
     }
   });
 });

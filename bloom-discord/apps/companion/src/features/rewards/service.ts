@@ -157,6 +157,19 @@ export interface MemberProfile {
 /** needs to be told their streak is 400 days for it to mean something. */
 const STREAK_WINDOW_DAYS = 120;
 
+export interface AchievementAwardRequest {
+  readonly guildId: GuildId;
+  readonly userId: UserId;
+  /** The definition key, which is what makes the payment idempotent. */
+  readonly awardKey: string;
+  readonly points: number;
+  readonly correlationId?: CorrelationId | null;
+}
+
+export type AchievementAwardResult =
+  | { readonly kind: 'paid'; readonly alreadyPaid: boolean; readonly balance: number }
+  | { readonly kind: 'failed'; readonly reason: 'insufficient' };
+
 export class RewardsService {
   private readonly clock: Clock;
   private readonly logger: Logger;
@@ -383,6 +396,70 @@ export class RewardsService {
     });
 
     return { kind: 'applied', balance: outcome.balance };
+  }
+
+  /**
+   * Pay the points attached to an unlocked achievement.
+   *
+   * The only route by which an award becomes points, and it goes through the
+   * same ledger write as everything else — there is no balance to mutate and
+   * no second economy here.
+   *
+   * The idempotency key is derived from the award rather than from the
+   * attempt: `achievement:{guild}:{user}:{key}`. An award is unique per
+   * member by primary key, so that string is unique per payable event, and a
+   * retry after a crash between the grant and the payment collides with the
+   * ledger's unique index and returns `duplicate`. Two concurrent
+   * evaluations therefore produce one ledger row even if both somehow reach
+   * this method.
+   */
+  public async awardAchievement(
+    request: AchievementAwardRequest,
+  ): Promise<AchievementAwardResult> {
+    if (request.points <= 0) {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `Achievement ${request.awardKey} asked to pay ${String(request.points)} points; achievement rewards must be positive.`,
+      });
+    }
+
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.userId,
+      kind: 'achievement_reward',
+      points: request.points,
+      // The schema forbids a reason and an actor on automatic kinds; the
+      // award key in the audit row is the better record anyway.
+      reason: null,
+      awardedBy: null,
+      idempotencyKey: `achievement:${request.guildId}:${request.userId}:${request.awardKey}`,
+      correlationId: request.correlationId ?? null,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      // Unreachable: the amount is validated positive above, and the
+      // insufficient rule only applies to debits. Handled rather than
+      // asserted, for the same reason as the referral path.
+      return { kind: 'failed', reason: 'insufficient' };
+    }
+
+    const alreadyPaid = outcome.kind === 'duplicate';
+
+    if (!alreadyPaid) {
+      await this.options.repositories.audit.append({
+        guildId: request.guildId,
+        botName: 'companion',
+        event: 'rewards.achievement',
+        targetId: request.userId,
+        // Info, not warn: a published rule applied by the platform, with no
+        // staff discretion involved.
+        severity: 'info',
+        source: 'awards',
+        correlationId: request.correlationId ?? null,
+        details: { points: request.points, award: request.awardKey },
+      });
+    }
+
+    return { kind: 'paid', alreadyPaid, balance: outcome.balance };
   }
 
   /**

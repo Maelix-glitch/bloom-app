@@ -42,6 +42,42 @@ const POINT_KIND_LABELS: Readonly<Record<PointKind, string>> = {
  * now" is answered by the balance, the rank, and what they have earned, not by
  * any one of them.
  */
+/**
+ * What this member is closest to earning.
+ *
+ * Exists for one staff question that comes up constantly — "is this person
+ * nearly at something?" — which otherwise takes reading two lists and doing
+ * arithmetic. Ranked by how much is left in absolute terms rather than by
+ * percentage, because "two more check-ins" is what matters to the person
+ * being helped, not "88% of the way to 250".
+ *
+ * Returns null when nothing is measurable: every award held, or everything
+ * outstanding is a non-countable criterion. Staff see no line rather than an
+ * invented one.
+ */
+function nearestLine(
+  milestones: readonly AwardProgress[],
+  achievements: readonly AwardProgress[],
+): string | null {
+  const candidates = [...milestones, ...achievements]
+    .filter((entry) => entry.award === null && entry.measure !== null)
+    .map((entry) => ({
+      name: entry.definition.name,
+      // measure is non-null by the filter above; narrowed here rather than
+      // asserted so a future change to the filter fails to compile.
+      remaining: Math.max(
+        0,
+        (entry.measure?.target ?? 0) - (entry.measure?.current ?? 0),
+      ),
+    }))
+    .sort((a, b) => a.remaining - b.remaining || a.name.localeCompare(b.name));
+
+  const nearest = candidates[0];
+  if (!nearest) return null;
+
+  return `**Next up** ${nearest.name} — ${String(nearest.remaining)} to go`;
+}
+
 export function staffMemberRewardsMessage(input: {
   readonly profile: MemberProfile;
   readonly achievements: readonly AwardProgress[];
@@ -90,7 +126,10 @@ export function staffMemberRewardsMessage(input: {
               }`,
           )
           .join('\n'),
-  ].join('\n');
+    nearestLine(input.milestones, input.achievements),
+  ]
+    .filter((line) => line !== null)
+    .join('\n');
 
   const footer = profile.rewardsEnabled
     ? 'Bloom Rewards is on. Companion data only — the main Bloom app is not connected.'

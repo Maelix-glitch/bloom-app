@@ -19,6 +19,7 @@ import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
+import type { AwardDefinition } from './features/awards/definitions.js';
 import { RewardsService } from './features/rewards/service.js';
 import { ReferralConsumer } from './features/rewards/referral-consumer.js';
 
@@ -81,6 +82,17 @@ export interface CompanionHarnessOptions {
   readonly milestonesChannel?: null;
   /** Fix the clock. Rewards are date-sensitive, so tests need to own "today". */
   readonly now?: () => Date;
+  /**
+   * Replace the award definitions the service evaluates.
+   *
+   * The reason this exists: no shipped definition carries points, and that is
+   * a product decision that should stay true. Proving the point-paying path
+   * works therefore needs a definition that pays, and the only honest place
+   * to put one is a test. Anything passed here is additional to nothing — it
+   * replaces the real list outright, so a test that uses it is clearly not
+   * describing production behaviour.
+   */
+  readonly awardDefinitions?: readonly AwardDefinition[];
 }
 
 export function companionHarness(
@@ -150,6 +162,8 @@ export function companionHarness(
     repositories,
     messaging,
     logger,
+    rewards,
+    ...(options.awardDefinitions ? { definitions: options.awardDefinitions } : {}),
   });
 
   const referralConsumer = new ReferralConsumer({

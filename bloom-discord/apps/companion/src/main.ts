@@ -40,6 +40,7 @@ await runBotMain(() =>
         repositories: context.repositories,
         messaging: context.discord.messaging,
         logger: context.logger,
+        rewards,
       });
 
       const referralConsumer = new ReferralConsumer({
