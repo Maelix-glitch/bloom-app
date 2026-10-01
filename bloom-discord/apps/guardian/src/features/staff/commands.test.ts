@@ -646,15 +646,43 @@ describe('the report list read model', () => {
     expect(await h.repositories.cases.listReports(TEST_GUILD_ID)).toHaveLength(0);
   });
 
-  it('clamps an absurd limit instead of trusting it', async () => {
+  /*
+   * Limit boundaries, in the fake. The same boundaries are asserted against
+   * real SQL in `cases.integration.test.ts`; both exist because the fake is
+   * what every unit test reads through, and a fake that clamps differently
+   * from the database is a lie that only surfaces in production.
+   */
+  it('clamps a limit of zero or less up to one', async () => {
+    await seedReport();
     await seedReport();
 
     expect(
       await h.repositories.cases.listReports(TEST_GUILD_ID, { limit: 0 }),
     ).toHaveLength(1);
     expect(
-      await h.repositories.cases.listReports(TEST_GUILD_ID, { limit: 10_000 }),
+      await h.repositories.cases.listReports(TEST_GUILD_ID, { limit: -5 }),
     ).toHaveLength(1);
+  });
+
+  it('defaults to a bounded page rather than everything', async () => {
+    for (let index = 0; index < 22; index += 1) await seedReport();
+
+    expect(await h.repositories.cases.listReports(TEST_GUILD_ID)).toHaveLength(20);
+  });
+
+  it('refuses to return more than the ceiling, however much is asked for', async () => {
+    for (let index = 0; index < 105; index += 1) await seedReport();
+
+    expect(
+      await h.repositories.cases.listReports(TEST_GUILD_ID, { limit: 10_000 }),
+    ).toHaveLength(100);
+  });
+
+  it('returns an empty list, not a null, when nothing is waiting', async () => {
+    expect(await h.repositories.cases.listReports(TEST_GUILD_ID)).toEqual([]);
+    expect(
+      await h.repositories.cases.listReports(TEST_GUILD_ID, { status: 'CLOSED' }),
+    ).toEqual([]);
   });
 });
 

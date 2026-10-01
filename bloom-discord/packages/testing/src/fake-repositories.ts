@@ -938,7 +938,11 @@ export class FakeCaseRepository implements CaseRepository {
       .sort(
         (a, b) =>
           rank[a.caseStatus] - rank[b.caseStatus] ||
-          a.createdAt.getTime() - b.createdAt.getTime(),
+          a.createdAt.getTime() - b.createdAt.getTime() ||
+          // Matches the `r.id ASC` tiebreaker in the SQL. Without it the fake
+          // would be stable where Postgres was not, and the difference would
+          // only show up in production.
+          a.id.localeCompare(b.id, undefined, { numeric: true }),
       )
       .slice(0, limit);
 

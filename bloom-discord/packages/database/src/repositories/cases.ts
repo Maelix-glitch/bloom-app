@@ -486,6 +486,13 @@ export class PostgresCaseRepository extends BaseRepository implements CaseReposi
     const sql = this.conn();
     const limit = Math.min(Math.max(filter?.limit ?? 20, 1), 100);
     const statuses = filter?.status ? [filter.status] : ACTIVE_CASE_STATUSES;
+    /*
+     * The ordering ends on `r.id` deliberately. `created_at` defaults to
+     * `now()`, which in Postgres is the *transaction* timestamp, so two
+     * reports written in one transaction share a value and would come back in
+     * whatever order the plan produced. The identity column is monotonic and
+     * unique, so it settles every tie and the queue is stable across reads.
+     */
     try {
       const rows = await sql<
         {
@@ -514,7 +521,8 @@ export class PostgresCaseRepository extends BaseRepository implements CaseReposi
             WHEN 'RESOLVED' THEN 3
             ELSE 4
           END,
-          r.created_at ASC
+          r.created_at ASC,
+          r.id ASC
         LIMIT ${limit}
       `;
       return rows.map((row) => ({
