@@ -15,6 +15,8 @@ import type {
   ChannelModerationService,
   ChannelSendPermission,
   GuildQueryService,
+  InviteQueryService,
+  InviteUsageSnapshot,
   MemberSnapshot,
   MessagingService,
   ModerationService,
@@ -531,5 +533,45 @@ export class FakeChannelModerationService implements ChannelModerationService {
       deleted: deletable.length,
       skippedTooOld: candidates.length - deletable.length,
     });
+  }
+}
+
+/**
+ * Invite use counts, under test control.
+ *
+ * Attribution is a diff between two readings, so a test needs to say what
+ * each reading contains — including "the read failed", which is the single
+ * most important case and the one a live Discord fixture could never produce
+ * on demand.
+ */
+export class FakeInviteQuery implements InviteQueryService {
+  /** Set to null to simulate a missing Manage Server permission or an outage. */
+  public snapshot: InviteUsageSnapshot | null = { invites: [], vanityUses: null };
+  public reads = 0;
+
+  public readUsage(_guildId: GuildId): Promise<InviteUsageSnapshot | null> {
+    this.reads += 1;
+    return Promise.resolve(this.snapshot);
+  }
+
+  /** Convenience: set the invite list without writing the wrapper each time. */
+  public setInvites(
+    invites: readonly {
+      code: string;
+      uses: number;
+      inviterId?: UserId | null;
+      inviterIsBot?: boolean;
+    }[],
+    vanityUses: number | null = null,
+  ): void {
+    this.snapshot = {
+      invites: invites.map((invite) => ({
+        code: invite.code,
+        uses: invite.uses,
+        inviterId: invite.inviterId ?? null,
+        inviterIsBot: invite.inviterIsBot ?? false,
+      })),
+      vanityUses,
+    };
   }
 }

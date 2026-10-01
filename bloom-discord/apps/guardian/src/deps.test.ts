@@ -34,6 +34,6 @@ describe('GuardianDeps.repositories', () => {
       expect(repositories).toHaveProperty(key);
     }
 
-    expect(BOT_REPOSITORY_CAPABILITIES.guardian).toHaveLength(11);
+    expect(BOT_REPOSITORY_CAPABILITIES.guardian).toHaveLength(12);
   });
 });

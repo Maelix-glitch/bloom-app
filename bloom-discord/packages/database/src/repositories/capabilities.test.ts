@@ -30,6 +30,7 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
       'jobs',
       'moderation',
       'onboarding',
+      'referrals',
       'retention',
       'settings',
       'telemetry',
@@ -43,6 +44,7 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
       'cooldowns',
       'idempotency',
       'jobs',
+      'referrals',
       'rewards',
       'settings',
       'telemetry',
@@ -67,7 +69,7 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
     ]);
 
     expect([...union].sort()).toEqual(ALL_REPOSITORY_KEYS);
-    expect(ALL_REPOSITORY_KEYS).toHaveLength(14);
+    expect(ALL_REPOSITORY_KEYS).toHaveLength(15);
   });
 
   it('keeps jobs, audit, settings and telemetry in every bot', () => {
@@ -111,9 +113,55 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
       'identity',
       'moderation',
       'onboarding',
+      'referrals',
       'retention',
       'rewards',
     ]);
+  });
+
+  /**
+   * The referral handoff is the only thing Guardian and Companion share
+   * beyond the four plumbing repositories.
+   *
+   * This is the architectural claim of the whole feature, so it is asserted
+   * rather than described: if a later change hands Companion `identity`, or
+   * Guardian `rewards`, this fails and names the repository that leaked.
+   */
+  it('shares exactly one domain repository between Guardian and Companion', () => {
+    const PLUMBING = [
+      'audit',
+      'cooldowns',
+      'idempotency',
+      'jobs',
+      'settings',
+      'telemetry',
+    ];
+
+    const shared = BOT_REPOSITORY_CAPABILITIES.guardian
+      .filter((key) =>
+        (BOT_REPOSITORY_CAPABILITIES.companion as readonly string[]).includes(key),
+      )
+      .filter((key) => !PLUMBING.includes(key));
+
+    expect(shared).toEqual(['referrals']);
+  });
+
+  it('keeps the referral handoff away from Labs', () => {
+    expect(BOT_REPOSITORY_CAPABILITIES.labs).not.toContain('referrals');
+    // And Labs gains nothing else from this change.
+    expect(BOT_REPOSITORY_CAPABILITIES.labs).toHaveLength(5);
+  });
+
+  it('still denies Guardian the ledger it is now adjacent to', () => {
+    /*
+     * Guardian can now write a row that causes a payment. It still cannot make
+     * one: the trigger is a request, Companion decides, and `rewards` remains
+     * outside Guardian's set. That separation is the reason the table exists.
+     */
+    expect(BOT_REPOSITORY_CAPABILITIES.guardian).not.toContain('rewards');
+    expect(BOT_REPOSITORY_CAPABILITIES.guardian).not.toContain('awards');
+    expect(BOT_REPOSITORY_CAPABILITIES.companion).not.toContain('identity');
+    expect(BOT_REPOSITORY_CAPABILITIES.companion).not.toContain('onboarding');
   });
 
   it('lists each bot in sorted order with no duplicates, so review diffs stay readable', () => {
@@ -143,7 +191,7 @@ describe('createRepositoriesFor', () => {
      */
     const labs = createRepositoriesFor('labs', stubDatabase);
 
-    // Declared type: five repositories. Actual object: all fourteen.
+    // Declared type: five repositories. Actual object: all fifteen.
     expect(BOT_REPOSITORY_CAPABILITIES.labs).toHaveLength(5);
     expect(Object.keys(labs).sort()).toEqual(ALL_REPOSITORY_KEYS);
   });
@@ -173,6 +221,9 @@ const sink: unknown[] = [];
 export function _guardianBoundaries(repositories: GuardianRepositories): void {
   sink.push(repositories.onboarding, repositories.moderation, repositories.cases);
 
+  // Guardian writes the referral handoff: attribution and qualification.
+  sink.push(repositories.referrals);
+
   // @ts-expect-error Guardian does not run the rewards economy.
   sink.push(repositories.rewards);
   // @ts-expect-error Guardian does not hand out achievements.
@@ -183,6 +234,10 @@ export function _guardianBoundaries(repositories: GuardianRepositories): void {
 
 export function _companionBoundaries(repositories: CompanionRepositories): void {
   sink.push(repositories.rewards, repositories.awards);
+
+  // Companion reads the handoff and pays it. The only table it shares with
+  // Guardian, and the reason it never needs `identity`.
+  sink.push(repositories.referrals);
 
   // @ts-expect-error Only Guardian writes onboarding state; Companion reads it through Guardian.
   sink.push(repositories.onboarding);
@@ -219,4 +274,6 @@ export function _labsBoundaries(repositories: LabsRepositories): void {
   sink.push(repositories.cooldowns);
   // @ts-expect-error Labs claims no idempotency keys.
   sink.push(repositories.idempotency);
+  // @ts-expect-error The referral handoff is between Guardian and Companion only.
+  sink.push(repositories.referrals);
 }

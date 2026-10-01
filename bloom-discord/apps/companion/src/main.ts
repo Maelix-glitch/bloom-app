@@ -20,6 +20,8 @@ import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
 import { RewardsService } from './features/rewards/service.js';
+import { ReferralConsumer } from './features/rewards/referral-consumer.js';
+import { createReferralPaymentJob } from './features/rewards/referral-job.js';
 
 await runBotMain(() =>
   startBotProcess<CompanionDeps>({
@@ -40,6 +42,20 @@ await runBotMain(() =>
         logger: context.logger,
       });
 
+      const referralConsumer = new ReferralConsumer({
+        repositories: context.repositories,
+        rewards,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+        now: () => new Date(),
+        /*
+         * Identifies this process in a claim. The run id would be per-job;
+         * this is per-process, which is the thing an operator looking at a
+         * stuck claim actually wants to know.
+         */
+        workerId: `companion:${String(process.pid)}`,
+      });
+
       return {
         bot: 'companion',
         config: context.platform,
@@ -51,6 +67,7 @@ await runBotMain(() =>
         jobSettings: context.jobSettings,
         rewards,
         awards,
+        referralConsumer,
       };
     },
 
@@ -65,6 +82,7 @@ await runBotMain(() =>
        * list that looks like a broken deployment.
        */
       context.scheduler.register(createDailyCheckInJob(deps));
+      context.scheduler.register(createReferralPaymentJob(deps));
 
       const registry = new CommandRegistry<CompanionDeps>('companion').registerAll(
         companionCommands,

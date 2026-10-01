@@ -7,6 +7,7 @@ import {
   type GuildId,
   type UserId,
 } from '@bloom/shared-types';
+import { REFERRAL_STATES, type ReferralState } from '@bloom/database';
 import { sanitiseUserText } from '@bloom/utils';
 import type { CompanionDeps } from '../../deps.js';
 import * as awardCopy from '../awards/messages.js';
@@ -250,6 +251,39 @@ const REASON_OPTION = {
   maxLength: REASON_MAX_LENGTH,
 } as const;
 
+/**
+ * Recent referral activity, for staff.
+ *
+ * A read of the handoff table and nothing else — no aggregation, no charts,
+ * no per-inviter ranking. The question this answers is the operational one:
+ * are referrals being attributed, and is anything stuck? An inviter
+ * leaderboard would be a different feature with a different risk, because
+ * publishing who recruits best is how a community feature becomes a contest.
+ */
+async function staffReferrals(
+  invocation: CommandInvocation,
+  deps: CompanionDeps,
+): Promise<BloomMessage> {
+  const guildId = requireGuild(invocation);
+  const requested = invocation.options.getString('state');
+  const state = isReferralState(requested) ? requested : undefined;
+  const limit = invocation.options.getInteger('limit') ?? DEFAULT_REFERRAL_PAGE;
+
+  const rows = await deps.repositories.referrals.listRecent(guildId, {
+    ...(state ? { state } : {}),
+    limit,
+  });
+
+  return copy.referralActivity(rows, state ?? null);
+}
+
+/** Narrow a client-supplied string to the closed set the repository accepts. */
+function isReferralState(value: string | null): value is ReferralState {
+  return value !== null && (REFERRAL_STATES as readonly string[]).includes(value);
+}
+
+const DEFAULT_REFERRAL_PAGE = 10;
+
 export const rewardsStaffSubcommands: readonly SubcommandContribution<CompanionDeps>[] = [
   {
     group: 'admin',
@@ -341,5 +375,46 @@ export const rewardsStaffSubcommands: readonly SubcommandContribution<CompanionD
       ],
     },
     execute: staffLeaderboard,
+  },
+  {
+    group: 'admin',
+    /*
+     * The read capability, not the award one. Looking at referral activity is
+     * diagnosis; it grants nothing and changes nothing. Payment remains
+     * Companion's scheduled job, which no command can trigger — there is
+     * deliberately no "pay this referral now" button, because a manual
+     * override of an idempotent payment path is how exactly-once becomes
+     * at-least-once.
+     */
+    policy: requireStaffCapability('staff.rewards.read'),
+    spec: {
+      name: 'referrals',
+      description: 'Recent referral activity and why referrals were not paid.',
+      options: [
+        {
+          name: 'state',
+          description: 'Only referrals in this state.',
+          type: 'string',
+          required: false,
+          choices: [
+            { name: 'Waiting to qualify', value: 'pending' },
+            { name: 'Qualified, awaiting payment', value: 'qualified' },
+            { name: 'Paid', value: 'paid' },
+            { name: 'Rejected', value: 'rejected' },
+          ],
+        },
+        {
+          name: 'limit',
+          description: 'How many to show. 10 or 25.',
+          type: 'integer',
+          required: false,
+          choices: [
+            { name: 'Last 10', value: 10 },
+            { name: 'Last 25', value: 25 },
+          ],
+        },
+      ],
+    },
+    execute: staffReferrals,
   },
 ];

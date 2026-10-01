@@ -29,6 +29,8 @@ import { ModerationActionService } from './features/moderation/service.js';
 import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
 import { memberJoinHandler, memberLeaveHandler } from './features/onboarding/handlers.js';
+import { ReferralService } from './features/referrals/service.js';
+import { createReferralQualificationJob } from './features/referrals/qualification-job.js';
 import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
 import { createRetentionSweepJob } from './features/jobs/retention-sweep.js';
 
@@ -97,11 +99,33 @@ await runBotMain(() =>
         logger: context.logger,
       });
 
+      /*
+       * Invite reading is optional in the type system but not in practice:
+       * Guardian's manifest grants `invite:read`, so bootstrap always builds
+       * it. The guard exists because the alternative is a non-null assertion
+       * on the dependency that decides who gets paid.
+       */
+      const invites = context.discord.invites;
+      if (!invites) {
+        throw bloomError('CAPABILITY_DENIED', {
+          operatorHint:
+            'Guardian started without an invite reader. Its capability manifest must include "invite:read".',
+        });
+      }
+
       const cases = new CaseService({
         config: context.platform,
         repositories: context.repositories,
         messaging: context.discord.messaging,
         logger: context.logger,
+      });
+
+      const referrals = new ReferralService({
+        repositories: context.repositories,
+        guilds: context.discord.guilds,
+        invites,
+        logger: context.logger,
+        now: () => new Date(),
       });
 
       return {
@@ -112,6 +136,7 @@ await runBotMain(() =>
         scheduler: context.scheduler,
         jobSettings: context.jobSettings,
         guilds: context.discord.guilds,
+        invites,
         roles,
         messaging: context.discord.messaging,
         discordModeration,
@@ -119,6 +144,7 @@ await runBotMain(() =>
         onboarding,
         moderation,
         cases,
+        referrals,
         /*
          * One verification attempt per member per 30 seconds.
          *
@@ -176,7 +202,8 @@ await runBotMain(() =>
        */
       context.scheduler
         .register(createStaleCaseSweepJob(deps))
-        .register(createRetentionSweepJob(deps));
+        .register(createRetentionSweepJob(deps))
+        .register(createReferralQualificationJob(deps));
 
       const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
         guardianCommands,

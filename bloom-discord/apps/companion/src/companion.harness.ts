@@ -20,6 +20,7 @@ import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
 import { RewardsService } from './features/rewards/service.js';
+import { ReferralConsumer } from './features/rewards/referral-consumer.js';
 
 /**
  * The harness clock, unless a test supplies its own.
@@ -151,6 +152,15 @@ export function companionHarness(
     logger,
   });
 
+  const referralConsumer = new ReferralConsumer({
+    repositories,
+    rewards,
+    messaging,
+    logger,
+    now: () => clock.date(),
+    workerId: 'companion:test',
+  });
+
   const deps: CompanionDeps = {
     bot: 'companion',
     config,
@@ -162,6 +172,7 @@ export function companionHarness(
     jobSettings,
     rewards,
     awards,
+    referralConsumer,
   };
 
   // The same registration `main.ts` performs, so the command tests inspect the

@@ -9,6 +9,7 @@ import type {
 import type { Scheduler } from '@bloom/events';
 import type { Logger } from '@bloom/logging';
 import type { AwardsService } from './features/awards/service.js';
+import type { ReferralConsumer } from './features/rewards/referral-consumer.js';
 import type { RewardsService } from './features/rewards/service.js';
 
 /**
@@ -47,4 +48,13 @@ export interface CompanionDeps extends JobAdminDeps {
 
   /** Milestones and achievements, derived from the same records. */
   readonly awards: AwardsService;
+
+  /**
+   * Claims qualified referrals from the shared trigger table and pays them.
+   *
+   * The only consumer of Guardian's handoff, and the reason Companion needs
+   * no access to identity or onboarding: everything it must know about the
+   * referral is already on the row.
+   */
+  readonly referralConsumer: ReferralConsumer;
 }

@@ -2,6 +2,7 @@ import {
   bloomError,
   DAILY_SMALL_WIN_LIMIT,
   POINT_AWARDS,
+  REFERRAL_POINTS,
   pointsToNextRank,
   rankForPoints,
   type CorrelationId,
@@ -47,6 +48,27 @@ import {
  * more honest degradation than hiding the commands, and it means a server can
  * run Bloom's community loop without a points economy at all.
  */
+
+export interface ReferralAwardRequest {
+  readonly guildId: GuildId;
+  /** The person who gets the points. Never the member who was invited. */
+  readonly inviterUserId: UserId;
+  readonly referredUserId: UserId;
+  readonly referralId: string;
+  /** The trigger's own identity, reused so a replay cannot double-pay. */
+  readonly idempotencyKey: string;
+  readonly correlationId?: CorrelationId | null;
+}
+
+export type ReferralAwardResult =
+  | {
+      readonly kind: 'paid';
+      readonly pointEventId: string;
+      readonly balance: number;
+      /** True when this trigger had already produced the ledger row. */
+      readonly alreadyPaid: boolean;
+    }
+  | { readonly kind: 'failed'; readonly reason: 'insufficient' };
 
 export interface RewardsServiceOptions {
   readonly config: PlatformConfig;
@@ -361,6 +383,77 @@ export class RewardsService {
     });
 
     return { kind: 'applied', balance: outcome.balance };
+  }
+
+  /**
+   * Pay a qualified referral.
+   *
+   * The only way a `referral` point event is ever created. Guardian decided
+   * *that* a referral earned something; this decides *what*, and it is the
+   * only side of the boundary that may.
+   *
+   * Three things make a replay safe, and all three are load-bearing:
+   *
+   *   - the amount comes from REFERRAL_POINTS, not from the caller, so a
+   *     malformed trigger cannot name its own price;
+   *   - the idempotency key is the trigger's own identity, so a second
+   *     attempt collapses onto the first ledger row instead of adding one;
+   *   - `awardedBy` is null, which the schema requires for an automatic kind
+   *     and which stops a referral being laundered into a staff grant.
+   */
+  public async awardReferral(
+    request: ReferralAwardRequest,
+  ): Promise<ReferralAwardResult> {
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.inviterUserId,
+      kind: 'referral',
+      points: REFERRAL_POINTS,
+      // No reason text: the schema forbids one for automatic kinds, and the
+      // trigger id in the audit row is a better record than a sentence.
+      reason: null,
+      awardedBy: null,
+      idempotencyKey: request.idempotencyKey,
+      correlationId: request.correlationId ?? null,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      /*
+       * Unreachable by construction — REFERRAL_POINTS is positive and the
+       * insufficient-balance rule only applies to debits — but handled rather
+       * than asserted, because an unreachable branch that throws is how a
+       * future negative constant becomes a crash in production.
+       */
+      return { kind: 'failed', reason: 'insufficient' };
+    }
+
+    const alreadyPaid = outcome.kind === 'duplicate';
+
+    if (!alreadyPaid) {
+      await this.options.repositories.audit.append({
+        guildId: request.guildId,
+        botName: 'companion',
+        event: 'rewards.referral',
+        targetId: request.inviterUserId,
+        // Info: the platform applying a published rule, with no staff
+        // discretion involved. Manual awards are warn because a person chose.
+        severity: 'info',
+        source: 'referral consumer',
+        correlationId: request.correlationId ?? null,
+        details: {
+          points: REFERRAL_POINTS,
+          referral_id: request.referralId,
+          referred_user_id: request.referredUserId,
+        },
+      });
+    }
+
+    return {
+      kind: 'paid',
+      pointEventId: outcome.event.id,
+      balance: outcome.balance,
+      alreadyPaid,
+    };
   }
 
   public async profile(guildId: GuildId, userId: UserId): Promise<MemberProfile> {

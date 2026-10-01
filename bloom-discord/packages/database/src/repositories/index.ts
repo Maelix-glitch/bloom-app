@@ -13,6 +13,7 @@ import { PostgresJobRunRepository, type JobRunRepository } from './jobs.js';
 import { PostgresLabsRepository, type LabsRepository } from './labs.js';
 import { PostgresRetentionRepository, type RetentionRepository } from './retention.js';
 import { PostgresOnboardingRepository, type OnboardingRepository } from './onboarding.js';
+import { PostgresReferralRepository, type ReferralRepository } from './referrals.js';
 import { PostgresRewardsRepository, type RewardsRepository } from './rewards.js';
 import { PostgresModerationRepository, type ModerationRepository } from './moderation.js';
 import { PostgresCaseRepository, type CaseRepository } from './cases.js';
@@ -28,6 +29,7 @@ export * from './jobs.js';
 export * from './labs.js';
 export * from './retention.js';
 export * from './onboarding.js';
+export * from './referrals.js';
 export * from './rewards.js';
 export * from './moderation.js';
 export * from './cases.js';
@@ -50,6 +52,7 @@ export interface Repositories {
   readonly labs: LabsRepository;
   readonly retention: RetentionRepository;
   readonly onboarding: OnboardingRepository;
+  readonly referrals: ReferralRepository;
   readonly rewards: RewardsRepository;
   readonly awards: AwardsRepository;
   readonly moderation: ModerationRepository;
@@ -68,6 +71,7 @@ export function createRepositories(database: Database): Repositories {
     labs: new PostgresLabsRepository(database),
     retention: new PostgresRetentionRepository(database),
     onboarding: new PostgresOnboardingRepository(database),
+    referrals: new PostgresReferralRepository(database),
     rewards: new PostgresRewardsRepository(database),
     awards: new PostgresAwardsRepository(database),
     moderation: new PostgresModerationRepository(database),
@@ -86,6 +90,14 @@ export function createRepositories(database: Database): Repositories {
  * rewards, Labs owns beta testing. Until now every bot received all fourteen
  * repositories, so nothing but code review stopped Labs from writing a
  * moderation row or Companion from mutating onboarding state.
+ *
+ * One entry is deliberately shared by exactly two bots. `referrals` is the
+ * Guardian → Companion handoff: Guardian attributes a join to an inviter and
+ * decides whether it qualifies, Companion is the only process that may turn a
+ * qualified referral into points. Each needs the table; neither needs the
+ * other's. It is the only cross-domain surface between them, which is the
+ * point — one narrow, auditable table instead of Guardian reaching into the
+ * ledger or Companion reaching into identity. Labs is not granted it.
  *
  * Four entries are deliberately shared by all three bots:
  *
@@ -114,6 +126,7 @@ export const BOT_REPOSITORY_CAPABILITIES = {
     'jobs',
     'moderation',
     'onboarding',
+    'referrals',
     'retention',
     'settings',
     'telemetry',
@@ -124,6 +137,7 @@ export const BOT_REPOSITORY_CAPABILITIES = {
     'cooldowns',
     'idempotency',
     'jobs',
+    'referrals',
     'rewards',
     'settings',
     'telemetry',
@@ -137,10 +151,16 @@ export type RepositoriesFor<TBot extends BotName> = Pick<
   (typeof BOT_REPOSITORY_CAPABILITIES)[TBot][number]
 >;
 
-/** Verification, onboarding, moderation, cases, retention. No rewards, no labs. */
+/**
+ * Verification, onboarding, moderation, cases, retention, and the write side
+ * of the referral handoff. No rewards, no labs.
+ */
 export type GuardianRepositories = RepositoriesFor<'guardian'>;
 
-/** Wellbeing, rewards, awards. No onboarding writes, no moderation, no cases. */
+/**
+ * Wellbeing, rewards, awards, and the read/pay side of the referral handoff.
+ * No onboarding writes, no moderation, no cases.
+ */
 export type CompanionRepositories = RepositoriesFor<'companion'>;
 
 /** Beta testing only. No identity, no rewards, no moderation. */

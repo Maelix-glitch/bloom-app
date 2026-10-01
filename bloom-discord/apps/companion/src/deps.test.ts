@@ -34,6 +34,6 @@ describe('CompanionDeps.repositories', () => {
       expect(repositories).toHaveProperty(key);
     }
 
-    expect(BOT_REPOSITORY_CAPABILITIES.companion).toHaveLength(8);
+    expect(BOT_REPOSITORY_CAPABILITIES.companion).toHaveLength(9);
   });
 });

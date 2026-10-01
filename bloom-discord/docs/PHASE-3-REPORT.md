@@ -292,7 +292,8 @@ the index that does the real work was already correct. This phase reads the
 schema it was given.
 
 **New Discord permissions: none.** The job posts to a channel Guardian can
-already post to. The permission integer is unchanged at `1497064631510`.
+already post to. The permission integer was unchanged at `1497064631510` by
+this phase; it later became `1497064631542` for referral attribution.
 
 **New commands: 3**, all under the existing `/guardian` registration.
 

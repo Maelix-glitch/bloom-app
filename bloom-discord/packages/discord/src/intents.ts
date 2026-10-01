@@ -34,6 +34,12 @@ export const BOT_INTENTS: Readonly<Record<BotName, readonly IntentDeclaration[]>
         'PRIVILEGED. guildMemberAdd is what starts onboarding, and guildMemberUpdate keeps the observed role cache current. There is no non-privileged substitute: without it the bot never learns that someone joined. Guardian is the only bot granted this.',
     },
     {
+      intent: 'GuildInvites',
+      privileged: false,
+      reason:
+        'inviteCreate / inviteDelete, which keep the invite-use cache current between joins. Referral attribution works by comparing use counts before and after a join, and without these events a code created since the last reading has no baseline — which produces an unattributed join rather than a wrong one, but produces a lot of them. Not privileged. Guardian is the only bot granted this, and the matching Manage Server permission.',
+    },
+    {
       intent: 'GuildModeration',
       privileged: false,
       reason:

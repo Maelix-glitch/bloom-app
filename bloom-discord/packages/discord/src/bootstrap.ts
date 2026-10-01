@@ -32,12 +32,14 @@ import { DiscordMessagingService } from './services/messaging.js';
 import { DiscordRoleService } from './services/role-service.js';
 import { DiscordModerationService } from './services/moderation-service.js';
 import { DiscordChannelModerationService } from './services/channel-moderation-service.js';
+import { DiscordInviteQueryService } from './services/invite-query.js';
 import type {
   ChannelModerationService,
   GuildQueryService,
   MessagingService,
   ModerationService,
   RoleService,
+  InviteQueryService,
 } from './ports.js';
 import {
   BotRuntime,
@@ -127,6 +129,11 @@ export interface DiscordServices {
   readonly moderation: ModerationService | null;
   /** Slowmode, locking, purges. Requires `message:manage`. */
   readonly channelModeration: ChannelModerationService | null;
+  /**
+   * Invite use counts, for referral attribution. Requires `invite:read`,
+   * which only Guardian holds — and, at the Discord end, Manage Server.
+   */
+  readonly invites: InviteQueryService | null;
 }
 
 export interface BotBootstrapContext {
@@ -244,6 +251,9 @@ export async function startBotProcess<TDeps>(
     const channelModeration = hasCapability(options.bot, 'message:manage')
       ? new DiscordChannelModerationService(client, logger, options.bot)
       : null;
+    const invites = hasCapability(options.bot, 'invite:read')
+      ? new DiscordInviteQueryService(client)
+      : null;
 
     /*
      * The scheduler, empty until features register into it.
@@ -273,7 +283,7 @@ export async function startBotProcess<TDeps>(
       logger,
       database,
       repositories,
-      discord: { guilds, messaging, roles, moderation, channelModeration },
+      discord: { guilds, messaging, roles, moderation, channelModeration, invites },
       scheduler,
       jobSettings,
     };

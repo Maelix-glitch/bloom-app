@@ -308,3 +308,27 @@ export function rewardsDisabledMessage(): BloomMessage {
 export function formatLocalDate(date: LocalDate): string {
   return date;
 }
+
+/**
+ * The inviter's notice that a referral paid out.
+ *
+ * Short, and sent once. It names the amount and says why, because a balance
+ * that changes without explanation is the thing members complain about in
+ * every points system. It does not name the person they invited: that is
+ * someone else's membership to disclose, not ours.
+ */
+export function referralPaid(points: number): BloomMessage {
+  return {
+    ephemeral: true,
+    embeds: [
+      bloomEmbed({
+        title: 'Someone you invited settled in',
+        description: [
+          `A member you invited has been here a week, so **${String(points)} points** have been added to your balance.`,
+          '',
+          'Thank you for bringing them. Rewards like this one are paid once per member, after they stay.',
+        ].join('\n'),
+      }),
+    ],
+  };
+}

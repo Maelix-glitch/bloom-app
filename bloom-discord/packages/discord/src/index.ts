@@ -17,6 +17,7 @@ export * from './adapters/command-spec.js';
 export * from './adapters/interaction.js';
 export * from './adapters/member.js';
 export * from './services/guild-query.js';
+export * from './services/invite-query.js';
 export * from './services/role-service.js';
 export * from './services/moderation-service.js';
 export * from './services/channel-moderation-service.js';

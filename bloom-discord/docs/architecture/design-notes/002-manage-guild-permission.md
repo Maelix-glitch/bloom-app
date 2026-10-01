@@ -1,7 +1,30 @@
 # Design note 002 — Manage Guild for Guardian
 
-**Status:** decision requested. Nothing implemented.
+**Status:** resolved — Option A adopted, for a different reason than this note
+anticipated. Guardian now holds Manage Guild, granted by the referral
+attribution work, not by auto-moderation. Guardian's install integer is
+`1497064631542`.
 **Question:** should Guardian hold Manage Server, and is there a way to avoid it?
+
+> **Outcome.** This note asked for Manage Guild so Guardian could receive
+> AutoMod events. The permission was eventually taken for invite reading:
+> qualified-referral attribution diffs invite use counts, and
+> `GET /guilds/{id}/invites` requires Manage Guild with no narrower
+> alternative. The cost/benefit argued below is unchanged, and the conclusion
+> it reached — that the permission is acceptable for Guardian and never for
+> Companion or Labs — still holds.
+>
+> Two consequences worth stating plainly:
+>
+> 1. **AutoMod events are now deliverable.** Holding the permission is what
+>    gates delivery, so the gateway will send
+>    `AUTO_MODERATION_ACTION_EXECUTION` to Guardian whether or not anything
+>    listens. Nothing does. Design note 001 remains unimplemented, and the
+>    presence of the permission must not be read as the feature existing.
+> 2. **The decision is no longer reversible for free.** Dropping Manage Guild
+>    would silently disable referral attribution rather than fail loudly —
+>    every join would record `unavailable`. Anyone narrowing Guardian's
+>    permissions should read `apps/guardian/src/features/referrals/` first.
 
 This note exists because [design note 001](./001-auto-moderation.md) proposes
 auto-moderation built on Discord's native AutoMod, and that approach needs one

@@ -24,6 +24,13 @@ import {
 import { localDateIn, localDaysBetween, type LocalDate } from '@bloom/utils';
 import { ACTIVE_CASE_STATUSES } from '@bloom/database';
 import type {
+  ClaimedReferral,
+  RecordReferralInput,
+  RecordReferralOutcome,
+  ReferralRejection,
+  ReferralRepository,
+  ReferralState,
+  ReferralTrigger,
   AuditEventInput,
   AwardInput,
   AwardOutcome,
@@ -1762,6 +1769,218 @@ export class FakeLabsRepository implements LabsRepository {
 
 export type { AwardKind };
 
+/**
+ * The referral handoff, in memory.
+ *
+ * Mirrors the SQL's state machine exactly, including the bits that look like
+ * paranoia: every transition re-checks the state it is moving *from*, because
+ * that is what the real UPDATE does in its WHERE clause and it is the reason
+ * two workers cannot both pay the same row. A fake that merely sets the field
+ * would let a concurrency test pass against a broken implementation.
+ *
+ * JavaScript's single thread does not reproduce row locks, so `claim` models
+ * SKIP LOCKED the way the database behaves rather than the way it is written:
+ * a row already claimed and not yet stale is invisible to the next caller.
+ */
+export class FakeReferralRepository implements ReferralRepository {
+  public readonly triggers: ReferralTrigger[] = [];
+  private sequence = 0;
+
+  public constructor(private readonly now: () => Date) {}
+
+  public record(input: RecordReferralInput): Promise<RecordReferralOutcome> {
+    const existing = this.triggers.find(
+      (row) =>
+        row.guildId === input.guildId && row.referredUserId === input.referredUserId,
+    );
+    if (existing) {
+      return Promise.resolve({ kind: 'already_referred', trigger: existing });
+    }
+
+    if (input.inviterUserId === input.referredUserId) {
+      // The database refuses this outright; so does the fake, so a test
+      // cannot accidentally depend on a row that could never exist.
+      throw new Error('referral_triggers_no_self_referral');
+    }
+
+    this.sequence += 1;
+    const trigger: ReferralTrigger = {
+      id: `referral-${String(this.sequence)}`,
+      guildId: input.guildId,
+      referredUserId: input.referredUserId,
+      inviterUserId: input.inviterUserId,
+      inviteCode: input.inviteCode,
+      source: input.source,
+      state: 'pending',
+      rejectedReason: null,
+      claimedAt: null,
+      claimedBy: null,
+      attempts: 0,
+      pointEventId: null,
+      idempotencyKey: input.idempotencyKey,
+      correlationId: input.correlationId ?? null,
+      createdAt: this.now(),
+      qualifiedAt: null,
+      consumedAt: null,
+    };
+    this.triggers.push(trigger);
+    return Promise.resolve({ kind: 'recorded', trigger });
+  }
+
+  public listPending(
+    guildId: GuildId,
+    createdBefore: Date,
+    limit = 50,
+  ): Promise<readonly ReferralTrigger[]> {
+    return Promise.resolve(
+      this.triggers
+        .filter(
+          (row) =>
+            row.guildId === guildId &&
+            row.state === 'pending' &&
+            row.createdAt.getTime() <= createdBefore.getTime(),
+        )
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id),
+        )
+        .slice(0, Math.min(Math.max(limit, 1), 200)),
+    );
+  }
+
+  public markQualified(id: string, qualifiedAt: Date): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(
+        id,
+        (row) => row.state === 'pending' && row.inviterUserId !== null,
+        { state: 'qualified', qualifiedAt },
+      ),
+    );
+  }
+
+  public markRejected(id: string, reason: ReferralRejection): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(id, (row) => row.state === 'pending' || row.state === 'qualified', {
+        state: 'rejected',
+        rejectedReason: reason,
+        qualifiedAt: null,
+      }),
+    );
+  }
+
+  public claim(input: {
+    readonly guildId: GuildId;
+    readonly workerId: string;
+    readonly limit: number;
+    readonly now: Date;
+    readonly staleClaimsBefore: Date;
+  }): Promise<readonly ClaimedReferral[]> {
+    const claimable = this.triggers
+      .filter(
+        (row) =>
+          row.guildId === input.guildId &&
+          row.state === 'qualified' &&
+          row.inviterUserId !== null &&
+          (row.claimedAt === null ||
+            row.claimedAt.getTime() < input.staleClaimsBefore.getTime()),
+      )
+      .sort(
+        (a, b) =>
+          (a.qualifiedAt?.getTime() ?? 0) - (b.qualifiedAt?.getTime() ?? 0) ||
+          a.id.localeCompare(b.id),
+      )
+      .slice(0, Math.min(Math.max(input.limit, 1), 200));
+
+    const claimed: ClaimedReferral[] = [];
+    for (const row of claimable) {
+      const index = this.triggers.indexOf(row);
+      const updated: ReferralTrigger = {
+        ...row,
+        claimedAt: input.now,
+        claimedBy: input.workerId,
+        attempts: row.attempts + 1,
+      };
+      this.triggers[index] = updated;
+      claimed.push(updated as ClaimedReferral);
+    }
+    return Promise.resolve(claimed);
+  }
+
+  public markPaid(input: {
+    readonly id: string;
+    readonly pointEventId: string;
+    readonly consumedAt: Date;
+  }): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(input.id, (row) => row.state === 'qualified', {
+        state: 'paid',
+        consumedAt: input.consumedAt,
+        pointEventId: input.pointEventId,
+        claimedAt: null,
+        claimedBy: null,
+      }),
+    );
+  }
+
+  public releaseClaim(id: string): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(id, (row) => row.state === 'qualified', {
+        claimedAt: null,
+        claimedBy: null,
+      }),
+    );
+  }
+
+  public findById(id: string): Promise<ReferralTrigger | null> {
+    return Promise.resolve(this.triggers.find((row) => row.id === id) ?? null);
+  }
+
+  public listRecent(
+    guildId: GuildId,
+    options: { readonly state?: ReferralState; readonly limit?: number } = {},
+  ): Promise<readonly ReferralTrigger[]> {
+    return Promise.resolve(
+      this.triggers
+        .filter(
+          (row) =>
+            row.guildId === guildId && (!options.state || row.state === options.state),
+        )
+        .sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id),
+        )
+        .slice(0, Math.min(Math.max(options.limit ?? 10, 1), 25)),
+    );
+  }
+
+  public countPaidForInviter(guildId: GuildId, inviterUserId: UserId): Promise<number> {
+    return Promise.resolve(
+      this.triggers.filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.inviterUserId === inviterUserId &&
+          row.state === 'paid',
+      ).length,
+    );
+  }
+
+  /** One place where "the WHERE clause must still match" is enforced. */
+  private transition(
+    id: string,
+    allowed: (row: ReferralTrigger) => boolean,
+    changes: Partial<ReferralTrigger>,
+  ): boolean {
+    const index = this.triggers.findIndex((row) => row.id === id);
+    if (index === -1) return false;
+
+    const row = this.triggers[index];
+    if (!row || !allowed(row)) return false;
+
+    this.triggers[index] = { ...row, ...changes };
+    return true;
+  }
+}
+
 export interface FakeRepositories extends Repositories {
   readonly identity: FakeIdentityRepository;
   readonly moderation: FakeModerationRepository;
@@ -1773,6 +1992,7 @@ export interface FakeRepositories extends Repositories {
   readonly telemetry: FakeTelemetryRepository;
   readonly jobs: FakeJobRunRepository;
   readonly settings: FakeSettingsRepository;
+  readonly referrals: FakeReferralRepository;
   readonly rewards: FakeRewardsRepository;
   readonly awards: FakeAwardsRepository;
   readonly labs: FakeLabsRepository;
@@ -1802,6 +2022,7 @@ export function fakeRepositories(
     settings: new FakeSettingsRepository(),
     moderation: new FakeModerationRepository(now),
     cases: new FakeCaseRepository(now),
+    referrals: new FakeReferralRepository(now),
     rewards: new FakeRewardsRepository(now),
     awards: new FakeAwardsRepository(now),
     retention: new FakeRetentionRepository(),

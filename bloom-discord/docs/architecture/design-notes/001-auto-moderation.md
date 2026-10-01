@@ -47,12 +47,22 @@ not hold the permission that would deliver them.
 
 ## Permissions required
 
-**Manage Guild (`1 << 5`) — new.** Guardian's integer is `1497064631510`, which
-has bit 5 clear. Auto Moderation events are delivered only to apps holding
-Manage Guild, and creating or updating rules requires it too.
+**Manage Guild (`1 << 5`) — already held.** When this note was written
+Guardian's integer was `1497064631510`, with bit 5 clear. It is now
+`1497064631542`: the referral attribution work took the permission to read
+invite use counts, which needs the same bit. Auto Moderation events are
+delivered only to apps holding Manage Guild, and creating or updating rules
+requires it too — so this note no longer has a permission cost to argue.
 
-This is a genuine escalation and should be argued, not slipped in. Manage Guild
-is broad: it covers guild settings, integrations and invites. The alternatives:
+That removes the objection; it does not make the feature free. Everything
+below still applies, and the permission being present must not be mistaken for
+AutoMod being wired up. Nothing listens for
+`AUTO_MODERATION_ACTION_EXECUTION` today.
+
+The escalation was argued rather than slipped in — see
+[design note 002](./002-manage-guild-permission.md). Manage Guild is broad: it
+covers guild settings, integrations and invites. The alternatives considered
+at the time:
 
 - **Do not manage rules from Bloom.** Staff configure AutoMod by hand in the
   Discord UI; Guardian only reacts. Still needs Manage Guild for the event.

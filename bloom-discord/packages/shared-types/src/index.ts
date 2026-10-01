@@ -16,5 +16,6 @@ export * from './roles.js';
 export * from './channels.js';
 export * from './onboarding.js';
 export * from './moderation.js';
+export * from './referrals.js';
 export * from './rewards.js';
 export * from './log-event.js';

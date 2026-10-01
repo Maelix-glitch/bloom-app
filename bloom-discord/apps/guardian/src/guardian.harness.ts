@@ -8,6 +8,7 @@ import {
   fakeInvocation,
   fakeRepositories,
   FakeChannelModerationService,
+  FakeInviteQuery,
   FakeGuild,
   FakeJobLock,
   FakeMessaging,
@@ -20,6 +21,7 @@ import {
 } from '@bloom/testing';
 import type { GuardianDeps } from './deps.js';
 import { OnboardingService } from './features/onboarding/service.js';
+import { ReferralService } from './features/referrals/service.js';
 import { ModerationActionService } from './features/moderation/service.js';
 import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
@@ -50,6 +52,7 @@ export interface GuardianHarness {
   readonly messaging: FakeMessaging;
   readonly moderation: FakeModerationService;
   readonly channels: FakeChannelModerationService;
+  readonly invites: FakeInviteQuery;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
   /** The scheduler the harness built, with Guardian's real jobs registered. */
   readonly scheduler: Scheduler;
@@ -71,9 +74,17 @@ export interface GuardianHarnessOptions {
   readonly moderationChannel?: null;
   /** Turn FEATURE_SCHEDULED_MESSAGES off. Defaults to on inside the harness. */
   readonly scheduledMessages?: false;
+  /**
+   * The clock the referral service reads.
+   *
+   * Qualification is entirely about elapsed time, so a test has to be able to
+   * stand a week later without waiting one.
+   */
+  readonly now?: () => Date;
 }
 
 export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianHarness {
+  const clock = options.now ?? ((): Date => new Date('2026-01-01T12:00:00.000Z'));
   // testConfig() already configures every channel, reports included.
   const base = testConfig();
   const config: PlatformConfig = {
@@ -101,7 +112,14 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
   const messaging = new FakeMessaging(guild);
   const moderation = new FakeModerationService(guild);
   const channels = new FakeChannelModerationService();
-  const repositories = fakeRepositories();
+  /*
+   * One clock for the fakes and the services. Without this the in-memory
+   * rows carry the default fixture date while the service reads the test's
+   * clock, and anything time-based — a referral waiting seven days — is
+   * measured against two different "now"s.
+   */
+  const repositories = fakeRepositories({ now: () => clock() });
+  const invites = new FakeInviteQuery();
   const { logger, sink } = createTestLogger();
 
   const lock = new FakeJobLock();
@@ -125,6 +143,7 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
     scheduler,
     jobSettings,
     guilds: guild,
+    invites,
     roles,
     messaging,
     discordModeration: moderation,
@@ -136,6 +155,13 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
       messaging,
       guilds: guild,
       logger,
+    }),
+    referrals: new ReferralService({
+      repositories,
+      guilds: guild,
+      invites,
+      logger,
+      now: () => clock(),
     }),
     moderation: new ModerationActionService({
       config,
@@ -199,6 +225,7 @@ export function guardianHarness(options: GuardianHarnessOptions = {}): GuardianH
     messaging,
     moderation,
     channels,
+    invites,
     logs: sink,
     scheduler,
     lock,

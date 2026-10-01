@@ -153,7 +153,8 @@ nobody will read.
 enums. Applied cleanly to the live database; re-running is a no-op.
 
 **Discord permissions added: none.** Guardian's invite integer is unchanged at
-`1497064631510`. Every permission moderation needs was in the Phase 0 baseline,
+`1497064631510` (superseded by `1497064631542`). Every permission moderation
+needs was in the Phase 0 baseline,
 so existing installs do not need re-inviting.
 
 One decision was settled here that Phase 0 had deferred: `lock`/`unlock` use

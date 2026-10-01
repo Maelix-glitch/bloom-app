@@ -637,6 +637,8 @@ describe('the staff reward surface stays inside Companion', () => {
       'bloom-rewards-port.ts',
       'commands.ts',
       'messages.ts',
+      'referral-consumer.ts',
+      'referral-job.ts',
       'service.ts',
       'staff-commands.ts',
       'staff-messages.ts',
