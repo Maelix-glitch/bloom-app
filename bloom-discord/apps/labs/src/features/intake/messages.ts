@@ -1,5 +1,5 @@
 import type { UserId } from '@bloom/shared-types';
-import type { BugReport, BugStatus, FeedbackEntry } from '@bloom/database';
+import type { BugEvent, BugReport, BugStatus, FeedbackEntry } from '@bloom/database';
 import {
   bloomEmbed,
   errorMessage,
@@ -9,7 +9,7 @@ import {
   type BloomMessage,
 } from '@bloom/embeds';
 import { bloomError } from '@bloom/shared-types';
-import { escapeMarkdown, neutraliseMentions } from '@bloom/utils';
+import { discordTimestamp, escapeMarkdown, neutraliseMentions } from '@bloom/utils';
 
 /**
  * Make stored text safe to render in Discord.
@@ -140,7 +140,11 @@ export function bugFiled(bug: BugReport, posted: boolean): BloomMessage {
   };
 }
 
-export function bugDetail(bug: BugReport, viewerIsStaff: boolean): BloomMessage {
+export function bugDetail(
+  bug: BugReport,
+  viewerIsStaff: boolean,
+  history: readonly BugEvent[] = [],
+): BloomMessage {
   const lines = [
     `**${STATUS_LABELS[bug.status]}** · ${AREA_LABELS[bug.area]}`,
     '',
@@ -160,6 +164,24 @@ export function bugDetail(bug: BugReport, viewerIsStaff: boolean): BloomMessage 
      */
     ...(viewerIsStaff && bug.triagedBy
       ? ['', `Triaged by ${mention(bug.triagedBy)}.`]
+      : []),
+    /*
+     * The trail of how it got here, staff only. Shown as a list of moves
+     * rather than a prose summary because the question it answers is usually
+     * "who changed this, and when" — and because a bug that has bounced
+     * between states three times is telling you something a single current
+     * status cannot.
+     */
+    ...(viewerIsStaff && history.length > 0
+      ? [
+          '',
+          '**History**',
+          ...history.map((event) => {
+            const from = event.fromStatus ? `${STATUS_LABELS[event.fromStatus]} → ` : '';
+            const actor = event.actorId ? ` by ${mention(event.actorId)}` : '';
+            return `${from}${STATUS_LABELS[event.toStatus]}${actor} · ${discordTimestamp(event.createdAt, 'R')}`;
+          }),
+        ]
       : []),
   ];
 
@@ -303,4 +325,45 @@ export function duplicateTargetMissing(bugNumber: number): BloomMessage {
       userMessage: `There is no bug ${String(bugNumber)} to be a duplicate of.`,
     }),
   );
+}
+
+/**
+ * Recent feedback, for staff.
+ *
+ * Ephemeral, and the only place feedback is ever read back. Summaries are
+ * shown in full because that is the useful part; the longer `detail` is
+ * marked as present rather than printed, so a staff member scanning twenty
+ * entries does not accidentally paste someone's paragraph into a channel.
+ */
+export function feedbackQueue(entries: readonly FeedbackEntry[]): BloomMessage {
+  if (entries.length === 0) {
+    return {
+      ephemeral: true,
+      embeds: [
+        noticeEmbed({
+          title: 'Feedback',
+          description: 'No feedback has been submitted in this server yet.',
+        }),
+      ],
+    };
+  }
+
+  const lines = entries.map((entry) => {
+    const detail = entry.detail ? ' · _has detail_' : '';
+    return [
+      `**${CATEGORY_LABELS[entry.category]}** · ${mention(entry.userId)} · ${discordTimestamp(entry.createdAt, 'R')}${detail}`,
+      forDiscord(entry.summary),
+    ].join('\n');
+  });
+
+  return {
+    ephemeral: true,
+    embeds: [
+      bloomEmbed({
+        title: 'Feedback',
+        description: ['Newest first.', '', ...lines].join('\n\n'),
+        footer: 'Staff only. Do not repost without asking the person who wrote it.',
+      }),
+    ],
+  };
 }

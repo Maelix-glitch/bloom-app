@@ -1611,8 +1611,12 @@ export class FakeLabsRepository implements LabsRepository {
     return Promise.resolve(
       this.feedback
         .filter((entry) => entry.guildId === guildId)
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .slice(0, limit),
+        // Mirrors the SQL's `id DESC` tiebreaker.
+        .sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id),
+        )
+        .slice(0, Math.min(Math.max(limit, 1), 25)),
     );
   }
 
@@ -1723,13 +1727,25 @@ export class FakeLabsRepository implements LabsRepository {
         .filter((bug) =>
           options.status ? bug.status === options.status : open.includes(bug.status),
         )
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-        .slice(0, options.limit ?? 10),
+        // Mirrors the SQL: `bug_number ASC` tiebreaker, and the same clamp.
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() || a.bugNumber - b.bugNumber,
+        )
+        .slice(0, Math.min(Math.max(options.limit ?? 10, 1), 25)),
     );
   }
 
-  public bugHistory(bugId: string): Promise<readonly BugEvent[]> {
-    return Promise.resolve(this.events.filter((event) => event.bugId === bugId));
+  public bugHistory(bugId: string, limit = 25): Promise<readonly BugEvent[]> {
+    return Promise.resolve(
+      this.events
+        .filter((event) => event.bugId === bugId)
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id),
+        )
+        .slice(0, Math.min(Math.max(limit, 1), 50)),
+    );
   }
 
   public countBugsSince(guildId: GuildId, userId: UserId, since: Date): Promise<number> {

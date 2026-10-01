@@ -428,4 +428,126 @@ describe('labs intake (integration)', () => {
       expect(await labs.bugQueue(GUILD)).toHaveLength(0);
     });
   });
+  // ---------------------------------------------------------------------------
+  // Staff read surfaces: bounded, ordered, deterministic
+  // ---------------------------------------------------------------------------
+
+  describe('the staff queues', () => {
+    /**
+     * Stability across reads, with the primary sort key fully tied.
+     *
+     * Sixty bugs filed in one transaction share a `created_at` — now() is the
+     * transaction timestamp — so `ORDER BY created_at` alone decides nothing
+     * and the plan is free to return any permutation. The `bug_number`
+     * tiebreaker is what makes the result a contract rather than a habit.
+     *
+     * Honest caveat: unlike the equivalent guards on the report queue and the
+     * rewards leaderboard, this one does not currently fail when the
+     * tiebreaker is removed. At this size the rows share a page, the rewrite
+     * below stays a HOT update, and the index order is therefore undisturbed,
+     * so today's planner happens to be stable. The tiebreaker is kept because
+     * a tied ORDER BY is unspecified by contract regardless of what this
+     * planner does at this scale — but this test is a regression guard, not a
+     * proof.
+     */
+    it('returns bugs in the same order even when every created_at ties', async () => {
+      /*
+       * Enough rows that the planner reaches for a top-N heapsort, which is
+       * not stable: with the sort key fully tied it returns whichever rows it
+       * happened to keep. Five would be sorted trivially and would prove
+       * nothing.
+       */
+      await database.sql.begin(async () => {
+        for (let index = 0; index < 60; index += 1) {
+          await file(`Tied bug number ${String(index)} summary`);
+        }
+      });
+
+      const before = await labs.bugQueue(GUILD, { limit: 25 });
+      expect(before).toHaveLength(25);
+      expect(before.map((bug) => bug.bugNumber)).toEqual(
+        Array.from({ length: 25 }, (_unused, index) => index + 1),
+      );
+
+      // Move rows in the heap so physical order disagrees with insertion order.
+      await database.sql`
+        UPDATE ${database.sql(SCHEMA)}.bug_reports
+        SET updated_at = updated_at
+        WHERE guild_id = ${GUILD} AND bug_number <= 20
+      `;
+
+      const after = await labs.bugQueue(GUILD, { limit: 25 });
+      expect(after.map((bug) => bug.bugNumber)).toEqual(
+        before.map((bug) => bug.bugNumber),
+      );
+    });
+
+    it('bounds the bug queue, however much is asked for', async () => {
+      for (let index = 0; index < 30; index += 1) {
+        await file(`Bounded bug number ${String(index)} summary`);
+      }
+
+      expect(await labs.bugQueue(GUILD, { limit: 10_000 })).toHaveLength(25);
+      expect(await labs.bugQueue(GUILD, { limit: 0 })).toHaveLength(1);
+      expect(await labs.bugQueue(GUILD)).toHaveLength(10);
+    });
+
+    it('returns feedback newest first, deterministically, and bounded', async () => {
+      await database.sql.begin(async () => {
+        for (let index = 0; index < 4; index += 1) {
+          await labs.submitFeedback({
+            guildId: GUILD,
+            userId: MEMBER,
+            category: 'feature',
+            summary: `Tied feedback entry ${String(index)} summary`,
+          });
+        }
+      });
+
+      const first = await labs.recentFeedback(GUILD, 25);
+      const second = await labs.recentFeedback(GUILD, 25);
+
+      expect(first).toHaveLength(4);
+      expect(first.map((entry) => entry.id)).toEqual(second.map((entry) => entry.id));
+      expect(await labs.recentFeedback(GUILD, 10_000)).toHaveLength(4);
+      expect(await labs.recentFeedback(GUILD, 0)).toHaveLength(1);
+    });
+
+    it('is empty, not an error, when nothing has been submitted', async () => {
+      expect(await labs.bugQueue(GUILD)).toEqual([]);
+      expect(await labs.recentFeedback(GUILD)).toEqual([]);
+    });
+
+    /* A bug's history is a staff read too, so it is bounded like the rest. */
+    it('bounds and orders a bug history', async () => {
+      const bug = await file();
+      /*
+       * A resolution accompanies the terminal move because the *schema*
+       * requires it, not only the service: `terminal_needs_resolution` is a
+       * CHECK on bug_reports. Worth knowing — the rule holds even for a
+       * caller that bypasses IntakeService entirely.
+       */
+      for (const status of ['TRIAGED', 'FIXED', 'TRIAGED'] as const) {
+        await labs.triage({
+          guildId: GUILD,
+          bugNumber: bug.bugNumber,
+          status,
+          actorId: STAFF,
+          resolution: status === 'FIXED' ? 'Shipped in 1.4.' : null,
+          duplicateOf: null,
+        });
+      }
+
+      const history = await labs.bugHistory(bug.id);
+      expect(history.map((event) => event.toStatus)).toEqual([
+        'NEW',
+        'TRIAGED',
+        'FIXED',
+        'TRIAGED',
+      ]);
+
+      expect(await labs.bugHistory(bug.id, 2)).toHaveLength(2);
+      expect(await labs.bugHistory(bug.id, 10_000)).toHaveLength(4);
+    });
+  });
 });

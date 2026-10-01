@@ -83,7 +83,9 @@ let reporterSeq = 0;
 
 function nextReporter(): UserId {
   reporterSeq += 1;
-  return unsafeSnowflake<UserId>(String(900000000000002000 + reporterSeq));
+  // Concatenated, not added: an 18-digit snowflake is past
+  // Number.MAX_SAFE_INTEGER, so arithmetic on one silently repeats itself.
+  return unsafeSnowflake<UserId>(`9000000000000${String(reporterSeq).padStart(5, '0')}`);
 }
 
 /**

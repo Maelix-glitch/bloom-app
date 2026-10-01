@@ -131,7 +131,7 @@ export interface LabsRepository {
   /** Moves a bug and appends the event. Refuses to invent a missing bug. */
   triage(input: TriageInput): Promise<TriageOutcome>;
   bugQueue(guildId: GuildId, options?: BugQueueOptions): Promise<readonly BugReport[]>;
-  bugHistory(bugId: string): Promise<readonly BugEvent[]>;
+  bugHistory(bugId: string, limit?: number): Promise<readonly BugEvent[]>;
   countBugsSince(guildId: GuildId, userId: UserId, since: Date): Promise<number>;
 }
 
@@ -184,6 +184,14 @@ const BUG_COLUMNS =
 
 const DEFAULT_QUEUE_LIMIT = 10;
 const MAX_QUEUE_LIMIT = 25;
+
+/*
+ * A bug's own triage history is naturally short, but "naturally short" is an
+ * assumption about callers rather than a property of the query. Bounded like
+ * every other read so no staff surface can issue an unbounded SELECT.
+ */
+const DEFAULT_HISTORY_LIMIT = 25;
+const MAX_HISTORY_LIMIT = 50;
 
 function toFeedback(row: FeedbackRow): FeedbackEntry {
   return {
@@ -288,7 +296,9 @@ export class PostgresLabsRepository extends BaseRepository implements LabsReposi
         SELECT ${this.db.sql.unsafe(FEEDBACK_COLUMNS)}
         FROM ${this.db.sql(this.schema)}.feedback
         WHERE guild_id = ${guildId}
-        ORDER BY created_at DESC
+        -- id closes the ordering: created_at is the transaction timestamp, so
+        -- entries written together tie and the plan would pick the rest.
+        ORDER BY created_at DESC, id DESC
         LIMIT ${Math.min(Math.max(limit, 1), MAX_QUEUE_LIMIT)}
       `;
       return rows.map(toFeedback);
@@ -467,21 +477,29 @@ export class PostgresLabsRepository extends BaseRepository implements LabsReposi
     const status = options.status;
 
     try {
-      // Oldest first for the open queue: the thing waiting longest is the thing
-      // most likely to have been forgotten.
+      /*
+       * Oldest first for the open queue: the thing waiting longest is the
+       * thing most likely to have been forgotten.
+       *
+       * `bug_number` closes the ordering. `created_at` defaults to now(),
+       * which in Postgres is the transaction timestamp, so two bugs filed in
+       * one transaction tie — and a tied ORDER BY lets the plan decide, so
+       * the queue could reshuffle between refreshes with nothing having
+       * changed. The number is unique per guild, so it settles every tie.
+       */
       const rows = status
         ? await this.db.sql<BugRow[]>`
             SELECT ${this.db.sql.unsafe(BUG_COLUMNS)}
             FROM ${this.db.sql(this.schema)}.bug_reports
             WHERE guild_id = ${guildId} AND status = ${status}
-            ORDER BY created_at ASC
+            ORDER BY created_at ASC, bug_number ASC
             LIMIT ${limit}
           `
         : await this.db.sql<BugRow[]>`
             SELECT ${this.db.sql.unsafe(BUG_COLUMNS)}
             FROM ${this.db.sql(this.schema)}.bug_reports
             WHERE guild_id = ${guildId} AND status IN ('NEW', 'TRIAGED')
-            ORDER BY created_at ASC
+            ORDER BY created_at ASC, bug_number ASC
             LIMIT ${limit}
           `;
       return rows.map(toBug);
@@ -490,13 +508,17 @@ export class PostgresLabsRepository extends BaseRepository implements LabsReposi
     }
   }
 
-  public async bugHistory(bugId: string): Promise<readonly BugEvent[]> {
+  public async bugHistory(
+    bugId: string,
+    limit = DEFAULT_HISTORY_LIMIT,
+  ): Promise<readonly BugEvent[]> {
     try {
       const rows = await this.db.sql<BugEventRow[]>`
         SELECT id, bug_id, from_status, to_status, actor_id, note, created_at
         FROM ${this.db.sql(this.schema)}.bug_events
         WHERE bug_id = ${bugId}
         ORDER BY created_at ASC, id ASC
+        LIMIT ${Math.min(Math.max(limit, 1), MAX_HISTORY_LIMIT)}
       `;
       return rows.map(toBugEvent);
     } catch (error) {
