@@ -133,6 +133,15 @@ export interface RewardsRepository {
     options?: { readonly since?: Date; readonly limit?: number },
   ): Promise<readonly LeaderboardEntry[]>;
 
+  /** Point events of one kind for a member inside a half-open window. */
+  countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    from: Date,
+    to: Date,
+  ): Promise<number>;
+
   /**
    * The counts the award definitions evaluate against.
    *
@@ -471,6 +480,41 @@ export class PostgresRewardsRepository
         LIMIT ${capped}
       `;
       return rows.map(toEvent);
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  /**
+   * How many point events of one kind a member has inside a window.
+   *
+   * Added for challenge targets, which ask "how many times did you check in
+   * while this challenge was running" — a question the existing
+   * `participation` summary cannot answer because it is lifetime-to-date and
+   * has no window.
+   *
+   * Half-open `[from, to)`, matching how every other window in this codebase
+   * is expressed, so two back-to-back challenges cannot both count the same
+   * check-in on the boundary.
+   */
+  public async countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    try {
+      const rows = await this.db.sql<{ count: string }[]>`
+        SELECT count(*)::text AS count
+        FROM ${this.db.sql(this.schema)}.point_events
+        WHERE guild_id = ${guildId}
+          AND user_id = ${userId}
+          AND kind = ${kind}
+          AND created_at >= ${from}
+          AND created_at < ${to}
+      `;
+      return Number(rows[0]?.count ?? '0');
     } catch (error) {
       throw toDatabaseError(error);
     }

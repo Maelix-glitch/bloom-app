@@ -34,6 +34,12 @@ describe('CompanionDeps.repositories', () => {
       expect(repositories).toHaveProperty(key);
     }
 
-    expect(BOT_REPOSITORY_CAPABILITIES.companion).toHaveLength(9);
+    /*
+     * Ten since challenges and events: Companion owns `community_activities`
+     * and `community_participants` outright. Pinned so a future feature that
+     * reaches for Guardian's or Labs' tables has to change this number and
+     * explain itself.
+     */
+    expect(BOT_REPOSITORY_CAPABILITIES.companion).toHaveLength(10);
   });
 });

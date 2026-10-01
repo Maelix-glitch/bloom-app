@@ -133,6 +133,14 @@ export interface ReferralRepository {
     options?: { readonly state?: ReferralState; readonly limit?: number },
   ): Promise<readonly ReferralTrigger[]>;
 
+  /** Paid referrals for an inviter inside a half-open window. */
+  countPaidForInviterInWindow(
+    guildId: GuildId,
+    inviterUserId: UserId,
+    from: Date,
+    to: Date,
+  ): Promise<number>;
+
   /** How many referrals this inviter has been paid for. */
   countPaidForInviter(guildId: GuildId, inviterUserId: UserId): Promise<number>;
 }
@@ -439,6 +447,37 @@ export class PostgresReferralRepository
             LIMIT ${limit}
           `;
       return rows.map(toTrigger);
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  /**
+   * Paid referrals credited to an inviter inside a window.
+   *
+   * The windowed sibling of `countPaidForInviter`, for challenge targets.
+   * Dated by `consumed_at` — when the payment actually happened — rather than
+   * `created_at`, because a referral that joined before a challenge started
+   * but qualified during it was earned during it. Using the join date would
+   * let a member bank invites and have none of them count.
+   */
+  public async countPaidForInviterInWindow(
+    guildId: GuildId,
+    inviterUserId: UserId,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    try {
+      const rows = await this.db.sql<{ count: string }[]>`
+        SELECT count(*)::text AS count
+        FROM ${this.db.sql(this.schema)}.referral_triggers
+        WHERE guild_id = ${guildId}
+          AND inviter_user_id = ${inviterUserId}
+          AND state = 'paid'
+          AND consumed_at >= ${from}
+          AND consumed_at < ${to}
+      `;
+      return Number(rows[0]?.count ?? '0');
     } catch (error) {
       throw toDatabaseError(error);
     }

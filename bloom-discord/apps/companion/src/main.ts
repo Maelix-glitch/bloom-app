@@ -19,6 +19,7 @@ import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
+import { CommunityService } from './features/community/service.js';
 import { RewardsService } from './features/rewards/service.js';
 import { ReferralConsumer } from './features/rewards/referral-consumer.js';
 import { createReferralPaymentJob } from './features/rewards/referral-job.js';
@@ -41,6 +42,16 @@ await runBotMain(() =>
         messaging: context.discord.messaging,
         logger: context.logger,
         rewards,
+      });
+
+      const community = new CommunityService({
+        config: context.platform,
+        repositories: context.repositories,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+        rewards,
+        awards,
+        now: () => new Date(),
       });
 
       const referralConsumer = new ReferralConsumer({
@@ -69,6 +80,7 @@ await runBotMain(() =>
         rewards,
         awards,
         referralConsumer,
+        community,
       };
     },
 

@@ -564,6 +564,8 @@ describe('boundaries', () => {
     expect(companion).toEqual([
       'audit',
       'awards',
+      // Added with challenges and events, which Companion owns outright.
+      'community',
       'cooldowns',
       'idempotency',
       'jobs',

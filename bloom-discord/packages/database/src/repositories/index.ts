@@ -3,6 +3,7 @@ import type { BotName } from '@bloom/shared-types';
 import type { Database } from '../client.js';
 import { PostgresAuditEventRepository, type AuditEventRepository } from './audit.js';
 import { PostgresAwardsRepository, type AwardsRepository } from './awards.js';
+import { PostgresCommunityRepository, type CommunityRepository } from './community.js';
 import { PostgresCooldownRepository, type CooldownRepository } from './cooldowns.js';
 import { PostgresIdentityRepository, type IdentityRepository } from './identity.js';
 import {
@@ -22,6 +23,7 @@ import { PostgresTelemetryRepository, type TelemetryRepository } from './telemet
 
 export * from './audit.js';
 export * from './awards.js';
+export * from './community.js';
 export * from './cooldowns.js';
 export * from './identity.js';
 export * from './idempotency.js';
@@ -57,6 +59,7 @@ export interface Repositories {
   readonly awards: AwardsRepository;
   readonly moderation: ModerationRepository;
   readonly cases: CaseRepository;
+  readonly community: CommunityRepository;
   readonly settings: SettingsRepository;
   readonly telemetry: TelemetryRepository;
 }
@@ -74,6 +77,7 @@ export function createRepositories(database: Database): Repositories {
     referrals: new PostgresReferralRepository(database),
     rewards: new PostgresRewardsRepository(database),
     awards: new PostgresAwardsRepository(database),
+    community: new PostgresCommunityRepository(database),
     moderation: new PostgresModerationRepository(database),
     cases: new PostgresCaseRepository(database),
     settings: new PostgresSettingsRepository(database),
@@ -134,6 +138,13 @@ export const BOT_REPOSITORY_CAPABILITIES = {
   companion: [
     'audit',
     'awards',
+    /*
+     * Challenges and events. Companion only: Guardian has no reason to know
+     * who signed up for a community event, and the referral handoff already
+     * showed that a cross-bot fact can travel through a dedicated table
+     * rather than through shared read access.
+     */
+    'community',
     'cooldowns',
     'idempotency',
     'jobs',

@@ -6,6 +6,7 @@ import {
   type UserId,
 } from '@bloom/shared-types';
 import { bloomEmbed, neutralEmbed, type BloomMessage } from '@bloom/embeds';
+import type { CommunityActivity } from '@bloom/database';
 import type { AwardDefinition } from '../awards/definitions.js';
 import { earnedLines } from '../awards/messages.js';
 import type { MemberProfile, RankMove } from './service.js';
@@ -59,12 +60,32 @@ function streakLine(streak: number): string {
   return `${pluralise(streak, 'day')} in a row.`;
 }
 
+/**
+ * Challenges finished by the action that just happened.
+ *
+ * One line each, in the reply to whatever the member was doing — the same
+ * treatment milestones get, and for the same reason. A separate congratulatory
+ * message would be a second notification for one action.
+ */
+function challengeLines(completed: readonly CommunityActivity[]): readonly string[] {
+  if (completed.length === 0) return [];
+  return [
+    '',
+    ...completed.map((activity) =>
+      activity.rewardPoints > 0
+        ? `**${activity.title}** — challenge complete, +${String(activity.rewardPoints)} points`
+        : `**${activity.title}** — challenge complete`,
+    ),
+  ];
+}
+
 export function checkedInMessage(input: {
   readonly pointsAwarded: number;
   readonly balance: number;
   readonly streak: number;
   readonly rankMove: RankMove | null;
   readonly granted?: readonly AwardDefinition[];
+  readonly challenges?: readonly CommunityActivity[];
 }): BloomMessage {
   const lines = [
     'Checked in for today.',
@@ -74,6 +95,7 @@ export function checkedInMessage(input: {
       : []),
     ...rankLine(input.rankMove),
     ...earnedLines(input.granted ?? []),
+    ...challengeLines(input.challenges ?? []),
   ];
 
   return {
@@ -103,6 +125,7 @@ export function winSharedMessage(input: {
   readonly rankMove: RankMove | null;
   readonly posted: boolean;
   readonly granted?: readonly AwardDefinition[];
+  readonly challenges?: readonly CommunityActivity[];
 }): BloomMessage {
   const lines = [
     input.posted
@@ -112,6 +135,7 @@ export function winSharedMessage(input: {
     `+${String(input.pointsAwarded)} points · ${String(input.balance)} total`,
     ...rankLine(input.rankMove),
     ...earnedLines(input.granted ?? []),
+    ...challengeLines(input.challenges ?? []),
   ];
 
   return {

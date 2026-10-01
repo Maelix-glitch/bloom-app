@@ -19,6 +19,7 @@ import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
+import { CommunityService } from './features/community/service.js';
 import type { AwardDefinition } from './features/awards/definitions.js';
 import { RewardsService } from './features/rewards/service.js';
 import { ReferralConsumer } from './features/rewards/referral-consumer.js';
@@ -80,6 +81,8 @@ export interface CompanionHarnessOptions {
   readonly smallWinsChannel?: null;
   /** Unset the milestones channel, so an earned award has nowhere to go. */
   readonly milestonesChannel?: null;
+  /** Unset the challenges channel, so a new activity has nowhere to announce. */
+  readonly challengesChannel?: null;
   /** Fix the clock. Rewards are date-sensitive, so tests need to own "today". */
   readonly now?: () => Date;
   /**
@@ -110,6 +113,7 @@ export function companionHarness(
       ...(options.milestonesChannel === null
         ? { milestones: null }
         : { milestones: TEST_CHANNEL_IDS.milestones }),
+      ...(options.challengesChannel === null ? { challenges: null } : {}),
     },
     // On by default: a harness where every job is switched off would make the
     // job tests pass without running anything.
@@ -127,6 +131,8 @@ export function companionHarness(
     TEST_CHANNEL_IDS.smallWins,
     TEST_CHANNEL_IDS.milestones,
     TEST_CHANNEL_IDS.achievements,
+    // Community activities announce here. One post per activity, never per join.
+    TEST_CHANNEL_IDS.challenges,
   );
 
   const messaging = new FakeMessaging(guild);
@@ -166,6 +172,16 @@ export function companionHarness(
     ...(options.awardDefinitions ? { definitions: options.awardDefinitions } : {}),
   });
 
+  const community = new CommunityService({
+    config,
+    repositories,
+    messaging,
+    logger,
+    rewards,
+    awards,
+    now: () => clock.date(),
+  });
+
   const referralConsumer = new ReferralConsumer({
     repositories,
     rewards,
@@ -187,6 +203,7 @@ export function companionHarness(
     rewards,
     awards,
     referralConsumer,
+    community,
   };
 
   // The same registration `main.ts` performs, so the command tests inspect the

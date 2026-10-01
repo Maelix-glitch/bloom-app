@@ -41,6 +41,7 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
     expect([...BOT_REPOSITORY_CAPABILITIES.companion]).toEqual([
       'audit',
       'awards',
+      'community',
       'cooldowns',
       'idempotency',
       'jobs',
@@ -69,7 +70,7 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
     ]);
 
     expect([...union].sort()).toEqual(ALL_REPOSITORY_KEYS);
-    expect(ALL_REPOSITORY_KEYS).toHaveLength(15);
+    expect(ALL_REPOSITORY_KEYS).toHaveLength(16);
   });
 
   it('keeps jobs, audit, settings and telemetry in every bot', () => {
@@ -92,8 +93,15 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
     const withheld = (keys: readonly string[]): string[] =>
       ALL_REPOSITORY_KEYS.filter((key) => !keys.includes(key));
 
+    /*
+     * `community` is withheld from Guardian deliberately. Guardian has no
+     * reason to know who signed up for an event, and the referral handoff
+     * already showed that a cross-bot fact can travel through a dedicated
+     * table rather than through shared read access.
+     */
     expect(withheld(BOT_REPOSITORY_CAPABILITIES.guardian)).toEqual([
       'awards',
+      'community',
       'labs',
       'rewards',
     ]);
@@ -108,6 +116,7 @@ describe('BOT_REPOSITORY_CAPABILITIES', () => {
     expect(withheld(BOT_REPOSITORY_CAPABILITIES.labs)).toEqual([
       'awards',
       'cases',
+      'community',
       'cooldowns',
       'idempotency',
       'identity',

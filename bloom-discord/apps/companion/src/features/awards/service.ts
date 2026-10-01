@@ -3,6 +3,7 @@ import type { PlatformConfig } from '@bloom/config';
 import type { MemberAward, Repositories } from '@bloom/database';
 import type { MessagingService } from '@bloom/discord';
 import type { Logger } from '@bloom/logging';
+import type { JsonObject } from '@bloom/shared-types';
 import {
   AWARD_DEFINITIONS,
   awardByKey,
@@ -141,6 +142,70 @@ export class AwardsService {
     }
 
     return granted;
+  }
+
+  /**
+   * Grant a named award outright, outside the criteria.
+   *
+   * For awards a community activity recognises: the criterion is "staff ran
+   * a challenge and you finished it", which is not something `definitions.ts`
+   * can compute and should not pretend to. The caller supplies the key and
+   * the evidence.
+   *
+   * Same guarantees as an evaluated grant, because it is the same repository
+   * call: the primary key arbitrates, only a real grant is audited and
+   * announced, and a replay is a no-op.
+   *
+   * It pays nothing, and cannot. There is no `points` here and no route to
+   * `payReward` — an award unlocked by an activity that already paid must not
+   * pay a second time, which is the circular reward the brief forbids.
+   */
+  public async grantDirect(request: {
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly awardKey: string;
+    readonly evidence?: JsonObject;
+    readonly correlationId: CorrelationId;
+  }): Promise<boolean> {
+    const definition = awardByKey(request.awardKey);
+
+    const outcome = await this.options.repositories.awards.grant({
+      guildId: request.guildId,
+      userId: request.userId,
+      awardKey: request.awardKey,
+      // An unknown key is still an achievement: staff named it when they
+      // created the activity, and refusing here would silently drop
+      // recognition a member has already earned.
+      kind: definition?.kind ?? 'achievement',
+      evidence: request.evidence ?? {},
+    });
+
+    if (outcome.kind !== 'granted') return false;
+
+    await this.options.repositories.audit.append({
+      guildId: request.guildId,
+      botName: 'companion',
+      event: 'awards.granted',
+      actorId: null,
+      targetId: request.userId,
+      severity: 'info',
+      source: 'awards',
+      correlationId: request.correlationId,
+      details: { award: request.awardKey, kind: outcome.award.kind, direct: true },
+    });
+
+    if (definition) {
+      await this.announce(
+        {
+          guildId: request.guildId,
+          userId: request.userId,
+          correlationId: request.correlationId,
+        },
+        definition,
+      );
+    }
+
+    return true;
   }
 
   /**

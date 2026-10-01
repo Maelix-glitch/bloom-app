@@ -7,6 +7,7 @@ import {
   rankForPoints,
   type CorrelationId,
   type GuildId,
+  type PointKind,
   type Rank,
   type UserId,
 } from '@bloom/shared-types';
@@ -167,6 +168,21 @@ export interface AchievementAwardRequest {
 }
 
 export type AchievementAwardResult =
+  | { readonly kind: 'paid'; readonly alreadyPaid: boolean; readonly balance: number }
+  | { readonly kind: 'failed'; readonly reason: 'insufficient' };
+
+export interface ActivityAwardRequest {
+  readonly guildId: GuildId;
+  readonly userId: UserId;
+  /** `challenge_completion` or `event_completion`. */
+  readonly kind: Extract<PointKind, 'challenge_completion' | 'event_completion'>;
+  readonly points: number;
+  /** Derived from the activity and member by the caller, never per attempt. */
+  readonly idempotencyKey: string;
+  readonly correlationId?: CorrelationId | null;
+}
+
+export type ActivityAwardResult =
   | { readonly kind: 'paid'; readonly alreadyPaid: boolean; readonly balance: number }
   | { readonly kind: 'failed'; readonly reason: 'insufficient' };
 
@@ -396,6 +412,49 @@ export class RewardsService {
     });
 
     return { kind: 'applied', balance: outcome.balance };
+  }
+
+  /**
+   * Pay a community activity completion.
+   *
+   * The single entry point for challenge and event rewards, and the reason
+   * `CommunityService` holds no repository write path to the ledger. The
+   * caller supplies the idempotency key because it owns the identity of the
+   * completion; this service owns everything about how a payment is made.
+   */
+  public async awardActivity(
+    request: ActivityAwardRequest,
+  ): Promise<ActivityAwardResult> {
+    if (request.points <= 0 || !Number.isInteger(request.points)) {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `A community reward must be a positive whole number; got ${String(request.points)}.`,
+      });
+    }
+
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.userId,
+      kind: request.kind,
+      points: request.points,
+      // Automatic kinds carry no reason and no actor; the activity id in the
+      // audit row is a better record than a sentence.
+      reason: null,
+      awardedBy: null,
+      idempotencyKey: request.idempotencyKey,
+      correlationId: request.correlationId ?? null,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      // Unreachable: validated positive above, and the insufficient rule
+      // applies only to debits. Handled rather than asserted, as elsewhere.
+      return { kind: 'failed', reason: 'insufficient' };
+    }
+
+    return {
+      kind: 'paid',
+      alreadyPaid: outcome.kind === 'duplicate',
+      balance: outcome.balance,
+    };
   }
 
   /**

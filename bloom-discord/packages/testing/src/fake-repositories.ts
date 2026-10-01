@@ -11,6 +11,7 @@ import {
   type ModerationAction,
   type ChannelId,
   type ChannelKey,
+  type CorrelationId,
   type GuildId,
   type IdempotencyKey,
   type JsonValue,
@@ -24,6 +25,16 @@ import {
 import { localDateIn, localDaysBetween, type LocalDate } from '@bloom/utils';
 import { ACTIVE_CASE_STATUSES } from '@bloom/database';
 import type {
+  ActivityKind,
+  ActivityStatus,
+  CommunityActivity,
+  CommunityParticipant,
+  CommunityRepository,
+  CompleteOutcome,
+  CompleteParticipantInput,
+  CreateActivityInput,
+  JoinOutcome,
+  ListActivitiesOptions,
   ClaimedReferral,
   RecordReferralInput,
   RecordReferralOutcome,
@@ -1391,6 +1402,25 @@ export class FakeRewardsRepository implements RewardsRepository {
     return Promise.resolve(rows);
   }
 
+  public countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    return Promise.resolve(
+      this.events.filter(
+        (event) =>
+          event.guildId === guildId &&
+          event.userId === userId &&
+          event.kind === kind &&
+          event.createdAt.getTime() >= from.getTime() &&
+          event.createdAt.getTime() < to.getTime(),
+      ).length,
+    );
+  }
+
   public participation(
     guildId: GuildId,
     userId: UserId,
@@ -1953,6 +1983,25 @@ export class FakeReferralRepository implements ReferralRepository {
     );
   }
 
+  public countPaidForInviterInWindow(
+    guildId: GuildId,
+    inviterUserId: UserId,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    return Promise.resolve(
+      this.triggers.filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.inviterUserId === inviterUserId &&
+          row.state === 'paid' &&
+          row.consumedAt !== null &&
+          row.consumedAt.getTime() >= from.getTime() &&
+          row.consumedAt.getTime() < to.getTime(),
+      ).length,
+    );
+  }
+
   public countPaidForInviter(guildId: GuildId, inviterUserId: UserId): Promise<number> {
     return Promise.resolve(
       this.triggers.filter(
@@ -1981,6 +2030,320 @@ export class FakeReferralRepository implements ReferralRepository {
   }
 }
 
+/**
+ * Challenges and events in memory.
+ *
+ * The one place a fake can lie about something that matters here is capacity:
+ * the real repository serialises the seat count behind an advisory lock, and
+ * JavaScript's single-threaded model means a naive fake can never reproduce
+ * the interleaving that lock exists to prevent. This fake deliberately yields
+ * between the count and the insert (`await Promise.resolve()`), so a test that
+ * fires concurrent joins actually interleaves them and would observe an
+ * oversubscribed event if the seat check were not also serialised here.
+ */
+export class FakeCommunityRepository implements CommunityRepository {
+  public readonly activities: CommunityActivity[] = [];
+  /** Keyed `activityId:userId`, mirroring the real primary key. */
+  public readonly records = new Map<string, CommunityParticipant>();
+
+  private nextId = 1;
+  /** Stands in for the advisory lock: one capacity check at a time. */
+  private seatGate: Promise<unknown> = Promise.resolve();
+
+  public constructor(private readonly now: () => Date = () => new Date()) {}
+
+  public create(input: CreateActivityInput): Promise<CommunityActivity> {
+    const activity: CommunityActivity = {
+      id: `activity-${String(this.nextId++)}`,
+      guildId: input.guildId,
+      kind: input.kind,
+      title: input.title,
+      description: input.description,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      status: 'open',
+      targetMetric: input.targetMetric ?? null,
+      targetAmount: input.targetAmount ?? null,
+      capacity: input.capacity ?? null,
+      rewardPoints: input.rewardPoints,
+      achievementKey: input.achievementKey ?? null,
+      createdBy: input.createdBy,
+      createdAt: this.now(),
+      closedBy: null,
+      closedAt: null,
+      correlationId: input.correlationId ?? null,
+    };
+    this.activities.push(activity);
+    return Promise.resolve(activity);
+  }
+
+  public byId(guildId: GuildId, activityId: string): Promise<CommunityActivity | null> {
+    return Promise.resolve(
+      this.activities.find(
+        (activity) => activity.guildId === guildId && activity.id === activityId,
+      ) ?? null,
+    );
+  }
+
+  public list(
+    guildId: GuildId,
+    options: ListActivitiesOptions,
+  ): Promise<readonly CommunityActivity[]> {
+    const limit = Math.min(options.limit ?? 10, 25);
+    return Promise.resolve(
+      this.activities
+        .filter(
+          (activity) =>
+            activity.guildId === guildId &&
+            activity.kind === options.kind &&
+            (options.status === undefined || activity.status === options.status),
+        )
+        .sort(
+          (a, b) => b.endsAt.getTime() - a.endsAt.getTime() || b.id.localeCompare(a.id),
+        )
+        .slice(0, limit),
+    );
+  }
+
+  public openAt(
+    guildId: GuildId,
+    kind: ActivityKind,
+    at: Date,
+  ): Promise<readonly CommunityActivity[]> {
+    return Promise.resolve(
+      this.activities
+        .filter(
+          (activity) =>
+            activity.guildId === guildId &&
+            activity.kind === kind &&
+            activity.status === 'open' &&
+            activity.startsAt.getTime() <= at.getTime() &&
+            activity.endsAt.getTime() > at.getTime(),
+        )
+        .sort(
+          (a, b) => a.endsAt.getTime() - b.endsAt.getTime() || a.id.localeCompare(b.id),
+        ),
+    );
+  }
+
+  public close(input: {
+    readonly guildId: GuildId;
+    readonly activityId: string;
+    readonly status: Exclude<ActivityStatus, 'open'>;
+    readonly closedBy: UserId;
+    readonly closedAt: Date;
+  }): Promise<CommunityActivity | null> {
+    const index = this.activities.findIndex(
+      (activity) =>
+        activity.guildId === input.guildId &&
+        activity.id === input.activityId &&
+        activity.status === 'open',
+    );
+    if (index === -1) return Promise.resolve(null);
+
+    const current = this.activities[index];
+    if (!current) return Promise.resolve(null);
+
+    const closed: CommunityActivity = {
+      ...current,
+      status: input.status,
+      closedBy: input.closedBy,
+      closedAt: input.closedAt,
+    };
+    this.activities[index] = closed;
+    return Promise.resolve(closed);
+  }
+
+  public async join(input: {
+    readonly activityId: string;
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly capacity: number | null;
+    readonly joinedAt: Date;
+    readonly correlationId?: CorrelationId | null;
+  }): Promise<JoinOutcome> {
+    const key = `${input.activityId}:${input.userId}`;
+
+    const attempt = async (): Promise<JoinOutcome> => {
+      const existing = this.records.get(key);
+      if (existing && existing.state !== 'withdrawn') {
+        return { kind: 'already_joined', participant: existing };
+      }
+
+      if (input.capacity !== null) {
+        const seatsUsed = [...this.records.values()].filter(
+          (participant) =>
+            participant.activityId === input.activityId &&
+            participant.state !== 'withdrawn',
+        ).length;
+
+        // Yield, so concurrent joins genuinely interleave here. Without this
+        // the test for the capacity race would pass against a broken
+        // implementation.
+        await Promise.resolve();
+
+        if (seatsUsed >= input.capacity) {
+          return existing
+            ? { kind: 'already_joined', participant: existing }
+            : { kind: 'full' };
+        }
+      }
+
+      const participant: CommunityParticipant = {
+        activityId: input.activityId,
+        guildId: input.guildId,
+        userId: input.userId,
+        state: 'joined',
+        joinedAt: existing?.joinedAt ?? input.joinedAt,
+        completedAt: null,
+        progress: null,
+        pointEventId: null,
+      };
+      this.records.set(key, participant);
+      return existing
+        ? { kind: 'already_joined', participant }
+        : { kind: 'joined', participant };
+    };
+
+    // Serialise, the way the advisory lock does. Only capped joins contend.
+    if (input.capacity === null) return await attempt();
+    const gated = this.seatGate.then(attempt);
+    this.seatGate = gated.catch(() => undefined);
+    return await gated;
+  }
+
+  public leave(
+    activityId: string,
+    guildId: GuildId,
+    userId: UserId,
+  ): Promise<'withdrawn' | 'not_joined'> {
+    const key = `${activityId}:${userId}`;
+    const existing = this.records.get(key);
+    if (existing?.guildId !== guildId || existing.state !== 'joined') {
+      return Promise.resolve('not_joined');
+    }
+    this.records.set(key, { ...existing, state: 'withdrawn' });
+    return Promise.resolve('withdrawn');
+  }
+
+  public participant(
+    activityId: string,
+    userId: UserId,
+  ): Promise<CommunityParticipant | null> {
+    return Promise.resolve(this.records.get(`${activityId}:${userId}`) ?? null);
+  }
+
+  public records_(activityId: string): readonly CommunityParticipant[] {
+    return [...this.records.values()].filter(
+      (participant) => participant.activityId === activityId,
+    );
+  }
+
+  public participants(
+    activityId: string,
+    limit = 100,
+  ): Promise<readonly CommunityParticipant[]> {
+    return Promise.resolve(
+      [...this.records_(activityId)]
+        .sort(
+          (a, b) =>
+            a.joinedAt.getTime() - b.joinedAt.getTime() ||
+            a.userId.localeCompare(b.userId),
+        )
+        .slice(0, Math.min(limit, 100)),
+    );
+  }
+
+  public counts(activityId: string): Promise<{ joined: number; completed: number }> {
+    const rows = this.records_(activityId);
+    return Promise.resolve({
+      joined: rows.filter((row) => row.state !== 'withdrawn').length,
+      completed: rows.filter((row) => row.state === 'completed').length,
+    });
+  }
+
+  public memberActivityIds(
+    guildId: GuildId,
+    userId: UserId,
+    activityIds: readonly string[],
+  ): Promise<ReadonlyMap<string, CommunityParticipant>> {
+    const wanted = new Set(activityIds);
+    return Promise.resolve(
+      new Map(
+        [...this.records.values()]
+          .filter(
+            (participant) =>
+              participant.guildId === guildId &&
+              participant.userId === userId &&
+              wanted.has(participant.activityId),
+          )
+          .map((participant) => [participant.activityId, participant]),
+      ),
+    );
+  }
+
+  public complete(input: CompleteParticipantInput): Promise<CompleteOutcome> {
+    const key = `${input.activityId}:${input.userId}`;
+    const existing = this.records.get(key);
+    if (existing?.guildId !== input.guildId || existing.state !== 'joined') {
+      return Promise.resolve({ kind: 'already_completed' });
+    }
+    const completed: CommunityParticipant = {
+      ...existing,
+      state: 'completed',
+      completedAt: this.now(),
+      progress: input.progress ?? null,
+      pointEventId: input.pointEventId ?? null,
+    };
+    this.records.set(key, completed);
+    return Promise.resolve({ kind: 'completed', participant: completed });
+  }
+
+  public completeDirect(input: CompleteParticipantInput): Promise<CompleteOutcome> {
+    const key = `${input.activityId}:${input.userId}`;
+    if (this.records.has(key)) {
+      return Promise.resolve({ kind: 'already_completed' });
+    }
+    const completed: CommunityParticipant = {
+      activityId: input.activityId,
+      guildId: input.guildId,
+      userId: input.userId,
+      state: 'completed',
+      joinedAt: this.now(),
+      completedAt: this.now(),
+      progress: input.progress ?? null,
+      pointEventId: input.pointEventId ?? null,
+    };
+    this.records.set(key, completed);
+    return Promise.resolve({ kind: 'completed', participant: completed });
+  }
+
+  public countCompletedEvents(
+    guildId: GuildId,
+    userId: UserId,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    const events = new Set(
+      this.activities
+        .filter((activity) => activity.kind === 'event')
+        .map((activity) => activity.id),
+    );
+    return Promise.resolve(
+      [...this.records.values()].filter(
+        (participant) =>
+          participant.guildId === guildId &&
+          participant.userId === userId &&
+          participant.state === 'completed' &&
+          events.has(participant.activityId) &&
+          participant.completedAt !== null &&
+          participant.completedAt.getTime() >= from.getTime() &&
+          participant.completedAt.getTime() < to.getTime(),
+      ).length,
+    );
+  }
+}
+
 export interface FakeRepositories extends Repositories {
   readonly identity: FakeIdentityRepository;
   readonly moderation: FakeModerationRepository;
@@ -1995,6 +2358,7 @@ export interface FakeRepositories extends Repositories {
   readonly referrals: FakeReferralRepository;
   readonly rewards: FakeRewardsRepository;
   readonly awards: FakeAwardsRepository;
+  readonly community: FakeCommunityRepository;
   readonly labs: FakeLabsRepository;
   readonly retention: FakeRetentionRepository;
 }
@@ -2025,6 +2389,7 @@ export function fakeRepositories(
     referrals: new FakeReferralRepository(now),
     rewards: new FakeRewardsRepository(now),
     awards: new FakeAwardsRepository(now),
+    community: new FakeCommunityRepository(now),
     retention: new FakeRetentionRepository(),
     labs: new FakeLabsRepository(now),
   };

@@ -93,12 +93,26 @@ export const checkInCommand: BloomCommand<CompanionDeps> = {
       correlationId: invocation.correlationId,
     });
 
+    /*
+     * Challenges are evaluated the same way and for the same reason: the
+     * member just did something countable, so re-check what that implies.
+     * Separate from awards because a challenge is staff-configured data
+     * rather than a code-level definition, but composed here identically —
+     * neither service knows the other exists.
+     */
+    const challenges = await deps.community.evaluateChallenges({
+      guildId: requireGuild(invocation),
+      userId: invocation.actor.userId,
+      correlationId: invocation.correlationId,
+    });
+
     return copy.checkedInMessage({
       pointsAwarded: result.pointsAwarded,
       balance: result.balance,
       streak: result.streak,
       rankMove: result.rankMove,
       granted,
+      challenges,
     });
   },
 };
@@ -173,12 +187,19 @@ export const winCommand: BloomCommand<CompanionDeps> = {
           correlationId: invocation.correlationId,
         });
 
+        const challenges = await deps.community.evaluateChallenges({
+          guildId: requireGuild(invocation),
+          userId: invocation.actor.userId,
+          correlationId: invocation.correlationId,
+        });
+
         return copy.winSharedMessage({
           pointsAwarded: result.pointsAwarded,
           balance: result.balance,
           rankMove: result.rankMove,
           posted: result.posted,
           granted,
+          challenges,
         });
       }
     }
