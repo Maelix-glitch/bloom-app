@@ -20,6 +20,8 @@ import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
 import { CommunityService } from './features/community/service.js';
+import { HighlightsService } from './features/highlights/service.js';
+import { createWeeklyRecapJob } from './features/highlights/job.js';
 import type { AwardDefinition } from './features/awards/definitions.js';
 import { RewardsService } from './features/rewards/service.js';
 import { ReferralConsumer } from './features/rewards/referral-consumer.js';
@@ -60,6 +62,7 @@ export interface CompanionHarness {
   readonly jobSettings: JobSettingsService;
   readonly rewards: RewardsService;
   readonly awards: AwardsService;
+  readonly highlights: HighlightsService;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
 }
 
@@ -182,6 +185,12 @@ export function companionHarness(
     now: () => clock.date(),
   });
 
+  const highlights = new HighlightsService({
+    config,
+    repositories,
+    now: () => clock.date(),
+  });
+
   const referralConsumer = new ReferralConsumer({
     repositories,
     rewards,
@@ -204,11 +213,13 @@ export function companionHarness(
     awards,
     referralConsumer,
     community,
+    highlights,
   };
 
   // The same registration `main.ts` performs, so the command tests inspect the
   // real job list rather than a fixture that can drift from it.
   scheduler.register(createDailyCheckInJob(deps));
+  scheduler.register(createWeeklyRecapJob(deps));
 
   const registry = new CommandRegistry<CompanionDeps>('companion').registerAll(
     companionCommands,
@@ -238,6 +249,7 @@ export function companionHarness(
     jobSettings,
     rewards,
     awards,
+    highlights,
     logs: sink,
   };
 }

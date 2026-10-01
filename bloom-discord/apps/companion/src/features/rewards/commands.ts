@@ -13,6 +13,13 @@ import type {
   SubcommandContribution,
 } from '@bloom/commands';
 import type { CompanionDeps } from '../../deps.js';
+import {
+  BOARD_CATEGORIES,
+  BOARD_PERIODS,
+  type BoardCategory,
+  type BoardPeriod,
+} from '../highlights/service.js';
+import { boardMessage } from '../highlights/messages.js';
 import * as copy from './messages.js';
 
 /**
@@ -234,38 +241,84 @@ async function showRank(
 }
 
 /**
- * Leaderboard periods.
+ * One leaderboard, four things it can rank.
  *
- * All-time is deliberately absent. It ranks longevity rather than
- * participation, it never changes at the top, and the only thing it tells a
- * member who joined last week is that they cannot win. A rolling window means
- * the board is always about what is happening now.
+ * Extended in place rather than joined by a second command. A server with
+ * `/companion leaderboard` and `/companion challenge-leaderboard` beside it
+ * teaches members that the first one is the real one and the rest are
+ * somewhere they have to go looking — and every category added later would
+ * have been another root name spent.
+ *
+ * ## All-time, and where it is refused
+ *
+ * Three of the four categories offer it. Points does not, and
+ * `HighlightsService` is where that is enforced rather than here: a board
+ * requested all-time for points comes back as the 30-day board, with the
+ * message saying so. The original reasoning stands — summing the ledger
+ * since the beginning ranks seniority, which the member who joined last week
+ * can never change — but it is now a property of one category rather than an
+ * absence from the whole command.
  */
-const PERIODS: Readonly<
-  Record<string, { readonly label: string; readonly days: number }>
-> = {
-  week: { label: 'last 7 days', days: 7 },
-  month: { label: 'last 30 days', days: 30 },
-};
+const CATEGORY_OPTION = {
+  name: 'category',
+  description: 'What to rank. Defaults to Bloom Points.',
+  type: 'string',
+  required: false,
+  choices: [
+    { name: 'Bloom Points', value: 'points' },
+    { name: 'People invited who stayed', value: 'referrals' },
+    { name: 'Challenges finished', value: 'challenges' },
+    { name: 'Events finished', value: 'events' },
+  ],
+} as const;
+
+const PERIOD_OPTION = {
+  name: 'period',
+  description: 'How far back to look. Defaults to the last 7 days.',
+  type: 'string',
+  required: false,
+  choices: [
+    { name: 'Last 7 days', value: 'week' },
+    { name: 'Last 30 days', value: 'month' },
+    { name: 'All time', value: 'all' },
+  ],
+} as const;
+
+function readCategory(value: string | null): BoardCategory {
+  return isBoardCategory(value) ? value : 'points';
+}
+
+function readPeriod(value: string | null): BoardPeriod {
+  return isBoardPeriod(value) ? value : 'week';
+}
+
+function isBoardCategory(value: string | null): value is BoardCategory {
+  return value !== null && (BOARD_CATEGORIES as readonly string[]).includes(value);
+}
+
+function isBoardPeriod(value: string | null): value is BoardPeriod {
+  return value !== null && (BOARD_PERIODS as readonly string[]).includes(value);
+}
 
 async function showLeaderboard(
   invocation: CommandInvocation,
   deps: CompanionDeps,
 ): Promise<BloomMessage> {
+  /*
+   * Still gated on the rewards feature flag, including for the three
+   * categories that count things rather than points. Every one of them ranks
+   * participation in an economy that is switched off, and a board that kept
+   * working after the economy stopped would be ranking nothing.
+   */
   if (!deps.config.features.rewards) return copy.rewardsDisabledMessage();
 
-  const requested = invocation.options.getString('period') ?? 'week';
-  const period = PERIODS[requested] ?? PERIODS['week']!;
-
-  const entries = await deps.rewards.leaderboard(requireGuild(invocation), {
-    days: period.days,
-    limit: 10,
+  const result = await deps.highlights.leaderboard({
+    guildId: requireGuild(invocation),
+    category: readCategory(invocation.options.getString('category')),
+    period: readPeriod(invocation.options.getString('period')),
   });
 
-  return copy.leaderboardMessage(entries, {
-    periodLabel: period.label,
-    viewer: invocation.actor.userId,
-  });
+  return boardMessage(result, invocation.actor.userId);
 }
 
 /**
@@ -305,19 +358,8 @@ export const rewardsSubcommands: readonly SubcommandContribution<CompanionDeps>[
   {
     spec: {
       name: 'leaderboard',
-      description: 'Show the members who earned the most points recently.',
-      options: [
-        {
-          name: 'period',
-          description: 'How far back to look. Defaults to the last 7 days.',
-          type: 'string',
-          required: false,
-          choices: [
-            { name: 'Last 7 days', value: 'week' },
-            { name: 'Last 30 days', value: 'month' },
-          ],
-        },
-      ],
+      description: 'Show who has been most active recently.',
+      options: [CATEGORY_OPTION, PERIOD_OPTION],
     },
     policy: requireBloomMember(),
     execute: showLeaderboard,

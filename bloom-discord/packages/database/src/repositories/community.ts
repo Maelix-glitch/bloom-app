@@ -130,6 +130,12 @@ export interface CompleteParticipantInput {
   readonly correlationId?: CorrelationId | null;
 }
 
+/** One row of a completion board: a member and how many they finished. */
+export interface CompletionCount {
+  readonly userId: UserId;
+  readonly count: number;
+}
+
 /** Hard ceilings. Nothing here is paginated, so nothing may be unbounded. */
 const MAX_LIST_LIMIT = 25;
 const DEFAULT_LIST_LIMIT = 10;
@@ -148,6 +154,20 @@ export interface CommunityRepository {
     kind: ActivityKind,
     at: Date,
   ): Promise<readonly CommunityActivity[]>;
+  /**
+   * Open activities of one kind that have not started yet, soonest first.
+   *
+   * Separate from `openAt` rather than a flag on it, because the two have
+   * different orderings and a combined method would have had to sort by
+   * something that means different things to each half.
+   */
+  upcomingAfter(
+    guildId: GuildId,
+    kind: ActivityKind,
+    at: Date,
+    limit?: number,
+  ): Promise<readonly CommunityActivity[]>;
+
   close(input: {
     readonly guildId: GuildId;
     readonly activityId: string;
@@ -214,6 +234,35 @@ export interface CommunityRepository {
     activityId: string,
     limit?: number,
   ): Promise<readonly CommunityParticipant[]>;
+
+  /**
+   * Who completed the most activities of one kind, over a window.
+   *
+   * Counts completions, not joins. Signing up for nine events and finishing
+   * none puts nobody on a board — which is the whole difference between a
+   * participation record and a recognition one.
+   */
+  completionLeaderboard(
+    guildId: GuildId,
+    options: {
+      readonly kind: ActivityKind;
+      readonly since?: Date;
+      readonly limit?: number;
+    },
+  ): Promise<readonly CompletionCount[]>;
+
+  /**
+   * Completions of one kind guild-wide in a window, and how many members.
+   *
+   * `to` may be null for "and everything since" — see `activitySummary` for
+   * why a live view must not be bounded at the instant its clock was read.
+   */
+  completionTotals(
+    guildId: GuildId,
+    kind: ActivityKind,
+    from: Date,
+    to: Date | null,
+  ): Promise<{ readonly completions: number; readonly members: number }>;
 
   /** Completed event participations in a window — the third challenge metric. */
   countCompletedEvents(
@@ -389,6 +438,29 @@ export class PostgresCommunityRepository
           AND ends_at > ${at}
         ORDER BY ends_at ASC, id ASC
         LIMIT ${MAX_LIST_LIMIT}
+      `;
+      return rows.map(toActivity);
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async upcomingAfter(
+    guildId: GuildId,
+    kind: ActivityKind,
+    at: Date,
+    limit?: number,
+  ): Promise<readonly CommunityActivity[]> {
+    const bounded = clampLimit(limit, MAX_LIST_LIMIT, DEFAULT_LIST_LIMIT);
+    try {
+      const rows = await this.db.sql<ActivityRow[]>`
+        SELECT * FROM ${this.db.sql(this.schema)}.community_activities
+        WHERE guild_id = ${guildId}
+          AND kind = ${kind}
+          AND status = 'open'
+          AND starts_at > ${at}
+        ORDER BY starts_at ASC, id ASC
+        LIMIT ${bounded}
       `;
       return rows.map(toActivity);
     } catch (error) {
@@ -775,6 +847,78 @@ export class PostgresCommunityRepository
           AND p.completed_at < ${to}
       `;
       return Number(rows[0]?.count ?? '0');
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async completionLeaderboard(
+    guildId: GuildId,
+    options: {
+      readonly kind: ActivityKind;
+      readonly since?: Date;
+      readonly limit?: number;
+    },
+  ): Promise<readonly CompletionCount[]> {
+    const limit = clampLimit(options.limit, MAX_LIST_LIMIT, DEFAULT_LIST_LIMIT);
+    const since = options.since ?? null;
+
+    try {
+      const rows = await this.db.sql<{ user_id: string; count: string }[]>`
+        SELECT p.user_id,
+               count(*)::text AS count
+        FROM ${this.db.sql(this.schema)}.community_participants p
+        JOIN ${this.db.sql(this.schema)}.community_activities a
+          ON a.id = p.activity_id AND a.guild_id = p.guild_id
+        WHERE p.guild_id = ${guildId}
+          AND p.state = 'completed'
+          AND a.kind = ${options.kind}
+          -- A cancelled activity paid nobody and recognises nobody, so its
+          -- completions must not rank. Open is allowed: a challenge completes
+          -- while it is still running, and that completion is real.
+          AND a.status <> 'cancelled'
+          AND (${since}::timestamptz IS NULL OR p.completed_at >= ${since})
+        GROUP BY p.user_id
+        -- Earliest completion breaks a tie, then user_id closes the order.
+        -- GROUP BY makes user_id unique here, so the sort is total and the
+        -- board cannot reshuffle between refreshes.
+        ORDER BY count(*) DESC, min(p.completed_at) ASC, p.user_id ASC
+        LIMIT ${limit}
+      `;
+
+      return rows.map((row) => ({
+        userId: row.user_id as UserId,
+        count: Number(row.count),
+      }));
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async completionTotals(
+    guildId: GuildId,
+    kind: ActivityKind,
+    from: Date,
+    to: Date | null,
+  ): Promise<{ readonly completions: number; readonly members: number }> {
+    try {
+      const rows = await this.db.sql<{ completions: string; members: string }[]>`
+        SELECT count(*)::text                      AS completions,
+               count(DISTINCT p.user_id)::text     AS members
+        FROM ${this.db.sql(this.schema)}.community_participants p
+        JOIN ${this.db.sql(this.schema)}.community_activities a
+          ON a.id = p.activity_id AND a.guild_id = p.guild_id
+        WHERE p.guild_id = ${guildId}
+          AND p.state = 'completed'
+          AND a.kind = ${kind}
+          AND a.status <> 'cancelled'
+          AND p.completed_at >= ${from}
+          AND (${to}::timestamptz IS NULL OR p.completed_at < ${to})
+      `;
+      return {
+        completions: Number(rows[0]?.completions ?? '0'),
+        members: Number(rows[0]?.members ?? '0'),
+      };
     } catch (error) {
       throw toDatabaseError(error);
     }

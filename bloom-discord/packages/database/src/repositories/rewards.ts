@@ -127,6 +127,32 @@ export interface RewardsRepository {
     since: Date,
   ): Promise<number>;
 
+  /**
+   * What the ledger did across a guild in a window.
+   *
+   * Three numbers, aggregated server-side. The alternative — fetching the
+   * rows and summing them here — would be unbounded by construction, and a
+   * busy week is exactly when it would break.
+   *
+   * `points` is the sum of a window's rows, so a correction inside the window
+   * reduces it. That is the honest figure: it is what the economy actually
+   * did, not what it handed out before anyone took anything back.
+   *
+   * `to` may be null, meaning "and everything since". A live view has no
+   * upper bound — there is no future data — and giving it one at the instant
+   * the clock was read would silently exclude anything that happened in the
+   * same millisecond as the read.
+   */
+  activitySummary(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<{
+    readonly points: number;
+    readonly events: number;
+    readonly members: number;
+  }>;
+
   /** Top members by points earned since `since` (or all time when omitted). */
   leaderboard(
     guildId: GuildId,
@@ -417,6 +443,37 @@ export class PostgresRewardsRepository
           AND created_at >= ${since}
       `;
       return Number(rows[0]?.count ?? '0');
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async activitySummary(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<{
+    readonly points: number;
+    readonly events: number;
+    readonly members: number;
+  }> {
+    try {
+      const rows = await this.db.sql<
+        { points: string; events: string; members: string }[]
+      >`
+        SELECT coalesce(sum(points), 0)::text  AS points,
+               count(*)::text                  AS events,
+               count(DISTINCT user_id)::text   AS members
+        FROM ${this.db.sql(this.schema)}.point_events
+        WHERE guild_id = ${guildId}
+          AND created_at >= ${from}
+          AND (${to}::timestamptz IS NULL OR created_at < ${to})
+      `;
+      return {
+        points: Number(rows[0]?.points ?? '0'),
+        events: Number(rows[0]?.events ?? '0'),
+        members: Number(rows[0]?.members ?? '0'),
+      };
     } catch (error) {
       throw toDatabaseError(error);
     }

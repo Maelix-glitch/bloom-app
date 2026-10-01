@@ -57,7 +57,24 @@ export interface AwardsRepository {
     awardKey: string,
     tx?: TransactionSql,
   ): Promise<void>;
+
+  /**
+   * What the community has earned lately, newest first.
+   *
+   * Guild-wide and bounded. Returns the grant rows only — the award key, the
+   * member and the instant. The evidence column is deliberately not part of
+   * what callers display: it holds the counts a grant was based on, which are
+   * fine in an audit and nobody else's business on a highlights board.
+   */
+  recent(
+    guildId: GuildId,
+    options?: { readonly since?: Date; readonly limit?: number },
+  ): Promise<readonly MemberAward[]>;
 }
+
+/** Bounded: the highlights board shows a handful, the recap a few more. */
+const DEFAULT_RECENT_LIMIT = 5;
+const MAX_RECENT_LIMIT = 25;
 
 interface AwardRow {
   readonly guild_id: string;
@@ -174,6 +191,34 @@ export class PostgresAwardsRepository extends BaseRepository implements AwardsRe
           AND user_id = ${userId}
           AND award_key = ${awardKey}
       `;
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async recent(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly MemberAward[]> {
+    const requested = options.limit ?? DEFAULT_RECENT_LIMIT;
+    const limit = Number.isInteger(requested)
+      ? Math.min(Math.max(requested, 1), MAX_RECENT_LIMIT)
+      : DEFAULT_RECENT_LIMIT;
+    const since = options.since ?? null;
+
+    try {
+      const rows = await this.db.sql<AwardRow[]>`
+        SELECT guild_id, user_id, award_key, kind, evidence, earned_at, announced
+        FROM ${this.db.sql(this.schema)}.member_awards
+        WHERE guild_id = ${guildId}
+          AND (${since}::timestamptz IS NULL OR earned_at >= ${since})
+        -- Two awards granted in the same evaluation share an instant to the
+        -- microsecond, so earned_at alone is not a total order. The last two
+        -- keys make it one, which is what keeps a recap deterministic.
+        ORDER BY earned_at DESC, user_id ASC, award_key ASC
+        LIMIT ${limit}
+      `;
+      return rows.map((row) => toAward(row));
     } catch (error) {
       throw toDatabaseError(error);
     }

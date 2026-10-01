@@ -20,6 +20,8 @@ import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
 import { CommunityService } from './features/community/service.js';
+import { HighlightsService } from './features/highlights/service.js';
+import { createWeeklyRecapJob } from './features/highlights/job.js';
 import { RewardsService } from './features/rewards/service.js';
 import { ReferralConsumer } from './features/rewards/referral-consumer.js';
 import { createReferralPaymentJob } from './features/rewards/referral-job.js';
@@ -54,6 +56,12 @@ await runBotMain(() =>
         now: () => new Date(),
       });
 
+      const highlights = new HighlightsService({
+        config: context.platform,
+        repositories: context.repositories,
+        now: () => new Date(),
+      });
+
       const referralConsumer = new ReferralConsumer({
         repositories: context.repositories,
         rewards,
@@ -81,6 +89,7 @@ await runBotMain(() =>
         awards,
         referralConsumer,
         community,
+        highlights,
       };
     },
 
@@ -96,6 +105,7 @@ await runBotMain(() =>
        */
       context.scheduler.register(createDailyCheckInJob(deps));
       context.scheduler.register(createReferralPaymentJob(deps));
+      context.scheduler.register(createWeeklyRecapJob(deps));
 
       const registry = new CommandRegistry<CompanionDeps>('companion').registerAll(
         companionCommands,

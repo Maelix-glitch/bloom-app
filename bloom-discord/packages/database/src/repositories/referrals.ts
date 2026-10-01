@@ -82,6 +82,12 @@ export interface ClaimedReferral extends ReferralTrigger {
   readonly inviterUserId: UserId;
 }
 
+/** One row of the referral board: a member and how many they brought. */
+export interface ReferralCount {
+  readonly userId: UserId;
+  readonly count: number;
+}
+
 export interface ReferralRepository {
   /** Guardian, at join time. Idempotent per (guild, referred member). */
   record(input: RecordReferralInput): Promise<RecordReferralOutcome>;
@@ -143,6 +149,34 @@ export interface ReferralRepository {
 
   /** How many referrals this inviter has been paid for. */
   countPaidForInviter(guildId: GuildId, inviterUserId: UserId): Promise<number>;
+
+  /**
+   * Who brought the most people in, over a window.
+   *
+   * Counts referrals that reached qualification, which is a deliberately
+   * different population from `countPaidForInviterInWindow` above. That one
+   * counts *paid* rows because it answers a challenge target, and a challenge
+   * must not complete on a referral the ledger has not settled. This answers
+   * "who did the community a good turn", and a referral that has qualified
+   * has already done it — whether Companion's payment job has caught up is
+   * bookkeeping the member did not cause and should not be ranked by.
+   *
+   * In practice the two agree within a job cycle. When they disagree, this
+   * one is the higher number, never the lower.
+   */
+  qualifiedLeaderboard(
+    guildId: GuildId,
+    options?: { readonly since?: Date; readonly limit?: number },
+  ): Promise<readonly ReferralCount[]>;
+
+  /**
+   * How many referrals qualified guild-wide in a window.
+   *
+   * `to` may be null for "and everything since", which is what the live
+   * staff view passes; the recap bounds it so two consecutive weeks cannot
+   * both claim the same referral.
+   */
+  countQualifiedInWindow(guildId: GuildId, from: Date, to: Date | null): Promise<number>;
 }
 
 interface ReferralRow {
@@ -494,6 +528,71 @@ export class PostgresReferralRepository
         WHERE guild_id = ${guildId}
           AND inviter_user_id = ${inviterUserId}
           AND state = 'paid'
+      `;
+      return Number(rows[0]?.count ?? '0');
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  /**
+   * Dated by qualification, not by creation.
+   *
+   * The join and the qualification are days apart by design — the hold-down
+   * period is what makes a referral mean anything — so dating a row by when
+   * it was created would file the referral under the week the newcomer
+   * arrived rather than the week they proved they stayed. For a weekly recap
+   * those are different weeks, and the later one is the one that earned it.
+   */
+  public async qualifiedLeaderboard(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly ReferralCount[]> {
+    const limit = clamp(options.limit ?? DEFAULT_LIST_LIMIT, 1, MAX_LIST_LIMIT);
+    const since = options.since ?? null;
+
+    try {
+      const rows = await this.db.sql<{ inviter_user_id: string; count: string }[]>`
+        SELECT inviter_user_id,
+               count(*)::text AS count
+        FROM ${this.db.sql(this.schema)}.referral_triggers
+        WHERE guild_id = ${guildId}
+          AND state IN ('qualified', 'paid')
+          -- Dated by qualified_at, not created_at -- see the note above the
+          -- method for why the distinction changes which week a referral
+          -- lands in.
+          AND (${since}::timestamptz IS NULL OR qualified_at >= ${since})
+        GROUP BY inviter_user_id
+        -- min(qualified_at) breaks ties toward whoever got there first, and
+        -- inviter_user_id closes the ordering so the board cannot reshuffle
+        -- between two refreshes with nothing having changed. GROUP BY makes
+        -- the last key unique, so this is a total order.
+        ORDER BY count(*) DESC, min(qualified_at) ASC, inviter_user_id ASC
+        LIMIT ${limit}
+      `;
+
+      return rows.map((row) => ({
+        userId: row.inviter_user_id as UserId,
+        count: Number(row.count),
+      }));
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async countQualifiedInWindow(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<number> {
+    try {
+      const rows = await this.db.sql<{ count: string }[]>`
+        SELECT count(*)::text AS count
+        FROM ${this.db.sql(this.schema)}.referral_triggers
+        WHERE guild_id = ${guildId}
+          AND state IN ('qualified', 'paid')
+          AND qualified_at >= ${from}
+          AND (${to}::timestamptz IS NULL OR qualified_at < ${to})
       `;
       return Number(rows[0]?.count ?? '0');
     } catch (error) {

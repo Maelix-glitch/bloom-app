@@ -475,13 +475,31 @@ describe('/companion leaderboard', () => {
     expect(result.responder.visibleText).toContain('No points have been earned');
   });
 
-  it('offers no all-time period', () => {
+  it('never ranks points all-time, whatever is asked for', async () => {
     /*
-     * An all-time board ranks longevity, never changes at the top, and tells a
-     * member who joined last week that they cannot win. The absence is the
-     * design, so it is asserted rather than left to be re-added by someone
-     * who assumes it was an oversight.
+     * An all-time points board ranks longevity, never changes at the top, and
+     * tells a member who joined last week that they cannot win. The period
+     * now exists on the command because three other categories support it, so
+     * the guard moved from "the choice is absent" to "points declines it" —
+     * and declining it visibly, rather than quietly serving a different
+     * board than the one asked for.
      */
+    await h.dispatch({ commandName: 'checkin', actor: asMember() });
+
+    const result = await h.dispatch({
+      commandName: 'companion',
+      subcommand: 'leaderboard',
+      actor: asMember(),
+      options: { strings: { category: 'points', period: 'all' } },
+    });
+
+    const text = result.responder.visibleText;
+    expect(text).toContain('last 30 days');
+    expect(text).not.toContain('all time');
+    expect(text).toContain('no all-time view');
+  });
+
+  it('offers all time for the categories that are counts, not rates', () => {
     const spec = companionCommandSpecs.find((entry) => entry.name === 'companion');
     expect(spec).toBeDefined();
     if (!spec || !isSlashCommandSpec(spec)) throw new Error('unreachable');
@@ -490,7 +508,7 @@ describe('/companion leaderboard', () => {
     const period = leaderboard?.options?.find((option) => option.name === 'period');
     const values = (period?.choices ?? []).map((choice) => choice.value);
 
-    expect(values).toEqual(['week', 'month']);
+    expect(values).toEqual(['week', 'month', 'all']);
   });
 });
 

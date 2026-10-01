@@ -584,4 +584,234 @@ suite('community repository (integration)', () => {
       expect(await repository.participant(id, member(4))).toBeNull();
     });
   });
+
+  describe('boards and totals', () => {
+    /**
+     * A completed participation on a given activity at a given instant.
+     *
+     * Built through the repository rather than by INSERT, so the rows these
+     * aggregates read are the rows the rest of the system writes.
+     */
+    async function completionAt(
+      activityId: string,
+      userId: UserId,
+      at: Date,
+    ): Promise<void> {
+      await repository.join({
+        activityId,
+        guildId: GUILD,
+        userId,
+        capacity: null,
+        joinedAt: at,
+      });
+      await repository.complete({
+        activityId,
+        guildId: GUILD,
+        userId,
+        progress: null,
+      });
+      await database.sql`
+        UPDATE ${database.sql(database.schema)}.community_participants
+        SET completed_at = ${at}
+        WHERE activity_id = ${activityId} AND user_id = ${userId}
+      `;
+    }
+
+    async function activityOfKind(
+      kind: 'challenge' | 'event',
+      title: string,
+    ): Promise<string> {
+      const activity = await repository.create({
+        guildId: GUILD,
+        kind,
+        title,
+        description: 'For the boards.',
+        startsAt: future(-3),
+        endsAt: future(3),
+        ...(kind === 'challenge'
+          ? { targetMetric: 'check_ins' as const, targetAmount: 1 }
+          : {}),
+        rewardPoints: 10,
+        createdBy: ACTOR,
+      });
+      return activity.id;
+    }
+
+    it('ranks members by completions of one kind', async () => {
+      const challenge = await activityOfKind('challenge', 'Mornings');
+      const event = await activityOfKind('event', 'Garden hours');
+
+      await completionAt(challenge, member(30), future(-2));
+      await completionAt(event, member(30), future(-2));
+      await completionAt(event, member(31), future(-1));
+
+      const events = await repository.completionLeaderboard(GUILD, { kind: 'event' });
+      expect(events.map((row) => [row.userId, row.count])).toEqual([
+        [member(30), 1],
+        [member(31), 1],
+      ]);
+
+      // The kind filter is the whole point: the challenge completion must not
+      // appear on the event board.
+      const challenges = await repository.completionLeaderboard(GUILD, {
+        kind: 'challenge',
+      });
+      expect(challenges).toHaveLength(1);
+      expect(challenges[0]?.userId).toBe(member(30));
+    });
+
+    it('orders by count, then earliest completion, then id', async () => {
+      const event = await activityOfKind('event', 'Ordering');
+      const second = await activityOfKind('event', 'Ordering again');
+
+      // member(33) has two; the other two have one each, at different times.
+      await completionAt(event, member(33), future(-2));
+      await completionAt(second, member(33), future(-2));
+      await completionAt(event, member(32), future(-1));
+      await completionAt(second, member(34), future(-2));
+
+      const rows = await repository.completionLeaderboard(GUILD, { kind: 'event' });
+
+      expect(rows.map((row) => row.userId)).toEqual([
+        member(33), // two completions
+        member(34), // one, completed earlier
+        member(32), // one, completed later
+      ]);
+    });
+
+    it('is stable across repeated reads when everything ties', async () => {
+      const event = await activityOfKind('event', 'All tied');
+      const at = future(-2);
+      for (const index of [40, 41, 42, 43]) {
+        await completionAt(event, member(index), at);
+      }
+
+      const first = await repository.completionLeaderboard(GUILD, { kind: 'event' });
+      const again = await repository.completionLeaderboard(GUILD, { kind: 'event' });
+
+      expect(again.map((row) => row.userId)).toEqual(first.map((row) => row.userId));
+      // user_id ascending is the documented final tiebreak.
+      const ids = first.map((row) => row.userId);
+      expect(ids).toEqual([...ids].toSorted((a, b) => a.localeCompare(b)));
+    });
+
+    it('bounds the board however many members qualify', async () => {
+      const event = await activityOfKind('event', 'Crowded');
+      for (let index = 0; index < 30; index += 1) {
+        await completionAt(event, member(100 + index), future(-2));
+      }
+
+      const asked = await repository.completionLeaderboard(GUILD, {
+        kind: 'event',
+        limit: 10_000,
+      });
+      expect(asked).toHaveLength(25);
+    });
+
+    it('honours the window', async () => {
+      const event = await activityOfKind('event', 'Windowed');
+      await completionAt(event, member(50), future(-2));
+
+      const recent = await repository.completionLeaderboard(GUILD, {
+        kind: 'event',
+        since: future(-1),
+      });
+      expect(recent).toHaveLength(0);
+
+      const wider = await repository.completionLeaderboard(GUILD, {
+        kind: 'event',
+        since: future(-3),
+      });
+      expect(wider).toHaveLength(1);
+    });
+
+    it('excludes a cancelled activity from boards and totals', async () => {
+      const event = await activityOfKind('event', 'Called off');
+      await completionAt(event, member(60), future(-2));
+      await repository.close({
+        guildId: GUILD,
+        activityId: event,
+        status: 'cancelled',
+        closedBy: ACTOR,
+        closedAt: new Date(),
+      });
+
+      expect(
+        await repository.completionLeaderboard(GUILD, { kind: 'event' }),
+      ).toHaveLength(0);
+      const totals = await repository.completionTotals(GUILD, 'event', future(-5), null);
+      expect(totals.completions).toBe(0);
+    });
+
+    it('counts completions and distinct members separately', async () => {
+      const a = await activityOfKind('event', 'One');
+      const b = await activityOfKind('event', 'Two');
+      await completionAt(a, member(70), future(-2));
+      await completionAt(b, member(70), future(-2));
+      await completionAt(a, member(71), future(-2));
+
+      const totals = await repository.completionTotals(GUILD, 'event', future(-5), null);
+
+      // Three completions, two people. Summing members across activities would
+      // have said three.
+      expect(totals).toEqual({ completions: 3, members: 2 });
+    });
+
+    it('treats a null upper bound as "and everything since"', async () => {
+      const event = await activityOfKind('event', 'Open ended');
+      const at = new Date();
+      await completionAt(event, member(80), at);
+
+      // Bounded at the same instant, the half-open window excludes it...
+      const bounded = await repository.completionTotals(GUILD, 'event', future(-1), at);
+      expect(bounded.completions).toBe(0);
+
+      // ...which is why a live view passes null instead.
+      const live = await repository.completionTotals(GUILD, 'event', future(-1), null);
+      expect(live.completions).toBe(1);
+    });
+
+    it('lists upcoming activities soonest first', async () => {
+      const soon = await repository.create({
+        guildId: GUILD,
+        kind: 'event',
+        title: 'Soon',
+        description: 'Starts shortly.',
+        startsAt: future(1),
+        endsAt: future(2),
+        rewardPoints: 0,
+        createdBy: ACTOR,
+      });
+      const later = await repository.create({
+        guildId: GUILD,
+        kind: 'event',
+        title: 'Later',
+        description: 'Starts later.',
+        startsAt: future(5),
+        endsAt: future(6),
+        rewardPoints: 0,
+        createdBy: ACTOR,
+      });
+
+      const upcoming = await repository.upcomingAfter(GUILD, 'event', new Date());
+
+      expect(upcoming.map((row) => row.id)).toEqual([soon.id, later.id]);
+      // An activity already running is not "upcoming".
+      expect(upcoming.map((row) => row.title)).not.toContain('Running now');
+    });
+
+    it('counts only this guild', async () => {
+      const event = await activityOfKind('event', 'Ours');
+      await completionAt(event, member(90), future(-2));
+
+      const elsewhere = '100000000000096999' as GuildId;
+      expect(
+        await repository.completionLeaderboard(elsewhere, { kind: 'event' }),
+      ).toHaveLength(0);
+      expect(
+        (await repository.completionTotals(elsewhere, 'event', future(-5), null))
+          .completions,
+      ).toBe(0);
+    });
+  });
 });

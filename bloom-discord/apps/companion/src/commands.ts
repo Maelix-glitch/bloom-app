@@ -13,6 +13,11 @@ import {
   communityStaffSubcommands,
   COMMUNITY_GROUP_DESCRIPTION,
 } from './features/community/commands.js';
+import {
+  highlightsMemberSubcommands,
+  highlightsStaffSubcommands,
+  HIGHLIGHTS_GROUP_DESCRIPTION,
+} from './features/highlights/commands.js';
 import { rewardsCommands, rewardsSubcommands } from './features/rewards/commands.js';
 import { rewardsStaffSubcommands } from './features/rewards/staff-commands.js';
 
@@ -54,6 +59,7 @@ export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceC
     jobs: JOBS_GROUP_DESCRIPTION,
     admin: 'Staff actions that change a member’s standing. Always audited.',
     event: COMMUNITY_GROUP_DESCRIPTION,
+    community: HIGHLIGHTS_GROUP_DESCRIPTION,
   },
   contributions: [
     ...rewardsSubcommands,
@@ -61,6 +67,8 @@ export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceC
     ...rewardsStaffSubcommands,
     ...communityMemberSubcommands,
     ...communityStaffSubcommands,
+    ...highlightsMemberSubcommands,
+    ...highlightsStaffSubcommands,
     ...jobSubcommands<CompanionDeps>(),
   ],
 });

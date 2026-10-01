@@ -605,4 +605,153 @@ describe('referral handoff (integration)', () => {
       expect(pending[0]?.referredUserId).toBe(OTHER);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // The referral board
+  // ---------------------------------------------------------------------------
+
+  describe('the qualified board', () => {
+    /** A qualified referral from one inviter, at a chosen instant. */
+    async function qualified(
+      inviter: UserId,
+      referred: UserId,
+      qualifiedAt: Date,
+    ): Promise<void> {
+      const { trigger } = await record({
+        inviterUserId: inviter,
+        referredUserId: referred,
+        idempotencyKey: `referral:${GUILD}:${referred}`,
+      });
+      await referrals.markQualified(trigger.id, qualifiedAt);
+    }
+
+    const member = (index: number): UserId =>
+      unsafeSnowflake<UserId>(`9000000000000951${String(index).padStart(2, '0')}`);
+
+    it('ranks inviters by how many they brought who stayed', async () => {
+      await qualified(INVITER, member(1), AT('2026-02-20T00:00:00.000Z'));
+      await qualified(INVITER, member(2), AT('2026-02-21T00:00:00.000Z'));
+      await qualified(OTHER, member(3), AT('2026-02-22T00:00:00.000Z'));
+
+      const board = await referrals.qualifiedLeaderboard(GUILD);
+
+      expect(board.map((row) => [row.userId, row.count])).toEqual([
+        [INVITER, 2],
+        [OTHER, 1],
+      ]);
+    });
+
+    it('counts a referral that has been paid as well as one merely qualified', async () => {
+      /*
+       * Payment is Companion catching up, not the member doing more. A board
+       * that dropped someone the moment they were paid would count down.
+       */
+      await qualified(INVITER, member(4), AT('2026-02-20T00:00:00.000Z'));
+      const rows = await database.sql<{ id: string }[]>`
+        SELECT id FROM ${database.sql(SCHEMA)}.referral_triggers
+        WHERE guild_id = ${GUILD} AND referred_user_id = ${member(4)}
+      `;
+      const id = rows[0]?.id;
+      if (!id) throw new Error('no referral to pay');
+
+      const outcome = await rewards.award({
+        guildId: GUILD,
+        userId: INVITER,
+        kind: 'referral',
+        points: 50,
+        idempotencyKey: `referral:pay:${id}`,
+      });
+      if (outcome.kind === 'insufficient') throw new Error('unreachable');
+
+      await referrals.claim({
+        guildId: GUILD,
+        limit: 1,
+        workerId: 'test',
+        now: NOW,
+        staleClaimsBefore: LONG_AGO,
+      });
+      await referrals.markPaid({
+        id,
+        pointEventId: outcome.event.id,
+        consumedAt: NOW,
+      });
+
+      const board = await referrals.qualifiedLeaderboard(GUILD);
+      expect(board).toEqual([{ userId: INVITER, count: 1 }]);
+    });
+
+    it('ignores a pending or rejected referral', async () => {
+      // Pending may still be rejected, so crediting it would recognise an
+      // invite that never qualified.
+      await record({ referredUserId: member(5), idempotencyKey: `r:${member(5)}` });
+
+      const { trigger } = await record({
+        referredUserId: member(6),
+        idempotencyKey: `r:${member(6)}`,
+      });
+      await referrals.markRejected(trigger.id, 'left_before_qualifying');
+
+      expect(await referrals.qualifiedLeaderboard(GUILD)).toHaveLength(0);
+    });
+
+    it('dates a referral by when it qualified, not when it was created', async () => {
+      /*
+       * The join and the qualification are days apart by design. Dating by
+       * creation would file a referral under the week the newcomer arrived
+       * rather than the week they proved they stayed.
+       */
+      await qualified(INVITER, member(7), AT('2026-03-01T00:00:00.000Z'));
+
+      const recent = await referrals.qualifiedLeaderboard(GUILD, {
+        since: AT('2026-02-25T00:00:00.000Z'),
+      });
+      expect(recent).toHaveLength(1);
+
+      const beforeQualification = await referrals.qualifiedLeaderboard(GUILD, {
+        since: AT('2026-03-02T00:00:00.000Z'),
+      });
+      expect(beforeQualification).toHaveLength(0);
+    });
+
+    it('breaks ties by earliest qualification, then by inviter id', async () => {
+      const at = AT('2026-02-20T00:00:00.000Z');
+      await qualified(INVITER, member(8), at);
+      await qualified(OTHER, member(9), at);
+
+      const first = await referrals.qualifiedLeaderboard(GUILD);
+      const again = await referrals.qualifiedLeaderboard(GUILD);
+
+      expect(again).toEqual(first);
+      const ids = first.map((row) => row.userId);
+      expect(ids).toEqual([...ids].toSorted((a, b) => a.localeCompare(b)));
+    });
+
+    it('bounds the board and the window count', async () => {
+      for (let index = 10; index < 40; index += 1) {
+        await qualified(
+          unsafeSnowflake<UserId>(`9000000000000952${String(index)}`),
+          member(index),
+          AT('2026-02-20T00:00:00.000Z'),
+        );
+      }
+
+      const board = await referrals.qualifiedLeaderboard(GUILD, { limit: 10_000 });
+      expect(board).toHaveLength(25);
+
+      const counted = await referrals.countQualifiedInWindow(
+        GUILD,
+        AT('2026-02-01T00:00:00.000Z'),
+        null,
+      );
+      expect(counted).toBe(30);
+    });
+
+    it('counts only this guild', async () => {
+      await qualified(INVITER, member(41), AT('2026-02-20T00:00:00.000Z'));
+
+      const elsewhere = unsafeSnowflake<GuildId>('100000000000095999');
+      expect(await referrals.qualifiedLeaderboard(elsewhere)).toHaveLength(0);
+      expect(await referrals.countQualifiedInWindow(elsewhere, LONG_AGO, null)).toBe(0);
+    });
+  });
 });

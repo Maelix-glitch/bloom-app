@@ -29,6 +29,7 @@ import type {
   ActivityStatus,
   CommunityActivity,
   CommunityParticipant,
+  CompletionCount,
   CommunityRepository,
   CompleteOutcome,
   CompleteParticipantInput,
@@ -41,6 +42,7 @@ import type {
   ReferralRejection,
   ReferralRepository,
   ReferralState,
+  ReferralCount,
   ReferralTrigger,
   AuditEventInput,
   AwardInput,
@@ -1347,6 +1349,34 @@ export class FakeRewardsRepository implements RewardsRepository {
     return Promise.resolve(count);
   }
 
+  public activitySummary(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<{
+    readonly points: number;
+    readonly events: number;
+    readonly members: number;
+  }> {
+    const members = new Set<UserId>();
+    let points = 0;
+    let events = 0;
+
+    for (const event of this.events) {
+      if (event.guildId !== guildId) continue;
+      const at = event.createdAt.getTime();
+      // Half-open when bounded, matching the SQL; open-ended when `to` is
+      // null, which is what a live view passes.
+      if (at < from.getTime()) continue;
+      if (to && at >= to.getTime()) continue;
+      points += event.points;
+      events += 1;
+      members.add(event.userId);
+    }
+
+    return Promise.resolve({ points, events, members: members.size });
+  }
+
   public leaderboard(
     guildId: GuildId,
     options: { readonly since?: Date; readonly limit?: number } = {},
@@ -1539,6 +1569,30 @@ export class FakeAwardsRepository implements AwardsRepository {
     const award = this.awards.get(key);
     if (award) this.awards.set(key, { ...award, announced: true });
     return Promise.resolve();
+  }
+  public recent(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly MemberAward[]> {
+    const requested = options.limit ?? 5;
+    const limit = Number.isInteger(requested) ? Math.min(Math.max(requested, 1), 25) : 5;
+
+    const rows = [...this.awards.values()]
+      .filter((award) => award.guildId === guildId)
+      .filter(
+        (award) => !options.since || award.earnedAt.getTime() >= options.since.getTime(),
+      )
+      // Same total order as the SQL: newest first, then the two keys that
+      // make it deterministic when one evaluation grants two awards.
+      .sort(
+        (a, b) =>
+          b.earnedAt.getTime() - a.earnedAt.getTime() ||
+          a.userId.localeCompare(b.userId) ||
+          a.awardKey.localeCompare(b.awardKey),
+      )
+      .slice(0, limit);
+
+    return Promise.resolve(rows);
   }
 }
 
@@ -2028,6 +2082,58 @@ export class FakeReferralRepository implements ReferralRepository {
     this.triggers[index] = { ...row, ...changes };
     return true;
   }
+  public qualifiedLeaderboard(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly ReferralCount[]> {
+    const limit = Math.min(Math.max(options.limit ?? 10, 1), 25);
+    const totals = new Map<UserId, { count: number; first: number }>();
+
+    for (const trigger of this.triggers) {
+      if (trigger.guildId !== guildId) continue;
+      if (trigger.state !== 'qualified' && trigger.state !== 'paid') continue;
+      const qualifiedAt = trigger.qualifiedAt;
+      if (!qualifiedAt) continue;
+      if (options.since && qualifiedAt.getTime() < options.since.getTime()) continue;
+      const inviter = trigger.inviterUserId;
+      if (!inviter) continue;
+
+      const current = totals.get(inviter) ?? { count: 0, first: qualifiedAt.getTime() };
+      totals.set(inviter, {
+        count: current.count + 1,
+        first: Math.min(current.first, qualifiedAt.getTime()),
+      });
+    }
+
+    const entries = [...totals.entries()]
+      .sort(
+        (a, b) =>
+          b[1].count - a[1].count || a[1].first - b[1].first || a[0].localeCompare(b[0]),
+      )
+      .slice(0, limit)
+      .map(([userId, value]) => ({ userId, count: value.count }));
+
+    return Promise.resolve(entries);
+  }
+
+  public countQualifiedInWindow(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<number> {
+    let count = 0;
+    for (const trigger of this.triggers) {
+      if (trigger.guildId !== guildId) continue;
+      if (trigger.state !== 'qualified' && trigger.state !== 'paid') continue;
+      const qualifiedAt = trigger.qualifiedAt;
+      if (!qualifiedAt) continue;
+      const at = qualifiedAt.getTime();
+      if (at < from.getTime()) continue;
+      if (to && at >= to.getTime()) continue;
+      count += 1;
+    }
+    return Promise.resolve(count);
+  }
 }
 
 /**
@@ -2388,6 +2494,107 @@ export class FakeCommunityRepository implements CommunityRepository {
           participant.completedAt.getTime() < to.getTime(),
       ).length,
     );
+  }
+
+  public upcomingAfter(
+    guildId: GuildId,
+    kind: ActivityKind,
+    at: Date,
+    limit?: number,
+  ): Promise<readonly CommunityActivity[]> {
+    const bounded = Math.min(Math.max(limit ?? 10, 1), 25);
+    const rows = this.activities
+      .filter(
+        (activity) =>
+          activity.guildId === guildId &&
+          activity.kind === kind &&
+          activity.status === 'open' &&
+          activity.startsAt.getTime() > at.getTime(),
+      )
+      .sort(
+        (a, b) => a.startsAt.getTime() - b.startsAt.getTime() || a.id.localeCompare(b.id),
+      )
+      .slice(0, bounded);
+    return Promise.resolve(rows);
+  }
+
+  public completionLeaderboard(
+    guildId: GuildId,
+    options: {
+      readonly kind: ActivityKind;
+      readonly since?: Date;
+      readonly limit?: number;
+    },
+  ): Promise<readonly CompletionCount[]> {
+    const limit = Math.min(Math.max(options.limit ?? 10, 1), 25);
+    const totals = new Map<UserId, { count: number; first: number }>();
+
+    for (const record of this.records.values()) {
+      if (record.guildId !== guildId) continue;
+      if (record.state !== 'completed') continue;
+      const completedAt = record.completedAt;
+      if (!completedAt) continue;
+      if (options.since && completedAt.getTime() < options.since.getTime()) continue;
+
+      const activity = this.activities.find(
+        (candidate) => candidate.id === record.activityId,
+      );
+      if (!activity) continue;
+      if (activity.kind !== options.kind) continue;
+      // Cancelled paid nobody and recognises nobody.
+      if (activity.status === 'cancelled') continue;
+
+      const current = totals.get(record.userId) ?? {
+        count: 0,
+        first: completedAt.getTime(),
+      };
+      totals.set(record.userId, {
+        count: current.count + 1,
+        first: Math.min(current.first, completedAt.getTime()),
+      });
+    }
+
+    const entries = [...totals.entries()]
+      .sort(
+        (a, b) =>
+          b[1].count - a[1].count || a[1].first - b[1].first || a[0].localeCompare(b[0]),
+      )
+      .slice(0, limit)
+      .map(([userId, value]) => ({ userId, count: value.count }));
+
+    return Promise.resolve(entries);
+  }
+
+  public completionTotals(
+    guildId: GuildId,
+    kind: ActivityKind,
+    from: Date,
+    to: Date | null,
+  ): Promise<{ readonly completions: number; readonly members: number }> {
+    const members = new Set<UserId>();
+    let completions = 0;
+
+    for (const record of this.records.values()) {
+      if (record.guildId !== guildId) continue;
+      if (record.state !== 'completed') continue;
+      const completedAt = record.completedAt;
+      if (!completedAt) continue;
+      const at = completedAt.getTime();
+      if (at < from.getTime()) continue;
+      if (to && at >= to.getTime()) continue;
+
+      const activity = this.activities.find(
+        (candidate) => candidate.id === record.activityId,
+      );
+      if (!activity) continue;
+      if (activity.kind !== kind) continue;
+      if (activity.status === 'cancelled') continue;
+
+      completions += 1;
+      members.add(record.userId);
+    }
+
+    return Promise.resolve({ completions, members: members.size });
   }
 }
 

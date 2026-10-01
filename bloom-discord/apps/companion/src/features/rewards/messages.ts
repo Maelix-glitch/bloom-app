@@ -1,10 +1,5 @@
 import { pluralise, type LocalDate } from '@bloom/utils';
-import {
-  RANK_DISPLAY_NAMES,
-  type PointKind,
-  type Rank,
-  type UserId,
-} from '@bloom/shared-types';
+import { RANK_DISPLAY_NAMES, type PointKind, type Rank } from '@bloom/shared-types';
 import { bloomEmbed, neutralEmbed, type BloomMessage } from '@bloom/embeds';
 import type { CommunityActivity } from '@bloom/database';
 import type { AwardDefinition } from '../awards/definitions.js';
@@ -273,45 +268,12 @@ export function rankMessage(profile: MemberProfile): BloomMessage {
   };
 }
 
-/**
- * The leaderboard.
- *
- * Period-scoped and short by design. An all-time list of every member is a
- * status game — it ranks how long someone has been here, which nobody can
- * change, and it tells the person in 340th place something they did not ask.
+/*
+ * The leaderboard's copy moved to `../highlights/messages.ts` when the board
+ * grew three more categories. One renderer, because the four boards differ
+ * only in what the number means — two would have drifted on the day one of
+ * them learned to mark the viewer.
  */
-export function leaderboardMessage(
-  entries: readonly { readonly userId: UserId; readonly points: number }[],
-  input: { readonly periodLabel: string; readonly viewer: UserId },
-): BloomMessage {
-  if (entries.length === 0) {
-    return {
-      ephemeral: true,
-      embeds: [
-        neutralEmbed({
-          title: `Leaderboard · ${input.periodLabel}`,
-          description: 'No points have been earned in this period yet.',
-        }),
-      ],
-    };
-  }
-
-  const lines = entries.map((entry, index) => {
-    const position = `${String(index + 1)}.`.padEnd(3, ' ');
-    const you = entry.userId === input.viewer ? ' ← you' : '';
-    return `${position} <@${entry.userId}> · ${String(entry.points)}${you}`;
-  });
-
-  return {
-    ephemeral: true,
-    embeds: [
-      bloomEmbed({
-        title: `Leaderboard · ${input.periodLabel}`,
-        description: lines.join('\n'),
-      }),
-    ],
-  };
-}
 
 export function rewardsDisabledMessage(): BloomMessage {
   return {

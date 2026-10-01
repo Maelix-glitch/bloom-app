@@ -621,4 +621,122 @@ describe('rewards ledger (integration)', () => {
       expect(await rewards.leaderboard(GUILD, { limit: 10 })).toEqual([]);
     });
   });
+
+  describe('activity summary', () => {
+    async function awardAt(
+      userId: UserId,
+      points: number,
+      at: Date,
+      key: string,
+    ): Promise<void> {
+      await rewards.award({
+        guildId: GUILD,
+        userId,
+        kind: 'check_in',
+        points,
+        idempotencyKey: key,
+      });
+      await database.sql`
+        UPDATE ${database.sql(SCHEMA)}.point_events
+        SET created_at = ${at}
+        WHERE guild_id = ${GUILD} AND idempotency_key = ${key}
+      `;
+    }
+
+    const at = (iso: string): Date => new Date(iso);
+
+    it('sums points, rows and distinct members over a window', async () => {
+      await awardAt(MEMBER, 10, at('2026-03-02T00:00:00.000Z'), 'summary:one');
+      await awardAt(MEMBER, 5, at('2026-03-03T00:00:00.000Z'), 'summary:two');
+      await awardAt(OTHER, 7, at('2026-03-04T00:00:00.000Z'), 'summary:three');
+
+      const summary = await rewards.activitySummary(
+        GUILD,
+        at('2026-03-01T00:00:00.000Z'),
+        at('2026-03-10T00:00:00.000Z'),
+      );
+
+      expect(summary).toEqual({ points: 22, events: 3, members: 2 });
+    });
+
+    it('lets a correction inside the window reduce the total', async () => {
+      /*
+       * The honest figure is what the economy did, not what it handed out
+       * before anyone took anything back. A summary that ignored negative
+       * rows would report more points in circulation than exist.
+       */
+      await awardAt(MEMBER, 20, at('2026-03-02T00:00:00.000Z'), 'correction:one');
+      await rewards.award({
+        guildId: GUILD,
+        userId: MEMBER,
+        kind: 'adjustment',
+        points: -5,
+        // A manual kind must name the staff member who did it; the schema
+        // refuses an adjustment that nobody is accountable for.
+        awardedBy: OTHER,
+        reason: 'a correction',
+        idempotencyKey: 'correction:two',
+      });
+      await database.sql`
+        UPDATE ${database.sql(SCHEMA)}.point_events
+        SET created_at = ${at('2026-03-03T00:00:00.000Z')}
+        WHERE guild_id = ${GUILD} AND idempotency_key = 'correction:two'
+      `;
+
+      const summary = await rewards.activitySummary(
+        GUILD,
+        at('2026-03-01T00:00:00.000Z'),
+        at('2026-03-10T00:00:00.000Z'),
+      );
+
+      expect(summary.points).toBe(15);
+      expect(summary.events).toBe(2);
+    });
+
+    it('is half-open when bounded', async () => {
+      const edge = at('2026-03-05T00:00:00.000Z');
+      await awardAt(MEMBER, 10, edge, 'edgecase:one');
+
+      // Included at the lower bound...
+      expect((await rewards.activitySummary(GUILD, edge, null)).events).toBe(1);
+      // ...excluded at the upper one, so two adjacent weeks cannot both
+      // claim the same row.
+      expect(
+        (await rewards.activitySummary(GUILD, at('2026-03-01T00:00:00.000Z'), edge))
+          .events,
+      ).toBe(0);
+    });
+
+    it('treats a null upper bound as "and everything since"', async () => {
+      await awardAt(MEMBER, 10, at('2026-03-05T00:00:00.000Z'), 'openended:one');
+
+      const live = await rewards.activitySummary(
+        GUILD,
+        at('2026-03-01T00:00:00.000Z'),
+        null,
+      );
+      expect(live.events).toBe(1);
+    });
+
+    it('reports zeroes rather than nothing for a quiet window', async () => {
+      const summary = await rewards.activitySummary(
+        GUILD,
+        at('2026-03-01T00:00:00.000Z'),
+        at('2026-03-10T00:00:00.000Z'),
+      );
+      expect(summary).toEqual({ points: 0, events: 0, members: 0 });
+    });
+
+    it('counts only this guild', async () => {
+      await awardAt(MEMBER, 10, at('2026-03-02T00:00:00.000Z'), 'guildscope:one');
+
+      const elsewhere = unsafeSnowflake<GuildId>('100000000000091999');
+      const summary = await rewards.activitySummary(
+        elsewhere,
+        at('2026-03-01T00:00:00.000Z'),
+        null,
+      );
+      expect(summary).toEqual({ points: 0, events: 0, members: 0 });
+    });
+  });
 });

@@ -230,21 +230,24 @@ one namespace.
 
 ### Built
 
-| Command                           | Policy            | Description                                   |  Phase   |
-| --------------------------------- | ----------------- | --------------------------------------------- | :------: |
-| `/checkin`                        | Bloom Member      | Check in for today                            | **5 ✅** |
-| `/win <description>`              | Bloom Member      | Share something that went well                | **5 ✅** |
-| `/companion profile [member]`     | Bloom Member      | Points, rank, streak and recent activity      | **5 ✅** |
-| `/companion rank`                 | Bloom Member      | Your rank and what is next                    | **5 ✅** |
-| `/companion leaderboard [period]` | Bloom Member      | Who earned the most in the last 7 or 30 days  | **5 ✅** |
-| `/companion milestones`           | Bloom Member      | Milestones reached, and the next one          | **6 ✅** |
-| `/companion achievements`         | Bloom Member      | Achievements earned                           | **6 ✅** |
-| `/companion admin award`          | **Administrator** | Adjust a member's points, with a reason       | **6 ✅** |
-| `/companion jobs list`            | Moderator         | Companion's jobs, schedules and next runs     | **4 ✅** |
-| `/companion jobs history <job>`   | Moderator         | The last recorded runs, including the failure | **4 ✅** |
-| `/companion jobs run <job>`       | **Administrator** | Run a job now, without waiting for its cron   | **4 ✅** |
-| `/companion jobs enable <job>`    | **Administrator** | Switch a job on for this server               | **4 ✅** |
-| `/companion jobs disable <job>`   | **Administrator** | Switch a job off for this server              | **4 ✅** |
+| Command                                      | Policy            | Description                                                       |  Phase   |
+| -------------------------------------------- | ----------------- | ----------------------------------------------------------------- | :------: |
+| `/checkin`                                   | Bloom Member      | Check in for today                                                | **5 ✅** |
+| `/win <description>`                         | Bloom Member      | Share something that went well                                    | **5 ✅** |
+| `/companion profile [member]`                | Bloom Member      | Points, rank, streak and recent activity                          | **5 ✅** |
+| `/companion rank`                            | Bloom Member      | Your rank and what is next                                        | **5 ✅** |
+| `/companion leaderboard [category] [period]` | Bloom Member      | Points, referrals, challenges or events, over 7d / 30d / all time | **5 ✅** |
+| `/companion community highlights`            | Bloom Member      | Who has been doing what, lately                                   | **7 ✅** |
+| `/companion community status`                | Bloom Member      | What is running now, and how the week is going                    | **7 ✅** |
+| `/companion milestones`                      | Bloom Member      | Milestones reached, and the next one                              | **6 ✅** |
+| `/companion achievements`                    | Bloom Member      | Achievements earned                                               | **6 ✅** |
+| `/companion admin award`                     | **Administrator** | Adjust a member's points, with a reason                           | **6 ✅** |
+| `/companion admin community-overview`        | **Administrator** | Activities, participation and totals. Read-only                   | **7 ✅** |
+| `/companion jobs list`                       | Moderator         | Companion's jobs, schedules and next runs                         | **4 ✅** |
+| `/companion jobs history <job>`              | Moderator         | The last recorded runs, including the failure                     | **4 ✅** |
+| `/companion jobs run <job>`                  | **Administrator** | Run a job now, without waiting for its cron                       | **4 ✅** |
+| `/companion jobs enable <job>`               | **Administrator** | Switch a job on for this server                                   | **4 ✅** |
+| `/companion jobs disable <job>`              | **Administrator** | Switch a job off for this server                                  | **4 ✅** |
 
 `/checkin` and `/win` are top-level because they are things a member does most
 days, and `/companion checkin` every morning is the kind of friction that
