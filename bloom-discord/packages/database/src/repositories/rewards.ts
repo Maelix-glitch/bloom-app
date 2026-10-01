@@ -438,7 +438,11 @@ export class PostgresRewardsRepository
          * one.
          */
         HAVING sum(points) > 0
-        ORDER BY sum(points) DESC, min(created_at) ASC
+        -- user_id closes the ordering: points and first-event time can both
+        -- tie, and a tied ORDER BY lets the plan decide the rest, so the board
+        -- could reshuffle between refreshes with nothing having changed.
+        -- GROUP BY makes user_id unique here, so it is a true tiebreaker.
+        ORDER BY sum(points) DESC, min(created_at) ASC, user_id ASC
         LIMIT ${limit}
       `;
 

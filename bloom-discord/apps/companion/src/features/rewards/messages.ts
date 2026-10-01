@@ -27,11 +27,21 @@ import type { MemberProfile, RankMove } from './service.js';
  * These are asserted in the tests, not just described here.
  */
 
+/*
+ * Exhaustive over `PointKind` on purpose: adding a kind without deciding what
+ * a member should see it called is a compile error, not a row rendered as
+ * `undefined`. The four reserved kinds have no feature behind them yet, so
+ * they are named for what they will mean rather than left blank.
+ */
 const POINT_KIND_LABELS: Readonly<Record<PointKind, string>> = {
   check_in: 'Check-in',
   small_win: 'Small win',
   manual_award: 'Awarded by staff',
   adjustment: 'Adjustment',
+  referral: 'Referral',
+  event_completion: 'Event',
+  challenge_completion: 'Challenge',
+  achievement_reward: 'Achievement',
 };
 
 function rankName(rank: Rank): string {

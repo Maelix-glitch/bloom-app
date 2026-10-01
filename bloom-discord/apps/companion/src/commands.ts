@@ -9,6 +9,7 @@ import { allOf, requireBloomMember } from '@bloom/permissions';
 import type { CompanionDeps } from './deps.js';
 import { awardsSubcommands } from './features/awards/commands.js';
 import { rewardsCommands, rewardsSubcommands } from './features/rewards/commands.js';
+import { rewardsStaffSubcommands } from './features/rewards/staff-commands.js';
 
 /**
  * The `/companion` namespace.
@@ -51,6 +52,7 @@ export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceC
   contributions: [
     ...rewardsSubcommands,
     ...awardsSubcommands,
+    ...rewardsStaffSubcommands,
     ...jobSubcommands<CompanionDeps>(),
   ],
 });

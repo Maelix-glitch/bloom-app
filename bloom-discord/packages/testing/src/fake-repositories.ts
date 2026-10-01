@@ -1353,7 +1353,14 @@ export class FakeRewardsRepository implements RewardsRepository {
 
     const entries = [...totals.entries()]
       .filter(([, value]) => value.points > 0)
-      .sort((a, b) => b[1].points - a[1].points || a[1].first - b[1].first)
+      // Matches the SQL's `user_id ASC` tiebreaker, so the fake cannot be
+      // stable where Postgres is not.
+      .sort(
+        (a, b) =>
+          b[1].points - a[1].points ||
+          a[1].first - b[1].first ||
+          a[0].localeCompare(b[0]),
+      )
       .slice(0, limit)
       .map(([userId, value]) => ({
         userId,

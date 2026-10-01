@@ -1,5 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { unsafeSnowflake, type GuildId, type UserId } from '@bloom/shared-types';
+import {
+  MANUAL_POINT_KINDS,
+  POINT_KINDS,
+  unsafeSnowflake,
+  type GuildId,
+  type PointKind,
+  type UserId,
+} from '@bloom/shared-types';
 import { createLogger, JsonLogSink } from '@bloom/logging';
 import { parseLocalDate } from '@bloom/utils';
 import { createDatabase, type Database } from '../client.js';
@@ -455,6 +462,163 @@ describe('rewards ledger (integration)', () => {
         parseLocalDate('2026-03-01'),
       );
       expect(dates).toEqual(['2026-03-13', '2026-03-12']);
+    });
+  });
+  // ---------------------------------------------------------------------------
+  // Migration 0009 — room for future reward sources
+  // ---------------------------------------------------------------------------
+
+  /*
+   * The TypeScript union and the CHECK constraint are two independent
+   * declarations of the same closed set. Nothing links them at build time, so
+   * a kind added to one and not the other is a runtime insert failure in
+   * production — exactly the bug this block exists to make impossible.
+   */
+  describe('the kind vocabulary', () => {
+    it('accepts every kind POINT_KINDS declares', async () => {
+      for (const [index, kind] of POINT_KINDS.entries()) {
+        const manual = (MANUAL_POINT_KINDS as readonly string[]).includes(kind);
+
+        const outcome = await rewards.award({
+          guildId: GUILD,
+          userId: MEMBER,
+          kind,
+          points: 5,
+          // The actor constraint cuts both ways: manual kinds require one,
+          // automatic kinds forbid one.
+          ...(manual ? { reason: 'A staff decision.', awardedBy: STAFF } : {}),
+          idempotencyKey: `vocabulary:${kind}:${String(index)}`,
+        });
+
+        expect(outcome.kind).toBe('recorded');
+      }
+    });
+
+    it('still refuses a kind nobody declared', async () => {
+      await expect(
+        rewards.award({
+          guildId: GUILD,
+          userId: MEMBER,
+          kind: 'bonus_event' as PointKind,
+          points: 5,
+          idempotencyKey: 'vocabulary:invented:1',
+        }),
+      ).rejects.toThrow();
+    });
+
+    /*
+     * The reserved kinds are automatic, so the 0006 actor constraint now
+     * governs them. A referral bonus must not be attributable to a moderator:
+     * that is how a hand-made grant gets laundered through a system kind.
+     */
+    it('forbids an actor on the reserved automatic kinds', async () => {
+      for (const kind of [
+        'referral',
+        'event_completion',
+        'challenge_completion',
+        'achievement_reward',
+      ] as const) {
+        await expect(
+          rewards.award({
+            guildId: GUILD,
+            userId: MEMBER,
+            kind,
+            points: 5,
+            awardedBy: STAFF,
+            idempotencyKey: `vocabulary:actor:${kind}`,
+          }),
+        ).rejects.toThrow();
+      }
+    });
+
+    /* Backward compatible: the original four still behave exactly as before. */
+    it('leaves the original four kinds untouched', async () => {
+      const outcome = await rewards.award({
+        guildId: GUILD,
+        userId: MEMBER,
+        kind: 'manual_award',
+        points: 20,
+        reason: 'Unchanged by 0009.',
+        awardedBy: STAFF,
+        idempotencyKey: 'vocabulary:backcompat:1',
+      });
+
+      expect(outcome.kind).toBe('recorded');
+      expect(await rewards.balance(GUILD, MEMBER)).toBe(20);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Leaderboard ordering
+  // ---------------------------------------------------------------------------
+
+  describe('the leaderboard', () => {
+    /**
+     * Determinism, checked the way it can actually break.
+     *
+     * Seeded in one transaction, every row shares `created_at` (now() is the
+     * transaction timestamp), so points and first-activity both tie. Rewriting
+     * a tuple then moves it to the end of the heap, making the physical order
+     * disagree with any logical one. Only the `user_id` tiebreaker holds the
+     * board still across those reads.
+     */
+    it('returns the same order when every tiebreaker is tied', async () => {
+      const members = [
+        '100000000000091010',
+        '100000000000091011',
+        '100000000000091012',
+      ].map((id) => unsafeSnowflake<UserId>(id));
+
+      await database.sql.begin(async (tx) => {
+        for (const [index, userId] of members.entries()) {
+          await rewards.award(
+            {
+              guildId: GUILD,
+              userId,
+              kind: 'check_in',
+              points: 10,
+              idempotencyKey: `leaderboard-tie:${String(index)}`,
+            },
+            tx,
+          );
+        }
+      });
+
+      const before = await rewards.leaderboard(GUILD, { limit: 10 });
+      expect(before).toHaveLength(3);
+
+      await database.sql`
+        UPDATE ${database.sql(SCHEMA)}.point_events
+        SET correlation_id = correlation_id
+        WHERE guild_id = ${GUILD} AND user_id = ${members[0] as string}
+      `;
+
+      const after = await rewards.leaderboard(GUILD, { limit: 10 });
+
+      expect(after.map((row) => row.userId)).toEqual(before.map((row) => row.userId));
+      expect(after.map((row) => row.userId)).toEqual(members);
+    });
+
+    it('bounds the board even when asked for more', async () => {
+      for (let index = 0; index < 30; index += 1) {
+        await rewards.award({
+          guildId: GUILD,
+          userId: unsafeSnowflake<UserId>(
+            `1000000000000920${String(index).padStart(2, '0')}`,
+          ),
+          kind: 'check_in',
+          points: index + 1,
+          idempotencyKey: `leaderboard-board:${String(index)}`,
+        });
+      }
+
+      expect(await rewards.leaderboard(GUILD, { limit: 10_000 })).toHaveLength(25);
+      expect(await rewards.leaderboard(GUILD, { limit: 0 })).toHaveLength(1);
+      expect(await rewards.leaderboard(GUILD)).toHaveLength(10);
+    });
+
+    it('is empty, not an error, when nothing has been earned', async () => {
+      expect(await rewards.leaderboard(GUILD, { limit: 10 })).toEqual([]);
     });
   });
 });

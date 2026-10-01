@@ -308,7 +308,13 @@ describe('/companion admin award', () => {
     expect(entry?.reason).toBe('hosted the Tuesday call');
   });
 
-  it('records a negative amount as an adjustment, not an award', async () => {
+  /*
+   * Corrections moved to `/companion admin revoke`, which takes a positive
+   * amount and applies it negatively. The ledger behaviour is unchanged — it
+   * is still an `adjustment` row through the same service — so these two
+   * tests follow the behaviour to its new command rather than being deleted.
+   */
+  it('records a revocation as an adjustment, not an award', async () => {
     await h.dispatch({
       commandName: 'companion',
       subcommandGroup: 'admin',
@@ -319,12 +325,12 @@ describe('/companion admin award', () => {
     const result = await h.dispatch({
       commandName: 'companion',
       subcommandGroup: 'admin',
-      subcommand: 'award',
+      subcommand: 'revoke',
       actor: asAdmin(),
-      options: awardOptions(-40, 'awarded twice by mistake'),
+      options: awardOptions(40, 'awarded twice by mistake'),
     });
 
-    expect(result.responder.visibleText).toContain('Removed 40 points');
+    expect(result.responder.visibleText).toContain('Removed **40** points');
     expect(h.repositories.rewards.events.at(-1)?.kind).toBe('adjustment');
     expect(await h.repositories.rewards.balance(TEST_GUILD_ID, member)).toBe(60);
   });
@@ -333,9 +339,9 @@ describe('/companion admin award', () => {
     const result = await h.dispatch({
       commandName: 'companion',
       subcommandGroup: 'admin',
-      subcommand: 'award',
+      subcommand: 'revoke',
       actor: asAdmin(),
-      options: awardOptions(-40, 'too much'),
+      options: awardOptions(40, 'too much'),
     });
 
     expect(result.responder.visibleText).toContain('below zero');
