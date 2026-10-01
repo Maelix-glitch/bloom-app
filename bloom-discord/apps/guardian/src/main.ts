@@ -29,6 +29,11 @@ import { ModerationActionService } from './features/moderation/service.js';
 import { CaseService } from './features/moderation/case-service.js';
 import { guardianCommands } from './commands.js';
 import { memberJoinHandler, memberLeaveHandler } from './features/onboarding/handlers.js';
+import {
+  inviteCreateHandler,
+  inviteDeleteHandler,
+} from './features/referrals/handlers.js';
+import { recoverInviteBaseline } from './features/referrals/recovery.js';
 import { ReferralService } from './features/referrals/service.js';
 import { createReferralQualificationJob } from './features/referrals/qualification-job.js';
 import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
@@ -244,7 +249,9 @@ await runBotMain(() =>
         },
       })
         .register(memberJoinHandler)
-        .register(memberLeaveHandler);
+        .register(memberLeaveHandler)
+        .register(inviteCreateHandler)
+        .register(inviteDeleteHandler);
 
       return { commands, events, commandCount: registry.size };
     },
@@ -263,6 +270,22 @@ await runBotMain(() =>
      */
     async onReady(context, deps) {
       const guildId = context.platform.discord.guildId;
+
+      /*
+       * Build the invite baseline before anything else awaits.
+       *
+       * Referral attribution is a diff, so until this completes there is
+       * nothing to diff against and every join is recorded `unavailable`.
+       * That window is unavoidable — Discord has no "who invited them" field
+       * — but it should be the length of one REST call, not the lifetime of
+       * the process, which is what it was before this ran at startup.
+       *
+       * Deliberately not awaited together with the role audit: a failure
+       * here is operational, not fatal, and `primeInviteCache` reports it
+       * rather than throwing. Guardian serves commands either way.
+       */
+      await recoverInviteBaseline(deps, guildId, 'startup');
+
       const [self, roles] = await Promise.all([
         deps.guilds.getSelf(guildId),
         deps.guilds.getRoles(guildId),
@@ -301,6 +324,23 @@ await runBotMain(() =>
           `Role placement is correct: "${self.highestRoleName}" at position ${String(self.highestRolePosition)}.`,
         );
       }
+    },
+
+    /**
+     * Recovery after a dropped gateway session.
+     *
+     * A resume replays buffered gateway events, but the invite cache was
+     * built from a REST read and nothing replays that. Invites created,
+     * deleted or *used* during the outage are invisible, so the baseline is
+     * stale by an unknown amount — and a stale baseline is the one input that
+     * can make attribution confidently wrong rather than merely absent.
+     *
+     * So it is rebuilt from Discord. If that read fails, `primeInviteCache`
+     * clears the cache instead of keeping it, and attribution falls back to
+     * `unavailable` until a later read succeeds.
+     */
+    async onResume(context, deps) {
+      await recoverInviteBaseline(deps, context.platform.discord.guildId, 'resume');
     },
 
     healthChecks(): readonly HealthCheck[] {

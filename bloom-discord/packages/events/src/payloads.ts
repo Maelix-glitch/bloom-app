@@ -38,6 +38,28 @@ export interface MemberLeavePayload {
   readonly leftAt: Date;
 }
 
+/**
+ * An invite was created.
+ *
+ * Carries `uses` even though a freshly created invite is always zero: the
+ * value comes from the gateway payload rather than from an assumption, and if
+ * Discord ever delivers this for an invite that already has uses, the cache
+ * records what was actually reported.
+ */
+export interface InviteCreatePayload {
+  readonly guildId: GuildId;
+  readonly code: string;
+  readonly uses: number;
+  /** Null for widget and system invites, which have no creator to pay. */
+  readonly inviterId: UserId | null;
+  readonly inviterIsBot: boolean;
+}
+
+export interface InviteDeletePayload {
+  readonly guildId: GuildId;
+  readonly code: string;
+}
+
 export interface MemberUpdatePayload {
   readonly guildId: GuildId;
   readonly userId: UserId;

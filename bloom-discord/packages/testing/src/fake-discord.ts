@@ -547,10 +547,19 @@ export class FakeChannelModerationService implements ChannelModerationService {
 export class FakeInviteQuery implements InviteQueryService {
   /** Set to null to simulate a missing Manage Server permission or an outage. */
   public snapshot: InviteUsageSnapshot | null = { invites: [], vanityUses: null };
+  /**
+   * Set to reject instead of resolving.
+   *
+   * Distinct from a null snapshot: the port returns null for "Discord said
+   * no", and throws for a transport failure. The caller must survive both,
+   * and before this existed only one of them was reachable from a test.
+   */
+  public failure: Error | null = null;
   public reads = 0;
 
   public readUsage(_guildId: GuildId): Promise<InviteUsageSnapshot | null> {
     this.reads += 1;
+    if (this.failure) return Promise.reject(this.failure);
     return Promise.resolve(this.snapshot);
   }
 

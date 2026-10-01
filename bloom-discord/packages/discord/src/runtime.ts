@@ -21,6 +21,7 @@ import {
   toComponentInvocation,
   toModalInvocation,
 } from './adapters/interaction.js';
+import { toInviteCreatePayload, toInviteDeletePayload } from './adapters/invite.js';
 import {
   toMemberJoinPayload,
   toMemberLeavePayload,
@@ -82,6 +83,14 @@ export interface BotRuntimeOptions {
   readonly events?: GatewayEventRouter;
   /** Called once the client is ready and the guild is reachable. */
   readonly onReady?: (client: Client<true>) => Promise<void>;
+  /**
+   * Called after the gateway resumes a dropped session.
+   *
+   * Separate from `onReady`, which fires once per process. Anything caching
+   * guild state has been blind for the duration of the outage and has to
+   * decide what to do about it; this is where that happens.
+   */
+  readonly onResume?: (client: Client) => Promise<void>;
   /** Called during shutdown, before the gateway connection is closed. */
   readonly onShutdown?: () => Promise<void>;
 }
@@ -222,6 +231,31 @@ export class BotRuntime implements GatewayClient {
         `Shard ${String(shardId)} resumed; ${String(replayed)} event(s) replayed.`,
         { context: { shard_id: shardId, replayed } },
       );
+
+      /*
+       * A resume replays what the gateway buffered, but anything the bot
+       * cached from the REST API went stale while it was disconnected and no
+       * replayed event will correct it. The hook runs in its own correlation
+       * scope and swallows its failures: a recovery step must never be the
+       * reason a reconnect turns into a crash.
+       */
+      if (!this.options.onResume) return;
+      void withCorrelation(async () => {
+        try {
+          await this.options.onResume?.(this.client);
+        } catch (error) {
+          const bloom = BloomError.from(error);
+          this.logger.log(
+            bloom.severity,
+            'runtime.resume_failed',
+            'Resume recovery failed.',
+            {
+              error: bloom,
+              error_code: bloom.code,
+            },
+          );
+        }
+      }, newCorrelationId());
     });
 
     if (this.options.commands ?? this.options.interactions) {
@@ -266,6 +300,20 @@ export class BotRuntime implements GatewayClient {
     if (subscribed.has('guildMemberUpdate')) {
       this.client.on(Events.GuildMemberUpdate, (previous, next) => {
         void router.dispatch('guildMemberUpdate', toMemberUpdatePayload(previous, next));
+      });
+    }
+
+    if (subscribed.has('inviteCreate')) {
+      this.client.on(Events.InviteCreate, (invite) => {
+        const payload = toInviteCreatePayload(invite);
+        if (payload) void router.dispatch('inviteCreate', payload);
+      });
+    }
+
+    if (subscribed.has('inviteDelete')) {
+      this.client.on(Events.InviteDelete, (invite) => {
+        const payload = toInviteDeletePayload(invite);
+        if (payload) void router.dispatch('inviteDelete', payload);
       });
     }
 

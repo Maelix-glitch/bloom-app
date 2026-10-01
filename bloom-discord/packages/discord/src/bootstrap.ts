@@ -96,6 +96,14 @@ export interface BotProcessOptions<TDeps> {
   readonly createFeatures: (deps: TDeps, context: BotBootstrapContext) => BotFeatures;
 
   readonly onReady?: (context: BotBootstrapContext, deps: TDeps) => Promise<void>;
+  /**
+   * Re-establish anything cached from the REST API after a gateway resume.
+   *
+   * A resume replays buffered gateway events; it does not refresh state the
+   * bot fetched over REST, which has been going stale for the length of the
+   * outage.
+   */
+  readonly onResume?: (context: BotBootstrapContext, deps: TDeps) => Promise<void>;
   readonly healthChecks?: (
     context: BotBootstrapContext,
     deps: TDeps,
@@ -367,6 +375,9 @@ export async function startBotProcess<TDeps>(
       ...(features.interactions ? { interactions: features.interactions } : {}),
       ...(features.events ? { events: features.events } : {}),
       ...(options.onReady ? { onReady: () => onReadyHook(options, context, deps) } : {}),
+      ...(options.onResume
+        ? { onResume: () => onResumeHook(options, context, deps) }
+        : {}),
       onShutdown: async () => {
         heartbeat.stop();
         healthServer?.close();
@@ -467,6 +478,15 @@ async function onReadyHook<TDeps>(
   deps: TDeps,
 ): Promise<void> {
   await options.onReady?.(context, deps);
+}
+
+/** The same, for `onResume`. */
+async function onResumeHook<TDeps>(
+  options: BotProcessOptions<TDeps>,
+  context: BotBootstrapContext,
+  deps: TDeps,
+): Promise<void> {
+  await options.onResume?.(context, deps);
 }
 
 /**

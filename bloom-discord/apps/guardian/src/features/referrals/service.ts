@@ -11,7 +11,7 @@ import type {
 } from '@bloom/database';
 import type { GuildQueryService, InviteQueryService } from '@bloom/discord';
 import type { Logger } from '@bloom/logging';
-import { attributeJoin, toUsageCache, type InviteUsageCache } from './attribution.js';
+import { attributeJoin, toUsageCache } from './attribution.js';
 
 /**
  * Guardian's half of the referral feature.
@@ -67,26 +67,65 @@ export class ReferralService {
    *
    * In memory on purpose, and the one piece of state here that does not
    * survive a restart. That is not a bug to be fixed with a table: the cache
-   * is only ever used to compute a difference, a stale baseline produces
-   * *wrong* attributions rather than missing ones, and a wrong attribution
-   * pays the wrong member. After a restart the first join in each guild is
-   * recorded as `unavailable` and the cache refills. Losing one attribution
-   * is the correct price for never inventing one.
+   * is only ever used to compute a difference, and a baseline persisted
+   * across a restart is a baseline from before an unknown amount of missed
+   * activity. It would produce *wrong* attributions rather than missing ones,
+   * and a wrong attribution pays the wrong member.
+   *
+   * Instead the baseline is rebuilt from Discord, which is authoritative,
+   * whenever it might have gone stale: at startup, after a resume, and after
+   * any failed read. Between those points `inviteCreate` and `inviteDelete`
+   * keep it current. The window where a join is unattributable is therefore
+   * the startup fetch itself, not the whole first-join-after-deploy.
    */
-  private readonly usageCache = new Map<GuildId, InviteUsageCache>();
+  private readonly usageCache = new Map<GuildId, Map<string, number>>();
   private readonly vanityCache = new Map<GuildId, number | null>();
 
   public constructor(private readonly options: ReferralServiceOptions) {}
 
   /**
-   * Prime the cache, at startup and after reconnects.
+   * Prime the cache, at startup and after a resume.
    *
-   * Without this the first join after every deploy is unattributable. With
-   * it, only a join that lands inside the startup window is.
+   * Without this the first join after every deploy is unattributable, because
+   * a diff needs something to diff against. With it, only a join that lands
+   * inside the startup window is.
+   *
+   * On failure the cache is **cleared**, not left alone. That is the whole
+   * safety property of this method: a baseline we could not refresh is a
+   * baseline we cannot date, and diffing against an undated baseline is how
+   * an invite tracker pays the wrong member. Dropping it costs attributions;
+   * keeping it risks inventing them.
    */
   public async primeInviteCache(guildId: GuildId): Promise<boolean> {
-    const snapshot = await this.options.invites.readUsage(guildId);
+    let snapshot;
+    try {
+      snapshot = await this.options.invites.readUsage(guildId);
+    } catch (error) {
+      this.invalidateInviteCache(guildId);
+
+      /*
+       * The error's *type*, never its message.
+       *
+       * This call goes to Discord with an Authorization header, and a failed
+       * HTTP response can quote the request back. The redaction layer works
+       * on field names, not on message text, so an error string is the one
+       * route by which a token could reach a log line. The class name and the
+       * fact of failure are what an operator needs; the prose is not.
+       */
+      this.options.logger.warn(
+        'referrals.invite_cache_unavailable',
+        'Reading guild invites failed, so joins will be recorded as unattributed until the next successful read.',
+        {
+          context: {
+            failure: error instanceof Error ? error.constructor.name : 'unknown',
+          },
+        },
+      );
+      return false;
+    }
+
     if (!snapshot) {
+      this.invalidateInviteCache(guildId);
       this.options.logger.warn(
         'referrals.invite_cache_unavailable',
         'Could not read guild invites, so joins will be recorded as unattributed. Guardian needs the Manage Server permission for referral attribution.',
@@ -96,7 +135,67 @@ export class ReferralService {
 
     this.usageCache.set(guildId, toUsageCache(snapshot));
     this.vanityCache.set(guildId, snapshot.vanityUses);
+
+    this.options.logger.info(
+      'referrals.invite_cache_primed',
+      `Invite baseline ready: ${String(snapshot.invites.length)} invite(s) tracked.`,
+      { context: { invite_count: snapshot.invites.length } },
+    );
     return true;
+  }
+
+  /**
+   * Forget the baseline for a guild.
+   *
+   * Attribution then reports `unavailable` until the next successful read,
+   * which is the fail-closed direction: no baseline produces no inviter, and
+   * never a guessed one.
+   */
+  public invalidateInviteCache(guildId: GuildId): void {
+    this.usageCache.delete(guildId);
+    this.vanityCache.delete(guildId);
+  }
+
+  /** True when this guild has a usable baseline. Diagnostics and tests. */
+  public hasInviteBaseline(guildId: GuildId): boolean {
+    return (this.usageCache.get(guildId)?.size ?? 0) > 0;
+  }
+
+  /**
+   * An invite was created: record its baseline.
+   *
+   * This is the one thing the gateway can tell us that a diff cannot. An
+   * invite first seen at join time has no baseline, so `attributeJoin` counts
+   * it as uncertainty and refuses the whole join — meaning anyone who creates
+   * a fresh link and shares it loses the referral on its first use. Knowing
+   * the invite started at zero turns that case into a clean attribution.
+   *
+   * Ignored when the guild has no baseline at all: adding a single known
+   * invite to an empty cache would make the next join look like "exactly one
+   * invite advanced, nothing else moved" when in truth we know nothing about
+   * the other invites in the guild.
+   */
+  public rememberInvite(payload: {
+    readonly guildId: GuildId;
+    readonly code: string;
+    readonly uses: number;
+  }): void {
+    const cache = this.usageCache.get(payload.guildId);
+    if (!cache) return;
+
+    cache.set(payload.code, payload.uses);
+  }
+
+  /**
+   * An invite was deleted: drop it.
+   *
+   * Mostly hygiene — `attributeJoin` only ever reads codes present in the
+   * fresh reading, so a stale entry is inert. It matters for the guild that
+   * churns through single-use invites, where never deleting would grow the
+   * map for the life of the process.
+   */
+  public forgetInvite(guildId: GuildId, code: string): void {
+    this.usageCache.get(guildId)?.delete(code);
   }
 
   /**

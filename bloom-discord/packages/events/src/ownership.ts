@@ -23,6 +23,8 @@ export const GATEWAY_EVENTS = [
   'roleUpdate',
   'roleDelete',
   'channelDelete',
+  'inviteCreate',
+  'inviteDelete',
   'interactionCreate',
   'clientReady',
   'error',
@@ -82,6 +84,18 @@ export const EVENT_OWNERSHIP: Readonly<Record<GatewayEventName, EventOwnership>>
     owner: null,
     observers: ['guardian', 'companion', 'labs'],
     rationale: 'Each bot notes that it lost access. Local bookkeeping.',
+  },
+  inviteCreate: {
+    owner: 'guardian',
+    observers: [],
+    rationale:
+      'Guardian attributes referrals by diffing invite use counts, so it needs a baseline for every invite. An invite first seen at join time has no baseline and poisons that join into "ambiguous"; this event supplies the baseline — zero uses — at the moment of creation. Guardian is the only bot with the GuildInvites intent, so it is the only bot that receives this.',
+  },
+  inviteDelete: {
+    owner: 'guardian',
+    observers: [],
+    rationale:
+      'Drops the deleted code from the same cache, so a revoked invite cannot linger as a stale baseline and the map does not grow without bound in a guild that churns through invites.',
   },
   roleUpdate: {
     owner: 'guardian',
