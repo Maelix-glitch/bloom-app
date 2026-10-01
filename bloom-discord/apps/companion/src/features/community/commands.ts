@@ -389,6 +389,29 @@ const LIMIT_OPTION = {
   maxValue: 25,
 } as const;
 
+/**
+ * Pay anyone a completed activity still owes.
+ *
+ * Under `staff.community.manage` rather than `staff.rewards.award`: this
+ * settles a debt the activity already committed to when staff created it,
+ * and the amount is not the operator's to choose. Someone who may run an
+ * activity may finish paying for it. It is still the narrowest fit — a
+ * moderator holds neither capability.
+ */
+async function retryPayments(
+  invocation: CommandInvocation,
+  deps: CompanionDeps,
+): Promise<BloomMessage> {
+  const result = await deps.community.reconcile({
+    guildId: requireGuild(invocation),
+    activityId: invocation.options.getString('id') ?? '',
+    actorId: invocation.actor.userId,
+    correlationId: invocation.correlationId,
+  });
+
+  return copy.reconciled(result);
+}
+
 export const communityStaffSubcommands: readonly SubcommandContribution<CompanionDeps>[] =
   [
     {
@@ -490,6 +513,16 @@ export const communityStaffSubcommands: readonly SubcommandContribution<Companio
         options: [ID_OPTION, OUTCOME_OPTION],
       },
       execute: (invocation, deps) => closeActivity(invocation, deps, 'event'),
+    },
+    {
+      group: 'admin',
+      policy: requireStaffCapability('staff.community.manage'),
+      spec: {
+        name: 'event-retry-payments',
+        description: 'Pay anyone a completed event still owes. Safe to run twice.',
+        options: [ID_OPTION],
+      },
+      execute: retryPayments,
     },
   ];
 

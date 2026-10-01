@@ -111,6 +111,19 @@ export type LeaveResult =
   | { readonly kind: 'closed'; readonly activity: CommunityActivity }
   | { readonly kind: 'not_found' };
 
+/** What a reconcile run found and did. */
+export interface ReconcileResult {
+  readonly activity: CommunityActivity;
+  /** Completions that were recorded but unpaid when the run started. */
+  readonly eligible: number;
+  /** Paid by this run. */
+  readonly retried: number;
+  /** The money was already in the ledger; only the link was missing. */
+  readonly alreadyPaid: number;
+  /** Still owed. Run it again. */
+  readonly stillFailed: number;
+}
+
 /** One challenge and how far the member is through it. */
 export interface ChallengeProgress {
   readonly activity: CommunityActivity;
@@ -263,6 +276,140 @@ export class CommunityService {
     });
 
     return { activity, completed, failed };
+  }
+
+  /**
+   * Pay the people a completed activity still owes.
+   *
+   * ## Why this exists
+   *
+   * Closing an activity claims each participant's completion and then pays
+   * it, in that order, because the claim is what decides who is allowed to
+   * be paid. If the ledger is unavailable between those two steps the member
+   * holds a completion with no payment. That is the better of the two
+   * available failures — the alternative pays first and risks paying twice —
+   * but "better failure" is only true if there is a way out of it. This is
+   * the way out.
+   *
+   * ## Why it is a staff command and not a background job
+   *
+   * A silent retry loop hides the fact that payments are failing, which is
+   * exactly the thing an operator needs to know. This runs when a person
+   * asks, reports what it found, and leaves anything it could not fix
+   * visible for the next run. No queue, no scheduler, no automatic retries.
+   *
+   * ## Why it is safe to run twice, or twice at once
+   *
+   * Nothing here decides whether a member has been paid. The idempotency key
+   * does — it is derived from the activity and the member, so every retry
+   * presents the same key and the ledger's unique index arbitrates. A second
+   * run gets `alreadyPaid` and writes no money. Two concurrent runs produce
+   * one ledger row between them, and the `point_event_id IS NULL` guard on
+   * `markPaid` picks one winner for the link.
+   */
+  public async reconcile(request: {
+    readonly guildId: GuildId;
+    readonly activityId: string;
+    readonly actorId: UserId;
+    readonly correlationId: CorrelationId;
+  }): Promise<ReconcileResult> {
+    const activity = await this.options.repositories.community.byId(
+      request.guildId,
+      request.activityId,
+    );
+
+    if (!activity) {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `No activity ${request.activityId} in this server.`,
+      });
+    }
+
+    /*
+     * Only a completed activity owes anything. An open one has not finished
+     * deciding who took part, and a cancelled one deliberately paid nobody —
+     * retrying either would invent a debt rather than settle one.
+     */
+    if (activity.status !== 'completed') {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `${activity.title} is ${activity.status}, not completed. Only a completed activity can owe anyone.`,
+      });
+    }
+
+    const owed = await this.options.repositories.community.unpaidCompletions(
+      request.guildId,
+      activity.id,
+    );
+
+    let retried = 0;
+    let alreadyPaid = 0;
+    let stillFailed = 0;
+
+    for (const participant of owed) {
+      try {
+        const result = await this.options.rewards.awardActivity({
+          guildId: activity.guildId,
+          userId: participant.userId,
+          kind: activityPointKind(activity.kind),
+          points: activity.rewardPoints,
+          idempotencyKey: completionIdempotencyKey(
+            activity.kind,
+            activity.id,
+            participant.userId,
+          ),
+          correlationId: request.correlationId,
+        });
+
+        if (result.kind !== 'paid') {
+          stillFailed += 1;
+          continue;
+        }
+
+        /*
+         * Link it either way. `alreadyPaid` means the money moved on an
+         * earlier attempt and only the link was lost — which is a real and
+         * likely state, because the link is written after the payment.
+         */
+        await this.options.repositories.community.markPaid({
+          activityId: activity.id,
+          guildId: activity.guildId,
+          userId: participant.userId,
+          pointEventId: result.eventId,
+        });
+
+        if (result.alreadyPaid) alreadyPaid += 1;
+        else retried += 1;
+      } catch (error) {
+        stillFailed += 1;
+        this.logger.error(
+          'community.reconcile_failed',
+          'A reconcile attempt could not pay a completion.',
+          { error, context: { activity_id: activity.id } },
+        );
+      }
+    }
+
+    await this.options.repositories.audit.append({
+      guildId: request.guildId,
+      botName: 'companion',
+      event: 'community.reconciled',
+      actorId: request.actorId,
+      targetId: null,
+      // Warn: a person moved money, even though the amounts were already
+      // decided when the activity was created.
+      severity: 'warn',
+      source: 'community',
+      correlationId: request.correlationId,
+      details: {
+        activity_id: activity.id,
+        kind: activity.kind,
+        eligible: owed.length,
+        retried,
+        already_paid: alreadyPaid,
+        still_failed: stillFailed,
+      },
+    });
+
+    return { activity, eligible: owed.length, retried, alreadyPaid, stillFailed };
   }
 
   /* ---------------------------------------------------------------------- *
@@ -626,6 +773,8 @@ export class CommunityService {
     userId: UserId,
     correlationId: CorrelationId,
   ): Promise<boolean> {
+    // Nothing to pay and nothing to link. Reported as paid because the
+    // member owes nobody anything and is not waiting on a repair.
     if (activity.rewardPoints <= 0) return true;
 
     try {
@@ -637,7 +786,27 @@ export class CommunityService {
         idempotencyKey: completionIdempotencyKey(activity.kind, activity.id, userId),
         correlationId,
       });
-      return result.kind === 'paid';
+      if (result.kind !== 'paid') return false;
+
+      /*
+       * Write the link back, so the participant row records which ledger
+       * entry paid it. This is what makes `point_event_id IS NULL` mean
+       * "owed" rather than "unknown", and therefore what makes the reconcile
+       * query below able to find anything at all.
+       *
+       * The link is a second statement and can itself fail. That is
+       * survivable in the only direction that matters: an unlinked payment
+       * is found by the reconcile, re-presented under the same idempotency
+       * key, reported as a duplicate, and linked then. Money is never moved
+       * twice; only the bookkeeping catches up.
+       */
+      await this.options.repositories.community.markPaid({
+        activityId: activity.id,
+        guildId: activity.guildId,
+        userId,
+        pointEventId: result.eventId,
+      });
+      return true;
     } catch (error) {
       /*
        * Not rethrown. One member's failed payment must not abort a close that

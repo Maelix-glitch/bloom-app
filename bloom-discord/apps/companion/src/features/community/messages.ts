@@ -6,7 +6,7 @@ import type {
 import { bloomEmbed, staffEmbed, type BloomMessage } from '@bloom/embeds';
 import { discordTimestamp } from '@bloom/utils';
 import type { UserId } from '@bloom/shared-types';
-import type { ChallengeProgress } from './service.js';
+import type { ChallengeProgress, ReconcileResult } from './service.js';
 
 /**
  * How a community activity reads.
@@ -348,6 +348,40 @@ export function closedResult(input: {
   return {
     ephemeral: true,
     embeds: [staffEmbed({ title: 'Closed', description: lines.join('\n') })],
+  };
+}
+
+/** What the reconcile run did, in four numbers. */
+export function reconciled(result: ReconcileResult): BloomMessage {
+  const lines = [
+    `**${result.activity.title}**`,
+    `**Eligible** ${String(result.eligible)}`,
+    `**Paid now** ${String(result.retried)}`,
+    `**Already paid** ${String(result.alreadyPaid)}`,
+    `**Still failing** ${String(result.stillFailed)}`,
+  ];
+
+  if (result.eligible === 0) {
+    lines.push('', 'Nobody is owed anything for this activity.');
+  } else if (result.stillFailed > 0) {
+    // Stated rather than implied by a number, because the operator needs to
+    // know the job is not finished.
+    lines.push(
+      '',
+      'Some payments still failed. The completions are recorded and can be retried again.',
+    );
+  }
+
+  if (result.alreadyPaid > 0) {
+    lines.push(
+      '',
+      'Already paid means the points had reached the ledger but the record had not caught up. No one was paid twice.',
+    );
+  }
+
+  return {
+    ephemeral: true,
+    embeds: [staffEmbed({ title: 'Payments reconciled', description: lines.join('\n') })],
   };
 }
 

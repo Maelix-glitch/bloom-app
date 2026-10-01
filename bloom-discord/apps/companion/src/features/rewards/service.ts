@@ -183,7 +183,20 @@ export interface ActivityAwardRequest {
 }
 
 export type ActivityAwardResult =
-  | { readonly kind: 'paid'; readonly alreadyPaid: boolean; readonly balance: number }
+  | {
+      readonly kind: 'paid';
+      readonly alreadyPaid: boolean;
+      readonly balance: number;
+      /**
+       * The ledger row this payment is recorded in.
+       *
+       * Returned so the caller can store the link back on its own record.
+       * Present on a duplicate too, and deliberately so: a retry that finds
+       * the payment already made still needs the id, because the reason it
+       * is retrying is usually that the link was never written.
+       */
+      readonly eventId: string;
+    }
   | { readonly kind: 'failed'; readonly reason: 'insufficient' };
 
 export class RewardsService {
@@ -454,6 +467,7 @@ export class RewardsService {
       kind: 'paid',
       alreadyPaid: outcome.kind === 'duplicate',
       balance: outcome.balance,
+      eventId: outcome.event.id,
     };
   }
 

@@ -52,13 +52,32 @@ suite('community repository (integration)', () => {
     // FK order: participants reference activities.
     await database.sql`DELETE FROM ${database.sql(database.schema)}.community_participants WHERE guild_id = ${GUILD}`;
     await database.sql`DELETE FROM ${database.sql(database.schema)}.community_activities WHERE guild_id = ${GUILD}`;
+    await database.sql`DELETE FROM ${database.sql(database.schema)}.point_events WHERE guild_id = ${GUILD}`;
   });
 
   afterAll(async () => {
     await database.sql`DELETE FROM ${database.sql(database.schema)}.community_participants WHERE guild_id = ${GUILD}`;
     await database.sql`DELETE FROM ${database.sql(database.schema)}.community_activities WHERE guild_id = ${GUILD}`;
+    await database.sql`DELETE FROM ${database.sql(database.schema)}.point_events WHERE guild_id = ${GUILD}`;
     await database.close();
   });
+
+  let ledgerRowCounter = 0;
+
+  /** A real ledger row, so the participant FK has something to point at. */
+  async function aPointEvent(): Promise<string> {
+    ledgerRowCounter += 1;
+    const rows = await database.sql<{ id: string }[]>`
+      INSERT INTO ${database.sql(database.schema)}.point_events
+        (guild_id, user_id, kind, points, idempotency_key)
+      VALUES (${GUILD}, ${member(20)}, 'event_completion', 20,
+              ${`event:recon:${String(ledgerRowCounter)}`})
+      RETURNING id
+    `;
+    const row = rows[0];
+    if (!row) throw new Error('could not insert a point event');
+    return row.id;
+  }
 
   async function anEvent(capacity: number | null): Promise<string> {
     const activity = await repository.create({
@@ -318,6 +337,153 @@ suite('community repository (integration)', () => {
       });
 
       expect(await repository.leave(id, GUILD, member(3))).toBe('not_joined');
+    });
+  });
+
+  describe('recovering unpaid completions', () => {
+    async function completedEventWith(reward: number): Promise<string> {
+      const activity = await repository.create({
+        guildId: GUILD,
+        kind: 'event',
+        title: 'Garden hours',
+        description: 'An hour together.',
+        startsAt: future(-2),
+        endsAt: future(-1),
+        rewardPoints: reward,
+        createdBy: ACTOR,
+      });
+      await repository.join({
+        activityId: activity.id,
+        guildId: GUILD,
+        userId: member(20),
+        capacity: null,
+        joinedAt: new Date(),
+      });
+      await repository.complete({
+        activityId: activity.id,
+        guildId: GUILD,
+        userId: member(20),
+        progress: null,
+      });
+      await repository.close({
+        guildId: GUILD,
+        activityId: activity.id,
+        status: 'completed',
+        closedBy: ACTOR,
+        closedAt: new Date(),
+      });
+      return activity.id;
+    }
+
+    it('finds a completion that was never paid', async () => {
+      const id = await completedEventWith(20);
+      const owed = await repository.unpaidCompletions(GUILD, id);
+      expect(owed.map((row) => row.userId)).toEqual([member(20)]);
+    });
+
+    it('finds nothing for a free activity', async () => {
+      // No ledger row exists or ever will, so these must never look like a
+      // backlog that cannot be cleared.
+      const id = await completedEventWith(0);
+      expect(await repository.unpaidCompletions(GUILD, id)).toHaveLength(0);
+    });
+
+    it('finds nothing while the activity is still open', async () => {
+      const activity = await repository.create({
+        guildId: GUILD,
+        kind: 'event',
+        title: 'Still running',
+        description: 'Not closed yet.',
+        startsAt: future(-1),
+        endsAt: future(1),
+        rewardPoints: 20,
+        createdBy: ACTOR,
+      });
+      await repository.join({
+        activityId: activity.id,
+        guildId: GUILD,
+        userId: member(21),
+        capacity: null,
+        joinedAt: new Date(),
+      });
+      await repository.complete({
+        activityId: activity.id,
+        guildId: GUILD,
+        userId: member(21),
+        progress: null,
+      });
+
+      expect(await repository.unpaidCompletions(GUILD, activity.id)).toHaveLength(0);
+    });
+
+    it('links the payment exactly once under concurrent repair', async () => {
+      /*
+       * Six connections racing to write the same link. The
+       * `point_event_id IS NULL` guard means exactly one succeeds — which
+       * is what stops two concurrent reconciles from disagreeing about
+       * which ledger row paid this member.
+       */
+      const id = await completedEventWith(20);
+      const ledgerRow = await aPointEvent();
+
+      const results = await Promise.all(
+        Array.from({ length: 6 }, () =>
+          repository.markPaid({
+            activityId: id,
+            guildId: GUILD,
+            userId: member(20),
+            pointEventId: ledgerRow,
+          }),
+        ),
+      );
+
+      expect(results.filter(Boolean)).toHaveLength(1);
+      expect(await repository.unpaidCompletions(GUILD, id)).toHaveLength(0);
+    });
+
+    it('refuses to link a payment to a participant who withdrew', async () => {
+      const activity = await repository.create({
+        guildId: GUILD,
+        kind: 'event',
+        title: 'Left early',
+        description: 'Withdrew before the close.',
+        startsAt: future(-2),
+        endsAt: future(-1),
+        rewardPoints: 20,
+        createdBy: ACTOR,
+      });
+      await repository.join({
+        activityId: activity.id,
+        guildId: GUILD,
+        userId: member(22),
+        capacity: null,
+        joinedAt: new Date(),
+      });
+      await repository.leave(activity.id, GUILD, member(22));
+
+      const ledgerRow = await aPointEvent();
+      expect(
+        await repository.markPaid({
+          activityId: activity.id,
+          guildId: GUILD,
+          userId: member(22),
+          pointEventId: ledgerRow,
+        }),
+      ).toBe(false);
+    });
+
+    it('refuses a link to a ledger row that does not exist', async () => {
+      // The FK is the guarantee that `point_event_id` always names a real
+      // payment, so a bookkeeping bug cannot fabricate one.
+      const id = await completedEventWith(20);
+      await expect(
+        repository.markPaid({
+          activityId: id,
+          guildId: GUILD,
+          userId: member(20),
+          pointEventId: '00000000-0000-0000-0000-000000000000',
+        }),
+      ).rejects.toThrow();
     });
   });
 

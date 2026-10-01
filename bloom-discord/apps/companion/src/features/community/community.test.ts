@@ -1027,3 +1027,329 @@ async function closeEvent(
     options: { strings: { id, outcome } },
   });
 }
+
+/* ========================================================================== *
+ * Recoverable payments
+ * ========================================================================== */
+
+describe('reconciling unpaid completions', () => {
+  /** Close an event as completed with the ledger down, so payment fails. */
+  async function closeWithLedgerDown(id: string): Promise<() => void> {
+    const award = h.repositories.rewards.award.bind(h.repositories.rewards);
+    h.repositories.rewards.award = () => Promise.reject(new Error('ledger unavailable'));
+    await closeEvent(id, 'completed');
+    return () => {
+      h.repositories.rewards.award = award;
+    };
+  }
+
+  async function retry(
+    id: string,
+  ): Promise<Awaited<ReturnType<CompanionHarness['dispatch']>>> {
+    return await h.dispatch({
+      commandName: 'companion',
+      subcommandGroup: 'admin',
+      subcommand: 'event-retry-payments',
+      actor: asAdmin(),
+      options: { strings: { id } },
+    });
+  }
+
+  it('links the ledger row on a payment that works first time', async () => {
+    /*
+     * The regression guard for the whole feature. Until the link is written,
+     * `point_event_id IS NULL` means "we never looked" rather than "owed",
+     * and the reconcile query below cannot tell a paid member from an unpaid
+     * one.
+     */
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await closeEvent(id, 'completed');
+
+    const record = await h.repositories.community.participant(id, member);
+    expect(record?.pointEventId).not.toBeNull();
+  });
+
+  it('leaves a failed payment eligible for recovery', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    const owed = await h.repositories.community.unpaidCompletions(TEST_GUILD_ID, id);
+    expect(owed.map((row) => row.userId)).toEqual([member]);
+  });
+
+  it('pays the people it owes when staff retry', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await joinAs(id, other);
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    const result = await retry(id);
+
+    expect(result.responder.visibleText).toContain('Paid now** 2');
+    expect(result.responder.messages[0]?.ephemeral).toBe(true);
+
+    const paid = h.repositories.rewards.events.filter(
+      (event) => event.kind === 'event_completion',
+    );
+    expect(paid).toHaveLength(2);
+    expect(paid.every((event) => event.points === 20)).toBe(true);
+
+    // And nobody is owed any more.
+    expect(
+      await h.repositories.community.unpaidCompletions(TEST_GUILD_ID, id),
+    ).toHaveLength(0);
+  });
+
+  it('pays once when retried twice', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    await retry(id);
+    const second = await retry(id);
+
+    // Nothing left to do, so nothing done.
+    expect(second.responder.visibleText).toContain('Eligible** 0');
+    expect(
+      h.repositories.rewards.events.filter((event) => event.kind === 'event_completion'),
+    ).toHaveLength(1);
+  });
+
+  it('pays once when two retries run at the same time', async () => {
+    /*
+     * Both runs read the same unpaid list before either has written, so both
+     * present the same idempotency key. The ledger's unique index decides;
+     * `markPaid` picks one winner for the link. Exactly one point event
+     * either way.
+     */
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await joinAs(id, other);
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    const [a, b] = await Promise.all([
+      h.deps.community.reconcile({
+        guildId: TEST_GUILD_ID,
+        activityId: id,
+        actorId: admin,
+        correlationId: 'corr-a' as never,
+      }),
+      h.deps.community.reconcile({
+        guildId: TEST_GUILD_ID,
+        activityId: id,
+        actorId: admin,
+        correlationId: 'corr-b' as never,
+      }),
+    ]);
+
+    expect(
+      h.repositories.rewards.events.filter((event) => event.kind === 'event_completion'),
+    ).toHaveLength(2);
+
+    // Between the two runs, each member was newly paid exactly once. The
+    // other run saw the payment already in the ledger.
+    expect(a.retried + b.retried).toBe(2);
+    expect(a.stillFailed + b.stillFailed).toBe(0);
+  });
+
+  it('refuses to relabel a participant who is already linked to a payment', async () => {
+    /*
+     * The guard the concurrent case actually rests on. Two reconciles can
+     * both believe they made the payment; only one may write the link, or
+     * the record would name a ledger row that did not pay this member.
+     * JavaScript cannot interleave the fake, so this asserts the rule
+     * directly — `community.integration.test.ts` races it for real.
+     */
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await closeEvent(id, 'completed');
+
+    const linked = await h.repositories.community.markPaid({
+      activityId: id,
+      guildId: TEST_GUILD_ID,
+      userId: member,
+      pointEventId: 'some-other-ledger-row',
+    });
+
+    expect(linked).toBe(false);
+    const record = await h.repositories.community.participant(id, member);
+    expect(record?.pointEventId).not.toBe('some-other-ledger-row');
+  });
+
+  it('does not touch a participant who was already paid', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await closeEvent(id, 'completed');
+
+    const before = await h.repositories.community.participant(id, member);
+
+    const result = await retry(id);
+
+    expect(result.responder.visibleText).toContain('Eligible** 0');
+    expect(
+      h.repositories.rewards.events.filter((event) => event.kind === 'event_completion'),
+    ).toHaveLength(1);
+
+    const after = await h.repositories.community.participant(id, member);
+    expect(after?.pointEventId).toBe(before?.pointEventId);
+  });
+
+  it('does not pay someone who withdrew before the close', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await joinAs(id, other);
+    await h.dispatch({
+      commandName: 'companion',
+      subcommandGroup: 'event',
+      subcommand: 'leave',
+      actor: asMember(),
+      options: { strings: { id } },
+    });
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    await retry(id);
+
+    const paid = h.repositories.rewards.events.filter(
+      (event) => event.kind === 'event_completion',
+    );
+    expect(paid).toHaveLength(1);
+    expect(paid[0]?.userId).toBe(other);
+  });
+
+  it('refuses to retry an activity that is still open', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+
+    const result = await retry(id);
+
+    expect(result.responder.visibleText).toContain('Check that input');
+    expect(
+      h.repositories.rewards.events.some((event) => event.kind === 'event_completion'),
+    ).toBe(false);
+  });
+
+  it('refuses to retry a cancelled activity', async () => {
+    // A cancellation deliberately paid nobody. Retrying it would invent a
+    // debt rather than settle one.
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await closeEvent(id, 'cancelled');
+
+    const result = await retry(id);
+
+    expect(result.responder.visibleText).toContain('Check that input');
+    expect(
+      h.repositories.rewards.events.some((event) => event.kind === 'event_completion'),
+    ).toBe(false);
+  });
+
+  it('owes nothing for a free activity, however many took part', async () => {
+    const id = await createEvent({ reward: 0 });
+    await joinAs(id, member);
+    await closeEvent(id, 'completed');
+
+    // No ledger row exists or ever will, so these must not look like a
+    // backlog that can never be cleared.
+    expect(
+      await h.repositories.community.unpaidCompletions(TEST_GUILD_ID, id),
+    ).toHaveLength(0);
+  });
+
+  it('refuses a moderator', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    const result = await h.dispatch({
+      commandName: 'companion',
+      subcommandGroup: 'admin',
+      subcommand: 'event-retry-payments',
+      actor: asModerator(),
+      options: { strings: { id } },
+    });
+
+    expect(result.responder.visibleText).toContain(
+      'This command is available to the Bloom staff team.',
+    );
+    expect(
+      h.repositories.rewards.events.some((event) => event.kind === 'event_completion'),
+    ).toBe(false);
+  });
+
+  it('audits the run with what it found', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    const restore = await closeWithLedgerDown(id);
+    restore();
+
+    await retry(id);
+
+    const audit = h.repositories.audit.events.find(
+      (event) => event.event === 'community.reconciled',
+    );
+    expect(audit?.severity).toBe('warn');
+    expect(audit?.actorId).toBe(admin);
+    expect(audit?.details).toMatchObject({
+      eligible: 1,
+      retried: 1,
+      already_paid: 0,
+      still_failed: 0,
+    });
+  });
+
+  it('reports what it still could not pay', async () => {
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    const restore = await closeWithLedgerDown(id);
+
+    // Ledger still down during the retry.
+    const result = await retry(id);
+    restore();
+
+    expect(result.responder.visibleText).toContain('Still failing** 1');
+    expect(result.responder.visibleText).toContain('can be retried again');
+
+    // Still recoverable afterwards.
+    expect(
+      await h.repositories.community.unpaidCompletions(TEST_GUILD_ID, id),
+    ).toHaveLength(1);
+  });
+
+  it('links a payment whose link was lost, without paying again', async () => {
+    /*
+     * The in-between state: money reached the ledger but the link did not.
+     * This is reachable in production because the two are separate
+     * statements. The retry must repair the record and report it honestly
+     * as already paid, not as a new payment.
+     */
+    const id = await createEvent({ reward: 20 });
+    await joinAs(id, member);
+    await closeEvent(id, 'completed');
+
+    const record = await h.repositories.community.participant(id, member);
+    expect(record?.pointEventId).not.toBeNull();
+    // Simulate the link having been lost after the payment.
+    h.repositories.community.records.set(`${id}:${member}`, {
+      ...record!,
+      pointEventId: null,
+    });
+
+    const result = await retry(id);
+
+    expect(result.responder.visibleText).toContain('Already paid** 1');
+    expect(result.responder.visibleText).toContain('No one was paid twice');
+    expect(
+      h.repositories.rewards.events.filter((event) => event.kind === 'event_completion'),
+    ).toHaveLength(1);
+    const after = await h.repositories.community.participant(id, member);
+    expect(after?.pointEventId).not.toBeNull();
+  });
+});

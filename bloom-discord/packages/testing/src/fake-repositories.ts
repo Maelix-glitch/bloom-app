@@ -2318,6 +2318,53 @@ export class FakeCommunityRepository implements CommunityRepository {
     return Promise.resolve({ kind: 'completed', participant: completed });
   }
 
+  public markPaid(input: {
+    readonly activityId: string;
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly pointEventId: string;
+  }): Promise<boolean> {
+    const key = `${input.activityId}:${input.userId}`;
+    const existing = this.records.get(key);
+    if (
+      existing?.guildId !== input.guildId ||
+      existing.state !== 'completed' ||
+      existing.pointEventId !== null
+    ) {
+      return Promise.resolve(false);
+    }
+    this.records.set(key, { ...existing, pointEventId: input.pointEventId });
+    return Promise.resolve(true);
+  }
+
+  public unpaidCompletions(
+    guildId: GuildId,
+    activityId: string,
+    limit = 100,
+  ): Promise<readonly CommunityParticipant[]> {
+    const activity = this.activities.find((candidate) => candidate.id === activityId);
+    if (activity?.status !== 'completed' || activity.rewardPoints <= 0) {
+      return Promise.resolve([]);
+    }
+
+    return Promise.resolve(
+      [...this.records.values()]
+        .filter(
+          (record) =>
+            record.guildId === guildId &&
+            record.activityId === activityId &&
+            record.state === 'completed' &&
+            record.pointEventId === null,
+        )
+        .sort(
+          (a, b) =>
+            (a.completedAt?.getTime() ?? 0) - (b.completedAt?.getTime() ?? 0) ||
+            a.userId.localeCompare(b.userId),
+        )
+        .slice(0, Math.min(limit, 100)),
+    );
+  }
+
   public countCompletedEvents(
     guildId: GuildId,
     userId: UserId,

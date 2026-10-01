@@ -188,6 +188,33 @@ export interface CommunityRepository {
   /** Challenges have no join step, so completion creates the record. */
   completeDirect(input: CompleteParticipantInput): Promise<CompleteOutcome>;
 
+  /**
+   * Link a completion to the ledger row that paid it.
+   *
+   * Separate from `complete` because the payment necessarily happens after
+   * the claim — the claim is what decides who is allowed to pay. Returns
+   * false when the link was already present, which is how a concurrent
+   * retry learns it lost.
+   */
+  markPaid(input: {
+    readonly activityId: string;
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly pointEventId: string;
+  }): Promise<boolean>;
+
+  /**
+   * Completions that were recorded but never paid.
+   *
+   * The recovery query. Bounded, and deliberately narrow — see the
+   * implementation for why a zero-reward activity is excluded.
+   */
+  unpaidCompletions(
+    guildId: GuildId,
+    activityId: string,
+    limit?: number,
+  ): Promise<readonly CommunityParticipant[]>;
+
   /** Completed event participations in a window — the third challenge metric. */
   countCompletedEvents(
     guildId: GuildId,
@@ -651,6 +678,79 @@ export class PostgresCommunityRepository
       return row
         ? { kind: 'completed', participant: toParticipant(row) }
         : { kind: 'already_completed' };
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async markPaid(input: {
+    readonly activityId: string;
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly pointEventId: string;
+  }): Promise<boolean> {
+    try {
+      /*
+       * `point_event_id IS NULL` is the guard, and it is the UPDATE itself
+       * rather than a preceding read. Two retries racing to repair the same
+       * participant both hold a valid ledger id — the same one, because the
+       * idempotency key made the second payment a duplicate — and exactly
+       * one of them writes it. The loser is told it lost rather than
+       * silently overwriting a link that is already correct.
+       */
+      const rows = await this.db.sql<{ user_id: string }[]>`
+        UPDATE ${this.db.sql(this.schema)}.community_participants
+        SET point_event_id = ${input.pointEventId}
+        WHERE activity_id = ${input.activityId}
+          AND guild_id = ${input.guildId}
+          AND user_id = ${input.userId}
+          AND state = 'completed'
+          AND point_event_id IS NULL
+        RETURNING user_id
+      `;
+      return rows.length > 0;
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  public async unpaidCompletions(
+    guildId: GuildId,
+    activityId: string,
+    limit = MAX_PARTICIPANT_LIST,
+  ): Promise<readonly CommunityParticipant[]> {
+    const bounded = clampLimit(limit, MAX_PARTICIPANT_LIST, MAX_PARTICIPANT_LIST);
+    try {
+      /*
+       * Three conditions, each load-bearing:
+       *
+       *   • `a.status = 'completed'` — a cancelled activity owes nobody, and
+       *     an open one has not finished deciding.
+       *   • `a.reward_points > 0` — a free activity produces no ledger row,
+       *     so its participants are permanently `point_event_id IS NULL`.
+       *     Without this they would appear as a backlog that can never be
+       *     cleared, and every reconcile would report work it cannot do.
+       *   • `p.state = 'completed'` — someone who withdrew is not owed.
+       *
+       * Ordered and bounded so the staff command has a predictable cost. The
+       * cap is the same hard ceiling the participant list uses; an activity
+       * with more unpaid members than that needs the command run twice,
+       * which is reported rather than hidden.
+       */
+      const rows = await this.db.sql<ParticipantRow[]>`
+        SELECT p.*
+        FROM ${this.db.sql(this.schema)}.community_participants p
+        JOIN ${this.db.sql(this.schema)}.community_activities a ON a.id = p.activity_id
+        WHERE p.guild_id = ${guildId}
+          AND p.activity_id = ${activityId}
+          AND p.state = 'completed'
+          AND p.point_event_id IS NULL
+          AND a.status = 'completed'
+          AND a.reward_points > 0
+        ORDER BY p.completed_at ASC, p.user_id ASC
+        LIMIT ${bounded}
+      `;
+      return rows.map(toParticipant);
     } catch (error) {
       throw toDatabaseError(error);
     }
