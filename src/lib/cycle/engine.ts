@@ -745,10 +745,24 @@ function resolveDayState(date: string, entries: CycleEntry[], ctx: ResolveCtx): 
       (nextPeriod.date !== null &&
         date >= nextPeriod.date &&
         date <= addDays(nextPeriod.date, ctx.estimatedPeriodLength - 1)));
+  /*
+   * Wrapping the day into a fresh cycle is only honest for future dates in a
+   * projected cycle. For today (or a past date) beyond the expected length,
+   * there is no next cycle yet: the person may simply not have logged the new
+   * start. Returning null is truthful; wrapping produced a permanent "luteal"
+   * label on a 54-day-old cycle, which is the bug this replaces.
+   */
+  const cycleLengthNow = Math.max(1, Math.round(ctx.avgSafe));
+  const phaseDay =
+    cycleDay === null
+      ? null
+      : date > ctx.today
+        ? ((cycleDay - 1) % cycleLengthNow) + 1
+        : cycleDay > cycleLengthNow + 7
+          ? null
+          : Math.min(cycleDay, cycleLengthNow);
   const reproductivePhase =
-    cycleDay !== null
-      ? ctx.reproductivePhaseFor(((cycleDay - 1) % Math.max(1, Math.round(ctx.avgSafe))) + 1)
-      : null;
+    phaseDay !== null ? ctx.reproductivePhaseFor(phaseDay) : null;
   const reproductiveProvenance =
     reproductivePhase === null
       ? PROV.unknown("No cycle anchor for reproductive phase yet.")

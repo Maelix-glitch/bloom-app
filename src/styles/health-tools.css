@@ -1,0 +1,553 @@
+/* ==========================================================================
+   Body & daily targets — the advanced trackers panel.
+   One calm surface, three answers, then the details. Mobile-first: every
+   interactive control is at least 44px tall and the form is a single column
+   under 480px. Tokens only, no new palette.
+   ========================================================================== */
+
+.bt-shell {
+  --bt-line: color-mix(in oklab, var(--foreground) 12%, transparent);
+  --bt-fill: color-mix(in oklab, var(--surface-2) 62%, transparent);
+  width: 100%;
+  max-width: 1120px;
+  margin: 2.5rem auto 0;
+  padding: 1.35rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 24px;
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--primary) 7%, transparent), transparent 60%),
+    var(--bt-fill);
+  color: var(--foreground);
+}
+
+.bt-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.bt-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.bt-title {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.35rem, 4.5vw, 1.8rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.bt-lede {
+  max-width: 62ch;
+  margin: 0.45rem 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.bt-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0 0.85rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.bt-ghost:hover {
+  border-color: color-mix(in oklab, var(--primary) 50%, transparent);
+  color: var(--primary);
+}
+
+.bt-ghost--sm {
+  min-height: 32px;
+  padding: 0 0.7rem;
+  font-size: 11.5px;
+}
+
+/* --------------------------------- cards --------------------------------- */
+
+.bt-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+  margin-top: 1.35rem;
+}
+
+@media (min-width: 720px) {
+  .bt-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.bt-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 196px;
+  padding: 1rem 1rem 0.95rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  overflow: hidden;
+}
+
+.bt-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--bt-accent, var(--primary)), transparent);
+  opacity: 0.55;
+}
+
+.bt-card--bmi {
+  --bt-accent: var(--sage, #7fae9a);
+}
+.bt-card--energy {
+  --bt-accent: var(--amber, #e0a866);
+}
+.bt-card--water {
+  --bt-accent: var(--sky, #6fa8c9);
+}
+
+.bt-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.bt-value {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(2rem, 9vw, 2.45rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.bt-value__unit {
+  margin-left: 0.35rem;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+}
+
+.bt-card__sub {
+  margin: 0.35rem 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+.bt-card__foot {
+  margin: 0.7rem 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.bt-card__foot--warn {
+  color: color-mix(in oklab, var(--amber, #e0a866) 80%, var(--foreground));
+}
+
+/* BMI rail: the healthy band is the only highlighted stretch. */
+.bt-scale {
+  position: relative;
+  height: 6px;
+  margin-top: 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #7fa9c9 0%,
+    #7fa9c9 14%,
+    #7fae9a 14%,
+    #7fae9a 40%,
+    #e0a866 40%,
+    #e0a866 60%,
+    #cf7a7a 60%,
+    #cf7a7a 100%
+  );
+  opacity: 0.55;
+}
+
+.bt-scale__marker {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--background);
+  border-radius: 999px;
+  background: var(--foreground);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--foreground) 25%, transparent);
+}
+
+.bt-mini {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0.8rem 0 0;
+}
+
+.bt-mini > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 12px;
+}
+
+.bt-mini dt {
+  color: var(--muted-foreground);
+}
+
+.bt-mini dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+}
+
+.bt-bar {
+  height: 6px;
+  margin-top: 0.9rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.bt-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--bt-accent, var(--primary));
+  transition: width 0.4s ease;
+}
+
+.bt-inline-link {
+  margin-top: 0.6rem;
+  font-size: 11.5px;
+  color: var(--primary);
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.bt-inline-link:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------- goal ---------------------------------- */
+
+.bt-goal,
+.bt-weigh {
+  margin-top: 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+}
+
+.bt-goal__head,
+.bt-weigh__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.bt-goal__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0.6rem 0 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.25rem, 5vw, 1.6rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.bt-goal__rate {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+/* ------------------------------ weigh-in --------------------------------- */
+
+.bt-weigh__row {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.bt-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.bt-delta.is-down {
+  color: var(--sage, #7fae9a);
+}
+.bt-delta.is-up {
+  color: var(--amber, #e0a866);
+}
+
+.bt-log {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bt-log li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed color-mix(in oklab, var(--foreground) 8%, transparent);
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.bt-log b {
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.bt-weigh__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.bt-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0 0.6rem;
+  border: 1px solid color-mix(in oklab, var(--danger, #cf7a7a) 32%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in oklab, var(--danger, #cf7a7a) 80%, var(--foreground));
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.bt-danger:hover {
+  background: color-mix(in oklab, var(--danger, #cf7a7a) 10%, transparent);
+}
+
+/* --------------------------------- form ---------------------------------- */
+
+.bt-form {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+}
+
+.bt-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .bt-form__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bt-shell {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+}
+
+.bt-seg {
+  display: inline-flex;
+  margin-bottom: 0.9rem;
+  padding: 3px;
+  border: 1px solid var(--bt-line);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--background) 50%, transparent);
+}
+
+.bt-seg button {
+  min-height: 34px;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.bt-seg button[aria-pressed="true"] {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.bt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.bt-field__label {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+.bt-field__input {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0 0.7rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+  transition: border-color 0.18s ease;
+}
+
+.bt-field__input:focus-within {
+  border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+}
+
+.bt-field__input input,
+.bt-field select {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 16px; /* prevents iOS zoom on focus */
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.bt-field select {
+  min-height: 44px;
+  padding: 0 0.7rem;
+  border: 1px solid var(--bt-line);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+  font-size: 14px;
+}
+
+.bt-field__suffix {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+}
+
+.bt-field--inline {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  max-width: 200px;
+}
+
+.bt-field--inline .bt-field__suffix {
+  padding-right: 0.6rem;
+}
+
+.bt-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 0.85rem;
+  padding: 0 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+.bt-primary:hover {
+  filter: brightness(1.05);
+}
+
+.bt-primary:active {
+  transform: scale(0.985);
+}
+
+.bt-primary--sm {
+  width: auto;
+  min-height: 44px;
+  margin-top: 0;
+  padding: 0 1rem;
+}
+
+.bt-note {
+  margin: 0.7rem 0 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.bt-error {
+  margin: 0.2rem 0 0;
+  font-size: 12px;
+  color: var(--danger, #cf7a7a);
+}
+
+.bt-saved {
+  margin: 0.5rem 0 0;
+  font-size: 12px;
+  color: var(--sage, #7fae9a);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-bar > span,
+  .bt-primary,
+  .bt-ghost {
+    transition: none;
+  }
+}

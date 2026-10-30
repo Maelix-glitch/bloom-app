@@ -3,9 +3,10 @@
  * components never speak to the database directly.
  */
 
-import { supabase } from "@/lib/supabase";
+import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import { report } from "./errors";
 import { classifyError, type ProfileProblem } from "./problems";
+import { normalizeUsername } from "./validation";
 import {
   normalizeAccent,
   type FeaturedMoment,
@@ -250,6 +251,14 @@ export interface ProfilePatch {
 
 export class ProfileSaveError extends Error {}
 
+/** The handle was claimed by someone else between the check and the save. */
+export class UsernameTakenError extends ProfileSaveError {
+  constructor(message = "That @username was just taken. Pick another one.") {
+    super(message);
+    this.name = "UsernameTakenError";
+  }
+}
+
 export async function saveProfile(userId: string, patch: ProfilePatch): Promise<void> {
   const values: Record<string, unknown> = {
     display_name: patch.displayName,
@@ -272,6 +281,7 @@ export async function saveProfile(userId: string, patch: ProfilePatch): Promise<
 
   if (updateError) {
     report("profile:save", updateError);
+    if ((updateError as { code?: string }).code === "23505") throw new UsernameTakenError();
     throw new ProfileSaveError("Couldn't save that just now.");
   }
 
@@ -285,6 +295,7 @@ export async function saveProfile(userId: string, patch: ProfilePatch): Promise<
     });
     if (insertError) {
       report("profile:save-insert", insertError);
+      if ((insertError as { code?: string }).code === "23505") throw new UsernameTakenError();
       throw new ProfileSaveError("Couldn't save that just now.");
     }
   }
@@ -318,6 +329,56 @@ export async function checkUsername(handle: string): Promise<UsernameCheck> {
     return "unknown";
   }
   return data === true ? "available" : "taken";
+}
+
+export type UsernameClaimStatus = "claimed" | "taken" | "invalid" | "reserved" | "unknown";
+
+/**
+ * Claim a handle atomically.
+ *
+ * The availability check is a courtesy while typing; this call is the one
+ * that decides. The database's unique index is the final authority, so two
+ * people racing for `@mira` cannot both win — the loser gets `taken` and the
+ * editor can offer the next free variants.
+ */
+export async function claimUsername(handle: string): Promise<UsernameClaimStatus> {
+  const { data, error } = await supabase.rpc("claim_bloom_username", {
+    p_username: handle,
+  });
+  if (error) {
+    // A project that hasn't run the migration yet: saveProfile's own unique
+    // constraint still protects the handle, and its error maps to `taken`.
+    report("profile:username-claim", error);
+    return "unknown";
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as { status?: unknown } | null;
+  const status = row?.status;
+  if (status === "claimed" || status === "taken" || status === "invalid" || status === "reserved") {
+    return status;
+  }
+  return "unknown";
+}
+
+/** Deterministic free handles near the one that was taken. */
+export async function suggestUsernames(base: string): Promise<string[]> {
+  const fallback = (): string[] => {
+    const clean = normalizeUsername(base).slice(0, 24) || "bloomer";
+    return [1, 2, 3, 7, 12, 24].map((n) => `${clean}${n}`.slice(0, 30));
+  };
+
+  if (!hasSupabaseConfig) return fallback().slice(0, 5);
+  const { data, error } = await supabase.rpc("bloom_username_suggestions", { p_base: base });
+  if (!error && Array.isArray(data)) {
+    const list = data.filter((value): value is string => typeof value === "string");
+    if (list.length > 0) return list.slice(0, 5);
+  }
+  // Older project: check the deterministic variants one by one.
+  const out: string[] = [];
+  for (const candidate of fallback()) {
+    if (out.length >= 5) break;
+    if ((await checkUsername(candidate)) === "available") out.push(candidate);
+  }
+  return out;
 }
 
 export async function uploadAvatar(userId: string, blob: Blob): Promise<string> {

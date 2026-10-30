@@ -163,6 +163,28 @@ describe("analyzeCycle — what the check-ins rely on", () => {
     expect(a.nextWindow?.spread).toBe(4);
   });
 
+  it("does not call a 54-day cycle 'luteal' when there is no pattern to be late against", () => {
+    const logs: PeriodLog[] = [{ id: "a", start: ago(54), end: ago(50) }];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.isGeneric).toBe(true);
+    expect(a.cycleDay).toBe(55);
+    expect(a.phase).toBe("late");
+    expect(a.phaseLabel).toBe("Past predicted date");
+    expect(a.overdue).toBe(true);
+    expect(a.overdueDays).toBe(27);
+    const flag = a.flags.find((f) => f.id === "overdue");
+    expect(flag?.title).toMatch(/Day 55/);
+    expect(flag?.action?.start).toBe(TODAY);
+  });
+
+  it("keeps a reasonably long cycle inside the grace window as luteal", () => {
+    // 40 days on a 28-day placeholder is 12 past — still inside the 14-day grace
+    const logs: PeriodLog[] = [{ id: "a", start: ago(39), end: ago(35) }];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.overdue).toBe(false);
+    expect(a.phase).toBe("luteal");
+  });
+
   it("gives a window that widens as confidence falls", () => {
     const steady: PeriodLog[] = [0, 1, 2, 3, 4].map((i) => ({
       id: `s${i}`,

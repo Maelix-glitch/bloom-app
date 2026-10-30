@@ -75,7 +75,13 @@ const LENGTH_RULE: Record<string, string> = {
   normal:
     "Answer in at most two short paragraphs. Under 150 words. Only use a list if the answer is genuinely a sequence of steps.",
   full: "Answer in at most four paragraphs. Under 320 words. Be thorough but do not pad.",
+  plan:
+    "Give a COMPLETE plan that covers the whole span asked for. When the request is a day plan, use exactly these labelled sections, each starting on its own line and separated by a blank line: Morning, Midday, Afternoon, Evening, Night. Every section must contain concrete times and actions. Never stop before Night: the night section (wind-down, last meal, screens, sleep time) is mandatory. Up to 900 words. Do not pad and do not repeat the plan back to them.",
 };
+
+/** Extra instruction only for plan-shaped answers, kept out of other registers. */
+const PLAN_STRUCTURE = `PLAN STRUCTURE
+A plan is judged on completeness, not on how little it says. If the person asks for a full day, cover morning, midday, afternoon, evening and night. If they ask for a week, cover all seven days. Never silently drop the last part of the range, and never replace a section that needs times with "and so on". Keep each section to two or three concrete lines; a readable plan beats an essay.`;
 
 const SYSTEM = `You are the coach inside Bloom, a personal wellbeing app.
 
@@ -89,7 +95,7 @@ Bloom is the wellbeing app this person uses every day. When they ask anything ab
 - Trackers: six daily numbers — sleep (minutes), water (millilitres), study (minutes), movement (minutes), energy (1–5), screen time (minutes) — each with a goal, a 7-day average and a streak. Study is logged as timed sessions.
 - Cycle: optional period tracking with phase and next-period predictions. If the person does not track a cycle, never raise it.
 - Mood: quick daily check-ins; Bloom watches trends, patterns and changes over time.
-- Rewards: the points total earned from habit ticks — points come from habit ticks only, that is the entire system. There are no other hidden rules.
+- Rewards: Bloom Points come from two visible sources — each habit tick (the habit's own point value, ten by default) and verified Journey goals (daily, weekly, monthly and milestone awards). Every earning appears in Point Activity, and a goal pays once per period. There are no other hidden rules.
 - Memory: Bloom keeps facts the person shares and uses them in later conversations. The person can view, pin and forget them in the Memory panel.
 - Profile: account details, full data export, period-history import, and a complete erase (device and account).
 - The coach has three modes the person can pick: Ask, Reflect, Plan.
@@ -399,7 +405,7 @@ async function callGemini(
         systemInstruction: { parts: [{ text: systemText }] },
         contents,
         ...(decls && decls.length > 0 ? { tools: [{ functionDeclarations: decls }] } : {}),
-        generationConfig: { temperature: 0.7, maxOutputTokens: 900 },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2400 },
       }),
       signal,
     },
@@ -535,7 +541,10 @@ async function callOpenAICompatible(
     model,
     messages,
     temperature: 0.7,
-    max_tokens: 900,
+    /* A full day plan routinely needs more than 900 tokens. Truncating it at
+       the transport layer was the second half of the "no night" bug — the
+       client budget was the first. */
+    max_tokens: 2400,
   };
   if (tools && tools.length > 0) body["tools"] = tools;
   const res = await fetch(url, {
@@ -778,11 +787,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const rule = LENGTH_RULE[body.register ?? "normal"] ?? LENGTH_RULE.normal;
+    const register = body.register ?? "normal";
+    const rule = LENGTH_RULE[register] ?? LENGTH_RULE.normal;
     const systemText = [
       SYSTEM,
       `THEIR RECORD\n${factsToPrompt(body.facts)}`,
       `LENGTH\n${rule}`,
+      ...(register === "plan" ? [PLAN_STRUCTURE] : []),
     ].join("\n\n");
     const turns = [
       ...sanitizeHistory(body.history),

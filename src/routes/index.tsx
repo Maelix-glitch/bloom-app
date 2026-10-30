@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarRange, Droplet, Gift, Loader2, Plus, Smile } from "lucide-react";
+import { CalendarRange, Droplet, Gift, Loader2, Plus, Scale, Smile } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
@@ -488,6 +488,10 @@ function TodayPage() {
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
               </button>
+              <Link to="/trackers" hash="body-tools" className="home-chip">
+                <Scale className="size-4" style={{ color: "var(--home-sage)" }} />
+                BMI &amp; daily targets
+              </Link>
               <Link to="/report" className="home-chip">
                 <CalendarRange className="size-4" style={{ color: "var(--home-mood)" }} />
                 Weekly report

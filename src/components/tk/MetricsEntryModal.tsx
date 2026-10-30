@@ -315,10 +315,21 @@ export function MetricsEntryModal({
       className="metrics-sheet"
       panelClassName="metrics-pop"
     >
-      <div className="overflow-hidden" style={{ backgroundColor: "var(--metric-surface)" }}>
+      {/*
+       * This wrapper is the sheet's scroll area. It used to be
+       * `overflow-hidden` with no scroll: on a phone the six metric cards plus
+       * the usual-chips block and Save were taller than the 88dvh sheet, so
+       * the bottom of the form — including Save — was clipped and could not be
+       * tapped. `min-h-0` is what lets the flex child actually shrink; without
+       * it the panel grows past the viewport instead of scrolling.
+       */}
+      <div
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        style={{ backgroundColor: "var(--metric-surface)" }}
+      >
         {/* Header */}
         <div
-          className="relative px-6 pb-5 pt-4"
+          className="relative px-4 pb-5 pt-4 sm:px-6"
           style={{
             background:
               "linear-gradient(100deg, var(--metric-screen) 0%, var(--brand) 55%, var(--metric-sleep) 100%)",
@@ -337,8 +348,8 @@ export function MetricsEntryModal({
         </div>
 
         {view === "form" && (
-          <div className="px-5 pb-6 pt-5">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5 sm:px-5">
+            <div className="metrics-grid grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
               {metrics.map((m) => {
                 const raw = values[m.key] ?? "";
                 const err = errors[m.key];
@@ -367,7 +378,7 @@ export function MetricsEntryModal({
                         onClick={() => bump(m, -1)}
                         disabled={num === null}
                         aria-label={`Decrease ${m.label}`}
-                        className="grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-all hover:text-foreground active:scale-95 disabled:opacity-25"
+                        className="relative grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-all after:absolute after:-inset-1.5 after:content-[''] hover:text-foreground active:scale-95 disabled:opacity-25"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
@@ -392,7 +403,7 @@ export function MetricsEntryModal({
                         onClick={() => bump(m, 1)}
                         disabled={num !== null && num >= m.max}
                         aria-label={`Increase ${m.label}`}
-                        className="grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-all hover:text-foreground active:scale-95 disabled:opacity-25"
+                        className="relative grid size-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-all after:absolute after:-inset-1.5 after:content-[''] hover:text-foreground active:scale-95 disabled:opacity-25"
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -444,7 +455,7 @@ export function MetricsEntryModal({
               type="button"
               onClick={handleConfirm}
               disabled={(submitted && hasErrors) || isEmpty}
-              className="mt-4 w-full rounded-lg py-3 text-sm font-bold uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              className="metrics-save mt-4 w-full rounded-lg py-3 text-sm font-bold uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
               style={{
                 background:
                   "linear-gradient(90deg, var(--metric-screen), var(--brand), var(--metric-sleep))",
@@ -497,7 +508,7 @@ export function MetricsEntryModal({
             </p>
 
             <div
-              className="mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
+              className="metrics-saved-grid mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
               style={{
                 backgroundColor: "var(--metric-surface-raised)",
                 gridTemplateColumns: `repeat(${Math.max(1, metrics.length)}, minmax(0, 1fr))`,

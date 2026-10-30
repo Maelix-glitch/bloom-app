@@ -62,7 +62,48 @@ function saveDoc(doc: PrefsDoc): void {
   }
 }
 
-/** Per key, the later write wins. Reports which side had anything newer. */
+/**
+ * Per key, the later write wins — with one deliberate exception: the points
+ * ledger is an append-only event map, so its merge must union events rather
+ * than discard one side. Taking "the newer document" there would silently
+ * delete points earned on the other device. The shape knowledge lives here
+ * (rather than importing the ledger module) to keep prefs free of cycles.
+ */
+const POINTS_LEDGER_KEY = "points.ledger.v1";
+
+function mergePointsPayload(local: unknown, remote: unknown): unknown {
+  const read = (raw: unknown): Record<string, unknown> => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    const events = (raw as { events?: unknown }).events;
+    return events && typeof events === "object" && !Array.isArray(events)
+      ? (events as Record<string, unknown>)
+      : {};
+  };
+  const isRecord = (value: unknown): value is Record<string, unknown> =>
+    Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  const localEvents = read(local);
+  const remoteEvents = read(remote);
+  const events: Record<string, unknown> = { ...localEvents };
+  for (const [key, incoming] of Object.entries(remoteEvents)) {
+    const current = events[key];
+    if (!current) {
+      events[key] = incoming;
+      continue;
+    }
+    if (!isRecord(incoming)) continue;
+    if (!isRecord(current)) {
+      events[key] = incoming;
+      continue;
+    }
+    const a = typeof current["updatedAt"] === "string" ? current["updatedAt"] : "";
+    const b = typeof incoming["updatedAt"] === "string" ? incoming["updatedAt"] : "";
+    if (b > a || (b === a && current["removed"] === true && incoming["removed"] !== true)) {
+      events[key] = incoming;
+    }
+  }
+  return { version: 1, events };
+}
+
 export function mergeDocs(
   local: PrefsDoc,
   remote: PrefsDoc,
@@ -75,7 +116,15 @@ export function mergeDocs(
     const l = local[key];
     const r = remote[key];
     if (l && r) {
-      if (l.updatedAt > r.updatedAt) {
+      if (key === POINTS_LEDGER_KEY) {
+        const value = mergePointsPayload(l.value, r.value);
+        if (JSON.stringify(value) !== JSON.stringify(l.value)) localNewer = true;
+        if (JSON.stringify(value) !== JSON.stringify(r.value)) remoteNewer = true;
+        merged[key] = {
+          value,
+          updatedAt: l.updatedAt > r.updatedAt ? l.updatedAt : r.updatedAt,
+        };
+      } else if (l.updatedAt > r.updatedAt) {
         merged[key] = l;
         localNewer = true;
       } else if (r.updatedAt > l.updatedAt) {

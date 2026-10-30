@@ -1,6 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Info, Moon, Smile, Sprout, BarChart3, Droplet, Zap, type LucideIcon } from "lucide-react";
+import {
+  Info,
+  BookOpen,
+  CircleDot,
+  MoonStar,
+  Orbit,
+  Repeat2,
+  SunMedium,
+  type LucideIcon,
+} from "lucide-react";
 
 import type { Connection, CrossLink, SignalId } from "@/lib/home/today";
 import { SIGNAL_LABEL, SIGNAL_ROUTE } from "@/lib/home/today";
@@ -20,13 +29,15 @@ export const SIGNAL_COLOR: Record<SignalId, string> = {
   sleep: "var(--home-sleep)",
 };
 
+/* One thin-line mark per signal. Consistent stroke, no fills, no decoration:
+   the map should read like an instrument, not an emoji set. */
 export const SIGNAL_ICON: Record<SignalId, LucideIcon> = {
-  mood: Smile,
-  habits: Sprout,
-  cycle: Droplet,
-  energy: Zap,
-  study: BarChart3,
-  sleep: Moon,
+  mood: CircleDot,
+  habits: Repeat2,
+  cycle: Orbit,
+  energy: SunMedium,
+  study: BookOpen,
+  sleep: MoonStar,
 };
 
 /* fixed layout: the six signals always sit in the same place so the map
@@ -84,16 +95,7 @@ export function ConnectionMapSkeleton({ rangeLabel = "Last 30 days" }: { rangeLa
         <div className="cm-stage" aria-hidden>
           <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 size-full">
             <g className="text-primary/20" fill="none" stroke="currentColor">
-              <circle cx={C} cy={C} r={R - 26} strokeWidth={0.6} strokeDasharray="2 8" />
-              <circle cx={C} cy={C} r={R - 62} strokeWidth={0.5} opacity={0.6} />
-              <circle
-                cx={C}
-                cy={C}
-                r={R + 14}
-                strokeWidth={0.5}
-                strokeDasharray="1 12"
-                opacity={0.5}
-              />
+              <circle cx={C} cy={C} r={R - 26} strokeWidth={0.5} strokeDasharray="2 10" />
             </g>
           </svg>
 
@@ -116,10 +118,6 @@ export function ConnectionMapSkeleton({ rangeLabel = "Last 30 days" }: { rangeLa
                 <span
                   className="cm-node-disc animate-pulse"
                   style={{ borderColor: "var(--border)", background: "var(--surface-3)" }}
-                />
-                <span
-                  className="h-2 w-10 animate-pulse rounded-full"
-                  style={{ background: "var(--surface-3)" }}
                 />
               </span>
             );
@@ -223,18 +221,9 @@ export function ConnectionMap({
               ))}
             </defs>
 
-            {/* orbit rings */}
+            {/* one orbit: the path every spoke ends on, nothing decorative */}
             <g className="text-primary/20" fill="none" stroke="currentColor">
-              <circle cx={C} cy={C} r={R - 26} strokeWidth={0.6} strokeDasharray="2 8" />
-              <circle cx={C} cy={C} r={R - 62} strokeWidth={0.5} opacity={0.6} />
-              <circle
-                cx={C}
-                cy={C}
-                r={R + 14}
-                strokeWidth={0.5}
-                strokeDasharray="1 12"
-                opacity={0.5}
-              />
+              <circle cx={C} cy={C} r={R - 26} strokeWidth={0.5} strokeDasharray="2 10" />
             </g>
 
             <circle cx={C} cy={C} r={R} fill="url(#cm-hub)" className="text-primary" />
@@ -248,9 +237,9 @@ export function ConnectionMap({
                     key={`${c.from}-${c.to}`}
                     d={c.d}
                     className="home-dash"
-                    strokeWidth={on ? 0.7 + c.weight * 1.2 : 0.6}
-                    strokeDasharray="4 8"
-                    opacity={on ? 0.35 + c.weight * 0.55 : 0.12}
+                    strokeWidth={on ? 0.6 + c.weight * 1.1 : 0.5}
+                    strokeDasharray="2 9"
+                    opacity={on ? 0.28 + c.weight * 0.45 : 0.08}
                   />
                 );
               })}
@@ -300,7 +289,7 @@ export function ConnectionMap({
               totalDays === 0 ? "Nothing logged yet" : `${totalDays} logged days behind this map`
             }
           >
-            <span className="cm-hub-halo home-halo" aria-hidden />
+            <span className="cm-hub-halo" aria-hidden />
             <span className="max-w-full truncate">{name ? name.split(" ")[0] : "You"}</span>
           </div>
 

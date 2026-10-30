@@ -66,7 +66,7 @@ export interface EdgeRequest {
   /** An attached photo or PDF for the vision model. */
   image?: CoachMedia;
   /** How long the answer should be, decided client-side from the question. */
-  register: "terse" | "brief" | "normal" | "full";
+  register: "terse" | "brief" | "normal" | "full" | "plan";
   /** What the question is about, so the function needn't re-classify. */
   topic: string;
 }

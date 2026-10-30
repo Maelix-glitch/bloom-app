@@ -15,7 +15,11 @@ import {
   HABITS_CHANGED,
   adjustPoints,
   applyDraft,
+  awardHabitPoints,
   deleteHabitRow,
+  habitNameKey,
+  isDuplicateHabit,
+  revokeHabitPoints,
   deleteLog,
   draftToLocalHabit,
   fetchHabits,
@@ -43,6 +47,12 @@ import {
 } from "@/lib/home/habits";
 import { shiftDay, todayLocal } from "@/lib/localDay";
 import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
+import {
+  announcePointsChanged,
+  habitPointKey,
+  recordPointEvent,
+  revokePointEvent,
+} from "@/lib/points/ledger";
 
 export type HabitsAuth = "checking" | "signed-out" | "signed-in" | "off";
 
@@ -262,15 +272,30 @@ export function useHabits(): HabitsStore {
     return subscribeToHabitChanges(profileId, () => setReload((r) => r + 1));
   }, [auth, profileId]);
 
-  /* other tabs / the coach mirror */
+  /*
+   * Other tabs, another hook instance and the coach all write the same
+   * mirror. Signed out, re-reading the mirror is enough; signed in, the
+   * account is the record, so a structural change asks the loader to run
+   * again. Debounced so a page with several habit consumers makes one call.
+   */
   useEffect(() => {
-    if (auth === "signed-in") return;
+    let timer: number | undefined;
     const onExternal = () => {
-      setHabits(loadLocalHabits());
-      setLogs(loadLocalLogs());
+      if (auth !== "signed-in") {
+        setHabits(loadLocalHabits());
+        setLogs(loadLocalLogs());
+        return;
+      }
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => setReload((r) => r + 1), 250);
     };
+    window.addEventListener(HABITS_CHANGED, onExternal);
     window.addEventListener("storage", onExternal);
-    return () => window.removeEventListener("storage", onExternal);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener(HABITS_CHANGED, onExternal);
+      window.removeEventListener("storage", onExternal);
+    };
   }, [auth]);
 
   const todayHabits = useMemo<HabitToday[]>(() => {
@@ -321,6 +346,7 @@ export function useHabits(): HabitsStore {
       /* only the recent past: never the future, never months back */
       if (date > today || date < shiftDay(today, -(BACKFILL_DAYS - 1))) return;
       const wasDone = logs.some((l) => l.habitId === habitId && l.date === date);
+      const pointKey = habitPointKey(habitId, date);
       const nowIso = new Date().toISOString();
       const nextLogs = wasDone
         ? logs.filter((l) => !(l.habitId === habitId && l.date === date))
@@ -328,12 +354,49 @@ export function useHabits(): HabitsStore {
       // optimistic — the ring moves before the network does
       setLogs(nextLogs);
       saveLocal(habits, nextLogs);
-      if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
+      /* The device ledger always records the receipt — even signed in, and
+         even for a habit that only exists on this device. The account balance
+         is still the server's to write. */
+      const recordLocal = () => {
+        if (wasDone) {
+          revokePointEvent(pointKey);
+          announcePointsChanged();
+          return;
+        }
+        const event = recordPointEvent({
+          key: pointKey,
+          points: habit.points,
+          kind: "habit",
+          label: habit.name,
+          refId: habitId,
+          at: `${date}T12:00:00.000Z`,
+        });
+        if (!event) announcePointsChanged();
+      };
+
+      if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) {
+        recordLocal();
+        return;
+      }
       try {
-        if (wasDone) await deleteLog(profileId, habitId, date);
-        else await insertLog(profileId, habitId, date);
-        const pts = await adjustPoints(profileId, wasDone ? -habit.points : habit.points);
-        if (pts !== null) setPoints(pts);
+        if (wasDone) {
+          await deleteLog(profileId, habitId, date);
+          const result = await revokeHabitPoints(profileId, habitId, date);
+          if (result) setPoints(result.balance);
+          else {
+            const pts = await adjustPoints(profileId, -habit.points);
+            if (pts !== null) setPoints(pts);
+          }
+        } else {
+          await insertLog(profileId, habitId, date);
+          const result = await awardHabitPoints(profileId, habitId, date, habit.points);
+          if (result) setPoints(result.balance);
+          else {
+            const pts = await adjustPoints(profileId, habit.points);
+            if (pts !== null) setPoints(pts);
+          }
+        }
+        recordLocal();
       } catch (e) {
         console.warn("[bloom:habits] toggle:", e);
         setLogs(logs);
@@ -346,22 +409,49 @@ export function useHabits(): HabitsStore {
 
   const addHabit = useCallback(
     async (draft: HabitDraft) => {
-      if (!draft.name.trim()) return;
+      const name = draft.name.trim();
+      if (!name) return;
+      /*
+       * Idempotent by name. The coach, the Today page and the Trackers page
+       * all create habits, and the old paths could each insert their own row
+       * (and the coach also mirrored a device copy, which was uploaded later
+       * as a *second* row). A duplicate name now resolves to the habit that
+       * already exists instead of creating another one.
+       */
+      const key = habitNameKey(name);
+      const existing = habitsRef.current.find(
+        (habit) => !habit.archived && habitNameKey(habit.name) === key,
+      );
+      if (existing) return;
+
       if (auth === "signed-in" && profileId) {
-        const habit = await insertHabit(profileId, draft);
-        setHabits((prev) => {
-          const next = [...prev.filter((h) => h.id !== habit.id), habit];
-          saveLocal(next, logs);
-          return next;
-        });
+        try {
+          const habit = await insertHabit(profileId, { ...draft, name });
+          setHabits((prev) => {
+            const next = [...prev.filter((h) => h.id !== habit.id), habit];
+            saveLocal(next, logs);
+            return next;
+          });
+          window.dispatchEvent(new Event(HABITS_CHANGED));
+        } catch (error) {
+          /* The database's unique index caught a race with another tab or
+             another device. Refresh so this view shows the surviving habit. */
+          if (isDuplicateHabit(error)) {
+            setError("You already have a habit with that name.");
+            setReload((r) => r + 1);
+            return;
+          }
+          throw error;
+        }
         return;
       }
-      const habit = draftToLocalHabit(draft);
+      const habit = draftToLocalHabit({ ...draft, name });
       setHabits((prev) => {
         const next = [...prev, habit];
         saveLocal(next, logs);
         return next;
       });
+      window.dispatchEvent(new Event(HABITS_CHANGED));
     },
     [auth, logs, profileId],
   );
@@ -381,6 +471,14 @@ export function useHabits(): HabitsStore {
     async (habitId: string, draft: HabitDraft) => {
       const habit = habitsRef.current.find((h) => h.id === habitId);
       if (!habit || !draft.name.trim()) return;
+      const key = habitNameKey(draft.name);
+      const collision = habitsRef.current.find(
+        (h) => h.id !== habitId && !h.archived && habitNameKey(h.name) === key,
+      );
+      if (collision) {
+        setError("Another habit already uses that name.");
+        return;
+      }
       const optimistic = applyDraft(habit, draft);
       putHabit(optimistic);
       if (auth !== "signed-in" || !profileId || isLocalHabitId(habitId)) return;
@@ -392,6 +490,7 @@ export function useHabits(): HabitsStore {
           pausedFrom: habit.pausedFrom,
           pausedUntil: habit.pausedUntil,
         });
+        window.dispatchEvent(new Event(HABITS_CHANGED));
       } catch (e) {
         console.warn("[bloom:habits] edit:", e);
         putHabit(habit);
