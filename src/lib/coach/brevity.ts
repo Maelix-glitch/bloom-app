@@ -13,7 +13,7 @@
  * person explicitly asked for depth or brevity.
  */
 
-export type Register = "terse" | "brief" | "normal" | "full";
+export type Register = "terse" | "brief" | "normal" | "full" | "plan";
 
 export interface Budget {
   register: Register;
@@ -30,6 +30,14 @@ const BUDGETS: Record<Register, Budget> = {
   brief: { register: "brief", maxParagraphs: 1, maxWords: 70, allowBlocks: true },
   normal: { register: "normal", maxParagraphs: 2, maxWords: 150, allowBlocks: true },
   full: { register: "full", maxParagraphs: 4, maxWords: 320, allowBlocks: true },
+  /*
+   * A plan is a different shape, not a longer paragraph. A complete day runs
+   * morning → midday → afternoon → evening → night, and the old four-paragraph
+   * cap silently deleted the end of it — which is exactly why a "full day
+   * plan" arrived with no night. Plans may be long, and their line breaks
+   * carry meaning, so they are never reflowed by the budget.
+   */
+  plan: { register: "plan", maxParagraphs: 16, maxWords: 900, allowBlocks: true },
 };
 
 /** "explain", "why", "how do I" — open questions that want room to answer. */
@@ -41,8 +49,12 @@ const CLOSED = /^(did|do|does|is|are|was|were|can|should|will|have|has|am)\b/i;
 
 /** Explicit asks, which beat every other signal. */
 const WANTS_SHORT =
-  /\b(short(ly)?|briefly|in a (word|line|sentence)|tl;?dr|quick(ly)?|just tell me|one line)\b/i;
+  /\b(short(ly)?|brief(ly)?|in a (word|line|sentence)|tl;?dr|quick(ly)?|just tell me|one line)\b/i;
 const WANTS_LONG = /\b(in detail|thorough|full|everything|deep dive|at length|elaborate)\b/i;
+
+/** A request for a sequence that spans the day — not a paragraph question. */
+const WANTS_PLAN =
+  /\b(day\s?plan|plan (my|the|a) (day|schedule)|schedule (my|the) day|full day|whole day|entire day|morning (to|through|until) (night|evening)|hour[- ]by[- ]hour|time ?table|itinerary|routine for (today|the day)|what should i do (today|tomorrow)|plan (today|tomorrow))\b/i;
 
 const wordCount = (s: string): number => s.trim().split(/\s+/).filter(Boolean).length;
 
@@ -59,6 +71,7 @@ export function budgetFor(question: string, opts: { greeting?: boolean } = {}): 
   if (q.length === 0) return BUDGETS.brief;
 
   if (WANTS_SHORT.test(q)) return BUDGETS.terse;
+  if (WANTS_PLAN.test(q)) return BUDGETS.plan;
   if (WANTS_LONG.test(q)) return BUDGETS.full;
 
   const words = wordCount(q);
@@ -94,6 +107,8 @@ export function budgetFor(question: string, opts: { greeting?: boolean } = {}): 
  */
 export function fitToBudget(paragraphs: string[], budget: Budget): string[] {
   const kept = paragraphs.filter((p) => p.trim().length > 0).slice(0, budget.maxParagraphs);
+  /* A plan is kept whole: cutting it is what produced plans with no night. */
+  if (budget.register === "plan") return kept;
   if (kept.length === 0) return [];
 
   let running = 0;

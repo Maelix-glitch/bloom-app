@@ -4,6 +4,7 @@ import designSystemCss from "../styles/cycle2.css?url";
 import trackersConsoleCss from "../styles/trackers.css?url";
 import trackersCss from "../styles/trackers2.css?url";
 import { AppNav } from "@/components/home/HomeSidebar";
+import { HealthTools } from "@/components/health/HealthTools";
 import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
 import { TourCard } from "@/components/tour/TourLauncher";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
@@ -41,7 +42,14 @@ function TrackersRoute() {
           tourId="trackers"
           containerClassName="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8"
         />
-        <div data-tour="trackers-compass"><TrackersDesign theme={theme} /></div>
+        <div id="trackers" data-tour="trackers-compass">
+          <TrackersDesign theme={theme} />
+        </div>
+        {/* Advanced tools live on the page, not behind a hidden menu: BMI,
+            energy, protein, hydration and a goal timeline. */}
+        <div className="px-5 pb-16 sm:px-8">
+          <HealthTools />
+        </div>
       </main>
     </div>
   );

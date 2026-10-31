@@ -80,10 +80,15 @@ const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
  */
 const DOCK_STYLE: CSSProperties = {
   position: "fixed",
-  bottom: 32,
   left: "50%",
   transform: "translateX(-50%)",
-  zIndex: 9999,
+  /*
+   * The vertical offset belongs to the stylesheet, which knows about the
+   * phone tab bar and the home indicator. An inline `bottom: 32` beat it, so
+   * on a phone the CTA sat underneath the tab bar and could not be tapped.
+   * z-index stays below sheets (2000) so an open modal always owns the screen.
+   */
+  zIndex: 40,
   pointerEvents: "none",
 };
 
@@ -200,6 +205,9 @@ export function Atlas({ theme = "nocturne" }: { theme?: string }) {
             blanks.
           </p>
           <SyncNote sync={store.sync} onRetry={store.syncNow} />
+          <a className="at-body-link" href="#body-tools">
+            BMI, calorie &amp; water targets <span aria-hidden>↓</span>
+          </a>
         </header>
 
         {!hydrated ? (

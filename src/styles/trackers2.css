@@ -575,6 +575,27 @@
   color: var(--ci-text-soft);
 }
 
+[data-design="atlas"] .at-body-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 38px;
+  margin-top: 1rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--ci-hair-strong, rgba(255, 255, 255, 0.16));
+  border-radius: 999px;
+  color: var(--ci-text-soft);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+[data-design="atlas"] .at-body-link:hover {
+  border-color: var(--accent-solid, var(--primary));
+  color: var(--ci-text);
+}
+
 [data-design="atlas"] .at-board {
   display: grid;
   gap: 2.5rem;
@@ -2575,18 +2596,22 @@
    meant for the page under it. */
 .premium-action-dock {
   position: fixed;
+  /* Clear the phone tab bar + home indicator. The Atlas component no longer
+     sets `bottom` inline, so this rule is finally the one that applies. */
   bottom: calc(16px + var(--app-bottom-nav, 0px));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: 40;
   pointer-events: none;
   max-width: calc(100vw - 32px);
   max-width: calc(100dvw - 32px);
 }
 
 @media (max-width: 639px) {
-  .premium-log-cta {
-    padding: 12px 22px;
+  /* Scoped to the dock so it still wins over the base rule below, which
+     appears later in the file for readability. */
+  .premium-action-dock .premium-log-cta {
+    padding: 13px 24px;
     font-size: 0.8rem;
     max-width: calc(100dvw - 32px);
     white-space: nowrap;
@@ -2959,7 +2984,7 @@
    ========================================================================== */
 @media (max-width: 480px) {
   [data-design="atlas"] .at {
-    padding: 2rem 1rem 3rem;
+    padding: 2rem 1rem 6rem;
   }
 
   [data-design="atlas"] .at-title {
@@ -2967,9 +2992,9 @@
   }
 
   .premium-log-cta {
-    font-size: 0.68rem !important;
-    padding: 12px 26px !important;
-    letter-spacing: 0.12em !important;
+    font-size: 0.78rem !important;
+    padding: 13px 24px !important;
+    letter-spacing: 0.04em !important;
   }
 
   [data-design="atlas"] .at-statement {

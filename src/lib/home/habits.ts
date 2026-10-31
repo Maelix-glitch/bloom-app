@@ -281,6 +281,71 @@ export async function deleteLog(profileId: string, habitId: string, date: string
   if (error) throw error;
 }
 
+/**
+ * Award a habit tick through the idempotent server function.
+ *
+ * One row per (habit, local day) in `point_transactions`; a retry or a second
+ * tab is a no-op. Projects that haven't run the migration fall back to the
+ * legacy adjustment, with the local ledger still preventing a duplicate
+ * receipt on this device.
+ */
+export async function awardHabitPoints(
+  profileId: string,
+  habitId: string,
+  date: string,
+  points: number,
+): Promise<{ awarded: boolean; points: number; balance: number } | null> {
+  const { data, error } = await supabase.rpc("award_habit_points", {
+    p_habit_id: habitId,
+    p_date: date,
+  });
+  if (error) {
+    if (isMissingRpc(error)) return null;
+    throw error;
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null;
+  if (!row) return null;
+  return {
+    awarded: row["awarded"] === true,
+    points: typeof row["points"] === "number" ? row["points"] : points,
+    balance: typeof row["balance"] === "number" ? row["balance"] : points,
+  };
+}
+
+export async function revokeHabitPoints(
+  profileId: string,
+  habitId: string,
+  date: string,
+): Promise<{ revoked: boolean; points: number; balance: number } | null> {
+  const { data, error } = await supabase.rpc("revoke_habit_points", {
+    p_habit_id: habitId,
+    p_date: date,
+  });
+  if (error) {
+    if (isMissingRpc(error)) return null;
+    throw error;
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null;
+  if (!row) return null;
+  return {
+    revoked: row["revoked"] === true,
+    points: typeof row["points"] === "number" ? row["points"] : 0,
+    balance: typeof row["balance"] === "number" ? row["balance"] : 0,
+  };
+}
+
+/** PostgREST's "no such function" answers, before the migration has run. */
+function isMissingRpc(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const e = error as { code?: unknown; message?: unknown };
+  const msg = typeof e.message === "string" ? e.message : "";
+  return (
+    e.code === "42883" ||
+    e.code === "PGRST202" ||
+    /function .* does not exist|could not find the function|schema cache/i.test(msg)
+  );
+}
+
 /** Points live on profiles.total_points; the RPCs exist on older projects, so try them first. */
 export async function adjustPoints(profileId: string, delta: number): Promise<number | null> {
   if (delta === 0) return null;
@@ -334,6 +399,16 @@ function draftToColumns(draft: HabitDraft) {
     tags: draft.tags && draft.tags.length ? draft.tags : null,
     start_date: draft.startDate ?? todayLocal(),
   };
+}
+
+/** One key for "the same habit" — case and extra spaces do not make a new one. */
+export function habitNameKey(name: string): string {
+  return name.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+/** Postgres' unique violation (a duplicate active habit name). */
+export function isDuplicateHabit(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && (error as { code?: unknown }).code === "23505");
 }
 
 export async function insertHabit(profileId: string, draft: HabitDraft): Promise<Habit> {
@@ -454,11 +529,30 @@ export async function uploadLocalHabits(
   const replacedIds: string[] = [];
   const movedLogs: HabitLog[] = [];
   let failed = 0;
+
+  /* The account may already hold this habit — the coach used to insert a
+     cloud row *and* a device copy, and the next signed-in load uploaded the
+     copy. Look before inserting, and fold any ticks into the existing row. */
+  let remoteByName = new Map<string, Habit>();
+  try {
+    const remote = await fetchHabits(profileId);
+    remoteByName = new Map(remote.map((habit) => [habitNameKey(habit.name), habit]));
+  } catch {
+    /* cannot read the account right now — the insert path below still runs */
+  }
+
   for (const h of habits) {
     if (!isLocalHabitId(h.id)) continue;
     const own = logs.filter((l) => l.habitId === h.id);
     const earliest = own.reduce<string | null>((a, l) => (a && a < l.date ? a : l.date), null);
     try {
+      const sameName = remoteByName.get(habitNameKey(h.name));
+      if (sameName) {
+        await insertLogs(profileId, sameName.id, own);
+        replacedIds.push(h.id);
+        for (const l of own) movedLogs.push({ ...l, habitId: sameName.id });
+        continue;
+      }
       const draft = habitToDraft(h);
       const start = h.startDate && (!earliest || h.startDate <= earliest) ? h.startDate : earliest;
       const created = await insertHabit(profileId, {
@@ -482,6 +576,7 @@ export async function uploadLocalHabits(
       }
       uploaded.push(final);
       replacedIds.push(h.id);
+      remoteByName.set(habitNameKey(final.name), final);
       for (const l of own) movedLogs.push({ ...l, habitId: created.id });
     } catch (e) {
       console.warn("[bloom:habits] upload local habit:", e);

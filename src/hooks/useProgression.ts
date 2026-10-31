@@ -46,6 +46,11 @@ import {
   recordRank,
   subscribeProgression,
 } from "@/lib/progression/store";
+import {
+  announcePointsChanged,
+  goalPointKey,
+  recordPointEvent,
+} from "@/lib/points/ledger";
 import type {
   GoalProgress,
   LedgerKind,
@@ -362,6 +367,12 @@ export function useProgression(): ProgressionStore {
     [signedIn, today],
   );
 
+  /**
+   * Record an award once, in both receipts: the progression ledger (which
+   * owns goal verification history) and the unified points ledger (which owns
+   * the wallet and the "+N" confirmation). Both are keyed, so a retry pays
+   * neither twice.
+   */
   const awardLocally = useCallback(
     (entry: {
       kind: LedgerKind;
@@ -371,7 +382,18 @@ export function useProgression(): ProgressionStore {
       source: PointSource;
       points: number;
     }): boolean => {
-      return Boolean(recordAward(entry));
+      const recorded = recordAward(entry);
+      if (recorded && entry.points > 0) {
+        recordPointEvent({
+          key: goalPointKey(entry.refId, entry.periodKey ?? "once"),
+          points: entry.points,
+          kind: entry.kind === "achievement" ? "achievement" : "goal",
+          label: entry.title,
+          refId: entry.refId,
+        });
+      }
+      announcePointsChanged();
+      return Boolean(recorded);
     },
     [],
   );
@@ -499,6 +521,15 @@ export function useProgression(): ProgressionStore {
               source: target.goal.source,
               points: server.points,
             });
+            if (server.points > 0) {
+              recordPointEvent({
+                key: goalPointKey(goalId, target.periodKey),
+                points: server.points,
+                kind: "goal",
+                label: target.goal.title,
+                refId: goalId,
+              });
+            }
           }
           refreshPoints();
           return {
@@ -519,7 +550,18 @@ export function useProgression(): ProgressionStore {
             source: target.goal.source,
             points: server.points || target.goal.points,
           });
+          const paid = server.points || target.goal.points;
+          if (paid > 0) {
+            recordPointEvent({
+              key: goalPointKey(goalId, target.periodKey),
+              points: paid,
+              kind: "goal",
+              label: target.goal.title,
+              refId: goalId,
+            });
+          }
           setCloudPoints(server.balance);
+          announcePointsChanged();
           setPointsNonce((n) => n + 1);
           const settled = await settle(server.balance, before);
           return {

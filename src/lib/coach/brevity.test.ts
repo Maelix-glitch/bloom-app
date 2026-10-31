@@ -56,6 +56,23 @@ describe("budgetFor", () => {
   it("never allows blocks in the tersest register", () => {
     expect(budgetFor("hi", { greeting: true }).allowBlocks).toBe(false);
   });
+
+  it("treats a complete day plan as a plan, not a clamped paragraph", () => {
+    for (const q of [
+      "create a full complete day plan for tomorrow",
+      "plan my day from morning to night",
+      "give me an hour-by-hour schedule for today",
+    ]) {
+      const budget = budgetFor(q);
+      expect(budget.register).toBe("plan");
+      expect(budget.maxParagraphs).toBeGreaterThanOrEqual(5);
+      expect(budget.maxWords).toBeGreaterThanOrEqual(800);
+    }
+  });
+
+  it("still honours an explicit request for a short plan", () => {
+    expect(budgetFor("give me a brief day plan").register).toBe("terse");
+  });
 });
 
 describe("fitToBudget", () => {
@@ -93,5 +110,19 @@ describe("fitToBudget", () => {
     const full = budgetFor("explain everything about my week in detail");
     const ps = ["a.", "b.", "c.", "d."];
     expect(fitToBudget(ps, full)).toEqual(ps);
+  });
+
+  it("never truncates a plan — the night must survive", () => {
+    const plan = budgetFor("create a full complete day plan for tomorrow");
+    const sections = [
+      "Morning: 7am wake, 8am breakfast, 9am deep work.",
+      "Midday: 12pm lunch, 1pm walk.",
+      "Afternoon: 2pm study, 4pm training.",
+      "Evening: 7pm dinner, 9pm reading.",
+      "Night: 10pm screens off, 10:30pm lights out.",
+    ];
+    const out = fitToBudget(sections, plan);
+    expect(out).toEqual(sections);
+    expect(out[out.length - 1]).toMatch(/^Night/);
   });
 });

@@ -364,11 +364,15 @@ export function CycleIntelligence({
                         <div>
                           <p className="ci-eyebrow">Phase overview</p>
                           <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                            Day {analysis.cycleDay} of about {Math.round(analysis.averageLength)}
+                            {analysis.overdue
+                              ? `Day ${analysis.cycleDay} · ${analysis.overdueDays} past your usual cycle`
+                              : `Day ${analysis.cycleDay} of about ${Math.round(analysis.averageLength)}`}
                           </h2>
                           <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
                             <span
-                              style={{ color: `var(--ci-${analysis.phase ?? "follicular"})` }}
+                              style={{
+                                color: `var(--ci-${analysis.phase === "late" || !analysis.phase ? "luteal" : analysis.phase})`,
+                              }}
                               className="font-medium"
                             >
                               {analysis.phaseLabel}
@@ -377,7 +381,27 @@ export function CycleIntelligence({
                               ? ` · started ${formatDate(analysis.lastStart)}`
                               : null}
                           </p>
+                          {analysis.overdue ? (
+                            <p className="mt-2 max-w-[58ch] text-[12.5px] leading-relaxed ci-muted">
+                              A cycle restarts when you log its first day — Bloom won't move the
+                              anchor for you. If your period has started, add that day and the count,
+                              phases and forecast all recalculate.
+                            </p>
+                          ) : null}
                         </div>
+                        {analysis.overdue && !preview ? (
+                          <button
+                            type="button"
+                            className="ci-btn ci-btn--primary"
+                            onClick={() => {
+                              setEditing(null);
+                              setPendingStart(today);
+                              focusForm();
+                            }}
+                          >
+                            Log a period start
+                          </button>
+                        ) : null}
                       </div>
 
                       <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">

@@ -38,7 +38,12 @@ import {
   validateDisplayName,
   validateUsername,
 } from "@/lib/profile/validation";
-import { checkUsername, type UsernameCheck } from "@/lib/profile/profileService";
+import {
+  checkUsername,
+  suggestUsernames,
+  UsernameTakenError,
+  type UsernameCheck,
+} from "@/lib/profile/profileService";
 import {
   ACCENT_LABELS,
   BLOOM_ACCENTS,
@@ -92,6 +97,7 @@ export function ProfileEditor({
   const [nameError, setNameError] = useState<string | null>(null);
   const [bioError, setBioError] = useState<string | null>(null);
   const [usernameState, setUsernameState] = useState<"idle" | "checking" | UsernameCheck>("idle");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const checkToken = useRef(0);
@@ -112,6 +118,7 @@ export function ProfileEditor({
     setNameError(null);
     setBioError(null);
     setUsernameState("idle");
+    setSuggestions([]);
     const draft = profileDraft.read();
     if (
       draft &&
@@ -167,18 +174,28 @@ export function ProfileEditor({
     const token = ++checkToken.current;
     debounceRef.current = window.setTimeout(() => {
       void checkUsername(normalizeUsername(username)).then((state) => {
-        if (checkToken.current === token) setUsernameState(state);
+        if (checkToken.current !== token) return;
+        setUsernameState(state);
+        if (state === "taken") {
+          void suggestUsernames(normalizeUsername(username)).then((list) => {
+            if (checkToken.current === token) setSuggestions(list);
+          });
+        } else {
+          setSuggestions([]);
+        }
       });
     }, 450);
     return () => window.clearTimeout(debounceRef.current);
   }, [open, username, usernameTouched]);
 
+  /*
+   * A handle is required, the way it is on a social profile: it is the link
+   * people share and the public identity other people see. The old editor
+   * allowed saving with none, which is why a username could look optional
+   * and "taken" handling never actually mattered.
+   */
   const usernameProblem =
-    username.trim() === "" && !usernameTouched
-      ? null
-      : usernameTouched && !identity.username && username.trim() === ""
-        ? "A username makes your profile shareable — or leave it blank."
-        : validateUsername(username);
+    username.trim() === "" ? "Pick a @username — it's how people find you." : validateUsername(username);
 
   const handleSave = useCallback(async () => {
     const nameInvalid = validateDisplayName(displayName);
@@ -188,20 +205,22 @@ export function ProfileEditor({
     if (nameInvalid || bioInvalid) return;
 
     const trimmed = username.trim().toLowerCase();
-    if (trimmed !== "") {
-      const usernameInvalid = validateUsername(trimmed);
-      if (usernameInvalid) {
-        setSaveError(usernameInvalid);
-        return;
-      }
-      if (usernameState === "checking") {
-        setSaveError("Give the check a second…");
-        return;
-      }
-      if (usernameState === "taken") {
-        setSaveError("That @username isn't free. Keep your current one, or pick another.");
-        return;
-      }
+    if (trimmed === "") {
+      setSaveError("Pick a @username — it's how people find you.");
+      return;
+    }
+    const usernameInvalid = validateUsername(trimmed);
+    if (usernameInvalid) {
+      setSaveError(usernameInvalid);
+      return;
+    }
+    if (usernameState === "checking") {
+      setSaveError("Give the check a second…");
+      return;
+    }
+    if (usernameState === "taken") {
+      setSaveError("That @username isn't free. Try one of the suggestions below.");
+      return;
     }
 
     setSaving(true);
@@ -222,7 +241,13 @@ export function ProfileEditor({
       toast(saidSaved());
       onClose();
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Couldn't save that just now.");
+      if (error instanceof UsernameTakenError) {
+        setUsernameState("taken");
+        setSaveError(error.message);
+        void suggestUsernames(normalizeUsername(username)).then(setSuggestions);
+      } else {
+        setSaveError(error instanceof Error ? error.message : "Couldn't save that just now.");
+      }
     } finally {
       setSaving(false);
     }
@@ -425,7 +450,7 @@ export function ProfileEditor({
                       />
                     </span>
                   </span>
-                  <span className="bedit-field-aside">
+                  <span className="bedit-field-aside" aria-live="polite">
                     {usernameState === "checking" ? (
                       <span className="flex items-center gap-1">
                         <Loader2 className="size-3 animate-spin" aria-hidden /> checking
@@ -444,6 +469,26 @@ export function ProfileEditor({
                 {usernameProblem ? <FieldNote message={usernameProblem} error /> : null}
                 {usernameState === "unknown" ? (
                   <FieldNote message="Couldn't check availability right now — we'll confirm on save." />
+                ) : null}
+                {suggestions.length > 0 ? (
+                  <div className="flex flex-wrap items-center gap-1.5" data-testid="username-suggestions">
+                    <span className="text-[11px] text-muted-foreground">Free instead:</span>
+                    {suggestions.map((candidate) => (
+                      <button
+                        key={candidate}
+                        type="button"
+                        onClick={() => {
+                          setUsername(candidate);
+                          setUsernameState("available");
+                          setSuggestions([]);
+                          setSaveError(null);
+                        }}
+                        className="rounded-full border border-border px-2.5 py-1 text-[11.5px] text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                      >
+                        @{candidate}
+                      </button>
+                    ))}
+                  </div>
                 ) : null}
                 {!usernameProblem && !usernameTouched && identity.username ? (
                   <FieldNote message="Links to your profile use this. Changing it will move your link." />

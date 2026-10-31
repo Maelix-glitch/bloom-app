@@ -14,6 +14,7 @@ import {
   HABITS_CHANGED,
   draftToLocalHabit,
   fetchHabits,
+  habitNameKey,
   insertHabit,
   insertLog,
   loadLocalHabits,
@@ -147,6 +148,18 @@ const ACTION: Record<string, Runner> = {
     const goalUnit = str(args["goalUnit"]).slice(0, 20);
     const note = str(args["note"]).slice(0, 240) || undefined;
 
+    /* The coach is idempotent too: asking for the same habit twice must not
+       create a second row. Names are compared case- and space-insensitively. */
+    const existing = (await visibleHabits(profileId)).find(
+      (habit) => habitNameKey(habit.name) === habitNameKey(name),
+    );
+    if (existing) {
+      return {
+        ok: true,
+        outcome: `“${existing.name}” is already one of your habits — I left it as it is.`,
+      };
+    }
+
     const draft: HabitDraft = {
       name,
       note,
@@ -161,18 +174,21 @@ const ACTION: Record<string, Runner> = {
     };
 
     /* Cloud when a profile is connected; the device mirror keeps every page
-       in step either way. */
+       in step either way. The mirror must use the SAME id as the account row:
+       the old code inserted a cloud habit and then a separate `local-…` copy,
+       which the signed-in loader uploaded on the next visit as a duplicate. */
     let onAccount = false;
+    let habit: Habit | null = null;
     if (profileId) {
       try {
-        await insertHabit(profileId, draft);
+        habit = await insertHabit(profileId, draft);
         onAccount = true;
       } catch {
         /* account unreachable — the local copy below still lands */
       }
     }
-    const habit = draftToLocalHabit(draft);
-    const next = [...loadLocalHabits().filter((h) => h.id !== habit.id), habit];
+    const savedHabit = habit ?? draftToLocalHabit(draft);
+    const next = [...loadLocalHabits().filter((h) => h.id !== savedHabit.id), savedHabit];
     saveLocal(next, loadLocalLogs());
     if (typeof window !== "undefined") window.dispatchEvent(new Event(HABITS_CHANGED));
 

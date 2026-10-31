@@ -14,9 +14,11 @@ import { report } from "@/lib/profile/errors";
 import { classifyError, type ProfileProblem } from "@/lib/profile/problems";
 import { clearSnapshot, readSnapshot, writeSnapshot } from "@/lib/profile/identityCache";
 import {
+  claimUsername,
   loadMyProfile,
   ProfileLoadError,
   ProfileSaveError,
+  UsernameTakenError,
   removeAvatar,
   removeBanner,
   savePrivacy,
@@ -496,6 +498,23 @@ export function useProfileSpace() {
         return;
       }
       if (!userId) throw authRequired();
+      /*
+       * The handle is claimed first, atomically. The editor's availability
+       * check is only advice while typing; this is the transaction that
+       * decides, so a race between two people typing the same name has one
+       * winner and one clear "taken" answer — never two accounts sharing it.
+       */
+      const previousHandle = identityRef?.identity.username ?? null;
+      if (patch.username && patch.username !== previousHandle) {
+        const status = await claimUsername(patch.username);
+        if (status === "taken") throw new UsernameTakenError();
+        if (status === "reserved" || status === "invalid") {
+          throw new ProfileSaveError("That @username can't be used. Try another one.");
+        }
+        /* `unknown` = the claim function isn't deployed yet. The unique index
+           on profiles still protects the handle, and saveProfile maps its
+           violation to UsernameTakenError. */
+      }
       await saveProfile(userId, patch);
       patchIdentity((identity) => ({
         ...identity,

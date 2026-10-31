@@ -519,11 +519,18 @@
 }
 .cm-node {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.76cqw;
-  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  /*
+   * The node's box is exactly the disc, so its centre is the coordinate the
+   * SVG spoke and correlation arcs end at. The label and percentage are taken
+   * out of flow underneath it. Previously the box also contained two text
+   * rows, which pushed the disc about 10px above the line — the "misaligned
+   * lines" on the connection map.
+   */
+  width: 12.94cqw;
+  height: 12.94cqw;
+  border-radius: 999px;
   outline: none;
 }
 .cm-node:focus-visible {
@@ -532,23 +539,41 @@
 .cm-node-disc {
   display: grid;
   place-items: center;
-  width: 12.94cqw;
-  height: 12.94cqw;
+  width: 100%;
+  height: 100%;
   border-radius: 999px;
-  border: 1px solid currentColor;
-  background: color-mix(in oklab, var(--surface) 90%, transparent);
+  border: 1px solid color-mix(in oklab, currentColor 55%, transparent);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
+  transition: border-color var(--motion-fast, 180ms) ease;
 }
+
+.cm-node:hover .cm-node-disc,
+.cm-node:focus-visible .cm-node-disc {
+  border-color: currentColor;
+}
+
 .cm-node-icon {
   width: 5.3cqw;
   height: 5.3cqw;
+  stroke-width: 1.5;
 }
+
 .cm-node-label {
+  position: absolute;
+  top: calc(100% + 0.28rem);
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 3.24cqw;
   line-height: 1;
   white-space: nowrap;
   color: var(--muted-foreground);
 }
+
 .cm-node-value {
+  position: absolute;
+  top: calc(100% + 1.15rem);
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 2.94cqw;
   line-height: 1;
   font-variant-numeric: tabular-nums;

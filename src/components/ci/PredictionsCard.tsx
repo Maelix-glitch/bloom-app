@@ -135,13 +135,21 @@ export function PredictionsCard({
         <Stat
           label="Where you are"
           value={analysis.cycleDay ? `Day ${analysis.cycleDay}` : "—"}
-          unit={analysis.cycleDay ? `of ~${Math.round(analysis.averageLength)}` : undefined}
+          unit={
+            analysis.cycleDay
+              ? analysis.overdue
+                ? `· ${analysis.overdueDays}d past ~${analysis.expectedCycleLength}`
+                : `of ~${Math.round(analysis.averageLength)}`
+              : undefined
+          }
           sub={
             upcoming
               ? "not placeable — the entry is dated ahead"
-              : analysis.phase
-                ? `${analysis.phaseLabel} — estimated`
-                : "nothing logged yet"
+              : analysis.overdue
+                ? "Log the first day of a period to restart the count"
+                : analysis.phase
+                  ? `${analysis.phaseLabel} — estimated`
+                  : "nothing logged yet"
           }
         />
       </div>

@@ -349,6 +349,18 @@ export interface CycleAnalysis {
   /** Days past `nextStart`; 0 when not past it. Informational — see `isLate`. */
   lateBy: number;
   /**
+   * The current cycle has outrun its expected length by more than the record's
+   * own grace period. True even with no completed cycles, where `isLate` stays
+   * false because there is no pattern to be late against. The phase becomes
+   * "late" and the UI offers to log a new start; Bloom never restarts the
+   * count by itself.
+   */
+  overdue: boolean;
+  /** Days past the expected cycle length (0 when inside it). */
+  overdueDays: number;
+  /** The length the current cycle is measured against (average or fallback). */
+  expectedCycleLength: number;
+  /**
    * The latest entry starts AFTER `today` — an import or a wrong device clock.
    * Nothing about "now" can be derived from it, so `cycleDay`/`phase` are null
    * and the UI shows the date as upcoming and offers to fix it.
@@ -662,6 +674,26 @@ export function analyzeCycle(
         ? o.lateAfterDaysLowConfidence
         : o.lateAfterDays;
   const isLate = lateBy >= lateThreshold;
+  /*
+   * A cycle can run past its expected length without the confidence to call a
+   * prediction "late". With no completed cycle behind it (the generic
+   * fallback), Bloom used to keep the day count climbing and the phase pinned
+   * to "luteal" forever — a 54-day luteal phase, which is not a phase at all.
+   *
+   * `overdue` is the factual part that does not depend on confidence: how far
+   * past the expected length today is. It stops the phase at "past predicted
+   * date" and asks for the one thing that can actually restart the count — a
+   * logged period start. Bloom never moves the anchor itself; that would be
+   * inventing a cycle.
+   */
+  const overdueGrace =
+    confidence === "none"
+      ? Math.max(14, o.lateAfterDaysLowConfidence)
+      : lateThreshold === Number.POSITIVE_INFINITY
+        ? o.lateAfterDaysLowConfidence
+        : lateThreshold;
+  const overdueDays = cycleDay !== null ? Math.max(0, cycleDay - cycleLength) : 0;
+  const overdue = expecting && cycleDay !== null && overdueDays > overdueGrace;
   /* A range, not a date, when the record can't vouch for a single day. */
   const spread =
     confidence === "none"
@@ -686,7 +718,7 @@ export function analyzeCycle(
   /* --- current phase ----------------------------------------------------- */
   let phase: Phase | null = null;
   if (cycleDay !== null && cycleDay > 0 && lastStart) {
-    if (cycleDay > cycleLength && isLate) {
+    if (cycleDay > cycleLength && (isLate || overdue)) {
       phase = "late";
     } else if (cycleDay > cycleLength) {
       // Past the estimate but not (yet) late — a generic guess, or a rough
@@ -874,7 +906,24 @@ export function analyzeCycle(
         confidence === "low"
           ? "That estimate was only a direction — built from a short or uneven record — so a week either side is normal. "
           : ""
-      }Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.`,
+      }Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.${
+        overdue
+          ? " If your period has started since this record, log its first day and the cycle count restarts from there."
+          : ""
+      }`,
+      ...(overdue ? { action: { label: "Log a period start", start: today } } : {}),
+    });
+  } else if (overdue && cycleDay !== null) {
+    /* The generic case: no completed cycle to be "late" against, but the
+       count has clearly outgrown the placeholder. Say what is true and offer
+       the only reset that isn't invented. */
+    flags.push({
+      id: "overdue",
+      kind: "late",
+      tone: "attention",
+      title: `Day ${cycleDay} since your last logged start`,
+      body: `That is ${overdueDays} ${plural(overdueDays, "day", "days")} longer than the ${cycleLength}-day estimate, and Bloom still has no completed cycle to measure you against. It won't start a new cycle on its own — a cycle begins when you log the first day of a period. If one has started, add that day and everything here recalculates. If cycles are often this long or this is new for you, a doctor or nurse is the right person to ask; this page cannot tell you why.`,
+      action: { label: "Log a period start", start: today },
     });
   }
 
@@ -934,6 +983,9 @@ export function analyzeCycle(
     nextWindow,
     isLate,
     lateBy,
+    overdue,
+    overdueDays,
+    expectedCycleLength: cycleLength,
     upcomingStart,
     ovulationDate,
     fertileStart,
@@ -1166,6 +1218,9 @@ export function describeNextPeriod(a: CycleAnalysis): string | null {
   if (a.isLate && a.lateBy > 0) {
     return `${a.lateBy} ${plural(a.lateBy, "day", "days")} later than predicted (${date})`;
   }
+  if (a.overdue) {
+    return `${a.overdueDays} ${plural(a.overdueDays, "day", "days")} past your usual ${a.expectedCycleLength}-day cycle — log the first day of a new period to restart the count`;
+  }
   const w = a.nextWindow;
   const span = w ? `${formatDateShort(w.from)}–${formatDateShort(w.to)}` : date;
   const d = a.daysUntilNext;
@@ -1191,6 +1246,7 @@ export function describeNextPeriodShort(a: CycleAnalysis): string | null {
   if (a.upcomingStart) return "starts " + formatDateShort(a.upcomingStart);
   if (!a.nextStart || a.daysUntilNext === null) return null;
   if (a.isLate && a.lateBy > 0) return `${a.lateBy}d late`;
+  if (a.overdue) return `${a.overdueDays}d past usual`;
   const d = a.daysUntilNext;
   if (a.confidence === "none") return "28-day guide only";
   if (a.confidence === "low") {

@@ -185,7 +185,9 @@ export function PhaseWave({
   const gradientId = `ci-wave-${compact ? "c" : "f"}-${Math.round(model.length)}-${Math.round(model.top)}`;
 
   const ariaLabel = analysis.entryCount
-    ? `Cycle map: about ${model.length} days. Today is day ${analysis.cycleDay ?? "unknown"} of the cycle, in the ${analysis.phaseLabel} phase. Ovulation is estimated around day ${model.ovDay}, the fertile window around days ${Math.max(1, model.ovDay - 5)} to ${model.ovDay + 1}, and the next period is predicted at day ${model.length + 1}.`
+    ? analysis.overdue
+      ? `Cycle map: about ${model.length} days. Today is day ${analysis.cycleDay ?? "unknown"}, ${analysis.overdueDays} days past the expected length. Bloom has not started a new cycle: log the first day of a period when one starts and the count restarts from there.`
+      : `Cycle map: about ${model.length} days. Today is day ${analysis.cycleDay ?? "unknown"} of the cycle, in the ${analysis.phaseLabel} phase. Ovulation is estimated around day ${model.ovDay}, the fertile window around days ${Math.max(1, model.ovDay - 5)} to ${model.ovDay + 1}, and the next period is predicted at day ${model.length + 1}.`
     : "Cycle map: empty until a period is logged.";
 
   return (

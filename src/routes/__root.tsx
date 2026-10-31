@@ -24,6 +24,7 @@ import { hasSupabaseConfig } from "@/lib/supabase";
 import { AdminBar } from "@/components/welcome/AdminBar";
 import { ConnectionNotice } from "@/components/system/ConnectionNotice";
 import { BloomToaster } from "@/components/system/BloomToaster";
+import { PointsAwardToast } from "@/components/system/PointsAwardToast";
 import { RemindersEngine } from "@/components/system/RemindersEngine";
 import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
@@ -339,6 +340,7 @@ function RootComponent() {
         {/* One toast surface for every route — a confirmation that never renders
             is a silent failure the person can't tell apart from a real one. */}
         <BloomToaster />
+        <PointsAwardToast />
         {/* Global tour FAB + auto-prompt for new users */}
         <TourFab />
       </TourProvider>

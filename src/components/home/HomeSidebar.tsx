@@ -17,6 +17,7 @@ import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { BloomLogo } from "@/components/BloomLogo";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
+import { PointsChip } from "@/components/system/PointsChip";
 
 export const HOME_NAV: {
   label: string;
@@ -115,6 +116,9 @@ export function HomeSidebar() {
           })}
         </nav>
         <span className="app-sidebar-rule mx-7 mt-5 block h-px" />
+        <div className="mx-4 mt-3">
+          <PointsChip className="w-full justify-center" />
+        </div>
         <Link
           to="/profile"
           aria-current={profileActive ? "page" : undefined}
@@ -206,6 +210,7 @@ export function HomeMobileBar() {
         <span className="font-display text-[21px] leading-none tracking-wide">Bloom</span>
       </Link>
       <div className="flex items-center gap-2">
+        <PointsChip compact />
         <NotificationBell />
         <Link
           to="/profile"

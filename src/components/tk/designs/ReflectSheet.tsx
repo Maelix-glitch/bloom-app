@@ -30,12 +30,9 @@ type ModalState = "editing" | "loading" | "success" | "error" | "reset_confirm";
 
 const HEADER_STYLE: CSSProperties = {
   background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
-  padding: "24px 32px",
+  padding: "22px 20px",
   borderRadius: "24px 24px 0 0",
-  marginBottom: 24,
-  marginLeft: -32,
-  marginRight: -32,
-  marginTop: -32,
+  marginBottom: 20,
 };
 
 const HEADER_TEXT: CSSProperties = {
@@ -55,9 +52,11 @@ const HEADER_SUBTITLE: CSSProperties = {
 
 const CARD_GRID_STYLE: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: 16,
-  marginTop: 24,
+  /* Auto-fit means one column on a 320–360px phone and two as soon as there
+     is room, instead of two cramped 130px cards with 32px steppers. */
+  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+  gap: 14,
+  marginTop: 20,
 };
 
 const TRACKER_CARD_STYLE: CSSProperties = {
@@ -361,7 +360,15 @@ export function ReflectSheet({
         <div className="tk2-curtain" style={CURTAIN_STYLE} onClick={onClose} aria-hidden />
         <div
           className="tk2-modal tk2-sheet"
-          style={{ ...PANEL_STYLE, maxWidth: 480, padding: 0, overflow: "hidden", textAlign: "center" }}
+          style={{
+            ...PANEL_STYLE,
+            maxWidth: 480,
+            padding: 0,
+            maxHeight: "88dvh",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            textAlign: "center",
+          }}
           role="dialog"
           aria-modal="true"
           aria-label="Metrics saved"
@@ -375,7 +382,7 @@ export function ReflectSheet({
             <p style={HEADER_SUBTITLE}>Your metrics for today have been recorded.</p>
           </div>
 
-          <div style={{ padding: "0 32px 32px" }}>
+          <div style={{ padding: "0 20px 24px" }}>
             <div style={SUCCESS_ICON_STYLE}>✓</div>
 
             <div style={SUMMARY_GRID_STYLE}>
@@ -414,7 +421,15 @@ export function ReflectSheet({
         <div className="tk2-curtain" style={CURTAIN_STYLE} onClick={() => setShowResetConfirm(false)} aria-hidden />
         <div
           className="tk2-modal tk2-sheet"
-          style={{ ...PANEL_STYLE, maxWidth: 380, padding: 0, overflow: "hidden", textAlign: "center" }}
+          style={{
+            ...PANEL_STYLE,
+            maxWidth: 380,
+            padding: 0,
+            maxHeight: "88dvh",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            textAlign: "center",
+          }}
           role="dialog"
           aria-modal="true"
           aria-label="Clear all entries?"
@@ -428,7 +443,7 @@ export function ReflectSheet({
             <p style={HEADER_SUBTITLE}>This will clear the highlighted fields.</p>
           </div>
 
-          <div style={{ padding: "0 32px 32px" }}>
+          <div style={{ padding: "0 20px 24px" }}>
             <div style={RESET_CONFIRM_ICON_STYLE}>🗑</div>
 
             <p style={{ ...RESET_DESCRIPTION_STYLE, marginTop: 0 }}>
@@ -469,7 +484,14 @@ export function ReflectSheet({
 
       <div
         className="tk2-modal tk2-sheet"
-        style={{ ...PANEL_STYLE, maxWidth: 540, padding: 0, overflow: "hidden" }}
+        style={{
+          ...PANEL_STYLE,
+          maxWidth: 540,
+          padding: 0,
+          maxHeight: "88dvh",
+          overflowY: "auto",
+          overscrollBehavior: "contain",
+        }}
         role="dialog"
         aria-modal="true"
         aria-label="Log today"
@@ -483,7 +505,7 @@ export function ReflectSheet({
           <p style={HEADER_SUBTITLE}>{headerSubtitle}</p>
         </div>
 
-        <div style={{ padding: "0 32px 24px" }}>
+        <div style={{ padding: "0 20px 20px" }}>
           <div style={CARD_GRID_STYLE}>
             {TRACKERS.map((def, i) => {
               const value = drafts[def.id] ?? "";
