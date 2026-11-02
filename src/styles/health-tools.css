@@ -5,18 +5,20 @@
    under 480px. Tokens only, no new palette.
    ========================================================================== */
 
+/* Same surface, border and radius family as the trackers cards above it, so
+   Body & daily targets reads as part of this page rather than a bolted-on
+   panel with its own tints. */
 .bt-shell {
-  --bt-line: color-mix(in oklab, var(--foreground) 12%, transparent);
-  --bt-fill: color-mix(in oklab, var(--surface-2) 62%, transparent);
+  --bt-line: var(--border);
+  --bt-fill: var(--surface);
   width: 100%;
   max-width: 1120px;
   margin: 2.5rem auto 0;
   padding: 1.35rem;
   border: 1px solid var(--bt-line);
-  border-radius: 24px;
-  background:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--primary) 7%, transparent), transparent 60%),
-    var(--bt-fill);
+  border-radius: var(--radius-panel);
+  background: var(--bt-fill);
+  box-shadow: var(--elevation-card);
   color: var(--foreground);
 }
 
@@ -120,13 +122,13 @@
 }
 
 .bt-card--bmi {
-  --bt-accent: var(--sage, #7fae9a);
+  --bt-accent: var(--success);
 }
 .bt-card--energy {
-  --bt-accent: var(--amber, #e0a866);
+  --bt-accent: var(--warning);
 }
 .bt-card--water {
-  --bt-accent: var(--sky, #6fa8c9);
+  --bt-accent: var(--info);
 }
 
 .bt-card__label {
@@ -175,7 +177,7 @@
 }
 
 .bt-card__foot--warn {
-  color: color-mix(in oklab, var(--amber, #e0a866) 80%, var(--foreground));
+  color: color-mix(in oklab, var(--warning) 80%, var(--foreground));
 }
 
 /* BMI rail: the healthy band is the only highlighted stretch. */
@@ -186,14 +188,14 @@
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    #7fa9c9 0%,
-    #7fa9c9 14%,
-    #7fae9a 14%,
-    #7fae9a 40%,
-    #e0a866 40%,
-    #e0a866 60%,
-    #cf7a7a 60%,
-    #cf7a7a 100%
+    var(--chart-1) 0%,
+    var(--chart-1) 14%,
+    var(--chart-2) 14%,
+    var(--chart-2) 40%,
+    var(--chart-6) 40%,
+    var(--chart-6) 60%,
+    var(--chart-5) 60%,
+    var(--chart-5) 100%
   );
   opacity: 0.55;
 }
@@ -317,10 +319,10 @@
 }
 
 .bt-delta.is-down {
-  color: var(--sage, #7fae9a);
+  color: var(--success);
 }
 .bt-delta.is-up {
-  color: var(--amber, #e0a866);
+  color: var(--warning);
 }
 
 .bt-log {
@@ -360,16 +362,16 @@
   gap: 0.35rem;
   min-height: 36px;
   padding: 0 0.6rem;
-  border: 1px solid color-mix(in oklab, var(--danger, #cf7a7a) 32%, transparent);
+  border: 1px solid color-mix(in oklab, var(--danger) 32%, transparent);
   border-radius: 999px;
   background: transparent;
-  color: color-mix(in oklab, var(--danger, #cf7a7a) 80%, var(--foreground));
+  color: color-mix(in oklab, var(--danger) 80%, var(--foreground));
   font-size: 11.5px;
   cursor: pointer;
 }
 
 .bt-danger:hover {
-  background: color-mix(in oklab, var(--danger, #cf7a7a) 10%, transparent);
+  background: color-mix(in oklab, var(--danger) 10%, transparent);
 }
 
 /* --------------------------------- form ---------------------------------- */
@@ -535,13 +537,13 @@
 .bt-error {
   margin: 0.2rem 0 0;
   font-size: 12px;
-  color: var(--danger, #cf7a7a);
+  color: var(--danger);
 }
 
 .bt-saved {
   margin: 0.5rem 0 0;
   font-size: 12px;
-  color: var(--sage, #7fae9a);
+  color: var(--success);
 }
 
 @media (prefers-reduced-motion: reduce) {

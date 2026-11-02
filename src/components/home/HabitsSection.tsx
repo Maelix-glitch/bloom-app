@@ -33,6 +33,7 @@ import { shiftDay } from "@/lib/localDay";
 import { toast } from "sonner";
 import { STREAK_KEPT } from "@/lib/voice/copy";
 import { pick } from "@/lib/voice/messages";
+import { semanticHabitIcon } from "./habitGlyphs";
 
 /**
  * Streak milestones that earn a quiet word of celebration. Deliberately
@@ -446,6 +447,12 @@ function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconUrl"> 
         {habitMonogram(habit.name)}
       </span>
     );
+  }
+  /* Bloom's own defaults are drawn with the app's line-icon family; an emoji a
+     person chose themselves still renders as themselves. */
+  const Glyph = semanticHabitIcon(habit.icon);
+  if (Glyph) {
+    return <Glyph aria-hidden="true" className="size-4" strokeWidth={1.75} />;
   }
   return <>{habit.icon}</>;
 }

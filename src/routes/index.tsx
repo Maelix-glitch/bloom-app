@@ -54,11 +54,11 @@ import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
 import { StoryRail } from "@/components/stories/StoryRail";
 import { StoryComposer } from "@/components/stories/StoryComposer";
 import { StoryViewer } from "@/components/stories/StoryViewer";
-import { TourCard } from "@/components/tour/TourLauncher";
 import { seenStore } from "@/lib/stories/seen";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
 import type { Story } from "@/lib/profile/types";
 import { toast } from "sonner";
+import { sublineFor } from "@/lib/home/subline";
 
 const TITLE = "Bloom — Today";
 const DESCRIPTION =
@@ -382,16 +382,17 @@ function TodayPage() {
   /* Day one gets its own line: the hero greets a person who has just arrived,
      not a dashboard demanding entries. Derived from the onboarding answer's
      timestamp — never asserted when it isn't known. */
-  const subline =
-    !trackers.hydrated || habits.loading
-      ? "Reading today's record…"
-      : personalVoice.firstDay
-        ? "Day one — look around, log one thing when it's natural."
-        : openCount === 0
-          ? "Everything you track is logged. Enjoy the quiet."
-          : openCount === 1
-            ? "One thing left to shape your day."
-            : `${["Two", "Three"][openCount - 2] ?? openCount} things left to shape your day.`;
+  /* Latched readiness. `hydrated` and `loading` both flip again during
+     background refetches, and the server pass can never see them — reading them
+     directly made this line alternate between the reading state and the day's
+     summary on a loop. Once the stores have loaded once, the hero stays in its
+     loaded state; the sentence itself is derived only from today's data. */
+  const recordReady = useEverReady(trackers.hydrated && !habits.loading);
+  const subline = sublineFor({
+    ready: recordReady,
+    firstDay: personalVoice.firstDay,
+    openCount,
+  });
 
   const syncLine =
     trackers.sync.state === "off"
@@ -464,7 +465,7 @@ function TodayPage() {
 
         <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
-            <h1 data-tour="home-greeting" className="font-display text-3xl leading-tight sm:text-5xl">
+            <h1 className="font-display text-3xl leading-tight sm:text-5xl">
               {firstName ? (
                 <>
                   {greetingFor(now.getHours())},{" "}
@@ -474,29 +475,32 @@ function TodayPage() {
                 <em className="home-text-gradient italic">{greetingFor(now.getHours())}.</em>
               )}
             </h1>
-            <p className="mt-1.5 font-display text-xl text-muted-foreground sm:text-3xl">
+            <p
+              className="mt-1.5 min-h-[1.5em] font-display text-xl text-muted-foreground sm:text-3xl"
+              aria-live="polite"
+            >
               {subline}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setMoodOpen(true)} data-tour="home-chip-mood" className="home-chip">
-                <Smile className="size-4" style={{ color: "var(--home-habits)" }} />
+              <button type="button" onClick={() => setMoodOpen(true)} className="home-chip home-chip--primary">
+                <Smile className="size-4" strokeWidth={1.75} />
                 {moodEntry ? `Mood ${Math.round(moodEntry.mood)}/10 logged` : "Log today's mood"}
               </button>
-              <button type="button" onClick={() => setMetricsOpen(true)} data-tour="home-chip-metrics" className="home-chip">
-                <Droplet className="size-4" style={{ color: "var(--home-sleep)" }} />
+              <button type="button" onClick={() => setMetricsOpen(true)} className="home-chip home-chip--primary">
+                <Droplet className="size-4" strokeWidth={1.75} />
                 {trackers.analysis.goalsMetToday > 0
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
               </button>
               <Link to="/trackers" hash="body-tools" className="home-chip">
-                <Scale className="size-4" style={{ color: "var(--home-sage)" }} />
+                <Scale className="size-4" strokeWidth={1.75} />
                 BMI &amp; daily targets
               </Link>
-              <Link to="/report" className="home-chip">
-                <CalendarRange className="size-4" style={{ color: "var(--home-mood)" }} />
+              <Link to="/report" className="home-chip home-chip--quiet">
+                <CalendarRange className="size-4" strokeWidth={1.75} />
                 Weekly report
               </Link>
-              <Link to="/rewards" className="home-chip">
+              <Link to="/rewards" className="home-chip home-chip--quiet">
                 <RankChip points={habits.points} />
               </Link>
             </div>
@@ -532,7 +536,11 @@ function TodayPage() {
 
         <div className="home-stack">
           {space.authState !== "signed-out" && space.userId ? (
-            <section data-tour="home-stories" className="home-band" aria-labelledby="home-moments-title">
+            <section
+              className="home-band"
+              data-empty={homeStories.length === 0}
+              aria-labelledby="home-moments-title"
+            >
               <div className="home-band-head">
                 <div>
                   <p className="home-eyebrow">Moments</p>
@@ -621,7 +629,6 @@ function TodayPage() {
             </div>
           </div>
 
-          <TourCard tourId="home" containerClassName="home-band" />
 
           <footer className="hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
             <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
@@ -637,7 +644,7 @@ function TodayPage() {
         onClick={openNewHabit}
         aria-label="Add habit"
         title="Add habit"
-        data-tour="home-fab"
+       
         data-testid="home-fab-add-habit"
         className="home-fab inline-flex h-12 items-center gap-2 rounded-full bg-primary px-3.5 text-sm font-medium text-primary-foreground lg:hidden sm:h-13 sm:pl-4 sm:pr-5"
       >

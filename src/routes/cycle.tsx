@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import cycleIntelligenceCss from "../styles/cycle2.css?url";
 import { AppNav } from "@/components/home/HomeSidebar";
-import { TourCard } from "@/components/tour/TourLauncher";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
@@ -43,11 +42,7 @@ function CyclePage() {
     <div className="app-shell min-h-screen bg-background text-foreground">
       <AppNav />
       <main className="min-w-0">
-        <TourCard
-          tourId="cycle"
-          containerClassName="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8"
-        />
-        {optedOut ? <CycleNotYours /> : <div><div data-tour="cycle-calendar"><CycleIntelligence theme={theme} /></div><div data-tour="cycle-predictions" className="h-1" /><div data-tour="cycle-insights" className="h-1" /></div>}
+        {optedOut ? <CycleNotYours /> : <div><div><CycleIntelligence theme={theme} /></div><div className="h-1" /><div className="h-1" /></div>}
       </main>
     </div>
   );

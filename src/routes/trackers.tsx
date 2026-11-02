@@ -6,7 +6,6 @@ import trackersCss from "../styles/trackers2.css?url";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { HealthTools } from "@/components/health/HealthTools";
 import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
-import { TourCard } from "@/components/tour/TourLauncher";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
 const FONTS =
@@ -38,11 +37,7 @@ function TrackersRoute() {
     <div className="app-shell min-h-screen bg-background text-foreground">
       <AppNav />
       <main className="min-w-0">
-        <TourCard
-          tourId="trackers"
-          containerClassName="mx-auto max-w-[1120px] px-5 pt-4 sm:px-8"
-        />
-        <div id="trackers" data-tour="trackers-compass">
+        <div id="trackers">
           <TrackersDesign theme={theme} />
         </div>
         {/* Advanced tools live on the page, not behind a hidden menu: BMI,

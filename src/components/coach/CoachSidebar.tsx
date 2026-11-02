@@ -274,7 +274,7 @@ export function CoachSidebarContent({
         <span>New conversation</span>
       </button>
 
-      <div data-tour="coach-lenses" className="coach-side-modes" role="group" aria-label="How Bloom should respond">
+      <div className="coach-side-modes" role="group" aria-label="How Bloom should respond">
         {MODES.map((item) => (
           <button
             key={item.id}

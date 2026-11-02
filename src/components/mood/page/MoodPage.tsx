@@ -161,7 +161,7 @@ export function MoodPage({
         />
       </div>
 
-      <div data-tour="mood-compose" className="mm-enter" data-order="1">
+      <div className="mm-enter" data-order="1">
         <LogMood
           selected={selected}
           saving={saving}
@@ -173,7 +173,7 @@ export function MoodPage({
         />
       </div>
 
-      <div data-tour="mood-timeline" className="mm-enter" data-order="2">
+      <div className="mm-enter" data-order="2">
         <MoodJourney
           loading={loading}
           points={journey}
@@ -196,7 +196,7 @@ export function MoodPage({
         )}
       </div>
 
-      <div data-tour="mood-distribution" className="mm-enter" data-order="4">
+      <div className="mm-enter" data-order="4">
         <MoodDistribution
           slices={slices}
           total={a.days.length}
@@ -207,7 +207,7 @@ export function MoodPage({
         />
       </div>
 
-      <div data-tour="mood-insights" className="mm-enter" data-order="5">
+      <div className="mm-enter" data-order="5">
         <QuickInsights insights={insights} entries={entries.length} />
       </div>
 
