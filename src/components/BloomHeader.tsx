@@ -38,7 +38,7 @@ export function BloomHeader() {
 
         <span className="mx-1 hidden h-4 w-px sm:block" style={{ background: "#30333F" }} />
 
-        <span className="hidden text-[12px] sm:block" style={{ color: "#63667A" }}>
+        <span className="hidden text-[12px] sm:block" style={{ color: "var(--faint)" }}>
           {todayActive
             ? "Today"
             : trackersActive

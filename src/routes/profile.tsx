@@ -61,8 +61,6 @@ import { useReminders } from "@/hooks/useReminders";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
 import { ProfileShareSheet } from "@/components/profile/ProfileShareSheet";
-import { TourCard } from "@/components/tour/TourLauncher";
-import { useTour } from "@/components/tour/TourContext";
 import { hasSupabaseConfig } from "@/lib/supabase";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { StoryComposer } from "@/components/stories/StoryComposer";
@@ -140,7 +138,6 @@ function ProfilePage() {
   } | null>(null);
   const [seenIds, setSeenIds] = useState<ReadonlySet<string>>(() => new Set());
   const online = useOnlineStatus();
-  const tour = useTour();
 
   // after a magic-link sign-in resolves, the dialog steps aside on its own
   useEffect(() => {
@@ -551,7 +548,6 @@ function ProfilePage() {
                 }}
               />
 
-              <TourCard tourId="profile" containerClassName="pf-section" />
 
               {/* numbers only logging can move */}
               <RecordNumbers
@@ -562,7 +558,7 @@ function ProfilePage() {
 
               {/* the record: 12 weeks + what's being tracked */}
               <section
-                data-tour="profile-record"
+               
                 className="pf-section pf-rise pf-rise-2"
                 aria-labelledby="pf-record-title"
               >
@@ -597,7 +593,7 @@ function ProfilePage() {
 
               {/* featured — the pinned post */}
               <section
-                data-tour="profile-featured"
+               
                 className="pf-section pf-rise pf-rise-3"
                 aria-labelledby="pf-featured-title"
               >
@@ -656,7 +652,7 @@ function ProfilePage() {
 
               {/* tabs — moments / highlights / journey */}
               <div
-                data-tour="profile-tabs"
+               
                 className="pf-tabs pf-rise pf-rise-4"
                 role="tablist"
                 aria-label="Profile sections"
@@ -828,7 +824,7 @@ function ProfilePage() {
 
               {/* account + data — settings rows */}
               <section
-                data-tour="profile-data"
+               
                 className="pf-section mt-10"
                 aria-label="Account and data"
               >
@@ -859,7 +855,6 @@ function ProfilePage() {
                   onOpenReminders={() => setRemindersOpen(true)}
                   onOpenErase={() => setEraseOpen(true)}
                   {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
-                  {...(tour ? { onOpenTour: () => tour.startTour("global") } : {})}
                   remindersValue={remindersValue}
                   installValue={installValue}
                 />

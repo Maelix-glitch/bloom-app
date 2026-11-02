@@ -285,7 +285,7 @@ export function CoachContextPanel({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            data-tour="coach-context" className="coach-panel"
+            className="coach-panel"
             initial={{ x: 40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 40, opacity: 0 }}

@@ -16,90 +16,105 @@
 }
 
 /* ------------------------------ palette ---------------------------------- */
-/* The trackers page runs on obsidian and champagne whatever theme the cycle  */
-/* page is set to: a near-black ground, charcoal cards, platinum type, gold   */
-/* for the figures and every active/met state, and six ring colours spaced    */
-/* evenly round the wheel so they stay legible on #0b0c10.                    */
+/*
+ * Trackers used to run its own product palette — a pure-black ground, burgundy
+ * cards and a hot-pink accent — which is why the page read as a different app.
+ * It now binds the global design tokens: the same canvas, surface hierarchy,
+ * border family and champagne accent as Home, Mood and Cycle. Only the six
+ * data hues are page-specific, and they come from the shared chart ramp.
+ */
 
 .tk2-root[data-design][data-theme] {
-  /* ---- the token manifest — VIBRANT & BOLD NEON REDESIGN ---- */
-  --bg-absolute-dark: #000000;
-  --panel-glass-bg: rgba(10, 10, 12, 0.85);
-  --glass-border-rim: rgba(255, 255, 255, 0.12);
-  --accent-neon-gradient: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
-  --neon-primary: #ff0055;
-  --text-ultra-white: #ffffff;
-  --text-cool-silver: #b0b0b8;
-  --text-architectural: rgba(255, 255, 255, 0.4);
+  --bg-absolute-dark: var(--background);
+  --panel-glass-bg: color-mix(in oklab, var(--surface) 94%, transparent);
+  --glass-border-rim: var(--border);
+  --accent-neon-gradient: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  --neon-primary: var(--gold);
+  --text-ultra-white: var(--foreground);
+  --text-cool-silver: var(--muted-foreground);
+  --text-architectural: var(--faint);
 
-  /* ---- the app's own variables, bound to those tokens ---- */
-  --ci-bg: var(--bg-absolute-dark);
-  --ci-bg-deep: #000000;
-  --ci-surface: #0a0a0c;
-  --ci-surface-2: #141416;
-  --ci-line: var(--glass-border-rim);
-  --ci-line-strong: rgba(255, 255, 255, 0.16);
-  --ci-text: var(--text-ultra-white);
-  --ci-text-soft: #e8e8ec;
-  --ci-text-mute: var(--text-cool-silver);
-  --ci-accent: var(--neon-primary);
-  --ci-accent-soft: rgba(255, 0, 85, 0.16);
-  --ci-focus: #ff0055;
-  --ci-ok: #00e676;
-  --ci-warn: #ffea00;
-  --ci-danger: #ff0055;
-  --ci-input-bg: #050506;
+  --ci-bg: var(--background);
+  --ci-bg-deep: var(--background);
+  --ci-surface: var(--surface);
+  --ci-surface-2: var(--surface-2);
+  --ci-line: var(--border);
+  --ci-line-strong: var(--border-strong);
+  --ci-text: var(--foreground);
+  --ci-text-soft: var(--text-secondary);
+  --ci-text-mute: var(--faint);
+  --ci-accent: var(--gold);
+  --ci-accent-soft: color-mix(in oklab, var(--gold) 16%, transparent);
+  --ci-focus: var(--gold);
+  --ci-ok: var(--success);
+  --ci-warn: var(--warning);
+  --ci-danger: var(--danger);
+  --ci-input-bg: var(--surface-2);
   --ci-veil:
-    radial-gradient(120% 80% at 12% -10%, rgba(255, 0, 85, 0.06), transparent 60%),
-    radial-gradient(90% 70% at 100% 0%, rgba(0, 240, 255, 0.03), transparent 55%);
+    radial-gradient(
+      120% 80% at 12% -10%,
+      color-mix(in oklab, var(--gold) 6%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 100% 0%,
+      color-mix(in oklab, var(--violet) 5%, transparent),
+      transparent 55%
+    );
 
-  /* neon accent marks met states */
-  --ci-follicular: #ff0055;
-  --ci-ovulation: #00f0ff;
+  --ci-follicular: var(--gold);
+  --ci-ovulation: var(--chart-2);
   /* the two phase names left over keep their ring colour */
   --ci-late: var(--tk2-ring-sleep);
   --ci-menstrual: var(--tk2-ring-screen);
 
-  /* six vibrant neon rings */
-  --tk2-ring-sleep: #8b87d9;
-  --tk2-ring-water: #7fb4d9;
-  --tk2-ring-movement: #7fa88f;
-  --tk2-ring-energy: #e8b75e;
-  --tk2-ring-screen: #c9788c;
-  --tk2-ring-study: #7c93c4;
+  /* six data hues from the shared chart ramp */
+  --tk2-ring-sleep: var(--chart-4);
+  --tk2-ring-water: var(--chart-1);
+  --tk2-ring-movement: var(--chart-2);
+  --tk2-ring-energy: var(--chart-6);
+  --tk2-ring-screen: var(--chart-5);
+  --tk2-ring-study: var(--chart-3);
 
-  --tk2-rule: var(--glass-border-rim);
-  --tk2-soft: var(--text-cool-silver);
+  --tk2-rule: var(--border);
+  --tk2-soft: var(--muted-foreground);
 
-  /* bold sans-serif for sporty, tech-forward feel */
-  --ci-display-weight: 700;
-  --ci-display-track: -0.03em;
+  /* editorial weight, matching the rest of the app */
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
 
   /* ---- aliases ---- */
-  --bg-deep: var(--bg-absolute-dark);
-  --surface-card: #0a0a0c;
-  --card-border: var(--glass-border-rim);
+  --bg-deep: var(--background);
+  --surface-card: var(--surface);
+  --card-border: var(--border);
   --accent-neon: var(--accent-neon-gradient);
-  --accent-solid: var(--neon-primary);
-  --text-primary: var(--text-ultra-white);
-  --text-muted: var(--text-cool-silver);
-  --text-dim: var(--text-architectural);
+  --accent-solid: var(--gold);
+  --text-primary: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-dim: var(--faint);
   --tk2-neon: var(--accent-neon-gradient);
-  --tk2-neon-line: rgba(255, 0, 85, 0.6);
-  --tk2-neon-glow: rgba(255, 0, 85, 0.8);
+  --tk2-neon-line: color-mix(in oklab, var(--gold) 55%, transparent);
+  --tk2-neon-glow: color-mix(in oklab, var(--gold) 45%, transparent);
   --tk2-glass: var(--panel-glass-bg);
-  --tk2-glass-rim: var(--glass-border-rim);
-  --tk2-glass-lift: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.08), transparent 62%);
+  --tk2-glass-rim: var(--border);
+  --tk2-glass-lift: radial-gradient(
+    120% 120% at 0% 0%,
+    color-mix(in oklab, var(--foreground) 5%, transparent),
+    transparent 62%
+  );
+
+  /* champagne action tokens used by the finishing pass */
+  --tk2-champagne: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  --tk2-champagne-line: color-mix(in oklab, var(--gold) 70%, transparent);
+  --tk2-champagne-glow: color-mix(in oklab, var(--gold) 30%, transparent);
 }
 
 /* The canvas itself. Scoped to the trackers page rather than set on <body>,
    so this can't repaint cycle, coach and profile blind. */
 .tk2-root {
-  background-color: var(--bg-absolute-dark);
-  color: var(--text-ultra-white);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: clip;
@@ -582,7 +597,7 @@
   min-height: 38px;
   margin-top: 1rem;
   padding: 0 0.85rem;
-  border: 1px solid var(--ci-hair-strong, rgba(255, 255, 255, 0.16));
+  border: 1px solid var(--ci-hair-strong, color-mix(in oklab, var(--foreground) 0.16, transparent));
   border-radius: 999px;
   color: var(--ci-text-soft);
   font-size: 12px;
@@ -1839,7 +1854,7 @@
 .tk2-root .ci-btn--primary {
   background-image: var(--tk2-champagne);
   border-color: var(--tk2-champagne-line);
-  color: #0b0c10;
+  color: var(--primary-foreground);
   font-weight: 600;
   box-shadow: 0 10px 26px -14px var(--tk2-champagne-glow);
 }
@@ -1898,7 +1913,7 @@
   background-image: var(--tk2-glass-lift);
   border: 1px solid var(--tk2-glass-rim);
   backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
 /* ------------------------ 4. spacing and selectors ------------------------ */
@@ -1914,9 +1929,9 @@
 
 .tk2-root .tk-quick button {
   padding: 0.42rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in oklab, var(--foreground) 0.02, transparent);
   color: var(--ci-text-soft);
   font-size: 11.5px;
   transition:
@@ -1926,17 +1941,17 @@
 }
 
 .tk2-root .tk-quick button:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: color-mix(in oklab, var(--foreground) 0.12, transparent);
   color: var(--ci-text);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in oklab, var(--foreground) 0.04, transparent);
 }
 
 /* rating scales: capsule pills, champagne glow on the selected one */
 .tk2-root .tk-pill {
   gap: 0.3rem;
   padding: 0.28rem;
-  border-color: rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.02);
+  border-color: color-mix(in oklab, var(--foreground) 0.05, transparent);
+  background: color-mix(in oklab, var(--foreground) 0.02, transparent);
 }
 
 .tk2-root .tk-pill button {
@@ -1947,7 +1962,7 @@
 }
 
 .tk2-root .tk-pill button[aria-pressed="true"] {
-  color: #0b0c10;
+  color: var(--primary-foreground);
   background-image: var(--tk2-champagne);
   border-color: var(--tk2-champagne-line);
   box-shadow: 0 0 18px -6px var(--tk2-champagne-glow);
@@ -1958,38 +1973,31 @@
    glow along its length and a lit cap where it stops. */
 
 [data-design="atlas"] .at-track {
-  stroke: rgba(255, 255, 255, 0.03);
+  stroke: color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
 [data-design="atlas"] .at-arc[data-id="sleep"] {
   stroke: var(--tk2-ring-sleep);
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-sleep) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="water"] {
   stroke: var(--tk2-ring-water);
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-water) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="movement"] {
   stroke: var(--tk2-ring-movement);
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-movement) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="screen"] {
   stroke: var(--tk2-ring-screen);
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-screen) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="study"] {
   stroke: var(--tk2-ring-study);
   stroke-width: 7;
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-study) 45%, transparent));
 }
 [data-design="atlas"] .at-arc[data-id="energy"] {
   stroke: var(--tk2-ring-energy);
   stroke-width: 6;
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--tk2-ring-energy) 45%, transparent));
 }
 
 [data-design="atlas"] .at-cap {
-  filter: drop-shadow(0 0 8px currentcolor);
 }
 
 [data-design="atlas"] .at-cap[data-id="sleep"] {
@@ -2070,7 +2078,7 @@
 
 .tk2-root .tk-quick button {
   padding: 5px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
   border-radius: 12px;
   background: transparent;
   color: var(--text-primary);
@@ -2083,7 +2091,7 @@
 }
 
 .tk2-root .tk-quick button:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: color-mix(in oklab, var(--foreground) 0.16, transparent);
 }
 
 .tk2-root .tk-quick button:active:not(:disabled) {
@@ -2106,7 +2114,7 @@
   border: 1px solid var(--card-border);
   border-radius: 16px;
   box-shadow:
-    inset 0px 1px 1px rgba(255, 255, 255, 0.03),
+    inset 0px 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
     0px 12px 30px rgba(0, 0, 0, 0.4);
 }
 
@@ -2119,13 +2127,13 @@
 
 .tk2-root .ci-btn--primary,
 .tk2-root .tk-pill button[aria-pressed="true"] {
-  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
-  background-color: #ff0055;
-  border-color: rgba(255, 0, 85, 0.8);
-  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  background-color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
+  color: var(--foreground) !important;
   font-weight: 700;
   text-shadow: none;
-  box-shadow: 0 10px 26px -6px rgba(255, 0, 85, 0.6);
+  box-shadow: 0 10px 26px -6px color-mix(in oklab, var(--gold) 0.6, transparent);
 }
 
 .tk2-root .ci-btn--primary:hover:not(:disabled) {
@@ -2135,7 +2143,7 @@
 /* --------------------------- 2. the dial itself -------------------------- */
 
 [data-design="atlas"] .at-track {
-  stroke: rgba(255, 255, 255, 0.03);
+  stroke: color-mix(in oklab, var(--foreground) 0.03, transparent);
   stroke-width: 2;
 }
 
@@ -2164,7 +2172,6 @@
 }
 
 [data-design="atlas"] .at-cap {
-  filter: drop-shadow(0px 0px 8px currentcolor);
 }
 
 /* ------------------ 5. tag groups and the number scale ------------------- */
@@ -2185,9 +2192,9 @@
 
 .tk2-tag {
   padding: 6px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.06, transparent);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in oklab, var(--foreground) 0.03, transparent);
   color: var(--text-muted);
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -2197,17 +2204,17 @@
 }
 
 .tk2-tag:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: color-mix(in oklab, var(--foreground) 0.14, transparent);
   color: var(--text-primary);
 }
 
 .tk2-tag[data-active="true"] {
-  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
-  background-color: #ff0055;
-  border-color: rgba(255, 0, 85, 0.8);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  background-color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
+  color: var(--foreground);
   font-weight: 700;
-  box-shadow: 0 0 16px rgba(255, 0, 85, 0.4);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--gold) 0.4, transparent);
 }
 
 .tk2-tag:disabled {
@@ -2220,9 +2227,9 @@
   gap: 4px;
   margin-top: 8px;
   padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
   border-radius: 30px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in oklab, var(--foreground) 0.02, transparent);
 }
 
 .tk2-number {
@@ -2243,14 +2250,14 @@
 
 .tk2-number:hover:not(:disabled) {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
 .tk2-number[data-active="true"] {
-  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  color: var(--foreground);
   font-weight: 700;
-  box-shadow: 0 0 16px rgba(255, 0, 85, 0.5);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--gold) 0.5, transparent);
 }
 
 .tk2-number:disabled {
@@ -2274,7 +2281,7 @@
   min-width: 32px;
   height: 32px;
   padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
   border-radius: 999px;
   background: transparent;
   color: var(--text-muted);
@@ -2286,7 +2293,7 @@
 }
 
 [data-design="atlas"] .at-territory-actions button:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: color-mix(in oklab, var(--foreground) 0.14, transparent);
   color: var(--text-primary);
 }
 
@@ -2295,12 +2302,12 @@
 }
 
 [data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
-  background: linear-gradient(135deg, #ff0055 0%, #8a2be2 100%);
-  background-color: #ff0055;
-  border-color: rgba(255, 0, 85, 0.8);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  background-color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
+  color: var(--foreground);
   font-weight: 700;
-  box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 0.4, transparent);
 }
 
 /* -------------------- the dial: percentage-driven rings ------------------ */
@@ -2320,7 +2327,7 @@
 /* the night itself — bed to wake — kept as a hairline outside the rings */
 [data-design="atlas"] .at-nightspan {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.12);
+  stroke: color-mix(in oklab, var(--foreground) 0.12, transparent);
   stroke-width: 1;
   stroke-linecap: round;
 }
@@ -2365,7 +2372,7 @@
   width: calc(100% - 32px);
   max-width: 420px;
   padding: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
   border-radius: 24px;
   background: rgba(18, 18, 21, 0.9);
   backdrop-filter: blur(30px);
@@ -2407,7 +2414,7 @@
 
 .tk2-modal-close:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in oklab, var(--foreground) 0.05, transparent);
 }
 
 .tk2-modal-kicker {
@@ -2434,9 +2441,9 @@
 
 .tk2-modal-tap {
   padding: 6px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.06, transparent);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in oklab, var(--foreground) 0.03, transparent);
   color: var(--text-muted);
   font-size: 0.72rem;
   letter-spacing: 0.06em;
@@ -2446,7 +2453,7 @@
 }
 
 .tk2-modal-tap:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: color-mix(in oklab, var(--foreground) 0.14, transparent);
   color: var(--text-primary);
 }
 
@@ -2468,10 +2475,10 @@
   margin-top: 26px;
   padding: 16px 0;
   border: none;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid color-mix(in oklab, var(--foreground) 0.1, transparent);
   border-radius: 0;
   background: transparent;
-  color: #f5f5f7;
+  color: var(--foreground);
   font-family: var(--ci-font-mono), ui-monospace, monospace;
   font-size: 2.2rem;
   font-weight: 300;
@@ -2481,7 +2488,7 @@
 
 .tk2-modal-input:focus {
   outline: none;
-  border-bottom-color: #d4af37;
+  border-bottom-color: var(--gold);
 }
 
 .tk2-modal-unit {
@@ -2497,7 +2504,7 @@
 .tk2-modal-error {
   margin: 14px 0 0;
   font-size: 0.72rem;
-  color: #e0705f;
+  color: var(--danger);
 }
 
 .tk2-modal-save {
@@ -2509,7 +2516,7 @@
   border-radius: 100px;
   background: var(--accent-champagne);
   background-color: var(--accent-solid);
-  color: #121214 !important;
+  color: var(--surface-2) !important;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -2549,7 +2556,7 @@
 }
 
 [data-design="atlas"] .at-territory:hover {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: color-mix(in oklab, var(--foreground) 0.1, transparent);
   transform: translateY(-2px);
 }
 
@@ -2645,7 +2652,7 @@
 }
 
 .premium-log-cta:focus-visible {
-  outline: 2px solid #fdf3e3;
+  outline: 2px solid var(--foreground);
   outline-offset: 4px;
 }
 
@@ -2692,7 +2699,7 @@
   grid-template-columns: 32px 1fr;
   gap: 20px;
   padding: 16px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.03, transparent);
   color: var(--text-ultra-white);
   font-size: 0.88rem;
   font-weight: 300;
@@ -2705,7 +2712,7 @@
 }
 
 .tk2-insight-index {
-  color: #e5d3b3;
+  color: var(--foreground);
   font-weight: 500;
   font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
   font-size: 0.8rem;
@@ -2723,12 +2730,12 @@
   border: 1px solid var(--glass-border-rim);
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(255, 0, 85, 0.03) 0%, rgba(138, 43, 226, 0.03) 100%),
+    linear-gradient(135deg, color-mix(in oklab, var(--gold) 0.03, transparent) 0%, rgba(138, 43, 226, 0.03) 100%),
     var(--panel-glass-bg);
   backdrop-filter: blur(24px) saturate(120%);
   -webkit-backdrop-filter: blur(24px) saturate(120%);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
     0 10px 30px rgba(0, 0, 0, 0.35);
   transition:
     border-color 0.3s ease,
@@ -2737,12 +2744,12 @@
 }
 
 [data-design="atlas"] .at-territory:hover {
-  border-color: rgba(255, 0, 85, 0.5);
+  border-color: color-mix(in oklab, var(--gold) 0.5, transparent);
   transform: translateY(-2px);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
     0 10px 30px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(255, 0, 85, 0.2);
+    0 0 20px color-mix(in oklab, var(--gold) 0.2, transparent);
 }
 
 [data-design="atlas"] .at-place {
@@ -2772,7 +2779,7 @@
 
 .tk2-unit,
 .tk2-root .tk2-target-field em {
-  color: rgba(255, 255, 255, 0.3);
+  color: color-mix(in oklab, var(--foreground) 0.3, transparent);
   font-size: 0.78rem;
   margin-left: 1px;
 }
@@ -2789,8 +2796,8 @@
 }
 
 [data-design="atlas"] .ci-table thead tr {
-  background: rgba(255, 255, 255, 0.015);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: color-mix(in oklab, var(--foreground) 0.015, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
 }
 
 [data-design="atlas"] .ci-table th {
@@ -2804,13 +2811,13 @@
 }
 
 [data-design="atlas"] .ci-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.025, transparent);
   background: transparent;
   transition: background-color 0.2s ease;
 }
 
 [data-design="atlas"] .ci-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: color-mix(in oklab, var(--foreground) 0.01, transparent);
 }
 
 [data-design="atlas"] .ci-table tbody th,
@@ -2839,7 +2846,7 @@
 }
 
 .tk2-row-action:hover:not(:disabled) {
-  color: #ff453a;
+  color: var(--danger);
 }
 
 .tk2-row-action:disabled {
@@ -2853,11 +2860,10 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: drop-shadow(0px 0px 8px var(--active-track-color-hex));
 }
 
 [data-design="atlas"] .at-track {
-  stroke: rgba(255, 255, 255, 0.035);
+  stroke: color-mix(in oklab, var(--foreground) 0.035, transparent);
   stroke-width: 2.5px;
 }
 
@@ -2944,7 +2950,7 @@
   margin-top: 6px;
   padding: 8px 0;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.12, transparent);
   border-radius: 0;
   background: transparent;
   color: var(--text-primary);
@@ -2961,7 +2967,7 @@
 }
 
 .tk2-sheet-input::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: color-mix(in oklab, var(--foreground) 0.2, transparent);
 }
 
 @media (max-width: 460px) {

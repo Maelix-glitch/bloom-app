@@ -96,26 +96,98 @@
   --animate-scan: scan 5.5s linear infinite;
 }
 
-:root {
-  --radius: 1rem;
-  --background: oklch(0.19 0.021 279);
-  --surface: oklch(0.235 0.023 279);
-  --surface-2: oklch(0.272 0.026 279);
-  --surface-3: oklch(0.305 0.028 279);
-  --border: oklch(0.33 0.026 279);
-  --border-strong: oklch(0.4 0.03 279);
-  --foreground: oklch(0.955 0.008 85);
-  --muted-foreground: oklch(0.66 0.026 285);
-  --faint: oklch(0.52 0.028 285);
+/* ==========================================================================
+   Bloom design tokens — Dark Editorial Luxury.
 
-  --violet: oklch(0.7 0.107 297);
-  --sky: oklch(0.71 0.073 250);
-  --amber: oklch(0.81 0.11 82);
-  --gold: oklch(0.855 0.086 82);
-  --gold-soft: oklch(0.9 0.05 88);
-  --sage: oklch(0.71 0.062 155);
-  --rose: oklch(0.72 0.083 355);
-  --destructive: oklch(0.66 0.16 22);
+   One palette, one surface hierarchy, one type scale. Every other stylesheet
+   consumes these; a component never invents its own charcoal or its own gold.
+
+   Distribution is deliberate: ~80% neutral surfaces, ~15% supporting surface
+   variation, ~5% accent. Gold is the primary brand accent, lavender supports
+   it, semantic colours only ever describe data.
+   ========================================================================== */
+:root {
+  /* ---- radius scale -------------------------------------------------- */
+  --radius: 0.875rem;
+  --radius-control: 0.625rem; /* inputs, small buttons */
+  --radius-card: 1rem; /* standard cards */
+  --radius-panel: 1.375rem; /* feature panels */
+  --radius-dialog: 1.25rem; /* dialogs and sheets */
+  --radius-pill: 999px;
+
+  /* ---- surface hierarchy --------------------------------------------- */
+  --background: #0d0f16; /* main canvas */
+  --sidebar: #0a0c12; /* navigation */
+  --surface: #151823; /* primary card surface */
+  --surface-2: #1b1f2b; /* elevated */
+  --surface-3: #232837; /* interactive / hover */
+  --border: #303747;
+  --border-subtle: #252a36;
+  --border-strong: #3a4356;
+
+  /* ---- text hierarchy ------------------------------------------------ */
+  --foreground: #f3efe7; /* primary */
+  --text-primary: var(--foreground);
+  --text-secondary: #b2b0b8;
+  --muted-foreground: #b2b0b8; /* secondary */
+  --faint: #858796; /* metadata */
+
+  /* ---- accents ------------------------------------------------------- */
+  --gold: #d9bc83; /* primary champagne gold */
+  --gold-soft: #e7cc9d; /* gold hover */
+  --accent-primary: var(--gold);
+  --accent-primary-hover: var(--gold-soft);
+  --violet: #a697d3; /* secondary lavender */
+  --accent-secondary: var(--violet);
+  --accent-secondary-muted: #302a43;
+
+  /* ---- semantic ------------------------------------------------------ */
+  --success: #86aa98;
+  --warning: #c5a16b;
+  --danger: #c77e82;
+  --destructive: #c77e82;
+  --info: #879dbb;
+  --sage: var(--success);
+  --amber: var(--warning);
+  --rose: #c77e82;
+  --sky: var(--info);
+
+  /* ---- data visualisation -------------------------------------------- */
+  --chart-1: #879dbb;
+  --chart-2: #86aa98;
+  --chart-3: #d9bc83;
+  --chart-4: #a697d3;
+  --chart-5: #c77e82;
+  --chart-6: #c5a16b;
+
+  /* ---- elevation ----------------------------------------------------- */
+  --elevation-card: 0 1px 2px rgb(0 0 0 / 0.24), 0 12px 28px -22px rgb(0 0 0 / 0.7);
+  --elevation-panel: 0 1px 2px rgb(0 0 0 / 0.3), 0 22px 48px -28px rgb(0 0 0 / 0.8);
+  --elevation-float: 0 8px 18px -10px rgb(0 0 0 / 0.6), 0 26px 60px -30px rgb(0 0 0 / 0.85);
+  --elevation-dialog: 0 40px 90px -40px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.04);
+
+  /* ---- spacing scale ------------------------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ---- type scale ---------------------------------------------------- */
+  --text-display: clamp(2rem, 5vw, 3.25rem);
+  --text-page: clamp(1.6rem, 3.4vw, 2.25rem);
+  --text-section: 1.125rem;
+  --text-card: 1rem;
+  --text-body: 0.9375rem;
+  --text-support: 0.8125rem;
+  --text-meta: 0.6875rem;
+
+  --primary: var(--gold);
+  --primary-foreground: #0d0f16;
 
   /* Cycle — semantic phase tokens */
   --cycle-menstrual: var(--rose);
@@ -124,14 +196,11 @@
   --cycle-luteal: var(--violet);
   --cycle-predicted: color-mix(in oklab, var(--foreground) 32%, transparent);
 
-  --primary: var(--violet);
-  --primary-foreground: oklch(0.19 0.021 279);
-
   --grad-violet: linear-gradient(135deg, var(--violet), var(--sky));
   --glow-violet:
     0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
     0 18px 50px -22px color-mix(in oklab, var(--violet) 70%, transparent);
-  --shadow-depth: 0 26px 60px -30px oklch(0.1 0.02 279 / 0.85);
+  --shadow-depth: var(--elevation-panel);
   --dim-violet: color-mix(in oklab, var(--violet) 14%, transparent);
   --dim-sky: color-mix(in oklab, var(--sky) 14%, transparent);
   --dim-amber: color-mix(in oklab, var(--amber) 14%, transparent);
@@ -144,17 +213,15 @@
    * page-scoped token set. Bloom already owns --surface, so the modal's two
    * surfaces are namespaced as --metric-surface / --metric-surface-raised.
    */
-  --metric-sleep: oklch(0.62 0.22 290);
-  --metric-water: oklch(0.72 0.14 220);
-  --metric-study: oklch(0.75 0.17 155);
-  --metric-movement: oklch(0.72 0.19 55);
-  --metric-energy: oklch(0.85 0.17 95);
-  --metric-screen: oklch(0.62 0.25 355);
-  --metric-surface: oklch(0.13 0.02 275);
-  --metric-surface-raised: oklch(0.17 0.02 275);
-  --brand: oklch(0.6 0.28 320);
-  --success: oklch(0.75 0.19 165);
-  --danger: oklch(0.65 0.24 20);
+  --metric-sleep: var(--chart-4);
+  --metric-water: var(--chart-1);
+  --metric-study: var(--chart-2);
+  --metric-movement: var(--chart-3);
+  --metric-energy: var(--chart-6);
+  --metric-screen: var(--chart-5);
+  --metric-surface: var(--surface);
+  --metric-surface-raised: var(--surface-2);
+  --brand: var(--gold);
 }
 
 @keyframes rise {
@@ -297,7 +364,8 @@
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--violet) 35%, transparent);
+    background: color-mix(in oklab, var(--gold) 30%, transparent);
+    color: var(--foreground);
   }
 
   ::-webkit-scrollbar {
@@ -314,7 +382,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--violet);
+    outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
 }
@@ -409,25 +477,25 @@
   }
 }
 .bloom-nav-link {
-  color: #63667a;
+  color: var(--faint);
   text-decoration: none;
   font-size: 13px;
   font-weight: 450;
   padding: 6px 11px;
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   transition:
-    color 0.18s ease,
-    background 0.18s ease;
+    color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
 }
 
 .bloom-nav-link:hover {
-  color: #9b9cac;
-  background: #191a22;
+  color: var(--text-secondary);
+  background: var(--surface-2);
 }
 
 .bloom-nav-link.bloom-nav-active {
-  color: #edebe4;
-  background: #1f212b;
+  color: var(--foreground);
+  background: var(--surface-3);
 }
 
 /* ---------------------------------------------------------------------------
@@ -437,22 +505,23 @@
  * (Rewards owns its own --gold, Mood owns the global panel utility).
  * ------------------------------------------------------------------------- */
 .home-page {
-  --home-surface: color-mix(in oklab, var(--surface) 85%, transparent);
-  --home-surface-2: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  --home-surface: var(--surface);
+  --home-surface-2: var(--surface-2);
   --home-secondary: var(--surface-2);
-  --home-gold: oklch(0.83 0.1 78);
-  --home-mood: oklch(0.78 0.13 20);
-  --home-sleep: oklch(0.72 0.13 255);
-  --home-habits: oklch(0.78 0.14 152);
-  --home-study: oklch(0.75 0.14 285);
-  --home-cycle: oklch(0.7 0.17 8);
-  --home-energy: oklch(0.84 0.13 85);
+  --home-gold: var(--gold);
+  --home-mood: var(--chart-5);
+  --home-sleep: var(--chart-1);
+  --home-habits: var(--chart-2);
+  --home-study: var(--chart-4);
+  --home-cycle: var(--rose);
+  --home-energy: var(--chart-6);
+  --home-sage: var(--success);
   --home-gradient-glow: radial-gradient(
     circle at 50% 50%,
-    color-mix(in oklab, var(--violet) 35%, transparent),
+    color-mix(in oklab, var(--gold) 18%, transparent),
     transparent 70%
   );
-  --home-shadow-soft: 0 24px 60px -30px oklch(0 0 0 / 80%);
+  --home-shadow-soft: var(--elevation-panel);
 }
 
 .home-panel {
@@ -477,10 +546,12 @@
  * so the hub, the node chips and their labels scale with the drawing as one
  * unit. No ResizeObserver, no post-paint jump.
  * ------------------------------------------------------------------------- */
+/* The stage fills the panel it is given: the network was a small drawing
+   floating in a large empty box. Cap at the panel width, keep 1:1. */
 .cm-stage {
   position: relative;
   container-type: inline-size;
-  width: min(340px, 100%);
+  width: min(400px, 100%);
   aspect-ratio: 1 / 1;
   margin-inline: auto;
 }
@@ -640,32 +711,59 @@
   color: var(--muted-foreground);
 }
 
+/* Primary and secondary action chips: the first two invite a log, the rest
+   are quiet navigation. Hierarchy comes from surface and border, not colour. */
 .home-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 0.9rem;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
   border-radius: 999px;
-  background: var(--home-surface-2);
-  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
   font-size: 0.8125rem;
+  line-height: 1.1;
   transition:
-    border-color 0.3s ease,
-    transform 0.3s ease;
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease;
 }
 .home-chip:hover {
   border-color: var(--border-strong);
-  transform: translateY(-1px);
+  background: var(--surface-3);
+  color: var(--foreground);
+}
+.home-chip svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+/* The two primary actions carry the champagne accent; the rest stay neutral. */
+.home-chip--primary {
+  border-color: color-mix(in oklab, var(--gold) 38%, transparent);
+  color: var(--foreground);
+}
+.home-chip--primary svg {
+  color: var(--gold);
+}
+.home-chip--quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--faint);
+}
+.home-chip--quiet:hover {
+  background: var(--surface-2);
 }
 
+/* Nodes carry their signal colour; no glow around every disc. */
 .home-node-glow {
-  box-shadow:
-    0 0 18px -2px currentColor,
-    inset 0 0 12px -6px currentColor;
+  box-shadow: none;
 }
 
 .home-text-gradient {
-  background: linear-gradient(100deg, oklch(0.95 0.03 90), var(--home-gold));
+  background: linear-gradient(100deg, var(--foreground), var(--gold));
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -1062,20 +1160,26 @@
 /* The rail reads Bloom's base palette on every route — even inside pages
    that retint the shared tokens (Rewards) — so it is identical everywhere. */
 .app-nav {
-  --background: oklch(0.19 0.021 279);
-  --surface: oklch(0.235 0.023 279);
-  --surface-2: oklch(0.272 0.026 279);
-  --surface-3: oklch(0.305 0.028 279);
-  --border: oklch(0.33 0.026 279);
-  --border-strong: oklch(0.4 0.03 279);
-  --foreground: oklch(0.955 0.008 85);
-  --muted-foreground: oklch(0.66 0.026 285);
-  --primary: oklch(0.7 0.107 297);
-  --radius: 1rem;
+  /* The rail reads the global palette on every route — even inside pages that
+     retint tokens — so it is identical everywhere. */
+  --background: #0d0f16;
+  --sidebar: #0a0c12;
+  --surface: #151823;
+  --surface-2: #1b1f2b;
+  --surface-3: #232837;
+  --border: #303747;
+  --border-strong: #3a4356;
+  --foreground: #f3efe7;
+  --muted-foreground: #b2b0b8;
+  --faint: #858796;
+  --gold: #d9bc83;
+  --primary: #d9bc83;
+  --radius: 0.875rem;
   color: var(--foreground);
 }
 .app-sidebar {
-  background: color-mix(in oklab, var(--surface) 40%, var(--background));
+  background: var(--sidebar);
+  border-right: 1px solid var(--border-subtle);
 }
 .app-mobile-bar {
   background: color-mix(in oklab, var(--surface) 55%, var(--background));
@@ -1133,18 +1237,15 @@
   right: 1rem;
   bottom: calc(1rem + var(--app-bottom-nav, 0px));
   z-index: 30;
-  box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
-    0 18px 50px -18px color-mix(in oklab, var(--violet) 80%, transparent);
-  transition:
-    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.25s ease;
+  background: var(--gold);
+  color: var(--primary-foreground);
+  box-shadow: var(--elevation-float);
+  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
 }
 .home-fab:hover {
   transform: translateY(-2px);
-  box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--violet) 60%, transparent),
-    0 22px 56px -16px color-mix(in oklab, var(--violet) 90%, transparent);
+  background: var(--gold-soft);
+  box-shadow: var(--elevation-panel);
 }
 @media (min-width: 40rem) {
   .home-fab {
@@ -1356,7 +1457,7 @@ html[data-bloom-effect="fx-mist"] {
 html {
   /* Edge-to-edge (viewport-fit=cover): the page owns the notch area, so the
      rubber-band background matches the theme instead of flashing white. */
-  background-color: #14151f;
+  background-color: var(--background);
   /* Kill pull-to-refresh / rubber-banding on the installed app — it reads as
      "website", not "app". In-page scroll containers are unaffected. */
   overscroll-behavior-y: none;
@@ -1374,7 +1475,7 @@ body {
 @media (display-mode: standalone) {
   html,
   body {
-    background-color: #14151f;
+    background-color: var(--background);
   }
 }
 
@@ -1508,4 +1609,30 @@ body {
 /* PhaseCard — Today's cycle read. Same panel language, one droplet accent. */
 .home-phase-sep {
   color: color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Stories — an empty band is a compact strip, not an empty wall. The rail
+ * itself already renders the add-ring; the band stops reserving a panel-sized
+ * block for one small control.
+ * ------------------------------------------------------------------------- */
+.home-band[data-empty="true"] {
+  padding: 10px 14px 8px;
+}
+.home-band[data-empty="true"] .home-band-head {
+  margin-bottom: 4px;
+}
+.home-band[data-empty="true"] .home-band-title {
+  font-size: 1rem;
+}
+@media (min-width: 64rem) {
+  .home-band[data-empty="true"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .home-band[data-empty="true"] .home-band-head {
+    margin-bottom: 0;
+  }
 }

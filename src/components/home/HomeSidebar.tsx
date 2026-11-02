@@ -102,7 +102,6 @@ export function HomeSidebar() {
                 key={item.label}
                 to={item.to}
                 aria-current={active ? "page" : undefined}
-                data-tour={`nav-${item.label.toLowerCase()}`}
                 className={`app-nav-link flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
                   active
                     ? "app-nav-link-active text-foreground"
@@ -122,7 +121,7 @@ export function HomeSidebar() {
         <Link
           to="/profile"
           aria-current={profileActive ? "page" : undefined}
-          data-tour="nav-profile"
+         
           className={`mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
             profileActive
               ? "app-nav-link-active text-foreground"
@@ -249,7 +248,6 @@ export function HomeMobileNav() {
             to={item.to}
             aria-current={active ? "page" : undefined}
             aria-label={item.label}
-            data-tour={`nav-${item.label.toLowerCase()}`}
             className={active ? "text-primary" : "text-muted-foreground"}
           >
             <Icon className="size-[22px]" strokeWidth={active ? 2.2 : 1.8} aria-hidden="true" />

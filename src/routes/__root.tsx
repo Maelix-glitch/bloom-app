@@ -11,7 +11,6 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import tourCss from "../styles/tour.css?url";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
 import { bootNativeShell } from "@/lib/native-shell";
 import { useSoundBoot } from "@/hooks/useSound";
@@ -28,8 +27,6 @@ import { PointsAwardToast } from "@/components/system/PointsAwardToast";
 import { RemindersEngine } from "@/components/system/RemindersEngine";
 import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
-import { TourProvider } from "@/components/tour/TourContext";
-import { TourFab } from "@/components/tour/TourLauncher";
 
 function NotFoundComponent() {
   return (
@@ -166,10 +163,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
-      },
-      {
-        rel: "stylesheet",
-        href: tourCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -322,7 +315,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TourProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <AccessControl>
           <Outlet />
@@ -342,8 +334,6 @@ function RootComponent() {
         <BloomToaster />
         <PointsAwardToast />
         {/* Global tour FAB + auto-prompt for new users */}
-        <TourFab />
-      </TourProvider>
     </QueryClientProvider>
   );
 }
