@@ -9,7 +9,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  analyzeCycle,
   formatDate,
   newLogId,
   todayKey,
@@ -19,6 +18,8 @@ import {
   type LogDraft,
   type PeriodLog,
 } from "@/lib/cycle/predict";
+import { buildCanonicalCycle } from "@/lib/cycle/canonical";
+import type { IntelligenceResult } from "@/lib/cycle/intel/types";
 import {
   analyzeDayLogs,
   validateDayLog,
@@ -120,6 +121,9 @@ export interface PeriodLogStore {
   /** Pull the table again and reconcile. Safe to call at any time. */
   syncNow: () => void;
   logs: PeriodLog[];
+  /** The one engine result every cycle view renders from. */
+  intel: IntelligenceResult;
+  /** Projection of `intel` for the existing visualisations. */
   analysis: CycleAnalysis;
   /** Advanced daily log, newest first. */
   days: DayLog[];
@@ -678,14 +682,19 @@ export function usePeriodLog(): PeriodLogStore {
   }, [keepForUndo]);
 
   const mode = effectiveMode(settings, today);
-  const analysis = useMemo(
+  /* One normalise -> analyse -> project pass. Every view reads this result, so
+     editing or deleting a record changes all of them together. */
+  const canonical = useMemo(
     () =>
-      analyzeCycle(logs, today, {
-        personalMaxPlausible: settings.personalMaxPlausible,
+      buildCanonicalCycle({
+        today,
+        logs,
+        days,
         expecting: mode === "tracking",
       }),
-    [logs, today, settings.personalMaxPlausible, mode],
+    [logs, days, today, mode],
   );
+  const { analysis, intel } = canonical;
 
   const setMode = useCallback(
     (nextMode: CycleMode, pause?: Partial<Omit<CyclePause, "since">>) => {
@@ -839,6 +848,7 @@ export function usePeriodLog(): PeriodLogStore {
     sync,
     syncNow,
     logs,
+    intel,
     analysis,
     days: useMemo(() => [...days].sort((a, b) => b.date.localeCompare(a.date)), [days]),
     dayAnalysis,
