@@ -1,0 +1,1120 @@
+npm notice run bloom-app@1.0.0 npx
+npm notice run vitest run --reporter=verbose
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/Windows 11 Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510[39m
+
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mrefuses a future start
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mrefuses a duplicate start and points at editing
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mrefuses a start inside another period's span
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mallows the same start while editing that entry
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mallows a two-year-old date (warned, not blocked) but refuses ten-year-old ones
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mrefuses an end before the start, a future end, and an absurd bleed length
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mallows a long-but-real bleed of 12 days
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mrefuses an end date that runs into the next logged period
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mvalidateLogDraft — the hard walls[2m > [22mstill refuses notes longer than 400 characters
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22massessLogDraft — soft margins that still save[2m > [22mwarns (does not block) when a start lands too close to the previous one
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22massessLogDraft — soft margins that still save[2m > [22mwarns when a start is noticeably earlier than the person's own average
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22massessLogDraft — soft margins that still save[2m > [22mwarns about a bleed longer than ten days but keeps it
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22massessLogDraft — soft margins that still save[2m > [22mwarns about a very old date instead of refusing it
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22massessLogDraft — soft margins that still save[2m > [22mis quiet for an ordinary, on-rhythm entry
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mexcludes implausible gaps and flags them with a midpoint suggestion
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mreports lateness only from three days past the prediction (medium+ confidence)
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mwaits a week before calling a rough estimate late (low confidence)
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mis never late against the population fallback
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mdoes not call a 54-day cycle 'luteal' when there is no pattern to be late against
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mkeeps a reasonably long cycle inside the grace window as luteal
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — what the check-ins rely on[2m > [22mgives a window that widens as confidence falls
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — long cycles are a rhythm, not a mistake[2m > [22maccepts consistent long cycles once two consecutive gaps agree
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — long cycles are a rhythm, not a mistake[2m > [22mstill treats a single long gap in an otherwise ordinary record as a probable missed log
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — long cycles are a rhythm, not a mistake[2m > [22mhonours what the person confirmed, up to the hard ceiling
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22manalyzeCycle — long cycles are a rhythm, not a mistake[2m > [22meffectiveMaxPlausible needs agreement, not just length
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22mgives a single date only at high confidence
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22mgives a window at medium confidence
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22mcalls a low-confidence estimate rough and shows the window
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22mnever dresses the 28-day fallback up as a prediction
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22msays how late, once the engine calls it late
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22mpoints at a future-dated entry instead of predicting from it
+ [32m✓[39m src/lib/cycle/predict.test.ts[2m > [22mdescribeNextPeriod — one sentence every surface can quote[2m > [22mhas nothing to say with nothing logged
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mstorySlides back-compat[2m > [22mreads a pre-multi-slide story as exactly one slide
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mstorySlides back-compat[2m > [22mnever returns an empty array, even for a blank story
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mstorySlides back-compat[2m > [22mprefers explicit slides when present
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mstorySlides back-compat[2m > [22mcaps an oversized slide array at MAX_SLIDES
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mstorySlides back-compat[2m > [22misMultiSlide is false for legacy rows and true past one slide
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtoSlide tolerance[2m > [22mfills in every field from an empty object
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtoSlide tolerance[2m > [22mrejects a bogus mediaType rather than trusting it
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtoSlide tolerance[2m > [22mtreats non-finite dimensions as absent
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtoSlide tolerance[2m > [22monly keeps a duration for video slides
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtoSlide tolerance[2m > [22mkeeps an existing id so React keys survive a round trip
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtoSlide tolerance[2m > [22mgives every new slide a distinct id
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mclampSlideDuration[2m > [22mclamps to the bounds
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mclampSlideDuration[2m > [22mfalls back to the default for junk
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtiming[2m > [22muses the clip length for video and the fallback otherwise
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mtiming[2m > [22msums the story
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22madds a slide
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mrefuses to add past the cap
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mduplicates in place, after the source
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mrefuses to remove the last slide
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mremoves by index
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mrejects an out-of-range removal
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mmoves forward and backward
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mclamps an out-of-range move target instead of throwing
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mreturns null for a no-op move
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mupdates in place and preserves the id
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mcloneSlide copies content but not the id
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22mlist operations[2m > [22mlist helpers are pure — they never mutate the input
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22msanitizeSlides[2m > [22maccepts a well-formed array
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22msanitizeSlides[2m > [22mrejects junk so the caller can fall back to the legacy path
+ [32m✓[39m src/lib/stories/slides.test.ts[2m > [22msanitizeSlides[2m > [22mtruncates an oversized payload
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22mdetectTopic[2m > [22mreads what the person actually asked about
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22mdetectTopic[2m > [22mfalls back to the mode when nothing is named
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — with data[2m > [22manswers a sleep question from the logged nights
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — with data[2m > [22msays what's missing instead of guessing when a tracker is empty
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — period[2m > [22mreads the cycle day, phase and confidence when there's a record
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — period[2m > [22msays predictions are paused instead of quoting a stale due date
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — period[2m > [22mnames the one log that would change the answer when there's no cycle
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — nothing logged at all[2m > [22madmits it rather than producing a template
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — nothing logged at all[2m > [22mgreets by pointing at what it can actually read
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — plan mode[2m > [22mbuilds steps from the record instead of a template
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — mood[2m > [22muses the mood check-ins when they exist
+ [32m✓[39m src/lib/coach/responder.test.ts[2m > [22manswer — mood[2m > [22mwon't invent a mood reading when there are none
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · ended early[2m > [22masks "did your period end early?" when a no-bleed day is logged on day 4 of an open period
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · ended early[2m > [22mdoes not ask when the recorded end already matches
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · ended early[2m > [22mdoes not ask when bleeding resumes after the quiet day (that's a different question)
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · ended early[2m > [22mstays quiet once the person says it's continuing
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · ended early[2m > [22m"Not now" parks the question for two days, then it comes back
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · continued[2m > [22masks "did it continue?" when bleeding is logged the day after the recorded last day
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · continued[2m > [22mextends to the end of the run that follows, not just the first day
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · same period vs new period[2m > [22mtreats a bleed two days after an older period as the same period, never a new cycle
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · same period vs new period[2m > [22masks whether an unexplained bleed run far from any entry was a period starting
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · same period vs new period[2m > [22mnever proposes a new period inside the 15-day implausible window
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · same period vs new period[2m > [22mignores spotting entirely — it is not a period day
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22masks for the last day when an open period runs well past the usual length
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mdoes not nag about an open period that is still inside its usual length
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22masks "has it started?" once the predicted date is three days past
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22masks ONE question when late and a bleed is already in the daily log
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mnever asks 'has it started?' against the population fallback
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mwaits a week past a rough (low-confidence) estimate before asking
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mstops asking whether an open period has finished once it is plainly over
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mdoes not ask 'has it finished?' alongside 'has it started?' for the same period
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22m'it really was that long' teaches the engine instead of just dismissing
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22ma months-long gap can only be dismissed, never accepted as one cycle
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mis silent for a person whose cycles simply run long
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mpoints at the midpoint of an implausibly long gap
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mis silent on a clean, closed, on-time record
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · still open · late · missed[2m > [22mis silent with nothing logged at all
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mclassifyBleedDay — what pre-ticks 'first day of a period'[2m > [22mthe start day itself is inside its own period
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mclassifyBleedDay — what pre-ticks 'first day of a period'[2m > [22mday 3 of a period is inside, not a new start
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mclassifyBleedDay — what pre-ticks 'first day of a period'[2m > [22mtwo days after the last day is adjacent
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mclassifyBleedDay — what pre-ticks 'first day of a period'[2m > [22mnine days after the start is too soon to be a cycle
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mclassifyBleedDay — what pre-ticks 'first day of a period'[2m > [22ma date long after everything is a plausible new start
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mclassifyBleedDay — what pre-ticks 'first day of a period'[2m > [22mwith no entries at all, any bleed is a new start
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mhelpers[2m > [22mbleedRunFrom tolerates one quiet day but stops after two
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mhelpers[2m > [22mpruneMemory forgets entries that no longer exist and expired snoozes
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22masks "did it really start on that day?" when the start day is logged as no bleeding
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22moffers only the date picker when no bleeding follows within three days
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22mstays quiet once the person confirms the date is right
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22mdoes not ask about the start day of a period logged as bleeding on day one
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22mflags a start dated in the future and asks for the real day — and asks nothing else
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22msuggests the last bleed day logged before today as the real start
+ [32m✓[39m src/lib/cycle/reconcile.test.ts[2m > [22mreconcile · the start itself is wrong (engine-probe fixes C6/C7)[2m > [22mthe analysis behind it reports the future start as upcoming, with no phase or cycle day
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mcounts nothing when there is no data
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mcounts distinct habit days inside the window
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mkeeps the longest run even after a missed day
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mreads movement, hydration and sleep from tracker days
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mnever infers a wake time that was not logged
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mcounts study sessions from the sessions list
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mbalance days count any check-in, from any record
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mcounts mood days only where entries exist
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22muses the person's own routine as the daily target
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mverification reads real records only[2m > [22mwindows are inclusive of today and end exactly at the horizon
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mclaim safety[2m > [22ma completed goal is claimable exactly once per period
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mclaim safety[2m > [22mperiods roll over cleanly: daily, weekly, monthly, one-time
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mclaim safety[2m > [22man insufficient-progress goal cannot be claimed and says so kindly
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mclaim safety[2m > [22mone-time milestones stay claimed forever
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mranks[2m > [22mderives the rank from earned points
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mranks[2m > [22ma goal crossing a threshold unlocks the rank exactly once
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mranks[2m > [22mnever ends: 0 → 20,000 → a million all resolve to a real rank
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mranks[2m > [22mthe cycle layer keeps opening without repeating a threshold
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mranks[2m > [22mthe journey path always shows the person's own rank
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mranks[2m > [22mthe named ladder is ordered and starts at zero
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe economy[2m > [22mnever pays a trivial amount for a goal
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe economy[2m > [22mkeeps repeating cadences honest about what they pay
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe economy[2m > [22mkeeps the top of the ladder reachable but never final
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22machievements[2m > [22munlock only when their real condition is met
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22machievements[2m > [22mrank achievements follow real earned points
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22machievements[2m > [22mcarry their real earned date when they have one
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22machievements[2m > [22mdefines a real condition for every achievement
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe next milestone recommendation[2m > [22mprefers a goal with real progress, then the closest
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe next milestone recommendation[2m > [22mnever recommends an already-claimed goal
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe next milestone recommendation[2m > [22mreturns null only when everything really is claimed
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mis 0 with no logs
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mcounts consecutive days back from today
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mkeeps yesterday's run while today is still open
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mbreaks on a missed day
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mignores other habits' logs
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mskips days the habit isn't scheduled
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mstreakOf[2m > [22mstops at the start date
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mweekly habits — 'N× a week' means N, not seven[2m > [22mknows which Monday a day belongs to
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mweekly habits — 'N× a week' means N, not seven[2m > [22mis due until the week has its N completions
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mweekly habits — 'N× a week' means N, not seven[2m > [22mreports the week's progress as of a given day
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mweekly habits — 'N× a week' means N, not seven[2m > [22mcounts a streak in weeks that hit the target
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mweekly habits — 'N× a week' means N, not seven[2m > [22mtreats a missing or silly target as once a week
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mpause and archive[2m > [22ma paused habit is neither due nor counted against you
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mpause and archive[2m > [22ma pause with only an end date starts on that date
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mpause and archive[2m > [22man archived habit is never due
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mediting keeps identity and history[2m > [22mround-trips a habit through the dialog's draft shape
+ [32m✓[39m src/lib/home/habits.test.ts[2m > [22mediting keeps identity and history[2m > [22mswitching frequency clears what no longer applies
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mrows ↔ records[2m > [22mround-trips an entry through the table shape
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mrows ↔ records[2m > [22mdrops rows it cannot trust and tolerates a missing stamp
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mmergePeriodRecords — per entry, the later change wins[2m > [22mkeeps entries that exist on only one side
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mmergePeriodRecords — per entry, the later change wins[2m > [22mtakes the fresher edit and reports what the device holds ahead of the table
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mmergePeriodRecords — per entry, the later change wins[2m > [22ma deletion made elsewhere removes the entry here — and a later edit here revives it
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mmergePeriodRecords — per entry, the later change wins[2m > [22mretires a duplicate period logged on two devices before they first synced
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mrecordsFromLogs — the plain list becomes stamped records[2m > [22mstamps new and changed entries, leaves untouched ones alone
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mrecordsFromLogs — the plain list becomes stamped records[2m > [22mturns a vanished entry into a tombstone, once
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mrecordsFromLogs — the plain list becomes stamped records[2m > [22mre-adding a deleted entry brings it back alive
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mrecordsFromLogs — the plain list becomes stamped records[2m > [22mforgets tombstones every device has long since seen
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mcheck-in memory + settings travel together[2m > [22mkeeps every dismissal, the later snooze and the higher confirmed ceiling
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mcheck-in memory + settings travel together[2m > [22ma dismissal anywhere beats a snooze anywhere
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mcheck-in memory + settings travel together[2m > [22mround-trips through the table row and shrugs at junk
+ [32m✓[39m src/lib/cycle/periodCloud.test.ts[2m > [22mcheck-in memory + settings travel together[2m > [22mthe cycle mode is one deliberate choice — the later choice wins on either side
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe award ledger[2m > [22mawards once, refuses the duplicate, and never invents a record[33m 342[2mms[22m[39m
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe award ledger[2m > [22mrecords a rank exactly once, even if the threshold is crossed twice
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mthe award ledger[2m > [22mwalks a whole simulated journey without repeating an award
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mcross-tab convergence[2m > [22mre-reads on another tab's write, ignores unrelated keys, and stops on unsubscribe
+ [32m✓[39m src/lib/progression/progression.test.ts[2m > [22mcross-tab convergence[2m > [22mnever learns points from the other tab — only that it should re-read
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario A — no history[2m > [22mmakes no personalised forecast
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario A — no history[2m > [22msays what would change that, without inventing a cycle length
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario B — one period start[2m > [22mrecords the day but refuses a personal baseline
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario B — one period start[2m > [22mnever claims ovulation
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario C — two starts, one interval[2m > [22mshows a preliminary estimate with a wide window
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario D — consistent intervals[2m > [22mderives a personal baseline and narrows the window
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario D — consistent intervals[2m > [22mscores its own past predictions
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario D — consistent intervals[2m > [22mplaces the phase as an estimate, not a measurement
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario E — variable cycle lengths[2m > [22mwidens the forecast instead of forcing a single date
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario F — one unusually long interval[2m > [22mkeeps the observation and sets it aside from the statistics
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario F — one unusually long interval[2m > [22mdoes not present it as a diagnosis
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario G — historical edit[2m > [22mrecalculates both the baseline and the forecast
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario H — historical deletion[2m > [22mremoves the record from every dependent calculation
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario H — historical deletion[2m > [22mleaves no resurrected entry behind
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario I — missing symptom records[2m > [22mtreats missing days as missing, never as absence of symptoms
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario K — insufficient symptom samples[2m > [22mrefuses to call one occurrence a correlation
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22msymptom patterns with enough evidence[2m > [22mreports recurrence with its sample attached
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario L — irregular recorded cycles[2m > [22mkeeps the history and shows uncertainty rather than certainty
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mscenario L — irregular recorded cycles[2m > [22mmarks a phase inside an ovulation window as estimated
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mbleeding duration[2m > [22muses only periods the user actually closed with an end date
+ [32m✓[39m src/lib/cycle/intel/intel.test.ts[2m > [22mdeterminism and versioning[2m > [22mreturns an identical result for the same record
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mno history[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mno history[2m > [22mshows the first-run brief and no forecast
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mone period[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mone period[2m > [22mcounts the day without inventing a phase
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mtwo starts[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mtwo starts[2m > [22mcarries the same window into the dial and the header
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mconsistent cycles[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mconsistent cycles[2m > [22mkeeps the dial, cards and stats on one length
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mvariable cycles[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mvariable cycles[2m > [22mwidens the window rather than forcing a date
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22man unusual interval[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22man unusual interval[2m > [22mkeeps the gap in history but out of the stats
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22ma historical edit[2m > [22magrees across every view, before and after
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22ma historical edit[2m > [22mmoves every dependent view, not just one
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22ma historical deletion[2m > [22magrees across every view, before and after
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22ma historical deletion[2m > [22mdrops the record from every view at once
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mirregular cycles[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mirregular cycles[2m > [22mshows uncertainty everywhere, not just in one card
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22ma date crossing a daylight-saving boundary[2m > [22magrees across every view
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22ma date crossing a daylight-saving boundary[2m > [22mcounts calendar days, not elapsed hours
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mpaused tracking[2m > [22mkeeps history and still agrees across views
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22marchitecture — one calculation path[2m > [22mno visualisation calls a cycle analyser itself
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22marchitecture — one calculation path[2m > [22mthe store is the only producer of cycle state
+ [32m✓[39m src/lib/cycle/canonical.test.ts[2m > [22mflow mix denominators[2m > [22mcounts one flow per period, so every share is a share of entryCount
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22monAuthStateChange is never called unguarded[2m > [22mhas no unguarded subscribers
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mevery module touching supabase can survive no config[2m > [22mlists no unprotected modules
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mevery module touching supabase can survive no config[2m > [22mthe session-only allowance is still accurate
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mawaited auth actions resolve their UI state[2m > [22mSignedOutProfile always leaves the sending state
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mawaited auth actions resolve their UI state[2m > [22msendMagicLink checks for a project before calling out
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mthe auth session storage key[2m > [22mis derived from the project URL, not hardcoded
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mthe person is told when there's no database[2m > [22mexposes a readable reason
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mthe person is told when there's no database[2m > [22mmounts a notice at the root
+ [32m✓[39m src/lib/supabase.guard.test.ts[2m > [22mschema coverage[2m > [22mevery table the code queries has a migration
+[90mstderr[2m | src/lib/profile/profileService.test.ts[2m > [22m[2mloadMyProfile[2m > [22m[2mthrows ProfileLoadError when the row cannot be read
+[22m[39m[bloom:profile:load] { message: [32m'relation does not exist'[39m, code: [32m'42P01'[39m }
+
+[90mstderr[2m | src/lib/profile/profileService.test.ts[2m > [22m[2mloadMyProfile[2m > [22m[2mcarries the kind of failure out to the screen
+[22m[39m[bloom:profile:load] { message: [32m'JWT expired'[39m, code: [32m'PGRST301'[39m }
+[bloom:profile:load] { message: [32m'JWT expired'[39m, code: [32m'PGRST301'[39m }
+
+[90mstderr[2m | src/lib/profile/profileService.test.ts[2m > [22m[2mloadMyProfile[2m > [22m[2mreads what it can when an identity column is missing
+[22m[39m[bloom:profile:load] { message: [32m'column profiles.featured does not exist'[39m, code: [32m'42703'[39m }
+
+[90mstderr[2m | src/lib/profile/profileService.test.ts[2m > [22m[2mloadMyProfile[2m > [22m[2mdoes not keep narrowing the select when the whole table is missing
+[22m[39m[bloom:profile:load] { message: [32m'relation does not exist'[39m, code: [32m'42P01'[39m }
+
+[90mstderr[2m | src/lib/profile/profileService.test.ts[2m > [22m[2mloadMyProfile[2m > [22m[2mrefreshes a stale session and reads again with the same columns
+[22m[39m[bloom:profile:load] { message: [32m'JWT expired'[39m, code: [32m'PGRST301'[39m }
+
+[90mstderr[2m | src/lib/profile/profileService.test.ts[2m > [22m[2mloadMyProfile[2m > [22m[2msurvives an auth client that cannot even answer getUser
+[22m[39m[bloom:profile:auth] Error: Bloom isn't connected to a database in this environment.
+    at Object.h.supabase.auth.getUser [90m(C:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\lib\profile\profileService.test.ts:199:13[90m)[39m
+    at Module.loadMyProfile [90m(C:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\lib\profile\profileService.ts:142:52[90m)[39m
+    at [90mC:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\lib\profile\profileService.test.ts:206:24
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:146:14
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:533:11
+    at runWithTimeout [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:39:7[90m)[39m
+    at runTest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1056:17[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at runSuite [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1205:15[90m)[39m
+    at runSuite [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1205:15[90m)[39m
+
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mmaps a saved row into the snapshot — banner included
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mreturns defaults (no throw) when the account has no profile row yet
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mthrows ProfileLoadError when the row cannot be read
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mcarries the kind of failure out to the screen
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mreads what it can when an identity column is missing
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mdoes not keep narrowing the select when the whole table is missing
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22mrefreshes a stale session and reads again with the same columns
+ [32m✓[39m src/lib/profile/profileService.test.ts[2m > [22mloadMyProfile[2m > [22msurvives an auth client that cannot even answer getUser
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies a@b.co as true
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies someone@example.com as true
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies first.last+tag@sub.domain.org as true
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies  as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies nope as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies @example.com as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies someone@ as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies someone@example as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies two words@example.com as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies someone@.com as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mclassifies someone@example. as false
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22misLikelyEmail[2m > [22mtrims rather than rejecting
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mthe happy path[2m > [22mgoes idle -> typing -> checking -> sending -> sent
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mthe happy path[2m > [22mlands on personalization for a first-time sign-in
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mthe happy path[2m > [22mlands on authenticated for a returning user
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mrejection[2m > [22mis a clear dead end with a message
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mrejection[2m > [22mcan be escaped by typing another address
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mrejection[2m > [22mdoes not leak a reason
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22minvalid input[2m > [22mnever reaches the network
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22minvalid input[2m > [22mclears once they fix it
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mfailure and retry[2m > [22mshows a human message, not the backend string
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mfailure and retry[2m > [22mkeeps the address so retry doesn't start from scratch
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mresend[2m > [22mdoes not re-check approval
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mresend[2m > [22mcounts sends and stops after three
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mresend[2m > [22mresets the count for a different address
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mresend[2m > [22mdrops the sent state when they edit the address
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mguards[2m > [22mblocks submission while checking or sending
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mguards[2m > [22mignores events that arrive out of order
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mguards[2m > [22mlabels the button per state
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mmessageFor[2m > [22mtranslates rate limit exceeded
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mmessageFor[2m > [22mtranslates SMTP provider error
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mmessageFor[2m > [22mtranslates Failed to fetch
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mmessageFor[2m > [22mtranslates Bloom access is by invitation only.
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mmessageFor[2m > [22mtranslates some opaque internal thing
+ [32m✓[39m src/lib/auth/flow.test.ts[2m > [22mmessageFor[2m > [22msurvives a non-Error
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22miTunes music provider[2m > [22mmaps search results to playable tracks
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22miTunes music provider[2m > [22mdrops tracks that can't be previewed
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22miTunes music provider[2m > [22mnever queries on an empty search
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22miTunes music provider[2m > [22mfails soft when the catalog is unreachable
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22miTunes music provider[2m > [22mtrending blends and dedupes
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mmusic chain — Deezer backs up iTunes[2m > [22mfalls back to Deezer when iTunes answers nothing
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mmusic chain — Deezer backs up iTunes[2m > [22mdrops Deezer tracks that can't be previewed
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mmusic chain — Deezer backs up iTunes[2m > [22mtrending prefers real charts over blended guesses
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mmusic chain — Deezer backs up iTunes[2m > [22msearch prefers iTunes when both answer
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mGIF + sticker providers — GIPHY[2m > [22mmaps GIPHY results to playable GIFs
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mGIF + sticker providers — GIPHY[2m > [22mmaps GIPHY sticker results to playable assets
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mGIF + sticker providers — GIPHY[2m > [22munconfigured providers stay silent
+ [32m✓[39m src/lib/stories/providers.test.ts[2m > [22mGIF + sticker providers — GIPHY[2m > [22mnever ships a GIPHY key in the client
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mappends up to the cap, then refuses
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22massigns a fresh id to every appended slide
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mrefuses to remove the only slide
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mremoves and keeps the index in range
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mduplicates after the source and selects the copy
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mmoves and clamps
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mwriteComposition preserves the slide id
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mwriteComposition ignores an out-of-range index
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mlist operations[2m > [22mnever mutates the input array
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mblankComposition[2m > [22mproduces something the editor can render immediately
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mthe editor -> viewer round trip[2m > [22msends nothing for a single-slide story
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mthe editor -> viewer round trip[2m > [22msends every slide, first one included
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mthe editor -> viewer round trip[2m > [22mgives the viewer every slide — including the first
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mthe editor -> viewer round trip[2m > [22mkeeps a single-slide story at exactly one segment
+ [32m✓[39m src/lib/stories/slideCompositions.test.ts[2m > [22mthe editor -> viewer round trip[2m > [22msurvives a save and reload
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · settings[2m > [22mdefaults to off — nothing fires until someone says yes
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · settings[2m > [22mrepairs anything odd on disk
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · habits[2m > [22mreminds about a habit at its time
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · habits[2m > [22msays nothing about a habit already ticked
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · habits[2m > [22mdoes not fire before its time, or long after
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · cycle[2m > [22mwarns two days before a predicted start
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · cycle[2m > [22mprefers the late message over the upcoming one
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · cycle[2m > [22mstays silent when the cycle is paused or off
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · cycle[2m > [22mmentions the fertile window on the day it opens
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · the evening nudge[2m > [22mfires on an empty day
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · the evening nudge[2m > [22mrounds off lightly-logged days, stays silent on captured ones
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · streaks[2m > [22mpasses the live streak into the copy
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · delivery memory[2m > [22mnever shows the same reason twice in a day
+ [32m✓[39m src/lib/reminders/schedule.test.ts[2m > [22mreminders · delivery memory[2m > [22mforgets yesterday's keys when it writes
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mJourneyHero[2m > [22mrenders a brand-new account without inventing progress
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mJourneyHero[2m > [22mshows the real rank, points and distance to the next rank
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mJourneyHero[2m > [22mshows a loading state, not a zero, while points are unknown
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankPath[2m > [22mmarks exactly one rank as the current one and keeps the future legible
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankPath[2m > [22mstill has a path far past the named ladder
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22mlists real goals with their verified progress
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22msummarises the full board instead of printing every card at once
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22moffers a claim only where a goal is genuinely complete
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22mleads with timescales and keeps wellness goals first-class
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22mcounts wellness goals on the chip so the number is never a claim
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22mclassifies wellness from the domain, never from the goal's wording
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mGoalsBoard[2m > [22mhandles an account with no records calmly
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mAchievementGallery[2m > [22mshows earned achievements with a real date and the rest with their condition
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mAchievementGallery[2m > [22mcalls an unlocked achievement earned even before its date is written
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mAchievementGallery[2m > [22mstates conditions for locked achievements instead of teasing
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mhistory surfaces[2m > [22mexplains an empty ledger instead of faking rows
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mhistory surfaces[2m > [22mshows real awards with dates, sources and amounts
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankCeremony[2m > [22mcelebrates the rank it was given, with its real threshold
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22memblems[2m > [22mrenders a real mark for every rank and achievement
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22memblems[2m > [22mfalls back to a real mark for an unknown id rather than rendering nothing
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankChip (Home)[2m > [22mstates the real distance to the next rank
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankChip (Home)[2m > [22mstays quiet while points load
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankBadge[2m > [22massigns escalating frame bands across the ladder
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankBadge[2m > [22mrenders every named rank plus a cycle rank without leaking NaN into paths
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mRankBadge[2m > [22mmutes future crests instead of hiding them
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mCrestHall[2m > [22mmarks earned, current and future crests for a mid-journey account
+ [32m✓[39m src/components/progression/render.smoke.test.ts[2m > [22mCrestHall[2m > [22mshows the next crests to chase even on a brand-new account
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mwhy do I keep waking up at 3am?
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mhow do I stop procrastinating on my thesis?
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mmy roommate is driving me insane
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mis intermittent fasting worth trying?
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mI think I'm burning out at work
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mwhat should I eat before a run?
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mhow do I know if I need therapy?
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mmoney is tight and I can't sleep
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mexplain why caffeine crashes happen
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mhow do I export my data?
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mI've been really lonely since I moved
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mI can't get motivated to do anything
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mdoes alcohol actually affect sleep
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mmy cramps are getting worse
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mhow do I stop doomscrolling at night
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mI don't feel good about my body
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mhow do I build a habit that sticks
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mI never have enough time
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mI keep second-guessing myself at work
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mmy grandmother died last month
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbreadth — every subject gets a real answer with no data logged[2m > [22mrecognises all of them as something other than a shrug
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbrevity — a short question gets a short answer[2m > [22manswers a one-line closed question in one paragraph
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbrevity — a short question gets a short answer[2m > [22mkeeps a greeting to a handful of words
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbrevity — a short question gets a short answer[2m > [22mgives an open question room
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbrevity — a short question gets a short answer[2m > [22mnever exceeds the paragraph ceiling it set itself
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mbrevity — a short question gets a short answer[2m > [22mshort questions are reliably shorter than open ones
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mrelevance — the line chosen answers the question asked[2m > [22mpicks the fasting line for a fasting question
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mrelevance — the line chosen answers the question asked[2m > [22mpicks the pre-exercise line for a pre-run question
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mthe log nudge[2m > [22mnever appears for a subject with no tracker behind it
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mclinical honesty[2m > [22mkeeps the see-someone line even when the budget is one paragraph
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mclinical honesty[2m > [22mmarks the topics where a human is part of the honest answer
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mthe knowledge base itself[2m > [22mcovers a wide range, not two or three subjects
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mthe knowledge base itself[2m > [22mgives every entry at least one core line
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22mthe knowledge base itself[2m > [22mhas no duplicated lines across topics
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22misGrounded[2m > [22mrejects the responder's empty-record boilerplate
+ [32m✓[39m src/lib/coach/breadth.test.ts[2m > [22misGrounded[2m > [22mkeeps real statements about the person
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · the run that is alive[2m > [22mflags the longest open streak, first
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · the run that is alive[2m > [22mstays quiet when the streak was completed today
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · the run that is alive[2m > [22mignores runs shorter than three days
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · week-over-week drift[2m > [22msees sleep climbing and cites the evidence
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · week-over-week drift[2m > [22mhides when the sample is thin
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · week-over-week drift[2m > [22mnever invents a trend under the floor
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · the shape of the week[2m > [22mnames lighter weekends after three consistent weeks
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · the shape of the week[2m > [22mneeds both buckets well populated
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · guard rails[2m > [22mcaps the panel and never touches the cycle
+ [32m✓[39m src/lib/smart/noticed.test.ts[2m > [22mnoticed · guard rails[2m > [22msays nothing when there is nothing worth saying
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mrecordGrid[2m > [22mis always twelve full Monday-first weeks ending on the current week
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mrecordGrid[2m > [22mcounts each logged thing and remembers where it came from
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mrecordGrid[2m > [22mignores empty tracker days and dates outside the window
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mrecordTotals[2m > [22mcomputes days, streaks and windows from every source
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mrecordTotals[2m > [22mlets an unlogged today keep yesterday's streak alive
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mrecordTotals[2m > [22mnever counts future-dated entries
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mtrackedThings[2m > [22mlists active trackers, mood, habits and cycle
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mtrackedThings[2m > [22mdrops the cycle chip when cycle tracking is off, dims it when paused
+ [32m✓[39m src/lib/profile/record.test.ts[2m > [22mtrackedThings[2m > [22mmarks mood and habits as not started when there is nothing yet
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mgreeting — knows the person before any entry exists[2m > [22mgreets by name, hour-aware, on an empty record
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mgreeting — knows the person before any entry exists[2m > [22mday one with a name welcomes and orients instead of demanding data
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mgreeting — knows the person before any entry exists[2m > [22mno name → daypart still shapes the hello
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mgreeting — knows the person before any entry exists[2m > [22mnothing known at all → the old hello, unchanged
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mperiod question — cycle science with zero entries[2m > [22mleads with the general model, not a bare log-this instruction
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mperiod question — cycle science with zero entries[2m > [22mwith a tracked phase, the science line arrives and cites its confidence
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mperiod question — cycle science with zero entries[2m > [22man assumed phase carries the caveat — no implied knowledge
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mperiod question — cycle science with zero entries[2m > [22ma paused cycle says nothing counts as late — even to a bare "am I late?"
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mperiod question — cycle science with zero entries[2m > [22man overdue period surfaces in a general question without cycle words
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mthe ground held — empty records never produce the old refusal[2m > [22ma general question on an empty record offers knowledge, not a wall
+ [32m✓[39m src/lib/coach/personal-coach.test.ts[2m > [22mthe ground held — empty records never produce the old refusal[2m > [22mfocus areas ride along in the record for the cloud brain to use
+ [32m✓[39m src/lib/cycle/mode.test.ts[2m > [22mengine · expecting: false[2m > [22mkeeps history and averages but predicts nothing and is never late
+ [32m✓[39m src/lib/cycle/mode.test.ts[2m > [22mengine · expecting: false[2m > [22masks nothing about lateness or long gaps while paused
+ [32m✓[39m src/lib/cycle/mode.test.ts[2m > [22msettings · mode + pause[2m > [22mnormalises junk to tracking and keeps a well-formed pause
+ [32m✓[39m src/lib/cycle/mode.test.ts[2m > [22msettings · mode + pause[2m > [22ma dated pause that has passed reads as tracking again
+ [32m✓[39m src/lib/cycle/mode.test.ts[2m > [22mToday · the cycle steps back when asked to[2m > [22moff removes the ring, the focus nudge and the map node
+ [32m✓[39m src/lib/cycle/mode.test.ts[2m > [22mToday · the cycle steps back when asked to[2m > [22mpaused keeps a quiet ring and never nags to set an anchor
+ [32m✓[39m src/lib/data/restore.test.ts[2m > [22mparseBundle[2m > [22mrejects non-JSON and foreign shapes
+ [32m✓[39m src/lib/data/restore.test.ts[2m > [22mparseBundle[2m > [22maccepts a real export
+ [32m✓[39m src/lib/data/restore.test.ts[2m > [22mapplyRestore[2m > [22mwrites the whole record onto an empty device
+ [32m✓[39m src/lib/data/restore.test.ts[2m > [22mapplyRestore[2m > [22mmerge keeps this device's rows and adds new ones
+ [32m✓[39m src/lib/data/restore.test.ts[2m > [22mapplyRestore[2m > [22mreplace makes the device the backup
+ [32m✓[39m src/lib/data/restore.test.ts[2m > [22mapplyRestore[2m > [22mtracker days reconcile on updatedAt like sync does
+[90mstdout[2m | src/lib/reminders/copy.test.ts[2m > [22m[2mreminder copy[2m > [22m[2mreports the real template count and the rendered count
+[22m[39mnotification copy: 337 templates, 3523+ rendered messages
+
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mproduces a non-empty title and body for every kind
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mnever leaks an unfilled {slot} marker
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mdoes not claim a streak below two days
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mspeaks about a real streak when there is one
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mnames the habit when given one, and stays generic when not
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mis stable for a given key and varied across keys
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mchanges the evening message by how much was logged
+ [32m✓[39m src/lib/reminders/copy.test.ts[2m > [22mreminder copy[2m > [22mreports the real template count and the rendered count
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22mreturns nothing when there is almost no history
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22mappears once the field has enough distinct logged days
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22mcomputes the median sleep window and never echoes the day being filled
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22mhandles bedtimes past midnight without wrapping
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22mexcludes the day being filled from its own suggestion
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22monly looks through the recent window
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22mreports the most recent mode for energy
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22msuggests the typical study total and most-logged subject
+ [32m✓[39m src/lib/smart/usual.test.ts[2m > [22musualDay[2m > [22musualSampleCount reports the strongest basis
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mthe count is exactly fifty[2m > [22mholds exactly 50 templates
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mthe count is exactly fifty[2m > [22msplits across exactly seven collections, at the agreed sizes
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mthe count is exactly fifty[2m > [22mreports no problems from the collection validator
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mthe count is exactly fifty[2m > [22mhas no hidden duplicates — ids and names are unique
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mthe count is exactly fifty[2m > [22mnever uses a technical name
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mdeclares only known collections, and every collection has designs
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mgives every template a name, a hint and tags
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22minstantiates every template without throwing
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mderives stack order from seed order when z is not declared
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mkeeps every seed inside the canvas
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mkeeps readable content clear of the viewer's top and bottom UI
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mnever ships a baked-in photograph — slots arrive empty
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mreferences only shapes and metrics that exist
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mstays on Bloom's palette
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22moffers genuinely different compositions, not one design re-skinned
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mdoes not let one composition family dominate
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mstory template library[2m > [22mlets several templates be genuinely minimal
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mtemplate discovery[2m > [22mlooks up by id and groups into exactly seven sections
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mtemplate discovery[2m > [22munderstands natural-language search over the fifty
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mtemplate discovery[2m > [22mdefers to the sections when the query is empty, and never throws on junk
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mtemplate discovery[2m > [22mexposes favourites and recents as plain id lists
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mno dangling references[2m > [22mevery hardcoded templateId in the source exists in the library
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mtemplate metadata[2m > [22mcounts photo slots and metrics honestly
+ [32m✓[39m src/lib/stories/templates/templates.test.ts[2m > [22mtemplate metadata[2m > [22mkeeps a multi-photo template
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mmaps an entry to a face by tagged emotion first, then by score
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mpicks the latest entry logged today, ignoring future-stamped ones
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mbuilds a real entry from a face tap
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mturns the last seven logged days into 0..1 chart points
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mbuckets days for the distribution ring and writes an honest note
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mnever invents insights from too little data
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mreports a lift, a time-of-day pattern and the top emotion
+ [32m✓[39m src/lib/mood/page.test.ts[2m > [22mmood page view-model[2m > [22mmarks the last seven days and compares the two weeks
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mrowToDay[2m > [22mreads the column names the legacy page wrote
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mrowToDay[2m > [22mkeeps spotting — it's an observation the person made, not noise
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mrowToDay[2m > [22mfalls back to logged_at when the row has no updated_at
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mrowToDay[2m > [22mdrops rows and values it can't trust
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mdayToRow[2m > [22mwrites the same columns the legacy page used
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mdayToRow[2m > [22msurvives a round trip through the table
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mmergeDayLists[2m > [22mkeeps days that exist on only one side, in date order
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mmergeDayLists[2m > [22mlets the newer copy win on a shared date
+ [32m✓[39m src/lib/cycle/cycleCloud.test.ts[2m > [22mmergeDayLists[2m > [22mtreats a missing timestamp as older than one
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mtracksCycle[2m > [22mincludes the cycle for someone who asked for it
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mtracksCycle[2m > [22mhides it only for an explicit no
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mtracksCycle[2m > [22mdefaults to showing it when nobody said otherwise
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mparseOnboarding[2m > [22mrejects anything that isn't an object
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mparseOnboarding[2m > [22mreads a well-formed record
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mparseOnboarding[2m > [22mkeeps the sex answer, and falls back to null on a bad one
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mparseOnboarding[2m > [22mnever infers a sex answer from the capability
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mparseOnboarding[2m > [22mfalls back rather than throwing on junk fields
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22mparseOnboarding[2m > [22mcaps a very long name
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22misCycleRoute[2m > [22mmatches the cycle pages and their children
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22misCycleRoute[2m > [22mleaves everything else alone
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22msuggestedTrackers[2m > [22mmaps a focus onto trackers worth switching on
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22msuggestedTrackers[2m > [22mde-duplicates across overlapping focuses
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22msuggestedTrackers[2m > [22msuggests nothing when nothing was chosen
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22madmin mode[2m > [22mis off by default
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22madmin mode[2m > [22mis on only for an explicit flag
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22madmin mode[2m > [22msurvives a round trip through storage
+ [32m✓[39m src/lib/onboarding/profileKind.test.ts[2m > [22madmin mode[2m > [22mis not implied by having finished setup
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mkeeps a greeting to one line
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22manswers a short closed question briefly
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mgives an open question room even when it is short
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mkeeps a closed question closed however long it rambles
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mobeys an explicit request for brevity over everything else
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mobeys an explicit request for depth
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mscales with length for plain statements
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mnever allows blocks in the tersest register
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mtreats a complete day plan as a plan, not a clamped paragraph
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mbudgetFor[2m > [22mstill honours an explicit request for a short plan
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22mdrops paragraphs beyond the cap
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22malways returns something when given something
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22mcuts at a sentence boundary, never mid-word
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22mignores blank paragraphs
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22mreturns nothing for nothing
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22mlets a full budget through untouched
+ [32m✓[39m src/lib/coach/brevity.test.ts[2m > [22mfitToBudget[2m > [22mnever truncates a plan — the night must survive
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22mbuildSegments[2m > [22mgives a legacy single-slide story exactly one segment
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22mbuildSegments[2m > [22mflattens a multi-slide story into one segment per slide
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22mbuildSegments[2m > [22mkeeps slide order across several stories
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22mbuildSegments[2m > [22mproduces stable, unique keys
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22mbuildSegments[2m > [22mnever yields zero segments for a non-empty rail
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22msegmentForStory[2m > [22mlands on the first slide of the requested story
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22msegmentForStory[2m > [22mskips an expired story and lands on the next playable one
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22msegmentForStory[2m > [22mreturns -1 when nothing is playable
+ [32m✓[39m src/components/stories/segments.test.ts[2m > [22msegmentForStory[2m > [22mfalls back to the first active segment for an out-of-range index
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parseDateToken[2m > [22mreads ISO, slashed ISO and day-first dates
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parseDateToken[2m > [22muses the impossible half to break the ambiguity
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parseDateToken[2m > [22mrefuses dates the calendar doesn't have
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parsePeriodImport[2m > [22mreads the CSV Bloom itself writes, header and all
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parsePeriodImport[2m > [22mreads bare start days and written ranges
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parsePeriodImport[2m > [22mreports every unreadable line with its number, and keeps the rest
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parsePeriodImport[2m > [22mskips blank lines and comments without complaining
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · parsePeriodImport[2m > [22mtreats an over-long bleed as a mistake, not a period
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · previewImport — nothing is written blind[2m > [22mmarks duplicates, overlaps and new rows separately
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · previewImport — nothing is written blind[2m > [22mde-duplicates within the paste itself
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · previewImport — nothing is written blind[2m > [22mhands back drafts the existing add() already accepts
+ [32m✓[39m src/lib/data/importPeriods.test.ts[2m > [22mimportPeriods · previewImport — nothing is written blind[2m > [22mcarries the unreadable lines through the plan
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mfirstNameOf — a greeting-length name, or nothing[2m > [22mtakes the first word of a full name
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mfirstNameOf — a greeting-length name, or nothing[2m > [22mtrims and keeps a single name
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mfirstNameOf — a greeting-length name, or nothing[2m > [22mrefuses nothing and refuses nonsense
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mfirstNameOf — a greeting-length name, or nothing[2m > [22mrefuses a pasted sentence — that is not a name
+ [31m×[39m src/lib/voice/personal.test.ts[2m > [22mreadPersonalVoice — identity from the onboarding answer, or honest blanks[2m > [22mreads the name, focus and cycle capability
+[31m   → expected 1 to be 2 // Object.is equality[39m
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mreadPersonalVoice — identity from the onboarding answer, or honest blanks[2m > [22mday one is day one
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mreadPersonalVoice — identity from the onboarding answer, or honest blanks[2m > [22mdegrades to blanks when nothing was answered — and must not throw
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mreadPersonalVoice — identity from the onboarding answer, or honest blanks[2m > [22msurvives corrupt storage
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mreadPersonalVoice — identity from the onboarding answer, or honest blanks[2m > [22mno-cycle profiles read as capability false
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mwelcomeLine — personal from minute zero, varied by daypart[2m > [22muses the name when there is one
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mwelcomeLine — personal from minute zero, varied by daypart[2m > [22mnever leaks the placeholder without a name
+ [32m✓[39m src/lib/voice/personal.test.ts[2m > [22mwelcomeLine — personal from minute zero, varied by daypart[2m > [22mthe night hears about the hour
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mbuildMoodGraph[2m > [22mis empty-but-honest with no entries
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mbuildMoodGraph[2m > [22mputs every logged signal on the map and never invents one
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mbuildMoodGraph[2m > [22muses the analytics layer's numbers, so the map matches Intelligence
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mbuildMoodGraph[2m > [22mmarks relationships with too few paired days as insufficient instead of drawing a strength
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mbuildMoodGraph[2m > [22mshows the most frequent emotions, capped by emotionLimit
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mbuildMoodGraph[2m > [22monly cross-links signals with real evidence, at most four
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mlayoutGraph[2m > [22mkeeps the hub centred and every node inside the canvas
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mlayoutGraph[2m > [22mnever overlaps two satellites
+ [32m✓[39m src/lib/mood/graph.test.ts[2m > [22mlayoutGraph[2m > [22mis deterministic
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22mhas real data to gate — the fixture is not empty
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22mreadings[2m > [22mincludes the cycle by default
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22mreadings[2m > [22mremoves it entirely when the mode is off
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22mreadings[2m > [22mkeeps it when paused — paused is a state, not an opt-out
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22minsightsOf[2m > [22mcan produce a cycle insight
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22minsightsOf[2m > [22mnever produces one when the mode is off
+ [32m✓[39m src/lib/home/cycleGate.test.ts[2m > [22mthe cycle gate[2m > [22minsightsOf[2m > [22mtreats an omitted mode as tracking, so existing callers don't change
+ [32m✓[39m src/lib/report/weekly.test.ts[2m > [22mweekly report[2m > [22mis honestly empty on a blank record
+ [32m✓[39m src/lib/report/weekly.test.ts[2m > [22mweekly report[2m > [22mcounts the window and not the week before
+ [32m✓[39m src/lib/report/weekly.test.ts[2m > [22mweekly report[2m > [22mnames the dominant emotion and the top habit
+ [32m✓[39m src/lib/report/weekly.test.ts[2m > [22mweekly report[2m > [22maverages trackers against goals
+ [32m✓[39m src/lib/report/weekly.test.ts[2m > [22mweekly report[2m > [22mspeaks the sleep/mood pattern only when the gap is real
+ [32m✓[39m src/lib/report/weekly.test.ts[2m > [22mweekly report[2m > [22mfalls back to week-over-week movement when it is large
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mactive trackers — someone tracking three things can reach 100%[2m > [22mcounts all six by default (the old behaviour)
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mactive trackers — someone tracking three things can reach 100%[2m > [22mcounts only the active ones, in canonical order
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mactive trackers — someone tracking three things can reach 100%[2m > [22mfalls back to all six when the active list is empty
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mactive trackers — someone tracking three things can reach 100%[2m > [22mfeeds Today's score: two of two active goals met is a full tracker share
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mactive trackers — someone tracking three things can reach 100%[2m > [22mdrops switched-off trackers from readings, focus and the flow
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mflow times — the day starts when the person says it does[2m > [22muses the defaults when nothing is set
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mflow times — the day starts when the person says it does[2m > [22mmoves every anchor to the given times
+ [32m✓[39m src/lib/trackers/core.active.test.ts[2m > [22mflow times — the day starts when the person says it does[2m > [22mparseFlowTimes tolerates junk and pads single-digit hours
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mcontext ↔ jsonb column[2m > [22mstores only the signals that are present, and reads them back
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mcontext ↔ jsonb column[2m > [22mis null when there is nothing to keep
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mcontext ↔ jsonb column[2m > [22mignores junk, out-of-range values and unknown weather
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mfrom the day's trackers[2m > [22mtranslates units: minutes → hours, 1–5 quality → /10, sessions summed
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mfrom the day's trackers[2m > [22monly offers what the day actually has
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mfrom the day's trackers[2m > [22mfills gaps in an entry without touching what the person typed
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mcomposer prefill follows the chosen day[2m > [22mfills empty fields and swaps an untouched prefill when the date changes
+ [32m✓[39m src/lib/mood/context.test.ts[2m > [22mcomposer prefill follows the chosen day[2m > [22mclears a prefill the new day cannot back up
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mthe mood outbox[2m > [22mtells local ids from account rows
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mthe mood outbox[2m > [22ma later save of the same entry replaces the earlier one
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mthe mood outbox[2m > [22mdeleting a never-synced entry just drops it; deleting an account row is remembered
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mthe mood outbox[2m > [22msaving again un-deletes
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mthe mood outbox[2m > [22mconfirmations empty the queue item by item
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mwhat the screens see[2m > [22mlays this device's unconfirmed changes over the account copy, in time order
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mwhat the screens see[2m > [22mis just the account copy when nothing is pending
+ [32m✓[39m src/lib/mood/pending.test.ts[2m > [22mwhat comes off the disk[2m > [22mkeeps sane entries — with their context — and drops the rest
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mcoverGeometry[2m > [22mcentres the image at pan 0
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mcoverGeometry[2m > [22mpan ±0.5 pushes the image exactly to the edge
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mcoverGeometry[2m > [22mcover never draws smaller than the box
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mcoverGeometry[2m > [22mcontain never overflows the box
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mcoverGeometry[2m > [22mzoom grows the drawn image
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mcoverGeometryPercent[2m > [22mreturns scale-invariant percentages
+ [32m✓[39m src/lib/stories/canvas/photogeom.test.ts[2m > [22mclampPan[2m > [22mclamps to ±0.5
+ [32m✓[39m src/lib/prefsStore.test.ts[2m > [22mprefsStore cache[2m > [22mreads storage only once for repeated snapshots
+ [32m✓[39m src/lib/prefsStore.test.ts[2m > [22mprefsStore cache[2m > [22mserves the stored value, not the fallback, once read
+ [32m✓[39m src/lib/prefsStore.test.ts[2m > [22mprefsStore cache[2m > [22mfalls back cleanly when nothing is stored
+ [32m✓[39m src/lib/prefsStore.test.ts[2m > [22mthe onboarding sentinel[2m > [22mdistinguishes 'not read yet' from 'nobody answered'
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mflatten[2m > [22mkeeps whitespace as its own token so text rebuilds exactly
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mflatten[2m > [22mtags each word with its paragraph
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mflatten[2m > [22mhandles an empty paragraph without producing phantom words
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mpace[2m > [22mkeeps short answers readable rather than instant
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mpace[2m > [22mspeeds up for long answers so they still finish promptly
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mpace[2m > [22mhits roughly the target for a mid-length answer
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mpace[2m > [22mnever returns a non-positive interval
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mrevealed[2m > [22mshows nothing at the start
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mrevealed[2m > [22mbuilds up in order
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mrevealed[2m > [22mdoes not show a later paragraph before an earlier one is done
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mrevealed[2m > [22mreconstructs the original text exactly when complete
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mrevealed[2m > [22mis stable — the same count always gives the same output
+ [32m✓[39m src/lib/coach/reveal.test.ts[2m > [22mrevealed[2m > [22msurvives paragraphs with awkward spacing
+ [32m✓[39m src/lib/report/weekly-usual.test.ts[2m > [22mweekly report · against your usual[2m > [22mis null for a brand-new record
+ [32m✓[39m src/lib/report/weekly-usual.test.ts[2m > [22mweekly report · against your usual[2m > [22mbaselines on the weeks BEFORE the report window
+ [32m✓[39m src/lib/report/weekly-usual.test.ts[2m > [22mweekly report · against your usual[2m > [22mkeeps the mood baseline separate from the week's average
+ [32m✓[39m src/lib/report/weekly-usual.test.ts[2m > [22mweekly report · against your usual[2m > [22mignores in-window tracker days entirely when the record starts this week
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mbreadth[2m > [22mrecognises subjects well outside the trackers
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mbreadth[2m > [22mstill recognises every tracker
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mbreadth[2m > [22mcovers noticeably more ground than the old eleven topics
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mprecedence[2m > [22mputs high-stakes subjects ahead of softer matches
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mprecedence[2m > [22mreads cycle words as the cycle, not as pain
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mprecedence[2m > [22mtreats a greeting with a question attached as the question
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mprecedence[2m > [22mreports the secondary subjects it also saw
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mprecedence[2m > [22mfalls back to general rather than guessing
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mclassification[2m > [22mmarks the subjects that need a person before a number
+ [32m✓[39m src/lib/coach/topics.test.ts[2m > [22mclassification[2m > [22mmarks what the record can actually answer
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mCoachCancelled[2m > [22mis an Error, so it travels the normal throw path
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mCoachCancelled[2m > [22mis identifiable by name across module boundaries
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mthe abort controller lifecycle[2m > [22ma completed request is not aborted by the next send
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mthe abort controller lifecycle[2m > [22man in-flight request IS superseded by the next send
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mthe abort controller lifecycle[2m > [22msequential sends never abort each other
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mempty answers are impossible[2m > [22msubstitutes a real reply for an empty list
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mempty answers are impossible[2m > [22mleaves a real answer untouched
+ [32m✓[39m src/lib/coach/cancel.test.ts[2m > [22mempty answers are impossible[2m > [22mnever yields a zero-length result
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseKeyOf — tolerant of the engine's display labels[2m > [22mmaps every engine label
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseKeyOf — tolerant of the engine's display labels[2m > [22mrefuses the unknown honestly
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseScienceLine — hedged, stable, caveated when assumed[2m > [22mreturns real content for a known phase
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseScienceLine — hedged, stable, caveated when assumed[2m > [22mis deterministic for a given seed
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseScienceLine — hedged, stable, caveated when assumed[2m > [22mthe assumed phase admits it — the app never implies knowledge it lacks
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseScienceLine — hedged, stable, caveated when assumed[2m > [22ma confirmed phase carries no caveat
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mphaseScienceLine — hedged, stable, caveated when assumed[2m > [22mnull for anything unrecognised
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mthe population-framing rules — nothing here diagnoses or promises[2m > [22mno 'you will' promises anywhere
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mthe population-framing rules — nothing here diagnoses or promises[2m > [22mno diagnosis of PMS or PMDD
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mthe population-framing rules — nothing here diagnoses or promises[2m > [22mthe 21–35 day honest range appears in the general model
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mthe population-framing rules — nothing here diagnoses or promises[2m > [22mevery line is a sentence with content
+ [32m✓[39m src/lib/cycle/phaseScience.test.ts[2m > [22mthe hash never indexes a pool out of range[2m > [22mevery phase label with arbitrary seeds yields a real line — visual QA regression
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpick[2m > [22mreturns a member of the pool
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpick[2m > [22mhandles the degenerate pools without throwing
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpick[2m > [22mexhausts the whole pool before repeating anything
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpick[2m > [22mstarts over once every line has been used
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpick[2m > [22mkeeps separate memory per key
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpick[2m > [22mis deterministic for a given seed
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpickStable[2m > [22mgives the same line for the same seed and writes nothing
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mpickStable[2m > [22mspreads different seeds across the pool
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mhashSeed[2m > [22mis stable and non-negative
+ [32m✓[39m src/lib/voice/messages.test.ts[2m > [22mhashSeed[2m > [22mseparates similar strings
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mlocal-day keying (Asia/Kolkata)[2m > [22mkeys a 1 a.m. check-in on the day it was made, not the UTC day
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mlocal-day keying (Asia/Kolkata)[2m > [22mleaves bare dates and legacy noon stamps alone
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mlocal-day keying (Asia/Kolkata)[2m > [22maggregates by the person's day
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mlocal-day keying (Asia/Kolkata)[2m > [22mdoes not break a streak at midnight UTC
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mlocal-day keying (Asia/Kolkata)[2m > [22mjourney stats count local days
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mday arithmetic[2m > [22mshifts calendar days safely across month ends and DST
+ [32m✓[39m src/lib/localDay.test.ts[2m > [22mday arithmetic[2m > [22mtodayLocal matches the local getters
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mreads an expired access token as a session problem worth retrying
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mreads a missing identity column as a partially readable schema
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mreads PostgREST's 'no such column' the same way
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mreads a missing table as a schema problem a narrower select cannot fix
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mreads a blocked fetch as offline
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mreads row level security as a permission problem
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mfalls back to 'unknown' — and unknown is worth one more try
+ [32m✓[39m src/lib/profile/problems.test.ts[2m > [22mclassifyError[2m > [22mnever leaks the provider's string into the sentence shown on screen
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mToday -> /
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mTrackers -> /trackers
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mCycle -> /cycle
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mMood -> /mood
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mCoach -> /coach
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mProfile -> /profile
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mCycle themes -> /cycle-styles
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mTracker designs -> /trackers-styles
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mTrackers (premium) -> /trackers-premium
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mCycle (classic) -> /cycle-classic
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mReward admin -> /admin/rewards
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mevery admin target resolves to a real route[2m > [22mDashboard -> /dashboard
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mthe target list[2m > [22mhas unique ids
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mthe target list[2m > [22mhas unique destinations
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mthe target list[2m > [22mgives every entry a label and a one-line detail
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mthe target list[2m > [22mreaches the surfaces that no navigation links to
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mgrouping[2m > [22mplaces every target in exactly one group
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mgrouping[2m > [22mlabels every group it emits
+ [32m✓[39m src/lib/onboarding/adminTargets.test.ts[2m > [22mroute discovery sanity[2m > [22mactually finds routes (guards the helper itself)
+ [32m✓[39m src/lib/prefs.test.ts[2m > [22mprefs · normalizeDoc — nothing corrupt reaches the UI[2m > [22mkeeps well-formed entries and drops the rest
+ [32m✓[39m src/lib/prefs.test.ts[2m > [22mprefs · normalizeDoc — nothing corrupt reaches the UI[2m > [22mtreats arrays, null and scalars as empty
+ [32m✓[39m src/lib/prefs.test.ts[2m > [22mprefs · mergeDocs — per key, later wins[2m > [22mtakes the newer side of each key independently
+ [32m✓[39m src/lib/prefs.test.ts[2m > [22mprefs · mergeDocs — per key, later wins[2m > [22mreports nothing newer when both sides are identical
+ [32m✓[39m src/lib/prefs.test.ts[2m > [22mprefs · mergeDocs — per key, later wins[2m > [22man empty account takes everything from the device, and vice versa
+ [32m✓[39m src/lib/coach/sidecar.test.ts[2m > [22mparseSidecars[2m > [22mleaves plain prose untouched
+ [32m✓[39m src/lib/coach/sidecar.test.ts[2m > [22mparseSidecars[2m > [22mextracts memory, forget and tool blocks and strips them from the text
+ [32m✓[39m src/lib/coach/sidecar.test.ts[2m > [22mparseSidecars[2m > [22mdrops malformed blocks from the result but still hides them from prose
+ [32m✓[39m src/lib/coach/sidecar.test.ts[2m > [22mparseSidecars[2m > [22mkeeps well-formed unknown tool names — the executor decides whether to run them
+ [32m✓[39m src/lib/coach/sidecar.test.ts[2m > [22mparseSidecars[2m > [22mkeeps prose before and after a block
+ [32m✓[39m src/lib/coach/sidecar.test.ts[2m > [22mparseSidecars[2m > [22mdefaults an unknown category to context
+ [32m✓[39m src/lib/smart/usual-mood.test.ts[2m > [22musualMood[2m > [22mreturns null below five distinct days
+ [32m✓[39m src/lib/smart/usual-mood.test.ts[2m > [22musualMood[2m > [22muses the day's last entry and excludes the day being filled
+ [32m✓[39m src/lib/smart/usual-mood.test.ts[2m > [22musualMood[2m > [22mcaps at the fourteen most recent logged days
+ [32m✓[39m src/lib/smart/usual-mood.test.ts[2m > [22musualMood[2m > [22msays nothing for a brand-new record
+ [32m✓[39m src/lib/smart/usual-mood.test.ts[2m > [22musualFaceOf[2m > [22mmaps a usual onto the nearest face
+ [32m✓[39m src/lib/smart/usual-mood.test.ts[2m > [22musualFaceOf[2m > [22mrefuses when no preset is close, or when nothing is offered
+ [32m✓[39m src/lib/data/exportAll.test.ts[2m > [22mexportAll · one file with everything[2m > [22mcarries every record and counts them
+ [32m✓[39m src/lib/data/exportAll.test.ts[2m > [22mexportAll · one file with everything[2m > [22mis happy with an empty record and still round-trips as JSON
+ [32m✓[39m src/lib/data/exportAll.test.ts[2m > [22mexportAll · one file with everything[2m > [22mnames the file by the day it was made
+ [32m✓[39m src/lib/data/exportAll.test.ts[2m > [22mexportAll · one file with everything[2m > [22msummarises what is inside in plain words
+ [32m✓[39m src/lib/data/exportAll.test.ts[2m > [22merase · this device[2m > [22mremoves every bloom key and nothing else
+ [32m✓[39m src/lib/data/exportAll.test.ts[2m > [22merase · this device[2m > [22monly accepts the exact typed phrase
+ [32m✓[39m src/lib/coach/signal-starters.test.ts[2m > [22msignalStarters[2m > [22mreads sleep running below its own recent average
+ [32m✓[39m src/lib/coach/signal-starters.test.ts[2m > [22msignalStarters[2m > [22mnudges a live streak with nothing logged today
+ [32m✓[39m src/lib/coach/signal-starters.test.ts[2m > [22msignalStarters[2m > [22mnever fires without real history
+ [32m✓[39m src/lib/coach/signal-starters.test.ts[2m > [22msignalStarters[2m > [22mcaps at two starters
+ [32m✓[39m src/lib/coach/signal-starters.test.ts[2m > [22msignalStarters[2m > [22msignal starters surface in the prompts pool
+ [32m✓[39m src/lib/coach/app-facts.test.ts[2m > [22mapp facts — Bloom questions answer from Bloom's rules, not the record[2m > [22manswers a points question from the rewards rules, even with an empty record
+ [32m✓[39m src/lib/coach/app-facts.test.ts[2m > [22mapp facts — Bloom questions answer from Bloom's rules, not the record[2m > [22manswers 'what is bloom' with an overview, never a deflection
+ [32m✓[39m src/lib/coach/app-facts.test.ts[2m > [22mapp facts — Bloom questions answer from Bloom's rules, not the record[2m > [22manswers 'what can you do' from the abilities list
+ [32m✓[39m src/lib/coach/app-facts.test.ts[2m > [22mapp facts — Bloom questions answer from Bloom's rules, not the record[2m > [22mstill answers ordinary wellbeing questions normally
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mpreset identification[2m > [22mrecognises a preset path
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mpreset identification[2m > [22mdoes not mistake an upload for one
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mpreset identification[2m > [22mround-trips id → path → preset
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mpreset identification[2m > [22mreturns null for a preset id that no longer ships
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mresolveAvatar[2m > [22mserves a bundled asset for a preset, without touching storage
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mresolveAvatar[2m > [22mdelegates a normal path to the storage resolver
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mresolveAvatar[2m > [22mfalls back to initials rather than a 404 for an unknown preset
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mresolveAvatar[2m > [22mhas nothing to resolve when there is no avatar
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mthe preset set itself[2m > [22mhas unique ids
+ [32m✓[39m src/lib/profile/presetAvatars.test.ts[2m > [22mthe preset set itself[2m > [22mgives every photo a label and a tint
+ [32m✓[39m src/lib/cycle/intel/compare.test.ts[2m > [22mcycle comparison[2m > [22mreports recorded lengths and leaves an open cycle without one
+ [32m✓[39m src/lib/cycle/intel/compare.test.ts[2m > [22mcycle comparison[2m > [22mcounts bleeding days only where an end was recorded
+ [32m✓[39m src/lib/cycle/intel/compare.test.ts[2m > [22mcycle comparison[2m > [22msummarises symptoms per cycle without merging them
+ [32m✓[39m src/lib/cycle/intel/compare.test.ts[2m > [22mcycle comparison[2m > [22madds no verdict about which cycle is better
+ [32m✓[39m src/lib/cycle/intel/compare.test.ts[2m > [22mcycle comparison[2m > [22masks for a second cycle rather than comparing one
+ [32m✓[39m src/lib/health/body.test.ts[2m > [22mbody · BMI[2m > [22mcomputes BMI and its band at the WHO boundaries
+ [32m✓[39m src/lib/health/body.test.ts[2m > [22mbody · BMI[2m > [22mneeds a height, a weight and an age before it offers targets
+ [32m✓[39m src/lib/health/body.test.ts[2m > [22mbody · energy and water[2m > [22muses Mifflin–St Jeor, activity and the goal rate
+ [32m✓[39m src/lib/health/body.test.ts[2m > [22mbody · energy and water[2m > [22mnever recommends eating below the safety floor
+ [32m✓[39m src/lib/health/body.test.ts[2m > [22mbody · energy and water[2m > [22mprojects a goal date only from a real goal weight
+ [32m✓[39m src/lib/health/body.test.ts[2m > [22mbody · energy and water[2m > [22mturns water left into glasses, and closes at target
+ [32m✓[39m src/lib/smart/usual-habit-time.test.ts[2m > [22musualHabitTime[2m > [22mstays silent under three completions
+ [32m✓[39m src/lib/smart/usual-habit-time.test.ts[2m > [22musualHabitTime[2m > [22mfinds the median finish over the last fortnight
+ [32m✓[39m src/lib/smart/usual-habit-time.test.ts[2m > [22musualHabitTime[2m > [22mcaps at fourteen completions and ignores other habits
+ [32m✓[39m src/lib/smart/usual-habit-time.test.ts[2m > [22mformatClock[2m > [22mreads like a person speaks
+ [32m✓[39m src/lib/smart/usual-habit-time.test.ts[2m > [22mformatClock[2m > [22mwraps values that fall before midnight's edge
+ [32m✓[39m src/lib/pageAll.test.ts[2m > [22mpageAll — the whole record, not the first thousand[2m > [22mkeeps asking until a page comes back short
+ [32m✓[39m src/lib/pageAll.test.ts[2m > [22mpageAll — the whole record, not the first thousand[2m > [22mstops after one page when the table is smaller than a page
+ [32m✓[39m src/lib/pageAll.test.ts[2m > [22mpageAll — the whole record, not the first thousand[2m > [22masks once more when the record is an exact multiple of the page size
+ [32m✓[39m src/lib/pageAll.test.ts[2m > [22mpageAll — the whole record, not the first thousand[2m > [22mreturns the first error and nothing else
+ [32m✓[39m src/lib/pageAll.test.ts[2m > [22mpageAll — the whole record, not the first thousand[2m > [22mtreats a null page as empty
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22msilent routes[2m > [22msilences the rewards page
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22msilent routes[2m > [22msilences everything under it
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22msilent routes[2m > [22mleaves the rest of the app audible
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22msilent routes[2m > [22mdoes not silence a route that merely starts with the same letters
+ [32m✓[39m src/lib/home/subline.test.ts[2m > [22mhome subtitle[2m > [22mis deterministic while the record is loading
+ [32m✓[39m src/lib/home/subline.test.ts[2m > [22mhome subtitle[2m > [22mkeeps the loaded message stable across repeated renders
+ [32m✓[39m src/lib/home/subline.test.ts[2m > [22mhome subtitle[2m > [22mreports the day's real state instead of rotating copy
+ [32m✓[39m src/lib/home/subline.test.ts[2m > [22mhome subtitle[2m > [22mgives day one its own line, once the record has loaded
+ [32m✓[39m src/lib/home/subline.test.ts[2m > [22mhome subtitle[2m > [22mtransitions exactly once from loading to loaded
+ [32m✓[39m src/lib/cycle/intel/dates.test.ts[2m > [22mdate-only arithmetic[2m > [22mkeeps a logged day stable across a DST transition
+ [32m✓[39m src/lib/cycle/intel/dates.test.ts[2m > [22mdate-only arithmetic[2m > [22mhandles month, year and leap-year boundaries
+ [32m✓[39m src/lib/cycle/intel/dates.test.ts[2m > [22mdate-only arithmetic[2m > [22mnever shifts a date through UTC conversion
+ [32m✓[39m src/lib/cycle/intel/dates.test.ts[2m > [22mdate-only arithmetic[2m > [22mrejects impossible keys instead of rolling them over
+ [32m✓[39m src/lib/coach/edge.test.ts[2m > [22mtoFacts — personal identity travels, safely shaped[2m > [22mcarries name, daypart, focus and tenure
+ [32m✓[39m src/lib/coach/edge.test.ts[2m > [22mtoFacts — personal identity travels, safely shaped[2m > [22mnull when nothing is known — never a stub object
+ [32m✓[39m src/lib/coach/edge.test.ts[2m > [22mtoFacts — personal identity travels, safely shaped[2m > [22mcaps the focus list so it can't dominate the facts
+ [32m✓[39m src/lib/coach/edge.test.ts[2m > [22mtoFacts — personal identity travels, safely shaped[2m > [22mstill carries the tracker and cycle facts alongside
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22mcue vocabulary[2m > [22mcovers every interaction the app actually has
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22mcue vocabulary[2m > [22mis on by default
+ [32m✓[39m src/lib/sound/sound.test.ts[2m > [22mcue vocabulary[2m > [22mdoes nothing, and throws nothing, before a gesture
+ [32m✓[39m src/lib/stories/giphy-edge.test.ts[2m > [22mgiphy edge client[2m > [22mreturns the function's data array
+ [32m✓[39m src/lib/stories/giphy-edge.test.ts[2m > [22mgiphy edge client[2m > [22mstays silent when Bloom has no database
+ [32m✓[39m src/lib/stories/giphy-edge.test.ts[2m > [22mgiphy edge client[2m > [22mfails soft on invoke errors
+ [32m✓[39m src/lib/stories/giphy-edge.test.ts[2m > [22mgiphy edge client[2m > [22mdrops malformed payloads
+ [32m✓[39m src/lib/cycle/intel/backtest.test.ts[2m > [22mchronological backtesting[2m > [22mscores a perfectly regular history at zero error
+ [32m✓[39m src/lib/cycle/intel/backtest.test.ts[2m > [22mchronological backtesting[2m > [22mnever uses the target or any later start
+ [32m✓[39m src/lib/cycle/intel/backtest.test.ts[2m > [22mchronological backtesting[2m > [22mneeds at least two intervals before it can score anything
+ [32m✓[39m src/lib/cycle/intel/backtest.test.ts[2m > [22mchronological backtesting[2m > [22mrecords the signed error, not just its size
+ [32m✓[39m src/lib/undo.test.ts[2m > [22mrestoreRemoved — the undo behind tracker delete / clear[2m > [22mputs removed days back exactly as they were
+ [32m✓[39m src/lib/undo.test.ts[2m > [22mrestoreRemoved — the undo behind tracker delete / clear[2m > [22mrestores a whole cleared record
+ [32m✓[39m src/lib/undo.test.ts[2m > [22mrestoreRemoved — the undo behind tracker delete / clear[2m > [22mnever overwrites a day that was re-logged in the meantime
+ [32m✓[39m src/lib/undo.test.ts[2m > [22mrestoreRemoved — the undo behind tracker delete / clear[2m > [22mkeeps a window long enough to notice, short enough to forget
+ [32m✓[39m src/lib/reminders/streak.test.ts[2m > [22mhabitStreak[2m > [22mis 0 with no logs
+ [32m✓[39m src/lib/reminders/streak.test.ts[2m > [22mhabitStreak[2m > [22mcounts a run ending today
+ [32m✓[39m src/lib/reminders/streak.test.ts[2m > [22mhabitStreak[2m > [22mkeeps a run that ended yesterday — still saveable
+ [32m✓[39m src/lib/reminders/streak.test.ts[2m > [22mhabitStreak[2m > [22mdrops a run that ended earlier
+ [32m✓[39m src/lib/reminders/streak.test.ts[2m > [22mhabitStreak[2m > [22mbreaks at the first gap
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mdrops non-arrays and unknown kinds
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mclamps placement into the canvas
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mcaps text length and rejects unsafe colors
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mcaps the element count per story
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mdrops unknown stickers without a source URL
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mkeeps GIPHY stickers that carry a https source
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mkeeps poll options honest
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mslider keeps a short emoji
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeElements[2m > [22mtext factory seeds readable defaults
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22msanitizeAdjustments[2m > [22mclamps each channel and drops garbage
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mstory time labels[2m > [22mages young stories in minutes, old ones in hours
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mstory time labels[2m > [22mexpiry returns null once passed
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mstory time labels[2m > [22marchive months round-trip through key and label
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mstory time labels[2m > [22mcountdown splits into days, hours, minutes and flags passing
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mseen store[2m > [22mmarks, checks, and counts unseen
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mseen store[2m > [22memits bloom:story-seen exactly once per story
+ [32m✓[39m src/lib/stories/stories.test.ts[2m > [22mseen store[2m > [22msubscribe hands back an unsubscribe
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22mrenders at 1080×1920
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22mpaints the background before any layer
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22mpaints every visible kind and skips hidden layers
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22mpaints in z order, not array order
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22msurvives a photo that fails to load
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22mprints an honest empty state instead of a made-up reading
+ [32m✓[39m src/lib/stories/exporter.test.ts[2m > [22mexportStory[2m > [22mhides the widget entirely when the author asked it to
+[90mstderr[2m | src/hooks/useProfileSpace.degraded.test.tsx[2m > [22m[2museProfileSpace when the cloud read fails[2m > [22m[2mshows the copy this device already has instead of an empty room
+[22m[39m[bloom:profile:identity] ProfileLoadError: This copy of Bloom isn't connected to a finished profile table yet.
+    at [90mC:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\hooks\useProfileSpace.degraded.test.tsx:67:22
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at VitestExecutor.runModule [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:399:5[90m)[39m
+    at VitestExecutor.directRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:381:5[90m)[39m
+    at VitestExecutor.cachedRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:206:14[90m)[39m
+    at VitestExecutor.executeId [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:173:12[90m)[39m
+    at collectTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:851:7[90m)[39m
+    at startTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1268:17[90m)[39m
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+    at withEnv [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:90:5[90m)[39m {
+  problem: {
+    kind: [32m'schema'[39m,
+    message: [32m"This copy of Bloom isn't connected to a finished profile table yet."[39m,
+    detail: [32m'relation "public.profiles" does not exist | 42P01'[39m,
+    retryable: [33mfalse[39m,
+    partialReadPossible: [33mfalse[39m
+  }
+}
+
+ [32m✓[39m src/hooks/useProfileSpace.local.test.tsx[2m > [22museProfileSpace without a database[2m > [22mkeeps a saved name/@username/bio across a revisit
+ [32m✓[39m src/hooks/useProfileSpace.local.test.tsx[2m > [22museProfileSpace without a database[2m > [22mpersists a preset photo but refuses uploads with a plain-language error
+ [32m✓[39m src/hooks/useProfileSpace.degraded.test.tsx[2m > [22museProfileSpace when the cloud read fails[2m > [22mshows the copy this device already has instead of an empty room
+[90mstderr[2m | src/hooks/useProfileSpace.degraded.test.tsx[2m > [22m[2museProfileSpace when the cloud read fails[2m > [22m[2mretries on its own when the failure is the kind that repairs itself
+[22m[39m[bloom:profile:identity] ProfileLoadError: You're offline, so Bloom can't reach your profile right now.
+    at [90mC:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\hooks\useProfileSpace.degraded.test.tsx:70:23
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at VitestExecutor.runModule [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:399:5[90m)[39m
+    at VitestExecutor.directRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:381:5[90m)[39m
+    at VitestExecutor.cachedRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:206:14[90m)[39m
+    at VitestExecutor.executeId [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:173:12[90m)[39m
+    at collectTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:851:7[90m)[39m
+    at startTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1268:17[90m)[39m
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+    at withEnv [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:90:5[90m)[39m {
+  problem: {
+    kind: [32m'offline'[39m,
+    message: [32m"You're offline, so Bloom can't reach your profile right now."[39m,
+    detail: [32m'TypeError: Failed to fetch'[39m,
+    retryable: [33mtrue[39m,
+    partialReadPossible: [33mfalse[39m
+  }
+}
+
+ [32m✓[39m src/hooks/useProfileSpace.local.test.tsx[2m > [22museProfileSpace without a database[2m > [22mkeeps an accent change across a revisit
+ [32m✓[39m src/hooks/useProfileSpace.local.test.tsx[2m > [22museProfileSpace without a database[2m > [22mwrites through to the shared device store
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mcycle sync[2m > [22msays it's device-only when nobody is signed in
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mcycle sync[2m > [22mpulls the table and shows the days it found
+ [32m✓[39m src/hooks/useProfileSpace.degraded.test.tsx[2m > [22museProfileSpace when the cloud read fails[2m > [22mretries on its own when the failure is the kind that repairs itself[33m 830[2mms[22m[39m
+[90mstderr[2m | src/hooks/useProfileSpace.degraded.test.tsx[2m > [22m[2museProfileSpace when the cloud read fails[2m > [22m[2monly falls back to the full-screen failure when there is nothing to show
+[22m[39m[bloom:profile:identity] ProfileLoadError: This copy of Bloom isn't connected to a finished profile table yet.
+    at [90mC:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\hooks\useProfileSpace.degraded.test.tsx:67:22
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at VitestExecutor.runModule [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:399:5[90m)[39m
+    at VitestExecutor.directRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:381:5[90m)[39m
+    at VitestExecutor.cachedRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:206:14[90m)[39m
+    at VitestExecutor.executeId [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:173:12[90m)[39m
+    at collectTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:851:7[90m)[39m
+    at startTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1268:17[90m)[39m
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+    at withEnv [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:90:5[90m)[39m {
+  problem: {
+    kind: [32m'schema'[39m,
+    message: [32m"This copy of Bloom isn't connected to a finished profile table yet."[39m,
+    detail: [32m'relation "public.profiles" does not exist | 42P01'[39m,
+    retryable: [33mfalse[39m,
+    partialReadPossible: [33mfalse[39m
+  }
+}
+
+ [32m✓[39m src/hooks/useProfileSpace.degraded.test.tsx[2m > [22museProfileSpace when the cloud read fails[2m > [22monly falls back to the full-screen failure when there is nothing to show
+[90mstderr[2m | src/hooks/useProfileSpace.degraded.test.tsx[2m > [22m[2museProfileSpace when the cloud read fails[2m > [22m[2mkeeps a successful read for the next visit
+[22m[39m[bloom:profile:identity] ProfileLoadError: This copy of Bloom isn't connected to a finished profile table yet.
+    at [90mC:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\hooks\useProfileSpace.degraded.test.tsx:67:22
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at VitestExecutor.runModule [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:399:5[90m)[39m
+    at VitestExecutor.directRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:381:5[90m)[39m
+    at VitestExecutor.cachedRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:206:14[90m)[39m
+    at VitestExecutor.executeId [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:173:12[90m)[39m
+    at collectTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:851:7[90m)[39m
+    at startTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1268:17[90m)[39m
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+    at withEnv [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:90:5[90m)[39m {
+  problem: {
+    kind: [32m'schema'[39m,
+    message: [32m"This copy of Bloom isn't connected to a finished profile table yet."[39m,
+    detail: [32m'relation "public.profiles" does not exist | 42P01'[39m,
+    retryable: [33mfalse[39m,
+    partialReadPossible: [33mfalse[39m
+  }
+}
+
+[90mstderr[2m | src/hooks/useProfileSpace.degraded.test.tsx[2m > [22m[2museProfileSpace when the cloud read fails[2m > [22m[2masks for another read without reloading the rest of the page
+[22m[39m[bloom:profile:identity] ProfileLoadError: This copy of Bloom isn't connected to a finished profile table yet.
+    at [90mC:\Users\Windows 11 Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\[39msrc\hooks\useProfileSpace.degraded.test.tsx:67:22
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at VitestExecutor.runModule [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:399:5[90m)[39m
+    at VitestExecutor.directRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:381:5[90m)[39m
+    at VitestExecutor.cachedRequest [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:206:14[90m)[39m
+    at VitestExecutor.executeId [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvite-node[24m/dist/client.mjs:173:12[90m)[39m
+    at collectTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:851:7[90m)[39m
+    at startTests [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1268:17[90m)[39m
+    at [90mfile:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:126:11
+    at withEnv [90m(file:///C:/Users/Windows%2011%20Pro/.freebuff/worktrees/1f00cb6b/17624e8d-d4b3-4763-b5f0-80c29311d510/[39mnode_modules/[4mvitest[24m/dist/chunks/runBaseTests.3qpJUEJM.js:90:5[90m)[39m {
+  problem: {
+    kind: [32m'schema'[39m,
+    message: [32m"This copy of Bloom isn't connected to a finished profile table yet."[39m,
+    detail: [32m'relation "public.profiles" does not exist | 42P01'[39m,
+    retryable: [33mfalse[39m,
+    partialReadPossible: [33mfalse[39m
+  }
+}
+
+ [32m✓[39m src/hooks/useProfileSpace.degraded.test.tsx[2m > [22museProfileSpace when the cloud read fails[2m > [22mkeeps a successful read for the next visit
+ [32m✓[39m src/hooks/useProfileSpace.degraded.test.tsx[2m > [22museProfileSpace when the cloud read fails[2m > [22masks for another read without reloading the rest of the page
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mcycle sync[2m > [22mpushes a new day up to the table[33m 891[2mms[22m[39m
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileLoadingScreen[2m > [22mannounces itself as a status, and says nothing alarming[33m 383[2mms[22m[39m
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileLoadingScreen[2m > [22mholds the shape of the page it stands in for
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileSwap[2m > [22mshows the skeleton while loading and the page when it is not
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileSwap[2m > [22mkeeps both panes in one grid cell, so the swap cannot shift the layout
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileProblemNotice[2m > [22msays what is on screen and why, and offers one way out
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileProblemNotice[2m > [22mdoes not offer a retry while one is already running
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileProblemNotice[2m > [22mcan be dismissed — the page underneath still works
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileUnavailable[2m > [22mnames the cause for a project that was never migrated
+ [32m✓[39m src/components/profile/ProfileLoading.test.tsx[2m > [22mProfileUnavailable[2m > [22mstill works with no diagnosis at all
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22masks for nothing on the first screen[33m 401[2mms[22m[39m
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22mdoes not render an admin door of its own
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22mwill not advance past the sex question until it is answered
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22mkeeps 'prefer not to say' distinct from answering no[33m 407[2mms[22m[39m
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22mrecords Male as no-cycle, and drops cycle from the focus list[33m 312[2mms[22m[39m
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22moffers the cycle focus to someone who kept it, and carries the name
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22mtreats the name as optional
+ [32m✓[39m src/components/welcome/Welcome.test.tsx[2m > [22mWelcome[2m > [22mpresents both answers alike — no pink-versus-blue styling
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mis quiet when everything is read
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mshows the count while something waits
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mcaps a huge count at 99+
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mupdates live when a notice arrives
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mrings the swing when an arrival lands on a quiet bell
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mgives every bell its own dome gradient[33m 368[2mms[22m[39m
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mcycle sync[2m > [22mkeeps the day on the device when the table can't be reached[33m 880[2mms[22m[39m
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mperiod entries sync (A5)[2m > [22mshows the periods the account already has
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22mdoes not render when closed
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22masks for a feeling first — save is disabled until one is chosen[33m 612[2mms[22m[39m
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22msaves a real entry carrying the chosen face's readings and note[33m 411[2mms[22m[39m
+ [32m✓[39m src/lib/points/ledger.test.ts[2m > [22mpoints ledger · idempotency[2m > [22mpays the same key once, however many times it is recorded
+ [32m✓[39m src/lib/points/ledger.test.ts[2m > [22mpoints ledger · idempotency[2m > [22mrevokes once and can revive on a later tick
+ [32m✓[39m src/lib/points/ledger.test.ts[2m > [22mpoints ledger · idempotency[2m > [22mignores malformed events instead of half-reading them
+ [32m✓[39m src/lib/points/ledger.test.ts[2m > [22mpoints ledger · device merge[2m > [22munions earnings from two devices instead of dropping one side
+ [32m✓[39m src/lib/points/ledger.test.ts[2m > [22mpoints ledger · device merge[2m > [22mnewer tombstone wins for the same key
+ [32m✓[39m src/lib/points/ledger.test.ts[2m > [22mpoints ledger · device merge[2m > [22mthe prefs document merge applies the same union, not last-write-wins
+ [32m✓[39m src/components/notifications/NotificationBell.test.tsx[2m > [22mNotificationBell[2m > [22mopens the center on click and clears the badge on close[33m 1048[2mms[22m[39m
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22mediting keeps the same id, so it updates instead of stacking a second row[33m 512[2mms[22m[39m
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22ma failed save keeps the sheet open and says so — never a silent success[33m 318[2mms[22m[39m
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mshows the hero with the waiting line[33m 948[2mms[22m[39m
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22msays so when all is caught up
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mmarks everything read on close — not before[33m 334[2mms[22m[39m
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mlists due reminders with their times
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mlists insights with their provenance
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mgroups history by day, newest first
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mis honest when there's nothing anywhere
+ [32m✓[39m src/components/notifications/NotificationCenter.test.tsx[2m > [22mNotificationCenter[2m > [22mclears the history
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mperiod entries sync (A5)[2m > [22msends a period logged here up to the account, and a deletion as a tombstone[33m 1686[2mms[22m[39m
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mperiod entries sync (A5)[2m > [22mcarries a device-only history onto the account at first sign-in
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mperiod entries sync (A5)[2m > [22ma deletion made on another device removes the entry here
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryRail[2m > [22mrenders your ring first with an add affordance[33m 482[2mms[22m[39m
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryRail[2m > [22mshows skeletons while loading
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryCanvas[2m > [22mrenders text elements in static mode
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryCanvas[2m > [22mgives the selected element four resize handles, and only that one
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryCanvas[2m > [22mhides the handles while a tool sheet owns the screen
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryViewer[2m > [22mopens on the story with header, caption, and footer[33m 387[2mms[22m[39m
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryViewer[2m > [22mis closed when no target is given
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryArchive[2m > [22mgroups memories by month with a view affordance
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStoryArchive[2m > [22mexplains the empty vault kindly
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mStorySettings[2m > [22mrenders every control with a default audience choice
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mInteractionSheets[2m > [22mreaction bar offers the full vocabulary
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mMediaTrays[2m > [22mGIF tray searches GIPHY only
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mMediaTrays[2m > [22msticker tray searches GIPHY only
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mMediaTrays[2m > [22mmusic tray offers search, moods, and own audio
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mShareCard[2m > [22mpreviews the achievement it will become
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mElementLayer resize gesture[2m > [22mrescales the selected element from the distance to its centre
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mElementLayer resize gesture[2m > [22mclamps the resize to the element scale limits
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mElementLayer resize gesture[2m > [22mshrinks no further than the minimum scale
+ [32m✓[39m src/components/stories/Stories.smoke.test.tsx[2m > [22mElementLayer resize gesture[2m > [22mkeeps the element pinned where it was while resizing
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22ma second click while saving cannot produce a duplicate entry
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22mfills the hidden context section from the day's trackers[33m 555[2mms[22m[39m
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22mkeeps context values the person typed when the day changes[33m 414[2mms[22m[39m
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22mdelete asks first, and only deletes once the person confirms[33m 329[2mms[22m[39m
+ [32m✓[39m src/components/mood/Composer.test.tsx[2m > [22mmood composer[2m > [22mhides delete when the caller cannot delete
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mperiod entries sync (A5)[2m > [22mkeeps syncing the daily log when the period tables don't exist yet[33m 867[2mms[22m[39m
+ [32m✓[39m src/hooks/usePeriodLog.sync.test.tsx[2m > [22mperiod entries sync (A5)[2m > [22man answer given on another device is remembered here
+ [32m✓[39m src/components/cycle/AssistantPanel.smoke.test.tsx[2m > [22mAssistantPanel[2m > [22mrenders as a real dialog with an accessible name
+ [32m✓[39m src/components/cycle/AssistantPanel.smoke.test.tsx[2m > [22mAssistantPanel[2m > [22moffers the quick prompts while the thread is empty, and asks with them
+ [32m✓[39m src/components/cycle/AssistantPanel.smoke.test.tsx[2m > [22mAssistantPanel[2m > [22mhides the quick prompts once there is a conversation
+ [32m✓[39m src/components/cycle/AssistantPanel.smoke.test.tsx[2m > [22mAssistantPanel[2m > [22mshows the thinking state without pretending there is an answer
+ [32m✓[39m src/components/cycle/AssistantPanel.smoke.test.tsx[2m > [22mAssistantPanel[2m > [22msurfaces a failure the person can act on
+ [32m✓[39m src/components/cycle/AssistantPanel.smoke.test.tsx[2m > [22mAssistantPanel[2m > [22mtoggles whether the record is used, and can close
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mreads as null before anything is saved
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mround-trips a saved identity
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mmerges patches instead of replacing the record
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mleaves the avatar alone unless the patch mentions it
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mtrims and clamps to the same limits the database enforces
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mtreats a corrupted record as absent, not half-applied
+ [32m✓[39m src/lib/profile/localIdentity.test.ts[2m > [22mlocalIdentity[2m > [22mclear removes the record
+ [32m✓[39m src/components/stories/templatePreview.test.tsx[2m > [22mempty photo slots[2m > [22mtint from the template's ink rather than a fixed grey[33m 904[2mms[22m[39m
+ [32m✓[39m src/lib/notifications/center.test.ts[2m > [22mnotification center[2m > [22mstarts empty and stays honest
+ [32m✓[39m src/lib/notifications/center.test.ts[2m > [22mnotification center[2m > [22mrecords deliveries, newest first, unread
+ [32m✓[39m src/lib/notifications/center.test.ts[2m > [22mnotification center[2m > [22msame key same reason replaces instead of stacking
+ [32m✓[39m src/lib/notifications/center.test.ts[2m > [22mnotification center[2m > [22mmarks read and clears
+ [32m✓[39m src/lib/notifications/center.test.ts[2m > [22mnotification center[2m > [22msurvives garbage on disk
+ [32m✓[39m src/components/ui/bloom-sheet.test.tsx[2m > [22mBloomSheet centring[2m > [22mcentres the desktop card with both half-offsets in the transform
+ [32m✓[39m src/components/ui/bloom-sheet.test.tsx[2m > [22mBloomSheet centring[2m > [22mcentres a phone pop, which the build folds into transform as well
+ [32m✓[39m src/components/ui/bloom-sheet.test.tsx[2m > [22mBloomSheet centring[2m > [22mleaves a real bottom sheet anchored to the bottom
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Suites 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/lib/data/eraseCoverage.test.ts[2m [ src/lib/data/eraseCoverage.test.ts ][22m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\C:\Users\Windows%2011%20Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\supabase\migrations\20260826_reward_delivery.sql'[39m
+[36m [2m❯[22m src/lib/data/eraseCoverage.test.ts:[2m39:34[22m[39m
+    [90m 37| [39m    [33m.[39m[34mfilter[39m((f) [33m=>[39m f[33m.[39m[34mendsWith[39m([32m".sql"[39m))
+    [90m 38| [39m    [33m.[39m[34msort[39m()
+    [90m 39| [39m    [33m.[39m[34mmap[39m((file) [33m=>[39m ({ file[33m,[39m sql[33m:[39m [34mreadFileSync[39m([34mjoin[39m([33mMIGRATIONS[39m[33m.[39mpathname…
+    [90m   | [39m                                 [31m^[39m
+    [90m 40| [39m}
+    [90m 41| [39m
+[90m [2m❯[22m migrations src/lib/data/eraseCoverage.test.ts:[2m39:6[22m[39m
+[90m [2m❯[22m createdTables src/lib/data/eraseCoverage.test.ts:[2m45:31[22m[39m
+[90m [2m❯[22m src/lib/data/eraseCoverage.test.ts:[2m72:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22m[39m
+[31m[1mSerialized Error:[22m[39m [90m{ errno: -4058, code: 'ENOENT', syscall: 'open', path: 'C:\C:\Users\Windows%2011%20Pro\.freebuff\worktrees\1f00cb6b\17624e8d-d4b3-4763-b5f0-80c29311d510\supabase\migrations\20260826_reward_delivery.sql' }[39m
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/lib/voice/personal.test.ts[2m > [22mreadPersonalVoice — identity from the onboarding answer, or honest blanks[2m > [22mreads the name, focus and cycle capability
+[31m[1mAssertionError[22m: expected 1 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m src/lib/voice/personal.test.ts:[2m81:33[22m[39m
+    [90m 79| [39m    [34mexpect[39m(voice[33m.[39mfocus)[33m.[39m[34mtoEqual[39m([[32m"sleep"[39m[33m,[39m [32m"mood"[39m])[33m;[39m
+    [90m 80| [39m    [34mexpect[39m(voice[33m.[39mcycle)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m 81| [39m    [34mexpect[39m(voice[33m.[39mdaysWithBloom)[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                                [31m^[39m
+    [90m 82| [39m    [34mexpect[39m(voice[33m.[39mfirstDay)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m 83| [39m    [34mexpect[39m(voice[33m.[39mdaypart)[33m.[39m[34mtoBe[39m([32m"morning"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m84 passed[39m[22m[90m (86)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m929 passed[39m[22m[90m (930)[39m
+[2m   Start at [22m 17:50:44
+[2m   Duration [22m 21.04s[2m (transform 17.18s, setup 0ms, collect 45.46s, tests 24.20s, environment 77.10s, prepare 23.08s)[22m
+
+FULL_SUITE_EXIT=1

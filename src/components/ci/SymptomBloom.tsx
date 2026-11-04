@@ -13,6 +13,7 @@ const SIZE = 260;
 const C = SIZE / 2;
 const R_INNER = 40;
 const R_MAX = 104;
+const LABEL_PADDING_X = 70;
 
 const PHASE_VAR: Record<string, string> = {
   menstrual: "var(--ci-menstrual)",
@@ -72,8 +73,10 @@ export function SymptomBloom({ tally, total }: { tally: SymptomTally[]; total: n
   return (
     <div className="flex flex-col items-center">
       <svg
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="ci-bloom w-full max-w-[280px]"
+        /* Extra horizontal room: the longest petal labels are anchored at
+           the tip and used to be clipped by the card edge. */
+        viewBox={`${-LABEL_PADDING_X} 0 ${SIZE + LABEL_PADDING_X * 2} ${SIZE}`}
+        className="ci-bloom w-full max-w-[360px]"
         role="img"
         aria-label={`Symptom bloom: ${top
           .map((t) => `${t.key} on ${t.count} day${t.count === 1 ? "" : "s"}`)

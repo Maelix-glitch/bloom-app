@@ -1,19 +1,18 @@
 /**
  * CycleIntelligence — the whole page body, themeable and embeddable.
  *
- * /cycle renders this live; /cycle-styles renders several of them side by side
- * with the same components at smaller widths, so a direction can be judged on
- * real content instead of swatches alone.
+ * The page is organised around four destinations — overview, calendar,
+ * insights, history — instead of a single wall of cards. Every estimate on the
+ * overview comes from `analyseCycle`, so the numbers, their sample sizes and
+ * their explanations cannot drift apart from each other.
  */
 
-import { greetingFor } from "@/lib/home/today";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { PhaseWave } from "./PhaseWave";
 import { Atmosphere } from "./Atmosphere";
 import { Reveal, CountUp } from "./motion";
-import { SignatureStrip } from "./SignatureStrip";
 import { SymptomPhaseGrid } from "./SymptomPhaseGrid";
 import { CycleHeatmap } from "./CycleHeatmap";
 import { RhythmChart } from "./RhythmChart";
@@ -23,7 +22,6 @@ import { CycleDial } from "./CycleDial";
 import { SymptomBloom } from "./SymptomBloom";
 import { VitalDials } from "./VitalDials";
 import { DayLogInsights } from "./DayLogInsights";
-import { PredictionsCard } from "./PredictionsCard";
 import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
 import { HistoryTable } from "./HistoryTable";
@@ -33,11 +31,25 @@ import { ImportPeriods } from "./ImportPeriods";
 import { UndoToast } from "./UndoToast";
 import { Button, Card, Disclaimer } from "./primitives";
 import { SyncLine } from "./SyncLine";
-import { BlockHead } from "./SignatureStrip";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { daysToCsv, logsToCsv } from "@/lib/cycle/periodStore";
 import { DEFAULT_THEME_ID } from "@/lib/cycle/themes";
-import { formatDate, type LogDraft, type PeriodLog } from "@/lib/cycle/predict";
+import { PHASE_LABEL, formatDate, type LogDraft, type PeriodLog } from "@/lib/cycle/predict";
+import {
+  Collapse,
+  CollapsibleSection,
+  CycleBriefPanel,
+  Details,
+  CycleComparisonPanel,
+  CycleOverviewPanel,
+  InsightList,
+  IntelTabs,
+  ModelNote,
+  PersonalPatternPanel,
+  WhatChangedPanel,
+  type IntelTab,
+} from "./intel/CycleIntelPanels";
+import { greetingFor } from "@/lib/home/today";
 import type { CheckIn } from "@/lib/cycle/reconcile";
 
 export function CycleIntelligence({
@@ -57,12 +69,16 @@ export function CycleIntelligence({
   /** Survives the panel remounting when the first entry switches the layout. */
   const [notice, setNotice] = useState<string | null>(null);
   const [logDate, setLogDate] = useState<string>(store.today);
+  const [tab, setTab] = useState<IntelTab>("overview");
   /* B8 — bring history in from another app */
   const [importOpen, setImportOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const hasEntries = analysis.entryCount > 0;
   /* paused / off: history and the daily log stay, everything forward-looking goes quiet */
   const expecting = store.mode === "tracking";
+
+  /* One engine result for the whole page — see src/lib/cycle/canonical.ts. */
+  const intel = store.intel;
 
   const focusDayLog = useCallback((date?: string) => {
     if (date) setLogDate(date);
@@ -73,6 +89,7 @@ export function CycleIntelligence({
   }, []);
 
   const focusForm = useCallback(() => {
+    setTab("overview");
     formRef.current?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "center",
@@ -151,6 +168,31 @@ export function CycleIntelligence({
     if (store.days.length > 0) download(`bloom-daily-log-${stamp}.csv`, daysToCsv(store.days));
   }, [logs, store.days, today]);
 
+  const logPanel = (
+    <LogPanel
+      logs={logs}
+      days={store.days}
+      today={today}
+      analysis={analysis}
+      date={logDate}
+      onDateChange={setLogDate}
+      {...(hasEntries
+        ? {
+            editing,
+            onCancelEdit: () => setEditing(null),
+            pendingStart,
+            onPendingConsumed: () => setPendingStart(null),
+          }
+        : {})}
+      disabled={preview}
+      onSavePeriod={submit}
+      onSetPeriodEnd={store.setPeriodEnd}
+      onSaveDay={store.saveDay}
+      onDeleteDay={store.removeDay}
+      notice={notice}
+    />
+  );
+
   return (
     <div className="ci ci-root" data-theme={theme}>
       <Atmosphere />
@@ -158,19 +200,16 @@ export function CycleIntelligence({
       <div className="ci-veil" aria-hidden />
       <div className="ci-shell">
         {/* ------------------------------- header ------------------------------ */}
-        <header className="ci-rise max-w-[68ch]">
+        <header className="ci-rise max-w-[62ch]">
           <p className="ci-eyebrow">{greeting()} · Bloom Cycle Intelligence</p>
-          <h1 className="ci-display mt-3 text-[30px] leading-[1.08] sm:text-[40px]">
-            Your cycle, read back to you —
-            <br />
-            <span style={{ color: "var(--ci-follicular)" }}>before it happens.</span>
+          <h1 className="ci-display mt-2.5 text-[28px] leading-[1.1] sm:text-[36px]">
+            Your cycle, read from your record.
           </h1>
-          <p className="mt-4 text-[14px] leading-relaxed ci-soft sm:text-[15px]">
-            Log the day a period starts. Everything below — predicted dates, your current phase, how
-            much to trust it, and what tends to help — is calculated from your own record and
-            recalculated the moment you change it.
+          <p className="mt-3 text-[13.5px] leading-relaxed ci-soft sm:text-[14px]">
+            Dates, phases and patterns computed from what you log — with the evidence, the sample
+            size and the uncertainty shown next to every estimate.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] ci-muted">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] ci-muted">
             <SyncLine sync={store.sync} onRetry={store.syncNow} />
             <span aria-hidden>·</span>
             <span>estimates, not medical advice</span>
@@ -193,56 +232,38 @@ export function CycleIntelligence({
           />
         ) : null}
 
-        {hydrated && analysis.entryCount > 0 && expecting ? (
-          <div className="mt-6">
-            <SignatureStrip analysis={analysis} dayAnalysis={store.dayAnalysis} />
-          </div>
-        ) : null}
-
         {hydrated && store.checkIns.length > 0 ? (
-          <div className="mt-6">
+          <div className="mt-4">
             <CheckIns checkIns={store.checkIns} onAnswer={answerCheckIn} disabled={preview} />
           </div>
         ) : null}
 
         {!hydrated ? (
-          <div className="mt-10 space-y-4" aria-hidden>
-            <div className="ci-card h-[240px] animate-pulse" />
-            <div className="ci-card h-[180px] animate-pulse" />
+          <div className="mt-8 space-y-4" aria-hidden>
+            <div className="ci-card h-[200px] animate-pulse" />
+            <div className="ci-card h-[150px] animate-pulse" />
           </div>
         ) : (
           <>
             {/* ---------------------- first-run: log a period ------------------ */}
             {!hasEntries ? (
-              <div className="mt-8 grid gap-4 lg:grid-cols-[1.15fr_1fr]">
+              <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_1.05fr]">
                 <Card className="ci-rise ci-rise-1">
                   <p className="ci-eyebrow">Start here</p>
                   <h2 className="ci-display mt-2 text-[22px] leading-tight sm:text-[26px]">
-                    One date is enough to begin.
+                    {intel.brief.headline}
                   </h2>
-                  <p className="mt-3 text-[13px] leading-relaxed ci-soft">
-                    Add the first day of your most recent period. One entry gives you a generic
-                    28-day placeholder, clearly labelled as one. Log a second period and the page
-                    switches to your own pattern.
-                  </p>
-                  <ul className="mt-5 space-y-2.5">
-                    {[
-                      "Predictions hide themselves until there's something real to predict.",
-                      "Implausible gaps get flagged, never silently averaged in.",
-                      "Delete or edit anything and every number recomputes from what's left.",
-                    ].map((line) => (
-                      <li key={line} className="flex gap-2.5 text-[12.5px] leading-relaxed ci-soft">
-                        <span
-                          aria-hidden
-                          className="mt-[7px] h-[5px] w-[5px] shrink-0 rotate-45 rounded-[1px]"
-                          style={{ background: "var(--ci-follicular)" }}
-                        />
-                        {line}
-                      </li>
+                  <ul className="ci-bullets mt-3">
+                    {intel.brief.lines.map((line) => (
+                      <li key={line}>{line}</li>
                     ))}
                   </ul>
+                  <p className="mt-4 text-[12px] leading-relaxed ci-muted">
+                    No forecast is shown until there is a measured interval. Bloom does not present
+                    a population average as your pattern.
+                  </p>
                   {!preview ? (
-                    <Button variant="primary" className="mt-6" onClick={focusForm}>
+                    <Button variant="primary" className="mt-5" onClick={focusForm}>
                       Log your first period
                       <ArrowRight size={14} aria-hidden />
                     </Button>
@@ -250,84 +271,8 @@ export function CycleIntelligence({
                 </Card>
 
                 <div ref={formRef} className="ci-rise ci-rise-2">
-                  <LogPanel
-                    logs={logs}
-                    days={store.days}
-                    today={today}
-                    analysis={analysis}
-                    date={logDate}
-                    onDateChange={setLogDate}
-                    disabled={preview}
-                    onSavePeriod={submit}
-                    onSetPeriodEnd={store.setPeriodEnd}
-                    onSaveDay={store.saveDay}
-                    onDeleteDay={store.removeDay}
-                    notice={notice}
-                  />
+                  {logPanel}
                 </div>
-
-                <Card className="lg:col-span-2">
-                  <p className="ci-eyebrow">What appears once you log</p>
-                  <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                    Ten views, computed from your entries
-                  </h2>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {[
-                      {
-                        name: "Phase wave",
-                        body: "Where today sits in your cycle, with ovulation, the fertile window and your next start marked on one line.",
-                      },
-                      {
-                        name: "Predictions",
-                        body: "Next period, ovulation estimate, fertile window and average length — each with a confidence badge.",
-                      },
-                      {
-                        name: "Cycle lengths chart",
-                        body: "Every cycle as a bar against your average. Gaps that were excluded stay on the chart, marked as excluded.",
-                      },
-                      {
-                        name: "The numbers",
-                        body: "Average, shortest–longest range, variability, average bleed length and total days tracked.",
-                      },
-                      {
-                        name: "Flow mix",
-                        body: "How light, medium and heavy distribute across everything you've logged.",
-                      },
-                      {
-                        name: "Phase cards",
-                        body: "Your current cycle split into the four phases, with the real dates each one is expected to cover.",
-                      },
-                      {
-                        name: "Forward look",
-                        body: "The next three cycles projected from your average, phase by phase.",
-                      },
-                      {
-                        name: "Advanced daily log",
-                        body: "Symptoms, mood, energy, pain, sleep and fertility signs per day — then compared across your phases.",
-                      },
-                      {
-                        name: "Twelve-week rhythm map",
-                        body: "One cell per day, coloured by phase, brighter where you logged more.",
-                      },
-                      {
-                        name: "Symptom map",
-                        body: "Which symptom belongs to which phase in your record, at a glance.",
-                      },
-                    ].map((item) => (
-                      <div
-                        key={item.name}
-                        className="rounded-[var(--ci-radius-md)] border px-3.5 py-3 ci-hair"
-                      >
-                        <p className="text-[12.5px] font-medium">{item.name}</p>
-                        {/* The description is the least useful thing on a phone —
-                            the name already says what the view is. Desktop keeps it. */}
-                        <p className="mt-1 hidden text-[11.5px] leading-relaxed ci-muted sm:block">
-                          {item.body}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
 
                 {store.legacyAvailable && !preview ? (
                   <Card className="lg:col-span-2">
@@ -356,294 +301,352 @@ export function CycleIntelligence({
               </div>
             ) : (
               <>
-                {/* ------------------------- phase overview --------------------- */}
-                {expecting ? (
-                  <>
-                    <Card className="ci-rise ci-rise-1 mt-8">
-                      <div className="flex flex-wrap items-end justify-between gap-3">
-                        <div>
-                          <p className="ci-eyebrow">Phase overview</p>
-                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                            {analysis.overdue
-                              ? `Day ${analysis.cycleDay} · ${analysis.overdueDays} past your usual cycle`
-                              : `Day ${analysis.cycleDay} of about ${Math.round(analysis.averageLength)}`}
-                          </h2>
-                          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
-                            <span
-                              style={{
-                                color: `var(--ci-${analysis.phase === "late" || !analysis.phase ? "luteal" : analysis.phase})`,
-                              }}
-                              className="font-medium"
-                            >
+                <div className="mt-6">
+                  <IntelTabs
+                    active={tab}
+                    onChange={setTab}
+                    counts={{ insights: intel.insights.length + intel.changes.length }}
+                  />
+                </div>
+
+                {/* ------------------------------ overview --------------------- */}
+                {tab === "overview" ? (
+                  <div className="mt-4 space-y-4" role="tabpanel" aria-label="Overview">
+                    {expecting ? (
+                      <>
+                        <CycleOverviewPanel
+                          intel={intel}
+                          disabled={preview}
+                          onLogPeriod={() => {
+                            setEditing(null);
+                            setPendingStart(today);
+                            focusForm();
+                          }}
+                          onLogSymptoms={() => focusDayLog(today)}
+                        />
+                        <CycleBriefPanel intel={intel} />
+                        <Reveal delay={90}>
+                          <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
+                        </Reveal>
+                      </>
+                    ) : (
+                      <Card data-testid="cycle-paused-note">
+                        <p className="ci-eyebrow">Predictions paused</p>
+                        <h2 className="ci-display mt-2 text-[19px] leading-tight sm:text-[22px]">
+                          Nothing is due, nothing is late.
+                        </h2>
+                        <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                          Your {analysis.entryCount} logged{" "}
+                          {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and
+                          the daily log still works — log bleeding or symptoms any day. When periods
+                          come back, say so above and the phases, dates and fertile window return
+                          from your own record.
+                        </p>
+                      </Card>
+                    )}
+
+                    <PersonalPatternPanel intel={intel} />
+
+                    <div ref={formRef}>
+                      <Reveal>{logPanel}</Reveal>
+                    </div>
+
+                    <ModelNote intel={intel} />
+                  </div>
+                ) : null}
+
+                {/* ------------------------------ calendar --------------------- */}
+                {tab === "calendar" ? (
+                  <div className="mt-4 space-y-4" role="tabpanel" aria-label="Calendar">
+                    {expecting ? (
+                      <Card>
+                        <div className="flex flex-wrap items-end justify-between gap-3">
+                          <div>
+                            <p className="ci-eyebrow">This cycle</p>
+                            <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                              {analysis.overdue
+                                ? `Day ${analysis.cycleDay} · ${analysis.overdueDays} past your usual cycle`
+                                : `Day ${analysis.cycleDay} of about ${Math.round(analysis.averageLength)}`}
+                            </h2>
+                            <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
                               {analysis.phaseLabel}
-                            </span>
-                            {analysis.lastStart
-                              ? ` · started ${formatDate(analysis.lastStart)}`
-                              : null}
-                          </p>
-                          {analysis.overdue ? (
-                            <p className="mt-2 max-w-[58ch] text-[12.5px] leading-relaxed ci-muted">
-                              A cycle restarts when you log its first day — Bloom won't move the
-                              anchor for you. If your period has started, add that day and the count,
-                              phases and forecast all recalculate.
+                              {analysis.lastStart
+                                ? ` · started ${formatDate(analysis.lastStart)}`
+                                : null}
                             </p>
+                          </div>
+                          {analysis.overdue && !preview ? (
+                            <Button
+                              variant="primary"
+                              onClick={() => {
+                                setEditing(null);
+                                setPendingStart(today);
+                                focusForm();
+                              }}
+                            >
+                              Log a period start
+                            </Button>
                           ) : null}
                         </div>
-                        {analysis.overdue && !preview ? (
-                          <button
-                            type="button"
-                            className="ci-btn ci-btn--primary"
-                            onClick={() => {
-                              setEditing(null);
-                              setPendingStart(today);
-                              focusForm();
-                            }}
-                          >
-                            Log a period start
-                          </button>
-                        ) : null}
-                      </div>
+                        <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(230px,300px)_1fr]">
+                          <CycleDial analysis={analysis} days={store.days} />
+                          <div>
+                            <PhaseWave analysis={analysis} />
+                            <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
+                              An estimate, not a fact — both assume your next period lands on the
+                              predicted date. Log a new start and they redraw immediately.
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ) : null}
 
-                      <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">
-                        <CycleDial analysis={analysis} days={store.days} />
-                        <div>
-                          <PhaseWave analysis={analysis} />
-                          <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
-                            An estimate, not a fact — both assume your next period lands on the
-                            predicted date. Log a new start and they redraw immediately.
+                    <Card>
+                      <p className="ci-eyebrow">Rhythm map</p>
+                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                        Twelve weeks, one cell per day
+                      </h2>
+                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                        Each square is a day, coloured by the phase it fell in. Brighter squares
+                        carry more logged detail; the outlined square is today.
+                      </p>
+                      <div className="mt-4">
+                        <CycleHeatmap
+                          days={store.days}
+                          analysis={analysis}
+                          onSelectDay={preview ? undefined : focusDayLog}
+                        />
+                      </div>
+                    </Card>
+
+                    {expecting ? (
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <Card>
+                          <p className="ci-eyebrow">The four phases</p>
+                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                            This cycle, split into phases
+                          </h2>
+                          <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                            From your own average, so the dates shift as your record shifts.
                           </p>
+                          <div className="mt-4">
+                            <PhaseCards analysis={analysis} />
+                          </div>
+                        </Card>
+                        <Card>
+                          <p className="ci-eyebrow">Forward look</p>
+                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                            The next three cycles
+                          </h2>
+                          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                            Projected from your average. Useful for planning, never a promise.
+                          </p>
+                          <div className="mt-4">
+                            <ForecastStrip analysis={analysis} />
+                          </div>
+                        </Card>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                                {/* ------------------------------ insights --------------------- */}
+                {tab === "insights" ? (
+                  <div className="mt-4 space-y-4" role="tabpanel" aria-label="Insights">
+                    {/* 1 — the personal observations come first, and stay open. */}
+                    <Card>
+                      <p className="ci-eyebrow">Cycle intelligence</p>
+                      <h2 className="ci-display mt-1.5 text-[22px] leading-tight sm:text-[26px]">
+                        Bloom understands your pattern.
+                      </h2>
+                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                        Only what your own records support — each line carries the count behind it.
+                      </p>
+                      <div className="mt-4">
+                        <InsightList insights={intel.insights} />
+                      </div>
+                    </Card>
+
+                    {/* 2 — symptom patterns: the shape first, the phase table one tap away. */}
+                    <Card>
+                      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,380px)_1fr]">
+                        {/* Centred against the taller pattern list: the bloom used
+                            to sit at the top and leave a band of empty card below it. */}
+                        <div className="lg:self-center">
+                          <SymptomBloom
+                            tally={store.dayAnalysis.symptoms}
+                            total={store.dayAnalysis.total}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="ci-eyebrow">Symptom patterns</p>
+                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                            What shows up, and how often
+                          </h2>
+                          <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-relaxed ci-soft">
+                            Counted from the days you logged. A symptom only appears once you have
+                            recorded it — nothing here is suggested from a general list.
+                          </p>
+                          {intel.symptoms.patterns.length > 0 ? (
+                            <ul className="mt-3.5 space-y-2.5">
+                              {intel.symptoms.patterns.slice(0, 5).map((pattern) => (
+                                <li key={pattern.symptom} className="min-w-0">
+                                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                                    <span className="text-[12.5px] font-medium capitalize">
+                                      {pattern.symptom}
+                                    </span>
+                                    <span className="text-[11px] ci-muted">
+                                      {pattern.cyclesSeen} of {pattern.totalCycles} cycles
+                                    </span>
+                                  </div>
+                                  <p className="mt-0.5 text-[11.5px] leading-relaxed ci-muted">
+                                    {pattern.daysLogged}{" "}
+                                    {pattern.daysLogged === 1 ? "day" : "days"} logged
+                                    {pattern.dominantPhase
+                                      ? ` · mostly ${PHASE_LABEL[pattern.dominantPhase]}`
+                                      : ""}
+                                    {pattern.medianCycleDay !== null
+                                      ? ` · around day ${pattern.medianCycleDay}`
+                                      : ""}
+                                  </p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="mt-3 text-[12px] leading-relaxed ci-muted">
+                              No recurring symptom yet — one needs to turn up on several days before
+                              it means anything.
+                            </p>
+                          )}
+                          <Details summary="Symptom by phase">
+                            <SymptomPhaseGrid rows={store.dayAnalysis.symptomPhase} />
+                          </Details>
                         </div>
                       </div>
                     </Card>
 
-                    {/* ----------------- predictions · insights · tips -------------- */}
-                    <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-                      <div>
-                        <Reveal delay={0}>
-                          <PredictionsCard analysis={analysis} />
-                        </Reveal>
-                      </div>
-                      <div>
-                        <Reveal delay={90}>
-                          <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
-                        </Reveal>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <Card className="ci-rise ci-rise-1 mt-8" data-testid="cycle-paused-note">
-                    <p className="ci-eyebrow">Predictions paused</p>
-                    <h2 className="ci-display mt-2 text-[19px] leading-tight sm:text-[22px]">
-                      Nothing is due, nothing is late.
-                    </h2>
-                    <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
-                      Your {analysis.entryCount} logged{" "}
-                      {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and the
-                      daily log still works — log bleeding or symptoms any day. When periods come
-                      back, say so above and the phases, dates and fertile window return from your
-                      own record.
-                    </p>
-                  </Card>
-                )}
+                    {/* 3 — meaningful historical changes. */}
+                    <WhatChangedPanel intel={intel} />
 
-                {/* ------------------------ analytics --------------------------- */}
-                <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <p className="ci-eyebrow">Cycle lengths</p>
-                        <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                          Your rhythm over time
-                        </h2>
-                        <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-relaxed ci-soft">
-                          Each bar is one cycle. Dashed bars were left out of the average — too
-                          short or too long to be a real cycle — but they stay on the chart.
-                        </p>
-                      </div>
-                      {analysis.trend ? (
-                        <span
-                          className="ci-badge"
-                          style={{
-                            color: "var(--ci-ovulation)",
-                            borderColor:
-                              "color-mix(in oklab, var(--ci-ovulation) 45%, transparent)",
-                          }}
-                        >
-                          {analysis.trend.direction === "lengthening"
-                            ? "getting longer"
-                            : "getting shorter"}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="mt-3">
-                      <RhythmChart analysis={analysis} />
-                    </div>
-                  </div>
+                    {/* 4 — cycle comparisons. */}
+                    <CycleComparisonPanel intel={intel} />
 
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <p className="ci-eyebrow">The numbers</p>
-                    <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                      What your record adds up to
-                    </h2>
-                    <div className="mt-4">
-                      <StatsStrip analysis={analysis} />
-                    </div>
-                    <div className="mt-5 border-t pt-4 ci-hair">
-                      <p className="ci-eyebrow">Flow mix</p>
-                      <div className="mt-3">
-                        <FlowBreakdown analysis={analysis} />
+                    {/* Everything below is depth: kept, folded, one tap away. */}
+                    <CollapsibleSection
+                      eyebrow="The numbers"
+                      title="Cycle lengths, totals and flow mix"
+                      summary="Open the charts and totals"
+                    >
+                      <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+                        <div className="min-w-0">
+                          <p className="text-[12.5px] font-medium">Your rhythm over time</p>
+                          <p className="mt-1 max-w-[52ch] text-[11.5px] leading-relaxed ci-muted">
+                            Each bar is one cycle. Dashed bars are outside the typical length used
+                            for the median — kept on the chart, not deleted.
+                          </p>
+                          <div className="mt-3">
+                            <RhythmChart analysis={analysis} />
+                          </div>
+                        </div>
+                        <div className="min-w-0">
+                          <StatsStrip analysis={analysis} />
+                          <div className="mt-5 border-t pt-4 ci-hair">
+                            <p className="ci-eyebrow">Flow mix</p>
+                            <div className="mt-3">
+                              <FlowBreakdown analysis={analysis} />
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                    </CollapsibleSection>
 
-                {/* ------------------- phases + forward look -------------------- */}
-                {expecting ? (
-                  <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-                    <div className="ci-card ci-card--pad ci-lift">
-                      <p className="ci-eyebrow">The four phases</p>
-                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                        This cycle, split into phases
-                      </h2>
-                      <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
-                        From your own average, so the dates shift as your record shifts.
-                      </p>
-                      <div className="mt-4">
-                        <PhaseCards analysis={analysis} />
+                    <CollapsibleSection
+                      eyebrow="Averages"
+                      title="Energy, mood, sleep and pain by phase"
+                      summary="Open the phase averages"
+                    >
+                      <div className="grid gap-5 lg:grid-cols-2">
+                        <div className="min-w-0">
+                          <p className="text-[12.5px] font-medium">Across every logged day</p>
+                          <div className="mt-4">
+                            <VitalDials dayAnalysis={store.dayAnalysis} />
+                          </div>
+                        </div>
+                        <div className="min-w-0 space-y-3">
+                          <p className="text-[12.5px] font-medium">By estimated phase</p>
+                          {intel.symptoms.metrics.map((metric) => (
+                            <div key={metric.metric}>
+                              <div className="flex items-baseline justify-between gap-2">
+                                <p className="text-[12.5px] font-medium">{metric.label}</p>
+                                <span className="text-[11px] ci-muted">
+                                  {metric.n} {metric.n === 1 ? "log" : "logs"}
+                                </span>
+                              </div>
+                              <div className="ci-phasebars">
+                                {metric.byPhase.map((phase) => (
+                                  <div key={phase.phase} className="ci-phasebars__row">
+                                    <span className="ci-phasebars__label">{phase.phase}</span>
+                                    <span className="ci-phasebars__track">
+                                      <span
+                                        className="ci-phasebars__fill"
+                                        style={{
+                                          width: `${phase.average !== null ? Math.round((phase.average / 5) * 100) : 0}%`,
+                                        }}
+                                      />
+                                    </span>
+                                    <span className="ci-phasebars__value">
+                                      {phase.average !== null ? phase.average.toFixed(1) : "—"}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                          {intel.symptoms.metrics.every((m) => !m.meaningful) ? (
+                            <p className="text-[11.5px] leading-relaxed ci-muted">
+                              Phase averages appear once a phase has at least three logged values.
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
+                    </CollapsibleSection>
 
-                    <div className="ci-card ci-card--pad ci-lift">
-                      <p className="ci-eyebrow">Forward look</p>
-                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
-                        The next three cycles
-                      </h2>
-                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
-                        Projected from your average. Useful for planning, never a promise.
-                      </p>
-                      <div className="mt-4">
-                        <ForecastStrip analysis={analysis} />
-                      </div>
-                    </div>
+                    <Collapse
+                      title="Notes triggered by your record"
+                      hint="Each note is tied to something specific and disappears when it stops being true."
+                    >
+                      <InsightsPanel
+                        analysis={analysis}
+                        onAddSuggested={
+                          preview
+                            ? undefined
+                            : (start) => {
+                                setEditing(null);
+                                setPendingStart(start);
+                                focusForm();
+                              }
+                        }
+                      />
+                    </Collapse>
+
+                    <Collapse
+                      title="Day-by-day records"
+                      hint="Every logged day, with its flow, symptoms and readings."
+                    >
+                      <DayLogInsights
+                        days={store.days}
+                        dayAnalysis={store.dayAnalysis}
+                        onEditDate={preview ? undefined : focusDayLog}
+                        onDeleteDate={preview ? undefined : store.removeDay}
+                        disabled={preview}
+                      />
+                    </Collapse>
                   </div>
                 ) : null}
 
-                <div className="mt-4">
-                  <Reveal>
-                    <InsightsPanel
-                      analysis={analysis}
-                      onAddSuggested={
-                        preview
-                          ? undefined
-                          : (start) => {
-                              setEditing(null);
-                              setPendingStart(start);
-                              focusForm();
-                            }
-                      }
-                    />
-                  </Reveal>
-                </div>
-
-                {/* ------------------------------ log --------------------------- */}
-                <div ref={formRef} className="mt-4">
-                  <Reveal>
-                    <LogPanel
-                      logs={logs}
-                      days={store.days}
-                      today={today}
-                      analysis={analysis}
-                      date={logDate}
-                      onDateChange={setLogDate}
-                      editing={editing}
-                      onCancelEdit={() => setEditing(null)}
-                      pendingStart={pendingStart}
-                      onPendingConsumed={() => setPendingStart(null)}
-                      disabled={preview}
-                      onSavePeriod={submit}
-                      onSetPeriodEnd={store.setPeriodEnd}
-                      onSaveDay={store.saveDay}
-                      onDeleteDay={store.removeDay}
-                      notice={notice}
-                    />
-                  </Reveal>
-                </div>
-
-                {/* --------------------- patterns in your record ------------------- */}
-                <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <BlockHead
-                      index="04"
-                      eyebrow="Rhythm map"
-                      title="Twelve weeks, one cell per day"
-                      note="Each square is a day, coloured by the phase it fell in. Brighter squares carry more logged detail; the outlined square is today."
-                    />
-                    <div className="mt-4">
-                      <CycleHeatmap
-                        days={store.days}
-                        analysis={analysis}
-                        onSelectDay={preview ? undefined : focusDayLog}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <BlockHead
-                      index="05"
-                      eyebrow="Symptom map"
-                      title="Which symptom lives in which phase"
-                      note="Built only from days you logged — a symptom you've never recorded isn't on the grid."
-                    />
-                    <div className="mt-4">
-                      <SymptomPhaseGrid rows={store.dayAnalysis.symptomPhase} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <BlockHead
-                      index="06"
-                      eyebrow="Bloom"
-                      title="What shows up, and how often"
-                      note="One petal per symptom."
-                    />
-                    <div className="mt-4">
-                      <SymptomBloom
-                        tally={store.dayAnalysis.symptoms}
-                        total={store.dayAnalysis.total}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="ci-card ci-card--pad ci-lift">
-                    <BlockHead
-                      index="07"
-                      eyebrow="Averages"
-                      title="Energy, pain, sleep, mood"
-                      note="Weighted across every day you logged."
-                    />
-                    <div className="mt-5">
-                      <VitalDials dayAnalysis={store.dayAnalysis} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <Reveal delay={120}>
-                    <DayLogInsights
-                      days={store.days}
-                      dayAnalysis={store.dayAnalysis}
-                      onEditDate={preview ? undefined : focusDayLog}
-                      onDeleteDate={preview ? undefined : store.removeDay}
-                      disabled={preview}
-                    />
-                  </Reveal>
-                </div>
-
-                {/* ---------------------------- history ------------------------- */}
-                <div className="mt-4">
-                  <Reveal>
+{/* ------------------------------ history ----------------------- */}
+                {tab === "history" ? (
+                  <div className="mt-4 space-y-4" role="tabpanel" aria-label="History">
                     <HistoryTable
                       analysis={analysis}
                       logs={logs}
@@ -664,8 +667,9 @@ export function CycleIntelligence({
                         store.sync.signedIn && !store.sync.periodsOnDevice ? "account" : "device"
                       }
                     />
-                  </Reveal>
-                </div>
+                    <ModelNote intel={intel} />
+                  </div>
+                ) : null}
               </>
             )}
 
@@ -701,6 +705,7 @@ export function CycleIntelligence({
 
 /** A time-of-day hello — small, but it makes the page feel addressed to you. */
 /* The shared, rotating hello — see src/lib/voice. */
+void CountUp;
 function greeting(): string {
   return greetingFor(new Date().getHours());
 }
