@@ -247,22 +247,24 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 24px 20px 112px;
+  padding: 24px 20px 118px;
 }
 @media (min-width: 640px) {
   .ci-shell {
-    padding: 28px 32px 112px;
+    padding: 28px 32px 118px;
   }
 }
 @media (min-width: 1024px) {
   .ci-shell {
-    padding: 28px 40px 96px;
+    padding: 28px 40px 104px;
   }
 }
-/* 320px phones: a narrower gutter keeps cards full-width and readable. */
+/* 320px phones: a narrower gutter keeps cards full-width and readable, and the
+   undo strip cannot sit on the history tab. */
 @media (max-width: 359px) {
   .ci-shell {
     padding-inline: 14px;
+    padding-bottom: 136px;
   }
 }
 /** The design gallery has no rail beside it, so it keeps a centred column. */
@@ -1349,6 +1351,14 @@ textarea.ci-input {
   transform: translateX(-50%);
   animation: ci-unfold 0.3s cubic-bezier(0.22, 0.9, 0.24, 1) both;
 }
+/* Narrow phones: the undo strip is allowed to sit up inside the shell's
+   bottom padding, not over the history tab. */
+@media (max-width: 359px) {
+  .ci-undo {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+    max-width: min(92vw, 420px);
+  }
+}
 @media (min-width: 1024px) {
   .ci-undo {
     left: calc(50% + var(--app-rail, 0px) / 2);
@@ -1399,4 +1409,582 @@ textarea.ci-input {
   flex: none;
   margin-top: 2px;
   color: var(--ci-ovulation);
+}
+
+/* ======================================================================
+ * Bloom global identity — Cycle inherits the app's tokens
+ *
+ * The page used to carry its own plum-and-violet theme with a full-bleed
+ * gradient veil. Cycle now takes the shared ink/charcoal/ivory/champagne
+ * system: no separate palette, no page-wide glow, phase hues reduced to
+ * restrained semantic tints that only appear inside data visualisations.
+ * ==================================================================== */
+
+.ci[data-theme="nocturne"] {
+  --ci-bg: var(--background, #0d0f16);
+  --ci-bg-deep: var(--sidebar, #0a0c12);
+  --ci-surface: var(--surface, #151823);
+  --ci-surface-2: var(--surface-2, #1b1f2b);
+  --ci-line: var(--border-subtle, #252a36);
+  --ci-line-strong: var(--border, #303747);
+  --ci-text: var(--foreground, #f3efe7);
+  --ci-text-soft: var(--muted-foreground, #b2b0b8);
+  --ci-text-mute: var(--faint, #858796);
+  --ci-menstrual: #c07d8a;
+  --ci-follicular: var(--violet, #a697d3);
+  --ci-luteal: #8d86a8;
+  --ci-ovulation: var(--gold, #d9bc83);
+  --ci-late: #8f98ad;
+  --ci-accent: var(--gold, #d9bc83);
+  --ci-accent-soft: color-mix(in oklab, var(--gold, #d9bc83) 14%, transparent);
+  --ci-focus: var(--gold-soft, #e7cc9d);
+  --ci-ok: var(--success, #86aa98);
+  --ci-warn: var(--warning, #c5a16b);
+  --ci-danger: var(--danger, #c77e82);
+  --ci-input-bg: var(--surface, #151823);
+  --ci-veil: none;
+  --ci-radius-lg: var(--radius-panel, 18px);
+  --ci-radius-md: var(--radius-card, 12px);
+  --ci-radius-sm: var(--radius-control, 10px);
+  --ci-shadow: var(--elevation-card, 0 1px 2px rgba(0, 0, 0, 0.35));
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+  --ci-font-display: var(--font-display, "Fraunces", ui-serif, Georgia, serif);
+  --ci-font-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  /* Metadata labels use the interface face, not a third typeface. */
+  --ci-font-mono: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+}
+
+.ci-root .ci-veil {
+  display: none;
+}
+
+.ci-btn--primary {
+  color: var(--background, #0d0f16);
+}
+
+.ci .ci-eyebrow {
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+}
+
+/* ------------------------------- tabs ------------------------------- */
+
+.ci-tabs {
+  /* Pinned under the app's own bar: the sections stay reachable however long
+     the panel is, instead of scrolling away under a fixed control. */
+  position: sticky;
+  top: var(--app-top-bar, 0px);
+  z-index: 12;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  background: var(--ci-bg);
+  border-bottom: 1px solid var(--ci-line);
+  padding-bottom: 2px;
+}
+
+.ci-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: transparent;
+  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.ci-tab:hover {
+  color: var(--ci-text);
+  background: color-mix(in oklab, var(--ci-surface-2) 70%, transparent);
+}
+
+.ci-tab[data-active="true"] {
+  color: var(--ci-text);
+  background: var(--ci-surface);
+  border-color: var(--ci-line);
+  box-shadow: inset 0 -2px 0 var(--ci-accent);
+}
+
+.ci-tab__count {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--ci-accent-soft);
+  color: var(--ci-accent);
+}
+
+/* ----------------------------- overview ----------------------------- */
+
+.ci-overview {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--ci-accent) 4%, transparent), transparent 42%),
+    var(--ci-surface);
+}
+
+.ci-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ci-line);
+}
+
+@media (min-width: 900px) {
+  .ci-overview__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.ci-overview__value {
+  margin-top: 6px;
+  font-family: var(--ci-font-display);
+  font-size: 19px;
+  line-height: 1.15;
+  color: var(--ci-text);
+}
+
+.ci-overview__sub {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ci-text-mute);
+}
+
+.ci-conf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ci-font-sans);
+  font-size: 13px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.ci-conf::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.ci-conf--none {
+  color: var(--ci-text-mute);
+  border-color: var(--ci-line-strong);
+}
+.ci-conf--low {
+  color: var(--ci-warn);
+  border-color: color-mix(in oklab, var(--ci-warn) 40%, transparent);
+  background: color-mix(in oklab, var(--ci-warn) 10%, transparent);
+}
+.ci-conf--moderate {
+  color: var(--ci-ovulation);
+  border-color: color-mix(in oklab, var(--ci-ovulation) 40%, transparent);
+  background: color-mix(in oklab, var(--ci-ovulation) 10%, transparent);
+}
+.ci-conf--good {
+  color: var(--ci-ok);
+  border-color: color-mix(in oklab, var(--ci-ok) 40%, transparent);
+  background: color-mix(in oklab, var(--ci-ok) 10%, transparent);
+}
+
+/* ------------------------------- brief ------------------------------ */
+
+.ci-brief {
+  background: var(--ci-surface);
+}
+
+.ci-brief__icon {
+  margin-top: 2px;
+  color: var(--ci-accent);
+  flex-shrink: 0;
+}
+
+/* ------------------------------- bullets ---------------------------- */
+
+.ci-bullets {
+  display: grid;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ci-text-soft);
+}
+
+.ci-bullets > li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.ci-bullets > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  rotate: 45deg;
+  background: var(--ci-accent);
+}
+
+/* ------------------------------ details ----------------------------- */
+
+.ci-details {
+  margin-top: 18px;
+  border-top: 1px solid var(--ci-line);
+  padding-top: 12px;
+}
+
+.ci-details__summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ci-text-soft);
+}
+
+.ci-details__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ci-details__chev {
+  transition: transform 160ms ease;
+}
+
+.ci-details[open] .ci-details__chev {
+  transform: rotate(180deg);
+}
+
+.ci-details__body {
+  margin-top: 10px;
+}
+
+/* ------------------------------ pattern ----------------------------- */
+
+.ci-pattern {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 18px;
+  margin-top: 18px;
+}
+
+@media (min-width: 760px) {
+  .ci-pattern {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ci-pattern__value {
+  margin-top: 5px;
+  font-family: var(--ci-font-sans);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  line-height: 1.2;
+  color: var(--ci-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ci-pattern__sub {
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ci-text-mute);
+}
+
+.ci-pattern__note {
+  margin-top: 16px;
+  border-top: 1px solid var(--ci-line);
+  padding-top: 12px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--ci-text-mute);
+}
+
+/* ------------------------------ insights ---------------------------- */
+
+.ci-insights {
+  display: grid;
+  gap: 12px;
+}
+
+.ci-insight {
+  border: 1px solid var(--ci-line);
+  border-radius: var(--ci-radius-md);
+  padding: 13px 14px;
+  background: color-mix(in oklab, var(--ci-surface-2) 45%, transparent);
+}
+
+.ci-insight__strength {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.ci-insight__strength[data-strength="good"] {
+  color: var(--ci-ok);
+}
+.ci-insight__strength[data-strength="moderate"] {
+  color: var(--ci-ovulation);
+}
+
+.ci-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.ci-evidence > li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  border: 1px solid var(--ci-line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 10.5px;
+}
+
+.ci-evidence__label {
+  color: var(--ci-text-mute);
+}
+
+.ci-evidence__value {
+  color: var(--ci-text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------- model ------------------------------ */
+
+.ci-model {
+  border-top: 1px solid var(--ci-line);
+  padding-top: 12px;
+}
+
+.ci-model__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+}
+
+/* ----------------------------- phase bars --------------------------- */
+
+.ci-phasebars {
+  display: grid;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.ci-phasebars__row {
+  display: grid;
+  grid-template-columns: 76px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+}
+
+.ci-phasebars__label {
+  text-transform: capitalize;
+}
+
+.ci-phasebars__track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ci-surface-2);
+  overflow: hidden;
+}
+
+.ci-phasebars__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ci-accent) 70%, var(--ci-follicular));
+}
+
+.ci-phasebars__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .ci-overview__grid,
+  .ci-pattern {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  /* Full-size labels, tighter gutters: the four labels still fit one row at
+     360px. If a fifth were ever added the row wraps rather than shrinking the
+     text until it is hard to read. */
+  .ci-tabs {
+    gap: 2px;
+  }
+
+  .ci-tab {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 9px 9px;
+  }
+}
+
+/* Below 381px four 13px labels no longer fit one row. Wrap to an even 2×2
+   grid instead: every tab keeps its full-size label, stays fully visible and
+   gets a bigger tap target than the squeezed single row would allow. */
+@media (max-width: 380px) {
+  .ci-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ci-tab {
+    justify-content: center;
+  }
+}
+
+/* ----------------------------- comparison --------------------------- */
+
+.ci-compare {
+  margin-top: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--ci-line);
+  border-radius: var(--ci-radius-md);
+}
+
+.ci-compare table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.ci-compare th,
+.ci-compare td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--ci-line);
+  white-space: nowrap;
+}
+
+.ci-compare thead th {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+  background: color-mix(in oklab, var(--ci-surface-2) 55%, transparent);
+}
+
+.ci-compare tbody th {
+  font-weight: 500;
+  color: var(--ci-text);
+}
+
+.ci-compare td {
+  color: var(--ci-text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.ci-compare tbody tr:last-child th,
+.ci-compare tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ======================================================================
+ * Section folds
+ * ==================================================================== */
+
+/* The connection chip is an app-level fixed control. At phone widths it lands
+   exactly on the section tabs and swallows the History tab, so it is
+   suppressed on this page: the same promise is already stated inline in the
+   header ("stored in this browser only") and the History tab names where the
+   entries live. This stylesheet is only loaded on /cycle. */
+@media (max-width: 1023px) {
+  /* `body` keeps this ahead of the component's own stylesheet whatever order
+     the bundles land in. */
+  body .conn-notice,
+  body .conn-notice-chip {
+    display: none;
+  }
+}
+
+/* A whole section folded behind one header; the summary is the closed card. */
+.ci-collapse {
+  border: 1px solid var(--ci-line);
+  border-radius: var(--ci-radius-lg);
+  background: var(--ci-surface);
+  padding: 14px 18px;
+}
+
+.ci-collapse__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--ci-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ci-text);
+}
+
+.ci-collapse__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ci-collapse__hint {
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--ci-text-mute);
+}
+
+.ci-collapse__summary .ci-details__chev {
+  color: var(--ci-text-mute);
+  transition: transform 160ms ease;
+}
+
+.ci-collapse[open] .ci-collapse__summary .ci-details__chev {
+  transform: rotate(180deg);
+}
+
+.ci-collapse__body {
+  margin-top: 14px;
+}
+
+/* A closed disclosure hides its body, whatever display the body's own rule
+   sets. Without this an author `display` beats the UA's hiding rule and the
+   "folded" tables keep taking up space while claiming to be closed. */
+.ci-details:not([open]) > *:not(summary),
+.ci-collapse:not([open]) > *:not(summary) {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ci-collapse__summary .ci-details__chev {
+    transition: none;
+  }
 }

@@ -89,6 +89,7 @@ const FLOW_BAR: Record<string, string> = {
 export function FlowBreakdown({ analysis }: { analysis: CycleAnalysis }) {
   const { flowCounts, mostCommonFlow } = analysis.stats;
   const total = analysis.entryCount;
+  const unspecified = flowCounts.unspecified;
   const rows = (["heavy", "medium", "light", "unspecified"] as const).filter(
     (k) => flowCounts[k] > 0,
   );
@@ -128,11 +129,19 @@ export function FlowBreakdown({ analysis }: { analysis: CycleAnalysis }) {
       </div>
       <p className="mt-3.5 text-[12px] leading-relaxed ci-muted">
         {mostCommonFlow && mostCommonFlow !== "unspecified"
-          ? `Most of your logged periods are ${FLOW_LABEL[mostCommonFlow].toLowerCase()} flow — ${pct(flowCounts[mostCommonFlow], total)}% of ${total}.`
-          : `Flow is recorded on ${total - flowCounts.unspecified} of ${total} entries. Adding it takes one tap and makes the record more useful.`}
+          ? `Most of your logged periods are ${FLOW_LABEL[mostCommonFlow].toLowerCase()} flow — ${flowCounts[mostCommonFlow]} of ${total}.`
+          : "No single flow leads your record yet."}
         {analysis.stats.entriesWithNotes > 0
           ? ` ${analysis.stats.entriesWithNotes} ${analysis.stats.entriesWithNotes === 1 ? "entry has" : "entries have"} notes.`
           : ""}
+      </p>
+      {/* One denominator, stated. Heavy at 75% beside “not specified” at 65%
+          is only a contradiction when the populations differ. */}
+      <p className="mt-2 border-t pt-2.5 text-[11px] leading-relaxed ci-muted ci-hair">
+        Every row shares one denominator: the {total} logged{" "}
+        {total === 1 ? "period" : "periods"} in this record. A period with no flow recorded
+        counts as “Not specified”{unspecified > 0 ? ` (${unspecified} of ${total})` : ""}, so the
+        rows add up to 100% — none of them is a share of the days you logged.
       </p>
     </div>
   );
@@ -194,7 +203,31 @@ export function PhaseCards({
             </p>
             {!compact ? (
               <>
-                <p className="mt-2 text-[12px] leading-relaxed ci-soft">{guide.summary}</p>
+                {/* Long-form copy stays one tap away, so the card leads with the dates. */}
+                <details className="ci-details mt-2">
+                  <summary className="ci-details__summary text-[11.5px] list-none">
+                    <span className="flex items-center gap-1.5">
+                      <svg
+                        className="ci-details__chev"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        aria-hidden
+                      >
+                        <path
+                          d="M3 4.5L6 7.5L9 4.5"
+                          stroke="currentColor"
+                          strokeWidth="1.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      About this phase
+                    </span>
+                  </summary>
+                  <p className="mt-1.5 text-[12px] leading-relaxed ci-soft">{guide.summary}</p>
+                </details>
                 <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
                   Often reported: {guide.signals.join(", ")}.
                 </p>
@@ -261,7 +294,7 @@ export function ForecastStrip({
           </div>
           {!compact && c.index === 1 ? (
             <p className="mt-1.5 text-[11.5px] ci-muted">
-              Berry is the bleed, gold is the fertile window around {formatDate(c.fertileStart)} –{" "}
+              Berry is the bleed, gold is the fertile window around {formatDate(c.fertileStart)} –
               {formatDate(c.fertileEnd)}.
             </p>
           ) : null}
