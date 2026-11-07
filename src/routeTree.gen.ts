@@ -13,8 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HandleRouteImport } from './routes/$handle'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as CycleRouteImport } from './routes/cycle'
-import { Route as CycleClassicRouteImport } from './routes/cycle-classic'
-import { Route as CycleStylesRouteImport } from './routes/cycle-styles'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -22,8 +20,6 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackersRouteImport } from './routes/trackers'
-import { Route as TrackersPremiumRouteImport } from './routes/trackers-premium'
-import { Route as TrackersStylesRouteImport } from './routes/trackers-styles'
 import { Route as AdminProgressionRouteImport } from './routes/admin/progression'
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as MoodIndexRouteImport } from './routes/mood/index'
@@ -49,16 +45,6 @@ const CoachRoute = CoachRouteImport.update({
 const CycleRoute = CycleRouteImport.update({
   id: '/cycle',
   path: '/cycle',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CycleClassicRoute = CycleClassicRouteImport.update({
-  id: '/cycle-classic',
-  path: '/cycle-classic',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CycleStylesRoute = CycleStylesRouteImport.update({
-  id: '/cycle-styles',
-  path: '/cycle-styles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -94,16 +80,6 @@ const TermsRoute = TermsRouteImport.update({
 const TrackersRoute = TrackersRouteImport.update({
   id: '/trackers',
   path: '/trackers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersPremiumRoute = TrackersPremiumRouteImport.update({
-  id: '/trackers-premium',
-  path: '/trackers-premium',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackersStylesRoute = TrackersStylesRouteImport.update({
-  id: '/trackers-styles',
-  path: '/trackers-styles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProgressionRoute = AdminProgressionRouteImport.update({
@@ -142,8 +118,6 @@ export interface FileRoutesByFullPath {
   '/$handle': typeof HandleRoute
   '/coach': typeof CoachRoute
   '/cycle': typeof CycleRoute
-  '/cycle-classic': typeof CycleClassicRoute
-  '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -151,8 +125,6 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRouteWithChildren
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
-  '/trackers-premium': typeof TrackersPremiumRoute
-  '/trackers-styles': typeof TrackersStylesRoute
   '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
@@ -165,16 +137,12 @@ export interface FileRoutesByTo {
   '/$handle': typeof HandleRoute
   '/coach': typeof CoachRoute
   '/cycle': typeof CycleRoute
-  '/cycle-classic': typeof CycleClassicRoute
-  '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
-  '/trackers-premium': typeof TrackersPremiumRoute
-  '/trackers-styles': typeof TrackersStylesRoute
   '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
@@ -188,8 +156,6 @@ export interface FileRoutesById {
   '/$handle': typeof HandleRoute
   '/coach': typeof CoachRoute
   '/cycle': typeof CycleRoute
-  '/cycle-classic': typeof CycleClassicRoute
-  '/cycle-styles': typeof CycleStylesRoute
   '/dashboard': typeof DashboardRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -197,8 +163,6 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRouteWithChildren
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
-  '/trackers-premium': typeof TrackersPremiumRoute
-  '/trackers-styles': typeof TrackersStylesRoute
   '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
@@ -213,8 +177,6 @@ export interface FileRouteTypes {
     | '/$handle'
     | '/coach'
     | '/cycle'
-    | '/cycle-classic'
-    | '/cycle-styles'
     | '/dashboard'
     | '/privacy'
     | '/profile'
@@ -222,8 +184,6 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/terms'
     | '/trackers'
-    | '/trackers-premium'
-    | '/trackers-styles'
     | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
@@ -236,16 +196,12 @@ export interface FileRouteTypes {
     | '/$handle'
     | '/coach'
     | '/cycle'
-    | '/cycle-classic'
-    | '/cycle-styles'
     | '/dashboard'
     | '/privacy'
     | '/profile'
     | '/report'
     | '/terms'
     | '/trackers'
-    | '/trackers-premium'
-    | '/trackers-styles'
     | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
@@ -258,8 +214,6 @@ export interface FileRouteTypes {
     | '/$handle'
     | '/coach'
     | '/cycle'
-    | '/cycle-classic'
-    | '/cycle-styles'
     | '/dashboard'
     | '/privacy'
     | '/profile'
@@ -267,8 +221,6 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/terms'
     | '/trackers'
-    | '/trackers-premium'
-    | '/trackers-styles'
     | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
@@ -282,8 +234,6 @@ export interface RootRouteChildren {
   HandleRoute: typeof HandleRoute
   CoachRoute: typeof CoachRoute
   CycleRoute: typeof CycleRoute
-  CycleClassicRoute: typeof CycleClassicRoute
-  CycleStylesRoute: typeof CycleStylesRoute
   DashboardRoute: typeof DashboardRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
@@ -291,8 +241,6 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRouteWithChildren
   TermsRoute: typeof TermsRoute
   TrackersRoute: typeof TrackersRoute
-  TrackersPremiumRoute: typeof TrackersPremiumRoute
-  TrackersStylesRoute: typeof TrackersStylesRoute
   AdminProgressionRoute: typeof AdminProgressionRoute
   AdminRewardsRoute: typeof AdminRewardsRoute
   MoodIntelligenceRoute: typeof MoodIntelligenceRoute
@@ -327,20 +275,6 @@ declare module '@tanstack/react-router' {
       path: '/cycle'
       fullPath: '/cycle'
       preLoaderRoute: typeof CycleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cycle-classic': {
-      id: '/cycle-classic'
-      path: '/cycle-classic'
-      fullPath: '/cycle-classic'
-      preLoaderRoute: typeof CycleClassicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cycle-styles': {
-      id: '/cycle-styles'
-      path: '/cycle-styles'
-      fullPath: '/cycle-styles'
-      preLoaderRoute: typeof CycleStylesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -390,20 +324,6 @@ declare module '@tanstack/react-router' {
       path: '/trackers'
       fullPath: '/trackers'
       preLoaderRoute: typeof TrackersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers-premium': {
-      id: '/trackers-premium'
-      path: '/trackers-premium'
-      fullPath: '/trackers-premium'
-      preLoaderRoute: typeof TrackersPremiumRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trackers-styles': {
-      id: '/trackers-styles'
-      path: '/trackers-styles'
-      fullPath: '/trackers-styles'
-      preLoaderRoute: typeof TrackersStylesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/progression': {
@@ -469,8 +389,6 @@ const rootRouteChildren: RootRouteChildren = {
   HandleRoute: HandleRoute,
   CoachRoute: CoachRoute,
   CycleRoute: CycleRoute,
-  CycleClassicRoute: CycleClassicRoute,
-  CycleStylesRoute: CycleStylesRoute,
   DashboardRoute: DashboardRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
@@ -478,8 +396,6 @@ const rootRouteChildren: RootRouteChildren = {
   RewardsRoute: RewardsRouteWithChildren,
   TermsRoute: TermsRoute,
   TrackersRoute: TrackersRoute,
-  TrackersPremiumRoute: TrackersPremiumRoute,
-  TrackersStylesRoute: TrackersStylesRoute,
   AdminProgressionRoute: AdminProgressionRoute,
   AdminRewardsRoute: AdminRewardsRoute,
   MoodIntelligenceRoute: MoodIntelligenceRoute,
