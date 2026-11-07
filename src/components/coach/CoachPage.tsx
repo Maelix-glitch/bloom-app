@@ -3,6 +3,7 @@ import { Info, X } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
+import { isSignedIn, useSession } from "@/hooks/useSession";
 import {
   coachErrorMessage,
   readCoachRecord,
@@ -84,6 +85,7 @@ function newMessageId(prefix: string) {
 export function CoachPage() {
   const moodSystem = useMoodSystem();
   const coach = useCoachSystem();
+  const session = useSession();
   const { entries, analytics } = moodSystem;
 
   const [fallbackLens, setFallbackLens] = useState<CoachMode>("ask");
@@ -947,7 +949,12 @@ export function CoachPage() {
         record={record}
         stats={panelStats}
         memories={coach.memories}
-        profileConnected={Boolean(coach.profileId)}
+        /* The panel's copy branches on this: signed-out wording ("Sign in to
+           sync your Coach…") must never be shown to a signed-in person. The
+           coach hook's profileId resolves on its own auth watch and can lag
+           the shared session, so the session is the authority here — either
+           one saying "signed in" is enough. */
+        profileConnected={isSignedIn(session) || Boolean(coach.profileId)}
         onToggleMemory={(memory) => void toggleMemory(memory)}
         onForgetMemory={(memory) => void forgetMemory(memory)}
       />

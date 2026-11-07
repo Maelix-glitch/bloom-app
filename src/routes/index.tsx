@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarRange, Droplet, Gift, Loader2, Plus, Scale, Smile } from "lucide-react";
+import { CalendarRange, Droplet, Gift, Plus, Scale, Smile } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
@@ -378,6 +378,10 @@ function TodayPage() {
     trackers.hydrated && cycle.hydrated && !habits.loading && !mood.loading,
   );
 
+  /* Latched like the map: the insights panel's empty copy must not flip back
+     to its reading line whenever a background refetch toggles `loading`. */
+  const insightsReady = useEverReady(!mood.loading && trackers.hydrated);
+
   const openCount = focus.filter((f) => !f.done).length;
   /* Day one gets its own line: the hero greets a person who has just arrived,
      not a dashboard demanding entries. Derived from the onboarding answer's
@@ -476,10 +480,22 @@ function TodayPage() {
               )}
             </h1>
             <p
-              className="mt-1.5 min-h-[1.5em] font-display text-xl text-muted-foreground sm:text-3xl"
+              className="mt-1.5 flex min-h-[1.5em] items-center font-display text-xl text-muted-foreground sm:text-3xl"
               aria-live="polite"
             >
-              {subline}
+              {/* While the record settles, the hero holds a shaped placeholder
+                  in the same line box — a loading sentence is a state, not
+                  copy, and must never read as the day's permanent subtitle.
+                  Once ready (latched), the real sentence takes the same box,
+                  so nothing jumps. */}
+              {recordReady ? (
+                subline
+              ) : (
+                <span
+                  className="block h-[0.72em] w-64 max-w-[70%] animate-pulse rounded-full bg-surface-2/80"
+                  aria-hidden="true"
+                />
+              )}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <button type="button" onClick={() => setMoodOpen(true)} className="home-chip home-chip--primary">
@@ -613,7 +629,7 @@ function TodayPage() {
                   onResetTimes={flowTimes.reset}
                   timesAreDefault={flowTimes.isDefault}
                 />
-                <InsightsPanel items={insights} loading={mood.loading || !trackers.hydrated} />
+                <InsightsPanel items={insights} loading={!insightsReady} />
               </div>
             </div>
 
@@ -708,14 +724,10 @@ function TodayPage() {
         </>
       ) : null}
 
-      {!trackers.hydrated ? (
-        <div
-          className="pointer-events-none fixed left-4 z-20 flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1.5 text-[11px] text-muted-foreground lg:left-[228px]"
-          style={{ bottom: "calc(1rem + var(--app-bottom-nav, 0px))" }}
-        >
-          <Loader2 className="size-3 animate-spin" /> Loading
-        </div>
-      ) : null}
+      {/* No global "Loading" pill: the trackers store hydrates from a local
+          read on mount, so the pill could only ever flash on arrival — and
+          every panel on this page already carries its own in-place loading
+          state (hero placeholder, map skeleton, panel reading lines). */}
     </div>
   );
 }

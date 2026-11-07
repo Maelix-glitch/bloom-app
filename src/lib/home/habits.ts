@@ -88,12 +88,22 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJson(key: string, value: unknown): void {
-  if (typeof window === "undefined") return;
+/**
+ * Writes only when the stored value actually changes, and says whether it
+ * did. Callers announce "changed" events off the answer: an identical
+ * rewrite must not announce, or listeners that reload on the announcement
+ * reload forever (see saveLocal).
+ */
+function writeJson(key: string, value: unknown): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    const raw = JSON.stringify(value);
+    if (window.localStorage.getItem(key) === raw) return false;
+    window.localStorage.setItem(key, raw);
+    return true;
   } catch {
     /* quota / private mode — the in-memory copy still works */
+    return false;
   }
 }
 
@@ -113,9 +123,19 @@ export function loadLocalLogs(): HabitLog[] {
     }));
 }
 
-/** Mirror for the Coach + offline fallback. Shape matches readHabitData(). */
+/**
+ * Mirror for the Coach + offline fallback. Shape matches readHabitData().
+ *
+ * The announcement is part of the write: HABITS_CHANGED fires only when the
+ * mirror actually changed. It used to fire on every call — and the signed-in
+ * loader in useHabits both calls saveLocal() at the end of a load AND
+ * reloads when HABITS_CHANGED fires, so every load scheduled the next one,
+ * forever. `loading` never settled, and anything gated on it (the profile's
+ * record numbers, via useProfileRecord's `hydrated`) sat on its loading
+ * placeholder permanently.
+ */
 export function saveLocal(habits: readonly Habit[], logs: readonly HabitLog[]): void {
-  writeJson(
+  const habitsChanged = writeJson(
     HABITS_KEY,
     habits.map((h) => ({
       id: h.id,
@@ -139,8 +159,10 @@ export function saveLocal(habits: readonly Habit[], logs: readonly HabitLog[]): 
       pausedUntil: h.pausedUntil,
     })),
   );
-  writeJson(LOGS_KEY, logs);
-  if (typeof window !== "undefined") window.dispatchEvent(new Event(HABITS_CHANGED));
+  const logsChanged = writeJson(LOGS_KEY, logs);
+  if ((habitsChanged || logsChanged) && typeof window !== "undefined") {
+    window.dispatchEvent(new Event(HABITS_CHANGED));
+  }
 }
 
 /* --------------------------------- rows ---------------------------------- */

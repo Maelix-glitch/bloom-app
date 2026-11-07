@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig, watchAuth } from "@/lib/supabase";
 import { ask as askCoach, CoachUnavailable } from "@/lib/coach/engine";
+import { dedupeAdjacentMessages } from "@/lib/coach/ui-helpers";
 import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
@@ -265,6 +266,12 @@ function rowsToMessage(r: Row, index: number): CoachMessage {
 
 export function useCoachSystem() {
   const [profileId, setProfileId] = useState<string | null>(null);
+  /* False until the first auth answer arrives. Until then `profileId` is
+     null for everyone — signed in or not — so the store must not load yet:
+     loading against the anonymous profile first made the thread paint the
+     wrong store (or the welcome) on arrival, then swap to the real one
+     seconds later when auth landed. */
+  const [authKnown, setAuthKnown] = useState(false);
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StoredConversations>({
     v: 1,
@@ -281,6 +288,7 @@ export function useCoachSystem() {
     const apply = (uid: string | null) => {
       if (!mounted) return;
       setProfileId(uid);
+      setAuthKnown(true);
     };
     if (!hasSupabaseConfig) {
       apply(null);
@@ -296,6 +304,9 @@ export function useCoachSystem() {
   }, []);
 
   useEffect(() => {
+    /* Hold the calm loading state until auth has answered once — the load
+       below then runs exactly once, against the person's real profile. */
+    if (!authKnown) return;
     if (loadedFor.current === profileId) return;
     loadedFor.current = profileId;
     let mounted = true;
@@ -330,7 +341,7 @@ export function useCoachSystem() {
         mode: "ask",
         createdAt: opened,
         updatedAt: new Date().toISOString(),
-        messages: legacy,
+        messages: dedupeAdjacentMessages(legacy),
       };
       return { v: 1, activeId: conversation.id, conversations: [conversation] };
     };
@@ -378,7 +389,10 @@ export function useCoachSystem() {
           );
         }
         if (Array.isArray(rows) && rows.length > 0) {
-          const messages = (rows as Row[]).map(rowsToMessage);
+          /* Regenerated/retried turns leave adjacent duplicate rows in the
+             cloud thread (see dedupeAdjacentMessages) — collapse them on
+             the way in so history never shows the same reply twice. */
+          const messages = dedupeAdjacentMessages((rows as Row[]).map(rowsToMessage));
           const firstTime = messages[0]?.time ?? new Date().toISOString();
           const conversation: CoachConversation = {
             id: `cloud-${profileId}`,
@@ -404,7 +418,7 @@ export function useCoachSystem() {
     return () => {
       mounted = false;
     };
-  }, [profileId]);
+  }, [profileId, authKnown]);
 
   /* Persist whenever the store changes — a small object, written on change. */
   useEffect(() => {

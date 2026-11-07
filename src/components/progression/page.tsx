@@ -228,7 +228,11 @@ export function JourneyPage() {
                 Read from your earned points. A quiet week costs you nothing.
               </p>
             </div>
-            <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
+            {progress.loading ? (
+              <p className="pg-empty">Loading your journey…</p>
+            ) : (
+              <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
+            )}
           </section>
         </PgReveal>
 
@@ -250,7 +254,11 @@ export function JourneyPage() {
                 the further you walk.
               </p>
             </div>
-            <CrestHall points={progress.points} rankTier={progress.rank.rank.tier} />
+            {progress.loading ? (
+              <p className="pg-empty">Loading your journey…</p>
+            ) : (
+              <CrestHall points={progress.points} rankTier={progress.rank.rank.tier} />
+            )}
           </section>
         </PgReveal>
 
@@ -268,8 +276,9 @@ export function JourneyPage() {
                 </h2>
               </div>
               <p className="pg-section-aside">
-                {progress.achievements.filter((a) => a.unlocked).length} of{" "}
-                {progress.achievements.length} earned — each one tied to a real condition.
+                {progress.loading
+                  ? "Each one tied to a real condition."
+                  : `${progress.achievements.filter((a) => a.unlocked).length} of ${progress.achievements.length} earned — each one tied to a real condition.`}
               </p>
             </div>
             <AchievementGallery achievements={progress.achievements} />
@@ -317,7 +326,9 @@ export function JourneyPage() {
                 </h2>
               </div>
               <p className="pg-section-aside">
-                {formatPoints(progress.points)} points earned · {progress.rank.rank.name}
+                {progress.loading
+                  ? "— points earned"
+                  : `${formatPoints(progress.points)} points earned · ${progress.rank.rank.name}`}
               </p>
             </div>
             <MilestoneArchive
