@@ -7,6 +7,7 @@
  */
 
 import { addDays, diffDays } from "./dates";
+import { PLAUSIBLE_MAX } from "./baseline";
 import { clamp } from "./stats";
 import type { Baseline, CycleRecord, ForecastResult, PhaseResult } from "./types";
 import type { PhaseKey } from "../types";
@@ -60,7 +61,10 @@ export function phaseEstimate(input: {
     return {
       key: null,
       label: "Cycle day recorded",
-      day,
+      /* No measured length yet, so the day is capped at the plausible
+         bound the baseline itself uses: a single start logged months ago
+         must not present as "day 212" of a cycle that has no length. */
+      day: Math.min(day, PLAUSIBLE_MAX),
       expectedLength: null,
       certainty: "observed",
       window: null,
@@ -73,7 +77,11 @@ export function phaseEstimate(input: {
     return {
       key: null,
       label: "Past your usual length",
-      day,
+      /* The day never exceeds the expected length: past it, the honest
+         statement is "the last expected day, N days past", carried by
+         `overdueDays` — not "day 61" of a ~28-day cycle, which reads as
+         a broken counter on every surface that prints the day. */
+      day: expectedLength,
       expectedLength,
       certainty: "estimated",
       window: null,
