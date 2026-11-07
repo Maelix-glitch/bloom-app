@@ -435,7 +435,12 @@ export function ProfileEditor({
                   </span>
                   <span className="min-w-0">
                     <span className="bedit-field-label">Username</span>
-                    <span className="flex items-baseline gap-1">
+                    {/* No gap between the @ and the field: with one, the
+                        empty field's placeholder read as "@ quietlavender"
+                        — a handle with a space in it, which the rules
+                        themselves forbid. The @ sits directly against the
+                        typed (or suggested) name, as a handle reads. */}
+                    <span className="flex items-baseline">
                       <span className="mono text-[14px] text-faint" aria-hidden>
                         @
                       </span>
