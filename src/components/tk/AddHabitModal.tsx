@@ -26,6 +26,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { formatClock } from "@/lib/smart/usual";
 import { createPortal } from "react-dom";
 
+import { BloomIcon, isBloomIconName } from "@/components/icons/BloomIcon";
+import { HABIT_ICON_CATALOGUE, twinGlyphFor } from "@/components/icons/habitIcons";
+
 import "@/styles/add-habit-modal.css";
 
 /* ============================ PUBLIC TYPES ================================ */
@@ -34,8 +37,8 @@ export type HabitColor = "amber" | "sage" | "rose" | "sky" | "violet";
 export type HabitFrequency = "daily" | "weekly" | "custom";
 export type HabitPriority = "low" | "medium" | "high";
 export interface HabitIcon {
-  type: "emoji" | "image";
-  /** emoji character, or a data URL for uploaded images */
+  type: "emoji" | "image" | "bloom";
+  /** registry glyph id ("bloom"), emoji character ("emoji"), or a data URL for uploaded images */
   value: string;
 }
 
@@ -84,38 +87,30 @@ export interface AddHabitModalProps {
 }
 
 /* --- ICON CATALOGUE ---------------------------------------------------------
-   Add/remove freely. `k` = search keywords. Grid is rendered from this array,
-   so the search box works automatically for anything you add. */
-const ICONS: { e: string; k: string }[] = [
-  { e: "⭐", k: "star favourite" },
-  { e: "🌱", k: "grow plant seed" },
-  { e: "📚", k: "read book study" },
-  { e: "💧", k: "water drink hydrate" },
-  { e: "🧘", k: "meditate calm yoga" },
-  { e: "🏃", k: "run exercise cardio" },
-  { e: "✍️", k: "write journal note" },
-  { e: "🍎", k: "eat food fruit" },
-  { e: "😴", k: "sleep rest bed" },
-  { e: "🎯", k: "goal focus target" },
-  { e: "🎨", k: "art draw create" },
-  { e: "💪", k: "gym strength workout" },
-  { e: "🧹", k: "clean tidy chore" },
-  { e: "💊", k: "medicine pill health" },
-  { e: "🚶", k: "walk steps outside" },
-  { e: "☀️", k: "morning sun wake" },
-  { e: "🌙", k: "night evening moon" },
-  { e: "💰", k: "save money budget" },
-  { e: "📵", k: "no phone screen detox" },
-  { e: "🧠", k: "learn brain think" },
-  { e: "🎧", k: "music listen podcast" },
-  { e: "🧴", k: "skincare routine" },
-  { e: "🦷", k: "teeth brush dental" },
-  { e: "📞", k: "call family friend" },
-  { e: "🌿", k: "nature outdoors green" },
-  { e: "🍵", k: "tea drink calm" },
-  { e: "🚴", k: "bike cycle ride" },
-  { e: "🧺", k: "laundry chore home" },
-];
+   The bespoke glyph catalogue (components/icons/habitIcons) — the same 28
+   choices the emoji picker always offered, in the same order, with the same
+   search keywords (`k` strings unchanged, so search behaves identically);
+   what changed is that each choice is now a Bloom glyph id, and picking one
+   saves `icon_type='bloom'`. Grid is rendered from this array, so the search
+   box works automatically for anything added to the catalogue. */
+const ICONS = HABIT_ICON_CATALOGUE.map((c) => ({ id: c.id, k: c.k }));
+
+/**
+ * A prefill icon from a legacy habit: a catalogue emoji becomes its bespoke
+ * twin as soon as the dialog opens, so re-saving upgrades the row naturally
+ * (plan §3.4). A free-pasted emoji keeps its type and renders as itself; an
+ * unknown bloom id degrades to the star-bloom rather than a blank tile.
+ */
+function normalisePrefillIcon(icon: HabitIcon): HabitIcon {
+  if (icon.type === "emoji") {
+    const twin = twinGlyphFor(icon.value);
+    return twin ? { type: "bloom", value: twin } : icon;
+  }
+  if (icon.type === "bloom" && !isBloomIconName(icon.value)) {
+    return { type: "bloom", value: "star-bloom" };
+  }
+  return icon;
+}
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -161,7 +156,7 @@ const DEFAULT_STATE = (): State => ({
   maxStepSeen: 0,
   name: "",
   note: "",
-  icon: { type: "emoji", value: "⭐" },
+  icon: { type: "bloom", value: "star-bloom" },
   color: "amber",
   frequency: "daily",
   days: [1, 2, 3, 4, 5],
@@ -184,7 +179,7 @@ function initialState(prefill: AddHabitPrefill | undefined): State {
     ...base,
     ...(prefill.name !== undefined && { name: prefill.name }),
     ...(prefill.note !== undefined && { note: prefill.note }),
-    ...(prefill.icon && { icon: { ...prefill.icon } }),
+    ...(prefill.icon && { icon: normalisePrefillIcon(prefill.icon) }),
     ...(prefill.color && { color: prefill.color }),
     ...(prefill.frequency && { frequency: prefill.frequency }),
     ...(prefill.days && prefill.days.length > 0 && { days: [...prefill.days] }),
@@ -443,7 +438,7 @@ function AddHabitDialog({
   const resetDropzone = () => {
     if (fileRef.current) fileRef.current.value = "";
     setUpload(null);
-    set({ icon: { type: "emoji", value: "⭐" } });
+    set({ icon: { type: "bloom", value: "star-bloom" } });
   };
 
   /* --- RENDER ------------------------------------------------------------- */
@@ -461,7 +456,13 @@ function AddHabitDialog({
   const q = s.iconQuery.trim().toLowerCase();
   const iconList = q ? ICONS.filter((i) => i.k.includes(q)) : ICONS;
   const iconNode: ReactNode =
-    s.icon.type === "image" ? <img src={s.icon.value} alt="" /> : s.icon.value;
+    s.icon.type === "image" ? (
+      <img src={s.icon.value} alt="" />
+    ) : s.icon.type === "bloom" && isBloomIconName(s.icon.value) ? (
+      <BloomIcon name={s.icon.value} size={26} />
+    ) : (
+      s.icon.value
+    );
 
   const errorFor = (key: keyof Errors, id: string) => (
     <div className={cx("error-msg", s.errors[key] && "show")} id={id} data-error-for={key}>
@@ -615,23 +616,37 @@ function AddHabitDialog({
                   onChange={(e) => set({ iconQuery: e.target.value })}
                 />
                 <div className="icon-grid" id="iconGrid">
+                  {/* A legacy free-pasted emoji keeps its own tile, selected,
+                      until the person picks a Bloom glyph instead. */}
+                  {s.icon.type === "emoji" ? (
+                    <button
+                      type="button"
+                      className="icon-opt selected"
+                      data-icon={s.icon.value}
+                      aria-label="Current icon"
+                      aria-pressed="true"
+                      onClick={() => set({ icon: { type: "emoji", value: s.icon.value } })}
+                    >
+                      {s.icon.value}
+                    </button>
+                  ) : null}
                   {iconList.length ? (
                     iconList.map((i) => (
                       <button
                         type="button"
-                        key={i.e}
+                        key={i.id}
                         className={cx(
                           "icon-opt",
-                          s.icon.type === "emoji" && s.icon.value === i.e && "selected",
+                          s.icon.type === "bloom" && s.icon.value === i.id && "selected",
                         )}
-                        data-icon={i.e}
+                        data-icon={i.id}
                         aria-label={i.k.split(" ")[0]}
-                        onClick={() => set({ icon: { type: "emoji", value: i.e } })}
+                        onClick={() => set({ icon: { type: "bloom", value: i.id } })}
                       >
-                        {i.e}
+                        <BloomIcon name={i.id} size={22} />
                       </button>
                     ))
-                  ) : (
+                  ) : s.icon.type === "emoji" ? null : (
                     <div className="icon-empty" style={{ gridColumn: "1/-1" }}>
                       No icons match “{q}”.
                     </div>
@@ -689,7 +704,9 @@ function AddHabitDialog({
                       </div>
                     ) : (
                       <>
-                        <div className="dropzone-icon">🖼️</div>
+                        <div className="dropzone-icon">
+                          <BloomIcon name="image" size={26} />
+                        </div>
                         <div className="dropzone-text">Drop an image or click to upload</div>
                         <div className="dropzone-sub">
                           PNG, JPG or WEBP up to 2MB — square works best
@@ -1049,6 +1066,8 @@ function AddHabitDialog({
                 alt=""
                 style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
               />
+            ) : success?.icon.type === "bloom" && isBloomIconName(success.icon.value) ? (
+              <BloomIcon name={success.icon.value} size={30} />
             ) : (
               (success?.icon.value ?? "⭐")
             )}

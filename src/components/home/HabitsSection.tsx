@@ -33,7 +33,8 @@ import { shiftDay } from "@/lib/localDay";
 import { toast } from "sonner";
 import { STREAK_KEPT } from "@/lib/voice/copy";
 import { pick } from "@/lib/voice/messages";
-import { semanticHabitIcon } from "./habitGlyphs";
+import { BloomIcon } from "@/components/icons/BloomIcon";
+import { resolveHabitIcon } from "@/components/icons/habitIcons";
 
 /**
  * Streak milestones that earn a quiet word of celebration. Deliberately
@@ -362,7 +363,7 @@ export function HabitsSection({
                   className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3 py-2.5 text-sm"
                   data-testid={`home-habit-paused-${h.id}`}
                 >
-                  <span className="text-base opacity-70">{asideGlyph(h)}</span>
+                  <AsideGlyph habit={h} className="opacity-70" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
                     <span className="block text-[11px] text-muted-foreground">
@@ -387,7 +388,7 @@ export function HabitsSection({
                   className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3 py-2.5 text-sm opacity-80"
                   data-testid={`home-habit-archived-${h.id}`}
                 >
-                  <span className="text-base opacity-60">{asideGlyph(h)}</span>
+                  <AsideGlyph habit={h} className="opacity-60" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
                     <span className="block text-[11px] text-muted-foreground">
@@ -427,8 +428,12 @@ export function HabitsSection({
  * The little picture tile on a habit row. Custom photos crop to fill the tile;
  * if the picture is missing or fails to load, a letter monogram in the habit's
  * own colour steps in — the row never shows a broken-image glyph.
+ *
+ * Everything else resolves through the U4 rule (icons/habitIcons): bespoke
+ * glyphs render as registry marks, catalogue emoji render as their bespoke
+ * twins, and an emoji a person chose themselves still renders as itself.
  */
-function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconUrl"> }) {
+function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconType" | "iconUrl"> }) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const src = habit.iconUrl && habit.iconUrl !== failedSrc ? habit.iconUrl : null;
   if (src) {
@@ -441,30 +446,18 @@ function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconUrl"> 
       />
     );
   }
-  if (isMissingIcon(habit.icon)) {
-    return (
-      <span aria-hidden="true" className="font-display text-base font-semibold leading-none">
-        {habitMonogram(habit.name)}
-      </span>
-    );
+  const resolved = resolveHabitIcon(habit.iconType, habit.icon);
+  if (resolved.kind === "glyph") {
+    return <BloomIcon name={resolved.name} size={16} />;
   }
-  /* Bloom's own defaults are drawn with the app's line-icon family; an emoji a
-     person chose themselves still renders as themselves. */
-  const Glyph = semanticHabitIcon(habit.icon);
-  if (Glyph) {
-    return <Glyph aria-hidden="true" className="size-4" strokeWidth={1.75} />;
+  if (resolved.kind === "emoji") {
+    return <>{resolved.value}</>;
   }
-  return <>{habit.icon}</>;
-}
-
-/**
- * True when the saved icon can't be shown as a picture: the "custom picture
- * went missing" placeholder, nothing at all, or a plain word from an old
- * import ("droplet") — a word rendered raw over the tile reads as a bug, so
- * the monogram steps in instead.
- */
-function isMissingIcon(icon: string): boolean {
-  return icon === "" || icon === "🖼️" || /^[a-z0-9 _-]+$/i.test(icon);
+  return (
+    <span aria-hidden="true" className="font-display text-base font-semibold leading-none">
+      {habitMonogram(habit.name)}
+    </span>
+  );
 }
 
 /** First letter of the habit's name — the premium fallback when its picture is missing. */
@@ -472,9 +465,42 @@ function habitMonogram(name: string): string {
   return name.trim().charAt(0).toUpperCase() || "★";
 }
 
-/** Paused/archived rows render the icon as plain text — same "never broken" rule. */
-function asideGlyph(habit: Pick<Habit, "name" | "icon">): string {
-  return isMissingIcon(habit.icon) ? habitMonogram(habit.name) : habit.icon;
+/** Paused/archived rows show the same resolved mark, quieter — same "never broken" rule. */
+function AsideGlyph({
+  habit,
+  className,
+}: {
+  habit: Pick<Habit, "name" | "icon" | "iconType" | "iconUrl">;
+  className?: string;
+}) {
+  if (habit.iconUrl) {
+    return (
+      <img
+        src={habit.iconUrl}
+        alt=""
+        className={`size-4 rounded object-cover ${className ?? ""}`}
+      />
+    );
+  }
+  const resolved = resolveHabitIcon(habit.iconType, habit.icon);
+  if (resolved.kind === "glyph") {
+    return (
+      <span className={className}>
+        <BloomIcon name={resolved.name} size={16} />
+      </span>
+    );
+  }
+  if (resolved.kind === "emoji") {
+    return <span className={`text-base ${className ?? ""}`}>{resolved.value}</span>;
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className={`font-display text-base font-semibold leading-none ${className ?? ""}`}
+    >
+      {habitMonogram(habit.name)}
+    </span>
+  );
 }
 
 /** The "…" on a habit row. Edit, pause (with three sensible lengths), archive, delete. */
