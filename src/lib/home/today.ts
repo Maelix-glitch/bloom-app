@@ -608,8 +608,11 @@ export function focusOf(input: {
   const out: FocusItem[] = [];
 
   /* The ease window: the estimated pre-period days. Their preference, their
-     window — off by default, and nothing here touches the record. */
+     window — off by default, and nothing here touches the record. The mode
+     check matters: `expecting` only knows the period mode, so without it
+     the opt-out lever the caller passes would leak this item through. */
   const inEaseWindow =
+    cycleMode !== "off" &&
     cycle.expecting &&
     cycle.daysUntilNext !== null &&
     cycle.daysUntilNext >= 0 &&
