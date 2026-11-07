@@ -17,10 +17,8 @@ export const Route = createFileRoute("/admin/rewards")({
         rel: "stylesheet",
         href: rewardsCss,
       },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap",
-      },
+      /* The per-route Cormorant Garamond load was removed in U1: routes
+         use the root three-family system (Fraunces / Inter / IBM Plex Mono). */
     ],
   }),
   component: RewardsAdminPage,
