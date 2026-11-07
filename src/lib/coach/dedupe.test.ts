@@ -62,6 +62,24 @@ describe("dedupeAdjacentMessages", () => {
     expect(out).toHaveLength(4);
   });
 
+  it("collapses both halves of the live pattern: a duplicated prompt and its duplicated reply", () => {
+    // Seen in an existing local thread after the import-path fix: the same
+    // user prompt twice in a row, then the same reply twice in a row. The
+    // local store load (readStored in useCoachSystem) runs this same helper
+    // over already-stored conversations, so both pairs collapse there too.
+    const reply =
+      "I read from your logs — and I'd rather say nothing than guess at something I can't see.";
+    const out = dedupeAdjacentMessages([
+      msg("user", "hello"),
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("coach", reply),
+      msg("user", "Thanks — plan tonight?"),
+    ]);
+    expect(out.map((m) => m.role)).toEqual(["user", "coach", "user"]);
+    expect(out.map((m) => m.paragraphs[0])).toEqual(["hello", reply, "Thanks — plan tonight?"]);
+  });
+
   it("treats whitespace-only differences as the same text", () => {
     const out = dedupeAdjacentMessages([msg("coach", "Same  reply."), msg("coach", "Same reply.")]);
     expect(out).toHaveLength(1);
