@@ -2,10 +2,10 @@ import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { MessageSquarePlus, Search } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import type { CoachConversation } from "@/hooks/useCoachSystem";
 import type { CoachMode } from "@/lib/coach/intelligence";
 import { cn } from "@/lib/utils";
-import { CoachGlyph } from "./bloom-mark";
 
 const MODE_LABEL: Record<CoachMode, string> = {
   ask: "Ask — a clear read",
@@ -121,7 +121,7 @@ export function QuickPalette({
                   }}
                 >
                   <span className="coach-palette-row-icon">
-                    <CoachGlyph size={15} />
+                    <BloomIcon name={item} size={15} />
                   </span>
                   <span>
                     <strong>{MODE_LABEL[item].split(" — ")[0]}</strong>
