@@ -18,6 +18,7 @@
  */
 
 import { todayLocal, shiftDay } from "@/lib/localDay";
+import { dayHasSignal, longestStreak } from "@/lib/stats";
 
 import { ACHIEVEMENTS } from "./achievements";
 import { DAILY_GOALS, MILESTONE_GOALS, MONTHLY_GOALS, WEEKLY_GOALS, recommendNext } from "./goals";
@@ -95,19 +96,9 @@ export function periodKeyFor(goal: GoalDef, today: string): string {
   }
 }
 
-/** Longest run of consecutive ticked days in a set of local dates. */
+/** Longest run of consecutive ticked days in a set of local dates — the shared definition (lib/stats). */
 export function longestRun(days: ReadonlySet<string>): number {
-  if (days.size === 0) return 0;
-  const sorted = [...days].sort();
-  let best = 0;
-  let run = 0;
-  let previous: string | null = null;
-  for (const day of sorted) {
-    run = previous !== null && shiftDay(previous, 1) === day ? run + 1 : 1;
-    previous = day;
-    if (run > best) best = run;
-  }
-  return best;
+  return longestStreak(days);
 }
 
 /* ------------------------------- spec resolver ---------------------------- */
@@ -221,13 +212,11 @@ export function resolveSpec(spec: GoalSpec, input: ProgressionInput): number {
     case "balanceDays": {
       const checked = new Set<string>(habitDaysAll);
       for (const day of input.trackerDays) {
-        const touched =
-          day.sleepMinutes !== null ||
-          day.waterMl !== null ||
-          day.movementMinutes !== null ||
-          day.energy !== null ||
-          day.studyMinutes > 0;
-        if (touched) checked.add(day.date);
+        /* The shared logged-day definition (lib/stats): any of the six
+           tracker signals — screen included, exactly as Profile counts it.
+           Screen is never a goal *target*; this only asks whether the
+           person checked in at all that day. */
+        if (dayHasSignal(day)) checked.add(day.date);
       }
       for (const day of input.moodDays) {
         if (day) checked.add(day);
