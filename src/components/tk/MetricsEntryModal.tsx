@@ -25,38 +25,23 @@
  */
 
 import { useEffect, useState } from "react";
-import {
-  X,
-  Moon,
-  Droplets,
-  BookOpen,
-  Activity,
-  Zap,
-  Smartphone,
-  Check,
-  Trash2,
-  CircleAlert,
-  Minus,
-  Plus,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { Minus, Plus, Sparkles, Trash2 } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
+import { Button } from "@/components/ui/button";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { usualDay } from "@/lib/smart/usual";
-import { readTrackerValue, setTrackerValues } from "@/components/tk/designs/shared";
+import { readTrackerValue, setTrackerValues } from "@/components/tk/shared";
 
 type MetricKey = TrackerId;
 
 type MetricDef = {
   key: MetricKey;
   label: string;
-  icon: LucideIcon;
   unit: string;
   placeholder: string;
-  colorVar: string;
   /** Hours ↔ minutes for the three duration trackers the user thinks of in hours. */
   scale: number;
   min: number;
@@ -64,15 +49,24 @@ type MetricDef = {
   validate: (v: number) => string | null;
 };
 
+/**
+ * Each metric's chart hue as utility classes (the @theme bridges for
+ * --metric-* in styles.css). Written out in full so Tailwind's scanner
+ * sees them; the glyph itself is the registry glyph of the same name as
+ * the tracker (U4), coloured by the text class via currentColor.
+ */
+const METRIC_COLOR: Record<MetricKey, { text: string; border: string }> = {
+  sleep: { text: "text-metric-sleep", border: "border-metric-sleep" },
+  water: { text: "text-metric-water", border: "border-metric-water" },
+  study: { text: "text-metric-study", border: "border-metric-study" },
+  movement: { text: "text-metric-movement", border: "border-metric-movement" },
+  energy: { text: "text-metric-energy", border: "border-metric-energy" },
+  screen: { text: "text-metric-screen", border: "border-metric-screen" },
+};
+
 const HOURS = 60;
 
-function metric(
-  key: MetricKey,
-  icon: LucideIcon,
-  unit: string,
-  placeholder: string,
-  scale = 1,
-): MetricDef {
+function metric(key: MetricKey, unit: string, placeholder: string, scale = 1): MetricDef {
   const def = trackerDef(key);
   const min = def.min / scale;
   const max = Math.round((def.max / scale) * 100) / 100;
@@ -83,10 +77,8 @@ function metric(
   return {
     key,
     label: def.name,
-    icon,
     unit,
     placeholder,
-    colorVar: `var(--metric-${key})`,
     scale,
     min,
     max,
@@ -95,12 +87,12 @@ function metric(
 }
 
 export const METRICS: MetricDef[] = [
-  metric("sleep", Moon, "hrs", "e.g. 7.5", HOURS),
-  metric("water", Droplets, "ml", "e.g. 2000"),
-  metric("study", BookOpen, "hrs", "e.g. 3", HOURS),
-  metric("movement", Activity, "min", "e.g. 30"),
-  metric("energy", Zap, "/5", "e.g. 4"),
-  metric("screen", Smartphone, "hrs", "e.g. 4", HOURS),
+  metric("sleep", "hrs", "e.g. 7.5", HOURS),
+  metric("water", "ml", "e.g. 2000"),
+  metric("study", "hrs", "e.g. 3", HOURS),
+  metric("movement", "min", "e.g. 30"),
+  metric("energy", "/5", "e.g. 4"),
+  metric("screen", "hrs", "e.g. 4", HOURS),
 ];
 
 /** One tap of − / +, in the unit the field shows (a glass of water, half an hour…). */
@@ -323,18 +315,9 @@ export function MetricsEntryModal({
        * tapped. `min-h-0` is what lets the flex child actually shrink; without
        * it the panel grows past the viewport instead of scrolling.
        */}
-      <div
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
-        style={{ backgroundColor: "var(--metric-surface)" }}
-      >
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-metric-surface">
         {/* Header */}
-        <div
-          className="relative px-4 pb-5 pt-4 sm:px-6"
-          style={{
-            background:
-              "linear-gradient(100deg, var(--metric-screen) 0%, var(--brand) 55%, var(--metric-sleep) 100%)",
-          }}
-        >
+        <div className="relative bg-[linear-gradient(100deg,var(--metric-screen)_0%,var(--brand)_55%,var(--metric-sleep)_100%)] px-4 pb-5 pt-4 sm:px-6">
           <h2 className="text-lg font-bold text-white">Today's snapshot</h2>
           {subtitle && <p className="mt-0.5 text-sm text-white/80">{subtitle}</p>}
           <button
@@ -343,7 +326,7 @@ export function MetricsEntryModal({
             aria-label="Close"
             className="absolute right-4 top-4 rounded-md p-1 text-white/80 transition-colors hover:text-white"
           >
-            <X className="h-4 w-4" />
+            <BloomIcon name="close" size={16} />
           </button>
         </div>
 
@@ -357,21 +340,22 @@ export function MetricsEntryModal({
                 return (
                   <div
                     key={m.key}
-                    className="rounded-xl border p-3 transition-colors"
-                    style={{
-                      backgroundColor: "var(--metric-surface-raised)",
-                      borderColor: err ? "var(--danger)" : "var(--border)",
-                    }}
+                    className={`rounded-xl border bg-metric-surface-raised p-3 transition-colors ${
+                      err ? "border-danger" : "border-border"
+                    }`}
                   >
                     <div className="flex items-center gap-2">
-                      <m.icon className="h-4 w-4" style={{ color: m.colorVar }} strokeWidth={2.4} />
+                      <span className={METRIC_COLOR[m.key].text}>
+                        <BloomIcon name={m.key} size={16} />
+                      </span>
                       <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                         {m.label}
                       </span>
                     </div>
                     <div
-                      className="mt-2 flex items-center gap-2 border-b-2 pb-2"
-                      style={{ borderColor: err ? "var(--danger)" : m.colorVar }}
+                      className={`mt-2 flex items-center gap-2 border-b-2 pb-2 ${
+                        err ? "border-danger" : METRIC_COLOR[m.key].border
+                      }`}
                     >
                       <button
                         type="button"
@@ -409,11 +393,10 @@ export function MetricsEntryModal({
                       </button>
                     </div>
                     {err && (
-                      <p
-                        className="mt-1.5 flex items-start gap-1 text-[11px] leading-tight"
-                        style={{ color: "var(--danger)" }}
-                      >
-                        <CircleAlert className="mt-px h-3 w-3 shrink-0" />
+                      <p className="mt-1.5 flex items-start gap-1 text-[11px] leading-tight text-danger">
+                        <span className="mt-px shrink-0">
+                          <BloomIcon name="error" size={12} />
+                        </span>
                         {err}
                       </p>
                     )}
@@ -423,10 +406,7 @@ export function MetricsEntryModal({
             </div>
 
             {usualChips.length > 0 ? (
-              <div
-                className="mt-3 rounded-xl border border-dashed p-3"
-                style={{ borderColor: "var(--border)" }}
-              >
+              <div className="mt-3 rounded-xl border border-dashed border-border p-3">
                 <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
                   Your usual · from your last logged days
                 </p>
@@ -436,11 +416,7 @@ export function MetricsEntryModal({
                       key={`usual-${def.key}`}
                       type="button"
                       onClick={() => setValue(def.key, strip(value / def.scale))}
-                      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors"
-                      style={{
-                        borderColor: def.colorVar,
-                        color: def.colorVar,
-                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors ${METRIC_COLOR[def.key].border} ${METRIC_COLOR[def.key].text}`}
                       title={`Fills ${def.label} with what you usually log — ${value} ${def.unit}`}
                     >
                       <Sparkles className="h-3 w-3" aria-hidden />
@@ -451,21 +427,17 @@ export function MetricsEntryModal({
               </div>
             ) : null}
 
-            <button
+            <Button
               type="button"
+              size="lg"
               onClick={handleConfirm}
               disabled={(submitted && hasErrors) || isEmpty}
-              className="metrics-save mt-4 w-full rounded-lg py-3 text-sm font-bold uppercase tracking-widest text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
-              style={{
-                background:
-                  "linear-gradient(90deg, var(--metric-screen), var(--brand), var(--metric-sleep))",
-              }}
+              className="metrics-save mt-4 w-full font-bold uppercase tracking-widest"
             >
               Save today
-            </button>
+            </Button>
             <p
-              className="mt-3 text-center text-xs text-muted-foreground"
-              style={saveError ? { color: "var(--danger)" } : undefined}
+              className={`mt-3 text-center text-xs ${saveError ? "text-danger" : "text-muted-foreground"}`}
               role={saveError ? "alert" : undefined}
             >
               {saveError
@@ -490,15 +462,8 @@ export function MetricsEntryModal({
 
         {view === "saved" && (
           <div className="flex flex-col items-center px-6 pb-7 pt-8 text-center">
-            <div
-              className="flex h-20 w-20 items-center justify-center rounded-full"
-              style={{
-                boxShadow: "0 0 40px 4px color-mix(in oklch, var(--success) 45%, transparent)",
-                color: "var(--success)",
-                border: "2px solid var(--success)",
-              }}
-            >
-              <Check className="h-9 w-9" strokeWidth={2.5} />
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-success text-success [box-shadow:0_0_40px_4px_color-mix(in_oklch,var(--success)_45%,transparent)]">
+              <BloomIcon name="check-bloom" size={36} />
             </div>
             <h3 className="mt-5 text-2xl font-bold text-foreground">Saved!</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
@@ -508,15 +473,18 @@ export function MetricsEntryModal({
             </p>
 
             <div
-              className="metrics-saved-grid mt-6 grid w-full gap-1 rounded-xl border border-border p-3"
+              className="metrics-saved-grid mt-6 grid w-full gap-1 rounded-xl border border-border bg-metric-surface-raised p-3"
               style={{
-                backgroundColor: "var(--metric-surface-raised)",
+                /* the column count is the number of metrics this person
+                   tracks — data, not styling, so it stays inline */
                 gridTemplateColumns: `repeat(${Math.max(1, metrics.length)}, minmax(0, 1fr))`,
               }}
             >
               {metrics.map((m) => (
                 <div key={m.key} className="flex flex-col items-center gap-1">
-                  <m.icon className="h-3.5 w-3.5" style={{ color: m.colorVar }} />
+                  <span className={METRIC_COLOR[m.key].text}>
+                    <BloomIcon name={m.key} size={14} />
+                  </span>
                   <span className="text-sm font-bold text-foreground">
                     {filled(m.key) ? values[m.key] : "—"}
                   </span>
@@ -525,58 +493,48 @@ export function MetricsEntryModal({
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="mt-6 w-full rounded-lg py-3 text-sm font-semibold text-white"
-              style={{
-                background:
-                  "linear-gradient(90deg, var(--metric-screen), var(--brand), var(--metric-sleep))",
-              }}
-            >
+            <Button type="button" size="lg" onClick={onClose} className="mt-6 w-full">
               Done
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
               onClick={clearAll}
-              className="mt-3 w-full rounded-lg border border-border py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="mt-3 w-full"
             >
               Add Another Entry
-            </button>
+            </Button>
           </div>
         )}
 
         {view === "reset" && (
           <div className="flex flex-col items-center px-6 pb-7 pt-8 text-center">
-            <div
-              className="flex h-20 w-20 items-center justify-center rounded-full"
-              style={{
-                color: "var(--danger)",
-                border: "2px solid var(--danger)",
-                boxShadow: "0 0 40px 4px color-mix(in oklch, var(--danger) 35%, transparent)",
-              }}
-            >
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-danger text-danger [box-shadow:0_0_40px_4px_color-mix(in_oklch,var(--danger)_35%,transparent)]">
               <Trash2 className="h-8 w-8" />
             </div>
             <h3 className="mt-5 text-xl font-bold text-foreground">Reset today's entry?</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               This will clear all the values you've entered. You can't undo this.
             </p>
-            <button
+            <Button
               type="button"
+              variant="destructive"
+              size="lg"
               onClick={clearAll}
-              className="mt-6 w-full rounded-lg py-3 text-sm font-semibold text-white"
-              style={{ background: "linear-gradient(90deg, var(--danger), var(--metric-screen))" }}
+              className="mt-6 w-full"
             >
               Yes, clear all
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
               onClick={() => setView("form")}
-              className="mt-3 w-full rounded-lg border border-border py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="mt-3 w-full"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         )}
       </div>
