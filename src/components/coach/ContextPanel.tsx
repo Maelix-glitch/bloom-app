@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
-import { Pin, ShieldCheck, Trash2, X } from "lucide-react";
+import { Pin, ShieldCheck, Trash2 } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
+import { BloomSheet } from "@/components/ui/bloom-sheet";
+import { Button } from "@/components/ui/button";
 import type { CoachMemory } from "@/hooks/useCoachSystem";
 import type { CoachRecord } from "@/lib/coach/responder";
 import { cn } from "@/lib/utils";
@@ -211,11 +213,15 @@ function MemoryView({
   );
 }
 
-/* ----------------------------- the slide-over ------------------------------ */
+/* ------------------------------- the sheet --------------------------------- */
 
 /**
- * Personal context — a quiet right-hand slide-over. Real derived signals
- * only; raw tracker history is never shown here.
+ * Personal context — a quiet sheet on the one overlay pattern (U6, plan
+ * §5.2): BloomSheet owns the scrim, focus trap, escape and motion, and the
+ * panel carries the `.coach-overlay-scope` token scope (the portal mounts
+ * outside `.coach-page`). Real derived signals only; raw tracker history
+ * is never shown here. The two tabs carry the registry's context/memory
+ * glyphs — the concepts they were drawn for (U4).
  */
 export function CoachContextPanel({
   open,
@@ -240,119 +246,63 @@ export function CoachContextPanel({
   onToggleMemory: (memory: CoachMemory) => void;
   onForgetMemory: (memory: CoachMemory) => void;
 }) {
-  const closeRef = useRef<HTMLButtonElement | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const titleId = "coach-context-panel-title";
-
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-      if (event.key !== "Tab") return;
-      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
-      );
-      if (!focusable?.length) return;
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = previous;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
-
+  const title = tab === "context" ? "Personal context" : "Memory";
   return (
-    <AnimatePresence>
-      {open ? (
-        <motion.div
-          className="coach-panel-backdrop"
-          role="presentation"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.24 }}
-          onMouseDown={(event) => {
-            if (event.currentTarget === event.target) onClose();
-          }}
-        >
-          <motion.aside
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="coach-panel"
-            initial={{ x: 40, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 40, opacity: 0 }}
-            transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+    <BloomSheet
+      open={open}
+      onClose={onClose}
+      title={title}
+      size="lg"
+      className="coach-overlay-scope"
+    >
+      <div className="coach-overlay-stack">
+        <div className="coach-panel-head">
+          <div>
+            <p className="coach-panel-kicker">Bloom</p>
+            <h2 className="coach-panel-title">{title}</h2>
+          </div>
+          <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
+            <BloomIcon name="close" size={16} />
+          </Button>
+        </div>
+        <div className="coach-panel-tabs" role="tablist" aria-label="Coach details">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "context"}
+            className={cn("coach-panel-tab", tab === "context" && "is-active")}
+            onClick={() => onTab("context")}
           >
-            <div className="coach-panel-head">
-              <div>
-                <p className="coach-panel-kicker">Bloom</p>
-                <h2 id={titleId} className="coach-panel-title">
-                  {tab === "context" ? "Personal context" : "Memory"}
-                </h2>
-              </div>
-              <button
-                ref={closeRef}
-                type="button"
-                className="coach-panel-close"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <X className="size-4" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="coach-panel-tabs" role="tablist" aria-label="Coach details">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === "context"}
-                className={cn("coach-panel-tab", tab === "context" && "is-active")}
-                onClick={() => onTab("context")}
-              >
-                Context
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === "memory"}
-                className={cn("coach-panel-tab", tab === "memory" && "is-active")}
-                onClick={() => onTab("memory")}
-              >
-                Memory{memories.length > 0 ? ` · ${memories.length}` : ""}
-              </button>
-            </div>
-            {tab === "context" ? (
-              <ContextView
-                record={record}
-                stats={stats}
-                profileConnected={profileConnected}
-                onSignInNeeded={onClose}
-              />
-            ) : (
-              <MemoryView
-                memories={memories}
-                onToggle={onToggleMemory}
-                onForget={onForgetMemory}
-                profileConnected={profileConnected}
-              />
-            )}
-          </motion.aside>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
+            <BloomIcon name="context" size={14} />
+            Context
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "memory"}
+            className={cn("coach-panel-tab", tab === "memory" && "is-active")}
+            onClick={() => onTab("memory")}
+          >
+            <BloomIcon name="memory" size={14} />
+            Memory{memories.length > 0 ? ` · ${memories.length}` : ""}
+          </button>
+        </div>
+        {tab === "context" ? (
+          <ContextView
+            record={record}
+            stats={stats}
+            profileConnected={profileConnected}
+            onSignInNeeded={onClose}
+          />
+        ) : (
+          <MemoryView
+            memories={memories}
+            onToggle={onToggleMemory}
+            onForget={onForgetMemory}
+            profileConnected={profileConnected}
+          />
+        )}
+      </div>
+    </BloomSheet>
   );
 }
