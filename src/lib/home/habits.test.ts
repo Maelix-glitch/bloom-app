@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyDraft,
+  draftToLocalHabit,
   habitToDraft,
   isDueOn,
   isPausedOn,
+  rowToHabit,
   streakOf,
   weekStartOf,
   weeklyProgress,
@@ -16,6 +18,7 @@ const habit = (over: Partial<Habit> = {}): Habit => ({
   id: "h1",
   name: "Read",
   icon: "📖",
+  iconType: "emoji",
   iconUrl: null,
   color: "sky",
   frequency: "daily",
@@ -222,5 +225,74 @@ describe("editing keeps identity and history", () => {
     expect(weekly.timesPerWeek).toBe(2);
     const daily = applyDraft(weekly, { ...habitToDraft(weekly), frequency: "daily" });
     expect(daily.timesPerWeek).toBeNull();
+  });
+});
+
+describe("habit icons (U4 — bloom glyphs beside legacy emoji)", () => {
+  it("reads a bloom row as a glyph id, not text", () => {
+    const h = rowToHabit({
+      id: "b1",
+      name: "Morning pages",
+      icon_type: "bloom",
+      icon_value: "pen",
+    });
+    expect(h?.iconType).toBe("bloom");
+    expect(h?.icon).toBe("pen");
+    expect(h?.iconUrl).toBeNull();
+  });
+
+  it("gives an empty bloom value the star-bloom instead of the ⭐ emoji", () => {
+    const h = rowToHabit({ id: "b2", name: "Something", icon_type: "bloom", icon_value: "" });
+    expect(h?.iconType).toBe("bloom");
+    expect(h?.icon).toBe("star-bloom");
+  });
+
+  it("keeps legacy rows exactly as stored — emoji type, emoji character", () => {
+    const h = rowToHabit({
+      id: "e1",
+      name: "Read",
+      icon_type: "emoji",
+      icon_value: "🌱",
+    });
+    expect(h?.iconType).toBe("emoji");
+    expect(h?.icon).toBe("🌱");
+    // a row from before the column existed reads as emoji too
+    const older = rowToHabit({ id: "e2", name: "Read", icon_value: "📚" });
+    expect(older?.iconType).toBe("emoji");
+    expect(older?.icon).toBe("📚");
+  });
+
+  it("round-trips a bloom habit through the edit draft without losing its type", () => {
+    const h = rowToHabit({
+      id: "b3",
+      name: "Ride",
+      icon_type: "bloom",
+      icon_value: "bicycle",
+    });
+    expect(h).not.toBeNull();
+    const draft = habitToDraft(h!);
+    expect(draft.icon).toEqual({ type: "bloom", value: "bicycle" });
+    const edited = applyDraft(h!, draft);
+    expect(edited.iconType).toBe("bloom");
+    expect(edited.icon).toBe("bicycle");
+  });
+
+  it("a local habit created from a bloom draft keeps the bloom type", () => {
+    const local = draftToLocalHabit({
+      name: "Water the fern",
+      icon: { type: "bloom", value: "fern" },
+    });
+    expect(local.iconType).toBe("bloom");
+    expect(local.icon).toBe("fern");
+    expect(local.iconUrl).toBeNull();
+  });
+
+  it("a local habit created from an emoji draft stays an emoji habit", () => {
+    const local = draftToLocalHabit({
+      name: "Unicorn time",
+      icon: { type: "emoji", value: "🦄" },
+    });
+    expect(local.iconType).toBe("emoji");
+    expect(local.icon).toBe("🦄");
   });
 });
