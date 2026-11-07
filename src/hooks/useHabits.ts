@@ -13,7 +13,7 @@ import { watchAuth } from "@/lib/supabase";
 import { subscribeToHabitChanges } from "@/lib/home/habitRealtime";
 import {
   HABITS_CHANGED,
-  adjustPoints,
+  adjustHabitPoints,
   applyDraft,
   awardHabitPoints,
   deleteHabitRow,
@@ -381,20 +381,20 @@ export function useHabits(): HabitsStore {
       try {
         if (wasDone) {
           await deleteLog(profileId, habitId, date);
-          const result = await revokeHabitPoints(profileId, habitId, date);
+          /* Both the primary revoke and the fallback move the balance only
+             together with the award's ledger row — never one without the
+             other. If neither function exists on the project, the balance
+             is left alone rather than adjusted without a receipt. */
+          const result =
+            (await revokeHabitPoints(profileId, habitId, date)) ??
+            (await adjustHabitPoints(profileId, habitId, date, -habit.points));
           if (result) setPoints(result.balance);
-          else {
-            const pts = await adjustPoints(profileId, -habit.points);
-            if (pts !== null) setPoints(pts);
-          }
         } else {
           await insertLog(profileId, habitId, date);
-          const result = await awardHabitPoints(profileId, habitId, date, habit.points);
+          const result =
+            (await awardHabitPoints(profileId, habitId, date, habit.points)) ??
+            (await adjustHabitPoints(profileId, habitId, date, habit.points));
           if (result) setPoints(result.balance);
-          else {
-            const pts = await adjustPoints(profileId, habit.points);
-            if (pts !== null) setPoints(pts);
-          }
         }
         recordLocal();
       } catch (e) {
