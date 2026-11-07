@@ -639,7 +639,13 @@ function TodayPage() {
                 onToggleHabit={(id) => void habits.toggle(id)}
                 onAddHabit={openNewHabit}
               />
-              <PhaseCard analysis={cycle.analysis} today={today} />
+              {/* The page's one lever covers the phase card too: it self-gates
+                  on the period mode, but the onboarding opt-out lives only in
+                  effectiveCycleMode — without this, someone who opted out
+                  with the mode still on would meet the card here. */}
+              {effectiveCycleMode === "tracking" ? (
+                <PhaseCard analysis={cycle.analysis} today={today} />
+              ) : null}
               <CoachPanel entries={mood.entries} habitsStore={habits} />
               <ActivityPanel items={activity} />
             </div>
