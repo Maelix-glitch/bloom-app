@@ -136,7 +136,7 @@ export const tracksCycle = (state: OnboardingState): boolean => state.kind !== "
 export const isAdmin = (state: OnboardingState): boolean => state.admin === true;
 
 /** Routes that only make sense for someone tracking a cycle. */
-export const CYCLE_ROUTES = ["/cycle", "/cycle-classic", "/cycle-styles"];
+export const CYCLE_ROUTES = ["/cycle"];
 
 export const isCycleRoute = (pathname: string): boolean =>
   CYCLE_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
