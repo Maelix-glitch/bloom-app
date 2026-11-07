@@ -9,7 +9,7 @@ import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
 const FONTS =
-  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap";
+  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap";
 
 export const Route = createFileRoute("/trackers")({
   head: () => ({
