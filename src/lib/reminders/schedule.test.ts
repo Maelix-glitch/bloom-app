@@ -16,6 +16,7 @@ const habit = (over: Partial<Habit> = {}): Habit => ({
   id: "h1",
   name: "Water",
   icon: "droplet",
+  iconType: "bloom",
   iconUrl: null,
   color: "sky",
   frequency: "daily",
