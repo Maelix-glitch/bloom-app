@@ -1,7 +1,7 @@
 /**
  * BloomToaster — the one notification surface in the app.
  *
- * It used to live inside /profile and /cycle-classic, which meant every other
+ * It used to live inside individual pages, which meant every other
  * route that called `toast()` produced nothing at all: a silently swallowed
  * confirmation, or worse, a swallowed error. It is mounted once at the root so
  * a toast always arrives wherever it was asked for, and removed from the two

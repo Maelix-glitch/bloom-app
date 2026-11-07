@@ -94,13 +94,14 @@ describe("parseOnboarding", () => {
 });
 
 describe("isCycleRoute", () => {
-  it("matches the cycle pages and their children", () => {
+  it("matches the cycle page and its children", () => {
     expect(isCycleRoute("/cycle")).toBe(true);
-    expect(isCycleRoute("/cycle-classic")).toBe(true);
     expect(isCycleRoute("/cycle/settings")).toBe(true);
   });
 
   it("leaves everything else alone", () => {
+    /* the removed design-variant cycle pages are not cycle routes any more;
+       arbitrary non-cycle paths stand in for them here */
     for (const r of ["/", "/coach", "/profile", "/cycles-of-the-moon"]) {
       expect(isCycleRoute(r)).toBe(false);
     }

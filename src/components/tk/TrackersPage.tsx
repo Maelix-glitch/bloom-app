@@ -1,6 +1,6 @@
 /**
  * TrackersPage — the whole page body, themed through the shared Bloom design
- * system so it matches whatever direction is applied on /cycle-styles.
+ * system so it belongs with whichever tracker design is chosen.
  *
  * Order: where today stands, log it, then what the record says. Every figure
  * comes from days the person actually logged; an empty day is never filled in.

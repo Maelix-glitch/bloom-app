@@ -55,12 +55,10 @@ import type { CheckIn } from "@/lib/cycle/reconcile";
 export function CycleIntelligence({
   theme = DEFAULT_THEME_ID,
   preview = false,
-  showFooterLinks = true,
 }: {
   theme?: string;
-  /** Disables writes — used by the style gallery so previews can't edit data. */
+  /** Disables writes — previews can't edit data. */
   preview?: boolean;
-  showFooterLinks?: boolean;
 }) {
   const store = usePeriodLog();
   const { analysis, logs, today, hydrated } = store;
@@ -676,13 +674,6 @@ export function CycleIntelligence({
             {/* ------------------------------ footer ---------------------------- */}
             <footer className="ci-rise mt-8 border-t pt-5 ci-hair">
               <Disclaimer className="max-w-[76ch]" />
-              {showFooterLinks && !preview ? (
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px]">
-                  <a href="/cycle-styles" className="ci-link py-1">
-                    See the other design directions
-                  </a>
-                </div>
-              ) : null}
             </footer>
           </>
         )}

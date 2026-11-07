@@ -21,7 +21,7 @@ export interface AdminTarget {
   detail: string;
   to: string;
   /** Grouping in the panel. */
-  group: "app" | "design" | "tools";
+  group: "app" | "tools";
 }
 
 export const ADMIN_TARGETS: AdminTarget[] = [
@@ -57,36 +57,6 @@ export const ADMIN_TARGETS: AdminTarget[] = [
     group: "app",
   },
 
-  /* --- design surfaces that no navigation links to --- */
-  {
-    id: "cycle-styles",
-    label: "Cycle themes",
-    detail: "All five directions side by side.",
-    to: "/cycle-styles",
-    group: "design",
-  },
-  {
-    id: "trackers-styles",
-    label: "Tracker designs",
-    detail: "The alternative tracker layouts.",
-    to: "/trackers-styles",
-    group: "design",
-  },
-  {
-    id: "trackers-premium",
-    label: "Trackers (premium)",
-    detail: "The premium tracker treatment.",
-    to: "/trackers-premium",
-    group: "design",
-  },
-  {
-    id: "cycle-classic",
-    label: "Cycle (classic)",
-    detail: "The previous cycle page, kept for reference.",
-    to: "/cycle-classic",
-    group: "design",
-  },
-
   /* --- actual tools --- */
   {
     id: "admin-rewards",
@@ -106,7 +76,6 @@ export const ADMIN_TARGETS: AdminTarget[] = [
 
 export const ADMIN_GROUP_LABEL: Record<AdminTarget["group"], string> = {
   app: "The app",
-  design: "Design surfaces",
   tools: "Tools",
 };
 
@@ -115,7 +84,7 @@ export const adminTargetsByGroup = (): Array<{
   label: string;
   items: AdminTarget[];
 }> =>
-  (["app", "design", "tools"] as const).map((group) => ({
+  (["app", "tools"] as const).map((group) => ({
     group,
     label: ADMIN_GROUP_LABEL[group],
     items: ADMIN_TARGETS.filter((t) => t.group === group),
