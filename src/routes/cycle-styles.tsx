@@ -41,7 +41,7 @@ import { CYCLE_THEMES, DEFAULT_THEME_ID, themeById } from "@/lib/cycle/themes";
 import { loadThemeId, PERIODS_CHANGED, saveThemeId } from "@/lib/cycle/periodStore";
 
 const FONTS =
-  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap";
 
 export const Route = createFileRoute("/cycle-styles")({
   head: () => ({
