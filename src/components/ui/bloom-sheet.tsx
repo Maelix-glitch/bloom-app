@@ -11,14 +11,24 @@
  *
  * Built on Radix Dialog (focus trap, escape, aria) with Motion driving the
  * transitions, so nothing here re-invents accessibility.
+ *
+ * U2 convergence (plan §2.4): this file also carries the confirm variant,
+ * `BloomConfirm` — the old standalone confirm-sheet is absorbed here, and
+ * `ui/confirm-sheet.tsx` survives only as a re-export shim. The ui sheet /
+ * dialog / alert-dialog wrappers keep their Radix APIs but wear this
+ * sheet's chrome (blurred canvas backdrop, token surface, --radius-dialog,
+ * --elevation-dialog, motion tokens), so every overlay in the app reads as
+ * one family until U6 migrates the remaining call sites onto BloomSheet.
  */
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { play } from "@/lib/sound/sound";
+import { Button } from "./button";
 import "@/styles/bloom-sheet.css";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -233,5 +243,96 @@ export function SheetItem({
     <motion.div className={className} variants={variants}>
       {children}
     </motion.div>
+  );
+}
+
+/**
+ * BloomConfirm — BloomSheet's confirm variant (plan §2.4/§5.2), absorbing
+ * the old standalone ConfirmSheet. Same props and behaviour the
+ * ConfirmSheet call sites know: calm rather than alarming (the copy
+ * carries the consequence), an async-aware busy state that locks dismissal
+ * while the confirm is in flight, and — since U2 — the kit Button for both
+ * actions instead of hand-rolled pills, so confirms inherit the button
+ * language (gold primary, rose destructive, ghost cancel) for free.
+ */
+export function BloomConfirm({
+  open,
+  onClose,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Keep",
+  tone = "danger",
+  busyLabel,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  description?: string | undefined;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  /** "danger" uses the destructive button; "default" the gold primary. */
+  tone?: "danger" | "default";
+  /** Shown on the confirm button while an async onConfirm is in flight. */
+  busyLabel?: string | undefined;
+  onConfirm: () => void | Promise<void>;
+}) {
+  const [busy, setBusy] = React.useState(false);
+
+  const run = async () => {
+    if (busy) return;
+    try {
+      setBusy(true);
+      await onConfirm();
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <BloomSheet
+      open={open}
+      onClose={busy ? () => {} : onClose}
+      title={title}
+      description={description}
+      onEscapeKeyDown={busy ? (e) => e.preventDefault() : undefined}
+    >
+      <div className="flex flex-col px-6 pb-6 pt-7 sm:px-7">
+        <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
+          {tone === "danger" ? "Before you go" : "Just checking"}
+        </p>
+        <h2 className="mt-3 font-display text-[22px] leading-tight text-foreground sm:text-[24px]">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-2.5 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            {description}
+          </p>
+        ) : null}
+
+        <div className="mt-7 flex items-center justify-end gap-2.5">
+          <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
+            {cancelLabel}
+          </Button>
+          <Button
+            type="button"
+            variant={tone === "danger" ? "destructive" : "default"}
+            onClick={() => void run()}
+            disabled={busy}
+          >
+            {busy ? (
+              <>
+                <Loader2 className="animate-pulse" aria-hidden />
+                {busyLabel ?? "Working…"}
+              </>
+            ) : (
+              confirmLabel
+            )}
+          </Button>
+        </div>
+      </div>
+    </BloomSheet>
   );
 }

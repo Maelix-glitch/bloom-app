@@ -3,17 +3,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Badge (UI update U2, plan §2.2): a pill on a token ground at the meta
+ * text size — no stock shadow, no stock ring. The default badge is a quiet
+ * --surface-3 chip; `gold` is the one accent badge (points, rank).
+ */
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1 rounded-pill border px-2.5 py-0.5 text-[length:var(--text-meta)] font-medium transition-colors duration-[var(--motion-standard)] ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
-        outline: "text-foreground",
+        default: "border-border-subtle bg-surface-3 text-foreground",
+        secondary: "border-border-subtle bg-surface-2 text-muted-foreground",
+        gold: "border-transparent bg-gold-deep text-gold",
+        destructive: "border-danger/30 bg-danger/10 text-rose-bright",
+        outline: "border-border-strong bg-transparent text-muted-foreground",
       },
     },
     defaultVariants: {
