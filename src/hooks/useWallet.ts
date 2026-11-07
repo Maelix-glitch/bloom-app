@@ -128,7 +128,14 @@ function getSnapshot(): Wallet {
   return snapshot;
 }
 
-/** SSR: no session, no ledger — a stable constant so hydration matches. */
+/**
+ * SSR: no session, no ledger — a stable constant so hydration matches.
+ * With a database configured, the honest server state is still `loading`:
+ * whether an account balance is coming is unknowable on the server, and
+ * rendering this snapshot's 0 as a device balance painted a brief guest
+ * splash (0 points, sign-in framing) on every cold load before the real
+ * store published. Same rule computeWallet applies on the client.
+ */
 const serverWallet: Wallet = {
   balance: 0,
   deviceBalance: 0,
@@ -136,7 +143,7 @@ const serverWallet: Wallet = {
   history: [],
   source: "device",
   degraded: false,
-  loading: false,
+  loading: hasSupabaseConfig,
   refresh: () => {},
 };
 const getServerSnapshot = (): Wallet => serverWallet;

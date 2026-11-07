@@ -24,7 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig, watchAuth } from "@/lib/supabase";
 import { ask as askCoach, CoachUnavailable } from "@/lib/coach/engine";
-import { dedupeAdjacentMessages } from "@/lib/coach/ui-helpers";
+import { dedupeAdjacentMessages, dedupeDuplicatedTurns } from "@/lib/coach/ui-helpers";
 import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
@@ -154,12 +154,14 @@ function readStored(uid: string | null): StoredConversations {
     Array.isArray(raw.conversations) &&
     raw.conversations.every((c) => c && Array.isArray(c.messages))
   ) {
-    /* Collapse adjacent duplicates on the way in, exactly as the cloud
-       import and legacy migration already do. Those two paths were fixed
-       first, but a thread that already lives in this local store never
-       passes through either of them — so duplicates a regenerate left in
-       the stored copy (the identical "hello" prompts and identical replies
-       seen live) survived every load. Repairing here, at the one read of
+    /* Collapse duplicates on the way in, exactly as the cloud import and
+       legacy migration already do: adjacent copies (dedupeAdjacentMessages)
+       and whole re-saved turns (dedupeDuplicatedTurns). A thread that
+       already lives in this local store never passes through the other two
+       paths — so duplicates a regenerate left in the stored copy (the
+       identical "hello" prompts and identical replies seen live, first as
+       adjacent rows, then as a repeated hello/reply turn) survived every
+       load until both passes ran here. Repairing here, at the one read of
        the local store, means every existing thread is cleaned the next
        time it is opened, without touching the cloud rows it came from. */
     return {
@@ -167,7 +169,7 @@ function readStored(uid: string | null): StoredConversations {
       activeId: raw.activeId ?? null,
       conversations: raw.conversations.map((c) => ({
         ...c,
-        messages: dedupeAdjacentMessages(c.messages),
+        messages: dedupeDuplicatedTurns(dedupeAdjacentMessages(c.messages)),
       })),
     };
   }
@@ -356,7 +358,7 @@ export function useCoachSystem() {
         mode: "ask",
         createdAt: opened,
         updatedAt: new Date().toISOString(),
-        messages: dedupeAdjacentMessages(legacy),
+        messages: dedupeDuplicatedTurns(dedupeAdjacentMessages(legacy)),
       };
       return { v: 1, activeId: conversation.id, conversations: [conversation] };
     };
@@ -404,10 +406,13 @@ export function useCoachSystem() {
           );
         }
         if (Array.isArray(rows) && rows.length > 0) {
-          /* Regenerated/retried turns leave adjacent duplicate rows in the
-             cloud thread (see dedupeAdjacentMessages) — collapse them on
-             the way in so history never shows the same reply twice. */
-          const messages = dedupeAdjacentMessages((rows as Row[]).map(rowsToMessage));
+          /* Regenerated/retried turns leave duplicate rows in the cloud
+             thread — adjacent copies (see dedupeAdjacentMessages) and
+             whole re-saved turns (see dedupeDuplicatedTurns). Collapse
+             both on the way in so history never shows the same turn twice. */
+          const messages = dedupeDuplicatedTurns(
+            dedupeAdjacentMessages((rows as Row[]).map(rowsToMessage)),
+          );
           const firstTime = messages[0]?.time ?? new Date().toISOString();
           const conversation: CoachConversation = {
             id: `cloud-${profileId}`,

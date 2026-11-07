@@ -156,7 +156,14 @@ export function HomeSidebar() {
 function RailProfile() {
   const id = useRailIdentity();
   const signedIn = id.status === "signed-in";
-  const name = signedIn ? (id.displayName ?? "Your profile") : "Sign in";
+  // While the session is still restoring, the name holds the same neutral
+  // placeholder the tagline below already uses — painting "Sign in" here
+  // flashed guest copy at signed-in users on every cold load.
+  const name = signedIn
+    ? (id.displayName ?? "Your profile")
+    : id.status === "checking"
+      ? "…"
+      : "Sign in";
   const line = signedIn
     ? (id.bio ?? "Keep growing.")
     : id.status === "checking"
@@ -175,7 +182,7 @@ function RailProfile() {
       <Link
         to="/profile"
         className="ml-2 flex min-w-0 items-center gap-3 rounded-full"
-        aria-label={signedIn ? "Your profile" : "Sign in"}
+        aria-label={signedIn ? "Your profile" : id.status === "checking" ? "Profile" : "Sign in"}
         data-testid="rail-profile"
       >
         <ProfileAvatar
