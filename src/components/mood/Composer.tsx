@@ -55,7 +55,7 @@ import { accentVar, type Accent } from "./primitives";
 import { MoodBlob, MOOD_LABELS } from "./page/MoodBlob";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 
-import "@/styles/mood-composer.css";
+import "@/styles/mood.css";
 
 const WEATHERS: { key: Weather; label: string }[] = [
   { key: "clear", label: "Clear" },
