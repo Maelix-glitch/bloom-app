@@ -156,9 +156,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        // All SIL Open Font License. Cormorant, Caveat and Oswald are the
-        // story canvas's romantic / script / poster voices.
-        href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Oswald:wght@300..700&display=swap",
+        // The type system is three families: Fraunces, Inter, IBM Plex Mono
+        // (UI update U1). ONE recorded exception, pending owner decision D4:
+        // Caveat stays loaded because the Stories canvas's Script presets
+        // (handwritten / margin note / journal — including stored stories)
+        // resolve it from here; there is no Stories-scoped load. Cormorant
+        // Garamond and Oswald were removed in U1 — the Stories romantic /
+        // poster presets fall back to Georgia / 'Arial Narrow' per their
+        // stacks until D4 decides whether they join the exception.
+        href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap",
       },
       {
         rel: "stylesheet",

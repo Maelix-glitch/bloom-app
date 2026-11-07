@@ -59,6 +59,12 @@
   --color-rose: var(--rose);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-deep: var(--gold-deep);
+  --color-violet-bright: var(--violet-bright);
+  --color-violet-deep: var(--violet-deep);
+  --color-rose-bright: var(--rose-bright);
+  --color-cream-2: var(--cream-2);
 
   /* Metrics entry modal tokens → bg-metric-sleep, text-brand, border-danger… */
   --color-metric-sleep: var(--metric-sleep);
@@ -79,12 +85,21 @@
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Bloom motion system — fast: micro; med: panels; slow: stories/entrances. */
-  --motion-fast: 140ms;
-  --motion-med: 260ms;
-  --motion-slow: 460ms;
+  /* Bloom motion system — the owner's scale (UI update plan §1.5):
+     micro = press/hover, standard = panels/rows, page = entrances and
+     sheets, signature = hero/celebration moments only. One easing. */
+  --motion-micro: 120ms;
+  --motion-standard: 200ms;
+  --motion-page: 320ms;
+  --motion-signature: 600ms;
+  /* Legacy names kept as aliases until call sites migrate (U5/U6);
+     they already resolve to the new scale, so nothing runs at the
+     old 140/260/460 durations. */
+  --motion-fast: var(--motion-micro);
+  --motion-med: var(--motion-standard);
+  --motion-slow: var(--motion-page);
 
-  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-rise: rise var(--motion-signature) cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-drift: drift 26s ease-in-out infinite;
   --animate-sheen: sheen 3.5s ease-in-out infinite;
   --animate-aurora: aurora 90s linear infinite;
@@ -135,9 +150,14 @@
   /* ---- accents ------------------------------------------------------- */
   --gold: #d9bc83; /* primary champagne gold */
   --gold-soft: #e7cc9d; /* gold hover */
+  --gold-bright: #eed9a4; /* bright gold tint — CTA gradients, hero numerals (promoted from literals, U1) */
+  --gold-deep: #2c2415; /* tinted dark ground behind gold elements */
+  --cream-2: #f4efe4; /* brighter cream for display/hero text */
   --accent-primary: var(--gold);
   --accent-primary-hover: var(--gold-soft);
   --violet: #a697d3; /* secondary lavender */
+  --violet-bright: #b7a6e8; /* bright pair to --violet */
+  --violet-deep: #221d33; /* tinted dark ground behind violet elements */
   --accent-secondary: var(--violet);
   --accent-secondary-muted: #302a43;
 
@@ -145,6 +165,7 @@
   --success: #86aa98;
   --warning: #c5a16b;
   --danger: #c77e82;
+  --rose-bright: #e0a3b8; /* bright pair to --rose/--danger (mood/cycle contexts) */
   --destructive: #c77e82;
   --info: #879dbb;
   --sage: var(--success);
@@ -185,6 +206,9 @@
   --text-body: 0.9375rem;
   --text-support: 0.8125rem;
   --text-meta: 0.6875rem;
+  --leading-display: 1.05;
+  --leading-body: 1.55;
+  --tracking-meta: 0.08em; /* small-caps metadata style */
 
   --primary: var(--gold);
   --primary-foreground: #0d0f16;
@@ -413,6 +437,15 @@
   font-family: var(--font-display);
   font-weight: 500;
   letter-spacing: -0.015em;
+}
+
+/* The signature gesture: the italic gold keyword inside a display heading.
+   One definition so Today, Mood, Coach and every deep screen produce the
+   identical treatment instead of hand-writing it per page (plan §1.3). */
+@utility display-em {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--gold);
 }
 
 @utility mono {

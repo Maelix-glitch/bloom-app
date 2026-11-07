@@ -56,7 +56,7 @@
   }
 }
 .bm-arrive {
-  animation: bm-arrive 520ms var(--ease-out-expo) both;
+  animation: bm-arrive var(--motion-page) var(--ease-out-expo) both;
   animation-delay: var(--bm-delay, 0ms);
 }
 
