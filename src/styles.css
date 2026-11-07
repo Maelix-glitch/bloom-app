@@ -26,6 +26,22 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 10px);
+  /* Bloom radius roles (U2): bridge the :root tokens below so the kit can
+     write rounded-control / rounded-card / rounded-panel / rounded-dialog /
+     rounded-pill instead of stock shadcn radii. Values stay defined once,
+     in :root; these lines only name them for Tailwind. */
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+  --radius-panel: var(--radius-panel);
+  --radius-dialog: var(--radius-dialog);
+  --radius-pill: var(--radius-pill);
+  /* Elevation roles (U2): shadow-card / shadow-panel / shadow-float /
+     shadow-dialog resolve to the --elevation-* tokens in :root, so no
+     component writes its own box-shadow or reaches for stock shadow-sm. */
+  --shadow-card: var(--elevation-card);
+  --shadow-panel: var(--elevation-panel);
+  --shadow-float: var(--elevation-float);
+  --shadow-dialog: var(--elevation-dialog);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -48,6 +64,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--foreground);
   --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
   --color-border-strong: var(--border-strong);
   --color-input: var(--border);
   --color-ring: var(--primary);
