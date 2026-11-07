@@ -31,6 +31,7 @@ function habit(patch: Partial<Habit> = {}): Habit {
     id: "h1",
     name: "Read 20 pages",
     icon: "book",
+    iconType: "bloom",
     iconUrl: null,
     color: "#a78bfa",
     frequency: "daily",
