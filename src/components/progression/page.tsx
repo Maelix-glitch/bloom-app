@@ -276,12 +276,16 @@ export function JourneyPage() {
                 </h2>
               </div>
               <p className="pg-section-aside">
-                {progress.loading
+                {progress.loading || progress.achievementsPending
                   ? "Each one tied to a real condition."
                   : `${progress.achievements.filter((a) => a.unlocked).length} of ${progress.achievements.length} earned — each one tied to a real condition.`}
               </p>
             </div>
-            <AchievementGallery achievements={progress.achievements} />
+            {progress.achievementsPending ? (
+              <p className="pg-empty">Loading your achievements…</p>
+            ) : (
+              <AchievementGallery achievements={progress.achievements} />
+            )}
           </section>
         </PgReveal>
 
