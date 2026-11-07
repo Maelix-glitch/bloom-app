@@ -6,13 +6,27 @@
    light. The conversation owns the page; everything else recedes.
    ==========================================================================*/
 
-.coach-page {
-  /* route-scoped palette */
+.coach-page,
+.coach-overlay-scope {
+  /* Route-scoped palette. U6 (plan §4.2): the family is bound to the global
+     tokens wherever a value matches exactly (fonts, ease, radii below);
+     the indigo/lavender hues themselves are Coach's own theme data — no
+     global token carries these values — so they stay defined here, and
+     every rule below references these names instead of raw hex. */
   --coach-bg: #0a0a11;
   --coach-bg-raise: #0e0e17;
+  --coach-bg-0: #07070d; /* deepest ground — camera stage */
+  --coach-bg-1: #09090f; /* atmosphere gradient, far stop */
+  --coach-bg-2: #0b0b13; /* atmosphere gradient, near stop */
   --coach-panel: #12121d;
   --coach-panel-2: #171726;
   --coach-panel-3: #1d1c2d;
+  --coach-panel-0: #0c0c15; /* panel gradient, low stop */
+  --coach-panel-1: #10101b; /* panel gradient, high stop */
+  --coach-panel-alt: #12121c; /* palette surface gradient, high stop */
+  --coach-panel-hi: #14141f; /* sheet gradient, high stop */
+  --coach-panel-cam: #13131e; /* camera surface gradient, high stop */
+  --coach-panel-deep: #0d0d15; /* sheet/palette/camera gradient, low stop */
 
   --coach-ink: #f1eee6; /* warm ivory */
   --coach-ink-2: #b4aec2; /* lavender-tinted muted */
@@ -34,20 +48,32 @@
   --coach-mark-a: #cfc3f0;
   --coach-mark-b: #9d89dd;
 
+  /* the violet action gradient (send, primary buttons) */
+  --coach-violet-a: #8f7cd8;
+  --coach-violet-b: #6d5ec2;
+  --coach-on-violet: #f4f0ff;
+
   --coach-line: rgb(240 236 226 / 0.075);
   --coach-line-soft: rgb(240 236 226 / 0.05);
   --coach-line-lav: rgb(185 167 233 / 0.22);
 
   --coach-danger: #e08a80;
+  --coach-danger-soft: #f2c1b9; /* danger text on hover */
 
   --coach-font-display: var(--font-display, "Fraunces", Georgia, serif);
   --coach-font-sans: var(--font-sans, "Inter", system-ui, sans-serif);
   --coach-font-mono: var(--font-mono, "IBM Plex Mono", monospace);
 
-  --coach-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --coach-radius-lg: 22px;
-  --coach-radius-md: 16px;
+  /* bound to the global motion/radius tokens (identical values) */
+  --coach-ease: var(--ease-out-expo);
+  --coach-radius-lg: var(--radius-panel);
+  --coach-radius-md: var(--radius-card);
+}
 
+/* The element properties stay page-only; `.coach-overlay-scope` exists so
+   BloomSheet portals — which mount at the document root, outside
+   `.coach-page` — can carry the same token scope on their panel. */
+.coach-page {
   isolation: isolate;
   overflow: clip;
   color-scheme: dark;
@@ -70,7 +96,7 @@
     radial-gradient(52rem 30rem at 68% -6rem, rgb(151 126 214 / 0.13), transparent 62%),
     radial-gradient(44rem 26rem at -8rem 108%, rgb(125 157 255 / 0.05), transparent 60%),
     radial-gradient(30rem 20rem at 50% 118%, rgb(168 138 214 / 0.06), transparent 70%),
-    linear-gradient(180deg, #0b0b13 0%, #0a0a11 34%, #09090f 100%);
+    linear-gradient(180deg, var(--coach-bg-2) 0%, var(--coach-bg) 34%, var(--coach-bg-1) 100%);
 }
 
 .coach-page::after {
@@ -556,15 +582,6 @@
 .coach-side-foot-glyph {
   color: var(--coach-lav);
   flex-shrink: 0;
-}
-
-.coach-side-foot-glyph-memory {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  border: 1.5px solid var(--coach-lav);
-  opacity: 0.85;
-  margin: 0 2px;
 }
 
 /* collapsed rail */
@@ -1300,7 +1317,7 @@
 
 .coach-error-retry:hover {
   background: rgb(224 138 128 / 0.12);
-  color: #f2c1b9;
+  color: var(--coach-danger-soft);
 }
 
 /* The offline escape hatch sits beside "Try again" — quieter, so retrying
@@ -1336,7 +1353,7 @@
 }
 
 .coach-error-knowledge:hover {
-  color: var(--gold, #d4a95c);
+  color: var(--gold);
   text-decoration-color: currentColor;
 }
 
@@ -2261,8 +2278,8 @@
 
 .coach-send.can-send {
   border-color: transparent;
-  background: linear-gradient(135deg, #8f7cd8, #6d5ec2);
-  color: #f4f0ff;
+  background: linear-gradient(135deg, var(--coach-violet-a), var(--coach-violet-b));
+  color: var(--coach-on-violet);
   cursor: pointer;
   box-shadow: 0 10px 26px -10px rgb(141 119 214 / 0.65);
 }
@@ -2448,29 +2465,8 @@
 }
 
 /* ===========================================================================
-   Context panel — right slide-over
+   Context panel — the sheet's inner layout (the shell is BloomSheet, U6)
    ==========================================================================*/
-.coach-panel-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: flex;
-  justify-content: flex-end;
-  background: rgb(4 4 9 / 0.55);
-  backdrop-filter: blur(3px);
-}
-
-.coach-panel {
-  display: flex;
-  flex-direction: column;
-  width: min(430px, 100%);
-  height: 100%;
-  border-left: 1px solid var(--coach-line);
-  background: linear-gradient(180deg, #10101b, #0c0c15 42%);
-  color: var(--coach-ink);
-  box-shadow: -30px 0 70px -30px rgb(0 0 8 / 0.8);
-}
-
 .coach-panel-head {
   display: flex;
   align-items: flex-start;
@@ -2530,6 +2526,10 @@
 
 .coach-panel-tab {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   height: 32px;
   border-radius: 9px;
   border: 1px solid transparent;
@@ -2793,51 +2793,13 @@
 }
 
 /* ===========================================================================
-   Mobile sheets
+   Mobile sheets — the shells are BloomSheet (U6); what remains here is
+   the sheets' inner layout: the head, the action rows, the divider.
    ==========================================================================*/
-.coach-sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  background: rgb(4 4 9 / 0.6);
-  backdrop-filter: blur(3px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.coach-sheet {
-  background: linear-gradient(180deg, #14141f, #0d0d15);
-  border: 1px solid var(--coach-line);
-  color: var(--coach-ink);
+.coach-sheet-actions {
   display: flex;
   flex-direction: column;
-}
-
-.coach-sheet-side {
-  height: 100%;
-  width: min(340px, 88vw);
-}
-
-.coach-sheet-left {
-  align-self: flex-start;
-  border-radius: 0 22px 22px 0;
-  border-left: none;
-}
-
-.coach-sheet-right {
-  align-self: flex-end;
-  border-radius: 22px 0 0 22px;
-  border-right: none;
-}
-
-.coach-sheet-actions {
-  width: min(480px, 100%);
-  border-radius: 22px 22px 0 0;
-  border-bottom: none;
   padding-bottom: env(safe-area-inset-bottom, 12px);
-  align-self: flex-end;
-  animation: coach-rise 260ms var(--coach-ease) both;
 }
 
 .coach-sheet-head {
@@ -2853,15 +2815,6 @@
   font-size: 18px;
   font-weight: 500;
   color: var(--coach-ink);
-}
-
-.coach-sheet-handle {
-  width: 42px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
-  margin: 10px auto 4px;
-  flex-shrink: 0;
 }
 
 .coach-sheet-divider {
@@ -2906,8 +2859,17 @@
   color: var(--coach-lav);
 }
 
-/* sheet content = sidebar sections (mobile nav) */
-.coach-sheet > .coach-side-content {
+/* U6: the CoachSheet / context-panel / message-actions overlays now render
+   inside BloomSheet (one overlay pattern, plan §5.2). The stack gives the
+   portalled panel the definite height the old drawers had, so the pinned
+   head/foot and the inner scroll areas behave exactly as before. */
+.coach-overlay-stack {
+  display: flex;
+  flex-direction: column;
+  height: min(84dvh, 720px);
+}
+
+.coach-overlay-scope .coach-side-content {
   height: auto;
   flex: 1;
   min-height: 0;
@@ -2934,7 +2896,7 @@
   flex-direction: column;
   border-radius: 20px;
   border: 1px solid var(--coach-line);
-  background: linear-gradient(180deg, #12121c, #0d0d15);
+  background: linear-gradient(180deg, var(--coach-panel-alt), var(--coach-panel-deep));
   box-shadow: 0 40px 90px -30px rgb(0 0 8 / 0.9);
   overflow: hidden;
 }
@@ -3069,7 +3031,7 @@
   width: min(560px, 100%);
   border-radius: 24px;
   border: 1px solid var(--coach-line);
-  background: linear-gradient(180deg, #13131e, #0d0d15);
+  background: linear-gradient(180deg, var(--coach-panel-cam), var(--coach-panel-deep));
   box-shadow: 0 40px 100px -30px rgb(0 0 8 / 0.95);
   padding: 22px;
   display: flex;
@@ -3111,7 +3073,7 @@
 .coach-camera-stage {
   border-radius: 18px;
   overflow: hidden;
-  background: #07070d;
+  background: var(--coach-bg-0);
   border: 1px solid var(--coach-line-soft);
   min-height: 320px;
   max-height: 52vh;
@@ -3197,8 +3159,8 @@
   align-items: center;
   gap: 8px;
   border: 1px solid transparent;
-  background: linear-gradient(135deg, #8f7cd8, #6d5ec2);
-  color: #f4f0ff;
+  background: linear-gradient(135deg, var(--coach-violet-a), var(--coach-violet-b));
+  color: var(--coach-on-violet);
   box-shadow: 0 10px 26px -12px rgb(141 119 214 / 0.6);
 }
 
