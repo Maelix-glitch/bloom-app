@@ -79,6 +79,7 @@ const rich: ProgressionInput = {
     waterMl: 2400,
     movementMinutes: i < 4 ? 35 : null,
     energy: 4,
+    screenMinutes: 120,
     studyMinutes: 60,
     studySessions: 1,
   })),
