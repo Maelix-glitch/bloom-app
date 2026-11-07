@@ -1266,6 +1266,159 @@
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
+/* --------------------------------------------------------------------------
+   Sidebar icon motion — the nav glyphs are alive, but only in the brand's
+   grammar: open, grow, settle. Never bounce, never spin, never loop. Every
+   duration is a motion token, the easing is the one signature curve, and
+   only transforms / opacity / colour move, so nothing shifts layout.
+
+   The glyph rides in an .app-nav-glyph wrapper (HomeSidebar): the colour
+   carrier (the svg paints currentColor, so the wrapper's colour *is* the
+   glyph's), the transform target, and the positioning context for the
+   soft gold glow disc behind the glyph. The points pill and the profile
+   block carry no wrapper and are untouched.
+
+   A stroke draw-in on the active glyph was considered and dropped: the
+   registry glyphs mix paths, rects, circles and ellipses whose lengths
+   run from ~6 to ~62 units, and CSS cannot normalise them (pathLength
+   lives on each element, inside the shared artwork) — a uniform dash
+   sweep would draw the outlines and then pop the small details in as a
+   clump. Grow-and-settle reads cleaner. */
+.app-nav-glyph {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  transition:
+    color var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease-out-expo);
+}
+.app-nav-glyph > svg {
+  position: relative;
+  z-index: 1;
+}
+/* The glow: a soft gold halo that fades and grows in behind the glyph,
+   sized off the glyph box so both the rail (16px) and the tab bar (22px)
+   get a proportional halo from one rule. */
+.app-nav-glyph::before {
+  content: "";
+  position: absolute;
+  inset: -55%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--gold) 34%, transparent) 0%,
+    transparent 68%
+  );
+  opacity: 0;
+  transform: scale(0.55);
+  transition:
+    opacity var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease-out-expo);
+  pointer-events: none;
+}
+
+/* Hover / keyboard focus: the glyph settles into gold and grows a breath,
+   and the glow comes up to full. */
+.app-nav-link:hover .app-nav-glyph,
+.app-nav-link:focus-visible .app-nav-glyph,
+.app-mobile-nav > a:focus-visible .app-nav-glyph {
+  color: var(--gold);
+  transform: scale(1.07);
+}
+.app-nav-link:hover .app-nav-glyph::before,
+.app-nav-link:focus-visible .app-nav-glyph::before,
+.app-mobile-nav > a:focus-visible .app-nav-glyph::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Active: gold at rest with a low ember of glow. The bloom runs once when
+   the active state lands — the animation is keyed on the active selectors,
+   so it starts when the class/attribute arrives and cannot re-trigger
+   while the item simply stays active. No fill mode: once it finishes, the
+   hover grow above owns the transform again. */
+@keyframes app-nav-glyph-bloom {
+  from {
+    transform: scale(0.88);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.app-nav-link-active .app-nav-glyph,
+.app-mobile-nav > a[aria-current="page"] .app-nav-glyph {
+  color: var(--primary);
+  animation: app-nav-glyph-bloom var(--motion-page) var(--ease-out-expo);
+}
+.app-nav-link-active .app-nav-glyph::before,
+.app-mobile-nav > a[aria-current="page"] .app-nav-glyph::before {
+  opacity: 0.55;
+  transform: scale(0.9);
+}
+
+/* Arrival: the nav items rise a few px and fade in, staggered ~45ms
+   apart. AppNav is rendered by each page, so this is the rail's share of
+   the page-arrival beat — kept small and quick so it never feels like a
+   reload. Fill is backwards only: the from-state covers the stagger delay,
+   and once the animation ends the links' own states (the tab bar's press
+   scale) own the transform again. */
+@keyframes app-nav-item-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.app-sidebar .app-nav-link,
+.app-mobile-nav > a {
+  animation: app-nav-item-arrive var(--motion-standard) var(--ease-out-expo) backwards;
+}
+.app-sidebar nav .app-nav-link:nth-child(2),
+.app-mobile-nav > a:nth-child(2) {
+  animation-delay: 45ms;
+}
+.app-sidebar nav .app-nav-link:nth-child(3),
+.app-mobile-nav > a:nth-child(3) {
+  animation-delay: 90ms;
+}
+.app-sidebar nav .app-nav-link:nth-child(4),
+.app-mobile-nav > a:nth-child(4) {
+  animation-delay: 135ms;
+}
+.app-sidebar nav .app-nav-link:nth-child(5),
+.app-mobile-nav > a:nth-child(5) {
+  animation-delay: 180ms;
+}
+.app-sidebar nav .app-nav-link:nth-child(n + 6),
+.app-mobile-nav > a:nth-child(n + 6) {
+  animation-delay: 225ms;
+}
+
+/* Reduced motion: no movement at all — the states (gold, glow) still
+   read, they just arrive instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .app-nav-glyph,
+  .app-nav-glyph::before {
+    transition: none;
+    transform: none;
+  }
+  .app-nav-link:hover .app-nav-glyph,
+  .app-nav-link:focus-visible .app-nav-glyph,
+  .app-mobile-nav > a:focus-visible .app-nav-glyph {
+    transform: none;
+  }
+  .app-sidebar .app-nav-link,
+  .app-mobile-nav > a,
+  .app-nav-link-active .app-nav-glyph,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph {
+    animation: none;
+  }
+}
+
 /* The botanical spans the whole rail: object-fit: cover keeps the photo's own
    proportions (never stretched) and anchors it to the foot; at typical
    viewport heights the 600×1200 source is scaled down, not up, so it stays
