@@ -1,16 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  Check,
-  Copy,
-  MessageSquareText,
-  MoreHorizontal,
-  RefreshCw,
-  Target,
-  ThumbsDown,
-  ThumbsUp,
-} from "lucide-react";
+import { Copy, MoreHorizontal, RefreshCw, ThumbsDown, ThumbsUp } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
+import { BloomSheet } from "@/components/ui/bloom-sheet";
 import type { CoachMessage } from "@/hooks/useCoachSystem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { copyText, messageTime, noticesFor, TREND_WORD } from "@/lib/coach/ui-helpers";
@@ -157,12 +150,6 @@ function MessageActions({
 }: MessageActionsProps) {
   const isMobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const sheetCloseRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (!sheetOpen) return;
-    sheetCloseRef.current?.focus();
-  }, [sheetOpen]);
 
   const compact = (
     <>
@@ -175,7 +162,7 @@ function MessageActions({
       >
         {copied ? (
           <>
-            <Check className="coach-action-icon" aria-hidden="true" />
+            <BloomIcon name="check-bloom" size={15} className="coach-action-icon" />
             <span className="coach-action-label">Copied</span>
           </>
         ) : (
@@ -234,92 +221,87 @@ function MessageActions({
             <MoreHorizontal className="coach-action-icon" aria-hidden="true" />
           </button>
         </div>
-        {sheetOpen ? (
-          <div
-            className="coach-sheet-backdrop"
-            role="presentation"
-            onMouseDown={() => setSheetOpen(false)}
-          >
-            <div
-              className="coach-sheet coach-sheet-actions"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Response actions"
+        {/* The actions sheet rides the one overlay pattern (U6, plan
+            §5.2): BloomSheet owns scrim, grab handle, focus and motion;
+            the rows keep their coach-sheet styling. */}
+        <BloomSheet
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          title="Response actions"
+          className="coach-overlay-scope"
+        >
+          <div className="coach-sheet-actions">
+            <button
+              type="button"
+              className="coach-sheet-row"
+              onClick={() => {
+                setSheetOpen(false);
+                onCopy();
+              }}
             >
-              <div className="coach-sheet-handle" aria-hidden="true" />
-              <button
-                ref={sheetCloseRef}
-                type="button"
-                className="coach-sheet-row"
-                onClick={() => {
-                  setSheetOpen(false);
-                  onCopy();
-                }}
-              >
-                <Copy className="coach-sheet-row-icon" aria-hidden="true" />
-                {copied ? "Copied" : "Copy response"}
-              </button>
-              {canRegenerate ? (
-                <button
-                  type="button"
-                  className="coach-sheet-row"
-                  onClick={() => {
-                    setSheetOpen(false);
-                    onRegenerate();
-                  }}
-                >
-                  <RefreshCw className="coach-sheet-row-icon" aria-hidden="true" />
-                  Regenerate response
-                </button>
-              ) : null}
-              <button
-                type="button"
-                className={cn("coach-sheet-row", feedback === "up" && "is-on")}
-                onClick={() => {
-                  setSheetOpen(false);
-                  onFeedback("up");
-                }}
-              >
-                <ThumbsUp className="coach-sheet-row-icon" aria-hidden="true" />
-                Good response
-              </button>
-              <button
-                type="button"
-                className={cn("coach-sheet-row", feedback === "down" && "is-on")}
-                onClick={() => {
-                  setSheetOpen(false);
-                  onFeedback("down");
-                }}
-              >
-                <ThumbsDown className="coach-sheet-row-icon" aria-hidden="true" />
-                Needs improvement
-              </button>
-              <div className="coach-sheet-divider" />
+              <Copy className="coach-sheet-row-icon" aria-hidden="true" />
+              {copied ? "Copied" : "Copy response"}
+            </button>
+            {canRegenerate ? (
               <button
                 type="button"
                 className="coach-sheet-row"
                 onClick={() => {
                   setSheetOpen(false);
-                  onTellMeMore();
+                  onRegenerate();
                 }}
               >
-                <MessageSquareText className="coach-sheet-row-icon" aria-hidden="true" />
-                Tell me more
+                <RefreshCw className="coach-sheet-row-icon" aria-hidden="true" />
+                Regenerate response
               </button>
-              <button
-                type="button"
-                className="coach-sheet-row"
-                onClick={() => {
-                  setSheetOpen(false);
-                  onMakePlan();
-                }}
-              >
-                <Target className="coach-sheet-row-icon" aria-hidden="true" />
-                Turn this into a plan
-              </button>
-            </div>
+            ) : null}
+            <button
+              type="button"
+              className={cn("coach-sheet-row", feedback === "up" && "is-on")}
+              onClick={() => {
+                setSheetOpen(false);
+                onFeedback("up");
+              }}
+            >
+              <ThumbsUp className="coach-sheet-row-icon" aria-hidden="true" />
+              Good response
+            </button>
+            <button
+              type="button"
+              className={cn("coach-sheet-row", feedback === "down" && "is-on")}
+              onClick={() => {
+                setSheetOpen(false);
+                onFeedback("down");
+              }}
+            >
+              <ThumbsDown className="coach-sheet-row-icon" aria-hidden="true" />
+              Needs improvement
+            </button>
+            <div className="coach-sheet-divider" />
+            <button
+              type="button"
+              className="coach-sheet-row"
+              onClick={() => {
+                setSheetOpen(false);
+                onTellMeMore();
+              }}
+            >
+              <BloomIcon name="ask" size={17} className="coach-sheet-row-icon" />
+              Tell me more
+            </button>
+            <button
+              type="button"
+              className="coach-sheet-row"
+              onClick={() => {
+                setSheetOpen(false);
+                onMakePlan();
+              }}
+            >
+              <BloomIcon name="plan" size={17} className="coach-sheet-row-icon" />
+              Turn this into a plan
+            </button>
           </div>
-        ) : null}
+        </BloomSheet>
       </>
     );
   }
