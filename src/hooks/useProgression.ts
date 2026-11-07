@@ -162,6 +162,8 @@ export function useProgression(): ProgressionStore {
   const [serverUnavailable, setServerUnavailable] = useState(false);
   const [pointsNonce, setPointsNonce] = useState(0);
   const busyRef = useRef(false);
+  /** The account `cloudPoints` currently belongs to. */
+  const cloudForRef = useRef<string | null>(null);
 
   /* ------------------------------- today ---------------------------------- */
   useEffect(() => {
@@ -189,11 +191,22 @@ export function useProgression(): ProgressionStore {
     let alive = true;
     async function load() {
       if (!signedIn || !profileId || !hasSupabaseConfig) {
+        cloudForRef.current = null;
         if (alive) {
           setCloudPoints(null);
           setServerUnavailable(false);
         }
         return;
+      }
+      if (cloudForRef.current !== profileId) {
+        // A different account than the one the held balance belongs to:
+        // that balance is not this person's, so drop it and let the input
+        // report the balance as pending until this account's read lands.
+        // (Re-reads for the same account keep the settled value, so a
+        // ledger nudge never flashes the hero back to loading.)
+        cloudForRef.current = profileId;
+        setCloudPoints(null);
+        setServerUnavailable(false);
       }
       const value = await readPoints(profileId);
       if (!alive) return;
@@ -234,7 +247,7 @@ export function useProgression(): ProgressionStore {
 
     // Device-derived lifetime balance: the habit logs are the record. Signed
     // in, the account's number is authoritative and this is only the fallback
-    // until it loads.
+    // once a read has actually failed (see below) — never while it is pending.
     const habitPoints = habits.habits.reduce(
       (sum, habit) =>
         sum +
@@ -242,9 +255,21 @@ export function useProgression(): ProgressionStore {
           habits.logs.filter((log) => log.habitId === habit.id).length,
       0,
     );
-    const earnedLifetime = signedIn
-      ? cloudPoints ?? habits.points
-      : habitPoints;
+    // Until the account balance has been read, the honest lifetime figure
+    // is `null` — the snapshot turns that into the loading state, and the
+    // Rewards hero holds its neutral placeholder instead of a number. This
+    // used to fall back to the device figures while waiting, so the hero
+    // presented a device total (349 on one visit, 126 on another) as the
+    // balance and then counted up to the real one when the account read
+    // landed. A failed read is not a pending one: once `serverUnavailable`
+    // is set, the fallbacks stand in, under the page's own banner.
+    const accountPending =
+      habits.auth === "checking" || (signedIn && cloudPoints === null && !serverUnavailable);
+    const earnedLifetime = accountPending
+      ? null
+      : signedIn
+        ? (cloudPoints ?? habits.points ?? habitPoints)
+        : habitPoints;
 
     return {
       today,
@@ -268,6 +293,8 @@ export function useProgression(): ProgressionStore {
     today,
     signedIn,
     cloudPoints,
+    serverUnavailable,
+    habits.auth,
     habits.habits,
     habits.logs,
     habits.points,

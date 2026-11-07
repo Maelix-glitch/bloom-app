@@ -154,7 +154,22 @@ function readStored(uid: string | null): StoredConversations {
     Array.isArray(raw.conversations) &&
     raw.conversations.every((c) => c && Array.isArray(c.messages))
   ) {
-    return { v: 1, activeId: raw.activeId ?? null, conversations: raw.conversations };
+    /* Collapse adjacent duplicates on the way in, exactly as the cloud
+       import and legacy migration already do. Those two paths were fixed
+       first, but a thread that already lives in this local store never
+       passes through either of them — so duplicates a regenerate left in
+       the stored copy (the identical "hello" prompts and identical replies
+       seen live) survived every load. Repairing here, at the one read of
+       the local store, means every existing thread is cleaned the next
+       time it is opened, without touching the cloud rows it came from. */
+    return {
+      v: 1,
+      activeId: raw.activeId ?? null,
+      conversations: raw.conversations.map((c) => ({
+        ...c,
+        messages: dedupeAdjacentMessages(c.messages),
+      })),
+    };
   }
   return { v: 1, activeId: null, conversations: [] };
 }

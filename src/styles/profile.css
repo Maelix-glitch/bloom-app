@@ -501,6 +501,16 @@ button.pf-number:hover {
 .pf-number-value--zero {
   color: var(--faint);
 }
+/* The loading placeholder inside a stat tile: a block sized like the
+   number it stands in for (26px line), so the tile's shape never moves
+   when the real figure arrives. Pulse and reduced-motion behaviour come
+   from .pf-skel. */
+.pf-number-skel {
+  display: block;
+  width: 46px;
+  height: 26px;
+  border-radius: 8px;
+}
 .pf-number-label {
   font-family: var(--font-mono);
   font-size: 10px;

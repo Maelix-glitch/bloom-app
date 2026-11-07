@@ -117,7 +117,17 @@ export function RecordNumbers({
                 (loading || t.value === 0) && "pf-number-value--zero",
               )}
             >
-              {loading ? "·" : <CountUp value={t.value} decimals={0} />}
+              {loading ? (
+                <>
+                  {/* A shaped block in the number's own space — first paint
+                      should read as "the number is coming", never as a
+                      stray bullet character where the number will be. */}
+                  <span className="pf-skel pf-number-skel" aria-hidden />
+                  <span className="sr-only">Loading</span>
+                </>
+              ) : (
+                <CountUp value={t.value} decimals={0} />
+              )}
             </span>
             {t.sub ? <span className="pf-number-sub">{t.sub}</span> : null}
           </Link>
