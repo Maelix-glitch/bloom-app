@@ -661,7 +661,7 @@ function MoodJourney({
             <EmptyLine
               text={
                 points.length === 1
-                  ? "One day on the record. The line appears with your second check-in."
+                  ? `One day in the ${rangeLabel.toLowerCase()}. The line appears with your second check-in.`
                   : "Your journey draws itself from your check-ins — nothing here is a placeholder."
               }
             />
