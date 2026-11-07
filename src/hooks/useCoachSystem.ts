@@ -169,7 +169,12 @@ function readStored(uid: string | null): StoredConversations {
       activeId: raw.activeId ?? null,
       conversations: raw.conversations.map((c) => ({
         ...c,
-        messages: dedupeDuplicatedTurns(dedupeAdjacentMessages(c.messages)),
+        /* Repair before dedupe: restoring a message's words can make it
+           identical to its neighbour, and the passes below should see the
+           repaired text. */
+        messages: dedupeDuplicatedTurns(
+          dedupeAdjacentMessages(c.messages.map(repairFromLegacyContent)),
+        ),
       })),
     };
   }
@@ -207,6 +212,14 @@ function maybeRename(messages: CoachMessage[]): string | null {
  * also come back as jsonb — a string, an array of parts, or an object with a
  * `text` field. `String({})` used to render "[object Object]" in the thread, so
  * every shape is unwrapped here instead.
+ *
+ * One more shape matters: an older client (August 2026) stored the whole
+ * response object — `{ paragraphs: [...], blocks: [...] }` — instead of the
+ * plain string. `paragraphs` is probed below (last, so shapes that also carry
+ * a text field keep their established precedence); without it those rows
+ * unwrapped to "" and imported as messages with a header, a source label and
+ * buttons but no words — the reply was in the account the whole time, dropped
+ * at this exact step.
  */
 export function contentToText(value: unknown): string {
   if (typeof value === "string") return value;
@@ -220,12 +233,119 @@ export function contentToText(value: unknown): string {
   }
   if (value && typeof value === "object") {
     const row = value as Record<string, unknown>;
-    for (const key of ["text", "content", "value", "message", "output", "parts"]) {
+    for (const key of ["text", "content", "value", "message", "output", "parts", "paragraphs"]) {
       const nested = contentToText(row[key]);
       if (nested.trim()) return nested;
     }
   }
   return "";
+}
+
+/** A stored block is only trusted when it is shaped exactly like one the
+    renderer knows — anything else is dropped rather than rendered raw. */
+function isCoachBlock(value: unknown): value is CoachBlock {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const block = value as Record<string, unknown>;
+  if (block["type"] === "metric") {
+    return (
+      typeof block["label"] === "string" &&
+      typeof block["value"] === "string" &&
+      Array.isArray(block["series"]) &&
+      block["series"].every((n) => typeof n === "number")
+    );
+  }
+  if (block["type"] === "plan") {
+    return (
+      typeof block["title"] === "string" &&
+      Array.isArray(block["steps"]) &&
+      block["steps"].every(
+        (s) =>
+          s !== null &&
+          typeof s === "object" &&
+          typeof (s as Record<string, unknown>)["label"] === "string",
+      )
+    );
+  }
+  if (block["type"] === "proposal") {
+    return typeof block["title"] === "string";
+  }
+  return false;
+}
+
+/**
+ * The structured blocks inside a stored `{ paragraphs, blocks }` content
+ * object (see contentToText). String content carries no blocks.
+ */
+export function contentToBlocks(value: unknown): CoachBlock[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const raw = (value as Record<string, unknown>)["blocks"];
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(isCoachBlock);
+}
+
+/** Whether a message carries anything the thread can actually show. */
+export function messageHasContent(message: CoachMessage): boolean {
+  return (
+    message.blocks.length > 0 ||
+    message.paragraphs.some((p) => p.trim().length > 0) ||
+    Boolean(message.text?.trim())
+  );
+}
+
+/**
+ * Repair, at read time, a stored message whose words sit in a legacy
+ * `content` field the current model no longer writes — the same
+ * `{ paragraphs, blocks }` object shape an older client saved. A message
+ * that already has content, or whose legacy field holds nothing usable,
+ * comes back untouched (same object).
+ */
+export function repairFromLegacyContent(message: CoachMessage): CoachMessage {
+  if (messageHasContent(message)) return message;
+  const legacy = (message as unknown as Record<string, unknown>)["content"];
+  if (legacy === undefined) return message;
+  const content = contentToText(legacy);
+  const blocks = contentToBlocks(legacy);
+  if (!content && blocks.length === 0) return message;
+  return {
+    ...message,
+    text: content || undefined,
+    paragraphs: content
+      .split("\n\n")
+      .map((part) => part.trim())
+      .filter(Boolean),
+    blocks,
+  };
+}
+
+/**
+ * Patch content-less messages in a store from freshly read cloud rows,
+ * matched by id. Only a replacement that actually has content lands, and
+ * only over a message that has none — a healthy thread comes back as the
+ * same object, so callers can skip the state update entirely.
+ */
+export function repairMessagesFromRows(
+  store: StoredConversations,
+  rows: CoachMessage[],
+): StoredConversations {
+  const byId = new Map<string, CoachMessage>();
+  for (const row of rows) {
+    if (messageHasContent(row)) byId.set(row.id, row);
+  }
+  if (byId.size === 0) return store;
+  let changed = false;
+  const conversations = store.conversations.map((conversation) => {
+    let conversationChanged = false;
+    const messages = conversation.messages.map((message) => {
+      const repaired = byId.get(message.id);
+      if (!repaired || messageHasContent(message)) return message;
+      conversationChanged = true;
+      return repaired;
+    });
+    if (!conversationChanged) return conversation;
+    changed = true;
+    return { ...conversation, messages };
+  });
+  return changed ? { ...store, conversations } : store;
 }
 
 /** A coach attachment becomes vision input only when the model can read it. */
@@ -265,7 +385,7 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
 
 type Row = Record<string, unknown>;
 
-function rowsToMessage(r: Row, index: number): CoachMessage {
+export function rowsToMessage(r: Row, index: number): CoachMessage {
   const content = contentToText(r["content"]);
   return {
     id: String(r["id"] ?? `row-${index}`),
@@ -277,7 +397,9 @@ function rowsToMessage(r: Row, index: number): CoachMessage {
       .map((part) => part.trim())
       .filter(Boolean),
     sources: Array.isArray(r["sources"]) ? (r["sources"] as string[]) : [],
-    blocks: [],
+    /* Blocks stored inside an object-shaped content come back too —
+       they used to be discarded here unconditionally. */
+    blocks: contentToBlocks(r["content"]),
   };
 }
 
@@ -335,6 +457,43 @@ export function useCoachSystem() {
     if (local.conversations.length > 0) {
       setStore(local);
       setLoading(false);
+      /* One healing exception to "local wins": messages an older import
+         left with no words at all (their stored content object was not
+         unwrapped — see contentToText) can never recover from local data,
+         because the persist effect wrote the damaged copies straight
+         back. The words still live in the account's coach_messages rows
+         under the same ids, so fetch just those rows and patch the
+         messages in. Imported messages keep their cloud UUIDs, which is
+         what makes them findable; anything else is left exactly as it
+         was, and any failure leaves the local thread untouched. */
+      if (profileId) {
+        const missing = local.conversations
+          .flatMap((c) => c.messages)
+          .filter((m) => !messageHasContent(m))
+          .map((m) => m.id)
+          .filter((id) =>
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id),
+          );
+        if (missing.length > 0) {
+          void (async () => {
+            try {
+              const { data: rows } = await supabase
+                .from("coach_messages")
+                .select("id, role, content, sources, created_at")
+                .eq("profile_id", profileId)
+                .in("id", missing);
+              if (!mounted || !Array.isArray(rows) || rows.length === 0) return;
+              const repaired = repairMessagesFromRows(
+                local,
+                (rows as Row[]).map(rowsToMessage),
+              );
+              if (repaired !== local) setStore(repaired);
+            } catch {
+              /* the local thread stands exactly as it was */
+            }
+          })();
+        }
+      }
       return () => {
         mounted = false;
       };
