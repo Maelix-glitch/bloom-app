@@ -32,6 +32,27 @@ const SIGNED_OUT: RailIdentity = {
   bio: null,
 };
 
+/**
+ * Whether a "no user" auth answer may turn the rail signed-out. Only once
+ * a person has actually been established on this device: the auth client's
+ * first answer on a cold load can be a *transient* null for someone who is
+ * signed in — when session recovery errors or races the token refresh,
+ * `@supabase/auth-js` emits `INITIAL_SESSION` with a null session, and
+ * `watchAuth` forwards it like any other answer. Treating that first null
+ * as signed-out painted "Sign in" in the rail for a frame before the real
+ * session landed (warm loads recover cleanly, so it only ever showed on
+ * the very first cold paint). Before establishment the honest state is
+ * still "checking" — the neutral mark the rail already holds — and a
+ * genuinely signed-out visitor meets the app-level access gate, which has
+ * its own readiness rule. After establishment, a null is a real sign-out
+ * and lands at once.
+ */
+export function nullAnswerEndsSession(
+  current: RailIdentity | null,
+): boolean {
+  return current?.status === "signed-in";
+}
+
 type Row = {
   display_name: string | null;
   avatar_path: string | null;
@@ -123,7 +144,10 @@ export function useRailIdentity(): RailIdentity {
         void syncPrefs(uid);
       }
       if (!uid) {
-        publishIdentity(SIGNED_OUT);
+        /* Hold the neutral checking state until someone has actually been
+           established — see nullAnswerEndsSession. A first null answer on
+           a cold load is not proof of signed-out. */
+        if (nullAnswerEndsSession(cachedIdentity)) publishIdentity(SIGNED_OUT);
         return;
       }
       void read(uid);

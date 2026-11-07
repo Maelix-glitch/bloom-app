@@ -403,6 +403,98 @@ describe("achievements", () => {
   });
 });
 
+/* --------------------- what the day-count badges count -------------------- */
+/*
+ * The counting rules, pinned because they are easy to misread from the
+ * gallery: Balance Keeper counts every day the person checked in at all,
+ * Thirty Days Strong counts the longest run of consecutive *habit* days,
+ * and Century / Year of Bloom count the total of distinct *habit* days.
+ * Three different quantities — a person can honestly stand at 11, 1 and 3
+ * at the same time, and these tests keep that from ever looking like a bug
+ * in the engine rather than a fact about the record.
+ */
+describe("achievement counting rules", () => {
+  const never = { achievedAt: () => null };
+  const progressOf = (
+    states: ReturnType<typeof evaluateAchievements>,
+    id: string,
+  ): number => {
+    const found = states.find((a) => a.def.id === id);
+    if (!found) throw new Error(`missing achievement ${id}`);
+    return found.progress;
+  };
+
+  it("reads the live-account shape as 11 balance days, a habit run of 1, and 3 habit days", () => {
+    /* The shape the live verification kept meeting: 11 days checked in
+       somehow, habit ticks on only 3 of them, none back-to-back, and the
+       best any-source run 3 long (tracker days in late August). */
+    const base = input({
+      logs: [
+        { habitId: "h1", date: "2026-09-01" },
+        { habitId: "h1", date: "2026-09-05" },
+        { habitId: "h1", date: "2026-09-08" },
+      ],
+      trackerDays: [
+        trackerDay("2026-08-20", { energy: 4 }),
+        trackerDay("2026-08-28", { energy: 4 }),
+        trackerDay("2026-08-29", { energy: 4 }),
+        trackerDay("2026-08-30", { energy: 4 }),
+        trackerDay("2026-09-03", { energy: 4 }),
+        trackerDay("2026-09-10", { energy: 4 }),
+      ],
+      moodDays: ["2026-08-15", "2026-09-07"],
+    });
+    const states = evaluateAchievements(base, never);
+    expect(progressOf(states, "ach-balance-keeper")).toBe(11);
+    expect(progressOf(states, "ach-thirty-strong")).toBe(1);
+    expect(progressOf(states, "ach-century")).toBe(3);
+    expect(progressOf(states, "ach-year-of-bloom")).toBe(3);
+
+    /* Coherence with Profile: every habit day is a logged day there too,
+       so the habit run can never exceed Profile's best any-source streak —
+       here 3 (Aug 28–30), which the habit run of 1 respects. */
+    const anySourceDays = new Set([
+      ...base.logs.map((l) => l.date),
+      ...base.trackerDays.map((d) => d.date),
+      ...base.moodDays,
+    ]);
+    expect(longestRun(anySourceDays)).toBe(3);
+  });
+
+  it("Thirty Days Strong follows the longest habit run; Century and Year follow the habit-day total", () => {
+    const base = input({
+      logs: [
+        ...consecutiveLogs(3), // Sep 8–10, a real run
+        { habitId: "h1", date: "2026-08-01" },
+        { habitId: "h1", date: "2026-08-15" },
+        { habitId: "h1", date: "2026-09-01" },
+      ],
+    });
+    const states = evaluateAchievements(base, never);
+    expect(progressOf(states, "ach-thirty-strong")).toBe(3);
+    expect(progressOf(states, "ach-century")).toBe(6);
+    expect(progressOf(states, "ach-year-of-bloom")).toBe(6);
+  });
+
+  it("mood and tracker days never extend the habit run or the habit-day total", () => {
+    /* A tracker day *between* two habit days bridges them for Balance
+       Keeper (the person did check in) but not for the habit badges: the
+       run is about the habit itself, unbroken. */
+    const base = input({
+      logs: [
+        { habitId: "h1", date: "2026-09-01" },
+        { habitId: "h1", date: "2026-09-03" },
+      ],
+      trackerDays: [trackerDay("2026-09-02", { energy: 4 })],
+      moodDays: ["2026-09-04"],
+    });
+    const states = evaluateAchievements(base, never);
+    expect(progressOf(states, "ach-thirty-strong")).toBe(1);
+    expect(progressOf(states, "ach-century")).toBe(2);
+    expect(progressOf(states, "ach-balance-keeper")).toBe(4);
+  });
+});
+
 /* ------------------------------ next milestone --------------------------- */
 
 describe("the next milestone recommendation", () => {
