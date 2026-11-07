@@ -104,11 +104,12 @@ export function HomeSidebar() {
                     : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"
                 }`}
               >
-                <BloomIcon
-                  name={item.icon}
-                  size={16}
-                  className={`shrink-0 ${active ? "text-primary" : ""}`}
-                />
+                {/* The glyph rides in .app-nav-glyph: the wrapper carries
+                    the colour, the grow/settle transform and the glow disc
+                    (see "Sidebar icon motion" in src/styles.css). */}
+                <span className="app-nav-glyph">
+                  <BloomIcon name={item.icon} size={16} />
+                </span>
                 {item.label}
               </Link>
             );
@@ -256,7 +257,9 @@ export function HomeMobileNav() {
             aria-label={item.label}
             className={active ? "text-primary" : "text-muted-foreground"}
           >
-            <BloomIcon name={item.icon} size={22} strokeWidth={active ? 2.1 : 1.75} />
+            <span className="app-nav-glyph">
+              <BloomIcon name={item.icon} size={22} strokeWidth={active ? 2.1 : 1.75} />
+            </span>
             <span aria-hidden="true">{item.label}</span>
           </Link>
         );
