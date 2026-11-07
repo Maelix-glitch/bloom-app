@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import cycleIntelligenceCss from "../styles/cycle2.css?url";
+import cycleIntelligenceCss from "../styles/cycle.css?url";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
