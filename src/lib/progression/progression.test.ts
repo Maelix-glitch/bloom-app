@@ -78,6 +78,7 @@ function trackerDay(date: string, overrides: Partial<ProgressionInput["trackerDa
     waterMl: null,
     movementMinutes: null,
     energy: null,
+    screenMinutes: null,
     studyMinutes: 0,
     studySessions: 0,
     ...overrides,
@@ -154,6 +155,18 @@ describe("verification reads real records only", () => {
       moodDays: ["2026-09-08"],
     });
     expect(resolveSpec({ on: "balanceDays", window: 7 }, base)).toBe(3);
+  });
+
+  it("balance days count a screen-only day — the same logged-day definition as Profile", () => {
+    /* Profile's record counts a day carrying only screen time as logged;
+       the balance goal must agree, or the same day is logged on one screen
+       and missing on the other. Screen stays excluded as a goal *target*
+       (see trackerDays specs) — this is only about checking in at all. */
+    const base = input({
+      trackerDays: [trackerDay("2026-09-09", { screenMinutes: 240 })],
+    });
+    expect(resolveSpec({ on: "balanceDays", window: 7 }, base)).toBe(1);
+    expect(resolveSpec({ on: "trackerDays", tracker: "screen", window: 7 }, base)).toBe(0);
   });
 
   it("counts mood days only where entries exist", () => {

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
+import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
@@ -83,6 +84,11 @@ export function WeeklyReportPage() {
   const mood = useMoodSystem();
   const trackers = useTrackers();
   const cycle = usePeriodLog();
+  /* Both off switches, not just the period mode: the onboarding opt-out
+     must remove the cycle from the report exactly as it does from Today.
+     Checking `cycle.mode` alone let an opted-out person's cycle data
+     (and a Cycle card) reach this page. */
+  const { visible: cycleVisible } = useCycleVisible();
 
   const report = useMemo(
     () =>
@@ -94,11 +100,11 @@ export function WeeklyReportPage() {
         trackerDays: trackers.days,
         goals: trackers.goals,
         cycle:
-          cycle.mode === "tracking" && cycle.analysis.phase
+          cycleVisible && cycle.mode === "tracking" && cycle.analysis.phase
             ? { phase: cycle.analysis.phaseLabel, cycleDay: cycle.analysis.cycleDay ?? 0 }
             : null,
       }),
-    [habits.habits, habits.logs, mood.entries, trackers.days, trackers.goals, cycle],
+    [habits.habits, habits.logs, mood.entries, trackers.days, trackers.goals, cycle, cycleVisible],
   );
 
   const fmtHours = (min: number | null): string =>
@@ -320,23 +326,28 @@ export function WeeklyReportPage() {
               </div>
             </Card>
 
-            <Card label="Cycle">
-              {report.cycle ? (
-                <div className="space-y-1">
-                  <p className="font-display text-[22px] leading-tight">{report.cycle.phase}</p>
-                  <p className="text-[12px] text-muted-foreground">
-                    {report.cycle.cycleDay > 0
-                      ? `day ${report.cycle.cycleDay} of this cycle`
-                      : "cycle day not yet placed"}
+            {/* No cycle card at all when the cycle is off or opted out —
+                a placeholder section is still a cycle section. Paused is a
+                state, not an opt-out, so the calm note stays for it. */}
+            {cycleVisible ? (
+              <Card label="Cycle">
+                {report.cycle ? (
+                  <div className="space-y-1">
+                    <p className="font-display text-[22px] leading-tight">{report.cycle.phase}</p>
+                    <p className="text-[12px] text-muted-foreground">
+                      {report.cycle.cycleDay > 0
+                        ? `day ${report.cycle.cycleDay} of this cycle`
+                        : "cycle day not yet placed"}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-[13px] leading-relaxed text-muted-foreground">
+                    Cycle isn't part of this Bloom, or is paused. The rest of the week still reads
+                    fine without it.
                   </p>
-                </div>
-              ) : (
-                <p className="text-[13px] leading-relaxed text-muted-foreground">
-                  Cycle isn't part of this Bloom, or is paused. The rest of the week still reads
-                  fine without it.
-                </p>
-              )}
-            </Card>
+                )}
+              </Card>
+            ) : null}
           </div>
         )}
 

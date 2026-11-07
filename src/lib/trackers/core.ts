@@ -15,6 +15,7 @@
  */
 
 import { addDays, diffDays, isValidDateKey, stdDev } from "@/lib/cycle/predict";
+import { currentStreak, longestStreak } from "@/lib/stats";
 
 /* --------------------------------- model --------------------------------- */
 
@@ -475,7 +476,12 @@ function progressOf(value: number, goal: number, def: TrackerDef): number {
   return Math.max(0, 1 - (value - goal) / goal);
 }
 
-/** Consecutive days meeting a goal, counting back from today or yesterday. */
+/**
+ * Consecutive days meeting a goal — the shared streak definitions
+ * (lib/stats) run over the set of days that met it. Anchored to today, or
+ * to yesterday when today isn't there yet: an unlogged morning shouldn't
+ * read as a broken streak.
+ */
 function streakOf(
   byDate: Map<string, DayEntry>,
   id: TrackerId,
@@ -483,43 +489,12 @@ function streakOf(
   today: string,
 ): { streak: number; bestStreak: number } {
   const def = trackerDef(id);
-  const qualifies = (date: string): boolean => {
-    const day = byDate.get(date);
-    if (!day) return false;
+  const qualifying = new Set<string>();
+  for (const [date, day] of byDate) {
     const value = valueOf(day, id);
-    return value !== null && metGoal(value, goal, def);
-  };
-
-  /* Current run: anchored to today, or to yesterday when today isn't logged
-     yet — an unlogged morning shouldn't read as a broken streak. */
-  let cursor = today;
-  if (!qualifies(cursor)) cursor = addDays(today, -1);
-  let streak = 0;
-  if (qualifies(cursor)) {
-    for (let i = 0; i < 400; i += 1) {
-      if (!qualifies(cursor)) break;
-      streak += 1;
-      cursor = addDays(cursor, -1);
-    }
+    if (value !== null && metGoal(value, goal, def)) qualifying.add(date);
   }
-
-  /* Longest run anywhere in the record. */
-  const dates = [...byDate.keys()].sort();
-  let best = 0;
-  let run = 0;
-  let prev: string | null = null;
-  for (const date of dates) {
-    const continues = prev !== null && diffDays(prev, date) === 1;
-    if (qualifies(date)) {
-      run = continues ? run + 1 : 1;
-      if (run > best) best = run;
-    } else {
-      run = 0;
-    }
-    prev = date;
-  }
-
-  return { streak, bestStreak: Math.max(best, streak) };
+  return { streak: currentStreak(qualifying, today), bestStreak: longestStreak(qualifying) };
 }
 
 function pearson(xs: number[], ys: number[]): number | null {

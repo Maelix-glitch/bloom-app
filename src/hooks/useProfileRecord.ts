@@ -9,6 +9,7 @@
 
 import { useMemo } from "react";
 
+import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useHabits } from "@/hooks/useHabits";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { useTrackers } from "@/hooks/useTrackers";
@@ -41,6 +42,14 @@ export function useProfileRecord(moodEntries: readonly MoodEntry[]): ProfileReco
   const trackers = useTrackers();
   const habits = useHabits();
   const cycle = usePeriodLog();
+  /* The same lever Today uses: the onboarding opt-out reads as mode "off"
+     for the cycle chip, so opting out removes it here too — checking the
+     period mode alone left the chip (and its cycle detail) on the profile
+     of someone who had opted out with the mode still on. The grid and
+     totals below still count historical cycle days: off hides surfaces,
+     it never rewrites the record. */
+  const { optedOut } = useCycleVisible();
+  const effectiveCycleMode = optedOut ? "off" : cycle.mode;
 
   const input = useMemo(
     () => ({
@@ -81,7 +90,7 @@ export function useProfileRecord(moodEntries: readonly MoodEntry[]): ProfileReco
       trackerDetail,
       moodEntries: moodEntries.length,
       habits: activeHabits,
-      cycleMode: cycle.mode,
+      cycleMode: effectiveCycleMode,
       cycleDetail,
     });
   }, [
@@ -91,7 +100,7 @@ export function useProfileRecord(moodEntries: readonly MoodEntry[]): ProfileReco
     moodEntries.length,
     cycle.logs.length,
     cycle.analysis,
-    cycle.mode,
+    effectiveCycleMode,
   ]);
 
   const pulse = useMemo(() => grid.days.map((d) => d.count), [grid.days]);

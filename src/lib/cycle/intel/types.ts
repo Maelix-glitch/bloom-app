@@ -97,6 +97,11 @@ export interface ForecastResult {
 export interface PhaseResult {
   key: PhaseKey | null;
   label: string;
+  /**
+   * The current cycle day, bounded: never past `expectedLength` (the
+   * overrun is carried by `overdueDays`), and never past the plausible
+   * bound while no length has been measured yet.
+   */
   day: number | null;
   expectedLength: number | null;
   certainty: "observed" | "estimated" | "unknown";

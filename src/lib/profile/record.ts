@@ -15,6 +15,7 @@ import type { PeriodLog } from "@/lib/cycle/predict";
 import type { MoodEntry } from "@/lib/mood/types";
 import type { CycleMode } from "@/lib/cycle/periodStore";
 import { todayLocal } from "@/lib/localDay";
+import { currentStreak, daySignalCount, longestStreak, type DaySignals } from "@/lib/stats";
 
 export type RecordSource = "trackers" | "mood" | "habits" | "cycle";
 
@@ -52,15 +53,19 @@ const weekStart = (date: string): string => {
   return shift(date, -dow);
 };
 
+/** A tracker day in the shared signal shape (lib/stats) — study arrives as sessions here. */
+const signalsOf = (e: DayEntry): DaySignals => ({
+  sleepMinutes: e.sleepMinutes,
+  waterMl: e.waterMl,
+  studyMinutes: e.sessions.reduce((sum, s) => sum + s.minutes, 0),
+  studySessions: e.sessions.length,
+  movementMinutes: e.movementMinutes,
+  energy: e.energy,
+  screenMinutes: e.screenMinutes,
+});
+
 function trackerCount(e: DayEntry): number {
-  let n = 0;
-  if (e.sleepMinutes !== null) n += 1;
-  if (e.waterMl !== null) n += 1;
-  if (e.sessions.length > 0) n += 1;
-  if (e.movementMinutes !== null) n += 1;
-  if (e.energy !== null) n += 1;
-  if (e.screenMinutes !== null) n += 1;
-  return n;
+  return daySignalCount(signalsOf(e));
 }
 
 /**
@@ -140,22 +145,11 @@ export function recordTotals(input: RecordInput): RecordTotals {
   let entries = 0;
   for (const n of days.values()) entries += n;
 
-  /* streak: today counts if logged, otherwise the run may end yesterday */
-  let streak = 0;
-  let cursor = days.has(today) ? today : shift(today, -1);
-  while (days.has(cursor)) {
-    streak += 1;
-    cursor = shift(cursor, -1);
-  }
-
-  let best = 0;
-  let run = 0;
-  let prev: string | null = null;
-  for (const d of sorted) {
-    run = prev !== null && shift(prev, 1) === d ? run + 1 : 1;
-    if (run > best) best = run;
-    prev = d;
-  }
+  /* The shared streak definitions (lib/stats), over the days this record
+     counts as logged. Future days were already excluded by `add` above, so
+     neither run can reach into them. */
+  const streak = currentStreak(days.keys(), today);
+  const best = longestStreak(days.keys());
 
   const d7 = shift(today, -6);
   const d30 = shift(today, -29);

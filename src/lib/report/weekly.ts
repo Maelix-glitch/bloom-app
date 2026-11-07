@@ -12,6 +12,7 @@
  */
 
 import { localDay, shiftDay } from "@/lib/localDay";
+import { averageMood } from "@/lib/stats";
 import { hasUsual, usualDay, usualMood } from "@/lib/smart/usual";
 import { EMOTION_MAP, type MoodEntry } from "@/lib/mood/types";
 import { habitStreak } from "@/lib/reminders/streak";
@@ -111,8 +112,10 @@ export function buildWeeklyReport(input: WeeklyReportInput): WeeklyReport {
   const mood: WeekMood = {
     count: moodThis.length,
     prevCount: moodPrev.length,
-    avgMood: round1OrNull(avg(moodThis.map((e) => e.mood))),
-    prevAvgMood: round1OrNull(avg(moodPrev.map((e) => e.mood))),
+    /* The shared average-mood definition (lib/stats), rounded to the
+       report's one-decimal presentation. */
+    avgMood: round1OrNull(averageMood(moodThis)),
+    prevAvgMood: round1OrNull(averageMood(moodPrev)),
     dominant,
     positiveShare: moodThis.length > 0 ? positive / moodThis.length : null,
   };
