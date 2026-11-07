@@ -3,7 +3,7 @@
  * journey"). Scales fluidly, no chart library. Points are real day averages
  * from the Mood record; days without an entry are simply absent.
  *
- * Motion (see styles/mood-motion.css): the line draws itself the first time
+ * Motion (see styles/mood.css): the line draws itself the first time
  * the chart scrolls into view, points arrive left → right, the latest point
  * breathes, and hovering a point shows a small tooltip. Re-ranging redraws.
  */

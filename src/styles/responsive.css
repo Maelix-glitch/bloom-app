@@ -243,7 +243,7 @@
   }
 }
 
-/* tracker overlay surfaces live in trackers2.css (route link wins). */
+/* tracker overlay surfaces live in trackers.css (route link wins). */
 
 /* ------------------- 5. responsive typography guards ---------------------
    Editorial serif stays; oversized hero lines get fluid caps so a 320px
@@ -345,14 +345,14 @@ textarea {
 }
 
 /* ------------------- 8. page compositions ----------------------------------
-   NOTE on precedence: page stylesheets (trackers2, cycle2, coach, profile,
+   NOTE on precedence: page stylesheets (trackers, cycle, coach, profile,
    rewards, progression...) load via route <link>s AFTER this global sheet,
    so page-specific mobile compositions live in those files, where they win.
    This section keeps only what has no rival elsewhere.
 
-   - tracker dock + ledger rows + atlas/strip density: trackers2.css
+   - tracker dock + ledger rows + atlas/strip density: trackers.css
    - coach thread/dock/composer/input: coach.css
-   - cycle shell/panels: cycle2.css
+   - cycle shell/panels: cycle.css
    - profile cover/numbers/tabs: profile.css
    - rewards/progression: rewards.css / progression.css
    - snapshot sheet internals (.metrics-sheet): below (unique classes)

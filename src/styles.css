@@ -3,10 +3,9 @@
 @import "tw-animate-css";
 /* Bloom's own motion primitives: press, arrival, changed, pending. */
 @import "./styles/motion.css";
-/* Premium header icon system: the notification bell and its siblings. */
-@import "./styles/bell.css";
-/* Notification Center — the sheet behind the bell. */
-@import "./styles/center.css";
+/* App shell chrome: header icons (the bell), the Notification Center
+   behind it, and the connection notice. */
+@import "./styles/shell.css";
 /* Bloom Story Platform: rings, rail, viewer, editor, trays, archive. */
 @import "./styles/stories.css";
 /* Bloom mobile-first responsive system: shell, nav, sheets, type, guards. */
@@ -78,6 +77,9 @@
   --color-gold-soft: var(--gold-soft);
   --color-gold-bright: var(--gold-bright);
   --color-gold-deep: var(--gold-deep);
+  --color-gold-champagne: var(--gold-champagne);
+  --color-gold-grad-hi: var(--gold-grad-hi);
+  --color-gold-grad-lo: var(--gold-grad-lo);
   --color-violet-bright: var(--violet-bright);
   --color-violet-deep: var(--violet-deep);
   --color-rose-bright: var(--rose-bright);
@@ -169,6 +171,9 @@
   --gold-soft: #e7cc9d; /* gold hover */
   --gold-bright: #eed9a4; /* bright gold tint — CTA gradients, hero numerals (promoted from literals, U1) */
   --gold-deep: #2c2415; /* tinted dark ground behind gold elements */
+  --gold-champagne: #e3c187; /* mid champagne — cycle ovulation hue, connection-notice accent (promoted from literals, U5) */
+  --gold-grad-hi: #f7dc9a; /* gold gradient highlight stop — bell / notification-centre badges (promoted from literals, U5) */
+  --gold-grad-lo: #d99b34; /* gold gradient deep stop — bell / notification-centre badges (promoted from literals, U5) */
   --cream-2: #f4efe4; /* brighter cream for display/hero text */
   --accent-primary: var(--gold);
   --accent-primary-hover: var(--gold-soft);

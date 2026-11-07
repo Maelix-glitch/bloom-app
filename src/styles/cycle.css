@@ -7,12 +7,18 @@
  *
  * Deliberately NOT: soft-pink period app, cream + serif + terracotta, or
  * all-black with a single neon accent.
+ *
+ * U5: renamed from cycle2.css. The font stacks and the default (nocturne)
+ * identity bind the root tokens in src/styles.css; the non-default theme
+ * palettes below are this file's own token definitions. The subset the
+ * trackers page shares lives in trackers.css — /trackers no longer loads
+ * this sheet.
  */
 
 .ci {
-  --ci-font-display: "Fraunces", ui-serif, Georgia, serif;
-  --ci-font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --ci-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --ci-font-display: var(--font-display, "Fraunces", ui-serif, Georgia, serif);
+  --ci-font-sans: var(--font-sans, "Inter", ui-sans-serif, system-ui, sans-serif);
+  --ci-font-mono: var(--font-mono, "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace);
   color-scheme: dark;
 }
 
@@ -40,13 +46,13 @@
   --ci-menstrual: #cf6d8f;
   --ci-follicular: #a58bff;
   --ci-luteal: #8b74c9;
-  --ci-ovulation: #e3c187;
+  --ci-ovulation: var(--gold-champagne);
   --ci-late: #7f8aa8;
   --ci-accent: #a58bff;
   --ci-accent-soft: rgba(165, 139, 255, 0.14);
   --ci-focus: #c3b1ff;
   --ci-ok: #8fbfa4;
-  --ci-warn: #e3c187;
+  --ci-warn: var(--gold-champagne);
   --ci-danger: #dd7f74;
   --ci-input-bg: #100d17;
   --ci-veil:
@@ -1421,27 +1427,27 @@ textarea.ci-input {
  * ==================================================================== */
 
 .ci[data-theme="nocturne"] {
-  --ci-bg: var(--background, #0d0f16);
-  --ci-bg-deep: var(--sidebar, #0a0c12);
-  --ci-surface: var(--surface, #151823);
-  --ci-surface-2: var(--surface-2, #1b1f2b);
-  --ci-line: var(--border-subtle, #252a36);
-  --ci-line-strong: var(--border, #303747);
-  --ci-text: var(--foreground, #f3efe7);
-  --ci-text-soft: var(--muted-foreground, #b2b0b8);
-  --ci-text-mute: var(--faint, #858796);
+  --ci-bg: var(--background);
+  --ci-bg-deep: var(--sidebar);
+  --ci-surface: var(--surface);
+  --ci-surface-2: var(--surface-2);
+  --ci-line: var(--border-subtle);
+  --ci-line-strong: var(--border);
+  --ci-text: var(--foreground);
+  --ci-text-soft: var(--muted-foreground);
+  --ci-text-mute: var(--faint);
   --ci-menstrual: #c07d8a;
-  --ci-follicular: var(--violet, #a697d3);
+  --ci-follicular: var(--violet);
   --ci-luteal: #8d86a8;
-  --ci-ovulation: var(--gold, #d9bc83);
+  --ci-ovulation: var(--gold);
   --ci-late: #8f98ad;
-  --ci-accent: var(--gold, #d9bc83);
-  --ci-accent-soft: color-mix(in oklab, var(--gold, #d9bc83) 14%, transparent);
-  --ci-focus: var(--gold-soft, #e7cc9d);
-  --ci-ok: var(--success, #86aa98);
-  --ci-warn: var(--warning, #c5a16b);
-  --ci-danger: var(--danger, #c77e82);
-  --ci-input-bg: var(--surface, #151823);
+  --ci-accent: var(--gold);
+  --ci-accent-soft: color-mix(in oklab, var(--gold) 14%, transparent);
+  --ci-focus: var(--gold-soft);
+  --ci-ok: var(--success);
+  --ci-warn: var(--warning);
+  --ci-danger: var(--danger);
+  --ci-input-bg: var(--surface);
   --ci-veil: none;
   --ci-radius-lg: var(--radius-panel, 18px);
   --ci-radius-md: var(--radius-card, 12px);
@@ -1460,7 +1466,7 @@ textarea.ci-input {
 }
 
 .ci-btn--primary {
-  color: var(--background, #0d0f16);
+  color: var(--background);
 }
 
 .ci .ci-eyebrow {

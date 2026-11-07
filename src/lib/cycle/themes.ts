@@ -1,6 +1,6 @@
 /**
  * The five design directions for Cycle Intelligence. Themes are pure CSS
- * custom properties (see src/styles/cycle2.css) — this file only carries the
+ * custom properties (see src/styles/cycle.css) — this file only carries the
  * metadata the style gallery needs to show and compare them.
  */
 
@@ -31,7 +31,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Ovulation", hex: "#e3c187" },
       { label: "Luteal", hex: "#8b74c9" },
     ],
-    traits: ["Hairline 1px cards", "14px radius", "Fraunces + Space Grotesk", "Quiet radial glow"],
+    traits: ["Hairline 1px cards", "14px radius", "Fraunces + Inter", "Quiet radial glow"],
     best: "The main direction — calm, legible, distinctive without being loud.",
   },
   {

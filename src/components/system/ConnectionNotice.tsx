@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { CloudOff, X } from "lucide-react";
 
 import { hasSupabaseConfig, supabaseConfigProblem } from "@/lib/supabase";
-import "@/styles/connection-notice.css";
+/* Notice styles live in the global shell sheet (styles/shell.css, U5). */
 
 const DISMISSED_KEY = "bloom.connection-notice.dismissed.v1";
 

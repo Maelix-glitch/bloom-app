@@ -1,0 +1,1032 @@
+/*
+ * Bloom shell — header, notification centre, connection notice (U5).
+ *
+ * One sheet for the app shell's chrome, merged from the former bell.css,
+ * center.css and connection-notice.css in their original load order
+ * (bell and center were global @imports; the notice was imported by its
+ * component and is now global with them — its selectors are unique to
+ * the notice, and the cycle sheet's phone-width suppression of the chip
+ * uses `body .conn-notice` specificity, so it still wins on /cycle and
+ * /trackers). Sections keep their original banners below.
+ *
+ * Token note: the gold badge gradient binds the --gold-grad-hi /
+ * --gold-grad-lo tokens and the notice accent binds --gold-champagne.
+ * What deliberately stays literal: the bell's metallic illustration
+ * stops and its --bell-gold fallback (single-use artwork values, exempt
+ * per plan section 4.3), the notice's warm near-black ground and its
+ * pinkish-white ink (no root token carries those values), and the
+ * achromatic white/black highlight and scrim primitives.
+ */
+
+/* ==========================================================================
+ * Section 1 — header icon system: the bell and its siblings (was bell.css)
+ * ========================================================================== */
+
+/* ==========================================================================
+ * Bloom header icon system — the bell, and the buttons beside it.
+ *
+ * One Apple-grade glass treatment shared by every circular header action:
+ * the notification bell, the rewards shortcut, the profile shortcut. A
+ * frosted 40px disc with a top inner highlight (the light source), a real
+ * drop shadow, a quiet lift on hover and a tactile press — so the bell
+ * feels machined, not drawn.
+ *
+ * Everything lives in @layer components so layout utilities at the call
+ * sites (`hidden lg:grid`) still win where they must.
+ * ========================================================================== */
+
+@layer components {
+  /* ------------------------- the glass disc itself ------------------------ */
+
+  .bloom-icon-btn {
+    --bib-size: 40px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--bib-size);
+    height: var(--bib-size);
+    flex: none;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--muted-foreground);
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.07), transparent 55%),
+      color-mix(in oklab, var(--surface-2) 64%, transparent);
+    border: 1px solid color-mix(in oklab, var(--foreground) 13%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.45),
+      0 8px 18px -10px rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s ease,
+      border-color 0.28s ease,
+      color 0.2s ease,
+      background-color 0.28s ease;
+  }
+
+  /* A 48px touch target around the 40px visual — the layout never knows. */
+  .bloom-icon-btn::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+  }
+
+  /* The gloss: a static sheet of light across the top half, iOS-icon style. */
+  .bloom-icon-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.03) 42%,
+      transparent 58%
+    );
+    opacity: 0.75;
+    transition: opacity 0.28s ease;
+  }
+
+  @media (hover: hover) {
+    .bloom-icon-btn:hover {
+      transform: translateY(-1px);
+      color: var(--foreground);
+      border-color: color-mix(in oklab, var(--foreground) 24%, transparent);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 0 rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.45),
+        0 12px 26px -10px rgba(0, 0, 0, 0.7),
+        0 0 18px -8px color-mix(in oklab, var(--violet) 55%, transparent);
+    }
+    .bloom-icon-btn:hover::after {
+      opacity: 1;
+    }
+  }
+
+  .bloom-icon-btn:active {
+    transform: translateY(0) scale(0.92);
+    transition-duration: 0.1s;
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+      inset 0 2px 6px rgba(0, 0, 0, 0.35),
+      0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  .bloom-icon-btn:focus-visible {
+    outline: none;
+    border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+      0 0 0 3px color-mix(in oklab, var(--gold) 28%, transparent),
+      0 0 22px -4px color-mix(in oklab, var(--gold) 55%, transparent);
+  }
+
+  /* The current page's shortcut (the profile glyph when on Profile). */
+  .bloom-icon-btn[data-active="true"] {
+    color: var(--foreground);
+    border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.45),
+      0 0 16px -6px color-mix(in oklab, var(--primary) 60%, transparent);
+  }
+
+  /* A small status pip for siblings (the rewards dot) — the badge's sibling. */
+  .bloom-icon-btn__dot {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--gold-grad-hi), var(--gold-grad-lo));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 0 0 2px color-mix(in oklab, var(--surface) 85%, black),
+      0 0 10px -1px rgba(217, 155, 52, 0.8);
+    animation: bell-badge-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+
+  /* --------------------------------- the bell ------------------------------ */
+
+  .bloom-bell-wrap {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    border-radius: 999px;
+  }
+
+  /* Warm halo behind the disc while something waits — it breathes, slowly. */
+  .bloom-bell-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: 999px;
+    pointer-events: none;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--gold) 32%, transparent) 0%,
+      transparent 68%
+    );
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+
+  .bloom-bell-wrap[data-unread="true"]::before {
+    opacity: 0.8;
+  }
+
+  /* Something waiting warms the glass itself: a gold wash under the gloss. */
+  .bloom-bell[data-unread="true"] {
+    color: var(--gold-soft);
+    border-color: color-mix(in oklab, var(--gold) 42%, transparent);
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.09), transparent 55%),
+      radial-gradient(
+        130% 130% at 50% 0%,
+        color-mix(in oklab, var(--gold) 17%, transparent),
+        transparent 62%
+      ),
+      color-mix(in oklab, var(--surface-2) 66%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.45),
+      0 8px 18px -10px rgba(0, 0, 0, 0.65),
+      0 0 20px -6px color-mix(in oklab, var(--gold) 55%, transparent);
+  }
+
+  @media (hover: hover) {
+    .bloom-bell[data-unread="true"]:hover {
+      border-color: color-mix(in oklab, var(--gold) 58%, transparent);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+        inset 0 -1px 0 0 rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.45),
+        0 12px 26px -10px rgba(0, 0, 0, 0.7),
+        0 0 26px -6px color-mix(in oklab, var(--gold) 70%, transparent);
+    }
+  }
+
+  /* ------------------------------ the bell glyph --------------------------- */
+
+  .bloom-bell__swing {
+    display: grid;
+    place-items: center;
+    transform-origin: 50% 10%;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Hover leans the bell a touch; release springs it back. */
+  @media (hover: hover) {
+    .bloom-bell:hover .bloom-bell__swing {
+      transform: rotate(-11deg);
+    }
+  }
+
+  /* A new arrival rings it once — a decaying swing, then stillness. */
+  .bloom-bell__swing[data-ring="true"] {
+    animation: bell-ring 1.15s cubic-bezier(0.3, 0.6, 0.3, 1);
+  }
+
+  .bloom-bell__glyph {
+    width: 20px;
+    height: 20px;
+    overflow: visible;
+  }
+
+  .bloom-bell__shell {
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linejoin: round;
+  }
+
+  /* Idle: a whisper of fill. Unread: the dome's fill comes from its own
+     gradient (a per-instance url() on the element) — never from CSS. */
+  .bloom-bell:not([data-unread="true"]) .bloom-bell__shell {
+    fill: color-mix(in oklab, currentColor 9%, transparent);
+  }
+
+  .bloom-bell__knob {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .bloom-bell__stem {
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+  }
+
+  .bloom-bell__ball {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  /* Unread: the bell is cast in gold and lit from within. */
+  .bloom-bell[data-unread="true"] .bloom-bell__glyph {
+    filter: drop-shadow(0 0 5px rgba(237, 190, 98, 0.55)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  }
+
+  .bloom-bell[data-unread="true"] .bloom-bell__shell {
+    fill: var(--bell-gold, #e9b558);
+    stroke: #ffedbd;
+    stroke-opacity: 0.65;
+  }
+
+  .bloom-bell[data-unread="true"] .bloom-bell__knob,
+  .bloom-bell[data-unread="true"] .bloom-bell__ball {
+    fill: var(--gold-grad-hi);
+  }
+
+  .bloom-bell[data-unread="true"] .bloom-bell__stem {
+    stroke: var(--gold-grad-hi);
+  }
+
+  /* The clapper counter-swings while the dome rings. */
+  .bloom-bell__clapper {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+  }
+
+  .bloom-bell__swing[data-ring="true"] .bloom-bell__clapper {
+    animation: bell-clapper 1.15s cubic-bezier(0.3, 0.6, 0.3, 1);
+  }
+
+  /* ------------------------------ the count pill --------------------------- */
+
+  .bloom-bell__badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 19px;
+    height: 19px;
+    padding-inline: 5.5px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #f8e0a4 0%, #efbe60 42%, var(--gold-grad-lo) 78%, #c07f22 100%);
+    color: #2a1b05;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 1px rgba(96, 54, 4, 0.4),
+      0 0 0 2px color-mix(in oklab, var(--background) 84%, black),
+      0 4px 12px -2px rgba(217, 155, 52, 0.6),
+      0 1px 3px rgba(0, 0, 0, 0.5);
+    animation: bell-badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+
+  /* The glow breathes on its own layer — opacity only, compositor-cheap. */
+  .bloom-bell__badge::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+      0 4px 18px 0 rgba(217, 155, 52, 0.85),
+      0 0 14px 2px rgba(217, 155, 52, 0.35);
+    opacity: 0;
+    animation: bell-badge-breathe 3.6s ease-in-out 1.4s infinite;
+  }
+}
+
+/* --------------------------------- motion ---------------------------------- */
+
+@keyframes bell-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  12% {
+    transform: rotate(-17deg);
+  }
+  24% {
+    transform: rotate(13deg);
+  }
+  36% {
+    transform: rotate(-9.5deg);
+  }
+  48% {
+    transform: rotate(6.5deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  72% {
+    transform: rotate(2.4deg);
+  }
+  84% {
+    transform: rotate(-1.2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes bell-clapper {
+  0% {
+    transform: rotate(0deg);
+  }
+  12% {
+    transform: rotate(24deg);
+  }
+  24% {
+    transform: rotate(-18deg);
+  }
+  36% {
+    transform: rotate(13deg);
+  }
+  48% {
+    transform: rotate(-9deg);
+  }
+  60% {
+    transform: rotate(5.5deg);
+  }
+  72% {
+    transform: rotate(-3deg);
+  }
+  84% {
+    transform: rotate(1.4deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes bell-badge-pop {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bell-badge-breathe {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bloom-bell__swing[data-ring="true"],
+  .bloom-bell__swing[data-ring="true"] .bloom-bell__clapper,
+  .bloom-bell__badge,
+  .bloom-bell__badge::after,
+  .bloom-icon-btn__dot {
+    animation: none;
+  }
+  .bloom-bell:hover .bloom-bell__swing {
+    transform: none;
+  }
+  .bloom-icon-btn,
+  .bloom-icon-btn:hover,
+  .bloom-icon-btn:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+ * Section 2 — notification centre (was center.css)
+ * ========================================================================== */
+
+/*
+ * Notification Center — the sheet behind the bell.
+ *
+ * An Apple-grade notification list in Bloom's dark-glass language: a calm
+ * photographic hero (candlelight, faded into the glass), grouped cards with
+ * tinted icon medallions, day-grouped history, and honest empty states.
+ * Scoped under .ncenter so nothing leaks. Follows the bsheet patterns
+ * (color-mix hairlines, orbs, phone breakpoints, reduced-motion guards).
+ */
+
+/* ------------------------------------------------------------ hero */
+
+.ncenter-hero {
+  position: relative;
+  padding: 26px 26px 6px;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+}
+@media (max-width: 640px) {
+  .ncenter-hero {
+    padding: 36px 20px 4px;
+  }
+}
+
+/* candlelight behind the header, dissolved into the glass below */
+.ncenter-art {
+  position: absolute;
+  inset: 1px 1px -70px;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: 27px 27px 0 0;
+  pointer-events: none;
+}
+/* the light catch along the top curve, over the photo rather than under it */
+.ncenter-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 22%, transparent);
+  pointer-events: none;
+}
+.ncenter-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  opacity: 0.55;
+  filter: saturate(0.9);
+  transform: scale(1.03);
+  animation: bsheet-settle 1.6s var(--ease-out-expo) both;
+}
+.ncenter-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--surface) 18%, transparent) 0%,
+      color-mix(in oklab, var(--surface) 52%, transparent) 55%,
+      var(--surface) 100%
+    ),
+    linear-gradient(90deg, color-mix(in oklab, var(--surface) 45%, transparent), transparent 60%);
+}
+
+.ncenter-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* the bell, resting — the same glass disc as the header, larger, decorative */
+.ncenter-hero-orb {
+  --bib-size: 54px;
+  pointer-events: none;
+}
+.ncenter-hero-orb .bloom-bell__glyph {
+  width: 26px;
+  height: 26px;
+}
+
+.ncenter-eyebrow {
+  margin-top: 16px;
+}
+.ncenter-title {
+  margin-top: 6px;
+}
+.ncenter-sub {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+.ncenter-sub[data-waiting="true"] {
+  color: var(--gold-soft);
+}
+
+/* ------------------------------------------------------------ sections */
+
+.ncenter-section {
+  margin: 20px 26px 0;
+}
+@media (max-width: 640px) {
+  .ncenter-section {
+    margin: 18px 14px 0;
+  }
+}
+
+.ncenter-head {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-inline: 4px;
+}
+
+/* One medallion for every orb in the sheet — head, rows, empties. Size and
+   corner via vars so a tweak lands everywhere at once. */
+.ncenter-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--nc-orb, 38px);
+  height: var(--nc-orb, 38px);
+  border-radius: var(--nc-orb-radius, 999px);
+  border: 1px solid color-mix(in oklab, var(--nc-tint, var(--gold)) 36%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 55%),
+    color-mix(in oklab, var(--nc-tint, var(--gold)) 14%, transparent);
+  color: color-mix(in oklab, var(--nc-tint, var(--gold)) 74%, #fff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.ncenter-orb svg {
+  width: var(--nc-orb-icon, 17px);
+  height: var(--nc-orb-icon, 17px);
+}
+.ncenter-orb--head {
+  --nc-orb: 34px;
+  --nc-orb-radius: 12px;
+  --nc-orb-icon: 16px;
+}
+.ncenter-orb--empty {
+  --nc-orb: 46px;
+  --nc-orb-icon: 20px;
+}
+
+.ncenter-head-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+
+.ncenter-count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+  color: color-mix(in oklab, var(--foreground) 68%, transparent);
+  white-space: nowrap;
+}
+
+/* a quieter ghost for the section header row */
+.ncenter-clear {
+  height: 32px;
+  padding-inline: 13px;
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------ rows */
+
+.ncenter-group {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent),
+    0 10px 26px -22px rgba(0, 0, 0, 0.9);
+}
+.ncenter-group > li + li {
+  margin-top: 2px;
+}
+
+.ncenter-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 15px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+a.ncenter-row:hover {
+  background: color-mix(in oklab, var(--background) 48%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+a.ncenter-row:active {
+  transform: scale(0.99);
+}
+a.ncenter-row:focus-visible {
+  outline: none;
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent);
+}
+
+/* the bell badge's little sibling — unread rows wear the gold dot */
+.ncenter-row[data-unread="true"] .ncenter-orb::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--gold-grad-hi), var(--gold-grad-lo));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 0 2px color-mix(in oklab, var(--surface) 88%, black),
+    0 0 8px rgba(217, 155, 52, 0.7);
+}
+
+.ncenter-row-text {
+  min-width: 0;
+}
+.ncenter-row-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ncenter-row[data-unread="true"] .ncenter-row-title {
+  font-weight: 600;
+}
+.ncenter-row-body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.42;
+  color: color-mix(in oklab, var(--foreground) 62%, transparent);
+  text-wrap: pretty;
+}
+.ncenter-row-why {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ncenter-row-aside {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+}
+.ncenter-time {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  white-space: nowrap;
+}
+.ncenter-row[data-unread="true"] .ncenter-time {
+  color: var(--gold-soft);
+}
+.ncenter-go {
+  width: 15px;
+  height: 15px;
+  color: color-mix(in oklab, var(--foreground) 38%, transparent);
+  transition:
+    transform 300ms var(--ease-out-expo),
+    color var(--motion-fast) ease;
+}
+a.ncenter-row:hover .ncenter-go {
+  transform: translateX(2px);
+  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+}
+
+/* ------------------------------------------------------------ day groups */
+
+.ncenter-days {
+  display: grid;
+  gap: 16px;
+}
+.ncenter-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+}
+.ncenter-day::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--foreground) 16%, transparent),
+    transparent
+  );
+}
+
+/* ------------------------------------------------------------ empty states */
+
+.ncenter-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 7px;
+  margin-inline: 4px;
+  padding: 22px 18px;
+  border-radius: 20px;
+  border: 1px dashed color-mix(in oklab, var(--foreground) 16%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 38%, transparent);
+}
+.ncenter-empty .ncenter-orb {
+  margin-bottom: 4px;
+}
+.ncenter-empty-title {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+.ncenter-empty-sub {
+  max-width: 32ch;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------ footer */
+
+.ncenter-foot {
+  margin: 22px 26px 26px;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  text-wrap: pretty;
+}
+@media (max-width: 640px) {
+  .ncenter-foot {
+    margin: 20px 18px 24px;
+  }
+}
+
+/* ------------------------------------------------------------ tints */
+
+.ncenter-orb[data-tint="gold"] {
+  --nc-tint: var(--gold);
+}
+.ncenter-orb[data-tint="violet"] {
+  --nc-tint: var(--violet);
+}
+.ncenter-orb[data-tint="sage"] {
+  --nc-tint: var(--sage);
+}
+.ncenter-orb[data-tint="rose"] {
+  --nc-tint: var(--rose);
+}
+.ncenter-orb[data-tint="amber"] {
+  --nc-tint: var(--amber);
+}
+.ncenter-orb[data-tint="sky"] {
+  --nc-tint: var(--sky);
+}
+
+/* ------------------------------------------------------------ width */
+
+/*
+ * A notification list wants a narrow column, not a wide card: 440px on
+ * desktop reads like a notification center instead of a stretched dialog.
+ * Phones are untouched — the bottom sheet already owns the width.
+ */
+.bsheet--card.ncenter-sheet {
+  max-width: 440px;
+}
+
+/*
+ * Small phones (320–360px): the rows keep every element, just tightened —
+ * orb, text, time and chevron all stay on one line, nothing escapes the card.
+ */
+@media (max-width: 360px) {
+  .ncenter-hero {
+    padding-inline: 16px;
+  }
+  .ncenter-section {
+    margin-inline: 10px;
+  }
+  .ncenter-row {
+    gap: 10px;
+    padding: 9px 10px 9px 9px;
+  }
+  .ncenter-row-aside {
+    gap: 5px;
+  }
+  .ncenter-foot {
+    margin-inline: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ncenter-art img {
+    animation: none;
+  }
+  .ncenter-row,
+  .ncenter-go {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+ * Section 3 — connection notice (was connection-notice.css)
+ * ========================================================================== */
+
+/*
+ * The "saving to this device only" notice.
+ *
+ * Amber, not red: this is a legitimate mode, not a failure. Bottom-right so it
+ * doesn't collide with the admin bar (bottom-left) or the mobile tab bar.
+ */
+
+.conn-notice {
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  /* Under the sheet layer (2000+): when a dialog is open it owns the screen. */
+  z-index: 1900;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 22px;
+  align-items: start;
+  gap: 10px;
+  width: min(340px, calc(100vw - 24px));
+  padding: 11px 11px 12px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--gold-champagne) 32%, transparent);
+  background: color-mix(in oklab, #14110c 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 44px -22px rgba(0, 0, 0, 0.95);
+  animation: conn-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 900ms;
+}
+
+@keyframes conn-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* above the phone tab bar */
+@media (max-width: 1023px) {
+  .conn-notice {
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+}
+
+.conn-notice-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  color: var(--gold-champagne);
+  background: color-mix(in oklab, var(--gold-champagne) 14%, transparent);
+}
+
+.conn-notice-title {
+  font-size: 12.5px;
+  font-weight: 550;
+  color: #f2ecec;
+}
+
+.conn-notice-text {
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: color-mix(in oklab, #f2ecec 62%, transparent);
+}
+
+.conn-notice-x {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: color-mix(in oklab, #f2ecec 50%, transparent);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.conn-notice-x:hover {
+  color: #f2ecec;
+  background: color-mix(in oklab, #fff 9%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conn-notice {
+    animation: none;
+  }
+}
+
+/* The folded state: the promise stays visible as a quiet chip, never on top
+   of the content. Same amber, same corner, one tap to reopen. */
+.conn-notice-chip {
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 1900;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  color: var(--gold-champagne);
+  border: 1px solid color-mix(in oklab, var(--gold-champagne) 32%, transparent);
+  background: color-mix(in oklab, #14110c 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.9);
+  animation: conn-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (max-width: 1023px) {
+  .conn-notice-chip {
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+}
