@@ -267,7 +267,9 @@ export function ProfileEditor({
   const previewIdentity: ProfileIdentity = {
     ...identity,
     displayName: displayName.trim() || "Bloom User",
-    username: username.trim() ? normalizeUsername(username) : null,
+    /* Preview what was actually typed (lowercased — handles are lowercase),
+       not a silently rewritten version of it. */
+    username: username.trim() ? username.trim().toLowerCase() : null,
     bio: bio.trim() || identity.bio,
     accent,
     /* Live preview: an upload beats a preset, a preset beats what's saved. */
@@ -440,10 +442,16 @@ export function ProfileEditor({
                       <input
                         value={username}
                         onChange={(e) => {
-                          setUsername(normalizeUsername(e.target.value));
+                          /* Keep exactly what was typed. This handler used to
+                             run normalizeUsername() on every keystroke, so a
+                             hyphen (or any disallowed character) silently
+                             vanished mid-typing and the field looked broken.
+                             Validation below now says what's wrong instead,
+                             and Save refuses until it is fixed. */
+                          setUsername(e.target.value);
                           setSaveError(null);
                         }}
-                        placeholder="quiet-lavender"
+                        placeholder="quietlavender"
                         maxLength={30}
                         className="bedit-field-input mono mt-0 text-[14px]"
                         data-testid="profile-username"

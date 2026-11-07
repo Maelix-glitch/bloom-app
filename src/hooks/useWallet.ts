@@ -1,20 +1,34 @@
 /**
- * useWallet — one points number, the same everywhere.
+ * useWallet — one points number, the same everywhere, from one store.
  *
- * Signed out (or with no database), the wallet is the device ledger: every
- * habit tick, verified goal and achievement is an idempotent event, so the
- * total is the real sum of what happened on this device.
+ * This used to be per-component state: every PointsChip (header, sidebar,
+ * phone bar) fetched the account balance on its own clock, and until its
+ * fetch landed it rendered the device ledger. A signed-in user therefore
+ * watched the number start at the device total, then swap to the account
+ * total — and two chips could disagree for seconds, because they swapped at
+ * different moments. That swap is the flicker the owner reported.
  *
- * Signed in, the account is authoritative: `profiles.total_points` is read
- * through the same code the habits hook uses, and the ledger is the receipt
- * feed. If that read fails, the device ledger stands in rather than showing a
- * wrong zero.
+ * Now the wallet is a module store, the same shape as `useSession` and
+ * `lib/prefsStore`: one auth watch, one account read, one snapshot. Every
+ * consumer renders the identical snapshot, so every points display updates
+ * in the same frame, and the account read happens once, not once per chip.
+ *
+ * What shows, by state:
+ *   · signed out (or no database): the device ledger — every habit tick,
+ *     verified goal and achievement is an idempotent event, so the total is
+ *     the real sum of what happened on this device.
+ *   · signed in, account not yet read: `loading` is true and `balance` is
+ *     provisional — displays must show a neutral placeholder, never the
+ *     device number and never zero. A wrong number that corrects itself is
+ *     worse than a brief dash.
+ *   · signed in, account read: the account balance, the only number shown.
+ *   · signed in, read failed: `degraded` — the device ledger stands in
+ *     rather than showing a wrong zero, and displays say so.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
-import { useSession } from "@/hooks/useSession";
-import { hasSupabaseConfig } from "@/lib/supabase";
+import { hasSupabaseConfig, watchAuth } from "@/lib/supabase";
 import { readPoints } from "@/lib/home/habits";
 import {
   POINTS_CHANGED,
@@ -27,7 +41,10 @@ import { PROGRESSION_CHANGED } from "@/lib/progression/store";
 import { PREFS_CHANGED } from "@/lib/prefs";
 
 export interface Wallet {
-  /** The number to show. Account balance when it is readable, else this device. */
+  /**
+   * The number to show. Account balance when it is readable, else this
+   * device. While `loading` is true this is provisional — do not render it.
+   */
   balance: number;
   /** The device ledger total — always available, never waits on a network. */
   deviceBalance: number;
@@ -38,71 +55,163 @@ export interface Wallet {
   source: "account" | "device";
   /** True when a signed-in balance could not be read, so the device total is shown. */
   degraded: boolean;
+  /**
+   * True while the signed-in account balance is still being read (including
+   * while we do not yet know whether there is a session). Displays render a
+   * neutral placeholder in this state instead of any number.
+   */
+  loading: boolean;
   refresh: () => void;
 }
 
-export function useWallet(): Wallet {
-  const session = useSession();
-  const [version, setVersion] = useState(0);
-  const [accountBalance, setAccountBalance] = useState<number | null>(null);
-  const [degraded, setDegraded] = useState(false);
+/* ------------------------------- the store ------------------------------ */
+
+interface WalletState {
+  /** Bumped by every writer (tick, award, another tab, a merge). */
+  version: number;
+  userId: string | null;
+  sessionReady: boolean;
+  /** The account balance for `userId`; null until read, or if the read failed. */
+  accountBalance: number | null;
+  /** Whether the account read for the current user has finished at least once. */
+  accountSettled: boolean;
+  degraded: boolean;
+}
+
+let state: WalletState = {
+  version: 0,
+  userId: null,
+  sessionReady: false,
+  accountBalance: null,
+  accountSettled: false,
+  degraded: false,
+};
+
+let snapshot: Wallet | null = null;
+const listeners = new Set<() => void>();
+let started = false;
+let fetchToken = 0;
+
+function computeWallet(): Wallet {
+  const deviceBalance = Math.max(0, pointsBalance());
+  const signedIn = state.sessionReady && state.userId !== null;
+  const fromAccount = signedIn && state.accountBalance !== null;
+  return {
+    balance: fromAccount ? (state.accountBalance as number) : deviceBalance,
+    deviceBalance,
+    todayEarned: todayPointsEarned(),
+    history: pointEvents(),
+    source: fromAccount ? "account" : "device",
+    degraded: signedIn && state.degraded,
+    // Before the first auth answer we cannot know whether an account
+    // balance is coming, so with a database configured the honest state is
+    // "loading", not the device number a signed-in user would watch swap.
+    loading: !state.sessionReady
+      ? hasSupabaseConfig
+      : signedIn && !state.accountSettled,
+    refresh: refreshWallet,
+  };
+}
+
+function publish(): void {
+  snapshot = computeWallet();
+  for (const l of [...listeners]) l();
+}
+
+function subscribe(onChange: () => void): () => void {
+  listeners.add(onChange);
+  return () => listeners.delete(onChange);
+}
+
+function getSnapshot(): Wallet {
+  if (!snapshot) snapshot = computeWallet();
+  return snapshot;
+}
+
+/** SSR: no session, no ledger — a stable constant so hydration matches. */
+const serverWallet: Wallet = {
+  balance: 0,
+  deviceBalance: 0,
+  todayEarned: 0,
+  history: [],
+  source: "device",
+  degraded: false,
+  loading: false,
+  refresh: () => {},
+};
+const getServerSnapshot = (): Wallet => serverWallet;
+
+/* ---------------------------- account reading --------------------------- */
+
+function fetchAccount(): void {
+  const userId = state.userId;
+  if (!state.sessionReady || !userId || !hasSupabaseConfig) {
+    if (state.accountBalance !== null || state.degraded || !state.accountSettled) {
+      state = { ...state, accountBalance: null, degraded: false, accountSettled: true };
+      publish();
+    }
+    return;
+  }
+  const token = ++fetchToken;
+  void readPoints(userId).then((value) => {
+    // A newer fetch (or a different user) supersedes this answer.
+    if (token !== fetchToken || state.userId !== userId) return;
+    state = {
+      ...state,
+      accountBalance: value,
+      degraded: value === null,
+      accountSettled: true,
+    };
+    publish();
+  });
+}
+
+function refreshWallet(): void {
+  state = { ...state, version: state.version + 1 };
+  publish();
+  fetchAccount();
+}
+
+/* -------------------------------- start --------------------------------- */
+
+function ensureStarted(): void {
+  if (started) return;
+  started = true;
 
   /* Seed once: existing ticks/awards on this device become real ledger events. */
-  useEffect(() => {
-    seedPointsFromDevice();
-    setVersion((v) => v + 1);
-  }, []);
+  seedPointsFromDevice();
 
-  /* Every writer (habit tick, goal claim, another tab, a merge) announces. */
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const bump = () => setVersion((v) => v + 1);
+  if (typeof window !== "undefined") {
+    /* Every writer announces; one listener set serves the whole app. */
+    const bump = () => refreshWallet();
     window.addEventListener(POINTS_CHANGED, bump);
     window.addEventListener(PREFS_CHANGED, bump);
     window.addEventListener(PROGRESSION_CHANGED, bump);
     window.addEventListener("storage", bump);
-    return () => {
-      window.removeEventListener(POINTS_CHANGED, bump);
-      window.removeEventListener(PREFS_CHANGED, bump);
-      window.removeEventListener(PROGRESSION_CHANGED, bump);
-      window.removeEventListener("storage", bump);
+  }
+
+  watchAuth((userId) => {
+    const userChanged = userId !== state.userId;
+    state = {
+      ...state,
+      userId,
+      sessionReady: true,
+      // A different user starts from "not read yet" — never show the
+      // previous account's number, and never the device number in between.
+      ...(userChanged
+        ? { accountBalance: null, accountSettled: false, degraded: false }
+        : {}),
     };
-  }, []);
+    publish();
+    fetchAccount();
+  });
+}
 
-  const signedIn = session.ready && session.userId !== null;
-
+/** The shared wallet. Every consumer sees the same snapshot. */
+export function useWallet(): Wallet {
+  const wallet = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   useEffect(() => {
-    if (!signedIn || !session.userId || !hasSupabaseConfig) {
-      setAccountBalance(null);
-      setDegraded(false);
-      return;
-    }
-    let alive = true;
-    void readPoints(session.userId).then((value) => {
-      if (!alive) return;
-      setAccountBalance(value);
-      setDegraded(value === null);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [signedIn, session.userId, version]);
-
-  const refresh = useCallback(() => setVersion((v) => v + 1), []);
-
-  return useMemo(() => {
-    void version;
-    const deviceBalance = pointsBalance();
-    const history = pointEvents();
-    const fromAccount = signedIn && accountBalance !== null;
-    return {
-      balance: fromAccount ? accountBalance : Math.max(0, deviceBalance),
-      deviceBalance: Math.max(0, deviceBalance),
-      todayEarned: todayPointsEarned(),
-      history,
-      source: fromAccount ? "account" : "device",
-      degraded: signedIn && degraded,
-      refresh,
-    };
-  }, [version, signedIn, accountBalance, degraded, refresh]);
+    ensureStarted();
+  }, []);
+  return wallet;
 }

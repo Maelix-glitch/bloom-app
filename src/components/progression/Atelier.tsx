@@ -95,17 +95,19 @@ export function AtelierPage() {
               Your Bloom Atelier
             </p>
             <h1 className="pg-title" style={{ fontSize: "clamp(30px, 4.4vw, 44px)" }}>
-              {progress.rank.rank.name}
+              {progress.loading ? "—" : progress.rank.rank.name}
             </h1>
-            <p className="pg-hero-note">
-              Looks open with ranks — you are rank {tier}, and every look you already owned stays
-              yours. This is the quiet second layer of the journey, not the point of it.
-            </p>
+            {progress.loading ? null : (
+              <p className="pg-hero-note">
+                Looks open with ranks — you are rank {tier}, and every look you already owned stays
+                yours. This is the quiet second layer of the journey, not the point of it.
+              </p>
+            )}
           </div>
           <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
             <span className="pg-to-next" style={{ padding: "0.6rem 1rem" }}>
               <Emblem id={progress.rank.rank.emblem} size={16} strokeWidth={1.6} />
-              {formatPoints(progress.points)} points
+              {progress.loading ? "—" : formatPoints(progress.points)} points
             </span>
             <button
               type="button"

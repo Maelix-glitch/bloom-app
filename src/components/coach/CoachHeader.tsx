@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Command, Menu } from "lucide-react";
 
 import { CoachGlyph } from "./bloom-mark";
@@ -22,6 +23,18 @@ export function CoachHeader({
   onOpenNav: () => void;
   onOpenPalette: () => void;
 }) {
+  /* The quick-switch chord is ⌘K on a Mac and Ctrl K everywhere else. The
+     button used to render ⌘K while its accessible name said "Ctrl K" — one
+     of the two was always wrong. Until the platform is known (server /
+     first paint) the kbd shows a neutral "K"; the effect resolves it in the
+     same tick as hydration, before it can be read as either. */
+  const [mac, setMac] = useState<boolean | null>(null);
+  useEffect(() => {
+    setMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent));
+  }, []);
+  const hint = mac === null ? "K" : mac ? "⌘K" : "Ctrl K";
+  const hintName = mac === null ? "Command or Control K" : mac ? "Command K" : "Ctrl K";
+
   return (
     <header className="coach-header">
       <div className="coach-header-left">
@@ -49,11 +62,11 @@ export function CoachHeader({
           type="button"
           className="coach-palette-btn coach-desktop-only"
           onClick={onOpenPalette}
-          aria-label="Quick switch (Ctrl K)"
+          aria-label={`Quick switch (${hintName})`}
           title="Quick switch"
         >
-          <Command className="size-3.5" aria-hidden="true" />
-          <kbd>⌘K</kbd>
+          {mac ? <Command className="size-3.5" aria-hidden="true" /> : null}
+          <kbd>{hint}</kbd>
         </button>
         <button
           type="button"

@@ -34,13 +34,14 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  *
  * Both panes live in one grid cell, so the container is always as tall as the
  * taller of the two — and the page is always taller than the skeleton, which
- * is what makes the skeleton's departure invisible. The outgoing pane blurs
- * out as the incoming one blurs in: the page *materialises* rather than being
- * swapped.
+ * is what makes the skeleton's departure invisible. The swap itself is a
+ * plain, short opacity crossfade: no blur, no scale. A placeholder that
+ * performs on its way in and a page that "materialises" through a blur both
+ * read as an overlay doing a trick; a shaped placeholder standing in place,
+ * quietly replaced, reads as the page simply arriving.
  */
 export function ProfileSwap({ loading, children }: { loading: boolean; children: ReactNode }) {
   const reduce = useReducedMotion();
-  const blur = reduce ? "blur(0px)" : undefined;
 
   return (
     <div className="pf-swap">
@@ -49,8 +50,8 @@ export function ProfileSwap({ loading, children }: { loading: boolean; children:
           <motion.div
             key="waiting"
             className="pf-swap-pane"
-            exit={{ opacity: 0, scale: reduce ? 1 : 0.995, filter: blur ?? "blur(6px)" }}
-            transition={{ duration: reduce ? 0.12 : 0.26, ease: EASE }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduce ? 0.1 : 0.2, ease: EASE }}
           >
             <ProfileLoadingScreen />
           </motion.div>
@@ -58,9 +59,9 @@ export function ProfileSwap({ loading, children }: { loading: boolean; children:
           <motion.div
             key="ready"
             className="pf-swap-pane"
-            initial={{ opacity: 0, filter: reduce ? "blur(0px)" : "blur(5px)" }}
-            animate={{ opacity: 1, filter: "blur(0px)" }}
-            transition={{ duration: reduce ? 0.15 : 0.5, ease: EASE }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: reduce ? 0.1 : 0.3, ease: EASE }}
           >
             {children}
           </motion.div>

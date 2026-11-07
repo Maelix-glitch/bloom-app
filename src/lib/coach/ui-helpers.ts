@@ -43,6 +43,50 @@ export function rowTime(iso: string): string {
   return date.toLocaleDateString([], { day: "numeric", month: "short" });
 }
 
+/* ------------------------- duplicate collapse --------------------------- */
+
+/** "you" and "user" are the same side of the thread, in different vintages. */
+function sameSide(a: CoachMessage["role"], b: CoachMessage["role"]): boolean {
+  if (a === b) return true;
+  const userSide = (r: CoachMessage["role"]) => r === "user" || r === "you";
+  return userSide(a) && userSide(b);
+}
+
+function messageText(message: CoachMessage): string {
+  return (message.text ?? message.paragraphs.join("\n\n")).replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Collapse *adjacent* duplicates — same side, identical text, one directly
+ * after the other — keeping the first.
+ *
+ * Why they exist: when a reply is regenerated or retried, the new reply is
+ * inserted into `coach_messages` as a fresh row and the prompt it answers
+ * is saved again alongside it, but the row it replaced is never removed
+ * (local message ids are not cloud row ids, so there is nothing to delete
+ * by). Importing that thread on a fresh device then showed the same —
+ * often canned — reply twice in a row. Collapsing at import repairs the
+ * visible history without deleting anyone's stored rows. Non-adjacent
+ * repeats are untouched: a person genuinely saying the same thing twice,
+ * turns apart, is a real conversation.
+ */
+export function dedupeAdjacentMessages(messages: CoachMessage[]): CoachMessage[] {
+  const out: CoachMessage[] = [];
+  for (const message of messages) {
+    const prev = out[out.length - 1];
+    if (
+      prev &&
+      sameSide(prev.role, message.role) &&
+      messageText(message) !== "" &&
+      messageText(prev) === messageText(message)
+    ) {
+      continue;
+    }
+    out.push(message);
+  }
+  return out;
+}
+
 /** Latest activity per conversation, used to group the list. */
 export type ConversationGroupId = "today" | "yesterday" | "previous7" | "earlier";
 

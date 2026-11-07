@@ -20,13 +20,24 @@ import { RankBadge, RankBanner } from "./RankBadge";
 /**
  * Smoothly counts a number from its previous value to the new one. Respects
  * reduced motion by snapping, and never animates on first paint.
+ *
+ * When `snapKey` changes, the display snaps straight to the value instead of
+ * counting: a new baseline (the real balance replacing a loading state) is
+ * not growth, and must never be seen counting up from a placeholder zero.
  */
-export function useCountUp(value: number, durationMs = 1100): number {
+export function useCountUp(value: number, durationMs = 1100, snapKey?: unknown): number {
   const [display, setDisplay] = useState(value);
   const previous = useRef(value);
   const frame = useRef<number | null>(null);
+  const lastSnapKey = useRef(snapKey);
 
   useEffect(() => {
+    if (lastSnapKey.current !== snapKey) {
+      lastSnapKey.current = snapKey;
+      previous.current = value;
+      setDisplay(value);
+      return;
+    }
     const from = previous.current;
     previous.current = value;
     if (from === value) return;
@@ -118,7 +129,7 @@ export function JourneyHero({
   earnedFromHabits?: number;
   onStartGoal?: (goalId: string) => void;
 }) {
-  const shown = useCountUp(points);
+  const shown = useCountUp(points, 1100, loading ? "loading" : "settled");
   const [bumped, setBumped] = useState(false);
   const lastPoints = useRef(points);
 
@@ -155,9 +166,9 @@ export function JourneyHero({
           <span className="pg-plate-flank pg-plate-flank-r" aria-hidden />
         </div>
         <h1 id="pg-journey-title" className="pg-title pg-hero-title">
-          {rank.rank.name}
+          {loading ? "—" : rank.rank.name}
         </h1>
-        <p className="pg-hero-line">{toNext}</p>
+        <p className="pg-hero-line">{loading ? "\u00A0" : toNext}</p>
         {/* Silent when there is nothing to report — no row of zeroes. */}
         {todayPoints > 0 || weekPoints > 0 ? (
           <p className="pg-hero-micro">
@@ -191,16 +202,20 @@ export function JourneyHero({
           <div className="pg-emblem-core">
             <span className="pg-halo" aria-hidden />
             <span className="pg-emblem-shimmer" aria-hidden />
-            {/* the full crest — frame and all — showcased inside the ring */}
-            <span className="pg-emblem-mark pg-emblem-crest">
-              <RankBadge rank={rank.rank} />
-            </span>
+            {/* the full crest — frame and all — showcased inside the ring.
+                While loading the crest stays empty: showing the first rank's
+                crest for a second would be a wrong rank, calmly presented. */}
+            {loading ? null : (
+              <span className="pg-emblem-mark pg-emblem-crest">
+                <RankBadge rank={rank.rank} />
+              </span>
+            )}
           </div>
         </div>
 
         {/* the rank's banner ribbon — the crest's nameplate, worn under the ring */}
         <div className="pg-hero-banner" aria-hidden>
-          <RankBanner tone={rank.rank.tone}>{rank.rank.name}</RankBanner>
+          <RankBanner tone={rank.rank.tone}>{loading ? "—" : rank.rank.name}</RankBanner>
         </div>
 
         <p className="pg-rank-points-label">Bloom points</p>
@@ -212,14 +227,16 @@ export function JourneyHero({
         </p>
         {loading ? <span className="sr-only">Loading your points</span> : null}
         <p className="pg-rank-meta">
-          <span>Rank {rank.rank.tier}</span>
+          <span>{loading ? "Rank —" : `Rank ${rank.rank.tier}`}</span>
         </p>
         {/* The ring is the progress; this states it for anyone who cannot see it. */}
-        <p className="sr-only">
-          {rank.intoRank.toLocaleString()} of {rank.span.toLocaleString()} points through{" "}
-          {rank.rank.name}
-          {next && rank.remaining > 0 ? `, ${rank.remaining.toLocaleString()} to ${next.name}` : ""}
-        </p>
+        {loading ? null : (
+          <p className="sr-only">
+            {rank.intoRank.toLocaleString()} of {rank.span.toLocaleString()} points through{" "}
+            {rank.rank.name}
+            {next && rank.remaining > 0 ? `, ${rank.remaining.toLocaleString()} to ${next.name}` : ""}
+          </p>
+        )}
       </div>
 
       {nextMilestone ? (

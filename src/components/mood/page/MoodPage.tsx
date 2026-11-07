@@ -22,7 +22,7 @@
  * elements, generous air. The sm:/lg: variants carry full desktop scale.
  */
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -338,14 +338,29 @@ function Hero({
     year: "numeric",
   }).format(new Date());
 
+  /* The photo fades in once it has actually loaded. Until then the panel
+     holds its (already reserved) space in a warm surface tone under the
+     gradient veils — never an empty dark block that the photo later fills.
+     A cached image may complete before onLoad attaches, so check on mount. */
+  const [photoIn, setPhotoIn] = useState(false);
+  const heroImgRef = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const img = heroImgRef.current;
+    if (img?.complete && img.naturalWidth > 0) setPhotoIn(true);
+  }, []);
+
   return (
-    <section className="relative overflow-hidden rounded-[calc(var(--radius)+0.5rem)]">
+    <section className="relative overflow-hidden rounded-[calc(var(--radius)+0.5rem)] bg-surface-2">
       <img
+        ref={heroImgRef}
         src={heroWindow}
         alt="Arched window at golden hour with white flowers, books and a candle on the sill"
         width={1376}
         height={768}
-        className="mm-hero-img absolute inset-0 h-full w-full object-cover object-center opacity-90"
+        onLoad={() => setPhotoIn(true)}
+        className={`mm-hero-img absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ease-out ${
+          photoIn ? "opacity-90" : "opacity-0"
+        }`}
       />
       <div className="mm-hero-light" aria-hidden />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />

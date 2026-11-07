@@ -54,8 +54,15 @@ function ContextView({
   }
   for (const tracker of record.trackers) {
     if (tracker.daysLogged === 0) continue;
+    /* A tracker can share a name with a check-in signal above: "Energy" is
+       both a mood check-in field (x/10, recent average) and a tracker on
+       its own scale (e.g. x/5). Two rows carrying one label on two scales
+       read as the app contradicting itself, so a colliding tracker row
+       names its source — both facts stay visible, and no label ever
+       appears twice with two meanings. */
+    const collides = rows.some((row) => row.label.toLowerCase() === tracker.name.toLowerCase());
     rows.push({
-      label: tracker.name,
+      label: collides ? `${tracker.name} tracker` : tracker.name,
       value: tracker.avg7 !== null ? tracker.format(Math.round(tracker.avg7)) : "—",
       detail: `${tracker.daysLogged} ${tracker.daysLogged === 1 ? "day" : "days"} logged`,
     });
