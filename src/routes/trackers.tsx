@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import trackersCss from "../styles/trackers.css?url";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { HealthTools } from "@/components/health/HealthTools";
-import { TrackersDesign } from "@/components/tk/designs/TrackersDesign";
+import { TrackersPage } from "@/components/tk/TrackersPage";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
 const FONTS =
@@ -34,7 +34,7 @@ function TrackersRoute() {
       <AppNav />
       <main className="min-w-0">
         <div id="trackers">
-          <TrackersDesign theme={theme} />
+          <TrackersPage theme={theme} />
         </div>
         {/* Advanced tools live on the page, not behind a hidden menu: BMI,
             energy, protein, hydration and a goal timeline. */}

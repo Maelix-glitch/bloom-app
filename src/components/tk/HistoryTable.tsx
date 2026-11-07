@@ -11,7 +11,7 @@ import { Download, Pencil, Trash2 } from "lucide-react";
 
 import { Button, Card } from "@/components/ci/primitives";
 import { formatDateShort } from "@/lib/cycle/predict";
-import { Metric } from "@/components/tk/designs/shared";
+import { Metric } from "@/components/tk/shared";
 import {
   TRACKERS,
   trackerDef,

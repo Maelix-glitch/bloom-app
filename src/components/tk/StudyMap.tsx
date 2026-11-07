@@ -73,19 +73,7 @@ export function StudyMap({
       <div className="mt-3 flex items-center gap-2 text-[11px] ci-muted">
         <span>Less</span>
         {[0, 1, 2, 3, 4].map((l) => (
-          <span
-            key={l}
-            aria-hidden
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              background:
-                l === 0
-                  ? "color-mix(in oklab, var(--ci-text) 8%, transparent)"
-                  : `color-mix(in oklab, var(--ci-ovulation) ${[0, 25, 45, 68, 100][l]}%, transparent)`,
-            }}
-          />
+          <i key={l} aria-hidden className="tk-heat-swatch" data-level={l} />
         ))}
         <span>More</span>
         <span className="ml-auto">target {study.format(goal)} a day</span>

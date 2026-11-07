@@ -1,87 +1,22 @@
 /**
- * Shared plumbing for the three trackers designs.
+ * Shared plumbing for the trackers page and its logging surfaces.
  *
- * Everything here is data handling and the two blocks every design agrees on —
- * the disclaimer and the observations list. Layout, chart shapes and type belong
- * to each design's own file and stylesheet.
+ * Everything here is data handling and the blocks every surface agrees on —
+ * the disclaimer, the observations list, the sync note and the small
+ * pickers. Layout, chart shapes and type belong to each component's own
+ * file and stylesheet.
+ *
+ * The hand-rolled overlay layer that used to live here (Overlay /
+ * CURTAIN_STYLE / PANEL_STYLE / SAVE_STYLE, with the modal's box set
+ * inline "in case the stylesheet is late") was deleted in U6: logging
+ * surfaces sit on BloomSheet now, which is Radix-backed, token-styled
+ * and portalled by construction.
  */
 
-import type { CSSProperties, ReactNode } from "react";
-import { createPortal } from "react-dom";
+import type { ReactNode } from "react";
 
 import { useTrackers, type SaveDayResult, type TrackerStore } from "@/hooks/useTrackers";
 import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/trackers/core";
-
-const OVERLAY_STYLE: CSSProperties = { position: "fixed", inset: 0, zIndex: 2000 };
-
-/**
- * The overlay layer — where every panel and sheet actually lives.
- *
- * Two reasons it is not rendered inside the page. A `position: fixed` element
- * stops being fixed the moment some ancestor gains a transform or a filter,
- * which drops the panel into the page flow; and anything rendered in the flow
- * shows up as bare words at the foot of the canvas if the stylesheet fails to
- * arrive. Portalling to <body> puts it outside both. The handful of rules it
- * cannot do without are set inline so they hold even with no CSS at all.
- */
-export function Overlay({ children }: { children: ReactNode }) {
-  if (typeof document === "undefined") return null;
-  return createPortal(
-    <div className="tk2-modal-root" data-overlay="" style={OVERLAY_STYLE}>
-      {children}
-    </div>,
-    document.body,
-  );
-}
-
-/** The dim behind a panel. Positioned inline so it can never sit in the flow. */
-export const CURTAIN_STYLE: CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  zIndex: 1999,
-  background: "rgba(0, 0, 0, 0.65)",
-};
-
-/**
- * The panel itself. Same reasoning as the floating action: if the stylesheet
- * is missing or stale this is the difference between a panel and a paragraph,
- * so the box is set here and the stylesheet only adds what it must.
- */
-export const PANEL_STYLE: CSSProperties = {
-  position: "fixed",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  zIndex: 2000,
-  width: "calc(100% - 32px)",
-  padding: 32,
-  borderRadius: 24,
-  border: "1px solid rgba(255, 255, 255, 0.12)",
-  background: "rgba(10, 10, 12, 0.92)",
-  backdropFilter: "blur(40px)",
-  WebkitBackdropFilter: "blur(40px)",
-  boxShadow: "0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
-  color: "#ffffff",
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-};
-
-export const SAVE_STYLE: CSSProperties = {
-  display: "block",
-  width: "100%",
-  marginTop: 26,
-  padding: "14px 20px",
-  borderRadius: 14,
-  border: 0,
-  background: "linear-gradient(135deg, #FF0055 0%, #8A2BE2 100%)",
-  color: "#ffffff",
-  fontSize: "0.78rem",
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: "0.14em",
-  cursor: "pointer",
-  boxShadow: "0 0 16px rgba(255, 0, 85, 0.4)",
-};
 
 export const DISCLAIMER =
   "Everything here is read back from days you logged yourself. It's a description of your own record — not medical advice, and it can't diagnose anything.";
@@ -202,18 +137,6 @@ export function setTrackerValues(
   return report(store.saveDay(next));
 }
 
-/** Last fourteen values, nulls where nothing was logged. */
-export function valuesOf(
-  store: TrackerStore,
-  id: TrackerId,
-): { value: number | null; met: boolean; date: string }[] {
-  return store.analysis.trackers[id].series.map((point) => ({
-    value: point.value,
-    met: point.met === true,
-    date: point.date,
-  }));
-}
-
 export function Observations({
   items,
   className = "",
@@ -298,100 +221,5 @@ export function Metric({ value, className }: { value: string; className?: string
         ),
       )}
     </span>
-  );
-}
-
-/**
- * A row of tag choices — one distinct element per word.
- *
- * These wrap rather than sit in a single rigid track: "Rough Fair Okay Good
- * Deep" is five separate controls, and in a narrow column it's better they
- * flow onto a second line than compress into each other.
- */
-export function TagGroup<T extends string | number>({
-  label,
-  labelId,
-  options,
-  value,
-  onSelect,
-  disabled,
-}: {
-  label?: string;
-  labelId?: string;
-  options: { value: T; label: string }[];
-  value: T | null;
-  onSelect: (value: T) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <div className="tk2-picker">
-      {label ? (
-        <span className="ci-label" id={labelId}>
-          {label}
-        </span>
-      ) : null}
-      <div className="tk2-tags" role="group" aria-labelledby={labelId}>
-        {options.map((option) => (
-          <button
-            key={String(option.value)}
-            type="button"
-            className="tk2-tag"
-            data-active={option.value === value ? "true" : "false"}
-            aria-pressed={option.value === value}
-            disabled={disabled}
-            onClick={() => onSelect(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/**
- * A scale of numbers as circles in a capsule bar — energy out of five.
- *
- * Each digit is its own 32px circle so it reads as a dial setting rather than
- * a line of text, and the bar itself is a single capsule the circles sit in.
- */
-export function NumberPicker<T extends string | number>({
-  label,
-  labelId,
-  options,
-  value,
-  onSelect,
-  disabled,
-}: {
-  label?: string;
-  labelId?: string;
-  options: { value: T; label: string }[];
-  value: T | null;
-  onSelect: (value: T) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <div className="tk2-picker">
-      {label ? (
-        <span className="ci-label" id={labelId}>
-          {label}
-        </span>
-      ) : null}
-      <div className="tk2-numbers" role="group" aria-labelledby={labelId}>
-        {options.map((option) => (
-          <button
-            key={String(option.value)}
-            type="button"
-            className="tk2-number"
-            data-active={option.value === value ? "true" : "false"}
-            aria-pressed={option.value === value}
-            disabled={disabled}
-            onClick={() => onSelect(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }

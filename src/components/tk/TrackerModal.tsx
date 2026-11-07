@@ -1,9 +1,10 @@
 /**
  * The logging modal — one number, one category.
  *
- * The dashboard is a reading surface: the dial and six cards, nothing that
- * can be typed into. Everything that writes happens here, in a panel that
- * mounts only when a card is opened and unmounts the moment it closes.
+ * The dashboard is a reading surface: the compass and six territories,
+ * nothing that can be typed into. Everything that writes happens here, in
+ * a panel that mounts only when a territory is opened and unmounts the
+ * moment it closes.
  *
  * The field takes the *total* for the category, not an increment — you type
  * 1750 for water because that's what you've drunk, not +250 on top of
@@ -15,23 +16,25 @@
  *
  * The store is passed in rather than created here: useTrackers holds its own
  * state per instance, so a fresh one inside the modal would write to a copy
- * the dial never sees.
+ * the compass never sees.
+ *
+ * U6: the panel is BloomSheet (the one overlay pattern, plan §2.4) with the
+ * kit Input and Button inside it. It used to be a hand-rolled portal whose
+ * box, curtain and save pill were set inline — including a neon
+ * pink-to-violet gradient on Save that belonged to no other screen in the
+ * app. All of that is gone; the sheet's chrome and the kit carry it now.
  */
 
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { BloomSheet } from "@/components/ui/bloom-sheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { TrackerStore } from "@/hooks/useTrackers";
 import { usualDay } from "@/lib/smart/usual";
 import { trackerDef, type TrackerId } from "@/lib/trackers/core";
 
-import {
-  CURTAIN_STYLE,
-  Overlay,
-  PANEL_STYLE,
-  SAVE_STYLE,
-  readTrackerValue,
-  setTrackerValue,
-} from "./shared";
+import { readTrackerValue, setTrackerValue } from "./shared";
 
 /** The word under the field, so nobody has to guess what the number means. */
 const PROMPT: Record<TrackerId, string> = {
@@ -61,60 +64,6 @@ const defaultUnit = (id: TrackerId): Unit => (id === "movement" ? "min" : "hrs")
 /** 2dp arithmetic, printed without trailing zeros ("8", "1.5", never "8.00"). */
 const stripNum = (v: number): string => String(Math.round(v * 100) / 100);
 
-/** The "Your usual" suggestion strip — one tap fills the field. */
-const USUAL_STYLE: CSSProperties = {
-  display: "flex",
-  alignItems: "baseline",
-  justifyContent: "space-between",
-  gap: 10,
-  width: "100%",
-  padding: "10px 14px",
-  marginBottom: 12,
-  borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.055)",
-  fontSize: 13,
-  fontWeight: 700,
-  letterSpacing: "0.02em",
-  cursor: "pointer",
-  textAlign: "left",
-};
-
-/**
- * The required target, said out loud at the point of logging. Inline like the
- * panel itself: the modal is portalled to <body>, outside the token scope.
- */
-const TARGET_STYLE: CSSProperties = {
-  margin: "8px 0 0",
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: "0.1em",
-  textTransform: "uppercase",
-  textAlign: "center",
-  color: "rgba(255, 255, 255, 0.55)",
-};
-
-/** The hours/minutes switch. Inline for the same portalled reason. */
-const TOGGLE_STYLE: CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  gap: 8,
-  marginTop: 14,
-};
-
-const unitButton = (active: boolean): CSSProperties => ({
-  padding: "7px 18px",
-  borderRadius: 999,
-  border: active ? "1px solid rgba(255, 255, 255, 0.55)" : "1px solid rgba(255, 255, 255, 0.16)",
-  background: active ? "rgba(255, 255, 255, 0.12)" : "transparent",
-  color: active ? "#ffffff" : "rgba(255, 255, 255, 0.55)",
-  fontSize: 12,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  cursor: "pointer",
-});
-
 export function TrackerModal({
   store,
   tracker,
@@ -130,7 +79,6 @@ export function TrackerModal({
   const [error, setError] = useState<string | null>(null);
   const [unit, setUnit] = useState<Unit>("min");
   const inputRef = useRef<HTMLInputElement>(null);
-  const titleId = useId();
 
   const def = tracker ? trackerDef(tracker) : null;
   const hasChoice = tracker !== null && UNIT_CHOICE.includes(tracker);
@@ -201,19 +149,13 @@ export function TrackerModal({
     setError(null);
   }, [tracker, store.days, store.today]);
 
-  /* escape closes, and focus lands in the field so typing works straight away */
+  /* focus lands in the field so typing works straight away (escape and the
+     focus trap are BloomSheet's — Radix carries them) */
   useEffect(() => {
     if (!tracker) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
     const id = window.setTimeout(() => inputRef.current?.focus(), 60);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.clearTimeout(id);
-    };
-  }, [tracker, onClose]);
+    return () => window.clearTimeout(id);
+  }, [tracker]);
 
   if (!tracker || !def) return null;
 
@@ -246,30 +188,20 @@ export function TrackerModal({
   };
 
   return (
-    <Overlay>
-      <div className="tk2-curtain" style={CURTAIN_STYLE} onClick={onClose} aria-hidden />
-
-      <div
-        className="tk2-modal"
-        style={{ ...PANEL_STYLE, maxWidth: 420 }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-      >
-        <button type="button" className="tk2-modal-close" onClick={onClose} aria-label="Close">
-          ×
-        </button>
-
-        <p className="tk2-modal-kicker" id={titleId}>
+    <BloomSheet open onClose={onClose} title={`Log ${def.name}`} description={prompt} placement="pop">
+      <div className="px-1 pb-1 pt-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Log {def.name}
         </p>
-        <p style={TARGET_STYLE}>Target · {def.format(store.goals[def.goalKey])}</p>
+        <p className="mt-2 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          Target · {def.format(store.goals[def.goalKey])}
+        </p>
 
         {usualValue !== null && usualEmpty && tracker !== "energy" ? (
-          <button
+          <Button
             type="button"
-            className="tk2-usual"
-            style={USUAL_STYLE}
+            variant="secondary"
+            className="mt-4 w-full justify-between"
             onClick={() => {
               setError(null);
               setDraft(usualDraft);
@@ -277,47 +209,43 @@ export function TrackerModal({
             }}
             title={`Your usual ${def.name.toLowerCase()} — from your last ${usualSamples} logs. Tap to fill, then adjust.`}
           >
-            <span style={{ color: "rgba(255,255,255,0.92)" }}>
-              Your usual · {def.format(usualValue)}
-            </span>
-            <span style={{ opacity: 0.55, fontWeight: 500 }}>
-              from {usualSamples} logs · tap to use
-            </span>
-          </button>
+            <span>Your usual · {def.format(usualValue)}</span>
+            <span className="font-normal opacity-60">from {usualSamples} logs · tap to use</span>
+          </Button>
         ) : null}
 
         {hasChoice ? (
-          <div style={TOGGLE_STYLE} role="group" aria-label="Hours or minutes">
+          <div className="mt-4 flex justify-center gap-2" role="group" aria-label="Hours or minutes">
             {(["hrs", "min"] as const).map((u) => (
-              <button
+              <Button
                 key={u}
                 type="button"
+                size="sm"
+                variant={unit === u ? "default" : "outline"}
                 aria-pressed={unit === u}
                 onClick={() => switchUnit(u)}
-                style={unitButton(unit === u)}
+                className="rounded-full px-[18px] text-xs font-bold uppercase tracking-[0.08em]"
               >
                 {u === "hrs" ? "Hours" : "Min"}
-              </button>
+              </Button>
             ))}
           </div>
         ) : null}
 
         {tracker === "energy" ? (
-          <div className="tk2-numbers" role="group" aria-label="Energy out of five">
+          <div className="tk2-numbers mt-5" role="group" aria-label="Energy out of five">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
                 type="button"
                 className="tk2-number"
                 data-active={Number(draft) === n ? "true" : "false"}
+                data-usual={
+                  usualValue !== null && usualEmpty && usualValue === n ? "true" : undefined
+                }
                 aria-pressed={Number(draft) === n}
                 title={
                   usualValue !== null && usualEmpty && usualValue === n ? "Your usual" : undefined
-                }
-                style={
-                  usualValue !== null && usualEmpty && usualValue === n
-                    ? { boxShadow: "0 0 0 1.5px rgba(255,255,255,0.45) inset" }
-                    : undefined
                 }
                 onClick={() => {
                   setError(null);
@@ -331,14 +259,13 @@ export function TrackerModal({
         ) : null}
 
         {usualValue !== null && usualEmpty && tracker === "energy" ? (
-          <p style={{ margin: "0 0 8px", fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
             Usually a {usualValue} — from your last {usualSamples} logs.
           </p>
         ) : null}
 
-        <input
+        <Input
           ref={inputRef}
-          className="tk2-modal-input"
           type="number"
           inputMode={unit === "hrs" ? "decimal" : "numeric"}
           min={0}
@@ -354,24 +281,20 @@ export function TrackerModal({
           onKeyDown={(event) => {
             if (event.key === "Enter") commit(draft);
           }}
+          className="mt-5 h-14 text-center font-mono text-[26px] font-light"
         />
-        <p className="tk2-modal-unit">{prompt}</p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">{prompt}</p>
 
         {error ? (
-          <p className="tk2-modal-error" role="alert">
+          <p className="mt-3 text-center text-sm text-danger" role="alert">
             {error}
           </p>
         ) : null}
 
-        <button
-          type="button"
-          className="tk2-modal-save"
-          style={SAVE_STYLE}
-          onClick={() => commit(draft)}
-        >
+        <Button type="button" size="lg" className="mt-6 w-full" onClick={() => commit(draft)}>
           Save &amp; close
-        </button>
+        </Button>
       </div>
-    </Overlay>
+    </BloomSheet>
   );
 }
