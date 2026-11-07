@@ -3,14 +3,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Alert (UI update U2, plan §2.2): the card surface at --radius-card; the
+ * destructive variant speaks in the --danger token (rose-bright text on a
+ * faint danger wash), never the stock red.
+ */
 const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
+  "relative w-full rounded-card border border-border-subtle bg-surface px-4 py-3 text-[length:var(--text-support)] [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        default: "text-foreground",
+        destructive: "border-danger/40 bg-danger/10 text-rose-bright [&>svg]:text-rose-bright",
       },
     },
     defaultVariants: {
@@ -31,7 +35,10 @@ const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<H
   ({ className, ...props }, ref) => (
     <h5
       ref={ref}
-      className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+      className={cn(
+        "mb-1 font-display text-[length:var(--text-card)] font-medium leading-tight",
+        className,
+      )}
       {...props}
     />
   ),
@@ -42,7 +49,14 @@ const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("text-sm [&_p]:leading-relaxed", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn(
+      "text-[length:var(--text-support)] [&_p]:leading-[var(--leading-body)]",
+      className,
+    )}
+    {...props}
+  />
 ));
 AlertDescription.displayName = "AlertDescription";
 
