@@ -235,6 +235,7 @@ export function useProgression(): ProgressionStore {
       waterMl: day.waterMl,
       movementMinutes: day.movementMinutes,
       energy: day.energy,
+      screenMinutes: day.screenMinutes,
       studyMinutes: day.sessions.reduce((sum, session) => sum + session.minutes, 0),
       studySessions: day.sessions.length,
     }));
