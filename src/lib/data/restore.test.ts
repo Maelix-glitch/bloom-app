@@ -22,6 +22,7 @@ const habit = (id: string, name: string) => ({
   id,
   name,
   icon: "droplet",
+  iconType: "bloom" as const,
   iconUrl: null,
   color: "#7FA88F",
   frequency: "daily",
