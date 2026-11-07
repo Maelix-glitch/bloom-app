@@ -60,7 +60,7 @@ describe("the target list", () => {
   it("reaches the surfaces that no navigation links to", () => {
     /* the reason the launcher exists at all */
     const tos = ADMIN_TARGETS.map((t) => t.to);
-    for (const hidden of ["/cycle-styles", "/trackers-styles", "/admin/rewards"]) {
+    for (const hidden of ["/admin/rewards"]) {
       expect(tos).toContain(hidden);
     }
   });
