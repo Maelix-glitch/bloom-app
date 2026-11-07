@@ -424,7 +424,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
  * The custom-drawn bell glyph — one drawing shared by the header bell and the
  * sheet hero, so the mark never drifts. The dome's gold gradient is
  * per-instance (several bells share a page) and its idle/gold dress comes
- * from src/styles/bell.css via the surrounding `.bloom-bell[data-unread]`.
+ * from src/styles/shell.css via the surrounding `.bloom-bell[data-unread]`.
  */
 export function BellGlyph({ unread }: { unread: boolean }) {
   const goldId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
@@ -460,7 +460,7 @@ export function BellGlyph({ unread }: { unread: boolean }) {
  * identical on the phone bar, the Today toolbar and the Mood top bar.
  *
  * `className` carries layout utilities only (`hidden lg:grid`) — the bell's
- * own visuals live in src/styles/bell.css and never vary by page.
+ * own visuals live in src/styles/shell.css and never vary by page.
  */
 export function NotificationBell({ className }: { className?: string | undefined }) {
   const [open, setOpen] = useState(false);
