@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 
+import { BloomIcon, type BloomIconName } from "@/components/icons/BloomIcon";
 import type { CoachConversation } from "@/hooks/useCoachSystem";
 import type { CoachMode } from "@/lib/coach/intelligence";
 import { groupConversations, rowTime, type ConversationGroup } from "@/lib/coach/ui-helpers";
@@ -19,10 +20,11 @@ import { cn } from "@/lib/utils";
 
 /* --------------------------- one conversation row --------------------------- */
 
-const MODES: { id: CoachMode; label: string }[] = [
-  { id: "ask", label: "Ask" },
-  { id: "reflect", label: "Reflect" },
-  { id: "plan", label: "Plan" },
+/** Each mode carries its registry glyph (U4) — the mode ids are glyph names. */
+const MODES: { id: CoachMode; label: string; glyph: BloomIconName }[] = [
+  { id: "ask", label: "Ask", glyph: "ask" },
+  { id: "reflect", label: "Reflect", glyph: "reflect" },
+  { id: "plan", label: "Plan", glyph: "plan" },
 ];
 
 function RowMenu({
@@ -283,7 +285,10 @@ export function CoachSidebarContent({
             aria-pressed={mode === item.id}
             onClick={() => onModeChange(item.id)}
           >
-            {item.label}
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <BloomIcon name={item.glyph} size={14} />
+              {item.label}
+            </span>
           </button>
         ))}
       </div>
@@ -403,7 +408,7 @@ export function CoachSidebar({
                     onClick={() => contentProps.onModeChange(item.id)}
                     title={item.label}
                   >
-                    {item.label.charAt(0)}
+                    <BloomIcon name={item.glyph} size={16} />
                   </button>
                 ))}
               </div>
