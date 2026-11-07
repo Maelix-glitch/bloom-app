@@ -1,15 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import {
-  CalendarCheck,
-  GitBranch,
-  Droplet,
-  Smile,
-  Gift,
-  LifeBuoy,
-  Settings,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
+import { Settings, UserRound } from "lucide-react";
+
+import { BloomIcon, type BloomIconName } from "@/components/icons/BloomIcon";
 
 import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
@@ -19,18 +11,23 @@ import { BloomLogo } from "@/components/BloomLogo";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { PointsChip } from "@/components/system/PointsChip";
 
+/**
+ * The primary destinations, marked with the bespoke registry glyphs (U4):
+ * the old Lucide picks — GitBranch for Trackers, LifeBuoy for Coach — said
+ * nothing about the places they named, in Bloom's language or any other.
+ */
 export const HOME_NAV: {
   label: string;
   to: string;
-  icon: LucideIcon;
+  icon: BloomIconName;
   match: (p: string) => boolean;
 }[] = [
-  { label: "Today", to: "/", icon: CalendarCheck, match: (p) => p === "/" },
-  { label: "Trackers", to: "/trackers", icon: GitBranch, match: (p) => p.startsWith("/trackers") },
-  { label: "Cycle", to: "/cycle", icon: Droplet, match: (p) => p.startsWith("/cycle") },
-  { label: "Mood", to: "/mood", icon: Smile, match: (p) => p.startsWith("/mood") },
-  { label: "Rewards", to: "/rewards", icon: Gift, match: (p) => p.startsWith("/rewards") },
-  { label: "Coach", to: "/coach", icon: LifeBuoy, match: (p) => p.startsWith("/coach") },
+  { label: "Today", to: "/", icon: "today", match: (p) => p === "/" },
+  { label: "Trackers", to: "/trackers", icon: "trackers", match: (p) => p.startsWith("/trackers") },
+  { label: "Cycle", to: "/cycle", icon: "cycle", match: (p) => p.startsWith("/cycle") },
+  { label: "Mood", to: "/mood", icon: "mood", match: (p) => p.startsWith("/mood") },
+  { label: "Rewards", to: "/rewards", icon: "rewards", match: (p) => p.startsWith("/rewards") },
+  { label: "Coach", to: "/coach", icon: "coach", match: (p) => p.startsWith("/coach") },
 ];
 
 /**
@@ -95,7 +92,6 @@ export function HomeSidebar() {
         <span className="app-sidebar-rule mx-7 block h-px" />
         <nav className="mt-5 space-y-1 px-4" aria-label="Primary">
           {navItems.map((item) => {
-            const Icon = item.icon;
             const active = item.match(pathname);
             return (
               <Link
@@ -108,7 +104,11 @@ export function HomeSidebar() {
                     : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"
                 }`}
               >
-                <Icon className={`size-4 ${active ? "text-primary" : ""}`} />
+                <BloomIcon
+                  name={item.icon}
+                  size={16}
+                  className={`shrink-0 ${active ? "text-primary" : ""}`}
+                />
                 {item.label}
               </Link>
             );
@@ -121,7 +121,7 @@ export function HomeSidebar() {
         <Link
           to="/profile"
           aria-current={profileActive ? "page" : undefined}
-         
+
           className={`mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
             profileActive
               ? "app-nav-link-active text-foreground"
@@ -247,7 +247,6 @@ export function HomeMobileNav() {
       aria-label="Primary"
     >
       {navItems.map((item) => {
-        const Icon = item.icon;
         const active = item.match(pathname);
         return (
           <Link
@@ -257,7 +256,7 @@ export function HomeMobileNav() {
             aria-label={item.label}
             className={active ? "text-primary" : "text-muted-foreground"}
           >
-            <Icon className="size-[22px]" strokeWidth={active ? 2.2 : 1.8} aria-hidden="true" />
+            <BloomIcon name={item.icon} size={22} strokeWidth={active ? 2.1 : 1.75} />
             <span aria-hidden="true">{item.label}</span>
           </Link>
         );
