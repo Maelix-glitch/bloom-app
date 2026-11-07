@@ -87,6 +87,70 @@ export function dedupeAdjacentMessages(messages: CoachMessage[]): CoachMessage[]
   return out;
 }
 
+/**
+ * Collapse *consecutive duplicated turns* — a user message and the reply
+ * that follows it, repeated verbatim as the very next turn.
+ *
+ * Why they exist: the same regenerate/retry artifact behind the adjacent
+ * duplicates can re-save a whole turn — prompt and reply together — so the
+ * thread reads hello / reply / hello / reply, identical text and identical
+ * timestamps. The adjacent pass cannot see that pattern: no two neighbours
+ * are alike, yet the second turn is a stored copy of the first, not a new
+ * exchange. (Seen live: an existing thread still ended hello/reply/hello/
+ * reply after the adjacent fix shipped.)
+ *
+ * The guard is the full turn: a later turn drops only when its user text
+ * AND every following reply match the turn immediately before it, text for
+ * text. A person genuinely repeating themselves draws a different reply,
+ * and that conversation is kept whole — as is a repeated prompt with no
+ * reply after it yet: an unanswered re-ask is a real message, and there is
+ * no duplicated reply artifact to hide. Attachment-only turns (no text on
+ * some message) are never collapsed: their identity cannot be established
+ * from text. Non-consecutive repeats are untouched. Like the adjacent
+ * pass, this runs at read/import time and deletes nothing from storage.
+ */
+export function dedupeDuplicatedTurns(messages: CoachMessage[]): CoachMessage[] {
+  // A turn is a user-side message plus everything that follows it, up to
+  // the next user-side message. Anything before the first user message (a
+  // thread that opens with the coach) is a lead-in, never a turn.
+  const segments: CoachMessage[][] = [];
+  for (const message of messages) {
+    if (sameSide(message.role, "user") || segments.length === 0) {
+      segments.push([message]);
+    } else {
+      segments[segments.length - 1]!.push(message);
+    }
+  }
+
+  // The comparable identity of a turn, or null when the segment is not a
+  // complete, text-bearing turn (lead-in, unanswered prompt, or a turn
+  // carrying an attachment-only message).
+  const signature = (segment: CoachMessage[]): string | null => {
+    const [first, ...rest] = segment;
+    if (!first || !sameSide(first.role, "user") || rest.length === 0) return null;
+    const texts = segment.map(messageText);
+    if (texts.some((text) => text === "")) return null;
+    return texts.join("\n");
+  };
+
+  const out: CoachMessage[] = [];
+  let lastTurn: string | null = null;
+  for (const segment of segments) {
+    const sig = signature(segment);
+    if (sig !== null && sig === lastTurn) continue;
+    out.push(...segment);
+    if (sig !== null) {
+      lastTurn = sig;
+    } else if (segment.some((m) => sameSide(m.role, "user"))) {
+      // An intervening user turn that is not itself comparable (e.g. a
+      // prompt still awaiting its reply) breaks the run: a full turn after
+      // it is no longer the consecutive copy of the one before it.
+      lastTurn = null;
+    }
+  }
+  return out;
+}
+
 /** Latest activity per conversation, used to group the list. */
 export type ConversationGroupId = "today" | "yesterday" | "previous7" | "earlier";
 
