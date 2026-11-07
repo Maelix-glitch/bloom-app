@@ -319,9 +319,9 @@ export async function deleteLog(profileId: string, habitId: string, date: string
  * Award a habit tick through the idempotent server function.
  *
  * One row per (habit, local day) in `point_transactions`; a retry or a second
- * tab is a no-op. Projects that haven't run the migration fall back to the
- * legacy adjustment, with the local ledger still preventing a duplicate
- * receipt on this device.
+ * tab is a no-op. Projects that haven't run the migration fall back to
+ * `adjustHabitPoints`, which writes the same ledger row server-side, with
+ * the local ledger still preventing a duplicate receipt on this device.
  */
 export async function awardHabitPoints(
   profileId: string,
@@ -380,23 +380,45 @@ function isMissingRpc(error: unknown): boolean {
   );
 }
 
-/** Points live on profiles.total_points; the RPCs exist on older projects, so try them first. */
-export async function adjustPoints(profileId: string, delta: number): Promise<number | null> {
+/**
+ * The ledgered fallback for a habit tick, used only when the primary
+ * award/revoke functions are unavailable on the project.
+ *
+ * `adjust_habit_points()` writes (or, for a negative delta, removes) the
+ * same `point_transactions` row the primary functions use — same award key,
+ * same server-read amount — and moves `profiles.total_points` only when the
+ * ledger actually changes, so the balance can never drift away from the sum
+ * of the ledger. The fallback this replaces adjusted the balance through
+ * the legacy increment/decrement helpers or a direct profile update, none
+ * of which write a ledger row.
+ *
+ * Returns null when even this function is missing: the balance is then left
+ * exactly as it is rather than adjusted without a receipt. The caller's
+ * local ledger still records the tick on this device.
+ */
+export async function adjustHabitPoints(
+  profileId: string,
+  habitId: string,
+  date: string,
+  delta: number,
+): Promise<{ applied: boolean; points: number; balance: number } | null> {
   if (delta === 0) return null;
-  const rpc = delta > 0 ? "increment_points" : "decrement_points";
-  const { error: rpcError } = await supabase.rpc(rpc, {
-    user_id: profileId,
-    pts: Math.abs(delta),
+  const { data, error } = await supabase.rpc("adjust_habit_points", {
+    p_habit_id: habitId,
+    p_date: date,
+    p_delta: delta,
   });
-  if (!rpcError) return readPoints(profileId);
-  const current = (await readPoints(profileId)) ?? 0;
-  const next = Math.max(0, current + delta);
-  const { error } = await supabase
-    .from("profiles")
-    .update({ total_points: next, updated_at: new Date().toISOString() })
-    .eq("id", profileId);
-  if (error) throw error;
-  return next;
+  if (error) {
+    if (isMissingRpc(error)) return null;
+    throw error;
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null;
+  if (!row) return null;
+  return {
+    applied: row["applied"] === true,
+    points: typeof row["points"] === "number" ? row["points"] : 0,
+    balance: typeof row["balance"] === "number" ? row["balance"] : 0,
+  };
 }
 
 export async function readPoints(profileId: string): Promise<number | null> {
