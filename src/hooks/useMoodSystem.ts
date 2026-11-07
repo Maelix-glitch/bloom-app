@@ -158,7 +158,7 @@ export function useMoodSystem() {
       patterns,
       anomalies,
 
-      insights: generateInsights(days, previousDays, periodEntries, range.days),
+      insights: generateInsights(days, previousDays, periodEntries, range.days, previousEntries),
 
       tier: depthTier(entries.length),
 
