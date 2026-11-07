@@ -1,7 +1,4083 @@
 /**
+ * Trackers — one stylesheet (U5).
+ *
+ * Until U5 this page loaded three sheets: the cycle design system
+ * (cycle2.css, as its "design system"), trackers2.css and trackers.css —
+ * two generations of the same screen plus a cross-feature dependency.
+ * They are merged here in the exact order the route used to link them,
+ * so the cascade the page renders with is unchanged:
+ *
+ *   section 1 — the shared `.ci` design-system core the trackers page
+ *               actually uses (theme tokens for all eight directions,
+ *               root, shell, cards, buttons, fields, tables and the
+ *               shared ci primitives), copied from cycle.css. The cycle
+ *               page keeps its own full copy in cycle.css; /trackers no
+ *               longer loads that sheet.
+ *   section 2 — the tk2 designs: ledger, atlas, strip (was trackers2.css)
+ *   section 3 — the console design (was trackers.css)
+ */
+
+/* ==========================================================================
+ * Section 1 — shared design-system core (from cycle.css)
+ * ========================================================================== */
+
+.ci {
+  --ci-font-display: var(--font-display, "Fraunces", ui-serif, Georgia, serif);
+  --ci-font-sans: var(--font-sans, "Inter", ui-sans-serif, system-ui, sans-serif);
+  --ci-font-mono: var(--font-mono, "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace);
+  color-scheme: dark;
+}
+
+/*
+ * Ink-plum ground, warm off-white type, amethyst + champagne + rose.
+ *
+ * This is the default, so it sets the tone for the whole feature. The earlier
+ * teal-green read as clinical — closer to a hospital chart than to something
+ * you'd want open on your own phone. Premium here means restraint: a near-black
+ * ground with a violet bias rather than a colour cast, one metal (champagne)
+ * carrying the highlights, and phase hues that are clearly distinct without any
+ * of them shouting. Hairline cards, generous shadow, no neon anywhere.
+ */
+.ci[data-theme="nocturne"] {
+  --ci-bg: #0d0b12;
+  --ci-bg-deep: #08070c;
+  --ci-surface: #16131e;
+  --ci-surface-2: #1d1927;
+  --ci-line: #241f30;
+  --ci-line-strong: #362f47;
+  --ci-text: #f2ecec;
+  --ci-text-soft: #c9c1d2;
+  --ci-text-mute: #8b849b;
+  --ci-menstrual: #cf6d8f;
+  --ci-follicular: #a58bff;
+  --ci-luteal: #8b74c9;
+  --ci-ovulation: var(--gold-champagne);
+  --ci-late: #7f8aa8;
+  --ci-accent: #a58bff;
+  --ci-accent-soft: rgba(165, 139, 255, 0.14);
+  --ci-focus: #c3b1ff;
+  --ci-ok: #8fbfa4;
+  --ci-warn: var(--gold-champagne);
+  --ci-danger: #dd7f74;
+  --ci-input-bg: #100d17;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(165, 139, 255, 0.13), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(207, 109, 143, 0.09), transparent 55%);
+  --ci-radius-lg: 14px;
+  --ci-radius-md: 10px;
+  --ci-radius-sm: 8px;
+  --ci-shadow: 0 20px 44px -30px rgba(0, 0, 0, 0.9);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* Charcoal-plum ground, orchid bleed, jade and brass. Glassier raised panels. */
+.ci[data-theme="orchid"] {
+  --ci-bg: #12101a;
+  --ci-bg-deep: #0c0a13;
+  --ci-surface: #1a1626;
+  --ci-surface-2: #211c30;
+  --ci-line: #2a2338;
+  --ci-line-strong: #3a3150;
+  --ci-text: #f4edf4;
+  --ci-text-soft: #d0c5d8;
+  --ci-text-mute: #968ba6;
+  --ci-menstrual: #d2608f;
+  --ci-follicular: #52b69b;
+  --ci-luteal: #3e8c90;
+  --ci-ovulation: #e3b55e;
+  --ci-late: #b39ad6;
+  --ci-accent: #d2608f;
+  --ci-accent-soft: rgba(210, 96, 143, 0.16);
+  --ci-focus: #d79ae0;
+  --ci-ok: #52b69b;
+  --ci-warn: #e3b55e;
+  --ci-danger: #e2795f;
+  --ci-input-bg: #15111f;
+  --ci-veil:
+    radial-gradient(120% 80% at 8% -10%, rgba(210, 96, 143, 0.16), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(82, 182, 155, 0.1), transparent 55%);
+  --ci-radius-lg: 20px;
+  --ci-radius-md: 14px;
+  --ci-radius-sm: 10px;
+  --ci-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.02em;
+}
+
+/* Charcoal-slate blue, crisp and technical. Raspberry / aqua / saffron. */
+.ci[data-theme="tide"] {
+  --ci-bg: #0d1620;
+  --ci-bg-deep: #080f16;
+  --ci-surface: #131f2a;
+  --ci-surface-2: #182734;
+  --ci-line: #1e2e3b;
+  --ci-line-strong: #2b4153;
+  --ci-text: #edf1f5;
+  --ci-text-soft: #c3ced7;
+  --ci-text-mute: #8b9baa;
+  --ci-menstrual: #c4557a;
+  --ci-follicular: #3fb6c6;
+  --ci-luteal: #2f8ca0;
+  --ci-ovulation: #edbb5f;
+  --ci-late: #93a9c4;
+  --ci-accent: #3fb6c6;
+  --ci-accent-soft: rgba(63, 182, 198, 0.14);
+  --ci-focus: #74d6e4;
+  --ci-ok: #3fb6c6;
+  --ci-warn: #edbb5f;
+  --ci-danger: #e5765c;
+  --ci-input-bg: #0f1b26;
+  --ci-veil:
+    radial-gradient(120% 80% at 10% -10%, rgba(63, 182, 198, 0.13), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(196, 85, 122, 0.1), transparent 55%);
+  --ci-radius-lg: 10px;
+  --ci-radius-md: 7px;
+  --ci-radius-sm: 5px;
+  --ci-shadow: none;
+  --ci-display-weight: 600;
+  --ci-display-track: -0.01em;
+}
+
+/* Deep charcoal-green. Shadow-built surfaces, no hairlines. Softer geometry. */
+.ci[data-theme="fern"] {
+  --ci-bg: #0d1512;
+  --ci-bg-deep: #070c0a;
+  --ci-surface: #131e19;
+  --ci-surface-2: #18261f;
+  --ci-line: #16221c;
+  --ci-line-strong: #22332a;
+  --ci-text: #eef1e7;
+  --ci-text-soft: #c7d0c2;
+  --ci-text-mute: #8e9a8c;
+  --ci-menstrual: #b4547c;
+  --ci-follicular: #7fb8a6;
+  --ci-luteal: #5f8f9d;
+  --ci-ovulation: #dfb35c;
+  --ci-late: #9aa8b6;
+  --ci-accent: #c9a86a;
+  --ci-accent-soft: rgba(201, 168, 106, 0.15);
+  --ci-focus: #e0c48c;
+  --ci-ok: #7fb8a6;
+  --ci-warn: #dfb35c;
+  --ci-danger: #dd7a5c;
+  --ci-input-bg: #101a15;
+  --ci-veil:
+    radial-gradient(120% 80% at 10% -10%, rgba(201, 168, 106, 0.12), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(180, 84, 124, 0.1), transparent 55%);
+  --ci-radius-lg: 18px;
+  --ci-radius-md: 13px;
+  --ci-radius-sm: 9px;
+  --ci-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.85);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* The same structure in daylight — warm paper, ink text, muted accents. */
+.ci[data-theme="daybreak"] {
+  color-scheme: light;
+  --ci-bg: #f3efe6;
+  --ci-bg-deep: #e9e4d8;
+  --ci-surface: #fbf9f3;
+  --ci-surface-2: #f5f1e7;
+  --ci-line: #e3ddcd;
+  --ci-line-strong: #cdc4b0;
+  --ci-text: #1b211e;
+  --ci-text-soft: #454f49;
+  --ci-text-mute: #6c756e;
+  --ci-menstrual: #a63e68;
+  --ci-follicular: #1f7f74;
+  --ci-luteal: #16636f;
+  --ci-ovulation: #a8781f;
+  --ci-late: #5d6470;
+  --ci-accent: #1f7f74;
+  --ci-accent-soft: rgba(31, 127, 116, 0.12);
+  --ci-focus: #1f7f74;
+  --ci-ok: #1f7f74;
+  --ci-warn: #a8781f;
+  --ci-danger: #b4462f;
+  --ci-input-bg: #ffffff;
+  --ci-veil:
+    radial-gradient(120% 80% at 10% -10%, rgba(31, 127, 116, 0.09), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(166, 62, 104, 0.07), transparent 55%);
+  --ci-radius-lg: 12px;
+  --ci-radius-md: 9px;
+  --ci-radius-sm: 7px;
+  --ci-shadow: 0 16px 34px -26px rgba(27, 33, 30, 0.5);
+  --ci-display-weight: 600;
+  --ci-display-track: -0.015em;
+}
+
+/* --------------------------------- shell --------------------------------- */
+.ci-root {
+  position: relative;
+  /* vh then dvh, matching .tk2-root: engines without dynamic viewport units
+   * (Chrome < 108) keep the vh line instead of dropping the height entirely. */
+  min-height: 100vh;
+  background: var(--ci-bg);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@supports (height: 100dvh) {
+.ci-root {
+    min-height: 100dvh;
+  }
+}
+
+.ci-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--ci-veil);
+}
+
+/**
+ * Full width, like Today and Mood: the shell's <main> already sits beside the
+ * rail, so the page runs edge to edge inside it. Side padding mirrors the
+ * app-shell contract (px-5 · sm:px-8 · lg:px-10); the bottom clears the
+ * phone tab bar.
+ */
+.ci-shell {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px 20px 118px;
+}
+
+@media (min-width: 640px) {
+.ci-shell {
+    padding: 28px 32px 118px;
+  }
+}
+
+@media (min-width: 1024px) {
+.ci-shell {
+    padding: 28px 40px 104px;
+  }
+}
+
+/* 320px phones: a narrower gutter keeps cards full-width and readable, and the
+   undo strip cannot sit on the history tab. */
+@media (max-width: 359px) {
+.ci-shell {
+    padding-inline: 14px;
+    padding-bottom: 136px;
+  }
+}
+
+.ci-display {
+  font-family: var(--ci-font-display);
+  font-weight: var(--ci-display-weight);
+  letter-spacing: var(--ci-display-track);
+  font-optical-sizing: auto;
+}
+
+.ci-eyebrow {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.ci-num {
+  font-family: var(--ci-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.ci-card {
+  position: relative;
+  min-width: 0;
+  background: var(--ci-surface);
+  border: 1px solid var(--ci-line);
+  border-radius: var(--ci-radius-lg);
+  box-shadow: var(--ci-shadow);
+}
+
+.ci-card--pad {
+  padding: clamp(16px, 2.6vw, 24px);
+}
+
+.ci-hair {
+  border-color: var(--ci-line);
+}
+
+.ci-muted {
+  color: var(--ci-text-mute);
+}
+
+.ci-soft {
+  color: var(--ci-text-soft);
+}
+
+/* --------------------------------- focus ---------------------------------- */
+.ci :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--ci-focus);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+/* --------------------------------- buttons -------------------------------- */
+.ci-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line-strong);
+  background: var(--ci-surface-2);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.ci-btn:hover:not(:disabled) {
+  border-color: var(--ci-accent);
+  background: var(--ci-accent-soft);
+}
+
+.ci-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ci-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ci-btn--primary {
+  background: var(--ci-accent);
+  border-color: var(--ci-accent);
+  color: var(--ci-bg-deep);
+  font-weight: 600;
+}
+
+.ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.07);
+  background: var(--ci-accent);
+}
+
+.ci-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ci-text-soft);
+  padding: 6px 10px;
+}
+
+.ci-btn--ghost:hover:not(:disabled) {
+  background: var(--ci-surface-2);
+  border-color: var(--ci-line);
+}
+
+.ci-btn--danger {
+  border-color: color-mix(in oklab, var(--ci-danger) 55%, transparent);
+  color: var(--ci-danger);
+  background: transparent;
+}
+
+.ci-btn--danger:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--ci-danger) 14%, transparent);
+  border-color: var(--ci-danger);
+}
+
+.ci-btn--sm {
+  padding: 8px 13px;
+  font-size: 12px;
+}
+
+/* ---------------------------------- form ---------------------------------- */
+.ci-field {
+  display: grid;
+  gap: 6px;
+  /* Fieldsets default to min-width: min-content, which forces the cycle grid
+     track wider than 320px viewports. Allow shrinking; inner rows wrap. */
+  min-width: 0;
+}
+
+.ci-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ci-text-soft);
+}
+
+.ci-hint {
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+}
+
+.ci-input {
+  width: 100%;
+  background: var(--ci-input-bg);
+  border: 1px solid var(--ci-line-strong);
+  border-radius: var(--ci-radius-sm);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  font-size: 14px;
+  padding: 10px 12px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.ci-input::placeholder {
+  color: color-mix(in oklab, var(--ci-text-mute) 80%, transparent);
+}
+
+.ci-input:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--ci-accent) 40%, var(--ci-line-strong));
+}
+
+.ci-input[aria-invalid="true"] {
+  border-color: var(--ci-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ci-danger) 14%, transparent);
+}
+
+.ci-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+textarea.ci-input {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.ci-error {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ci-danger);
+}
+
+.ci-error svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* --------------------------------- badges --------------------------------- */
+.ci-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--c-line, var(--ci-line-strong));
+  background: var(--c-bg, transparent);
+  color: var(--c-fg, var(--ci-text-soft));
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.ci-badge--dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-fg, currentColor);
+}
+
+.ci-confidence[data-level="none"] {
+  --c-fg: var(--ci-text-mute);
+  --c-line: var(--ci-line-strong);
+  --c-bg: transparent;
+}
+
+.ci-confidence[data-level="low"] {
+  --c-fg: var(--ci-menstrual);
+  --c-line: color-mix(in oklab, var(--ci-menstrual) 45%, transparent);
+  --c-bg: color-mix(in oklab, var(--ci-menstrual) 12%, transparent);
+}
+
+.ci-confidence[data-level="medium"] {
+  --c-fg: var(--ci-ovulation);
+  --c-line: color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+  --c-bg: color-mix(in oklab, var(--ci-ovulation) 12%, transparent);
+}
+
+.ci-confidence[data-level="high"] {
+  --c-fg: var(--ci-follicular);
+  --c-line: color-mix(in oklab, var(--ci-follicular) 45%, transparent);
+  --c-bg: color-mix(in oklab, var(--ci-follicular) 12%, transparent);
+}
+
+/* --------------------------------- tables --------------------------------- */
+.ci-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.ci-table th {
+  text-align: left;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+  font-weight: 400;
+  padding: 0 12px 9px;
+  border-bottom: 1px solid var(--ci-line-strong);
+}
+
+.ci-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--ci-line);
+  vertical-align: middle;
+  color: var(--ci-text-soft);
+}
+
+.ci-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ci-table tbody tr.is-anomaly {
+  background: color-mix(in oklab, var(--ci-ovulation) 6%, transparent);
+}
+
+/* --------------------------------- motion --------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+.ci-rise {
+    animation: ci-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes ci-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.ci *,
+  .ci *::before,
+  .ci *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.ci-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ci-line-strong) transparent;
+}
+
+/* =========================================================================
+   6. Aurora — deep teal-indigo, glass panels, drifting light
+   ========================================================================= */
+.ci[data-theme="aurora"] {
+  --ci-bg: #09131a;
+  --ci-bg-deep: #050d12;
+  --ci-surface: rgba(16, 34, 42, 0.72);
+  --ci-surface-2: rgba(22, 46, 56, 0.6);
+  --ci-line: rgba(120, 200, 210, 0.14);
+  --ci-line-strong: rgba(120, 200, 210, 0.26);
+  --ci-text: #e8f6f4;
+  --ci-text-soft: #b9d6d6;
+  --ci-text-mute: #7fa3a8;
+  --ci-menstrual: #e2578c;
+  --ci-follicular: #45e0c0;
+  --ci-luteal: #2f9fbb;
+  --ci-ovulation: #ffd166;
+  --ci-late: #9db6d8;
+  --ci-accent: #45e0c0;
+  --ci-accent-soft: rgba(69, 224, 192, 0.14);
+  --ci-focus: #7ff2dd;
+  --ci-ok: #45e0c0;
+  --ci-warn: #ffd166;
+  --ci-danger: #f2805f;
+  --ci-input-bg: rgba(8, 22, 28, 0.7);
+  --ci-veil: none;
+  --ci-atmos-1: #1fb8a6;
+  --ci-atmos-2: #7d4bd8;
+  --ci-atmos-3: #e2578c;
+  --ci-atmos-opacity: 0.3;
+  --ci-glass: 1;
+  --ci-grain: 0.5;
+  --ci-radius-lg: 18px;
+  --ci-radius-md: 13px;
+  --ci-radius-sm: 9px;
+  --ci-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.02em;
+}
+
+/* =========================================================================
+   7. Ember — warm charcoal, candlelight glow, softest geometry
+   ========================================================================= */
+.ci[data-theme="ember"] {
+  --ci-bg: #14100e;
+  --ci-bg-deep: #0c0908;
+  --ci-surface: #1d1714;
+  --ci-surface-2: #251d18;
+  --ci-line: #31251f;
+  --ci-line-strong: #43342b;
+  --ci-text: #f6ece1;
+  --ci-text-soft: #d6c3b2;
+  --ci-text-mute: #9c8676;
+  --ci-menstrual: #d05a6e;
+  --ci-follicular: #4fae9b;
+  --ci-luteal: #3a8c86;
+  --ci-ovulation: #f0a94c;
+  --ci-late: #b09a8c;
+  --ci-accent: #f0a94c;
+  --ci-accent-soft: rgba(240, 169, 76, 0.15);
+  --ci-focus: #ffc98a;
+  --ci-ok: #4fae9b;
+  --ci-warn: #f0a94c;
+  --ci-danger: #e0705a;
+  --ci-input-bg: #171210;
+  --ci-veil:
+    radial-gradient(120% 80% at 12% -10%, rgba(240, 169, 76, 0.12), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(208, 90, 110, 0.09), transparent 55%);
+  --ci-atmos-1: #f0a94c;
+  --ci-atmos-2: #d05a6e;
+  --ci-atmos-3: #4fae9b;
+  --ci-atmos-opacity: 0.18;
+  --ci-grain: 0.7;
+  --ci-radius-lg: 22px;
+  --ci-radius-md: 16px;
+  --ci-radius-sm: 11px;
+  --ci-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.9);
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+}
+
+/* =========================================================================
+   8. Ink — near-black, bone white, hairline sharpness, no ornament
+   ========================================================================= */
+.ci[data-theme="ink"] {
+  --ci-bg: #0a0a0b;
+  --ci-bg-deep: #050506;
+  --ci-surface: #111113;
+  --ci-surface-2: #17171a;
+  --ci-line: #242428;
+  --ci-line-strong: #34343a;
+  --ci-text: #f4f4f1;
+  --ci-text-soft: #c4c4bf;
+  --ci-text-mute: #8a8a85;
+  --ci-menstrual: #e35d84;
+  --ci-follicular: #7fd1c3;
+  --ci-luteal: #4fa3ae;
+  --ci-ovulation: #f2c46b;
+  --ci-late: #a3a3ad;
+  --ci-accent: #f4f4f1;
+  --ci-accent-soft: rgba(244, 244, 241, 0.08);
+  --ci-focus: #ffffff;
+  --ci-ok: #7fd1c3;
+  --ci-warn: #f2c46b;
+  --ci-danger: #e8654f;
+  --ci-input-bg: #0d0d0f;
+  --ci-veil: none;
+  --ci-atmos-opacity: 0;
+  --ci-grain: 0.35;
+  --ci-radius-lg: 6px;
+  --ci-radius-md: 4px;
+  --ci-radius-sm: 3px;
+  --ci-shadow: none;
+  --ci-display-weight: 600;
+  --ci-display-track: -0.02em;
+}
+
+/* ------------------------------- atmosphere ------------------------------ */
+.ci-atmos {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ci-atmos i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: var(--ci-atmos-opacity, 0.22);
+  will-change: transform;
+}
+
+.ci-atmos i:nth-child(1) {
+  width: 46vw;
+  height: 46vw;
+  top: -14vw;
+  left: -8vw;
+  background: var(--ci-atmos-1, var(--ci-follicular));
+  animation: ci-drift-a 38s ease-in-out infinite alternate;
+}
+
+.ci-atmos i:nth-child(2) {
+  width: 38vw;
+  height: 38vw;
+  top: 18vh;
+  right: -10vw;
+  background: var(--ci-atmos-2, var(--ci-luteal));
+  animation: ci-drift-b 46s ease-in-out infinite alternate;
+}
+
+.ci-atmos i:nth-child(3) {
+  width: 30vw;
+  height: 30vw;
+  bottom: -8vw;
+  left: 26vw;
+  background: var(--ci-atmos-3, var(--ci-menstrual));
+  animation: ci-drift-c 54s ease-in-out infinite alternate;
+}
+
+.ci-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: calc(var(--ci-grain, 0.5) * 0.16);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* glass panels for the aurora direction */
+.ci[data-theme="aurora"] .ci-card {
+  backdrop-filter: blur(16px);
+}
+
+@keyframes ci-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6vw, 5vh, 0) scale(1.12);
+  }
+}
+
+@keyframes ci-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-7vw, -4vh, 0) scale(1);
+  }
+}
+
+@keyframes ci-drift-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4vw, -6vh, 0) scale(1.15);
+  }
+}
+
+/* scroll reveal — the component adds [data-visible] when it enters the viewport */
+.ci-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 560ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.ci-reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* bars and fills grow in once their section is on screen */
+.ci-grow {
+  transform-origin: left center;
+  animation: ci-grow-x 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--grow-delay, 0ms);
+}
+
+.ci-grow-y {
+  transform-origin: bottom center;
+  animation: ci-grow-y 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--grow-delay, 0ms);
+}
+
+@keyframes ci-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ci-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* numbers settle in rather than popping */
+.ci-tick {
+  font-variant-numeric: tabular-nums;
+  transition: opacity 200ms ease;
+}
+
+/* a top highlight inside every card, like light catching an edge */
+.ci-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--ci-text) 12%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+.ci-atmos i {
+    animation: none !important;
+  }
+
+.ci-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+.ci-grow,
+  .ci-grow-y {
+    animation: none !important;
+  }
+}
+
+@keyframes ci-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the undo strip that follows a delete / clear */
+.ci-undo {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(92vw, 480px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ci-line-strong);
+  background: color-mix(in oklab, var(--ci-surface) 92%, var(--ci-text) 8%);
+  box-shadow: var(--ci-shadow);
+  color: var(--ci-text);
+  font-size: 12.5px;
+  transform: translateX(-50%);
+  animation: ci-unfold 0.3s cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+/* Narrow phones: the undo strip is allowed to sit up inside the shell's
+   bottom padding, not over the history tab. */
+@media (max-width: 359px) {
+.ci-undo {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+    max-width: min(92vw, 420px);
+  }
+}
+
+@media (min-width: 1024px) {
+.ci-undo {
+    left: calc(50% + var(--app-rail, 0px) / 2);
+    bottom: 28px;
+  }
+}
+
+.ci-undo__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ci-follicular);
+  transform-origin: left;
+  animation: ci-drain var(--ci-undo-ms, 8000ms) linear both;
+}
+
+@keyframes ci-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.ci-undo {
+    animation: none;
+  }
+}
+
+/* ======================================================================
+ * Bloom global identity — Cycle inherits the app's tokens
+ *
+ * The page used to carry its own plum-and-violet theme with a full-bleed
+ * gradient veil. Cycle now takes the shared ink/charcoal/ivory/champagne
+ * system: no separate palette, no page-wide glow, phase hues reduced to
+ * restrained semantic tints that only appear inside data visualisations.
+ * ==================================================================== */
+.ci[data-theme="nocturne"] {
+  --ci-bg: var(--background);
+  --ci-bg-deep: var(--sidebar);
+  --ci-surface: var(--surface);
+  --ci-surface-2: var(--surface-2);
+  --ci-line: var(--border-subtle);
+  --ci-line-strong: var(--border);
+  --ci-text: var(--foreground);
+  --ci-text-soft: var(--muted-foreground);
+  --ci-text-mute: var(--faint);
+  --ci-menstrual: #c07d8a;
+  --ci-follicular: var(--violet);
+  --ci-luteal: #8d86a8;
+  --ci-ovulation: var(--gold);
+  --ci-late: #8f98ad;
+  --ci-accent: var(--gold);
+  --ci-accent-soft: color-mix(in oklab, var(--gold) 14%, transparent);
+  --ci-focus: var(--gold-soft);
+  --ci-ok: var(--success);
+  --ci-warn: var(--warning);
+  --ci-danger: var(--danger);
+  --ci-input-bg: var(--surface);
+  --ci-veil: none;
+  --ci-radius-lg: var(--radius-panel, 18px);
+  --ci-radius-md: var(--radius-card, 12px);
+  --ci-radius-sm: var(--radius-control, 10px);
+  --ci-shadow: var(--elevation-card, 0 1px 2px rgba(0, 0, 0, 0.35));
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+  --ci-font-display: var(--font-display, "Fraunces", ui-serif, Georgia, serif);
+  --ci-font-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  /* Metadata labels use the interface face, not a third typeface. */
+  --ci-font-mono: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+}
+
+.ci-root .ci-veil {
+  display: none;
+}
+
+.ci-btn--primary {
+  color: var(--background);
+}
+
+.ci .ci-eyebrow {
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+}
+
+/* The connection chip is an app-level fixed control. At phone widths it lands
+   exactly on the section tabs and swallows the History tab, so it is
+   suppressed on this page: the same promise is already stated inline in the
+   header ("stored in this browser only") and the History tab names where the
+   entries live. This stylesheet is only loaded on /cycle. */
+@media (max-width: 1023px) {
+  /* `body` keeps this ahead of the component's own stylesheet whatever order
+     the bundles land in. */
+  body .conn-notice,
+  body .conn-notice-chip {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+ * Section 2 — the tk2 designs: ledger, atlas, strip (was trackers2.css)
+ * ========================================================================== */
+
+/**
+ * Trackers — three design directions, one stylesheet.
+ *
+ * All three share the theme's ground, ink and type scale, so they belong to the
+ * same app. Nothing else is shared with the cycle page: no cards, no numbered
+ * editorial blocks, no ring grids, no eyebrow-plus-rule heads.
+ *
+ *   [data-design="ledger"]  a bookkeeper's sheet — rules, tabular figures, ticks
+ *   [data-design="atlas"]   a map — a 24-hour compass, territories, one route
+ *   [data-design="strip"]   a filmstrip — one band per tracker, one playhead
+ */
+
+.tk2-root {
+  --tk2-rule: color-mix(in oklab, var(--ci-text) 14%, transparent);
+  --tk2-soft: color-mix(in oklab, var(--ci-text) 62%, transparent);
+}
+
+/* ------------------------------ palette ---------------------------------- */
+/*
+ * Trackers used to run its own product palette — a pure-black ground, burgundy
+ * cards and a hot-pink accent — which is why the page read as a different app.
+ * It now binds the global design tokens: the same canvas, surface hierarchy,
+ * border family and champagne accent as Home, Mood and Cycle. Only the six
+ * data hues are page-specific, and they come from the shared chart ramp.
+ */
+
+.tk2-root[data-design][data-theme] {
+  --bg-absolute-dark: var(--background);
+  --panel-glass-bg: color-mix(in oklab, var(--surface) 94%, transparent);
+  --glass-border-rim: var(--border);
+  --accent-neon-gradient: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  --neon-primary: var(--gold);
+  --text-ultra-white: var(--foreground);
+  --text-cool-silver: var(--muted-foreground);
+  --text-architectural: var(--faint);
+
+  --ci-bg: var(--background);
+  --ci-bg-deep: var(--background);
+  --ci-surface: var(--surface);
+  --ci-surface-2: var(--surface-2);
+  --ci-line: var(--border);
+  --ci-line-strong: var(--border-strong);
+  --ci-text: var(--foreground);
+  --ci-text-soft: var(--text-secondary);
+  --ci-text-mute: var(--faint);
+  --ci-accent: var(--gold);
+  --ci-accent-soft: color-mix(in oklab, var(--gold) 16%, transparent);
+  --ci-focus: var(--gold);
+  --ci-ok: var(--success);
+  --ci-warn: var(--warning);
+  --ci-danger: var(--danger);
+  --ci-input-bg: var(--surface-2);
+  --ci-veil:
+    radial-gradient(
+      120% 80% at 12% -10%,
+      color-mix(in oklab, var(--gold) 6%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 100% 0%,
+      color-mix(in oklab, var(--violet) 5%, transparent),
+      transparent 55%
+    );
+
+  --ci-follicular: var(--gold);
+  --ci-ovulation: var(--chart-2);
+  /* the two phase names left over keep their ring colour */
+  --ci-late: var(--tk2-ring-sleep);
+  --ci-menstrual: var(--tk2-ring-screen);
+
+  /* six data hues from the shared chart ramp */
+  --tk2-ring-sleep: var(--chart-4);
+  --tk2-ring-water: var(--chart-1);
+  --tk2-ring-movement: var(--chart-2);
+  --tk2-ring-energy: var(--chart-6);
+  --tk2-ring-screen: var(--chart-5);
+  --tk2-ring-study: var(--chart-3);
+
+  --tk2-rule: var(--border);
+  --tk2-soft: var(--muted-foreground);
+
+  /* editorial weight, matching the rest of the app */
+  --ci-display-weight: 500;
+  --ci-display-track: -0.015em;
+
+  /* ---- aliases ---- */
+  --bg-deep: var(--background);
+  --surface-card: var(--surface);
+  --card-border: var(--border);
+  --accent-neon: var(--accent-neon-gradient);
+  --accent-solid: var(--gold);
+  --text-primary: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-dim: var(--faint);
+  --tk2-neon: var(--accent-neon-gradient);
+  --tk2-neon-line: color-mix(in oklab, var(--gold) 55%, transparent);
+  --tk2-neon-glow: color-mix(in oklab, var(--gold) 45%, transparent);
+  --tk2-glass: var(--panel-glass-bg);
+  --tk2-glass-rim: var(--border);
+  --tk2-glass-lift: radial-gradient(
+    120% 120% at 0% 0%,
+    color-mix(in oklab, var(--foreground) 5%, transparent),
+    transparent 62%
+  );
+
+  /* champagne action tokens used by the finishing pass */
+  --tk2-champagne: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  --tk2-champagne-line: color-mix(in oklab, var(--gold) 70%, transparent);
+  --tk2-champagne-glow: color-mix(in oklab, var(--gold) 30%, transparent);
+}
+
+/* The canvas itself. Scoped to the trackers page rather than set on <body>,
+   so this can't repaint cycle, coach and profile blind. */
+.tk2-root {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+@supports (height: 100dvh) {
+  .tk2-root {
+    min-height: 100dvh;
+  }
+}
+
+.tk2-footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--tk2-rule);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ci-text-mute);
+}
+
+/* ==========================================================================
+   LEDGER — rules and tabular figures
+   ========================================================================== */
+
+[data-design="ledger"] .lg {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+[data-design="ledger"] .lg-masthead {
+  display: grid;
+  gap: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid color-mix(in oklab, var(--ci-text) 26%, transparent);
+}
+
+@media (min-width: 860px) {
+  [data-design="ledger"] .lg-masthead {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+[data-design="ledger"] .lg-kicker {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-title {
+  margin: 0.6rem 0 0;
+  font-family: var(--ci-font-sans);
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+[data-design="ledger"] .lg-lede {
+  margin-top: 0.75rem;
+  max-width: 54ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-meta {
+  display: flex;
+  gap: 1.75rem;
+  margin: 0;
+}
+
+[data-design="ledger"] .lg-meta dt {
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-meta dd {
+  margin: 0.3rem 0 0;
+  font-family: var(--ci-font-mono);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the sheet */
+[data-design="ledger"] .lg-sheet {
+  margin-top: 2rem;
+  border-top: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr minmax(0, 2fr) 0.7fr 0.5fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 0.25rem;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-row--head {
+  padding: 0.5rem 0.25rem;
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-row:not(.lg-row--head):hover {
+  background: color-mix(in oklab, var(--ci-text) 4%, transparent);
+}
+
+[data-design="ledger"] .lg-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+}
+
+[data-design="ledger"] .lg-fig {
+  font-family: var(--ci-font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-fig--strong {
+  font-size: 14px;
+  color: var(--ci-text);
+}
+
+[data-design="ledger"] .lg-row > * {
+  min-width: 0;
+}
+
+[data-design="ledger"] .lg-ticks {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 26px;
+}
+
+[data-design="ledger"] .lg-ticks i {
+  flex: 1;
+  min-height: 1px;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="ledger"] .lg-ticks i[data-met="true"] {
+  background: var(--ci-follicular);
+}
+
+[data-design="ledger"] .lg-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+[data-design="ledger"] .lg-actions button {
+  padding: 0.22rem 0.5rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 3px;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+[data-design="ledger"] .lg-actions button:hover,
+[data-design="ledger"] .lg-actions button[aria-pressed="true"] {
+  color: var(--ci-text);
+  border-color: color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+[data-design="ledger"] .lg-notice {
+  min-height: 1.2rem;
+  margin-top: 0.6rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-follicular);
+}
+
+[data-design="ledger"] .lg-block {
+  margin-top: 3rem;
+}
+
+[data-design="ledger"] .lg-blockhead {
+  margin-bottom: 1rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-table-scroll {
+  overflow-x: auto;
+}
+
+[data-design="ledger"] .lg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-design="ledger"] .lg-table th,
+[data-design="ledger"] .lg-table td {
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--tk2-rule);
+  white-space: nowrap;
+}
+
+[data-design="ledger"] .lg-table thead th {
+  font-weight: 400;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-table tbody th {
+  font-weight: 400;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-table td {
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-table td i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 0.4rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--ci-text) 30%, transparent);
+}
+
+[data-design="ledger"] .lg-table td i[data-met="true"] {
+  background: var(--ci-follicular);
+  border-color: var(--ci-follicular);
+}
+
+[data-design="ledger"] .lg-dash {
+  color: color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="ledger"] .lg-leaders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-design="ledger"] .lg-leaders li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 12.5px;
+  border-bottom: 1px dotted var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-leaders li i {
+  flex: 1;
+  border-bottom: 1px dotted color-mix(in oklab, var(--ci-text) 25%, transparent);
+}
+
+[data-design="ledger"] .lg-leaders li span:last-child {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-statement {
+  max-width: 68ch;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+[data-design="ledger"] .lg-table--insight {
+  margin-top: 1.25rem;
+}
+
+[data-design="ledger"] .lg-finelist {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 72ch;
+}
+
+[data-design="ledger"] .lg-finelist li {
+  padding: 0.3rem 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ci-text-soft);
+}
+
+[data-design="ledger"] .lg-observations {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 74ch;
+}
+
+[data-design="ledger"] .lg-observations li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="ledger"] .lg-observations li span {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+  padding-top: 0.25rem;
+}
+
+[data-design="ledger"] .lg-observations li p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+[data-design="ledger"] .lg-fine,
+[data-design="ledger"] .lg-loading {
+  margin-top: 0.75rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+}
+
+[data-design="ledger"] .lg-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+@media (max-width: 720px) {
+  /*
+   * Phones: each tracker is one compact labelled module — name, then four
+   * labelled figures (Today / Target / Avg 7 / Run), then the fourteen-day
+   * ticks, then the quick taps. Labels come from data-label attributes so
+   * no number ever stands unexplained.
+   */
+  [data-design="ledger"] .lg {
+    padding: 1.75rem 1rem 3rem;
+  }
+
+  [data-design="ledger"] .lg-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem 0.75rem;
+    padding: 0.85rem 0.25rem;
+  }
+
+  [data-design="ledger"] .lg-row--head {
+    display: none;
+  }
+
+  [data-design="ledger"] .lg-entry {
+    grid-column: 1 / -1;
+    order: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  [data-design="ledger"] .lg-row .lg-fig {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+  }
+
+  [data-design="ledger"] .lg-row .lg-fig::before {
+    content: attr(data-label);
+    font-family: var(--ci-font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ci-text-mute);
+  }
+
+  [data-design="ledger"] .lg-fig--strong {
+    font-size: 14px;
+  }
+
+  [data-design="ledger"] .lg-ticks {
+    grid-column: 1 / -1;
+    order: 3;
+    height: 30px;
+  }
+
+  [data-design="ledger"] .lg-actions {
+    grid-column: 1 / -1;
+    order: 4;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  [data-design="ledger"] .lg-actions button {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.7rem;
+    font-size: 11.5px;
+  }
+}
+
+/* 320px phones: the four figures pair up instead of squeezing. */
+@media (max-width: 359px) {
+  [data-design="ledger"] .lg-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================================
+   ATLAS — a map of the day
+   ========================================================================== */
+
+[data-design="atlas"] .at {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+}
+
+[data-design="atlas"] .at-head {
+  max-width: 46rem;
+}
+
+[data-design="atlas"] .at-kicker,
+[data-design="atlas"] .at-sectionhead {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-title {
+  margin: 0.6rem 0 0;
+  font-family: var(--ci-font-sans);
+  font-size: clamp(26px, 5vw, 44px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+[data-design="atlas"] .at-lede {
+  margin-top: 0.7rem;
+  max-width: 52ch;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-body-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 38px;
+  margin-top: 1rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--ci-hair-strong, color-mix(in oklab, var(--foreground) 0.16, transparent));
+  border-radius: 999px;
+  color: var(--ci-text-soft);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+[data-design="atlas"] .at-body-link:hover {
+  border-color: var(--accent-solid, var(--primary));
+  color: var(--ci-text);
+}
+
+[data-design="atlas"] .at-board {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 960px) {
+  [data-design="atlas"] .at-board {
+    grid-template-columns: 340px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* The compass column and everything it explains. One wrapper, so the grid
+   keeps exactly two children — a third child would drop into row two and
+   leave the right-hand column empty beside it. */
+[data-design="atlas"] .at-board-main {
+  min-width: 0;
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+}
+
+[data-design="atlas"] .at-board-main .at-key {
+  margin-top: 0;
+}
+
+[data-design="atlas"] .at-territories {
+  min-width: 0;
+}
+
+[data-design="atlas"] .at-territory {
+  min-width: 0;
+}
+
+[data-design="atlas"] .at-compass {
+  position: sticky;
+  top: 1.5rem;
+}
+
+[data-design="atlas"] .at-compass svg {
+  width: 100%;
+  height: auto;
+}
+
+/* On a phone the compass would otherwise be as wide as the screen. */
+@media (max-width: 959px) {
+  [data-design="atlas"] .at-compass {
+    position: static;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+[data-design="atlas"] .at-track {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ci-text) 8%, transparent);
+  stroke-width: 10;
+}
+
+[data-design="atlas"] .at-tick {
+  stroke: var(--ci-text);
+  opacity: 0.25;
+  stroke-width: 0.7;
+}
+
+[data-design="atlas"] .at-tick[data-major="true"] {
+  opacity: 0.5;
+  stroke-width: 1.4;
+}
+
+[data-design="atlas"] .at-arc {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+}
+
+[data-design="atlas"] .at-hour {
+  font-family: var(--ci-font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-anchor: middle;
+  fill: var(--ci-text);
+  opacity: 0.5;
+}
+
+[data-design="atlas"] .at-centre-fig {
+  font-family: var(--ci-font-display);
+  font-size: 34px;
+  text-anchor: middle;
+  fill: var(--ci-text);
+}
+
+[data-design="atlas"] .at-centre-label {
+  font-family: var(--ci-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-anchor: middle;
+  text-transform: uppercase;
+  fill: var(--ci-text);
+  opacity: 0.55;
+}
+
+[data-design="atlas"] .at-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-key li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-design="atlas"] .at-key i {
+  width: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ci-text);
+  opacity: 0.7;
+}
+
+[data-design="atlas"] .at-key li[data-id="sleep"] i {
+  background: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-key li[data-id="water"] i {
+  background: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-key li[data-id="study"] i {
+  background: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-key li[data-id="movement"] i {
+  background: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-key li[data-id="energy"] i {
+  background: var(--tk2-ring-energy);
+}
+[data-design="atlas"] .at-key li[data-id="screen"] i {
+  background: var(--tk2-ring-screen);
+}
+
+[data-design="atlas"] .at-arc[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+  stroke-width: 7;
+}
+
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+  stroke-width: 6;
+}
+
+[data-design="atlas"] .at-route-today {
+  stroke: var(--ci-accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+}
+
+[data-design="atlas"] .at-route-date {
+  font-family: var(--ci-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  text-anchor: middle;
+  fill: var(--ci-text);
+  opacity: 0.45;
+}
+
+/* the study field — round cells, so it reads as a field rather than a grid */
+[data-design="atlas"] .tk-heat {
+  gap: 5px;
+  max-width: 34rem;
+}
+
+[data-design="atlas"] .tk-heat i {
+  border-radius: 999px;
+}
+
+[data-design="atlas"] .tk-heat i[data-level="1"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 22%, transparent);
+}
+
+[data-design="atlas"] .at-leaders {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 34rem;
+}
+
+[data-design="atlas"] .at-leaders li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-size: 12.5px;
+  border-bottom: 1px dotted var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-leaders li i {
+  flex: 1;
+  border-bottom: 1px dotted color-mix(in oklab, var(--ci-text) 22%, transparent);
+}
+
+[data-design="atlas"] .at-leaders li span:last-child {
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-territories {
+  display: grid;
+  gap: 1.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  [data-design="atlas"] .at-territories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+[data-design="atlas"] .at-territory {
+  position: relative;
+  padding-left: 1rem;
+  border-left: 1px solid var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-territory-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+[data-design="atlas"] .at-place {
+  font-family: var(--ci-font-display);
+  font-size: 19px;
+}
+
+[data-design="atlas"] .at-coord {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-contour {
+  display: block;
+  width: 100%;
+  height: 54px;
+  margin-top: 0.5rem;
+}
+
+[data-design="atlas"] .at-contour-line {
+  fill: none;
+  stroke: var(--ci-text);
+  stroke-width: 1.4;
+  opacity: 0.75;
+}
+
+[data-design="atlas"] .at-contour-area {
+  fill: color-mix(in oklab, var(--ci-text) 10%, transparent);
+  stroke: none;
+}
+
+[data-design="atlas"] .at-contour-empty {
+  stroke: var(--ci-text);
+  opacity: 0.2;
+  stroke-dasharray: 2 4;
+}
+
+[data-design="atlas"] .at-territory-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-territory-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+[data-design="atlas"] .at-territory-actions button {
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 999px;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+}
+
+[data-design="atlas"] .at-territory-actions button:hover,
+[data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
+  color: var(--ci-text);
+  border-color: color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+[data-design="atlas"] .at-notice {
+  min-height: 1.2rem;
+  margin-top: 1rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-follicular);
+}
+
+[data-design="atlas"] .at-section {
+  margin-top: 3.5rem;
+}
+
+[data-design="atlas"] .at-sectionhead {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--tk2-rule);
+  margin-bottom: 1.5rem;
+  font-family: var(--ci-font-sans);
+  font-weight: 600;
+}
+
+[data-design="atlas"] .at-route-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+[data-design="atlas"] .at-route {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 560px;
+}
+
+[data-design="atlas"] .at-route-line {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+[data-design="atlas"] .at-route-line[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-route-line[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-route-line[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-route-line[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-route-line[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+}
+[data-design="atlas"] .at-route-line[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+}
+
+[data-design="atlas"] .at-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-design="atlas"] .at-legend i {
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ci-text);
+}
+
+[data-design="atlas"] .at-legend li[data-id="sleep"] i {
+  background: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-legend li[data-id="water"] i {
+  background: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-legend li[data-id="study"] i {
+  background: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-legend li[data-id="movement"] i {
+  background: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-legend li[data-id="screen"] i {
+  background: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-legend li[data-id="energy"] i {
+  background: var(--tk2-ring-energy);
+}
+
+[data-design="atlas"] .at-statement {
+  max-width: 64ch;
+  font-family: var(--ci-font-display);
+  font-size: clamp(19px, 2.6vw, 25px);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+[data-design="atlas"] .at-contrasts {
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-design="atlas"] .at-contrasts li {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="atlas"] .at-pair {
+  display: grid;
+  gap: 3px;
+}
+
+[data-design="atlas"] .at-pair i {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ci-text);
+}
+
+[data-design="atlas"] .at-pair i[data-kind="low"] {
+  opacity: 0.28;
+}
+
+[data-design="atlas"] .at-pair i[data-kind="bright"] {
+  opacity: 0.9;
+}
+
+[data-design="atlas"] .at-coord em {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-style: normal;
+  opacity: 0.6;
+}
+
+[data-design="atlas"] .at-finelist,
+[data-design="atlas"] .at-observations {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 72ch;
+}
+
+[data-design="atlas"] .at-finelist li,
+[data-design="atlas"] .at-observations li {
+  padding: 0.35rem 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ci-text-soft);
+}
+
+[data-design="atlas"] .at-observations li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+[data-design="atlas"] .at-observations li span {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+  padding-top: 0.3rem;
+}
+
+[data-design="atlas"] .at-observations li p {
+  margin: 0;
+}
+
+[data-design="atlas"] .at-fine {
+  margin-top: 0.85rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--ci-text-mute);
+}
+
+[data-design="atlas"] .at-loading {
+  margin-top: 3rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-mute);
+}
+
+/* ==========================================================================
+   STRIP — one band per tracker
+   ========================================================================== */
+
+[data-design="strip"] .sp {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+}
+
+[data-design="strip"] .sp-head {
+  padding: 0 0.5rem 2rem;
+}
+
+[data-design="strip"] .sp-kicker,
+[data-design="strip"] .sp-sectionhead {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-title {
+  margin: 0.75rem 0 0;
+  font-family: var(--ci-font-sans);
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+[data-design="strip"] .sp-lede {
+  margin-top: 0.85rem;
+  max-width: 52ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ci-text-soft);
+}
+
+[data-design="strip"] .sp-strip {
+  position: relative;
+  padding: 0.5rem;
+}
+
+[data-design="strip"] .sp-axis {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* The empty first cell lines the dates up with the day-cells below them. */
+[data-design="strip"] .sp-axis span:first-child {
+  width: 132px;
+  flex: none;
+}
+
+[data-design="strip"] .sp-axis > span:not(:first-child) {
+  flex: 1;
+  text-align: center;
+  font-family: var(--ci-font-mono);
+  font-size: 9.5px;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-axis span[data-today="true"] {
+  color: var(--ci-accent);
+  font-weight: 600;
+}
+
+[data-design="strip"] .sp-band {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--tk2-rule);
+}
+
+[data-design="strip"] .sp-band:last-of-type {
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="strip"] .sp-band-id {
+  width: 132px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+[data-design="strip"] .sp-band-name {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-band-fig {
+  font-family: var(--ci-font-mono);
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+[data-design="strip"] .sp-band-sub {
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-cells {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 74px;
+  padding: 0 2px;
+}
+
+[data-design="strip"] .sp-cell {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--ci-text) 5%, transparent);
+  overflow: hidden;
+}
+
+[data-design="strip"] .sp-cell i {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  background: color-mix(in oklab, var(--ci-text) 22%, transparent);
+  transition: height 0.4s ease;
+}
+
+[data-design="strip"] .sp-cell[data-met="true"] i {
+  background: var(--ci-follicular);
+}
+
+[data-design="strip"] .sp-cell[data-today="true"] {
+  outline: 1px solid color-mix(in oklab, var(--ci-text) 45%, transparent);
+  outline-offset: 1px;
+}
+
+[data-design="strip"] .sp-target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed color-mix(in oklab, var(--ci-text) 35%, transparent);
+  pointer-events: none;
+}
+
+[data-design="strip"] .sp-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(132px + 0.75rem + (100% - 132px - 0.75rem - 5.5rem) * (13 / 14) + 2px);
+  width: 1px;
+  background: color-mix(in oklab, var(--ci-accent) 55%, transparent);
+  pointer-events: none;
+}
+
+[data-design="strip"] .sp-band-actions {
+  width: 5.5rem;
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 0.25rem;
+}
+
+[data-design="strip"] .sp-band-actions button {
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 999px;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-soft);
+  cursor: pointer;
+}
+
+[data-design="strip"] .sp-band-actions button:hover,
+[data-design="strip"] .sp-band-actions button[aria-pressed="true"] {
+  color: var(--ci-text);
+  border-color: color-mix(in oklab, var(--ci-text) 45%, transparent);
+}
+
+[data-design="strip"] .sp-notice {
+  min-height: 1.2rem;
+  margin-top: 0.75rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-follicular);
+  padding-left: 0.5rem;
+}
+
+[data-design="strip"] .sp-section {
+  margin-top: 3rem;
+  padding: 0 0.5rem;
+}
+
+[data-design="strip"] .sp-sectionhead {
+  margin-bottom: 1.25rem;
+}
+
+[data-design="strip"] .sp-heat {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 4px;
+}
+
+[data-design="strip"] .sp-heat i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--ci-text) 7%, transparent);
+}
+
+[data-design="strip"] .sp-heat i[data-level="1"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 25%, transparent);
+}
+[data-design="strip"] .sp-heat i[data-level="2"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 45%, transparent);
+}
+[data-design="strip"] .sp-heat i[data-level="3"] {
+  background: color-mix(in oklab, var(--ci-ovulation) 68%, transparent);
+}
+[data-design="strip"] .sp-heat i[data-level="4"] {
+  background: var(--ci-ovulation);
+}
+
+[data-design="strip"] .sp-heat i[data-today="true"] {
+  outline: 1px solid var(--ci-text);
+  outline-offset: 1px;
+}
+
+[data-design="strip"] .sp-statement {
+  max-width: 66ch;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+[data-design="strip"] .sp-contrasts {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+[data-design="strip"] .sp-contrast {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+[data-design="strip"] .sp-contrast-name {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-contrast-bars {
+  display: grid;
+  gap: 3px;
+}
+
+[data-design="strip"] .sp-contrast-bars i {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ci-text);
+}
+
+[data-design="strip"] .sp-contrast-bars i[data-kind="low"] {
+  opacity: 0.25;
+}
+
+[data-design="strip"] .sp-contrast-fig {
+  font-family: var(--ci-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-design="strip"] .sp-contrast-fig em {
+  margin: 0 0.4rem;
+  font-style: normal;
+  opacity: 0.5;
+}
+
+[data-design="strip"] .sp-contrast-fig b {
+  margin-left: 0.6rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+[data-design="strip"] .sp-finelist,
+[data-design="strip"] .sp-observations {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 74ch;
+}
+
+[data-design="strip"] .sp-finelist li {
+  padding: 0.3rem 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ci-text-soft);
+}
+
+[data-design="strip"] .sp-observations li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--tk2-rule);
+}
+
+[data-design="strip"] .sp-observations li span {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+  padding-top: 0.25rem;
+}
+
+[data-design="strip"] .sp-observations li p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+[data-design="strip"] .sp-fine {
+  margin-top: 0.85rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--ci-text-mute);
+}
+
+[data-design="strip"] .sp-loading {
+  padding: 2rem 0.5rem;
+  font-family: var(--ci-font-mono);
+  font-size: 11px;
+  color: var(--ci-text-mute);
+}
+
+@media (max-width: 720px) {
+  [data-design="strip"] .sp-band {
+    flex-wrap: wrap;
+  }
+
+  [data-design="strip"] .sp-band-id {
+    width: 100%;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  [data-design="strip"] .sp-cells {
+    flex: 1 1 100%;
+  }
+
+  [data-design="strip"] .sp-band-actions {
+    width: auto;
+  }
+
+  [data-design="strip"] .sp-playhead {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="strip"] .sp-cell i {
+    transition: none;
+  }
+}
+
+/* ------------------------------- sync note -------------------------------- */
+/* One honest line about where these days live. Sits under each header.       */
+
+.tk2-sync {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.01em;
+  color: var(--ci-text-mute);
+}
+
+.tk2-sync-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ci-text-mute);
+  transform: translateY(-2px);
+}
+
+.tk2-sync[data-state="saved"] .tk2-sync-dot {
+  background: var(--ci-accent);
+}
+.tk2-sync[data-state="pending"] .tk2-sync-dot {
+  background: color-mix(in oklab, var(--ci-accent) 40%, transparent);
+}
+.tk2-sync[data-state="loading"] .tk2-sync-dot {
+  background: var(--ci-text-mute);
+}
+.tk2-sync[data-state="error"] {
+  color: var(--ci-danger);
+}
+.tk2-sync[data-state="error"] .tk2-sync-dot {
+  background: var(--ci-danger);
+}
+
+.tk2-sync-retry {
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.tk2-sync-retry:hover {
+  opacity: 0.7;
+}
+.tk2-sync-retry:focus-visible {
+  outline: 1px solid var(--ci-text-soft);
+  outline-offset: 2px;
+}
+
+/* --------------------------- targets + badges ---------------------------- */
+/* Editable targets and the achievements read off the record. Both live on    */
+/* the page rather than in a settings screen, because every chart above       */
+/* measures against them.                                                     */
+
+/* "What you track" — six switches above the targets. Off = kept, not counted. */
+.tk2-active {
+  margin: 0 0 1rem;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border: 1px dashed var(--tk2-rule);
+  border-radius: 10px;
+}
+
+.tk2-active-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.6rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.tk2-active-head span {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ci-text-mute);
+  opacity: 0.85;
+}
+
+.tk2-active-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tk2-active-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem 0.35rem 0.5rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ci-text-mute);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.tk2-active-toggle i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.tk2-active-toggle[data-on="true"] {
+  color: var(--ci-text);
+  border-color: var(--ci-text-soft);
+}
+
+.tk2-active-toggle[data-on="true"] i {
+  opacity: 1;
+}
+
+.tk2-active-list li[data-id="sleep"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-sleep);
+}
+.tk2-active-list li[data-id="water"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-water);
+}
+.tk2-active-list li[data-id="study"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-study);
+}
+.tk2-active-list li[data-id="movement"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-movement);
+}
+.tk2-active-list li[data-id="energy"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-energy);
+}
+.tk2-active-list li[data-id="screen"] .tk2-active-toggle[data-on="true"] i {
+  background: var(--tk2-ring-screen);
+}
+
+.tk2-active-toggle[data-on="false"] {
+  text-decoration: line-through;
+  text-decoration-color: var(--tk2-rule);
+}
+
+.tk2-active-toggle:hover:not(:disabled) {
+  color: var(--ci-text);
+}
+
+.tk2-active-toggle:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.tk2-active-toggle:focus-visible {
+  outline: 2px solid var(--ci-focus, var(--ci-text-soft));
+  outline-offset: 2px;
+}
+
+.tk2-targets-grid,
+.tk2-badges-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.tk2-targets-grid li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 10px;
+}
+
+.tk2-targets-grid label {
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.tk2-target-field {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.tk2-targets-grid input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.15rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--tk2-rule);
+  background: transparent;
+  color: var(--ci-text);
+  font-family: var(--ci-font-mono);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.18s ease;
+}
+
+.tk2-targets-grid input:focus {
+  outline: none;
+  border-bottom-color: var(--ci-text-soft);
+}
+
+.tk2-targets-grid input:focus-visible {
+  outline: 2px solid var(--ci-focus, var(--ci-text-soft));
+  outline-offset: 3px;
+}
+
+.tk2-target-field em {
+  font-family: var(--ci-font-mono);
+  font-size: 10px;
+  font-style: normal;
+  color: var(--ci-text-mute);
+}
+
+.tk2-targets-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin: 1rem 0 0;
+  font-size: 11.5px;
+  color: var(--ci-text-mute);
+}
+
+.tk2-targets-foot button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ci-text-soft);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.tk2-targets-foot button:hover {
+  color: var(--ci-text);
+}
+
+.tk2-badges {
+  margin-top: 1rem;
+}
+
+.tk2-badges-count {
+  margin: 0 0 0.75rem;
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ci-text-mute);
+}
+
+.tk2-badges-grid li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--tk2-rule);
+  border-radius: 10px;
+  opacity: 0.55;
+}
+
+.tk2-badges-grid li[data-earned="true"] {
+  opacity: 1;
+  border-color: color-mix(in oklab, var(--ci-follicular) 55%, transparent);
+  background: color-mix(in oklab, var(--ci-follicular) 8%, transparent);
+}
+
+.tk2-badge-name {
+  font-size: 12.5px;
+  color: var(--ci-text);
+}
+
+.tk2-badge-detail {
+  font-family: var(--ci-font-mono);
+  font-size: 10.5px;
+  color: var(--ci-text-mute);
+}
+
+@media (max-width: 560px) {
+  .tk2-targets-grid,
+  .tk2-badges-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tk2-targets-grid input {
+    font-size: 15px;
+  }
+}
+
+/* ==========================================================================
+   The finishing pass.
+
+   Five things, all of them about how the page feels rather than what it says:
+   champagne on the actions instead of a flat block of colour, small labels set
+   in tracked capitals, containers that read as glass over the obsidian rather
+   than as grey boxes, roomier log cards with pill selectors, and a dial that
+   still looks like a dial on a day nothing has been logged.
+   ========================================================================== */
+
+/* ------------------------------- 1. actions ------------------------------ */
+
+.tk2-root .ci-btn--primary {
+  background-image: var(--tk2-champagne);
+  border-color: var(--tk2-champagne-line);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  box-shadow: 0 10px 26px -14px var(--tk2-champagne-glow);
+}
+
+.tk2-root .ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* the study-subject tags read as glass chips, not coloured labels */
+.tk2-root .tk-session {
+  background-color: var(--tk2-glass);
+  background-image: var(--tk2-glass-lift);
+  border-color: var(--tk2-glass-rim);
+  backdrop-filter: blur(12px);
+  padding: 0.5rem 0.85rem;
+}
+
+/* ----------------------------- 2. typography ----------------------------- */
+/* Small labels go to tracked capitals; the units drop to 40% so the figures
+   themselves carry the weight. */
+
+.tk2-root .at-kicker,
+.tk2-root .at-sectionhead,
+.tk2-root .at-coord,
+.tk2-root .at-key span,
+.tk2-root .at-legend li,
+.tk2-root .tk2-sync,
+.tk2-root .tk2-badges-count,
+.tk2-root .tk2-targets-grid label,
+.tk2-root .ci-label,
+.tk2-root .tk-quick button,
+.tk2-root .tk-pill button {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tk2-root .tk2-target-field em,
+.tk2-root .ci-hint,
+.tk2-root .at-fine {
+  opacity: 0.4;
+}
+
+.tk2-root .at-title,
+.tk2-root .at-statement {
+  letter-spacing: -0.02em;
+}
+
+/* --------------------------- 3. glass containers -------------------------- */
+
+.tk2-root .ci-card,
+.tk2-root .tk-block,
+.tk2-root .tk2-targets-grid li,
+.tk2-root .tk2-badges-grid li,
+.tk2-root .tk-panel {
+  background-color: var(--tk2-glass);
+  background-image: var(--tk2-glass-lift);
+  border: 1px solid var(--tk2-glass-rim);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 0.03, transparent);
+}
+
+/* ------------------------ 4. spacing and selectors ------------------------ */
+
+.tk2-root .tk-block {
+  padding: 24px;
+  border-radius: var(--ci-radius-md, 12px);
+}
+
+.tk2-root .tk-quick {
+  gap: 0.4rem;
+}
+
+.tk2-root .tk-quick button {
+  padding: 0.42rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 0.02, transparent);
+  color: var(--ci-text-soft);
+  font-size: 11.5px;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.tk2-root .tk-quick button:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--foreground) 0.12, transparent);
+  color: var(--ci-text);
+  background: color-mix(in oklab, var(--foreground) 0.04, transparent);
+}
+
+/* rating scales: capsule pills, champagne glow on the selected one */
+.tk2-root .tk-pill {
+  gap: 0.3rem;
+  padding: 0.28rem;
+  border-color: color-mix(in oklab, var(--foreground) 0.05, transparent);
+  background: color-mix(in oklab, var(--foreground) 0.02, transparent);
+}
+
+.tk2-root .tk-pill button {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid transparent;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+
+.tk2-root .tk-pill button[aria-pressed="true"] {
+  color: var(--primary-foreground);
+  background-image: var(--tk2-champagne);
+  border-color: var(--tk2-champagne-line);
+  box-shadow: 0 0 18px -6px var(--tk2-champagne-glow);
+}
+
+/* ------------------------------- 5. the dial ------------------------------ */
+/* An unlogged ring is a faint deep track; a filled one is jewel-toned with a
+   glow along its length and a lit cap where it stops. */
+
+[data-design="atlas"] .at-track {
+  stroke: color-mix(in oklab, var(--foreground) 0.03, transparent);
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  stroke: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  stroke: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  stroke: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  stroke: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-arc[data-id="study"] {
+  stroke: var(--tk2-ring-study);
+  stroke-width: 7;
+}
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  stroke: var(--tk2-ring-energy);
+  stroke-width: 6;
+}
+
+[data-design="atlas"] .at-cap {
+}
+
+[data-design="atlas"] .at-cap[data-id="sleep"] {
+  fill: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-cap[data-id="water"] {
+  fill: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-cap[data-id="movement"] {
+  fill: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-cap[data-id="screen"] {
+  fill: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-cap[data-id="study"] {
+  fill: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-cap[data-id="energy"] {
+  fill: var(--tk2-ring-energy);
+}
+
+/* ==========================================================================
+   Haute-horlogerie pass.
+
+   The page is built the way a watch dial is: a deep ground, hairline guides
+   that sit just above the surface, jewel-toned progress with a lit terminal,
+   and chamfered metal on anything you press. Numbers carry the weight and
+   their units fall back to a whisper.
+   ========================================================================== */
+
+/* -------------------- 4. editorial labels and metrics -------------------- */
+/* Micro-metadata sits in tracked capitals; the figures themselves stay in
+   platinum while the units drop to 35% so the number is what you read. */
+
+.tk2-root .at-kicker,
+.tk2-root .at-sectionhead,
+.tk2-root .at-coord,
+.tk2-root .at-key span,
+.tk2-root .at-legend li,
+.tk2-root .at-fine,
+.tk2-root .at-territory-foot span,
+.tk2-root .tk2-sync,
+.tk2-root .tk2-badges-count,
+.tk2-root .tk2-badge-detail,
+.tk2-root .tk2-targets-grid label,
+.tk2-root .ci-label,
+.tk2-root .ci-hint,
+.tk2-root .tk-quick button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-metric b {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.tk2-unit,
+.tk2-root .tk2-target-field em {
+  color: var(--text-dim);
+  font-size: 0.85em;
+  margin-left: 2px;
+  opacity: 1;
+}
+
+/* ------------------ 5. capsule docks and the tracer chip ----------------- */
+/* Multi-option rows become a single capsule with a metal chip that slides
+   beneath the active option rather than each button lighting up alone. */
+
+/* ------------------------- 7. quick-add counters ------------------------- */
+
+.tk2-root .tk-quick {
+  gap: 0.4rem;
+}
+
+.tk2-root .tk-quick button {
+  padding: 5px 12px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.tk2-root .tk-quick button:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--foreground) 0.16, transparent);
+}
+
+.tk2-root .tk-quick button:active:not(:disabled) {
+  transform: scale(0.94);
+  border-color: var(--text-muted);
+}
+
+/* ----------------------- 6. glassmorphic containers ---------------------- */
+
+.tk2-root .ci-card,
+.tk2-root .tk-block,
+.tk2-root .tk2-targets-grid li,
+.tk2-root .tk2-badges-grid li,
+.tk2-root .tk-panel,
+.tk2-root .tk2-picker,
+[data-design="atlas"] .at-territory {
+  background: rgba(18, 18, 21, 0.7);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow:
+    inset 0px 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
+    0px 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.tk2-root .tk-block {
+  padding: 24px;
+}
+
+/* --------------------------- 3. active surfaces -------------------------- */
+/* Anything selected or primary is champagne with hard-contrast type. */
+
+.tk2-root .ci-btn--primary,
+.tk2-root .tk-pill button[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  background-color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
+  color: var(--foreground) !important;
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: 0 10px 26px -6px color-mix(in oklab, var(--gold) 0.6, transparent);
+}
+
+.tk2-root .ci-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* --------------------------- 2. the dial itself -------------------------- */
+
+[data-design="atlas"] .at-track {
+  stroke: color-mix(in oklab, var(--foreground) 0.03, transparent);
+  stroke-width: 2;
+}
+
+[data-design="atlas"] .at-arc {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-design="atlas"] .at-arc[data-id="sleep"] {
+  --active-track-color-hex: var(--tk2-ring-sleep);
+}
+[data-design="atlas"] .at-arc[data-id="water"] {
+  --active-track-color-hex: var(--tk2-ring-water);
+}
+[data-design="atlas"] .at-arc[data-id="movement"] {
+  --active-track-color-hex: var(--tk2-ring-movement);
+}
+[data-design="atlas"] .at-arc[data-id="screen"] {
+  --active-track-color-hex: var(--tk2-ring-screen);
+}
+[data-design="atlas"] .at-arc[data-id="study"] {
+  --active-track-color-hex: var(--tk2-ring-study);
+}
+[data-design="atlas"] .at-arc[data-id="energy"] {
+  --active-track-color-hex: var(--tk2-ring-energy);
+}
+
+[data-design="atlas"] .at-cap {
+}
+
+/* ------------------ 5. tag groups and the number scale ------------------- */
+/* Every choice is its own element. Tags wrap onto a second line rather than
+   compressing into each other in a narrow column; the scale sits as circles
+   inside a capsule bar. */
+
+.tk2-picker {
+  margin-top: 8px;
+}
+
+.tk2-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tk2-tag {
+  padding: 6px 14px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.06, transparent);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--foreground) 0.03, transparent);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-tag:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--foreground) 0.14, transparent);
+  color: var(--text-primary);
+}
+
+.tk2-tag[data-active="true"] {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  background-color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
+  color: var(--foreground);
+  font-weight: 700;
+  box-shadow: 0 0 16px color-mix(in oklab, var(--gold) 0.4, transparent);
+}
+
+.tk2-tag:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tk2-numbers {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
+  border-radius: 30px;
+  background: color-mix(in oklab, var(--foreground) 0.02, transparent);
+}
+
+.tk2-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-number:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--foreground) 0.03, transparent);
+}
+
+.tk2-number[data-active="true"] {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  color: var(--foreground);
+  font-weight: 700;
+  box-shadow: 0 0 16px color-mix(in oklab, var(--gold) 0.5, transparent);
+}
+
+.tk2-number:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --------------------- 3b. the territory action rows --------------------- */
+/* The taps under each card — the energy scale and the +250ml style
+   increments — get the same treatment as the log sheet's, and sit clear of
+   the contour above them rather than crowding its baseline. */
+
+[data-design="atlas"] .at-territory-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+[data-design="atlas"] .at-territory-actions button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory-actions button:hover {
+  border-color: color-mix(in oklab, var(--foreground) 0.14, transparent);
+  color: var(--text-primary);
+}
+
+[data-design="atlas"] .at-territory-actions button:active {
+  transform: scale(0.94);
+}
+
+[data-design="atlas"] .at-territory-actions button[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
+  background-color: var(--gold);
+  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
+  color: var(--foreground);
+  font-weight: 700;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 0.4, transparent);
+}
+
+/* -------------------- the dial: percentage-driven rings ------------------ */
+/* Each ring is one circle whose dashoffset hides whatever share of the target
+   is still missing, so an increment sweeps into place instead of jumping. */
+
+[data-design="atlas"] .at-arc {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-design="atlas"] .at-cap {
+  transition:
+    cx 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    cy 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* the night itself — bed to wake — kept as a hairline outside the rings */
+[data-design="atlas"] .at-nightspan {
+  fill: none;
+  stroke: color-mix(in oklab, var(--foreground) 0.12, transparent);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="atlas"] .at-arc,
+  [data-design="atlas"] .at-cap {
+    transition: none;
+  }
+}
+
+/* The overlay layer. Panels mount to <body> through a portal, out of the page
+   tree entirely, so nothing here can fall into the page flow if a stylesheet
+   is slow or missing. */
+.tk2-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+/* -------------------------- the logging modal ---------------------------- */
+/* One category at a time, over a blurred curtain. The card is the trigger;
+   this is the only place that writes. */
+
+.tk2-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1999;
+  background: rgba(0, 0, 0, 0.65);
+  animation: tk2-curtain-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tk2-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  padding: 32px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
+  border-radius: 24px;
+  background: rgba(18, 18, 21, 0.9);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+  animation: tk2-modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tk2-curtain-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes tk2-modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px));
+  }
+}
+
+.tk2-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.tk2-modal-close:hover {
+  color: var(--text-primary);
+  background: color-mix(in oklab, var(--foreground) 0.05, transparent);
+}
+
+.tk2-modal-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-modal-hint {
+  margin: 22px 0 10px;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tk2-modal-taps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tk2-modal-tap {
+  padding: 6px 14px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 0.06, transparent);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--foreground) 0.03, transparent);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tk2-modal-tap:hover {
+  border-color: color-mix(in oklab, var(--foreground) 0.14, transparent);
+  color: var(--text-primary);
+}
+
+.tk2-modal-tap:active {
+  transform: scale(0.94);
+}
+
+.tk2-modal-label {
+  display: block;
+  margin: 26px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.tk2-modal-input {
+  width: 100%;
+  margin-top: 26px;
+  padding: 16px 0;
+  border: none;
+  border-bottom: 2px solid color-mix(in oklab, var(--foreground) 0.1, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--ci-font-mono), ui-monospace, monospace;
+  font-size: 2.2rem;
+  font-weight: 300;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.tk2-modal-input:focus {
+  outline: none;
+  border-bottom-color: var(--gold);
+}
+
+.tk2-modal-unit {
+  margin: 12px 0 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  opacity: 0.5;
+  text-align: center;
+}
+
+.tk2-modal-error {
+  margin: 14px 0 0;
+  font-size: 0.72rem;
+  color: var(--danger);
+}
+
+.tk2-modal-save {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 14px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 100px;
+  background: var(--accent-champagne);
+  background-color: var(--accent-solid);
+  color: var(--surface-2) !important;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: none;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -14px rgba(212, 175, 55, 0.7);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.tk2-modal-save:hover {
+  filter: brightness(1.05);
+}
+
+.tk2-modal-save:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk2-curtain,
+  .tk2-modal {
+    animation: none;
+  }
+}
+
+/* ------------------- the card is the trigger, not a form ----------------- */
+/* Cards read as panels and do nothing until you open them. The only hint
+   that they're pressable is a word that fades in on hover. */
+
+[data-design="atlas"] .at-territory {
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory:hover {
+  border-color: color-mix(in oklab, var(--foreground) 0.1, transparent);
+  transform: translateY(-2px);
+}
+
+[data-design="atlas"] .at-territory:focus-visible {
+  outline: 2px solid var(--accent-solid);
+  outline-offset: 3px;
+}
+
+[data-design="atlas"] .at-territory-more {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+[data-design="atlas"] .at-territory:hover .at-territory-more,
+[data-design="atlas"] .at-territory:focus-visible .at-territory-more {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="atlas"] .at-territory {
+    transition: none;
+  }
+
+  [data-design="atlas"] .at-territory:hover {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   The clean blueprint.
+
+   One floating action, cards that only ever report, and a record table that
+   reads like a statement rather than a spreadsheet. Everything here is
+   surface: no new data, no new claims — the same numbers, better lit.
+   ========================================================================== */
+
+/* ------------------------- the floating action --------------------------- */
+
+/* The dock is inert — it only holds the button, and it never eats a click
+   meant for the page under it. */
+.premium-action-dock {
+  position: fixed;
+  /* Clear the phone tab bar + home indicator. The Atlas component no longer
+     sets `bottom` inline, so this rule is finally the one that applies. */
+  bottom: calc(16px + var(--app-bottom-nav, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+  max-width: calc(100dvw - 32px);
+}
+
+@media (max-width: 639px) {
+  /* Scoped to the dock so it still wins over the base rule below, which
+     appears later in the file for readability. */
+  .premium-action-dock .premium-log-cta {
+    padding: 13px 24px;
+    font-size: 0.8rem;
+    max-width: calc(100dvw - 32px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.premium-log-cta {
+  pointer-events: auto;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 550;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.85rem;
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.premium-log-cta:hover {
+  opacity: 0.92;
+}
+
+.premium-log-cta:active {
+  transform: scale(0.97);
+}
+
+.premium-log-cta:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-log-cta {
+    transition: none;
+  }
+
+  .premium-log-cta:hover,
+  .premium-log-cta:active {
+    transform: none;
+  }
+}
+
+/* ------------------------- the insight dock ------------------------------ */
+
+.tk2-insight {
+  background: linear-gradient(180deg, rgba(18, 18, 22, 0.4) 0%, rgba(8, 8, 10, 0.6) 100%);
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 20px;
+  padding: 32px;
+  margin: 32px 0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.tk2-insight-caption {
+  display: block;
+  margin: 0 0 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--gold-solid-fallback);
+  text-transform: uppercase;
+}
+
+.tk2-insight-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tk2-insight-list li {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.03, transparent);
+  color: var(--text-ultra-white);
+  font-size: 0.88rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.tk2-insight-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.tk2-insight-index {
+  color: var(--foreground);
+  font-weight: 500;
+  font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.tk2-insight-list p {
+  margin: 0;
+}
+
+/* ------------------ the summary matrix: glass cards ---------------------- */
+
+[data-design="atlas"] .at-territory {
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--gold) 0.03, transparent) 0%, rgba(138, 43, 226, 0.03) 100%),
+    var(--panel-glass-bg);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  box-shadow:
+    inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
+    0 10px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+[data-design="atlas"] .at-territory:hover {
+  border-color: color-mix(in oklab, var(--gold) 0.5, transparent);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 20px color-mix(in oklab, var(--gold) 0.2, transparent);
+}
+
+[data-design="atlas"] .at-place {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-ultra-white);
+  letter-spacing: -0.01em;
+  margin: 0 0 12px 0;
+}
+
+[data-design="atlas"] .at-territory-foot span {
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-cool-silver);
+  margin-top: 14px;
+}
+
+/* the contour must never push its card wider than the grid gives it */
+[data-design="atlas"] .at-contour {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* --------------------- units inside every metric ------------------------ */
+
+.tk2-unit,
+.tk2-root .tk2-target-field em {
+  color: color-mix(in oklab, var(--foreground) 0.3, transparent);
+  font-size: 0.78rem;
+  margin-left: 1px;
+}
+
+/* --------------------------- the record ---------------------------------- */
+
+.tk2-root .ci-table-wrap,
+[data-design="atlas"] .ci-table {
+  border: 1px solid var(--glass-border-rim);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(12, 12, 15, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-design="atlas"] .ci-table thead tr {
+  background: color-mix(in oklab, var(--foreground) 0.015, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
+}
+
+[data-design="atlas"] .ci-table th {
+  padding: 18px 24px;
+  color: var(--text-cool-silver);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  text-align: left;
+}
+
+[data-design="atlas"] .ci-table tbody tr {
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.025, transparent);
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+[data-design="atlas"] .ci-table tbody tr:hover {
+  background-color: color-mix(in oklab, var(--foreground) 0.01, transparent);
+}
+
+[data-design="atlas"] .ci-table tbody th,
+[data-design="atlas"] .ci-table td {
+  padding: 20px 24px;
+  font-size: 0.85rem;
+  color: var(--text-ultra-white);
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.tk2-cell-met {
+  color: var(--gold-solid-fallback);
+}
+
+.tk2-row-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-cool-silver);
+  padding: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tk2-row-action:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.tk2-row-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --------------------------- 6. the dial -------------------------------- */
+
+[data-design="atlas"] .at-arc {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-design="atlas"] .at-track {
+  stroke: color-mix(in oklab, var(--foreground) 0.035, transparent);
+  stroke-width: 2.5px;
+}
+
+/* the floating action needs room at the foot of the page, and it must never
+   sit on top of an open panel */
+[data-design="atlas"] .at {
+  padding-bottom: 120px;
+}
+
+/* phones: compact territory cards and stacked comparisons — the same map,
+   composed for a narrow viewport instead of squeezed into it */
+@media (max-width: 639px) {
+  [data-design="atlas"] .at {
+    padding: 1.75rem 1rem 8rem;
+  }
+
+  [data-design="atlas"] .at-territory {
+    padding: 18px;
+  }
+
+  [data-design="atlas"] .at-contrasts li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  [data-design="strip"] .sp {
+    padding: 1.75rem 0.75rem 8rem;
+  }
+
+  [data-design="strip"] .sp-contrast {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  /* every tap target on the page meets the 44px floor */
+  [data-design="atlas"] .at-territory-actions button,
+  [data-design="strip"] .sp-band-actions button,
+  .tk2-root .tk-quick button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .tk2-tag {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tk2-number {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* --------------------------- the reflect sheet --------------------------- */
+/* Six fields, one per tracker, each opening on what today holds. Wider than
+   the single-category panel, and arranged in two columns so it stays short. */
+
+.tk2-sheet {
+  max-width: 520px;
+}
+
+.tk2-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  margin-top: 26px;
+}
+
+.tk2-sheet-field {
+  display: block;
+}
+
+.tk2-sheet-field > span {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tk2-sheet-input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.12, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--ci-font-mono), ui-monospace, monospace;
+  font-size: 1.25rem;
+  font-weight: 300;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+
+.tk2-sheet-input:focus {
+  outline: none;
+  border-bottom-color: var(--accent-solid);
+}
+
+.tk2-sheet-input::placeholder {
+  color: color-mix(in oklab, var(--foreground) 0.2, transparent);
+}
+
+@media (max-width: 460px) {
+  .tk2-sheet-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ==========================================================================
+   Slice 3 — Atlas phone pass (≤480px only, desktop untouched).
+
+   1. Floating "Reflect & log" button goes smaller (!important beats the
+      inline critical styles Atlas sets in TSX).
+   2. Territory cards: reverted to normal — no card rules (per your call).
+   3. Bottom text shrinks (statement + medical-safety footer, words kept).
+   4. Hero title steps down one notch; compass untouched.
+   5. "Today's snapshot" becomes a centered floating pop like the mood and
+      habit pops — hooked straight onto this sheet's own classes, with
+      !important positioning so it wins against the sheet base styles.
+   ========================================================================== */
+@media (max-width: 480px) {
+  [data-design="atlas"] .at {
+    padding: 2rem 1rem 6rem;
+  }
+
+  [data-design="atlas"] .at-title {
+    font-size: 24px;
+  }
+
+  .premium-log-cta {
+    font-size: 0.78rem !important;
+    padding: 13px 24px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  [data-design="atlas"] .at-statement {
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .tk2-footer {
+    font-size: 10.5px;
+    line-height: 1.6;
+    margin-top: 2rem;
+  }
+
+  .bsheet--phone.metrics-sheet {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    bottom: auto !important;
+    /* `!important` beats Motion's inline transform on this panel, so this rule
+       is the one that actually centres it. A standalone `translate` beside it
+       would be folded into the same transform at build time and double the
+       offset — down-right by a whole sheet. */
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% - 32px) !important;
+    max-width: 480px !important;
+    max-height: 70vh !important;
+    max-height: 70dvh !important;
+    margin: 0 !important;
+  }
+
+  .bsheet--phone .metrics-pop {
+    border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent) !important;
+    border-radius: 24px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .bsheet--phone .metrics-pop > .bsheet-grab {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+ * Section 3 — the console design (was trackers.css)
+ * ========================================================================== */
+
+/**
  * Trackers — its own visual language inside the shared Bloom design system.
  *
- * The theme (ground, ink, type, radius scale) comes from cycle2.css so the page
+ * The theme (ground, ink, type, radius scale) comes from the shared design-system
+ * core at the top of this file (section 1) so the page
  * belongs to the same family. Everything else is deliberately different from
  * the cycle page:
  *
