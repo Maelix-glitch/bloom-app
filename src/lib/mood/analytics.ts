@@ -9,7 +9,8 @@ import type {
   MoodEntry,
 } from "./types";
 import { EMOTION_MAP, EMOTIONS } from "./types";
-import { localDay, shiftDay, todayLocal } from "@/lib/localDay";
+import { localDay, todayLocal } from "@/lib/localDay";
+import { averageMood, currentStreak as sharedCurrentStreak } from "@/lib/stats";
 
 /* ------------------------------------------------------------------ *
  * Pure analytics engine. No DOM, no React — safe to reuse for an AI
@@ -59,8 +60,9 @@ export function aggregateDays(entries: MoodEntry[]): DayAggregate[] {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+/** The shared average-mood definition (lib/stats): entry-weighted, 0 when empty. */
 export function calculateAverageMood(entries: MoodEntry[]): number {
-  return round(mean(entries.map((e) => e.mood)), 2);
+  return round(averageMood(entries) ?? 0, 2);
 }
 
 /** Least-squares slope over day index → points per day, plus direction. */
@@ -442,13 +444,22 @@ export function generateInsights(
   prevDays: DayAggregate[],
   entries: MoodEntry[],
   rangeDays: number,
+  previousEntries?: readonly MoodEntry[],
 ): Insight[] {
   const out: Insight[] = [];
   if (days.length < 2) return out;
 
-  const avg = mean(days.map((d) => d.mood));
-  if (prevDays.length >= 2) {
-    const prevAvg = mean(prevDays.map((d) => d.mood));
+  /* The trend sentence speaks about "your average mood", so when the caller
+     can hand over both periods' entries it uses the shared entry-weighted
+     average (lib/stats) — the same number the headline shows. Averaging the
+     day aggregates instead weights every day equally, and the two could
+     move in opposite directions over the same period. The day-weighted
+     fallback only serves callers that hold aggregates, not entries. */
+  const entryAvg = previousEntries ? averageMood(entries) : null;
+  const entryPrevAvg = previousEntries ? averageMood(previousEntries) : null;
+  const avg = entryAvg ?? mean(days.map((d) => d.mood));
+  const prevAvg = entryPrevAvg ?? (prevDays.length >= 2 ? mean(prevDays.map((d) => d.mood)) : null);
+  if (prevAvg !== null) {
     const pct = round(((avg - prevAvg) / (prevAvg || 1)) * 100, 1);
     if (Math.abs(pct) >= 1)
       out.push({
@@ -521,18 +532,12 @@ export function depthTier(entryCount: number) {
   return { current, next, tiers };
 }
 
+/** The shared streak definition (lib/stats), over the days that carry a check-in. */
 export function currentStreak(days: DayAggregate[], today: string = todayLocal()): number {
-  if (!days.length) return 0;
-  const set = new Set(days.map((d) => d.date));
-  let streak = 0;
-  // Allow the streak to start today or yesterday — a day isn't "missed"
-  // until it is over.
-  let cursor = set.has(today) ? today : shiftDay(today, -1);
-  while (set.has(cursor)) {
-    streak += 1;
-    cursor = shiftDay(cursor, -1);
-  }
-  return streak;
+  return sharedCurrentStreak(
+    days.map((d) => d.date),
+    today,
+  );
 }
 
 export function moodLabel(mood: number) {
