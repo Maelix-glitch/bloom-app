@@ -149,14 +149,22 @@ export function distributionSlices(days: DayAggregate[]) {
   }));
 }
 
-/** One honest sentence about where days have been landing. */
+/**
+ * One honest sentence about where days have been landing.
+ *
+ * `days` is the selected range only (the section's range pill), never the
+ * all-time record — so both branches name the window. The singular branch
+ * used to say "logged so far", which reads as all-time and collided with
+ * Profile's all-time "days logged" (the same words, two different scopes,
+ * seen live as Mood "1 day logged" beside Profile "11").
+ */
 export function distributionNote(days: DayAggregate[], rangeLabel: string): string {
   if (days.length === 0) return "Log a few days and this ring fills in on its own.";
   const slices = distributionSlices(days);
   const top = [...slices].sort((a, b) => b.value - a.value)[0]!;
   const share = Math.round((top.value / days.length) * 100);
   const noun = top.label.toLowerCase();
-  if (days.length === 1) return `One day logged so far — it read as ${noun}.`;
+  if (days.length === 1) return `One day logged in the ${rangeLabel.toLowerCase()} — it read as ${noun}.`;
   return `${top.label} days are your most common ones — ${share}% of the ${days.length} days logged in the ${rangeLabel.toLowerCase()}.`;
 }
 
