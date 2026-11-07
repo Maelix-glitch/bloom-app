@@ -74,7 +74,7 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import type { BloomAccent } from "@/lib/profile/types";
 
 import { MOOD_LABELS, MoodBlob } from "./MoodBlob";
-import "@/styles/mood-motion.css";
+import "@/styles/mood.css";
 import { MoodJourneyChart } from "./MoodJourneyChart";
 import { MoodDonut } from "./MoodDonut";
 import { MoodGraph, MoodGraphSkeleton } from "./MoodGraph";
