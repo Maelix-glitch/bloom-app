@@ -22,9 +22,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useHabits, type HabitsStore } from "@/hooks/useHabits";
-import { useTrackers } from "@/hooks/useTrackers";
+import { useHabits, type HabitsAuth, type HabitsStore } from "@/hooks/useHabits";
+import { useTrackers, type TrackerSyncState } from "@/hooks/useTrackers";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
+import { useEverReady } from "@/hooks/useEverReady";
 import { todayLocal, shiftDay } from "@/lib/localDay";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import { readPoints } from "@/lib/home/habits";
@@ -75,6 +76,17 @@ export interface AwardResult {
 
 export interface ProgressionStore {
   loading: boolean;
+  /**
+   * True while the records behind achievement progress (habit logs,
+   * tracker days, mood entries) are still arriving from the account. In
+   * that window the only counts available are this device's, and showing
+   * them as progress would repeat the hero's old defect one section down
+   * (Balance Keeper at 3/30, settling to 11/30 a moment later) — so the
+   * gallery holds a loading state until the records settle, exactly as
+   * the hero holds its placeholder until the balance does. Latched:
+   * once settled, background syncs never turn this back on.
+   */
+  achievementsPending: boolean;
   points: number;
   today: string;
   rank: RankState;
@@ -147,6 +159,32 @@ function isMissingRpcError(err: unknown): boolean {
     msg.includes("could not find") ||
     msg.includes("404")
   );
+}
+
+/**
+ * Have the records behind goal/achievement progress (habit logs, tracker
+ * days, mood entries) settled into their account state? Until they have,
+ * the only days the engine can count are the ones already on this device —
+ * real, but interim: the account pull routinely carries more of them.
+ * Presenting those counts as achievement progress was the achievements
+ * section's version of the hero's old count-up defect.
+ */
+export function progressionRecordsSettled(state: {
+  auth: HabitsAuth;
+  habitsLoading: boolean;
+  moodLoading: boolean;
+  trackersHydrated: boolean;
+  trackerSyncState: TrackerSyncState;
+}): boolean {
+  // Still learning whether there is a session at all: nothing has settled.
+  if (state.auth === "checking") return false;
+  // Signed out, or a device-only build: the device record IS the record.
+  if (state.auth !== "signed-in") return true;
+  if (state.habitsLoading || state.moodLoading || !state.trackersHydrated) return false;
+  // The tracker pull starts at "off" and passes through "loading"; every
+  // later state means the pull has answered. On "error" the device days
+  // stand in — the same fallback the balance takes under its banner.
+  return state.trackerSyncState !== "off" && state.trackerSyncState !== "loading";
 }
 
 export function useProgression(): ProgressionStore {
@@ -224,6 +262,22 @@ export function useProgression(): ProgressionStore {
   }, [signedIn, profileId, habits.points, pointsNonce, ledgerVersion]);
 
   const refreshPoints = useCallback(() => setPointsNonce((n) => n + 1), []);
+
+  /* --------------------- records behind the progress --------------------- */
+  // The balance has its own pending rule (below); this is the same rule
+  // for the records the achievements are counted from. Latched like the
+  // Mood page's first-data gate, so a background sync never re-hides a
+  // settled gallery — it only ever covers the first arrival.
+  const recordsSettled = progressionRecordsSettled({
+    auth: habits.auth,
+    habitsLoading: habits.loading,
+    moodLoading: mood.loading,
+    trackersHydrated: trackers.hydrated,
+    trackerSyncState: trackers.sync.state,
+  });
+  const recordsReady = useEverReady(recordsSettled);
+  const achievementsPending =
+    habits.auth !== "signed-out" && habits.auth !== "off" && !recordsReady;
 
   /* -------------------------------- input --------------------------------- */
   const input: ProgressionInput = useMemo(() => {
@@ -737,6 +791,7 @@ export function useProgression(): ProgressionStore {
 
   return {
     loading: snapshot.loading,
+    achievementsPending,
     points: snapshot.points,
     today,
     rank: snapshot.rank,
