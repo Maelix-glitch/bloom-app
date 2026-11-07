@@ -343,6 +343,10 @@ export interface ProgressionInput {
     waterMl: number | null;
     movementMinutes: number | null;
     energy: number | null;
+    /** Screen minutes — never a goal target, but a day that only logged
+     *  screen still counts as a checked-in day (see evaluate's balanceDays
+     *  and the shared signal definition in lib/stats). */
+    screenMinutes: number | null;
     studyMinutes: number;
     /** How many study sessions that day recorded (Trackers stores a list). */
     studySessions: number;
