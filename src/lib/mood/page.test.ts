@@ -90,6 +90,16 @@ describe("mood page view-model", () => {
     expect(distributionNote([], "Last 30 days")).toMatch(/Log a few days/);
   });
 
+  it("names the window for a single day too — never an all-time-sounding 'so far'", () => {
+    // The distribution is range-scoped; Profile's "days logged" is all-time.
+    // The singular branch must state its window exactly like the plural one,
+    // so the same words never carry two scopes.
+    const note = distributionNote([day("2026-09-01", 9)], "Last 30 days");
+    expect(note).toBe("One day logged in the last 30 days — it read as excellent.");
+    expect(note).not.toMatch(/so far/);
+    expect(distributionNote([day("2026-09-01", 9)], "Last 7 days")).toContain("last 7 days");
+  });
+
   it("never invents insights from too little data", () => {
     expect(
       quickInsights({
