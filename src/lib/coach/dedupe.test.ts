@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { CoachMessage } from "@/hooks/useCoachSystem";
-import { dedupeAdjacentMessages } from "./ui-helpers";
+import { dedupeAdjacentMessages, dedupeDuplicatedTurns } from "./ui-helpers";
 
 /**
  * The cloud thread can hold adjacent duplicate rows (a regenerated reply is
@@ -83,5 +83,100 @@ describe("dedupeAdjacentMessages", () => {
   it("treats whitespace-only differences as the same text", () => {
     const out = dedupeAdjacentMessages([msg("coach", "Same  reply."), msg("coach", "Same reply.")]);
     expect(out).toHaveLength(1);
+  });
+});
+
+describe("dedupeDuplicatedTurns", () => {
+  const reply =
+    "I read from your logs — and I'd rather say nothing than guess at something I can't see.";
+
+  it("collapses the exact live pattern: hello / reply / hello / reply becomes one turn", () => {
+    // The stored thread the adjacent pass could not repair: the prompt and
+    // its reply are each identical, but a reply sits between the two
+    // prompts, so no two neighbours are alike.
+    const thread = [
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "hello"),
+      msg("coach", reply),
+    ];
+    const out = dedupeDuplicatedTurns(dedupeAdjacentMessages(thread));
+    expect(out.map((m) => m.role)).toEqual(["user", "coach"]);
+    expect(out.map((m) => m.paragraphs[0])).toEqual(["hello", reply]);
+  });
+
+  it("collapses a turn repeated three times down to the first", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "hello"),
+      msg("coach", reply),
+    ]);
+    expect(out).toHaveLength(2);
+  });
+
+  it("keeps a legitimate repeat: same prompt, different reply", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "hello"),
+      msg("coach", "Hello again — what are we looking at today?"),
+    ]);
+    expect(out).toHaveLength(4);
+  });
+
+  it("keeps a repeated prompt that has no reply yet (the thread just ends)", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "hello"),
+    ]);
+    expect(out).toHaveLength(3);
+  });
+
+  it("keeps identical turns that are not consecutive", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "How did I sleep?"),
+      msg("coach", "Soundly — seven and a half hours."),
+      msg("user", "hello"),
+      msg("coach", reply),
+    ]);
+    expect(out).toHaveLength(6);
+  });
+
+  it("keeps a turn whose reply is attachment-only (no text to compare)", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("user", "hello"),
+      msg("coach", ""),
+      msg("user", "hello"),
+      msg("coach", ""),
+    ]);
+    expect(out).toHaveLength(4);
+  });
+
+  it("leaves a coach lead-in and the turns after it alone", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("coach", "Welcome back."),
+      msg("user", "hello"),
+      msg("coach", reply),
+      msg("user", "Thanks — plan tonight?"),
+      msg("coach", "Here is a gentle plan."),
+    ]);
+    expect(out).toHaveLength(5);
+  });
+
+  it("compares across the 'you'/'user' role vintages", () => {
+    const out = dedupeDuplicatedTurns([
+      msg("you", "hello"),
+      msg("coach", reply),
+      msg("user", "hello"),
+      msg("coach", reply),
+    ]);
+    expect(out).toHaveLength(2);
+    expect(out[0]?.role).toBe("you");
   });
 });
