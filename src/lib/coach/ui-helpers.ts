@@ -151,6 +151,36 @@ export function dedupeDuplicatedTurns(messages: CoachMessage[]): CoachMessage[] 
   return out;
 }
 
+/**
+ * Put an imported thread in the order it was spoken.
+ *
+ * The cloud read orders by `created_at` alone, and that is not a total
+ * order: a question and its reply saved inside the same instant (a turn
+ * written in one breath, or rows whose timestamps share the precision the
+ * database kept) come back in whatever order the store pleases — seen
+ * live as a reply rendered directly *before* the message it answers.
+ * Timestamps still lead; only an exact tie falls to the one fact that is
+ * always true of a turn: the person's words came before the reply to
+ * them. Anything else — different times, unparseable times, same side —
+ * keeps the order it arrived in. Display order only: no row is touched.
+ */
+export function orderImportedMessages(messages: CoachMessage[]): CoachMessage[] {
+  return messages
+    .map((message, index) => ({ message, index }))
+    .sort((a, b) => {
+      const at = Date.parse(a.message.time);
+      const bt = Date.parse(b.message.time);
+      if (Number.isFinite(at) && Number.isFinite(bt)) {
+        if (at !== bt) return at - bt;
+        const aUser = sameSide(a.message.role, "user");
+        const bUser = sameSide(b.message.role, "user");
+        if (aUser !== bUser) return aUser ? -1 : 1;
+      }
+      return a.index - b.index;
+    })
+    .map(({ message }) => message);
+}
+
 /** Latest activity per conversation, used to group the list. */
 export type ConversationGroupId = "today" | "yesterday" | "previous7" | "earlier";
 
