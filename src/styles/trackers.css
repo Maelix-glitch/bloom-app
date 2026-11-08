@@ -2168,11 +2168,26 @@
   stroke-width: 2.5px;
 }
 
-/* the floating action needs room at the foot of the page, and it must never
-   sit on top of an open panel */
+/* The floating action needs room at the foot of the page, and it must never
+   sit on top of an open panel — or on the page's own content. The dock is a
+   fixed strip: its button (~48px) plus its 16px offset from the viewport
+   edge, over the phone tab bar (--app-bottom-nav). The page's bottom
+   padding is computed from that same geometry, so the two can never drift
+   apart: at the foot of the page the strip only ever covers padding, and
+   7.5rem over the tab bar leaves ~56px of air above the button. The flat
+   values this replaces quietly broke that promise at small widths — the
+   ≤480px rule shrank the padding to 6rem while the strip there is ~7.5rem,
+   trapping the footer under the pill. */
 
 .at {
-  padding-bottom: 120px;
+  padding-bottom: calc(var(--app-bottom-nav, 0px) + 7.5rem);
+}
+
+/* Anchored landings (the #body-tools jump, scroll-into-view) stop with the
+   same clearance, so a section head never settles under the dock either. */
+
+.at-board, .at-section {
+  scroll-margin-bottom: calc(var(--app-bottom-nav, 0px) + 5.5rem);
 }
 
 /* phones: compact territory cards and stacked comparisons — the same map,
@@ -2180,7 +2195,7 @@
 
 @media (max-width: 639px) {
   .at {
-    padding: 1.75rem 1rem 8rem;
+    padding: 1.75rem 1rem calc(var(--app-bottom-nav, 0px) + 7.5rem);
   }
 
   .at-territory {
@@ -2279,7 +2294,7 @@
 
 @media (max-width: 480px) {
   .at {
-    padding: 2rem 1rem 6rem;
+    padding: 2rem 1rem calc(var(--app-bottom-nav, 0px) + 7.5rem);
   }
 
   .at-title {
