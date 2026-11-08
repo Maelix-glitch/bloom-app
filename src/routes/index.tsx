@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarRange, Droplet, Gift, Plus, Scale, Smile } from "lucide-react";
 
 import storiesCss from "../styles/stories.css?url";
+import { STORIES_SCOPED_FONT_HREF } from "@/lib/stories/canvas/typography";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
@@ -77,7 +78,11 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     /* Today carries the story rail, composer and viewer. */
-    links: [{ rel: "stylesheet", href: storiesCss }],
+    links: [
+      { rel: "stylesheet", href: storiesCss },
+      /* D4: the Stories-scoped preset fonts (Cormorant Garamond, Oswald). */
+      { rel: "stylesheet", href: STORIES_SCOPED_FONT_HREF },
+    ],
   }),
   component: TodayPage,
 });

@@ -75,12 +75,13 @@ describe("UI guard (warn): hex literals outside the token home", () => {
 
 describe("UI guard (warn): Google Fonts families outside the three", () => {
   const ALLOWED = new Set(["Fraunces", "Inter", "IBM Plex Mono"]);
-  /* D4 exception, pending the owner's decision: Stories canvas presets
-     (handwritten/romantic/poster voices, incl. stored stories) resolve
-     Caveat — and currently also Cormorant Garamond and Oswald — from the
-     root link. Caveat is the exception the plan recommends keeping,
-     Stories-scoped; the other two are drift even by that reading. */
-  const EXCEPTIONS = new Set(["Caveat"]);
+  /* D4 exception, ADOPTED 2026-11-08: Stories canvas presets
+     (handwritten/romantic/poster voices, incl. stored stories) get three
+     scoped families — Caveat from the root link, and Cormorant Garamond +
+     Oswald loaded only by the Stories-bearing routes (/, /profile,
+     /$handle) via STORIES_SCOPED_FONT_HREF. Anywhere else they would be
+     drift; scoped to Stories they are the design. */
+  const EXCEPTIONS = new Set(["Caveat", "Cormorant Garamond", "Oswald"]);
 
   it("reports families loaded outside the system", () => {
     const loaded = new Map<string, string[]>();

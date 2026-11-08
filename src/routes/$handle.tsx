@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import profileCss from "../styles/profile.css?url";
 import storiesCss from "../styles/stories.css?url";
+import { STORIES_SCOPED_FONT_HREF } from "@/lib/stories/canvas/typography";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
 
@@ -42,6 +43,8 @@ export const Route = createFileRoute("/$handle")({
       { rel: "stylesheet", href: profileCss },
       /* The public profile renders the story viewer and rings. */
       { rel: "stylesheet", href: storiesCss },
+      /* D4: the Stories-scoped preset fonts (Cormorant Garamond, Oswald). */
+      { rel: "stylesheet", href: STORIES_SCOPED_FONT_HREF },
     ],
     meta: [{ title: `Bloom — @${params.handle.replace(/^@/, "")}` }],
   }),

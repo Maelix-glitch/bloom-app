@@ -426,11 +426,60 @@ function paintData(
 
 /* --------------------------------- export -------------------------------- */
 
+/**
+ * The exact font faces an export can draw with: every text element's
+ * preset voice (weight and style included), the "soft" voice the data
+ * badges borrow, and Inter for the badges' numbers and labels.
+ */
+export function exportFontFaces(options: ExportOptions): { family: string; weight: number; style: string }[] {
+  const faces = new Map<string, { family: string; weight: number; style: string }>();
+  const add = (family: string, weight: number, style: string) => {
+    const first = family.split(",")[0]!.trim().replace(/^["']|["']$/g, "");
+    if (first) faces.set(`${style} ${weight} ${first}`, { family: first, weight, style });
+  };
+  for (const el of options.elements) {
+    if (el.kind !== "text") continue;
+    const r = resolveText(el.preset, el.style ?? {}, 1);
+    add(r.canvasFamily, r.fontWeight, r.fontStyle);
+  }
+  const soft = resolveText("soft", {}, 1);
+  add(soft.canvasFamily, soft.fontWeight, soft.fontStyle);
+  add("Inter", 400, "normal");
+  add("Inter", 600, "normal");
+  add("Inter", 700, "normal");
+  return [...faces.values()];
+}
+
+/**
+ * Wait — briefly — for the export's webfonts before rasterising.
+ *
+ * Canvas text drawn before a webfont arrives is baked into the PNG in
+ * the fallback face for good; nothing downstream can repair it. The
+ * wait is capped: a slow font CDN must never hold an export hostage,
+ * and environments without the Font Loading API (SSR, jsdom) skip it.
+ */
+async function ensureExportFonts(options: ExportOptions): Promise<void> {
+  if (typeof document === "undefined") return;
+  const fonts = document.fonts;
+  if (!fonts?.load) return;
+  const loads = exportFontFaces(options).map((face) =>
+    fonts
+      .load(`${face.style} ${face.weight} 16px "${face.family}"`, "Bloom")
+      .catch(() => [] as FontFace[]),
+  );
+  await Promise.race([
+    Promise.all(loads),
+    new Promise((resolve) => setTimeout(resolve, 1200)),
+  ]).catch(() => undefined);
+}
+
 export async function exportStory(options: ExportOptions): Promise<ExportResult> {
   const width = options.width ?? EXPORT_WIDTH;
   const height = options.height ?? EXPORT_HEIGHT;
   const k = width / BASE_WIDTH;
   const load = options.loadImage ?? defaultLoadImage;
+
+  await ensureExportFonts(options);
 
   const canvas = document.createElement("canvas");
   canvas.width = width;

@@ -30,8 +30,8 @@ import type { BloomStoryData } from "@/lib/stories/types";
 
 /**
  * A real composition at thumbnail size. The canvas only mounts once the card
- * scrolls near the viewport — 141 mounted canvases would be 141 ResizeObservers
- * and a very slow first paint.
+ * scrolls near the viewport — fifty mounted canvases would be fifty
+ * ResizeObservers and a very slow first paint.
  */
 export function TemplateThumb({
   def,
