@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -41,9 +42,28 @@ import type { InstallState } from "@/hooks/useInstallPrompt";
 
 /* -------------------------------- shared -------------------------------- */
 
+/**
+ * The family's visible way out (popup-premium slice): these sheets relied
+ * on Escape / backdrop alone, so on desktop nothing on screen said they
+ * could be closed. One round ×, top-right of the panel, like the tracker
+ * sheets carry. It only dismisses — it never saves or erases.
+ */
+function SheetClose({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label="Close"
+      className="bsheet-icon absolute right-4 top-4 z-10 sm:right-5"
+    >
+      <BloomIcon name="close" size={16} />
+    </button>
+  );
+}
+
 function SheetHead({ title, blurb }: { title: string; blurb: string }) {
   return (
-    <SheetItem className="px-5 pb-1 pt-1 sm:px-6">
+    <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
       <h2 className="display text-[20px] leading-tight">{title}</h2>
       <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{blurb}</p>
     </SheetItem>
@@ -82,6 +102,7 @@ export function ExportSheet({
 
   return (
     <BloomSheet open={open} onClose={onClose} title="Download everything" size="md">
+      <SheetClose onClose={onClose} />
       <SheetBody className="pb-5">
         <SheetHead
           title="Download everything"
@@ -156,6 +177,7 @@ export function RemindersSheet({
 
   return (
     <BloomSheet open={open} onClose={onClose} title="Reminders" size="md">
+      <SheetClose onClose={onClose} />
       <SheetBody className="pb-5">
         <SheetHead
           title="Remind me"
@@ -336,8 +358,9 @@ export function EraseSheet({
 
   return (
     <BloomSheet open={open} onClose={onClose} title="Erase everything" size="md">
+      <SheetClose onClose={onClose} />
       <SheetBody className="pb-5">
-        <SheetItem className="px-5 pb-1 pt-1 sm:px-6">
+        <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
           <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.08em] text-red-400">
             <AlertTriangle className="size-3.5" aria-hidden /> This cannot be undone
           </p>
