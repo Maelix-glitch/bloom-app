@@ -13,6 +13,7 @@
 import { useMemo, useState } from "react";
 import { Check, ChevronDown, Sparkles } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CADENCE_LABELS, JOURNEY_DOMAIN_LABELS } from "@/lib/progression/types";
 import type { GoalProgress, JourneyDomain } from "@/lib/progression/types";
@@ -147,14 +148,14 @@ function GoalCard({
         ) : complete ? (
           <>
             <span className="pg-goal-length">Ready</span>
-            <button
+            <Button
               type="button"
-              className="pg-btn pg-btn-primary"
+              size="sm"
               onClick={() => onClaim(item.goal.id)}
               disabled={isDisabled}
             >
               {isClaiming ? "Claiming…" : "Claim points"}
-            </button>
+            </Button>
           </>
         ) : (
           <>
@@ -354,10 +355,10 @@ export function GoalsBoard({
 
       {hidden > 0 ? (
         <div className="pg-pager">
-          <button type="button" className="pg-btn pg-btn-quiet" onClick={() => setShowAll(true)}>
-            <ChevronDown width={13} height={13} aria-hidden />
+          <Button type="button" variant="secondary" size="sm" onClick={() => setShowAll(true)}>
+            <ChevronDown aria-hidden />
             Show {hidden} more {CADENCE_LABELS.monthly === "This month" ? "" : ""}goals
-          </button>
+          </Button>
         </div>
       ) : null}
     </div>

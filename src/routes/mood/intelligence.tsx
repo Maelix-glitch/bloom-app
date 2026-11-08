@@ -18,7 +18,7 @@ import { Distribution } from "@/components/mood/Distribution";
 import { Insights } from "@/components/mood/Insights";
 import { History } from "@/components/mood/History";
 import { Composer } from "@/components/mood/Composer";
-import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { BloomConfirm } from "@/components/ui/bloom-sheet";
 import { Reveal } from "@/components/mood/primitives";
 import { AppNav } from "@/components/home/HomeSidebar";
 
@@ -218,7 +218,7 @@ function MoodIntelligencePage() {
         )}
       </main>
 
-      <ConfirmSheet
+      <BloomConfirm
         open={resetOpen}
         onClose={() => setResetOpen(false)}
         title="Erase every mood entry?"

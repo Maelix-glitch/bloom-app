@@ -13,6 +13,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import type { GoalProgress, RankState } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
 import { RankBadge, RankBanner } from "./RankBadge";
@@ -275,14 +276,15 @@ export function JourneyHero({
               <small>points</small>
             </span>
             {onStartGoal ? (
-              <button
+              <Button
                 type="button"
-                className="pg-icon-btn"
+                variant="outline"
+                size="icon-sm"
                 aria-label={`Find ${nextMilestone.goal.title} in the goals list`}
                 onClick={() => onStartGoal(nextMilestone.goal.id)}
               >
-                <ArrowUpRight width={14} height={14} aria-hidden />
-              </button>
+                <ArrowUpRight aria-hidden />
+              </Button>
             ) : null}
           </div>
         </div>

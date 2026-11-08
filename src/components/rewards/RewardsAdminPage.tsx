@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 import { BloomHeader } from "@/components/BloomHeader";
-import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { BloomConfirm } from "@/components/ui/bloom-sheet";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import {
   useRewardsSystem,
@@ -511,7 +511,7 @@ export function RewardsAdminPage() {
         )}
       </section>
 
-      <ConfirmSheet
+      <BloomConfirm
         open={revoking !== null}
         onClose={() => setRevoking(null)}
         title={revoking ? `Revoke “${revoking.title}”?` : "Revoke this reward?"}

@@ -13,6 +13,7 @@
 import { useState } from "react";
 import { Check, ChevronDown, Lock } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { ACHIEVEMENT_RARITY_LABELS } from "@/lib/progression/types";
 import type { AchievementState } from "@/lib/progression/types";
 import { formatShortDate } from "@/lib/progression/format";
@@ -106,10 +107,10 @@ export function AchievementGallery({
 
       {list.length < ordered.length ? (
         <div className="pg-pager">
-          <button type="button" className="pg-btn pg-btn-quiet" onClick={() => setShowAll(true)}>
-            <ChevronDown width={13} height={13} aria-hidden />
+          <Button type="button" variant="secondary" size="sm" onClick={() => setShowAll(true)}>
+            <ChevronDown aria-hidden />
             Show all {ordered.length} achievements
-          </button>
+          </Button>
         </div>
       ) : null}
     </div>

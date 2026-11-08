@@ -10,6 +10,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { ladderPreview } from "@/lib/progression/ranks";
 import { formatPoints } from "@/lib/progression/format";
 import { RankBadge, badgeBand, BADGE_BAND_NAMES } from "./RankBadge";
@@ -61,10 +62,10 @@ export function CrestHall({ points, rankTier }: { points: number; rankTier: numb
 
       {!showAll && visible.length < ladder.length ? (
         <div className="pg-pager">
-          <button type="button" className="pg-btn pg-btn-quiet" onClick={() => setShowAll(true)}>
-            <ChevronDown width={13} height={13} aria-hidden />
+          <Button type="button" variant="secondary" size="sm" onClick={() => setShowAll(true)}>
+            <ChevronDown aria-hidden />
             Show all {ladder.length} crests
-          </button>
+          </Button>
         </div>
       ) : null}
 

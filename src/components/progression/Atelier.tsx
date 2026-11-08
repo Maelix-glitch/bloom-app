@@ -14,6 +14,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, Lock, RotateCcw } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
+import { Button } from "@/components/ui/button";
 import { useProgression } from "@/hooks/useProgression";
 import { CATALOG, componentsById } from "@/lib/rewards/catalog";
 import { ComponentKind } from "@/lib/rewards/types";
@@ -109,16 +110,17 @@ export function AtelierPage() {
               <Emblem id={progress.rank.rank.emblem} size={16} strokeWidth={1.6} />
               {progress.loading ? "—" : formatPoints(progress.points)} points
             </span>
-            <button
+            <Button
               type="button"
-              className="pg-btn pg-btn-quiet"
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 resetEquipped();
                 setStore(loadRewardsStore());
               }}
             >
-              <RotateCcw width={13} height={13} aria-hidden /> Bloom default
-            </button>
+              <RotateCcw aria-hidden /> Bloom default
+            </Button>
           </div>
         </div>
 
@@ -150,14 +152,14 @@ export function AtelierPage() {
                         <Lock width={11} height={11} aria-hidden /> Rank {RANK_GATE[slotKind]}
                       </span>
                     ) : (
-                      <button
+                      <Button
                         type="button"
-                        className="pg-btn pg-btn-quiet"
-                        style={{ padding: "0.35rem 0.8rem" }}
+                        variant="secondary"
+                        size="sm"
                         onClick={() => setKind(slotKind)}
                       >
                         {comp ? "Change" : "Choose"}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 );
@@ -205,9 +207,10 @@ export function AtelierPage() {
                           <Check width={12} height={12} aria-hidden /> Equipped
                         </span>
                       ) : (
-                        <button
+                        <Button
                           type="button"
-                          className="pg-btn pg-btn-quiet"
+                          variant="secondary"
+                          size="sm"
                           onClick={() => {
                             if (!slot) return;
                             setEquipped({ [slot]: comp.id });
@@ -215,7 +218,7 @@ export function AtelierPage() {
                           }}
                         >
                           Use this look
-                        </button>
+                        </Button>
                       )
                     ) : (
                       <span className="pg-lock-note">

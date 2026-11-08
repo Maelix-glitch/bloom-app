@@ -13,8 +13,9 @@
  * transitions, so nothing here re-invents accessibility.
  *
  * U2 convergence (plan §2.4): this file also carries the confirm variant,
- * `BloomConfirm` — the old standalone confirm-sheet is absorbed here, and
- * `ui/confirm-sheet.tsx` survives only as a re-export shim. The ui sheet /
+ * `BloomConfirm` — the old standalone confirm-sheet was absorbed here; its
+ * re-export shim was retired in the U6 Rewards pass once the last call
+ * sites migrated to importing `BloomConfirm` from this file. The ui sheet /
  * dialog / alert-dialog wrappers keep their Radix APIs but wear this
  * sheet's chrome (blurred canvas backdrop, token surface, --radius-dialog,
  * --elevation-dialog, motion tokens), so every overlay in the app reads as
