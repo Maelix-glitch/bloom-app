@@ -28,7 +28,7 @@ import { formatDate } from "@/lib/cycle/predict";
 import { Achievements, TargetSheet } from "./Targets";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { TrackerModal } from "./TrackerModal";
-import { contour, loggedCount, routePath } from "./atlasCharts";
+import { contour, loggedCount, routePath, spreadRouteDots } from "./atlasCharts";
 import { Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
 
 const C = 130;
@@ -135,6 +135,30 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
       document.querySelector<HTMLElement>(`.at-territory[data-id="${openId}"]`)?.focus();
     });
   }, [openId]);
+
+  /*
+   * The route chart, computed across all six series at once. Each tracker
+   * is scaled to its own peak, so a lone logged day lands at the same
+   * height for every tracker — and on the same day, at the same x. Without
+   * the spread, six first-day dots coincide exactly and only the
+   * last-painted one shows; the legend still counts the other five.
+   * spreadRouteDots separates the dots inside their day's column; lines
+   * stay per-series (they can only coincide when two trackers genuinely
+   * share a shape, and both colours then read as one path).
+   */
+  const routeSeries = defs.map((def) => {
+    const stat = analysis.trackers[def.id];
+    const values = stat.series.map((p) => p.value);
+    const peak = Math.max(...values.map((v) => v ?? 0), 1);
+    const y = (v: number) => Math.round(200 - (v / peak) * 170);
+    return { def, stat, path: routePath(values, routeX, y) };
+  });
+  const routeDots = spreadRouteDots(
+    routeSeries.flatMap((s) => s.path.singles.map((d) => ({ ...d, id: s.def.id }))),
+    8,
+    4,
+    200,
+  );
 
   return (
     <div className="ci ci-root tk2-root" data-theme={theme}>
@@ -285,9 +309,14 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                           role="img"
                           aria-label={`${def.name}: ${shape.logged} of ${values.length} days logged`}
                         >
-                          {shape.logged === 0 ? (
-                            <line x1="0" y1="51" x2="240" y2="51" className="at-contour-empty" />
-                          ) : (
+                          {/* The ground axis — y=51 is exactly where a value
+                              of zero maps in this plot. It used to render
+                              only for an empty series and vanish the moment
+                              a day was logged, leaving a lone dot floating
+                              in a blank strip; it now stays under the data
+                              in every state, as the chart's ground. */}
+                          <line x1="0" y1="51" x2="240" y2="51" className="at-contour-empty" />
+                          {shape.logged === 0 ? null : (
                             <>
                               {shape.areas.map((d) => (
                                 <path key={d} d={d} className="at-contour-area" />
@@ -360,28 +389,34 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                       role="img"
                       aria-label="Fourteen days of all six trackers"
                     >
-                      {defs.map((def) => {
-                        const values = analysis.trackers[def.id].series.map((p) => p.value);
-                        const peak = Math.max(...values.map((v) => v ?? 0), 1);
-                        const y = (v: number) => Math.round(200 - (v / peak) * 170);
-                        const path = routePath(values, routeX, y);
-                        if (path.logged === 0) return null;
-                        return (
+                      {routeSeries.map(({ def, path }) =>
+                        path.logged === 0 ? null : (
                           <g key={def.id}>
                             {path.lines.map((d) => (
                               <path key={d} d={d} className="at-route-line" data-id={def.id} />
                             ))}
-                            {path.singles.map((dot) => (
-                              <circle
-                                key={`${dot.x}-${dot.y}`}
-                                cx={dot.x}
-                                cy={dot.y}
-                                r={3}
-                                className="at-route-dot"
-                                data-id={def.id}
-                              />
-                            ))}
                           </g>
+                        ),
+                      )}
+                      {/* dots after every line, so no path can paint over one;
+                          the <title> is the chart family's native hover
+                          affordance (the cycle charts use the same) */}
+                      {routeDots.map((dot) => {
+                        const s = routeSeries.find((r) => r.def.id === dot.id)!;
+                        const day = s.stat.series[dot.i];
+                        return (
+                          <circle
+                            key={dot.id}
+                            cx={dot.x}
+                            cy={dot.y}
+                            r={3}
+                            className="at-route-dot"
+                            data-id={dot.id}
+                          >
+                            <title>
+                              {`${s.def.name} · ${day ? formatDate(day.date) : ""} · ${s.def.format(Math.round(dot.v))}`}
+                            </title>
+                          </circle>
                         );
                       })}
                       <line
