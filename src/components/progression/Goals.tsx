@@ -13,6 +13,7 @@
 import { useMemo, useState } from "react";
 import { Check, ChevronDown, Sparkles } from "lucide-react";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { CADENCE_LABELS, JOURNEY_DOMAIN_LABELS } from "@/lib/progression/types";
 import type { GoalProgress, JourneyDomain } from "@/lib/progression/types";
 import { formatPoints } from "@/lib/progression/format";
@@ -340,9 +341,15 @@ export function GoalsBoard({
         : <div className="pg-goals-grid">{list.map((item) => cardFor(item))}</div>}
 
       {visible.length === 0 ? (
-        <p className="pg-empty">
-          No goals in this journal yet — try another one, or just keep doing what you are doing.
-        </p>
+        <EmptyState
+          title={
+            <>
+              No goals in this journal <span className="display-em">yet</span>
+            </>
+          }
+          description="Try another journal, or just keep doing what you are doing."
+          className="py-8"
+        />
       ) : null}
 
       {hidden > 0 ? (
