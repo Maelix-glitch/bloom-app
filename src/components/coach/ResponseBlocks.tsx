@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import type { CoachBlock } from "@/hooks/useCoachSystem";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +75,7 @@ function PlanBlock({
               <span className="coach-plan-step-label">{step.label}</span>
               {step.time ? <span className="coach-plan-step-time">{step.time}</span> : null}
             </span>
-            <Check className="coach-plan-step-check" aria-hidden="true" />
+            <BloomIcon name="check-bloom" size={14} className="coach-plan-step-check" />
           </li>
         ))}
       </ol>
@@ -137,7 +138,7 @@ function ProposalBlock({
           Explore this change <ArrowRight className="coach-block-action-icon" />
         </button>
         <button type="button" className="coach-block-action-ghost" onClick={onDismiss}>
-          <X className="coach-block-action-icon" /> Not now
+          <BloomIcon name="close" size={13} className="coach-block-action-icon" /> Not now
         </button>
       </div>
     </div>

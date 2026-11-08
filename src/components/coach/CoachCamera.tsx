@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { AlertCircle, Check, Image as ImageIcon, X } from "lucide-react";
+
+import { BloomIcon } from "@/components/icons/BloomIcon";
 
 /**
  * A private camera capture — nothing leaves the device until the person
@@ -158,17 +159,17 @@ export function CoachCamera({
               onClick={onClose}
               aria-label="Close camera"
             >
-              <X className="size-4" aria-hidden="true" />
+              <BloomIcon name="close" size={16} />
             </button>
           </div>
           <div className="coach-camera-stage">
             {error ? (
               <div className="coach-camera-error" role="alert">
-                <AlertCircle className="size-4" aria-hidden="true" />
+                <BloomIcon name="error" size={16} />
                 <div>
                   <p>{error}</p>
                   <button type="button" onClick={onChooseFile} className="coach-camera-alt">
-                    <ImageIcon className="size-3.5" aria-hidden="true" /> Choose a photo instead
+                    <BloomIcon name="image" size={14} /> Choose a photo instead
                   </button>
                 </div>
               </div>
@@ -195,7 +196,7 @@ export function CoachCamera({
                 className="coach-btn-primary"
                 onClick={() => onUsePhoto(captured.file)}
               >
-                <Check className="size-4" aria-hidden="true" /> Use photo
+                <BloomIcon name="check-bloom" size={16} /> Use photo
               </button>
             </div>
           ) : (
