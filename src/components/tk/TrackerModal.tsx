@@ -27,6 +27,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,7 +190,19 @@ export function TrackerModal({
 
   return (
     <BloomSheet open onClose={onClose} title={`Log ${def.name}`} description={prompt} placement="pop">
-      <div className="px-1 pb-1 pt-2">
+      <div className="relative px-1 pb-1 pt-2">
+        {/* The sheet family's visible way out — the same round × the mood
+            composer and the snapshot sheet carry. Escape and the backdrop
+            already closed this pop, but on desktop nothing on screen said
+            so; closing here only dismisses, it never saves. */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="bsheet-icon absolute right-0 top-0"
+        >
+          <BloomIcon name="close" size={16} />
+        </button>
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Log {def.name}
         </p>

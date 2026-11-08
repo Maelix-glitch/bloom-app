@@ -226,7 +226,11 @@ function ProfilePage() {
     () => (moodBlock?.status === "ready" ? moodBlock.data : []),
     [moodBlock],
   );
-  const record = useProfileRecord(moodEntries);
+  /* Mood check-ins count as logged days in the record's totals, so the
+     record hasn't settled until the mood block has answered — ready, or
+     error (the empty stand-in the block already falls back to). */
+  const moodSettled = moodBlock != null && moodBlock.status !== "loading";
+  const record = useProfileRecord(moodEntries, { moodSettled });
   const habits = useHabits();
 
   /* Tier B part 2 — reminders, install, one export, one erase */
@@ -550,11 +554,14 @@ function ProfilePage() {
               />
 
 
-              {/* numbers only logging can move */}
+              {/* numbers only logging can move — held on their skeletons
+                  until every record behind them has settled (record.settled
+                  is latched, and the rewards figures wait for the journey),
+                  so the first values shown are the final ones, shown once */}
               <RecordNumbers
-                totals={record.hydrated ? record.totals : null}
+                totals={record.settled ? record.totals : null}
                 stats={journey.status === "ready" ? journey.stats : null}
-                loading={!record.hydrated}
+                loading={!record.settled || journey.status === "loading"}
               />
 
               {/* the record: 12 weeks + what's being tracked */}
@@ -573,21 +580,43 @@ function ProfilePage() {
                         </h2>
                       </div>
                       <p className="text-[12px] text-faint">
-                        {record.totals.last30} of the last 30 days
+                        {record.settled ? (
+                          `${record.totals.last30} of the last 30 days`
+                        ) : (
+                          <span
+                            className="pf-skel inline-block h-3 w-24 align-middle"
+                            aria-hidden
+                          />
+                        )}
                       </p>
                     </div>
-                    <RecordGrid days={record.grid} today={record.today} onSelectDay={openDay} />
+                    {record.settled ? (
+                      <RecordGrid days={record.grid} today={record.today} onSelectDay={openDay} />
+                    ) : (
+                      <p className="text-[12px] text-faint">Loading your record…</p>
+                    )}
                   </div>
                   <div className="pf-card pf-card--pad">
                     <div className="pf-section-head">
                       <div>
                         <p className="pf-eyebrow">Tracking now</p>
                         <h2 className="pf-title">
-                          {record.things.filter((t) => t.on).length} things
+                          {record.settled ? (
+                            `${record.things.filter((t) => t.on).length} things`
+                          ) : (
+                            <span
+                              className="pf-skel inline-block h-5 w-20 align-middle"
+                              aria-hidden
+                            />
+                          )}
                         </h2>
                       </div>
                     </div>
-                    <TrackedThings things={record.things} />
+                    {record.settled ? (
+                      <TrackedThings things={record.things} />
+                    ) : (
+                      <p className="text-[12px] text-faint">Loading…</p>
+                    )}
                   </div>
                 </div>
               </section>
