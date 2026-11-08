@@ -1278,12 +1278,13 @@
    soft gold glow disc behind the glyph. The points pill and the profile
    block carry no wrapper and are untouched.
 
-   A stroke draw-in on the active glyph was considered and dropped: the
-   registry glyphs mix paths, rects, circles and ellipses whose lengths
-   run from ~6 to ~62 units, and CSS cannot normalise them (pathLength
-   lives on each element, inside the shared artwork) — a uniform dash
-   sweep would draw the outlines and then pop the small details in as a
-   clump. Grow-and-settle reads cleaner. */
+   A uniform stroke draw-in was considered and dropped for this layer:
+   the registry glyphs mix paths, rects, circles and ellipses whose
+   lengths run from ~6 to ~62 units, so one dash sweep would draw the
+   outlines and then pop the small details in as a clump. The per-glyph
+   choreography after the arrival block solves it properly instead —
+   pathLength={1} inside the six nav glyphs normalises every drawable,
+   and each glyph's parts arrive in their own sequence. */
 .app-nav-glyph {
   position: relative;
   display: inline-grid;
@@ -1396,6 +1397,407 @@
 .app-sidebar nav .app-nav-link:nth-child(n + 6),
 .app-mobile-nav > a:nth-child(n + 6) {
   animation-delay: 225ms;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar icon choreography — the layer the grow/glow above could not
+   do: each nav glyph performs its own small botanical sequence when its
+   item becomes active. Drawables carry pathLength={1} in the registry,
+   so stroke-dashoffset draws every stroke evenly whatever its true
+   length; parts then arrive staggered by role — outlines lead, structure
+   follows, details land last — inside the --motion-signature budget, and
+   every sequence ends on the glyph's exact rest artwork. Hovering an
+   inactive item answers with a shortened echo: one part flourish, no
+   redraw. All of it is scoped to .app-nav-glyph[data-glyph="…"], so the
+   same glyphs in habits, trackers and coach stay still, and the whole
+   subsection sits under no-preference — reduced-motion users get the
+   rest artwork instantly, states still reading through colour and glow. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Part mechanics: the pivots the part motions turn on. Leaves pivot on
+     the corner where they meet their stem (bi-lo / bi-ro), petals on
+     their base at the flower's centre, dots and eyes on their centres,
+     and the gauge needle on its hub in view-box units. */
+  .app-nav-glyph .bi-leaf,
+  .app-nav-glyph .bi-eye,
+  .app-nav-glyph .bi-petal,
+  .app-nav-glyph .bi-dot,
+  .app-nav-glyph .bi-h {
+    transform-box: fill-box;
+  }
+  .app-nav-glyph .bi-lo {
+    transform-origin: 0% 100%;
+  }
+  .app-nav-glyph .bi-ro {
+    transform-origin: 100% 100%;
+  }
+  .app-nav-glyph .bi-eye,
+  .app-nav-glyph .bi-dot {
+    transform-origin: 50% 50%;
+  }
+  .app-nav-glyph .bi-petal {
+    transform-origin: 50% 100%;
+  }
+  .app-nav-glyph .bi-needle {
+    transform-box: view-box;
+    transform-origin: 12px 14.6px;
+  }
+
+  @keyframes bi-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes bi-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes bi-pop {
+    from {
+      opacity: 0;
+      transform: scale(0);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes bi-unfold {
+    from {
+      opacity: 0;
+      transform: scale(0.3) rotate(-7deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+  @keyframes bi-petal-unfold {
+    from {
+      opacity: 0;
+      transform: scale(0.25);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes bi-blink-in {
+    from {
+      opacity: 0.3;
+      transform: scaleY(0.08);
+    }
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+  @keyframes bi-sweep {
+    from {
+      transform: rotate(-44deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+  /* Hover echoes — one quiet flourish per part, identity at both ends. */
+  @keyframes bi-echo-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    45% {
+      transform: translateY(0.9px);
+    }
+  }
+  @keyframes bi-echo-tilt {
+    0%,
+    100% {
+      transform: rotate(0deg) scale(1);
+    }
+    45% {
+      transform: rotate(4.5deg) scale(1.05);
+    }
+  }
+  @keyframes bi-echo-dip {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    40% {
+      transform: rotate(-7deg);
+    }
+  }
+  @keyframes bi-echo-blink {
+    0%,
+    100% {
+      transform: scaleY(1);
+    }
+    32% {
+      transform: scaleY(0.1);
+    }
+    64% {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes bi-echo-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    45% {
+      transform: scale(1.09);
+    }
+  }
+
+  /* — Today: the page draws, its hangers drop in, the sprout blooms. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-o,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-o {
+    stroke-dasharray: 1;
+    animation: bi-draw 290ms var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-s,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-s {
+    stroke-dasharray: 1;
+    animation: bi-draw 140ms var(--ease-out-expo) 130ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-h,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-h {
+    animation: bi-drop 160ms var(--ease-out-expo) 195ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-h ~ .bi-h,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-h ~ .bi-h {
+    animation-delay: 250ms;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-stem,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-stem {
+    stroke-dasharray: 1;
+    animation: bi-draw 150ms var(--ease-out-expo) 285ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-leaf {
+    animation: bi-unfold 180ms var(--ease-out-expo) 360ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-leaf ~ .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-leaf ~ .bi-leaf {
+    animation-delay: 415ms;
+  }
+
+  /* — Trackers: the arc draws, the leaf needle sweeps home, hub lands. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="trackers"] .bi-o,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="trackers"] .bi-o {
+    stroke-dasharray: 1;
+    animation: bi-draw var(--motion-page) var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="trackers"] .bi-needle,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="trackers"] .bi-needle {
+    animation: bi-sweep 400ms var(--ease-out-expo) 120ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="trackers"] .bi-dot,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="trackers"] .bi-dot {
+    animation: bi-pop 150ms var(--ease-out-expo) 450ms both;
+  }
+
+  /* — Mood: the face draws, the leaf eyes blink open, the smile lands. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-o,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-o {
+    stroke-dasharray: 1;
+    animation: bi-draw 330ms var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-eye,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-eye {
+    animation: bi-blink-in 170ms var(--ease-out-expo) 220ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-eye ~ .bi-eye,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-eye ~ .bi-eye {
+    animation-delay: 280ms;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-s,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-s {
+    stroke-dasharray: 1;
+    animation: bi-draw 210ms var(--ease-out-expo) 370ms both;
+  }
+
+  /* — Rewards: the stem grows up, petals unfold in turn, centre lands. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-stem,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-stem {
+    stroke-dasharray: 1;
+    animation: bi-draw 190ms var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-petal {
+    animation: bi-petal-unfold 230ms var(--ease-out-expo) 110ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal-g:nth-of-type(2) .bi-petal,
+  .app-mobile-nav
+    > a[aria-current="page"]
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal-g:nth-of-type(2)
+    .bi-petal {
+    animation-delay: 160ms;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal-g:nth-of-type(3) .bi-petal,
+  .app-mobile-nav
+    > a[aria-current="page"]
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal-g:nth-of-type(3)
+    .bi-petal {
+    animation-delay: 210ms;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal-g:nth-of-type(4) .bi-petal,
+  .app-mobile-nav
+    > a[aria-current="page"]
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal-g:nth-of-type(4)
+    .bi-petal {
+    animation-delay: 260ms;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal-g:nth-of-type(5) .bi-petal,
+  .app-mobile-nav
+    > a[aria-current="page"]
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal-g:nth-of-type(5)
+    .bi-petal {
+    animation-delay: 310ms;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-leaf {
+    animation: bi-unfold 190ms var(--ease-out-expo) 360ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-dot,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-dot {
+    animation: bi-pop 150ms var(--ease-out-expo) 420ms both;
+  }
+
+  /* — Coach: the bubble draws, the sprout inside it grows and opens. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-o,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-o {
+    stroke-dasharray: 1;
+    animation: bi-draw 350ms var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-stem,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-stem {
+    stroke-dasharray: 1;
+    animation: bi-draw 150ms var(--ease-out-expo) 250ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-leaf {
+    animation: bi-unfold 190ms var(--ease-out-expo) 340ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-leaf ~ .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-leaf ~ .bi-leaf {
+    animation-delay: 395ms;
+  }
+
+  /* — Profile: the head draws, the shoulders follow, the leaf settles. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-o,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-o {
+    stroke-dasharray: 1;
+    animation: bi-draw 250ms var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-s,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-s {
+    stroke-dasharray: 1;
+    animation: bi-draw 260ms var(--ease-out-expo) 140ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-leaf {
+    animation: bi-unfold 200ms var(--ease-out-expo) 370ms both;
+  }
+
+  /* — Hover echoes: a shortened answer from an inactive item — one part
+     flourish at token durations, never a redraw, identity at both ends
+     so the glyph is untouched once the flourish passes. — */
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="today"] .bi-h,
+  .app-nav-link:focus-visible:not(.app-nav-link-active) .app-nav-glyph[data-glyph="today"] .bi-h,
+  .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="today"] .bi-h,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="today"]
+    .bi-h {
+    animation: bi-echo-bob var(--motion-standard) var(--ease-out-expo);
+  }
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="today"] .bi-leaf,
+  .app-nav-link:focus-visible:not(.app-nav-link-active) .app-nav-glyph[data-glyph="today"] .bi-leaf,
+  .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="today"] .bi-leaf,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="today"]
+    .bi-leaf {
+    animation: bi-echo-tilt var(--motion-standard) var(--ease-out-expo);
+  }
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="trackers"] .bi-needle,
+  .app-nav-link:focus-visible:not(.app-nav-link-active)
+    .app-nav-glyph[data-glyph="trackers"]
+    .bi-needle,
+  .app-mobile-nav
+    > a:hover:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="trackers"]
+    .bi-needle,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="trackers"]
+    .bi-needle {
+    animation: bi-echo-dip var(--motion-standard) var(--ease-out-expo);
+  }
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="mood"] .bi-eye,
+  .app-nav-link:focus-visible:not(.app-nav-link-active) .app-nav-glyph[data-glyph="mood"] .bi-eye,
+  .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="mood"] .bi-eye,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="mood"]
+    .bi-eye {
+    animation: bi-echo-blink var(--motion-page) var(--ease-out-expo);
+  }
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="rewards"] .bi-petal,
+  .app-nav-link:focus-visible:not(.app-nav-link-active)
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal,
+  .app-mobile-nav
+    > a:hover:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-petal {
+    animation: bi-echo-pulse var(--motion-standard) var(--ease-out-expo);
+  }
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="rewards"] .bi-leaf,
+  .app-nav-link:focus-visible:not(.app-nav-link-active)
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-leaf,
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="coach"] .bi-leaf,
+  .app-nav-link:focus-visible:not(.app-nav-link-active) .app-nav-glyph[data-glyph="coach"] .bi-leaf,
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="profile"] .bi-leaf,
+  .app-nav-link:focus-visible:not(.app-nav-link-active)
+    .app-nav-glyph[data-glyph="profile"]
+    .bi-leaf,
+  .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="rewards"] .bi-leaf,
+  .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="coach"] .bi-leaf,
+  .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="profile"] .bi-leaf,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="rewards"]
+    .bi-leaf,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="coach"]
+    .bi-leaf,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="profile"]
+    .bi-leaf {
+    animation: bi-echo-tilt var(--motion-standard) var(--ease-out-expo);
+  }
 }
 
 /* Reduced motion: no movement at all — the states (gold, glow) still
