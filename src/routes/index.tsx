@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarRange, Droplet, Gift, Plus, Scale, Smile } from "lucide-react";
 
+import storiesCss from "../styles/stories.css?url";
+
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
@@ -74,6 +76,8 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    /* Today carries the story rail, composer and viewer. */
+    links: [{ rel: "stylesheet", href: storiesCss }],
   }),
   component: TodayPage,
 });
