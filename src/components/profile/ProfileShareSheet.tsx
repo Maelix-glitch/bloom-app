@@ -18,6 +18,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Check, Copy, Eye, Link2, Share2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
 import { accentVar } from "@/components/mood/primitives";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -104,9 +105,19 @@ export function ProfileShareSheet({
 
   return (
     <BloomSheet open={open} onClose={onClose} title="Share profile" size="md">
+      {/* the family's visible way out (popup-premium slice) — this sheet
+          relied on Escape / backdrop alone */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="bsheet-icon absolute right-4 top-4 z-10 sm:right-5"
+      >
+        <BloomIcon name="close" size={16} />
+      </button>
       <SheetBody className="pb-6">
         {/* eyebrow + title */}
-        <SheetItem className="px-5 pt-1 sm:px-6">
+        <SheetItem className="px-5 pr-14 pt-1 sm:px-6 sm:pr-16">
           <p className="mono flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-faint">
             <Sparkles className="size-3" aria-hidden />
             Share your space
