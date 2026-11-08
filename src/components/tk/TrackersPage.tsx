@@ -17,7 +17,7 @@
  * data: zeros with nothing behind them are noise.
  */
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
@@ -29,6 +29,7 @@ import { Achievements, TargetSheet } from "./Targets";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { TrackerModal } from "./TrackerModal";
 import { contour, loggedCount, routePath, spreadRouteDots } from "./atlasCharts";
+import { DOCK_RETURN_MS, dockHiddenAfterScroll } from "./dockVisibility";
 import { Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
 
 const C = 130;
@@ -127,6 +128,35 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
 
   const [openId, setOpenId] = useState<TrackerId | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  /*
+   * The log dock steps aside while the page scrolls (see dockVisibility):
+   * hidden on the way down, back the moment the scroll turns up, and back
+   * on its own once the scroll has rested for DOCK_RETURN_MS. The page
+   * scrolls on the window — Atlas has no inner scroll container.
+   */
+  const dockRendered = openId === null && !sheetOpen;
+  const [dockAway, setDockAway] = useState(false);
+  useEffect(() => {
+    if (!dockRendered) {
+      setDockAway(false);
+      return;
+    }
+    let lastY = window.scrollY;
+    let restTimer: number | undefined;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setDockAway((away) => dockHiddenAfterScroll(away, y - lastY));
+      lastY = y;
+      window.clearTimeout(restTimer);
+      restTimer = window.setTimeout(() => setDockAway(false), DOCK_RETURN_MS);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(restTimer);
+    };
+  }, [dockRendered]);
 
   const closeModal = useCallback(() => {
     setOpenId(null);
@@ -566,7 +596,7 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
              tab-bar clearance, states). They used to be duplicated inline
              "in case the stylesheet is late"; the sheet is a route-level
              link, and every other control on the page trusts it. */
-          <div className="premium-action-dock">
+          <div className="premium-action-dock" data-away={dockAway ? "true" : undefined}>
             <button
               type="button"
               className="premium-log-cta"
