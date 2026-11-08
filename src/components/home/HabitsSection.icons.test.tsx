@@ -6,7 +6,7 @@
  * legacy value falls back to the monogram instead of raw text.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 import type { HabitToday } from "@/hooks/useHabits";
 import { HabitsSection } from "./HabitsSection";
@@ -83,5 +83,44 @@ describe("HabitsSection — habit icon rendering", () => {
     const tile = tileOf(habit({ icon: "droplet", iconType: "emoji", name: "Water" }));
     expect(tile.querySelector("svg")).toBeNull();
     expect(tile.textContent).toBe("W");
+  });
+
+  /* The flip-flop regression: a photo habit showed its photo on one load
+     and the "D" monogram on the next, because a single transient decode
+     error swapped the fallback in for the whole session. The photo must
+     own the tile through retries; the monogram is for terminal failure. */
+  describe("photo icons are deterministic", () => {
+    const photo = () =>
+      habit({
+        name: "Drink water",
+        icon: "🖼️",
+        iconType: "image",
+        iconUrl: "data:image/png;base64,iVBORw0KGgo=",
+      });
+
+    it("renders the photo, holding its space before it loads", () => {
+      const tile = tileOf(photo());
+      expect(tile.querySelector("img")).not.toBeNull();
+      expect(tile.textContent).not.toContain("D");
+    });
+
+    it("survives a transient error — retrying, never the monogram", () => {
+      const tile = tileOf(photo());
+      fireEvent.error(tile.querySelector("img")!);
+      expect(tile.querySelector("img")).not.toBeNull();
+      expect(tile.textContent).not.toContain("D");
+      fireEvent.error(tile.querySelector("img")!);
+      expect(tile.querySelector("img")).not.toBeNull();
+      expect(tile.textContent).not.toContain("D");
+    });
+
+    it("shows the monogram only once every attempt has failed", () => {
+      const tile = tileOf(photo());
+      fireEvent.error(tile.querySelector("img")!);
+      fireEvent.error(tile.querySelector("img")!);
+      fireEvent.error(tile.querySelector("img")!);
+      expect(tile.querySelector("img")).toBeNull();
+      expect(tile.textContent).toBe("D");
+    });
   });
 });
