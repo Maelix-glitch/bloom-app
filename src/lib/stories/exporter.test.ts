@@ -260,3 +260,30 @@ describe("exportStory", () => {
     expect(painted).toHaveLength(0);
   });
 });
+
+describe("exportFontFaces — the faces an export must wait for", () => {
+  it("collects each text element's preset voice with its weight and style", async () => {
+    const { exportFontFaces } = await import("./exporter");
+    const faces = exportFontFaces({
+      elements: [
+        makeTextElement("In Cormorant", { preset: "romantic" }),
+        makeTextElement("In Oswald", { preset: "poster" }),
+        makeShapeElement("rect")!,
+      ],
+      background: null,
+    });
+    const families = faces.map((f) => f.family);
+    expect(families).toContain("Cormorant Garamond");
+    expect(families).toContain("Oswald");
+    expect(families).toContain("Inter");
+    // No duplicates even when two elements share a voice.
+    expect(new Set(faces.map((f) => `${f.style} ${f.weight} ${f.family}`)).size).toBe(faces.length);
+  });
+
+  it("always includes the data-badge voices even with no text elements", async () => {
+    const { exportFontFaces } = await import("./exporter");
+    const faces = exportFontFaces({ elements: [], background: null });
+    expect(faces.map((f) => f.family)).toContain("Inter");
+    expect(faces.length).toBeGreaterThan(1); // + the "soft" badge voice
+  });
+});
