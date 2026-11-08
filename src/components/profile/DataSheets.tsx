@@ -122,6 +122,8 @@ export function ExportSheet({
                   label="Moments & highlights"
                   value={String(counts.stories + counts.highlights)}
                 />
+                <LineRow label="Coach messages" value={String(counts.coachMessages)} />
+                <LineRow label="Point entries" value={String(counts.pointEntries)} />
                 <div className="mt-2 border-t border-border pt-2">
                   <LineRow label="Records in the file" value={String(totalRecords(counts))} />
                 </div>
