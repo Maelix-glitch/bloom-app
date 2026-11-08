@@ -187,6 +187,10 @@ describe("verification reads real records only", () => {
     const goals = evaluateGoals({ ...base, logs: [{ habitId: "a", date: TODAY }] }, noClaims);
     const state = goalState(goals, "daily-routine");
     expect(state.progress).toBe(1);
+    /* The display target must be the resolved one — the card once showed
+       the catalog's static 1 next to this remaining 2 ("1/1" vs "3 TO GO"
+       with four habits, seen live 2026-11-08). */
+    expect(state.target).toBe(3);
     expect(state.complete).toBe(false);
     expect(state.remaining).toBe(2);
   });

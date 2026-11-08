@@ -255,7 +255,7 @@ export function JourneyHero({
               className="pg-rail"
               role="progressbar"
               aria-valuemin={0}
-              aria-valuemax={nextMilestone.goal.target}
+              aria-valuemax={nextMilestone.target}
               aria-valuenow={nextMilestone.progress}
               aria-label={nextMilestone.goal.title}
             >
@@ -266,7 +266,7 @@ export function JourneyHero({
             </span>
             <span className="pg-next-count">
               {nextMilestone.progress}
-              <span className="pg-next-count-total"> / {nextMilestone.goal.target}</span>
+              <span className="pg-next-count-total"> / {nextMilestone.target}</span>
             </span>
           </div>
 

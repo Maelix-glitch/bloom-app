@@ -298,6 +298,7 @@ export function evaluateGoals(input: ProgressionInput, claimed: ClaimLookup): Go
     return {
       goal,
       progress,
+      target,
       ratio: target > 0 ? Math.min(1, progress / target) : 0,
       complete,
       periodKey,
