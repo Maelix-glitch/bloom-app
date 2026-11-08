@@ -125,7 +125,7 @@ const MEMORIES_KEY = (uid: string | null) => `bloom.coach.memories.${uid ?? "ano
 const MAX_CONVERSATIONS = 24;
 const MAX_MESSAGES_PER_CONVERSATION = 120;
 
-interface StoredConversations {
+export interface StoredConversations {
   v: 1;
   activeId: string | null;
   conversations: CoachConversation[];
@@ -379,6 +379,30 @@ export function repairMessagesFromRows(
   return changed ? { ...store, conversations } : store;
 }
 
+/**
+ * Put every stored conversation back in spoken order.
+ *
+ * The import-time ordering (orderImportedMessages) only ever runs on a
+ * device with nothing stored — every thread already on a device keeps the
+ * order its original import baked in, and an import made before the
+ * tiebreak existed baked some replies in ahead of their questions for
+ * good. Running the same ordering over the stored conversations at load
+ * heals those threads in place; the persist effect then writes the healed
+ * order back, so it sticks. A store that is already in order comes back
+ * as the same object, so callers can skip the state update entirely.
+ */
+export function orderStoredConversations(store: StoredConversations): StoredConversations {
+  let changed = false;
+  const conversations = store.conversations.map((conversation) => {
+    const ordered = orderImportedMessages(conversation.messages);
+    const sameOrder = ordered.every((message, i) => message === conversation.messages[i]);
+    if (sameOrder) return conversation;
+    changed = true;
+    return { ...conversation, messages: ordered };
+  });
+  return changed ? { ...store, conversations } : store;
+}
+
 /** A coach attachment becomes vision input only when the model can read it. */
 function attachmentToMedia(
   attachment: CoachFilePayload | undefined,
@@ -483,7 +507,7 @@ export function useCoachSystem() {
     setLoading(true);
 
     /* Local conversations are the source of truth on this device. */
-    const local = readStored(profileId);
+    const local = orderStoredConversations(readStored(profileId));
     setMemories(readJson<CoachMemory[]>(MEMORIES_KEY(profileId), []));
     if (local.conversations.length > 0) {
       setStore(local);
@@ -548,7 +572,9 @@ export function useCoachSystem() {
         mode: "ask",
         createdAt: opened,
         updatedAt: new Date().toISOString(),
-        messages: dedupeDuplicatedTurns(dedupeAdjacentMessages(legacy)),
+        messages: dedupeDuplicatedTurns(
+          dedupeAdjacentMessages(orderImportedMessages(legacy)),
+        ),
       };
       return { v: 1, activeId: conversation.id, conversations: [conversation] };
     };

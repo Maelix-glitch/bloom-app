@@ -266,46 +266,6 @@ function PersonalizationSection() {
   );
 }
 
-/** Export what the user has chosen to keep — identity, stories, highlights. JSON, client-side. */
-function exportProfile(
-  identity: ProfileIdentity,
-  stories: Story[],
-  highlights: HighlightItem[],
-  account: AccountDetails,
-) {
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    profile: {
-      displayName: identity.displayName,
-      username: identity.username,
-      bio: identity.bio,
-      accent: identity.accent,
-      memberSince: account.memberSince,
-    },
-    stories: stories.map((s) => ({
-      kind: s.kind,
-      title: s.title,
-      body: s.body,
-      createdAt: s.createdAt,
-      expiresAt: s.expiresAt,
-      visibility: s.visibility,
-    })),
-    highlights: highlights.map((h) => ({
-      name: h.name,
-      accent: h.accent,
-      icon: h.icon,
-      stories: h.stories.map((s) => ({ title: s.title, createdAt: s.createdAt })),
-    })),
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "bloom-profile-export.json";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
   violet: "Violet",
   sky: "Sky",
@@ -319,7 +279,6 @@ export function AccountRow({
   account,
   privacy,
   stories,
-  highlights,
   isSignedIn,
   onOpenPrivacy,
   onShare,
@@ -361,8 +320,6 @@ export function AccountRow({
   remindersValue: string;
   installValue: string | null;
 }) {
-  const [exporting, setExporting] = useState(false);
-
   return (
     <div className="pf-settings">
       <Group label="Account">
@@ -464,20 +421,6 @@ export function AccountRow({
           value="json"
           testId="pf-row-export-all"
           onClick={onExportAll}
-        />
-        <Row
-          icon={<Download className="size-3.5" />}
-          label="Export my profile"
-          value={exporting ? "preparing…" : "json"}
-          testId="pf-row-export"
-          onClick={() => {
-            setExporting(true);
-            try {
-              exportProfile(identity, stories, highlights, account);
-            } finally {
-              window.setTimeout(() => setExporting(false), 600);
-            }
-          }}
         />
         <Row
           icon={<Bell className="size-3.5" />}

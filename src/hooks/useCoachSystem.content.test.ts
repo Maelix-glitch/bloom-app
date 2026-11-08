@@ -25,10 +25,12 @@ import {
   contentToBlocks,
   contentToText,
   messageHasContent,
+  orderStoredConversations,
   repairFromLegacyContent,
   repairMessagesFromRows,
   rowsToMessage,
   type CoachMessage,
+  type StoredConversations,
 } from "./useCoachSystem";
 
 const UUID = "3f6d1c2a-9b4e-4a1c-8d2f-5e6a7b8c9d0e";
@@ -225,5 +227,72 @@ describe("repairMessagesFromRows", () => {
       0,
     );
     expect(repairMessagesFromRows(healthyStore, [row])).toBe(healthyStore);
+  });
+});
+
+describe("orderStoredConversations — healing threads stored before the tiebreak", () => {
+  const TIE = "2026-08-26T12:35:31.781719+00:00";
+  const msg = (id: string, role: CoachMessage["role"], time: string, text: string): CoachMessage => ({
+    id,
+    role,
+    time,
+    text,
+    paragraphs: [text],
+    sources: [],
+    blocks: [],
+  });
+  const storeWith = (messages: CoachMessage[]): StoredConversations => ({
+    v: 1,
+    activeId: "cloud-x",
+    conversations: [
+      {
+        id: "cloud-x",
+        title: "Earlier with Bloom",
+        mode: "ask",
+        createdAt: TIE,
+        updatedAt: TIE,
+        messages,
+      },
+    ],
+  });
+
+  it("moves a reply stored ahead of its same-timestamp question back behind it", () => {
+    const reply = msg("r1", "coach", TIE, "I hear you — cycle tracking is optional.");
+    const question = msg("u1", "user", TIE, "im saying im a man soo dont count the cyle for me");
+    const healed = orderStoredConversations(storeWith([reply, question]));
+    expect(healed.conversations[0]!.messages.map((m) => m.id)).toEqual(["u1", "r1"]);
+  });
+
+  it("returns the same store object when every thread is already in spoken order", () => {
+    const store = storeWith([
+      msg("u1", "user", TIE, "is planning important?"),
+      msg("r1", "coach", TIE, "Planning isn't just a nice-to-have."),
+    ]);
+    expect(orderStoredConversations(store)).toBe(store);
+  });
+
+  it("leaves distinct timestamps in time order, whichever side came first", () => {
+    const store = storeWith([
+      msg("r0", "coach", "2026-08-26T12:33:32.785526+00:00", "A thread can open with the coach."),
+      msg("u1", "user", "2026-08-26T12:34:22.477881+00:00", "Why did you write that note?"),
+    ]);
+    expect(orderStoredConversations(store)).toBe(store);
+  });
+
+  it("heals only the flipped conversation and keeps the other's identity", () => {
+    const flipped = storeWith([
+      msg("r1", "coach", TIE, "Reply first, wrongly."),
+      msg("u1", "user", TIE, "Question second, wrongly."),
+    ]);
+    const calm = storeWith([msg("u9", "user", TIE, "All good here.")]).conversations[0]!;
+    const store: StoredConversations = {
+      v: 1,
+      activeId: "cloud-x",
+      conversations: [flipped.conversations[0]!, calm],
+    };
+    const healed = orderStoredConversations(store);
+    expect(healed).not.toBe(store);
+    expect(healed.conversations[0]!.messages.map((m) => m.id)).toEqual(["u1", "r1"]);
+    expect(healed.conversations[1]).toBe(calm);
   });
 });
