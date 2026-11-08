@@ -9,8 +9,10 @@
 
 import { useCallback, useMemo } from "react";
 
+import { readCoachExport } from "@/hooks/useCoachSystem";
 import { useHabits } from "@/hooks/useHabits";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
+import { useProgression } from "@/hooks/useProgression";
 import { useTrackers } from "@/hooks/useTrackers";
 import { buildExport, type ExportBundle, type ExportInput } from "@/lib/data/exportAll";
 import { loadDoc } from "@/lib/prefs";
@@ -22,6 +24,8 @@ export interface ExportSources {
   stories?: ExportInput["stories"];
   highlights?: ExportInput["highlights"];
   moodEntries: readonly MoodEntry[];
+  /** Whose Coach mirror to read — the signed-in id, or null when signed out. */
+  userId?: string | null;
 }
 
 export interface ExportBundleStore {
@@ -33,8 +37,9 @@ export function useExportBundle(sources: ExportSources): ExportBundleStore {
   const habits = useHabits();
   const trackers = useTrackers();
   const cycle = usePeriodLog();
+  const progression = useProgression();
 
-  const { profile, stories, highlights, moodEntries } = sources;
+  const { profile, stories, highlights, moodEntries, userId } = sources;
 
   const build = useCallback(
     () =>
@@ -53,6 +58,22 @@ export function useExportBundle(sources: ExportSources): ExportBundleStore {
         cycleSettings: cycle.settings,
         checkIns: loadCheckInMemory(),
         prefs: loadDoc(),
+        /* The Coach mirror is read at build time, like checkIns and prefs:
+           it is this device's store, and build() is the moment of asking. */
+        coachConversations: readCoachExport(userId ?? null),
+        progression: {
+          points: progression.points,
+          rank: progression.rank.rank.name,
+          ledger: progression.ledger,
+          rankEvents: progression.rankEvents,
+          achievements: progression.achievements.map((a) => ({
+            id: a.def.id,
+            title: a.def.title,
+            unlocked: a.unlocked,
+            achievedAt: a.achievedAt,
+            progress: a.progress,
+          })),
+        },
       }),
     [
       profile,
@@ -67,6 +88,12 @@ export function useExportBundle(sources: ExportSources): ExportBundleStore {
       cycle.logs,
       cycle.days,
       cycle.settings,
+      userId,
+      progression.points,
+      progression.rank,
+      progression.ledger,
+      progression.rankEvents,
+      progression.achievements,
     ],
   );
 
@@ -78,6 +105,11 @@ export function useExportBundle(sources: ExportSources): ExportBundleStore {
       { label: "Tracker days", value: trackers.days.length },
       { label: "Periods", value: cycle.logs.length },
       { label: "Cycle days", value: cycle.days.length },
+      {
+        label: "Coach messages",
+        value: readCoachExport(userId ?? null).reduce((sum, c) => sum + c.messages.length, 0),
+      },
+      { label: "Point entries", value: progression.ledger.length },
     ],
     [
       moodEntries.length,
@@ -86,6 +118,8 @@ export function useExportBundle(sources: ExportSources): ExportBundleStore {
       trackers.days.length,
       cycle.logs.length,
       cycle.days.length,
+      userId,
+      progression.ledger.length,
     ],
   );
 
