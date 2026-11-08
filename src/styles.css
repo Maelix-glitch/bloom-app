@@ -6,8 +6,9 @@
 /* App shell chrome: header icons (the bell), the Notification Center
    behind it, and the connection notice. */
 @import "./styles/shell.css";
-/* Bloom Story Platform: rings, rail, viewer, editor, trays, archive. */
-@import "./styles/stories.css";
+/* Bloom Story Platform CSS is NOT here: stories.css loads route-scoped
+   (the ?url link pattern) on the three routes that render Stories —
+   /, /profile and /$handle — so its ~59 KB no longer rides every page. */
 /* Bloom mobile-first responsive system: shell, nav, sheets, type, guards. */
 @import "./styles/responsive.css";
 @import "./styles/access.css";
