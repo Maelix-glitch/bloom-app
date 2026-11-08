@@ -14,6 +14,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Check, FileUp, Upload } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
 import { cn } from "@/lib/utils";
 import { formatDate, type LogDraft, type PeriodLog } from "@/lib/cycle/predict";
@@ -87,8 +88,21 @@ export function ImportPeriods({
       title="Import period history"
       size="lg"
     >
+      {/* the family's visible way out (popup-premium slice) — same dismiss
+          path as the sheet's own onClose, so the added-count reset runs */}
+      <button
+        type="button"
+        onClick={() => {
+          setAdded(null);
+          onClose();
+        }}
+        aria-label="Close"
+        className="bsheet-icon absolute right-4 top-4 z-10 sm:right-5"
+      >
+        <BloomIcon name="close" size={16} />
+      </button>
       <SheetBody className="pb-5">
-        <SheetItem className="px-5 pb-1 pt-1 sm:px-6">
+        <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
           <h2 className="display text-[20px] leading-tight">Bring your history in</h2>
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
             Paste the start days from your old app, or drop its CSV here. Bloom shows you what it
