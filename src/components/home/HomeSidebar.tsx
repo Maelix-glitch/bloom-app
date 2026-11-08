@@ -105,9 +105,10 @@ export function HomeSidebar() {
                 }`}
               >
                 {/* The glyph rides in .app-nav-glyph: the wrapper carries
-                    the colour, the grow/settle transform and the glow disc
-                    (see "Sidebar icon motion" in src/styles.css). */}
-                <span className="app-nav-glyph">
+                    the colour, the grow/settle transform and the glow disc,
+                    and data-glyph keys the per-glyph choreography (see
+                    "Sidebar icon motion" in src/styles.css). */}
+                <span className="app-nav-glyph" data-glyph={item.icon}>
                   <BloomIcon name={item.icon} size={16} />
                 </span>
                 {item.label}
@@ -123,13 +124,18 @@ export function HomeSidebar() {
           to="/profile"
           aria-current={profileActive ? "page" : undefined}
 
-          className={`mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
+          className={`app-nav-link mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
             profileActive
               ? "app-nav-link-active text-foreground"
               : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"
           }`}
         >
-          <UserRound className={`size-4 ${profileActive ? "text-primary" : ""}`} />
+          {/* The bespoke profile glyph in the same .app-nav-glyph wrapper
+              as the primary links, so it takes the same colour, glow and
+              choreography (it carried a stock Lucide person before). */}
+          <span className="app-nav-glyph" data-glyph="profile">
+            <BloomIcon name="profile" size={16} />
+          </span>
           Profile
         </Link>
       </div>
@@ -257,7 +263,7 @@ export function HomeMobileNav() {
             aria-label={item.label}
             className={active ? "text-primary" : "text-muted-foreground"}
           >
-            <span className="app-nav-glyph">
+            <span className="app-nav-glyph" data-glyph={item.icon}>
               <BloomIcon name={item.icon} size={22} strokeWidth={active ? 2.1 : 1.75} />
             </span>
             <span aria-hidden="true">{item.label}</span>
