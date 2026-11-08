@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  Camera,
-  FileText,
-  Image as ImageIcon,
-  Mic,
-  Paperclip,
-  Plus,
-  Send,
-  Square,
-  X,
-} from "lucide-react";
+import { Camera, FileText, Image as ImageIcon, Mic, Paperclip, Send, Square } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { CoachGlyph } from "./bloom-mark";
@@ -72,15 +65,17 @@ function AttachmentPreview({
         <strong>{attachment.name}</strong>
         <small>{formatBytes(attachment.size)}</small>
       </span>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         className="coach-attachment-remove"
         onClick={onRemove}
         aria-label={`Remove ${attachment.name}`}
         title="Remove attachment"
       >
-        <X className="size-3.5" aria-hidden="true" />
-      </button>
+        <BloomIcon name="close" size={14} />
+      </Button>
     </div>
   );
 }
@@ -368,22 +363,26 @@ export function Composer({
           <span className="coach-recording-label">Recording</span>
           <span className="coach-recording-time">0:{String(seconds).padStart(2, "0")}</span>
           <span className="coach-recording-spacer" />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             className="coach-recording-action"
             onClick={() => finishRecording(true)}
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             className="coach-recording-stop"
             onClick={() => finishRecording(false)}
             aria-label="Use recording"
           >
             <Square className="coach-recording-stop-icon" aria-hidden="true" />
             Use
-          </button>
+          </Button>
         </div>
       ) : (
         <form
@@ -394,8 +393,10 @@ export function Composer({
           <div className="coach-composer-row">
             <div className="coach-composer-actions-left">
               <div ref={menuRef} className="coach-attach">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   className="coach-composer-icon"
                   onClick={() => setMenuOpen((open) => !open)}
                   aria-label="Add to your message"
@@ -403,8 +404,12 @@ export function Composer({
                   aria-haspopup="menu"
                   title="Add to your message"
                 >
-                  <Plus className={cn("coach-composer-icon-svg", menuOpen && "is-rotated")} />
-                </button>
+                  <BloomIcon
+                    name="plus"
+                    size={18}
+                    className={cn("coach-composer-icon-svg", menuOpen && "is-rotated")}
+                  />
+                </Button>
                 {menuOpen ? (
                   <div className="coach-attach-menu" role="menu" aria-label="Add options">
                     <button
@@ -466,7 +471,12 @@ export function Composer({
                 }}
               />
             </div>
-            <textarea
+            {/* The kit Textarea primitive (U6) — the dock's own rules keep
+                the field transparent and box-free (focus lives on the
+                composer shell, per the stylesheet's documented design);
+                min-h-0 releases the kit's field min-height so the
+                auto-grow owns the height. */}
+            <Textarea
               ref={textareaRef}
               value={draft}
               rows={1}
@@ -479,11 +489,13 @@ export function Composer({
               }}
               placeholder={placeholder}
               aria-label="Message Bloom"
-              className="coach-composer-input"
+              className={cn("coach-composer-input", "min-h-0")}
             />
             <div className="coach-composer-actions-right">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 className="coach-composer-icon"
                 onClick={() => void startRecording()}
                 disabled={thinking}
@@ -491,21 +503,27 @@ export function Composer({
                 title="Voice note"
               >
                 <Mic className="coach-composer-icon-svg" />
-              </button>
-              <motion.button
+              </Button>
+              {/* Kit Button (U6): the press settle and focus ring are the
+                  kit's; the coach-send rules keep the 38px geometry and
+                  the violet action gradient — Coach's scoped action
+                  colour. The gold-vs-accent rule is U7's call, not this
+                  pass. The thinking state still swaps in the bloom mark. */}
+              <Button
                 type="submit"
+                variant="ghost"
+                size="icon-sm"
                 disabled={!canSubmit}
                 className={cn("coach-send", canSubmit && "can-send", thinking && "is-thinking")}
                 aria-label="Send message"
                 title="Send message"
-                whileTap={{ scale: 0.9 }}
               >
                 {thinking ? (
                   <CoachGlyph size={16} active />
                 ) : (
                   <Send className="coach-send-icon" aria-hidden="true" />
                 )}
-              </motion.button>
+              </Button>
             </div>
           </div>
           <div className="coach-composer-foot">
