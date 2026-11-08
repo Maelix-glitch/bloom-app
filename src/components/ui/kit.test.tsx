@@ -17,7 +17,6 @@ import { BloomConfirm } from "./bloom-sheet";
 import { Button } from "./button";
 import { Card, CardTitle } from "./card";
 import { Checkbox } from "./checkbox";
-import { ConfirmSheet } from "./confirm-sheet";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";
 import { EmptyState } from "./empty-state";
 import { Input } from "./input";
@@ -264,9 +263,9 @@ describe("Overlay convergence (§2.4)", () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it("the ConfirmSheet shim re-exports the same component", () => {
-    expect(ConfirmSheet).toBe(BloomConfirm);
-  });
+  /* The U2 ConfirmSheet shim was retired in the U6 Rewards pass: the last
+     call sites (Rewards admin, Mood intelligence) import BloomConfirm from
+     ./bloom-sheet directly, as the behaviour tests above already did. */
 });
 
 describe("EmptyState (§5.5)", () => {
