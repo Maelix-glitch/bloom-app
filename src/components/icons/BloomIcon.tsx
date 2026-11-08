@@ -23,42 +23,54 @@
 
 import type { ReactElement } from "react";
 
-/** Petals around a centre — the shared bloom construction. */
+/**
+ * Petals around a centre — the shared bloom construction. Each petal rides
+ * in its own rotated group so the ellipse itself stays free for CSS part
+ * motion (the nav choreography unfolds the rewards petals one by one —
+ * a CSS transform on the ellipse would override its rotation attribute).
+ * Rendering is unchanged: the rotation lives on the group instead.
+ */
 function petals(count: number, cx: number, cy: number, rx: number, ry: number, topY: number) {
   return Array.from({ length: count }, (_, i) => (
-    <ellipse
-      key={i}
-      cx={cx}
-      cy={topY}
-      rx={rx}
-      ry={ry}
-      transform={`rotate(${(360 / count) * i} ${cx} ${cy})`}
-    />
+    <g key={i} className="bi-petal-g" transform={`rotate(${(360 / count) * i} ${cx} ${cy})`}>
+      <ellipse className="bi-petal" cx={cx} cy={topY} rx={rx} ry={ry} />
+    </g>
   ));
 }
 
 const GLYPHS = {
   /* ------------------------------ navigation ------------------------------ */
 
-  /** Today — a calendar whose page holds a young sprout. */
+  /**
+   * Today — a calendar whose page holds a young sprout. The outline is a
+   * path (not a rect) and the drawable strokes carry pathLength={1} so the
+   * nav choreography in styles.css can draw them on evenly; the `bi-*`
+   * classes are inert hooks — every animation selector is scoped to the
+   * sidebar's .app-nav-glyph wrapper, so the glyph is still everywhere
+   * else. Geometry is unchanged from the rect it replaces.
+   */
   today: (
     <>
-      <rect x="3.5" y="5" width="17" height="16" rx="3" />
-      <path d="M3.5 9.8h17" />
-      <path d="M8 3v4" />
-      <path d="M16 3v4" />
-      <path d="M12 18.6c-.1-1.9.2-3.5 1-4.9" />
-      <path d="M12.3 14.9c-1.9.2-3.4-.8-4.1-2.9 2.2.1 3.8 1.1 4.1 2.9Z" />
-      <path d="M13 13.6c.2-1.9 1.4-3.1 3.4-3.4-.1 2-1.3 3.2-3.4 3.4Z" />
+      <path
+        className="bi-o"
+        pathLength={1}
+        d="M6.5 5h11a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-11a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3Z"
+      />
+      <path className="bi-s" pathLength={1} d="M3.5 9.8h17" />
+      <path className="bi-h" d="M8 3v4" />
+      <path className="bi-h" d="M16 3v4" />
+      <path className="bi-stem" pathLength={1} d="M12 18.6c-.1-1.9.2-3.5 1-4.9" />
+      <path className="bi-leaf bi-ro" d="M12.3 14.9c-1.9.2-3.4-.8-4.1-2.9 2.2.1 3.8 1.1 4.1 2.9Z" />
+      <path className="bi-leaf bi-lo" d="M13 13.6c.2-1.9 1.4-3.1 3.4-3.4-.1 2-1.3 3.2-3.4 3.4Z" />
     </>
   ),
   /** Trackers — an arc gauge whose needle is a leaf. */
   trackers: (
     <>
-      <path d="M4 19a9.5 9.5 0 1 1 16 0" />
-      <path d="M12 14.6 15.4 8.7" />
-      <path d="M15.4 8.7c1.8-.4 3.4.4 4.4 2.1-1.8.4-3.4-.4-4.4-2.1Z" />
-      <circle cx="12" cy="14.6" r="1.2" />
+      <path className="bi-o" pathLength={1} d="M4 19a9.5 9.5 0 1 1 16 0" />
+      <path className="bi-needle" d="M12 14.6 15.4 8.7" />
+      <path className="bi-needle" d="M15.4 8.7c1.8-.4 3.4.4 4.4 2.1-1.8.4-3.4-.4-4.4-2.1Z" />
+      <circle className="bi-dot" cx="12" cy="14.6" r="1.2" />
     </>
   ),
   /** Cycle — a droplet with a leaf-vein running through it. */
@@ -69,31 +81,52 @@ const GLYPHS = {
       <path d="M13 14.6c1.1-.5 2-.5 3 .1" opacity="0.7" />
     </>
   ),
-  /** Mood — a face whose eyes are two leaves. */
+  /** Mood — a face whose eyes are two leaves. The circle is a path so it
+   *  can draw on like the other outlines; geometry is unchanged. */
   mood: (
     <>
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M7 10.6c.8-1.7 2.2-2.6 4.1-2.5-.4 1.9-1.9 2.8-4.1 2.5Z" />
-      <path d="M17 10.6c-.8-1.7-2.2-2.6-4.1-2.5.4 1.9 1.9 2.8 4.1 2.5Z" />
-      <path d="M8.6 14.6c1.1 1.2 2.2 1.8 3.4 1.8s2.3-.6 3.4-1.8" />
+      <path className="bi-o" pathLength={1} d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 1 1 0-17Z" />
+      <path className="bi-eye" d="M7 10.6c.8-1.7 2.2-2.6 4.1-2.5-.4 1.9-1.9 2.8-4.1 2.5Z" />
+      <path className="bi-eye" d="M17 10.6c-.8-1.7-2.2-2.6-4.1-2.5.4 1.9 1.9 2.8 4.1 2.5Z" />
+      <path className="bi-s" pathLength={1} d="M8.6 14.6c1.1 1.2 2.2 1.8 3.4 1.8s2.3-.6 3.4-1.8" />
     </>
   ),
-  /** Rewards — the bloom mark itself, a five-petal flower head. */
+  /**
+   * Rewards — the bloom mark itself, a five-petal flower head. The stem
+   * path runs base → head (the same curve, reversed) so its draw-on grows
+   * upward out of the ground instead of down from the flower.
+   */
   rewards: (
     <>
       {petals(5, 12, 11, 2.7, 3.9, 7.1)}
-      <circle cx="12" cy="11" r="1.7" />
-      <path d="M12 15.2c-.2 2.2-1 4-2.4 5.5" />
-      <path d="M10.4 18.4c-1.8.1-3.2-.7-4.1-2.3 1.8-.1 3.2.7 4.1 2.3Z" />
+      <circle className="bi-dot" cx="12" cy="11" r="1.7" />
+      <path className="bi-stem" pathLength={1} d="M9.6 20.7C11 19.2 11.8 17.4 12 15.2" />
+      <path className="bi-leaf bi-ro" d="M10.4 18.4c-1.8.1-3.2-.7-4.1-2.3 1.8-.1 3.2.7 4.1 2.3Z" />
     </>
   ),
   /** Coach — a speech arc with a sprout growing inside it. */
   coach: (
     <>
-      <path d="M12 3.5h7A2.5 2.5 0 0 1 21.5 6v7a2.5 2.5 0 0 1-2.5 2.5h-6.2L8 19.6v-4.1H5A2.5 2.5 0 0 1 2.5 13V6A2.5 2.5 0 0 1 5 3.5h7Z" />
-      <path d="M12.2 13.6c-.1-1.5.1-2.8.8-3.9" />
-      <path d="M12.4 11.1c-1.5.1-2.7-.7-3.3-2.3 1.8.1 3 .9 3.3 2.3Z" />
-      <path d="M13 9.7c.2-1.5 1.1-2.5 2.7-2.7-.1 1.6-1.1 2.5-2.7 2.7Z" />
+      <path
+        className="bi-o"
+        pathLength={1}
+        d="M12 3.5h7A2.5 2.5 0 0 1 21.5 6v7a2.5 2.5 0 0 1-2.5 2.5h-6.2L8 19.6v-4.1H5A2.5 2.5 0 0 1 5 3.5h7Z"
+      />
+      <path className="bi-stem" pathLength={1} d="M12.2 13.6c-.1-1.5.1-2.8.8-3.9" />
+      <path className="bi-leaf bi-ro" d="M12.4 11.1c-1.5.1-2.7-.7-3.3-2.3 1.8.1 3 .9 3.3 2.3Z" />
+      <path className="bi-leaf bi-lo" d="M13 9.7c.2-1.5 1.1-2.5 2.7-2.7-.1 1.6-1.1 2.5-2.7 2.7Z" />
+    </>
+  ),
+  /**
+   * Profile — a head and shoulders with a leaf settling at the shoulder:
+   * the person, in the family's language (the rail's Profile link carried
+   * a stock Lucide person until this glyph landed).
+   */
+  profile: (
+    <>
+      <path className="bi-o" pathLength={1} d="M12 6.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 1 1 0-7.6Z" />
+      <path className="bi-s" pathLength={1} d="M5.3 19.6c1.3-3.5 3.7-5.2 6.7-5.2s5.4 1.7 6.7 5.2" />
+      <path className="bi-leaf bi-lo" d="M16.6 15.9c.1-1.7 1-2.9 2.6-3.4-.1 1.8-1 3-2.6 3.4Z" />
     </>
   ),
 

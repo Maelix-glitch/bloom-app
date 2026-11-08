@@ -7,13 +7,13 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render } from "@testing-library/react";
 
-import { BLOOM_ICON_NAMES, BloomIcon, isBloomIconName } from "./BloomIcon";
+import { BLOOM_ICON_NAMES, BloomIcon, isBloomIconName, type BloomIconName } from "./BloomIcon";
 
 afterEach(cleanup);
 
 describe("BloomIcon registry", () => {
-  it("carries the full v1 set: nav 6, trackers 6, habits 28, ranks 8, coach 5, system 11", () => {
-    expect(BLOOM_ICON_NAMES).toHaveLength(64);
+  it("carries the full v1 set: nav 7, trackers 6, habits 28, ranks 8, coach 5, system 11", () => {
+    expect(BLOOM_ICON_NAMES).toHaveLength(65);
     for (const name of [
       // nav
       "today",
@@ -22,6 +22,7 @@ describe("BloomIcon registry", () => {
       "mood",
       "rewards",
       "coach",
+      "profile",
       // trackers
       "sleep",
       "water",
@@ -72,6 +73,33 @@ describe("BloomIcon registry", () => {
       expect(svg?.getAttribute("stroke-linejoin"), name).toBe("round");
       expect(svg?.getAttribute("fill"), name).toBe("none");
       expect(svg?.childElementCount, name).toBeGreaterThan(0);
+      unmount();
+    }
+  });
+
+  it("carries the nav choreography hooks on the six sidebar glyphs", () => {
+    // The sidebar's per-glyph choreography (styles.css) keys off these
+    // hooks: pathLength-normalised drawables and named part classes.
+    // Every other consumer renders the same markup with no animation.
+    const hooks: Partial<Record<BloomIconName, string[]>> = {
+      today: ["bi-o", "bi-s", "bi-h", "bi-stem", "bi-leaf"],
+      trackers: ["bi-o", "bi-needle", "bi-dot"],
+      mood: ["bi-o", "bi-eye", "bi-s"],
+      rewards: ["bi-petal", "bi-stem", "bi-leaf", "bi-dot"],
+      coach: ["bi-o", "bi-stem", "bi-leaf"],
+      profile: ["bi-o", "bi-s", "bi-leaf"],
+    };
+    for (const [name, classes] of Object.entries(hooks) as [BloomIconName, string[]][]) {
+      const { container, unmount } = render(<BloomIcon name={name} />);
+      for (const cls of classes) {
+        expect(container.querySelector(`.${cls}`), `${name} .${cls}`).not.toBeNull();
+      }
+      // Drawable strokes are normalised so dash draw-on is even.
+      // (jsdom lowercases the attribute name; real browsers keep it.)
+      const normalised = [...container.querySelectorAll("path")].some(
+        (el) => el.getAttribute("pathLength") === "1" || el.getAttribute("pathlength") === "1",
+      );
+      expect(normalised, `${name} pathLength`).toBe(true);
       unmount();
     }
   });
