@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Check, Gift } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { useLegacyRewards } from "@/lib/rewards/legacy";
 import { playRewardSound } from "@/lib/rewards/audio";
 
@@ -52,9 +53,10 @@ export function LegacyRewards() {
                   <Check width={13} height={13} aria-hidden /> Claimed
                 </span>
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="pg-btn pg-btn-quiet"
+                  variant="secondary"
+                  size="sm"
                   disabled={claimingId === item.id}
                   onClick={async () => {
                     setClaimingId(item.id);
@@ -74,9 +76,9 @@ export function LegacyRewards() {
                     }
                   }}
                 >
-                  <Gift width={13} height={13} aria-hidden />
+                  <Gift aria-hidden />
                   {claimingId === item.id ? "Opening…" : "Open reward"}
-                </button>
+                </Button>
               )}
             </li>
           );
