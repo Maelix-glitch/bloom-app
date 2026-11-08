@@ -10,9 +10,10 @@
 import { useMemo } from "react";
 
 import { useCycleVisible } from "@/hooks/useCycleVisible";
-import { useHabits } from "@/hooks/useHabits";
+import { useEverReady } from "@/hooks/useEverReady";
+import { useHabits, type HabitsAuth } from "@/hooks/useHabits";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
-import { useTrackers } from "@/hooks/useTrackers";
+import { useTrackers, type TrackerSyncState } from "@/hooks/useTrackers";
 import type { MoodEntry } from "@/lib/mood/types";
 import {
   recordGrid,
@@ -36,9 +37,53 @@ export interface ProfileRecord {
   tags: string[];
   /** True once every underlying store has read its local copy. */
   hydrated: boolean;
+  /**
+   * True once every record behind the totals has SETTLED — the account
+   * reads have answered, not just the device copies — and latched: once
+   * true it never goes back, so a background refetch can't re-hide
+   * settled figures. The stat surfaces render placeholders until this is
+   * true and their final values exactly once after (the discipline the
+   * Rewards achievements gallery already follows).
+   */
+  settled: boolean;
 }
 
-export function useProfileRecord(moodEntries: readonly MoodEntry[]): ProfileRecord {
+/**
+ * Have the records behind the profile's numbers finished arriving?
+ *
+ * The same rule as `progressionRecordsSettled` on the Rewards path,
+ * widened to the two extra sources the profile joins (cycle days, and the
+ * mood block, whose check-ins count as logged days). Local hydration
+ * alone is NOT settled: the stores hydrate from the device instantly and
+ * then merge the account's answer, so totals computed in between are
+ * intermediate values over a partial record — the profile used to render
+ * those as final, and the numbers visibly stepped up as each store
+ * landed ("4 of 84 days" on the way to 11).
+ */
+export function profileRecordsSettled(state: {
+  auth: HabitsAuth;
+  habitsLoading: boolean;
+  moodSettled: boolean;
+  trackersHydrated: boolean;
+  trackerSyncState: TrackerSyncState;
+  cycleHydrated: boolean;
+}): boolean {
+  if (!state.trackersHydrated || !state.cycleHydrated || !state.moodSettled) return false;
+  // Still learning whether there is a session at all: nothing has settled.
+  if (state.auth === "checking") return false;
+  // Signed out, or a device-only build: the device record IS the record.
+  if (state.auth !== "signed-in") return true;
+  if (state.habitsLoading) return false;
+  // The tracker pull starts at "off" and passes through "loading"; every
+  // later state means the pull has answered. On "error" the device days
+  // stand in — the same fallback the progression path takes.
+  return state.trackerSyncState !== "off" && state.trackerSyncState !== "loading";
+}
+
+export function useProfileRecord(
+  moodEntries: readonly MoodEntry[],
+  opts?: { moodSettled?: boolean },
+): ProfileRecord {
   const trackers = useTrackers();
   const habits = useHabits();
   const cycle = usePeriodLog();
@@ -106,6 +151,17 @@ export function useProfileRecord(moodEntries: readonly MoodEntry[]): ProfileReco
   const pulse = useMemo(() => grid.days.map((d) => d.count), [grid.days]);
   const tags = useMemo(() => things.filter((t) => t.on).map((t) => t.label), [things]);
 
+  const settled = useEverReady(
+    profileRecordsSettled({
+      auth: habits.auth,
+      habitsLoading: habits.loading,
+      moodSettled: opts?.moodSettled ?? true,
+      trackersHydrated: trackers.hydrated,
+      trackerSyncState: trackers.sync.state,
+      cycleHydrated: cycle.hydrated,
+    }),
+  );
+
   return {
     grid: grid.days,
     today: grid.end,
@@ -114,5 +170,6 @@ export function useProfileRecord(moodEntries: readonly MoodEntry[]): ProfileReco
     pulse,
     tags,
     hydrated: trackers.hydrated && !habits.loading && cycle.hydrated,
+    settled,
   };
 }
