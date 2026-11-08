@@ -2034,6 +2034,41 @@ body:has(.tk2-log-sheet) .bsheet-backdrop {
   -webkit-backdrop-filter: blur(18px) saturate(1.05);
 }
 
+/* ------------------- the snapshot sheet (MetricsEntryModal) --------------
+   The same treatment as the log sheet above, for the six-metric snapshot
+   form the "Reflect & log today" pill opens: solid panel (the family glass
+   ghosted the page through this form too), the family's default placement
+   (centred card on desktop, grabbed bottom sheet on phones — it used to be
+   forced into a centred pop on phones by the Atlas phone pass below), a
+   slightly wider card than the single-metric form since it carries a
+   two-column grid, and the same harder backdrop while it is up. */
+
+.bsheet.bsheet--card.tk2-snap-sheet {
+  max-width: 500px;
+}
+
+.bsheet-panel.tk2-snap-panel {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bsheet.bsheet--phone .bsheet-panel.tk2-snap-panel {
+  border-radius: 24px 24px 0 0;
+}
+
+body:has(.tk2-snap-sheet) .bsheet-backdrop {
+  background:
+    radial-gradient(
+      80% 60% at 50% 100%,
+      color-mix(in oklab, var(--violet) 10%, transparent),
+      transparent 70%
+    ),
+    color-mix(in oklab, var(--background) 86%, transparent);
+  backdrop-filter: blur(18px) saturate(1.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.05);
+}
+
 /* ------------------------- the insight dock ------------------------------ */
 
 .tk2-insight {
@@ -2351,9 +2386,9 @@ body:has(.tk2-log-sheet) .bsheet-backdrop {
    2. Territory cards: reverted to normal — no card rules (per your call).
    3. Bottom text shrinks (statement + medical-safety footer, words kept).
    4. Hero title steps down one notch; compass untouched.
-   5. "Today's snapshot" becomes a centered floating pop like the mood and
-      habit pops — hooked straight onto this sheet's own classes, with
-      !important positioning so it wins against the sheet base styles.
+   5. "Today's snapshot" became a centered floating pop (retired by the
+      popup-premium slice: it now uses the family's bottom-sheet placement
+      and the tk2-snap-* solid panel, like the quick-log sheet).
    ========================================================================== */
 
 @media (max-width: 480px) {
@@ -2382,34 +2417,9 @@ body:has(.tk2-log-sheet) .bsheet-backdrop {
     margin-top: 2rem;
   }
 
-  .bsheet--phone.metrics-sheet {
-    position: fixed !important;
-    left: 50% !important;
-    right: auto !important;
-    top: 50% !important;
-    bottom: auto !important;
-    /* `!important` beats Motion's inline transform on this panel, so this rule
-    is the one that actually centres it. A standalone `translate` beside it
-    would be folded into the same transform at build time and double the
-    offset — down-right by a whole sheet. */
-    transform: translate(-50%, -50%) !important;
-    width: calc(100% - 32px) !important;
-    max-width: 480px !important;
-    max-height: 70vh !important;
-    max-height: 70dvh !important;
-    margin: 0 !important;
-  }
-
-  .bsheet--phone .metrics-pop {
-    border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent) !important;
-    border-radius: 24px !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  .bsheet--phone .metrics-pop > .bsheet-grab {
-    display: none !important;
-  }
+  /* The snapshot sheet's old centred-pop overrides lived here (item 5
+     below); the popup-premium slice retired them — the sheet now takes
+     the family's bottom-sheet placement via its tk2-snap-* classes. */
 }
 
 /* ---------------------------------- heat --------------------------------- */
