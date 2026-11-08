@@ -118,16 +118,30 @@ export interface ReconcileOptions {
   maxBleedDays?: number;
 }
 
-const DEFAULTS: Required<ReconcileOptions> = {
-  snoozeDays: 2,
-  openGraceDays: 2,
-  openAskUntilDays: 10,
-  lateAfterDays: CYCLE_DEFAULTS.lateAfterDays,
-  samePeriodWithinDays: 3,
-  maxBleedDays: 14,
-};
+let cachedDefaults: Required<ReconcileOptions> | null = null;
 
-export const SNOOZE_DAYS = DEFAULTS.snoozeDays;
+/**
+ * The defaults, built lazily on first use — never at module evaluation.
+ * `lateAfterDays` reads the imported `CYCLE_DEFAULTS` binding, and the
+ * server bundle does not guarantee predict.ts has initialised before this
+ * module's top level runs (the SSR chunks form a circular pair, so a
+ * module-init dereference here once took every route down with
+ * "Cannot read properties of undefined (reading 'lateAfterDays')").
+ * Function-scope reads happen after all modules are live, so they are safe.
+ */
+function defaults(): Required<ReconcileOptions> {
+  return (cachedDefaults ??= {
+    snoozeDays: 2,
+    openGraceDays: 2,
+    openAskUntilDays: 10,
+    lateAfterDays: CYCLE_DEFAULTS.lateAfterDays,
+    samePeriodWithinDays: 3,
+    maxBleedDays: 14,
+  });
+}
+
+/** Mirrors `defaults().snoozeDays`; a plain literal so it stays init-safe. */
+export const SNOOZE_DAYS = 2;
 
 /* -------------------------------- helpers -------------------------------- */
 
@@ -223,7 +237,7 @@ export function remember(
   id: string,
   how: "dismiss" | "snooze",
   today: string,
-  snoozeDays = DEFAULTS.snoozeDays,
+  snoozeDays = defaults().snoozeDays,
 ): CheckInMemory {
   if (how === "dismiss") {
     const { [id]: _gone, ...snoozed } = memory.snoozed;
@@ -282,7 +296,7 @@ const ORDER: Record<CheckInKind, number> = {
  * answered ones are filtered out; the page shows the first one or two.
  */
 export function reconcile(input: ReconcileInput): CheckIn[] {
-  const o = { ...DEFAULTS, ...(input.options ?? {}) };
+  const o = { ...defaults(), ...(input.options ?? {}) };
   const today = input.today;
   const logs = sortedLogs(input.logs);
   const byDate = dayMap(input.days);
@@ -812,7 +826,7 @@ export function classifyBleedDay(
   options: { samePeriodWithinDays?: number; minPlausible?: number } = {},
 ): BleedContext {
   if (!isValidDateKey(date)) return { kind: "none" };
-  const within = options.samePeriodWithinDays ?? DEFAULTS.samePeriodWithinDays;
+  const within = options.samePeriodWithinDays ?? defaults().samePeriodWithinDays;
   const minPlausible = options.minPlausible ?? CYCLE_DEFAULTS.minPlausible;
   const usual = usualBleedLength(analysis);
   const sorted = sortedLogs(logs);
