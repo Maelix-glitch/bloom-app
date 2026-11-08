@@ -85,7 +85,7 @@ function GoalCard({
   busy: boolean;
   claimingId: string | null;
 }) {
-  const shownTarget = Math.max(item.goal.target, item.progress);
+  const shownTarget = Math.max(item.target, item.progress);
   const claimed = item.claimed;
   const complete = item.complete;
   const tone = DOMAIN_TONE[item.goal.domain] ?? "var(--gold)";

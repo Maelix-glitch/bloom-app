@@ -208,6 +208,11 @@ export interface GoalProgress {
   goal: GoalDef;
   /** Verified counter, clamped to the target. */
   progress: number;
+  /** The effective target for this period — goal.target with targetMode
+   *  resolved (e.g. "todayHabits" → however many habits are due today).
+   *  Display must use this, never the catalog's static goal.target, or
+   *  the count and the remaining figure disagree. */
+  target: number;
   /** 0–1. */
   ratio: number;
   complete: boolean;
