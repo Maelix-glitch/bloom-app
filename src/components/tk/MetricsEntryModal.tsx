@@ -1,9 +1,11 @@
 /**
  * MetricsEntryModal — "Today's snapshot".
  *
- * The markup, classes and flow (form → saved / reset) are the design from
- * the data-entry prototype, kept as-is. Only the data layer underneath
- * was swapped for Bloom's tracker store:
+ * The flow (form → saved / reset) is the design from the data-entry
+ * prototype; the chrome was re-skinned in the popup-premium slice to the
+ * quick-log sheet's treatment (solid panel, editorial header, kit save
+ * pill — see the tk2-snap-* rules in trackers.css). Only the data layer
+ * underneath was swapped for Bloom's tracker store:
  *
  *   • opens on today's real values (readTrackerValue) instead of blank
  *   • shows only the trackers this person tracks (store.active) and saves
@@ -299,13 +301,19 @@ export function MetricsEntryModal({
               : "Enter your metrics now";
 
   return (
+    /* Geometry (popup-premium slice): the family's default sheet, like the
+       quick-log sheet — a centred card on desktop, a bottom sheet with the
+       grab handle on phones. The tk2-snap-* classes in trackers.css narrow
+       the card to a form's width and make the panel solid: the sheet
+       family's glass let the page ghost through this form, the same defect
+       the quick-log sheet's tk2-log-* treatment fixed. */
     <BloomSheet
       open={open}
       onClose={onClose}
       title="Today's snapshot"
       description="Log the numbers you actually measured today. Anything left blank stays untouched."
-      className="metrics-sheet"
-      panelClassName="metrics-pop"
+      className="tk2-snap-sheet"
+      panelClassName="tk2-snap-panel"
     >
       {/*
        * This wrapper is the sheet's scroll area. It used to be
@@ -316,15 +324,25 @@ export function MetricsEntryModal({
        * it the panel grows past the viewport instead of scrolling.
        */}
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-metric-surface">
-        {/* Header */}
-        <div className="relative bg-[linear-gradient(100deg,var(--metric-screen)_0%,var(--brand)_55%,var(--metric-sleep)_100%)] px-4 pb-5 pt-4 sm:px-6">
-          <h2 className="text-lg font-bold text-white">Today's snapshot</h2>
-          {subtitle && <p className="mt-0.5 text-sm text-white/80">{subtitle}</p>}
+        {/* Header — the calm editorial pattern the quick-log sheet wears:
+            a small gold caps label, the Fraunces title, the muted state
+            line, a hairline divider, and the family's round ×. (It used to
+            be a loud gradient band with bold white text.) */}
+        <div className="relative border-b border-border px-5 pb-4 pt-5 sm:px-6">
+          <div className="pr-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+              Reflect &amp; log today
+            </p>
+            <h2 className="mt-1.5 font-display text-[24px] leading-tight text-foreground">
+              Today&apos;s snapshot
+            </h2>
+            {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="absolute right-4 top-4 rounded-md p-1 text-white/80 transition-colors hover:text-white"
+            className="bsheet-icon absolute right-4 top-4 sm:right-5"
           >
             <BloomIcon name="close" size={16} />
           </button>
@@ -432,7 +450,7 @@ export function MetricsEntryModal({
               size="lg"
               onClick={handleConfirm}
               disabled={(submitted && hasErrors) || isEmpty}
-              className="metrics-save mt-4 w-full font-bold uppercase tracking-widest"
+              className="mt-4 w-full"
             >
               Save today
             </Button>
@@ -465,7 +483,7 @@ export function MetricsEntryModal({
             <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-success text-success [box-shadow:0_0_40px_4px_color-mix(in_oklch,var(--success)_45%,transparent)]">
               <BloomIcon name="check-bloom" size={36} />
             </div>
-            <h3 className="mt-5 text-2xl font-bold text-foreground">Saved!</h3>
+            <h3 className="mt-5 font-display text-2xl text-foreground">Saved!</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               {partial
                 ? "What you filled in is on today's record. The rest stays open."
@@ -513,7 +531,7 @@ export function MetricsEntryModal({
             <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-danger text-danger [box-shadow:0_0_40px_4px_color-mix(in_oklch,var(--danger)_35%,transparent)]">
               <Trash2 className="h-8 w-8" />
             </div>
-            <h3 className="mt-5 text-xl font-bold text-foreground">Reset today's entry?</h3>
+            <h3 className="mt-5 font-display text-xl text-foreground">Reset today&apos;s entry?</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               This will clear all the values you've entered. You can't undo this.
             </p>
