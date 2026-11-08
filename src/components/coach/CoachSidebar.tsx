@@ -6,16 +6,13 @@ import {
   Pencil,
   PanelLeftClose,
   PanelLeftOpen,
-  Plus,
   Trash2,
-  X,
 } from "lucide-react";
 
 import { BloomIcon, type BloomIconName } from "@/components/icons/BloomIcon";
 import type { CoachConversation } from "@/hooks/useCoachSystem";
 import type { CoachMode } from "@/lib/coach/intelligence";
 import { groupConversations, rowTime, type ConversationGroup } from "@/lib/coach/ui-helpers";
-import { CoachGlyph } from "./bloom-mark";
 import { cn } from "@/lib/utils";
 
 /* --------------------------- one conversation row --------------------------- */
@@ -180,7 +177,7 @@ function ConversationRow({
           }}
         >
           {menuOpen ? (
-            <X className="coach-conv-more-icon" />
+            <BloomIcon name="close" size={15} className="coach-conv-more-icon" />
           ) : (
             <MoreHorizontal className="coach-conv-more-icon" />
           )}
@@ -309,14 +306,14 @@ export function CoachSidebarContent({
 
       <div className="coach-side-foot">
         <button type="button" className="coach-side-foot-item" onClick={() => onContext("context")}>
-          <CoachGlyph size={14} className="coach-side-foot-glyph" />
+          <BloomIcon name="context" size={15} className="coach-side-foot-glyph" />
           <span className="min-w-0">
             <strong>Personal context</strong>
             <small>What Bloom can see</small>
           </span>
         </button>
         <button type="button" className="coach-side-foot-item" onClick={() => onContext("memory")}>
-          <span className="coach-side-foot-glyph coach-side-foot-glyph-memory" aria-hidden="true" />
+          <BloomIcon name="memory" size={15} className="coach-side-foot-glyph" />
           <span className="min-w-0">
             <strong>Memory</strong>
             <small>Saved things you said</small>
@@ -392,7 +389,7 @@ export function CoachSidebar({
                 aria-label="New conversation"
                 title="New conversation"
               >
-                <Plus className="size-4" aria-hidden="true" />
+                <BloomIcon name="plus" size={16} />
               </button>
               <div
                 className="coach-rail-fab-stack"
