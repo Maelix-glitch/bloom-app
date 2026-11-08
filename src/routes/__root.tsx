@@ -11,6 +11,8 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
 import { bootNativeShell } from "@/lib/native-shell";
 import { useSoundBoot } from "@/hooks/useSound";
@@ -28,23 +30,33 @@ import { RemindersEngine } from "@/components/system/RemindersEngine";
 import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
 
+/**
+ * The two screens every lost or unlucky visitor is guaranteed to meet, so
+ * they speak Bloom like everything else (Wave 1): the EmptyState pattern —
+ * the botanical mark in its quiet ring, a Fraunces headline, one calm line,
+ * the kit's gold pill home. Only the words and the way out differ; the
+ * routing and error mechanics are exactly what they were.
+ */
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+      <div className="w-full max-w-md">
+        <p className="text-center text-[11px] font-semibold uppercase tracking-[var(--tracking-meta)] text-gold">
+          404 · Page not found
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+        <EmptyState
+          title={
+            <>
+              This path has <span className="display-em">wandered off</span>
+            </>
+          }
+          description="The page you're looking for doesn't exist or has been moved. Everything you've logged is exactly where you left it."
+          action={
+            <Button asChild>
+              <Link to="/">Go home</Link>
+            </Button>
+          }
+        />
       </div>
     </div>
   );
@@ -56,30 +68,30 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
-        </div>
+      <div className="w-full max-w-md">
+        <EmptyState
+          title={
+            <>
+              This page didn't <span className="display-em">load</span>
+            </>
+          }
+          description="Something went wrong on our end. You can try again, or head back home — your record is safe either way."
+          action={
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button
+                onClick={() => {
+                  router.invalidate();
+                  reset();
+                }}
+              >
+                Try again
+              </Button>
+              <Button asChild variant="ghost">
+                <a href="/">Go home</a>
+              </Button>
+            </div>
+          }
+        />
       </div>
     </div>
   );
