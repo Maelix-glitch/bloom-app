@@ -47,7 +47,12 @@ describe("mood page view-model", () => {
   });
 
   it("picks the latest entry logged today, ignoring future-stamped ones", () => {
-    const now = new Date();
+    /* Frozen at a local midday and passed in explicitly — this used to read
+       the wall clock, so a suite run in the last three hours before local
+       midnight pushed the "future" entry into tomorrow and the assertions
+       flipped with the clock. Midday local time keeps -2h / +3h on the
+       same local day in every timezone. */
+    const now = new Date(2026, 8, 20, 12, 0, 0);
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const early = new Date(now.getTime() - 2 * 3600_000).toISOString();
     const recent = new Date(now.getTime() - 60_000).toISOString();
@@ -56,12 +61,12 @@ describe("mood page view-model", () => {
     const b = entry({ id: "b", timestamp: recent });
     const c = entry({ id: "c", timestamp: future });
     const old = entry({ id: "old", timestamp: "2020-01-01T10:00:00" });
-    expect(todayEntry([old, a, b], today)?.id).toBe("b");
+    expect(todayEntry([old, a, b], today, now)?.id).toBe("b");
     // a hand-set later time doesn't hide the fresh check-in…
-    expect(todayEntry([old, a, c, b], today)?.id).toBe("b");
+    expect(todayEntry([old, a, c, b], today, now)?.id).toBe("b");
     // …but if it's all there is, it still counts as today's entry
-    expect(todayEntry([c], today)?.id).toBe("c");
-    expect(todayEntry([old], today)).toBeNull();
+    expect(todayEntry([c], today, now)?.id).toBe("c");
+    expect(todayEntry([old], today, now)).toBeNull();
   });
 
   it("builds a real entry from a face tap", () => {

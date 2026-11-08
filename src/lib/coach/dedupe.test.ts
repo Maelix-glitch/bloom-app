@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { CoachMessage } from "@/hooks/useCoachSystem";
-import { dedupeAdjacentMessages, dedupeDuplicatedTurns } from "./ui-helpers";
+import { dedupeAdjacentMessages, dedupeDuplicatedTurns, orderImportedMessages } from "./ui-helpers";
 
 /**
  * The cloud thread can hold adjacent duplicate rows (a regenerated reply is
@@ -26,13 +26,21 @@ function msg(role: CoachMessage["role"], text: string): CoachMessage {
 describe("dedupeAdjacentMessages", () => {
   it("collapses two identical coach replies in a row into one", () => {
     const canned = "Sorry — I lost my train of thought there. Ask me again?";
-    const out = dedupeAdjacentMessages([msg("user", "How did I sleep?"), msg("coach", canned), msg("coach", canned)]);
+    const out = dedupeAdjacentMessages([
+      msg("user", "How did I sleep?"),
+      msg("coach", canned),
+      msg("coach", canned),
+    ]);
     expect(out.map((m) => m.role)).toEqual(["user", "coach"]);
     expect(out[1]?.paragraphs).toEqual([canned]);
   });
 
   it("collapses a re-saved prompt, across the 'you'/'user' role vintages", () => {
-    const out = dedupeAdjacentMessages([msg("you", "Plan my week"), msg("user", "Plan my week"), msg("coach", "Here is a plan.")]);
+    const out = dedupeAdjacentMessages([
+      msg("you", "Plan my week"),
+      msg("user", "Plan my week"),
+      msg("coach", "Here is a plan."),
+    ]);
     expect(out).toHaveLength(2);
     expect(out[0]?.role).toBe("you");
   });
@@ -178,5 +186,69 @@ describe("dedupeDuplicatedTurns", () => {
     ]);
     expect(out).toHaveLength(2);
     expect(out[0]?.role).toBe("you");
+  });
+});
+
+describe("orderImportedMessages", () => {
+  /* Rows stamped at the exact same instant — the shape behind the live
+     "reply above its question" render. The tiebreak must restore spoken
+     order without disturbing anything the timestamps actually order. */
+  const T = "2026-11-07T12:34:00.000Z";
+  const at = (role: CoachMessage["role"], text: string, time: string): CoachMessage => ({
+    id: `${role}-${text}`,
+    role,
+    time,
+    paragraphs: [text],
+    sources: [],
+    blocks: [],
+  });
+
+  it("puts a reply stamped at the same instant as its question after it", () => {
+    const out = orderImportedMessages([
+      at("coach", "You slept 6h 40m.", T),
+      at("user", "How did I sleep?", T),
+    ]);
+    expect(out.map((m) => m.role)).toEqual(["user", "coach"]);
+  });
+
+  it("untangles a whole same-timestamp thread into turns", () => {
+    const out = orderImportedMessages([
+      at("coach", "Reply two", T),
+      at("user", "Question two", T),
+      at("coach", "Reply one", T),
+      at("user", "Question one", T),
+    ]);
+    /* One shared instant cannot recover which turn came first beyond the
+       user-before-reply rule; within that rule arrival order is kept. */
+    expect(out.map((m) => m.role)).toEqual(["user", "user", "coach", "coach"]);
+    expect(out[0]?.paragraphs[0]).toBe("Question two");
+  });
+
+  it("leaves genuinely ordered threads untouched", () => {
+    const input = [
+      at("user", "Morning", "2026-11-07T09:00:00.000Z"),
+      at("coach", "Morning!", "2026-11-07T09:00:20.000Z"),
+      at("user", "Plan today?", "2026-11-07T09:01:00.000Z"),
+      at("coach", "Here is a plan.", "2026-11-07T09:01:20.000Z"),
+    ];
+    expect(orderImportedMessages(input).map((m) => m.id)).toEqual(input.map((m) => m.id));
+  });
+
+  it("still orders by timestamp when times differ across a reply-first pair", () => {
+    const out = orderImportedMessages([
+      at("coach", "Later reply", "2026-11-07T09:05:00.000Z"),
+      at("user", "Earlier question", "2026-11-07T09:04:00.000Z"),
+    ]);
+    expect(out.map((m) => m.role)).toEqual(["user", "coach"]);
+  });
+
+  it("treats 'you' as the person's side, same as 'user'", () => {
+    const out = orderImportedMessages([at("coach", "Reply", T), at("you", "Question", T)]);
+    expect(out.map((m) => m.role)).toEqual(["you", "coach"]);
+  });
+
+  it("keeps arrival order when a timestamp cannot be parsed", () => {
+    const out = orderImportedMessages([at("coach", "Reply", "now"), at("user", "Question", "now")]);
+    expect(out.map((m) => m.role)).toEqual(["coach", "user"]);
   });
 });

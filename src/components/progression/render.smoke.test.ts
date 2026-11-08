@@ -327,7 +327,10 @@ describe("AchievementGallery", () => {
 describe("history surfaces", () => {
   it("explains an empty ledger instead of faking rows", () => {
     const html = render(PointActivity, { ledger: [], today: TODAY });
-    expect(html).toContain("Nothing has been awarded yet");
+    /* The EmptyState headline italicises "yet" in a span, so read the text
+       the way a person does — tags stripped — rather than the raw markup. */
+    const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    expect(text).toContain("Nothing has been awarded yet");
     expect(html).not.toMatch(/undefined|NaN/);
   });
 

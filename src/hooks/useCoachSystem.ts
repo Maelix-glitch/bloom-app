@@ -24,7 +24,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig, watchAuth } from "@/lib/supabase";
 import { ask as askCoach, CoachUnavailable } from "@/lib/coach/engine";
-import { dedupeAdjacentMessages, dedupeDuplicatedTurns } from "@/lib/coach/ui-helpers";
+import {
+  dedupeAdjacentMessages,
+  dedupeDuplicatedTurns,
+  orderImportedMessages,
+} from "@/lib/coach/ui-helpers";
 import { activeProvider } from "@/lib/coach/providers";
 import type { CoachBlock, CoachRecord, CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachHabitData, CoachMode } from "@/lib/coach/intelligence";
@@ -179,6 +183,33 @@ function readStored(uid: string | null): StoredConversations {
     };
   }
   return { v: 1, activeId: null, conversations: [] };
+}
+
+/**
+ * The conversations as the data export (lib/data/exportAll) wants them:
+ * who spoke, when, and the words — the record, without the runtime
+ * fields (status, fallback reasons, attachments' payloads). Read through
+ * readStored, so the export carries the same repaired, deduped thread
+ * the Coach page shows. Read-only: nothing here writes or fetches.
+ */
+export function readCoachExport(uid: string | null): {
+  title: string;
+  mode: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: { role: "user" | "coach"; at: string; text: string }[];
+}[] {
+  return readStored(uid).conversations.map((conversation) => ({
+    title: conversation.title,
+    mode: conversation.mode,
+    createdAt: conversation.createdAt,
+    updatedAt: conversation.updatedAt,
+    messages: conversation.messages.map((message) => ({
+      role: message.role === "coach" ? ("coach" as const) : ("user" as const),
+      at: message.time,
+      text: message.text ?? message.paragraphs.join("\n\n"),
+    })),
+  }));
 }
 
 function trimConversations(store: StoredConversations): StoredConversations {
@@ -568,9 +599,12 @@ export function useCoachSystem() {
           /* Regenerated/retried turns leave duplicate rows in the cloud
              thread — adjacent copies (see dedupeAdjacentMessages) and
              whole re-saved turns (see dedupeDuplicatedTurns). Collapse
-             both on the way in so history never shows the same turn twice. */
+             both on the way in so history never shows the same turn twice.
+             Order first (orderImportedMessages): rows sharing a timestamp
+             can arrive with a reply ahead of its question, and the dedupe
+             passes should see the thread in spoken order. */
           const messages = dedupeDuplicatedTurns(
-            dedupeAdjacentMessages((rows as Row[]).map(rowsToMessage)),
+            dedupeAdjacentMessages(orderImportedMessages((rows as Row[]).map(rowsToMessage))),
           );
           const firstTime = messages[0]?.time ?? new Date().toISOString();
           const conversation: CoachConversation = {

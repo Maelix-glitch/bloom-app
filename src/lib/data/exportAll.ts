@@ -9,6 +9,13 @@
  * memory (the same stores every page reads), so an export never needs the
  * network and never disagrees with what is on screen. It is pure: the caller
  * hands in the records, this returns the payload and the file name.
+ *
+ * Wave 1 completed the record: the Coach conversations and the points
+ * ledger/progression used to be the two domains the file silently left
+ * behind. Coach arrives as the device mirror's conversations (the same
+ * store the Coach page itself treats as the source of truth on this
+ * device); progression arrives from the progression store — the ledger
+ * entries, the rank events, the balance and the achievement states.
  */
 
 import type { DayEntry, Goals, TrackerId } from "@/lib/trackers/core";
@@ -17,6 +24,30 @@ import type { DayLog } from "@/lib/cycle/dayLogs";
 import type { PeriodLog } from "@/lib/cycle/predict";
 import type { CycleSettings } from "@/lib/cycle/periodStore";
 import type { MoodEntry } from "@/lib/mood/types";
+import type { PointEntry, RankEvent } from "@/lib/progression/types";
+
+/** One Coach conversation, reduced to the record: who spoke, when, the words. */
+export interface ExportCoachConversation {
+  title: string;
+  mode: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: readonly {
+    /** Normalised: "user" for the person, "coach" for Bloom. */
+    role: "user" | "coach";
+    at: string;
+    text: string;
+  }[];
+}
+
+/** One achievement's state at export time — the definition's id/title + outcome. */
+export interface ExportAchievement {
+  id: string;
+  title: string;
+  unlocked: boolean;
+  achievedAt: string | null;
+  progress: number;
+}
 
 /** Bumped only when the shape changes in a way an importer must notice. */
 export const EXPORT_FORMAT = "bloom.export.v1";
@@ -56,6 +87,16 @@ export interface ExportInput {
   cycleSettings?: CycleSettings | null;
   checkIns?: unknown;
   prefs?: unknown;
+  coachConversations?: readonly ExportCoachConversation[];
+  progression?: {
+    /** Current balance (the account figure when signed in). */
+    points: number | null;
+    /** Current rank's name, e.g. "Seedling". */
+    rank: string | null;
+    ledger?: readonly PointEntry[];
+    rankEvents?: readonly RankEvent[];
+    achievements?: readonly ExportAchievement[];
+  } | null;
 }
 
 export interface ExportCounts {
@@ -67,6 +108,8 @@ export interface ExportCounts {
   cycleDays: number;
   stories: number;
   highlights: number;
+  coachMessages: number;
+  pointEntries: number;
 }
 
 export interface ExportBundle {
@@ -90,6 +133,14 @@ export interface ExportBundle {
     settings: CycleSettings | null;
     checkIns: unknown;
   };
+  coach: readonly ExportCoachConversation[];
+  progression: {
+    points: number | null;
+    rank: string | null;
+    ledger: readonly PointEntry[];
+    rankEvents: readonly RankEvent[];
+    achievements: readonly ExportAchievement[];
+  } | null;
   prefs: unknown;
 }
 
@@ -105,6 +156,16 @@ export function buildExport(input: ExportInput): ExportBundle {
   const cycleDays = list(input.cycleDays);
   const stories = list(input.stories);
   const highlights = list(input.highlights);
+  const coach = list(input.coachConversations);
+  const progression = input.progression
+    ? {
+        points: input.progression.points,
+        rank: input.progression.rank,
+        ledger: list(input.progression.ledger),
+        rankEvents: list(input.progression.rankEvents),
+        achievements: list(input.progression.achievements),
+      }
+    : null;
 
   return {
     format: EXPORT_FORMAT,
@@ -118,6 +179,8 @@ export function buildExport(input: ExportInput): ExportBundle {
       cycleDays: cycleDays.length,
       stories: stories.length,
       highlights: highlights.length,
+      coachMessages: coach.reduce((sum, c) => sum + c.messages.length, 0),
+      pointEntries: progression?.ledger.length ?? 0,
     },
     profile: input.profile ?? null,
     stories,
@@ -136,6 +199,8 @@ export function buildExport(input: ExportInput): ExportBundle {
       settings: input.cycleSettings ?? null,
       checkIns: input.checkIns ?? null,
     },
+    coach,
+    progression,
     prefs: input.prefs ?? null,
   };
 }
@@ -163,6 +228,8 @@ export function describeExport(counts: ExportCounts): string {
   add(counts.periods, "period");
   add(counts.cycleDays, "cycle day");
   add(counts.stories, "moment");
+  add(counts.coachMessages, "coach message");
+  add(counts.pointEntries, "point entry", "point entries");
   if (parts.length === 0) return "Nothing logged yet — the file has your profile only.";
   return parts.join(" · ");
 }

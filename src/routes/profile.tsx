@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import profileCss from "../styles/profile.css?url";
+import storiesCss from "../styles/stories.css?url";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { useProfileRecord } from "@/hooks/useProfileRecord";
@@ -80,7 +81,11 @@ export type ProfileSearch = z.infer<typeof profileSearchSchema>;
 export const Route = createFileRoute("/profile")({
   validateSearch: (search: Record<string, unknown>) => profileSearchSchema.parse(search),
   head: () => ({
-    links: [{ rel: "stylesheet", href: profileCss }],
+    links: [
+      { rel: "stylesheet", href: profileCss },
+      /* Stories render on this route (composer, viewer, archive, settings). */
+      { rel: "stylesheet", href: storiesCss },
+    ],
     meta: [
       { title: "Bloom — Profile" },
       {
@@ -423,6 +428,7 @@ function ProfilePage() {
       stories: h.stories.map((st) => ({ title: st.title, createdAt: st.createdAt })),
     })),
     moodEntries,
+    userId,
   });
 
   const remindersValue = !reminders.settings.enabled

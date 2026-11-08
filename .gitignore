@@ -48,3 +48,8 @@ docs/*/
 
 # visual-QA screenshots — generated artifacts, not source
 snapshots/
+
+# downloaded archives/kits — artefacts, not source (Wave 1). The two
+# source zips that lived here were removed from the tree; they remain in
+# git history. downloads/kit/ predates this entry and stays tracked.
+downloads/

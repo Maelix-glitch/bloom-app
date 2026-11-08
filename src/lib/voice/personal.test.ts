@@ -34,8 +34,19 @@ function onboardingDoc(value: unknown): Store {
   };
 }
 
-const MORNING = new Date("2026-09-20T09:30:00");
-const EVENING = new Date("2026-09-20T20:30:00");
+/* Wall-clock fixtures are built from local components on purpose: the
+   daypart expectations are about the local hour, so these read as 09:30 /
+   20:30 in whatever timezone the suite runs in. Anything that measures
+   ELAPSED time (daysWithBloom) must not pair them with a fixed UTC
+   timestamp — that was the flake: in IST the pair spanned 44h, not the
+   ≥48h the expectation needs. Elapsed fixtures are computed relative to
+   MORNING instead (see hoursBefore), which is exact in every timezone. */
+const MORNING = new Date(2026, 8, 20, 9, 30, 0);
+const EVENING = new Date(2026, 8, 20, 20, 30, 0);
+
+/** An ISO timestamp exactly `hours` before `date` — timezone-proof. */
+const hoursBefore = (date: Date, hours: number): string =>
+  new Date(date.getTime() - hours * 3600_000).toISOString();
 
 beforeEach(() => {
   withStorage({});
@@ -71,7 +82,8 @@ describe("readPersonalVoice — identity from the onboarding answer, or honest b
         sex: "female",
         focus: ["sleep", "mood"],
         name: "Maya Krishnan",
-        at: "2026-09-18T08:00:00.000Z",
+        /* 49.5 hours before the read: two whole days, in every timezone. */
+        at: hoursBefore(MORNING, 49.5),
       }),
     );
     const voice = readPersonalVoice(MORNING);
@@ -91,7 +103,8 @@ describe("readPersonalVoice — identity from the onboarding answer, or honest b
         sex: null,
         focus: [],
         name: "Ada",
-        at: "2026-09-20T01:00:00.000Z",
+        /* 8.5 hours before the read: still day one, in every timezone. */
+        at: hoursBefore(MORNING, 8.5),
       }),
     );
     expect(readPersonalVoice(MORNING).firstDay).toBe(true);
