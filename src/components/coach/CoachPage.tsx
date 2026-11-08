@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Info, X } from "lucide-react";
+import { Info } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { AppNav } from "@/components/home/HomeSidebar";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { isSignedIn, useSession } from "@/hooks/useSession";
@@ -898,7 +899,7 @@ export function CoachPage() {
                   }}
                   aria-label="Dismiss notice"
                 >
-                  <X className="size-3" aria-hidden="true" />
+                  <BloomIcon name="close" size={12} />
                 </button>
               </div>
             ) : null}
