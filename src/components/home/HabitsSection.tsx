@@ -35,6 +35,7 @@ import { STREAK_KEPT } from "@/lib/voice/copy";
 import { pick } from "@/lib/voice/messages";
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { resolveHabitIcon } from "@/components/icons/habitIcons";
+import { habitImageFailed, useHabitImage } from "@/components/icons/habitImage";
 
 /**
  * Streak milestones that earn a quiet word of celebration. Deliberately
@@ -426,24 +427,34 @@ export function HabitsSection({
 
 /**
  * The little picture tile on a habit row. Custom photos crop to fill the tile;
- * if the picture is missing or fails to load, a letter monogram in the habit's
- * own colour steps in — the row never shows a broken-image glyph.
+ * if the picture is genuinely missing (or fails every load attempt), a letter
+ * monogram in the habit's own colour steps in — the row never shows a
+ * broken-image glyph.
+ *
+ * A photo that exists owns its tile while it loads (icons/habitImage): the
+ * space is held and the photo fades in, so the tile no longer flip-flops
+ * between the photo and the monogram on a transient decode error.
  *
  * Everything else resolves through the U4 rule (icons/habitIcons): bespoke
  * glyphs render as registry marks, catalogue emoji render as their bespoke
  * twins, and an emoji a person chose themselves still renders as itself.
  */
 function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconType" | "iconUrl"> }) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const src = habit.iconUrl && habit.iconUrl !== failedSrc ? habit.iconUrl : null;
-  if (src) {
+  const image = useHabitImage(habit.iconUrl);
+  if (habit.iconUrl && !habitImageFailed(image.state)) {
     return (
-      <img
-        src={src}
-        alt=""
-        className="size-5 rounded object-cover"
-        onError={() => setFailedSrc(src)}
-      />
+      <span className="inline-block size-5 rounded bg-surface-2/60">
+        <img
+          key={image.state.attempt}
+          src={habit.iconUrl}
+          alt=""
+          onLoad={image.onLoad}
+          onError={image.onError}
+          className={`size-5 rounded object-cover transition-opacity duration-[var(--motion-standard)] ${
+            image.state.phase === "ready" ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      </span>
     );
   }
   const resolved = resolveHabitIcon(habit.iconType, habit.icon);
@@ -473,13 +484,21 @@ function AsideGlyph({
   habit: Pick<Habit, "name" | "icon" | "iconType" | "iconUrl">;
   className?: string;
 }) {
-  if (habit.iconUrl) {
+  const image = useHabitImage(habit.iconUrl);
+  if (habit.iconUrl && !habitImageFailed(image.state)) {
     return (
-      <img
-        src={habit.iconUrl}
-        alt=""
-        className={`size-4 rounded object-cover ${className ?? ""}`}
-      />
+      <span className={`inline-block size-4 rounded bg-surface-2/60 ${className ?? ""}`}>
+        <img
+          key={image.state.attempt}
+          src={habit.iconUrl}
+          alt=""
+          onLoad={image.onLoad}
+          onError={image.onError}
+          className={`size-4 rounded object-cover transition-opacity duration-[var(--motion-standard)] ${
+            image.state.phase === "ready" ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      </span>
     );
   }
   const resolved = resolveHabitIcon(habit.iconType, habit.icon);
