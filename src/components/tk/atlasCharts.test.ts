@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { contour, loggedCount, loggedRuns, routePath } from "./atlasCharts";
+import { contour, loggedCount, loggedRuns, routePath, spreadRouteDots } from "./atlasCharts";
 
 const EMPTY14: (number | null)[] = Array.from({ length: 14 }, () => null);
 
@@ -66,7 +66,7 @@ describe("routePath — a lone day is a dot, not a silent absence", () => {
   it("a tracker with one logged day still appears, as a single dot", () => {
     const r = routePath([null, null, 3, null], x, y);
     expect(r.lines).toEqual([]);
-    expect(r.singles).toEqual([{ x: 20, y: 97 }]);
+    expect(r.singles).toEqual([{ x: 20, y: 97, i: 2, v: 3 }]);
     expect(r.logged).toBe(1);
   });
 
@@ -74,7 +74,7 @@ describe("routePath — a lone day is a dot, not a silent absence", () => {
     const r = routePath([2, 4, null, 6], x, y);
     expect(r.lines).toHaveLength(1);
     expect(r.lines[0]).not.toContain("C");
-    expect(r.singles).toEqual([{ x: 30, y: 94 }]);
+    expect(r.singles).toEqual([{ x: 30, y: 94, i: 3, v: 6 }]);
   });
 
   it("nothing logged: nothing drawn", () => {
@@ -82,5 +82,94 @@ describe("routePath — a lone day is a dot, not a silent absence", () => {
     expect(r.lines).toEqual([]);
     expect(r.singles).toEqual([]);
     expect(r.logged).toBe(0);
+  });
+});
+
+describe("spreadRouteDots — six first days must not hide under one dot", () => {
+  /* The page's own geometry (TrackersPage): fourteen days across the plot,
+     each series scaled to its own peak, so a lone day lands at y=30. */
+  const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
+  const NOV5 = 11; // index of the one logged day in the fourteen
+  const oneDay = (v: number) => {
+    const values: (number | null)[] = Array.from({ length: 14 }, () => null);
+    values[NOV5] = v;
+    return values;
+  };
+
+  /* The live account's fixture, verbatim: Nov 5 2026 is the only logged
+     day, with all six trackers on it (sleep 1h, water 2L, study 1h,
+     movement 10m, energy 1/5, screen 0h40m — in stored units). */
+  const FIXTURE: { id: string; v: number }[] = [
+    { id: "sleep", v: 60 },
+    { id: "water", v: 2000 },
+    { id: "study", v: 60 },
+    { id: "movement", v: 10 },
+    { id: "energy", v: 1 },
+    { id: "screen", v: 40 },
+  ];
+
+  it("before the spread, all six lone days coincide at one point", () => {
+    const raw = FIXTURE.map(({ id, v }) => {
+      const values = oneDay(v);
+      const peak = Math.max(...values.map((n) => n ?? 0), 1);
+      const y = (n: number) => Math.round(200 - (n / peak) * 170);
+      return { id, ...routePath(values, routeX, y).singles[0]! };
+    });
+    /* the defect, pinned: one x, one y, six dots — only the last painted
+       (screen) could ever be seen */
+    expect(new Set(raw.map((d) => `${d.x},${d.y}`)).size).toBe(1);
+  });
+
+  it("after the spread: six distinct dots, same day, all inside the plot", () => {
+    const raw = FIXTURE.map(({ id, v }) => {
+      const values = oneDay(v);
+      const peak = Math.max(...values.map((n) => n ?? 0), 1);
+      const y = (n: number) => Math.round(200 - (n / peak) * 170);
+      const path = routePath(values, routeX, y);
+      expect(path.logged).toBe(1);
+      return { id, ...path.singles[0]! };
+    });
+    const spread = spreadRouteDots(raw, 8, 4, 200);
+    expect(spread).toHaveLength(6);
+    /* no two dots share a position — every tracker is visible */
+    expect(new Set(spread.map((d) => `${d.x},${d.y}`)).size).toBe(6);
+    for (const d of spread) {
+      /* the day never moves: x is the fact */
+      expect(d.x).toBe(routeX(NOV5));
+      /* renderable inside the plot area (viewBox 720×230, floor at y=200) */
+      expect(d.y).toBeGreaterThanOrEqual(4);
+      expect(d.y).toBeLessThanOrEqual(200);
+      expect(d.i).toBe(NOV5);
+    }
+    /* and neighbours are a full dot diameter apart, not merely distinct */
+    const ys = spread.map((d) => d.y).sort((a, b) => a - b);
+    for (let k = 1; k < ys.length; k += 1) expect(ys[k]! - ys[k - 1]!).toBeGreaterThanOrEqual(8);
+  });
+
+  it("dots that are already clear keep their true positions", () => {
+    const dots = [
+      { x: 100, y: 30 },
+      { x: 100, y: 90 },
+      { x: 300, y: 30 },
+    ];
+    expect(spreadRouteDots(dots, 8, 4, 200)).toEqual(dots);
+  });
+
+  it("a column that would overflow the floor is lifted whole", () => {
+    const dots = [
+      { x: 50, y: 196 },
+      { x: 50, y: 196 },
+      { x: 50, y: 196 },
+    ];
+    const spread = spreadRouteDots(dots, 8, 4, 200);
+    expect(spread.map((d) => d.y)).toEqual([184, 192, 200]);
+  });
+
+  it("different days never interact", () => {
+    const dots = [
+      { x: 10, y: 30 },
+      { x: 63, y: 30 },
+    ];
+    expect(spreadRouteDots(dots, 8, 4, 200)).toEqual(dots);
   });
 });
