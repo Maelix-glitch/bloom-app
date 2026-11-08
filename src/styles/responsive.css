@@ -355,7 +355,7 @@ textarea {
    - cycle shell/panels: cycle.css
    - profile cover/numbers/tabs: profile.css
    - rewards/progression: rewards.css / progression.css
-   - snapshot sheet internals (.metrics-sheet): below (unique classes)
+   - snapshot sheet saved-grid wrap: below (unique class)
    - moment picker tiles: below AND bloom-sheet.css (bundled import; the
      later of the two wins, and both carry the same values) */
 
@@ -405,37 +405,13 @@ textarea {
 }
 
 /* ------------------- 8e. snapshot sheet internals ------------------------
-   The gradient header stays pinned; the form beneath it owns the scroll
-   gesture, so short phones and open keyboards never clip the save action. */
+   The old pinned-gradient-header rules for this sheet were dead selectors
+   (they targeted a .metrics-sheet descendant the sheet never renders) and
+   the popup-premium slice retired the classes entirely — the sheet now
+   scrolls as one area under the family's bottom-sheet placement. What
+   stays live here is the saved summary's phone wrap. */
 
 @media (max-width: 639px) {
-  .bsheet--phone .metrics-sheet {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    max-height: 92vh;
-  }
-  @supports (height: 100dvh) {
-    .bsheet--phone .metrics-sheet {
-      max-height: 92dvh;
-    }
-  }
-
-  /* header is the first child; every view below it scrolls */
-  .bsheet--phone .metrics-sheet > div:first-child {
-    flex: none;
-  }
-  .bsheet--phone .metrics-sheet > div:not(:first-child) {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-  /* the six-metric grid stays 2-up but compact with room to type */
-  .bsheet--phone .metrics-sheet .grid.grid-cols-2 {
-    gap: 10px;
-  }
   /* the saved summary wraps 3-up instead of squeezing six across */
   .bsheet--phone .metrics-saved-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
