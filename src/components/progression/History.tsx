@@ -9,6 +9,7 @@
 
 import { ArrowUpRight } from "lucide-react";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { POINT_SOURCE_LABELS } from "@/lib/progression/types";
 import type { PointEntry, PointSource, RankEvent } from "@/lib/progression/types";
 import { formatPoints, formatShortDate, relativeDay } from "@/lib/progression/format";
@@ -26,10 +27,15 @@ export function PointActivity({
   const rows = ledger.slice(0, limit);
   if (rows.length === 0) {
     return (
-      <p className="pg-empty">
-        Nothing has been awarded yet — your first verified goal will appear here with its real date
-        and amount. Points never change quietly.
-      </p>
+      <EmptyState
+        title={
+          <>
+            Nothing has been awarded <span className="display-em">yet</span>
+          </>
+        }
+        description="Your first verified goal will appear here with its real date and amount. Points never change quietly."
+        className="py-8"
+      />
     );
   }
   return (
@@ -102,10 +108,15 @@ export function MilestoneArchive({
 
   if (rows.length === 0) {
     return (
-      <p className="pg-empty">
-        This is where your journey will be readable at a glance — every rank you reach, every
-        milestone you finish. Nothing has happened yet, and there is no hurry.
-      </p>
+      <EmptyState
+        title={
+          <>
+            Nothing has happened <span className="display-em">yet</span>
+          </>
+        }
+        description="This is where your journey will be readable at a glance — every rank you reach, every milestone you finish. There is no hurry."
+        className="py-8"
+      />
     );
   }
 
