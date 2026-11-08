@@ -189,8 +189,20 @@ export function TrackerModal({
   };
 
   return (
-    <BloomSheet open onClose={onClose} title={`Log ${def.name}`} description={prompt} placement="pop">
-      <div className="relative px-1 pb-1 pt-2">
+    /* Geometry (polish slice): the family's default sheet, not the centred
+       pop — a centred card on desktop, a bottom sheet with the grab handle
+       on phones. The tk2-log-* classes in trackers.css narrow the card to
+       a form's width and make the panel solid: the sheet family's glass
+       let the compass ghost through and read as dialog content. */
+    <BloomSheet
+      open
+      onClose={onClose}
+      title={`Log ${def.name}`}
+      description={prompt}
+      className="tk2-log-sheet"
+      panelClassName="tk2-log-panel"
+    >
+      <div className="relative px-5 pb-5 pt-5">
         {/* The sheet family's visible way out — the same round × the mood
             composer and the snapshot sheet carry. Escape and the backdrop
             already closed this pop, but on desktop nothing on screen said
@@ -228,7 +240,11 @@ export function TrackerModal({
         ) : null}
 
         {hasChoice ? (
-          <div className="mt-4 flex justify-center gap-2" role="group" aria-label="Hours or minutes">
+          <div
+            className="mt-3 flex justify-center gap-2"
+            role="group"
+            aria-label="Hours or minutes"
+          >
             {(["hrs", "min"] as const).map((u) => (
               <Button
                 key={u}
@@ -246,7 +262,7 @@ export function TrackerModal({
         ) : null}
 
         {tracker === "energy" ? (
-          <div className="tk2-numbers mt-5" role="group" aria-label="Energy out of five">
+          <div className="tk2-numbers mt-4" role="group" aria-label="Energy out of five">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
@@ -294,7 +310,7 @@ export function TrackerModal({
           onKeyDown={(event) => {
             if (event.key === "Enter") commit(draft);
           }}
-          className="mt-5 h-14 text-center font-mono text-[26px] font-light"
+          className="mt-4 h-[60px] text-center font-mono text-[28px] font-light"
         />
         <p className="mt-2 text-center text-xs text-muted-foreground">{prompt}</p>
 
@@ -304,7 +320,7 @@ export function TrackerModal({
           </p>
         ) : null}
 
-        <Button type="button" size="lg" className="mt-6 w-full" onClick={() => commit(draft)}>
+        <Button type="button" size="lg" className="mt-5 w-full" onClick={() => commit(draft)}>
           Save &amp; close
         </Button>
       </div>
