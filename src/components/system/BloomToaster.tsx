@@ -10,9 +10,20 @@
  * Top-centre is deliberate: the phone's tab bar and the "saved on this device"
  * notice both own the bottom edge, and a toast there would cover the very
  * controls the message is talking about.
+ *
+ * The skin is an iOS-style banner, not a slab: the card hugs its content
+ * (see the [data-sonner-toast] rules in styles.css — sonner fixes its own
+ * width, so the fit has to be negotiated there), floats on a deep soft
+ * shadow, and wears frosted glass with a hairline top highlight. There is
+ * no close button: toasts leave on their own timer or with a swipe, the
+ * way a banner should. Bespoke toast cards (the points award) wear the
+ * same shared shell — see toastShell.ts.
  */
 
+import type { CSSProperties } from "react";
 import { Toaster } from "sonner";
+
+import { TOAST_SHELL_STYLE } from "@/components/system/toastShell";
 
 export function BloomToaster() {
   return (
@@ -22,22 +33,23 @@ export function BloomToaster() {
       mobileOffset={{ top: 72 }}
       gap={10}
       visibleToasts={3}
-      closeButton
+      // The cap on sonner's fixed --width: 420px, and never wider than
+      // the viewport minus a margin each side. (On phones sonner's own
+      // inset layout takes over.) Content-fit sizing is in styles.css.
+      style={
+        {
+          "--width": "min(420px, calc(100vw - 32px))",
+          // Sonner's own font stack would maroon the toasts off the app
+          // typeface; inherit Inter from the app root instead.
+          fontFamily: "inherit",
+        } as CSSProperties
+      }
       toastOptions={{
         duration: 4200,
         style: {
-          background: "color-mix(in oklab, var(--surface-2) 92%, transparent)",
-          border: "1px solid color-mix(in oklab, var(--foreground) 12%, transparent)",
-          color: "var(--foreground)",
-          borderRadius: "14px",
-          boxShadow: "0 20px 44px -24px rgba(0, 0, 0, 0.9)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
+          ...TOAST_SHELL_STYLE,
+          padding: "12px 16px",
           fontSize: "13px",
-        },
-        classNames: {
-          title: "font-normal",
-          description: "text-muted-foreground",
         },
       }}
     />

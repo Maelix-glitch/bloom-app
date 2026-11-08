@@ -1871,6 +1871,42 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Toasts (sonner) — the banner geometry the inline shell can't negotiate.
+
+   Sonner fixes every toast at its container's --width, which made short
+   messages render as a wide slab. On desktop the card instead hugs its
+   content: width max-content up to the 420px cap BloomToaster sets, and
+   centred in the toaster with the standalone `translate` property —
+   sonner owns `transform` for its enter/exit/settle, so the centring
+   must not touch it. Phones keep sonner's own inset layout (its media
+   query below 600px), so this block is desktop-only.
+
+   The type rules exist because sonner's baked-in title weight and
+   description colour (#3f3f3f, a light-theme grey) are unlayered and
+   outrank utility classes; these selectors outrank them back.
+   --------------------------------------------------------------------------- */
+@media (min-width: 601px) {
+  [data-sonner-toaster][data-x-position="center"] [data-sonner-toast] {
+    left: 50%;
+    translate: -50% 0;
+    width: max-content;
+    max-width: min(420px, calc(100vw - 32px));
+  }
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-title] {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-description] {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
 /* ==========================================================================
    Bloom customization skin — equipped reward components restyle the whole
    app through the shared tokens. Pages that use var(--background) etc. pick
