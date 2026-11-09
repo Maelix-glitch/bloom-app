@@ -180,6 +180,8 @@
   --gold-grad-hi: #f7dc9a; /* gold gradient highlight stop — bell / notification-centre badges (promoted from literals, U5) */
   --gold-grad-lo: #d99b34; /* gold gradient deep stop — bell / notification-centre badges (promoted from literals, U5) */
   --bell-gold: #e9b558; /* the notification bell's cast gold (promoted from shell.css, U7) */
+  --logo-grad-a: #7fa88f; /* the Bloom mark's gradient, sage stop — mirrors BloomLogo + the favicon (U8) */
+  --logo-grad-b: #e8b75e; /* the Bloom mark's gradient, gold stop */
   --bell-gold-hi: #ffedbd; /* the bell's lit edge (promoted from shell.css, U7) */
   --cream-2: #f4efe4; /* brighter cream for display/hero text */
   --accent-primary: var(--gold);

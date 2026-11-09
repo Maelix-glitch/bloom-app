@@ -52,7 +52,7 @@ const STEP_COUNT = 4;
  * gone, a colour that changes for no reason reads as arbitrary — so the flow
  * holds one accent and lets the type carry the change between screens.
  */
-const ACCENT = "var(--violet, #b9a4ff)";
+const ACCENT = "var(--violet)";
 
 /**
  * The first real question: Male or Female.

@@ -11,7 +11,14 @@
   --story-ring: linear-gradient(135deg, #e0d5f0 0%, #f4e0ec 48%, #ffe8d6 100%);
   --story-ring-close-friends: linear-gradient(135deg, #d5c5e0 0%, #e0d5f0 50%, #f4e0ec 100%);
   --story-ring-seen: color-mix(in oklab, var(--foreground) 20%, transparent);
-  --story-ink: #f4efe4;
+  --story-ink: var(--cream-2); /* == the house cream-2 exactly */
+  --story-ink-deep: #221d33; /* dark ink on cream story chips */
+  --story-danger-soft: #ff9d9d; /* the editor's delete-zone hot pink */
+  --story-recording: #e0685e; /* the camera's recording red */
+  --story-paper: #fbf8f1; /* polaroid paper */
+  --story-paper-window: #f6f1e6; /* window-frame paper */
+  --story-paper-torn: #f7f2e6; /* torn-paper frame */
+  --story-frame-film: #14121c; /* film-stock frame */
   --story-ink-dim: rgba(244, 239, 228, 0.6);
   --story-ink-faint: rgba(244, 239, 228, 0.38);
   --story-veil: rgba(12, 8, 20, 0.5);
@@ -1097,7 +1104,7 @@
 .se-chip-btn[data-primary="true"] {
   background: var(--cream-2);
   border-color: transparent;
-  color: #221d33;
+  color: var(--story-ink-deep);
 }
 
 .se-delete-zone {
@@ -1133,7 +1140,7 @@
 }
 
 .se-delete-zone[data-hot="true"] {
-  color: #ff9d9d;
+  color: var(--story-danger-soft);
   border-color: rgba(255, 120, 120, 0.7);
   border-style: solid;
   background: rgba(80, 20, 28, 0.72);
@@ -1381,7 +1388,7 @@
 .scam-shutter[data-recording="true"] > span {
   transform: scale(0.62);
   border-radius: 14px;
-  background: #e0685e;
+  background: var(--story-recording);
 }
 
 @keyframes scam-rec {
@@ -2136,12 +2143,12 @@
 
 .se-frame-chip[data-frame="polaroid"] {
   padding: 2px 2px 7px;
-  background: #fbf8f1;
+  background: var(--story-paper);
 }
 
 .se-frame-chip[data-frame="mat"] {
   padding: 3px;
-  background: #fbf8f1;
+  background: var(--story-paper);
 }
 
 .se-frame-chip[data-frame="tape"] {
@@ -2162,7 +2169,7 @@
 
 .se-frame-chip[data-frame="film"] {
   padding: 4px 2px;
-  background: #14121c;
+  background: var(--story-frame-film);
   box-shadow:
     inset 0 2px 0 rgba(244, 239, 228, 0.6),
     inset 0 -2px 0 rgba(244, 239, 228, 0.6);
@@ -2170,7 +2177,7 @@
 
 .se-frame-chip[data-frame="window"] {
   padding: 2px;
-  background: #f6f1e6;
+  background: var(--story-paper-window);
   box-shadow:
     inset 0 0 0 1px rgba(20, 17, 29, 0.35),
     inset 0 1px 0 6px transparent;
@@ -2183,7 +2190,7 @@
 
 .se-frame-chip[data-frame="torn-paper"] {
   padding: 3px;
-  background: #f7f2e6;
+  background: var(--story-paper-torn);
   border-radius: 1px;
   clip-path: polygon(
     0 6%,
@@ -2823,7 +2830,7 @@
   min-height: 50px;
   border-radius: 999px;
   background: var(--cream-2);
-  color: #14111d;
+  color: var(--story-ink-deep);
   font-size: 14.5px;
   font-weight: 700;
   transition: transform var(--motion-fast) var(--story-ease);

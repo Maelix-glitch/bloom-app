@@ -110,7 +110,7 @@ function MomentCard({
       </span>
 
       <span className="relative mt-auto block px-3 pb-3">
-        <span className="display line-clamp-2 text-[16px] leading-snug text-[#F3F1EA] drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]">
+        <span className="display line-clamp-2 text-[16px] leading-snug text-[var(--foreground)] drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]">
           {story.title || "A moment"}
         </span>
         {story.title && story.body ? (
