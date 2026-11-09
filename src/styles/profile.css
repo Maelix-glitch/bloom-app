@@ -989,7 +989,7 @@ button.pf-row:hover {
 }
 .pf-switch[data-on="true"] {
   border-color: transparent;
-  background: color-mix(in oklab, var(--profile-accent, var(--violet)) 72%, #fff);
+  background: color-mix(in oklab, var(--pf-accent) 72%, white);
 }
 .pf-switch-knob {
   position: absolute;
@@ -1004,7 +1004,7 @@ button.pf-row:hover {
 }
 .pf-switch[data-on="true"] .pf-switch-knob {
   transform: translateX(16px);
-  background: #16131e;
+  background: var(--primary-foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -216,34 +216,37 @@
   transform: scale(0.96);
 }
 
-/* the primary pill — pale lavender fill like the mockup's Save */
+/* the primary pill — the gold system, always (D1: gold owns actions.
+   The profile accent tints identity surfaces only — avatar rings,
+   highlights, share cards — and must never recolour a primary action,
+   on any screen, in any state. This pill once took its fill from
+   --profile-accent, so a violet accent turned every sheet's Save
+   lavender while the rest of the app stayed gold: two brands, one
+   screen. Metrics mirror the kit Button's default variant (44 px,
+   bg-primary, hover bg-gold-soft, ink = --primary-foreground). */
 .bsheet-primary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 42px;
+  height: 44px;
   padding: 0 20px;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--profile-accent, var(--violet)) 62%, #fff),
-    color-mix(in oklab, var(--profile-accent, var(--violet)) 74%, #fff)
-  );
-  color: #1a1523;
+  border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent);
+  background: var(--primary);
+  color: var(--primary-foreground);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.005em;
   box-shadow:
-    0 12px 30px -14px color-mix(in oklab, var(--profile-accent, var(--violet)) 80%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 12px 30px -14px color-mix(in oklab, var(--primary) 55%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition:
-    transform var(--motion-fast) ease,
-    filter var(--motion-fast) ease,
-    box-shadow var(--motion-fast) ease;
+    background-color var(--motion-fast) var(--ease-out-expo),
+    transform var(--motion-fast) var(--ease-out-expo),
+    box-shadow var(--motion-fast) var(--ease-out-expo);
 }
 .bsheet-primary:hover:not(:disabled) {
-  filter: brightness(1.04);
+  background: var(--gold-soft);
   transform: translateY(-1px);
 }
 .bsheet-primary:active:not(:disabled) {
@@ -857,9 +860,13 @@
   margin-top: 8px;
 }
 .bedit-field:focus-within {
-  border-color: color-mix(in oklab, var(--profile-accent, var(--violet)) 55%, transparent);
+  /* Focus is the gold system (D1), mirroring the kit Input recipe:
+     gold border plus a 2 px gold ring at 60%. The accent once tinted
+     this ring, so the editor's fields glowed in the user's identity
+     colour while every kit field elsewhere focused gold. */
+  border-color: var(--primary);
   background: color-mix(in oklab, var(--background) 60%, transparent);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--profile-accent, var(--violet)) 12%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 60%, transparent);
 }
 .bedit-field[data-invalid="true"] {
   border-color: color-mix(in oklab, var(--rose) 55%, transparent);
@@ -999,6 +1006,16 @@ textarea.bedit-field-input {
   height: 40px;
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  /* The swatch's lit-disc gradient lives here, driven by the
+     --bedit-accent-color the component sets; it used to be an inline
+     style rebuilt on every render. The check mark reads in the
+     system's dark ink (currentColor from this color). */
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in oklab, var(--bedit-accent-color) 70%, white),
+    var(--bedit-accent-color) 70%
+  );
+  color: var(--primary-foreground);
   transition:
     transform 300ms var(--ease-out-expo),
     box-shadow 300ms var(--ease-out-expo);
