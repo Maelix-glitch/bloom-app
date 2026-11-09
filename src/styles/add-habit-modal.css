@@ -16,32 +16,32 @@
  */
 /* ---------- DESIGN TOKENS -------------------------------------------- */
 .bloom-add-habit {
-  color: var(--text);
+  color: var(--ahm-text);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: normal;
   -webkit-font-smoothing: antialiased;
-  --bg: #14151f;
-  --surface: #1c1e2b;
-  --surface-2: #23263a;
-  --surface-3: #292c42;
-  --border: #2e3145;
-  --border-hover: #3a3d56;
-  --text: #f0efea;
-  --text-muted: #8b8ca3;
-  --text-faint: #5a5d75;
+  --ahm-bg: var(--background);
+  --ahm-surface: var(--surface);
+  --ahm-surface-2: var(--surface-2);
+  --ahm-surface-3: var(--surface-3);
+  --ahm-border: var(--border);
+  --ahm-border-hover: var(--border-strong);
+  --ahm-text: var(--foreground);
+  --ahm-text-muted: var(--muted-foreground);
+  --ahm-text-faint: #5a5d75; /* no house equal — the modal's deepest quiet text */
 
-  --amber: #e8b75e;
-  --amber-dim: rgba(232, 183, 94, 0.14);
-  --sage: #7fa88f;
-  --sage-dim: rgba(127, 168, 143, 0.14);
-  --rose: #c98ba0;
-  --rose-dim: rgba(201, 139, 160, 0.14);
-  --sky: #7fa0c9;
-  --sky-dim: rgba(127, 160, 201, 0.14);
-  --violet: #a48bc9;
-  --violet-dim: rgba(164, 139, 201, 0.14);
-  --danger: #e07a7a;
+  --ahm-amber: var(--gold);
+  --ahm-amber-dim: color-mix(in oklab, var(--gold) 14%, transparent);
+  --ahm-sage: #7fa88f;
+  --ahm-sage-dim: rgba(127, 168, 143, 0.14);
+  --ahm-rose: #c98ba0;
+  --ahm-rose-dim: rgba(201, 139, 160, 0.14);
+  --ahm-sky: #7fa0c9;
+  --ahm-sky-dim: rgba(127, 160, 201, 0.14);
+  --ahm-violet: #a48bc9;
+  --ahm-violet-dim: rgba(164, 139, 201, 0.14);
+  --ahm-danger: var(--destructive);
 
   --space-1: 4px;
   --space-2: 8px;
@@ -58,29 +58,29 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* accent = live theme colour, overridden per data-accent below */
-  --accent: var(--amber);
-  --accent-dim: var(--amber-dim);
+  --accent: var(--ahm-amber);
+  --accent-dim: var(--ahm-amber-dim);
 }
 /* accent switching: one attribute re-tints everything */
 .bloom-add-habit [data-accent="amber"] {
-  --accent: var(--amber);
-  --accent-dim: var(--amber-dim);
+  --accent: var(--ahm-amber);
+  --accent-dim: var(--ahm-amber-dim);
 }
 .bloom-add-habit [data-accent="sage"] {
-  --accent: var(--sage);
-  --accent-dim: var(--sage-dim);
+  --accent: var(--ahm-sage);
+  --accent-dim: var(--ahm-sage-dim);
 }
 .bloom-add-habit [data-accent="rose"] {
-  --accent: var(--rose);
-  --accent-dim: var(--rose-dim);
+  --accent: var(--ahm-rose);
+  --accent-dim: var(--ahm-rose-dim);
 }
 .bloom-add-habit [data-accent="sky"] {
-  --accent: var(--sky);
-  --accent-dim: var(--sky-dim);
+  --accent: var(--ahm-sky);
+  --accent-dim: var(--ahm-sky-dim);
 }
 .bloom-add-habit [data-accent="violet"] {
-  --accent: var(--violet);
-  --accent-dim: var(--violet-dim);
+  --accent: var(--ahm-violet);
+  --accent-dim: var(--ahm-violet-dim);
 }
 
 .bloom-add-habit * {
@@ -128,8 +128,8 @@
   max-height: 90dvh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, var(--surface), var(--surface-2));
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--ahm-surface), var(--ahm-surface-2));
+  border: 1px solid var(--ahm-border);
   border-radius: var(--radius);
   box-shadow:
     0 40px 90px -20px rgba(0, 0, 0, 0.65),
@@ -174,7 +174,7 @@
   font-size: 11px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
   margin-bottom: 6px;
 }
 .bloom-add-habit .modal-title {
@@ -187,9 +187,9 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-muted);
+  border: 1px solid var(--ahm-border);
+  background: var(--ahm-surface);
+  color: var(--ahm-text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,8 +199,8 @@
   font-size: 14px;
 }
 .bloom-add-habit .modal-close:hover {
-  border-color: var(--rose);
-  color: var(--text);
+  border-color: var(--ahm-rose);
+  color: var(--ahm-text);
   transform: rotate(90deg);
 }
 
@@ -225,7 +225,7 @@
 .bloom-add-habit .step-bar {
   height: 3px;
   border-radius: 999px;
-  background: var(--surface-3);
+  background: var(--ahm-surface-3);
   overflow: hidden;
 }
 .bloom-add-habit .step-bar i {
@@ -247,14 +247,14 @@
   font-family: var(--font-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
   transition: color 0.25s ease;
 }
 .bloom-add-habit .step-pill.active .step-name {
   color: var(--accent);
 }
 .bloom-add-habit .step-pill.done .step-name {
-  color: var(--text-muted);
+  color: var(--ahm-text-muted);
 }
 
 /* ---------- BODY ------------------------------------------------------ */
@@ -267,7 +267,7 @@
   width: 6px;
 }
 .bloom-add-habit .modal-body::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--ahm-border);
   border-radius: 6px;
 }
 
@@ -294,7 +294,7 @@
 .bloom-add-habit .field-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--ahm-text-muted);
   margin-bottom: var(--space-2);
   display: flex;
   align-items: center;
@@ -304,12 +304,12 @@
 .bloom-add-habit .field-hint {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
   font-weight: 400;
 }
 .bloom-add-habit .error-msg {
   font-size: 12px;
-  color: var(--danger);
+  color: var(--ahm-danger);
   margin-top: 6px;
   display: none;
 }
@@ -323,8 +323,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: var(--surface-3);
-  border: 1px solid var(--border);
+  background: var(--ahm-surface-3);
+  border: 1px solid var(--ahm-border);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
 }
@@ -361,7 +361,7 @@
 }
 .bloom-add-habit .preview-sub {
   font-size: 12px;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -380,11 +380,11 @@
 .bloom-add-habit input[type="date"],
 .bloom-add-habit textarea {
   width: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
   border-radius: var(--radius-sm);
   padding: 13px 14px;
-  color: var(--text);
+  color: var(--ahm-text);
   font-family: var(--font-body);
   font-size: 15px;
   transition:
@@ -398,7 +398,7 @@
 }
 .bloom-add-habit input::placeholder,
 .bloom-add-habit textarea::placeholder {
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
 }
 .bloom-add-habit input:focus,
 .bloom-add-habit textarea:focus {
@@ -407,7 +407,7 @@
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 .bloom-add-habit input[aria-invalid="true"] {
-  border-color: var(--danger);
+  border-color: var(--ahm-danger);
 }
 
 /* ---------- ICON PICKER ---------------------------------------------- */
@@ -419,9 +419,9 @@
 .bloom-add-habit .icon-tab {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-faint);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  color: var(--ahm-text-faint);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
   border-radius: 999px;
   padding: 7px 14px;
   cursor: pointer;
@@ -434,8 +434,8 @@
   color: var(--accent);
 }
 .bloom-add-habit .icon-tab:hover:not(.active) {
-  color: var(--text);
-  border-color: var(--border-hover);
+  color: var(--ahm-text);
+  border-color: var(--ahm-border-hover);
 }
 
 .bloom-add-habit .icon-panel {
@@ -461,14 +461,14 @@
   width: 5px;
 }
 .bloom-add-habit .icon-grid::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--ahm-border);
   border-radius: 6px;
 }
 .bloom-add-habit .icon-opt {
   aspect-ratio: 1;
   border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -478,7 +478,7 @@
 }
 .bloom-add-habit .icon-opt:hover {
   transform: translateY(-2px);
-  border-color: var(--border-hover);
+  border-color: var(--ahm-border-hover);
 }
 .bloom-add-habit .icon-opt.selected {
   background: var(--accent-dim);
@@ -487,13 +487,13 @@
 }
 .bloom-add-habit .icon-empty {
   font-size: 12px;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
   padding: var(--space-4) 0;
   text-align: center;
 }
 
 .bloom-add-habit .dropzone {
-  border: 1.5px dashed var(--border);
+  border: 1.5px dashed var(--ahm-border);
   border-radius: var(--radius-sm);
   padding: var(--space-6) var(--space-4);
   text-align: center;
@@ -518,11 +518,11 @@
 }
 .bloom-add-habit .dropzone-text {
   font-size: 13px;
-  color: var(--text-muted);
+  color: var(--ahm-text-muted);
 }
 .bloom-add-habit .dropzone-sub {
   font-size: 11px;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
   margin-top: 2px;
 }
 .bloom-add-habit .dropzone-preview {
@@ -536,13 +536,13 @@
   height: 44px;
   border-radius: var(--radius-sm);
   object-fit: cover;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ahm-border);
 }
 .bloom-add-habit .dropzone-remove {
   position: relative;
   z-index: 1;
   font-size: 12px;
-  color: var(--rose);
+  color: var(--ahm-rose);
   text-decoration: underline;
   cursor: pointer;
   background: none;
@@ -569,23 +569,23 @@
   transform: scale(1.12);
 }
 .bloom-add-habit .swatch[aria-pressed="true"] {
-  border-color: var(--text);
+  border-color: var(--ahm-text);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
 }
 .bloom-add-habit .sw-amber {
-  background: var(--amber);
+  background: var(--ahm-amber);
 }
 .bloom-add-habit .sw-sage {
-  background: var(--sage);
+  background: var(--ahm-sage);
 }
 .bloom-add-habit .sw-rose {
-  background: var(--rose);
+  background: var(--ahm-rose);
 }
 .bloom-add-habit .sw-sky {
-  background: var(--sky);
+  background: var(--ahm-sky);
 }
 .bloom-add-habit .sw-violet {
-  background: var(--violet);
+  background: var(--ahm-violet);
 }
 
 /* ---------- CHIPS ----------------------------------------------------- */
@@ -599,9 +599,9 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-muted);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  color: var(--ahm-text-muted);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
   cursor: pointer;
   font-family: var(--font-body);
   transition: all 0.2s var(--ease);
@@ -610,29 +610,29 @@
   gap: 6px;
 }
 .bloom-add-habit .chip:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
+  border-color: var(--ahm-border-hover);
+  color: var(--ahm-text);
 }
 .bloom-add-habit .chip[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--bg);
+  color: var(--ahm-bg);
   font-weight: 600;
 }
 .bloom-add-habit .chip[data-priority="low"][aria-pressed="true"] {
-  background: var(--sage);
-  border-color: var(--sage);
-  color: var(--bg);
+  background: var(--ahm-sage);
+  border-color: var(--ahm-sage);
+  color: var(--ahm-bg);
 }
 .bloom-add-habit .chip[data-priority="medium"][aria-pressed="true"] {
-  background: var(--amber);
-  border-color: var(--amber);
-  color: var(--bg);
+  background: var(--ahm-amber);
+  border-color: var(--ahm-amber);
+  color: var(--ahm-bg);
 }
 .bloom-add-habit .chip[data-priority="high"][aria-pressed="true"] {
-  background: var(--rose);
-  border-color: var(--rose);
-  color: var(--bg);
+  background: var(--ahm-rose);
+  border-color: var(--ahm-rose);
+  color: var(--ahm-bg);
 }
 .bloom-add-habit .priority-dot {
   width: 7px;
@@ -640,13 +640,13 @@
   border-radius: 50%;
 }
 .bloom-add-habit .priority-dot.low {
-  background: var(--sage);
+  background: var(--ahm-sage);
 }
 .bloom-add-habit .priority-dot.medium {
-  background: var(--amber);
+  background: var(--ahm-amber);
 }
 .bloom-add-habit .priority-dot.high {
-  background: var(--rose);
+  background: var(--ahm-rose);
 }
 
 /* ---------- DAY PICKER (custom frequency) ---------------------------- */
@@ -671,9 +671,9 @@
   flex: 1;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
+  color: var(--ahm-text-muted);
   font-size: 11px;
   font-weight: 600;
   font-family: var(--font-body);
@@ -684,13 +684,13 @@
   transition: all 0.18s var(--ease);
 }
 .bloom-add-habit .day:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
+  border-color: var(--ahm-border-hover);
+  color: var(--ahm-text);
 }
 .bloom-add-habit .day[aria-pressed="true"] {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--bg);
+  color: var(--ahm-bg);
 }
 
 /* ---------- ROWS: points, goal, toggles ------------------------------ */
@@ -699,8 +699,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
 }
@@ -710,7 +710,7 @@
 }
 .bloom-add-habit .row-sub {
   font-size: 12px;
-  color: var(--text-faint);
+  color: var(--ahm-text-faint);
 }
 .bloom-add-habit .stepper {
   display: flex;
@@ -721,9 +721,9 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
+  border: 1px solid var(--ahm-border);
+  background: var(--ahm-surface);
+  color: var(--ahm-text);
   font-size: 16px;
   display: flex;
   align-items: center;
@@ -752,8 +752,8 @@
   width: 42px;
   height: 24px;
   border-radius: 999px;
-  background: var(--surface-3);
-  border: 1px solid var(--border);
+  background: var(--ahm-surface-3);
+  border: 1px solid var(--ahm-border);
   position: relative;
   cursor: pointer;
   transition:
@@ -770,7 +770,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--text-faint);
+  background: var(--ahm-text-faint);
   transition:
     transform 0.25s var(--ease),
     background 0.25s ease;
@@ -790,8 +790,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  background: var(--ahm-surface-2);
+  border: 1px solid var(--ahm-border);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
 }
@@ -832,8 +832,8 @@
   display: flex;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-6) var(--space-6);
-  border-top: 1px solid var(--border);
-  background: var(--surface-2);
+  border-top: 1px solid var(--ahm-border);
+  background: var(--ahm-surface-2);
 }
 .bloom-add-habit .btn {
   flex: 1;
@@ -847,17 +847,17 @@
   transition: all 0.25s var(--ease);
 }
 .bloom-add-habit .btn-secondary {
-  background: var(--surface-3);
-  border-color: var(--border);
-  color: var(--text-muted);
+  background: var(--ahm-surface-3);
+  border-color: var(--ahm-border);
+  color: var(--ahm-text-muted);
 }
 .bloom-add-habit .btn-secondary:hover {
-  color: var(--text);
-  border-color: var(--border-hover);
+  color: var(--ahm-text);
+  border-color: var(--ahm-border-hover);
 }
 .bloom-add-habit .btn-primary {
-  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 78%, #000));
-  color: #14151f;
+  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 78%, black));
+  color: var(--ahm-bg);
 }
 .bloom-add-habit .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
@@ -879,7 +879,7 @@
 .bloom-add-habit .success {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  background: linear-gradient(180deg, var(--ahm-surface), var(--ahm-surface-2));
   display: none;
   flex-direction: column;
   align-items: center;
@@ -922,7 +922,7 @@
 }
 .bloom-add-habit .success p {
   font-size: 13px;
-  color: var(--text-muted);
+  color: var(--ahm-text-muted);
 }
 
 .bloom-add-habit button:focus-visible,
