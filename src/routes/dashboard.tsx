@@ -7,7 +7,6 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
 import { useHabits } from "@/hooks/useHabits";
 import { TRACKERS } from "@/lib/trackers/core";
-import { greetingFor } from "@/lib/home/today";
 import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 
 export const Route = createFileRoute("/dashboard")({
