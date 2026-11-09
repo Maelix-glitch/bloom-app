@@ -49,9 +49,38 @@ function scrub(text: string): string {
   return text.replace(/(https?:\/\/[^\s?#]+)\?[^\s]*/g, "$1").replace(/([?&])(token|code|email)=[^\s&]*/gi, "$1$2=…");
 }
 
+/**
+ * A readable message for anything a caller can throw or hand us. PostgREST /
+ * Supabase errors are PLAIN objects ({ message, code, details, hint }), not
+ * Error instances — String() on one is the useless "[object Object]" that
+ * hid the profile:load failures in the first telemetry catch. Compose from
+ * the parts instead, keeping the code: it is usually the diagnosis.
+ */
+function messageOf(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const e = error as { message?: unknown; code?: unknown; details?: unknown; hint?: unknown };
+    const parts: string[] = [];
+    if (typeof e.message === "string" && e.message) parts.push(e.message);
+    if (typeof e.code === "string" && e.code) parts.push(`[${e.code}]`);
+    else if (typeof e.code === "number") parts.push(`[${e.code}]`);
+    if (typeof e.details === "string" && e.details) parts.push(e.details);
+    if (typeof e.hint === "string" && e.hint) parts.push(`hint: ${e.hint}`);
+    if (parts.length > 0) return parts.join(" — ");
+    try {
+      return JSON.stringify(error) ?? "unknown";
+    } catch {
+      return "unknown"; // circular structure
+    }
+  }
+  if (error == null) return "unknown";
+  return String(error);
+}
+
 function normalise(scope: string, error: unknown): ErrorEvent {
   const err = error instanceof Error ? error : null;
-  const rawMessage = err ? err.message : typeof error === "string" ? error : String(error ?? "unknown");
+  const rawMessage = messageOf(error);
   return {
     scope: scope.slice(0, 80),
     message: scrub(rawMessage).slice(0, 500) || "unknown",

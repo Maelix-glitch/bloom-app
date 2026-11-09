@@ -478,7 +478,11 @@ function TodayPage() {
 
         <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
-            <h1 className="font-display text-3xl leading-tight sm:text-5xl">
+            {/* suppressHydrationWarning: the greeting is LOCAL time by
+                design, but the server renders on a UTC clock — its band can
+                legitimately differ from the reader's (React #418). The
+                client value wins on hydration; the swap is one word. */}
+            <h1 className="font-display text-3xl leading-tight sm:text-5xl" suppressHydrationWarning>
               {firstName ? (
                 <>
                   {greetingFor(now.getHours())},{" "}

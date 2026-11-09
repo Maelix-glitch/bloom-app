@@ -49,6 +49,36 @@ describe("enqueueError", () => {
     expect(event!.message).toContain("https://x.dev/cb");
   });
 
+  it("reads plain-object (PostgREST/Supabase) errors instead of '[object Object]'", () => {
+    enqueueError("profile:load", {
+      message: 'column profiles.banner_path does not exist',
+      code: "42703",
+      details: null,
+      hint: null,
+    });
+    const [event] = __errorBufferForTests();
+    expect(event!.message).toContain("banner_path does not exist");
+    expect(event!.message).toContain("42703");
+    expect(event!.message).not.toContain("[object Object]");
+  });
+
+  it("includes details and hint from plain-object errors when present", () => {
+    enqueueError("habits:save", { message: "insert failed", code: "23505", details: "Key already exists.", hint: "Use upsert." });
+    const [event] = __errorBufferForTests();
+    expect(event!.message).toContain("Key already exists.");
+    expect(event!.message).toContain("hint: Use upsert.");
+  });
+
+  it("falls back to JSON for message-less objects and survives circular ones", () => {
+    enqueueError("x", { weird: true });
+    const circular: Record<string, unknown> = {};
+    circular["self"] = circular;
+    enqueueError("y", circular);
+    const buf = __errorBufferForTests();
+    expect(buf[0]!.message).toContain('"weird":true');
+    expect(buf[1]!.message).toBe("unknown");
+  });
+
   it("persists the buffer so a dead page still reports on next launch", () => {
     enqueueError("profile:load", new Error("gone"));
     const raw = window.localStorage.getItem("bloom:error-log:v1");
