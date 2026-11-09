@@ -19,3 +19,18 @@ enabled = true
 #   supabase secrets set GIPHY_API_KEY=...
 # The GIPHY key is a server secret — never a VITE_ client env.
 enabled = true
+
+[functions.bloom-dual-ai-router]
+# Source recovered from the live deployment (v21) on 2026-11-09 — see the
+# header in supabase/functions/bloom-dual-ai-router/index.ts before
+# redeploying. verify_jwt is false live: the function authenticates the
+# caller itself via getUser. Needs GROQ_API_KEY / GEMINI_API_KEY secrets.
+enabled = true
+verify_jwt = false
+
+[functions.generate-bloom-invite]
+# Source recovered from the live deployment (v3) on 2026-11-09 — see the
+# header in supabase/functions/generate-bloom-invite/index.ts before
+# redeploying. Uses the SUPABASE_SECRET_KEY server secret.
+enabled = true
+verify_jwt = true
