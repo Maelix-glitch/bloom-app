@@ -3,6 +3,8 @@
  * only; the UI gets calm human sentences.
  */
 
+import { enqueueError } from "@/lib/telemetry";
+
 const FRIENDLY: Record<string, string> = {
   network: "You're offline.",
   failedtofetch: "You're offline.",
@@ -24,5 +26,13 @@ export function friendlyError(error: unknown, fallback = "Something went wrong."
 /** Log for developers, return the calm message for the screen. */
 export function report(scope: string, error: unknown): string {
   console.error(`[bloom:${scope}]`, error);
+  /* …and ship it to the telemetry sink (lib/telemetry), so a failure on
+     someone's phone leaves a trace the console never could. Guarded:
+     telemetry must never break the caller it reports for. */
+  try {
+    enqueueError(scope, error);
+  } catch {
+    /* the console line above is the fallback */
+  }
   return friendlyError(error);
 }

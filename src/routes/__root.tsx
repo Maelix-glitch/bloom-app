@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { registerServiceWorker } from "@/hooks/useInstallPrompt";
 import { bootNativeShell } from "@/lib/native-shell";
+import { installErrorTelemetry } from "@/lib/telemetry";
 import { useSoundBoot } from "@/hooks/useSound";
 import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
@@ -299,6 +300,13 @@ function RootComponent() {
   /* B6 — the offline shell. Registered after load, never blocking first paint. */
   useEffect(() => {
     registerServiceWorker();
+  }, []);
+
+  /* Error telemetry: report() calls land in the sink from anywhere, and
+     this installs the global net (uncaught errors, unhandled rejections,
+     flush on hide) exactly once. */
+  useEffect(() => {
+    installErrorTelemetry();
   }, []);
 
   /* B7 — inside the Capacitor wrapper: light status bar on our dark theme. */
