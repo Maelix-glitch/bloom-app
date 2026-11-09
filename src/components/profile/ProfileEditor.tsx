@@ -687,13 +687,12 @@ export function ProfileEditor({
                       style={
                         {
                           ["--bedit-accent-color" as string]: accentVar[a],
-                          background: `radial-gradient(circle at 35% 30%, color-mix(in oklab, ${accentVar[a]} 70%, #fff), ${accentVar[a]} 70%)`,
                         } as React.CSSProperties
                       }
                       data-testid={`profile-accent-${a}`}
                     >
                       {accent === a ? (
-                        <Check className="size-4 text-[#1a1523]" strokeWidth={2.4} aria-hidden />
+                        <Check className="size-4" strokeWidth={2.4} aria-hidden />
                       ) : null}
                     </button>
                   ))}

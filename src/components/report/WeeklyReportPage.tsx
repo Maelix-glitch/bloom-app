@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 
 import { AppNav } from "@/components/home/HomeSidebar";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
@@ -188,19 +190,20 @@ export function WeeklyReportPage() {
         ) : null}
 
         {report.empty ? (
-          <div className="mt-10 max-w-md rounded-2xl border border-dashed border-border p-8 text-center">
-            <p className="font-display text-[20px] italic">A quiet week so far.</p>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-              The report writes itself from whatever you log — a mood, a tick, a night of sleep.
-              Start small and come back on Sunday.
-            </p>
-            <Link
-              to="/mood"
-              className="mt-5 inline-block rounded-full bg-primary px-5 py-2 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              Log a first mood
-            </Link>
-          </div>
+          <EmptyState
+            className="mt-10 max-w-md rounded-2xl border border-dashed border-border py-10"
+            title={
+              <>
+                A quiet week <span className="display-em">so far</span>.
+              </>
+            }
+            description="The report writes itself from whatever you log — a mood, a tick, a night of sleep. Start small and come back on Sunday."
+            action={
+              <Button asChild>
+                <Link to="/mood">Log a first mood</Link>
+              </Button>
+            }
+          />
         ) : (
           <div className="mt-8 grid max-w-5xl gap-4 sm:grid-cols-2">
             <Card label="Mood">
