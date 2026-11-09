@@ -65,14 +65,14 @@ const HELLO = [
   "Hello. What's on your mind?",
   "Hey. Where shall we start?",
   "Hi. What are we looking at today?",
-  "Morning — or whenever this is. What's up?",
+  "Hi there. What's on your mind?",
   "Hello. Ask me anything about your record, or just think out loud.",
 ];
 
 /** Time-of-day hellos for when we know the hour but not the name. */
 const HELLO_DAYPART: Record<string, string[]> = {
   night: [
-    "Still up. What's on your mind?",
+    "Good night. What's on your mind?",
     "The quiet hours. Where shall we start?",
     "Late one — what are we looking at?",
   ],
@@ -95,7 +95,7 @@ const HELLO_DAYPART: Record<string, string[]> = {
 
 /** Named hellos — the coach and this person have met. */
 const HELLO_NAMED: Record<string, string[]> = {
-  night: ["Still up, {name}. What's on your mind?", "Late one, {name}. What are we looking at?"],
+  night: ["Good night, {name}. What's on your mind?", "Late one, {name}. What are we looking at?"],
   morning: [
     "Morning, {name}. What's on your mind?",
     "Morning, {name}. Where shall we start?",

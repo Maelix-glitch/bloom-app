@@ -263,7 +263,7 @@ export function GoalsBoard({
 
   return (
     <div>
-      <div className="pg-chip-row" role="group" aria-label="Filter goals by journal">
+      <div className="pg-chip-row" role="group" aria-label="Filter goals by area">
         <button
           type="button"
           className={cn("pg-chip", filter === "all" && "is-on")}
@@ -345,10 +345,10 @@ export function GoalsBoard({
         <EmptyState
           title={
             <>
-              No goals in this journal <span className="display-em">yet</span>
+              No goals here <span className="display-em">yet</span>
             </>
           }
-          description="Try another journal, or just keep doing what you are doing."
+          description="Try a different filter, or just keep doing what you are doing."
           className="py-8"
         />
       ) : null}

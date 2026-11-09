@@ -48,7 +48,7 @@ function NotFoundComponent() {
         <EmptyState
           title={
             <>
-              This path has <span className="display-em">wandered off</span>
+              Page <span className="display-em">not found.</span>
             </>
           }
           description="The page you're looking for doesn't exist or has been moved. Everything you've logged is exactly where you left it."
@@ -147,13 +147,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "A private analytics command center for your emotional life — trends, rhythms, correlations, anomalies and insights computed entirely from what you log.",
+          "Bloom is a private record of your mood, sleep, habits and cycle, with the patterns worked out from what you log.",
       },
       { property: "og:title", content: "Bloom — Mood Intelligence" },
       {
         property: "og:description",
         content:
-          "A private analytics command center for your emotional life — trends, rhythms, correlations, anomalies and insights computed entirely from what you log.",
+          "Bloom is a private record of your mood, sleep, habits and cycle, with the patterns worked out from what you log.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

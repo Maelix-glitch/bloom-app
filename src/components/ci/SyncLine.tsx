@@ -34,6 +34,9 @@ export function SyncLine({
   sync: SyncStatus;
   onRetry?: (() => void) | undefined;
 }) {
+  /* Settled states only — the same rule as the Mood and Trackers sync
+     lines. The check is a moment; printing it invites it to look stuck. */
+  if (sync.state === "loading") return null;
   const showAction = (sync.state === "error" || sync.state === "signed-out") && onRetry;
   return (
     <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-1" aria-live="polite">

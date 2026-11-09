@@ -10,7 +10,7 @@
  */
 
 import type { DayEntry, TrackerAnalysis, TrackerId } from "@/lib/trackers/core";
-import { TRACKERS } from "@/lib/trackers/core";
+import { isEmptyDay, TRACKERS } from "@/lib/trackers/core";
 import { describeNextPeriodShort, type CycleAnalysis } from "@/lib/cycle/predict";
 import type { CycleMode } from "@/lib/cycle/periodStore";
 import type {
@@ -291,8 +291,8 @@ export function scoreOf(input: {
   else if (moodPct === null) note = "Log today's mood to complete the picture.";
   else if (overall >= 80)
     note = "A strong day — habits, trackers and mood are all pulling together.";
-  else if (overall >= 60) note = "Steady rhythm. One more small win pushes this higher.";
-  else note = "Room to build momentum — a quick win lifts the ring fast.";
+  else if (overall >= 60) note = "Steady rhythm. One more small thing completes more of the day.";
+  else note = "Early in the day — each thing you log adds to the picture.";
 
   const caption =
     present.length === 3
@@ -344,10 +344,26 @@ export function connections(input: {
   cycle: CycleAnalysis;
   cycleMode?: CycleMode | undefined;
   today: string;
-}): { nodes: Connection[]; links: CrossLink[] } {
+}): { nodes: Connection[]; links: CrossLink[]; loggedDays: number } {
   const { trackers, habits, moodEntries, moodDays, moodCorrelations, cycle, today } = input;
   const cycleMode = input.cycleMode ?? "tracking";
   const monthAgo = shiftDate(today, -29);
+
+  /* Distinct days in the window carrying ANY mapped signal — the honest
+     "logged days behind this map". Each node counts its own signal's days,
+     so summing the nodes counts a day with three signals three times; the
+     map once printed that sum as its day count (6 "logged days" over a
+     record whose real count was 1–2). */
+  const loggedDayKeys = new Set<string>();
+  for (const d of trackers.entries) {
+    if (d.date >= monthAgo && !isEmptyDay(d)) loggedDayKeys.add(d.date);
+  }
+  for (const l of habits.logs) {
+    if (l.date >= monthAgo) loggedDayKeys.add(l.date);
+  }
+  for (const d of moodDays) {
+    if (d.date >= monthAgo) loggedDayKeys.add(d.date);
+  }
 
   /* strength = evidence: how many of the last 30 days carry this signal,
      nudged up when today is logged. Strictly from the record. */
@@ -373,7 +389,7 @@ export function connections(input: {
       days: moodMonth.length,
       note:
         moodMonth.length === 0
-          ? "Log a mood check-in and this node comes alive."
+          ? "Log a mood check-in and this joins the map."
           : (bestMoodCorr("sleep")?.statement ??
             `${moodMonth.length} mood ${moodMonth.length === 1 ? "day" : "days"} this month.`),
     },
@@ -457,7 +473,7 @@ export function connections(input: {
   }
   links.sort((x, y) => y.weight - x.weight);
 
-  return { nodes, links: dedupeLinks(links).slice(0, 5) };
+  return { nodes, links: dedupeLinks(links).slice(0, 5), loggedDays: loggedDayKeys.size };
 }
 
 function dedupeLinks(links: CrossLink[]): CrossLink[] {

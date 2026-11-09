@@ -295,10 +295,10 @@ export function MetricsEntryModal({
         : hasErrors
           ? "Please fix the highlighted fields."
           : allFilled
-            ? "You're doing great — one day at a time."
+            ? "Everything's filled — ready to save."
             : !isEmpty
               ? `${filledCount} of ${metrics.length} filled — save what you have, or keep going.`
-              : "Enter your metrics now";
+              : "Today's measurements";
 
   return (
     /* Geometry (popup-premium slice): the family's default sheet, like the
@@ -462,9 +462,7 @@ export function MetricsEntryModal({
                 ? saveError
                 : submitted && isEmpty
                   ? "Fill in at least one field."
-                  : allFilled
-                    ? "Real data only. No estimates."
-                    : "Real data only — leave anything you didn't measure blank."}
+                  : "Leave blank anything you didn't measure."}
             </p>
             {!isEmpty && (
               <button
@@ -483,7 +481,7 @@ export function MetricsEntryModal({
             <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-success text-success [box-shadow:0_0_40px_4px_color-mix(in_oklch,var(--success)_45%,transparent)]">
               <BloomIcon name="check-bloom" size={36} />
             </div>
-            <h3 className="mt-5 font-display text-2xl text-foreground">Saved!</h3>
+            <h3 className="mt-5 font-display text-2xl text-foreground">Saved.</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               {partial
                 ? "What you filled in is on today's record. The rest stays open."
@@ -521,7 +519,7 @@ export function MetricsEntryModal({
               onClick={clearAll}
               className="mt-3 w-full"
             >
-              Add Another Entry
+              Add another entry
             </Button>
           </div>
         )}

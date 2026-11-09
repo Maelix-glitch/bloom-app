@@ -114,7 +114,7 @@ export function MilestoneArchive({
             Nothing has happened <span className="display-em">yet</span>
           </>
         }
-        description="This is where your journey will be readable at a glance — every rank you reach, every milestone you finish. There is no hurry."
+        description="This is where your record reads at a glance — every rank you reach, every milestone you finish. There is no hurry."
         className="py-8"
       />
     );
@@ -137,7 +137,11 @@ export function MilestoneArchive({
           <span className="pg-history-points">
             {row.kind === "rank"
               ? row.points !== null
-                ? `${formatPoints(row.points)} pts`
+                ? /* A rank event stores the LIFETIME total at the moment it
+                     fired — labelled as such, so a stored "785 lifetime pts"
+                     never reads as a balance beside today's progress toward
+                     the same rank. */
+                  `${formatPoints(row.points)} lifetime pts`
                 : "Reached"
               : row.points !== null
                 ? `+${formatPoints(row.points)}`

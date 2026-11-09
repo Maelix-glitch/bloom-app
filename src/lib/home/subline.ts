@@ -23,6 +23,18 @@ export type SublineInput = {
   openCount: number;
 };
 
+/**
+ * Whether the hero may use its day-one line. The onboarding answer's
+ * "first day" claim lives on ONE device: a person who signs in on a new
+ * browser re-answers onboarding and the claim says "day one" over a
+ * months-old record (seen live — "Day one" beside 405 points and a
+ * three-month history). The record itself is the authority: day one is
+ * only real when the record holds at most one logged day.
+ */
+export function genuineFirstDay(claimedFirstDay: boolean, distinctLoggedDays: number): boolean {
+  return claimedFirstDay && distinctLoggedDays <= 1;
+}
+
 const WORDS = ["Two", "Three", "Four", "Five"];
 
 export function sublineFor({ ready, firstDay, openCount }: SublineInput): string {

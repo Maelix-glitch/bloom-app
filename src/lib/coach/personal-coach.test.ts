@@ -63,7 +63,9 @@ describe("greeting — knows the person before any entry exists", () => {
       ...baseRecord,
       personal: { name: null, daypart: "night", focusAreas: [], daysWithBloom: null },
     });
-    expect(a.paragraphs.join(" ")).toMatch(/still up|quiet hours|late one/i);
+    /* "Still up" was retired from the night pool in the sweep pass (PR #78
+       removed it everywhere else); the daypart lines are these now. */
+    expect(a.paragraphs.join(" ")).toMatch(/good night|quiet hours|late one/i);
   });
 
   it("nothing known at all → the old hello, unchanged", () => {

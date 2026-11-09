@@ -54,7 +54,7 @@ export function CoachHeader({
             <span className={cn("coach-ready-dot", ready && "is-busy")} aria-hidden="true" />
             <span className="coach-ready-text sr-only">{ready ? "Responding" : "Ready"}</span>
           </h1>
-          <p className="coach-header-subtitle">Your personal wellbeing companion</p>
+          <p className="coach-header-subtitle">A second mind for your day</p>
         </div>
       </div>
       <div className="coach-header-right">

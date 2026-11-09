@@ -369,7 +369,7 @@ export const APP_FACTS: AppFact[] = [
       /\bwhat('| a)?re (the )?rewards?\b/i,
     ],
     paragraphs: [
-      "Habit ticks earn points — each habit carries its own value (ten by default, and you can set anything from five to five hundred when you create it). On top of that, verified goals pay real milestones: a week of consistency, a batch of movement sessions, thirty days of reflection. Those are worth hundreds to a few thousand points.",
+      "Habit ticks earn points — each habit carries its own value (ten by default, and you can set anything from five to five hundred when you create it). On top of that, verified goals pay real milestones: a week of consistency, a batch of movement sessions, thirty days of reflection. Those pay between 100 and 10,000 points, depending on the goal.",
       "Everything you earn counts towards your rank, and your rank is read from your all-time earned points — so a quiet week never costs you a rank you already hold. Points are confirmed by the database, verified against your own logs, and never change quietly: the Point activity list on the Rewards page shows the date, the source and the amount of every award.",
     ],
   },
@@ -398,7 +398,7 @@ export const APP_FACTS: AppFact[] = [
     ],
     paragraphs: [
       "Bloom is a private wellbeing companion. You check in with how you feel, log the daily trackers — sleep, water, study, movement, energy, screen time — keep habits with reminders, and track your cycle if you want to. Bloom's coach reads the record and talks with you about your days, and can act inside the app for you: create habits, log a value, set a goal.",
-      "Everything is stored on your device by default and only ever syncs to a database you own. There is no Bloom server holding your data, and Profile has a full export and a complete erase.",
+      "Your record is kept in your Bloom account and syncs across the devices you sign in on. Profile has a full export and a complete erase, and both are yours to use at any time.",
     ],
   },
   {

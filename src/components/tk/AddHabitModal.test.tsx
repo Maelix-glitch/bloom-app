@@ -25,7 +25,7 @@ async function fillAndSubmit(name: string) {
 describe("AddHabitModal — bespoke icon picker", () => {
   it("renders glyph buttons, not emoji, for the catalogue", () => {
     render(<AddHabitModal open onClose={() => {}} onSubmit={() => {}} />);
-    const sprout = screen.getByRole("button", { name: "grow" });
+    const sprout = screen.getByRole("button", { name: "Sprout" });
     expect(sprout.querySelector("svg")).not.toBeNull();
     expect(sprout.getAttribute("data-icon")).toBe("sprout");
     // the whole grid is glyphs: no button carries a catalogue emoji
@@ -37,7 +37,7 @@ describe("AddHabitModal — bespoke icon picker", () => {
   it("saves the picked glyph as a bloom icon", async () => {
     const onSubmit = vi.fn<(h: AddHabitPayload) => void>();
     render(<AddHabitModal open onClose={() => {}} onSubmit={onSubmit} />);
-    fireEvent.click(screen.getByRole("button", { name: "grow" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sprout" }));
     await fillAndSubmit("Water the plants");
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
     expect(onSubmit.mock.calls[0]?.[0].icon).toEqual({ type: "bloom", value: "sprout" });
@@ -62,7 +62,7 @@ describe("AddHabitModal — bespoke icon picker", () => {
       />,
     );
     // the twin is already the selected tile before anything is touched
-    expect(screen.getByRole("button", { name: "grow" }).className).toContain("selected");
+    expect(screen.getByRole("button", { name: "Sprout" }).className).toContain("selected");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
@@ -92,7 +92,7 @@ describe("AddHabitModal — bespoke icon picker", () => {
     fireEvent.change(screen.getByPlaceholderText("Search icons…"), {
       target: { value: "laundry" },
     });
-    expect(screen.getByRole("button", { name: "laundry" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "grow" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Basket" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Sprout" })).toBeNull();
   });
 });

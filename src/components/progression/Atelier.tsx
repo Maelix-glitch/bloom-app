@@ -89,7 +89,7 @@ export function AtelierPage() {
         <div className="pg-atelier-hero">
           <div className="pg-hero-copy">
             <Link to="/rewards" className="pg-link" style={{ marginBottom: "0.6rem" }}>
-              <ArrowLeft width={13} height={13} aria-hidden /> Back to your journey
+              <ArrowLeft width={13} height={13} aria-hidden /> Back to rewards
             </Link>
             <p className="pg-eyebrow">
               <span className="pg-eyebrow-rule" aria-hidden />
@@ -101,7 +101,7 @@ export function AtelierPage() {
             {progress.loading ? null : (
               <p className="pg-hero-note">
                 Looks open with ranks — you are rank {tier}, and every look you already owned stays
-                yours. This is the quiet second layer of the journey, not the point of it.
+                yours. This is the quiet second layer of Bloom, not the point of it.
               </p>
             )}
           </div>

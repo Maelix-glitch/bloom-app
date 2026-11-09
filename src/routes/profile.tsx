@@ -841,7 +841,7 @@ function ProfilePage() {
                   <div className="pf-section-head">
                     <div>
                       <p className="pf-eyebrow">Milestones &amp; lately</p>
-                      <h2 className="pf-title">Your Bloom journey</h2>
+                      <h2 className="pf-title">Your Bloom record</h2>
                     </div>
                   </div>
                   <div className="pf-card pf-card--pad">

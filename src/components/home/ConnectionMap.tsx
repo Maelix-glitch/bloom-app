@@ -138,11 +138,18 @@ export function ConnectionMap({
   links,
   name,
   rangeLabel = "Last 30 days",
+  loggedDays,
 }: {
   nodes: Connection[];
   links: CrossLink[];
   name: string | null;
   rangeLabel?: string;
+  /**
+   * Distinct days in the window carrying any mapped signal, computed by
+   * the model (lib/home/today `connections`). Each node counts only its
+   * own signal's days, so the count is never the sum of the nodes.
+   */
+  loggedDays?: number;
 }) {
   const [active, setActive] = useState<SignalId | null>(null);
 
@@ -176,7 +183,7 @@ export function ConnectionMap({
   );
 
   const activeLink = active ? crossPaths.find((c) => c.from === active || c.to === active) : null;
-  const totalDays = nodes.reduce((s, n) => s + n.days, 0);
+  const totalDays = loggedDays ?? nodes.reduce((s, n) => s + n.days, 0);
 
   return (
     <section className="home-panel relative overflow-hidden p-5" aria-labelledby="home-map-title">
@@ -362,7 +369,7 @@ export function ConnectionMap({
             : crossPaths[0]
               ? crossPaths[0].sentence
               : totalDays === 0
-                ? "The map draws itself from what you log — nothing here is a placeholder."
+                ? "Log a day or two and the first connections appear."
                 : "Arcs appear once two signals have enough shared days to correlate."}
       </p>
     </section>

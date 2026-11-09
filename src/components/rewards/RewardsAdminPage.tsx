@@ -45,7 +45,7 @@ const MEDAL_LIBRARY = Array.from({ length: 30 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0");
   return {
     id: `medal-${number}`,
-    label: `Military medal ${number}`,
+    label: `Medal ${number}`,
     url: `/rewards/medals/medal-${number}.png`,
   };
 });
@@ -223,7 +223,7 @@ export function RewardsAdminPage() {
             <ShieldCheck className="size-3.5 text-sage" /> Authorized reward console
           </p>
           <h1 className="display mt-4 text-[42px] leading-[.98] sm:text-[58px]">
-            Curate the <span className="rewards-gradient-text">moment.</span>
+            Create a <span className="rewards-gradient-text">reward.</span>
           </h1>
           <p className="mt-4 max-w-[57ch] text-[14px] leading-relaxed text-muted-foreground">
             Create a reward, choose its recipients, and publish it deliberately. Nothing in this
@@ -316,10 +316,8 @@ export function RewardsAdminPage() {
             <div className="reward-admin-medal-library">
               <div className="reward-admin-medal-library-head">
                 <div>
-                  <p className="reward-admin-field-label">Military medal library</p>
-                  <p className="reward-admin-field-hint">
-                    Optional. Pick one of the 30 custom AI-generated medal assets.
-                  </p>
+                  <p className="reward-admin-field-label">Medal artwork</p>
+                  <p className="reward-admin-field-hint">Choose from the 30 medal designs.</p>
                 </div>
                 {MEDAL_LIBRARY.some((medal) => medal.url === form.imageUrl) ? (
                   <button
@@ -417,8 +415,8 @@ export function RewardsAdminPage() {
             <span className="reward-admin-count">{recipients.length} selected</span>
           </div>
           <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
-            Recipients are passed to a server-side publish function. A normal user cannot assign a
-            reward to themselves.
+            A reward goes only to the recipients you choose here — it can&rsquo;t be claimed by
+            anyone else.
           </p>
           <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
             Publishing is locked to a single recipient, set in the product itself — it can't be

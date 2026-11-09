@@ -26,6 +26,35 @@ export function messageTime(iso: string | undefined, nowLabel = "just now"): str
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+/**
+ * A saved-memory date for the context panel: "9 Nov 2026", never the raw
+ * ISO string the store carries ("2026-11-09T18:09:35.459Z" shipped to the
+ * panel verbatim once). Unparseable input renders nothing.
+ */
+export function savedDateLabel(iso: string | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
+}
+
+/**
+ * The name an attachment is shown under. Files the person picked keep
+ * their own name; files the app generated carry pipeline names
+ * ("media-generation-coach-food-…") that mean nothing to them, so those
+ * present as what they are.
+ */
+export function attachmentDisplayName(name: string, type: string): string {
+  const trimmed = name.trim();
+  const internal = /^media-generation\b/i.test(trimmed) || /^generated[-_]/i.test(trimmed);
+  if (!trimmed || internal) {
+    if (type.startsWith("image/")) return "Photo";
+    if (type.startsWith("audio/")) return "Voice note";
+    return "File";
+  }
+  return trimmed;
+}
+
 export function rowTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";

@@ -444,7 +444,7 @@ export function StoryCreator({
       icon: Clapperboard,
       art: mountainLakeArt,
     },
-    { id: "text", label: "Text", hint: "Words, beautifully", icon: Type, art: duskArt },
+    { id: "text", label: "Text", hint: "Add text to your story.", icon: Type, art: duskArt },
   ];
 
   return (

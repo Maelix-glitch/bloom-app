@@ -16,7 +16,7 @@ export const Route = createFileRoute("/dashboard")({
       {
         name: "description",
         content:
-          "Your personal wellness dashboard. Track habits, sleep, energy, study, movement, and more. Premium analytics and insights powered by your data.",
+          "Your habits, sleep, energy and mood for today, and the trends behind them.",
       },
     ],
   }),

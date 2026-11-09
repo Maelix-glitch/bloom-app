@@ -127,7 +127,9 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
                 <span>
                   stress <span className="text-rose">{hover.stress?.toFixed(2)}</span>
                 </span>
-                <span className="text-faint">{hover.count} entries</span>
+                <span className="text-faint">
+                  {hover.count} {hover.count === 1 ? "entry" : "entries"}
+                </span>
               </div>
             ) : (
               <p className="mono text-[11px] text-faint">Hover a cell for detail</p>

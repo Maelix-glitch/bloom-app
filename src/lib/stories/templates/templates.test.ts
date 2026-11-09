@@ -33,6 +33,7 @@ import {
 } from "./index";
 import { TEMPLATE_CATEGORIES, type StoryTemplateDef } from "./dsl";
 import { COLLECTION_SIZES } from "./collection";
+import { resolveText } from "@/lib/stories/canvas/typography";
 import { FRAMES, MASKS } from "@/lib/stories/canvas/masks";
 import { SHAPES } from "@/lib/stories/canvas/shapes";
 import { STORY_FILTERS } from "@/lib/stories/catalogs";
@@ -102,6 +103,27 @@ describe("story template library", () => {
       expect(composed, t.id).not.toBeNull();
       expect(composed!.composed.elements.length, t.id).toBe(t.seeds.length);
       expect(composed!.composed.background.v).toBe(1);
+    }
+  });
+
+  it("renders text at the size the seed authored", () => {
+    /* Seeds author size as absolute points on the reference canvas; the
+       element contract is a multiplier of the preset's base size, and
+       instantiate() converts between them. When the conversion was lost,
+       resolveText multiplied base × points and every template rendered
+       with giant clipped letters (a 40pt headline at 1,760pt). */
+    for (const t of STORY_TEMPLATE_LIBRARY) {
+      const composed = instantiateTemplate(t)!;
+      const textEls = composed.composed.elements.filter((e) => e.kind === "text");
+      const textSeeds = t.seeds.filter((s) => s.kind === "text");
+      expect(textEls.length, t.id).toBe(textSeeds.length);
+      textSeeds.forEach((seed, i) => {
+        if (seed.size === undefined) return;
+        const el = textEls[i]!;
+        if (el.kind !== "text") return;
+        const resolved = resolveText(el.preset, el.style ?? {}, 1);
+        expect(resolved.fontSize, `${t.id} "${seed.text.slice(0, 16)}"`).toBeCloseTo(seed.size, 5);
+      });
     }
   });
 

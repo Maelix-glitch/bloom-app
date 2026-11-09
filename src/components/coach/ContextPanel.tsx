@@ -7,12 +7,17 @@ import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { Button } from "@/components/ui/button";
 import type { CoachMemory } from "@/hooks/useCoachSystem";
 import type { CoachRecord } from "@/lib/coach/responder";
+import { savedDateLabel } from "@/lib/coach/ui-helpers";
 import { cn } from "@/lib/utils";
 
 export type CoachPanelTab = "context" | "memory";
 
 interface CoachPanelStats {
   entries: number;
+  /** Check-ins inside the averages' window — the count the Mood row pairs with. */
+  periodEntries: number;
+  /** The averages' window, lower-cased for mid-sentence use ("last 30 days"). */
+  windowLabel: string;
   avg: number;
   avgEnergy: number;
   avgStress: number;
@@ -49,10 +54,18 @@ function ContextView({
     rows.push({
       label: "Mood",
       value: `${fmt(stats.avg)} / 10`,
-      detail: `${stats.entries} ${stats.entries === 1 ? "check-in" : "check-ins"}`,
+      detail: `${stats.periodEntries} ${stats.periodEntries === 1 ? "check-in" : "check-ins"} · ${stats.windowLabel}`,
     });
-    rows.push({ label: "Energy", value: `${fmt(stats.avgEnergy)} / 10`, detail: "recent average" });
-    rows.push({ label: "Stress", value: `${fmt(stats.avgStress)} / 10`, detail: "recent average" });
+    rows.push({
+      label: "Energy",
+      value: `${fmt(stats.avgEnergy)} / 10`,
+      detail: `average · ${stats.windowLabel}`,
+    });
+    rows.push({
+      label: "Stress",
+      value: `${fmt(stats.avgStress)} / 10`,
+      detail: `average · ${stats.windowLabel}`,
+    });
   }
   for (const tracker of record.trackers) {
     if (tracker.daysLogged === 0) continue;
@@ -170,7 +183,9 @@ function MemoryView({
               <span className="coach-memory-copy">
                 <span className="coach-memory-category">{CATEGORY_LABEL[memory.category]}</span>
                 <span className="coach-memory-text">{memory.text}</span>
-                {memory.learnedAt ? <small>Saved {memory.learnedAt}</small> : null}
+                {memory.learnedAt ? (
+                  <small>Saved {savedDateLabel(memory.learnedAt)}</small>
+                ) : null}
               </span>
               <span className="coach-memory-actions">
                 <button

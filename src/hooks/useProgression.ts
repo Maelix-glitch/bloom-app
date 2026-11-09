@@ -26,6 +26,7 @@ import { useHabits, type HabitsAuth, type HabitsStore } from "@/hooks/useHabits"
 import { useTrackers, type TrackerSyncState } from "@/hooks/useTrackers";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { useEverReady } from "@/hooks/useEverReady";
+import { watchAccountCheck } from "@/lib/accountCheck";
 import { todayLocal, shiftDay } from "@/lib/localDay";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import { readPoints } from "@/lib/home/habits";
@@ -227,6 +228,7 @@ export function useProgression(): ProgressionStore {
 
   useEffect(() => {
     let alive = true;
+    let cancelWatch: () => void = () => {};
     async function load() {
       if (!signedIn || !profileId || !hasSupabaseConfig) {
         cloudForRef.current = null;
@@ -246,7 +248,28 @@ export function useProgression(): ProgressionStore {
         setCloudPoints(null);
         setServerUnavailable(false);
       }
-      const value = await readPoints(profileId);
+      /* A read that never answers is a failed read: if it hasn't landed
+         within the account-check window, land where a failure lands — the
+         device figures under the page's "couldn't load" banner — instead
+         of holding the hero on dashes for the whole session (live sweep,
+         2026-11-10). A late success still replaces the fallback below. */
+      let readSettled = false;
+      cancelWatch = watchAccountCheck(
+        () => !readSettled,
+        () => {
+          if (!alive) return;
+          setCloudPoints(null);
+          setServerUnavailable(true);
+        },
+      );
+      let value: number | null;
+      try {
+        value = await readPoints(profileId);
+      } catch {
+        value = null;
+      }
+      readSettled = true;
+      cancelWatch();
       if (!alive) return;
       setCloudPoints(value);
       // `null` means the read failed — it is not the same as zero, and must
@@ -256,6 +279,7 @@ export function useProgression(): ProgressionStore {
     void load();
     return () => {
       alive = false;
+      cancelWatch();
     };
     // `ledgerVersion` is in the list so a nudge from another tab (or a merge
     // after sign-in) re-reads the authoritative balance, not just the mirror.

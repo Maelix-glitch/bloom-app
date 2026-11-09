@@ -9,6 +9,7 @@
 import type { Correlation, DayAggregate, EmotionKey, Evidence, MoodEntry } from "@/lib/mood/types";
 import { EMOTION_MAP } from "@/lib/mood/types";
 import { calculateCorrelation, evidenceFor, mean, round } from "@/lib/mood/analytics";
+import { averageMood } from "@/lib/stats";
 
 export type GraphNodeKind = "hub" | "signal" | "emotion";
 
@@ -167,12 +168,20 @@ export function buildMoodGraph(input: {
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
 
-  const avgMood = days.length ? round(mean(days.map((d) => d.mood)), 1) : 0;
+  /* The hub's average is THE average mood (lib/stats): entry-weighted over
+     every check-in in the record. Averaging the per-day means here instead
+     made the web disagree with the Mood headline and Intelligence over the
+     same record (7.1 here vs 3.00 there, seen live) — a per-day mean is a
+     different statistic and no surface may present it as "average mood".
+     The window is the whole record, and the reading says so. */
+  const avgMood = entries.length ? round(averageMood(entries) ?? 0, 1) : 0;
   nodes.push({
     id: "mood",
     kind: "hub",
     label: "Mood",
-    reading: days.length ? `${avgMood.toFixed(1)} /10 · ${days.length} days` : "no entries yet",
+    reading: days.length
+      ? `${avgMood.toFixed(1)} /10 · ${days.length} days · whole record`
+      : "no entries yet",
     n: days.length,
     weight: 1,
     color: "var(--gold)",

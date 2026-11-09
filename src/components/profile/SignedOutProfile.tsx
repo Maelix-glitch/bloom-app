@@ -91,7 +91,7 @@ export function SignedOutProfile({
             type="email"
             autoComplete="email"
             inputMode="email"
-            placeholder="you@somewhere.calm"
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);

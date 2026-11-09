@@ -30,7 +30,7 @@ function EmotionsImpl({
       <SectionHead
         eyebrow="Composition"
         title="Emotional spectrum"
-        sub="Frequency, share, and the average mood recorded alongside each state."
+        sub="Share of check-ins naming each feeling, and the average mood recorded alongside it. A check-in can name more than one feeling, so the shares add to more than 100%."
         right={
           filter ? (
             <button

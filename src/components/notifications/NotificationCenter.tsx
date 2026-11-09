@@ -309,7 +309,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
                   icon={Sparkles}
                   tint="violet"
                   title="No insights yet"
-                  sub="They appear once there's a little cycle history to read."
+                  sub="They appear once there's a little more in your record to read."
                 />
               ) : (
                 <ul className="ncenter-group">

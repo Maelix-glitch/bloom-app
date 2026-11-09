@@ -122,6 +122,8 @@ interface Errors {
   days?: string | undefined;
   goal?: string | undefined;
   icon?: string | undefined;
+  /** A failure that belongs to no field — a save that didn't go through. */
+  form?: string | undefined;
 }
 interface State {
   step: number;
@@ -210,7 +212,7 @@ function validate(state: State, step = state.step): Errors {
   const e: Errors = {};
   if (step === 0) {
     if (!state.name.trim()) e.name = "Give your habit a name.";
-    else if (state.name.trim().length < 2) e.name = "A little longer, please.";
+    else if (state.name.trim().length < 2) e.name = "Names need at least two characters.";
   }
   if (step === 1) {
     if (state.frequency === "custom" && state.days.length === 0) e.days = "Pick at least one day.";
@@ -341,7 +343,10 @@ function AddHabitDialog({
     } catch (err) {
       console.error("[AddHabitModal] submit failed", err);
       if (alive.current) {
-        set({ submitting: false, errors: { name: "Could not save. Try again." }, step: 0 });
+        /* A save failure is not a name error: stay on the step, keep the
+           input, and say so at the form level — this used to blame the
+           Name field and throw the person back to step one. */
+        set({ submitting: false, errors: { form: "Couldn't save that just now." } });
       }
     }
   };
@@ -640,7 +645,7 @@ function AddHabitDialog({
                           s.icon.type === "bloom" && s.icon.value === i.id && "selected",
                         )}
                         data-icon={i.id}
-                        aria-label={i.k.split(" ")[0]}
+                        aria-label={i.id.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase())}
                         onClick={() => set({ icon: { type: "bloom", value: i.id } })}
                       >
                         <BloomIcon name={i.id} size={22} />
@@ -1027,6 +1032,8 @@ function AddHabitDialog({
             </div>
           </section>
         </div>
+
+        {errorFor("form", "err-form")}
 
         {/* FOOTER: buttons change label/behaviour per step */}
         <div className="modal-foot">

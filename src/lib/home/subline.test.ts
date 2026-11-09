@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { RECORD_READING, sublineFor } from "./subline";
+import { genuineFirstDay, RECORD_READING, sublineFor } from "./subline";
+
+describe("genuineFirstDay", () => {
+  it("trusts the claim only when the record itself is new", () => {
+    expect(genuineFirstDay(true, 0)).toBe(true);
+    expect(genuineFirstDay(true, 1)).toBe(true);
+    /* A fresh device's onboarding answer over an established record. */
+    expect(genuineFirstDay(true, 2)).toBe(false);
+    expect(genuineFirstDay(true, 88)).toBe(false);
+    expect(genuineFirstDay(false, 0)).toBe(false);
+  });
+});
 
 describe("home subtitle", () => {
   it("is deterministic while the record is loading", () => {

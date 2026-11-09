@@ -372,7 +372,7 @@ export function StoryEditor({
   const addElement = useCallback(
     (el: StoryElement) => {
       if (elements.length >= ELEMENT_LIMITS.maxElements) {
-        toast("That's plenty of layers — remove one to add another.");
+        toast("That's the layer limit — remove one to add another.");
         return;
       }
       const placed = { ...el, x: 0.5, y: 0.42, z: nextZ(elements) };
@@ -464,7 +464,7 @@ export function StoryEditor({
   const openText = useCallback(
     (existing: Extract<StoryElement, { kind: "text" }> | null) => {
       if (!existing && elements.length >= ELEMENT_LIMITS.maxElements) {
-        toast("That's plenty of layers — remove one to add another.");
+        toast("That's the layer limit — remove one to add another.");
         return;
       }
       setTextEditing({
