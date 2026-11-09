@@ -141,11 +141,21 @@ describe("awaited auth actions resolve their UI state", () => {
   });
 
   it("sendMagicLink checks for a project before calling out", () => {
-    const f = FILES.find((x) => x.rel.endsWith("useProfileSpace.ts"))!;
-    const fn = f.text.slice(f.text.indexOf("const sendMagicLink"));
-    const body = fn.slice(0, fn.indexOf("}, []);"));
+    /* The send moved into the shared lib/auth/magicLink (the gate uses it
+       too) — the guarantee this guard exists for lives there now: the
+       config check must come BEFORE the signInWithOtp call, inside a try.
+       The profile hook must delegate, not regrow a local copy. */
+    const shared = FILES.find((x) => x.rel === "lib/auth/magicLink.ts")!;
+    const fn = shared.text.slice(shared.text.indexOf("export async function requestMagicLink"));
+    const body = fn.slice(0, fn.indexOf("\n}\n"));
     expect(body).toMatch(/hasSupabaseConfig/);
+    expect(body.indexOf("hasSupabaseConfig")).toBeLessThan(body.indexOf("signInWithOtp"));
     expect(body).toMatch(/try\s*{/);
+    const hook = FILES.find((x) => x.rel.endsWith("useProfileSpace.ts"))!;
+    const hookFn = hook.text.slice(hook.text.indexOf("const sendMagicLink"));
+    const hookBody = hookFn.slice(0, hookFn.indexOf("}, []);"));
+    expect(hookBody).toMatch(/requestMagicLink/);
+    expect(hookBody).not.toMatch(/signInWithOtp/);
   });
 });
 

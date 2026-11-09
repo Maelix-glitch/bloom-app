@@ -39,8 +39,8 @@ import {
   isLikelyEmail,
   submitLabel,
 } from "@/lib/auth/flow";
-import { hasSupabaseConfig, supabase } from "@/lib/supabase";
-import { report } from "@/lib/profile/errors";
+import { requestMagicLink } from "@/lib/auth/magicLink";
+import { hasSupabaseConfig } from "@/lib/supabase";
 
 /** Where a magic link lands. Root, not /profile: the app decides from there. */
 function redirectTarget(): string | undefined {
@@ -85,25 +85,15 @@ export function AccessGate() {
       }
 
       const email = state.email.trim().toLowerCase();
-      try {
-        const redirectTo = redirectTarget();
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          ...(redirectTo ? { options: { emailRedirectTo: redirectTo } } : {}),
-        });
-        if (error) {
-          report("access:magic-link", error);
-          dispatch({ type: "error", message: error.message });
-          return;
-        }
-        dispatch({ type: "sent", email });
-      } catch (error) {
-        report("access:magic-link", error);
-        dispatch({
-          type: "error",
-          message: error instanceof Error ? error.message : "unknown",
-        });
+      const result = await requestMagicLink(email, {
+        redirectTo: redirectTarget(),
+        scope: "access:magic-link",
+      });
+      if (!result.ok) {
+        dispatch({ type: "error", message: result.message });
+        return;
       }
+      dispatch({ type: "sent", email });
     },
     [ask, state],
   );
