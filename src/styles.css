@@ -1,3 +1,7 @@
+/* Self-hosted type (Fraunces, Inter, IBM Plex Mono, Caveat) — @font-face
+   for the woff2 files in public/fonts/. No Google Fonts request anywhere:
+   the app serves its own type, and the service worker cache-firsts it. */
+@import "./styles/fonts.css";
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";

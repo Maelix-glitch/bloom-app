@@ -22,7 +22,7 @@ import { z } from "zod";
 
 import profileCss from "../styles/profile.css?url";
 import storiesCss from "../styles/stories.css?url";
-import { STORIES_SCOPED_FONT_HREF } from "@/lib/stories/canvas/typography";
+import storiesFontsCss from "../styles/fonts-stories.css?url";
 
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { useProfileRecord } from "@/hooks/useProfileRecord";
@@ -87,7 +87,7 @@ export const Route = createFileRoute("/profile")({
       /* Stories render on this route (composer, viewer, archive, settings). */
       { rel: "stylesheet", href: storiesCss },
       /* D4: the Stories-scoped preset fonts (Cormorant Garamond, Oswald). */
-      { rel: "stylesheet", href: STORIES_SCOPED_FONT_HREF },
+      { rel: "stylesheet", href: storiesFontsCss },
     ],
     meta: [
       { title: "Bloom — Profile" },

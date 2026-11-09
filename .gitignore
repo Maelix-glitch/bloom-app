@@ -53,3 +53,7 @@ snapshots/
 # source zips that lived here were removed from the tree; they remain in
 # git history. downloads/kit/ predates this entry and stays tracked.
 downloads/
+
+# Self-hosted font binaries are build outputs (scripts/fetch-fonts.mjs vendors
+# them at build time, pinned by scripts/fonts-manifest.json)
+public/fonts/*.woff2
