@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarRange, Droplet, Gift, Plus, Scale, Smile } from "lucide-react";
 
 import storiesCss from "../styles/stories.css?url";
-import { STORIES_SCOPED_FONT_HREF } from "@/lib/stories/canvas/typography";
+import storiesFontsCss from "../styles/fonts-stories.css?url";
 
 import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
@@ -81,7 +81,7 @@ export const Route = createFileRoute("/")({
     links: [
       { rel: "stylesheet", href: storiesCss },
       /* D4: the Stories-scoped preset fonts (Cormorant Garamond, Oswald). */
-      { rel: "stylesheet", href: STORIES_SCOPED_FONT_HREF },
+      { rel: "stylesheet", href: storiesFontsCss },
     ],
   }),
   component: TodayPage,

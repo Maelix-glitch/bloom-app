@@ -77,10 +77,11 @@ describe("UI guard (warn): Google Fonts families outside the three", () => {
   const ALLOWED = new Set(["Fraunces", "Inter", "IBM Plex Mono"]);
   /* D4 exception, ADOPTED 2026-11-08: Stories canvas presets
      (handwritten/romantic/poster voices, incl. stored stories) get three
-     scoped families — Caveat from the root link, and Cormorant Garamond +
-     Oswald loaded only by the Stories-bearing routes (/, /profile,
-     /$handle) via STORIES_SCOPED_FONT_HREF. Anywhere else they would be
-     drift; scoped to Stories they are the design. */
+     scoped families — Caveat with the global set, and Cormorant Garamond +
+     Oswald only on the Stories-bearing routes (/, /profile, /$handle).
+     Since the self-hosting slice (2026-11-09) all of them are @font-face
+     in styles/fonts.css / styles/fonts-stories.css served from /fonts —
+     this tripwire now watches for any Google Fonts link coming back. */
   const EXCEPTIONS = new Set(["Caveat", "Cormorant Garamond", "Oswald"]);
 
   it("reports families loaded outside the system", () => {

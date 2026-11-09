@@ -11,14 +11,13 @@
 /**
  * The two preset voices that are not in the app's global font load:
  * Cormorant Garamond (romantic/elegant) and Oswald (poster/condensed).
- * Decision D4: they load Stories-scoped — the routes that render stories
- * (/, /profile, /$handle — the same ones that pull stories.css) add this
- * stylesheet to their head links, so the rest of the app never pays for
- * them and the presets stop falling back to Georgia / Arial Narrow in
- * the editor, the viewer and canvas exports alike.
+ * Decision D4: they load Stories-scoped and self-hosted — the routes that
+ * render stories (/, /profile, /$handle — the same ones that pull
+ * stories.css) also pull styles/fonts-stories.css, whose @font-face rules
+ * serve the woff2 files from /fonts, so the rest of the app never pays
+ * for them and the presets stop falling back to Georgia / Arial Narrow
+ * in the editor, the viewer and canvas exports alike.
  */
-export const STORIES_SCOPED_FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Oswald:wght@400;500;600&display=swap";
 
 export type TypePresetId =
   /* legacy ids kept so stored stories keep their voice */

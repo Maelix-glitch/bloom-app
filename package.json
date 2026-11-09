@@ -19,7 +19,10 @@
     "app:sync": "npx cap sync",
     "build:app": "BLOOM_TARGET=capacitor vite build && node scripts/app-postbuild.mjs",
     "app:build": "npm run build:app && npx cap sync",
-    "app:assets": "node scripts/app-icon-source.mjs && node scripts/app-assets.mjs"
+    "app:assets": "node scripts/app-icon-source.mjs && node scripts/app-assets.mjs",
+    "prebuild": "node scripts/fetch-fonts.mjs",
+    "prebuild:worker": "node scripts/fetch-fonts.mjs",
+    "fonts": "node scripts/fetch-fonts.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

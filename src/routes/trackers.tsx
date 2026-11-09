@@ -6,9 +6,6 @@ import { HealthTools } from "@/components/health/HealthTools";
 import { TrackersPage } from "@/components/tk/TrackersPage";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 
-const FONTS =
-  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap";
-
 export const Route = createFileRoute("/trackers")({
   head: () => ({
     meta: [
@@ -19,10 +16,7 @@ export const Route = createFileRoute("/trackers")({
           "Sleep, water, study, movement, energy and screen time — one day at a time, drawn as a map: a twenty-four hour compass, six territories, and a route through the last fortnight, all computed only from what you log.",
       },
     ],
-    links: [
-      { rel: "stylesheet", href: FONTS },
-      { rel: "stylesheet", href: trackersCss },
-    ],
+    links: [{ rel: "stylesheet", href: trackersCss }],
   }),
   component: TrackersRoute,
 });

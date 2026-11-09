@@ -164,20 +164,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "Bloom" },
     ],
     links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        // The type system is three families: Fraunces, Inter, IBM Plex Mono
-        // (UI update U1). ONE recorded exception, pending owner decision D4:
-        // Caveat stays loaded because the Stories canvas's Script presets
-        // (handwritten / margin note / journal — including stored stories)
-        // resolve it from here; there is no Stories-scoped load. Cormorant
-        // Garamond and Oswald were removed in U1 — the Stories romantic /
-        // poster presets fall back to Georgia / 'Arial Narrow' per their
-        // stacks until D4 decides whether they join the exception.
-        href: "https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap",
-      },
+      /* Type is self-hosted: Fraunces, Inter, IBM Plex Mono and Caveat
+         (the U1 system + the D4 Stories exception) are @font-face rules in
+         styles/fonts.css, imported by appCss below, with the woff2 files
+         served from /fonts. Cormorant Garamond + Oswald stay Stories-scoped
+         via styles/fonts-stories.css on /, /profile and /$handle. */
       {
         rel: "stylesheet",
         href: appCss,
