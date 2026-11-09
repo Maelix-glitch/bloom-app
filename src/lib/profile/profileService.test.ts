@@ -144,7 +144,7 @@ describe("loadMyProfile", () => {
   });
 
   /**
-   * A project that ran `20260909_core_tables.sql` but not
+   * A project that ran `20260825_core_tables.sql` but not
    * `20260828_profile_identity_stories.sql` has a `profiles` table with none of
    * the identity columns. The full select fails; the row is still perfectly
    * readable with fewer columns, and a working page beats an error wall.

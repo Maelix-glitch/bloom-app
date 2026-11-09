@@ -12,6 +12,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "seed:evidence": "node scripts/vitalis-evidence-seed.mjs",
+    "seed:evidence:check": "node scripts/vitalis-evidence-seed.mjs --check",
     "preview:prod": "npm run build && npx wrangler --cwd .output/server dev",
     "deploy": "npm run build:worker && npx wrangler deploy",
     "deploy:name": "npm run build && npx wrangler --cwd .output/server deploy --name bloom-app",
@@ -73,9 +75,11 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
     "@eslint/js": "^9.32.0",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^22.16.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
@@ -88,6 +92,7 @@
     "jsdom": "^30.0.1",
     "lightningcss": "^1.30.0",
     "nitro": "3.0.260603-beta",
+    "pg": "^8.23.1",
     "playwright": "^1.63.0",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",

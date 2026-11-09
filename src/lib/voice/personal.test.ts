@@ -37,6 +37,21 @@ function onboardingDoc(value: unknown): Store {
 const MORNING = new Date("2026-09-20T09:30:00");
 const EVENING = new Date("2026-09-20T20:30:00");
 
+/**
+ * An instant `hours` before `now`, as an ISO string — the shape onboarding
+ * stores in `at`.
+ *
+ * `daysWithBloom` counts elapsed whole 24-hour periods, so a fixture that pins
+ * `at` to a UTC instant and `now` to a local one measures a different duration
+ * in every time zone: `2026-09-18T08:00:00.000Z` against a local 09:30 on the
+ * 20th is 49.5 hours in UTC but 44 hours in IST, which floors to 2 days in one
+ * zone and 1 in the other. Deriving the stored instant from the same `now` the
+ * test passes in makes the elapsed time exactly what the test says it is,
+ * wherever the suite runs.
+ */
+const hoursBefore = (now: Date, hours: number): string =>
+  new Date(now.getTime() - hours * 3_600_000).toISOString();
+
 beforeEach(() => {
   withStorage({});
 });
@@ -71,7 +86,9 @@ describe("readPersonalVoice — identity from the onboarding answer, or honest b
         sex: "female",
         focus: ["sleep", "mood"],
         name: "Maya Krishnan",
-        at: "2026-09-18T08:00:00.000Z",
+        // Two whole 24-hour periods and two hours, so the expectation below is
+        // about whole days rather than about the clock this machine is set to.
+        at: hoursBefore(MORNING, 50),
       }),
     );
     const voice = readPersonalVoice(MORNING);
@@ -91,7 +108,10 @@ describe("readPersonalVoice — identity from the onboarding answer, or honest b
         sex: null,
         focus: [],
         name: "Ada",
-        at: "2026-09-20T01:00:00.000Z",
+        // Answered two hours ago, so this is the first 24-hour period in every
+        // zone — not "an hour after midnight UTC", which is a different tenure
+        // depending on where the runner is.
+        at: hoursBefore(MORNING, 2),
       }),
     );
     expect(readPersonalVoice(MORNING).firstDay).toBe(true);

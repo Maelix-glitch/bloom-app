@@ -9,6 +9,7 @@ import {
   faceForEntry,
   faceForScore,
   journeyPoints,
+  localDay,
   quickInsights,
   streakLine,
   todayEntry,
@@ -47,21 +48,40 @@ describe("mood page view-model", () => {
   });
 
   it("picks the latest entry logged today, ignoring future-stamped ones", () => {
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const early = new Date(now.getTime() - 2 * 3600_000).toISOString();
-    const recent = new Date(now.getTime() - 60_000).toISOString();
-    const future = new Date(now.getTime() + 3 * 3600_000).toISOString();
+    // A fixed local clock, with every timestamp derived from it and from local
+    // date parts — so the fixture means the same thing in every time zone.
+    //
+    // It used to be built from the real clock as `now + 3h`. That is still
+    // "today" in the morning and already "tomorrow" after 21:00 local, so from
+    // `localDay(future) !== today` the future entry silently stopped being one
+    // of today's entries at all, and the last two assertions had nothing to
+    // test. An hour ahead keeps it future-stamped and on the same calendar day
+    // at any hour and in any zone, which is the behaviour this test is about.
+    const now = new Date(2026, 8, 20, 9, 30);
+    const today = localDay(now.toISOString());
+    const hoursFromNow = (hours: number): string =>
+      new Date(now.getTime() + hours * 3_600_000).toISOString();
+
+    const early = hoursFromNow(-2);
+    const recent = hoursFromNow(-1 / 60);
+    const future = hoursFromNow(1);
+
     const a = entry({ id: "a", timestamp: early });
     const b = entry({ id: "b", timestamp: recent });
     const c = entry({ id: "c", timestamp: future });
     const old = entry({ id: "old", timestamp: "2020-01-01T10:00:00" });
-    expect(todayEntry([old, a, b], today)?.id).toBe("b");
+
+    // The premise everything below rests on: `c` is stamped after `now` and is
+    // still today. Without this the assertions could pass for the wrong reason.
+    expect(c.timestamp > now.toISOString()).toBe(true);
+    expect(localDay(c.timestamp)).toBe(today);
+
+    expect(todayEntry([old, a, b], today, now)?.id).toBe("b");
     // a hand-set later time doesn't hide the fresh check-in…
-    expect(todayEntry([old, a, c, b], today)?.id).toBe("b");
+    expect(todayEntry([old, a, c, b], today, now)?.id).toBe("b");
     // …but if it's all there is, it still counts as today's entry
-    expect(todayEntry([c], today)?.id).toBe("c");
-    expect(todayEntry([old], today)).toBeNull();
+    expect(todayEntry([c], today, now)?.id).toBe("c");
+    expect(todayEntry([old], today, now)).toBeNull();
   });
 
   it("builds a real entry from a face tap", () => {

@@ -91,7 +91,7 @@ const FULL_COLUMNS = "id, display_name, username, bio, avatar_path, banner_path,
 
 /**
  * Narrower reads, tried in order only when the project says a *column* is
- * missing — a real state: `20260909_core_tables.sql` creates `profiles` with
+ * missing — a real state: `20260825_core_tables.sql` creates `profiles` with
  * (id, profile_name, total_points) and `20260828_profile_identity_stories.sql`
  * adds the identity columns, and a project that ran one without the other
  * answers "column does not exist" on the full select. Reading what exists
