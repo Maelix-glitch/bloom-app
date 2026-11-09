@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig, supabaseConfigProblem, watchAuth } from "@/lib/supabase";
+import { requestMagicLink } from "@/lib/auth/magicLink";
 import { moodStorage } from "@/lib/mood/storage";
 import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
@@ -715,56 +716,17 @@ export function useProfileSpace() {
   }, [userId]);
 
   const sendMagicLink = useCallback(async (email: string) => {
-    /*
-     * Guarded, and everything inside a try.
-     *
-     * Without the guard this hit the throwing Supabase proxy when no project
-     * is configured. The throw rejected the promise, the caller had no
-     * try/catch, so its `setState` never ran and the button sat on "sending"
-     * forever — the "magic link isn't sending" report, with no error shown.
-     *
-     * Now an unconfigured build says so plainly instead of hanging.
-     */
-    if (!hasSupabaseConfig) {
-      return {
-        ok: false,
-        message:
-          supabaseConfigProblem() ??
-          "This copy of Bloom has no account system connected, so there's no link to send.",
-      };
-    }
-    try {
-      const redirectTo =
-        typeof window !== "undefined" ? `${window.location.origin}/profile` : undefined;
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        ...(redirectTo ? { options: { emailRedirectTo: redirectTo } } : {}),
-      });
-      if (error) {
-        report("profile:magic-link", error);
-        /*
-         * Supabase's own wording is more useful than a generic apology here:
-         * rate limits and an unconfirmed SMTP setup are the two usual causes
-         * and they need different fixes.
-         */
-        const detail = /rate|limit|too many/i.test(error.message)
-          ? "Too many requests just now — wait a minute and try again."
-          : /smtp|email|sender|provider/i.test(error.message)
-            ? "The project's email sending isn't set up yet, so no link could go out."
-            : error.message;
-        return { ok: false, message: detail };
-      }
-      return { ok: true, message: "Check your inbox — a sign-in link is on its way." };
-    } catch (e) {
-      report("profile:magic-link", e);
-      return {
-        ok: false,
-        message:
-          e instanceof Error && /not connected/i.test(e.message)
-            ? "Bloom isn't connected to a database here, so there's no account to sign in to."
-            : "We couldn't reach the sign-in service. Check your connection and try again.",
-      };
-    }
+    /* The send itself is the shared one (lib/auth/magicLink) — the guard
+       against an unconfigured build, the error wording and the reporting
+       live there now; this surface only chooses the /profile landing and
+       the success sentence. */
+    const result = await requestMagicLink(email, {
+      redirectTo: typeof window !== "undefined" ? `${window.location.origin}/profile` : undefined,
+      scope: "profile:magic-link",
+    });
+    return result.ok
+      ? { ok: true, message: "Check your inbox — a sign-in link is on its way." }
+      : result;
   }, []);
 
   return {
