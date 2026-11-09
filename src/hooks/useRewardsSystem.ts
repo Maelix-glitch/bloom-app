@@ -1,5 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
+/**
+ * Rewards data — a person's delivered rewards and the admin workspace —
+ * on react-query (see lib/query.ts: this surface is pure server state,
+ * so it gets the query client instead of another hand-rolled copy of
+ * the loading/error/reload plumbing).
+ *
+ * The public API is the hand-rolled version's, field for field, so the
+ * consumers didn't change: same loading/error surfaces, same imperative
+ * reloads, same throwing mutation wrappers. What changed underneath:
+ * caching + dedupe + refetch are the client's job, the session comes
+ * from the shared useSession store instead of a private auth listener,
+ * and claiming a reward updates the cached list optimistically —
+ * rolling back if the server refuses — instead of waiting a round-trip
+ * to show the claim.
+ */
 
+import { useCallback, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { useSession } from "@/hooks/useSession";
+import { queryKeys } from "@/lib/query";
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 
 export type RewardStatus = "draft" | "published" | "claimed" | "expired" | "revoked";
@@ -68,164 +87,194 @@ function ensureSupabase() {
   }
 }
 
+const UNCONFIGURED_USER =
+  "Bloom isn't connected to a database in this environment, so rewards can't be loaded here.";
+const UNCONFIGURED_ADMIN = "Bloom isn't connected to a database in this environment.";
+const ADMIN_REQUIRED = "Rewards administrator access required.";
+
+async function fetchMyRewards(): Promise<UserReward[]> {
+  const { data, error } = await supabase.rpc("get_my_rewards");
+  if (error) throw error;
+  return (data ?? []) as UserReward[];
+}
+
+async function fetchIsRewardsAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_rewards_admin");
+  if (error) throw error;
+  return Boolean(data);
+}
+
+interface AdminWorkspace {
+  rewards: AdminReward[];
+  users: AdminUser[];
+}
+
+async function fetchAdminWorkspace(): Promise<AdminWorkspace> {
+  const [rewardsResult, usersResult] = await Promise.all([
+    supabase.rpc("admin_list_rewards"),
+    supabase.rpc("admin_list_reward_users"),
+  ]);
+  if (rewardsResult.error) throw rewardsResult.error;
+  if (usersResult.error) throw usersResult.error;
+  return {
+    rewards: (rewardsResult.data ?? []) as AdminReward[],
+    users: (usersResult.data ?? []) as AdminUser[],
+  };
+}
+
 export function useRewardsSystem() {
-  const [rewards, setRewards] = useState<UserReward[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminLoading, setAdminLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { userId, ready } = useSession();
+  const [claimError, setClaimError] = useState<string | null>(null);
   const [adminError, setAdminError] = useState<string | null>(null);
-  const [adminRewards, setAdminRewards] = useState<AdminReward[]>([]);
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [adminBusy, setAdminBusy] = useState(false);
 
-  const loadUserRewards = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  /* ------------------------------------------------------------ mine */
 
-    if (!hasSupabaseConfig) {
-      // No project in this environment: keep the page up with an honest,
-      // empty record rather than taking the route down.
-      setUserId(null);
-      setRewards([]);
-      setError(
-        "Bloom isn't connected to a database in this environment, so rewards can't be loaded here.",
-      );
-      setLoading(false);
-      return;
-    }
+  const mineKey = queryKeys.rewardsMine(userId);
+  const mineQuery = useQuery({
+    queryKey: mineKey,
+    queryFn: fetchMyRewards,
+    enabled: hasSupabaseConfig && ready && !!userId,
+  });
 
+  const rewards = mineQuery.data ?? [];
+  const loading = !hasSupabaseConfig
+    ? false
+    : !ready || (!!userId && mineQuery.isLoading);
+  const loadError = mineQuery.error ? messageFrom(mineQuery.error) : null;
+  const error = claimError ?? (hasSupabaseConfig ? loadError : UNCONFIGURED_USER);
+
+  const reload = useCallback(async () => {
+    setClaimError(null);
+    await queryClient.refetchQueries({ queryKey: queryKeys.rewardsMine(userId), exact: true });
+  }, [queryClient, userId]);
+
+  /* ------------------------------------------------------------ admin gate */
+
+  const checkAdmin = useCallback(async (): Promise<boolean> => {
+    if (!hasSupabaseConfig || !userId) return false;
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const id = session?.user?.id ?? null;
-      setUserId(id);
-
-      if (!id) {
-        setRewards([]);
-        return;
-      }
-
-      const { data, error: rpcError } = await supabase.rpc("get_my_rewards");
-      if (rpcError) throw rpcError;
-      setRewards((data ?? []) as UserReward[]);
-    } catch (loadError) {
-      console.error("Could not load Rewards:", loadError);
-      setRewards([]);
-      setError(messageFrom(loadError));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadUserRewards();
-    if (!hasSupabaseConfig) return;
-
-    try {
-      const listener = supabase.auth.onAuthStateChange((_event, session) => {
-        setUserId(session?.user?.id ?? null);
-        void loadUserRewards();
+      /* staleTime 0: the imperative gate always re-asks, like the
+         hand-rolled version did; the hook query below shares the cache. */
+      return await queryClient.fetchQuery({
+        queryKey: queryKeys.rewardsIsAdmin(userId),
+        queryFn: fetchIsRewardsAdmin,
+        retry: false,
+        staleTime: 0,
       });
-
-      return () => listener.data.subscription.unsubscribe();
     } catch {
-      // No supabase config — already handled above.
-      return;
-    }
-  }, [loadUserRewards]);
-
-  const checkAdmin = useCallback(async () => {
-    if (!hasSupabaseConfig) {
-      setIsAdmin(false);
       return false;
     }
-    try {
-      const { data, error: rpcError } = await supabase.rpc("is_rewards_admin");
-      if (rpcError) throw rpcError;
-      const allowed = Boolean(data);
-      setIsAdmin(allowed);
-      return allowed;
-    } catch (adminCheckError) {
-      setIsAdmin(false);
-      return false;
-    }
-  }, []);
+  }, [queryClient, userId]);
 
-  useEffect(() => {
-    if (userId) void checkAdmin();
-    else setIsAdmin(false);
-  }, [checkAdmin, userId]);
+  const adminGateQuery = useQuery({
+    queryKey: queryKeys.rewardsIsAdmin(userId),
+    queryFn: fetchIsRewardsAdmin,
+    enabled: hasSupabaseConfig && !!userId,
+    retry: false, // fail closed on the first answer; never retry a gate
+  });
+  const isAdmin = adminGateQuery.data ?? false;
 
-  const claimReward = useCallback(async (rewardId: string) => {
-    setError(null);
-    try {
+  /* ------------------------------------------------------------ claim */
+
+  const claimMutation = useMutation({
+    mutationFn: async (rewardId: string) => {
       ensureSupabase();
       const { data, error: rpcError } = await supabase.rpc("claim_reward", {
         p_reward_id: rewardId,
       });
-      if (rpcError) {
-        setError(messageFrom(rpcError));
-        throw rpcError;
-      }
-
-      const claimed = Array.isArray(data) ? data[0] : data;
-      setRewards((current) =>
-        current.map((reward) =>
+      if (rpcError) throw rpcError;
+      return Array.isArray(data) ? data[0] : data;
+    },
+    onMutate: async (rewardId: string) => {
+      setClaimError(null);
+      await queryClient.cancelQueries({ queryKey: mineKey });
+      const previous = queryClient.getQueryData<UserReward[]>(mineKey);
+      queryClient.setQueryData<UserReward[]>(mineKey, (current) =>
+        (current ?? []).map((reward) =>
           reward.id === rewardId
-            ? {
-                ...reward,
-                delivery_state: "claimed",
-                claimed_at: (claimed as { claimed_at?: string } | null)?.claimed_at ?? new Date().toISOString(),
-              }
+            ? { ...reward, delivery_state: "claimed" as const, claimed_at: new Date().toISOString() }
             : reward,
         ),
       );
-      return claimed as { id: string; title: string; delivery_state: string; claimed_at: string };
-    } catch (err) {
-      const msg = messageFrom(err);
-      setError(msg);
-      throw err instanceof Error ? err : new Error(msg);
-    }
-  }, []);
+      return { previous };
+    },
+    onSuccess: (claimed, rewardId) => {
+      /* Settle the optimistic timestamp with the server's own. */
+      const claimedAt = (claimed as { claimed_at?: string } | null)?.claimed_at;
+      if (claimedAt) {
+        queryClient.setQueryData<UserReward[]>(mineKey, (current) =>
+          (current ?? []).map((reward) =>
+            reward.id === rewardId ? { ...reward, claimed_at: claimedAt } : reward,
+          ),
+        );
+      }
+    },
+    onError: (mutationError, _rewardId, context) => {
+      if (context?.previous) queryClient.setQueryData(mineKey, context.previous);
+      setClaimError(messageFrom(mutationError));
+    },
+  });
+
+  const claimReward = useCallback(
+    async (rewardId: string) => {
+      try {
+        const claimed = await claimMutation.mutateAsync(rewardId);
+        return claimed as { id: string; title: string; delivery_state: string; claimed_at: string };
+      } catch (err) {
+        throw err instanceof Error ? err : new Error(messageFrom(err));
+      }
+    },
+    [claimMutation],
+  );
+
+  /* ------------------------------------------------------------ admin workspace */
+
+  const workspaceQuery = useQuery({
+    queryKey: queryKeys.rewardsAdminWorkspace,
+    queryFn: fetchAdminWorkspace,
+    enabled: false, // loaded imperatively by loadAdminWorkspace, never on mount
+  });
 
   const loadAdminWorkspace = useCallback(async () => {
-    setAdminLoading(true);
-    setAdminError(null);
-
-    if (!hasSupabaseConfig) {
-      setAdminRewards([]);
-      setAdminUsers([]);
-      setAdminError("Bloom isn't connected to a database in this environment.");
-      setAdminLoading(false);
-      return;
-    }
-
+    setAdminBusy(true);
     try {
-      const allowed = await checkAdmin();
-      if (!allowed) {
-        setAdminRewards([]);
-        setAdminUsers([]);
-        setAdminError("Rewards administrator access required.");
+      if (!hasSupabaseConfig) {
+        setAdminError(UNCONFIGURED_ADMIN);
         return;
       }
-
-      const [rewardsResult, usersResult] = await Promise.all([
-        supabase.rpc("admin_list_rewards"),
-        supabase.rpc("admin_list_reward_users"),
-      ]);
-      if (rewardsResult.error) throw rewardsResult.error;
-      if (usersResult.error) throw usersResult.error;
-      setAdminRewards((rewardsResult.data ?? []) as AdminReward[]);
-      setAdminUsers((usersResult.data ?? []) as AdminUser[]);
+      const allowed = await checkAdmin();
+      if (!allowed) {
+        queryClient.setQueryData<AdminWorkspace>(queryKeys.rewardsAdminWorkspace, {
+          rewards: [],
+          users: [],
+        });
+        setAdminError(ADMIN_REQUIRED);
+        return;
+      }
+      setAdminError(null);
+      await queryClient.fetchQuery({
+        queryKey: queryKeys.rewardsAdminWorkspace,
+        queryFn: fetchAdminWorkspace,
+        staleTime: 0,
+      });
     } catch (workspaceError) {
       console.error("Could not load Rewards admin workspace:", workspaceError);
       setAdminError(messageFrom(workspaceError));
     } finally {
-      setAdminLoading(false);
+      setAdminBusy(false);
     }
-  }, [checkAdmin]);
+  }, [checkAdmin, queryClient]);
+
+  const adminRewards = workspaceQuery.data?.rewards ?? [];
+  const adminUsers = workspaceQuery.data?.users ?? [];
+  const adminLoading = adminBusy || workspaceQuery.isFetching;
+
+  /* ------------------------------------------------------------ admin mutations
+     Plain throwing wrappers, as before: the admin page reloads the
+     workspace itself after each one (its loadAdminWorkspace call is
+     the invalidation). */
 
   const createDraft = useCallback(async (draft: RewardDraftInput) => {
     ensureSupabase();
@@ -305,7 +354,7 @@ export function useRewardsSystem() {
     userId,
     isAdmin,
     checkAdmin,
-    reload: loadUserRewards,
+    reload,
     claimReward,
     adminLoading,
     adminError,
