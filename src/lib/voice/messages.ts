@@ -116,7 +116,7 @@ export type Daypart = "night" | "morning" | "afternoon" | "evening";
 
 export function daypart(now: Date = new Date()): Daypart {
   const h = now.getHours();
-  if (h < 5) return "night";
+  if (h >= 21 || h < 5) return "night";
   if (h < 12) return "morning";
   if (h < 17) return "afternoon";
   return "evening";

@@ -842,6 +842,20 @@
 .home-rise {
   animation: home-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+/* Route crossfade (see __root.tsx): opacity only, standard 200ms house
+   step on the house curve — a calm cut, never a slide. The global
+   reduced-motion rule stills it like every other animation. */
+.bloom-page-enter {
+  animation: bloom-page-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes bloom-page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 .home-dash {
   animation: home-dash 18s linear infinite;
 }

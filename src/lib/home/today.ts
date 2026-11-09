@@ -140,7 +140,13 @@ const fmt = (id: TrackerId, v: number) => TRACKERS.find((t) => t.id === id)!.for
  */
 export function greetingFor(hour: number): string {
   const part: Daypart =
-    hour < 5 ? "night" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+    hour >= 21 || hour < 5
+      ? "night"
+      : hour < 12
+        ? "morning"
+        : hour < 17
+          ? "afternoon"
+          : "evening";
   return greeting(part, `${part}-${hour}`);
 }
 

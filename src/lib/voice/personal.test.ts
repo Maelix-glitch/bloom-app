@@ -156,6 +156,6 @@ describe("welcomeLine — personal from minute zero, varied by daypart", () => {
 
   it("the night hears about the hour", () => {
     const line = welcomeLine({ ...base, name: null, daypart: "night" });
-    expect(line.toLowerCase()).toMatch(/still up|quiet hours/);
+    expect(line.toLowerCase()).toMatch(/good night|quiet hours/);
   });
 });

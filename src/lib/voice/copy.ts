@@ -13,7 +13,7 @@ import { pick, pickStable, type Daypart } from "./messages";
 /* ------------------------------- greetings -------------------------------- */
 
 const GREETING: Record<Daypart, string[]> = {
-  night: ["Still up", "Late one", "Quiet hours", "The small hours", "Night owl"],
+  night: ["Good night", "Good night", "Winding down", "Time to rest", "Quiet hours"],
   morning: ["Good morning", "Morning", "A new day", "Early on", "Fresh start"],
   afternoon: ["Good afternoon", "Afternoon", "Midway", "Halfway through", "Good day"],
   evening: ["Good evening", "Evening", "Winding down", "Day's end", "Settling in"],
