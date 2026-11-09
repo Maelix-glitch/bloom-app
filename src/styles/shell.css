@@ -316,8 +316,12 @@
     height: 19px;
     padding-inline: 5.5px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #f8e0a4 0%, #efbe60 42%, var(--gold-grad-lo) 78%, #c07f22 100%);
-    color: #2a1b05;
+    --badge-hi: #f8e0a4;
+    --badge-mid: #efbe60;
+    --badge-deep: #c07f22;
+    --badge-ink: #2a1b05;
+    background: linear-gradient(180deg, var(--badge-hi) 0%, var(--badge-mid) 42%, var(--gold-grad-lo) 78%, var(--badge-deep) 100%);
+    color: var(--badge-ink);
     font-family: var(--font-sans);
     font-size: 10.5px;
     font-weight: 700;

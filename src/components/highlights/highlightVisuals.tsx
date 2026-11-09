@@ -24,13 +24,13 @@ export function HighlightMark({
     <span className="grid place-items-center" style={{ width: size, height: size }} aria-hidden>
       {Icon ? (
         <Icon
-          className="text-[#F6F4EC]"
+          className="text-[var(--cream-2)]"
           strokeWidth={1.7}
           style={{ width: size * 0.42, height: size * 0.42 }}
         />
       ) : (
         <span
-          className="display leading-none text-[#F6F4EC]"
+          className="display leading-none text-[var(--cream-2)]"
           style={{ fontSize: size * 0.38, letterSpacing: "-0.02em" }}
         >
           {name.trim().slice(0, 1).toUpperCase()}

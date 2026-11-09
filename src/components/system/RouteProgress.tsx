@@ -52,7 +52,7 @@ export function RouteProgress() {
         zIndex: 9998,
         pointerEvents: "none",
         opacity: visible ? 1 : 0,
-        background: "linear-gradient(90deg, #7FA88F, #E8B75E)",
+        background: "linear-gradient(90deg, var(--logo-grad-a), var(--logo-grad-b))",
         boxShadow: "0 0 12px rgba(232,183,94,.55)",
         transition:
           width >= 100

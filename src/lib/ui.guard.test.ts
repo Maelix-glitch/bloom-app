@@ -1,29 +1,33 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, sep } from "node:path";
 
-import { describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 /**
- * UI system guards — WARN LEVEL (Slice U0 of the premium UI update).
+ * UI system guards (Slice U0 of the premium UI update; flipped to FAIL in
+ * U8, 2026-11-09).
  *
  * The design-token system in `src/styles.css` only stays a system if new
  * code stops bypassing it. These structural tests (same mechanism as
- * `supabase.guard.test.ts`) scan the source and REPORT the three bypasses
- * the plan (§1.6) will eventually forbid:
+ * `supabase.guard.test.ts`) scan the source for the bypasses the plan
+ * (§1.6) forbids:
  *
- *   1. hex literals in `src/styles/**` and `src/components/**` outside the
- *      allowlist (the token definitions themselves live in styles.css);
+ *   1. hex literals in `src/styles/**` and `src/components/**` — FAILED
+ *      since U8. A hex may live only (a) in styles.css, the token home,
+ *      (b) on a custom-property DEFINITION line in a feature stylesheet
+ *      (the sanctioned scoped-token pattern: cycle's --ci-*, Coach's
+ *      identity remnant, the Stories --story-* content palette…), or
+ *      (c) in the exempt files below, each with its reason recorded.
+ *      Baseline was 470 (2026-11-07, main @ c32cfa0); U8 budget: 0
+ *      outside those rules. Reproduce the census any time with
+ *      `node scripts/ui-inventory.mjs`.
  *   2. Google Fonts families outside Fraunces / Inter / IBM Plex Mono
- *      (Caveat is the recorded exception — Stories canvas presets, plan
- *      decision D4, pending the owner's answer);
- *   3. `animate-spin` / `animate-bounce` class names (motion is settle,
- *      never spin or bounce — plan §1.5).
- *
- * For this slice they only warn: each test prints the current count and
- * the recorded baseline, and passes. The counts may only go down. In
- * Slice U8 the expectations flip to hard failures against the final
- * budgets. Baselines recorded 2026-11-07 on main @ c32cfa0; reproduce
- * them any time with `node scripts/ui-inventory.mjs`.
+ *      (plus the D4 Stories exceptions) — FAILED since U8. All type is
+ *      self-hosted now, so any googleapis link coming back is drift.
+ *   3. `animate-spin` / `animate-bounce` class names — still WARN: the
+ *      motion law is settle, never spin or bounce (plan §1.5), but the
+ *      kit's functional loading spinner is a recorded exception under
+ *      review, so this one keeps reporting instead of failing.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -50,30 +54,48 @@ const CSS_AND_COMPONENTS = readAll([
 ]);
 const ALL_SOURCES = readAll(walk(SRC, (n) => /\.(css|tsx?)$/.test(n)));
 
-describe("UI guard (warn): hex literals outside the token home", () => {
+describe("UI guard: hex literals outside the token home", () => {
   /* styles.css defines the tokens — hex belongs there and nowhere else
-     in the styling/component layer. Feature CSS outside src/styles and
-     lib code join the count in U8; for now this is the managed surface. */
+     in the styling/component layer, with two sanctioned forms:
+       · a hex on a custom-property definition line in a feature
+         stylesheet is a scoped token being BORN, not a bypass
+         (cycle's --ci-* phase system works exactly like this);
+       · the files below are exempt, each for a recorded reason.
+     lib/ is outside this guard's surface by design: the Stories canvas
+     and template palettes there are content DATA (what a user picks),
+     not chrome. */
   const ALLOWLIST = new Set(["styles.css"]);
-  const HEX = /#[0-9a-fA-F]{6}\b/g;
+  const EXEMPT = new Map<string, string>([
+    /* The brand mark: its tile + sage→gold gradient are the definition
+       the favicon is synced from (see the file's own header). */
+    ["components/BloomLogo.tsx", "brand mark definition"],
+    /* The notification bell's cast-gold SVG gradient — a brand rendering
+       of the same gradient shell.css paints for the count badge. */
+    ["components/notifications/NotificationCenter.tsx", "the bell's gradient"],
+    /* Stories canvas/editor palettes are content data (template and
+       element colours a user chooses), not app chrome. */
+    ["components/stories/", "Stories content palettes"],
+  ]);
+  const HEX = /#[0-9a-fA-F]{6}\b/;
+  const DEFINITION = /^\s*--[a-zA-Z0-9-]+\s*:/;
 
-  it("reports the current count", () => {
-    let count = 0;
+  it("fails on any hex that is not a token definition or exempt", () => {
     const offenders: string[] = [];
     for (const f of CSS_AND_COMPONENTS) {
       if (ALLOWLIST.has(f.rel)) continue;
-      const n = (f.text.match(HEX) ?? []).length;
-      if (n) offenders.push(`${f.rel} (${n})`);
-      count += n;
+      if ([...EXEMPT.keys()].some((k) => f.rel === k || f.rel.startsWith(k))) continue;
+      f.text.split("\n").forEach((line, i) => {
+        if (HEX.test(line) && !DEFINITION.test(line)) offenders.push(`${f.rel}:${i + 1}`);
+      });
     }
-    console.warn(
-      `[ui-guard] hex literals outside allowlist: ${count} (baseline 470 across styles+components; U8 budget: 0 outside exemptions)`,
-    );
-    if (offenders.length) console.warn(`[ui-guard] in: ${offenders.slice(0, 12).join(", ")}`);
+    expect(
+      offenders,
+      `hex literals outside token definitions: ${offenders.slice(0, 12).join(", ")}`,
+    ).toEqual([]);
   });
 });
 
-describe("UI guard (warn): Google Fonts families outside the three", () => {
+describe("UI guard: Google Fonts families outside the three", () => {
   const ALLOWED = new Set(["Fraunces", "Inter", "IBM Plex Mono"]);
   /* D4 exception, ADOPTED 2026-11-08: Stories canvas presets
      (handwritten/romantic/poster voices, incl. stored stories) get three
@@ -98,9 +120,10 @@ describe("UI guard (warn): Google Fonts families outside the three", () => {
     const outside = [...loaded.entries()].filter(
       ([name]) => !ALLOWED.has(name) && !EXCEPTIONS.has(name),
     );
-    console.warn(
-      `[ui-guard] font families loaded: ${[...loaded.keys()].join(", ")}; outside the three (excl. Caveat/D4): ${outside.map(([n]) => n).join(", ") || "none"}`,
-    );
+    expect(
+      outside.map(([n]) => n),
+      "type is self-hosted; a Google Fonts family outside the system means a link crept back",
+    ).toEqual([]);
   });
 });
 
