@@ -174,6 +174,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      /* First-paint type: preload the two faces every page opens with —
+         Fraunces (display) and Inter 400 (body) — so the hero never swaps
+         in from a fallback font. Latin only; latin-ext loads on demand. */
+      {
+        rel: "preload",
+        href: "/fonts/Fraunces-latin-normal-300700.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/Inter-latin-normal-400.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/bloom/icons/icon-192.png" },
@@ -296,6 +313,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  /* Page transitions: keying the wrapper by pathname remounts it on every
+     navigation, replaying the .bloom-page-enter crossfade (opacity only —
+     a transform would trap position:fixed descendants in a containing
+     block). Pages keep their own richer entrances; this just removes the
+     hard cut between routes. */
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   /* B6 — the offline shell. Registered after load, never blocking first paint. */
   useEffect(() => {
@@ -334,7 +357,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <AccessControl>
-          <Outlet />
+          <div key={pathname} className="bloom-page-enter">
+            <Outlet />
+          </div>
         </AccessControl>
         {/* First run only: covers the app until the person has told us who they are. */}
         <WelcomeGate />

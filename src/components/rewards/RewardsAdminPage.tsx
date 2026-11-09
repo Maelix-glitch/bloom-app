@@ -420,6 +420,10 @@ export function RewardsAdminPage() {
             Recipients are passed to a server-side publish function. A normal user cannot assign a
             reward to themselves.
           </p>
+          <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+            Publishing is locked to a single recipient, set in the product itself — it can't be
+            changed from this page.
+          </p>
           <div className="reward-admin-user-list">
             {adminUsers.length ? (
               adminUsers.map((user) => (

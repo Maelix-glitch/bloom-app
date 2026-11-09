@@ -30,8 +30,15 @@ import type { CoachRecord } from "@/lib/coach/responder";
 export const COACH_FUNCTION =
   (import.meta.env["VITE_COACH_FUNCTION"] as string | undefined)?.trim() || "coach";
 
-/** Past this, the request is abandoned and the failure state shows. */
-export const TIMEOUT_MS = 20_000;
+/** Past this, the request is abandoned and the failure state shows. The
+ *  budget sits ABOVE the function's own failover deadline: the chain now
+ *  gives a stalled provider ~6s before rerouting, so a healthy reroute
+ *  lands well inside this — cutting the request at 20s used to kill
+ *  replies that were one hop away from arriving. */
+export const TIMEOUT_MS = 30_000;
+
+/** One quiet retry before the failure surfaces (see askEdge). */
+const RETRY_DELAY_MS = 600;
 
 /**
  * A photo or document attached to a message. Bytes go to the edge function,
@@ -175,6 +182,19 @@ export async function askEdge(request: EdgeRequest, signal?: AbortSignal): Promi
   if (!hasSupabaseConfig) return { ok: false, reason: "unconfigured" };
   if (signal?.aborted) return { ok: false, reason: "aborted" };
 
+  /* One quiet retry: a single transient failure (a provider chain landing
+     on cooldowns, a cold start) shouldn't reach the person as an error
+     card when a second ask a breath later would simply work. The manual
+     "Try again" remains for anything that fails twice. */
+  let result = await askEdgeOnce(request, signal);
+  if (!result.ok && result.reason !== "aborted" && !signal?.aborted) {
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+    if (!signal?.aborted) result = await askEdgeOnce(request, signal);
+  }
+  return result;
+}
+
+async function askEdgeOnce(request: EdgeRequest, signal?: AbortSignal): Promise<EdgeResult> {
   const timer = new AbortController();
   const timeout = setTimeout(() => timer.abort(), TIMEOUT_MS);
   /* Chain the caller's signal onto ours so either can cancel the request. */
