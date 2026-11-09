@@ -105,7 +105,7 @@ export const TRACKERS: TrackerDef[] = [
   {
     id: "water",
     name: "Water",
-    blurb: "Glassed up today",
+    blurb: "Glasses so far today.",
     kind: "volume",
     direction: "more",
     goalKey: "waterMl",
@@ -958,8 +958,11 @@ function observationsOf(
     if (loggedDates.has(addDays(today, -i))) inWindow += 1;
   }
   if (inWindow > 0 && inWindow < window) {
+    /* Tracker days, named as such: "days logged" without the qualifier is
+       Profile's all-record number (mood, habits and cycle included), and
+       the two sat side by side as if they measured the same thing. */
     out.push(
-      `You've logged ${inWindow} of the last ${window} days. The gaps are left empty on purpose — nothing here is filled in for you.`,
+      `Your trackers have entries on ${inWindow} of the last ${window} days. The gaps are left empty on purpose — nothing here is filled in for you.`,
     );
   }
 

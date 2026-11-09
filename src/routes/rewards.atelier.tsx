@@ -6,10 +6,10 @@ import { AtelierPage } from "@/components/progression/Atelier";
 export const Route = createFileRoute("/rewards/atelier")({
   head: () => ({
     meta: [
-      { title: "Bloom — Your Bloom Atelier" },
+      { title: "Bloom — Atelier" },
       {
         name: "description",
-        content: "Looks opened by your ranks — the quiet second layer of the Bloom journey.",
+        content: "The looks your rank has opened, and the ones still ahead.",
       },
     ],
   }),

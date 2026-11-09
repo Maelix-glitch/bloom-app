@@ -104,10 +104,10 @@ const HABIT_OPEN_STREAK = [
   "{streak} days of {habit}. Don't break it now.",
   "You're on a {streak}-day run with {habit}.",
   "{habit} again. That's {streak} straight.",
-  "Day {streak} of {habit}. Look at you.",
+  "Day {streak} of {habit}.",
   "{greet} — {habit} is {streak} days strong.",
-  "{streak} in a row. {habit} is officially a habit.",
-  "The {streak}-day club of {habit} keeps growing.",
+  "{streak} in a row — steady going.",
+  "The {streak}-day run of {habit} keeps growing.",
   "{habit} shows up for day {streak}.",
 ];
 
@@ -129,8 +129,8 @@ const HABIT_BODY_STREAK = [
   "Tick it and the streak keeps going.",
   "One more and the run holds.",
   "You've earned the momentum — spend a minute on it.",
-  "Small thing, big streak. Go on.",
-  "Streaks are just habits that got believed in.",
+  "Small thing, big streak.",
+  "One more day on the record.",
   "Keep it gentle, keep it going.",
 ];
 

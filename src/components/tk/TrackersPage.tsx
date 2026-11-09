@@ -195,7 +195,10 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
       <div className="at">
         <header className="at-head">
           <p className="at-kicker">
-            {hasDays ? `${analysis.daysLogged} days logged` : "start tracking"} ·{" "}
+            {hasDays
+              ? `${analysis.daysLogged} ${analysis.daysLogged === 1 ? "day" : "days"} tracked`
+              : "start tracking"}{" "}
+            ·{" "}
             {analysis.goalsMetToday}/6 targets today
           </p>
           <h1 className="at-title">Daily metrics at a glance.</h1>
@@ -552,7 +555,7 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                   <Observations
                     items={analysis.observations}
                     className="at-observations"
-                    caption="AI cognitive analysis · active biometric patterns"
+                    caption="From your own logged days"
                   />
                 </section>
 

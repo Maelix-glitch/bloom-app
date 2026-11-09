@@ -37,6 +37,20 @@ describe("buildMoodGraph", () => {
     expect(g2.edges.map((e) => e.id)).not.toContain("mood-sleep");
   });
 
+  it("averages the hub entry-weighted, like every other surface", () => {
+    /* Two check-ins on one day (2, 4) and one on another (9): the shared
+       average mood is (2+4+9)/3 = 5.0. A per-day mean would say 6.0 — the
+       drift that made the web disagree with the headline, live. */
+    const entries: MoodEntry[] = [
+      { ...seed[0]!, timestamp: "2026-09-01T09:00:00.000Z", mood: 2 },
+      { ...seed[0]!, timestamp: "2026-09-01T20:00:00.000Z", mood: 4 },
+      { ...seed[0]!, timestamp: "2026-09-02T09:00:00.000Z", mood: 9 },
+    ];
+    const d = aggregateDays(entries);
+    const g = buildMoodGraph({ days: d, entries, correlations: calculateCorrelations(d) });
+    expect(g.nodes[0]!.reading).toBe("5.0 /10 · 2 days · whole record");
+  });
+
   it("uses the analytics layer's numbers, so the map matches Intelligence", () => {
     const g = buildMoodGraph({ days, entries: seed, correlations });
     const sleep = g.edges.find((e) => e.id === "mood-sleep")!;

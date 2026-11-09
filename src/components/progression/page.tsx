@@ -229,7 +229,7 @@ export function JourneyPage() {
               </p>
             </div>
             {progress.loading ? (
-              <p className="pg-empty">Loading your journey…</p>
+              <p className="pg-empty">Loading…</p>
             ) : (
               <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
             )}
@@ -255,7 +255,7 @@ export function JourneyPage() {
               </p>
             </div>
             {progress.loading ? (
-              <p className="pg-empty">Loading your journey…</p>
+              <p className="pg-empty">Loading…</p>
             ) : (
               <CrestHall points={progress.points} rankTier={progress.rank.rank.tier} />
             )}

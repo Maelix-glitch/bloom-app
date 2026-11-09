@@ -144,15 +144,21 @@ export function WeeklyReportPage() {
     report.trackers.movementAvg,
   ]);
 
-  /* Who the report is addressed to — name and honest tenure from onboarding,
-     computed once. Absent an answer the header stays as it was. */
+  /* Who the report is addressed to — the name comes from onboarding, but
+     tenure comes from the record itself (report.tenureWeeks): the
+     onboarding timestamp lives on one device, so a person who signs in on
+     a new browser would otherwise be told a months-old record is "Week 1".
+     The onboarding age survives only as a fallback for a record with no
+     dated entries yet. Absent both, the header stays as it was. */
   const intro = useMemo(() => {
     const voice = readPersonalVoice();
     return {
       name: voice.name,
-      tenureWeeks: voice.daysWithBloom === null ? null : Math.floor(voice.daysWithBloom / 7) + 1,
+      tenureWeeks:
+        report.tenureWeeks ??
+        (voice.daysWithBloom === null ? null : Math.floor(voice.daysWithBloom / 7) + 1),
     };
-  }, []);
+  }, [report.tenureWeeks]);
 
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">

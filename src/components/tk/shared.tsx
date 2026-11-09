@@ -172,6 +172,10 @@ export function Observations({
  * one thing: the day isn't on the account yet. It says that instead of spinning.
  */
 export function SyncNote({ sync, onRetry }: { sync: TrackerStore["sync"]; onRetry: () => void }) {
+  /* The check itself is never the line — the Mood page's sync line set this
+     pattern. A transient "Checking your account…" that outlives the check
+     reads as a stuck product; settled states are what the line is for. */
+  if (sync.state === "loading") return null;
   const retryable = sync.state === "error" || sync.state === "signed-out";
   return (
     <p className="tk2-sync" data-state={sync.state} aria-live="polite">

@@ -11,8 +11,10 @@
  * something you have to remember.
  *
  * Sleep, study and movement let the person pick hours or minutes — typing 8
- * hours beats typing 480 minutes. The store always keeps minutes; the switch
- * only changes what the field shows and accepts.
+ * hours beats typing 480 minutes. Water picks litres or millilitres, for the
+ * same reason: its target reads "2L", so the field must accept 2, not only
+ * 2000. The store always keeps the small unit (minutes, ml); the switch only
+ * changes what the field shows and accepts.
  *
  * The store is passed in rather than created here: useTrackers holds its own
  * state per instance, so a fresh one inside the modal would write to a copy
@@ -47,20 +49,56 @@ const PROMPT: Record<TrackerId, string> = {
   screen: "Enter total minutes on screen",
 };
 
-/** The hours wording, for the three trackers with a unit switch. */
-const PROMPT_HRS: Partial<Record<TrackerId, string>> = {
-  sleep: "Enter total hours slept",
-  study: "Enter total hours studied",
-  movement: "Enter total hours moved",
-};
+/**
+ * The unit switch. The two slots are "min" (the stored unit) and "hrs" (the
+ * large unit); what they are CALLED comes from this table — hours/minutes
+ * for the durations, litres/millilitres for water.
+ */
+interface UnitChoice {
+  /** Stored units per one large unit: 60 minutes in an hour, 1000 ml in a litre. */
+  factor: number;
+  altLabel: string;
+  baseLabel: string;
+  altPrompt: string;
+  /** Open in the large unit (hours, litres) or the stored one. */
+  startAlt: boolean;
+}
 
-/** The three durations stored in minutes but typed either way. */
-const UNIT_CHOICE: TrackerId[] = ["sleep", "study", "movement"];
+const UNIT_CHOICES: Partial<Record<TrackerId, UnitChoice>> = {
+  sleep: {
+    factor: 60,
+    altLabel: "Hours",
+    baseLabel: "Min",
+    altPrompt: "Enter total hours slept",
+    startAlt: true,
+  },
+  study: {
+    factor: 60,
+    altLabel: "Hours",
+    baseLabel: "Min",
+    altPrompt: "Enter total hours studied",
+    startAlt: true,
+  },
+  movement: {
+    factor: 60,
+    altLabel: "Hours",
+    baseLabel: "Min",
+    altPrompt: "Enter total hours moved",
+    startAlt: false,
+  },
+  water: {
+    factor: 1000,
+    altLabel: "Litres",
+    baseLabel: "ml",
+    altPrompt: "Enter total litres",
+    startAlt: true,
+  },
+};
 
 type Unit = "min" | "hrs";
 
-/** Sleep and study open in hours, movement in minutes — one tap flips either. */
-const defaultUnit = (id: TrackerId): Unit => (id === "movement" ? "min" : "hrs");
+/** Sleep and study open in hours, movement in minutes, water in litres. */
+const defaultUnit = (id: TrackerId): Unit => (UNIT_CHOICES[id]?.startAlt ? "hrs" : "min");
 
 /** 2dp arithmetic, printed without trailing zeros ("8", "1.5", never "8.00"). */
 const stripNum = (v: number): string => String(Math.round(v * 100) / 100);
@@ -82,13 +120,10 @@ export function TrackerModal({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const def = tracker ? trackerDef(tracker) : null;
-  const hasChoice = tracker !== null && UNIT_CHOICE.includes(tracker);
+  const choice = tracker ? UNIT_CHOICES[tracker] : undefined;
+  const hasChoice = choice !== undefined;
   const prompt =
-    unit === "hrs" && tracker && PROMPT_HRS[tracker]
-      ? PROMPT_HRS[tracker]!
-      : tracker
-        ? PROMPT[tracker]
-        : "";
+    unit === "hrs" && choice ? choice.altPrompt : tracker ? PROMPT[tracker] : "";
 
   /* Their own recent pattern — offered, never imposed (see smart/usual.ts). */
   const usualDay_ = tracker ? usualDay(store.days, store.today) : null;
@@ -131,21 +166,21 @@ export function TrackerModal({
   const usualDraft =
     usualValue !== null
       ? hasChoice && unit === "hrs"
-        ? stripNum(usualValue / 60)
+        ? stripNum(usualValue / choice.factor)
         : String(usualValue)
       : "";
 
   /* start from what's already logged, so the field is a correction not a blank */
   useEffect(() => {
     if (!tracker) return;
-    const choice = UNIT_CHOICE.includes(tracker);
+    const cfg = UNIT_CHOICES[tracker];
     const startUnit = defaultUnit(tracker);
-    setUnit(choice ? startUnit : "min");
+    setUnit(cfg ? startUnit : "min");
     const current = readTrackerValue(store, tracker);
     if (current == null || current === 0) {
       setDraft("");
     } else {
-      setDraft(choice && startUnit === "hrs" ? stripNum(current / 60) : String(current));
+      setDraft(cfg && startUnit === "hrs" ? stripNum(current / cfg.factor) : String(current));
     }
     setError(null);
   }, [tracker, store.days, store.today]);
@@ -162,11 +197,11 @@ export function TrackerModal({
 
   /** Flipping the switch converts what's typed — nothing is ever lost. */
   const switchUnit = (next: Unit) => {
-    if (next === unit) return;
+    if (next === unit || !choice) return;
     const cur = Number(draft);
     if (draft.trim() !== "" && Number.isFinite(cur)) {
-      const stored = unit === "hrs" ? cur * 60 : cur;
-      setDraft(stripNum(next === "hrs" ? stored / 60 : stored));
+      const stored = unit === "hrs" ? cur * choice.factor : cur;
+      setDraft(stripNum(next === "hrs" ? stored / choice.factor : stored));
     }
     setError(null);
     setUnit(next);
@@ -178,7 +213,7 @@ export function TrackerModal({
       setError("Type a number first.");
       return;
     }
-    const stored = hasChoice && unit === "hrs" ? Math.round(parsed * 60) : parsed;
+    const stored = hasChoice && unit === "hrs" ? Math.round(parsed * choice.factor) : parsed;
     const message = setTrackerValue(store, tracker, stored);
     if (message) {
       setError(message);
@@ -243,7 +278,7 @@ export function TrackerModal({
           <div
             className="mt-3 flex justify-center gap-2"
             role="group"
-            aria-label="Hours or minutes"
+            aria-label={`Unit: ${choice.altLabel} or ${choice.baseLabel}`}
           >
             {(["hrs", "min"] as const).map((u) => (
               <Button
@@ -255,7 +290,7 @@ export function TrackerModal({
                 onClick={() => switchUnit(u)}
                 className="rounded-full px-[18px] text-xs font-bold uppercase tracking-[0.08em]"
               >
-                {u === "hrs" ? "Hours" : "Min"}
+                {u === "hrs" ? choice.altLabel : choice.baseLabel}
               </Button>
             ))}
           </div>

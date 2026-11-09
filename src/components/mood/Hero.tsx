@@ -127,7 +127,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           <Metric
             label="Logging streak"
             raw={`${a.streak}`}
-            suffix="days"
+            suffix={a.streak === 1 ? "day" : "days"}
             accent="amber"
             sub={<span className="mono text-[11px] text-faint">{a.consistency}% of days covered</span>}
           />
@@ -148,7 +148,9 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             <Sparkles className="size-3 text-violet" /> depth: {a.tier.current.label}
           </span>
           <span className="flex items-center gap-2">
-            <Activity className="size-3 text-sky" /> {entries.length} entries · {a.days.length} days in range
+            <Activity className="size-3 text-sky" /> {entries.length}{" "}
+            {entries.length === 1 ? "entry" : "entries"} · {a.days.length}{" "}
+            {a.days.length === 1 ? "day" : "days"} in range
           </span>
           <span className="flex items-center gap-2">
             <Zap className="size-3 text-amber" /> trend {a.trend.direction} ({a.trend.perWeek > 0 ? "+" : ""}
@@ -156,7 +158,8 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           </span>
           {a.tier.next ? (
             <span className="flex items-center gap-2">
-              <Flame className="size-3 text-rose" /> {a.tier.next.min - entries.length} more entries unlock{" "}
+              <Flame className="size-3 text-rose" /> {a.tier.next.min - entries.length} more{" "}
+              {a.tier.next.min - entries.length === 1 ? "entry unlocks" : "entries unlock"}{" "}
               {a.tier.next.label}
             </span>
           ) : null}

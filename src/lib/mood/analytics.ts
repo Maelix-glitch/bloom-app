@@ -112,6 +112,10 @@ export function calculateEmotionDistribution(entries: MoodEntry[]) {
       accent: EMOTION_MAP[key]?.accent ?? "violet",
       valence: EMOTION_MAP[key]?.valence ?? "neutral",
       count: v.count,
+      /* Share of CHECK-INS carrying the emotion — a check-in can carry
+         several, so shares across emotions sum to more than 100%. Any
+         surface printing this must say "share of check-ins", never imply
+         a partition of a whole. */
       share: round((v.count / total) * 100, 1),
       avgMood: round(mean(v.moods), 2),
       trend:

@@ -46,7 +46,7 @@ function DistributionImpl({
                   key={b.key}
                   className="h-full transition-all duration-700"
                   style={{ width: `${b.share}%`, background: accentVar[b.accent as Accent] }}
-                  title={`${b.label}: ${b.count} days`}
+                  title={`${b.label}: ${b.count} ${b.count === 1 ? "day" : "days"}`}
                 />
               ) : null,
             )}

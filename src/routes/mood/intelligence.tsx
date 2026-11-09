@@ -29,7 +29,7 @@ export const Route = createFileRoute("/mood/intelligence")({
       {
         name: "description",
         content:
-          "A private analytics command center for your emotional life — trends, rhythms, correlations, anomalies and insights computed entirely from what you log.",
+          "Bloom is a private record of your mood, sleep, habits and cycle, with the patterns worked out from what you log.",
       },
     ],
   }),

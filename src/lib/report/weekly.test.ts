@@ -57,6 +57,29 @@ describe("weekly report", () => {
     expect(r.empty).toBe(true);
     expect(r.insight).toBeNull();
     expect(r.mood.count).toBe(0);
+    expect(r.recordStart).toBeNull();
+    expect(r.tenureWeeks).toBeNull();
+  });
+
+  it("counts tenure from the record itself, not from any device", () => {
+    /* A record that began 2026-08-13 read on 2026-11-09 is in its 13th
+       week (88 days in) — the sweep saw "Week 1" live because tenure came
+       from a fresh browser's one-day-old onboarding answer. */
+    const r = buildWeeklyReport({
+      ...base,
+      today: "2026-11-09",
+      moodEntries: [mood("2026-08-13"), mood("2026-11-09")],
+      habitLogs: [{ habitId: "h1", date: "2026-09-01" }],
+      trackerDays: [day("2026-10-05", { sleepMinutes: 420 })],
+    });
+    expect(r.recordStart).toBe("2026-08-13");
+    expect(r.tenureWeeks).toBe(13);
+  });
+
+  it("starts the count at week 1 on the record's first day", () => {
+    const r = buildWeeklyReport({ ...base, moodEntries: [mood(TODAY)] });
+    expect(r.recordStart).toBe(TODAY);
+    expect(r.tenureWeeks).toBe(1);
   });
 
   it("counts the window and not the week before", () => {

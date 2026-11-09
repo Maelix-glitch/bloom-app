@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { FileText } from "lucide-react";
 
 import type { CoachMessage } from "@/hooks/useCoachSystem";
-import { messageTime } from "@/lib/coach/ui-helpers";
+import { attachmentDisplayName, messageTime } from "@/lib/coach/ui-helpers";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -21,22 +21,18 @@ function AttachmentInline({
   if (!attachment) return null;
   const isImage = attachment.type.startsWith("image/");
   const isAudio = attachment.type.startsWith("audio/");
+  const displayName = attachmentDisplayName(attachment.name, attachment.type);
   return (
     <span className="coach-user-attachment">
       {isImage && previewUrl ? (
-        <img src={previewUrl} alt={attachment.name} className="coach-user-attachment-img" />
+        <img src={previewUrl} alt={displayName} className="coach-user-attachment-img" />
       ) : isAudio && previewUrl ? (
-        <audio
-          controls
-          preload="metadata"
-          src={previewUrl}
-          aria-label={`Preview ${attachment.name}`}
-        />
+        <audio controls preload="metadata" src={previewUrl} aria-label={`Preview ${displayName}`} />
       ) : (
         <span className="coach-user-attachment-file">
           <FileText className="coach-user-attachment-icon" aria-hidden="true" />
           <span>
-            <strong>{attachment.name}</strong>
+            <strong>{displayName}</strong>
             <small>{formatBytes(attachment.size)}</small>
           </span>
         </span>

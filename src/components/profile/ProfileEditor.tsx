@@ -344,10 +344,10 @@ export function ProfileEditor({
                 <p className="bsheet-eyebrow mt-6">Edit your space</p>
               </SheetItem>
               <SheetItem>
-                <h2 className="bsheet-h1 mt-2">Make it feel like you.</h2>
+                <h2 className="bsheet-h1 mt-2">Your profile</h2>
               </SheetItem>
               <SheetItem>
-                <p className="bsheet-sub mt-1.5">A more you, for a brighter tomorrow.</p>
+                <p className="bsheet-sub mt-1.5">Name, photo and handle — what the rest of Bloom uses.</p>
               </SheetItem>
 
               <SheetItem>
@@ -382,11 +382,6 @@ export function ProfileEditor({
                 </div>
               </SheetItem>
 
-              <p className="bedit-script" aria-hidden>
-                Same you,
-                <br />
-                brighter days.
-              </p>
             </div>
 
             {/* ---------------------------------- personal information */}
@@ -398,7 +393,7 @@ export function ProfileEditor({
                   </span>
                   <div>
                     <p className="bedit-group-title">Personal information</p>
-                    <p className="bedit-group-sub">Tell us a little about yourself.</p>
+                    <p className="bedit-group-sub">The basics, as they appear across Bloom.</p>
                   </div>
                 </div>
 
@@ -415,7 +410,7 @@ export function ProfileEditor({
                         setNameError(null);
                       }}
                       onBlur={(e) => setNameError(validateDisplayName(e.target.value))}
-                      placeholder="What should this space be called?"
+                      placeholder="Your name"
                       className="bedit-field-input bedit-field-input--display"
                       data-testid="profile-name"
                     />
@@ -520,7 +515,7 @@ export function ProfileEditor({
                         setBioError(null);
                       }}
                       onBlur={(e) => setBioError(validateBio(e.target.value))}
-                      placeholder="A little about you..."
+                      placeholder="A little about you…"
                       rows={2}
                       className="bedit-field-input"
                       data-testid="profile-bio"
@@ -543,7 +538,7 @@ export function ProfileEditor({
                   </span>
                   <div>
                     <p className="bedit-group-title">Profile photo</p>
-                    <p className="bedit-group-sub">Choose a photo that feels like you.</p>
+                    <p className="bedit-group-sub">Shown on your profile and stories.</p>
                   </div>
                 </div>
 

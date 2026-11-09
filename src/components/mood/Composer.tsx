@@ -404,7 +404,7 @@ export function Composer({
                 {m === usualFace && !on ? (
                   <span
                     className="bmood-face-usual"
-                    title={`Your usual check-in, from ${usual?.samples} entries`}
+                    title={`Your usual check-in, from ${usual?.samples} ${usual?.samples === 1 ? "entry" : "entries"}`}
                   >
                     usually
                   </span>

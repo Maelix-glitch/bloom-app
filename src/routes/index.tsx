@@ -61,7 +61,8 @@ import { seenStore } from "@/lib/stories/seen";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
 import type { Story } from "@/lib/profile/types";
 import { toast } from "sonner";
-import { sublineFor } from "@/lib/home/subline";
+import { genuineFirstDay, sublineFor } from "@/lib/home/subline";
+import { localDay } from "@/lib/localDay";
 
 const TITLE = "Bloom — Today";
 const DESCRIPTION =
@@ -401,18 +402,34 @@ function TodayPage() {
      summary on a loop. Once the stores have loaded once, the hero stays in its
      loaded state; the sentence itself is derived only from today's data. */
   const recordReady = useEverReady(trackers.hydrated && !habits.loading);
+  /* Day one is a property of the record, not of this device's onboarding
+     answer — see genuineFirstDay. The stores on this page are the record:
+     habit ticks, mood check-ins and tracker days, by distinct day. */
+  const recordDayCount = useMemo(() => {
+    const keys = new Set<string>();
+    for (const l of habits.logs) keys.add(l.date);
+    for (const e of mood.entries) keys.add(localDay(e.timestamp));
+    for (const d of trackers.days) keys.add(d.date);
+    return keys.size;
+  }, [habits.logs, mood.entries, trackers.days]);
   const subline = sublineFor({
     ready: recordReady,
-    firstDay: personalVoice.firstDay,
+    firstDay: genuineFirstDay(personalVoice.firstDay, recordDayCount),
     openCount,
   });
 
+  /* Settled states only: while the account check runs there is no line at
+     all (the sync lines' shared rule — a printed "checking" can outlive
+     the check and read as stuck). The store's watchdog guarantees a
+     settled state follows. */
   const syncLine =
-    trackers.sync.state === "off"
-      ? "Saved on this device"
-      : trackers.sync.state === "signed-out"
-        ? "Saved on this device — sign in to sync"
-        : trackers.sync.message || null;
+    trackers.sync.state === "loading"
+      ? null
+      : trackers.sync.state === "off"
+        ? "Saved on this device"
+        : trackers.sync.state === "signed-out"
+          ? "Saved on this device — sign in to sync"
+          : trackers.sync.message || null;
 
   const addHabit = async (draft: HabitDraft) => {
     try {
@@ -452,7 +469,12 @@ function TodayPage() {
 
       <main className="home-main min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
         <div className="home-toolbar">
-          <p className="text-xs text-muted-foreground">
+          {/* suppressHydrationWarning for the same reason as the greeting
+              below: the date is LOCAL time by design, the server renders on
+              a UTC clock, and an unprotected text node can keep the
+              server's day after hydration — the hero once showed a date
+              two days stale while everything else on the page was live. */}
+          <p className="text-xs text-muted-foreground" suppressHydrationWarning>
             {longDate(now)}
             {syncLine ? (
               <span className="ml-3 hidden text-faint sm:inline">· {syncLine}</span>
@@ -551,13 +573,11 @@ function TodayPage() {
 
           <figure className="relative hidden overflow-hidden rounded-2xl border border-border lg:block">
             <WallpaperFigure />
-            <figcaption className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-background/90 via-background/20 to-background/70 p-4">
-              <span className="font-display text-sm italic leading-snug text-muted-foreground">
-                Discipline today, freedom tomorrow.
-                <span className="mt-2 block h-px w-8 bg-border" />
-              </span>
+            <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/20 to-background/70 p-4">
+              {/* One tagline for the whole product — the sidebar's line.
+                  This panel used to stack two competing slogans of its own. */}
               <span className="font-display text-2xl leading-snug">
-                Same person. A more intentional day.
+                A calmer you, a brighter tomorrow.
               </span>
             </figcaption>
           </figure>
@@ -626,7 +646,12 @@ function TodayPage() {
                   logging={!trackers.hydrated}
                 />
                 {mapReady ? (
-                  <ConnectionMap nodes={map.nodes} links={map.links} name={firstName} />
+                  <ConnectionMap
+                    nodes={map.nodes}
+                    links={map.links}
+                    name={firstName}
+                    loggedDays={map.loggedDays}
+                  />
                 ) : (
                   <ConnectionMapSkeleton />
                 )}
@@ -668,7 +693,7 @@ function TodayPage() {
           <footer className="hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
             <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
             <span className="h-px w-16 bg-border" />
-            <span>A MORE INTENTIONAL DAY, EVERYWHERE</span>
+            <span>A CALMER YOU, A BRIGHTER TOMORROW</span>
           </footer>
         </div>
       </main>

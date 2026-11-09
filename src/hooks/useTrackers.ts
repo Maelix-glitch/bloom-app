@@ -21,6 +21,7 @@ import {
   type TrackerAnalysis,
   type TrackerId,
 } from "@/lib/trackers/core";
+import { watchAccountCheck } from "@/lib/accountCheck";
 import {
   currentProfileId,
   deleteDay,
@@ -100,6 +101,8 @@ export function useTrackers(): TrackerStore {
     message: "",
     signedIn: false,
   });
+  const syncRef = useRef(sync);
+  syncRef.current = sync;
   const profileId = useRef<string | null>(null);
   /** Dates the device holds that the table hasn't seen yet. */
   const dirtyDates = useRef<Set<string>>(new Set());
@@ -332,6 +335,18 @@ export function useTrackers(): TrackerStore {
         return;
       }
       setSync((prev) => ({ ...prev, state: "loading", message: "Checking your account…" }));
+      /* If the round-trip never settles (a hung auth lock, a dead
+         connection), the watchdog lands the line on the honest device
+         state instead of leaving "checking" up for the whole session. */
+      const cancelWatch = watchAccountCheck(
+        () => syncRef.current.state === "loading",
+        () =>
+          setSync({
+            state: "error",
+            message: "Saved here — not on your account yet",
+            signedIn: profileId.current !== null,
+          }),
+      );
       try {
         const pid = await currentProfileId();
         profileId.current = pid;
@@ -355,6 +370,8 @@ export function useTrackers(): TrackerStore {
           message: "Saved here — not on your account yet",
           signedIn: profileId.current !== null,
         });
+      } finally {
+        cancelWatch();
       }
     })();
   }, [pushPending]);

@@ -20,6 +20,7 @@ import {
 import type { PhotoFrame, PhotoMask } from "@/lib/stories/canvas/masks";
 import type { ShapeKind } from "@/lib/stories/canvas/shapes";
 import type { TextBackdrop, TextTransform, TypePresetId } from "@/lib/stories/canvas/typography";
+import { typePreset } from "@/lib/stories/canvas/typography";
 import {
   gradientBackground,
   photoBackground,
@@ -240,7 +241,18 @@ export function instantiate(def: StoryTemplateDef): InstantiatedTemplate {
             opacity: seed.opacity ?? 100,
             ...(seed.name ? { name: seed.name } : {}),
             style: {
-              ...(seed.size !== undefined ? { size: seed.size } : {}),
+              /* Seeds author `size` as absolute points on the 390-wide
+                 reference canvas (a headline is 40, an eyebrow 10). The
+                 element contract — resolveText, the editor, the sanitizer's
+                 0.35–3.2 clamp — treats TextStyle.size as a MULTIPLIER of
+                 the preset's base size. The conversion belongs here, at the
+                 bridge: without it every template's type rendered
+                 base-size-times too large (a 44pt preset × "40" = 1,760pt
+                 before scaling), which is why the template shelf showed
+                 giant clipped letters instead of compositions. */
+              ...(seed.size !== undefined
+                ? { size: seed.size / typePreset(seed.preset).baseSize }
+                : {}),
               ...(seed.weight !== undefined ? { weight: seed.weight } : {}),
               ...(seed.tracking !== undefined ? { tracking: seed.tracking } : {}),
               ...(seed.leading !== undefined ? { leading: seed.leading } : {}),

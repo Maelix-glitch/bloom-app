@@ -6,6 +6,7 @@ import { BloomIcon } from "@/components/icons/BloomIcon";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { attachmentDisplayName } from "@/lib/coach/ui-helpers";
 import { cn } from "@/lib/utils";
 import { CoachGlyph } from "./bloom-mark";
 
@@ -62,7 +63,7 @@ function AttachmentPreview({
         </span>
       )}
       <span className="coach-attachment-copy">
-        <strong>{attachment.name}</strong>
+        <strong>{attachmentDisplayName(attachment.name, attachment.type)}</strong>
         <small>{formatBytes(attachment.size)}</small>
       </span>
       <Button
@@ -71,7 +72,7 @@ function AttachmentPreview({
         size="icon-sm"
         className="coach-attachment-remove"
         onClick={onRemove}
-        aria-label={`Remove ${attachment.name}`}
+        aria-label={`Remove ${attachmentDisplayName(attachment.name, attachment.type)}`}
         title="Remove attachment"
       >
         <BloomIcon name="close" size={14} />

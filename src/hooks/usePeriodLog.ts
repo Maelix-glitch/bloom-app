@@ -66,6 +66,7 @@ import {
   type CycleState,
   type PeriodRecord,
 } from "@/lib/cycle/periodCloud";
+import { watchAccountCheck } from "@/lib/accountCheck";
 import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 import {
   EMPTY_MEMORY,
@@ -206,6 +207,8 @@ export function usePeriodLog(): PeriodLogStore {
     message: "",
     signedIn: false,
   });
+  const syncRef = useRef(sync);
+  syncRef.current = sync;
   const [memory, setMemory] = useState<CheckInMemory>(EMPTY_MEMORY);
   const [settings, setSettings] = useState<CycleSettings>(DEFAULT_CYCLE_SETTINGS);
   /** Per-entry change stamps + tombstones — what the period sync reasons about. */
@@ -372,6 +375,18 @@ export function usePeriodLog(): PeriodLogStore {
         return;
       }
       setSync((prev) => ({ ...prev, state: "loading", message: "Fetching your records…" }));
+      /* Same watchdog as the tracker store: a check that never settles
+         lands on the honest error line (with its retry) instead of
+         leaving "checking your account…" up for the whole session. */
+      const cancelWatch = watchAccountCheck(
+        () => syncRef.current.state === "loading",
+        () =>
+          setSync({
+            state: "error",
+            message: "Couldn't reach your account — showing what's saved on this device.",
+            signedIn: profileId.current !== null,
+          }),
+      );
       try {
         const pid = await currentProfileId();
         profileId.current = pid;
@@ -454,6 +469,8 @@ export function usePeriodLog(): PeriodLogStore {
           message: "Couldn't reach your account — showing what's saved on this device.",
           signedIn: profileId.current !== null,
         });
+      } finally {
+        cancelWatch();
       }
     })();
   }, [pushPending]);

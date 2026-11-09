@@ -254,14 +254,28 @@ export function CoachPage() {
 
   const contextLabel = contextLive ? "Personal context · On" : "Personal context";
 
+  /* The averages are the mood system's selected-window values (30 days by
+     default), so the panel carries the window and the in-window check-in
+     count alongside them — pairing a 30-day average with the all-time
+     check-in count made Coach quote a different "average mood" than the
+     Mood page over the same record. */
   const panelStats = useMemo(
     () => ({
       entries: entries.length,
+      periodEntries: analytics.periodEntries.length,
+      windowLabel: moodSystem.range.label.toLowerCase(),
       avg: analytics.avg ?? 0,
       avgEnergy: analytics.avgEnergy ?? 0,
       avgStress: analytics.avgStress ?? 0,
     }),
-    [entries.length, analytics.avg, analytics.avgEnergy, analytics.avgStress],
+    [
+      entries.length,
+      analytics.periodEntries.length,
+      moodSystem.range.label,
+      analytics.avg,
+      analytics.avgEnergy,
+      analytics.avgStress,
+    ],
   );
 
   const starters = useMemo(

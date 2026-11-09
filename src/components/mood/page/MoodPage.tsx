@@ -232,7 +232,10 @@ export function MoodPage({
 function TopBar({ identity }: { identity: MoodPageIdentity }) {
   return (
     <header className="flex items-center justify-between gap-4">
-      <p className="text-xs text-muted-foreground">{longDate(new Date())}</p>
+      {/* Local date, client-authoritative — same hydration guard as Today. */}
+      <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+        {longDate(new Date())}
+      </p>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {/* Phone shell carries the bell and the rewards tab — desktop pair only. */}
         <NotificationBell className="hidden lg:grid" />
@@ -413,18 +416,14 @@ function Hero({
                 .
               </>
             ) : (
-              "A small check-in. A more mindful you."
+              "Nothing logged yet today — ten seconds now puts today on the record."
             )}
           </p>
         </div>
 
         <div className="lg:pb-2 lg:text-right">
           <p className="font-display text-lg italic leading-relaxed text-gold-soft/90 sm:text-2xl">
-            Feel it.
-            <br />
-            Understand it.
-            <br />
-            Grow from it.
+            Noted honestly, understood over time.
           </p>
           <span className="mt-5 block h-px w-10 bg-gold/50 lg:ml-auto" />
         </div>
@@ -557,16 +556,9 @@ function LogMood({
           <div className="flex min-w-0 items-start gap-4">
             <Quote className="mt-1 h-5 w-5 shrink-0 text-gold/60" strokeWidth={1.5} />
             <p className="font-display text-lg leading-relaxed text-foreground sm:text-2xl">
-              Every emotion is valid.
-              <br />
-              It&rsquo;s part of your story.
+              However today lands, it goes on the record exactly as it felt.
             </p>
           </div>
-          <p className="font-display text-base italic leading-relaxed text-gold-soft/90 sm:text-xl lg:text-right">
-            Same you.
-            <br />
-            Softer days.
-          </p>
         </div>
       </div>
     </section>
@@ -598,7 +590,7 @@ function RangePill({
         aria-label="Period"
         value={RANGES.some((r) => r.key === value) ? value : "30d"}
         onChange={(e) => onChange(e.target.value as RangeKey)}
-        className="absolute inset-0 cursor-pointer opacity-0"
+        className="mp-range-select absolute inset-0 cursor-pointer opacity-0"
       >
         {RANGES.map((r) => (
           <option key={r.key} value={r.key}>
@@ -638,8 +630,8 @@ function MoodJourney({
     <section className="mp-panel p-6 sm:p-9 lg:p-11" data-testid="mood-journey">
       <SectionHead
         icon={ChartNoAxesColumn}
-        title="Your mood journey"
-        subtitle="See how your mood flows over time."
+        title="Your mood over time"
+        subtitle="Drawn from your check-ins, day by day."
         action={<RangePill value={rangeKey} label={rangeLabel} onChange={onRange} />}
       />
 
@@ -662,7 +654,7 @@ function MoodJourney({
               text={
                 points.length === 1
                   ? `One day in the ${rangeLabel.toLowerCase()}. The line appears with your second check-in.`
-                  : "Your journey draws itself from your check-ins — nothing here is a placeholder."
+                  : "Your chart appears with your second check-in."
               }
             />
           )}
@@ -753,11 +745,7 @@ function MoodDistribution({
           <div className="absolute inset-0 bg-gradient-to-br from-card/95 to-card/70" />
           <div className="relative p-7 sm:p-9">
             <p className="font-display text-xl leading-snug text-foreground">
-              You feel.
-              <br />
-              You heal.
-              <br />
-              You grow.
+              Your days, grouped by how they felt.
             </p>
             <span className="mt-6 block h-px w-10 bg-gold/50" />
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">{note}</p>
@@ -784,7 +772,7 @@ function QuickInsights({
       <SectionHead
         icon={Sun}
         title="Quick insights"
-        subtitle="Gentle patterns we noticed in your entries."
+        subtitle="Patterns Bloom noticed in your entries."
         action={
           <Link
             to="/mood/intelligence"
@@ -878,9 +866,7 @@ function Streak({
               >
                 {streak}
               </p>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {streak === 1 ? "day streak" : "day streak"}
-              </p>
+              <p className="mt-3 text-sm text-muted-foreground">day streak</p>
             </div>
             <div className="flex items-center gap-2.5" aria-label="Last seven days">
               {dots.map((done, i) => (
@@ -943,9 +929,9 @@ function ClosingBanner() {
       <div className="relative grid gap-8 p-7 sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-14">
         <div className="min-w-0">
           <p className="font-display text-xl leading-snug text-foreground sm:text-3xl">
-            A calmer mind
+            A calmer you,
             <br />
-            creates a brighter you.
+            a brighter tomorrow.
           </p>
           <span className="mt-6 block h-px w-10 bg-gold/50" />
         </div>

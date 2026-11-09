@@ -38,7 +38,7 @@ function InsightsImpl({
       />
 
       {insights.length === 0 ? (
-        <Insufficient>Insights unlock after a few logged days.</Insufficient>
+        <Insufficient>Insights appear after a few logged days.</Insufficient>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {insights.map((i) => (

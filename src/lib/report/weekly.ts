@@ -74,6 +74,16 @@ export interface WeeklyReport {
   insight: string | null;
   /** True when there is nothing at all in the window. */
   empty: boolean;
+  /** The first day anything was logged, across every record handed in. */
+  recordStart: string | null;
+  /**
+   * Which week of the record this is (1-based), counted from recordStart.
+   * Derived from the record itself — never from a device-local onboarding
+   * timestamp: a person who signs in on a new browser has a months-old
+   * record and a one-day-old onboarding answer, and the report must
+   * believe the record.
+   */
+  tenureWeeks: number | null;
 }
 
 const inWindow = (date: string, start: string, end: string): boolean =>
@@ -188,6 +198,19 @@ export function buildWeeklyReport(input: WeeklyReportInput): WeeklyReport {
         }
       : null;
 
+  /* ----------------------------------------------------- tenure */
+  let recordStart: string | null = null;
+  const consider = (date: string) => {
+    if (date <= today && (recordStart === null || date < recordStart)) recordStart = date;
+  };
+  for (const l of input.habitLogs) consider(l.date);
+  for (const e of input.moodEntries) consider(moodDay(e));
+  for (const d of input.trackerDays) consider(d.date);
+  const tenureWeeks =
+    recordStart === null
+      ? null
+      : Math.floor((Date.parse(today) - Date.parse(recordStart)) / 604_800_000) + 1;
+
   /* ----------------------------------------------------- insight */
   const insight = pickInsight(input, { weekStart, today, mood });
 
@@ -206,6 +229,8 @@ export function buildWeeklyReport(input: WeeklyReportInput): WeeklyReport {
       daysThis.length === 0 &&
       moodPrev.length === 0 &&
       prevTicks === 0,
+    recordStart,
+    tenureWeeks,
   };
 }
 
