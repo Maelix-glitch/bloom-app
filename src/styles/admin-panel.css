@@ -8,6 +8,8 @@
  */
 
 .adm {
+  --ap-scrim: #05040a; /* near-black violet scrim ground — the launcher's own dark */
+  --ap-panel: #0d0b12; /* panel ground, a breath above the scrim */
   position: fixed;
   inset: 0;
   z-index: 3200;
@@ -19,7 +21,7 @@
 .adm-scrim {
   position: absolute;
   inset: 0;
-  background: color-mix(in oklab, #05040a 72%, transparent);
+  background: color-mix(in oklab, var(--ap-scrim) 72%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -59,9 +61,9 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  border: 1px solid color-mix(in oklab, var(--amber, #e3c187) 40%, transparent);
-  background: color-mix(in oklab, var(--amber, #e3c187) 14%, transparent);
-  color: var(--amber, #e3c187);
+  border: 1px solid color-mix(in oklab, var(--amber) 40%, transparent);
+  background: color-mix(in oklab, var(--amber) 14%, transparent);
+  color: var(--amber);
 }
 
 .adm-title {
@@ -115,8 +117,8 @@
     box-shadow 180ms ease;
 }
 .adm-search:focus-within {
-  border-color: color-mix(in oklab, var(--amber, #e3c187) 55%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber, #e3c187) 14%, transparent);
+  border-color: color-mix(in oklab, var(--amber) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber) 14%, transparent);
 }
 .adm-search input {
   min-width: 0;
@@ -296,8 +298,8 @@
   gap: 7px;
   padding: 5px 7px 5px 9px;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--amber, #e3c187) 34%, transparent);
-  background: color-mix(in oklab, #0d0b12 82%, transparent);
+  border: 1px solid color-mix(in oklab, var(--amber) 34%, transparent);
+  background: color-mix(in oklab, var(--ap-panel) 82%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.95);
@@ -319,14 +321,14 @@
 .adm-bar-mark {
   display: grid;
   place-items: center;
-  color: var(--amber, #e3c187);
+  color: var(--amber);
 }
 
 .adm-bar-label {
   font: 9.5px var(--font-mono);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--amber, #e3c187);
+  color: var(--amber);
 }
 
 .adm-bar-btn {
@@ -335,8 +337,8 @@
   gap: 4px;
   padding: 3px 9px;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklab, #fff 14%, transparent);
-  color: color-mix(in oklab, #fff 72%, transparent);
+  border: 1px solid color-mix(in oklab, white 14%, transparent);
+  color: color-mix(in oklab, white 72%, transparent);
   font-size: 11px;
   transition:
     color 150ms ease,
@@ -344,13 +346,13 @@
     background-color 150ms ease;
 }
 .adm-bar-btn:hover {
-  color: #fff;
-  border-color: color-mix(in oklab, #fff 30%, transparent);
-  background: color-mix(in oklab, #fff 8%, transparent);
+  color: white;
+  border-color: color-mix(in oklab, white 30%, transparent);
+  background: color-mix(in oklab, white 8%, transparent);
 }
 .adm-bar-exit:hover {
-  border-color: color-mix(in oklab, var(--rose, #cf6d8f) 55%, transparent);
-  background: color-mix(in oklab, var(--rose, #cf6d8f) 16%, transparent);
+  border-color: color-mix(in oklab, var(--rose) 55%, transparent);
+  background: color-mix(in oklab, var(--rose) 16%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

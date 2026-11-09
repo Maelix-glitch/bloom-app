@@ -342,7 +342,7 @@
   inset: 0;
   z-index: 1;
   border-radius: inherit;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 22%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 22%, transparent);
   pointer-events: none;
 }
 .bmoment-hero-art img {
@@ -407,13 +407,13 @@
   /* Over a photograph a foreground-mix hairline reads as nothing, so the tile
      edge is a light inner rim plus a dark outer one — legible on both a bright
      and a dark image. */
-  border: 1px solid color-mix(in oklab, #fff 16%, transparent);
+  border: 1px solid color-mix(in oklab, white 16%, transparent);
   text-align: left;
   color: var(--foreground);
   isolation: isolate;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 color-mix(in oklab, #fff 20%, transparent),
+    inset 0 1px 0 color-mix(in oklab, white 20%, transparent),
     0 14px 30px -20px rgba(0, 0, 0, 0.9);
   transition:
     transform 420ms var(--ease-out-expo),
@@ -461,10 +461,10 @@
 }
 .bmoment-tile:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in oklab, #fff 34%, transparent);
+  border-color: color-mix(in oklab, white 34%, transparent);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 color-mix(in oklab, #fff 28%, transparent),
+    inset 0 1px 0 color-mix(in oklab, white 28%, transparent),
     0 22px 40px -24px rgba(0, 0, 0, 0.9);
 }
 .bmoment-tile:hover img {
@@ -512,13 +512,13 @@
   height: 52px;
   margin-bottom: auto;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklab, #fff 28%, transparent);
+  border: 1px solid color-mix(in oklab, white 28%, transparent);
   background: color-mix(
     in oklab,
     var(--bmoment-tint, var(--violet)) 40%,
     rgba(255, 255, 255, 0.08)
   );
-  color: #fff;
+  color: white;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 10px 24px -12px rgba(0, 0, 0, 0.8);
@@ -535,7 +535,7 @@
   font-size: 22px;
   line-height: 1.05;
   letter-spacing: -0.015em;
-  color: #fff;
+  color: white;
 }
 .bmoment-hint {
   font-size: 12.5px;
@@ -591,7 +591,7 @@
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--background) 45%, transparent);
-  color: color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, #fff);
+  color: color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, white);
 }
 .bmoment-foot-orb svg {
   animation: bsheet-glow 3.2s ease-in-out infinite;
@@ -717,9 +717,9 @@
   padding: 3px;
   background: linear-gradient(
     135deg,
-    color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, #fff),
+    color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, white),
     color-mix(in oklab, var(--profile-accent, var(--violet)) 25%, transparent) 60%,
-    color-mix(in oklab, #fff 30%, transparent)
+    color-mix(in oklab, white 30%, transparent)
   );
   box-shadow:
     0 24px 60px -24px color-mix(in oklab, var(--profile-accent, var(--violet)) 80%, transparent),
@@ -745,7 +745,7 @@
   border-radius: 999px;
   border: 2px solid color-mix(in oklab, var(--surface) 90%, transparent);
   background: color-mix(in oklab, var(--profile-accent, var(--violet)) 35%, #2a2438);
-  color: #fff;
+  color: white;
   box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.9);
   transition: transform var(--motion-fast) ease;
 }
@@ -979,7 +979,7 @@ textarea.bedit-field-input {
 .bedit-photo[data-selected="true"] .bedit-photo-disc {
   box-shadow:
     0 0 0 2px var(--surface),
-    0 0 0 4px color-mix(in oklab, var(--profile-accent, var(--violet)) 80%, #fff),
+    0 0 0 4px color-mix(in oklab, var(--profile-accent, var(--violet)) 80%, white),
     0 0 26px -4px color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, transparent);
   transform: scale(1.06);
 }
@@ -1182,7 +1182,7 @@ textarea.bedit-field-input {
   border-color: transparent;
   box-shadow:
     0 0 0 2px var(--surface),
-    0 0 0 4px color-mix(in oklab, var(--preset-tint, var(--violet)) 85%, #fff),
+    0 0 0 4px color-mix(in oklab, var(--preset-tint, var(--violet)) 85%, white),
     0 8px 22px -8px color-mix(in oklab, var(--preset-tint, var(--violet)) 75%, transparent);
 }
 .bedit-preset[data-on="true"] img {
