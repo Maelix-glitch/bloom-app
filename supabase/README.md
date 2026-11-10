@@ -1,5 +1,23 @@
 # Bloom backend setup
 
+## Vitalis evidence registry — migration and seed
+
+The scientific evidence registry is schema plus content. The schema arrives as a
+normal migration; the content arrives as a generated seed that an operator
+applies deliberately.
+
+1. Run `migrations/20261106_vitalis_evidence_foundation.sql` in the SQL editor.
+2. Apply `seeds/20261107_vitalis_evidence_catalog.sql` the same way, as one
+   batch (wrap it in `BEGIN`/`COMMIT` if your editor does not).
+
+The seed is generated from `src/lib/vitalis/evidence/catalog.ts`. Edit the
+catalogue, then run `npm run seed:evidence`; never edit the SQL by hand, and
+never apply it from application code or with a key committed to the repository.
+`npm run seed:evidence:check` fails if the committed file is out of date.
+
+Full procedure, verification queries and failure modes:
+[`docs/vitalis-evidence-seed.md`](../docs/vitalis-evidence-seed.md).
+
 ## GIPHY catalog — story GIFs and stickers
 
 The story editor's GIF and sticker trays call the `giphy` Edge Function.

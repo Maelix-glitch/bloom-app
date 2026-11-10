@@ -18,9 +18,13 @@
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-const MIGRATIONS = new URL("../../../supabase/migrations", import.meta.url);
+// `URL.pathname` keeps the leading slash and percent-encoding on Windows, which
+// turned this into `C:\C:\Users\...` and made the suite fail before it asserted
+// anything. `fileURLToPath` is the portable form.
+const MIGRATIONS = fileURLToPath(new URL("../../../supabase/migrations", import.meta.url));
 
 /** Columns that mean "this row belongs to a person". */
 const PERSON_COLUMNS = ["user_id", "profile_id", "owner_id", "sender_id", "viewer_id"] as const;
@@ -36,7 +40,7 @@ function migrations(): { file: string; sql: string }[] {
   return readdirSync(MIGRATIONS)
     .filter((f) => f.endsWith(".sql"))
     .sort()
-    .map((file) => ({ file, sql: readFileSync(join(MIGRATIONS.pathname, file), "utf8") }));
+    .map((file) => ({ file, sql: readFileSync(join(MIGRATIONS, file), "utf8") }));
 }
 
 /** Every table the migrations create, with the columns declared in its body. */
