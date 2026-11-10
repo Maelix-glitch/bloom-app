@@ -42,6 +42,7 @@ import type { CreateStoryInput } from "@/lib/profile/storyService";
 import { buildViewModel, resolveFeatured } from "@/components/profile/ProfileView";
 import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
 import { ProfileHero } from "@/components/profile/ProfileHero";
+import { AssessmentProfileCard } from "@/components/assessment/AssessmentEntry";
 import {
   ProfileProblemNotice,
   ProfileSwap,
@@ -572,6 +573,12 @@ function ProfilePage() {
                 stats={journey.status === "ready" ? journey.stats : null}
                 loading={!record.settled || journey.status === "loading"}
               />
+
+              {/* W4-1: the assessment's permanent home — take, continue,
+                  read the summary, retake. */}
+              <section className="pf-section" aria-label="Assessment">
+                <AssessmentProfileCard />
+              </section>
 
               {/* the record: 12 weeks + what's being tracked */}
               <section
