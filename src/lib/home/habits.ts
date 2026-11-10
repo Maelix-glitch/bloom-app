@@ -81,6 +81,45 @@ const num = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
+/* ---------------------------- icon URL guard ----------------------------- */
+
+/**
+ * The longest icon URL worth keeping. A real icon URL is a short storage
+ * link; anything longer is not a URL anyone can use — it is a file wearing
+ * a URL's clothes.
+ */
+export const MAX_ICON_URL_LENGTH = 2048;
+
+/**
+ * Egress guard (2026-11 incident): one habit row once carried a whole photo
+ * as a base64 `data:` URI in `icon_url` — about 1.5 MB of text — and every
+ * habits fetch re-downloaded it, burning ~47 GB of Supabase egress in one
+ * billing cycle. A stored icon URL is therefore only believable when it is
+ * a real, small remote URL: not a `data:` URI, not oversized. Anything else
+ * is treated as NO image, on read and on write alike. The database carries
+ * the same rule as a CHECK constraint (20261110_habit_icon_url_guard.sql),
+ * so no client — this one included — can put the blob back.
+ */
+export function safeIconUrl(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const url = raw.trim();
+  if (!url || url.length > MAX_ICON_URL_LENGTH) return null;
+  if (url.toLowerCase().startsWith("data:")) return null;
+  return url;
+}
+
+/**
+ * The glyph to fall back on when an "image" habit loses its picture: the
+ * stored icon value, but only when it is plainly a glyph. The old write
+ * path stored the URL in `icon_value` too, and a URL (or a blob) must never
+ * be rendered as the habit's mark.
+ */
+function safeStoredGlyph(value: string): string | null {
+  if (!value || value.length > 16) return null;
+  if (/^(data:|https?:)/i.test(value)) return null;
+  return value;
+}
+
 /* ------------------------------ localStorage ------------------------------ */
 
 function readJson<T>(key: string, fallback: T): T {
@@ -180,9 +219,13 @@ export function rowToHabit(r: Row | null | undefined): Habit | null {
   const name = str(r["name"]).trim();
   if (!id || !name) return null;
   const rawIconType = str(r["icon_type"], "emoji");
-  const iconType: HabitIconType =
+  const storedType: HabitIconType =
     rawIconType === "image" ? "image" : rawIconType === "bloom" ? "bloom" : "emoji";
-  const iconUrl = str(r["icon_url"] ?? r["iconUrl"], "") || null;
+  /* An image habit is only an image habit while its URL survives
+     safeIconUrl. Without a believable URL it reads as an emoji habit —
+     exactly how a habit with no picture at all is read. */
+  const iconUrl = storedType === "image" ? safeIconUrl(r["icon_url"] ?? r["iconUrl"]) : null;
+  const iconType: HabitIconType = storedType === "image" && iconUrl === null ? "emoji" : storedType;
   const rawGoal = r["goal"];
   const goalObj =
     rawGoal && typeof rawGoal === "object"
@@ -201,7 +244,9 @@ export function rowToHabit(r: Row | null | undefined): Habit | null {
     icon:
       iconType === "image"
         ? "🖼️"
-        : str(r["icon_value"] ?? r["icon"], "") || (iconType === "bloom" ? "star-bloom" : "⭐"),
+        : storedType === "image"
+          ? (safeStoredGlyph(str(r["icon_value"] ?? r["icon"], "")) ?? "⭐")
+          : str(r["icon_value"] ?? r["icon"], "") || (iconType === "bloom" ? "star-bloom" : "⭐"),
     iconType,
     iconUrl: iconType === "image" ? iconUrl : null,
     color: str(r["color"], "amber"),
@@ -432,10 +477,24 @@ export async function readPoints(profileId: string): Promise<number | null> {
 }
 
 /** The columns a draft maps onto — shared by insert and update. */
-function draftToColumns(draft: HabitDraft) {
+export function draftToColumns(draft: HabitDraft) {
+  /* The write side of the icon URL guard: an "image" draft only stays an
+     image while its value survives safeIconUrl. A data: URI or oversized
+     value is stripped to no image (emoji fallback) before it can reach the
+     row — the blob can never be written back. */
+  const imageUrl = draft.icon?.type === "image" ? safeIconUrl(draft.icon.value) : null;
   const iconType: HabitIconType =
-    draft.icon?.type === "image" ? "image" : draft.icon?.type === "bloom" ? "bloom" : "emoji";
-  const iconValue = draft.icon?.value ?? (iconType === "bloom" ? "star-bloom" : "⭐");
+    draft.icon?.type === "image" && imageUrl !== null
+      ? "image"
+      : draft.icon?.type === "bloom"
+        ? "bloom"
+        : "emoji";
+  const iconValue =
+    iconType === "image"
+      ? (imageUrl as string)
+      : draft.icon?.type === "image"
+        ? (safeStoredGlyph(draft.icon?.value ?? "") ?? "⭐")
+        : (draft.icon?.value ?? (iconType === "bloom" ? "star-bloom" : "⭐"));
   return {
     name: draft.name.trim(),
     note: draft.note?.trim() || null,
@@ -648,17 +707,27 @@ export const isLocalHabitId = (id: string): boolean => id.startsWith("local-");
 /** Local-only habit, for people who aren't signed in yet. */
 export function draftToLocalHabit(draft: HabitDraft): Habit {
   const now = new Date().toISOString();
+  /* Same icon URL guard as the cloud write path: a local habit must not
+     carry a data: blob in its model (and so never into the mirror or a
+     later upload) either. */
+  const imageUrl = draft.icon?.type === "image" ? safeIconUrl(draft.icon.value) : null;
   const iconType: HabitIconType =
-    draft.icon?.type === "image" ? "image" : draft.icon?.type === "bloom" ? "bloom" : "emoji";
+    draft.icon?.type === "image" && imageUrl !== null
+      ? "image"
+      : draft.icon?.type === "bloom"
+        ? "bloom"
+        : "emoji";
   return {
     id: `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
     name: draft.name.trim(),
     icon:
       iconType === "image"
         ? "🖼️"
-        : (draft.icon?.value ?? (iconType === "bloom" ? "star-bloom" : "⭐")),
+        : draft.icon?.type === "image"
+          ? (safeStoredGlyph(draft.icon?.value ?? "") ?? "⭐")
+          : (draft.icon?.value ?? (iconType === "bloom" ? "star-bloom" : "⭐")),
     iconType,
-    iconUrl: draft.icon?.type === "image" ? draft.icon.value : null,
+    iconUrl: imageUrl,
     color: draft.color ?? "amber",
     frequency: draft.frequency ?? "daily",
     points: draft.points ?? 10,
