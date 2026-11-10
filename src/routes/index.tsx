@@ -21,6 +21,10 @@ import {
   TrackersPanel,
 } from "@/components/home/panels";
 import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
+import { OverviewBand } from "@/components/home/OverviewBand";
+import { useAssessment } from "@/hooks/useAssessment";
+import { summaryOf } from "@/lib/assessment/summary";
+import { synthesizeOverview } from "@/lib/overview/synthesis";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { Composer } from "@/components/mood/Composer";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
@@ -139,6 +143,7 @@ function TodayPage() {
   const trackers = useTrackers();
   const habits = useHabits();
   const mood = useMoodSystem();
+  const assessment = useAssessment();
   const cycle = usePeriodLog();
   const { optedOut } = useCycleVisible();
   /*
@@ -413,6 +418,53 @@ function TodayPage() {
     for (const d of trackers.days) keys.add(d.date);
     return keys.size;
   }, [habits.logs, mood.entries, trackers.days]);
+
+  /* W4-2 — the command centre's synthesis: the record, read once, answering
+     how you're doing / what changed / what matters / what's next. Its day
+     count is the same distinct-day union as recordDayCount above (the lib
+     computes it from the same three sources), so the band and the hero can
+     never disagree. The summary is null until the assessment is complete. */
+  const assessmentSummary = useMemo(
+    () => summaryOf(assessment.state),
+    [assessment.state],
+  );
+  const overview = useMemo(
+    () =>
+      synthesizeOverview({
+        today,
+        habits: {
+          all: habits.habits,
+          logs: habits.logs,
+          todayHabits: habits.todayHabits,
+          completedToday: habits.completedToday,
+          dueToday: habits.dueToday,
+          points: habits.points,
+        },
+        moodEntries: mood.entries,
+        trackerDays: trackers.days,
+        trackers: trackers.analysis,
+        assessment: { state: assessment.state, summary: assessmentSummary },
+      }),
+    [
+      today,
+      habits.habits,
+      habits.logs,
+      habits.todayHabits,
+      habits.completedToday,
+      habits.dueToday,
+      habits.points,
+      mood.entries,
+      trackers.days,
+      trackers.analysis,
+      assessment.state,
+      assessmentSummary,
+    ],
+  );
+  /* Latched like the map and the hero: once the stores have loaded once,
+     the band never falls back to its placeholders on a background refetch. */
+  const overviewReady = useEverReady(
+    trackers.hydrated && !habits.loading && !mood.loading,
+  );
   const subline = sublineFor({
     ready: recordReady,
     firstDay: genuineFirstDay(personalVoice.firstDay, recordDayCount),
@@ -585,6 +637,17 @@ function TodayPage() {
         </header>
 
         <div className="home-stack">
+          {/* W4-2: the command centre leads the stack — state, change, the
+              one priority and the one next action, all read off the record
+              by the Overview synthesis. Everything below stays as it was. */}
+          <OverviewBand
+            overview={overview}
+            ready={overviewReady}
+            onToggleHabit={(id) => void habits.toggle(id)}
+            onLogMood={() => setMoodOpen(true)}
+            onLogMetrics={() => setMetricsOpen(true)}
+            onAddHabit={openNewHabit}
+          />
           {/* W4-1: the ASSESS step's quiet door — renders only while the
               assessment is unfinished and undismissed; never a lockout. */}
           <AssessmentPromptCard />
