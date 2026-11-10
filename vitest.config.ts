@@ -13,6 +13,13 @@ export default defineConfig({
      * environment with the `@vitest-environment` pragma it already carries.
      */
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    /*
+     * Real-PostgreSQL integration tests (*.integration.test.ts) are NOT part
+     * of the default suite: they need a live local PostgreSQL at
+     * 127.0.0.1:5433/vitalis_test and fail with ECONNREFUSED without one.
+     * They run under vitest.db.config.ts via `npm run test:db`.
+     */
+    exclude: ["**/node_modules/**", "**/*.integration.test.ts"],
     globals: false,
   },
 });
