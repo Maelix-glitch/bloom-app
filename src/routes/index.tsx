@@ -20,6 +20,7 @@ import {
   ProgressPanel,
   TrackersPanel,
 } from "@/components/home/panels";
+import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { Composer } from "@/components/mood/Composer";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
@@ -584,6 +585,9 @@ function TodayPage() {
         </header>
 
         <div className="home-stack">
+          {/* W4-1: the ASSESS step's quiet door — renders only while the
+              assessment is unfinished and undismissed; never a lockout. */}
+          <AssessmentPromptCard />
           {space.authState !== "signed-out" && space.userId ? (
             <section
               className="home-band"
