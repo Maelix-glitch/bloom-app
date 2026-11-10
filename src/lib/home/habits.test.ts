@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyDraft,
+  draftToColumns,
   draftToLocalHabit,
   habitToDraft,
   isDueOn,
   isPausedOn,
+  MAX_ICON_URL_LENGTH,
   rowToHabit,
+  safeIconUrl,
   streakOf,
   weekStartOf,
   weeklyProgress,
@@ -294,5 +297,152 @@ describe("habit icons (U4 — bloom glyphs beside legacy emoji)", () => {
     });
     expect(local.iconType).toBe("emoji");
     expect(local.icon).toBe("🦄");
+  });
+});
+
+/*
+ * The egress guard. One habit row once carried a whole photo as a base64
+ * data: URI in icon_url (~1.5 MB of text) and every habits fetch
+ * re-downloaded it — ~47 GB of Supabase egress in a cycle. A data: URI or
+ * oversized icon_url must be treated as NO image on read, and stripped on
+ * write, so the class can never recur. The database carries the same rule
+ * as a CHECK constraint (20261110_habit_icon_url_guard.sql).
+ */
+describe("icon URL egress guard", () => {
+  const PHOTO_URL =
+    "https://zsqsfxmjphctknnumgsi.supabase.co/storage/v1/object/public/habit-icons/u1/icon.png";
+  const SMALL_DATA_URI = "data:image/png;base64,iVBORw0KGgo=";
+  const BLOB_DATA_URI = `data:image/jpeg;base64,${"A".repeat(4096)}`;
+  const OVERSIZED_URL = `https://example.com/${"a".repeat(MAX_ICON_URL_LENGTH)}`;
+
+  describe("safeIconUrl", () => {
+    it("passes a normal storage URL through untouched", () => {
+      expect(safeIconUrl(PHOTO_URL)).toBe(PHOTO_URL);
+    });
+
+    it("rejects data: URIs — small ones too, and in any casing", () => {
+      expect(safeIconUrl(SMALL_DATA_URI)).toBeNull();
+      expect(safeIconUrl(BLOB_DATA_URI)).toBeNull();
+      expect(safeIconUrl("DATA:image/png;base64,iVBORw0KGgo=")).toBeNull();
+      expect(safeIconUrl("  data:image/png;base64,iVBORw0KGgo=  ")).toBeNull();
+    });
+
+    it("rejects oversized values and accepts one exactly at the limit", () => {
+      expect(OVERSIZED_URL.length).toBeGreaterThan(MAX_ICON_URL_LENGTH);
+      expect(safeIconUrl(OVERSIZED_URL)).toBeNull();
+      const atLimit = `https://e.co/${"a".repeat(MAX_ICON_URL_LENGTH - "https://e.co/".length)}`;
+      expect(atLimit).toHaveLength(MAX_ICON_URL_LENGTH);
+      expect(safeIconUrl(atLimit)).toBe(atLimit);
+    });
+
+    it("rejects empty and non-string values", () => {
+      expect(safeIconUrl("")).toBeNull();
+      expect(safeIconUrl("   ")).toBeNull();
+      expect(safeIconUrl(null)).toBeNull();
+      expect(safeIconUrl(undefined)).toBeNull();
+      expect(safeIconUrl(42)).toBeNull();
+    });
+  });
+
+  describe("read path — rowToHabit", () => {
+    it("maps a habit whose icon_url is a data: URI as image-less", () => {
+      // The old write path stored the URI in icon_value as well; neither may
+      // surface — not as the picture, not as the habit's mark.
+      const h = rowToHabit({
+        id: "img1",
+        name: "Drink water",
+        icon_type: "image",
+        icon_value: BLOB_DATA_URI,
+        icon_url: BLOB_DATA_URI,
+      });
+      expect(h?.iconUrl).toBeNull();
+      expect(h?.iconType).toBe("emoji");
+      expect(h?.icon).toBe("⭐");
+    });
+
+    it("maps a habit whose icon_url is oversized as image-less", () => {
+      const h = rowToHabit({
+        id: "img2",
+        name: "Drink water",
+        icon_type: "image",
+        icon_value: OVERSIZED_URL,
+        icon_url: OVERSIZED_URL,
+      });
+      expect(h?.iconUrl).toBeNull();
+      expect(h?.iconType).toBe("emoji");
+    });
+
+    it("cleans a data: URI arriving in the local mirror's camelCase shape", () => {
+      const h = rowToHabit({
+        id: "img3",
+        name: "Drink water",
+        icon_type: "image",
+        icon: "🖼️",
+        iconUrl: SMALL_DATA_URI,
+      });
+      expect(h?.iconUrl).toBeNull();
+      expect(h?.iconType).toBe("emoji");
+    });
+
+    it("keeps a real photo habit a photo habit", () => {
+      const h = rowToHabit({
+        id: "img4",
+        name: "Drink water",
+        icon_type: "image",
+        icon_value: PHOTO_URL,
+        icon_url: PHOTO_URL,
+      });
+      expect(h?.iconType).toBe("image");
+      expect(h?.iconUrl).toBe(PHOTO_URL);
+      expect(h?.icon).toBe("🖼️");
+    });
+  });
+
+  describe("write path — drafts", () => {
+    it("strips a data: URI icon before it can reach the row", () => {
+      const cols = draftToColumns({
+        name: "Drink water",
+        icon: { type: "image", value: BLOB_DATA_URI },
+      });
+      expect(cols.icon_url).toBeNull();
+      expect(cols.icon_type).toBe("emoji");
+      expect(JSON.stringify(cols)).not.toContain("data:");
+    });
+
+    it("strips an oversized icon URL before it can reach the row", () => {
+      const cols = draftToColumns({
+        name: "Drink water",
+        icon: { type: "image", value: OVERSIZED_URL },
+      });
+      expect(cols.icon_url).toBeNull();
+      expect(cols.icon_type).toBe("emoji");
+    });
+
+    it("keeps a local habit from carrying the blob in its model either", () => {
+      const local = draftToLocalHabit({
+        name: "Drink water",
+        icon: { type: "image", value: BLOB_DATA_URI },
+      });
+      expect(local.iconUrl).toBeNull();
+      expect(local.iconType).toBe("emoji");
+      expect(local.icon).toBe("⭐");
+    });
+
+    it("writes a normal photo URL through untouched", () => {
+      const cols = draftToColumns({
+        name: "Drink water",
+        icon: { type: "image", value: PHOTO_URL },
+      });
+      expect(cols.icon_type).toBe("image");
+      expect(cols.icon_url).toBe(PHOTO_URL);
+      expect(cols.icon_value).toBe(PHOTO_URL);
+
+      const local = draftToLocalHabit({
+        name: "Drink water",
+        icon: { type: "image", value: PHOTO_URL },
+      });
+      expect(local.iconType).toBe("image");
+      expect(local.iconUrl).toBe(PHOTO_URL);
+    });
   });
 });
