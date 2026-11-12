@@ -8,7 +8,6 @@ import { useRailIdentity } from "@/hooks/useRailIdentity";
 import type { MoodEntry } from "@/lib/mood/types";
 import { Composer } from "@/components/mood/Composer";
 import { MoodPage } from "@/components/mood/page/MoodPage";
-import { AppNav } from "@/components/home/HomeSidebar";
 
 export const Route = createFileRoute("/mood/")({
   head: () => ({
@@ -48,7 +47,6 @@ function MoodRoute() {
 
   return (
     <div className="mood-page app-shell relative min-h-screen bg-background text-foreground">
-      <AppNav />
 
       <main className="min-w-0 pb-28 lg:pb-16">
         <MoodPage

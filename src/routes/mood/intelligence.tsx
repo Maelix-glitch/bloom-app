@@ -20,7 +20,6 @@ import { History } from "@/components/mood/History";
 import { Composer } from "@/components/mood/Composer";
 import { BloomConfirm } from "@/components/ui/bloom-sheet";
 import { Reveal } from "@/components/mood/primitives";
-import { AppNav } from "@/components/home/HomeSidebar";
 
 export const Route = createFileRoute("/mood/intelligence")({
   head: () => ({
@@ -106,7 +105,6 @@ function MoodIntelligencePage() {
 
   return (
     <div className="app-shell relative min-h-screen bg-background text-foreground">
-      <AppNav />
       {/* No <Atmosphere /> here: the opaque .app-shell sits above its -z-10
           layer so it was never visible on this page — only its 11 looping
           animations and rAF spotlight were running. */}

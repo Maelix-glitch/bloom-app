@@ -13,7 +13,6 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, Lock, RotateCcw } from "lucide-react";
 
-import { AppNav } from "@/components/home/HomeSidebar";
 import { Button } from "@/components/ui/button";
 import { useProgression } from "@/hooks/useProgression";
 import { CATALOG, componentsById } from "@/lib/rewards/catalog";
@@ -77,7 +76,6 @@ export function AtelierPage() {
 
   return (
     <div className="pg-page app-shell relative min-h-screen bg-background text-foreground">
-      <AppNav />
       <div className="pg-sky" aria-hidden>
         <span className="pg-sky-wall" />
         <span className="pg-sky-orb pg-sky-orb-a" />
