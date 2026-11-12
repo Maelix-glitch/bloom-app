@@ -13,7 +13,6 @@ import {
   authReducer,
   canResend,
   canSubmit,
-  canVerify,
   INITIAL_AUTH,
   isLikelyEmail,
   messageFor,
@@ -176,40 +175,6 @@ describe("resend", () => {
   });
 });
 
-describe("code verification", () => {
-  const sent = run([
-    { type: "email", value: "a@b.co" },
-    { type: "submit" },
-    { type: "invited" },
-    { type: "sent", email: "a@b.co" },
-  ]);
-
-  it("moves from the code-entry state into verifying", () => {
-    const s = authReducer(sent, { type: "verify" });
-    expect(s.phase).toBe("verifying");
-    expect(s.message).toBeNull();
-    expect(canVerify(sent)).toBe(true);
-    expect(canVerify(s)).toBe(false);
-  });
-
-  it("a failed check returns to code entry with a human reason", () => {
-    const s = run([{ type: "verify" }, { type: "verify-error", message: "Invalid token" }], sent);
-    expect(s.phase).toBe("sent");
-    expect(s.message).toMatch(/doesn't match/i);
-    expect(s.sentTo).toBe("a@b.co"); // the approval and the address survive
-  });
-
-  it("ignores verify events outside the code-entry state", () => {
-    expect(authReducer(INITIAL_AUTH, { type: "verify" })).toEqual(INITIAL_AUTH);
-    expect(authReducer(sent, { type: "verify-error", message: "Invalid token" })).toEqual(sent);
-  });
-
-  it("blocks the email submit while a check is running", () => {
-    const s = authReducer(sent, { type: "verify" });
-    expect(canSubmit(s)).toBe(false);
-  });
-});
-
 describe("guards", () => {
   it("blocks submission while checking or sending", () => {
     expect(canSubmit({ ...INITIAL_AUTH, phase: "checking" })).toBe(false);
@@ -227,7 +192,7 @@ describe("guards", () => {
     expect(submitLabel({ ...INITIAL_AUTH, phase: "idle" })).toBe("Continue");
     expect(submitLabel({ ...INITIAL_AUTH, phase: "checking" })).toBe("Checking…");
     expect(submitLabel({ ...INITIAL_AUTH, phase: "sending" })).toBe("Sending…");
-    expect(submitLabel({ ...INITIAL_AUTH, phase: "sent" })).toBe("Send a fresh code");
+    expect(submitLabel({ ...INITIAL_AUTH, phase: "sent" })).toBe("Resend link");
   });
 });
 
@@ -237,8 +202,6 @@ describe("messageFor", () => {
     ["SMTP provider error", /email right now/i],
     ["Failed to fetch", /connection/i],
     ["Bloom access is by invitation only.", /invite list/i],
-    ["Token has expired or is invalid", /fresh code/i],
-    ["Invalid token", /doesn't match/i],
     ["some opaque internal thing", /didn't work/i],
   ])("translates %s", (input, expected) => {
     expect(messageFor(new Error(input))).toMatch(expected);

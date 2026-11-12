@@ -354,7 +354,7 @@ export function AccountRow({
           <Row
             icon={<LogIn className="size-3.5" />}
             label="Sign in"
-            value="email code"
+            value="magic link"
             onClick={onSignIn}
             testId="pf-row-signin"
           />

@@ -17,12 +17,10 @@ export type AuthPhase =
   | "typing"
   /** Asking the server whether this address is invited. */
   | "checking"
-  /** Invited — the code is being sent. */
+  /** Invited — the link is being sent. */
   | "sending"
-  /** Code sent; the code-entry step. A resting state, not a spinner. */
+  /** Link sent; this is a resting state, not a spinner. */
   | "sent"
-  /** The typed code is being checked. */
-  | "verifying"
   /** Not on the list. A dead end until they try another address. */
   | "rejected"
   /** The address is not a valid email. */
@@ -38,11 +36,11 @@ export interface AuthState {
   phase: AuthPhase;
   /** What is in the email box. */
   email: string;
-  /** The address a code was sent to, so the confirmation can name it. */
+  /** The address a link was sent to, so the confirmation can name it. */
   sentTo: string | null;
   /** A human-facing message. Never a raw backend string — see `messageFor`. */
   message: string | null;
-  /** How many codes have been sent to `sentTo`, to gate resends. */
+  /** How many links have been sent to `sentTo`, to gate resends. */
   sends: number;
 }
 
@@ -52,8 +50,6 @@ export type AuthEvent =
   | { type: "invited" }
   | { type: "not-invited" }
   | { type: "sent"; email: string }
-  | { type: "verify" }
-  | { type: "verify-error"; message: string }
   | { type: "error"; message: string }
   | { type: "retry" }
   | { type: "edit-email" }
@@ -95,15 +91,6 @@ export function messageFor(error: unknown): string {
   if (/rate|limit|too many/i.test(text)) {
     return "That's a few too many attempts. Give it a minute and try again.";
   }
-  /* Supabase answers a wrong code and an expired code with the same string
-     ("Token has expired or is invalid"), so the wording covers both rather
-     than pretending to know which one it was. */
-  if (
-    /(token|otp|code)[\s\S]{0,40}(expired|invalid|incorrect|not found)/i.test(text) ||
-    /(invalid|incorrect|expired)[\s\S]{0,20}(token|otp|code)/i.test(text)
-  ) {
-    return "That code doesn't match, or it has expired. Check the email and try again — or send a fresh code.";
-  }
   if (/smtp|email provider|sender/i.test(text)) {
     return "Bloom can't send email right now. Try again shortly.";
   }
@@ -118,12 +105,7 @@ export function messageFor(error: unknown): string {
 
 /** Whether the primary button should do anything. */
 export function canSubmit(state: AuthState): boolean {
-  return state.phase !== "checking" && state.phase !== "sending" && state.phase !== "verifying";
-}
-
-/** Whether a code check can start — only from the code-entry resting state. */
-export function canVerify(state: AuthState): boolean {
-  return state.phase === "sent";
+  return state.phase !== "checking" && state.phase !== "sending";
 }
 
 /** Whether a resend is allowed — gated so the button can't be hammered. */
@@ -139,7 +121,7 @@ export function submitLabel(state: AuthState): string {
     case "sending":
       return "Sending…";
     case "sent":
-      return "Send a fresh code";
+      return "Resend link";
     default:
       return "Continue";
   }
@@ -149,7 +131,7 @@ export function authReducer(state: AuthState, event: AuthEvent): AuthState {
   switch (event.type) {
     case "email": {
       const email = event.value;
-      /* While a code is already on its way, editing the box means starting
+      /* While a link is already on its way, editing the box means starting
          over with a different address — drop the sent state. */
       const phase: AuthPhase =
         email.length === 0
@@ -202,19 +184,6 @@ export function authReducer(state: AuthState, event: AuthEvent): AuthState {
         sends: state.sentTo === event.email ? state.sends + 1 : 1,
         message: null,
       };
-
-    case "verify":
-      /* Only the code-entry state can start a check — a stray verify from
-         anywhere else is out of order and ignored, like the other guards. */
-      return state.phase === "sent" ? { ...state, phase: "verifying", message: null } : state;
-
-    case "verify-error":
-      /* A failed check returns to the code-entry state with the reason —
-         the code may be wrong or stale, but the address stays approved and
-         the person stays exactly where they were. */
-      return state.phase === "verifying"
-        ? { ...state, phase: "sent", message: messageFor(event.message) }
-        : state;
 
     case "error":
       /* An error while sending leaves the address approved — they can retry
