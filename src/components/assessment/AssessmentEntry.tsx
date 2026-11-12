@@ -51,8 +51,8 @@ export function AssessmentPromptCard() {
 
   const inProgress = state.status === "in_progress";
   return (
-    <section className="home-band" aria-labelledby="home-assessment-title">
-      <div className="flex items-start gap-3 px-1 pb-2 pt-1">
+    <section className="home-band assess-prompt" aria-labelledby="home-assessment-title">
+      <div className="flex items-start gap-3 px-2 pb-3 pt-2">
         <span
           aria-hidden
           className="grid size-10 shrink-0 place-items-center rounded-full bg-gold/10 text-gold"
@@ -119,7 +119,7 @@ export function AssessmentProfileCard() {
         : "Not taken yet.";
 
   return (
-    <div className="pf-card pf-card--pad">
+    <div className="pf-card pf-card--pad assess-card">
       <div className="pf-section-head">
         <div>
           <p className="pf-eyebrow">Assessment</p>
@@ -162,6 +162,8 @@ export function AssessmentProfileCard() {
         onClose={() => setSummaryOpen(false)}
         title="Your assessment summary"
         size="lg"
+        className="assess-sheet"
+        panelClassName="assess-panel"
       >
         <div className="flex max-h-[82vh] flex-col px-6 pb-6 pt-6 sm:px-7">
           <div className="flex items-start justify-between gap-4">

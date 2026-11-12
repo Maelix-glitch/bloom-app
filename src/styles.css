@@ -749,6 +749,26 @@
   border-radius: calc(var(--radius) + 8px);
   padding: 14px 16px 10px;
 }
+/*
+ * The assessment prompt wears the band's shape as a slab: the plain band's
+ * hairline and flat fill read unfinished next to the Overview band above
+ * it, so this card gets the strong border, a real shadow under it, and the
+ * lit top edge the sheet family uses — solid surface throughout, nothing
+ * showing through.
+ */
+.home-band.assess-prompt {
+  border-color: var(--border-strong);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--foreground) 4%, transparent),
+      transparent 42%
+    ),
+    var(--surface);
+  box-shadow:
+    0 18px 40px -22px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 14%, transparent);
+}
 .home-band-head {
   display: flex;
   align-items: baseline;

@@ -580,6 +580,20 @@ button.pf-number:hover {
   border: 1px solid var(--pf-line);
   background: var(--pf-card);
 }
+/*
+ * The assessment's home on Profile is a slab, not the family's glass: the
+ * shared --pf-card fill is 82% surface, so the cover photograph behind the
+ * card ghosted through it and the section read unfinished. Solid house
+ * surface, the strong border, a shadow to sit it on the page, and the lit
+ * top edge the sheet family uses.
+ */
+.pf-card.assess-card {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  box-shadow:
+    0 18px 40px -22px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 14%, transparent);
+}
 .pf-card--pad {
   padding: 18px 18px 16px;
 }
