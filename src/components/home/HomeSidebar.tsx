@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Settings, UserRound } from "lucide-react";
 
 import { BloomIcon, type BloomIconName } from "@/components/icons/BloomIcon";
+import { routeShowsAppNav } from "@/lib/appNav";
 
 import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
@@ -275,11 +276,21 @@ export function HomeMobileNav() {
 }
 
 /**
- * AppNav — the only chrome a main page renders. Drop it first inside any page
- * wrapper that carries the `app-shell` class: on desktop the rail (brand +
- * primary links + profile) is fixed beside the page's own <main>; on phones
- * the brand bar is fixed on top and the tab bar at the bottom. No re-nesting
- * needed — `.app-shell` (src/styles.css) pads for whichever chrome is shown.
+ * AppNav — the app's one chrome: on desktop the rail (brand + primary
+ * links + profile) fixed beside the page's own <main>; on phones the
+ * brand bar fixed on top and the tab bar at the bottom. The pieces are
+ * all viewport-fixed, and `.app-shell` (src/styles.css) pads page
+ * content for whichever chrome is shown, so the chrome itself no
+ * longer needs to live inside a page.
+ *
+ * It is mounted exactly once, by the root layout through `AppNavGate`
+ * below — never by a page. It used to be rendered by every page, and
+ * because the root remounts each page on navigation (the keyed
+ * crossfade wrapper), the rail was destroyed and recreated on every
+ * tab switch: its arrival animation replayed, its botanical and avatar
+ * images were new DOM nodes, and the whole sidebar visibly refreshed.
+ * At the root it is the same DOM on every route; switching tabs only
+ * moves the active state across it.
  */
 export function AppNav() {
   return (
@@ -289,4 +300,15 @@ export function AppNav() {
       <HomeMobileNav />
     </>
   );
+}
+
+/**
+ * The root layout's chrome switch: renders `AppNav` on the routes that
+ * carry it (see `routeShowsAppNav` in src/lib/appNav.ts for the set and
+ * why), nothing anywhere else — the public pages, the gate and the 404
+ * stand without a rail, exactly as they did when pages owned the chrome.
+ */
+export function AppNavGate() {
+  const { pathname } = useLocation();
+  return routeShowsAppNav(pathname) ? <AppNav /> : null;
 }

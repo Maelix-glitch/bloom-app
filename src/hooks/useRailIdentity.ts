@@ -61,11 +61,12 @@ type Row = {
 };
 
 /*
- * The rail is rendered by every route rather than by a shared layout, so it
- * unmounts and remounts on every tab change. Without a cache that meant each
- * navigation re-ran getSession(), a profiles query and a prefs sync, and the
- * avatar dropped back to "checking" until they returned — the lag and flicker
- * on switching tabs.
+ * The rail is mounted once by the root layout, but it still unmounts and
+ * remounts across the access gate (signed-out ↔ signed-in) and on a full
+ * page load. Without a cache that meant each remount re-ran getSession(),
+ * a profiles query and a prefs sync, and the avatar dropped back to
+ * "checking" until they returned — the lag and flicker on tab switches
+ * back when every page rendered its own rail.
  *
  * One module-level record, shared by every mount and kept between them. The
  * effect below still runs once per mount to subscribe to auth changes, but it
