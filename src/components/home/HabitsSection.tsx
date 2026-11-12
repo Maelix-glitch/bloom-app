@@ -72,6 +72,7 @@ export function HabitsSection({
   logs,
   today,
   loading,
+  signedIn = false,
   points,
   onToggle,
   onAdd,
@@ -83,6 +84,10 @@ export function HabitsSection({
   logs: HabitLog[];
   today: string;
   loading: boolean;
+  /** Signed in, the account is the record: while it is still loading, any
+      rows in state are the device mirror, not the account — show the
+      skeleton instead of flashing them as real rows (defaults-flash). */
+  signedIn?: boolean | undefined;
   points: number | null;
   /** Tick/untick. `date` is a local day within the last week; omitted = today. */
   onToggle: (id: string, date?: string) => void;
@@ -103,6 +108,10 @@ export function HabitsSection({
 
   const done = habits.filter((h) => h.done).length;
   const due = habits.length;
+  /* While the account is still answering, the list is the skeleton — even
+     if stale rows are sitting in state. (The hook holds the list empty on a
+     signed-in cold load; this is the second line of defence.) */
+  const showSkeleton = loading && (due === 0 || signedIn);
 
   /* Milestone celebrations: watch the streaks, celebrate only a crossing that
      happened here (previous streaks captured on mount, never toasted), once
@@ -149,14 +158,13 @@ export function HabitsSection({
   const pct = due === 0 ? 0 : Math.round((done / due) * 100);
   const bestStreak = Math.max(0, ...habits.map((h) => streaks.get(h.id) ?? 0));
 
-  const summary =
-    loading && due === 0
-      ? "Reading your routines…"
-      : due === 0
-        ? "Small routines that shape the day — add your first one."
-        : done === due
-          ? `All ${due} done today. Lovely.`
-          : `${done} of ${due} done today${due - done === 1 ? " — one to go." : "."}`;
+  const summary = showSkeleton
+    ? "Reading your routines…"
+    : due === 0
+      ? "Small routines that shape the day — add your first one."
+      : done === due
+        ? `All ${due} done today. Lovely.`
+        : `${done} of ${due} done today${due - done === 1 ? " — one to go." : "."}`;
 
   return (
     <section
@@ -200,7 +208,7 @@ export function HabitsSection({
         </div>
       </header>
 
-      {due > 0 ? (
+      {due > 0 && !showSkeleton ? (
         <div
           className="mt-5 h-1.5 overflow-hidden rounded-full"
           style={{ background: "var(--home-secondary)" }}
@@ -221,7 +229,7 @@ export function HabitsSection({
         </div>
       ) : null}
 
-      {loading && due === 0 ? (
+      {showSkeleton ? (
         <p className="mt-5 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-3.5 animate-spin" /> Loading your habits…
         </p>
