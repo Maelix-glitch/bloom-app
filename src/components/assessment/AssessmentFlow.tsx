@@ -73,7 +73,7 @@ function ChoiceGroup<T extends string | number>({
               "rounded-2xl border px-4 py-3 text-left transition-colors duration-[var(--motion-micro)] ease-out-expo",
               selected
                 ? "border-gold/60 bg-gold/10"
-                : "border-border bg-surface-2/40 hover:border-border-strong",
+                : "border-border bg-surface-2 hover:border-border-strong",
             )}
           >
             <span className="block text-[length:var(--text-support)] font-medium text-foreground">
@@ -116,7 +116,7 @@ function MultiChoice({
               "rounded-pill border px-3.5 py-2 text-[13px] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
               selected
                 ? "border-gold/60 bg-gold/10 text-foreground"
-                : "border-border bg-surface-2/40 text-muted-foreground hover:border-border-strong hover:text-foreground",
+                : "border-border bg-surface-2 text-muted-foreground hover:border-border-strong hover:text-foreground",
             )}
           >
             {option.label}
@@ -165,7 +165,7 @@ function TriChoice({
               "rounded-pill border px-4 py-2 text-[13px] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
               option.value !== "skip" && selected
                 ? "border-gold/60 bg-gold/10 text-foreground"
-                : "border-border bg-surface-2/40 text-muted-foreground hover:border-border-strong hover:text-foreground",
+                : "border-border bg-surface-2 text-muted-foreground hover:border-border-strong hover:text-foreground",
             )}
           >
             {option.label}
@@ -378,7 +378,14 @@ export function AssessmentFlow({ open, onClose }: { open: boolean; onClose: () =
   };
 
   return (
-    <BloomSheet open={open} onClose={close} title="Your assessment" size="lg">
+    <BloomSheet
+      open={open}
+      onClose={close}
+      title="Your assessment"
+      size="lg"
+      className="assess-sheet"
+      panelClassName="assess-panel"
+    >
       <div className="flex max-h-[82vh] flex-col px-6 pb-6 pt-6 sm:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -423,7 +430,7 @@ export function AssessmentFlow({ open, onClose }: { open: boolean; onClose: () =
                 ).map(([purpose, granted, setGranted]) => (
                   <div
                     key={purpose}
-                    className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-surface-2/40 px-4 py-3.5"
+                    className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-surface-2 px-4 py-3.5"
                   >
                     <div>
                       <p className="text-[length:var(--text-support)] font-medium text-foreground">

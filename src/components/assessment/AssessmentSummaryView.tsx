@@ -52,7 +52,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
           ) : null}
         </div>
       ) : (
-        <div className="rounded-2xl border border-border bg-surface-2/60 px-4 py-3.5">
+        <div className="rounded-2xl border border-border bg-surface-2 px-4 py-3.5">
           <p className="flex items-start gap-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
             <Check className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden />
             {summary.safety.headline}
@@ -76,7 +76,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
         {summary.sections.map((section) => (
           <section
             key={section.section}
-            className="rounded-2xl border border-border bg-surface-2/40 px-4 py-3.5"
+            className="rounded-2xl border border-border bg-surface-2 px-4 py-3.5"
             aria-label={section.title}
           >
             <div className="flex items-baseline justify-between gap-3">
@@ -110,7 +110,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
         ))}
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface-2/60 px-4 py-3.5">
+      <div className="rounded-2xl border border-border bg-surface-2 px-4 py-3.5">
         <p className="text-[11px] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
           For your plan
         </p>
