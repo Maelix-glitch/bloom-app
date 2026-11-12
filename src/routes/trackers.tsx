@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import trackersCss from "../styles/trackers.css?url";
-import { AppNav } from "@/components/home/HomeSidebar";
 import { HealthTools } from "@/components/health/HealthTools";
 import { TrackersPage } from "@/components/tk/TrackersPage";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
@@ -25,7 +24,6 @@ function TrackersRoute() {
   const [theme] = useCycleTheme();
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
-      <AppNav />
       <main className="min-w-0">
         <div id="trackers">
           <TrackersPage theme={theme} />

@@ -105,7 +105,7 @@
    Six destinations must always fit. Equal flex shares, a guaranteed touch
    height, labels that shrink gracefully — never clipped, never overflowing. */
 
-.app-shell > nav.app-mobile-nav {
+nav.app-mobile-nav {
   display: flex;
   align-items: stretch;
   /* the bar's own background fills the home-indicator zone */

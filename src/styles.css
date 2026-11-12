@@ -1227,11 +1227,15 @@
   --app-rail: 0px;
   padding-top: var(--app-top-bar);
 }
-.app-shell > .app-mobile-bar {
+/* The chrome is mounted by the root layout now, not inside a page's
+   .app-shell — these rules name the chrome elements directly. The bar's
+   height is the literal 60px --app-top-bar stands for below lg (the bar
+   is hidden at lg, where the token goes to 0). */
+.app-mobile-bar {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
-  height: var(--app-top-bar);
+  height: 60px;
 }
 @media (min-width: 64rem) {
   .app-shell {
@@ -1243,11 +1247,12 @@
   }
   /* The rail: pinned to the left edge, top to bottom of the viewport — the
      brand, the links and the botanical at the foot stay put however long the
-     page is and however far it is scrolled. */
-  .app-shell > .app-sidebar {
+     page is and however far it is scrolled. Root-mounted (see above), so
+     the width is the literal 220px --app-rail stands for at this size. */
+  .app-sidebar {
     position: fixed;
     inset: 0 auto 0 0;
-    width: var(--app-rail);
+    width: 220px;
     z-index: 2;
   }
   .app-shell > main {
@@ -1286,7 +1291,7 @@
 /* The phone tab bar: the extra bottom padding is the safe area, and the bar's
    own background fills it — otherwise the labels sit under the home indicator
    and the page behind shows through the gap. */
-.app-shell > nav.app-mobile-nav {
+nav.app-mobile-nav {
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 }
 .app-sidebar-rule {
@@ -1402,10 +1407,12 @@
 }
 
 /* Arrival: the nav items rise a few px and fade in, staggered ~45ms
-   apart. AppNav is rendered by each page, so this is the rail's share of
-   the page-arrival beat — kept small and quick so it never feels like a
-   reload. Fill is backwards only: the from-state covers the stagger delay,
-   and once the animation ends the links' own states (the tab bar's press
+   apart. AppNav is mounted once by the root layout, so this is the
+   rail's share of the FIRST page-arrival beat only — it no longer
+   replays on tab switches (when every page rendered its own rail, this
+   stagger was the visible "sidebar refresh" on each navigation). Fill
+   is backwards only: the from-state covers the stagger delay, and once
+   the animation ends the links' own states (the tab bar's press
    scale) own the transform again. */
 @keyframes app-nav-item-arrive {
   from {
@@ -2171,7 +2178,7 @@ body {
 /* Desktop: the phone tab bar must never show — the rail owns nav at lg.
    Unlayered and explicit, so it holds even where the lg: utility fails. */
 @media (min-width: 64rem) {
-  .app-shell > nav.app-mobile-nav {
+  nav.app-mobile-nav {
     display: none;
   }
 }

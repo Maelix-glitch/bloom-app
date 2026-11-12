@@ -5,7 +5,6 @@ import { CalendarRange, Droplet, Gift, Plus, Scale, Smile } from "lucide-react";
 import storiesCss from "../styles/stories.css?url";
 import storiesFontsCss from "../styles/fonts-stories.css?url";
 
-import { AppNav } from "@/components/home/HomeSidebar";
 import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { useEverReady } from "@/hooks/useEverReady";
@@ -517,9 +516,6 @@ function TodayPage() {
 
   return (
     <div className="home-page app-shell min-h-screen bg-background text-foreground">
-      {/* the one shared chrome: rail on desktop, brand bar + tab bar on phones */}
-      <AppNav />
-
       <main className="home-main min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
         <div className="home-toolbar">
           {/* suppressHydrationWarning for the same reason as the greeting
