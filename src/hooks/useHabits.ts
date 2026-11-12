@@ -135,6 +135,8 @@ export function useHabits(): HabitsStore {
   const [today, setToday] = useState(() => localDate());
   const [reload, setReload] = useState(0);
   const hydrated = useRef(false);
+  /** The account whose rows are currently in state, once its first load settled. */
+  const signedInLoaded = useRef<string | null>(null);
   const habitsRef = useRef<Habit[]>(habits);
   habitsRef.current = habits;
   const logsRef = useRef<HabitLog[]>(logs);
@@ -188,20 +190,36 @@ export function useHabits(): HabitsStore {
     };
   }, []);
 
-  /* load: local first (instant), then the account */
+  /* load: the device mirror first (instant) when it IS the record, the
+     account first when it is — never the mirror dressed up as account rows.
+     On a signed-in cold load the mirror is stale by definition (habits
+     deleted, renamed or ticked on another device since this device last
+     synced), and rendering it first is the defaults-flash: rows that are
+     not the account's flash on screen, then get replaced. So while signed
+     in, the list stays empty behind the skeleton until the account answers
+     (success or error). The mirror is still read inside the fetch below,
+     for the upload-local-habits path — this only governs what renders. */
   useEffect(() => {
     if (auth === "checking") return;
-    if (!hydrated.current) {
+    if (auth !== "signed-in" || !profileId) {
+      /* Signed out (or no database): the device mirror IS the record, so it
+         renders instantly — and a sign-out re-seeds it, never leaving the
+         previous account's rows on screen. */
+      signedInLoaded.current = null;
       hydrated.current = true;
       setHabits(loadLocalHabits());
       setLogs(loadLocalLogs());
-    }
-    if (auth !== "signed-in" || !profileId) {
       setLoading(false);
       return;
     }
+    const cold = signedInLoaded.current !== profileId;
+    if (cold) {
+      hydrated.current = true;
+      setHabits([]);
+      setLogs([]);
+      setLoading(true);
+    }
     let mounted = true;
-    setLoading(true);
     setError(null);
     void (async () => {
       try {
@@ -252,6 +270,10 @@ export function useHabits(): HabitsStore {
         setLogs(nextLogs);
         setPoints(pts);
         saveLocal(nextHabits, nextLogs);
+        /* Only a settled fetch counts: an error leaves the account unloaded,
+           so a retry (refresh, realtime) is a cold load again — empty list
+           behind the skeleton, not the mirror and not a stale empty state. */
+        signedInLoaded.current = profileId;
       } catch (e) {
         console.warn("[bloom:habits] load:", e);
         if (mounted) setError("Your habits couldn't be loaded from your account just now.");

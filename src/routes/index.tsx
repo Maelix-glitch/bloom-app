@@ -689,6 +689,7 @@ function TodayPage() {
             logs={habits.logs}
             today={habits.today}
             loading={habits.loading}
+            signedIn={habits.auth === "signed-in"}
             points={habits.points}
             onToggle={(id, date) => void habits.toggle(id, date)}
             onAdd={openNewHabit}
