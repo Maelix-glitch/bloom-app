@@ -36,12 +36,15 @@ import {
   evaluateGoals,
   goalTarget,
   moodDayOf,
+  periodKeyFor,
   resolveSpec,
+  GOALS_ORDER,
 } from "@/lib/progression/evaluate";
 import { ACHIEVEMENTS } from "@/lib/progression/achievements";
 import { rankFor } from "@/lib/progression/ranks";
 import {
   achievedAtOf,
+  claimKey,
   hasClaim,
   loadLedger,
   recordAward,
@@ -62,6 +65,12 @@ import type {
   RankEvent,
   RankState,
 } from "@/lib/progression/types";
+
+/** How the server settled a claim. Device mode (no server) is `null`. */
+export type ServerAward =
+  | { outcome: "awarded"; points: number; balance: number }
+  | { outcome: "refused"; points: number; balance: number; reason: string }
+  | { outcome: "unavailable" };
 
 /** How the award went — the UI only ever needs this. */
 export interface AwardResult {
@@ -127,39 +136,34 @@ export interface ProgressionStore {
 
 const MAX_AUTO_UNLOCKS = 6;
 
-// Once we know the server doesn't have the progression RPCs, stop calling them
-// for the rest of the session — this prevents a 404 POST showing in the console
-// on every claim click when the migration hasn't been run.
-let awardProgressMissing = false;
+// Once we know the server doesn't have the achievement RPC, stop calling
+// it for the rest of the session — this prevents a 404 POST showing in the
+// console on every auto-unlock pass when the migration hasn't been run.
+// Session-only, deliberately: an earlier version persisted this to
+// localStorage (bloom.progression.rpcMissing), and one transient or
+// misclassified error then disabled server awards on that device FOREVER —
+// every later claim silently settled in the local ledger while the account
+// balance never moved (the 2026-11-12 quest-claim incident). A page load
+// re-probes; a stale persisted flag is removed on sight below.
 let awardAchievementMissing = false;
 
 try {
-  if (typeof window !== "undefined" && localStorage.getItem("bloom.progression.rpcMissing") === "1") {
-    awardProgressMissing = true;
-    awardAchievementMissing = true;
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("bloom.progression.rpcMissing");
   }
 } catch {
   // ignore
 }
 
-function isMissingRpcError(err: unknown): boolean {
+export function isMissingRpcError(err: unknown): boolean {
   if (!err || typeof err !== "object") return false;
-  const e = err as { code?: string; message?: string; status?: number; details?: string };
+  const e = err as { code?: string };
   const code = typeof e.code === "string" ? e.code : "";
-  const msg = `${e.message ?? ""} ${e.details ?? ""}`.toLowerCase();
-  // PostgREST codes for missing function/table, plus generic 404 / not-found text
-  return (
-    code === "42883" ||
-    code === "PGRST202" ||
-    code === "PGRST205" ||
-    code === "PGRST116" ||
-    code === "42P01" ||
-    e.status === 404 ||
-    msg.includes("not found") ||
-    msg.includes("does not exist") ||
-    msg.includes("could not find") ||
-    msg.includes("404")
-  );
+  // PostgREST codes for a missing function/table, plus the Postgres codes
+  // for undefined function/table. Codes only: an earlier version also
+  // matched message substrings ("404", "not found", "could not find"),
+  // which misclassifies ordinary server errors as a missing migration.
+  return code === "42883" || code === "PGRST202" || code === "PGRST205" || code === "42P01";
 }
 
 /**
@@ -287,6 +291,44 @@ export function useProgression(): ProgressionStore {
 
   const refreshPoints = useCallback(() => setPointsNonce((n) => n + 1), []);
 
+  /* ----------------- server award record (reconciliation) -----------------
+   * The local ledger's claim marks are a mirror, not the authority: the
+   * server's goal_awards rows are. Read them so the claimed state shown is
+   * the account's — including awards made on another device — and so a
+   * local-only mark left behind by the old silent fallback (a claim that
+   * displayed as awarded but never credited the account) can be told apart
+   * from a real award. Null while unknown (signed out, or the read failed):
+   * local semantics stand in, exactly as before. */
+  const [serverClaims, setServerClaims] = useState<ReadonlySet<string> | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    async function load() {
+      if (!signedIn || !profileId || !hasSupabaseConfig) {
+        if (alive) setServerClaims(null);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from("goal_awards")
+          .select("goal_id, period_key")
+          .eq("profile_id", profileId);
+        if (!alive || error || !data) return;
+        const keys = new Set<string>();
+        for (const row of data as { goal_id: string; period_key: string }[]) {
+          keys.add(claimKey(row.goal_id, row.period_key));
+        }
+        setServerClaims(keys);
+      } catch {
+        /* offline or unconfigured — local semantics stand in */
+      }
+    }
+    void load();
+    return () => {
+      alive = false;
+    };
+  }, [signedIn, profileId, ledgerVersion]);
+
   /* --------------------- records behind the progress --------------------- */
   // The balance has its own pending rule (below); this is the same rule
   // for the records the achievements are counted from. Latched like the
@@ -387,8 +429,23 @@ export function useProgression(): ProgressionStore {
   const ledger = useMemo(() => loadLedger(), [ledgerVersion]);
 
   const claimedLookup = useMemo(
-    () => ({ has: (goalId: string, periodKey: string) => hasClaim(goalId, periodKey) }),
-    [ledgerVersion],
+    () => ({
+      has: (goalId: string, periodKey: string) => {
+        if (signedIn && serverClaims) {
+          if (serverClaims.has(claimKey(goalId, periodKey))) return true;
+          /* The server is the authority for the period that is still open:
+             a local-only mark for it is an unpaid claim left behind by the
+             old silent fallback, so the goal is offered again and claiming
+             it can actually land this time. Past periods keep their local
+             record — the server can no longer award them, and the archive
+             stays as it was earned. */
+          const def = GOALS_ORDER.find((g) => g.id === goalId);
+          if (def && periodKeyFor(def, today) === periodKey) return false;
+        }
+        return hasClaim(goalId, periodKey);
+      },
+    }),
+    [ledgerVersion, signedIn, serverClaims, today],
   );
 
   const goals = useMemo(() => evaluateGoals(input, claimedLookup), [input, claimedLookup]);
@@ -412,16 +469,22 @@ export function useProgression(): ProgressionStore {
   /* ------------------------------ award engine ---------------------------- */
 
   /**
-   * Server-side award. Returns null when there is no database (the caller
-   * falls back to the local ledger), otherwise the server's decision.
+   * Server-side award. Returns null only in device mode (no database, or
+   * not signed in) — the caller then takes the verified local path, where
+   * the device ledger IS the balance.
    *
-   * This never throws — any server failure falls back to the verified local
-   * ledger so the claim button never shows a console error for an expected
-   * offline or missing-migration case.
+   * Signed in, the answer is explicit: "awarded", "refused" (the server
+   * verified and said no), or "unavailable" (the award could not be
+   * settled — missing function, a server error, offline). "Unavailable"
+   * must never be settled locally: the account balance is the only number
+   * a signed-in person sees, a local record cannot move it, and marking
+   * the goal claimed locally would block the retry that could. That
+   * silent settle was the 2026-11-12 defect — claims displayed as awarded
+   * while `award_progress()` was raising 42702 and the balance never moved.
    */
   const awardOnServer = useCallback(
-    async (goalId: string): Promise<{ awarded: boolean; points: number; balance: number; reason: string } | null> => {
-      if (!hasSupabaseConfig || !signedIn || awardProgressMissing) return null;
+    async (goalId: string): Promise<ServerAward | null> => {
+      if (!hasSupabaseConfig || !signedIn) return null;
       // Temporarily suppress console.error during the RPC so a 404 from a missing
       // migration doesn't appear as a red error in the console — we handle it as fallback.
       const originalConsoleError = console.error;
@@ -433,39 +496,30 @@ export function useProgression(): ProgressionStore {
           p_today: today,
         });
         if (rpcError) {
-          if (isMissingRpcError(rpcError)) {
-            awardProgressMissing = true;
-            try {
-              localStorage.setItem("bloom.progression.rpcMissing", "1");
-            } catch {}
-            return null;
+          if (!isMissingRpcError(rpcError)) {
+            console.warn("Progression award could not be settled on the server:", rpcError);
           }
-          const code = (rpcError as { code?: string }).code;
-          if (code === "42501" || code === "28000" || code === "PGRST301") {
-            return null;
-          }
-          console.warn("Progression award fallback to local:", rpcError);
-          return null;
+          return { outcome: "unavailable" };
         }
         const row = Array.isArray(data) ? data[0] : data;
-        if (!row) return null;
+        if (!row) return { outcome: "unavailable" };
         const record = row as Record<string, unknown>;
+        const points = typeof record["points"] === "number" ? record["points"] : 0;
+        const balance = typeof record["balance"] === "number" ? record["balance"] : 0;
+        if (record["awarded"] === true) {
+          return { outcome: "awarded", points, balance };
+        }
         return {
-          awarded: record["awarded"] === true,
-          points: typeof record["points"] === "number" ? record["points"] : 0,
-          balance: typeof record["balance"] === "number" ? record["balance"] : 0,
+          outcome: "refused",
+          points,
+          balance,
           reason: typeof record["reason"] === "string" ? record["reason"] : "",
         };
       } catch (cause) {
-        if (isMissingRpcError(cause)) {
-          awardProgressMissing = true;
-          try {
-            localStorage.setItem("bloom.progression.rpcMissing", "1");
-          } catch {}
-          return null;
+        if (!isMissingRpcError(cause)) {
+          console.warn("Progression award could not be settled on the server (exception):", cause);
         }
-        console.warn("Progression award fallback to local (exception):", cause);
-        return null;
+        return { outcome: "unavailable" };
       } finally {
         console.error = originalConsoleError;
       }
@@ -517,6 +571,8 @@ export function useProgression(): ProgressionStore {
           });
           if (rpcError) {
             if (isMissingRpcError(rpcError)) {
+              // Session-only (see the flag's declaration): a fresh page load
+              // re-probes, so a device can never be poisoned permanently.
               awardAchievementMissing = true;
             } else {
               const code = (rpcError as { code?: string }).code;
@@ -614,7 +670,24 @@ export function useProgression(): ProgressionStore {
         const before = snapshot.points;
         const server = await awardOnServer(goalId);
 
-        if (server && !server.awarded) {
+        if (server?.outcome === "unavailable") {
+          // Signed in, but the award could not be settled on the account.
+          // Record NOTHING — not locally, not anywhere: the goal stays
+          // claimable and the retry can land the real credit. Settling it
+          // in the local ledger here was the 2026-11-12 defect (the claim
+          // displayed as awarded, the balance never moved, and the local
+          // mark blocked every retry).
+          return {
+            awarded: false,
+            points: 0,
+            rankUp: null,
+            unlocked: [],
+            message:
+              "Bloom couldn't reach your account to add those points, so this claim wasn't saved. Nothing was lost — try again in a moment.",
+          };
+        }
+
+        if (server?.outcome === "refused") {
           // The server disagreed (already awarded, or verification stricter
           // than ours). Trust the server, and mirror the "already awarded"
           // state locally so the UI stops offering it.
@@ -647,7 +720,7 @@ export function useProgression(): ProgressionStore {
           };
         }
 
-        if (server && server.awarded) {
+        if (server?.outcome === "awarded") {
           recordAward({
             kind: "goal",
             refId: goalId,
@@ -666,6 +739,9 @@ export function useProgression(): ProgressionStore {
               refId: goalId,
             });
           }
+          setServerClaims((current) =>
+            current ? new Set(current).add(claimKey(goalId, target.periodKey)) : current,
+          );
           setCloudPoints(server.balance);
           announcePointsChanged();
           setPointsNonce((n) => n + 1);
