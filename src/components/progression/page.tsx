@@ -18,7 +18,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, CircleAlert, RefreshCw, Sparkles } from "lucide-react";
 
-import { AppNav } from "@/components/home/HomeSidebar";
 import { useProgression } from "@/hooks/useProgression";
 import { rankFor } from "@/lib/progression/ranks";
 import { formatPoints } from "@/lib/progression/format";
@@ -114,7 +113,6 @@ export function JourneyPage() {
 
   return (
     <div className="pg-page app-shell relative min-h-screen bg-background text-foreground">
-      <AppNav />
 
       <div className="pg-sky" aria-hidden>
         <span className="pg-sky-wall" />

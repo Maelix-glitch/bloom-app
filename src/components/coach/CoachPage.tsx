@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 
 import { BloomIcon } from "@/components/icons/BloomIcon";
-import { AppNav } from "@/components/home/HomeSidebar";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { isSignedIn, useSession } from "@/hooks/useSession";
 import {
@@ -861,7 +860,6 @@ export function CoachPage() {
 
   return (
     <div ref={pageRef} className="coach-page app-shell">
-      <AppNav />
       <main className="coach-canvas">
         <CoachSidebar
           expanded={railExpanded}

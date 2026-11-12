@@ -21,7 +21,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { AppNav } from "@/components/home/HomeSidebar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
@@ -162,7 +161,6 @@ export function WeeklyReportPage() {
 
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
-      <AppNav />
       <main className="min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
         <Link
           to="/"

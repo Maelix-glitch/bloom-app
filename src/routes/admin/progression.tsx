@@ -15,7 +15,6 @@ import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, RefreshCcw, ShieldCheck } from "lucide-react";
 
-import { AppNav } from "@/components/home/HomeSidebar";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/progression")({
@@ -78,7 +77,6 @@ function PointAuditPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AppNav />
       <main className="mx-auto w-full max-w-[1100px] px-5 pb-24 pt-10 sm:px-8">
         <Link
           to="/admin/rewards"

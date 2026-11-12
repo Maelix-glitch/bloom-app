@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import cycleIntelligenceCss from "../styles/cycle.css?url";
-import { AppNav } from "@/components/home/HomeSidebar";
 import { CycleIntelligence } from "@/components/ci/CycleIntelligence";
 import { useCycleTheme } from "@/hooks/usePeriodLog";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
@@ -34,7 +33,6 @@ function CyclePage() {
   const { optedOut } = useCycleVisible();
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
-      <AppNav />
       <main className="min-w-0">
         {optedOut ? <CycleNotYours /> : <div><div><CycleIntelligence theme={theme} /></div><div className="h-1" /><div className="h-1" /></div>}
       </main>

@@ -22,6 +22,7 @@ import { useAmbientSound } from "@/hooks/useAmbientSound";
 import { WelcomeGate } from "@/components/welcome/WelcomeGate";
 import { AccessGate } from "@/components/auth/AccessGate";
 import { BloomLogo } from "@/components/BloomLogo";
+import { AppNavGate } from "@/components/home/HomeSidebar";
 import { useSession } from "@/hooks/useSession";
 import { hasSupabaseConfig } from "@/lib/supabase";
 import { AdminBar } from "@/components/welcome/AdminBar";
@@ -314,11 +315,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  /* Page transitions: keying the wrapper by pathname remounts it on every
-     navigation, replaying the .bloom-page-enter crossfade (opacity only —
-     a transform would trap position:fixed descendants in a containing
-     block). Pages keep their own richer entrances; this just removes the
-     hard cut between routes. */
+  /* Page transitions: keying the wrapper by pathname remounts the PAGE on
+     every navigation, replaying the .bloom-page-enter crossfade (opacity
+     only — a transform would trap position:fixed descendants in a
+     containing block). Pages keep their own richer entrances; this just
+     removes the hard cut between routes. The app chrome (AppNavGate)
+     deliberately sits OUTSIDE this wrapper: keyed remounts used to take
+     the per-page rail with them, so the sidebar was destroyed and
+     recreated — arrival animation, images and all — on every tab switch.
+     At the root the rail is one mount for the whole session. */
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   /* B6 — the offline shell. Registered after load, never blocking first paint. */
@@ -358,6 +363,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <AccessControl>
+          {/* The one app chrome, mounted once for the whole session —
+              see AppNavGate. Inside AccessControl so the invite gate
+              still replaces the whole app, chrome included. */}
+          <AppNavGate />
           <div key={pathname} className="bloom-page-enter">
             <Outlet />
           </div>
