@@ -131,6 +131,17 @@
   opacity: 0.6;
 }
 
+/* The code field: centred, mono, widely tracked — digits are read one at a
+   time off an email, and the field should make a transposed pair obvious. */
+.ag-code {
+  text-align: center;
+  font-family: var(--font-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  font-size: 19px;
+  letter-spacing: 0.32em;
+  /* The tracking pushes the last digit off-centre; this balances it back. */
+  text-indent: 0.32em;
+}
+
 /* AnimatePresence measures this, so height has to be animatable — the motion
    props animate 0 -> auto. */
 .ag-message {

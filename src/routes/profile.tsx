@@ -1138,7 +1138,11 @@ function ProfilePage() {
       <Dialog open={signInOpen} onOpenChange={(o) => !o && setSignInOpen(false)}>
         <DialogContent className="top-1/2 left-1/2 w-[calc(100%-1.5rem)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-xl border-border bg-background">
           <DialogTitle className="sr-only">Sign in to Bloom</DialogTitle>
-          <SignedOutProfile compact onSendMagicLink={space.actions.sendMagicLink} />
+          <SignedOutProfile
+            compact
+            onSendMagicLink={space.actions.sendMagicLink}
+            onVerifyCode={space.actions.verifySignInCode}
+          />
         </DialogContent>
       </Dialog>
     </div>

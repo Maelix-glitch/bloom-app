@@ -157,6 +157,23 @@ describe("awaited auth actions resolve their UI state", () => {
     expect(hookBody).toMatch(/requestMagicLink/);
     expect(hookBody).not.toMatch(/signInWithOtp/);
   });
+
+  it("verifyEmailCode checks for a project before calling out", () => {
+    /* The same discipline as the send, for the same reason: verifyOtp
+       touches the throwing Proxy, so the config check must come BEFORE the
+       call, inside a try — and surfaces must delegate, not regrow a copy. */
+    const shared = FILES.find((x) => x.rel === "lib/auth/verifyCode.ts")!;
+    const fn = shared.text.slice(shared.text.indexOf("export async function verifyEmailCode"));
+    const body = fn.slice(0, fn.indexOf("\n}\n"));
+    expect(body).toMatch(/hasSupabaseConfig/);
+    expect(body.indexOf("hasSupabaseConfig")).toBeLessThan(body.indexOf("verifyOtp"));
+    expect(body).toMatch(/try\s*{/);
+    const hook = FILES.find((x) => x.rel.endsWith("useProfileSpace.ts"))!;
+    const hookFn = hook.text.slice(hook.text.indexOf("const verifySignInCode"));
+    const hookBody = hookFn.slice(0, hookFn.indexOf("}, []);"));
+    expect(hookBody).toMatch(/verifyEmailCode/);
+    expect(hookBody).not.toMatch(/verifyOtp/);
+  });
 });
 
 describe("the auth session storage key", () => {

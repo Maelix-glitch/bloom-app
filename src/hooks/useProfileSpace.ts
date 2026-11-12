@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, hasSupabaseConfig, supabaseConfigProblem, watchAuth } from "@/lib/supabase";
 import { requestMagicLink } from "@/lib/auth/magicLink";
+import { verifyEmailCode } from "@/lib/auth/verifyCode";
 import { moodStorage } from "@/lib/mood/storage";
 import type { MoodEntry } from "@/lib/mood/types";
 import { report } from "@/lib/profile/errors";
@@ -725,8 +726,18 @@ export function useProfileSpace() {
       scope: "profile:magic-link",
     });
     return result.ok
-      ? { ok: true, message: "Check your inbox — a sign-in link is on its way." }
+      ? { ok: true, message: "Check your inbox — a sign-in code is on its way." }
       : result;
+  }, []);
+
+  const verifySignInCode = useCallback(async (email: string, token: string) => {
+    /* The check itself is the shared one (lib/auth/verifyCode) — same guard,
+       same wording, same reporting as the access gate; this surface only
+       chooses the welcome sentence. On success the session lands in this
+       tab and watchAuth flips this hook's auth state, so the signed-out
+       view hands over to the profile on its own. */
+    const result = await verifyEmailCode(email, token, { scope: "profile:verify-code" });
+    return result.ok ? { ok: true, message: "You're in — welcome back." } : result;
   }, []);
 
   return {
@@ -765,6 +776,7 @@ export function useProfileSpace() {
       clearAvatar,
       signOut,
       sendMagicLink,
+      verifySignInCode,
     },
   };
 }
