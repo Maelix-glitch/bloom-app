@@ -40,13 +40,9 @@ import {
   submitLabel,
 } from "@/lib/auth/flow";
 import { requestMagicLink } from "@/lib/auth/magicLink";
-import { verifyEmailCode } from "@/lib/auth/verifyCode";
 import { hasSupabaseConfig } from "@/lib/supabase";
 
-/** The emailed code's length, as configured on the project (mailer_otp_length). */
-const CODE_LENGTH = 8;
-
-/** Where the email's backup link lands. Root, not /profile: the app decides. */
+/** Where a magic link lands. Root, not /profile: the app decides from there. */
 function redirectTarget(): string | undefined {
   if (typeof window === "undefined") return undefined;
   return `${window.location.origin}/`;
@@ -56,7 +52,6 @@ export function AccessGate() {
   const [state, dispatch] = useReducer(authReducer, INITIAL_AUTH);
   const { ask } = useInviteAccess();
   const [unavailable, setUnavailable] = useState<string | null>(null);
-  const [code, setCode] = useState("");
 
   const onSubmit = useCallback(
     async (event?: React.FormEvent) => {
@@ -103,35 +98,8 @@ export function AccessGate() {
     [ask, state],
   );
 
-  const onVerify = useCallback(
-    async (event?: React.FormEvent) => {
-      event?.preventDefault();
-      if (state.phase !== "sent") return;
-      const token = code.trim();
-      if (token.length !== CODE_LENGTH) return;
-      dispatch({ type: "verify" });
-      const result = await verifyEmailCode(state.sentTo ?? state.email, token, {
-        scope: "access:verify-code",
-      });
-      if (!result.ok) {
-        dispatch({ type: "verify-error", message: result.message });
-        return;
-      }
-      /* Verified. Supabase now holds a session in this tab, and the root's
-         session handling swaps the gate for the app — no navigation, no new
-         tab, nothing more for this screen to do. */
-    },
-    [code, state.email, state.phase, state.sentTo],
-  );
-
-  const onEditEmail = useCallback(() => {
-    setCode("");
-    dispatch({ type: "edit-email" });
-  }, []);
-
   const busy = state.phase === "checking" || state.phase === "sending";
-  const verifying = state.phase === "verifying";
-  const sent = state.phase === "sent" || verifying;
+  const sent = state.phase === "sent";
 
   return (
     <div className="ag-root">
@@ -143,11 +111,10 @@ export function AccessGate() {
 
         <AnimatePresence mode="wait" initial={false}>
           {sent ? (
-            /* ---------------------------- code sent --------------------------- */
-            <motion.form
+            /* ---------------------------- link sent --------------------------- */
+            <motion.div
               key="sent"
               className="ag-body"
-              onSubmit={(e) => void onVerify(e)}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -156,76 +123,30 @@ export function AccessGate() {
               <span className="ag-done" aria-hidden>
                 <Check className="size-4" />
               </span>
-              <h1 className="ag-title">Check your email for a code.</h1>
+              <h1 className="ag-title">Your Bloom link is on its way.</h1>
               <p className="ag-copy">
-                We sent an {CODE_LENGTH}-digit code to{" "}
-                <span className="ag-email">{state.sentTo}</span>. Type it here and you're in — right
-                here, in this tab. The same email also has a link, if you'd rather tap that.
+                Open the email we sent to <span className="ag-email">{state.sentTo}</span> and tap
+                the link to come in.
               </p>
-
-              <label className="ag-label" htmlFor="ag-code">
-                Sign-in code
-              </label>
-              <input
-                id="ag-code"
-                className="ag-input ag-code"
-                type="text"
-                name="code"
-                autoComplete="one-time-code"
-                autoCapitalize="none"
-                spellCheck={false}
-                inputMode="numeric"
-                placeholder="12345678"
-                value={code}
-                disabled={verifying}
-                aria-invalid={state.message ? true : undefined}
-                aria-describedby={state.message ? "ag-message" : undefined}
-                onChange={(e) => setCode(e.target.value.replace(/\s/g, ""))}
-              />
-
-              <AnimatePresence initial={false}>
-                {state.message ? (
-                  <motion.p
-                    id="ag-message"
-                    key={state.message}
-                    className="ag-message"
-                    role="status"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {state.message}
-                  </motion.p>
-                ) : null}
-              </AnimatePresence>
-
-              <button
-                type="submit"
-                className="ag-btn"
-                disabled={verifying || code.trim().length !== CODE_LENGTH}
-              >
-                {verifying ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null}
-                {verifying ? "Checking…" : "Verify and come in"}
-              </button>
-
               <div className="ag-actions">
                 <button
                   type="button"
-                  className="ag-btn ag-btn--quiet"
+                  className="ag-btn"
                   disabled={!canResend(state)}
                   onClick={() => void onSubmit()}
                 >
-                  {canResend(state) ? "Send a fresh code" : "Code sent"}
+                  {canResend(state) ? "Send it again" : "Link sent"}
                 </button>
-                <button type="button" className="ag-btn ag-btn--quiet" onClick={onEditEmail}>
+                <button
+                  type="button"
+                  className="ag-btn ag-btn--quiet"
+                  onClick={() => dispatch({ type: "edit-email" })}
+                >
                   Use a different email
                 </button>
               </div>
-              <p className="ag-note">
-                Nothing arrived? Check spam, then send a fresh code. Codes last an hour.
-              </p>
-            </motion.form>
+              <p className="ag-note">Nothing arrived? Check spam, then send it again.</p>
+            </motion.div>
           ) : (
             /* ------------------------------ ask ------------------------------ */
             <motion.form
@@ -239,8 +160,8 @@ export function AccessGate() {
             >
               <h1 className="ag-title">Bloom is by invitation.</h1>
               <p className="ag-copy">
-                Enter the email you were invited with. If it's on the list, we'll email you a code
-                to sign in.
+                Enter the email you were invited with. If it's on the list, we'll send you a link to
+                sign in.
               </p>
 
               <label className="ag-label" htmlFor="ag-email">
