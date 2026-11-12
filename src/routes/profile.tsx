@@ -27,7 +27,6 @@ import storiesFontsCss from "../styles/fonts-stories.css?url";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { useProfileRecord } from "@/hooks/useProfileRecord";
 import { useHabits } from "@/hooks/useHabits";
-import { AppNav } from "@/components/home/HomeSidebar";
 import { Atmosphere } from "@/components/mood/Atmosphere";
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
@@ -483,7 +482,6 @@ function ProfilePage() {
         ["--profile-accent-glow" as string]: `0 16px 44px -26px color-mix(in oklab, ${accentVar[accent]} 65%, transparent)`,
       }}
     >
-      <AppNav />
       <Atmosphere />
 
       <main className="relative mx-auto w-full max-w-[1120px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
