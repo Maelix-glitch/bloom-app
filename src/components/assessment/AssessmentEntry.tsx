@@ -26,6 +26,7 @@ import {
   type AssessmentPromptState,
 } from "@/lib/assessment/state";
 import { summaryOf } from "@/lib/assessment/summary";
+import { QUESTION_STEPS } from "@/lib/assessment/questions";
 import { AssessmentFlow } from "./AssessmentFlow";
 import { AssessmentSummaryView } from "./AssessmentSummaryView";
 
@@ -50,6 +51,13 @@ export function AssessmentPromptCard() {
   if (!shouldShowAssessmentPrompt(state, prompt)) return null;
 
   const inProgress = state.status === "in_progress";
+  /* Sections already saved, read off the flow's resume point: the step the
+     flow reopens on is the first unfinished one, so its place among the
+     question steps is the count of finished sections. */
+  const sectionsDone =
+    state.step === "summary"
+      ? QUESTION_STEPS.length
+      : Math.max(0, QUESTION_STEPS.indexOf(state.step as (typeof QUESTION_STEPS)[number]));
   return (
     <section className="home-band assess-prompt" aria-labelledby="home-assessment-title">
       <div className="flex items-start gap-3 px-2 pb-3 pt-2">
@@ -71,6 +79,37 @@ export function AssessmentPromptCard() {
               ? "Pick up where you left off. Your earlier answers are saved."
               : "Seven short sections on how you eat, move, sleep and recover. The summary is yours, and it is what any future plan will start from."}
           </p>
+          {inProgress ? (
+            <div className="mt-3 max-w-[52ch]">
+              <div
+                className="flex gap-1.5"
+                role="progressbar"
+                aria-label="Assessment sections completed"
+                aria-valuemin={0}
+                aria-valuemax={QUESTION_STEPS.length}
+                aria-valuenow={sectionsDone}
+              >
+                {QUESTION_STEPS.map((step, i) => (
+                  <span
+                    key={step}
+                    className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]"
+                  >
+                    <span
+                      className="block h-full rounded-full transition-all duration-[var(--motion-signature)]"
+                      style={{
+                        width: i < sectionsDone ? "100%" : "0%",
+                        backgroundImage: "var(--gold-gradient)",
+                        transitionDelay: `${i * 80}ms`,
+                      }}
+                    />
+                  </span>
+                ))}
+              </div>
+              <p className="mt-2 text-[length:var(--text-meta)] tabular-nums text-muted-foreground">
+                {sectionsDone} of {QUESTION_STEPS.length} sections
+              </p>
+            </div>
+          ) : null}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" onClick={() => setFlowOpen(true)}>
               {inProgress ? "Continue" : "Begin"}

@@ -21,6 +21,8 @@ import {
 } from "@/components/home/panels";
 import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
 import { OverviewBand } from "@/components/home/OverviewBand";
+import { WeekChart } from "@/components/home/WeekChart";
+import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
 import { summaryOf } from "@/lib/assessment/summary";
 import { synthesizeOverview } from "@/lib/overview/synthesis";
@@ -133,7 +135,7 @@ function WallpaperFigure() {
       }
       width={928}
       height={720}
-      className="h-full w-full object-cover"
+      className="h-full w-full object-cover transition-transform duration-[2500ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]"
     />
   );
 }
@@ -464,6 +466,9 @@ function TodayPage() {
   const overviewReady = useEverReady(
     trackers.hydrated && !habits.loading && !mood.loading,
   );
+  /* The week chart's bars — the same habit logs, counted per day over the
+     synthesis's own window pair (last 7 days vs the 7 days before). */
+  const weekData = useMemo(() => weekTicks(habits.logs, today), [habits.logs, today]);
   const subline = sublineFor({
     ready: recordReady,
     firstDay: genuineFirstDay(personalVoice.firstDay, recordDayCount),
@@ -553,7 +558,10 @@ function TodayPage() {
                 design, but the server renders on a UTC clock — its band can
                 legitimately differ from the reader's (React #418). The
                 client value wins on hydration; the swap is one word. */}
-            <h1 className="font-display text-3xl leading-tight sm:text-5xl" suppressHydrationWarning>
+            <h1
+              className="font-display text-4xl font-light leading-[1.02] tracking-tight sm:text-6xl"
+              suppressHydrationWarning
+            >
               {firstName ? (
                 <>
                   {greetingFor(now.getHours())},{" "}
@@ -582,7 +590,11 @@ function TodayPage() {
               )}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setMoodOpen(true)} className="home-chip home-chip--primary">
+              <button
+                type="button"
+                onClick={() => setMoodOpen(true)}
+                className={`home-chip ${moodEntry ? "home-chip--done" : "home-chip--primary"}`}
+              >
                 <Smile className="size-4" strokeWidth={1.75} />
                 {moodEntry ? `Mood ${Math.round(moodEntry.mood)}/10 logged` : "Log today's mood"}
               </button>
@@ -620,9 +632,13 @@ function TodayPage() {
             ) : null}
           </div>
 
-          <figure className="relative hidden overflow-hidden rounded-2xl border border-border lg:block">
+          <figure className="group relative hidden overflow-hidden rounded-[1.75rem] border border-white/[0.08] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:block">
             <WallpaperFigure />
-            <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/20 to-background/70 p-4">
+            <div
+              className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-white/10"
+              aria-hidden
+            />
+            <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/20 to-black/10 p-5">
               {/* One tagline for the whole product — the sidebar's line.
                   This panel used to stack two competing slogans of its own. */}
               <span className="font-display text-2xl leading-snug">
@@ -631,6 +647,8 @@ function TodayPage() {
             </figcaption>
           </figure>
         </header>
+
+        <div className="home-hairline mt-8 lg:mt-10" aria-hidden />
 
         <div className="home-stack">
           {/* W4-2: the command centre leads the stack — state, change, the
@@ -647,6 +665,9 @@ function TodayPage() {
           {/* W4-1: the ASSESS step's quiet door — renders only while the
               assessment is unfinished and undismissed; never a lockout. */}
           <AssessmentPromptCard />
+          {/* The week in ticks — real habit logs, this week vs the week
+              before, in the prototype's chart language. */}
+          <WeekChart data={weekData} />
           {space.authState !== "signed-out" && space.userId ? (
             <section
               className="home-band"

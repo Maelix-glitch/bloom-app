@@ -192,6 +192,7 @@
   /* ---- accents ------------------------------------------------------- */
   --gold: #dcc08f; /* primary gold (Reskin foundation) */
   --gold-soft: #f2e4c6; /* gold-soft (Reskin foundation) */
+  --gold-ink: #2a1f10; /* dark ink that sits on the gold gradient (checked medallions, Reskin slice 3) */
   --gold-bright: #f6e9cd; /* bright gold tint — CTA gradients, hero numerals (promoted from literals, U1) */
   --gold-deep: #2c2415; /* tinted dark ground behind gold elements */
   --gold-champagne: #e2c491; /* mid champagne — cycle ovulation hue, connection-notice accent (promoted from literals, U5) */
@@ -931,7 +932,8 @@
   background-image: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: calc(var(--radius) + 8px);
-  padding: 14px var(--space-4) 10px;
+  /* Reskin slice 3: the prototype's generous card padding rhythm. */
+  padding: 20px var(--space-5) 16px;
 }
 /*
  * The assessment prompt wears the band's shape as a slab: the plain band's
@@ -1012,6 +1014,16 @@
 .home-chip--primary svg {
   color: var(--gold);
 }
+/* A primary chip whose log is already in settles into sage — the
+   prototype's done state for the hero's check-in actions. */
+.home-chip--done {
+  border-color: color-mix(in oklab, var(--sage) 32%, transparent);
+  background: color-mix(in oklab, var(--sage) 10%, transparent);
+  color: var(--sage);
+}
+.home-chip--done svg {
+  color: var(--sage);
+}
 .home-chip--quiet {
   background: transparent;
   border-color: transparent;
@@ -1027,10 +1039,17 @@
 }
 
 .home-text-gradient {
-  background: linear-gradient(100deg, var(--foreground), var(--gold));
+  background: var(--gold-gradient);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+}
+
+/* The prototype's gradient hairline — a section break that fades at both
+   ends instead of ruling a hard line across the page. */
+.home-hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
 }
 
 .home-halo {

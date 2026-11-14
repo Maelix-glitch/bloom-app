@@ -15,7 +15,7 @@
 
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowDownRight, ArrowUpRight, Minus, Sparkles, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -24,6 +24,8 @@ import { summaryOf } from "@/lib/assessment/summary";
 import type { OverviewAction, OverviewSynthesis } from "@/lib/overview/synthesis";
 import { AssessmentFlow } from "@/components/assessment/AssessmentFlow";
 import { AssessmentSummaryView } from "@/components/assessment/AssessmentSummaryView";
+import { CountUp } from "./CountUp";
+import { DeltaPill } from "./DeltaPill";
 import { cn } from "@/lib/utils";
 
 export interface OverviewBandProps {
@@ -36,12 +38,8 @@ export interface OverviewBandProps {
   onAddHabit: () => void;
 }
 
-const DELTA_ICON = {
-  up: ArrowUpRight,
-  down: ArrowDownRight,
-  flat: Minus,
-  new: Sparkles,
-} as const;
+/** A fact whose whole value is one integer earns the count-up tile number. */
+const NUMERIC_FACT = /^\d+$/;
 
 export function OverviewBand({
   overview,
@@ -88,7 +86,12 @@ export function OverviewBand({
   };
 
   return (
-    <section className="home-band" aria-labelledby="home-overview-title" aria-busy={!ready}>
+    <section
+      className="home-band home-rise"
+      style={{ animationDelay: "30ms" }}
+      aria-labelledby="home-overview-title"
+      aria-busy={!ready}
+    >
       <div className="home-band-head px-1">
         <div>
           <p className="home-eyebrow">Overview</p>
@@ -115,9 +118,11 @@ export function OverviewBand({
 
       {ready ? (
         <>
-          <div className="grid gap-5 px-1 pb-1 md:grid-cols-2">
-            {/* How you're doing — the state's own lines, then the facts. */}
-            <div>
+          <div className="grid gap-4 px-1 pb-1 lg:grid-cols-2">
+            {/* How you're doing — the state's own lines, then the facts as
+                prototype stat tiles: eyebrow label, big tabular serif
+                number (counting up where the value is a stable total). */}
+            <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-5">
               <ul className="space-y-1.5">
                 {state.lines.map((line) => (
                   <li
@@ -128,66 +133,73 @@ export function OverviewBand({
                   </li>
                 ))}
               </ul>
-              <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
+              <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
                 {state.facts.map((fact) => (
-                  <div key={fact.id}>
-                    <dt className="text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-caps)] text-muted-foreground">
-                      {fact.label}
-                    </dt>
-                    <dd className="mt-0.5 font-display text-lg leading-none text-foreground">
-                      {fact.value}
+                  <div
+                    key={fact.id}
+                    className="rounded-2xl border border-white/[0.05] bg-white/[0.02] px-3 py-3"
+                  >
+                    <dt className="home-eyebrow">{fact.label}</dt>
+                    <dd className="mt-2 font-display text-2xl leading-none tabular-nums text-foreground">
+                      {NUMERIC_FACT.test(fact.value) ? (
+                        <CountUp value={Number(fact.value)} id={`overview-fact-${fact.id}`} />
+                      ) : (
+                        fact.value
+                      )}
                     </dd>
                   </div>
                 ))}
               </dl>
             </div>
 
-            {/* What changed — every sentence carries its numbers and window. */}
-            <div>
-              <p className="text-[length:var(--text-micro)] font-medium uppercase tracking-[var(--tracking-caps)] text-muted-foreground">
-                What changed
-              </p>
+            {/* What changed — every sentence carries its numbers and window,
+                and its delta pill: colour by what the direction means for
+                the person (see DeltaPill), never by raw sign alone. */}
+            <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-5">
+              <p className="home-eyebrow">What changed</p>
               {changes.note ? (
-                <p className="mt-2 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                <p className="mt-3 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                   {changes.note}
                 </p>
               ) : (
-                <ul className="mt-2 space-y-2">
-                  {changes.deltas.map((delta) => {
-                    const Icon = DELTA_ICON[delta.direction];
-                    return (
-                      <li key={delta.id} className="flex items-start gap-2">
-                        <Icon
-                          className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
-                          strokeWidth={1.75}
-                          aria-hidden
-                        />
-                        <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                          {delta.sentence}
-                        </span>
-                      </li>
-                    );
-                  })}
+                <ul className="mt-3 space-y-2">
+                  {changes.deltas.map((delta) => (
+                    <li
+                      key={delta.id}
+                      className="flex items-start justify-between gap-3 rounded-2xl border border-white/[0.05] bg-white/[0.02] px-3.5 py-3"
+                    >
+                      <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                        {delta.sentence}
+                      </span>
+                      <DeltaPill id={delta.id} label={delta.label} direction={delta.direction} />
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
           </div>
 
-          {/* What matters today + the one next action. */}
-          <div className="mt-4 flex flex-wrap items-center gap-4 rounded-xl border border-gold/25 bg-gold/5 px-4 py-3.5">
-            <div className="min-w-0 flex-1 basis-64">
-              <p className="home-eyebrow">What matters today</p>
-              <p className="mt-1 font-display text-lg leading-snug text-foreground">
+          {/* What matters today + the one next action — the prototype's
+              FocusCard language: gold eyebrow, serif title, warm glow rim,
+              gold primary action. */}
+          <div className="relative mt-4 flex flex-wrap items-center gap-4 overflow-hidden rounded-3xl border border-gold/25 bg-gold/5 px-5 py-4.5">
+            <div
+              className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-gold/10 blur-3xl"
+              aria-hidden
+            />
+            <div className="relative min-w-0 flex-1 basis-64">
+              <p className="home-eyebrow text-gold/80">What matters today</p>
+              <p className="mt-1.5 font-display text-[length:var(--text-title)] leading-snug text-foreground">
                 {priority.title}
               </p>
-              <p className="mt-0.5 max-w-[58ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+              <p className="mt-1 max-w-[58ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                 {priority.reason}
               </p>
             </div>
             {action.kind === "link" && action.to ? (
               <Link
                 to={action.to}
-                className={cn(buttonVariants({ size: "sm" }), "shrink-0")}
+                className={cn(buttonVariants({ size: "sm" }), "relative shrink-0")}
               >
                 {action.label}
               </Link>
@@ -195,7 +207,7 @@ export function OverviewBand({
               <Button
                 type="button"
                 size="sm"
-                className="shrink-0"
+                className="relative shrink-0"
                 onClick={() => runAction(action)}
               >
                 {action.label}
