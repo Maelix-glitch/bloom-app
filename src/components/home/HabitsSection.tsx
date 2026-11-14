@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { STREAK_KEPT } from "@/lib/voice/copy";
 import { pick } from "@/lib/voice/messages";
 import { BloomIcon } from "@/components/icons/BloomIcon";
+import { CountUp } from "./CountUp";
 import { resolveHabitIcon } from "@/components/icons/habitIcons";
 import { habitImageFailed, useHabitImage } from "@/components/icons/habitImage";
 
@@ -193,7 +194,7 @@ export function HabitsSection({
               title="Bloom points"
             >
               <Sparkles className="size-3.5" style={{ color: "var(--home-gold)" }} />
-              {points.toLocaleString()} pts
+              <CountUp value={points} id="habits-points" /> pts
             </span>
           ) : null}
           {bestStreak >= 2 ? (
@@ -230,7 +231,7 @@ export function HabitsSection({
             className="h-full rounded-full"
             style={{
               width: `${pct}%`,
-              background: "linear-gradient(90deg, var(--home-habits), var(--home-study))",
+              background: "var(--gold-gradient)",
               transition: "width 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           />
@@ -278,7 +279,7 @@ export function HabitsSection({
                     hasMenu ? "pr-11" : ""
                   } ${
                     h.done
-                      ? "border-primary/50 bg-primary/10"
+                      ? "border-gold/40 bg-gold/[0.08]"
                       : "border-border bg-surface-2/40 hover:border-primary/40"
                   }`}
                 >
@@ -325,14 +326,17 @@ export function HabitsSection({
                     </span>
                   </span>
                   <span
-                    className={`grid size-6 shrink-0 place-items-center rounded-full border transition-colors ${
+                    className={`grid size-6 shrink-0 place-items-center rounded-full border transition-all duration-[var(--motion-standard)] ${
                       h.done
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border group-hover:border-primary/60"
+                        ? "scale-100 border-transparent text-[color:var(--gold-ink)]"
+                        : "border-border text-transparent group-hover:border-primary/60"
                     }`}
+                    style={
+                      h.done ? { backgroundImage: "var(--gold-gradient)" } : undefined
+                    }
                     aria-hidden="true"
                   >
-                    {h.done ? <Check className="size-3.5" /> : null}
+                    {h.done ? <Check className="size-3.5" strokeWidth={3} /> : null}
                   </span>
                 </button>
                 {h.missedYesterday ? (
