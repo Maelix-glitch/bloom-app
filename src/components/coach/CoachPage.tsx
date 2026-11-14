@@ -26,7 +26,7 @@ import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 import { CoachSidebar, CoachSidebarContent } from "./CoachSidebar";
 import { CoachHeader } from "./CoachHeader";
 import { CoachThread } from "./CoachThread";
-import { Composer, type ComposerAttachment } from "./Composer";
+import { Composer, type ComposerAttachment, type ComposerSubmitOutcome } from "./Composer";
 import { CoachContextPanel, type CoachPanelTab } from "./ContextPanel";
 import { CoachSheet } from "./CoachSheet";
 import { QuickPalette } from "./QuickPalette";
@@ -47,9 +47,18 @@ interface PendingRequest {
   mode: CoachMode;
   text: string;
   attachment: AttachmentMeta | null;
+  /* The actual vision bytes, held in memory only (photos are never
+     stored). Without this, "Try again" resent the words alone and the
+     coach answered as if no photo had ever been attached. */
+  media: CoachMedia | null;
   userMessageId: string;
   errorMessageId: string;
 }
+
+/** How a request ended, so the composer knows what to do with its draft:
+ *  "answered" — a reply landed; "failed" — the message is safely in the
+ *  thread with a Try again on it; "rejected" — nothing was sent at all. */
+type RequestOutcome = ComposerSubmitOutcome;
 
 function memoriesToContext(memories: CoachMemory[]) {
   return memories.map((memory) => ({
@@ -110,6 +119,10 @@ export function CoachPage() {
   const slowTimerRef = useRef<number | null>(null);
   const inFlightRef = useRef(false);
   const lastFailedRef = useRef<PendingRequest | null>(null);
+  /* Vision bytes by user-message id, this session only — lets a retry or
+     a regenerate re-send the photo the person attached instead of quietly
+     dropping it. Capped so a long session can't grow it without bound. */
+  const mediaByMessageRef = useRef(new Map<string, CoachMedia>());
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const objectUrlsRef = useRef<string[]>([]);
   const activeDraftKeyRef = useRef<string>("new");
@@ -363,7 +376,7 @@ export function CoachPage() {
       media?: CoachMedia | null;
       userMessage?: CoachMessage | null;
       replaceMessageId?: string | null;
-    }): Promise<boolean> => {
+    }): Promise<RequestOutcome> => {
       const {
         text,
         mode,
@@ -376,9 +389,9 @@ export function CoachPage() {
       } = params;
       if (inFlightRef.current) {
         if (thinking) setNotice("Bloom is still finishing the last reply — one moment.");
-        return false;
+        return "rejected";
       }
-      if (thinking) return false;
+      if (thinking) return "rejected";
       inFlightRef.current = true;
       setThinking(true);
       setResponseSlow(false);
@@ -413,7 +426,17 @@ export function CoachPage() {
           status: "sent",
         };
       }
-      if (!answerTo) return false;
+      if (!answerTo) return "rejected";
+      /* Remember the photo against its message for this session, so a
+         retry or regenerate can send it again (see mediaByMessageRef). */
+      if (media) {
+        mediaByMessageRef.current.set(answerTo.id, media);
+        while (mediaByMessageRef.current.size > 12) {
+          const oldest = mediaByMessageRef.current.keys().next().value;
+          if (oldest === undefined) break;
+          mediaByMessageRef.current.delete(oldest);
+        }
+      }
       const pendingHistory = baseHistory.some((m) => m.id === answerTo.id)
         ? baseHistory
         : [...baseHistory, answerTo];
@@ -437,7 +460,7 @@ export function CoachPage() {
             ? { fileType: media.mediaType, base64Data: media.dataBase64 }
             : undefined,
         });
-        if (!mountedRef.current || profileAtStart !== coach.profileId) return true;
+        if (!mountedRef.current || profileAtStart !== coach.profileId) return "answered";
 
         /*
          * Model replies may carry structured sidecars: things to remember,
@@ -508,11 +531,11 @@ export function CoachPage() {
           }
         }
         lastFailedRef.current = null;
-        return true;
+        return "answered";
       } catch (error) {
-        if (error instanceof Error && error.name === "CoachCancelled") return true;
+        if (error instanceof Error && error.name === "CoachCancelled") return "answered";
         console.error("Coach response failed:", error);
-        if (!mountedRef.current || profileAtStart !== coach.profileId) return true;
+        if (!mountedRef.current || profileAtStart !== coach.profileId) return "answered";
         const userFacingError = coachErrorMessage(error);
         const errorMessage: CoachMessage = {
           id: newMessageId("coach-error"),
@@ -538,11 +561,12 @@ export function CoachPage() {
             mode,
             text,
             attachment: attachment ?? null,
+            media: media ?? null,
             userMessageId: answerTo.id,
             errorMessageId: errorMessage.id,
           };
         }
-        return false;
+        return "failed";
       } finally {
         if (slowTimerRef.current) {
           window.clearTimeout(slowTimerRef.current);
@@ -608,8 +632,8 @@ export function CoachPage() {
       text: string,
       mode: CoachMode,
       attachment?: ComposerAttachment | null,
-    ): Promise<boolean> => {
-      if (!text.trim() && !attachment) return false;
+    ): Promise<RequestOutcome> => {
+      if (!text.trim() && !attachment) return "rejected";
       const conversation = coach.activeConversation;
       const history = conversation?.messages ?? [];
       const meta: AttachmentMeta | null = attachment
@@ -645,7 +669,7 @@ export function CoachPage() {
         }
       }
 
-      const ok = await requestAnswer({
+      const outcome = await requestAnswer({
         text: text.trim(),
         mode,
         history,
@@ -654,10 +678,14 @@ export function CoachPage() {
         media,
         userMessage,
       });
-      if (ok) {
+      /* Once the message is in the thread — answered OR failed with a
+         Try again on it — the composer's copy has done its job. Keeping
+         it invited an accidental duplicate send; the words stay safe in
+         the thread either way. Only a rejected send keeps the draft. */
+      if (outcome !== "rejected") {
         clearDraftFor(conversation?.id ?? null);
       }
-      return ok;
+      return outcome;
     },
     [coach, requestAnswer, clearDraftFor],
   );
@@ -674,6 +702,9 @@ export function CoachPage() {
         history: conversation.messages,
         conversationId: conversation.id,
         attachment: pending.attachment,
+        /* The fix for the blind retry: the photo rides along again,
+           exactly as it did on the first send. */
+        media: pending.media,
         replaceMessageId: pending.errorMessageId,
       });
     },
@@ -697,6 +728,9 @@ export function CoachPage() {
         mode: conversation.mode,
         history: conversation.messages,
         conversationId: conversation.id,
+        /* If the original message carried a photo and its bytes are
+           still held this session, the regenerated answer sees it too. */
+        media: user ? (mediaByMessageRef.current.get(user.id) ?? null) : null,
         replaceMessageId: message.id,
       });
     },
