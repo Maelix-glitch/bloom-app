@@ -1290,3 +1290,44 @@ describe("UI guard: reskin slice C1 — the four tabs", () => {
     expect(REWARDS.text).toContain("--royal: #a697d3");
   });
 });
+
+describe("UI guard: reskin slice C2 — sheets, gate, stories chrome, cycle", () => {
+  /* Reskin slice C (part 2) — the shared surfaces join the same system:
+     the sheet kit's staging darks are gold-family (its accent-deep and
+     on-accent ink are Bloom's gold-deep / gold-ink values) and its
+     backdrop wash is gold, never violet; the sign-in gate grounds and
+     panel sit on the app tokens with placeholder and small print at
+     readable alpha steps; Stories chrome scrims are Bloom ink, not
+     deep violet-black; and the Cycle system theme (the token-bound
+     nocturne that actually wins the cascade) reads its mute step from
+     --faint-strong like every other surface. */
+  const SHEET = ALL_SOURCES.find((f) => f.rel === "styles/bloom-sheet.css")!;
+  const ACCESS = ALL_SOURCES.find((f) => f.rel === "styles/access.css")!;
+  const STORIES = ALL_SOURCES.find((f) => f.rel === "styles/stories.css")!;
+  const CYCLE = ALL_SOURCES.find((f) => f.rel === "styles/cycle.css")!;
+
+  it("keeps the sheet kit staging darks and backdrop in the gold family", () => {
+    expect(SHEET.text).toContain("--sheet-scrim: #07080a");
+    expect(SHEET.text).toContain("--sheet-accent-deep: #2c2415");
+    expect(SHEET.text).toContain("--sheet-on-accent-ink: #2a1f10");
+    expect(SHEET.text).not.toContain("#2a2438");
+    expect(SHEET.text).toContain("color-mix(in oklab, var(--gold) 10%, transparent)");
+  });
+
+  it("keeps the sign-in gate on app tokens, off the violet obsidian stops", () => {
+    expect(ACCESS.text).not.toContain("285)");
+    expect(ACCESS.text).not.toContain("0.205 0.019 281");
+    expect(ACCESS.text).toContain("var(--surface);");
+    expect(ACCESS.text).toContain("oklch(0.955 0.008 85 / 0.5)");
+  });
+
+  it("keeps Stories chrome scrims on Bloom ink", () => {
+    expect(STORIES.text).not.toContain("rgba(20, 17, 29");
+    expect(STORIES.text).not.toContain("rgba(18, 15, 26");
+    expect(STORIES.text).toContain("rgba(10, 11, 14, 0.72)");
+  });
+
+  it("keeps the Cycle system theme mute step lifted", () => {
+    expect(CYCLE.text).toContain("--ci-text-mute: var(--faint-strong)");
+  });
+});

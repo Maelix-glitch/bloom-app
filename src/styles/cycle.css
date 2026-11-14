@@ -1435,7 +1435,7 @@ textarea.ci-input {
   --ci-line-strong: var(--border);
   --ci-text: var(--foreground);
   --ci-text-soft: var(--muted-foreground);
-  --ci-text-mute: var(--faint);
+  --ci-text-mute: var(--faint-strong);
   --ci-menstrual: #c07d8a;
   --ci-follicular: var(--violet);
   --ci-luteal: #8d86a8;

@@ -373,7 +373,7 @@
   position: fixed;
   inset: 0;
   z-index: 80;
-  background: rgba(8, 6, 16, 0.55);
+  background: rgba(7, 8, 10, 0.55);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   animation: ssheet-fade 220ms var(--story-ease) both;
@@ -492,7 +492,7 @@
   box-sizing: border-box;
   border: 1.5px solid rgba(238, 217, 164, 0.95);
   border-radius: 7px;
-  background: rgba(18, 15, 26, 0.92);
+  background: rgba(10, 11, 14, 0.92);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   touch-action: none;
   pointer-events: auto;
@@ -798,7 +798,7 @@
   width: 230px;
   border-radius: 18px;
   padding: 12px 12px 13px;
-  background: rgba(20, 17, 29, 0.72);
+  background: rgba(10, 11, 14, 0.72);
   border: 1px solid rgba(244, 239, 228, 0.16);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -865,7 +865,7 @@
   gap: 6px;
   padding: 7px 14px;
   border-radius: 999px;
-  background: rgba(20, 17, 29, 0.72);
+  background: rgba(10, 11, 14, 0.72);
   border: 1px solid rgba(244, 239, 228, 0.2);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -879,7 +879,7 @@
   padding: 8px 16px;
   border-radius: 14px;
   font-size: 15px;
-  background: rgba(20, 17, 29, 0.6);
+  background: rgba(10, 11, 14, 0.6);
   border: 1px solid rgba(244, 239, 228, 0.16);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -907,7 +907,7 @@
   max-width: 240px;
   padding: 8px 14px 8px 9px;
   border-radius: 999px;
-  background: rgba(20, 17, 29, 0.72);
+  background: rgba(10, 11, 14, 0.72);
   border: 1px solid rgba(244, 239, 228, 0.16);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -1120,7 +1120,7 @@
   font-size: 12.5px;
   font-weight: 600;
   color: var(--story-ink-dim);
-  background: rgba(20, 17, 29, 0.7);
+  background: rgba(10, 11, 14, 0.7);
   border: 1px dashed rgba(244, 239, 228, 0.25);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2179,7 +2179,7 @@
   padding: 2px;
   background: var(--story-paper-window);
   box-shadow:
-    inset 0 0 0 1px rgba(20, 17, 29, 0.35),
+    inset 0 0 0 1px rgba(10, 11, 14, 0.35),
     inset 0 1px 0 6px transparent;
 }
 
