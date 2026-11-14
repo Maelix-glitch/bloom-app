@@ -149,12 +149,13 @@ export function FocusPanel({
                     {body}
                     <span
                       className={`ml-auto grid size-4 shrink-0 place-items-center rounded-full border ${
-                        f.done
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border"
+                        f.done ? "border-transparent text-[color:var(--gold-ink)]" : "border-border"
                       }`}
+                      style={
+                        f.done ? { backgroundImage: "var(--gold-gradient)" } : undefined
+                      }
                     >
-                      {f.done ? <Check className="size-3" /> : null}
+                      {f.done ? <Check className="size-3" strokeWidth={3} /> : null}
                     </span>
                   </button>
                 ) : (
