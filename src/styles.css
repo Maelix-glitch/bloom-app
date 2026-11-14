@@ -1428,9 +1428,10 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
      go to 0 once the rail takes over at lg. Anything a page pins to the bottom
      of the viewport should add --app-bottom-nav to its offset. */
   --app-top-bar: 60px;
-  /* 56px of tab bar plus the device's own home-indicator inset, so anything
-     anchored to the bottom of the screen clears the indicator automatically. */
-  --app-bottom-nav: calc(56px + env(safe-area-inset-bottom, 0px));
+  /* The floating tab bar (Reskin slice 2): 64px of bar plus its 12px air
+     above the screen edge, plus the device's own home-indicator inset, so
+     anything anchored to the bottom of the screen clears it automatically. */
+  --app-bottom-nav: calc(76px + env(safe-area-inset-bottom, 0px));
   --app-rail: 0px;
   padding-top: var(--app-top-bar);
 }
@@ -1496,12 +1497,9 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   background: color-mix(in oklab, var(--surface) 55%, var(--background));
   backdrop-filter: blur(16px);
 }
-/* The phone tab bar: the extra bottom padding is the safe area, and the bar's
-   own background fills it — otherwise the labels sit under the home indicator
-   and the page behind shows through the gap. */
-nav.app-mobile-nav {
-  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
-}
+/* The phone tab bar is a floating pill now (Reskin slice 2): its geometry —
+   inset, radius, panel, shadow, safe-area lift — lives with the rest of the
+   bar's layout in src/styles/responsive.css (§3). */
 .app-sidebar-rule {
   background: linear-gradient(90deg, var(--border-strong), transparent);
   opacity: 0.7;
@@ -1517,9 +1515,90 @@ nav.app-mobile-nav {
     display: none;
   }
 }
+/* Rail link states (Reskin slice 2, after the owner's prototype): inactive
+   items sit at cream 55%, hover lifts to a white 4% fill at 85% text, and
+   the active item is a white 7% pill with an inset top highlight, full
+   cream text, a gold glyph (the .app-nav-glyph rules below) and the gold
+   tick on the rail's left edge. Transitions run on the house motion
+   tokens — background and colour only, nothing shifts layout. */
+.app-sidebar .app-nav-link {
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+  transition:
+    background-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo);
+}
+.app-sidebar .app-nav-link:hover {
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+  color: color-mix(in oklab, var(--foreground) 85%, transparent);
+}
 .app-nav-link-active {
-  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
-  box-shadow: inset 0 0 0 1px var(--border);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+.app-sidebar .app-nav-link-active,
+.app-sidebar .app-nav-link-active:hover {
+  color: var(--foreground);
+}
+/* The gold tick: 3px wide, rounded on its outer edge, centred on the
+   active pill and flush with the rail's left edge — the link sits in the
+   nav's 16px gutter, so -1rem lands the tick exactly on the edge. */
+.app-nav-tick {
+  position: absolute;
+  left: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--gold);
+}
+
+/* The sidebar points card (Reskin slice 2): the prototype's glass card —
+   the shared glass surface at the control radius, a 4px progress track in
+   white 7%, and the fill as a gold-soft → gold gradient whose width
+   animates on the house page motion when an award lands. */
+.rail-points-card {
+  background-image: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+.rail-points-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+.rail-points-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--gold-soft), var(--gold));
+  transition: width var(--motion-page) var(--ease-out-expo);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-points-fill {
+    transition: none;
+  }
+}
+
+/* The botanical footer's dark gradient scrim (Reskin slice 2): the rail's
+   panel tone at the top (the photograph fades in from the rail above),
+   55% through the middle, and solid again at the foot so the tagline and
+   the identity strip stay legible over the fern. */
+.app-sidebar-scrim {
+  background: linear-gradient(
+    to top,
+    var(--sidebar) 4%,
+    color-mix(in oklab, var(--sidebar) 55%, transparent) 55%,
+    var(--sidebar) 100%
+  );
+}
+/* The identity strip at the very foot: a blurred dark band over the
+   photograph, split from the tagline block by the one hairline. */
+.app-sidebar-profile {
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--background) 30%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 /* --------------------------------------------------------------------------
@@ -2079,14 +2158,15 @@ nav.app-mobile-nav {
   }
 }
 
-/* The botanical spans the whole rail: object-fit: cover keeps the photo's own
-   proportions (never stretched) and anchors it to the foot; at typical
-   viewport heights the 600×1200 source is scaled down, not up, so it stays
-   sharp. It dissolves upward into the panel so there is no seam. */
+/* The botanical dresses the rail's footer (Reskin slice 2; it spanned the
+   whole rail before): object-fit: cover keeps the photo's own proportions
+   (never stretched) and anchors it to the foot, and the mask plus the
+   .app-sidebar-scrim gradient dissolve it into the panel above so there
+   is no seam. */
 .app-sidebar-botanical {
   opacity: 0.6;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 100%);
-  mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
 }
 
 /* Bottom-anchored controls other pages already own sit above the tab bar

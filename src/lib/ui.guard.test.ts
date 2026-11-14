@@ -1165,3 +1165,85 @@ describe("UI guard: reskin foundation (R-1)", () => {
     expect(PROGRESSION.text).toContain("color: var(--faint-strong)");
   });
 });
+
+describe("UI guard: reskin chrome (R-2)", () => {
+  /* Reskin slice 2 (2026-11-14) — the app chrome takes the prototype's
+     composition: rail pills with the gold edge tick, the richer points
+     card, the botanical footer, the floating mobile pill. Bloom's own
+     things stay Bloom's: the wordmark component, the fern photograph, the
+     tagline, the synced line, and the rank maths (rankFor over the shared
+     wallet — the prototype's hardcoded threshold formula must never
+     appear). The chrome stays mounted ONCE by the root (PR #90): no page
+     may render AppNav again. */
+  const SIDEBAR = ALL_SOURCES.find((f) => f.rel === "components/home/HomeSidebar.tsx")!;
+  const CARD = ALL_SOURCES.find((f) => f.rel === "components/home/RailPointsCard.tsx")!;
+  const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+  const RESPONSIVE = ALL_SOURCES.find((f) => f.rel === "styles/responsive.css")!;
+  const ROOT = ALL_SOURCES.find((f) => f.rel === "routes/__root.tsx")!;
+
+  function blocks(text: string): { selector: string; body: string }[] {
+    const clean = text.replace(/\/\*[\s\S]*?\*\//g, " ");
+    const out: { selector: string; body: string }[] = [];
+    let prev = 0;
+    for (const m of clean.matchAll(/\{([^{}]*)\}/g)) {
+      out.push({ selector: clean.slice(prev, m.index).trim(), body: m[1]! });
+      prev = m.index + m[0].length;
+    }
+    return out;
+  }
+  const blockFor = (text: string, selector: string) =>
+    blocks(text).find((b) => b.selector.trim().endsWith(selector) || b.selector.includes(selector));
+
+  it("marks the active rail item with the gold edge tick and the white 7% pill", () => {
+    expect(SIDEBAR.text).toContain("app-nav-tick");
+    const tick = blockFor(STYLES.text, ".app-nav-tick")!;
+    expect(tick.body).toContain("width: 3px");
+    expect(tick.body).toContain("background: var(--gold)");
+    const active = blockFor(STYLES.text, ".app-nav-link-active")!;
+    expect(active.body).toContain("color-mix(in oklab, var(--foreground) 7%, transparent)");
+  });
+
+  it("derives the points card from Bloom's wallet and rank ladder, never hardcoded maths", () => {
+    expect(CARD.text).toContain('data-testid="rail-points-card"');
+    expect(CARD.text).toContain("useWallet");
+    expect(CARD.text).toContain("rankFor");
+    expect(CARD.text).toContain("Next level ·");
+    expect(CARD.text).not.toContain("SPROUT_AT");
+    const fill = blockFor(STYLES.text, ".rail-points-fill")!;
+    expect(fill.body).toContain("linear-gradient(90deg, var(--gold-soft), var(--gold))");
+    expect(fill.body).toContain("transition: width var(--motion-page) var(--ease-out-expo)");
+  });
+
+  it("keeps Bloom's own footer: fern asset, tagline, synced line, rank identity strip", () => {
+    expect(SIDEBAR.text).toContain("@/assets/home/sidebar-botanical.jpg");
+    expect(SIDEBAR.text).toContain("A calmer you, a brighter tomorrow.");
+    expect(SIDEBAR.text).toContain("Synced with your account");
+    expect(SIDEBAR.text).toContain('data-testid="rail-sync-line"');
+    expect(SIDEBAR.text).toContain('data-testid="rail-profile"');
+    expect(SIDEBAR.text).not.toContain("Day 14");
+    expect(STYLES.text).toContain(".app-sidebar-scrim");
+    expect(STYLES.text).toContain(".app-sidebar-profile");
+  });
+
+  it("floats the mobile nav as a pill with a white 7% active item", () => {
+    expect(SIDEBAR.text).toContain("app-mobile-nav fixed inset-x-3");
+    const bar = blockFor(RESPONSIVE.text, "nav.app-mobile-nav")!;
+    expect(bar.body).toContain("border-radius: var(--radius-lg)");
+    expect(bar.body).toContain("color-mix(in oklab, var(--surface) 90%, transparent)");
+    expect(bar.body).toContain("backdrop-filter: blur(16px)");
+    const active = blockFor(RESPONSIVE.text, '.app-mobile-nav > a[aria-current="page"]')!;
+    expect(active.body).toContain("color-mix(in oklab, var(--foreground) 7%, transparent)");
+    expect(active.body).toContain("color: var(--gold)");
+  });
+
+  it("keeps the chrome mounted once at the root — no page renders its own nav (PR #90)", () => {
+    expect(ROOT.text).toContain("<AppNavGate />");
+    const routes = ALL_SOURCES.filter(
+      (f) => f.rel.startsWith("routes/") && f.rel !== "routes/__root.tsx",
+    );
+    for (const f of routes) {
+      expect(f.text, `${f.rel} must not render the app chrome`).not.toContain("<AppNav");
+      expect(f.text, `${f.rel} must not render the sidebar`).not.toContain("<HomeSidebar");
+    }
+  });
+});
