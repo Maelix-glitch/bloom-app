@@ -41,11 +41,13 @@ export function PointsAwardToast() {
               <Sparkles className="size-[18px]" strokeWidth={1.8} aria-hidden />
             </span>
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="text-[14px] font-semibold leading-snug text-foreground">
+              <span className="text-[length:var(--text-callout)] font-semibold leading-snug text-foreground">
                 +{points} Bloom Points
               </span>
               {label ? (
-                <span className="text-[13px] leading-snug text-muted-foreground">{label}</span>
+                <span className="text-[length:var(--text-support)] leading-snug text-muted-foreground">
+                  {label}
+                </span>
               ) : null}
             </span>
           </div>

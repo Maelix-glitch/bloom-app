@@ -43,7 +43,7 @@ const formatDate = (iso: string) =>
 /* ---------------------------------- Today ---------------------------------- */
 
 export function AssessmentPromptCard() {
-  const { state } = useAssessment();
+  const { state, retake } = useAssessment();
   const [prompt, dismiss] = usePromptState();
   const [flowOpen, setFlowOpen] = useState(false);
 
@@ -66,13 +66,20 @@ export function AssessmentPromptCard() {
               ? "Your assessment is part-finished"
               : "A short assessment, when you are ready"}
           </h2>
-          <p className="mt-1 max-w-[52ch] text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+          <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             {inProgress
               ? "Pick up where you left off. Your earlier answers are saved."
               : "Seven short sections on how you eat, move, sleep and recover. The summary is yours, and it is what any future plan will start from."}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" onClick={() => setFlowOpen(true)}>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                if (state.status === "complete") retake();
+                setFlowOpen(true);
+              }}
+            >
               {inProgress ? "Continue" : "Begin"}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={dismiss}>
@@ -99,12 +106,8 @@ export function AssessmentPromptCard() {
 /* --------------------------------- Profile --------------------------------- */
 
 export function AssessmentProfileCard() {
-  const { state } = useAssessment();
+  const { state, retake } = useAssessment();
   const [flowOpen, setFlowOpen] = useState(false);
-  /* Set at click time, read by the flow when it opens. Opening with retake
-     intent must not write state — the completed assessment is demoted only
-     when the person presses Begin inside the sheet. */
-  const [flowRetake, setFlowRetake] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const summary = summaryOf(state);
 
@@ -123,7 +126,7 @@ export function AssessmentProfileCard() {
           <h2 className="pf-title">Your starting point</h2>
         </div>
       </div>
-      <p className="max-w-[56ch] text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+      <p className="max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
         How you eat, move, sleep and recover, what you want to change, and the safety answers that
         decide what Bloom will suggest. {statusLine}
       </p>
@@ -138,7 +141,7 @@ export function AssessmentProfileCard() {
               size="sm"
               variant="ghost"
               onClick={() => {
-                setFlowRetake(true);
+                retake();
                 setFlowOpen(true);
               }}
             >
@@ -146,20 +149,13 @@ export function AssessmentProfileCard() {
             </Button>
           </>
         ) : (
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => {
-              setFlowRetake(false);
-              setFlowOpen(true);
-            }}
-          >
+          <Button type="button" size="sm" onClick={() => setFlowOpen(true)}>
             {state.status === "in_progress" ? "Continue assessment" : "Take the assessment"}
           </Button>
         )}
       </div>
 
-      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} retake={flowRetake} />
+      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} />
 
       <BloomSheet
         open={summaryOpen}

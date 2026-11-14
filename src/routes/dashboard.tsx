@@ -89,7 +89,7 @@ function DashboardRoute() {
             {stats.map((stat) => (
               <div key={stat.label} className="home-panel p-5">
                 <stat.icon className="size-5" style={{ color: stat.color }} aria-hidden="true" />
-                <div className="mt-3 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                <div className="mt-3 text-[length:var(--text-meta)] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                   {stat.label}
                 </div>
                 <div className="mt-1 font-display text-3xl tabular-nums text-foreground">
@@ -128,10 +128,10 @@ function DashboardRoute() {
                 return (
                   <div key={def.id} className="home-panel p-5">
                     <div className="mb-4 flex items-center justify-between gap-3">
-                      <h3 className="text-[15px] font-medium text-foreground">{def.name}</h3>
+                      <h3 className="text-[length:var(--text-body)] font-medium text-foreground">{def.name}</h3>
                       {isMet ? (
                         <span
-                          className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px]"
+                          className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[length:var(--text-meta)]"
                           style={{
                             borderColor:
                               "color-mix(in oklab, var(--home-movement) 35%, transparent)",
@@ -165,7 +165,7 @@ function DashboardRoute() {
                         <div className="text-sm font-semibold tabular-nums text-foreground">
                           {stat.today === null ? "—" : def.format(Math.round(stat.today))}
                         </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                        <div className="mt-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                           Today
                         </div>
                       </div>
@@ -173,7 +173,7 @@ function DashboardRoute() {
                         <div className="text-sm font-semibold tabular-nums text-foreground">
                           {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
                         </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                        <div className="mt-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                           7-day avg
                         </div>
                       </div>
@@ -181,7 +181,7 @@ function DashboardRoute() {
                         <div className="text-sm font-semibold tabular-nums text-foreground">
                           {def.format(stat.goal)}
                         </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                        <div className="mt-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                           Target
                         </div>
                       </div>

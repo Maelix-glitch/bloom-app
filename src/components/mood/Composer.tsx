@@ -535,7 +535,7 @@ export function Composer({
                   <p className="bmood-band-label">Context · optional</p>
                   {fromTrackers.length > 0 ? (
                     <p
-                      className="mt-2 text-[12px] text-muted-foreground"
+                      className="mt-2 text-[length:var(--text-caption)] text-muted-foreground"
                       data-testid="mood-context-prefill"
                     >
                       {describePrefill(fromTrackers)}.

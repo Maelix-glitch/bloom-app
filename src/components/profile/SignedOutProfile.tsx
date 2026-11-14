@@ -65,8 +65,8 @@ export function SignedOutProfile({
       </h1>
       <p
         className={cn(
-          "mt-4 max-w-[46ch] text-[14px] leading-relaxed text-muted-foreground",
-          compact && "text-[13.5px]",
+          "mt-4 max-w-[46ch] text-[length:var(--text-callout)] leading-relaxed text-muted-foreground",
+          compact && "text-[length:var(--text-support)]",
         )}
       >
         Sign in and Bloom will show you your moments, your milestones, and the things you've chosen
@@ -103,13 +103,13 @@ export function SignedOutProfile({
                 void submit();
               }
             }}
-            className="min-w-0 flex-1 bg-transparent py-1.5 text-[14px] outline-none placeholder:text-faint/70"
+            className="min-w-0 flex-1 bg-transparent py-1.5 text-[length:var(--text-callout)] outline-none placeholder:text-faint/70"
           />
           <button
             type="button"
             onClick={() => void submit()}
             disabled={state === "sending"}
-            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-[13px] font-medium text-[var(--primary-foreground)] transition-transform duration-300 enabled:hover:scale-[1.02] disabled:opacity-60"
+            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-[length:var(--text-support)] font-medium text-[var(--primary-foreground)] transition-transform duration-300 enabled:hover:scale-[1.02] disabled:opacity-60"
             style={{ background: "linear-gradient(135deg, var(--violet), var(--sky))" }}
           >
             {state === "sending" ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null}
@@ -120,12 +120,15 @@ export function SignedOutProfile({
         {message ? (
           <p
             role="status"
-            className={cn("mt-3 text-[12.5px]", state === "sent" ? "text-sage" : "text-rose")}
+            className={cn(
+              "mt-3 text-[length:var(--text-caption)]",
+              state === "sent" ? "text-sage" : "text-rose",
+            )}
           >
             {message}
           </p>
         ) : (
-          <p className="mt-3 text-[12px] text-faint">
+          <p className="mt-3 text-[length:var(--text-caption)] text-faint">
             A sign-in link, once. No password to remember.
           </p>
         )}

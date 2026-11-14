@@ -31,7 +31,7 @@ function InsightsImpl({
         title="Insights center"
         sub="Plain-language statements generated strictly from your recorded data."
         right={
-          <span className="mono flex items-center gap-2 rounded-full border border-violet/40 bg-[var(--dim-violet)] px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] text-violet">
+          <span className="mono flex items-center gap-2 rounded-full border border-violet/40 bg-[var(--dim-violet)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-violet">
             <BrainCircuit className="size-3" /> {tier.current.label}
           </span>
         }
@@ -47,7 +47,9 @@ function InsightsImpl({
               className="rounded-[12px] border border-border bg-surface-2/40 p-4 transition-colors hover:border-border-strong"
             >
               <p className={`eyebrow mb-2 ${kindAccent[i.kind]}`}>{i.kind}</p>
-              <p className="text-[13px] leading-relaxed text-muted-foreground">{i.text}</p>
+              <p className="text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
+                {i.text}
+              </p>
             </div>
           ))}
         </div>
@@ -59,7 +61,7 @@ function InsightsImpl({
           {tier.tiers.map((t) => (
             <span
               key={t.label}
-              className={`mono rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] ${
+              className={`mono rounded-full border px-2.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] ${
                 t.label === tier.current.label
                   ? "border-violet/60 bg-[var(--dim-violet)] text-violet"
                   : "border-border text-faint"

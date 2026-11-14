@@ -31,7 +31,7 @@ function TimelineImpl({ days }: { days: DayAggregate[] }) {
             <select
               value={active?.date ?? ""}
               onChange={(e) => setSelected(e.target.value)}
-              className="mono rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[11px] text-foreground"
+              className="mono rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[length:var(--text-meta)] text-foreground"
               aria-label="Select day"
             >
               {[...days].reverse().map((d) => (
@@ -51,13 +51,13 @@ function TimelineImpl({ days }: { days: DayAggregate[] }) {
           <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3 rounded-[12px] border border-border bg-surface-2/50 px-5 py-4">
             <div>
               <p className="eyebrow mb-1">{dayjs(active.date).format("dddd, MMMM D YYYY")}</p>
-              <p className="display text-[17px]">
+              <p className="display text-[length:var(--text-section)]">
                 {moodLabel(active.mood)} · <span className="numeric">{active.mood.toFixed(2)}</span>
               </p>
             </div>
             <p
               className={cn(
-                "mono text-[11px]",
+                "mono text-[length:var(--text-meta)]",
                 active.mood - rangeAvg >= 0 ? "text-sage" : "text-rose",
               )}
             >
@@ -77,22 +77,29 @@ function TimelineImpl({ days }: { days: DayAggregate[] }) {
                     style={{ background: accentVar[accent] }}
                   />
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span className="mono flex items-center gap-1.5 text-[11px] text-faint">
+                    <span className="mono flex items-center gap-1.5 text-[length:var(--text-meta)] text-faint">
                       <Clock3 className="size-3" />
                       {dayjs(e.timestamp).format("HH:mm")}
                     </span>
-                    <span className="numeric text-[15px]" style={{ color: accentVar[accent] }}>
+                    <span
+                      className="numeric text-[length:var(--text-body)]"
+                      style={{ color: accentVar[accent] }}
+                    >
                       {e.mood.toFixed(1)}
                     </span>
-                    <span className="mono text-[11px] text-sage">energy {e.energy.toFixed(1)}</span>
-                    <span className="mono text-[11px] text-rose">stress {e.stress.toFixed(1)}</span>
+                    <span className="mono text-[length:var(--text-meta)] text-sage">
+                      energy {e.energy.toFixed(1)}
+                    </span>
+                    <span className="mono text-[length:var(--text-meta)] text-rose">
+                      stress {e.stress.toFixed(1)}
+                    </span>
                   </div>
                   {e.emotions.length ? (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {e.emotions.map((k) => (
                         <span
                           key={k}
-                          className="mono rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+                          className="mono rounded-full border border-border px-2 py-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground"
                         >
                           {EMOTION_MAP[k]?.label ?? k}
                         </span>
@@ -100,12 +107,14 @@ function TimelineImpl({ days }: { days: DayAggregate[] }) {
                     </div>
                   ) : null}
                   {e.note ? (
-                    <p className="mt-2 max-w-[62ch] text-[13px] leading-relaxed text-muted-foreground">
+                    <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
                       {e.note}
                     </p>
                   ) : null}
                   {e.tags.length ? (
-                    <p className="mono mt-1.5 text-[10px] text-faint">#{e.tags.join("  #")}</p>
+                    <p className="mono mt-1.5 text-[length:var(--text-micro)] text-faint">
+                      #{e.tags.join("  #")}
+                    </p>
                   ) : null}
                 </li>
               );

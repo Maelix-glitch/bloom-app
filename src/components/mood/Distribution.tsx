@@ -55,7 +55,7 @@ function DistributionImpl({
           <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             {buckets.map((b) => (
               <div key={b.key} className="rounded-[12px] border border-border bg-surface-2/40 p-3">
-                <p className="flex items-center gap-2 text-[12px] text-foreground">
+                <p className="flex items-center gap-2 text-[length:var(--text-caption)] text-foreground">
                   <span
                     className="size-1.5 rounded-full"
                     style={{ background: accentVar[b.accent as Accent] }}
@@ -63,7 +63,7 @@ function DistributionImpl({
                   {b.label}
                 </p>
                 <p className="numeric mt-1.5 text-[20px] text-foreground">{b.count}</p>
-                <p className="mono text-[10px] text-faint">
+                <p className="mono text-[length:var(--text-micro)] text-faint">
                   {b.share.toFixed(0)}% ·{" "}
                   <span
                     className={cn(
@@ -85,7 +85,7 @@ function DistributionImpl({
                 <p className="numeric text-[34px] leading-none text-sage">
                   {volatility.stability === null ? "—" : volatility.stability}
                 </p>
-                <span className="mono pb-1 text-[11px] text-faint">/ 100</span>
+                <span className="mono pb-1 text-[length:var(--text-meta)] text-faint">/ 100</span>
               </div>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-3">
                 <span
@@ -93,7 +93,7 @@ function DistributionImpl({
                   style={{ width: `${volatility.stability ?? 0}%`, background: "var(--sage)" }}
                 />
               </div>
-              <p className="mt-3 text-[12px] text-muted-foreground">
+              <p className="mt-3 text-[length:var(--text-caption)] text-muted-foreground">
                 Derived from average day-to-day mood change. Higher means a steadier emotional
                 baseline.
               </p>

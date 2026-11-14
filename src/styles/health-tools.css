@@ -36,7 +36,7 @@
   gap: 0.45rem;
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted-foreground);
@@ -54,7 +54,7 @@
 .bt-lede {
   max-width: 62ch;
   margin: 0.45rem 0 0;
-  font-size: 13px;
+  font-size: var(--text-support);
   line-height: 1.55;
   color: var(--muted-foreground);
 }
@@ -69,7 +69,7 @@
   border-radius: 999px;
   background: transparent;
   color: var(--foreground);
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease;
 }
@@ -82,7 +82,7 @@
 .bt-ghost--sm {
   min-height: 32px;
   padding: 0 0.7rem;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
 }
 
 /* --------------------------------- cards --------------------------------- */
@@ -137,7 +137,7 @@
   gap: 0.4rem;
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--muted-foreground);
@@ -156,7 +156,7 @@
 .bt-value__unit {
   margin-left: 0.35rem;
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--muted-foreground);
@@ -164,14 +164,14 @@
 
 .bt-card__sub {
   margin: 0.35rem 0 0;
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   line-height: 1.45;
   color: var(--muted-foreground);
 }
 
 .bt-card__foot {
   margin: 0.7rem 0 0;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   line-height: 1.5;
   color: var(--muted-foreground);
 }
@@ -223,7 +223,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 .bt-mini dt {
@@ -233,7 +233,7 @@
 .bt-mini dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
-  font-weight: 550;
+  font-weight: 600;
 }
 
 .bt-bar {
@@ -254,7 +254,7 @@
 
 .bt-inline-link {
   margin-top: 0.6rem;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   color: var(--primary);
   text-decoration: none;
   align-self: flex-start;
@@ -296,7 +296,7 @@
 
 .bt-goal__rate {
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 11px;
+  font-size: var(--text-meta);
   letter-spacing: 0.04em;
   color: var(--muted-foreground);
 }
@@ -313,7 +313,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   font-variant-numeric: tabular-nums;
   color: var(--muted-foreground);
 }
@@ -338,7 +338,7 @@
   justify-content: space-between;
   padding: 0.35rem 0;
   border-bottom: 1px dashed color-mix(in oklab, var(--foreground) 8%, transparent);
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--muted-foreground);
 }
 
@@ -366,7 +366,7 @@
   border-radius: 999px;
   background: transparent;
   color: color-mix(in oklab, var(--danger) 80%, var(--foreground));
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   cursor: pointer;
 }
 
@@ -417,7 +417,7 @@
   border-radius: 999px;
   background: transparent;
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: var(--text-caption);
   cursor: pointer;
 }
 
@@ -434,7 +434,7 @@
 }
 
 .bt-field__label {
-  font-size: 11px;
+  font-size: var(--text-meta);
   letter-spacing: 0.05em;
   color: var(--muted-foreground);
 }
@@ -462,7 +462,7 @@
   border: 0;
   background: transparent;
   color: var(--foreground);
-  font-size: 16px; /* prevents iOS zoom on focus */
+  font-size: var(--text-card); /* prevents iOS zoom on focus */
   font-variant-numeric: tabular-nums;
   outline: none;
 }
@@ -473,12 +473,12 @@
   border: 1px solid var(--bt-line);
   border-radius: 12px;
   background: color-mix(in oklab, var(--background) 42%, transparent);
-  font-size: 14px;
+  font-size: var(--text-callout);
 }
 
 .bt-field__suffix {
   flex-shrink: 0;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   color: var(--muted-foreground);
 }
 
@@ -506,7 +506,7 @@
   border-radius: 999px;
   background: var(--primary);
   color: var(--primary-foreground);
-  font-size: 13px;
+  font-size: var(--text-support);
   font-weight: 600;
   cursor: pointer;
   transition: filter 0.18s ease, transform 0.18s ease;
@@ -529,20 +529,20 @@
 
 .bt-note {
   margin: 0.7rem 0 0;
-  font-size: 11px;
+  font-size: var(--text-meta);
   line-height: 1.55;
   color: var(--muted-foreground);
 }
 
 .bt-error {
   margin: 0.2rem 0 0;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--danger);
 }
 
 .bt-saved {
   margin: 0.5rem 0 0;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--success);
 }
 

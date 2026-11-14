@@ -44,7 +44,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
         sub="Every logged day tinted by its average mood. Select a day to inspect it."
         right={
           <div className="flex items-center gap-2">
-            <span className="mono mr-2 text-[11px] text-faint">
+            <span className="mono mr-2 text-[length:var(--text-meta)] text-faint">
               {monthAvg === null ? "no data" : `avg ${monthAvg.toFixed(2)}`}
             </span>
             <button
@@ -55,7 +55,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
             >
               <ChevronLeft className="size-3.5" />
             </button>
-            <span className="mono w-[92px] text-center text-[11px] text-foreground">
+            <span className="mono w-[92px] text-center text-[length:var(--text-meta)] text-foreground">
               {cursor.format("MMM YYYY")}
             </span>
             <button
@@ -70,7 +70,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
         }
       />
 
-      <div className="mono mb-2 grid grid-cols-7 gap-1.5 text-center text-[9px] uppercase tracking-[0.08em] text-faint">
+      <div className="mono mb-2 grid grid-cols-7 gap-1.5 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
         {WD.map((d) => (
           <span key={d}>{d}</span>
         ))}
@@ -103,11 +103,11 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
               }
               title={day ? `${date} · mood ${day.mood.toFixed(1)}` : date}
             >
-              <span className="mono absolute left-1.5 top-1 text-[9px] text-foreground/70">
+              <span className="mono absolute left-1.5 top-1 text-[length:var(--text-micro)] text-foreground/70">
                 {dayjs(date).date()}
               </span>
               {day ? (
-                <span className="numeric absolute inset-x-0 bottom-1 text-center text-[12px] text-foreground">
+                <span className="numeric absolute inset-x-0 bottom-1 text-center text-[length:var(--text-caption)] text-foreground">
                   {day.mood.toFixed(1)}
                 </span>
               ) : null}
@@ -127,11 +127,11 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <div>
               <p className="eyebrow mb-1">{dayjs(active.date).format("dddd, MMMM D")}</p>
-              <p className="display text-[18px]">
+              <p className="display text-[length:var(--text-section)]">
                 {moodLabel(active.mood)} · <span className="numeric">{active.mood.toFixed(2)}</span>
               </p>
             </div>
-            <div className="mono flex gap-4 text-[11px]">
+            <div className="mono flex gap-4 text-[length:var(--text-meta)]">
               <span className="text-sage">energy {active.energy.toFixed(1)}</span>
               <span className="text-rose">stress {active.stress.toFixed(1)}</span>
               {typeof active.sleep === "number" ? (
@@ -144,7 +144,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
               {active.emotions.map((k) => (
                 <span
                   key={k}
-                  className="mono rounded-full border border-border px-2.5 py-1 text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+                  className="mono rounded-full border border-border px-2.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground"
                 >
                   {EMOTION_MAP[k]?.label ?? k}
                 </span>
@@ -153,7 +153,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
           ) : null}
           <div className="mt-4 flex flex-col gap-2">
             {active.entries.map((e) => (
-              <div key={e.id} className="flex gap-3 text-[12px]">
+              <div key={e.id} className="flex gap-3 text-[length:var(--text-caption)]">
                 <span className="mono w-14 shrink-0 text-faint">
                   {dayjs(e.timestamp).format("HH:mm")}
                 </span>

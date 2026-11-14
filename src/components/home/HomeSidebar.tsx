@@ -99,7 +99,7 @@ export function HomeSidebar() {
                 key={item.label}
                 to={item.to}
                 aria-current={active ? "page" : undefined}
-                className={`app-nav-link flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
+                className={`app-nav-link flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[length:var(--text-support)] transition-colors ${
                   active
                     ? "app-nav-link-active text-foreground"
                     : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"
@@ -125,7 +125,7 @@ export function HomeSidebar() {
           to="/profile"
           aria-current={profileActive ? "page" : undefined}
 
-          className={`app-nav-link mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] transition-colors ${
+          className={`app-nav-link mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[length:var(--text-support)] transition-colors ${
             profileActive
               ? "app-nav-link-active text-foreground"
               : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"
@@ -144,7 +144,7 @@ export function HomeSidebar() {
       <div className="relative">
         <div className="app-sidebar-quote px-7">
           <span className="app-sidebar-gold-rule block h-px w-8" />
-          <p className="mt-5 font-display text-[17px] italic leading-snug text-muted-foreground">
+          <p className="mt-5 font-display text-[length:var(--text-section)] italic leading-snug text-muted-foreground">
             A calmer you, a brighter tomorrow.
           </p>
           <span className="app-sidebar-gold-rule mt-5 block h-px w-8" />

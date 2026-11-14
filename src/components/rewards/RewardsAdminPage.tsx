@@ -203,7 +203,7 @@ export function RewardsAdminPage() {
           </div>
           <p className="eyebrow mt-6">Restricted route</p>
           <h1 className="display mt-3 text-[36px]">Administrator access required.</h1>
-          <p className="mx-auto mt-3 max-w-[48ch] text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mx-auto mt-3 max-w-[48ch] text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
             {adminError ??
               "This workspace is protected. Rewards can only be created and published by an authorized administrator."}
           </p>
@@ -225,7 +225,7 @@ export function RewardsAdminPage() {
           <h1 className="display mt-4 text-[42px] leading-[.98] sm:text-[58px]">
             Create a <span className="rewards-gradient-text">reward.</span>
           </h1>
-          <p className="mt-4 max-w-[57ch] text-[14px] leading-relaxed text-muted-foreground">
+          <p className="mt-4 max-w-[57ch] text-[length:var(--text-callout)] leading-relaxed text-muted-foreground">
             Create a reward, choose its recipients, and publish it deliberately. Nothing in this
             console is generated from points or streaks.
           </p>
@@ -414,11 +414,11 @@ export function RewardsAdminPage() {
             <Users className="size-3.5 text-sky" /> Intended recipients{" "}
             <span className="reward-admin-count">{recipients.length} selected</span>
           </div>
-          <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+          <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
             A reward goes only to the recipients you choose here — it can&rsquo;t be claimed by
             anyone else.
           </p>
-          <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+          <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
             Publishing is locked to a single recipient, set in the product itself — it can't be
             changed from this page.
           </p>
@@ -507,7 +507,7 @@ export function RewardsAdminPage() {
         ) : (
           <div className="reward-admin-empty">
             <FilePlus2 className="size-5" />
-            <p className="display mt-3 text-[17px]">No reward records yet.</p>
+            <p className="display mt-3 text-[length:var(--text-section)]">No reward records yet.</p>
             <span>Create a draft above. It will stay invisible until you publish it.</span>
           </div>
         )}
@@ -606,12 +606,12 @@ function AdminRewardRow({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[14px] font-medium">{reward.title}</h3>
+            <h3 className="text-[length:var(--text-callout)] font-medium">{reward.title}</h3>
             <span className={cn("reward-admin-state", STATUS_STYLES[reward.state])}>
               {statusLabel(reward.state)}
             </span>
           </div>
-          <p className="mt-1 truncate text-[11px] text-muted-foreground">
+          <p className="mt-1 truncate text-[length:var(--text-meta)] text-muted-foreground">
             {reward.description || "No description"}
           </p>
           <div className="reward-admin-record-meta">

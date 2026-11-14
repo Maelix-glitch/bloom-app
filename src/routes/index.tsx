@@ -605,7 +605,7 @@ function TodayPage() {
               </Link>
             </div>
             {space.authState === "signed-out" ? (
-              <p className="mt-4 text-[12px] text-muted-foreground">
+              <p className="mt-4 text-[length:var(--text-caption)] text-muted-foreground">
                 You're browsing on this device only.{" "}
                 <Link to="/profile" className="underline underline-offset-2 hover:text-foreground">
                   Sign in
@@ -614,7 +614,7 @@ function TodayPage() {
               </p>
             ) : null}
             {habits.error || habitNotice ? (
-              <p className="mt-3 text-[12px] text-rose" role="status">
+              <p className="mt-3 text-[length:var(--text-caption)] text-rose" role="status">
                 {habitNotice ?? habits.error}
               </p>
             ) : null}
@@ -754,7 +754,7 @@ function TodayPage() {
           </div>
 
 
-          <footer className="hidden items-center justify-center gap-6 text-[11px] tracking-[0.3em] text-muted-foreground lg:flex">
+          <footer className="hidden items-center justify-center gap-6 text-[length:var(--text-meta)] tracking-[0.3em] text-muted-foreground lg:flex">
             <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
             <span className="h-px w-16 bg-border" />
             <span>A CALMER YOU, A BRIGHTER TOMORROW</span>

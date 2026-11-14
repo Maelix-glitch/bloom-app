@@ -58,21 +58,23 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
       }}
     >
       <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-        <SheetTitle className="display text-[17px]">Restore from backup</SheetTitle>
-        <SheetDescription className="mt-0.5 text-[12px] text-muted-foreground">
+        <SheetTitle className="display text-[length:var(--text-section)]">
+          Restore from backup
+        </SheetTitle>
+        <SheetDescription className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
           Reads a “Download everything” file back into this browser.
         </SheetDescription>
 
         {report ? (
           <div className="mt-5 space-y-4">
-            <p className="text-[13px] leading-relaxed text-foreground">
+            <p className="text-[length:var(--text-support)] leading-relaxed text-foreground">
               Restored with <span className="text-foreground">{mode}</span> — what landed:
             </p>
             <ul className="space-y-1.5">
               {report.sections.map((s) => (
                 <li
                   key={s.label}
-                  className="flex justify-between text-[12.5px] text-muted-foreground"
+                  className="flex justify-between text-[length:var(--text-caption)] text-muted-foreground"
                 >
                   <span>{s.label}</span>
                   <span>
@@ -81,12 +83,12 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
                 </li>
               ))}
             </ul>
-            <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+            <p className="text-[length:var(--text-meta)] leading-relaxed text-muted-foreground">
               Skipped: {report.skipped.join("; ")}.
             </p>
             <button
               type="button"
-              className="w-full rounded-full bg-primary px-4 py-2.5 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              className="w-full rounded-full bg-primary px-4 py-2.5 text-[length:var(--text-support)] font-medium text-primary-foreground transition-opacity hover:opacity-90"
               onClick={() => window.location.assign("/")}
             >
               Reload Bloom to see it
@@ -96,7 +98,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
           <div className="mt-5 space-y-5">
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface-2/40 px-4 py-3 text-[13px] text-foreground transition-colors hover:bg-surface-2"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface-2/40 px-4 py-3 text-[length:var(--text-support)] text-foreground transition-colors hover:bg-surface-2"
               onClick={() => inputRef.current?.click()}
             >
               <FileUp className="size-4" />
@@ -111,14 +113,14 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
             />
 
             {parsed && !parsed.ok ? (
-              <p className="text-[12.5px] text-rose" role="alert">
+              <p className="text-[length:var(--text-caption)] text-rose" role="alert">
                 {parsed.error}
               </p>
             ) : null}
 
             {parsed?.ok ? (
               <>
-                <p className="text-[12px] text-muted-foreground">
+                <p className="text-[length:var(--text-caption)] text-muted-foreground">
                   Backup from {new Date(parsed.bundle.exportedAt).toLocaleString()} —{" "}
                   {parsed.bundle.counts.habits} habits, {parsed.bundle.counts.habitLogs} ticks,{" "}
                   {parsed.bundle.counts.trackerDays} tracker days,{" "}
@@ -137,7 +139,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
                       key={m}
                       type="button"
                       onClick={() => setMode(m)}
-                      className={`rounded-xl border px-4 py-2.5 text-left text-[12.5px] transition-colors ${
+                      className={`rounded-xl border px-4 py-2.5 text-left text-[length:var(--text-caption)] transition-colors ${
                         mode === m
                           ? "border-primary/60 bg-primary/10 text-foreground"
                           : "border-border text-muted-foreground hover:text-foreground"
@@ -150,7 +152,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
 
                 <button
                   type="button"
-                  className="w-full rounded-full bg-primary px-4 py-2.5 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                  className="w-full rounded-full bg-primary px-4 py-2.5 text-[length:var(--text-support)] font-medium text-primary-foreground transition-opacity hover:opacity-90"
                   onClick={apply}
                 >
                   Restore to this device
@@ -161,7 +163,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
         )}
 
         {report ? (
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-[length:var(--text-meta)] text-muted-foreground">
             <RotateCw className="size-3" /> nothing is sent anywhere; this stayed on your device
           </p>
         ) : null}

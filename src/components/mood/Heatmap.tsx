@@ -27,7 +27,7 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
         sub="Where in the week your emotional states actually cluster."
         right={
           bestBand && populated.length >= 4 ? (
-            <p className="mono max-w-[24ch] text-right text-[11px] text-muted-foreground">
+            <p className="mono max-w-[24ch] text-right text-[length:var(--text-meta)] text-muted-foreground">
               Strongest window
               <span className="ml-2 text-sky">{bestBand.range}</span>
             </p>
@@ -45,15 +45,15 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
             <div />
             {TIME_BANDS.map((b) => (
               <div key={b.key} className="pb-2 text-center">
-                <p className="mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="mono text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                   {b.label}
                 </p>
-                <p className="mono text-[9px] text-faint">{b.range}</p>
+                <p className="mono text-[length:var(--text-micro)] text-faint">{b.range}</p>
               </div>
             ))}
             {ORDER.map((wd, i) => (
               <div key={wd} className="contents">
-                <div className="mono flex items-center text-[10px] uppercase tracking-[0.08em] text-faint">
+                <div className="mono flex items-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
                   {WEEKDAYS[i]}
                 </div>
                 {TIME_BANDS.map((b) => {
@@ -88,11 +88,11 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
                       }
                     >
                       {cell?.count ? (
-                        <span className="numeric absolute inset-0 flex items-center justify-center text-[13px]">
+                        <span className="numeric absolute inset-0 flex items-center justify-center text-[length:var(--text-support)]">
                           {cell.mood?.toFixed(1)}
                         </span>
                       ) : (
-                        <span className="mono absolute inset-0 flex items-center justify-center text-[10px] text-faint">
+                        <span className="mono absolute inset-0 flex items-center justify-center text-[length:var(--text-micro)] text-faint">
                           —
                         </span>
                       )}
@@ -104,7 +104,7 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
-            <div className="mono flex items-center gap-2 text-[10px] text-faint">
+            <div className="mono flex items-center gap-2 text-[length:var(--text-micro)] text-faint">
               <span>low</span>
               <span
                 className="h-1.5 w-28 rounded-full"
@@ -113,7 +113,7 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
               <span>high</span>
             </div>
             {hover && hover.count > 0 ? (
-              <div className="mono flex flex-wrap gap-4 text-[11px]">
+              <div className="mono flex flex-wrap gap-4 text-[length:var(--text-meta)]">
                 <span className="text-faint">
                   {WEEKDAYS[ORDER.indexOf(hover.weekday)]} ·{" "}
                   {TIME_BANDS.find((b) => b.key === hover.band)?.label}
@@ -132,7 +132,9 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
                 </span>
               </div>
             ) : (
-              <p className="mono text-[11px] text-faint">Hover a cell for detail</p>
+              <p className="mono text-[length:var(--text-meta)] text-faint">
+                Hover a cell for detail
+              </p>
             )}
           </div>
         </div>

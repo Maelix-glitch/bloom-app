@@ -152,7 +152,7 @@ export function AvatarEditor({
               ) : (
                 <ImagePlus className="size-6" strokeWidth={1.5} />
               )}
-              <span className="text-[12.5px]">
+              <span className="text-[length:var(--text-caption)]">
                 {busy ? "Reading…" : "Your photo will appear here"}
               </span>
             </span>
@@ -194,7 +194,7 @@ export function AvatarEditor({
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="mono rounded-full border border-border px-3.5 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+              className="mono rounded-full border border-border px-3.5 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:text-foreground"
             >
               Choose another
             </button>
@@ -204,7 +204,7 @@ export function AvatarEditor({
                 setImg(null);
                 setRawUrl(null);
               }}
-              className="mono rounded-full border border-border px-3.5 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+              className="mono rounded-full border border-border px-3.5 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:text-foreground"
             >
               Cancel photo
             </button>
@@ -215,14 +215,14 @@ export function AvatarEditor({
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="mono rounded-full border border-border px-4 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+            className="mono rounded-full border border-border px-4 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
           >
             Replace photo
           </button>
           <button
             type="button"
             onClick={onRemove}
-            className="mono rounded-full border border-border px-4 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-rose/40 hover:text-rose"
+            className="mono rounded-full border border-border px-4 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:border-rose/40 hover:text-rose"
           >
             Remove photo
           </button>
@@ -231,7 +231,7 @@ export function AvatarEditor({
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="mono rounded-full border border-border px-4 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+          className="mono rounded-full border border-border px-4 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
         >
           Choose a photo
         </button>

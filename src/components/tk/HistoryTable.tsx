@@ -52,7 +52,7 @@ export function HistoryTable({
           <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
             Every day you've logged
           </h2>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+          <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-soft">
             {analysis.daysLogged} {analysis.daysLogged === 1 ? "day" : "days"} in the record · best
             run {analysis.bestStreak} {analysis.bestStreak === 1 ? "day" : "days"}
           </p>
@@ -86,7 +86,7 @@ export function HistoryTable({
           aria-label="Confirm clearing the record"
           data-testid="tk-clear-all-confirm"
         >
-          <p className="text-[12.5px] leading-relaxed ci-soft">
+          <p className="text-[length:var(--text-caption)] leading-relaxed ci-soft">
             Remove all {days.length} {days.length === 1 ? "day" : "days"} from your record
             {" — "}every tracker, every date? You'll get a few seconds to undo.
           </p>
@@ -111,7 +111,7 @@ export function HistoryTable({
       ) : null}
 
       {rows.length === 0 ? (
-        <p className="mt-4 text-[12.5px] leading-relaxed ci-muted">
+        <p className="mt-4 text-[length:var(--text-caption)] leading-relaxed ci-muted">
           Nothing logged yet. Save a day above and it lands here.
         </p>
       ) : (
@@ -191,7 +191,7 @@ export function HistoryTable({
         </div>
       )}
 
-      <p className="mt-3 text-[11.5px] leading-relaxed ci-muted">
+      <p className="mt-3 text-[length:var(--text-meta)] leading-relaxed ci-muted">
         Showing the {rows.length} most recent {rows.length === 1 ? "day" : "days"}. Targets:{" "}
         {TRACKERS.map((def) => `${def.name} ${def.format(analysis.trackers[def.id].goal)}`).join(
           " · ",

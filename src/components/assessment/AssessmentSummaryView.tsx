@@ -43,7 +43,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
               {summary.safety.findings.map((finding) => (
                 <li
                   key={finding}
-                  className="text-[13px] leading-[var(--leading-body)] text-muted-foreground"
+                  className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
                 >
                   {finding}
                 </li>
@@ -62,7 +62,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
               {summary.safety.findings.map((finding) => (
                 <li
                   key={finding}
-                  className="text-[13px] leading-[var(--leading-body)] text-muted-foreground"
+                  className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
                 >
                   {finding}
                 </li>
@@ -80,10 +80,12 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
             aria-label={section.title}
           >
             <div className="flex items-baseline justify-between gap-3">
-              <h3 className="font-display text-[16px] text-foreground">{section.title}</h3>
+              <h3 className="font-display text-[length:var(--text-card)] text-foreground">
+                {section.title}
+              </h3>
               <span
                 className={cn(
-                  "shrink-0 text-[11px] font-medium uppercase tracking-[var(--tracking-meta)]",
+                  "shrink-0 text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)]",
                   section.state === "complete" ? "text-gold" : "text-faint",
                 )}
               >
@@ -111,7 +113,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
       </div>
 
       <div className="rounded-2xl border border-border bg-surface-2 px-4 py-3.5">
-        <p className="text-[11px] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
+        <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
           For your plan
         </p>
         <p className="mt-1.5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
@@ -119,7 +121,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
         </p>
       </div>
 
-      <p className="text-[12px] leading-[var(--leading-body)] text-faint">
+      <p className="text-[length:var(--text-caption)] leading-[var(--leading-body)] text-faint">
         {summary.safety.disclaimer}
       </p>
     </div>

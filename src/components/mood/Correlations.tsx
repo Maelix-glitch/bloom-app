@@ -30,10 +30,15 @@ function CorrelationsImpl({ correlations }: { correlations: Correlation[] }) {
                 className="group rounded-[12px] border border-border bg-surface-2/40 p-4 transition-colors hover:border-border-strong"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-[13px] font-medium text-foreground">{c.label}</p>
+                  <p className="text-[length:var(--text-support)] font-medium text-foreground">
+                    {c.label}
+                  </p>
                   <div className="flex items-center gap-3">
                     <span
-                      className={cn("numeric text-[16px]", positive ? "text-sage" : "text-rose")}
+                      className={cn(
+                        "numeric text-[length:var(--text-card)]",
+                        positive ? "text-sage" : "text-rose",
+                      )}
                     >
                       {c.r > 0 ? "+" : ""}
                       {c.r.toFixed(2)}
@@ -52,13 +57,13 @@ function CorrelationsImpl({ correlations }: { correlations: Correlation[] }) {
                     }}
                   />
                 </div>
-                <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
+                <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
                   {c.statement}
                 </p>
               </div>
             );
           })}
-          <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
+          <p className="mono mt-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
             correlation ≠ causation · negative ← 0 → positive
           </p>
         </div>

@@ -244,7 +244,7 @@
   border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent);
   background: var(--primary);
   color: var(--primary-foreground);
-  font-size: 14px;
+  font-size: var(--text-callout);
   font-weight: 600;
   letter-spacing: -0.005em;
   box-shadow:
@@ -276,7 +276,7 @@
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 30%, transparent);
   color: var(--muted-foreground);
-  font-size: 13px;
+  font-size: var(--text-support);
   transition:
     color var(--motion-fast) ease,
     border-color var(--motion-fast) ease,
@@ -292,7 +292,7 @@
 
 .bsheet-eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 55%, transparent);
@@ -312,7 +312,7 @@
   }
 }
 .bsheet-sub {
-  font-size: 14px;
+  font-size: var(--text-callout);
   line-height: 1.45;
   color: color-mix(in oklab, var(--foreground) 68%, transparent);
 }
@@ -507,10 +507,10 @@
   }
   .bmoment-title {
     margin-top: 8px;
-    font-size: 18px;
+    font-size: var(--text-section);
   }
   .bmoment-hint {
-    font-size: 11.5px;
+    font-size: var(--text-meta);
     padding-right: 20px;
   }
 }
@@ -548,7 +548,7 @@
   color: white;
 }
 .bmoment-hint {
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.72);
   text-wrap: pretty;
@@ -586,10 +586,10 @@
     padding: 10px 12px 10px 10px;
   }
   .bmoment-foot-title {
-    font-size: 14px;
+    font-size: var(--text-callout);
   }
   .bmoment-foot-sub {
-    font-size: 11.5px;
+    font-size: var(--text-meta);
   }
 }
 .bmoment-foot-orb {
@@ -621,12 +621,12 @@
 }
 .bmoment-foot-title {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--text-card);
   line-height: 1.15;
   color: var(--foreground);
 }
 .bmoment-foot-sub {
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   color: color-mix(in oklab, var(--foreground) 62%, transparent);
 }
 
@@ -642,7 +642,7 @@
   border-radius: 16px;
   border: 1px solid color-mix(in oklab, var(--amber) 35%, transparent);
   background: color-mix(in oklab, var(--amber) 8%, transparent);
-  font-size: 13px;
+  font-size: var(--text-support);
   color: var(--foreground);
 }
 @media (max-width: 640px) {
@@ -782,7 +782,7 @@
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--background) 42%, transparent);
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   letter-spacing: 0.02em;
   color: color-mix(in oklab, var(--foreground) 78%, transparent);
   backdrop-filter: blur(8px);
@@ -793,7 +793,7 @@
   top: 78px;
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 15px;
+  font-size: var(--text-body);
   line-height: 1.25;
   text-align: right;
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
@@ -843,12 +843,12 @@
 }
 .bedit-group-title {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: var(--text-section);
   line-height: 1.15;
 }
 .bedit-group-sub {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: color-mix(in oklab, var(--foreground) 58%, transparent);
 }
 
@@ -891,7 +891,7 @@
 }
 .bedit-field-label {
   display: block;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   line-height: 1;
   color: color-mix(in oklab, var(--foreground) 55%, transparent);
 }
@@ -902,7 +902,7 @@
   background: transparent;
   border: 0;
   outline: none;
-  font-size: 15px;
+  font-size: var(--text-body);
   line-height: 1.3;
   color: var(--foreground);
 }
@@ -911,7 +911,7 @@
 }
 .bedit-field-input--display {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: var(--text-section);
 }
 textarea.bedit-field-input {
   resize: none;
@@ -921,14 +921,14 @@ textarea.bedit-field-input {
   align-self: start;
   padding-top: 2px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.04em;
   color: color-mix(in oklab, var(--foreground) 45%, transparent);
   white-space: nowrap;
 }
 .bedit-field-note {
   padding: 6px 4px 0 58px;
-  font-size: 12px;
+  font-size: var(--text-caption);
   line-height: 1.4;
   color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
@@ -954,7 +954,7 @@ textarea.bedit-field-input {
   align-items: center;
   gap: 6px;
   width: 78px;
-  font-size: 11px;
+  font-size: var(--text-meta);
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   transition: color var(--motion-fast) ease;
 }
@@ -1082,7 +1082,7 @@ textarea.bedit-field-input {
   border-radius: 16px;
   border: 1px solid color-mix(in oklab, var(--rose) 40%, transparent);
   background: color-mix(in oklab, var(--rose) 8%, transparent);
-  font-size: 13px;
+  font-size: var(--text-support);
   color: var(--rose);
 }
 @media (max-width: 640px) {
@@ -1144,7 +1144,7 @@ textarea.bedit-field-input {
 }
 .bedit-presets-label {
   padding: 0 4px 8px;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   color: color-mix(in oklab, var(--foreground) 55%, transparent);
 }
 .bedit-presets-rail {

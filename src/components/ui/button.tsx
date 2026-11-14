@@ -30,8 +30,8 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-11 rounded-pill px-5",
-        sm: "h-9 rounded-pill px-4 text-[13px]",
-        lg: "h-12 rounded-pill px-7 text-[15px]",
+        sm: "h-9 rounded-pill px-4 text-[length:var(--text-support)]",
+        lg: "h-12 rounded-pill px-7 text-[length:var(--text-body)]",
         icon: "h-11 w-11 rounded-pill",
         "icon-sm": "h-9 w-9 rounded-pill",
       },

@@ -147,7 +147,9 @@ function PublicProfilePage() {
         {state.status === "loading" ? (
           <div className="flex items-center justify-center gap-3 py-32 text-faint">
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            <span className="mono text-[11px] uppercase tracking-[0.08em]">Opening the space…</span>
+            <span className="mono text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)]">
+              Opening the space…
+            </span>
           </div>
         ) : state.status === "error" ? (
           <div className="panel mx-auto mt-14 max-w-[480px] p-8 text-center">
@@ -155,7 +157,7 @@ function PublicProfilePage() {
             <button
               type="button"
               onClick={() => setState({ status: "retry" })}
-              className="mono mt-4 rounded-full border border-border px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground"
+              className="mono mt-4 rounded-full border border-border px-4 py-2 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground hover:text-foreground"
             >
               Try again
             </button>
@@ -164,12 +166,12 @@ function PublicProfilePage() {
           <div className="mx-auto mt-14 max-w-[480px] rounded-2xl border border-border bg-surface/40 p-10 text-center">
             <Lock className="mx-auto size-5 text-faint" strokeWidth={1.5} aria-hidden />
             <h1 className="display mt-5 text-[24px]">This space is private.</h1>
-            <p className="mt-2.5 text-[13.5px] leading-relaxed text-muted-foreground">
+            <p className="mt-2.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
               @{handle} keeps their Bloom to themselves right now — and that's okay.
             </p>
             <Link
               to="/"
-              className="mono mt-6 inline-block rounded-full border border-border px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+              className="mono mt-6 inline-block rounded-full border border-border px-4 py-2 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:text-foreground"
             >
               Back to Bloom
             </Link>
@@ -177,12 +179,12 @@ function PublicProfilePage() {
         ) : !model ? (
           <div className="mx-auto mt-14 max-w-[480px] text-center">
             <h1 className="display text-[24px]">No Bloom space here yet.</h1>
-            <p className="mt-2.5 text-[13.5px] text-muted-foreground">
+            <p className="mt-2.5 text-[length:var(--text-support)] text-muted-foreground">
               @{handle} isn't a name in Bloom.
             </p>
             <Link
               to="/"
-              className="mono mt-6 inline-block rounded-full border border-border px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+              className="mono mt-6 inline-block rounded-full border border-border px-4 py-2 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:text-foreground"
             >
               Back to Bloom
             </Link>

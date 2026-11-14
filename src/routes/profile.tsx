@@ -511,7 +511,7 @@ function ProfilePage() {
               ) : null}
               {authState === "signed-out" ? (
                 hasSupabaseConfig ? (
-                  <p className="mb-2 text-center text-[12px] text-faint">
+                  <p className="mb-2 text-center text-[length:var(--text-caption)] text-faint">
                     preview — nothing is saved until you{" "}
                     <button
                       type="button"
@@ -522,7 +522,7 @@ function ProfilePage() {
                     </button>
                   </p>
                 ) : (
-                  <p className="mb-2 text-center text-[12px] text-faint">
+                  <p className="mb-2 text-center text-[length:var(--text-caption)] text-faint">
                     no account connected — your profile is saved on this device
                   </p>
                 )
@@ -593,7 +593,7 @@ function ProfilePage() {
                           Last twelve weeks
                         </h2>
                       </div>
-                      <p className="text-[12px] text-faint">
+                      <p className="text-[length:var(--text-caption)] text-faint">
                         {record.settled ? (
                           `${record.totals.last30} of the last 30 days`
                         ) : (
@@ -607,7 +607,7 @@ function ProfilePage() {
                     {record.settled ? (
                       <RecordGrid days={record.grid} today={record.today} onSelectDay={openDay} />
                     ) : (
-                      <p className="text-[12px] text-faint">Loading your record…</p>
+                      <p className="text-[length:var(--text-caption)] text-faint">Loading your record…</p>
                     )}
                   </div>
                   <div className="pf-card pf-card--pad">
@@ -629,7 +629,7 @@ function ProfilePage() {
                     {record.settled ? (
                       <TrackedThings things={record.things} />
                     ) : (
-                      <p className="text-[12px] text-faint">Loading…</p>
+                      <p className="text-[length:var(--text-caption)] text-faint">Loading…</p>
                     )}
                   </div>
                 </div>
@@ -681,13 +681,13 @@ function ProfilePage() {
                     >
                       <Sparkles className="size-4" strokeWidth={1.8} />
                     </span>
-                    <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
+                    <span className="min-w-0 flex-1 text-[length:var(--text-support)] leading-snug text-muted-foreground">
                       <span className="font-medium text-foreground">
                         Pin one moment that feels like you.
                       </span>{" "}
                       A story, a reflection, a reward, a milestone — only one.
                     </span>
-                    <span className="mono hidden shrink-0 text-[9.5px] tracking-[0.08em] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
+                    <span className="mono hidden shrink-0 text-[length:var(--text-micro)] tracking-[var(--tracking-meta)] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
                       Choose
                     </span>
                   </button>
@@ -737,21 +737,21 @@ function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setArchiveOpen(true)}
-                        className="pf-btn pf-btn--ghost h-8 px-3 text-[12px]"
+                        className="pf-btn pf-btn--ghost h-8 px-3 text-[length:var(--text-caption)]"
                       >
                         <Archive className="size-3.5" aria-hidden /> Archive
                       </button>
                       <button
                         type="button"
                         onClick={() => setComposerOpen(true)}
-                        className="pf-btn h-8 px-3 text-[12px]"
+                        className="pf-btn h-8 px-3 text-[length:var(--text-caption)]"
                       >
                         <Plus className="size-3.5" aria-hidden /> New
                       </button>
                     </div>
                   </div>
                   {space.storiesBlock?.status === "error" ? (
-                    <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[12.5px] text-muted-foreground">
+                    <p className="rounded-xl border border-dashed border-border px-4 py-4 text-center text-[length:var(--text-caption)] text-muted-foreground">
                       {space.storiesBlock.message}{" "}
                       <button
                         type="button"
@@ -801,7 +801,7 @@ function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setHighlightEditor({ id: null, preselect: null })}
-                        className="pf-btn h-8 px-3 text-[12px]"
+                        className="pf-btn h-8 px-3 text-[length:var(--text-caption)]"
                       >
                         <Plus className="size-3.5" aria-hidden /> New highlight
                       </button>
@@ -820,7 +820,7 @@ function ProfilePage() {
                       onEdit={(h) => setHighlightEditor({ id: h.id, preselect: null })}
                     />
                   ) : highlightsBlock?.status === "error" ? (
-                    <p className="text-[12.5px] text-faint">
+                    <p className="text-[length:var(--text-caption)] text-faint">
                       {highlightsBlock.message}{" "}
                       <button
                         type="button"
@@ -939,11 +939,11 @@ function ProfilePage() {
               </section>
 
               <footer className="pf-footer">
-                <p className="display text-[15px] text-muted-foreground">Bloom</p>
-                <p className="mono mt-1 text-[10px] uppercase tracking-[0.08em] text-faint">
+                <p className="display text-[length:var(--text-body)] text-muted-foreground">Bloom</p>
+                <p className="mono mt-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
                   Your record. Your story. Your Bloom.
                 </p>
-                <p className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
+                <p className="mt-3 flex gap-4 text-[length:var(--text-meta)] text-muted-foreground">
                   <Link
                     to="/privacy"
                     className="underline underline-offset-2 hover:text-foreground"

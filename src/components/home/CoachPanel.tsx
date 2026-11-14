@@ -138,7 +138,7 @@ export function CoachPanel({
         </Link>
       </header>
 
-      <div className="mt-4 space-y-2 text-[13px] leading-relaxed">
+      <div className="mt-4 space-y-2 text-[length:var(--text-support)] leading-relaxed">
         {shown ? (
           <>
             {shown.paragraphs.slice(0, 2).map((p, i) => (
@@ -149,17 +149,22 @@ export function CoachPanel({
             {plan && plan.type === "plan" ? (
               <ul className="mt-2 space-y-1.5 rounded-xl border border-border bg-surface-2/40 p-3">
                 {plan.steps.slice(0, 4).map((s, i) => (
-                  <li key={i} className="flex items-baseline justify-between gap-3 text-[12px]">
+                  <li
+                    key={i}
+                    className="flex items-baseline justify-between gap-3 text-[length:var(--text-caption)]"
+                  >
                     <span>{s.label}</span>
                     {s.time ? (
-                      <span className="shrink-0 text-[10.5px] text-muted-foreground">{s.time}</span>
+                      <span className="shrink-0 text-[length:var(--text-micro)] text-muted-foreground">
+                        {s.time}
+                      </span>
                     ) : null}
                   </li>
                 ))}
               </ul>
             ) : null}
             {shown.sources.length ? (
-              <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground/80">
+              <p className="text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground/80">
                 From {shown.sources.slice(0, 3).join(" · ")}
               </p>
             ) : null}
@@ -186,7 +191,7 @@ export function CoachPanel({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Ask about your sleep, mood, cycle…"
-          className="min-w-0 flex-1 bg-transparent py-1.5 text-[13px] outline-none placeholder:text-muted-foreground/70"
+          className="min-w-0 flex-1 bg-transparent py-1.5 text-[length:var(--text-support)] outline-none placeholder:text-muted-foreground/70"
         />
         <button
           type="submit"
@@ -202,7 +207,7 @@ export function CoachPanel({
         </button>
       </form>
       {notice ? (
-        <p className="mt-2 text-[11.5px] text-muted-foreground" role="status">
+        <p className="mt-2 text-[length:var(--text-meta)] text-muted-foreground" role="status">
           {notice}{" "}
           {!coach.profileId ? (
             <Link to="/coach" className="underline underline-offset-2 hover:text-foreground">

@@ -137,3 +137,72 @@ describe("UI guard (warn): spin and bounce", () => {
     console.warn(`[ui-guard] animate-spin: ${spin} (baseline 20) · animate-bounce: ${bounce} (baseline 0)`);
   });
 });
+
+describe("UI guard: type scale discipline (P2-1)", () => {
+  /* Premium pass 2, slice 1: the surfaces below size their text from the
+     type scale in styles.css :root (--text-display … --text-micro). Any
+     literal font-size at or below the section step (18px) in these files
+     is the ad-hoc half-pixel soup regrowing — half-pixel sizes, and
+     anything under the 10px micro floor, fail here. Display sizes above
+     18px stay literal until the display slice (P2-6). Scoped systems
+     (stories.css, cycle.css, components/ci, components/stories) are
+     deliberately outside this guard until P2-7. */
+  const MIGRATED_CSS = new Set([
+    "styles.css",
+    "styles/shell.css",
+    "styles/bloom-sheet.css",
+    "styles/trackers.css",
+    "styles/rewards.css",
+    "styles/mood.css",
+    "styles/coach.css",
+    "styles/profile.css",
+    "styles/progression.css",
+    "styles/health-tools.css",
+    "styles/access.css",
+    "styles/add-habit-modal.css",
+    "styles/welcome.css",
+    "styles/admin-panel.css",
+    "styles/responsive.css",
+  ]);
+  const MIGRATED_TSX_PREFIXES = [
+    "components/assessment/",
+    "components/home/",
+    "components/mood/",
+    "components/profile/",
+    "components/report/",
+    "components/rewards/",
+    "components/system/",
+    "components/tk/",
+    "components/ui/",
+    "routes/",
+  ];
+  const ROUTES = readAll(
+    walk(join(SRC, "routes"), (n) => n.endsWith(".tsx")).filter(
+      (p) => !toRel(p).startsWith("routes/admin/"),
+    ),
+  );
+  const POOL = [...CSS_AND_COMPONENTS, ...ROUTES].filter(
+    (f) =>
+      MIGRATED_CSS.has(f.rel) ||
+      MIGRATED_TSX_PREFIXES.some((p) => f.rel.startsWith(p)),
+  );
+  const CSS_SIZE = /font-size:\s*(\d+(?:\.\d+)?)px/g;
+  const CSS_FONT_SHORT = /\bfont:\s*(\d+(?:\.\d+)?)px/g;
+  const TSX_SIZE = /text-\[(\d+(?:\.\d+)?)px\]/g;
+
+  it("fails on literal small sizes in migrated files", () => {
+    const offenders: string[] = [];
+    for (const f of POOL) {
+      const pats = f.rel.endsWith(".css") ? [CSS_SIZE, CSS_FONT_SHORT] : [TSX_SIZE];
+      for (const pat of pats) {
+        for (const m of f.text.matchAll(pat)) {
+          if (parseFloat(m[1]!) <= 18) offenders.push(`${f.rel}: ${m[0]}`);
+        }
+      }
+    }
+    expect(
+      offenders,
+      `small text must come from the type scale: ${offenders.slice(0, 12).join(", ")}`,
+    ).toEqual([]);
+  });
+});

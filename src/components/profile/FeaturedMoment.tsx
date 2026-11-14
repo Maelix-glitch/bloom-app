@@ -55,13 +55,15 @@ export function FeaturedCard({
       </p>
       {content.body ? (
         <p
-          className="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-muted-foreground"
+          className="mt-3 whitespace-pre-line text-[length:var(--text-callout)] leading-relaxed text-muted-foreground"
           style={{ maxWidth: "54ch" }}
         >
           {content.body}
         </p>
       ) : null}
-      <p className="mono mt-4 text-[10px] uppercase tracking-[0.08em] text-faint">{content.date}</p>
+      <p className="mono mt-4 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+        {content.date}
+      </p>
     </button>
   );
 }
@@ -80,7 +82,7 @@ export function FeaturePrompt({
       <button
         type="button"
         onClick={onPick}
-        className="mono rounded-full border border-border px-3.5 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+        className="mono rounded-full border border-border px-3.5 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
       >
         Change moment
       </button>
@@ -88,7 +90,7 @@ export function FeaturePrompt({
         <button
           type="button"
           onClick={onClear}
-          className="mono rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-rose"
+          className="mono rounded-full px-3.5 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors hover:text-rose"
         >
           Remove
         </button>
@@ -167,11 +169,13 @@ export function FeaturedPicker({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="top-1/2 left-1/2 max-h-[min(86dvh,640px)] w-[calc(100%-1.5rem)] max-w-[480px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border-border bg-background p-0 gap-0 flex flex-col">
         <div className="border-b border-border px-4 py-3">
-          <DialogTitle className="display text-[16px]">What represents you right now?</DialogTitle>
+          <DialogTitle className="display text-[length:var(--text-card)]">
+            What represents you right now?
+          </DialogTitle>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-3">
           {candidates.length === 0 ? (
-            <p className="px-3 py-10 text-center text-[13px] text-muted-foreground">
+            <p className="px-3 py-10 text-center text-[length:var(--text-support)] text-muted-foreground">
               There's nothing to feature yet. Stories, reflections, rewards, and milestones will
               show up here.
             </p>
@@ -181,7 +185,7 @@ export function FeaturedPicker({
                 <button
                   type="button"
                   onClick={() => void choose(null)}
-                  className="flex w-full items-center justify-between rounded-xl border border-dashed border-border px-3.5 py-2.5 text-left text-[13px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+                  className="flex w-full items-center justify-between rounded-xl border border-dashed border-border px-3.5 py-2.5 text-left text-[length:var(--text-support)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
                 >
                   No featured moment
                   {activeKey === null ? <Check className="size-4 text-sage" aria-hidden /> : null}
@@ -202,8 +206,10 @@ export function FeaturedPicker({
                     )}
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13.5px] font-medium">{c.label}</span>
-                      <span className="mono block text-[10px] uppercase tracking-[0.06em] text-faint">
+                      <span className="block truncate text-[length:var(--text-support)] font-medium">
+                        {c.label}
+                      </span>
+                      <span className="mono block text-[length:var(--text-micro)] uppercase tracking-[0.06em] text-faint">
                         {c.sub}
                       </span>
                     </span>

@@ -40,15 +40,24 @@ function PatternsImpl({ patterns }: { patterns: DetectedPattern[] }) {
                   style={{ background: accentVar[accent], opacity: 0.6 }}
                 />
                 <div className="flex items-start justify-between gap-3">
-                  <p className={cn("text-[13px] font-medium", accentText[accent])}>{p.title}</p>
+                  <p
+                    className={cn(
+                      "text-[length:var(--text-support)] font-medium",
+                      accentText[accent],
+                    )}
+                  >
+                    {p.title}
+                  </p>
                   {p.delta ? (
-                    <span className="numeric text-[15px] text-foreground">{p.delta}</span>
+                    <span className="numeric text-[length:var(--text-body)] text-foreground">
+                      {p.delta}
+                    </span>
                   ) : null}
                 </div>
-                <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+                <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
                   {p.statement}
                 </p>
-                <div className="mono mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[11px]">
+                <div className="mono mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[length:var(--text-meta)]">
                   {p.metrics.map((m) => (
                     <span key={m.label} className="text-faint">
                       {m.label} <span className="text-foreground">{m.value}</span>
@@ -85,21 +94,28 @@ function AnomaliesImpl({ anomalies }: { anomalies: Anomaly[] }) {
             <div key={a.date} className="flex flex-wrap items-center gap-4 py-3.5">
               <span
                 className={cn(
-                  "mono rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.08em]",
+                  "mono rounded-full border px-2.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)]",
                   a.kind === "high" ? "border-sage/40 text-sage" : "border-rose/40 text-rose",
                 )}
               >
                 {a.kind === "high" ? "peak" : "dip"}
               </span>
-              <span className="text-[13px] text-foreground">
+              <span className="text-[length:var(--text-support)] text-foreground">
                 {dayjs(a.date).format("ddd, MMM D YYYY")}
               </span>
-              <span className="numeric text-[15px] text-foreground">{a.mood.toFixed(1)}</span>
-              <span className={cn("mono text-[11px]", a.deviation > 0 ? "text-sage" : "text-rose")}>
+              <span className="numeric text-[length:var(--text-body)] text-foreground">
+                {a.mood.toFixed(1)}
+              </span>
+              <span
+                className={cn(
+                  "mono text-[length:var(--text-meta)]",
+                  a.deviation > 0 ? "text-sage" : "text-rose",
+                )}
+              >
                 {a.deviation > 0 ? "+" : ""}
                 {a.deviation.toFixed(2)} vs {a.baseline.toFixed(2)} baseline
               </span>
-              <span className="mono ml-auto flex flex-wrap gap-x-4 text-[11px] text-faint">
+              <span className="mono ml-auto flex flex-wrap gap-x-4 text-[length:var(--text-meta)] text-faint">
                 {a.context.map((c) => (
                   <span key={c.label}>
                     {c.label} <span className="text-muted-foreground">{c.value}</span>

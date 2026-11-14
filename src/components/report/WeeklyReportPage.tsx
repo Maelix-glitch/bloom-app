@@ -35,11 +35,15 @@ function Delta({ now, prev, unit }: { now: number | null; prev: number | null; u
   if (now === null || prev === null) return null;
   const d = Math.round((now - prev) * 10) / 10;
   if (d === 0) {
-    return <span className="text-[11px] text-muted-foreground">level with last week</span>;
+    return (
+      <span className="text-[length:var(--text-meta)] text-muted-foreground">
+        level with last week
+      </span>
+    );
   }
   const up = d > 0;
   return (
-    <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+    <span className="flex items-center gap-1 text-[length:var(--text-meta)] text-muted-foreground">
       {up ? (
         <ArrowUpRight className="size-3 text-primary" />
       ) : (
@@ -54,7 +58,7 @@ function Delta({ now, prev, unit }: { now: number | null; prev: number | null; u
 function Card({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section className="rounded-2xl border border-border bg-surface-1/60 p-5 sm:p-6">
-      <h2 className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <h2 className="text-[length:var(--text-micro)] font-medium uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </h2>
       <div className="mt-4">{children}</div>
@@ -75,7 +79,7 @@ const Stat = ({
     <span className="mt-1 text-muted-foreground">{icon}</span>
     <span>
       <span className="block font-display text-[22px] leading-tight text-foreground">{value}</span>
-      <span className="block text-[11.5px] text-muted-foreground">{caption}</span>
+      <span className="block text-[length:var(--text-meta)] text-muted-foreground">{caption}</span>
     </span>
   </div>
 );
@@ -164,13 +168,13 @@ export function WeeklyReportPage() {
       <main className="min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-[length:var(--text-caption)] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" /> Today
         </Link>
 
         <header className="mt-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-[length:var(--text-micro)] uppercase tracking-[0.2em] text-muted-foreground">
             Weekly report · {report.weekStart} → {report.weekEnd}
           </p>
           <h1 className="mt-2 font-display text-[clamp(28px,5vw,44px)] italic leading-tight">
@@ -179,7 +183,7 @@ export function WeeklyReportPage() {
               : "Your week, read back to you."}
           </h1>
           {intro.tenureWeeks !== null ? (
-            <p className="mt-2 text-[12.5px] text-muted-foreground">
+            <p className="mt-2 text-[length:var(--text-caption)] text-muted-foreground">
               Week {intro.tenureWeeks.toLocaleString()} of your Bloom record
               {report.insight ? " — one thing stands out below." : "."}
             </p>
@@ -187,7 +191,7 @@ export function WeeklyReportPage() {
         </header>
 
         {report.insight ? (
-          <p className="mt-6 flex max-w-2xl items-start gap-3 rounded-2xl border border-primary/25 bg-primary/10 px-5 py-4 text-[14px] leading-relaxed text-foreground">
+          <p className="mt-6 flex max-w-2xl items-start gap-3 rounded-2xl border border-primary/25 bg-primary/10 px-5 py-4 text-[length:var(--text-callout)] leading-relaxed text-foreground">
             <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
             {report.insight}
           </p>
@@ -228,14 +232,14 @@ export function WeeklyReportPage() {
                 {report.usual?.avgMood !== null &&
                 report.usual?.avgMood !== undefined &&
                 report.mood.avgMood !== null ? (
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[length:var(--text-caption)] text-muted-foreground">
                     Against your usual check-in:{" "}
                     <span className="text-foreground">{report.mood.avgMood}</span> vs{" "}
                     {report.usual.avgMood} usually
                   </p>
                 ) : null}
                 {report.mood.dominant ? (
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[length:var(--text-caption)] text-muted-foreground">
                     Most present feeling:{" "}
                     <span className="text-foreground">{report.mood.dominant}</span>
                   </p>
@@ -248,7 +252,7 @@ export function WeeklyReportPage() {
                         style={{ width: `${Math.round(report.mood.positiveShare * 100)}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 text-[length:var(--text-meta)] text-muted-foreground">
                       {Math.round(report.mood.positiveShare * 100)}% of check-ins carried a positive
                       feeling
                     </p>
@@ -277,7 +281,7 @@ export function WeeklyReportPage() {
               <div className="mt-4 space-y-1.5">
                 <Delta now={report.habits.ticks} prev={report.habits.prevTicks} />
                 {report.habits.topHabit ? (
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[length:var(--text-caption)] text-muted-foreground">
                     Most ticked:{" "}
                     <span className="text-foreground">{report.habits.topHabit.name}</span> (
                     {report.habits.topHabit.ticks}×)
@@ -319,10 +323,12 @@ export function WeeklyReportPage() {
                   unit="m"
                 />
                 {usualBodyLine ? (
-                  <p className="text-[12px] text-muted-foreground">{usualBodyLine}</p>
+                  <p className="text-[length:var(--text-caption)] text-muted-foreground">
+                    {usualBodyLine}
+                  </p>
                 ) : null}
                 {report.trackers.sleepGoalShare !== null ? (
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[length:var(--text-caption)] text-muted-foreground">
                     Sleep goal met on{" "}
                     <span className="text-foreground">
                       {Math.round(report.trackers.sleepGoalShare * 100)}%
@@ -341,14 +347,14 @@ export function WeeklyReportPage() {
                 {report.cycle ? (
                   <div className="space-y-1">
                     <p className="font-display text-[22px] leading-tight">{report.cycle.phase}</p>
-                    <p className="text-[12px] text-muted-foreground">
+                    <p className="text-[length:var(--text-caption)] text-muted-foreground">
                       {report.cycle.cycleDay > 0
                         ? `day ${report.cycle.cycleDay} of this cycle`
                         : "cycle day not yet placed"}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-[13px] leading-relaxed text-muted-foreground">
+                  <p className="text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
                     Cycle isn't part of this Bloom, or is paused. The rest of the week still reads
                     fine without it.
                   </p>
@@ -358,7 +364,7 @@ export function WeeklyReportPage() {
           </div>
         )}
 
-        <p className="mt-10 max-w-md text-[11.5px] leading-relaxed text-muted-foreground">
+        <p className="mt-10 max-w-md text-[length:var(--text-meta)] leading-relaxed text-muted-foreground">
           Computed on this device from what you logged. Estimates, not medical advice — and never a
           judgement.
         </p>
