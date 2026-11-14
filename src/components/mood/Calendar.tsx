@@ -89,7 +89,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
               onClick={() => setSelected(day ? (selected === date ? null : date) : null)}
               disabled={!day}
               className={cn(
-                "group relative aspect-square rounded-[10px] border transition-all duration-300",
+                "group relative aspect-square rounded-control border transition-all duration-[var(--motion-page)]",
                 day ? "border-transparent hover:scale-[1.06]" : "border-dashed border-border/60",
                 selected === date && "ring-1 ring-violet",
                 isToday && "border-border-strong",

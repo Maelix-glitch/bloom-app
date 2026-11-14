@@ -9,7 +9,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { Button } from "@/components/ui/button";
@@ -298,10 +298,10 @@ function RootShell({ children }: { children: ReactNode }) {
         </div>
         <style>{`#bloom-boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#14151f;transition:opacity .45s ease}
 #bloom-boot.bloom-boot-done{opacity:0;pointer-events:none}
-.bloom-boot-glow{position:absolute;width:300px;height:300px;border-radius:9999px;background:radial-gradient(closest-side,rgba(232,183,94,.13),transparent 70%);animation:bloom-boot-breathe 2.6s ease-in-out infinite}
+.bloom-boot-glow{position:absolute;width:300px;height:300px;border-radius:9999px;background:radial-gradient(closest-side,rgba(232,183,94,.13),transparent 70%);animation:bloom-boot-breathe 2.6s ease-[var(--ease-out-expo)] infinite}
 .bloom-boot-mark{position:relative}
-.bloom-boot-arc{stroke-dasharray:100;animation:bloom-boot-draw 1.1s ease-out both}
-.bloom-boot-word{position:relative;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;font-weight:500;letter-spacing:.44em;text-indent:.44em;text-transform:uppercase;color:#8b8fa3;animation:bloom-boot-rise .7s ease-out .15s both}
+.bloom-boot-arc{stroke-dasharray:100;animation:bloom-boot-draw 1.1s ease-[var(--ease-out-expo)] both}
+.bloom-boot-word{position:relative;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;font-weight:500;letter-spacing:.44em;text-indent:.44em;text-transform:uppercase;color:#8b8fa3;animation:bloom-boot-rise .7s ease-[var(--ease-out-expo)] .15s both}
 @keyframes bloom-boot-draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
 @keyframes bloom-boot-breathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 @keyframes bloom-boot-rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -325,6 +325,19 @@ function RootComponent() {
      recreated — arrival animation, images and all — on every tab switch.
      At the root the rail is one mount for the whole session. */
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  /* R15 — page entrances are for arrival, not for tab returns. The first
+     route CHANGE marks the document, and the entrance animations stand
+     down from then on (the html.bloom-navigated rules in styles.css);
+     the cold-load entrance still plays exactly once. The sweep behind
+     this: on every tab switch the URL moved instantly while the content
+     trailed it, replaying its entrance over a full refetch. */
+  const arrivalPath = useRef(pathname);
+  useEffect(() => {
+    if (pathname !== arrivalPath.current) {
+      document.documentElement.classList.add("bloom-navigated");
+    }
+  }, [pathname]);
 
   /* B6 — the offline shell. Registered after load, never blocking first paint. */
   useEffect(() => {

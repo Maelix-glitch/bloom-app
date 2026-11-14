@@ -70,7 +70,7 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
                       onBlur={() => setHover(null)}
                       aria-label={`${WEEKDAYS[i]} ${b.label}: ${cell?.count ? `mood ${cell.mood}` : "no entries"}`}
                       className={cn(
-                        "relative h-14 rounded-[10px] border transition-all duration-300",
+                        "relative h-14 rounded-control border transition-all duration-[var(--motion-page)]",
                         cell?.count
                           ? "border-border hover:border-border-strong"
                           : "border-dashed border-border/60",

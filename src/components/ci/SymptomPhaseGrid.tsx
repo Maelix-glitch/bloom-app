@@ -41,7 +41,7 @@ export function SymptomPhaseGrid({
           {PHASES.map((phase) => (
             <span
               key={phase}
-              className="pb-1 text-center text-[9.5px] uppercase tracking-[0.08em] ci-muted"
+              className="pb-1 text-center text-[length:var(--text-micro)] uppercase tracking-[0.08em] ci-muted"
             >
               {compact ? PHASE_LABEL[phase].slice(0, 3) : PHASE_LABEL[phase]}
             </span>

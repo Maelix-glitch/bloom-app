@@ -56,8 +56,8 @@ export function RouteProgress() {
         boxShadow: "0 0 12px rgba(232,183,94,.55)",
         transition:
           width >= 100
-            ? "width .25s ease-out, opacity .3s ease"
-            : "width 1.4s ease-out, opacity .3s ease",
+            ? "width .25s ease-[var(--ease-out-expo)], opacity .3s ease"
+            : "width 1.4s ease-[var(--ease-out-expo)], opacity .3s ease",
       }}
     />
   );

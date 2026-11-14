@@ -30,7 +30,7 @@ export function FeaturedCard({
       disabled={!onOpen}
       aria-label={onOpen ? "Open featured moment" : undefined}
       className={cn(
-        "relative w-full overflow-hidden rounded-2xl border p-6 text-left transition-all duration-500 sm:p-7",
+        "relative w-full overflow-hidden rounded-2xl border p-6 text-left transition-all duration-[var(--motion-signature)] sm:p-7",
         onOpen ? "cursor-pointer hover:-translate-y-[2px]" : "cursor-default",
       )}
       style={{

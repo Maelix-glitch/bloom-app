@@ -205,7 +205,7 @@ export function TrackersPanel({ readings }: { readings: SignalReading[] }) {
             >
               <Link
                 to={t.to}
-                className="relative grid size-[52px] place-items-center rounded-full transition-transform duration-300 group-hover:scale-105"
+                className="relative grid size-[52px] place-items-center rounded-full transition-transform duration-[var(--motion-page)] group-hover:scale-105"
                 aria-label={`${t.label}: ${t.empty ? "nothing logged today" : t.value}`}
               >
                 <svg width="52" height="52" className="absolute -rotate-90" aria-hidden>

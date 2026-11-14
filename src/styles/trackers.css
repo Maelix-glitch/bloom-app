@@ -128,20 +128,20 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--ci-line-strong);
   background: var(--ci-surface-2);
   color: var(--ci-text);
   font-family: var(--ci-font-sans);
   font-size: var(--text-support);
   font-weight: 500;
-  padding: 9px 16px;
+  padding: 9px var(--space-4);
   cursor: pointer;
   transition:
-  background-color 160ms ease,
-  border-color 160ms ease,
-  transform 160ms ease,
-  opacity 160ms ease;
+  background-color var(--motion-standard) var(--ease-out-expo),
+  border-color var(--motion-standard) var(--ease-out-expo),
+  transform var(--motion-standard) var(--ease-out-expo),
+  opacity var(--motion-standard) var(--ease-out-expo);
 }
 
 .ci-btn:hover:not(:disabled) {
@@ -194,7 +194,7 @@
 }
 
 .ci-btn--sm {
-  padding: 8px 13px;
+  padding: var(--space-2) 13px;
   font-size: var(--text-caption);
 }
 
@@ -206,14 +206,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--c-line, var(--ci-line-strong));
   background: var(--c-bg, transparent);
   color: var(--c-fg, var(--ci-text-soft));
   font-size: var(--text-meta);
   font-weight: 500;
   letter-spacing: var(--tracking-body);
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   white-space: nowrap;
 }
 
@@ -221,7 +221,7 @@
   content: "";
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-fg, currentColor);
 }
 
@@ -265,12 +265,12 @@
   text-transform: uppercase;
   color: var(--ci-text-mute);
   font-weight: 400;
-  padding: 0 12px 9px;
+  padding: 0 var(--space-3) 9px;
   border-bottom: 1px solid var(--ci-line-strong);
 }
 
 .ci-table td {
-  padding: 12px;
+  padding: var(--space-3);
   border-bottom: 1px solid var(--ci-line);
   vertical-align: middle;
   color: var(--ci-text-soft);
@@ -484,8 +484,8 @@
 }
 
 .tk2-footer {
-  margin-top: 3rem;
-  padding-top: 1.25rem;
+  margin-top: var(--space-12);
+  padding-top: var(--space-5);
   border-top: 1px solid var(--tk2-rule);
   font-size: var(--text-meta);
   line-height: 1.7;
@@ -503,7 +503,7 @@
 .at {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 3rem 1.25rem 4rem;
+  padding: var(--space-12) var(--space-5) 4rem;
 }
 
 .at-head {
@@ -540,15 +540,15 @@
   align-items: center;
   gap: 0.35rem;
   min-height: 38px;
-  margin-top: 1rem;
+  margin-top: var(--space-4);
   padding: 0 0.85rem;
   border: 1px solid var(--ci-hair-strong, color-mix(in oklab, var(--foreground) 0.16, transparent));
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ci-text-soft);
   font-size: var(--text-caption);
   letter-spacing: var(--tracking-body);
   text-decoration: none;
-  transition: border-color 0.18s ease, color 0.18s ease;
+  transition: border-color var(--motion-standard) var(--ease-out-expo), color var(--motion-standard) var(--ease-out-expo);
 }
 
 .at-body-link:hover {
@@ -558,8 +558,8 @@
 
 .at-board {
   display: grid;
-  gap: 2.5rem;
-  margin-top: 3rem;
+  gap: var(--space-10);
+  margin-top: var(--space-12);
 }
 
 @media (min-width: 960px) {
@@ -576,7 +576,7 @@
 .at-board-main {
   min-width: 0;
   display: grid;
-  gap: 1.5rem;
+  gap: var(--space-6);
   align-content: start;
 }
 
@@ -680,8 +680,8 @@
 .at-key {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  margin: 1.25rem 0 0;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-5) 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--ci-font-mono);
@@ -700,7 +700,7 @@
 .at-key i {
   width: 12px;
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--ci-text);
   opacity: 0.7;
 }
@@ -763,7 +763,7 @@
 }
 
 .tk-heat i {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .tk-heat i[data-level="1"] {
@@ -771,7 +771,7 @@
 }
 
 .at-leaders {
-  margin: 1.5rem 0 0;
+  margin: var(--space-6) 0 0;
   padding: 0;
   list-style: none;
   max-width: 34rem;
@@ -780,7 +780,7 @@
 .at-leaders li {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: var(--space-2);
   padding: 0.35rem 0;
   font-size: var(--text-caption);
   border-bottom: 1px dotted var(--tk2-rule);
@@ -813,7 +813,7 @@
 
 .at-territory {
   position: relative;
-  padding-left: 1rem;
+  padding-left: var(--space-4);
   border-left: 1px solid var(--tk2-rule);
 }
 
@@ -821,12 +821,12 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .at-place {
   font-family: var(--ci-font-display);
-  font-size: 19px;
+  font-size: var(--text-section);
 }
 
 .at-coord {
@@ -840,7 +840,7 @@
   display: block;
   width: 100%;
   height: 54px;
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
 }
 
 .at-contour-line {
@@ -871,7 +871,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
   margin-top: 0.35rem;
   font-family: var(--ci-font-mono);
   font-size: var(--text-micro);
@@ -881,13 +881,13 @@
 
 .at-territory-actions {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .at-territory-actions button {
   padding: 0.15rem 0.4rem;
   border: 1px solid var(--tk2-rule);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: var(--ci-font-mono);
   font-size: var(--text-micro);
   color: var(--ci-text-soft);
@@ -901,7 +901,7 @@
 
 .at-notice {
   min-height: 1.2rem;
-  margin-top: 1rem;
+  margin-top: var(--space-4);
   font-family: var(--ci-font-mono);
   font-size: var(--text-meta);
   color: var(--ci-follicular);
@@ -912,9 +912,9 @@
 }
 
 .at-sectionhead {
-  padding-bottom: 0.75rem;
+  padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--tk2-rule);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
   font-family: var(--ci-font-sans);
   font-weight: 600;
 }
@@ -995,8 +995,8 @@
 .at-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin: 1rem 0 0;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--ci-font-mono);
@@ -1066,7 +1066,7 @@
 .at-contrasts li {
   display: grid;
   grid-template-columns: 8rem minmax(0, 1fr) auto;
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: center;
   padding: 0.7rem 0;
   border-bottom: 1px solid var(--tk2-rule);
@@ -1080,7 +1080,7 @@
 .at-pair i {
   display: block;
   height: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--ci-text);
 }
 
@@ -1094,13 +1094,13 @@
 
 .at-coord em {
   display: inline-block;
-  margin-left: 0.5rem;
+  margin-left: var(--space-2);
   font-style: normal;
   opacity: 0.6;
 }
 
 .at-finelist, .at-observations {
-  margin: 1.25rem 0 0;
+  margin: var(--space-5) 0 0;
   padding: 0;
   list-style: none;
   max-width: 72ch;
@@ -1116,7 +1116,7 @@
 .at-observations li {
   display: grid;
   grid-template-columns: 2.5rem minmax(0, 1fr);
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .at-observations li span {
@@ -1139,7 +1139,7 @@
 }
 
 .at-loading {
-  margin-top: 3rem;
+  margin-top: var(--space-12);
   font-family: var(--ci-font-mono);
   font-size: var(--text-meta);
   color: var(--ci-text-mute);
@@ -1166,7 +1166,7 @@
   display: inline-block;
   width: 5px;
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--ci-text-mute);
   transform: translateY(-2px);
 }
@@ -1197,7 +1197,7 @@
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
-  transition: opacity 0.18s ease;
+  transition: opacity var(--motion-standard) var(--ease-out-expo);
 }
 
 .tk2-sync-retry:hover {
@@ -1220,17 +1220,17 @@
 /* "What you track" — six switches above the targets. Off = kept, not counted. */
 
 .tk2-active {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   padding: 0.8rem 0.9rem 0.9rem;
   border: 1px dashed var(--tk2-rule);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
 }
 
 .tk2-active-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 0.75rem;
+  gap: var(--space-1) var(--space-3);
   margin: 0 0 0.6rem;
   font-family: var(--ci-font-mono);
   font-size: var(--text-micro);
@@ -1261,24 +1261,24 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.35rem 0.7rem 0.35rem 0.5rem;
+  padding: 0.35rem 0.7rem 0.35rem var(--space-2);
   border: 1px solid var(--tk2-rule);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--ci-text-mute);
   font: inherit;
   font-size: var(--text-caption);
   cursor: pointer;
   transition:
-  border-color 0.18s ease,
-  color 0.18s ease,
-  opacity 0.18s ease;
+  border-color var(--motion-standard) var(--ease-out-expo),
+  color var(--motion-standard) var(--ease-out-expo),
+  opacity var(--motion-standard) var(--ease-out-expo);
 }
 
 .tk2-active-toggle i {
   width: 9px;
   height: 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: currentColor;
   opacity: 0.35;
 }
@@ -1337,7 +1337,7 @@
 
 .tk2-targets-grid, .tk2-badges-grid {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1350,7 +1350,7 @@
   gap: 0.35rem;
   padding: 0.7rem 0.8rem;
   border: 1px solid var(--tk2-rule);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
 }
 
 .tk2-targets-grid label {
@@ -1378,7 +1378,7 @@
   font-family: var(--ci-font-mono);
   font-size: var(--text-section);
   font-variant-numeric: tabular-nums;
-  transition: border-color 0.18s ease;
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .tk2-targets-grid input:focus {
@@ -1402,8 +1402,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.5rem 1rem;
-  margin: 1rem 0 0;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-4) 0 0;
   font-size: var(--text-meta);
   color: var(--ci-text-mute);
 }
@@ -1424,11 +1424,11 @@
 }
 
 .tk2-badges {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
 }
 
 .tk2-badges-count {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   font-family: var(--ci-font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
@@ -1442,7 +1442,7 @@
   gap: 0.2rem;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--tk2-rule);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   opacity: 0.55;
 }
 
@@ -1642,7 +1642,7 @@
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
   border: 1px solid var(--card-border);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   box-shadow:
   inset 0px 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
   0px 12px 30px rgba(0, 0, 0, 0.4);
@@ -1714,9 +1714,9 @@
 
 .tk2-numbers {
   display: inline-flex;
-  gap: 4px;
-  margin-top: 8px;
-  padding: 4px;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  padding: var(--space-1);
   border: 1px solid color-mix(in oklab, var(--foreground) 0.05, transparent);
   border-radius: 30px;
   background: color-mix(in oklab, var(--foreground) 0.02, transparent);
@@ -1735,7 +1735,7 @@
   color: var(--text-muted);
   font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--motion-standard) var(--ease-out-expo);
 }
 
 .tk2-number:hover:not(:disabled) {
@@ -1779,14 +1779,14 @@
   height: 32px;
   padding: 0 10px;
   border: 1px solid color-mix(in oklab, var(--foreground) 0.08, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-muted);
   font-size: 0.72rem;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--motion-standard) var(--ease-out-expo);
 }
 
 .at-territory-actions button:hover {
@@ -1813,13 +1813,13 @@
    is still missing, so an increment sweeps into place instead of jumping. */
 
 .at-arc {
-  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: stroke-dashoffset var(--motion-signature) var(--ease-out-expo);
 }
 
 .at-cap {
   transition:
-  cx 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-  cy 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cx var(--motion-page) var(--ease-out-expo),
+  cy var(--motion-page) var(--ease-out-expo);
 }
 
 /* the night itself — bed to wake — kept as a hairline outside the rings */
@@ -1854,8 +1854,8 @@
 .at-territory {
   cursor: pointer;
   transition:
-  border-color 0.2s ease,
-  transform 0.2s ease;
+  border-color var(--motion-standard) var(--ease-out-expo),
+  transform var(--motion-standard) var(--ease-out-expo);
 }
 
 .at-territory:hover {
@@ -1874,7 +1874,7 @@
   text-transform: uppercase;
   color: var(--text-dim);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--motion-standard) var(--ease-out-expo);
 }
 
 .at-territory:hover .at-territory-more, .at-territory:focus-visible .at-territory-more {
@@ -1947,7 +1947,7 @@
      appears later in the file for readability. */
 
   .premium-action-dock .premium-log-cta {
-    padding: 13px 24px;
+    padding: 13px var(--space-6);
     font-size: 0.8rem;
     max-width: calc(100dvw - 32px);
     white-space: nowrap;
@@ -1964,12 +1964,12 @@
   text-transform: none;
   letter-spacing: var(--tracking-body);
   font-size: 0.85rem;
-  padding: 12px 26px;
-  border-radius: 999px;
+  padding: var(--space-3) 26px;
+  border-radius: var(--radius-pill);
   border: none;
   box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--motion-standard) var(--ease-out-expo);
 }
 
 .premium-log-cta:hover {
@@ -2074,15 +2074,15 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-insight {
   background: linear-gradient(180deg, rgba(18, 18, 22, 0.4) 0%, rgba(8, 8, 10, 0.6) 100%);
   border: 1px solid var(--glass-border-rim);
-  border-radius: 20px;
-  padding: 32px;
-  margin: 32px 0;
+  border-radius: var(--radius-dialog);
+  padding: var(--space-8);
+  margin: var(--space-8) 0;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .tk2-insight-caption {
   display: block;
-  margin: 0 0 20px;
+  margin: 0 0 var(--space-5);
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: var(--tracking-wide);
@@ -2099,8 +2099,8 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-insight-list li {
   display: grid;
   grid-template-columns: 32px 1fr;
-  gap: 20px;
-  padding: 16px 0;
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.03, transparent);
   color: var(--text-ultra-white);
   font-size: 0.88rem;
@@ -2128,9 +2128,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .at-territory {
   overflow: hidden;
-  padding: 24px;
+  padding: var(--space-6);
   border: 1px solid var(--glass-border-rim);
-  border-radius: 20px;
+  border-radius: var(--radius-dialog);
   background:
   linear-gradient(135deg, color-mix(in oklab, var(--gold) 0.03, transparent) 0%, rgba(138, 43, 226, 0.03) 100%),
   var(--panel-glass-bg);
@@ -2140,9 +2140,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
   0 10px 30px rgba(0, 0, 0, 0.35);
   transition:
-  border-color 0.3s ease,
-  transform 0.3s ease,
-  box-shadow 0.3s ease;
+  border-color var(--motion-page) var(--ease-out-expo),
+  transform var(--motion-page) var(--ease-out-expo),
+  box-shadow var(--motion-page) var(--ease-out-expo);
 }
 
 .at-territory:hover {
@@ -2159,7 +2159,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   font-weight: 500;
   color: var(--text-ultra-white);
   letter-spacing: var(--tracking-heading);
-  margin: 0 0 12px 0;
+  margin: 0 0 var(--space-3) 0;
 }
 
 .at-territory-foot span {
@@ -2190,7 +2190,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .tk2-root .ci-table-wrap, .ci-table {
   border: 1px solid var(--glass-border-rim);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   background: rgba(12, 12, 15, 0.4);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
@@ -2202,7 +2202,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .ci-table th {
-  padding: 18px 24px;
+  padding: 18px var(--space-6);
   color: var(--text-cool-silver);
   font-size: 0.68rem;
   text-transform: uppercase;
@@ -2214,7 +2214,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .ci-table tbody tr {
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.025, transparent);
   background: transparent;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .ci-table tbody tr:hover {
@@ -2222,7 +2222,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .ci-table tbody th, .ci-table td {
-  padding: 20px 24px;
+  padding: var(--space-5) var(--space-6);
   font-size: 0.85rem;
   color: var(--text-ultra-white);
   font-weight: 400;
@@ -2240,9 +2240,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   background: none;
   border: none;
   color: var(--text-cool-silver);
-  padding: 4px;
+  padding: var(--space-1);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color var(--motion-standard) var(--ease-out-expo);
 }
 
 .tk2-row-action:hover:not(:disabled) {
@@ -2259,7 +2259,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .at-arc {
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: stroke-dashoffset var(--motion-signature) var(--ease-out-expo);
 }
 
 .at-track {
@@ -2303,7 +2303,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
   .at-contrasts li {
     grid-template-columns: minmax(0, 1fr);
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
 /* every tap target on the page meets the 44px floor */
@@ -2331,7 +2331,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-sheet-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
+  gap: 18px var(--space-5);
   margin-top: 26px;
 }
 
@@ -2350,17 +2350,17 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-sheet-input {
   width: 100%;
   margin-top: 6px;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   border: none;
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.12, transparent);
   border-radius: 0;
   background: transparent;
   color: var(--text-primary);
   font-family: var(--ci-font-mono), ui-monospace, monospace;
-  font-size: 1.25rem;
+  font-size: var(--text-title);
   font-weight: 300;
   text-align: left;
-  transition: border-color 0.2s;
+  transition: border-color var(--motion-standard);
 }
 
 .tk2-sheet-input:focus {
@@ -2397,12 +2397,12 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   }
 
   .at-title {
-    font-size: 24px;
+    font-size: var(--text-title);
   }
 
   .premium-log-cta {
     font-size: 0.78rem !important;
-    padding: 13px 24px !important;
+    padding: 13px var(--space-6) !important;
     letter-spacing: var(--tracking-label) !important;
   }
 
@@ -2414,7 +2414,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   .tk2-footer {
     font-size: var(--text-micro);
     line-height: var(--leading-body);
-    margin-top: 2rem;
+    margin-top: var(--space-8);
   }
 
   /* The snapshot sheet's old centred-pop overrides lived here (item 5
@@ -2434,7 +2434,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 3px;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .tk-heat-axis span {

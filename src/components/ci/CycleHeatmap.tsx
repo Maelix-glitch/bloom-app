@@ -90,7 +90,7 @@ export function CycleHeatmap({
       <div className="flex gap-1.5">
         <div className="flex flex-col justify-between py-[1px] pr-1">
           {DAY_LABELS.map((label, i) => (
-            <span key={i} className="h-[13px] text-[9px] leading-[13px] ci-muted">
+            <span key={i} className="h-[13px] text-[length:var(--text-micro)] leading-[13px] ci-muted">
               {label}
             </span>
           ))}

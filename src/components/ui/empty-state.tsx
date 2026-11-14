@@ -38,7 +38,7 @@ export function EmptyState({ title, description, action, glyph, className }: Emp
       >
         {glyph ?? <BloomIcon name="empty-garden" size={28} />}
       </div>
-      <h3 className="mt-5 font-display text-[22px] font-medium leading-tight text-foreground">
+      <h3 className="mt-5 font-display text-[length:var(--text-title)] font-medium leading-tight text-foreground">
         {title}
       </h3>
       {description ? (

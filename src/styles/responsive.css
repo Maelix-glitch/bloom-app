@@ -27,7 +27,7 @@
   /* page geometry */
   --bloom-page-px: 20px; /* mobile page gutter */
   --bloom-page-px-sm: 32px; /* ≥640px gutter */
-  --bloom-section-gap: 1.5rem; /* rhythm between sections on phones */
+  --bloom-section-gap: var(--space-6); /* rhythm between sections on phones */
   --bloom-card-pad: 1rem; /* compact card padding on phones */
   --bloom-content-max: 72rem; /* widest comfortable reading column */
 
@@ -59,7 +59,7 @@
 @media (min-width: 40rem) {
   :root {
     --bloom-page-px: 32px;
-    --bloom-section-gap: 2rem;
+    --bloom-section-gap: var(--space-8);
     --bloom-card-pad: 1.25rem;
   }
 }
@@ -135,9 +135,9 @@ nav.app-mobile-nav {
   text-overflow: ellipsis;
   -webkit-tap-highlight-color: transparent;
   transition:
-    color 180ms ease,
-    background-color 180ms ease,
-    transform 140ms ease;
+    color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-micro) var(--ease-out-expo);
 }
 
 .app-mobile-nav > a:active {
@@ -369,11 +369,11 @@ textarea {
 @media (max-width: 639px) {
   .bmoment-grid {
     gap: 10px;
-    padding: 10px 14px 4px;
+    padding: 10px 14px var(--space-1);
   }
   .bmoment-tile {
     min-height: 128px;
-    padding: 12px 12px 10px;
+    padding: var(--space-3) var(--space-3) 10px;
     border-radius: 18px;
   }
   .bmoment-orb {
@@ -385,16 +385,16 @@ textarea {
     height: 19px;
   }
   .bmoment-title {
-    margin-top: 8px;
+    margin-top: var(--space-2);
     font-size: var(--text-section);
   }
   .bmoment-hint {
     font-size: var(--text-meta);
-    padding-right: 20px;
+    padding-right: var(--space-5);
   }
   .bmoment-foot {
     margin: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px));
-    padding: 10px 12px 10px 10px;
+    padding: 10px var(--space-3) 10px 10px;
   }
   .bmoment-foot-title {
     font-size: var(--text-callout);
@@ -418,7 +418,7 @@ textarea {
   /* the saved summary wraps 3-up instead of squeezing six across */
   .bsheet--phone .metrics-saved-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 12px 8px;
+    gap: var(--space-3) var(--space-2);
   }
 }
 

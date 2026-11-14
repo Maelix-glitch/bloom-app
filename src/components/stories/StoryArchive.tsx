@@ -262,7 +262,7 @@ function ArchiveCard({
           style={{ background: "linear-gradient(0deg, rgba(8,6,16,0.6), transparent)" }}
           aria-hidden
         />
-        <span className="mono absolute bottom-1.5 left-2 text-[9px] tracking-[0.06em] text-white/75">
+        <span className="mono absolute bottom-1.5 left-2 text-[length:var(--text-micro)] tracking-[0.06em] text-white/75">
           {new Date(story.createdAt).toLocaleDateString(undefined, {
             day: "numeric",
             month: "short",
@@ -270,7 +270,7 @@ function ArchiveCard({
         </span>
         {story.audience === "close" ? (
           <span
-            className="absolute left-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.06em]"
+            className="absolute left-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[length:var(--text-micro)] font-bold uppercase tracking-[0.06em]"
             style={{ background: "rgba(20,17,29,0.7)", color: "var(--sage)" }}
             aria-label="Close friends story"
           >

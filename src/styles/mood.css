@@ -49,7 +49,7 @@
 
 .bmood-head {
   position: relative;
-  padding: 30px 26px 8px;
+  padding: 30px 26px var(--space-2);
 }
 .bmood-eyebrow {
   font-family: var(--font-mono);
@@ -69,7 +69,7 @@
 .bmood-title em {
   font-style: italic;
   color: var(--bmood-accent);
-  transition: color 420ms var(--ease-out-expo);
+  transition: color var(--motion-page) var(--ease-out-expo);
 }
 .bmood-sub {
   margin-top: 10px;
@@ -126,16 +126,16 @@
   flex-direction: column;
   align-items: center;
   gap: 9px;
-  padding: 8px 2px 6px;
+  padding: var(--space-2) 2px 6px;
   border: 0;
   border-radius: 18px;
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform 420ms var(--ease-out-expo),
-    background-color 300ms ease,
-    opacity 300ms ease;
+    transform var(--motion-page) var(--ease-out-expo),
+    background-color var(--motion-page) var(--ease-out-expo),
+    opacity var(--motion-page) var(--ease-out-expo);
 }
 .bmood-face:hover {
   background: color-mix(in oklab, var(--foreground) 5%, transparent);
@@ -160,8 +160,8 @@
   display: grid;
   place-items: center;
   transition:
-    transform 520ms var(--ease-out-expo),
-    filter 520ms var(--ease-out-expo);
+    transform var(--motion-signature) var(--ease-out-expo),
+    filter var(--motion-signature) var(--ease-out-expo);
 }
 .bmood-face[aria-pressed="true"] {
   opacity: 1;
@@ -184,14 +184,14 @@
    * override it.
    */
   transform: translate(-50%, 0);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: radial-gradient(
     circle,
     color-mix(in oklab, var(--bmood-face-color, var(--violet)) 26%, transparent),
     transparent 68%
   );
   opacity: 0;
-  transition: opacity 520ms var(--ease-out-expo);
+  transition: opacity var(--motion-signature) var(--ease-out-expo);
   pointer-events: none;
 }
 .bmood-face[aria-pressed="true"] .bmood-face-halo {
@@ -201,7 +201,7 @@
   font-size: var(--text-meta);
   line-height: var(--leading-tight);
   color: color-mix(in oklab, var(--foreground) 55%, transparent);
-  transition: color 300ms ease;
+  transition: color var(--motion-page) var(--ease-out-expo);
 }
 .bmood-face[aria-pressed="true"] .bmood-face-label {
   color: var(--bmood-face-color, var(--foreground));
@@ -214,7 +214,7 @@
   translate: -50% 0;
   z-index: 1;
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
   background: color-mix(in oklab, var(--background) 80%, transparent);
   font-size: var(--text-micro);
@@ -232,7 +232,7 @@
   width: 8px;
   height: 8px;
   translate: -50% -50%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid var(--foreground);
   background: var(--background);
   opacity: 0.55;
@@ -251,8 +251,8 @@
   opacity: 0;
   scale: 0.6;
   transition:
-    opacity 260ms ease,
-    scale 320ms var(--ease-out-expo);
+    opacity var(--motion-page) var(--ease-out-expo),
+    scale var(--motion-page) var(--ease-out-expo);
 }
 .bmood-face[aria-pressed="true"] .bmood-face-tick {
   opacity: 1;
@@ -276,11 +276,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 .bmood-chip {
   padding: 7px 13px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
   font-size: var(--text-caption);
@@ -288,10 +288,10 @@
   color: color-mix(in oklab, var(--foreground) 72%, transparent);
   cursor: pointer;
   transition:
-    transform var(--motion-fast) ease,
-    background-color 260ms ease,
-    border-color 260ms ease,
-    color 260ms ease;
+    transform var(--motion-fast) var(--ease-out-expo),
+    background-color var(--motion-page) var(--ease-out-expo),
+    border-color var(--motion-page) var(--ease-out-expo),
+    color var(--motion-page) var(--ease-out-expo);
 }
 .bmood-chip:hover {
   background: color-mix(in oklab, var(--foreground) 9%, transparent);
@@ -310,7 +310,7 @@
   color: color-mix(in oklab, var(--chip-accent, var(--violet)) 88%, var(--foreground));
 }
 .bmood-band > .bmood-more:first-child {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 /* the unfolded words: the same chips, given their own breath below the toggle */
@@ -324,8 +324,8 @@
 .bmood-note {
   display: block;
   width: 100%;
-  margin-top: 12px;
-  padding: 14px 16px;
+  margin-top: var(--space-3);
+  padding: 14px var(--space-4);
   min-height: 74px;
   border: 0;
   border-radius: 18px;
@@ -336,8 +336,8 @@
   resize: none;
   outline: none;
   transition:
-    background-color 260ms ease,
-    box-shadow 260ms ease;
+    background-color var(--motion-page) var(--ease-out-expo),
+    box-shadow var(--motion-page) var(--ease-out-expo);
 }
 .bmood-note::placeholder {
   color: color-mix(in oklab, var(--foreground) 34%, transparent);
@@ -352,10 +352,10 @@
 .bmood-more {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   margin-top: 18px;
-  padding: 10px 4px;
+  padding: 10px var(--space-1);
   border: 0;
   border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   background: transparent;
@@ -363,7 +363,7 @@
   color: color-mix(in oklab, var(--foreground) 58%, transparent);
   cursor: pointer;
   text-align: left;
-  transition: color var(--motion-fast) ease;
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .bmood-more:hover {
   color: var(--foreground);
@@ -381,7 +381,7 @@
   color: color-mix(in oklab, var(--foreground) 42%, transparent);
 }
 .bmood-more-chevron {
-  transition: rotate 320ms var(--ease-out-expo);
+  transition: rotate var(--motion-page) var(--ease-out-expo);
 }
 .bmood-more[aria-expanded="true"] .bmood-more-chevron {
   rotate: 180deg;
@@ -389,8 +389,8 @@
 
 .bmood-detail {
   display: grid;
-  gap: 20px;
-  padding: 18px 26px 4px;
+  gap: var(--space-5);
+  padding: 18px 26px var(--space-1);
   border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 .bmood-detail-grid {
@@ -416,7 +416,7 @@
 }
 .bmood-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   border-radius: 12px;
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
@@ -424,8 +424,8 @@
   color: var(--foreground);
   outline: none;
   transition:
-    border-color 220ms ease,
-    box-shadow 220ms ease;
+    border-color var(--motion-standard) var(--ease-out-expo),
+    box-shadow var(--motion-standard) var(--ease-out-expo);
 }
 .bmood-input::placeholder {
   color: color-mix(in oklab, var(--foreground) 30%, transparent);
@@ -450,7 +450,7 @@ select.bmood-input {
 .bmood-slider {
   width: 100%;
   height: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   appearance: none;
   background: color-mix(in oklab, var(--foreground) 14%, transparent);
   outline: none;
@@ -460,11 +460,11 @@ select.bmood-input {
   appearance: none;
   width: 18px;
   height: 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--foreground);
   border: 3px solid var(--surface);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  transition: scale var(--motion-fast) ease;
+  transition: scale var(--motion-fast) var(--ease-out-expo);
 }
 .bmood-slider::-webkit-slider-thumb:active {
   scale: 1.12;
@@ -472,7 +472,7 @@ select.bmood-input {
 .bmood-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--foreground);
   border: 3px solid var(--surface);
 }
@@ -490,8 +490,8 @@ select.bmood-input {
 .bmood-foot {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 26px 22px;
+  gap: var(--space-3);
+  padding: var(--space-4) 26px 22px;
   margin-top: 6px;
 }
 @media (max-width: 640px) {
@@ -505,20 +505,20 @@ select.bmood-input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   height: 50px;
-  padding: 0 24px;
+  padding: 0 var(--space-6);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bmood-accent);
   color: oklch(0.17 0.02 150);
   font-size: var(--text-callout);
   font-weight: 500;
   cursor: pointer;
   transition:
-    transform 200ms var(--ease-out-expo),
-    filter 200ms ease,
-    opacity 200ms ease;
+    transform var(--motion-standard) var(--ease-out-expo),
+    filter var(--motion-standard) var(--ease-out-expo),
+    opacity var(--motion-standard) var(--ease-out-expo);
 }
 .bmood-save:hover:not(:disabled) {
   filter: brightness(1.07);
@@ -542,13 +542,13 @@ select.bmood-input {
 /* Delete, and the calm two-button confirm that replaces it in place. */
 .bmood-danger {
   flex: none;
-  padding: 10px 4px;
+  padding: 10px var(--space-1);
   border: 0;
   background: transparent;
   font-size: var(--text-caption);
   color: color-mix(in oklab, var(--foreground) 48%, transparent);
   cursor: pointer;
-  transition: color var(--motion-fast) ease;
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .bmood-danger:hover {
   color: var(--rose);
@@ -561,27 +561,27 @@ select.bmood-input {
 .bmood-confirm {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--rose) 34%, transparent);
   background: color-mix(in oklab, var(--rose) 8%, transparent);
 }
 .bmood-confirm-q {
-  padding-left: 8px;
+  padding-left: var(--space-2);
   font-size: var(--text-caption);
   color: color-mix(in oklab, var(--foreground) 74%, transparent);
   white-space: nowrap;
 }
 .bmood-confirm-btn {
-  padding: 8px 14px;
+  padding: var(--space-2) 14px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--text-caption);
   cursor: pointer;
   transition:
-    transform var(--motion-fast) ease,
-    filter var(--motion-fast) ease;
+    transform var(--motion-fast) var(--ease-out-expo),
+    filter var(--motion-fast) var(--ease-out-expo);
 }
 .bmood-confirm-btn:active {
   transform: scale(0.96);
@@ -608,7 +608,7 @@ select.bmood-input {
 .bmood-error {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0 26px;
   padding: 10px 14px;
   border-radius: 14px;
@@ -709,7 +709,7 @@ select.bmood-input {
 
 /* the order the note asks for: hero → mood logging → journey → insight */
 .mood-page .mm-enter {
-  animation: mm-rise 720ms var(--mm-ease) both;
+  animation: mm-rise var(--motion-signature) var(--mm-ease) both;
 }
 .mood-page .mm-enter[data-order="0"] {
   animation-delay: 0ms;
@@ -738,7 +738,7 @@ select.bmood-input {
 
 /* the hero's inner content arrives a beat after the panel */
 .mood-page .mm-hero-copy > * {
-  animation: mm-rise 800ms var(--mm-ease) both;
+  animation: mm-rise var(--motion-signature) var(--mm-ease) both;
 }
 .mood-page .mm-hero-copy > :nth-child(1) {
   animation-delay: 120ms;
@@ -861,18 +861,18 @@ select.bmood-input {
   position: relative;
   display: grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition:
-    transform 420ms var(--mm-spring),
-    opacity 420ms ease,
-    filter 420ms ease;
+    transform var(--motion-page) var(--mm-spring),
+    opacity var(--motion-page) var(--ease-out-expo),
+    filter var(--motion-page) var(--ease-out-expo);
 }
 .mood-page .mm-face-btn:hover:not(:disabled) .mm-face {
   transform: scale(1.04) translateY(-2px);
 }
 .mood-page .mm-face-btn:active:not(:disabled) .mm-face {
   transform: scale(0.97);
-  transition-duration: 110ms;
+  transition-duration: var(--motion-micro);
 }
 /* the chosen face: glow + scale 1.06; the others recede */
 .mood-page .mm-face[data-active="true"] {
@@ -896,7 +896,7 @@ select.bmood-input {
 .mood-page .mm-face svg path,
 .mood-page .mm-face svg circle,
 .mood-page .mm-face svg g {
-  transition: opacity 360ms ease;
+  transition: opacity var(--motion-page) var(--ease-out-expo);
 }
 
 /* one ripple ring around the face just picked */
@@ -914,16 +914,16 @@ select.bmood-input {
   content: "";
   position: absolute;
   inset: -6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid oklch(0.86 0.1 85 / 0.7);
-  animation: mm-ripple 760ms var(--mm-ease) both;
+  animation: mm-ripple var(--motion-signature) var(--mm-ease) both;
   pointer-events: none;
 }
 /* label follows the face */
 .mood-page .mm-face-btn .mm-face-label {
   transition:
-    color 300ms ease,
-    transform 420ms var(--mm-spring);
+    color var(--motion-page) var(--ease-out-expo),
+    transform var(--motion-page) var(--mm-spring);
 }
 .mood-page .mm-face-btn:hover:not(:disabled) .mm-face-label {
   transform: translateY(-1px);
@@ -947,7 +947,7 @@ select.bmood-input {
   opacity: 0;
 }
 .mood-page [data-inview="true"] .mm-area {
-  animation: mm-fade 900ms ease 700ms both;
+  animation: mm-fade var(--motion-signature) var(--ease-out-expo) 700ms both;
 }
 @keyframes mm-fade {
   to {
@@ -961,7 +961,7 @@ select.bmood-input {
   transform: scale(0.4);
 }
 .mood-page [data-inview="true"] .mm-point {
-  animation: mm-pop 520ms var(--mm-ease) both;
+  animation: mm-pop var(--motion-signature) var(--mm-ease) both;
   animation-delay: calc(240ms + var(--mm-i, 0) * 70ms);
 }
 @keyframes mm-pop {
@@ -1007,7 +1007,7 @@ select.bmood-input {
   white-space: nowrap;
   pointer-events: none;
   transform: translate(-50%, calc(-100% - 14px));
-  animation: mm-tip-in 220ms var(--mm-ease) both;
+  animation: mm-tip-in var(--motion-standard) var(--mm-ease) both;
 }
 .mood-page .mm-tip small {
   display: block;
@@ -1032,9 +1032,9 @@ select.bmood-input {
 
 .mood-page .mm-insight {
   transition:
-    transform 320ms var(--mm-ease),
-    filter 320ms ease,
-    background-color 320ms ease;
+    transform var(--motion-page) var(--mm-ease),
+    filter var(--motion-page) var(--ease-out-expo),
+    background-color var(--motion-page) var(--ease-out-expo);
 }
 .mood-page .mm-insight:hover {
   transform: translateY(-2px);
@@ -1042,7 +1042,7 @@ select.bmood-input {
 }
 .mood-page .mm-insight:active {
   transform: scale(0.985);
-  transition-duration: 110ms;
+  transition-duration: var(--motion-micro);
 }
 @keyframes mm-glow {
   0%,
@@ -1061,9 +1061,9 @@ select.bmood-input {
 
 .mood-page .mm-btn {
   transition:
-    transform 380ms var(--mm-spring),
-    filter 200ms ease,
-    opacity 200ms ease;
+    transform var(--motion-page) var(--mm-spring),
+    filter var(--motion-standard) var(--ease-out-expo),
+    opacity var(--motion-standard) var(--ease-out-expo);
 }
 .mood-page .mm-btn:hover:not(:disabled) {
   transform: translateY(-1px);
@@ -1071,7 +1071,7 @@ select.bmood-input {
 }
 .mood-page .mm-btn:active:not(:disabled) {
   transform: scale(0.97);
-  transition-duration: 90ms;
+  transition-duration: var(--motion-micro);
 }
 
 /* ------------------------------------------------------------ reduced motion */
@@ -1079,7 +1079,7 @@ select.bmood-input {
 @media (prefers-reduced-motion: reduce) {
   .mood-page .mm-enter,
   .mood-page .mm-hero-copy > * {
-    animation: mm-fade 300ms ease both;
+    animation: mm-fade var(--motion-page) var(--ease-out-expo) both;
   }
   .mood-page .mm-hero-img,
   .mood-page .mm-hero-light,

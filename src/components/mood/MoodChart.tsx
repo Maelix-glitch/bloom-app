@@ -315,7 +315,7 @@ export function MoodChart({
                   }
                   aria-pressed={on}
                   className={cn(
-                    "mono flex items-center gap-2 rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-300",
+                    "mono flex items-center gap-2 rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-[var(--motion-page)]",
                     on
                       ? "border-border-strong bg-surface-2 text-foreground"
                       : "border-border bg-transparent text-faint hover:text-muted-foreground",

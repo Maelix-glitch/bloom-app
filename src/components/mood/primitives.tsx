@@ -35,7 +35,7 @@ export function Panel({
     <div
       {...rest}
       className={cn(
-        "panel relative overflow-hidden transition-[border-color] duration-300",
+        "panel relative overflow-hidden transition-[border-color] duration-[var(--motion-page)]",
         "hover:border-border-strong",
         className,
       )}

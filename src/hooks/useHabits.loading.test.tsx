@@ -81,7 +81,7 @@ vi.mock("@/lib/home/habits", async (importOriginal) => {
   };
 });
 
-import { useHabits } from "./useHabits";
+import { __resetHabitsSessionCache, useHabits } from "./useHabits";
 
 const habit = (id: string, name: string): Habit => ({
   id,
@@ -120,6 +120,7 @@ const emitAuth = (uid: string | null) => {
 
 beforeEach(() => {
   ctrl.reset();
+  __resetHabitsSessionCache();
   window.localStorage.clear();
   vi.useRealTimers();
 });
@@ -213,5 +214,45 @@ describe("useHabits — signed out, the mirror is the record", () => {
     expect(view.result.current.habits.map((h) => h.name)).toEqual(["Local habit"]);
     expect(view.result.current.todayHabits.map((h) => h.name)).toEqual(["Local habit"]);
     view.unmount();
+  });
+});
+
+describe("useHabits — warm remount renders the settled rows at once (R15)", () => {
+  it("seeds a remount from the session cache while the revalidation is still in flight, then reconciles", async () => {
+    const view = renderHook(() => useHabits());
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    const remote = [habit("remote-1", "Drink water"), habit("remote-2", "Log sleep")];
+    await act(async () => {
+      ctrl.fetchHabits.resolve(remote);
+      ctrl.fetchLogs.resolve([]);
+      ctrl.readPoints.resolve(405);
+    });
+    await waitFor(() => expect(view.result.current.loading).toBe(false));
+    expect(view.result.current.habits).toHaveLength(2);
+    view.unmount();
+
+    /* The tab switch: a fresh mount, and this time the network hangs.
+       The settled rows are simply there — no skeleton, no empty list —
+       because the session cache seeded them; the fetch still runs. */
+    ctrl.reset();
+    const back = renderHook(() => useHabits());
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    expect(back.result.current.loading).toBe(false);
+    expect(back.result.current.habits.map((h) => h.name)).toEqual([
+      "Drink water",
+      "Log sleep",
+    ]);
+
+    /* The revalidation lands with a third habit: state reconciles. */
+    await act(async () => {
+      ctrl.fetchHabits.resolve([...remote, habit("remote-3", "Stretch")]);
+      ctrl.fetchLogs.resolve([]);
+      ctrl.readPoints.resolve(415);
+    });
+    await waitFor(() => expect(back.result.current.habits).toHaveLength(3));
+    expect(back.result.current.points).toBe(415);
+    back.unmount();
   });
 });

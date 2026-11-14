@@ -15,7 +15,7 @@
   z-index: 3200;
   display: grid;
   place-items: center;
-  padding: 20px;
+  padding: var(--space-5);
 }
 
 .adm-scrim {
@@ -34,7 +34,7 @@
   max-height: min(620px, 88vh);
   max-height: min(620px, 88dvh);
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: var(--radius-dialog);
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--surface) 94%, transparent);
   backdrop-filter: blur(28px) saturate(1.2);
@@ -52,7 +52,7 @@
   grid-template-columns: 32px minmax(0, 1fr) 30px;
   align-items: center;
   gap: 11px;
-  padding: 15px 15px 12px;
+  padding: 15px 15px var(--space-3);
 }
 
 .adm-badge {
@@ -60,7 +60,7 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   border: 1px solid color-mix(in oklab, var(--amber) 40%, transparent);
   background: color-mix(in oklab, var(--amber) 14%, transparent);
   color: var(--amber);
@@ -82,13 +82,13 @@
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   transition:
-    color 150ms ease,
-    border-color 150ms ease,
-    transform 150ms ease;
+    color var(--motion-micro) var(--ease-out-expo),
+    border-color var(--motion-micro) var(--ease-out-expo),
+    transform var(--motion-micro) var(--ease-out-expo);
 }
 .adm-x:hover {
   color: var(--foreground);
@@ -106,15 +106,15 @@
   align-items: center;
   gap: 9px;
   margin: 0 15px 10px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   height: 40px;
   border-radius: 12px;
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 55%, transparent);
   color: color-mix(in oklab, var(--foreground) 55%, transparent);
   transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+    border-color var(--motion-standard) var(--ease-out-expo),
+    box-shadow var(--motion-standard) var(--ease-out-expo);
 }
 .adm-search:focus-within {
   border-color: color-mix(in oklab, var(--amber) 55%, transparent);
@@ -157,7 +157,7 @@
   margin-top: 6px;
 }
 .adm-group-label {
-  padding: 8px 6px 5px;
+  padding: var(--space-2) 6px 5px;
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -170,13 +170,13 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 10px;
+  padding: var(--space-2) 10px;
+  border-radius: var(--radius-control);
   text-align: left;
   color: color-mix(in oklab, var(--foreground) 70%, transparent);
   transition:
-    background-color 130ms ease,
-    color 130ms ease;
+    background-color var(--motion-micro) var(--ease-out-expo),
+    color var(--motion-micro) var(--ease-out-expo);
 }
 /* driven by the cursor, so hover and keyboard highlight identically */
 .adm-item[data-on="true"] {
@@ -204,8 +204,8 @@
 .adm-item-arrow {
   opacity: 0;
   transition:
-    opacity 130ms ease,
-    transform 200ms var(--ease-out-expo);
+    opacity var(--motion-micro) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease-out-expo);
 }
 .adm-item[data-on="true"] .adm-item-arrow {
   opacity: 0.7;
@@ -213,7 +213,7 @@
 }
 
 .adm-empty {
-  padding: 24px 12px;
+  padding: var(--space-6) var(--space-3);
   text-align: center;
   font-size: var(--text-caption);
   color: color-mix(in oklab, var(--foreground) 50%, transparent);
@@ -224,7 +224,7 @@
 .adm-foot {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 11px 15px 13px;
   border-top: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
 }
@@ -235,14 +235,14 @@
   gap: 6px;
   flex: none;
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   color: color-mix(in oklab, var(--foreground) 62%, transparent);
   font-size: var(--text-meta);
   transition:
-    color 150ms ease,
-    border-color 150ms ease,
-    background-color 150ms ease;
+    color var(--motion-micro) var(--ease-out-expo),
+    border-color var(--motion-micro) var(--ease-out-expo),
+    background-color var(--motion-micro) var(--ease-out-expo);
 }
 .adm-toggle:hover {
   color: var(--foreground);
@@ -268,7 +268,7 @@
   .adm-foot {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--space-2);
   }
 }
 
@@ -297,14 +297,14 @@
   align-items: center;
   gap: 7px;
   padding: 5px 7px 5px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--amber) 34%, transparent);
   background: color-mix(in oklab, var(--ap-panel) 82%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.95);
   opacity: 0.62;
-  transition: opacity 200ms ease;
+  transition: opacity var(--motion-standard) var(--ease-out-expo);
 }
 .adm-bar:hover,
 .adm-bar:focus-within {
@@ -334,16 +334,16 @@
 .adm-bar-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, white 14%, transparent);
   color: color-mix(in oklab, white 72%, transparent);
   font-size: var(--text-meta);
   transition:
-    color 150ms ease,
-    border-color 150ms ease,
-    background-color 150ms ease;
+    color var(--motion-micro) var(--ease-out-expo),
+    border-color var(--motion-micro) var(--ease-out-expo),
+    background-color var(--motion-micro) var(--ease-out-expo);
 }
 .adm-bar-btn:hover {
   color: white;

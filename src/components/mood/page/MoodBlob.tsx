@@ -122,7 +122,7 @@ export function MoodBlob({
       viewBox="0 0 100 100"
       width={size}
       height={size}
-      className="shrink-0 transition-transform duration-500 ease-out group-hover:-translate-y-1"
+      className="shrink-0 transition-transform duration-[var(--motion-signature)] ease-[var(--ease-out-expo)] group-hover:-translate-y-1"
       style={{ filter: active ? "drop-shadow(0 0 22px oklch(0.86 0.1 85 / 0.45))" : undefined }}
       aria-hidden="true"
     >

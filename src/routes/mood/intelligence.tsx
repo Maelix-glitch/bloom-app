@@ -59,7 +59,7 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
         <button
           type="button"
           onClick={onCompose}
-          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-500 hover:scale-[1.03]"
+          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-[var(--motion-signature)] hover:scale-[1.03]"
           style={{
             background: "var(--grad-violet)",
             boxShadow: "var(--glow-violet)",

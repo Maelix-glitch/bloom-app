@@ -109,7 +109,7 @@
 }
 .bloom-add-habit .backdrop.open {
   display: flex;
-  animation: bah-fadeIn 0.28s var(--ease) both;
+  animation: bah-fadeIn var(--motion-page) var(--ease) both;
 }
 @keyframes bah-fadeIn {
   from {
@@ -131,10 +131,8 @@
   background: linear-gradient(180deg, var(--ahm-surface), var(--ahm-surface-2));
   border: 1px solid var(--ahm-border);
   border-radius: var(--radius);
-  box-shadow:
-    0 40px 90px -20px rgba(0, 0, 0, 0.65),
-    0 0 0 1px rgba(255, 255, 255, 0.03);
-  animation: bah-modalIn 0.45s var(--ease) both;
+  box-shadow: var(--elevation-dialog);
+  animation: bah-modalIn var(--motion-page) var(--ease) both;
   overflow: hidden;
 }
 @keyframes bah-modalIn {
@@ -157,7 +155,7 @@
   height: 150px;
   pointer-events: none;
   background: radial-gradient(120% 100% at 50% 0%, var(--accent-dim), transparent 70%);
-  transition: background 0.4s ease;
+  transition: background var(--motion-page) var(--ease-out-expo);
 }
 
 /* ---------- HEADER + PROGRESS ---------------------------------------- */
@@ -180,7 +178,7 @@
 .bloom-add-habit .modal-title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 24px;
+  font-size: var(--text-title);
   letter-spacing: var(--tracking-heading);
 }
 .bloom-add-habit .modal-close {
@@ -195,7 +193,7 @@
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.25s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
   font-size: var(--text-callout);
 }
 .bloom-add-habit .modal-close:hover {
@@ -224,7 +222,7 @@
 }
 .bloom-add-habit .step-bar {
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--ahm-surface-3);
   overflow: hidden;
 }
@@ -233,10 +231,10 @@
   height: 100%;
   width: 0;
   background: var(--accent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition:
-    width 0.45s var(--ease),
-    background 0.3s ease;
+    width var(--motion-page) var(--ease),
+    background var(--motion-page) var(--ease-out-expo);
 }
 .bloom-add-habit .step-pill.active .step-bar i,
 .bloom-add-habit .step-pill.done .step-bar i {
@@ -248,7 +246,7 @@
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--ahm-text-faint);
-  transition: color 0.25s ease;
+  transition: color var(--motion-standard) var(--ease-out-expo);
 }
 .bloom-add-habit .step-pill.active .step-name {
   color: var(--accent);
@@ -278,7 +276,7 @@
 }
 .bloom-add-habit section[data-step].active {
   display: flex;
-  animation: bah-panelIn 0.35s var(--ease) both;
+  animation: bah-panelIn var(--motion-page) var(--ease) both;
 }
 @keyframes bah-panelIn {
   from {
@@ -299,7 +297,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .bloom-add-habit .field-hint {
   font-family: var(--font-mono);
@@ -315,7 +313,7 @@
 }
 .bloom-add-habit .error-msg.show {
   display: block;
-  animation: bah-panelIn 0.2s var(--ease) both;
+  animation: bah-panelIn var(--motion-standard) var(--ease) both;
 }
 
 /* live preview card — shows the habit as it will appear in the app list */
@@ -340,8 +338,8 @@
   flex-shrink: 0;
   overflow: hidden;
   transition:
-    background 0.3s ease,
-    transform 0.25s var(--ease);
+    background var(--motion-page) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .icon-preview img {
   width: 100%;
@@ -388,8 +386,8 @@
   font-family: var(--font-body);
   font-size: var(--text-body);
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color var(--motion-standard) var(--ease-out-expo),
+    box-shadow var(--motion-standard) var(--ease-out-expo);
 }
 .bloom-add-habit textarea {
   resize: vertical;
@@ -422,11 +420,11 @@
   color: var(--ahm-text-faint);
   background: var(--ahm-surface-2);
   border: 1px solid var(--ahm-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 7px 14px;
   cursor: pointer;
   font-family: var(--font-body);
-  transition: all 0.2s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .icon-tab.active {
   background: var(--accent-dim);
@@ -443,7 +441,7 @@
 }
 .bloom-add-habit .icon-panel.active {
   display: block;
-  animation: bah-panelIn 0.3s var(--ease) both;
+  animation: bah-panelIn var(--motion-page) var(--ease) both;
 }
 
 .bloom-add-habit .icon-search {
@@ -474,7 +472,7 @@
   justify-content: center;
   font-size: var(--text-section);
   cursor: pointer;
-  transition: all 0.18s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .icon-opt:hover {
   transform: translateY(-2px);
@@ -498,7 +496,7 @@
   padding: var(--space-6) var(--space-4);
   text-align: center;
   cursor: pointer;
-  transition: all 0.25s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
   position: relative;
 }
 .bloom-add-habit .dropzone:hover,
@@ -563,7 +561,7 @@
   cursor: pointer;
   padding: 0;
   position: relative;
-  transition: transform 0.2s var(--ease);
+  transition: transform var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .swatch:hover {
   transform: scale(1.12);
@@ -595,8 +593,8 @@
   flex-wrap: wrap;
 }
 .bloom-add-habit .chip {
-  padding: 9px 16px;
-  border-radius: 999px;
+  padding: 9px var(--space-4);
+  border-radius: var(--radius-pill);
   font-size: var(--text-support);
   font-weight: 500;
   color: var(--ahm-text-muted);
@@ -604,7 +602,7 @@
   border: 1px solid var(--ahm-border);
   cursor: pointer;
   font-family: var(--font-body);
-  transition: all 0.2s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -655,8 +653,8 @@
   overflow: hidden;
   opacity: 0;
   transition:
-    max-height 0.35s var(--ease),
-    opacity 0.25s ease;
+    max-height var(--motion-page) var(--ease),
+    opacity var(--motion-standard) var(--ease-out-expo);
 }
 .bloom-add-habit .conditional.open {
   max-height: 220px;
@@ -681,7 +679,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.18s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .day:hover {
   border-color: var(--ahm-border-hover);
@@ -729,7 +727,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .step-btn:hover:not(:disabled) {
   border-color: var(--accent);
@@ -751,14 +749,14 @@
 .bloom-add-habit .switch {
   width: 42px;
   height: 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--ahm-surface-3);
   border: 1px solid var(--ahm-border);
   position: relative;
   cursor: pointer;
   transition:
-    background 0.25s ease,
-    border-color 0.25s ease;
+    background var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo);
   flex-shrink: 0;
   padding: 0;
 }
@@ -772,8 +770,8 @@
   border-radius: 50%;
   background: var(--ahm-text-faint);
   transition:
-    transform 0.25s var(--ease),
-    background 0.25s ease;
+    transform var(--motion-standard) var(--ease),
+    background var(--motion-standard) var(--ease-out-expo);
 }
 .bloom-add-habit .switch[aria-checked="true"] {
   background: var(--accent-dim);
@@ -793,7 +791,7 @@
   background: var(--ahm-surface-2);
   border: 1px solid var(--ahm-border);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
 }
 .bloom-add-habit .tag-input-wrap:focus-within {
   border-color: var(--accent);
@@ -807,8 +805,8 @@
   background: var(--accent-dim);
   color: var(--accent);
   border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) 10px;
 }
 .bloom-add-habit .tag button {
   background: none;
@@ -844,7 +842,7 @@
   font-size: var(--text-callout);
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.25s var(--ease);
+  transition: all var(--motion-standard) var(--ease);
 }
 .bloom-add-habit .btn-secondary {
   background: var(--ahm-surface-3);
@@ -891,7 +889,7 @@
 }
 .bloom-add-habit .success.show {
   display: flex;
-  animation: bah-fadeIn 0.3s var(--ease) both;
+  animation: bah-fadeIn var(--motion-page) var(--ease) both;
 }
 .bloom-add-habit .success-badge {
   width: 64px;
@@ -903,7 +901,7 @@
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  animation: bah-pop 0.5s var(--ease) both;
+  animation: bah-pop var(--motion-signature) var(--ease) both;
 }
 @keyframes bah-pop {
   from {
@@ -918,7 +916,7 @@
 .bloom-add-habit .success h3 {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 20px;
+  font-size: var(--text-title);
 }
 .bloom-add-habit .success p {
   font-size: var(--text-support);
@@ -950,7 +948,7 @@
     padding-top: var(--space-5);
   }
   .bloom-add-habit .modal-title {
-    font-size: 22px;
+    font-size: var(--text-title);
   }
   .bloom-add-habit .modal-foot {
     padding: var(--space-4) var(--space-4) var(--space-5);
@@ -990,8 +988,8 @@
   gap: 6px;
   width: 100%;
   margin-top: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
+  padding: 9px var(--space-3);
+  border-radius: var(--radius-control);
   border: 1px dashed color-mix(in oklab, var(--foreground) 22%, transparent);
   background: color-mix(in oklab, var(--primary) 7%, transparent);
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
@@ -1000,8 +998,8 @@
   text-align: left;
   cursor: pointer;
   transition:
-    border-color 150ms ease,
-    background 150ms ease;
+    border-color var(--motion-micro) var(--ease-out-expo),
+    background var(--motion-micro) var(--ease-out-expo);
 }
 .bloom-add-habit .usual-reminder-chip:hover {
   border-color: color-mix(in oklab, var(--primary) 45%, transparent);

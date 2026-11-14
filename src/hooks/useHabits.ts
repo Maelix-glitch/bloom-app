@@ -46,6 +46,7 @@ import {
   type HabitLog,
 } from "@/lib/home/habits";
 import { shiftDay, todayLocal } from "@/lib/localDay";
+import { noteAccountBalance } from "@/hooks/useWallet";
 import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
 import {
   announcePointsChanged,
@@ -114,6 +115,28 @@ export interface HabitsStore {
   undo: () => void;
   dismissUndo: () => void;
   refresh: () => void;
+}
+
+/* Session cache (P2-5, R15). The root remounts the page on every tab
+   switch, and this hook's state dies with the mount — so a return to
+   Today used to replay the skeleton and the full refetch before any
+   content showed, while the URL had already moved. The last SETTLED
+   account rows live here for the session instead: a warm remount
+   renders them immediately and revalidates behind them. The PR #88
+   contract is unchanged — a cold load (no cache entry for this
+   profile) still holds the list empty behind the skeleton, and the
+   device mirror still never renders as account rows. */
+type HabitsSessionCache = {
+  profileId: string;
+  habits: Habit[];
+  logs: HabitLog[];
+  points: number | null;
+};
+let sessionCache: HabitsSessionCache | null = null;
+
+/** Test seam: forget the session cache (the next load is a cold load). */
+export function __resetHabitsSessionCache(): void {
+  sessionCache = null;
 }
 
 const localDate = (d = new Date()) => todayLocal(d);
@@ -206,11 +229,25 @@ export function useHabits(): HabitsStore {
          renders instantly — and a sign-out re-seeds it, never leaving the
          previous account's rows on screen. */
       signedInLoaded.current = null;
+      sessionCache = null;
       hydrated.current = true;
       setHabits(loadLocalHabits());
       setLogs(loadLocalLogs());
       setLoading(false);
       return;
+    }
+    /* Warm return (R15): this mount has not loaded the account yet, but
+       the session cache holds its last settled rows — render those now
+       and let the fetch below reconcile, instead of skeleton + wait. */
+    if (
+      signedInLoaded.current !== profileId &&
+      sessionCache?.profileId === profileId
+    ) {
+      setHabits(sessionCache.habits);
+      setLogs(sessionCache.logs);
+      setPoints(sessionCache.points);
+      setLoading(false);
+      signedInLoaded.current = profileId;
     }
     const cold = signedInLoaded.current !== profileId;
     if (cold) {
@@ -285,6 +322,20 @@ export function useHabits(): HabitsStore {
       mounted = false;
     };
   }, [auth, profileId, reload]);
+
+  /* Keep the session cache in step with the settled account rows, so
+     ticks and edits made on this mount are what a warm remount seeds
+     (R15). Only a settled profile writes — a cold load in flight must
+     never cache its empty list. */
+  useEffect(() => {
+    if (
+      auth === "signed-in" &&
+      profileId &&
+      signedInLoaded.current === profileId
+    ) {
+      sessionCache = { profileId, habits, logs, points };
+    }
+  }, [auth, profileId, habits, logs, points]);
 
   /* realtime: another device ticks a habit → this ring moves. Multiple
      consumers use this hook on the same screen, so the helper shares one
@@ -410,13 +461,19 @@ export function useHabits(): HabitsStore {
           const result =
             (await revokeHabitPoints(profileId, habitId, date)) ??
             (await adjustHabitPoints(profileId, habitId, date, -habit.points));
-          if (result) setPoints(result.balance);
+          if (result) {
+            setPoints(result.balance);
+            noteAccountBalance(result.balance);
+          }
         } else {
           await insertLog(profileId, habitId, date);
           const result =
             (await awardHabitPoints(profileId, habitId, date, habit.points)) ??
             (await adjustHabitPoints(profileId, habitId, date, habit.points));
-          if (result) setPoints(result.balance);
+          if (result) {
+            setPoints(result.balance);
+            noteAccountBalance(result.balance);
+          }
         }
         recordLocal();
       } catch (e) {

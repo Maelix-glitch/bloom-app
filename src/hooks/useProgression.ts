@@ -26,6 +26,7 @@ import { useHabits, type HabitsAuth, type HabitsStore } from "@/hooks/useHabits"
 import { useTrackers, type TrackerSyncState } from "@/hooks/useTrackers";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { useEverReady } from "@/hooks/useEverReady";
+import { noteAccountBalance } from "@/hooks/useWallet";
 import { watchAccountCheck } from "@/lib/accountCheck";
 import { todayLocal, shiftDay } from "@/lib/localDay";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
@@ -710,6 +711,7 @@ export function useProgression(): ProgressionStore {
               });
             }
           }
+          noteAccountBalance(server.balance);
           refreshPoints();
           return {
             awarded: false,
@@ -743,6 +745,9 @@ export function useProgression(): ProgressionStore {
             current ? new Set(current).add(claimKey(goalId, target.periodKey)) : current,
           );
           setCloudPoints(server.balance);
+          /* R16: the pill moves now, on the balance the RPC just
+             returned — not after the wallet's re-read round trip. */
+          noteAccountBalance(server.balance);
           announcePointsChanged();
           setPointsNonce((n) => n + 1);
           const settled = await settle(server.balance, before);

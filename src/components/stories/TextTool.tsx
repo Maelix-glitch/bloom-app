@@ -192,7 +192,7 @@ export function TextTool({
               >
                 Ag
               </span>
-              <span className="text-[9.5px]">{f.name}</span>
+              <span className="text-[length:var(--text-micro)]">{f.name}</span>
             </button>
           ))}
         </div>

@@ -80,7 +80,7 @@ function EmotionsImpl({
                 <span className="col-span-2 sm:col-span-1">
                   <span className="relative block h-1.5 overflow-hidden rounded-full bg-surface-2">
                     <span
-                      className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
+                      className="absolute inset-y-0 left-0 rounded-full transition-all duration-[var(--motion-signature)]"
                       style={{
                         width: `${(e.count / max) * 100}%`,
                         background: `linear-gradient(90deg, color-mix(in oklab, ${accentVar[accent]} 40%, transparent), ${accentVar[accent]})`,

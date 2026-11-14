@@ -16,7 +16,7 @@
   --pf-accent-line: color-mix(in oklab, var(--pf-accent) 42%, transparent);
   --pf-card: color-mix(in oklab, var(--surface) 82%, transparent);
   --pf-card-2: color-mix(in oklab, var(--surface-2) 70%, transparent);
-  --pf-line: color-mix(in oklab, var(--border) 80%, transparent);
+  --pf-line: var(--hairline-soft);
   --pf-radius: 22px;
   --pf-cover-h: 172px;
   --pf-avatar: 124px;
@@ -43,7 +43,7 @@
     gap: 6px;
   }
   .pf-number {
-    padding: 12px 12px 10px;
+    padding: var(--space-3) var(--space-3) 10px;
   }
   .pf-section {
     padding-inline: 10px;
@@ -173,7 +173,7 @@
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 42%, transparent);
   backdrop-filter: blur(8px);
@@ -189,24 +189,24 @@
   right: 14px;
   top: 14px;
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .pf-icon-btn {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
+  width: var(--icon-btn-sm);
+  height: var(--icon-btn-sm);
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 48%, transparent);
   backdrop-filter: blur(8px);
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
   transition:
-    border-color var(--motion-fast) ease,
-    color var(--motion-fast) ease,
-    background-color var(--motion-fast) ease,
-    transform var(--motion-fast) ease;
+    border-color var(--motion-fast) var(--ease-out-expo),
+    color var(--motion-fast) var(--ease-out-expo),
+    background-color var(--motion-fast) var(--ease-out-expo),
+    transform var(--motion-fast) var(--ease-out-expo);
 }
 .pf-icon-btn:hover,
 .pf-icon-btn[data-state="open"] {
@@ -226,8 +226,8 @@
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   text-align: center;
-  padding-inline: 20px;
-  padding-bottom: 4px;
+  padding-inline: var(--space-5);
+  padding-bottom: var(--space-1);
   margin-top: calc(var(--pf-avatar) * -0.46);
 }
 
@@ -242,15 +242,15 @@
   position: relative;
   width: var(--pf-avatar);
   height: var(--pf-avatar);
-  border-radius: 999px;
-  padding: 4px;
+  border-radius: var(--radius-pill);
+  padding: var(--space-1);
   background: var(--background);
   box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.75);
 }
 
 .pf-avatar-btn {
   display: block;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: transform var(--motion-med) var(--ease-out-expo);
 }
 .pf-avatar-btn:hover {
@@ -269,12 +269,12 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 3px solid var(--background);
   background: var(--pf-accent);
   color: var(--primary-foreground);
   box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.9);
-  transition: transform var(--motion-fast) ease;
+  transition: transform var(--motion-fast) var(--ease-out-expo);
 }
 .pf-avatar-add:hover {
   transform: scale(1.08);
@@ -325,7 +325,7 @@
 }
 
 .pf-handle {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -344,15 +344,15 @@
 .pf-handle-btn {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
+  padding: var(--space-1) 10px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--pf-line);
   background: var(--pf-card-2);
   color: var(--muted-foreground);
   cursor: pointer;
   transition:
-    color var(--motion-fast) ease,
-    border-color var(--motion-fast) ease;
+    color var(--motion-fast) var(--ease-out-expo),
+    border-color var(--motion-fast) var(--ease-out-expo);
 }
 .pf-handle-btn:hover {
   color: var(--foreground);
@@ -368,8 +368,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  border-radius: 999px;
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--pf-line);
   background: var(--pf-card-2);
   font-family: var(--font-mono);
@@ -387,13 +387,13 @@
   content: "";
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--pf-accent);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--pf-accent) 25%, transparent);
 }
 
 .pf-bio {
-  margin: 12px auto 0;
+  margin: var(--space-3) auto 0;
   max-width: 46ch;
   font-size: var(--text-callout);
   line-height: var(--leading-body);
@@ -411,26 +411,26 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .pf-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   height: 38px;
-  padding: 0 16px;
-  border-radius: 999px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: var(--pf-card-2);
   font-size: var(--text-support);
   font-weight: 500;
   color: var(--foreground);
   transition:
-    border-color var(--motion-fast) ease,
-    background-color var(--motion-fast) ease,
-    transform var(--motion-fast) ease,
-    filter var(--motion-fast) ease;
+    border-color var(--motion-fast) var(--ease-out-expo),
+    background-color var(--motion-fast) var(--ease-out-expo),
+    transform var(--motion-fast) var(--ease-out-expo),
+    filter var(--motion-fast) var(--ease-out-expo);
 }
 .pf-btn:hover {
   border-color: var(--border-strong);
@@ -460,9 +460,9 @@
 .pf-numbers {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 22px;
-  padding-inline: 20px;
+  padding-inline: var(--space-5);
 }
 @media (max-width: 640px) {
   .pf-numbers {
@@ -475,15 +475,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px 12px;
-  border-radius: 16px;
+  gap: var(--space-1);
+  padding: 14px var(--space-4) var(--space-3);
+  border-radius: var(--radius-card);
   border: 1px solid var(--pf-line);
   background: var(--pf-card);
   text-align: left;
   transition:
-    border-color var(--motion-fast) ease,
-    background-color var(--motion-fast) ease;
+    border-color var(--motion-fast) var(--ease-out-expo),
+    background-color var(--motion-fast) var(--ease-out-expo);
 }
 a.pf-number:hover,
 button.pf-number:hover {
@@ -527,7 +527,7 @@ button.pf-number:hover {
 
 .pf-section {
   margin-top: 26px;
-  padding-inline: 20px;
+  padding-inline: var(--space-5);
 }
 @media (max-width: 640px) {
   .pf-section {
@@ -540,8 +540,8 @@ button.pf-number:hover {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 8px 16px;
-  margin-bottom: 12px;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-3);
 }
 .pf-eyebrow {
   font-family: var(--font-mono);
@@ -551,17 +551,17 @@ button.pf-number:hover {
   color: var(--faint-strong);
 }
 .pf-title {
-  margin-top: 4px;
+  margin-top: var(--space-1);
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 20px;
+  font-size: var(--text-title);
   line-height: 1.15;
   letter-spacing: var(--tracking-heading);
 }
 .pf-section-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .pf-link {
   font-family: var(--font-mono);
@@ -569,7 +569,7 @@ button.pf-number:hover {
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   color: var(--faint-strong);
-  transition: color var(--motion-fast) ease;
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .pf-link:hover {
   color: var(--foreground);
@@ -595,7 +595,7 @@ button.pf-number:hover {
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 14%, transparent);
 }
 .pf-card--pad {
-  padding: 18px 18px 16px;
+  padding: var(--space-4);
 }
 
 /* --------------------------------- tabs ---------------------------------- */
@@ -605,9 +605,9 @@ button.pf-number:hover {
   top: 0;
   z-index: 5;
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
   margin-top: 26px;
-  padding: 6px 20px 0;
+  padding: 6px var(--space-5) 0;
   border-bottom: 1px solid var(--pf-line);
   background: color-mix(in oklab, var(--background) 86%, transparent);
   backdrop-filter: blur(12px);
@@ -619,7 +619,7 @@ button.pf-number:hover {
 }
 @media (max-width: 640px) {
   .pf-tabs {
-    padding-inline: 8px;
+    padding-inline: var(--space-2);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -631,13 +631,13 @@ button.pf-number:hover {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px 12px;
-  border-radius: 10px 10px 0 0;
+  gap: var(--space-2);
+  padding: 10px 14px var(--space-3);
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
   font-size: var(--text-support);
   color: var(--muted-foreground);
   white-space: nowrap;
-  transition: color var(--motion-fast) ease;
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .pf-tab:hover {
   color: var(--foreground);
@@ -665,7 +665,7 @@ button.pf-number:hover {
 .pf-grid-wrap {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
 }
 .pf-grid-days {
   display: grid;
@@ -682,7 +682,7 @@ button.pf-number:hover {
 .pf-grid-months {
   display: grid;
   height: 14px;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-label);
@@ -702,8 +702,8 @@ button.pf-number:hover {
   background: color-mix(in oklab, var(--surface-3) 70%, transparent);
   border: 1px solid transparent;
   transition:
-    transform var(--motion-fast) ease,
-    filter var(--motion-fast) ease;
+    transform var(--motion-fast) var(--ease-out-expo),
+    filter var(--motion-fast) var(--ease-out-expo);
 }
 .pf-cell[data-level="1"] {
   background: color-mix(in oklab, var(--pf-accent) 28%, var(--surface-2));
@@ -737,7 +737,7 @@ button.pf-cell:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 14px;
-  margin-top: 12px;
+  margin-top: var(--space-3);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-label);
@@ -761,20 +761,20 @@ button.pf-cell:hover {
 .pf-things {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
 }
 .pf-thing {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border-radius: 14px;
   border: 1px solid var(--pf-line);
   background: var(--pf-card-2);
   text-align: left;
   transition:
-    border-color var(--motion-fast) ease,
-    background-color var(--motion-fast) ease;
+    border-color var(--motion-fast) var(--ease-out-expo),
+    background-color var(--motion-fast) var(--ease-out-expo);
 }
 .pf-thing:hover {
   border-color: var(--pf-accent-line);
@@ -783,7 +783,7 @@ button.pf-cell:hover {
   width: 9px;
   height: 9px;
   flex: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--pf-thing-color, var(--pf-accent));
   box-shadow: 0 0 0 3px
     color-mix(in oklab, var(--pf-thing-color, var(--pf-accent)) 20%, transparent);
@@ -812,9 +812,9 @@ button.pf-cell:hover {
 
 .pf-miles {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: var(--space-1);
   scrollbar-width: none;
 }
 .pf-miles::-webkit-scrollbar {
@@ -825,10 +825,10 @@ button.pf-cell:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 92px;
-  padding: 12px 8px 10px;
-  border-radius: 16px;
+  padding: var(--space-3) var(--space-2) 10px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--pf-line);
   background: var(--pf-card-2);
   text-align: center;
@@ -838,7 +838,7 @@ button.pf-cell:hover {
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--pf-mile-color, var(--pf-accent)) 14%, transparent);
   border: 1px solid color-mix(in oklab, var(--pf-mile-color, var(--pf-accent)) 32%, transparent);
   color: var(--pf-mile-color, var(--pf-accent));
@@ -865,7 +865,7 @@ button.pf-cell:hover {
 
 .pf-progress {
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--surface-3) 80%, transparent);
   overflow: hidden;
 }
@@ -891,7 +891,7 @@ button.pf-cell:hover {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 10px 0;
   border-top: 1px solid var(--pf-line);
   font-size: var(--text-support);
@@ -904,7 +904,7 @@ button.pf-cell:hover {
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--pf-card-2);
   border: 1px solid var(--pf-line);
   color: var(--muted-foreground);
@@ -927,16 +927,16 @@ button.pf-cell:hover {
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  padding: 11px 16px;
+  padding: 11px var(--space-4);
   border-top: 1px solid var(--pf-line);
   text-align: left;
   font-size: var(--text-support);
   color: var(--muted-foreground);
   transition:
-    background-color var(--motion-fast) ease,
-    transform 180ms var(--ease-out-expo);
+    background-color var(--motion-fast) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease-out-expo);
 }
 /* the give that makes a tap feel received on a touchscreen, where there is
    no hover state to confirm it */
@@ -956,7 +956,7 @@ button.pf-row:hover {
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: var(--pf-card-2);
   border: 1px solid var(--pf-line);
   color: var(--muted-foreground);
@@ -994,12 +994,12 @@ button.pf-row:hover {
   display: block;
   width: 38px;
   height: 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--foreground) 8%, transparent);
   transition:
-    background-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 260ms ease;
+    background-color var(--motion-page) var(--ease-out-expo),
+    border-color var(--motion-page) var(--ease-out-expo);
 }
 .pf-switch[data-on="true"] {
   border-color: transparent;
@@ -1011,10 +1011,10 @@ button.pf-row:hover {
   left: 2px;
   width: 16px;
   height: 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--foreground);
   box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.6);
-  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--motion-page) var(--ease-out-expo);
 }
 .pf-switch[data-on="true"] .pf-switch-knob {
   transform: translateX(16px);
@@ -1031,8 +1031,8 @@ button.pf-row:hover {
 /* ------------------------------- footer ---------------------------------- */
 
 .pf-footer {
-  margin-top: 40px;
-  padding: 22px 20px 0;
+  margin-top: var(--space-10);
+  padding: 22px var(--space-5) 0;
   border-top: 1px solid var(--pf-line);
   text-align: center;
 }
@@ -1146,7 +1146,7 @@ button.pf-row:hover {
    stamp never wraps or collides with the text column. */
 @media (max-width: 359px) {
   .pf-activity-row {
-    gap: 8px;
+    gap: var(--space-2);
   }
   .pf-activity-icon {
     width: 26px;
@@ -1209,7 +1209,7 @@ button.pf-row:hover {
 
 .pf-group-label {
   margin: 0 0 7px;
-  padding-inline: 16px;
+  padding-inline: var(--space-4);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   font-weight: 500;
@@ -1253,7 +1253,7 @@ button.pf-row:hover {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 16px 14px;
+  padding: var(--space-3) var(--space-4) 14px;
   border-top: 1px solid var(--pf-line);
   background: color-mix(in oklab, var(--surface-2) 55%, transparent);
 }
@@ -1267,18 +1267,18 @@ button.pf-row:hover {
 
 .pf-confirm-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .pf-confirm-btn {
   flex: 1;
   height: 36px;
   border: 1px solid var(--pf-line);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--muted-foreground);
   font-size: var(--text-caption);
-  transition: background-color var(--motion-fast) ease;
+  transition: background-color var(--motion-fast) var(--ease-out-expo);
 }
 
 .pf-confirm-btn:hover {
@@ -1327,7 +1327,7 @@ button.pf-row:hover {
 
 .pf-load {
   position: relative;
-  padding-top: 4px;
+  padding-top: var(--space-1);
 }
 
 /* The placeholder is simply present — no staggered entrance. A skeleton
@@ -1354,9 +1354,9 @@ button.pf-row:hover {
   display: block;
   width: min(180px, 46%);
   height: 2px;
-  margin: 6px auto 24px;
+  margin: 6px auto var(--space-6);
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 .pf-load-progress-run {
@@ -1420,7 +1420,7 @@ button.pf-row:hover {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: radial-gradient(
     118% 108% at 50% -8%,
     color-mix(in oklab, var(--pf-accent) 16%, var(--surface-2)),
@@ -1430,7 +1430,7 @@ button.pf-row:hover {
 .pf-load-avatar-ring {
   position: absolute;
   inset: -7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--pf-accent) 46%, transparent);
   animation: pf-load-breathe 3s ease-in-out infinite;
 }
@@ -1471,7 +1471,7 @@ button.pf-row:hover {
 /* Text bars. Widths echo the real thing: a name, a @handle, two lines of bio. */
 .pf-load-line {
   display: block;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--surface-3) 78%, transparent);
   animation: pf-load-pulse 2.4s ease-in-out infinite;
 }
@@ -1484,19 +1484,19 @@ button.pf-row:hover {
 .pf-load-line--handle {
   width: min(122px, 38%);
   height: 12px;
-  margin: 12px auto 0;
+  margin: var(--space-3) auto 0;
   animation-delay: 120ms;
 }
 .pf-load-line--bio {
   width: min(268px, 78%);
   height: 11px;
-  margin: 16px auto 0;
+  margin: var(--space-4) auto 0;
   opacity: 0.72;
   animation-delay: 220ms;
 }
 .pf-load-line--short {
   width: min(172px, 52%);
-  margin-top: 8px;
+  margin-top: var(--space-2);
   opacity: 0.5;
   animation-delay: 320ms;
 }
@@ -1525,12 +1525,12 @@ button.pf-row:hover {
 .pf-load-actions {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .pf-load-pill {
   width: 128px;
   height: 38px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--surface-3) 70%, transparent);
   animation: pf-load-pulse 2.4s ease-in-out 120ms infinite;
 }
@@ -1544,7 +1544,7 @@ button.pf-row:hover {
   display: block;
   height: 84px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--pf-line);
   background: color-mix(in oklab, var(--surface-2) 58%, transparent);
   animation: pf-load-pulse 2.6s ease-in-out infinite;
@@ -1552,7 +1552,7 @@ button.pf-row:hover {
 }
 
 .pf-load-card {
-  padding: 18px;
+  padding: var(--space-4);
   border-radius: var(--pf-radius);
   border: 1px solid var(--pf-line);
   background: var(--pf-card);
@@ -1609,8 +1609,8 @@ button.pf-row:hover {
   align-items: center;
   gap: 10px;
   max-width: 720px;
-  margin: 0 auto 16px;
-  padding: 11px 12px;
+  margin: 0 auto var(--space-4);
+  padding: 11px var(--space-3);
   border-radius: 18px;
   border: 1px solid color-mix(in oklab, var(--amber) 22%, transparent);
   background: color-mix(in oklab, var(--amber) 8%, transparent);
@@ -1621,7 +1621,7 @@ button.pf-row:hover {
   flex: none;
   width: 27px;
   height: 27px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--amber) 14%, transparent);
   color: var(--amber);
 }
@@ -1642,8 +1642,8 @@ button.pf-row:hover {
   gap: 6px;
   flex: none;
   height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--pf-line);
   background: color-mix(in oklab, var(--surface) 72%, transparent);
   font-size: var(--text-caption);
@@ -1666,7 +1666,7 @@ button.pf-row:hover {
   flex: none;
   width: 24px;
   height: 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--faint);
   transition: color var(--motion-fast) linear;
 }
@@ -1712,7 +1712,7 @@ button.pf-row:hover {
   border: 1px solid var(--pf-line);
   background: color-mix(in oklab, var(--surface) 74%, transparent);
   box-shadow: 0 44px 84px -54px rgba(0, 0, 0, 0.92);
-  animation: pf-load-in 720ms var(--ease-out-expo) both;
+  animation: pf-load-in var(--motion-signature) var(--ease-out-expo) both;
 }
 .pf-out-mark {
   display: grid;
@@ -1720,7 +1720,7 @@ button.pf-row:hover {
   width: 46px;
   height: 46px;
   margin: 0 auto 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--pf-accent) 34%, transparent);
   background: radial-gradient(
     120% 110% at 50% -10%,
@@ -1731,7 +1731,7 @@ button.pf-row:hover {
 }
 .pf-out-title {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: var(--text-title);
   font-weight: 500;
   letter-spacing: var(--tracking-heading);
   color: var(--foreground);
@@ -1749,7 +1749,7 @@ button.pf-row:hover {
   height: 36px;
   margin-top: 22px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--foreground);
   color: var(--background);
   font-size: var(--text-caption);

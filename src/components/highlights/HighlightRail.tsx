@@ -70,7 +70,7 @@ function Circle({
           {highlight.name}
         </span>
         {highlight.stories.length > 0 ? (
-          <span className="mono block text-[9.5px] tracking-[0.04em] text-faint">
+          <span className="mono block text-[length:var(--text-micro)] tracking-[0.04em] text-faint">
             {highlight.stories.length} {highlight.stories.length === 1 ? "story" : "stories"}
           </span>
         ) : null}
@@ -133,7 +133,7 @@ export function HighlightRail({
               type="button"
               onClick={() => onEdit(highlight)}
               aria-label={`Edit ${highlight.name} highlight`}
-              className="mono absolute -top-1 right-0 hidden rounded-full border border-border bg-surface-2 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.06em] text-faint transition-colors hover:text-foreground group-hover/hi:block group-focus-within/hi:block"
+              className="mono absolute -top-1 right-0 hidden rounded-full border border-border bg-surface-2 px-1.5 py-0.5 text-[length:var(--text-micro)] uppercase tracking-[0.06em] text-faint transition-colors hover:text-foreground group-hover/hi:block group-focus-within/hi:block"
             >
               Edit
             </button>

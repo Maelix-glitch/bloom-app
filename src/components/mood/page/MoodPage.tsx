@@ -361,7 +361,7 @@ function Hero({
         width={1376}
         height={768}
         onLoad={() => setPhotoIn(true)}
-        className={`mm-hero-img absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ease-out ${
+        className={`mm-hero-img absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[var(--motion-signature)] ease-[var(--ease-out-expo)] ${
           photoIn ? "opacity-90" : "opacity-0"
         }`}
       />
