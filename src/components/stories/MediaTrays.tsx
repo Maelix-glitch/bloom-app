@@ -235,7 +235,7 @@ export function MusicTray({
                     <span className="block truncate text-[13.5px] font-semibold">
                       {track.title}
                       {track.explicit ? (
-                        <span className="mono ml-1.5 rounded border border-border px-1 text-[9px] text-faint">
+                        <span className="mono ml-1.5 rounded border border-border px-1 text-[length:var(--text-micro)] text-faint">
                           E
                         </span>
                       ) : null}

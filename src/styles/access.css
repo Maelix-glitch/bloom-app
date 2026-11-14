@@ -20,8 +20,7 @@
   align-items: center;
   justify-content: center;
   gap: clamp(16px, 3vh, 28px);
-  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
-    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   background:
     radial-gradient(120% 80% at 50% 0%, oklch(0.235 0.024 285), transparent 62%),
     oklch(0.155 0.016 280);
@@ -37,9 +36,9 @@
   margin-inline: auto;
   padding: clamp(24px, 5vw, 36px) clamp(20px, 5vw, 32px);
   border: 1px solid oklch(1 0 0 / 0.07);
-  border-radius: 20px;
+  border-radius: var(--radius-dialog);
   background: oklch(0.205 0.019 281 / 0.72);
-  box-shadow: 0 30px 80px -50px rgb(0 0 0 / 0.95);
+  box-shadow: var(--elevation-dialog);
 }
 
 /* The mark is BloomLogo — the exact favicon tile — so the wrapper only
@@ -110,8 +109,8 @@
   font-size: var(--text-body);
   outline: none;
   transition:
-    border-color 140ms ease,
-    background 140ms ease;
+    border-color var(--motion-micro) var(--ease-out-expo),
+    background var(--motion-micro) var(--ease-out-expo);
 }
 
 .ag-input::placeholder {
@@ -152,7 +151,7 @@
   gap: 7px;
   width: 100%;
   height: 46px;
-  margin-top: 16px;
+  margin-top: var(--space-4);
   border: 1px solid transparent;
   border-radius: 12px;
   background: oklch(0.87 0.055 88);
@@ -161,8 +160,8 @@
   font-weight: 600;
   cursor: pointer;
   transition:
-    background 140ms ease,
-    opacity 140ms ease;
+    background var(--motion-micro) var(--ease-out-expo),
+    opacity var(--motion-micro) var(--ease-out-expo);
 }
 
 .ag-btn:hover:not(:disabled) {
@@ -175,7 +174,7 @@
 }
 
 .ag-btn--quiet {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   border-color: oklch(1 0 0 / 0.1);
   background: transparent;
   color: oklch(0.955 0.008 85 / 0.6);
@@ -205,7 +204,7 @@
 }
 
 .ag-note {
-  margin: 16px 0 0;
+  margin: var(--space-4) 0 0;
   font-size: var(--text-meta);
   line-height: var(--leading-support);
   text-align: center;
@@ -215,7 +214,7 @@
 .ag-foot {
   max-width: 400px;
   margin: 0;
-  padding-inline: 12px;
+  padding-inline: var(--space-3);
   font-size: var(--text-meta);
   line-height: var(--leading-support);
   text-align: center;
@@ -243,7 +242,7 @@
 /* Narrow phones: tighten the panel, never the margins. */
 @media (max-width: 360px) {
   .ag-panel {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
   }
 }
 

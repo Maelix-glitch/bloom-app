@@ -162,6 +162,11 @@
   --surface-2: #1b1f2b; /* elevated */
   --surface-3: #232837; /* interactive / hover */
   --border: #303747;
+  /* Hairlines (P2-4, R9): one chrome recipe and one soft recipe. Surface
+     line tokens (--pf-line, --pg-line-soft, --bt-line, --ahm-border,
+     --tk2-rule) resolve to these two, never to a per-file mix. */
+  --hairline: var(--border);
+  --hairline-soft: color-mix(in oklab, var(--border) 80%, transparent);
   --border-subtle: #252a36;
   --border-strong: #3a4356;
 
@@ -237,11 +242,19 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  /* Icon-button geometry (P2-3, R17): two size roles for every icon-only
+     control, centred by grid place-items — never by hand padding. The ui
+     kit's h-9 / h-10 buttons are the same two steps. */
+  --icon-btn-sm: 36px;
+  --icon-btn-md: 40px;
 
   /* ---- type scale ---------------------------------------------------- */
   --text-display: clamp(2rem, 5vw, 3.25rem);
   --text-page: clamp(1.6rem, 3.4vw, 2.25rem);
   --text-section: 1.125rem;
+  /* P2-6: the title step — sheet, modal and panel titles (22px) that
+     used to be hand-set anywhere from 19 to 24px. */
+  --text-title: 1.375rem;
   --text-card: 1rem;
   --text-body: 0.9375rem;
   --text-callout: 0.875rem;
@@ -467,7 +480,7 @@
   }
   ::-webkit-scrollbar-thumb {
     background: var(--surface-3);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 3px solid var(--background);
   }
 
@@ -503,7 +516,7 @@
 @utility display {
   font-family: var(--font-display);
   font-weight: 500;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--tracking-display);
   font-optical-sizing: auto;
 }
 
@@ -602,7 +615,7 @@
 /* One-shot entrance for Mood Intelligence sections: starts on mount, ends
    at full opacity, and is skipped entirely under reduced motion. */
 .mood-reveal {
-  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rise var(--motion-signature) var(--ease-out-expo) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .mood-reveal {
@@ -644,8 +657,8 @@
   padding: 6px 11px;
   border-radius: var(--radius-control);
   transition:
-    color var(--motion-fast) ease,
-    background var(--motion-fast) ease;
+    color var(--motion-fast) var(--ease-out-expo),
+    background var(--motion-fast) var(--ease-out-expo);
 }
 
 .bloom-nav-link:hover {
@@ -732,7 +745,7 @@
   width: 23.5cqw;
   height: 23.5cqw;
   padding-inline: 2.35cqw;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
   background: color-mix(in oklab, var(--surface) 80%, transparent);
   font-family: var(--font-display);
@@ -745,7 +758,7 @@
 .cm-hub-halo {
   position: absolute;
   inset: -9.4cqw;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--home-gradient-glow);
 }
 .cm-node {
@@ -761,7 +774,7 @@
    */
   width: 12.94cqw;
   height: 12.94cqw;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   outline: none;
 }
 .cm-node:focus-visible {
@@ -772,10 +785,10 @@
   place-items: center;
   width: 100%;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, currentColor 55%, transparent);
   background: color-mix(in oklab, var(--surface) 92%, transparent);
-  transition: border-color var(--motion-fast, 180ms) ease;
+  transition: border-color var(--motion-fast, var(--motion-standard)) var(--ease-out-expo);
 }
 
 .cm-node:hover .cm-node-disc,
@@ -831,7 +844,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
   min-height: 36px;
 }
 .home-stack {
@@ -843,7 +856,7 @@
   background: var(--home-surface);
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) + 8px);
-  padding: 14px 16px 10px;
+  padding: 14px var(--space-4) 10px;
 }
 /*
  * The assessment prompt wears the band's shape as a slab: the plain band's
@@ -869,8 +882,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 .home-eyebrow {
   margin: 0;
@@ -896,19 +909,19 @@
 .home-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-height: 36px;
   padding: 0.4rem 0.85rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-2);
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   font-size: var(--text-support);
   line-height: 1.1;
   transition:
-    border-color var(--motion-fast) ease,
-    background var(--motion-fast) ease,
-    color var(--motion-fast) ease;
+    border-color var(--motion-fast) var(--ease-out-expo),
+    background var(--motion-fast) var(--ease-out-expo),
+    color var(--motion-fast) var(--ease-out-expo);
 }
 .home-chip:hover {
   border-color: var(--border-strong);
@@ -956,13 +969,25 @@
   animation: home-float 6s ease-in-out infinite;
 }
 .home-rise {
-  animation: home-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: home-rise var(--motion-signature) var(--ease-out-expo) both;
 }
 /* Route crossfade (see __root.tsx): opacity only, standard 200ms house
    step on the house curve — a calm cut, never a slide. The global
    reduced-motion rule stills it like every other animation. */
 .bloom-page-enter {
-  animation: bloom-page-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: bloom-page-in var(--motion-standard) var(--ease-out-expo) both;
+}
+
+/* Tab switches are returns, not arrivals (P2-5, R15): once the app has
+   navigated (the root sets html.bloom-navigated on the first route
+   change), page entrances stop replaying — the content is simply there,
+   the way iOS and Material treat a tab return. The cold-load entrance
+   is untouched: it plays exactly once, on arrival. */
+html.bloom-navigated .bloom-page-enter,
+html.bloom-navigated .home-rise,
+html.bloom-navigated .mood-page .mm-enter,
+html.bloom-navigated .mood-page .mm-hero-copy > * {
+  animation: none;
 }
 @keyframes bloom-page-in {
   from {
@@ -1021,17 +1046,17 @@
   z-index: 40;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   max-width: min(92vw, 480px);
-  padding: 10px 12px 10px 16px;
-  border-radius: 999px;
+  padding: 10px var(--space-3) 10px var(--space-4);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   background: color-mix(in oklab, var(--surface) 94%, var(--foreground) 6%);
   box-shadow: var(--home-shadow-soft);
   color: var(--foreground);
   font-size: var(--text-support);
   transform: translateX(-50%);
-  animation: home-rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: home-rise var(--motion-page) var(--ease-out-expo) both;
 }
 @media (min-width: 1024px) {
   .home-page .home-undo {
@@ -1143,8 +1168,8 @@
 /* edges */
 .mood-page .mg-edge {
   transition:
-    opacity 0.35s ease,
-    stroke-width 0.35s ease;
+    opacity var(--motion-page) var(--ease-out-expo),
+    stroke-width var(--motion-page) var(--ease-out-expo);
 }
 .mood-page .mg-edge-up {
   stroke: color-mix(in oklab, var(--gold) 75%, transparent);
@@ -1164,7 +1189,7 @@
 
 /* particles */
 .mood-page .mg-particle {
-  transition: opacity 0.35s ease;
+  transition: opacity var(--motion-page) var(--ease-out-expo);
 }
 .mood-page .mg-particle-up {
   fill: var(--gold-soft);
@@ -1208,7 +1233,7 @@
 
 /* satellites */
 .mood-page .mg-node {
-  transition: opacity 0.35s ease;
+  transition: opacity var(--motion-page) var(--ease-out-expo);
 }
 .mood-page .mg-node[data-state="off"] {
   opacity: 0.22;
@@ -1217,8 +1242,8 @@
   fill: var(--mg-c);
   opacity: 0;
   transition:
-    opacity 0.35s ease,
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity var(--motion-page) var(--ease-out-expo),
+    transform var(--motion-page) var(--ease-out-expo);
   transform-box: fill-box;
   transform-origin: center;
 }
@@ -1232,7 +1257,7 @@
   fill: color-mix(in oklab, var(--mg-c) 18%, var(--surface));
   stroke: color-mix(in oklab, var(--mg-c) 70%, transparent);
   stroke-width: 1.2;
-  transition: fill 0.35s ease;
+  transition: fill var(--motion-page) var(--ease-out-expo);
 }
 .mood-page .mg-node:hover .mg-node-body,
 .mood-page .mg-node[data-state="on"] .mg-node-body {
@@ -1247,7 +1272,7 @@
 .mood-page .mg-label {
   font-size: var(--text-meta);
   fill: var(--muted-foreground);
-  transition: fill 0.3s ease;
+  transition: fill var(--motion-page) var(--ease-out-expo);
   pointer-events: none;
 }
 .mood-page .mg-node-emotion .mg-label {
@@ -1269,7 +1294,7 @@
   border-radius: 1rem;
   border: 1px solid var(--border);
   background: color-mix(in oklab, var(--card) 70%, transparent);
-  padding: 1.5rem;
+  padding: var(--space-6);
 }
 
 @keyframes mg-breathe {
@@ -1709,16 +1734,16 @@ nav.app-mobile-nav {
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-o,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-o {
     stroke-dasharray: 1;
-    animation: bi-draw 290ms var(--ease-out-expo) both;
+    animation: bi-draw var(--motion-page) var(--ease-out-expo) both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-s,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-s {
     stroke-dasharray: 1;
-    animation: bi-draw 140ms var(--ease-out-expo) 130ms both;
+    animation: bi-draw var(--motion-micro) var(--ease-out-expo) 130ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-h,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-h {
-    animation: bi-drop 160ms var(--ease-out-expo) 195ms both;
+    animation: bi-drop var(--motion-standard) var(--ease-out-expo) 195ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-h ~ .bi-h,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-h ~ .bi-h {
@@ -1727,11 +1752,11 @@ nav.app-mobile-nav {
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-stem,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-stem {
     stroke-dasharray: 1;
-    animation: bi-draw 150ms var(--ease-out-expo) 285ms both;
+    animation: bi-draw var(--motion-micro) var(--ease-out-expo) 285ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-leaf,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-leaf {
-    animation: bi-unfold 180ms var(--ease-out-expo) 360ms both;
+    animation: bi-unfold var(--motion-standard) var(--ease-out-expo) 360ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="today"] .bi-leaf ~ .bi-leaf,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="today"] .bi-leaf ~ .bi-leaf {
@@ -1746,22 +1771,22 @@ nav.app-mobile-nav {
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="trackers"] .bi-needle,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="trackers"] .bi-needle {
-    animation: bi-sweep 400ms var(--ease-out-expo) 120ms both;
+    animation: bi-sweep var(--motion-page) var(--ease-out-expo) 120ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="trackers"] .bi-dot,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="trackers"] .bi-dot {
-    animation: bi-pop 150ms var(--ease-out-expo) 450ms both;
+    animation: bi-pop var(--motion-micro) var(--ease-out-expo) 450ms both;
   }
 
   /* — Mood: the face draws, the leaf eyes blink open, the smile lands. — */
   .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-o,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-o {
     stroke-dasharray: 1;
-    animation: bi-draw 330ms var(--ease-out-expo) both;
+    animation: bi-draw var(--motion-page) var(--ease-out-expo) both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-eye,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-eye {
-    animation: bi-blink-in 170ms var(--ease-out-expo) 220ms both;
+    animation: bi-blink-in var(--motion-standard) var(--ease-out-expo) 220ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-eye ~ .bi-eye,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-eye ~ .bi-eye {
@@ -1770,18 +1795,18 @@ nav.app-mobile-nav {
   .app-nav-link-active .app-nav-glyph[data-glyph="mood"] .bi-s,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="mood"] .bi-s {
     stroke-dasharray: 1;
-    animation: bi-draw 210ms var(--ease-out-expo) 370ms both;
+    animation: bi-draw var(--motion-standard) var(--ease-out-expo) 370ms both;
   }
 
   /* — Rewards: the stem grows up, petals unfold in turn, centre lands. — */
   .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-stem,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-stem {
     stroke-dasharray: 1;
-    animation: bi-draw 190ms var(--ease-out-expo) both;
+    animation: bi-draw var(--motion-standard) var(--ease-out-expo) both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-petal {
-    animation: bi-petal-unfold 230ms var(--ease-out-expo) 110ms both;
+    animation: bi-petal-unfold var(--motion-standard) var(--ease-out-expo) 110ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-petal-g:nth-of-type(2) .bi-petal,
   .app-mobile-nav
@@ -1817,27 +1842,27 @@ nav.app-mobile-nav {
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-leaf,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-leaf {
-    animation: bi-unfold 190ms var(--ease-out-expo) 360ms both;
+    animation: bi-unfold var(--motion-standard) var(--ease-out-expo) 360ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="rewards"] .bi-dot,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="rewards"] .bi-dot {
-    animation: bi-pop 150ms var(--ease-out-expo) 420ms both;
+    animation: bi-pop var(--motion-micro) var(--ease-out-expo) 420ms both;
   }
 
   /* — Coach: the bubble draws, the sprout inside it grows and opens. — */
   .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-o,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-o {
     stroke-dasharray: 1;
-    animation: bi-draw 350ms var(--ease-out-expo) both;
+    animation: bi-draw var(--motion-page) var(--ease-out-expo) both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-stem,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-stem {
     stroke-dasharray: 1;
-    animation: bi-draw 150ms var(--ease-out-expo) 250ms both;
+    animation: bi-draw var(--motion-micro) var(--ease-out-expo) 250ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-leaf,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-leaf {
-    animation: bi-unfold 190ms var(--ease-out-expo) 340ms both;
+    animation: bi-unfold var(--motion-standard) var(--ease-out-expo) 340ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="coach"] .bi-leaf ~ .bi-leaf,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="coach"] .bi-leaf ~ .bi-leaf {
@@ -1848,16 +1873,16 @@ nav.app-mobile-nav {
   .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-o,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-o {
     stroke-dasharray: 1;
-    animation: bi-draw 250ms var(--ease-out-expo) both;
+    animation: bi-draw var(--motion-standard) var(--ease-out-expo) both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-s,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-s {
     stroke-dasharray: 1;
-    animation: bi-draw 260ms var(--ease-out-expo) 140ms both;
+    animation: bi-draw var(--motion-page) var(--ease-out-expo) 140ms both;
   }
   .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-leaf,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-leaf {
-    animation: bi-unfold 200ms var(--ease-out-expo) 370ms both;
+    animation: bi-unfold var(--motion-standard) var(--ease-out-expo) 370ms both;
   }
 
   /* — Hover echoes: a shortened answer from an inactive item — one part
@@ -1997,7 +2022,7 @@ nav.app-mobile-nav {
   background: var(--gold);
   color: var(--primary-foreground);
   box-shadow: var(--elevation-float);
-  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+  transition: transform var(--motion-fast) var(--ease-out-expo), box-shadow var(--motion-fast) var(--ease-out-expo);
 }
 .home-fab:hover {
   transform: translateY(-2px);
@@ -2220,7 +2245,7 @@ html[data-bloom-effect="fx-mist"] {
   gap: 0.35rem;
   margin-left: 0.6rem;
   padding: 0.18rem 0.6rem 0.18rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--rank-tone, var(--gold)) 34%, transparent);
   background: color-mix(in oklab, var(--rank-tone, var(--gold)) 9%, transparent);
   color: color-mix(in oklab, var(--rank-tone, var(--gold)) 84%, var(--foreground));
@@ -2284,14 +2309,14 @@ body {
 @media (min-width: 64rem) {
   /* P2 — the top date rail reads as a header, not a floating line. */
   .mood-page main > div > div > header {
-    padding-bottom: 1rem;
+    padding-bottom: var(--space-4);
     border-bottom: 1px solid var(--border);
   }
 
   /* P1+P4 — the "small insight" card: text breathes across the card
      instead of stranding in 1/3, sun medallion docks right with a glow. */
   .mood-page [data-testid="mood-journey"] > div.relative > div.relative {
-    gap: 2.5rem;
+    gap: var(--space-10);
     padding: 2.25rem 2.75rem;
   }
   .mood-page [data-testid="mood-journey"] > div.relative p {
@@ -2326,7 +2351,7 @@ body {
     grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
   }
   .mood-page .mg-reading {
-    padding: 2rem 2.25rem;
+    padding: var(--space-8) 2.25rem;
   }
 }
 
@@ -2410,10 +2435,10 @@ body {
  * block for one small control.
  * ------------------------------------------------------------------------- */
 .home-band[data-empty="true"] {
-  padding: 10px 14px 8px;
+  padding: 10px 14px var(--space-2);
 }
 .home-band[data-empty="true"] .home-band-head {
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 .home-band[data-empty="true"] .home-band-title {
   font-size: var(--text-card);
@@ -2423,7 +2448,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: var(--space-6);
   }
   .home-band[data-empty="true"] .home-band-head {
     margin-bottom: 0;

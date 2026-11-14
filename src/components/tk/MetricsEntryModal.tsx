@@ -333,7 +333,7 @@ export function MetricsEntryModal({
             <p className="text-[length:var(--text-meta)] font-semibold uppercase tracking-[var(--tracking-caps)] text-primary">
               Reflect &amp; log today
             </p>
-            <h2 className="mt-1.5 font-display text-[24px] leading-tight text-foreground">
+            <h2 className="mt-1.5 font-display text-[length:var(--text-title)] leading-tight text-foreground">
               Today&apos;s snapshot
             </h2>
             {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}

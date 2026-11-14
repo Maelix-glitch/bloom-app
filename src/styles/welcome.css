@@ -46,7 +46,7 @@
   );
   filter: blur(46px);
   opacity: 0.62;
-  transition: opacity 700ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: opacity var(--motion-signature) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 /* A hairline of light along the top edge — the only edge treatment. */
@@ -78,14 +78,14 @@
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
-  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  padding: max(24px, env(safe-area-inset-top)) var(--space-6) max(24px, env(safe-area-inset-bottom));
 }
 
 .wl-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 36px;
 }
 
@@ -105,7 +105,7 @@
   position: relative;
   flex: 1;
   height: 2px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--foreground) 12%, transparent);
   overflow: hidden;
 }
@@ -118,7 +118,7 @@
   background: var(--wl-accent, var(--violet));
   transform: scaleX(var(--fill, 0));
   transform-origin: left center;
-  transition: transform 520ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: transform var(--motion-signature) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 /* The admin door. Present only for someone the database lists; for everybody
@@ -129,7 +129,7 @@
   height: 28px;
   padding: 0 11px;
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   font-family: var(--font-mono);
@@ -138,8 +138,8 @@
   text-transform: uppercase;
   white-space: nowrap;
   transition:
-    color var(--motion-fast) ease,
-    border-color var(--motion-fast) ease;
+    color var(--motion-fast) var(--ease-out-expo),
+    border-color var(--motion-fast) var(--ease-out-expo);
 }
 .wl-skip:hover {
   color: var(--foreground);
@@ -152,7 +152,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 28px 0 8px;
+  padding: 28px 0 var(--space-2);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -213,14 +213,14 @@
   align-items: flex-start;
   gap: 14px;
   width: 100%;
-  padding: 15px 16px;
+  padding: var(--space-4);
   text-align: left;
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
   background: color-mix(in oklab, var(--surface) 46%, transparent);
   transition:
-    border-color 220ms ease,
-    background-color 220ms ease;
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .wl-card:hover {
@@ -243,19 +243,19 @@
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid color-mix(in oklab, var(--foreground) 26%, transparent);
-  transition: border-color 200ms ease;
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .wl-radio::after {
   content: "";
   position: absolute;
   inset: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--wl-accent, var(--violet));
   transform: scale(0);
-  transition: transform 240ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: transform var(--motion-standard) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 .wl-card[data-on="true"] .wl-radio {
@@ -281,16 +281,16 @@
   border: 1.5px solid color-mix(in oklab, var(--foreground) 26%, transparent);
   color: var(--primary-foreground);
   transition:
-    border-color 200ms ease,
-    background-color 200ms ease;
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .wl-check svg {
   opacity: 0;
   transform: scale(0.6);
   transition:
-    opacity 180ms ease,
-    transform 240ms var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+    opacity var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-standard) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 .wl-card[data-on="true"] .wl-check {
@@ -335,7 +335,7 @@
 }
 
 .wl-card--decline {
-  padding: 13px 16px;
+  padding: 13px var(--space-4);
   border-color: transparent;
   background: transparent;
 }
@@ -372,9 +372,9 @@
   font-weight: 500;
   letter-spacing: var(--tracking-heading);
   transition:
-    background-color 220ms ease,
-    border-color 220ms ease,
-    opacity 220ms ease;
+    background-color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    opacity var(--motion-standard) var(--ease-out-expo);
 }
 .wl-next:hover:not(:disabled) {
   background: color-mix(in oklab, var(--wl-accent, var(--violet)) 24%, transparent);
@@ -399,8 +399,8 @@
   background: transparent;
   color: color-mix(in oklab, var(--foreground) 66%, transparent);
   transition:
-    color var(--motion-fast) ease,
-    border-color var(--motion-fast) ease;
+    color var(--motion-fast) var(--ease-out-expo),
+    border-color var(--motion-fast) var(--ease-out-expo);
 }
 .wl-back:hover {
   color: var(--foreground);
@@ -416,7 +416,7 @@
   width: 100%;
   height: 52px;
   margin-top: 22px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   border-radius: 14px;
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--surface) 50%, transparent);
@@ -424,8 +424,8 @@
   font-size: var(--text-card); /* 16px, not smaller: below this iOS zooms the page on focus */
   letter-spacing: var(--tracking-heading);
   transition:
-    border-color 200ms ease,
-    background-color 200ms ease;
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
 }
 .wl-input::placeholder {
   color: color-mix(in oklab, var(--foreground) 30%, transparent);
@@ -449,7 +449,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
   padding: 11px 2px;
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 7%, transparent);
   font-size: var(--text-caption);
@@ -478,7 +478,7 @@
    The type and the gaps give way first; the tap targets never do. */
 @media (max-height: 680px) {
   .wl-body {
-    padding-top: 16px;
+    padding-top: var(--space-4);
   }
   .wl-title {
     font-size: clamp(25px, 6.6vw, 32px);
@@ -486,10 +486,10 @@
   }
   .wl-choices {
     margin-top: 18px;
-    gap: 8px;
+    gap: var(--space-2);
   }
   .wl-card {
-    padding: 12px 14px;
+    padding: var(--space-3) 14px;
   }
   .wl-next,
   .wl-back {

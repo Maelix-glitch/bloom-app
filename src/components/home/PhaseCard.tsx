@@ -171,7 +171,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
           >
             The science, in full
             <ChevronDown
-              className={`size-3.5 transition-transform duration-300 ${scienceOpen ? "rotate-180" : ""}`}
+              className={`size-3.5 transition-transform duration-[var(--motion-page)] ${scienceOpen ? "rotate-180" : ""}`}
               aria-hidden
             />
           </button>

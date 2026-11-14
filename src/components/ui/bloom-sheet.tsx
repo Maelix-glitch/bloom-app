@@ -304,7 +304,7 @@ export function BloomConfirm({
         <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
           {tone === "danger" ? "Before you go" : "Just checking"}
         </p>
-        <h2 className="mt-3 font-display text-[22px] leading-tight text-foreground sm:text-[24px]">
+        <h2 className="mt-3 font-display text-[length:var(--text-title)] leading-tight text-foreground">
           {title}
         </h2>
         {description ? (

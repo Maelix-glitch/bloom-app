@@ -44,7 +44,7 @@ function DistributionImpl({
               b.count ? (
                 <span
                   key={b.key}
-                  className="h-full transition-all duration-700"
+                  className="h-full transition-all duration-[var(--motion-signature)]"
                   style={{ width: `${b.share}%`, background: accentVar[b.accent as Accent] }}
                   title={`${b.label}: ${b.count} ${b.count === 1 ? "day" : "days"}`}
                 />
@@ -89,7 +89,7 @@ function DistributionImpl({
               </div>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-3">
                 <span
-                  className="block h-full rounded-full transition-all duration-700"
+                  className="block h-full rounded-full transition-all duration-[var(--motion-signature)]"
                   style={{ width: `${volatility.stability ?? 0}%`, background: "var(--sage)" }}
                 />
               </div>

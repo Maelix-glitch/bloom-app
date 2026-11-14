@@ -225,7 +225,7 @@ export function OverviewBand({
               <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                 Assessment
               </p>
-              <h2 className="mt-2 font-display text-[24px] leading-tight text-foreground">
+              <h2 className="mt-2 font-display text-[length:var(--text-title)] leading-tight text-foreground">
                 Your summary
               </h2>
             </div>

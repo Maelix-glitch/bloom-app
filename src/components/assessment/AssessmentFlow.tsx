@@ -420,7 +420,7 @@ export function AssessmentFlow({
               Assessment
               {questionIndex >= 0 ? ` · Step ${questionIndex + 1} of ${QUESTION_STEPS.length}` : ""}
             </p>
-            <h2 className="mt-2 font-display text-[24px] leading-tight text-foreground">
+            <h2 className="mt-2 font-display text-[length:var(--text-title)] leading-tight text-foreground">
               {STEP_TITLE[step]}
             </h2>
           </div>

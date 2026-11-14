@@ -101,7 +101,7 @@ export function ReactionBar({
             <span className="relative" aria-hidden>
               {meta.glyph}
               {count > 0 ? (
-                <span className="absolute -right-2 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-white/15 px-1 text-[9px] font-bold text-white">
+                <span className="absolute -right-2 -top-1.5 grid min-w-[16px] place-items-center rounded-full bg-white/15 px-1 text-[length:var(--text-micro)] font-bold text-white">
                   {count}
                 </span>
               ) : null}
@@ -237,7 +237,7 @@ export function ReplySheet({
                   )}
                 >
                   {!mine ? (
-                    <p className="mono mb-1 text-[9.5px] uppercase tracking-[0.08em] text-faint">
+                    <p className="mono mb-1 text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
                       {reply.authorName ?? "Someone"} · {storyAge(reply.createdAt)}
                     </p>
                   ) : null}
@@ -437,7 +437,7 @@ export function StoryInsightsSheet({
           >
             <s.icon className="size-3.5 text-faint" aria-hidden />
             <span className="display text-[19px] leading-none">{s.value}</span>
-            <span className="mono text-[9px] uppercase tracking-[0.08em] text-faint">
+            <span className="mono text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
               {s.label}
             </span>
           </div>
@@ -603,7 +603,7 @@ function RepliesList({ storyId, userId }: { storyId: string; userId: string | nu
     <ul className="flex flex-col gap-2">
       {replies.map((r) => (
         <li key={r.id} className="rounded-2xl border border-border bg-surface/60 px-3.5 py-2.5">
-          <p className="mono mb-1 text-[9.5px] uppercase tracking-[0.08em] text-faint">
+          <p className="mono mb-1 text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
             {r.authorName ?? "Someone"} · {storyAge(r.createdAt)}
           </p>
           <p className="whitespace-pre-line text-[13.5px] leading-relaxed">{r.body}</p>

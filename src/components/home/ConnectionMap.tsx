@@ -345,7 +345,7 @@ export function ConnectionMap({
         {spokes.map((n) => (
           <p
             key={`note-${n.id}`}
-            className="absolute hidden w-[104px] rounded-lg border border-border bg-surface-2/70 px-2 py-1.5 text-[length:var(--text-micro)] leading-snug text-muted-foreground transition-opacity duration-300 2xl:block"
+            className="absolute hidden w-[104px] rounded-lg border border-border bg-surface-2/70 px-2 py-1.5 text-[length:var(--text-micro)] leading-snug text-muted-foreground transition-opacity duration-[var(--motion-page)] 2xl:block"
             style={{
               top: `calc(50% + ${n.dy}px)`,
               [n.side === "left" ? "left" : "right"]: "-6px",

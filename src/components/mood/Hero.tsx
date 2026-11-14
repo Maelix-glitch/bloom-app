@@ -47,7 +47,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           <button
             type="button"
             onClick={onCompose}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-500 hover:scale-[1.02]"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-[var(--motion-signature)] hover:scale-[1.02]"
             style={{ background: "var(--grad-violet)", backgroundSize: "200% 200%", boxShadow: "var(--glow-violet)" }}
           >
             <span
@@ -55,7 +55,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
               className="animate-sweep absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent"
               style={{ transform: "translateX(-170%) skewX(-14deg)" }}
             />
-            <Plus className="size-4 transition-transform duration-500 group-hover:rotate-90" />
+            <Plus className="size-4 transition-transform duration-[var(--motion-signature)] group-hover:rotate-90" />
             Log an entry
           </button>
           <div className="flex flex-wrap gap-1.5">
@@ -66,7 +66,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
                 onClick={() => setRangeKey(r.key)}
                 aria-pressed={rangeKey === r.key}
                 className={cn(
-                  "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-300",
+                  "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-[var(--motion-page)]",
                   rangeKey === r.key
                     ? "border-violet/60 bg-[var(--dim-violet)] text-violet"
                     : "border-border text-faint hover:border-border-strong hover:text-muted-foreground",

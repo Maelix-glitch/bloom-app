@@ -13,7 +13,7 @@
   --bt-fill: var(--surface);
   width: 100%;
   max-width: 1120px;
-  margin: 2.5rem auto 0;
+  margin: var(--space-10) auto 0;
   padding: 1.35rem;
   border: 1px solid var(--bt-line);
   border-radius: var(--radius-panel);
@@ -27,7 +27,7 @@
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .bt-kicker {
@@ -66,12 +66,12 @@
   min-height: 40px;
   padding: 0 0.85rem;
   border: 1px solid var(--bt-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--foreground);
   font-size: var(--text-caption);
   cursor: pointer;
-  transition: border-color 0.18s ease, color 0.18s ease;
+  transition: border-color var(--motion-standard) var(--ease-out-expo), color var(--motion-standard) var(--ease-out-expo);
 }
 
 .bt-ghost:hover {
@@ -105,7 +105,7 @@
   display: flex;
   flex-direction: column;
   min-height: 196px;
-  padding: 1rem 1rem 0.95rem;
+  padding: var(--space-4);
   border: 1px solid var(--bt-line);
   border-radius: 18px;
   background: color-mix(in oklab, var(--surface) 78%, transparent);
@@ -185,7 +185,7 @@
   position: relative;
   height: 6px;
   margin-top: 0.9rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(
     90deg,
     var(--chart-1) 0%,
@@ -206,7 +206,7 @@
   width: 12px;
   height: 12px;
   border: 2px solid var(--background);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--foreground);
   transform: translate(-50%, -50%);
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--foreground) 25%, transparent);
@@ -222,7 +222,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   font-size: var(--text-caption);
 }
 
@@ -239,7 +239,7 @@
 .bt-bar {
   height: 6px;
   margin-top: 0.9rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--foreground) 10%, transparent);
   overflow: hidden;
 }
@@ -249,7 +249,7 @@
   height: 100%;
   border-radius: inherit;
   background: var(--bt-accent, var(--primary));
-  transition: width 0.4s ease;
+  transition: width var(--motion-page) var(--ease-out-expo);
 }
 
 .bt-inline-link {
@@ -269,7 +269,7 @@
 .bt-goal,
 .bt-weigh {
   margin-top: 0.9rem;
-  padding: 1rem;
+  padding: var(--space-4);
   border: 1px solid var(--bt-line);
   border-radius: 18px;
   background: color-mix(in oklab, var(--surface) 70%, transparent);
@@ -280,14 +280,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .bt-goal__line {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.75rem;
+  gap: var(--space-3);
   margin: 0.6rem 0 0;
   font-family: var(--font-display, Georgia, serif);
   font-size: clamp(1.25rem, 5vw, 1.6rem);
@@ -312,7 +312,7 @@
 .bt-delta {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
   font-size: var(--text-meta);
   font-variant-numeric: tabular-nums;
   color: var(--muted-foreground);
@@ -363,7 +363,7 @@
   min-height: 36px;
   padding: 0 0.6rem;
   border: 1px solid color-mix(in oklab, var(--danger) 32%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: color-mix(in oklab, var(--danger) 80%, var(--foreground));
   font-size: var(--text-meta);
@@ -377,8 +377,8 @@
 /* --------------------------------- form ---------------------------------- */
 
 .bt-form {
-  margin-top: 1.25rem;
-  padding: 1rem;
+  margin-top: var(--space-5);
+  padding: var(--space-4);
   border: 1px solid var(--bt-line);
   border-radius: 18px;
   background: color-mix(in oklab, var(--surface) 70%, transparent);
@@ -387,8 +387,8 @@
 .bt-form__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 @media (max-width: 480px) {
@@ -396,8 +396,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .bt-shell {
-    padding: 1rem;
-    border-radius: 20px;
+    padding: var(--space-4);
+    border-radius: var(--radius-dialog);
   }
 }
 
@@ -406,7 +406,7 @@
   margin-bottom: 0.9rem;
   padding: 3px;
   border: 1px solid var(--bt-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--background) 50%, transparent);
 }
 
@@ -414,7 +414,7 @@
   min-height: 34px;
   padding: 0 0.85rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--muted-foreground);
   font-size: var(--text-caption);
@@ -448,7 +448,7 @@
   border: 1px solid var(--bt-line);
   border-radius: 12px;
   background: color-mix(in oklab, var(--background) 42%, transparent);
-  transition: border-color 0.18s ease;
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .bt-field__input:focus-within {
@@ -503,13 +503,13 @@
   margin-top: 0.85rem;
   padding: 0 1.1rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--primary);
   color: var(--primary-foreground);
   font-size: var(--text-support);
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.18s ease, transform 0.18s ease;
+  transition: filter var(--motion-standard) var(--ease-out-expo), transform var(--motion-standard) var(--ease-out-expo);
 }
 
 .bt-primary:hover {
@@ -524,7 +524,7 @@
   width: auto;
   min-height: 44px;
   margin-top: 0;
-  padding: 0 1rem;
+  padding: 0 var(--space-4);
 }
 
 .bt-note {
@@ -541,7 +541,7 @@
 }
 
 .bt-saved {
-  margin: 0.5rem 0 0;
+  margin: var(--space-2) 0 0;
   font-size: var(--text-caption);
   color: var(--success);
 }

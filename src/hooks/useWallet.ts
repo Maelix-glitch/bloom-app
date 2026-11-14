@@ -118,6 +118,28 @@ function publish(): void {
   for (const l of [...listeners]) l();
 }
 
+/**
+ * The account balance a mutation already knows (P2-5, R16). A claim's
+ * award RPC and a habit tick's award both RETURN the new server balance;
+ * before this, the wallet ignored that value and re-read it over the
+ * network on POINTS_CHANGED, so the points pill trailed the action by a
+ * full round trip. Noting the balance moves the pill in the same frame
+ * as the action; the next refresh still reconciles with the server.
+ * Signed-out or pre-session calls are ignored — the device ledger is
+ * that world's balance, and it already updates synchronously.
+ */
+export function noteAccountBalance(balance: number): void {
+  if (!state.sessionReady || state.userId === null) return;
+  if (state.accountSettled && state.accountBalance === balance) return;
+  state = {
+    ...state,
+    accountBalance: balance,
+    accountSettled: true,
+    degraded: false,
+  };
+  publish();
+}
+
 function subscribe(onChange: () => void): () => void {
   listeners.add(onChange);
   return () => listeners.delete(onChange);

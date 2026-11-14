@@ -122,7 +122,7 @@ export function ProfileShareSheet({
             <Sparkles className="size-3" aria-hidden />
             Share your space
           </p>
-          <h2 className="display mt-2 text-[22px] leading-tight tracking-tight">
+          <h2 className="display mt-2 text-[length:var(--text-title)] leading-tight tracking-tight">
             {needsUsername ? "Pick a name for your space" : "Your profile link"}
           </h2>
           <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
@@ -137,7 +137,7 @@ export function ProfileShareSheet({
         {/* preview card — same accent language as the rest of profile */}
         <SheetItem className="px-5 pt-5 sm:px-6">
           <div
-            className="relative overflow-hidden rounded-[20px] border px-5 py-5"
+            className="relative overflow-hidden rounded-dialog border px-5 py-5"
             style={{
               borderColor: `color-mix(in oklab, ${accentVar[accent]} 24%, var(--border))`,
               background: `radial-gradient(120% 90% at 50% -20%, color-mix(in oklab, ${accentVar[accent]} 14%, var(--surface-2)), var(--surface) 62%)`,

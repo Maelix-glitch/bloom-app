@@ -69,7 +69,7 @@ function HistoryImpl({
       />
 
       <div className="mb-5 flex flex-wrap items-center gap-3">
-        <label className="flex min-w-[220px] flex-1 items-center gap-2 rounded-[10px] border border-border bg-surface-2 px-3 py-2 transition-colors focus-within:border-border-strong">
+        <label className="flex min-w-[220px] flex-1 items-center gap-2 rounded-control border border-border bg-surface-2 px-3 py-2 transition-colors focus-within:border-border-strong">
           <Search className="size-3.5 text-faint" />
           <input
             type="search"
@@ -87,7 +87,7 @@ function HistoryImpl({
               onClick={() => setValence(v)}
               aria-pressed={valence === v}
               className={cn(
-                "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-300",
+                "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-[var(--motion-page)]",
                 valence === v
                   ? "border-amber/60 bg-[var(--dim-amber)] text-amber"
                   : "border-border text-faint hover:text-muted-foreground",

@@ -49,7 +49,7 @@ function CorrelationsImpl({ correlations }: { correlations: Correlation[] }) {
                 <div className="relative mt-3 h-1.5 overflow-hidden rounded-full bg-surface-3">
                   <span className="absolute left-1/2 top-0 h-full w-px bg-border-strong" />
                   <span
-                    className="absolute top-0 h-full rounded-full transition-all duration-700"
+                    className="absolute top-0 h-full rounded-full transition-all duration-[var(--motion-signature)]"
                     style={{
                       width: `${pct / 2}%`,
                       left: positive ? "50%" : `${50 - pct / 2}%`,
