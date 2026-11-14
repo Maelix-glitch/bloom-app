@@ -61,7 +61,7 @@ export function FeaturedCard({
           {content.body}
         </p>
       ) : null}
-      <p className="mono mt-4 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+      <p className="mono mt-4 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
         {content.date}
       </p>
     </button>
@@ -90,7 +90,7 @@ export function FeaturePrompt({
         <button
           type="button"
           onClick={onClear}
-          className="mono rounded-full px-3.5 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors hover:text-rose"
+          className="mono rounded-full px-3.5 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong transition-colors hover:text-rose"
         >
           Remove
         </button>
@@ -209,7 +209,7 @@ export function FeaturedPicker({
                       <span className="block truncate text-[length:var(--text-support)] font-medium">
                         {c.label}
                       </span>
-                      <span className="mono block text-[length:var(--text-micro)] uppercase tracking-[0.06em] text-faint">
+                      <span className="mono block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-label)] text-faint-strong">
                         {c.sub}
                       </span>
                     </span>

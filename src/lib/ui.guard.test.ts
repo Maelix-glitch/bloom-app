@@ -206,3 +206,205 @@ describe("UI guard: type scale discipline (P2-1)", () => {
     ).toEqual([]);
   });
 });
+
+describe("UI guard: small-text system (P2-2)", () => {
+  /* Premium pass 2, slice 2 — the owner's named priority ("the small text
+     looks cheap quality"). P2-1 put every small size on the scale; this
+     guard pins the rest of each role's recipe so the dialect cannot
+     regrow: tracking and leading come from --tracking-* / --leading-*,
+     meta-sized text on raised surfaces takes the --faint-strong contrast
+     step (register R3), Inter never asks for the nonexistent 700 face
+     (R5), and numeric UI keeps tabular figures (R12). Recorded bands,
+     mirroring the audit's slice plan: line-height literals >= 1.62 are
+     the prose band (Coach messages, panel ledes — long-form air, owned
+     by the body/display work), and display-sized rules (clamp or >= 19px)
+     keep their leading until P2-6. styles.css is exempt throughout: it is
+     the recipe home, as in the hex guard. */
+  const FEATURE_CSS = new Set([
+    "styles/shell.css",
+    "styles/bloom-sheet.css",
+    "styles/trackers.css",
+    "styles/rewards.css",
+    "styles/mood.css",
+    "styles/coach.css",
+    "styles/profile.css",
+    "styles/progression.css",
+    "styles/health-tools.css",
+    "styles/access.css",
+    "styles/add-habit-modal.css",
+    "styles/welcome.css",
+    "styles/admin-panel.css",
+    "styles/responsive.css",
+  ]);
+  const TSX_PREFIXES = [
+    "components/assessment/",
+    "components/home/",
+    "components/mood/",
+    "components/profile/",
+    "components/report/",
+    "components/rewards/",
+    "components/system/",
+    "components/tk/",
+    "components/ui/",
+    "routes/",
+  ];
+  const ROUTES2 = readAll(
+    walk(join(SRC, "routes"), (n) => n.endsWith(".tsx")).filter(
+      (p) => !toRel(p).startsWith("routes/admin/"),
+    ),
+  );
+  const POOL2 = [...CSS_AND_COMPONENTS, ...ROUTES2].filter(
+    (f) => FEATURE_CSS.has(f.rel) || TSX_PREFIXES.some((p) => f.rel.startsWith(p)),
+  );
+  const CSS_POOL = POOL2.filter((f) => f.rel.endsWith(".css"));
+  const TSX_POOL = POOL2.filter((f) => f.rel.endsWith(".tsx"));
+  const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+
+  /* Innermost rule blocks of a stylesheet, comments stripped: the
+     selector chunk is whatever sits between the previous close brace
+     and this block's open brace. Keyframe steps (from / to / %) are
+     returned too and skipped by callers — they animate, they don't
+     set type. */
+  function blocks(text: string): { selector: string; body: string }[] {
+    const clean = text.replace(/\/\*[\s\S]*?\*\//g, " ");
+    const out: { selector: string; body: string }[] = [];
+    let prev = 0;
+    for (const m of clean.matchAll(/\{([^{}]*)\}/g)) {
+      out.push({ selector: clean.slice(prev, m.index).trim(), body: m[1]! });
+      prev = m.index + m[0].length;
+    }
+    return out;
+  }
+  const isKeyframe = (sel: string) => /(^|[,\s])(from|to|\d+(?:\.\d+)?%)\s*$/.test(sel.trim());
+  const isDisplayBlock = (body: string) => {
+    const m = body.match(/font-size:\s*([^;]+);/);
+    if (!m) return false;
+    const v = m[1]!.trim();
+    if (v.startsWith("clamp")) return true;
+    if (/var\(--text-(display|page)\)/.test(v)) return true;
+    const px = v.match(/^(\d+(?:\.\d+)?)px/);
+    return px ? parseFloat(px[1]!) >= 19 : false;
+  };
+
+  it("defines the small-text recipes and the meta contrast step in styles.css", () => {
+    for (const needle of [
+      "--faint-strong:",
+      "--color-faint-strong: var(--faint-strong)",
+      "@utility type-caption",
+      "@utility type-label",
+      "@utility type-meta",
+      "@utility type-timestamp",
+      "@utility type-badge",
+    ]) {
+      expect(STYLES.text, `styles.css must define ${needle}`).toContain(needle);
+    }
+    const meta = blocks(STYLES.text).find((b) => b.selector.includes("@utility type-meta"))!;
+    expect(meta.body).toContain("color: var(--faint-strong)");
+    expect(meta.body).toContain("letter-spacing: var(--tracking-meta)");
+    const stamp = blocks(STYLES.text).find((b) => b.selector.includes("@utility type-timestamp"))!;
+    expect(stamp.body).toContain("font-variant-numeric: tabular-nums");
+    const badge = blocks(STYLES.text).find((b) => b.selector.includes("@utility type-badge"))!;
+    expect(badge.body).toContain("font-weight: 600");
+  });
+
+  it("fails on letter-spacing literals in migrated stylesheets", () => {
+    const offenders: string[] = [];
+    for (const f of CSS_POOL) {
+      for (const b of blocks(f.text)) {
+        if (isKeyframe(b.selector)) continue;
+        for (const m of b.body.matchAll(/letter-spacing:\s*(-?\d[^;]*);/g)) {
+          offenders.push(`${f.rel}: letter-spacing: ${m[1]!.trim()}`);
+        }
+      }
+    }
+    expect(
+      offenders,
+      `tracking comes from --tracking-*: ${offenders.slice(0, 12).join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it("fails on line-height literals outside the prose band and display rules", () => {
+    const offenders: string[] = [];
+    for (const f of CSS_POOL) {
+      for (const b of blocks(f.text)) {
+        if (isKeyframe(b.selector) || isDisplayBlock(b.body)) continue;
+        for (const m of b.body.matchAll(/line-height:\s*([^;]+);/g)) {
+          const v = m[1]!.trim().replace(/\s*!important$/, "");
+          if (/^var\(--leading-/.test(v)) continue;
+          const num = parseFloat(v);
+          if (!Number.isNaN(num) && num >= 1.62 && !v.endsWith("px")) continue; /* prose band */
+          offenders.push(`${f.rel}: line-height: ${v}`);
+        }
+      }
+    }
+    expect(
+      offenders,
+      `leading comes from --leading-*: ${offenders.slice(0, 12).join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it("fails on font-weight 700 and on meta-sized text in --faint (R5, R3)", () => {
+    const offenders: string[] = [];
+    for (const f of CSS_POOL) {
+      for (const b of blocks(f.text)) {
+        if (isKeyframe(b.selector)) continue;
+        if (/font-weight:\s*700\b/.test(b.body)) offenders.push(`${f.rel}: font-weight: 700`);
+        if (
+          /font-size:\s*var\(--text-(meta|micro)\)/.test(b.body) &&
+          /color:\s*var\(--faint\)/.test(b.body)
+        ) {
+          offenders.push(`${f.rel}: meta/micro text in --faint (use --faint-strong)`);
+        }
+        for (const m of b.body.matchAll(/font-variant-numeric:\s*([^;]+);/g)) {
+          if (!m[1]!.includes("tabular-nums")) {
+            offenders.push(`${f.rel}: font-variant-numeric without tabular-nums`);
+          }
+        }
+      }
+    }
+    expect(offenders, offenders.slice(0, 12).join(", ")).toEqual([]);
+  });
+
+  it("fails on ad-hoc tracking, small-text leading, bold and faint meta in migrated TSX", () => {
+    const offenders: string[] = [];
+    for (const f of TSX_POOL) {
+      for (const m of f.text.matchAll(/tracking-\[(-?\d+(?:\.\d+)?)em\]/g)) {
+        /* One recorded exemption: the footer wordmark in routes/index.tsx
+           (font-display "BLOOM" at 0.5em) is display type — P2-6 owns it. */
+        if (f.rel === "routes/index.tsx" && m[1] === "0.5") continue;
+        offenders.push(`${f.rel}: ${m[0]}`);
+      }
+      for (const m of f.text.matchAll(/leading-\[(\d+(?:\.\d+)?)\]/g)) {
+        if (parseFloat(m[1]!) >= 1.3) offenders.push(`${f.rel}: ${m[0]}`);
+      }
+      for (const m of f.text.matchAll(/leading-\[\d+(?:\.\d+)?px\]/g)) {
+        offenders.push(`${f.rel}: ${m[0]}`);
+      }
+      if (/\bfont-bold\b/.test(f.text)) offenders.push(`${f.rel}: font-bold`);
+      for (const m of f.text.matchAll(/className=(?:\{`([^`]*)`|"([^"]*)")/gs)) {
+        const s = m[1] ?? m[2] ?? "";
+        if (
+          (s.includes("text-[length:var(--text-meta)]") ||
+            s.includes("text-[length:var(--text-micro)]")) &&
+          /(^|\s)text-faint(\s|$)/.test(s)
+        ) {
+          offenders.push(`${f.rel}: meta/micro text in text-faint (use text-faint-strong)`);
+        }
+      }
+    }
+    expect(offenders, offenders.slice(0, 12).join(", ")).toEqual([]);
+  });
+
+  it("keeps phone and rail tab labels on one recipe (R6)", () => {
+    const responsive = CSS_POOL.find((f) => f.rel === "styles/responsive.css")!;
+    expect(responsive.text).toContain("--bloom-nav-label: var(--text-micro)");
+    const nav = blocks(responsive.text).find(
+      (b) => b.selector.includes(".app-mobile-nav > a") && b.body.includes("--bloom-nav-label"),
+    )!;
+    expect(nav.body).toContain("font-weight: 500");
+    expect(nav.body).toContain("line-height: var(--leading-micro)");
+    expect(nav.body).toContain("letter-spacing: var(--tracking-body)");
+    const chip = TSX_POOL.find((f) => f.rel === "components/system/PointsChip.tsx")!;
+    expect(chip.text).toContain("tabular-nums");
+  });
+});

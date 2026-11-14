@@ -68,7 +68,7 @@ export function PublicProfileView({
       {asPreview ? (
         <p
           className={cn(
-            "mono mx-auto w-fit rounded-full border px-3.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[0.1em]",
+            "mono mx-auto w-fit rounded-full border px-3.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)]",
             model.canBeShared ? "border-sage/40 text-sage" : "border-amber/40 text-amber",
           )}
         >
@@ -122,7 +122,7 @@ export function PublicProfileView({
           <button
             type="button"
             onClick={() => setViewer(0)}
-            className="mono mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[0.06em] text-muted-foreground uppercase transition-colors hover:text-foreground"
+            className="mono mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[var(--tracking-label)] text-muted-foreground uppercase transition-colors hover:text-foreground"
             style={{
               borderColor:
                 "color-mix(in oklab, var(--profile-accent, var(--violet)) 35%, transparent)",

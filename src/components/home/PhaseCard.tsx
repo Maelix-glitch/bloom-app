@@ -93,7 +93,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
     <section className="home-panel home-phase p-5 sm:p-6" aria-labelledby="home-phase-title">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[length:var(--text-meta)] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
             Your cycle
           </p>
           <h2 id="home-phase-title" className="mt-1 font-display text-xl leading-tight sm:text-2xl">
@@ -180,7 +180,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
               {brief.map((row) => (
                 <div key={row.key}>
                   <dt
-                    className={`text-[length:var(--text-meta)] font-semibold uppercase tracking-[0.14em] ${
+                    className={`text-[length:var(--text-meta)] font-semibold uppercase tracking-[var(--tracking-caps)] ${
                       phaseKeyOf(analysis.phaseLabel) === row.key
                         ? "text-[var(--home-cycle,var(--gold))]"
                         : "text-muted-foreground/80"

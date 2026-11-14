@@ -107,7 +107,7 @@ function EmotionsImpl({
               </button>
             );
           })}
-          <div className="mono flex justify-end gap-4 pt-3 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+          <div className="mono flex justify-end gap-4 pt-3 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
             <span>share</span>
             <span>count</span>
             <span>avg mood</span>

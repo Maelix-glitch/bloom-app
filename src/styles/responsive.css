@@ -34,7 +34,7 @@
   /* chrome */
   --bloom-header-h: 60px; /* phone brand bar */
   --bloom-nav-h: 60px; /* phone tab bar content height */
-  --bloom-nav-label: 10px; /* tab label size */
+  --bloom-nav-label: var(--text-micro); /* tab label size — the type scale's micro step (P2-2, R6) */
   --bloom-rail-w: 220px;
 
   /* touch + type */
@@ -125,8 +125,11 @@ nav.app-mobile-nav {
   padding: 7px 2px 5px;
   border-radius: 12px;
   font-size: var(--bloom-nav-label);
-  line-height: 1.2;
-  letter-spacing: 0.01em;
+  /* tab-label recipe (P2-2, R6): one system with the desktop rail —
+     same weight and leading tokens, size per form factor */
+  font-weight: 500;
+  line-height: var(--leading-micro);
+  letter-spacing: var(--tracking-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

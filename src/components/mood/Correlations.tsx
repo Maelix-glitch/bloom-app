@@ -63,7 +63,7 @@ function CorrelationsImpl({ correlations }: { correlations: Correlation[] }) {
               </div>
             );
           })}
-          <p className="mono mt-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+          <p className="mono mt-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
             correlation ≠ causation · negative ← 0 → positive
           </p>
         </div>

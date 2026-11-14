@@ -77,7 +77,7 @@ function TimelineImpl({ days }: { days: DayAggregate[] }) {
                     style={{ background: accentVar[accent] }}
                   />
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span className="mono flex items-center gap-1.5 text-[length:var(--text-meta)] text-faint">
+                    <span className="mono flex items-center gap-1.5 text-[length:var(--text-meta)] text-faint-strong">
                       <Clock3 className="size-3" />
                       {dayjs(e.timestamp).format("HH:mm")}
                     </span>
@@ -112,7 +112,7 @@ function TimelineImpl({ days }: { days: DayAggregate[] }) {
                     </p>
                   ) : null}
                   {e.tags.length ? (
-                    <p className="mono mt-1.5 text-[length:var(--text-micro)] text-faint">
+                    <p className="mono mt-1.5 text-[length:var(--text-micro)] text-faint-strong">
                       #{e.tags.join("  #")}
                     </p>
                   ) : null}

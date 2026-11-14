@@ -94,7 +94,7 @@ function MomentCard({
       />
 
       <span className="relative flex items-start justify-between p-2.5">
-        <span className="mono rounded-full bg-black/35 px-2 py-1 text-[length:var(--text-micro)] uppercase tracking-[0.09em] text-white/85 backdrop-blur-[3px]">
+        <span className="mono rounded-full bg-black/35 px-2 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-white/85 backdrop-blur-[3px]">
           {KIND_LABEL[story.kind]}
         </span>
         {active ? (
@@ -213,7 +213,7 @@ export function MomentsGrid({
           <span className="font-medium text-foreground">No moments yet — that's okay.</span> Tap to
           keep the first one.
         </span>
-        <span className="mono shrink-0 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors group-hover:text-foreground">
+        <span className="mono shrink-0 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong transition-colors group-hover:text-foreground">
           New moment
         </span>
       </button>
@@ -237,7 +237,7 @@ export function MomentsGrid({
                 aria-selected={filter === f.key}
                 onClick={() => setFilter(f.key)}
                 className={cn(
-                  "mono shrink-0 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[0.05em] uppercase transition-colors duration-[var(--motion-fast)]",
+                  "mono shrink-0 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[var(--tracking-label)] uppercase transition-colors duration-[var(--motion-fast)]",
                   filter === f.key
                     ? "border-[color:var(--profile-accent-border)] bg-[color:var(--profile-accent-soft)] text-foreground"
                     : "border-border text-faint hover:border-border-strong hover:text-muted-foreground",
@@ -301,7 +301,7 @@ export function MomentsGrid({
                     <span className="block truncate text-[length:var(--text-support)] font-medium">
                       {story.title || `${KIND_LABEL[story.kind]} moment`}
                     </span>
-                    <span className="mono block text-[length:var(--text-micro)] uppercase tracking-[0.07em] text-faint">
+                    <span className="mono block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
                       {KIND_LABEL[story.kind]} · {dateLabel(story.createdAt)}
                     </span>
                   </span>

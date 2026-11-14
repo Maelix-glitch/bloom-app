@@ -118,7 +118,7 @@ export function ProfileShareSheet({
       <SheetBody className="pb-6">
         {/* eyebrow + title */}
         <SheetItem className="px-5 pr-14 pt-1 sm:px-6 sm:pr-16">
-          <p className="mono flex items-center gap-1.5 text-[length:var(--text-micro)] uppercase tracking-[0.14em] text-faint">
+          <p className="mono flex items-center gap-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-caps)] text-faint-strong">
             <Sparkles className="size-3" aria-hidden />
             Share your space
           </p>
@@ -225,7 +225,7 @@ export function ProfileShareSheet({
               >
                 Choose your @username
               </button>
-              <p className="text-center text-[length:var(--text-meta)] text-faint">
+              <p className="text-center text-[length:var(--text-meta)] text-faint-strong">
                 You can change it later — old links stop working.
               </p>
             </div>
@@ -268,7 +268,7 @@ export function ProfileShareSheet({
                   Preview as others see it
                 </button>
               </div>
-              <p className="text-center text-[length:var(--text-meta)] leading-relaxed text-faint">
+              <p className="text-center text-[length:var(--text-meta)] leading-relaxed text-faint-strong">
                 Link opens at <span className="text-muted-foreground">/{username ? `@${username}` : ""}</span> ·{" "}
                 {isPublic ? "visible to anyone with the link" : "shows a private note until you make it public"}
               </p>

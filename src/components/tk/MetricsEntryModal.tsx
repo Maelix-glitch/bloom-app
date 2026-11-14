@@ -330,7 +330,7 @@ export function MetricsEntryModal({
             be a loud gradient band with bold white text.) */}
         <div className="relative border-b border-border px-5 pb-4 pt-5 sm:px-6">
           <div className="pr-12">
-            <p className="text-[length:var(--text-meta)] font-semibold uppercase tracking-[0.14em] text-primary">
+            <p className="text-[length:var(--text-meta)] font-semibold uppercase tracking-[var(--tracking-caps)] text-primary">
               Reflect &amp; log today
             </p>
             <h2 className="mt-1.5 font-display text-[24px] leading-tight text-foreground">
@@ -501,7 +501,7 @@ export function MetricsEntryModal({
                   <span className={METRIC_COLOR[m.key].text}>
                     <BloomIcon name={m.key} size={14} />
                   </span>
-                  <span className="text-sm font-bold text-foreground">
+                  <span className="text-sm font-semibold text-foreground">
                     {filled(m.key) ? values[m.key] : "—"}
                   </span>
                   <span className="text-[length:var(--text-micro)] text-muted-foreground">

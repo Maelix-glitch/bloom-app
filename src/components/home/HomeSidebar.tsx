@@ -99,7 +99,7 @@ export function HomeSidebar() {
                 key={item.label}
                 to={item.to}
                 aria-current={active ? "page" : undefined}
-                className={`app-nav-link flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[length:var(--text-support)] transition-colors ${
+                className={`app-nav-link flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[length:var(--text-support)] font-medium leading-[var(--leading-support)] transition-colors ${
                   active
                     ? "app-nav-link-active text-foreground"
                     : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"
@@ -125,7 +125,7 @@ export function HomeSidebar() {
           to="/profile"
           aria-current={profileActive ? "page" : undefined}
 
-          className={`app-nav-link mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[length:var(--text-support)] transition-colors ${
+          className={`app-nav-link mx-4 mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[length:var(--text-support)] font-medium leading-[var(--leading-support)] transition-colors ${
             profileActive
               ? "app-nav-link-active text-foreground"
               : "text-muted-foreground hover:bg-surface-2/40 hover:text-foreground"

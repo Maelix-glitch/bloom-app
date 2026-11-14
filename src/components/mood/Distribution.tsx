@@ -63,7 +63,7 @@ function DistributionImpl({
                   {b.label}
                 </p>
                 <p className="numeric mt-1.5 text-[20px] text-foreground">{b.count}</p>
-                <p className="mono text-[length:var(--text-micro)] text-faint">
+                <p className="mono text-[length:var(--text-micro)] text-faint-strong">
                   {b.share.toFixed(0)}% ·{" "}
                   <span
                     className={cn(
@@ -85,7 +85,7 @@ function DistributionImpl({
                 <p className="numeric text-[34px] leading-none text-sage">
                   {volatility.stability === null ? "—" : volatility.stability}
                 </p>
-                <span className="mono pb-1 text-[length:var(--text-meta)] text-faint">/ 100</span>
+                <span className="mono pb-1 text-[length:var(--text-meta)] text-faint-strong">/ 100</span>
               </div>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-surface-3">
                 <span

@@ -63,6 +63,7 @@
   --color-muted: var(--surface-2);
   --color-muted-foreground: var(--muted-foreground);
   --color-faint: var(--faint);
+  --color-faint-strong: var(--faint-strong);
   --color-accent: var(--surface-3);
   --color-accent-foreground: var(--foreground);
   --color-destructive: var(--destructive);
@@ -170,6 +171,14 @@
   --text-secondary: #b2b0b8;
   --muted-foreground: #b2b0b8; /* secondary */
   --faint: #858796; /* metadata */
+  /* One contrast step above --faint for small text on raised surfaces
+     (P2-2, register R3): --faint measures 4.97:1 on --surface and 4.62:1
+     on --surface-2 — technically passing, visually washed at meta sizes.
+     --faint-strong measures 6.82:1 / 6.34:1 on the same surfaces while
+     staying clearly below --text-secondary (8.25:1 / 7.67:1), so the
+     hierarchy survives. The meta and timestamp recipes carry this step;
+     --faint itself is unchanged for large/decorative use. */
+  --faint-strong: #9ea0ae; /* metadata on raised surfaces (P2-2) */
 
   /* ---- accents ------------------------------------------------------- */
   --gold: #d9bc83; /* primary champagne gold */
@@ -250,6 +259,7 @@
   --leading-caption: 1.45;
   --leading-meta: 1.4;
   --leading-micro: 1.35;
+  --leading-tight: 1; /* single-line labels, chips and badges: no leading (P2-2) */
   --tracking-display: -0.02em;
   --tracking-heading: -0.01em;
   --tracking-body: 0em;
@@ -479,7 +489,7 @@
   font-size: var(--text-micro);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 @utility numeric {
@@ -509,6 +519,65 @@
 @utility mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* Small-text recipes (Premium Pass 2, slice P2-2 — the owner's named
+   priority). Before this slice every caption, label and meta line was a
+   one-off tuple of size/weight/tracking/leading/colour (audit T1/T5/R4).
+   Each small-text role now has ONE recipe, composed entirely from the
+   P2-1 token steps, so the same role carries the same air on every
+   screen. Feature CSS adopts the same tuples declaration-by-declaration
+   (the ui guard pins both sides). */
+/* Caption — small print under headings, quiet descriptions. */
+@utility type-caption {
+  font-size: var(--text-caption);
+  font-weight: 400;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+  color: var(--text-secondary);
+}
+
+/* Label — field and section labels; the rail's nav labels share this
+   recipe's weight and leading at their form-factor size. */
+@utility type-label {
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-support);
+  letter-spacing: var(--tracking-body);
+  color: var(--foreground);
+}
+
+/* Meta — the small-caps metadata style (timestamps' quieter sibling):
+   tracked, uppercase, and carried on the --faint-strong contrast step
+   because meta text lives on raised surfaces (R3). */
+@utility type-meta {
+  font-size: var(--text-meta);
+  font-weight: 500;
+  line-height: var(--leading-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--faint-strong);
+}
+
+/* Timestamp — meta-sized but sentence-case and numeric: tabular figures
+   are part of the recipe, so times and dates never jitter (R12). */
+@utility type-timestamp {
+  font-size: var(--text-meta);
+  font-weight: 400;
+  line-height: var(--leading-meta);
+  letter-spacing: var(--tracking-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--faint-strong);
+}
+
+/* Badge — chip and pill labels. Weight is the honest 600 face (never a
+   synthesised 700 on Inter, R5); colour is the caller's, set by tone. */
+@utility type-badge {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  line-height: var(--leading-micro);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
 }
 
 @utility hairline {
@@ -1302,6 +1371,7 @@
   --foreground: #f3efe7;
   --muted-foreground: #b2b0b8;
   --faint: #858796;
+  --faint-strong: #9ea0ae;
   --gold: #d9bc83;
   --primary: #d9bc83;
   --radius: 0.875rem;

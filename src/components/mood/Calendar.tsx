@@ -44,7 +44,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
         sub="Every logged day tinted by its average mood. Select a day to inspect it."
         right={
           <div className="flex items-center gap-2">
-            <span className="mono mr-2 text-[length:var(--text-meta)] text-faint">
+            <span className="mono mr-2 text-[length:var(--text-meta)] text-faint-strong">
               {monthAvg === null ? "no data" : `avg ${monthAvg.toFixed(2)}`}
             </span>
             <button
@@ -70,7 +70,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
         }
       />
 
-      <div className="mono mb-2 grid grid-cols-7 gap-1.5 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+      <div className="mono mb-2 grid grid-cols-7 gap-1.5 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
         {WD.map((d) => (
           <span key={d}>{d}</span>
         ))}

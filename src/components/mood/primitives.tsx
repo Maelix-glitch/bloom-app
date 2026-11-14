@@ -123,7 +123,7 @@ export function Delta({
   invert?: boolean;
 }) {
   if (value === null || Number.isNaN(value))
-    return <span className="mono text-[length:var(--text-meta)] text-faint">no baseline</span>;
+    return <span className="mono text-[length:var(--text-meta)] text-faint-strong">no baseline</span>;
   const good = invert ? value < 0 : value > 0;
   const flat = Math.abs(value) < 0.05;
   return (
@@ -188,7 +188,7 @@ export function Metric({
           {raw ?? (typeof value === "number" ? <CountUp value={value} decimals={decimals} /> : "—")}
         </span>
         {suffix ? (
-          <span className="mono text-[length:var(--text-meta)] text-faint">{suffix}</span>
+          <span className="mono text-[length:var(--text-meta)] text-faint-strong">{suffix}</span>
         ) : null}
       </p>
       {sub ? (
@@ -204,7 +204,7 @@ export function Insufficient({ children }: { children: ReactNode }) {
       <p className="display text-[length:var(--text-body)] text-muted-foreground">
         Not enough data yet.
       </p>
-      <p className="mono mt-2 text-[length:var(--text-meta)] text-faint">{children}</p>
+      <p className="mono mt-2 text-[length:var(--text-meta)] text-faint-strong">{children}</p>
     </div>
   );
 }

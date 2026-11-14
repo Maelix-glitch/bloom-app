@@ -244,7 +244,7 @@ export function RemindersSheet({
                 <label className="flex items-center justify-between gap-4 py-2">
                   <span className="text-[length:var(--text-support)]">
                     Cycle
-                    <span className="block text-[length:var(--text-meta)] text-faint">
+                    <span className="block text-[length:var(--text-meta)] text-faint-strong">
                       two days before an expected period, and when it's late
                     </span>
                   </span>
@@ -257,7 +257,7 @@ export function RemindersSheet({
                 <label className="flex items-center justify-between gap-4 py-2">
                   <span className="text-[length:var(--text-support)]">
                     Nothing logged today
-                    <span className="block text-[length:var(--text-meta)] text-faint">
+                    <span className="block text-[length:var(--text-meta)] text-faint-strong">
                       only on an empty day
                     </span>
                   </span>
@@ -322,7 +322,7 @@ export function RemindersSheet({
                   <Smartphone className="size-3.5" aria-hidden /> Add to home screen
                 </button>
               ) : install.ios ? (
-                <p className="mono mt-3 flex items-center gap-1.5 text-[length:var(--text-meta)] text-faint">
+                <p className="mono mt-3 flex items-center gap-1.5 text-[length:var(--text-meta)] text-faint-strong">
                   <Share className="size-3.5" aria-hidden /> Share → Add to Home Screen
                 </p>
               ) : null}

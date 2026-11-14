@@ -54,7 +54,7 @@
 .bmood-eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
@@ -63,7 +63,7 @@
   font-family: var(--font-display);
   font-size: 27px;
   line-height: 1.14;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
 }
 .bmood-title em {
@@ -75,7 +75,7 @@
   margin-top: 10px;
   max-width: 42ch;
   font-size: var(--text-support);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   color: color-mix(in oklab, var(--foreground) 58%, transparent);
 }
 .bmood-close {
@@ -199,7 +199,7 @@
 }
 .bmood-face-label {
   font-size: var(--text-meta);
-  line-height: 1;
+  line-height: var(--leading-tight);
   color: color-mix(in oklab, var(--foreground) 55%, transparent);
   transition: color 300ms ease;
 }
@@ -219,7 +219,7 @@
   background: color-mix(in oklab, var(--background) 80%, transparent);
   font-size: var(--text-micro);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   pointer-events: none;
@@ -267,7 +267,7 @@
 .bmood-band-label {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 48%, transparent);
 }
@@ -284,7 +284,7 @@
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
   font-size: var(--text-caption);
-  line-height: 1;
+  line-height: var(--leading-tight);
   color: color-mix(in oklab, var(--foreground) 72%, transparent);
   cursor: pointer;
   transition:
@@ -331,7 +331,7 @@
   border-radius: 18px;
   background: color-mix(in oklab, var(--foreground) 5%, transparent);
   font-size: var(--text-callout);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   color: var(--foreground);
   resize: none;
   outline: none;
@@ -377,7 +377,7 @@
   margin-left: auto;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   color: color-mix(in oklab, var(--foreground) 42%, transparent);
 }
 .bmood-more-chevron {
@@ -410,7 +410,7 @@
 .bmood-field-label {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 46%, transparent);
 }
@@ -615,7 +615,7 @@ select.bmood-input {
   border: 1px solid color-mix(in oklab, var(--rose) 34%, transparent);
   background: color-mix(in oklab, var(--rose) 8%, transparent);
   font-size: var(--text-caption);
-  line-height: 1.4;
+  line-height: var(--leading-caption);
   color: color-mix(in oklab, var(--rose) 92%, var(--foreground));
 }
 
@@ -1002,7 +1002,7 @@ select.bmood-input {
   backdrop-filter: blur(10px);
   box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.9);
   font-size: var(--text-caption);
-  line-height: 1.25;
+  line-height: var(--leading-section);
   color: oklch(0.96 0.01 90);
   white-space: nowrap;
   pointer-events: none;
@@ -1013,7 +1013,7 @@ select.bmood-input {
   display: block;
   margin-top: 2px;
   font-size: var(--text-micro);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: oklch(0.8 0.02 90 / 0.8);
 }

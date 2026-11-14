@@ -152,7 +152,7 @@ export function JourneyCard({
             <span className="text-muted-foreground">
               Next: <span className="text-foreground">{next.label}</span>
             </span>
-            <span className="mono text-[length:var(--text-meta)] text-faint">
+            <span className="mono text-[length:var(--text-meta)] text-faint-strong">
               {next.progress} / {next.of}
             </span>
           </div>
@@ -178,7 +178,7 @@ export function JourneyCard({
                   <span className="min-w-0">
                     <span className="block truncate">{a.text}</span>
                     {a.detail ? (
-                      <span className="block truncate text-[length:var(--text-meta)] text-faint">
+                      <span className="block truncate text-[length:var(--text-meta)] text-faint-strong">
                         {a.detail}
                       </span>
                     ) : null}

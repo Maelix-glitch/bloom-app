@@ -119,7 +119,7 @@ function HistoryImpl({
                 >
                   {e.mood.toFixed(0)}
                 </span>
-                <span className="mono w-[132px] text-[length:var(--text-meta)] text-faint">
+                <span className="mono w-[132px] text-[length:var(--text-meta)] text-faint-strong">
                   {dayjs(e.timestamp).format("MMM D YYYY · HH:mm")}
                 </span>
                 <span className="min-w-0 flex-1">
@@ -127,12 +127,12 @@ function HistoryImpl({
                     {e.note || e.tags.map((t) => `#${t}`).join(" ") || "—"}
                   </span>
                   {e.emotions.length ? (
-                    <span className="mono mt-0.5 block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+                    <span className="mono mt-0.5 block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
                       {e.emotions.map((k) => EMOTION_MAP[k]?.label ?? k).join(" · ")}
                     </span>
                   ) : null}
                 </span>
-                <span className="mono hidden text-[length:var(--text-meta)] text-faint sm:block">
+                <span className="mono hidden text-[length:var(--text-meta)] text-faint-strong sm:block">
                   <span className="text-sage">E{e.energy}</span> ·{" "}
                   <span className="text-rose">S{e.stress}</span>
                 </span>
@@ -171,7 +171,7 @@ function HistoryImpl({
                       <button
                         type="button"
                         onClick={() => setConfirmId(null)}
-                        className="mono rounded-full border border-border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint hover:text-foreground"
+                        className="mono rounded-full border border-border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong hover:text-foreground"
                       >
                         Keep
                       </button>
@@ -191,7 +191,7 @@ function HistoryImpl({
             );
           })}
           {filtered.length > 60 ? (
-            <p className="mono pt-4 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+            <p className="mono pt-4 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
               Showing 60 of {filtered.length} — refine the search to narrow further
             </p>
           ) : null}

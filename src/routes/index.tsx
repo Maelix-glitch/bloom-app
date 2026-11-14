@@ -754,7 +754,7 @@ function TodayPage() {
           </div>
 
 
-          <footer className="hidden items-center justify-center gap-6 text-[length:var(--text-meta)] tracking-[0.3em] text-muted-foreground lg:flex">
+          <footer className="hidden items-center justify-center gap-6 text-[length:var(--text-meta)] tracking-[var(--tracking-wide)] text-muted-foreground lg:flex">
             <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
             <span className="h-px w-16 bg-border" />
             <span>A CALMER YOU, A BRIGHTER TOMORROW</span>

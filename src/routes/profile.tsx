@@ -687,7 +687,7 @@ function ProfilePage() {
                       </span>{" "}
                       A story, a reflection, a reward, a milestone — only one.
                     </span>
-                    <span className="mono hidden shrink-0 text-[length:var(--text-micro)] tracking-[var(--tracking-meta)] text-faint uppercase transition-colors group-hover:text-foreground sm:block">
+                    <span className="mono hidden shrink-0 text-[length:var(--text-micro)] tracking-[var(--tracking-meta)] text-faint-strong uppercase transition-colors group-hover:text-foreground sm:block">
                       Choose
                     </span>
                   </button>
@@ -940,7 +940,7 @@ function ProfilePage() {
 
               <footer className="pf-footer">
                 <p className="display text-[length:var(--text-body)] text-muted-foreground">Bloom</p>
-                <p className="mono mt-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+                <p className="mono mt-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
                   Your record. Your story. Your Bloom.
                 </p>
                 <p className="mt-3 flex gap-4 text-[length:var(--text-meta)] text-muted-foreground">
