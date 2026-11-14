@@ -11,9 +11,9 @@ import type { Habit, HabitLog } from "@/lib/home/habits";
  * is stale by definition — habits deleted, renamed or ticked on another
  * device since this device last synced — so it must never render as the
  * account's rows. The list stays empty behind the skeleton until the
- * account answers. Signed out, the mirror IS the record and still renders
- * instantly. The upload-local-habits path is untouched: a device-only
- * habit still joins the account.
+ * account answers. In device mode (no database) the mirror IS the record
+ * and still renders instantly. The upload-local-habits path is untouched:
+ * a device-only habit still joins the account.
  *
  * The remote fetch is held behind deferred promises so the test can look
  * at the list *while* the account is still answering.
@@ -31,6 +31,7 @@ const ctrl = vi.hoisted(() => {
   };
   return {
     authCb: null as ((uid: string | null) => void) | null,
+    hasCloud: true,
     fetchHabitsCalls: 0,
     fetchHabits: deferred<Habit[]>(),
     fetchLogs: deferred<HabitLog[]>(),
@@ -43,6 +44,7 @@ const ctrl = vi.hoisted(() => {
     },
     reset() {
       this.authCb = null;
+      this.hasCloud = true;
       this.fetchHabitsCalls = 0;
       this.fetchHabits = deferred<Habit[]>();
       this.fetchLogs = deferred<HabitLog[]>();
@@ -71,6 +73,7 @@ vi.mock("@/lib/home/habits", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/home/habits")>();
   return {
     ...actual,
+    hasHabitCloud: () => ctrl.hasCloud,
     fetchHabits: () => {
       ctrl.fetchHabitsCalls += 1;
       return ctrl.fetchHabits.promise;
@@ -82,6 +85,7 @@ vi.mock("@/lib/home/habits", async (importOriginal) => {
 });
 
 import { __resetHabitsSessionCache, useHabits } from "./useHabits";
+import { HABITS_CHANGED } from "@/lib/home/habits";
 
 const habit = (id: string, name: string): Habit => ({
   id,
@@ -203,13 +207,19 @@ describe("useHabits — signed-in cold load never renders the device mirror", ()
   });
 });
 
-describe("useHabits — signed out, the mirror is the record", () => {
+describe("useHabits — device mode (no database), the mirror is the record", () => {
   it("shows local habits instantly, with no account fetch", async () => {
+    /* With no database configured the auth state is "off" and the mirror
+       IS the record — the one path that still seeds it. (With a database,
+       a bare null auth answer is held as "checking" and never seeds the
+       mirror: signed-out is the root gate's call, not this hook's — see
+       the fresh-module-state regression test below.) */
+    ctrl.hasCloud = false;
     seedMirror([{ id: "mirror-1", name: "Local habit" }]);
     const view = renderHook(() => useHabits());
-    emitAuth(null);
 
     await waitFor(() => expect(view.result.current.loading).toBe(false));
+    expect(view.result.current.auth).toBe("off");
     expect(ctrl.fetchHabitsCalls).toBe(0);
     expect(view.result.current.habits.map((h) => h.name)).toEqual(["Local habit"]);
     expect(view.result.current.todayHabits.map((h) => h.name)).toEqual(["Local habit"]);
@@ -240,10 +250,7 @@ describe("useHabits — warm remount renders the settled rows at once (R15)", ()
     emitAuth("profile-1");
     await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
     expect(back.result.current.loading).toBe(false);
-    expect(back.result.current.habits.map((h) => h.name)).toEqual([
-      "Drink water",
-      "Log sleep",
-    ]);
+    expect(back.result.current.habits.map((h) => h.name)).toEqual(["Drink water", "Log sleep"]);
 
     /* The revalidation lands with a third habit: state reconciles. */
     await act(async () => {
@@ -307,11 +314,70 @@ describe("useHabits — the Profile path: a neighbour's auth flicker cannot pois
     emitAuth("profile-1");
     await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
     expect(back.result.current.loading).toBe(false);
-    expect(back.result.current.habits.map((h) => h.name)).toEqual([
-      "Drink water",
-      "Log sleep",
-    ]);
+    expect(back.result.current.habits.map((h) => h.name)).toEqual(["Drink water", "Log sleep"]);
     back.unmount();
+  });
+
+  it("a warm remount in a FRESH module state (hard refresh / fresh chunk copy) holds on the first null — mirror never paints while the account fetch is in flight", async () => {
+    /* The 2026-11-14 live failure, second sweep: PR #95 held nulls only
+       AFTER an account was established in the module's session state.
+       A warm return that lands in a fresh copy of that state — the owner
+       hard-refreshes, or the route chunk carries its own copy — starts
+       with nothing established, so a transient first null (getSession
+       racing session recovery) was honoured as signed-out: the mirror
+       branch seeded the device record, set loading false, and Today
+       painted "No habits yet" plus mirror-derived Overview numbers for
+       as long as the real account fetch took (~6s live). */
+    seedMirror([{ id: "mirror-1", name: "Stale mirror habit" }]);
+    await settleFirstMount();
+
+    /* Fresh module state: no establishment, no session cache. */
+    __resetHabitsSessionCache();
+    ctrl.reset();
+    const back = renderHook(() => useHabits());
+
+    /* The transient first answer is a bare null. It is not proof of
+       signed-out — the instance must hold its checking state: skeleton
+       up, mirror nowhere. */
+    emitAuth(null);
+    expect(back.result.current.auth).toBe("checking");
+    expect(back.result.current.loading).toBe(true);
+    expect(back.result.current.habits).toHaveLength(0);
+    expect(back.result.current.todayHabits).toHaveLength(0);
+
+    /* A mirror-write event inside the same window must not seed it. */
+    act(() => {
+      window.dispatchEvent(new Event(HABITS_CHANGED));
+    });
+    expect(back.result.current.habits).toHaveLength(0);
+    expect(back.result.current.loading).toBe(true);
+
+    /* The real answer arrives and the account fetch hangs — still the
+       skeleton, never the mirror, for the whole flight. */
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    expect(back.result.current.loading).toBe(true);
+    expect(back.result.current.habits).toHaveLength(0);
+
+    await act(async () => {
+      ctrl.fetchHabits.resolve([habit("remote-1", "Drink water"), habit("remote-2", "Log sleep")]);
+      ctrl.fetchLogs.resolve([]);
+      ctrl.readPoints.resolve(405);
+    });
+    await waitFor(() => expect(back.result.current.loading).toBe(false));
+    expect(back.result.current.habits.map((h) => h.name)).toEqual(["Drink water", "Log sleep"]);
+    back.unmount();
+  });
+
+  it("a cold first mount that hears a bare null first holds checking — the mirror is not the record until signed-out is proven", async () => {
+    seedMirror([{ id: "mirror-1", name: "Stale mirror habit" }]);
+    const view = renderHook(() => useHabits());
+    emitAuth(null);
+    expect(view.result.current.auth).toBe("checking");
+    expect(view.result.current.loading).toBe(true);
+    expect(view.result.current.habits).toHaveLength(0);
+    expect(ctrl.fetchHabitsCalls).toBe(0);
+    view.unmount();
   });
 
   it("a warm remount that hears signed-out first holds — it never seeds the mirror or flips state", async () => {
@@ -334,10 +400,7 @@ describe("useHabits — the Profile path: a neighbour's auth flicker cannot pois
     emitAuth("profile-1");
     await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
     expect(back.result.current.loading).toBe(false);
-    expect(back.result.current.habits.map((h) => h.name)).toEqual([
-      "Drink water",
-      "Log sleep",
-    ]);
+    expect(back.result.current.habits.map((h) => h.name)).toEqual(["Drink water", "Log sleep"]);
     back.unmount();
   });
 });

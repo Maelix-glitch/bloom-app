@@ -138,17 +138,24 @@ let sessionCache: HabitsSessionCache | null = null;
    instance opens its OWN watchAuth subscription, and a fresh
    subscription can report a transient signed-out while its session
    recovery races the token refresh (the race the rail identity hook's
-   nullAnswerEndsSession guards against). Once an account is established
-   here, a bare null from a later subscription is that race — not a
-   sign-out. The session's real end is adjudicated by the root gate
-   (useSession / AccessControl), which replaces the whole app and
-   unmounts this hook with it, so holding a post-establishment null
-   cannot strand a signed-out person inside their account: it only
-   stops a neighbour's flicker from flipping this instance to its
-   signed-out branch, where it would seed the device mirror as the
-   record and destroy the session cache the warm return depends on.
-   Before any establishment a null is honoured exactly as before — a
-   genuinely signed-out session still gets the mirror as its record. */
+   nullAnswerEndsSession guards against). PR #95 held a bare null only
+   AFTER establishment — and the 2026-11-14 live re-check showed that
+   was not enough: a warm return landing in a FRESH copy of this
+   module's state (the owner hard-refreshed; a route chunk can carry
+   its own copy) starts with nothing established, so its transient
+   first null was honoured as signed-out, the mirror branch seeded the
+   device record with loading=false, and Today painted the false empty
+   state ("No habits yet", mirror-derived Overview numbers) for as
+   long as the real account fetch took (~6s live). So now a bare null
+   is held ALWAYS, before and after establishment: it is never proof
+   of signed-out on its own. The session's real end is adjudicated by
+   the root gate (useSession / AccessControl), which replaces the
+   whole app and unmounts this hook with it, so holding a null cannot
+   strand a signed-out person inside their account — with a database
+   configured, a genuinely signed-out visitor meets the gate, not this
+   hook's mirror. Device-only builds never reach the subscription at
+   all: with no database the auth state is "off" and the mirror IS the
+   record, exactly as before. */
 let establishedProfileId: string | null = null;
 
 /** Test seam: forget the session cache and the established account
@@ -210,17 +217,17 @@ export function useHabits(): HabitsStore {
     let mounted = true;
     const stop = watchAuth((uid) => {
       if (!mounted) return;
-      if (uid) {
-        establishedProfileId = uid;
-      } else if (establishedProfileId) {
-        /* Transient null after establishment — hold this instance's
-           state exactly as it is. See the note on establishedProfileId:
-           the root gate, not this subscription, decides when the
-           session has actually ended. */
+      if (!uid) {
+        /* A bare null — hold this instance's state exactly as it is.
+           See the note on establishedProfileId: a null is never proof
+           of signed-out on its own (transient before establishment,
+           a neighbour's flicker after it), and the root gate, not this
+           subscription, decides when the session has actually ended. */
         return;
       }
+      establishedProfileId = uid;
       setProfileId(uid);
-      setAuth(uid ? "signed-in" : "signed-out");
+      setAuth("signed-in");
     });
     return () => {
       mounted = false;
@@ -253,15 +260,17 @@ export function useHabits(): HabitsStore {
   useEffect(() => {
     if (auth === "checking") return;
     if (auth !== "signed-in" || !profileId) {
-      /* Signed out (or no database): the device mirror IS the record, so it
-         renders instantly — and a sign-out re-seeds it, never leaving the
-         previous account's rows on screen. The session cache is NOT
-         cleared here: it is keyed by profile and only ever read back for
-         that same profile, so one instance landing in this branch (its
-         own transient, a neighbour's flicker) must not destroy the warm
-         return of an account that is, in fact, still signed in — that
-         destruction is what turned Profile → Today into a cold load
-         flashing a false empty state in the 2026-11-14 sweep. */
+      /* Device mode (no database — auth "off"): the device mirror IS
+         the record, so it renders instantly. With a database configured
+         this branch is not how signed-out arrives: a bare null is held
+         in the auth subscription above, and a genuine sign-out is
+         adjudicated by the root gate, which unmounts the app. The
+         session cache is NOT cleared here: it is keyed by profile and
+         only ever read back for that same profile, so one instance
+         landing in this branch must not destroy the warm return of an
+         account that is, in fact, still signed in — that destruction
+         is what turned Profile → Today into a cold load flashing a
+         false empty state in the 2026-11-14 sweep. */
       signedInLoaded.current = null;
       hydrated.current = true;
       setHabits(loadLocalHabits());
@@ -380,13 +389,19 @@ export function useHabits(): HabitsStore {
 
   /*
    * Other tabs, another hook instance and the coach all write the same
-   * mirror. Signed out, re-reading the mirror is enough; signed in, the
-   * account is the record, so a structural change asks the loader to run
-   * again. Debounced so a page with several habit consumers makes one call.
+   * mirror. In device mode, re-reading the mirror is enough; signed in,
+   * the account is the record, so a structural change asks the loader to
+   * run again. Debounced so a page with several habit consumers makes
+   * one call. While auth is still "checking" the event is IGNORED: the
+   * mirror must never seed this instance before the auth answer lands
+   * (the loader owns that window) — treating "checking" as device mode
+   * here painted mirror rows on a signed-in mount whose account fetch
+   * was still in flight.
    */
   useEffect(() => {
     let timer: number | undefined;
     const onExternal = () => {
+      if (auth === "checking") return;
       if (auth !== "signed-in") {
         setHabits(loadLocalHabits());
         setLogs(loadLocalLogs());
