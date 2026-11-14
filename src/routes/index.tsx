@@ -14,7 +14,7 @@ import { WeekChart } from "@/components/home/WeekChart";
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
 import { summaryOf } from "@/lib/assessment/summary";
-import { synthesizeOverview } from "@/lib/overview/synthesis";
+import { overviewRecordsSettled, synthesizeOverview } from "@/lib/overview/synthesis";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { Composer } from "@/components/mood/Composer";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
@@ -145,8 +145,20 @@ function TodayPage() {
      background refetches, and the server pass can never see them — reading them
      directly made this line alternate between the reading state and the day's
      summary on a loop. Once the stores have loaded once, the hero stays in its
-     loaded state; the sentence itself is derived only from today's data. */
-  const recordReady = useEverReady(trackers.hydrated && !habits.loading);
+     loaded state; the sentence itself is derived only from today's data.
+     Slice B: device hydration alone is NOT readiness — the tracker store
+     hydrates from the device mirror instantly and merges the account pull
+     later, so latching on `hydrated` presented mirror numbers as the
+     record until the pull landed. The settled predicate (the Profile /
+     Rewards discipline) waits for every source's account answer. */
+  const recordsSettled = overviewRecordsSettled({
+    auth: habits.auth,
+    habitsLoading: habits.loading,
+    moodLoading: mood.loading,
+    trackersHydrated: trackers.hydrated,
+    trackerSyncState: trackers.sync.state,
+  });
+  const recordReady = useEverReady(recordsSettled);
   /* Day one is a property of the record, not of this device's onboarding
      answer — see genuineFirstDay. The stores on this page are the record:
      habit ticks, mood check-ins and tracker days, by distinct day. */
@@ -196,9 +208,11 @@ function TodayPage() {
       assessmentSummary,
     ],
   );
-  /* Latched like the hero: once the stores have loaded once, the Overview
-     pieces never fall back to their placeholders on a background refetch. */
-  const overviewReady = useEverReady(trackers.hydrated && !habits.loading && !mood.loading);
+  /* Latched like the hero, on the same settled predicate: once the
+     records have settled once, the Overview pieces never fall back to
+     their placeholders on a background refetch — and never latch early
+     onto mirror-derived numbers while an account pull is in flight. */
+  const overviewReady = recordReady;
   /* The week chart's bars — the same habit logs, counted per day over the
      synthesis's own window pair (last 7 days vs the 7 days before). */
   const weekData = useMemo(() => weekTicks(habits.logs, today), [habits.logs, today]);
@@ -403,8 +417,11 @@ function TodayPage() {
           <div className="grid gap-6 lg:grid-cols-12">
             <div className="lg:col-span-7 [&>*]:h-full">
               {/* The week in ticks — real habit logs, this week vs the
-                  week before, in the prototype's chart language. */}
-              <WeekChart data={weekData} />
+                  week before, in the prototype's chart language. Gated
+                  on the same latched settled flag as the Overview: the
+                  section shell is always present, interim bars never
+                  paint, and the real chart never unmounts once shown. */}
+              <WeekChart data={weekData} ready={overviewReady} />
             </div>
             <div className="lg:col-span-5 [&>*]:h-full">
               <ChangesCard overview={overview} ready={overviewReady} />
@@ -418,7 +435,7 @@ function TodayPage() {
                 logs={habits.logs}
                 today={habits.today}
                 loading={habits.loading}
-                signedIn={habits.auth === "signed-in"}
+                signedIn={habits.auth === "signed-in" || habits.auth === "checking"}
                 onToggle={(id, date) => void habits.toggle(id, date)}
                 onAdd={openNewHabit}
                 paused={habits.pausedHabits}

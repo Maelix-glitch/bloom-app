@@ -31,9 +31,11 @@ import {
 } from "@/lib/vitalis/domain/safety";
 import {
   OVERVIEW_WINDOW_LABEL,
+  overviewRecordsSettled,
   recordDayKeys,
   synthesizeOverview,
   type OverviewInput,
+  type OverviewSettleState,
 } from "./synthesis";
 
 const TODAY = "2026-11-10";
@@ -602,5 +604,57 @@ describe("priority ladder", () => {
       label: "See your weekly report",
       to: "/report",
     });
+  });
+});
+
+/* --------------------- the settle predicate (Slice B) -------------------- */
+/**
+ * Today's Overview used to latch "ready" off device hydration alone:
+ * the tracker store hydrates from the device mirror instantly, so the
+ * tiles latched onto mirror days ("days logged 10") while the account
+ * pull was still in flight, then stepped to the truth (14) when it
+ * landed. The predicate is the same discipline the Profile and Rewards
+ * paths already use: signed in, every source — habits, mood AND the
+ * tracker account pull — must have answered before anything is final.
+ */
+describe("overviewRecordsSettled — Today's numbers are final only when every source answered", () => {
+  const SETTLED: OverviewSettleState = {
+    auth: "signed-in",
+    habitsLoading: false,
+    moodLoading: false,
+    trackersHydrated: true,
+    trackerSyncState: "saved",
+  };
+
+  it("all sources answered: settled", () => {
+    expect(overviewRecordsSettled(SETTLED)).toBe(true);
+  });
+
+  it("tracker pull still in flight (off / loading): NOT settled, even with device days hydrated", () => {
+    expect(overviewRecordsSettled({ ...SETTLED, trackerSyncState: "off" })).toBe(false);
+    expect(overviewRecordsSettled({ ...SETTLED, trackerSyncState: "loading" })).toBe(false);
+  });
+
+  it("tracker pull errored: settled — the device days stand in, as on the Profile/Rewards paths", () => {
+    expect(overviewRecordsSettled({ ...SETTLED, trackerSyncState: "error" })).toBe(true);
+  });
+
+  it("habits or mood still loading from the account: not settled", () => {
+    expect(overviewRecordsSettled({ ...SETTLED, habitsLoading: true })).toBe(false);
+    expect(overviewRecordsSettled({ ...SETTLED, moodLoading: true })).toBe(false);
+  });
+
+  it("auth still checking: not settled, however much else has landed", () => {
+    expect(overviewRecordsSettled({ ...SETTLED, auth: "checking" })).toBe(false);
+  });
+
+  it("device-only (off) or signed-out: settled once the local reads land", () => {
+    expect(overviewRecordsSettled({ ...SETTLED, auth: "off", trackerSyncState: "off" })).toBe(true);
+    expect(
+      overviewRecordsSettled({ ...SETTLED, auth: "signed-out", trackerSyncState: "signed-out" }),
+    ).toBe(true);
+    expect(overviewRecordsSettled({ ...SETTLED, auth: "off", trackersHydrated: false })).toBe(
+      false,
+    );
   });
 });

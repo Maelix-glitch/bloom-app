@@ -177,6 +177,51 @@ export function recordDayKeys(input: OverviewInput): Set<string> {
   return keys;
 }
 
+/* ------------------------------ settledness ------------------------------ */
+
+/**
+ * The settle state of the records behind Today's Overview — the same
+ * inputs the synthesis counts (habits, mood, tracker days), each with
+ * whether its account answer has landed.
+ */
+export interface OverviewSettleState {
+  auth: "checking" | "signed-out" | "signed-in" | "off";
+  habitsLoading: boolean;
+  moodLoading: boolean;
+  /** The tracker store has read its device copy. */
+  trackersHydrated: boolean;
+  /** Where the tracker account pull stands. */
+  trackerSyncState: "off" | "loading" | "signed-out" | "saved" | "pending" | "error";
+}
+
+/**
+ * Have the records behind Today's numbers settled into their account
+ * state? Until they have, the only days the synthesis can count are the
+ * ones already on this device — real, but interim: the tracker store
+ * hydrates from the device mirror instantly and merges the account's
+ * answer later, so totals computed in between are intermediate values
+ * over a partial record ("days logged 10" on the way to 14, in the
+ * 2026-11-14 sweep). Today used to latch its ready flag off device
+ * hydration alone; this predicate is the discipline the Profile totals
+ * (`profileRecordsSettled`) and the Rewards gallery
+ * (`progressionRecordsSettled`) already follow — signed in, EVERY
+ * source must have answered. On a tracker-pull "error" the device days
+ * stand in, the same fallback those paths take.
+ */
+export function overviewRecordsSettled(state: OverviewSettleState): boolean {
+  // Still learning whether there is a session at all: nothing has settled.
+  if (state.auth === "checking") return false;
+  // Device mode (no database, or genuinely signed out): the device
+  // record IS the record, once the local reads have landed.
+  if (state.auth !== "signed-in") {
+    return state.trackersHydrated && !state.habitsLoading && !state.moodLoading;
+  }
+  if (state.habitsLoading || state.moodLoading || !state.trackersHydrated) return false;
+  // The tracker pull starts at "off" and passes through "loading"; every
+  // later state means the pull has answered.
+  return state.trackerSyncState !== "off" && state.trackerSyncState !== "loading";
+}
+
 /* --------------------------------- deltas -------------------------------- */
 
 interface MetricDelta extends OverviewDelta {
