@@ -979,3 +979,81 @@ describe("UI guard: scoped systems floor (P2-7)", () => {
     expect(offenders, offenders.slice(0, 12).join(", ")).toEqual([]);
   });
 });
+
+describe("UI guard: small-text leftovers — mood web and rewards micro", () => {
+  /* Post-pass sweep follow-up (2026-11-14 live sweep of main b2cbb3ab,
+     residual defect B). Two surfaces escaped the P2-2 system: the mood
+     web's SVG text lives in styles.css — the recipe home, which the
+     feature-CSS pools deliberately never scan — and the Rewards hero
+     micro line reached --faint through a color-mix, a form the R3
+     check (which matches the bare custom property) could not see.
+     These pins are selector-precise on purpose: they close the two
+     observed holes without re-litigating every --faint use in the app.
+     SVG text is sized in viewBox units that only shrink on screen, so
+     the meta step is the floor there, not micro. */
+  const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+  const PROGRESSION = ALL_SOURCES.find((f) => f.rel === "styles/progression.css")!;
+  const MOOD_GRAPH = ALL_SOURCES.find((f) => f.rel === "components/mood/page/MoodGraph.tsx")!;
+
+  function blocks(text: string): { selector: string; body: string }[] {
+    const clean = text.replace(/\/\*[\s\S]*?\*\//g, " ");
+    const out: { selector: string; body: string }[] = [];
+    let prev = 0;
+    for (const m of clean.matchAll(/\{([^{}]*)\}/g)) {
+      out.push({ selector: clean.slice(prev, m.index).trim(), body: m[1]! });
+      prev = m.index + m[0].length;
+    }
+    return out;
+  }
+  const blockFor = (text: string, selector: string) =>
+    blocks(text).find((b) => b.selector.trim().endsWith(selector));
+
+  it("mood-web node labels sit on the meta step, at the recipe weight, in a lifted colour", () => {
+    const label = blockFor(STYLES.text, ".mood-page .mg-label")!;
+    expect(label, "styles.css must define .mood-page .mg-label").toBeTruthy();
+    expect(label.body).toContain("font-size: var(--text-meta)");
+    expect(label.body).toContain("font-weight: 500");
+    /* The meta/timestamp recipe colours: --faint-strong or stronger,
+       never --faint — and never smuggled back in through a color-mix. */
+    expect(label.body).toMatch(
+      /fill:\s*var\(--(muted-foreground|faint-strong|text-secondary|foreground)\)/,
+    );
+    expect(label.body).not.toMatch(/var\(--faint\)/);
+    expect(label.body).not.toContain("color-mix");
+  });
+
+  it("mood-web emotion labels share the meta floor — no micro step in the web", () => {
+    const emotion = blockFor(STYLES.text, ".mood-page .mg-node-emotion .mg-label")!;
+    expect(emotion, "styles.css must define the emotion label rule").toBeTruthy();
+    expect(emotion.body).toContain("font-size: var(--text-meta)");
+    expect(emotion.body).not.toContain("var(--text-micro)");
+  });
+
+  it("the hub figure pairs the full background tone on the meta step, unmixed", () => {
+    const sub = blockFor(STYLES.text, ".mood-page .mg-hub-sub")!;
+    expect(sub, "styles.css must define .mood-page .mg-hub-sub").toBeTruthy();
+    expect(sub.body).toContain("font-size: var(--text-meta)");
+    expect(sub.body).toContain("font-weight: 600");
+    expect(sub.body).toContain("fill: var(--background)");
+    expect(sub.body).not.toContain("color-mix");
+  });
+
+  it("the hub gradient keeps the dark-on-gold pairing across the whole core", () => {
+    /* The figure's glyphs land beyond the gradient's centre; the outer
+       stop must stay gold (the old 0.08 stop left dark text on the dark
+       canvas — the sweep's faint gold-on-gold). */
+    expect(MOOD_GRAPH.text).toContain('stopOpacity="0.8"');
+    expect(MOOD_GRAPH.text).not.toContain('stopOpacity="0.08"');
+  });
+
+  it("the rewards hero micro line rides --faint-strong, unmixed, with full-tone figures", () => {
+    const micro = blockFor(PROGRESSION.text, ".pg-hero-micro")!;
+    expect(micro, "progression.css must define .pg-hero-micro").toBeTruthy();
+    expect(micro.body).toContain("color: var(--faint-strong)");
+    expect(micro.body).not.toMatch(/var\(--faint\)/);
+    expect(micro.body).not.toContain("color-mix");
+    const strong = blockFor(PROGRESSION.text, ".pg-hero-micro strong")!;
+    expect(strong.body).toContain("color: var(--foreground)");
+    expect(strong.body).not.toContain("color-mix");
+  });
+});

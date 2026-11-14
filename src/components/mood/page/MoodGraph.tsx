@@ -250,8 +250,12 @@ function Canvas({
       <defs>
         <radialGradient id={`mg-${keyPrefix}-hub`} cx="50%" cy="45%" r="60%">
           <stop offset="0%" stopColor="var(--gold-soft)" stopOpacity="0.95" />
-          <stop offset="55%" stopColor="var(--gold)" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="var(--gold)" stopOpacity="0.08" />
+          {/* The hub's dark text (label + the mood figure) sits across the
+              whole core, not only at its centre — the mid and outer stops
+              stay gold enough for that pairing to hold everywhere the
+              glyphs land. */}
+          <stop offset="55%" stopColor="var(--gold)" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="var(--gold)" stopOpacity="0.3" />
         </radialGradient>
         <radialGradient id={`mg-${keyPrefix}-halo`} cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="var(--gold)" stopOpacity="0.22" />
