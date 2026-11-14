@@ -384,7 +384,7 @@
   --neon-primary: var(--gold);
   --text-ultra-white: var(--foreground);
   --text-cool-silver: var(--muted-foreground);
-  --text-architectural: var(--faint);
+  --text-architectural: var(--faint-strong);
   --ci-bg: var(--background);
   --ci-bg-deep: var(--background);
   --ci-surface: var(--surface);
@@ -393,7 +393,7 @@
   --ci-line-strong: var(--border-strong);
   --ci-text: var(--foreground);
   --ci-text-soft: var(--text-secondary);
-  --ci-text-mute: var(--faint);
+  --ci-text-mute: var(--faint-strong);
   --ci-accent: var(--gold);
   --ci-accent-soft: color-mix(in oklab, var(--gold) 16%, transparent);
   --ci-focus: var(--gold);
@@ -433,7 +433,7 @@
   --accent-solid: var(--gold);
   --text-primary: var(--foreground);
   --text-muted: var(--muted-foreground);
-  --text-dim: var(--faint);
+  --text-dim: var(--faint-strong);
   --tk2-neon: var(--accent-neon-gradient);
   --tk2-neon-line: color-mix(in oklab, var(--gold) 55%, transparent);
   --tk2-neon-glow: color-mix(in oklab, var(--gold) 45%, transparent);

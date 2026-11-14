@@ -216,7 +216,7 @@ export function MoodChart({
        at hue 279, so the chart ignored the app's theme variants entirely. */
     const chrome = {
       text: resolveCssColor("var(--muted-foreground)"),
-      label: resolveCssColor("var(--faint)"),
+      label: resolveCssColor("var(--faint-strong)"),
       surface: resolveCssColor("var(--surface-2)"),
       border: resolveCssColor("var(--border)"),
       borderSubtle: resolveCssColor("var(--border-subtle)"),
@@ -248,7 +248,7 @@ export function MoodChart({
             if (!date || !meta) return "";
             const row = (label: string, value: string, color?: string) =>
               `<div style="display:flex;justify-content:space-between;gap:20px;font-size:11px;padding:2px 0">
-                 <span style="color:var(--faint)">${label}</span>
+                 <span style="color:var(--faint-strong)">${label}</span>
                  <span style="color:${color ?? "var(--foreground)"};font-variant-numeric:tabular-nums">${value}</span>
                </div>`;
             return `<div style="padding:12px 14px;min-width:200px">
@@ -260,7 +260,7 @@ export function MoodChart({
               ${typeof meta.sleep === "number" ? row("Sleep", `${meta.sleep.toFixed(1)}h`) : ""}
               ${typeof meta.exercise === "number" ? row("Exercise", `${Math.round(meta.exercise)} min`) : ""}
               ${row("Entries", String(meta.entries))}
-              ${meta.emotions.length ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)">${meta.emotions.join(" · ")}</div>` : ""}
+              ${meta.emotions.length ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint-strong)">${meta.emotions.join(" · ")}</div>` : ""}
             </div>`;
           },
         },

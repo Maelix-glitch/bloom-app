@@ -2,20 +2,25 @@
 
 .rewards-delivery-page,
 .rewards-admin-page {
-  --background: oklch(0.16 0.04 278);
-  --surface: oklch(0.235 0.038 277);
-  --surface-2: oklch(0.29 0.045 282);
-  --surface-3: oklch(0.35 0.05 284);
-  --border: oklch(0.38 0.05 283);
-  --faint: oklch(0.62 0.035 285);
-  /* the meta contrast step inside the Rewards retint (P2-2, R3): one
-     lightness step above the retinted --faint, below its muted 0.72 */
-  --faint-strong: oklch(0.7 0.032 285);
-  --muted-foreground: oklch(0.72 0.03 285);
-  --violet: oklch(0.72 0.12 297);
-  --sky: oklch(0.75 0.09 240);
-  --sage: oklch(0.73 0.09 155);
-  --rose: oklch(0.75 0.1 355);
+  /* Reskin slice C1: this scope used to retint the delivery/admin pages
+     violet (oklch hue 277–297 surfaces). The wash is gone — the scope now
+     re-declares Bloom's official gold-led token values from styles.css,
+     so these pages sit in the same ink/panel/cream system as the rest of
+     the app. Values are literals because a scoped var() pointing at the
+     same custom property would be circular. */
+  --background: #0a0b0e;
+  --surface: #111318;
+  --surface-2: #171a21;
+  --surface-3: #20242e;
+  --border: rgba(255, 255, 255, 0.07);
+  --faint: #8f8c85;
+  /* the meta contrast step (P2-2, R3) — same step as the global token */
+  --faint-strong: #aba69c;
+  --muted-foreground: #bcb7ad;
+  --violet: #a697d3;
+  --sky: #879dbb;
+  --sage: #8fc7a2;
+  --rose: #e3919f;
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -30,7 +35,7 @@
 /* Regular aliases for reward pages when the base app does not define Bloom Mood tokens. */
 .rewards-delivery-page .text-faint,
 .rewards-admin-page .text-faint {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .rewards-delivery-page .text-sky,
 .rewards-admin-page .text-sky {
@@ -106,7 +111,7 @@
   background: var(--border);
 }
 .rewards-brand-section {
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
@@ -987,7 +992,7 @@
   align-items: center;
   gap: 7px;
   margin-top: 34px;
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
@@ -1173,7 +1178,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 9px;
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
@@ -1293,7 +1298,7 @@
   place-items: center;
   border: 1px solid var(--border);
   border-radius: 50%;
-  color: var(--faint);
+  color: var(--faint-strong);
   background: var(--surface-2);
   transition:
     color var(--motion-standard) var(--ease-out-expo),
@@ -1352,7 +1357,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
 }
 .reward-delivery-dates span {
@@ -1443,7 +1448,7 @@
   font-weight: 500;
 }
 .reward-admin-field-hint {
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro)/1.4 var(--font-mono);
 }
 .reward-admin-field input,
@@ -1465,7 +1470,7 @@
 }
 .reward-admin-field input::placeholder,
 .reward-admin-field textarea::placeholder {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .reward-admin-field input:focus,
 .reward-admin-field textarea:focus {
@@ -1486,7 +1491,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
 }
 .reward-admin-user-list {
@@ -1550,7 +1555,7 @@
 }
 .reward-admin-user-copy small {
   overflow: hidden;
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1560,7 +1565,7 @@
   justify-items: center;
   gap: 7px;
   padding: 42px 15px;
-  color: var(--faint);
+  color: var(--faint-strong);
   text-align: center;
 }
 .reward-admin-no-users p {
@@ -1585,7 +1590,7 @@
 .reward-admin-alert button {
   display: grid;
   margin-left: auto;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .reward-admin-alert-success {
   border-color: color-mix(in oklab, var(--sage) 38%, var(--border));
@@ -1640,7 +1645,7 @@
   flex-wrap: wrap;
   gap: 11px;
   margin-top: 7px;
-  color: var(--faint);
+  color: var(--faint-strong);
   font: var(--text-micro) var(--font-mono);
 }
 .reward-admin-record-meta span {
@@ -1680,7 +1685,7 @@
   letter-spacing: var(--tracking-label);
 }
 .reward-admin-status-draft {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .reward-admin-status-published {
   color: var(--sky);
@@ -1730,7 +1735,7 @@
   justify-items: center;
   gap: 7px;
   padding: 57px 15px;
-  color: var(--faint);
+  color: var(--faint-strong);
   text-align: center;
 }
 .reward-admin-empty p {
@@ -1926,7 +1931,7 @@
   border: 1px solid var(--border);
   border-radius: 9px;
   padding: var(--space-1);
-  color: var(--faint);
+  color: var(--faint-strong);
   background: color-mix(in oklab, var(--background) 58%, transparent);
   transition:
     transform var(--motion-page) var(--ease-out-expo),
@@ -1984,7 +1989,7 @@
 .reward-admin-clear-medal {
   flex: 0 0 auto;
   border: 0;
-  color: var(--faint);
+  color: var(--faint-strong);
   background: transparent;
   font: var(--text-micro) var(--font-mono);
   text-transform: uppercase;
@@ -2202,7 +2207,7 @@
   place-items: center;
   margin-left: 3px;
   border: 0;
-  color: var(--faint);
+  color: var(--faint-strong);
   background: transparent;
 }
 .reward-toast button:hover {
@@ -2237,12 +2242,15 @@
   z-index: 1;
 }
 
-/* Core reward palette used by the gradients, orbit lines, and empty-state seal. */
+/* Core reward palette used by the gradients, orbit lines, and empty-state seal.
+   Reskin slice C1: aligned to the official tokens — gold is Bloom gold, and
+   the old saturated royal purple becomes Bloom's secondary lavender token
+   (an accent particle hue in the claim cinematic, never a surface wash). */
 .rewards-delivery-page,
 .rewards-admin-page {
-  --gold: oklch(0.85 0.14 88);
-  --gold-soft: oklch(0.93 0.09 95);
-  --royal: oklch(0.55 0.19 295);
+  --gold: #dcc08f;
+  --gold-soft: #f2e4c6;
+  --royal: #a697d3;
 }
 
 /* Keep the Rewards atmosphere above the page background but below content. */
@@ -2289,7 +2297,7 @@
 }
 .reward-points-unit {
   font-size: var(--text-body);
-  color: var(--faint);
+  color: var(--faint-strong);
   letter-spacing: var(--tracking-body);
 }
 .reward-points-week {
@@ -2340,5 +2348,5 @@
 .reward-points-empty {
   margin-top: var(--space-3);
   font-size: var(--text-support);
-  color: var(--faint);
+  color: var(--faint-strong);
 }

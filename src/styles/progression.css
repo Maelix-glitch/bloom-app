@@ -246,7 +246,7 @@
   max-width: 34ch;
   font-size: var(--text-caption);
   line-height: var(--leading-body);
-  color: var(--faint);
+  color: var(--faint-strong);
   text-align: right;
 }
 
@@ -551,7 +551,7 @@
 }
 
 .pg-next-count-total {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-next-pay {
@@ -763,7 +763,7 @@
   padding-left: 72px;
   font-size: var(--text-caption);
   line-height: 1.65;
-  color: var(--faint);
+  color: var(--faint-strong);
   max-width: 54ch;
 }
 
@@ -1015,7 +1015,7 @@
 }
 
 .pg-goal-count-total {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-goal-foot {
@@ -1108,7 +1108,7 @@
 .pg-goal-note {
   font-size: var(--text-caption);
   line-height: var(--leading-body);
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-pager {
@@ -1219,7 +1219,7 @@
 .pg-ach-date {
   font-size: var(--text-caption);
   line-height: var(--leading-body);
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-ach-date {
@@ -1299,7 +1299,7 @@
   border: 1px dashed var(--pg-line-soft);
   font-size: var(--text-support);
   line-height: 1.7;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 /* ------------------------------ point moments ---------------------------- */
@@ -1612,7 +1612,7 @@
 }
 
 .pg-slot[data-locked="true"] .pg-slot-value {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-shelf-grid {
@@ -3101,7 +3101,7 @@
 }
 
 .pg-hall-item[data-state="future"] .pg-hall-name {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-hall-meta {
@@ -3125,7 +3125,7 @@
 }
 
 .pg-hall-item[data-state="future"] .pg-hall-state {
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 /* frame-band caption under the hall */
