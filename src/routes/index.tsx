@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Gift, Leaf } from "lucide-react";
+import { Leaf } from "lucide-react";
 
-import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { useEverReady } from "@/hooks/useEverReady";
 import { HabitsSection } from "@/components/home/HabitsSection";
 import { HabitUndo } from "@/components/home/HabitUndo";
@@ -10,6 +9,7 @@ import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
 import { ChangesCard, StatTiles } from "@/components/home/OverviewBand";
 import { LevelCard } from "@/components/home/LevelCard";
 import { MoodCard } from "@/components/home/MoodCard";
+import { TopBar } from "@/components/home/TopBar";
 import { WeekChart } from "@/components/home/WeekChart";
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
@@ -23,7 +23,7 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
-import { greetingFor, longDate, moodToday } from "@/lib/home/today";
+import { greetingFor, moodToday } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
 import { entryFromFace, type PageMood } from "@/lib/mood/page";
 import { formatClock, usualHabitTime, usualMood } from "@/lib/smart/usual";
@@ -265,37 +265,15 @@ function TodayPage() {
   return (
     <div className="home-page app-shell min-h-screen bg-background text-foreground">
       <main className="home-main min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
-        {/* TopBar — Bloom's own: the local date, the sync state ("Synced
-            with your account" and its settled kin), bell and rewards. */}
-        <div className="home-toolbar">
-          {/* suppressHydrationWarning for the same reason as the greeting
-              below: the date is LOCAL time by design, the server renders on
-              a UTC clock, and an unprotected text node can keep the
-              server's day after hydration — the hero once showed a date
-              two days stale while everything else on the page was live. */}
-          <p className="text-xs text-muted-foreground" suppressHydrationWarning>
-            {longDate(now)}
-            {syncLine ? (
-              <span className="ml-3 hidden text-faint sm:inline">· {syncLine}</span>
-            ) : null}
-          </p>
-          {/* The phone shell already carries the bell (header) and rewards
-              (tab bar) — the toolbar pair is a desktop affordance. */}
-          <div className="hidden items-center gap-2 lg:flex">
-            <NotificationBell className="hidden lg:grid" />
-            <Link
-              to="/rewards"
-              aria-label="Rewards"
-              title="Rewards"
-              className="bloom-icon-btn hidden lg:grid"
-            >
-              <Gift className="size-[18px]" strokeWidth={1.75} />
-              {habits.points !== null && habits.points > 0 ? (
-                <span className="bloom-icon-btn__dot" aria-hidden="true" />
-              ) : null}
-            </Link>
-          </div>
-        </div>
+        {/* TopBar — the prototype's top row in Bloom's build: the live
+            date, the honest sync pill ("Synced with your account" and
+            its settled kin), the real notifications bell and rewards. */}
+        <TopBar
+          now={now}
+          syncState={trackers.sync.state}
+          syncLabel={syncLine}
+          points={habits.points}
+        />
 
         {/* Hero — the slice-3 build, unchanged: greeting, the day's
             subline, the check-in chips (the mood chip settles sage once
