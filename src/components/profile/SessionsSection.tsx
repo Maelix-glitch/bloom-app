@@ -158,6 +158,13 @@ export function SessionsSection({
           </>
         ) : null}
 
+      </div>
+
+      {/* Danger zone — its own rose-toned card, separated from the sessions
+          list above it (the owner's Profile file pattern). Erase everything
+          lives inside the EraseSheet this row opens. */}
+      <p className="pf-danger-label">Danger zone</p>
+      <div className="pf-group-rows pf-group-rows--danger">
         <button type="button" className="pf-row" onClick={onOpenErase}>
           <span className="pf-row-icon" aria-hidden>
             <Eraser className="size-4" />

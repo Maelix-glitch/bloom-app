@@ -89,15 +89,20 @@ export function CoverPulse({ values, className }: { values: number[]; className?
     >
       <defs>
         <linearGradient id="pf-pulse-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="var(--pf-accent)" stopOpacity="0.32" />
-          <stop offset="1" stopColor="var(--pf-accent)" stopOpacity="0" />
+          <stop offset="0" stopColor="var(--gold)" stopOpacity="0.32" />
+          <stop offset="1" stopColor="var(--gold)" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="pf-pulse-line" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="var(--gold)" stopOpacity="0.45" />
+          <stop offset="0.5" stopColor="var(--gold)" />
+          <stop offset="1" stopColor="var(--gold-soft)" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#pf-pulse-fill)" />
       <path
         d={d}
         fill="none"
-        stroke="var(--pf-accent)"
+        stroke="url(#pf-pulse-line)"
         strokeWidth="1.6"
         vectorEffect="non-scaling-stroke"
         strokeLinejoin="round"

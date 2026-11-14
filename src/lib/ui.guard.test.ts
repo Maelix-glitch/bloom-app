@@ -1331,3 +1331,56 @@ describe("UI guard: reskin slice C2 — sheets, gate, stories chrome, cycle", ()
     expect(CYCLE.text).toContain("--ci-text-mute: var(--faint-strong)");
   });
 });
+
+describe("UI guard: reskin slice C3 — Profile in the owner's file pattern, in gold", () => {
+  /* Reskin slice C (part 3) — Profile takes the owner's Profile file
+     completely: grouped settings LIST CARDS, a separated rose danger
+     zone, the gold heatmap ramp, gold primary actions and pulse. The
+     file's violet is mapped, never copied: heatmap, pulse, primary
+     button, tab underline, cover wash and avatar-add all run on the
+     gold family; the user's accent survives only where the mapping
+     allows it (switches and small accent touches). */
+  const PROFILE = ALL_SOURCES.find((f) => f.rel === "styles/profile.css")!;
+  const HERO = ALL_SOURCES.find((f) => f.rel === "components/profile/ProfileHero.tsx")!;
+  const SESSIONS = ALL_SOURCES.find((f) => f.rel === "components/profile/SessionsSection.tsx")!;
+
+  function blocks(text: string): { selector: string; body: string }[] {
+    const clean = text.replace(/\/\*[\s\S]*?\*\//g, " ");
+    const out: { selector: string; body: string }[] = [];
+    let prev = 0;
+    for (const m of clean.matchAll(/\{([^{}]*)\}/g)) {
+      out.push({ selector: clean.slice(prev, m.index).trim(), body: m[1]! });
+      prev = m.index + m[0].length;
+    }
+    return out;
+  }
+  const blockFor = (text: string, selector: string) =>
+    blocks(text).find((b) => b.selector.trim().endsWith(selector));
+
+  it("paints the heatmap ramp, primary button and tab underline in gold", () => {
+    const top = blockFor(PROFILE.text, '.pf-cell[data-level="4"]')!;
+    expect(top.body).toContain("background: var(--gold)");
+    const primary = blockFor(PROFILE.text, ".pf-btn--primary")!;
+    expect(primary.body).toContain("background: var(--gold-gradient)");
+    expect(primary.body).toContain("color: var(--gold-ink)");
+    const tab = blockFor(PROFILE.text, '.pf-tab[aria-selected="true"]::after')!;
+    expect(tab.body).toContain("linear-gradient(90deg, var(--gold), var(--gold-soft))");
+  });
+
+  it("draws the hero pulse in the gold family", () => {
+    expect(HERO.text).toContain('stopColor="var(--gold)"');
+    expect(HERO.text).toContain('stroke="url(#pf-pulse-line)"');
+    expect(HERO.text).not.toContain('stroke="var(--pf-accent)"');
+  });
+
+  it("renders settings groups as list cards with a separated danger zone", () => {
+    const rows = blockFor(PROFILE.text, ".pf-group-rows")!;
+    expect(rows.body).toContain("border: 1px solid var(--pf-line)");
+    expect(rows.body).toContain("background: var(--glass-bg), var(--surface)");
+    expect(rows.body).toContain("overflow: hidden");
+    const danger = blockFor(PROFILE.text, ".pf-group-rows--danger")!;
+    expect(danger.body).toContain("var(--rose)");
+    expect(SESSIONS.text).toContain("pf-group-rows pf-group-rows--danger");
+    expect(SESSIONS.text).toContain("pf-danger-label");
+  });
+});
