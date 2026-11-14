@@ -18,6 +18,11 @@ export interface ComposerAttachment {
   previewUrl: string | null;
 }
 
+/** What a submit came back with: "answered" (a reply landed), "failed"
+ *  (the message is in the thread with a Try again on it) or "rejected"
+ *  (nothing was sent — the draft must stay put). */
+export type ComposerSubmitOutcome = "answered" | "failed" | "rejected";
+
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -107,7 +112,7 @@ export function Composer({
   thinking: boolean;
   /** Forced focus from the page (starters, follow-ups). */
   inputRef: RefObject<HTMLTextAreaElement | null>;
-  onSubmit: (text: string, attachment: ComposerAttachment | null) => Promise<boolean>;
+  onSubmit: (text: string, attachment: ComposerAttachment | null) => Promise<ComposerSubmitOutcome>;
   onOpenCamera: () => void;
   onNotice: (message: string | null) => void;
   onOpenContext: () => void;
@@ -292,14 +297,21 @@ export function Composer({
     const text = draft.trim();
     if (!text && !attachment) return;
     setBusy(true);
-    const ok = await onSubmit(text, attachment);
+    const outcome = await onSubmit(text, attachment);
     setBusy(false);
-    if (ok) {
+    if (outcome === "answered") {
       setDraftState("");
       removeAttachment();
-    } else {
-      onNotice("That reply didn't make it — your message is still here to try again.");
+    } else if (outcome === "failed") {
+      /* The message itself is safe in the thread, carrying its own
+         Try again — so the composer lets go of its copy. Leaving the
+         caption and photo chip sitting here made the send look like it
+         never happened and invited an accidental duplicate. */
+      setDraftState("");
+      removeAttachment();
+      onNotice("That reply didn't make it — tap Try again on your message above.");
     }
+    /* "rejected": nothing was sent at all; the draft stays as it was. */
   };
 
   /* Camera picks arrive here (the page hands them to us via events). */

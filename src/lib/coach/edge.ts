@@ -37,6 +37,16 @@ export const COACH_FUNCTION =
  *  replies that were one hop away from arriving. */
 export const TIMEOUT_MS = 30_000;
 
+/** Photo requests get a much longer leash: a vision answer measured
+ *  ~18s inside the provider on 2026-11-14, and the function's own media
+ *  budget runs to ~45s end to end. The old flat 30s cut killed photo
+ *  replies that were seconds from landing — the "couldn't connect"
+ *  error on every food photo — so a request carrying an image waits
+ *  this long instead, and skips the quiet retry (a second full vision
+ *  call would double an already long wait; the in-thread Try again,
+ *  which now re-sends the photo, is the retry for photos). */
+export const MEDIA_TIMEOUT_MS = 75_000;
+
 /** One quiet retry before the failure surfaces (see askEdge). */
 const RETRY_DELAY_MS = 600;
 
@@ -187,7 +197,7 @@ export async function askEdge(request: EdgeRequest, signal?: AbortSignal): Promi
      card when a second ask a breath later would simply work. The manual
      "Try again" remains for anything that fails twice. */
   let result = await askEdgeOnce(request, signal);
-  if (!result.ok && result.reason !== "aborted" && !signal?.aborted) {
+  if (!result.ok && result.reason !== "aborted" && !signal?.aborted && !request.image) {
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
     if (!signal?.aborted) result = await askEdgeOnce(request, signal);
   }
@@ -196,7 +206,7 @@ export async function askEdge(request: EdgeRequest, signal?: AbortSignal): Promi
 
 async function askEdgeOnce(request: EdgeRequest, signal?: AbortSignal): Promise<EdgeResult> {
   const timer = new AbortController();
-  const timeout = setTimeout(() => timer.abort(), TIMEOUT_MS);
+  const timeout = setTimeout(() => timer.abort(), request.image ? MEDIA_TIMEOUT_MS : TIMEOUT_MS);
   /* Chain the caller's signal onto ours so either can cancel the request. */
   const onAbort = () => timer.abort();
   signal?.addEventListener("abort", onAbort, { once: true });

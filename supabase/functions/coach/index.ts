@@ -24,7 +24,7 @@
  *   (30s→60s→120s), auth failures disable a provider for 10 minutes, and a
  *   success resets the breaker. Each provider is attempted at most once per
  *   request, bounded by COACH_MAX_PROVIDER_ATTEMPTS (3) and a hard total
- *   deadline (COACH_TOTAL_TIMEOUT_MS, default 12s) so the user never waits
+ *   deadline (COACH_TOTAL_TIMEOUT_MS, default 45s) so the user never waits
  *   through a long provider parade.
  *
  *   Adapters are transport only: every provider receives the same Bloom
@@ -32,9 +32,10 @@
  *   register. No provider-specific personality, reasoning traces are never
  *   read into responses, and API keys never leave the server.
  *
- *   Every provider is vision-capable (Gemini native inline_data; Groq/APINEX/HF
- *   via OpenAI image_url parts) and tool-capable (native function schemas
- *   converted to [BLOOM_TOOL] sidecars). Photos are never stored.
+ *   Vision-capable: Gemini (native inline_data), APINEX and Groq (OpenAI
+ *   image_url parts; Groq answers photos with a dedicated vision model,
+ *   GROQ_VISION_MODEL, while its text model stays gpt-oss). The HF Qwen
+ *   model is text-only. Photos are never stored.
  *
  *   Failure is a clean consumer-safe state: any non-2xx means the client
  *   shows "Bloom couldn't connect right now" with a manual Try again — the
@@ -51,10 +52,12 @@
  *   COACH_PROVIDER_ORDER=apinex,grok,huggingface-qwen   # gemini = Google-direct, optional
  *   COACH_GEMINI_ENABLED=true  COACH_GROK_ENABLED=true  COACH_HF_ENABLED=true
  *   GEMINI_MODEL=gemini-3.6-flash   GROQ_MODEL=openai/gpt-oss-20b
+ *   GROQ_VISION_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
  *   APINEX_MODEL=free/gemini-3.8-flash
  *   HF_QWEN_MODEL=Qwen/Qwen3.8-27B  HF_QWEN_PROVIDER=ovhcloud   # or novita
  *   COACH_MAX_PROVIDER_ATTEMPTS=3   COACH_PROVIDER_TIMEOUT_MS=8000
- *   COACH_TOTAL_TIMEOUT_MS=18000    COACH_COOLDOWN_BASE_MS=30000
+ *   COACH_MEDIA_TIMEOUT_MS=30000   (per-attempt budget when a photo/PDF rides along)
+ *   COACH_TOTAL_TIMEOUT_MS=45000    COACH_COOLDOWN_BASE_MS=30000
  *   COACH_COOLDOWN_MAX_MS=120000    COACH_LOG_DETAIL=false
  *   BLOOM_COACH_DEV_KEY=...  # optional: enables x-bloom-coach-dev pinning
  */
@@ -204,7 +207,17 @@ const MAX_PROVIDER_ATTEMPTS = () => Math.min(envInt("COACH_MAX_PROVIDER_ATTEMPTS
  * (observed live: two ~20s failures before a reply landed). 6s per attempt
  * lets three providers be tried inside roughly the old single wait. */
 const PROVIDER_TIMEOUT_MS = () => envInt("COACH_PROVIDER_TIMEOUT_MS", 6000);
-const TOTAL_TIMEOUT_MS = () => envInt("COACH_TOTAL_TIMEOUT_MS", 18000);
+/* Vision attempts get a longer leash: a photo request carries a large
+ * payload and the vision models are slower than the text chain — the 6s
+ * text budget used to strangle the one working vision attempt after the
+ * dead providers ahead of it had burned their (fast-failing) turns. The
+ * total deadline still bounds the whole request. */
+const MEDIA_PROVIDER_TIMEOUT_MS = () => envInt("COACH_MEDIA_TIMEOUT_MS", 30000);
+/* The total budget has to fit a real vision answer: on 2026-11-14 a
+ * food photo took ~18s inside Gemini alone, after APINEX (the fast
+ * gateway path) died on an empty balance. Text stays snappy regardless —
+ * its per-attempt caps bind long before this outer bound matters. */
+const TOTAL_TIMEOUT_MS = () => envInt("COACH_TOTAL_TIMEOUT_MS", 45000);
 const COOLDOWN_BASE_MS = () => envInt("COACH_COOLDOWN_BASE_MS", 30000);
 const COOLDOWN_MAX_MS = () => envInt("COACH_COOLDOWN_MAX_MS", 120000);
 /** 401s disable a provider for this long — no hammering a dead key. */
@@ -238,6 +251,9 @@ interface ProviderDef {
   /** Native OpenAI tool schemas for providers whose models prefer real tool calls. */
   tools?: boolean;
   model: () => string;
+  /** Vision requests use this model instead of `model()` when set — a
+   *  provider's text brain and its eyes are rarely the same model. */
+  visionModel?: () => string;
   enabled: () => boolean;
 }
 
@@ -257,9 +273,17 @@ const REGISTRY: Record<ProviderId, ProviderDef> = {
     label: "Groq",
     secret: "GROQ_API_KEY",
     kind: "openai",
-    vision: false,
+    /* Vision-capable via a dedicated vision model (Llama 4 Scout): the
+       text model (gpt-oss-20b) cannot see. Access note, 2026-11-14: this
+       Groq account answered model_not_found for the Llama 4 vision
+       models, so today Gemini carries photos and this path is a
+       configured fallback that heals itself if access is granted —
+       GROQ_VISION_MODEL can point it at any vision model the account
+       can actually reach. */
+    vision: true,
     url: "https://api.groq.com/openai/v1/chat/completions",
     model: () => envStr("GROQ_MODEL", "openai/gpt-oss-20b"),
+    visionModel: () => envStr("GROQ_VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
     enabled: () => envBool("COACH_GROK_ENABLED"),
     tools: true,
   },
@@ -604,7 +628,11 @@ async function callProvider(
   signal: AbortSignal,
 ): Promise<string> {
   if (def.kind === "google") {
-    const decls = def.tools ? BLOOM_TOOLS.map((t) => t.function) : undefined;
+    /* No native function declarations on a media request: a photo reply
+       is prose plus the ≈ estimate line (text sidecars still parse), and
+       the proven 2026-11-14 recovery configuration answered photos with
+       declarations off. Text requests keep the native schemas. */
+    const decls = def.tools && !media ? BLOOM_TOOLS.map((t) => t.function) : undefined;
     return callGemini(key, def.model(), systemText, turns, media, signal, decls);
   }
   const messages: Array<Record<string, unknown>> = [
@@ -627,13 +655,19 @@ async function callProvider(
       ];
     }
   }
+  /* A request carrying a photo is answered by the provider's vision model
+     when it has a separate one (Groq), and never carries native tool
+     schemas: a photo reply is prose (the ≈ estimate line), and vision
+     models are not guaranteed to accept tool declarations. Text sidecars
+     still work — the client parses those from any reply. */
+  const hasImage = Boolean(media && media.mediaType.startsWith("image/"));
   return callOpenAICompatible(
     def.url as string,
     key,
-    def.model(),
+    hasImage && def.visionModel ? def.visionModel() : def.model(),
     messages,
     signal,
-    def.tools ? BLOOM_TOOLS : undefined,
+    hasImage ? undefined : def.tools ? BLOOM_TOOLS : undefined,
   );
 }
 
@@ -874,7 +908,7 @@ Deno.serve(async (req: Request) => {
       const attemptStart = Date.now();
       try {
         const signal = AbortSignal.timeout(
-          Math.min(PROVIDER_TIMEOUT_MS(), Math.max(1000, remaining - 700)),
+          Math.min(media ? MEDIA_PROVIDER_TIMEOUT_MS() : PROVIDER_TIMEOUT_MS(), Math.max(1000, remaining - 700)),
         );
         const text = await callProvider(def, key, systemText, turns, media, signal);
         recordSuccess(id);
