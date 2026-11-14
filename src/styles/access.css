@@ -22,8 +22,8 @@
   gap: clamp(16px, 3vh, 28px);
   padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   background:
-    radial-gradient(120% 80% at 50% 0%, oklch(0.235 0.024 285), transparent 62%),
-    oklch(0.155 0.016 280);
+    radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--gold) 8%, var(--surface)), transparent 62%),
+    var(--background);
   overflow-y: auto;
 }
 
@@ -37,7 +37,9 @@
   padding: clamp(24px, 5vw, 36px) clamp(20px, 5vw, 32px);
   border: 1px solid oklch(1 0 0 / 0.07);
   border-radius: var(--radius-dialog);
-  background: oklch(0.205 0.019 281 / 0.72);
+  /* Reskin slice C2: glass light over a SOLID panel — the gate joins the
+     app surface system instead of its old violet-tinted translucent fill. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)), var(--surface);
   box-shadow: var(--elevation-dialog);
 }
 
@@ -104,7 +106,7 @@
   padding: 0 14px;
   border: 1px solid oklch(1 0 0 / 0.12);
   border-radius: 12px;
-  background: oklch(0.175 0.015 280 / 0.9);
+  background: var(--surface-2);
   color: oklch(0.955 0.008 85);
   font-size: var(--text-body);
   outline: none;
@@ -114,12 +116,12 @@
 }
 
 .ag-input::placeholder {
-  color: oklch(0.955 0.008 85 / 0.28);
+  color: oklch(0.955 0.008 85 / 0.5);
 }
 
 .ag-input:focus-visible {
   border-color: oklch(0.81 0.11 82 / 0.6);
-  background: oklch(0.19 0.017 280 / 0.95);
+  background: var(--surface-3);
 }
 
 .ag-input[aria-invalid="true"] {
@@ -208,7 +210,7 @@
   font-size: var(--text-meta);
   line-height: var(--leading-support);
   text-align: center;
-  color: oklch(0.955 0.008 85 / 0.36);
+  color: oklch(0.955 0.008 85 / 0.58);
 }
 
 .ag-foot {
@@ -218,7 +220,7 @@
   font-size: var(--text-meta);
   line-height: var(--leading-support);
   text-align: center;
-  color: oklch(0.955 0.008 85 / 0.3);
+  color: oklch(0.955 0.008 85 / 0.45);
 }
 
 /* Short screens: the panel must not force a scroll to reach the button. */

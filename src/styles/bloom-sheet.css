@@ -10,9 +10,9 @@
    deep enough for moment tiles, a base that deepens the accent, and the
    ink that sits on a lit accent. */
 :root {
-  --sheet-scrim: #0b0910;
-  --sheet-accent-deep: #2a2438;
-  --sheet-on-accent-ink: #16131e;
+  --sheet-scrim: #07080a;
+  --sheet-accent-deep: #2c2415;
+  --sheet-on-accent-ink: #2a1f10;
 }
 
 /* ------------------------------------------------------------ shell */
@@ -24,7 +24,7 @@
   background:
     radial-gradient(
       80% 60% at 50% 100%,
-      color-mix(in oklab, var(--violet) 14%, transparent),
+      color-mix(in oklab, var(--gold) 10%, transparent),
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 72%, transparent);
