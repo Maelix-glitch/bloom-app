@@ -319,16 +319,13 @@ export function completeAssessment(state: AssessmentState, now: string): Assessm
   };
 }
 
-/** Retake: keep the previous answers as the starting point for editing. */
-export function retakeAssessment(state: AssessmentState, now: string): AssessmentState {
-  return {
-    ...state,
-    status: "in_progress",
-    step: "intro",
-    startedAt: now,
-    updatedAt: now,
-  };
-}
+/**
+ * There is deliberately no "retake" transition. A retake is a begin() from
+ * the completed state: beginAssessment flips the status to in_progress and
+ * keeps completedAt and the answers until the new run finishes — and it is
+ * invoked only from the flow's Begin button, never when a sheet opens, so
+ * looking at a completed assessment can never demote it.
+ */
 
 /** Restart: clear the answers. Consent decisions stand — they were separate choices. */
 export function restartAssessment(state: AssessmentState, now: string): AssessmentState {

@@ -273,7 +273,22 @@ const splitList = (text: string): string[] =>
 
 /* ---------------------------------- flow ----------------------------------- */
 
-export function AssessmentFlow({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AssessmentFlow({
+  open,
+  onClose,
+  retake = false,
+}: {
+  open: boolean;
+  onClose: () => void;
+  /**
+   * Retake intent, passed by the doors when a completed assessment is being
+   * redone. Intent only — it decides where the sheet opens, never what is
+   * stored. The stored state stays "complete" until the person presses
+   * Begin on the intro step, which is the commitment that starts the retake
+   * (see goNext). Opening and closing this sheet untouched writes nothing.
+   */
+  retake?: boolean;
+}) {
   const store = useAssessment();
   const [step, setStep] = useState<AssessmentStep>("intro");
   const [draft, setDraft] = useState<AssessmentAnswers>(store.state.answers);
@@ -290,7 +305,15 @@ export function AssessmentFlow({ open, onClose }: { open: boolean; onClose: () =
     setMedicationText(s.answers.medications.join(", "));
     setHealthConsent(consentState(s.consents, "health_data_processing") === "granted");
     setSensitiveConsent(consentState(s.consents, "sensitive_health_processing") === "granted");
-    setStep(s.status === "complete" ? "summary" : s.status === "in_progress" ? s.step : "intro");
+    setStep(
+      retake
+        ? "intro"
+        : s.status === "complete"
+          ? "summary"
+          : s.status === "in_progress"
+            ? s.step
+            : "intro",
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -326,6 +349,10 @@ export function AssessmentFlow({ open, onClose }: { open: boolean; onClose: () =
   const goNext = () => {
     const next = ASSESSMENT_STEPS[stepIndex + 1] ?? "summary";
     if (step === "intro") {
+      /* Begin is the commitment point of every sitting — first take, resume
+         and retake alike. Only here does the stored state move: begin()
+         flips it to in_progress (a completed assessment keeps its
+         completedAt and answers until the new run finishes). */
       recordConsentDecisions();
       store.begin();
       store.saveStep(draft, "identity");
