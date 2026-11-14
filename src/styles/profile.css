@@ -179,7 +179,7 @@
   backdrop-filter: blur(8px);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 80%, transparent);
 }
@@ -314,7 +314,7 @@
   font-weight: 500;
   font-size: 30px;
   line-height: 1.05;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-display);
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
@@ -333,7 +333,7 @@
   gap: 6px 10px;
   font-family: var(--font-mono);
   font-size: var(--text-caption);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-body);
   color: var(--faint);
 }
 
@@ -374,7 +374,7 @@
   background: var(--pf-card-2);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
@@ -396,7 +396,7 @@
   margin: 12px auto 0;
   max-width: 46ch;
   font-size: var(--text-callout);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   color: var(--muted-foreground);
   text-wrap: pretty;
 }
@@ -495,7 +495,7 @@ button.pf-number:hover {
   font-weight: 500;
   font-size: 26px;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-display);
   font-variant-numeric: tabular-nums;
 }
 .pf-number-value--zero {
@@ -514,9 +514,9 @@ button.pf-number:hover {
 .pf-number-label {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .pf-number-sub {
   font-size: var(--text-meta);
@@ -546,9 +546,9 @@ button.pf-number:hover {
 .pf-eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .pf-title {
   margin-top: 4px;
@@ -556,7 +556,7 @@ button.pf-number:hover {
   font-weight: 500;
   font-size: 20px;
   line-height: 1.15;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--tracking-heading);
 }
 .pf-section-right {
   display: flex;
@@ -566,9 +566,9 @@ button.pf-number:hover {
 .pf-link {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
   transition: color var(--motion-fast) ease;
 }
 .pf-link:hover {
@@ -657,7 +657,7 @@ button.pf-number:hover {
 .pf-tab-count {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 /* ------------------------------ record grid ------------------------------ */
@@ -676,8 +676,8 @@ button.pf-number:hover {
 .pf-grid-days span {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  line-height: 13px;
-  color: var(--faint);
+  line-height: var(--leading-micro);
+  color: var(--faint-strong);
 }
 .pf-grid-months {
   display: grid;
@@ -685,9 +685,9 @@ button.pf-number:hover {
   margin-bottom: 4px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .pf-grid {
   display: grid;
@@ -740,9 +740,9 @@ button.pf-cell:hover {
   margin-top: 12px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 .pf-grid-legend-scale {
   display: inline-flex;
@@ -797,15 +797,15 @@ button.pf-cell:hover {
   display: block;
   font-size: var(--text-support);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: var(--leading-section);
 }
 .pf-thing-detail {
   display: block;
   margin-top: 2px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.04em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-label);
+  color: var(--faint-strong);
 }
 
 /* ------------------------------- milestones ------------------------------ */
@@ -853,14 +853,14 @@ button.pf-cell:hover {
 }
 .pf-mile-label {
   font-size: var(--text-meta);
-  line-height: 1.25;
+  line-height: var(--leading-section);
   font-weight: 500;
 }
 .pf-mile-date {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.04em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-label);
+  color: var(--faint-strong);
 }
 
 .pf-progress {
@@ -912,8 +912,8 @@ button.pf-cell:hover {
 .pf-activity-when {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.04em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-label);
+  color: var(--faint-strong);
   white-space: nowrap;
 }
 
@@ -1213,9 +1213,9 @@ button.pf-row:hover {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 /* The connected run of rows. The hairline between rows is the only structure —
@@ -1242,8 +1242,8 @@ button.pf-row:hover {
 
 .pf-row-hint {
   font-size: var(--text-meta);
-  line-height: 1.35;
-  color: var(--faint);
+  line-height: var(--leading-meta);
+  color: var(--faint-strong);
 }
 
 /* The inline consequence-confirmation. Deliberately not a modal: the question
@@ -1261,7 +1261,7 @@ button.pf-row:hover {
 .pf-confirm-msg {
   margin: 0;
   font-size: var(--text-caption);
-  line-height: 1.5;
+  line-height: var(--leading-caption);
   color: var(--muted-foreground);
 }
 
@@ -1584,9 +1584,9 @@ button.pf-row:hover {
   text-align: center;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.2em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
   animation: pf-load-caption 3.4s ease-in-out infinite;
 }
 @keyframes pf-load-caption {
@@ -1629,7 +1629,7 @@ button.pf-row:hover {
   flex: 1 1 auto;
   min-width: 0;
   font-size: var(--text-caption);
-  line-height: 1.45;
+  line-height: var(--leading-caption);
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
 }
 .pf-note-copy strong {
@@ -1733,7 +1733,7 @@ button.pf-row:hover {
   font-family: var(--font-display);
   font-size: 21px;
   font-weight: 500;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
 }
 .pf-out-copy {

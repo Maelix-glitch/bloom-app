@@ -134,7 +134,7 @@
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   white-space: nowrap;
   transition:
@@ -166,7 +166,7 @@
 .wl-eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 46%, transparent);
 }
@@ -176,7 +176,7 @@
   font-weight: 400;
   font-size: clamp(29px, 7.6vw, 42px);
   line-height: 1.06;
-  letter-spacing: -0.026em;
+  letter-spacing: var(--tracking-display);
   text-wrap: balance;
   margin-top: 14px;
 }
@@ -184,7 +184,7 @@
 .wl-sub {
   margin-top: 14px;
   font-size: var(--text-callout);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: color-mix(in oklab, var(--foreground) 64%, transparent);
   text-wrap: pretty;
   max-width: 40ch;
@@ -313,13 +313,13 @@
 .wl-card-title {
   font-size: var(--text-callout);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
 }
 
 .wl-card-sub {
   font-size: var(--text-caption);
-  line-height: 1.5;
+  line-height: var(--leading-caption);
   color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
@@ -370,7 +370,7 @@
   color: var(--foreground);
   font-size: var(--text-callout);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   transition:
     background-color 220ms ease,
     border-color 220ms ease,
@@ -422,7 +422,7 @@
   background: color-mix(in oklab, var(--surface) 50%, transparent);
   color: var(--foreground);
   font-size: var(--text-card); /* 16px, not smaller: below this iOS zooms the page on focus */
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   transition:
     border-color 200ms ease,
     background-color 200ms ease;

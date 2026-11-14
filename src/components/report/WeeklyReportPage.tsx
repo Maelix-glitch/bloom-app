@@ -58,7 +58,7 @@ function Delta({ now, prev, unit }: { now: number | null; prev: number | null; u
 function Card({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section className="rounded-2xl border border-border bg-surface-1/60 p-5 sm:p-6">
-      <h2 className="text-[length:var(--text-micro)] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <h2 className="text-[length:var(--text-micro)] font-medium uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
         {label}
       </h2>
       <div className="mt-4">{children}</div>
@@ -174,7 +174,7 @@ export function WeeklyReportPage() {
         </Link>
 
         <header className="mt-4">
-          <p className="text-[length:var(--text-micro)] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
             Weekly report · {report.weekStart} → {report.weekEnd}
           </p>
           <h1 className="mt-2 font-display text-[clamp(28px,5vw,44px)] italic leading-tight">

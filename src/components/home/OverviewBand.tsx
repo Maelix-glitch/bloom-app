@@ -131,7 +131,7 @@ export function OverviewBand({
               <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
                 {state.facts.map((fact) => (
                   <div key={fact.id}>
-                    <dt className="text-[length:var(--text-micro)] uppercase tracking-[0.14em] text-muted-foreground">
+                    <dt className="text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-caps)] text-muted-foreground">
                       {fact.label}
                     </dt>
                     <dd className="mt-0.5 font-display text-lg leading-none text-foreground">
@@ -144,7 +144,7 @@ export function OverviewBand({
 
             {/* What changed — every sentence carries its numbers and window. */}
             <div>
-              <p className="text-[length:var(--text-micro)] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <p className="text-[length:var(--text-micro)] font-medium uppercase tracking-[var(--tracking-caps)] text-muted-foreground">
                 What changed
               </p>
               {changes.note ? (

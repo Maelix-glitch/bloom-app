@@ -19,7 +19,7 @@
   color: var(--ahm-text);
   font-family: var(--font-body);
   font-size: var(--text-card);
-  line-height: normal;
+  line-height: var(--leading-card);
   -webkit-font-smoothing: antialiased;
   --ahm-bg: var(--background);
   --ahm-surface: var(--surface);
@@ -172,7 +172,7 @@
 .bloom-add-habit .modal-eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text-meta);
-  letter-spacing: 0.09em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   color: var(--ahm-text-faint);
   margin-bottom: 6px;
@@ -181,7 +181,7 @@
   font-family: var(--font-display);
   font-weight: 500;
   font-size: 24px;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
 }
 .bloom-add-habit .modal-close {
   width: 34px;
@@ -245,7 +245,7 @@
 .bloom-add-habit .step-name {
   font-size: var(--text-meta);
   font-family: var(--font-mono);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--ahm-text-faint);
   transition: color 0.25s ease;
@@ -816,7 +816,7 @@
   color: inherit;
   cursor: pointer;
   font-size: var(--text-caption);
-  line-height: 1;
+  line-height: var(--leading-tight);
 }
 .bloom-add-habit .tag-input-wrap input {
   flex: 1;
@@ -996,7 +996,7 @@
   background: color-mix(in oklab, var(--primary) 7%, transparent);
   color: color-mix(in oklab, var(--foreground) 82%, transparent);
   font-size: var(--text-caption);
-  line-height: 1.45;
+  line-height: var(--leading-caption);
   text-align: left;
   cursor: pointer;
   transition:

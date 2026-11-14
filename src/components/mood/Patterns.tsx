@@ -115,7 +115,7 @@ function AnomaliesImpl({ anomalies }: { anomalies: Anomaly[] }) {
                 {a.deviation > 0 ? "+" : ""}
                 {a.deviation.toFixed(2)} vs {a.baseline.toFixed(2)} baseline
               </span>
-              <span className="mono ml-auto flex flex-wrap gap-x-4 text-[length:var(--text-meta)] text-faint">
+              <span className="mono ml-auto flex flex-wrap gap-x-4 text-[length:var(--text-meta)] text-faint-strong">
                 {a.context.map((c) => (
                   <span key={c.label}>
                     {c.label} <span className="text-muted-foreground">{c.value}</span>

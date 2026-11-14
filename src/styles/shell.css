@@ -324,9 +324,9 @@
     color: var(--badge-ink);
     font-family: var(--font-sans);
     font-size: var(--text-micro);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-heading);
     font-variant-numeric: tabular-nums;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.65),
@@ -623,14 +623,14 @@
   font-family: var(--font-display);
   font-size: 19px;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
 }
 
 .ncenter-count {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
@@ -713,8 +713,8 @@ a.ncenter-row:focus-visible {
   display: block;
   font-size: var(--text-callout);
   font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.005em;
+  line-height: var(--leading-section);
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
@@ -731,7 +731,7 @@ a.ncenter-row:focus-visible {
   overflow: hidden;
   margin-top: 2px;
   font-size: var(--text-caption);
-  line-height: 1.42;
+  line-height: var(--leading-caption);
   color: color-mix(in oklab, var(--foreground) 62%, transparent);
   text-wrap: pretty;
 }
@@ -739,7 +739,7 @@ a.ncenter-row:focus-visible {
   display: block;
   margin-top: 3px;
   font-size: var(--text-meta);
-  line-height: 1.4;
+  line-height: var(--leading-meta);
   color: color-mix(in oklab, var(--foreground) 45%, transparent);
   white-space: nowrap;
   overflow: hidden;
@@ -755,7 +755,7 @@ a.ncenter-row:focus-visible {
 .ncenter-time {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-body);
   color: color-mix(in oklab, var(--foreground) 48%, transparent);
   white-space: nowrap;
 }
@@ -788,7 +788,7 @@ a.ncenter-row:hover .ncenter-go {
   margin: 0 4px 8px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.18em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 48%, transparent);
 }
@@ -823,13 +823,13 @@ a.ncenter-row:hover .ncenter-go {
 .ncenter-empty-title {
   font-family: var(--font-display);
   font-size: var(--text-card);
-  line-height: 1.2;
+  line-height: var(--leading-section);
   color: var(--foreground);
 }
 .ncenter-empty-sub {
   max-width: 32ch;
   font-size: var(--text-caption);
-  line-height: 1.5;
+  line-height: var(--leading-caption);
   color: color-mix(in oklab, var(--foreground) 58%, transparent);
   text-wrap: pretty;
 }
@@ -840,7 +840,7 @@ a.ncenter-row:hover .ncenter-go {
   margin: 22px 26px 26px;
   text-align: center;
   font-size: var(--text-meta);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   color: color-mix(in oklab, var(--foreground) 42%, transparent);
   text-wrap: pretty;
 }
@@ -991,7 +991,7 @@ a.ncenter-row:hover .ncenter-go {
 .conn-notice-text {
   margin-top: 2px;
   font-size: var(--text-meta);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   color: color-mix(in oklab, var(--cn-ink) 62%, transparent);
 }
 

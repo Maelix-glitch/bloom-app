@@ -191,7 +191,7 @@
   gap: 0.65rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.2em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 92%, transparent);
 }
@@ -205,15 +205,15 @@
 .pg-title {
   font-family: var(--font-display);
   font-weight: 500;
-  letter-spacing: -0.015em;
-  line-height: 1.06;
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-tight);
 }
 
 .pg-section-title {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(21px, 2.4vw, 26px);
-  letter-spacing: -0.012em;
+  letter-spacing: var(--tracking-heading);
   line-height: 1.15;
   color: var(--foreground);
 }
@@ -245,7 +245,7 @@
 .pg-section-aside {
   max-width: 34ch;
   font-size: var(--text-caption);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: var(--faint);
   text-align: right;
 }
@@ -318,7 +318,7 @@
 
 .pg-hero-title {
   font-size: clamp(42px, 6.6vw, 74px);
-  letter-spacing: -0.025em;
+  letter-spacing: var(--tracking-display);
   background: linear-gradient(
     170deg,
     var(--pg-ivory) 12%,
@@ -345,7 +345,7 @@
   margin-top: 0.35rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 88%, transparent);
 }
@@ -450,14 +450,14 @@
   gap: 0.6rem;
   font-family: var(--font-mono);
   font-size: var(--text-meta);
-  letter-spacing: 0.08em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-meta);
+  color: var(--faint-strong);
 }
 
 .pg-rank-points {
   font-family: var(--font-display);
   font-size: clamp(30px, 4vw, 42px);
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-display);
   line-height: 1;
   color: var(--pg-ivory);
   font-variant-numeric: tabular-nums;
@@ -467,7 +467,7 @@
   margin-top: 0.35rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.28em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 85%, transparent);
 }
@@ -581,7 +581,7 @@
   font-family: var(--font-display);
   font-size: clamp(17px, 2vw, 21px);
   line-height: 1.28;
-  letter-spacing: -0.008em;
+  letter-spacing: var(--tracking-heading);
 }
 
 /* -------------------------------- rails --------------------------------- */
@@ -726,7 +726,7 @@
 .pg-node-name {
   font-family: var(--font-display);
   font-size: var(--text-section);
-  line-height: 1.2;
+  line-height: var(--leading-section);
   color: color-mix(in oklab, var(--foreground) 88%, transparent);
 }
 
@@ -738,16 +738,16 @@
 .pg-node-meta {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-label);
+  color: var(--faint-strong);
 }
 
 .pg-node-state {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
   white-space: nowrap;
 }
 
@@ -799,8 +799,8 @@
   background: color-mix(in oklab, var(--surface) 45%, transparent);
   font-family: var(--font-mono);
   font-size: var(--text-meta);
-  letter-spacing: 0.04em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-label);
+  color: var(--faint-strong);
   transition:
     border-color 0.35s ease,
     color 0.35s ease,
@@ -925,7 +925,7 @@
   gap: 0.45rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.18em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--goal-tone, var(--gold)) 80%, var(--foreground));
 }
@@ -945,8 +945,8 @@
   gap: 0.3rem;
   font-family: var(--font-display);
   font-size: var(--text-section);
-  line-height: 1;
-  letter-spacing: -0.01em;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-heading);
   color: color-mix(in oklab, var(--gold) 92%, var(--foreground));
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -955,7 +955,7 @@
 .pg-goal-value small {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.18em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 90%, transparent);
 }
@@ -968,7 +968,7 @@
 .pg-goal-state {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 88%, transparent);
 }
@@ -982,7 +982,7 @@
 
 .pg-goal-detail {
   font-size: var(--text-caption);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: color-mix(in oklab, var(--faint) 94%, transparent);
   /* two lines, always: the card stays a card, never an essay */
   display: -webkit-box;
@@ -1027,7 +1027,7 @@
 .pg-goal-resets {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 80%, transparent);
 }
@@ -1044,9 +1044,9 @@
 .pg-points small {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 
@@ -1060,7 +1060,7 @@
   border: 1px solid transparent;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   white-space: nowrap;
   transition:
@@ -1097,14 +1097,14 @@
   gap: 0.4rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--gold) 88%, var(--foreground));
 }
 
 .pg-goal-note {
   font-size: var(--text-caption);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: var(--faint);
 }
 
@@ -1193,13 +1193,13 @@
   gap: 0.5rem;
   font-family: var(--font-display);
   font-size: var(--text-card);
-  line-height: 1.25;
+  line-height: var(--leading-section);
 }
 
 .pg-rarity {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   padding: 0.15rem 0.45rem;
   border-radius: 999px;
@@ -1215,14 +1215,14 @@
 .pg-ach-condition,
 .pg-ach-date {
   font-size: var(--text-caption);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   color: var(--faint);
 }
 
 .pg-ach-date {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-label);
 }
 
 .pg-ach-line {
@@ -1259,13 +1259,13 @@
 .pg-history-date {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.06em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-label);
+  color: var(--faint-strong);
 }
 
 .pg-history-title {
   font-size: var(--text-support);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   color: color-mix(in oklab, var(--foreground) 88%, transparent);
 }
 
@@ -1274,9 +1274,9 @@
   margin-top: 0.15rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-history-points {
@@ -1325,7 +1325,7 @@
 .pg-float-label {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 72%, transparent);
 }
@@ -1463,7 +1463,7 @@
   font-family: var(--font-display);
   font-size: clamp(34px, 7vw, 56px);
   line-height: 1.05;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   animation: pg-rise 1.2s cubic-bezier(0.22, 0.61, 0.36, 1) 0.75s both;
 }
 
@@ -1598,9 +1598,9 @@
 .pg-slot-kind {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-slot-value {
@@ -1660,9 +1660,9 @@
 .pg-look-meta {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-lock-note {
@@ -1670,7 +1670,7 @@
   align-items: center;
   gap: 0.4rem;
   font-size: var(--text-meta);
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 /* --------------------------------- footer -------------------------------- */
@@ -1691,7 +1691,7 @@
   font-family: var(--font-display);
   font-size: var(--text-body);
   font-style: italic;
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: color-mix(in oklab, var(--foreground) 78%, transparent);
 }
 
@@ -1701,8 +1701,8 @@
   gap: 0.5rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.08em;
-  color: var(--faint);
+  letter-spacing: var(--tracking-meta);
+  color: var(--faint-strong);
 }
 
 .pg-link {
@@ -1711,7 +1711,7 @@
   gap: 0.4rem;
   font-family: var(--font-mono);
   font-size: var(--text-meta);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-label);
   color: color-mix(in oklab, var(--gold) 78%, var(--foreground));
   text-decoration: none;
   transition: opacity 0.3s ease;
@@ -1797,9 +1797,9 @@
 .pg-group-count {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 @media (max-width: 620px) {
@@ -2945,7 +2945,7 @@
   padding: 0.42rem 1.1rem 0.46rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   white-space: nowrap;
   color: color-mix(in oklab, var(--pg-ivory) 92%, var(--pg-crest-tone, var(--gold)));
@@ -3092,7 +3092,7 @@
 .pg-hall-name {
   font-family: var(--font-display);
   font-size: var(--text-callout);
-  line-height: 1.25;
+  line-height: var(--leading-section);
   text-align: center;
   color: color-mix(in oklab, var(--foreground) 90%, transparent);
 }
@@ -3104,9 +3104,9 @@
 .pg-hall-meta {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
   text-align: center;
 }
 
@@ -3116,7 +3116,7 @@
   right: 0.8rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.18em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--gold) 80%, var(--foreground));
 }
@@ -3133,9 +3133,9 @@
   margin-top: 1.2rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
 }
 
 .pg-hall-legend i {
@@ -3270,7 +3270,7 @@
 
 .pg-plate-eyebrow {
   color: color-mix(in oklab, var(--gold) 55%, var(--faint));
-  letter-spacing: 0.34em;
+  letter-spacing: var(--tracking-wide);
 }
 
 /* the rank name — engraved metal, not flat text */
@@ -3523,7 +3523,7 @@
 .pg-ach-title {
   font-family: var(--font-display);
   font-size: var(--text-card);
-  line-height: 1.25;
+  line-height: var(--leading-section);
   color: var(--foreground);
 }
 
@@ -3552,9 +3552,9 @@
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   font-weight: 500;
-  letter-spacing: 0.34em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  text-indent: 0.34em;
+  text-indent: var(--tracking-wide);
   color: color-mix(in oklab, var(--ach-tone, var(--gold)) 90%, var(--foreground));
   background: linear-gradient(
     180deg,
@@ -3649,7 +3649,7 @@
 .pg-node-state {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
 }
 

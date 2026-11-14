@@ -175,7 +175,7 @@ export function HabitsSection({
     >
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
-          <p className="text-[length:var(--text-meta)] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
             Habits
           </p>
           <h2
@@ -355,7 +355,7 @@ export function HabitsSection({
       {paused.length > 0 || archived.length > 0 ? (
         <div className="mt-5 border-t border-border pt-4" data-testid="home-habits-aside">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[length:var(--text-meta)] uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
               {paused.length > 0 && archived.length > 0
                 ? "Paused & archived"
                 : paused.length > 0

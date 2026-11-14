@@ -189,7 +189,7 @@
   color: var(--foreground);
   font-size: var(--text-support);
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
   transition:
     border-color 200ms ease,
@@ -257,7 +257,7 @@
   margin: 22px 12px 10px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.13em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 68%, black);
 }
@@ -287,7 +287,7 @@
 .coach-conv-group-label {
   padding: 0 8px 6px;
   font-size: var(--text-micro);
-  letter-spacing: 0.09em;
+  letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   font-family: var(--font-mono);
   color: color-mix(in oklab, var(--faint) 68%, black);
@@ -338,12 +338,12 @@
   flex: 1;
   min-width: 0;
   font-size: var(--text-support);
-  line-height: 1.35;
+  line-height: var(--leading-card);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  letter-spacing: 0.005em;
+  letter-spacing: var(--tracking-body);
 }
 
 .coach-conv-time {
@@ -497,7 +497,7 @@
   border-radius: 12px;
   color: color-mix(in oklab, var(--faint) 68%, black);
   font-size: var(--text-caption);
-  line-height: 1.6;
+  line-height: var(--leading-body);
 }
 
 .coach-side-foot {
@@ -667,7 +667,7 @@
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--text-card);
-  letter-spacing: 0.005em;
+  letter-spacing: var(--tracking-body);
   color: var(--foreground);
   white-space: nowrap;
 }
@@ -690,7 +690,7 @@
   margin: 3px 0 0;
   font-size: var(--text-meta);
   color: color-mix(in oklab, var(--faint) 68%, black);
-  letter-spacing: 0.012em;
+  letter-spacing: var(--tracking-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -712,7 +712,7 @@
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   background: transparent;
-  color: var(--faint);
+  color: var(--faint-strong);
   font-size: var(--text-meta);
   cursor: pointer;
   transition:
@@ -745,7 +745,7 @@
   background: transparent;
   color: var(--muted-foreground);
   font-size: var(--text-caption);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
   transition:
     border-color 180ms ease,
@@ -817,7 +817,7 @@
   padding: 40px 20px 90px;
   color: var(--faint);
   font-size: var(--text-caption);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-body);
 }
 
 .coach-thread-center-mark {
@@ -866,7 +866,7 @@
   gap: 8px;
   padding: 7px 22px;
   font-size: var(--text-meta);
-  color: var(--faint);
+  color: var(--faint-strong);
   background: rgb(217 178 110 / 0.05);
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 5%, transparent);
   flex-shrink: 0;
@@ -904,7 +904,7 @@
   color: var(--foreground);
   font-size: var(--text-callout);
   line-height: 1.65;
-  letter-spacing: 0.004em;
+  letter-spacing: var(--tracking-body);
   text-wrap: pretty;
 }
 
@@ -996,14 +996,14 @@
 .coach-msg-author {
   font-size: var(--text-support);
   font-weight: 600;
-  letter-spacing: 0.008em;
+  letter-spacing: var(--tracking-body);
   color: var(--foreground);
 }
 
 .coach-msg-time {
   font-size: var(--text-meta);
   color: color-mix(in oklab, var(--faint) 68%, black);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-body);
   margin-left: 2px;
   font-variant-numeric: tabular-nums;
 }
@@ -1015,7 +1015,7 @@
 .coach-msg-copy {
   font-size: var(--text-body);
   line-height: 1.78;
-  letter-spacing: 0.004em;
+  letter-spacing: var(--tracking-body);
   color: rgb(240 236 230 / 0.92);
   text-wrap: pretty;
   max-width: 68ch;
@@ -1043,7 +1043,7 @@
   margin: 16px 0 0;
   font-size: var(--text-meta);
   color: color-mix(in oklab, var(--faint) 68%, black);
-  letter-spacing: 0.012em;
+  letter-spacing: var(--tracking-body);
 }
 
 .coach-msg-sources-text {
@@ -1246,7 +1246,7 @@
 .coach-error-copy {
   flex: 1 1 240px;
   font-size: var(--text-support);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: var(--muted-foreground);
 }
 
@@ -1300,7 +1300,7 @@
   flex: 0 1 auto;
   white-space: normal;
   text-align: left;
-  line-height: 1.35;
+  line-height: var(--leading-caption);
   padding: 5px 4px;
   border: none;
   background: transparent;
@@ -1345,9 +1345,9 @@
 .coach-welcome-kicker {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.22em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--faint-strong);
   margin: 0 0 14px;
 }
 
@@ -1357,14 +1357,14 @@
   font-weight: 500;
   font-size: clamp(34px, 4.4vw, 52px);
   line-height: 1.06;
-  letter-spacing: -0.018em;
+  letter-spacing: var(--tracking-display);
   color: var(--foreground);
 }
 
 .coach-welcome-greeting {
   margin: 14px auto 0;
   font-size: var(--text-support);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-body);
   color: var(--muted-foreground);
   font-style: italic;
 }
@@ -1373,7 +1373,7 @@
   max-width: 52ch;
   margin: 12px auto 0;
   font-size: var(--text-caption);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   font-style: italic;
   color: color-mix(in oklab, var(--muted-foreground) 78%, transparent);
 }
@@ -1415,7 +1415,7 @@
   background: rgb(255 255 255 / 0.014);
   color: var(--muted-foreground);
   font-size: var(--text-support);
-  letter-spacing: 0.005em;
+  letter-spacing: var(--tracking-body);
   text-align: left;
   cursor: pointer;
   transition:
@@ -1531,7 +1531,7 @@
   margin: 0 0 4px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 68%, black);
 }
@@ -1552,7 +1552,7 @@
   margin: 2px 0 0;
   font-family: var(--font-display);
   font-size: 23px;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
   line-height: 1.1;
 }
@@ -1649,7 +1649,7 @@
   font-family: var(--font-display);
   font-size: var(--text-section);
   color: var(--foreground);
-  letter-spacing: -0.006em;
+  letter-spacing: var(--tracking-heading);
 }
 
 .coach-plan-detail {
@@ -1694,7 +1694,7 @@
 .coach-plan-step-label {
   font-size: var(--text-support);
   color: var(--muted-foreground);
-  letter-spacing: 0.003em;
+  letter-spacing: var(--tracking-body);
 }
 
 .coach-plan-step-time {
@@ -1891,7 +1891,7 @@
 .coach-noticed-lede {
   margin: 0 0 10px;
   font-size: var(--text-meta);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: color-mix(in oklab, var(--faint) 68%, black);
   font-style: italic;
   max-width: 52ch;
@@ -1916,13 +1916,13 @@
   font-size: var(--text-caption);
   font-weight: 600;
   color: var(--coach-lav-soft);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-body);
 }
 
 .coach-noticed-item-copy span {
   font-size: var(--text-caption);
   color: var(--muted-foreground);
-  line-height: 1.55;
+  line-height: var(--leading-body);
 }
 
 .coach-noticed-item-copy em {
@@ -1987,7 +1987,7 @@
 }
 
 .coach-notice-text {
-  line-height: 1.4;
+  line-height: var(--leading-meta);
 }
 
 .coach-notice-link {
@@ -2084,8 +2084,8 @@
   caret-color: var(--coach-lav-soft);
   font: inherit;
   font-size: var(--text-body);
-  line-height: 1.6;
-  letter-spacing: 0.004em;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
   padding: 6px 6px 4px;
   max-height: 168px;
   overflow-y: auto;
@@ -2276,7 +2276,7 @@
 .coach-composer-hint {
   font-size: var(--text-micro);
   color: color-mix(in oklab, var(--faint) 68%, black);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-body);
 }
 
 /* attachment chip above the composer */
@@ -2440,7 +2440,7 @@
   margin: 0 0 5px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.2em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--coach-lav);
 }
@@ -2450,7 +2450,7 @@
   font-family: var(--font-display);
   font-size: 23px;
   font-weight: 500;
-  letter-spacing: -0.012em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
 }
 
@@ -2624,7 +2624,7 @@
   background: rgb(157 199 166 / 0.05);
   border: 1px solid rgb(157 199 166 / 0.12);
   font-size: var(--text-caption);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   color: var(--muted-foreground);
 }
 
@@ -2707,14 +2707,14 @@
 .coach-memory-category {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 68%, black);
 }
 
 .coach-memory-text {
   font-size: var(--text-support);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   color: var(--muted-foreground);
   overflow-wrap: anywhere;
 }
@@ -2900,7 +2900,7 @@
   padding: 12px 12px 6px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: color-mix(in oklab, var(--faint) 68%, black);
 }
@@ -3012,7 +3012,7 @@
   margin: 0 0 4px;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  letter-spacing: 0.2em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--coach-lav);
 }
@@ -3022,7 +3022,7 @@
   font-family: var(--font-display);
   font-size: 21px;
   font-weight: 500;
-  letter-spacing: -0.012em;
+  letter-spacing: var(--tracking-heading);
   color: var(--foreground);
 }
 
@@ -3060,7 +3060,7 @@
   padding: 16px;
   color: var(--muted-foreground);
   font-size: var(--text-support);
-  line-height: 1.6;
+  line-height: var(--leading-body);
 }
 
 .coach-camera-error > svg {

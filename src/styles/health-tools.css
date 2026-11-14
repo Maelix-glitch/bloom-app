@@ -37,7 +37,7 @@
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
@@ -47,7 +47,7 @@
   font-family: var(--font-display, Georgia, serif);
   font-size: clamp(1.35rem, 4.5vw, 1.8rem);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   line-height: 1.15;
 }
 
@@ -55,7 +55,7 @@
   max-width: 62ch;
   margin: 0.45rem 0 0;
   font-size: var(--text-support);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   color: var(--muted-foreground);
 }
 
@@ -138,7 +138,7 @@
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: var(--text-micro);
-  letter-spacing: 0.13em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
@@ -150,7 +150,7 @@
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-display);
 }
 
 .bt-value__unit {
@@ -158,21 +158,21 @@
   font-family: var(--font-sans, system-ui, sans-serif);
   font-size: var(--text-meta);
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-body);
   color: var(--muted-foreground);
 }
 
 .bt-card__sub {
   margin: 0.35rem 0 0;
   font-size: var(--text-caption);
-  line-height: 1.45;
+  line-height: var(--leading-caption);
   color: var(--muted-foreground);
 }
 
 .bt-card__foot {
   margin: 0.7rem 0 0;
   font-size: var(--text-meta);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   color: var(--muted-foreground);
 }
 
@@ -297,7 +297,7 @@
 .bt-goal__rate {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: var(--text-meta);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
   color: var(--muted-foreground);
 }
 
@@ -435,7 +435,7 @@
 
 .bt-field__label {
   font-size: var(--text-meta);
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-label);
   color: var(--muted-foreground);
 }
 
@@ -530,7 +530,7 @@
 .bt-note {
   margin: 0.7rem 0 0;
   font-size: var(--text-meta);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   color: var(--muted-foreground);
 }
 

@@ -71,7 +71,7 @@
   font-size: clamp(20px, 5.4vw, 24px);
   font-weight: 500;
   line-height: 1.2;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   text-align: center;
   color: oklch(0.955 0.008 85);
 }
@@ -79,7 +79,7 @@
 .ag-copy {
   margin: 10px 0 0;
   font-size: clamp(12.5px, 3.4vw, 13.5px);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   text-align: center;
   color: oklch(0.955 0.008 85 / 0.58);
 }
@@ -94,7 +94,7 @@
   margin: clamp(20px, 4vh, 26px) 0 7px;
   font-family: var(--font-mono, "IBM Plex Mono"), ui-monospace, monospace;
   font-size: var(--text-micro);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: oklch(0.955 0.008 85 / 0.42);
 }
@@ -137,7 +137,7 @@
   margin: 10px 0 0;
   overflow: hidden;
   font-size: var(--text-caption);
-  line-height: 1.5;
+  line-height: var(--leading-caption);
   color: oklch(0.81 0.11 82 / 0.85);
 }
 
@@ -207,7 +207,7 @@
 .ag-note {
   margin: 16px 0 0;
   font-size: var(--text-meta);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   text-align: center;
   color: oklch(0.955 0.008 85 / 0.36);
 }
@@ -217,7 +217,7 @@
   margin: 0;
   padding-inline: 12px;
   font-size: var(--text-meta);
-  line-height: 1.5;
+  line-height: var(--leading-support);
   text-align: center;
   color: oklch(0.955 0.008 85 / 0.3);
 }

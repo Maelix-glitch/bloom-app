@@ -89,7 +89,7 @@ function DashboardRoute() {
             {stats.map((stat) => (
               <div key={stat.label} className="home-panel p-5">
                 <stat.icon className="size-5" style={{ color: stat.color }} aria-hidden="true" />
-                <div className="mt-3 text-[length:var(--text-meta)] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                <div className="mt-3 text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-caps)] text-muted-foreground">
                   {stat.label}
                 </div>
                 <div className="mt-1 font-display text-3xl tabular-nums text-foreground">

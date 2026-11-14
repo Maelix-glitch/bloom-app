@@ -112,7 +112,7 @@ function MoodIntelligencePage() {
       <main className="relative min-w-0 w-full px-5 pb-28 pt-6 sm:px-8 sm:pt-7 lg:px-10 lg:pb-24 lg:pt-7">
         <Link
           to="/mood"
-          className="mono mb-8 inline-flex items-center gap-2 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors hover:text-foreground"
+          className="mono mb-8 inline-flex items-center gap-2 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-faint-strong transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" /> Mood
         </Link>
@@ -202,14 +202,14 @@ function MoodIntelligencePage() {
             </Reveal>
 
             <footer className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-              <p className="mono text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
+              <p className="mono text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
                 Bloom · your data is saved securely to your private account
               </p>
 
               <button
                 type="button"
                 onClick={() => setResetOpen(true)}
-                className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors hover:border-rose/50 hover:text-rose"
+                className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong transition-colors hover:border-rose/50 hover:text-rose"
               >
                 <RotateCcw className="size-3" /> Reset all data
               </button>
