@@ -51,8 +51,11 @@ export function OverviewBand({
   onLogMetrics,
   onAddHabit,
 }: OverviewBandProps) {
-  const { state: assessmentState, retake } = useAssessment();
+  const { state: assessmentState } = useAssessment();
   const [flowOpen, setFlowOpen] = useState(false);
+  /* Retake intent for the flow — display only, never a state write. The
+     completed assessment is demoted only by Begin inside the sheet. */
+  const [flowRetake, setFlowRetake] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const summary = summaryOf(assessmentState);
 
@@ -73,7 +76,7 @@ export function OverviewBand({
         onAddHabit();
         break;
       case "assessment":
-        if (assessmentState.status === "complete") retake();
+        setFlowRetake(assessmentState.status === "complete");
         setFlowOpen(true);
         break;
       case "assessment-summary":
@@ -208,7 +211,7 @@ export function OverviewBand({
         </div>
       )}
 
-      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} />
+      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} retake={flowRetake} />
 
       <BloomSheet
         open={summaryOpen}
