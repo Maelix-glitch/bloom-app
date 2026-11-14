@@ -133,13 +133,12 @@
    * the top curve the way a real bevel would.
    */
   border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  /* Reskin foundation: the glass light (white 5% -> 1.8%) over a solid
+     panel mix — the sheet keeps its PR #87 slab opacity, so nothing
+     bleeds through, while its surface joins the glass system. */
   background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--foreground) 5%, transparent),
-      transparent 32%
-    ),
-    color-mix(in oklab, var(--surface) 78%, transparent);
+    var(--glass-bg),
+    color-mix(in oklab, var(--surface) 88%, transparent);
   box-shadow:
     0 40px 90px -30px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(0, 0, 0, 0.45),

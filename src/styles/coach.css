@@ -259,12 +259,12 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-side-heading em {
   font-style: normal;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-micro);
 }
 
@@ -290,7 +290,7 @@
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   font-family: var(--font-mono);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-weight: 400;
 }
 
@@ -349,7 +349,7 @@
 .coach-conv-time {
   flex-shrink: 0;
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-variant-numeric: tabular-nums;
 }
 
@@ -495,7 +495,7 @@
   padding: 14px 10px;
   border: 1px dashed color-mix(in oklab, var(--foreground) 8%, transparent);
   border-radius: 12px;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-caption);
   line-height: var(--leading-body);
 }
@@ -538,7 +538,7 @@
   display: block;
   margin-top: 1px;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-side-foot-glyph {
@@ -689,7 +689,7 @@
 .coach-header-subtitle {
   margin: 3px 0 0;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   letter-spacing: var(--tracking-body);
   white-space: nowrap;
   overflow: hidden;
@@ -730,7 +730,7 @@
 .coach-palette-btn kbd {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 /* context chip (header + composer share the look) */
@@ -760,7 +760,7 @@
 }
 
 .coach-context-chip.is-quiet .coach-context-dot {
-  background: color-mix(in oklab, var(--faint) 68%, black);
+  background: var(--faint-strong);
   box-shadow: none;
 }
 
@@ -920,7 +920,7 @@
   margin-top: 6px;
   padding-right: 6px;
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-variant-numeric: tabular-nums;
 }
 
@@ -967,7 +967,7 @@
 
 .coach-user-attachment-file small {
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-user-attachment-icon {
@@ -1002,7 +1002,7 @@
 
 .coach-msg-time {
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   letter-spacing: var(--tracking-body);
   margin-left: 2px;
   font-variant-numeric: tabular-nums;
@@ -1042,7 +1042,7 @@
   gap: 5px var(--space-3);
   margin: var(--space-4) 0 0;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   letter-spacing: var(--tracking-body);
 }
 
@@ -1102,7 +1102,7 @@
   border-radius: 9px;
   border: 0;
   background: transparent;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-meta);
   cursor: pointer;
   transition:
@@ -1199,7 +1199,7 @@
 
 .coach-thinking-word {
   font-size: var(--text-caption);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-style: italic;
   animation: coach-fade-word 1.6s ease-in-out infinite;
 }
@@ -1444,7 +1444,7 @@
 .coach-starter-arrow {
   width: 15px;
   height: 15px;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   flex-shrink: 0;
   transition:
     transform var(--motion-standard) var(--ease-out-expo),
@@ -1459,7 +1459,7 @@
 .coach-welcome-note {
   margin: 26px 0 0;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1533,7 +1533,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 /* metric */
@@ -1560,7 +1560,7 @@
 .coach-metric-detail {
   margin: 3px 0 0;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-metric-chart {
@@ -1699,7 +1699,7 @@
 
 .coach-plan-step-time {
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   white-space: nowrap;
   font-style: italic;
 }
@@ -1759,7 +1759,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-meta);
 }
 
@@ -1824,7 +1824,7 @@
   border-radius: 9px;
   border: 0;
   background: transparent;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-caption);
   cursor: pointer;
   transition:
@@ -1892,7 +1892,7 @@
   margin: 0 0 10px;
   font-size: var(--text-meta);
   line-height: var(--leading-body);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-style: italic;
   max-width: 52ch;
 }
@@ -1928,7 +1928,7 @@
 .coach-noticed-item-copy em {
   font-style: normal;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 /* fresh arrival */
@@ -2009,7 +2009,7 @@
   border-radius: 6px;
   border: 0;
   background: transparent;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -2117,7 +2117,7 @@
 }
 
 .coach-composer-input::placeholder {
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-composer-actions-left,
@@ -2223,7 +2223,7 @@
   border-radius: 12px;
   border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   background: rgb(255 255 255 / 0.03);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   cursor: default;
   transition:
     background var(--motion-standard) var(--ease-out-expo),
@@ -2275,7 +2275,7 @@
 
 .coach-composer-hint {
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   letter-spacing: var(--tracking-body);
 }
 
@@ -2328,7 +2328,7 @@
 
 .coach-attachment-copy small {
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-attachment-remove {
@@ -2339,7 +2339,7 @@
   border-radius: 8px;
   border: 0;
   background: transparent;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -2584,7 +2584,7 @@
 
 .coach-signal-copy small {
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-signal-value {
@@ -2610,7 +2610,7 @@
 
 .coach-panel-empty p + p {
   margin-top: 5px;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-caption);
 }
 
@@ -2662,7 +2662,7 @@
   border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   background: transparent;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   font-size: var(--text-meta);
   cursor: pointer;
   transition:
@@ -2709,7 +2709,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-memory-text {
@@ -2721,7 +2721,7 @@
 
 .coach-memory-copy small {
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-memory-actions {
@@ -2738,7 +2738,7 @@
   border-radius: 8px;
   border: 0;
   background: transparent;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   cursor: pointer;
   transition:
     color var(--motion-micro) var(--ease-out-expo),
@@ -2883,7 +2883,7 @@
   margin-left: auto;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
   border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   border-radius: 6px;
   padding: 2px 7px;
@@ -2902,7 +2902,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-palette-row {
@@ -2936,7 +2936,7 @@
   display: block;
   margin-top: 1px;
   font-size: var(--text-meta);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-palette-row-icon {
@@ -2954,7 +2954,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: color-mix(in oklab, var(--faint) 68%, black);
+  background: var(--faint-strong);
   margin: 0 11px;
   flex-shrink: 0;
 }
@@ -3029,7 +3029,7 @@
 .coach-camera-sub {
   margin: var(--space-1) 0 0;
   font-size: var(--text-caption);
-  color: color-mix(in oklab, var(--faint) 68%, black);
+  color: var(--faint-strong);
 }
 
 .coach-camera-stage {
