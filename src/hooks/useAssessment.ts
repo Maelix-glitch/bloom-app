@@ -17,7 +17,6 @@ import {
   parseAssessmentState,
   recordConsents,
   restartAssessment,
-  retakeAssessment,
   saveStep,
   type AssessmentAnswers,
   type AssessmentState,
@@ -31,7 +30,6 @@ export interface AssessmentStore {
   saveStep: (patch: Partial<AssessmentAnswers>, resumeStep: AssessmentStep) => void;
   recordConsents: (records: ConsentRecord[]) => void;
   complete: () => void;
-  retake: () => void;
   restart: () => void;
 }
 
@@ -85,10 +83,6 @@ export function useAssessment(): AssessmentStore {
     setPref(ASSESSMENT_KEY, completeAssessment(current(), nowIso()));
   }, []);
 
-  const retake = useCallback(() => {
-    setPref(ASSESSMENT_KEY, retakeAssessment(current(), nowIso()));
-  }, []);
-
   const restart = useCallback(() => {
     setPref(ASSESSMENT_KEY, restartAssessment(current(), nowIso()));
   }, []);
@@ -99,7 +93,6 @@ export function useAssessment(): AssessmentStore {
     saveStep: saveStepFn,
     recordConsents: recordConsentsFn,
     complete,
-    retake,
     restart,
   };
 }

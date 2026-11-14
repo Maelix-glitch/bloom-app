@@ -10,7 +10,6 @@ import {
   parseAssessmentState,
   recordConsents,
   restartAssessment,
-  retakeAssessment,
   saveStep,
   shouldShowAssessmentPrompt,
   toHealthProfile,
@@ -118,15 +117,24 @@ describe("transitions", () => {
     expect(s.updatedAt).toBe(T1);
   });
 
-  it("complete stamps completedAt; retake keeps it until the retake finishes", () => {
+  it("complete stamps completedAt; beginning again keeps it until the new run finishes", () => {
     const done = completeAssessment(answeredState(), T2);
     expect(done.status).toBe("complete");
     expect(done.completedAt).toBe(T2);
 
-    const retake = retakeAssessment(done, "2026-11-12T09:00:00.000Z");
-    expect(retake.status).toBe("in_progress");
-    expect(retake.completedAt).toBe(T2);
-    expect(retake.answers).toEqual(done.answers);
+    /* A retake is a begin() from the completed state — the only transition
+       that may demote it, and it runs from the flow's Begin button, never
+       when a sheet opens. completedAt and the answers survive until the
+       new run completes. */
+    const again = saveStep(
+      beginAssessment(done, "2026-11-12T09:00:00.000Z"),
+      done.answers,
+      "identity",
+      "2026-11-12T09:00:00.000Z",
+    );
+    expect(again.status).toBe("in_progress");
+    expect(again.completedAt).toBe(T2);
+    expect(again.answers).toEqual(done.answers);
   });
 
   it("restart clears answers but keeps consent decisions", () => {
