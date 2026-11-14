@@ -1247,3 +1247,46 @@ describe("UI guard: reskin chrome (R-2)", () => {
     }
   });
 });
+
+describe("UI guard: reskin slice C1 — the four tabs", () => {
+  /* Reskin slice C (part 1) — Trackers, Mood, Rewards and Coach take the
+     Profile file's design language in Bloom's gold-led tokens. The faded
+     small-text class is closed for good on these surfaces: no text rule
+     in Coach, progression or Rewards may sit on the bare --faint step
+     (it survives only as large/decorative tone elsewhere), the Trackers
+     scoped mute tokens resolve to the --faint-strong step, the Mood
+     echarts chrome reads its axis labels from the same step, and the
+     Rewards delivery/admin scope no longer retints its surfaces violet. */
+  const COACH = ALL_SOURCES.find((f) => f.rel === "styles/coach.css")!;
+  const PROGRESSION = ALL_SOURCES.find((f) => f.rel === "styles/progression.css")!;
+  const REWARDS = ALL_SOURCES.find((f) => f.rel === "styles/rewards.css")!;
+  const TRACKERS = ALL_SOURCES.find((f) => f.rel === "styles/trackers.css")!;
+  const MOOD_CHART = ALL_SOURCES.find((f) => f.rel === "components/mood/MoodChart.tsx")!;
+
+  it("keeps Coach, progression and Rewards text off the bare --faint step", () => {
+    for (const f of [COACH, PROGRESSION, REWARDS]) {
+      expect(f.text, `${f.rel} must not colour text with bare var(--faint)`).not.toContain(
+        "color: var(--faint);",
+      );
+      expect(f.text).toContain("color: var(--faint-strong)");
+    }
+  });
+
+  it("resolves the Trackers scoped mute tokens to the lifted step", () => {
+    expect(TRACKERS.text).toContain("--ci-text-mute: var(--faint-strong)");
+    expect(TRACKERS.text).toContain("--text-dim: var(--faint-strong)");
+    expect(TRACKERS.text).toContain("--text-architectural: var(--faint-strong)");
+  });
+
+  it("themes the Mood echarts chrome from the lifted label step", () => {
+    expect(MOOD_CHART.text).toContain('label: resolveCssColor("var(--faint-strong)")');
+    expect(MOOD_CHART.text).not.toContain('resolveCssColor("var(--faint)")');
+  });
+
+  it("keeps the Rewards delivery/admin scope on the official palette", () => {
+    expect(REWARDS.text).not.toContain("oklch(0.16 0.04 278)");
+    expect(REWARDS.text).not.toContain("oklch(0.55 0.19 295)");
+    expect(REWARDS.text).toContain("--background: #0a0b0e");
+    expect(REWARDS.text).toContain("--royal: #a697d3");
+  });
+});
