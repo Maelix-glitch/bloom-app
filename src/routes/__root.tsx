@@ -160,7 +160,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       /* B6 — installable: the phone needs a theme colour and a display hint */
-      { name: "theme-color", content: "#14151f" },
+      { name: "theme-color", content: "#0a0b0e" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -296,12 +296,12 @@ function RootShell({ children }: { children: ReactNode }) {
           <BloomLogo size={76} className="bloom-boot-mark" arcClassName="bloom-boot-arc" />
           <div className="bloom-boot-word">Bloom</div>
         </div>
-        <style>{`#bloom-boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#14151f;transition:opacity .45s ease}
+        <style>{`#bloom-boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#0a0b0e;transition:opacity .45s ease}
 #bloom-boot.bloom-boot-done{opacity:0;pointer-events:none}
 .bloom-boot-glow{position:absolute;width:300px;height:300px;border-radius:9999px;background:radial-gradient(closest-side,rgba(232,183,94,.13),transparent 70%);animation:bloom-boot-breathe 2.6s ease-[var(--ease-out-expo)] infinite}
 .bloom-boot-mark{position:relative}
 .bloom-boot-arc{stroke-dasharray:100;animation:bloom-boot-draw 1.1s ease-[var(--ease-out-expo)] both}
-.bloom-boot-word{position:relative;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;font-weight:500;letter-spacing:.44em;text-indent:.44em;text-transform:uppercase;color:#8b8fa3;animation:bloom-boot-rise .7s ease-[var(--ease-out-expo)] .15s both}
+.bloom-boot-word{position:relative;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;font-weight:500;letter-spacing:.44em;text-indent:.44em;text-transform:uppercase;color:#aba69c;animation:bloom-boot-rise .7s ease-[var(--ease-out-expo)] .15s both}
 @keyframes bloom-boot-draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
 @keyframes bloom-boot-breathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 @keyframes bloom-boot-rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -374,6 +374,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+        {/* Reskin foundation — the ambient app background: fixed gold and
+            sage glows plus film grain, behind everything, pointer-events
+            none, mounted once at the root (never per page). */}
+        <div className="bloom-ambient" aria-hidden="true">
+          <div className="bloom-ambient-gold" />
+          <div className="bloom-ambient-sage" />
+          <div className="bloom-ambient-grain" />
+        </div>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <AccessControl>
           {/* The one app chrome, mounted once for the whole session —

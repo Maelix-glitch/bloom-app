@@ -193,7 +193,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 92%, transparent);
+  color: var(--faint-strong);
 }
 
 .pg-eyebrow-rule {
@@ -472,7 +472,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 85%, transparent);
+  color: var(--faint-strong);
 }
 
 /* the count-up number */
@@ -960,7 +960,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 90%, transparent);
+  color: var(--faint-strong);
 }
 
 .pg-goal-value.is-muted {
@@ -973,7 +973,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 88%, transparent);
+  color: var(--faint-strong);
 }
 
 .pg-goal-title {
@@ -986,7 +986,7 @@
 .pg-goal-detail {
   font-size: var(--text-caption);
   line-height: var(--leading-body);
-  color: color-mix(in oklab, var(--faint) 94%, transparent);
+  color: var(--faint-strong);
   /* two lines, always: the card stays a card, never an essay */
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1032,7 +1032,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 80%, transparent);
+  color: var(--faint-strong);
 }
 
 .pg-points {
@@ -3272,7 +3272,7 @@
 }
 
 .pg-plate-eyebrow {
-  color: color-mix(in oklab, var(--gold) 55%, var(--faint));
+  color: color-mix(in oklab, var(--gold) 55%, var(--faint-strong));
   letter-spacing: var(--tracking-wide);
 }
 

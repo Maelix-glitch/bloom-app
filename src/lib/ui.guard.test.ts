@@ -1057,3 +1057,111 @@ describe("UI guard: small-text leftovers — mood web and rewards micro", () => 
     expect(strong.body).not.toContain("color-mix");
   });
 });
+
+describe("UI guard: reskin foundation (R-1)", () => {
+  /* Reskin slice 1 (2026-11-14) — the owner's prototype palette and glass
+     surface system become the base skin. The token home (styles.css)
+     carries the new values; the OLD palette hexes are pinned out of it
+     so a stale clone or a copied rule cannot quietly restore the
+     pre-reskin skin. Scoped systems with their own recorded palettes
+     (Cycle's --ci-*, Stories content) are outside this pin, exactly as
+     in the hex guard above. The faded-faint pin closes the leftover
+     class from the PR #95 report: small text in Coach and progression
+     was faded through color-mix into near-invisibility; it now rides
+     --faint-strong directly, and the mix form may not return. */
+  const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+  const COACH = ALL_SOURCES.find((f) => f.rel === "styles/coach.css")!;
+  const PROGRESSION = ALL_SOURCES.find((f) => f.rel === "styles/progression.css")!;
+  const ROOT = ALL_SOURCES.find((f) => f.rel === "routes/__root.tsx")!;
+
+  function blocks(text: string): { selector: string; body: string }[] {
+    const clean = text.replace(/\/\*[\s\S]*?\*\//g, " ");
+    const out: { selector: string; body: string }[] = [];
+    let prev = 0;
+    for (const m of clean.matchAll(/\{([^{}]*)\}/g)) {
+      out.push({ selector: clean.slice(prev, m.index).trim(), body: m[1]! });
+      prev = m.index + m[0].length;
+    }
+    return out;
+  }
+  const blockFor = (text: string, selector: string) =>
+    blocks(text).find((b) => b.selector.trim().endsWith(selector) || b.selector.includes(selector));
+
+  it("defines the new palette, gradient, glass and radius tokens", () => {
+    for (const needle of [
+      "--ink: #0a0b0e",
+      "--panel: #111318",
+      "--background: #0a0b0e",
+      "--surface: #111318",
+      "--foreground: #ece8e1",
+      "--gold: #dcc08f",
+      "--gold-soft: #f2e4c6",
+      "--gold-gradient: linear-gradient(110deg, #f6e9cd 0%, #dcc08f 45%, #c79d62 100%)",
+      "--success: #8fc7a2",
+      "--rose: #e3919f",
+      "--glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018))",
+      "--glass-border: rgba(255, 255, 255, 0.07)",
+      "--glass-shadow:",
+      "--hairline-gradient: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent)",
+      "--tracking-eyebrow: 0.16em",
+      "--radius-card: 1.5rem",
+      "--radius-panel: 1.5rem",
+    ]) {
+      expect(STYLES.text, `styles.css must define ${needle}`).toContain(needle);
+    }
+  });
+
+  it("pins the old palette hexes out of the token home", () => {
+    const OLD = [
+      "#0d0f16", "#0a0c12", "#151823", "#1b1f2b", "#232837", "#303747",
+      "#252a36", "#3a4356", "#f3efe7", "#b2b0b8", "#858796", "#9ea0ae",
+      "#d9bc83", "#e7cc9d", "#eed9a4", "#e3c187", "#f7dc9a", "#d99b34",
+      "#86aa98", "#c77e82",
+    ];
+    for (const hex of OLD) {
+      expect(STYLES.text, `old palette value ${hex} must not return to styles.css`).not.toContain(hex);
+    }
+  });
+
+  it("keeps the glass system on the shared surfaces", () => {
+    const panel = blockFor(STYLES.text, "@utility panel")!;
+    expect(panel.body).toContain("background-image: var(--glass-bg)");
+    expect(panel.body).toContain("border: 1px solid var(--glass-border)");
+    expect(panel.body).toContain("box-shadow: var(--glass-shadow)");
+    expect(STYLES.text).toContain("@utility surface-glass");
+    expect(STYLES.text).toContain("@utility text-gold-gradient");
+    const hairline = blockFor(STYLES.text, "@utility hairline")!;
+    expect(hairline.body).toContain("background: var(--hairline-gradient)");
+  });
+
+  it("keeps the prototype base polish: selection, focus ring, scrollbar", () => {
+    expect(STYLES.text).toContain("background: rgba(220, 192, 143, 0.3)");
+    expect(STYLES.text).toContain("outline: 2px solid rgba(220, 192, 143, 0.7)");
+    expect(STYLES.text).toContain("background: rgba(255, 255, 255, 0.08)");
+  });
+
+  it("keeps the eyebrow recipe on the prototype values via tokens", () => {
+    const eyebrow = blockFor(STYLES.text, "@utility eyebrow")!;
+    expect(eyebrow.body).toContain("font-size: var(--text-meta)");
+    expect(eyebrow.body).toContain("font-weight: 500");
+    expect(eyebrow.body).toContain("letter-spacing: var(--tracking-eyebrow)");
+    expect(eyebrow.body).toContain("text-transform: uppercase");
+  });
+
+  it("mounts the ambient background once at the root, behind everything", () => {
+    expect(ROOT.text).toContain('className="bloom-ambient"');
+    expect(STYLES.text).toContain(".bloom-ambient-gold");
+    expect(STYLES.text).toContain(".bloom-ambient-sage");
+    expect(STYLES.text).toContain(".bloom-ambient-grain");
+    const ambient = blockFor(STYLES.text, ".bloom-ambient")!;
+    expect(ambient.body).toContain("position: fixed");
+    expect(ambient.body).toContain("pointer-events: none");
+  });
+
+  it("pins color-mix-faded --faint out of Coach and progression small text", () => {
+    expect(COACH.text).not.toContain("color-mix(in oklab, var(--faint)");
+    expect(PROGRESSION.text).not.toContain("color-mix(in oklab, var(--faint)");
+    expect(COACH.text).toContain("color: var(--faint-strong)");
+    expect(PROGRESSION.text).toContain("color: var(--faint-strong)");
+  });
+});
