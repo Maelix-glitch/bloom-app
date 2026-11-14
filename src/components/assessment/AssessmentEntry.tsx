@@ -228,7 +228,7 @@ export function AssessmentProfileCard() {
               <X className="size-4" aria-hidden />
             </Button>
           </div>
-          <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="no-scrollbar mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
             {summary ? (
               <AssessmentSummaryView summary={summary} />
             ) : (

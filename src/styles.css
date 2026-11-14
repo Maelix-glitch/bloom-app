@@ -2259,11 +2259,13 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   bottom: calc(20px + var(--app-bottom-nav));
 }
 
-/* Floating "Add habit" on Today — clears the tab bar on phones. */
+/* Floating "Add habit" on Today — clears the tab bar on phones by a full
+   1.5rem (the nav token already includes the safe-area inset), and sits
+   1.5rem in from the right edge so it never rides a card border. */
 .home-fab {
   position: fixed;
-  right: 1rem;
-  bottom: calc(1rem + var(--app-bottom-nav, 0px));
+  right: 1.5rem;
+  bottom: calc(1.5rem + var(--app-bottom-nav, 0px));
   z-index: 30;
   background: var(--gold);
   color: var(--primary-foreground);

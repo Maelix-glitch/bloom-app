@@ -323,7 +323,7 @@ export function MetricsEntryModal({
        * tapped. `min-h-0` is what lets the flex child actually shrink; without
        * it the panel grows past the viewport instead of scrolling.
        */}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-metric-surface">
+      <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain bg-metric-surface">
         {/* Header — the calm editorial pattern the quick-log sheet wears:
             a small gold caps label, the Fraunces title, the muted state
             line, a hairline divider, and the family's round ×. (It used to

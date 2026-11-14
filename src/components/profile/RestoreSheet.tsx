@@ -57,7 +57,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
         }
       }}
     >
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+      <SheetContent side="bottom" className="no-scrollbar max-h-[85dvh] overflow-y-auto">
         <SheetTitle className="display text-[length:var(--text-section)]">
           Restore from backup
         </SheetTitle>

@@ -27,6 +27,14 @@ import { DeltaPill } from "./DeltaPill";
 /** A fact whose whole value is one integer earns the count-up tile number. */
 const NUMERIC_FACT = /^\d+$/;
 
+/**
+ * A fact whose value ends in a day unit ("3 of 7 days") renders as a
+ * no-wrap figure ("3 of 7") with the unit as its own caption line — the
+ * whole phrase once wrapped mid-phrase inside the tile, which made the
+ * tile taller than its row-mates and left dead space in theirs.
+ */
+const UNIT_FACT = /^(.+?) (days?)$/;
+
 /* ------------------------------- stat tiles ------------------------------ */
 
 /**
@@ -69,18 +77,28 @@ export function StatTiles({
             </ul>
           ) : null}
           <dl className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {state.facts.map((fact) => (
-              <div key={fact.id} className="home-panel p-5">
-                <dt className="home-eyebrow">{fact.label}</dt>
-                <dd className="mt-3 font-display text-4xl font-light leading-none tracking-tight tabular-nums text-foreground">
-                  {NUMERIC_FACT.test(fact.value) ? (
-                    <CountUp value={Number(fact.value)} id={`overview-fact-${fact.id}`} />
-                  ) : (
-                    fact.value
-                  )}
-                </dd>
-              </div>
-            ))}
+            {state.facts.map((fact) => {
+              const unit = UNIT_FACT.exec(fact.value);
+              return (
+                <div key={fact.id} className="home-panel flex flex-col p-5">
+                  <dt className="home-eyebrow">{fact.label}</dt>
+                  <dd className="mt-auto whitespace-nowrap pt-3 font-display text-4xl font-light leading-none tracking-tight tabular-nums text-foreground">
+                    {NUMERIC_FACT.test(fact.value) ? (
+                      <CountUp value={Number(fact.value)} id={`overview-fact-${fact.id}`} />
+                    ) : unit ? (
+                      unit[1]
+                    ) : (
+                      fact.value
+                    )}
+                    {unit ? (
+                      <span className="mt-2 block font-sans text-[length:var(--text-caption)] font-normal normal-case leading-tight tracking-normal text-muted-foreground">
+                        {unit[2]}
+                      </span>
+                    ) : null}
+                  </dd>
+                </div>
+              );
+            })}
           </dl>
         </>
       ) : (

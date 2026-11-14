@@ -413,7 +413,7 @@ export function AssessmentFlow({
       className="assess-sheet"
       panelClassName="assess-panel"
     >
-      <div className="flex max-h-[82vh] flex-col px-6 pb-6 pt-6 sm:px-7">
+      <div className="flex max-h-[82dvh] flex-col px-6 pb-6 pt-6 sm:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
@@ -431,7 +431,7 @@ export function AssessmentFlow({
 
         <Progress value={progress} className="mt-4" aria-label="Assessment progress" />
 
-        <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="no-scrollbar mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
           <SheetBody key={step}>
             {step !== "intro" && step !== "summary" ? (
               <SheetItem>
