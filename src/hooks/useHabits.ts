@@ -134,9 +134,28 @@ type HabitsSessionCache = {
 };
 let sessionCache: HabitsSessionCache | null = null;
 
-/** Test seam: forget the session cache (the next load is a cold load). */
+/* The account this tab session has established, if any. Every hook
+   instance opens its OWN watchAuth subscription, and a fresh
+   subscription can report a transient signed-out while its session
+   recovery races the token refresh (the race the rail identity hook's
+   nullAnswerEndsSession guards against). Once an account is established
+   here, a bare null from a later subscription is that race — not a
+   sign-out. The session's real end is adjudicated by the root gate
+   (useSession / AccessControl), which replaces the whole app and
+   unmounts this hook with it, so holding a post-establishment null
+   cannot strand a signed-out person inside their account: it only
+   stops a neighbour's flicker from flipping this instance to its
+   signed-out branch, where it would seed the device mirror as the
+   record and destroy the session cache the warm return depends on.
+   Before any establishment a null is honoured exactly as before — a
+   genuinely signed-out session still gets the mirror as its record. */
+let establishedProfileId: string | null = null;
+
+/** Test seam: forget the session cache and the established account
+ *  (the next load is a cold load, and the next auth answer counts). */
 export function __resetHabitsSessionCache(): void {
   sessionCache = null;
+  establishedProfileId = null;
 }
 
 const localDate = (d = new Date()) => todayLocal(d);
@@ -191,6 +210,15 @@ export function useHabits(): HabitsStore {
     let mounted = true;
     const stop = watchAuth((uid) => {
       if (!mounted) return;
+      if (uid) {
+        establishedProfileId = uid;
+      } else if (establishedProfileId) {
+        /* Transient null after establishment — hold this instance's
+           state exactly as it is. See the note on establishedProfileId:
+           the root gate, not this subscription, decides when the
+           session has actually ended. */
+        return;
+      }
       setProfileId(uid);
       setAuth(uid ? "signed-in" : "signed-out");
     });
@@ -227,9 +255,14 @@ export function useHabits(): HabitsStore {
     if (auth !== "signed-in" || !profileId) {
       /* Signed out (or no database): the device mirror IS the record, so it
          renders instantly — and a sign-out re-seeds it, never leaving the
-         previous account's rows on screen. */
+         previous account's rows on screen. The session cache is NOT
+         cleared here: it is keyed by profile and only ever read back for
+         that same profile, so one instance landing in this branch (its
+         own transient, a neighbour's flicker) must not destroy the warm
+         return of an account that is, in fact, still signed in — that
+         destruction is what turned Profile → Today into a cold load
+         flashing a false empty state in the 2026-11-14 sweep. */
       signedInLoaded.current = null;
-      sessionCache = null;
       hydrated.current = true;
       setHabits(loadLocalHabits());
       setLogs(loadLocalLogs());

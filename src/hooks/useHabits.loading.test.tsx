@@ -256,3 +256,88 @@ describe("useHabits — warm remount renders the settled rows at once (R15)", ()
     back.unmount();
   });
 });
+
+describe("useHabits — the Profile path: a neighbour's auth flicker cannot poison the return", () => {
+  /* The 2026-11-14 post-deploy sweep: Today → Trackers → Today returned
+     instantly (above), but Profile → Today flashed a FALSE empty state —
+     "No habits yet", an Overview day-count missing the habit-log days —
+     for seconds before the account data landed. The asymmetry is
+     structural: the Profile page mounts fresh useHabits instances (the
+     route itself, and another inside useProfileRecord); Trackers mounts
+     none. Every instance opens its own watchAuth subscription, and a
+     fresh subscription can report a transient signed-out while its
+     session recovery races the token refresh. Two poisons followed:
+     the transient flipped the instance to its signed-out branch, which
+     (a) seeded the device mirror as the record and (b) destroyed the
+     shared session cache — so the next mount of Today inherited a cold
+     load and every unlatched surface computed from an empty store. */
+  const settleFirstMount = async () => {
+    const first = renderHook(() => useHabits());
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    const remote = [habit("remote-1", "Drink water"), habit("remote-2", "Log sleep")];
+    await act(async () => {
+      ctrl.fetchHabits.resolve(remote);
+      ctrl.fetchLogs.resolve([]);
+      ctrl.readPoints.resolve(405);
+    });
+    await waitFor(() => expect(first.result.current.loading).toBe(false));
+    first.unmount();
+    return remote;
+  };
+
+  it("a transient signed-out heard on the Profile page does not destroy Today's warm return", async () => {
+    seedMirror([{ id: "mirror-1", name: "Stale mirror habit" }]);
+    await settleFirstMount();
+
+    /* The Profile page: a fresh instance whose subscription first reports
+       a transient signed-out, then the account — and the page is left
+       before its own load settles (its fetch hangs). */
+    ctrl.reset();
+    const profile = renderHook(() => useHabits());
+    emitAuth(null);
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    profile.unmount();
+
+    /* Back on Today: the settled rows are simply there while the
+       revalidation is still in flight — no cold load, no empty state. */
+    ctrl.reset();
+    const back = renderHook(() => useHabits());
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    expect(back.result.current.loading).toBe(false);
+    expect(back.result.current.habits.map((h) => h.name)).toEqual([
+      "Drink water",
+      "Log sleep",
+    ]);
+    back.unmount();
+  });
+
+  it("a warm remount that hears signed-out first holds — it never seeds the mirror or flips state", async () => {
+    seedMirror([{ id: "mirror-1", name: "Stale mirror habit" }]);
+    await settleFirstMount();
+
+    ctrl.reset();
+    const back = renderHook(() => useHabits());
+    /* The fresh subscription's first answer is the transient null. An
+       account is established in this session, so the null is held: the
+       instance stays in its checking state, the mirror never renders,
+       and the list stays empty behind the skeleton — not dressed up as
+       a signed-out record. */
+    emitAuth(null);
+    expect(back.result.current.auth).toBe("checking");
+    expect(back.result.current.habits).toHaveLength(0);
+    expect(back.result.current.loading).toBe(true);
+
+    /* The real answer lands: warm seed from the cache, at once. */
+    emitAuth("profile-1");
+    await waitFor(() => expect(ctrl.fetchHabitsCalls).toBeGreaterThan(0));
+    expect(back.result.current.loading).toBe(false);
+    expect(back.result.current.habits.map((h) => h.name)).toEqual([
+      "Drink water",
+      "Log sleep",
+    ]);
+    back.unmount();
+  });
+});

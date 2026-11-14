@@ -347,12 +347,15 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--faint) 88%, transparent);
+  /* The P2-2 meta contrast step, unmixed (R3): the old line faded
+     --faint to 88%, which is how it slipped past the guard and read
+     as dim mono in the 2026-11-14 sweep. */
+  color: var(--faint-strong);
 }
 
 .pg-hero-micro strong {
   font-weight: 500;
-  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+  color: var(--foreground);
   font-variant-numeric: tabular-nums;
 }
 

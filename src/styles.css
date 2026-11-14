@@ -1223,8 +1223,13 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   pointer-events: none;
 }
 .mood-page .mg-hub-sub {
-  font-size: var(--text-micro);
-  fill: color-mix(in oklab, var(--background) 75%, transparent);
+  /* The centre figure is data, not decoration: meta step, the honest
+     600 face, and the full background tone — a dark figure on the gold
+     core with no fade mixed in (the 75% mix read as faint gold-on-gold
+     in the 2026-11-14 sweep). */
+  font-size: var(--text-meta);
+  font-weight: 600;
+  fill: var(--background);
   pointer-events: none;
 }
 .mood-page .mg-hub[data-state="off"] {
@@ -1270,13 +1275,22 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   fill: var(--mg-c);
 }
 .mood-page .mg-label {
+  /* Node labels carry the timestamp recipe's discipline (P2-2): the
+     meta step, the recipe weight and body tracking, and a colour step
+     at --faint-strong or stronger — --muted-foreground (the secondary
+     step) here, never --faint. The meta step is also the floor in
+     unit space: the SVG scales with its panel, so anything smaller
+     lands under 10px on screen, as the micro-sized emotion labels did
+     in the 2026-11-14 sweep. */
   font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   fill: var(--muted-foreground);
   transition: fill var(--motion-page) var(--ease-out-expo);
   pointer-events: none;
 }
 .mood-page .mg-node-emotion .mg-label {
-  font-size: var(--text-micro);
+  font-size: var(--text-meta);
   font-style: italic;
 }
 .mood-page .mg-node:hover .mg-label,
