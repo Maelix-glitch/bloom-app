@@ -11,7 +11,6 @@ import {
   Pencil,
   PlayCircle,
   Plus,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 
@@ -34,9 +33,9 @@ import { toast } from "sonner";
 import { STREAK_KEPT } from "@/lib/voice/copy";
 import { pick } from "@/lib/voice/messages";
 import { BloomIcon } from "@/components/icons/BloomIcon";
-import { CountUp } from "./CountUp";
 import { resolveHabitIcon } from "@/components/icons/habitIcons";
 import { habitImageFailed, useHabitImage } from "@/components/icons/habitImage";
+import { cn } from "@/lib/utils";
 
 /**
  * Streak milestones that earn a quiet word of celebration. Deliberately
@@ -58,15 +57,37 @@ export interface HabitActions {
 }
 
 /**
- * HabitsSection — the dedicated habits block that sits directly under the
- * hero on Today. One tap toggles a habit (the same path the ring, the points
- * and the Coach read from); streaks are computed from the same logs. The "…"
- * on each row edits, pauses, archives or deletes it — nothing about a habit
- * is permanent any more.
+ * The one line of real meta under a habit's name — its stored note first,
+ * then its schedule (this week's count, a reminder time), then its streak.
+ * Every part is read off the habit's own record; a habit with nothing real
+ * to say gets NO line at all — the prototype's hint slot is never filled
+ * with invented copy.
+ */
+function habitHint(h: HabitToday, streak: number, unit: string): string | null {
+  const parts: string[] = [];
+  if (h.note) parts.push(h.note);
+  if (h.week) parts.push(`${h.week.done} of ${h.week.target} this week`);
+  if (h.reminderTime) parts.push(`Around ${h.reminderTime}`);
+  if (streak >= 2) parts.push(`${streak}${unit === "week" ? "-week" : "-day"} streak`);
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+/**
+ * HabitsSection — Today's rituals card, rebuilt to the prototype's
+ * HabitsCard: a glass card whose header carries the day's count as a
+ * serif title and a segmented pill per habit (gold when done), then one
+ * full-width row per habit divided by hairlines — a 40px icon tile, the
+ * name, a hint line only when the habit has real meta, its real points
+ * value, and the round gold medallion check. The whole row is the toggle.
  *
- * Phone scale: the title sits one step smaller (text-xl) so the hero keeps its
- * air. Habit icons always show something premium: photo → emoji → monogram,
- * never a broken-image glyph.
+ * Bloom's own life stays in the card: the "…" menu (edit, pause, backfill,
+ * archive, delete), the missed-yesterday tick, the paused/archived shelf,
+ * the streak-milestone toasts, and the Add Habit pill in the card footer
+ * opening the same add-habit flow as everywhere else.
+ *
+ * One tap toggles a habit (the same path the points and the Coach read
+ * from); streaks are computed from the same logs. Habit icons always show
+ * something premium: photo → emoji → monogram, never a broken-image glyph.
  */
 export function HabitsSection({
   habits,
@@ -74,7 +95,6 @@ export function HabitsSection({
   today,
   loading,
   signedIn = false,
-  points,
   onToggle,
   onAdd,
   paused = [],
@@ -89,7 +109,6 @@ export function HabitsSection({
       rows in state are the device mirror, not the account — show the
       skeleton instead of flashing them as real rows (defaults-flash). */
   signedIn?: boolean | undefined;
-  points: number | null;
   /** Tick/untick. `date` is a local day within the last week; omitted = today. */
   onToggle: (id: string, date?: string) => void;
   onAdd: () => void;
@@ -156,87 +175,51 @@ export function HabitsSection({
     seenStreaks.current = next;
   }, [habits, streaks]);
 
-  const pct = due === 0 ? 0 : Math.round((done / due) * 100);
-  const bestStreak = Math.max(0, ...habits.map((h) => streaks.get(h.id) ?? 0));
-
-  const summary = showSkeleton
-    ? "Reading your routines…"
+  const title = showSkeleton
+    ? "Your habits today"
     : due === 0
-      ? "Small routines that shape the day — add your first one."
+      ? "No habits yet"
       : done === due
-        ? `All ${due} done today. Lovely.`
-        : `${done} of ${due} done today${due - done === 1 ? " — one to go." : "."}`;
+        ? `All ${due} habits are done.`
+        : `${done} of ${due} habits done`;
 
   return (
     <section
-      className="home-panel home-rise p-5 sm:p-7"
-      style={{ animationDelay: "70ms" }}
+      className="home-panel home-rise h-full p-5 sm:p-7"
+      style={{ animationDelay: "130ms" }}
       aria-labelledby="home-habits-title"
       data-testid="home-habits-section"
     >
-      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+      <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
-            Habits
-          </p>
-          <h2
-            id="home-habits-title"
-            className="mt-1 font-display text-xl leading-tight sm:text-3xl"
-          >
-            Your habits today
+          <p className="home-eyebrow">Today's rituals</p>
+          <h2 id="home-habits-title" className="home-band-title mt-1">
+            {title}
           </h2>
-          <p className="mt-1.5 text-sm text-muted-foreground">{summary}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {points !== null ? (
-            <span
-              className="home-chip text-[length:var(--text-meta)] tabular-nums"
-              title="Bloom points"
-            >
-              <Sparkles className="size-3.5" style={{ color: "var(--home-gold)" }} />
-              <CountUp value={points} id="habits-points" /> pts
-            </span>
-          ) : null}
-          {bestStreak >= 2 ? (
-            <span
-              className="home-chip text-[length:var(--text-meta)] tabular-nums"
-              title="Longest current streak"
-            >
-              <Flame className="size-3.5" style={{ color: "var(--home-energy)" }} />
-              {bestStreak}-day streak
-            </span>
-          ) : null}
-          <button
-            type="button"
-            onClick={onAdd}
-            className="home-chip text-xs"
-            data-testid="home-habits-add"
-          >
-            <Plus className="size-3.5" /> Add habit
-          </button>
-        </div>
-      </header>
-
-      {due > 0 && !showSkeleton ? (
-        <div
-          className="mt-5 h-1.5 overflow-hidden rounded-full"
-          style={{ background: "var(--home-secondary)" }}
-          role="progressbar"
-          aria-label="Habits completed today"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={pct}
-        >
+        {/* Segmented pill progress — one segment per habit, gold when done. */}
+        {due > 0 && !showSkeleton ? (
           <div
-            className="h-full rounded-full"
-            style={{
-              width: `${pct}%`,
-              background: "var(--gold-gradient)",
-              transition: "width 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-          />
-        </div>
-      ) : null}
+            className="flex items-center gap-1.5 pt-1"
+            role="progressbar"
+            aria-label="Habits completed today"
+            aria-valuemin={0}
+            aria-valuemax={due}
+            aria-valuenow={done}
+            data-testid="home-habits-segments"
+          >
+            {habits.map((h) => (
+              <span
+                key={h.id}
+                className={cn(
+                  "h-1.5 w-5 rounded-full transition-all duration-[var(--motion-page)]",
+                  h.done ? "bg-gold" : "bg-white/10",
+                )}
+              />
+            ))}
+          </div>
+        ) : null}
+      </header>
 
       {showSkeleton ? (
         <p className="mt-5 flex items-center gap-2 text-sm text-muted-foreground">
@@ -247,8 +230,8 @@ export function HabitsSection({
           <div>
             <p className="font-display text-lg">No habits yet.</p>
             <p className="mt-1 max-w-[52ch] text-sm leading-snug text-muted-foreground">
-              Add one small routine. It becomes part of today's ring, earns points when you tick it,
-              and the Coach starts noticing it.
+              Add one small routine. It earns points when you tick it, and the Coach starts noticing
+              it.
             </p>
           </div>
           <button
@@ -260,11 +243,12 @@ export function HabitsSection({
           </button>
         </div>
       ) : (
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="mt-2 divide-y divide-white/[0.05]">
           {habits.map((h) => {
             const streak = streaks.get(h.id) ?? 0;
             const unit = streakUnitOf(h);
             const tone = `var(--${habitColorVar(h.color)})`;
+            const hint = habitHint(h, streak, unit);
             return (
               <li key={h.id} className="relative">
                 {hasMenu ? (
@@ -275,75 +259,72 @@ export function HabitsSection({
                   onClick={() => onToggle(h.id)}
                   aria-pressed={h.done}
                   data-testid={`home-habit-${h.id}`}
-                  className={`group flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
-                    hasMenu ? "pr-11" : ""
-                  } ${
-                    h.done
-                      ? "border-gold/40 bg-gold/[0.08]"
-                      : "border-border bg-surface-2/40 hover:border-primary/40"
-                  }`}
+                  className={cn(
+                    "group flex w-full items-center gap-4 rounded-xl py-3.5 text-left transition-colors",
+                    hasMenu && "pr-11",
+                  )}
                 >
                   <span
-                    className="grid size-10 shrink-0 place-items-center rounded-xl text-lg"
-                    style={{
-                      background: `color-mix(in oklab, ${tone} 16%, transparent)`,
-                      color: tone,
-                    }}
+                    className={cn(
+                      "grid size-10 shrink-0 place-items-center rounded-xl border text-lg transition-all duration-[var(--motion-standard)]",
+                      h.done
+                        ? "border-gold/25 bg-gold/10 text-gold"
+                        : "border-white/10 bg-white/[0.03]",
+                    )}
+                    style={h.done ? undefined : { color: tone }}
                   >
                     <HabitIcon habit={h} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span
-                      className={`block truncate text-sm font-medium ${h.done ? "text-muted-foreground line-through decoration-border" : ""}`}
+                      className={cn(
+                        "block truncate text-[length:var(--text-body)] font-medium transition-colors",
+                        h.done ? "text-foreground" : "text-muted-foreground",
+                      )}
                     >
                       {h.name}
                     </span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[length:var(--text-meta)] text-muted-foreground">
-                      <span>
-                        {h.week
-                          ? h.done
-                            ? `${h.week.done} of ${h.week.target} this week`
-                            : `${h.week.done} of ${h.week.target} this week${
-                                h.reminderTime ? ` · around ${h.reminderTime}` : ""
-                              }`
-                          : h.done
-                            ? "Done"
-                            : h.reminderTime
-                              ? `Around ${h.reminderTime}`
-                              : "Anytime today"}
+                    {hint ? (
+                      <span className="mt-0.5 flex items-center gap-1.5 truncate text-[length:var(--text-caption)] text-muted-foreground">
+                        {streak >= 2 ? (
+                          <Flame
+                            className="size-3 shrink-0"
+                            style={{ color: "var(--home-energy)" }}
+                            aria-hidden
+                          />
+                        ) : null}
+                        <span className="truncate">{hint}</span>
                       </span>
-                      <span className="tabular-nums">· +{h.points} pts</span>
-                      {streak >= 2 ? (
-                        <span
-                          className="inline-flex items-center gap-0.5 tabular-nums"
-                          style={{ color: "var(--home-energy)" }}
-                          title={`${streak}-${unit} streak`}
-                        >
-                          <Flame className="size-3" /> {streak}
-                          {unit === "week" ? "w" : ""}
-                        </span>
-                      ) : null}
-                    </span>
+                    ) : null}
+                  </span>
+                  {/* The habit's own points value — the same `h.points` the
+                      toggle awards in useHabits (awardHabitPoints). */}
+                  <span
+                    className={cn(
+                      "text-[length:var(--text-caption)] tabular-nums transition-colors",
+                      h.done ? "text-gold/80" : "text-muted-foreground",
+                    )}
+                  >
+                    +{h.points}
                   </span>
                   <span
-                    className={`grid size-6 shrink-0 place-items-center rounded-full border transition-all duration-[var(--motion-standard)] ${
+                    className={cn(
+                      "grid size-6 shrink-0 place-items-center rounded-full border transition-all duration-[var(--motion-standard)]",
                       h.done
                         ? "scale-100 border-transparent text-[color:var(--gold-ink)]"
-                        : "border-border text-transparent group-hover:border-primary/60"
-                    }`}
-                    style={
-                      h.done ? { backgroundImage: "var(--gold-gradient)" } : undefined
-                    }
+                        : "border-white/20 text-transparent group-hover:border-white/40",
+                    )}
+                    style={h.done ? { backgroundImage: "var(--gold-gradient)" } : undefined}
                     aria-hidden="true"
                   >
-                    {h.done ? <Check className="size-3.5" strokeWidth={3} /> : null}
+                    <Check className="size-3.5" strokeWidth={3} />
                   </span>
                 </button>
                 {h.missedYesterday ? (
                   <button
                     type="button"
                     onClick={() => onToggle(h.id, h.missedYesterday!)}
-                    className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-[length:var(--text-meta)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                    className="mb-2 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-[length:var(--text-meta)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
                     data-testid={`home-habit-yesterday-${h.id}`}
                     title="Forgot to tick it before bed? Add yesterday's tick and keep the streak."
                   >
@@ -355,6 +336,21 @@ export function HabitsSection({
           })}
         </ul>
       )}
+
+      {/* The owner's one addition to the prototype card: Bloom's Add Habit
+          flow, kept — a quiet gold-outline pill in the card footer. */}
+      {!showSkeleton && due > 0 ? (
+        <div className="mt-4 border-t border-white/[0.05] pt-4">
+          <button
+            type="button"
+            onClick={onAdd}
+            className="inline-flex items-center gap-1.5 rounded-full border border-gold/35 bg-gold/[0.07] px-4 py-2 text-[length:var(--text-support)] text-gold-soft transition-colors hover:bg-gold/[0.12]"
+            data-testid="home-habits-add"
+          >
+            <Plus className="size-3.5" /> Add habit
+          </button>
+        </div>
+      ) : null}
 
       {paused.length > 0 || archived.length > 0 ? (
         <div className="mt-5 border-t border-border pt-4" data-testid="home-habits-aside">
@@ -377,7 +373,7 @@ export function HabitsSection({
             </button>
           </div>
           {showArchive ? (
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
               {paused.map((h) => (
                 <li
                   key={h.id}
@@ -479,7 +475,7 @@ function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconType" 
   }
   const resolved = resolveHabitIcon(habit.iconType, habit.icon);
   if (resolved.kind === "glyph") {
-    return <BloomIcon name={resolved.name} size={16} />;
+    return <BloomIcon name={resolved.name} size={17} />;
   }
   if (resolved.kind === "emoji") {
     return <>{resolved.value}</>;

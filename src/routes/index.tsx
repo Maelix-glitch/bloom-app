@@ -1,26 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarRange, Droplet, Gift, Plus, Scale, Smile } from "lucide-react";
+import { Gift, Leaf } from "lucide-react";
 
-import storiesCss from "../styles/stories.css?url";
-import storiesFontsCss from "../styles/fonts-stories.css?url";
-
-import { ConnectionMap, ConnectionMapSkeleton } from "@/components/home/ConnectionMap";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { useEverReady } from "@/hooks/useEverReady";
-import { CoachPanel } from "@/components/home/CoachPanel";
 import { HabitsSection } from "@/components/home/HabitsSection";
 import { HabitUndo } from "@/components/home/HabitUndo";
-import {
-  ActivityPanel,
-  FlowPanel,
-  FocusPanel,
-  InsightsPanel,
-  ProgressPanel,
-  TrackersPanel,
-} from "@/components/home/panels";
 import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
-import { OverviewBand } from "@/components/home/OverviewBand";
+import { ChangesCard, StatTiles } from "@/components/home/OverviewBand";
+import { LevelCard } from "@/components/home/LevelCard";
+import { MoodCard } from "@/components/home/MoodCard";
 import { WeekChart } from "@/components/home/WeekChart";
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
@@ -33,40 +22,17 @@ import { AddHabitModal } from "@/components/tk/AddHabitModal";
 import { useTrackers } from "@/hooks/useTrackers";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
-import { usePeriodLog } from "@/hooks/usePeriodLog";
-import { useCycleVisible } from "@/hooks/useCycleVisible";
-import { useFlowTimes } from "@/hooks/useFlowTimes";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
-import {
-  activityOf,
-  connections,
-  flowOf,
-  focusOf,
-  greetingFor,
-  insightsOf,
-  longDate,
-  moodToday,
-  readings,
-  scoreOf,
-} from "@/lib/home/today";
+import { greetingFor, longDate, moodToday } from "@/lib/home/today";
 import { habitToDraft, type HabitDraft } from "@/lib/home/habits";
-import { CYCLE_SETTINGS_CHANGED, loadCycleSettings } from "@/lib/cycle/periodStore";
+import { entryFromFace, type PageMood } from "@/lib/mood/page";
 import { formatClock, usualHabitTime, usualMood } from "@/lib/smart/usual";
 import { readPersonalVoice } from "@/lib/voice/personal";
-import { PhaseCard } from "@/components/home/PhaseCard";
 import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 
 import windowDusk from "@/assets/home/window-dusk.jpg";
-import { RankChip } from "@/components/progression/RankChip";
 import { componentsById } from "@/lib/rewards/catalog";
 import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
-import { StoryRail } from "@/components/stories/StoryRail";
-import { StoryComposer } from "@/components/stories/StoryComposer";
-import { StoryViewer } from "@/components/stories/StoryViewer";
-import { seenStore } from "@/lib/stories/seen";
-import type { CreateStoryInput } from "@/lib/profile/storyService";
-import type { Story } from "@/lib/profile/types";
-import { toast } from "sonner";
 import { genuineFirstDay, sublineFor } from "@/lib/home/subline";
 import { localDay } from "@/lib/localDay";
 
@@ -83,12 +49,6 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-    ],
-    /* Today carries the story rail, composer and viewer. */
-    links: [
-      { rel: "stylesheet", href: storiesCss },
-      /* D4: the Stories-scoped preset fonts (Cormorant Garamond, Oswald). */
-      { rel: "stylesheet", href: storiesFontsCss },
     ],
   }),
   component: TodayPage,
@@ -145,23 +105,6 @@ function TodayPage() {
   const habits = useHabits();
   const mood = useMoodSystem();
   const assessment = useAssessment();
-  const cycle = usePeriodLog();
-  const { optedOut } = useCycleVisible();
-  /*
-   * One lever for every cycle surface on this page.
-   *
-   * `optedOut` is the onboarding answer — "the cycle is not part of my Bloom".
-   * For that person the cycle must not appear anywhere: not the Today ring,
-   * not a cycle insight, and not in the record the coach reads. `readings` and
-   * `insightsOf` both already treat mode "off" as "remove it entirely", so
-   * answering with "off" is the honest way to say it once rather than adding a
-   * visibility check at all eight call sites.
-   *
-   * `optedOut` is hydration-aware (it is false until storage has been read), so
-   * this cannot make the ring flash off for someone who does track a cycle —
-   * the same reasoning that keeps the nav stable.
-   */
-  const effectiveCycleMode = optedOut ? "off" : cycle.mode;
   const space = useProfileSpace();
   const now = useNow();
 
@@ -171,58 +114,6 @@ function TodayPage() {
   /** Which habit the dialog is editing; null = creating a new one. */
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
   const [habitNotice, setHabitNotice] = useState<string | null>(null);
-
-  /* stories — the day begins with the people in it (starting with you) */
-  const [storyComposerOpen, setStoryComposerOpen] = useState(false);
-  const [storyViewer, setStoryViewer] = useState<{
-    stories: Story[];
-    startIndex: number;
-  } | null>(null);
-  const [, setSeenTick] = useState(0);
-  useEffect(() => {
-    const onSeen = () => setSeenTick((t) => t + 1);
-    window.addEventListener("bloom:story-seen", onSeen);
-    return () => window.removeEventListener("bloom:story-seen", onSeen);
-  }, []);
-  const homeStories = useMemo(() => space.storiesByAge?.active ?? [], [space.storiesByAge]);
-  const homeMilestones = useMemo(
-    () => (space.journey.status === "ready" ? space.journey.milestones.achieved : []),
-    [space.journey],
-  );
-  const publishHomeStory = async (input: CreateStoryInput) => {
-    try {
-      await space.actions.publishStory(input);
-      toast(input.visibility === "public" ? "Story published." : "Saved privately.");
-    } catch (error) {
-      throw error instanceof Error && error.message
-        ? error
-        : new Error("Couldn't publish your story.");
-    }
-  };
-  const deleteHomeStory = (story: Story) => {
-    void space.actions
-      .removeStory(story)
-      .then(({ undo }) => {
-        setStoryViewer((v) =>
-          v && v.stories.length <= 1
-            ? null
-            : v
-              ? { ...v, stories: v.stories.filter((s) => s.id !== story.id) }
-              : null,
-        );
-        toast("Story deleted.", {
-          action: {
-            label: "Undo",
-            onClick: () => {
-              void undo().catch(() => toast.error("Couldn't bring that back."));
-            },
-          },
-        });
-      })
-      .catch((error: unknown) =>
-        toast.error(error instanceof Error ? error.message : "Couldn't delete that just now."),
-      );
-  };
 
   const today = trackers.today;
   const identity = space.identity?.identity ?? null;
@@ -234,81 +125,6 @@ function TodayPage() {
   const firstName = displayName ? displayName.split(" ")[0]! : null;
 
   const moodEntry = useMemo(() => moodToday(mood.entries, today), [mood.entries, today]);
-  const moodDays = mood.analytics.days;
-
-  const signalReadings = useMemo(
-    () =>
-      readings({
-        trackers: trackers.analysis,
-        habits: { completedToday: habits.completedToday, dueToday: habits.dueToday },
-        mood: moodEntry,
-        cycle: cycle.analysis,
-        cycleMode: effectiveCycleMode,
-      }),
-    [
-      trackers.analysis,
-      habits.completedToday,
-      habits.dueToday,
-      moodEntry,
-      cycle.analysis,
-      effectiveCycleMode,
-    ],
-  );
-
-  const score = useMemo(
-    () =>
-      scoreOf({
-        trackers: trackers.analysis,
-        habits: { completedToday: habits.completedToday, dueToday: habits.dueToday },
-        mood: moodEntry,
-      }),
-    [trackers.analysis, habits.completedToday, habits.dueToday, moodEntry],
-  );
-
-  const map = useMemo(
-    () =>
-      connections({
-        trackers: trackers.analysis,
-        habits: {
-          habits: habits.habits,
-          logs: habits.logs,
-          completedToday: habits.completedToday,
-          dueToday: habits.dueToday,
-        },
-        moodEntries: mood.entries,
-        moodDays,
-        moodCorrelations: mood.analytics.correlations,
-        cycle: cycle.analysis,
-        cycleMode: effectiveCycleMode,
-        today,
-      }),
-    [
-      trackers.analysis,
-      habits.habits,
-      habits.logs,
-      habits.completedToday,
-      habits.dueToday,
-      mood.entries,
-      moodDays,
-      mood.analytics.correlations,
-      cycle.analysis,
-      effectiveCycleMode,
-      today,
-    ],
-  );
-
-  const flowTimes = useFlowTimes();
-  const flow = useMemo(
-    () =>
-      flowOf({
-        habits: habits.todayHabits,
-        mood: moodEntry,
-        trackers: trackers.analysis,
-        now,
-        times: flowTimes.times,
-      }),
-    [habits.todayHabits, moodEntry, trackers.analysis, now, flowTimes.times],
-  );
 
   /* When editing a habit, its tick history may know a usual finish time —
      offered once as a reminder suggestion, never set silently. */
@@ -324,85 +140,7 @@ function TodayPage() {
   /* Their usual check-in readings — feeds the composer's honest markers. */
   const moodUsual = useMemo(() => usualMood(mood.entries, today), [mood.entries, today]);
 
-  /* Their "ease this week" opt-in — live, and re-read when the Cycle page or
-     another tab changes it (the store announces the change). */
-  const [easePref, setEasePref] = useState(() => loadCycleSettings().easeBeforePeriod === true);
-  useEffect(() => {
-    const reread = () => setEasePref(loadCycleSettings().easeBeforePeriod === true);
-    window.addEventListener(CYCLE_SETTINGS_CHANGED, reread);
-    return () => window.removeEventListener(CYCLE_SETTINGS_CHANGED, reread);
-  }, []);
-
-  const focus = useMemo(
-    () =>
-      focusOf({
-        habits: habits.todayHabits,
-        mood: moodEntry,
-        trackers: trackers.analysis,
-        cycle: cycle.analysis,
-        cycleMode: effectiveCycleMode,
-        easeBeforePeriod: easePref,
-      }),
-    [
-      habits.todayHabits,
-      moodEntry,
-      trackers.analysis,
-      cycle.analysis,
-      effectiveCycleMode,
-      easePref,
-    ],
-  );
-
-  const insights = useMemo(
-    () =>
-      insightsOf({
-        trackers: trackers.analysis,
-        days: trackers.days,
-        moodInsights: mood.analytics.insights,
-        moodCorrelations: mood.analytics.correlations,
-        habits: { habits: habits.habits, logs: habits.logs },
-        cycle: cycle.analysis,
-        cycleMode: effectiveCycleMode,
-        today,
-      }),
-    [
-      trackers.analysis,
-      trackers.days,
-      mood.analytics.insights,
-      mood.analytics.correlations,
-      habits.habits,
-      habits.logs,
-      cycle.analysis,
-      effectiveCycleMode,
-      today,
-    ],
-  );
-
-  const activity = useMemo(
-    () =>
-      activityOf({
-        habits: { habits: habits.habits, logs: habits.logs },
-        moodEntries: mood.entries,
-        trackers: trackers.analysis,
-        cycle: cycle.analysis,
-      }),
-    [habits.habits, habits.logs, mood.entries, trackers.analysis, cycle.analysis],
-  );
-
-  /* B9 — the map only draws once its stores have real data (latched: refetches
-  never re-flash the skeleton). */
-  const mapReady = useEverReady(
-    trackers.hydrated && cycle.hydrated && !habits.loading && !mood.loading,
-  );
-
-  /* Latched like the map: the insights panel's empty copy must not flip back
-     to its reading line whenever a background refetch toggles `loading`. */
-  const insightsReady = useEverReady(!mood.loading && trackers.hydrated);
-
-  const openCount = focus.filter((f) => !f.done).length;
-  /* Day one gets its own line: the hero greets a person who has just arrived,
-     not a dashboard demanding entries. Derived from the onboarding answer's
-     timestamp — never asserted when it isn't known. */
+  const openCount = habits.todayHabits.filter((h) => !h.done).length;
   /* Latched readiness. `hydrated` and `loading` both flip again during
      background refetches, and the server pass can never see them — reading them
      directly made this line alternate between the reading state and the day's
@@ -423,12 +161,9 @@ function TodayPage() {
   /* W4-2 — the command centre's synthesis: the record, read once, answering
      how you're doing / what changed / what matters / what's next. Its day
      count is the same distinct-day union as recordDayCount above (the lib
-     computes it from the same three sources), so the band and the hero can
+     computes it from the same three sources), so the tiles and the hero can
      never disagree. The summary is null until the assessment is complete. */
-  const assessmentSummary = useMemo(
-    () => summaryOf(assessment.state),
-    [assessment.state],
-  );
+  const assessmentSummary = useMemo(() => summaryOf(assessment.state), [assessment.state]);
   const overview = useMemo(
     () =>
       synthesizeOverview({
@@ -461,11 +196,9 @@ function TodayPage() {
       assessmentSummary,
     ],
   );
-  /* Latched like the map and the hero: once the stores have loaded once,
-     the band never falls back to its placeholders on a background refetch. */
-  const overviewReady = useEverReady(
-    trackers.hydrated && !habits.loading && !mood.loading,
-  );
+  /* Latched like the hero: once the stores have loaded once, the Overview
+     pieces never fall back to their placeholders on a background refetch. */
+  const overviewReady = useEverReady(trackers.hydrated && !habits.loading && !mood.loading);
   /* The week chart's bars — the same habit logs, counted per day over the
      synthesis's own window pair (last 7 days vs the 7 days before). */
   const weekData = useMemo(() => weekTicks(habits.logs, today), [habits.logs, today]);
@@ -519,9 +252,21 @@ function TodayPage() {
     ? (habitToDraft(editingHabit) as AddHabitPrefill)
     : undefined;
 
+  /* The MoodCard's one-tap check-in — the Mood page's own quick-log path:
+     a face builds a real entry from its preset; re-tapping today replaces
+     today's quick entry instead of stacking a second one, and a Composer
+     entry (words, detail) is never replaced by a face tap. */
+  const pickMoodFace = (face: PageMood) => {
+    const replace = moodEntry && moodEntry.tags.includes("quick-log") ? moodEntry : null;
+    const fresh = entryFromFace(face);
+    void mood.saveEntry(replace ? { ...fresh, id: replace.id } : fresh);
+  };
+
   return (
     <div className="home-page app-shell min-h-screen bg-background text-foreground">
       <main className="home-main min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
+        {/* TopBar — Bloom's own: the local date, the sync state ("Synced
+            with your account" and its settled kin), bell and rewards. */}
         <div className="home-toolbar">
           {/* suppressHydrationWarning for the same reason as the greeting
               below: the date is LOCAL time by design, the server renders on
@@ -552,6 +297,9 @@ function TodayPage() {
           </div>
         </div>
 
+        {/* Hero — the slice-3 build, unchanged: greeting, the day's
+            subline, the check-in chips (the mood chip settles sage once
+            today's mood is logged), and the photo panel. */}
         <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
             {/* suppressHydrationWarning: the greeting is LOCAL time by
@@ -595,25 +343,22 @@ function TodayPage() {
                 onClick={() => setMoodOpen(true)}
                 className={`home-chip ${moodEntry ? "home-chip--done" : "home-chip--primary"}`}
               >
-                <Smile className="size-4" strokeWidth={1.75} />
                 {moodEntry ? `Mood ${Math.round(moodEntry.mood)}/10 logged` : "Log today's mood"}
               </button>
-              <button type="button" onClick={() => setMetricsOpen(true)} className="home-chip home-chip--primary">
-                <Droplet className="size-4" strokeWidth={1.75} />
+              <button
+                type="button"
+                onClick={() => setMetricsOpen(true)}
+                className="home-chip home-chip--primary"
+              >
                 {trackers.analysis.goalsMetToday > 0
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
               </button>
               <Link to="/trackers" hash="body-tools" className="home-chip">
-                <Scale className="size-4" strokeWidth={1.75} />
                 BMI &amp; daily targets
               </Link>
               <Link to="/report" className="home-chip home-chip--quiet">
-                <CalendarRange className="size-4" strokeWidth={1.75} />
                 Weekly report
-              </Link>
-              <Link to="/rewards" className="home-chip home-chip--quiet">
-                <RankChip points={habits.points} />
               </Link>
             </div>
             {space.authState === "signed-out" ? (
@@ -650,154 +395,83 @@ function TodayPage() {
 
         <div className="home-hairline mt-8 lg:mt-10" aria-hidden />
 
+        {/* The prototype stack, exactly (Reskin slice A): Focus + Level,
+            StatTiles, WeekChart + Changes, Habits + Mood, and the small
+            centred footer line. Everything else that used to live here —
+            the Coach card, the Stories band, the highlight rail, the
+            tracker/flow/insights/activity panels, the connection map,
+            the cycle phase card, and the Overview priority strip — is
+            gone from Today; every one of those features keeps its own
+            tab or page, untouched, and every priority the synthesis can
+            name still has its door in this stack (habits card, mood
+            card, hero chips, assessment card). */}
         <div className="home-stack">
-          {/* W4-2: the command centre leads the stack — state, change, the
-              one priority and the one next action, all read off the record
-              by the Overview synthesis. Everything below stays as it was. */}
-          <OverviewBand
-            overview={overview}
-            ready={overviewReady}
-            onToggleHabit={(id) => void habits.toggle(id)}
-            onLogMood={() => setMoodOpen(true)}
-            onLogMetrics={() => setMetricsOpen(true)}
-            onAddHabit={openNewHabit}
-          />
-          {/* W4-1: the ASSESS step's quiet door — renders only while the
-              assessment is unfinished and undismissed; never a lockout. */}
-          <AssessmentPromptCard />
-          {/* The week in ticks — real habit logs, this week vs the week
-              before, in the prototype's chart language. */}
-          <WeekChart data={weekData} />
-          {space.authState !== "signed-out" && space.userId ? (
-            <section
-              className="home-band"
-              data-empty={homeStories.length === 0}
-              aria-labelledby="home-moments-title"
-            >
-              <div className="home-band-head">
-                <div>
-                  <p className="home-eyebrow">Moments</p>
-                  <h2 id="home-moments-title" className="home-band-title">
-                    Today's stories
-                  </h2>
-                </div>
-                <p className="home-band-note hidden sm:block">
-                  {homeStories.length === 0
-                    ? "A quiet ring — add one from the day."
-                    : `${homeStories.length} live · fades in 24 hours`}
-                </p>
-              </div>
-              <StoryRail
-                name={identity?.displayName ?? "You"}
-                avatarPath={identity?.avatarPath ?? null}
-                accent={identity?.accent ?? "violet"}
-                stories={homeStories}
-                seenIds={new Set(homeStories.filter((s) => seenStore.has(s.id)).map((s) => s.id))}
-                loading={space.storiesByAge == null}
-                onAdd={() => setStoryComposerOpen(true)}
-                onOpen={(index) => setStoryViewer({ stories: homeStories, startIndex: index })}
-                label="Today's stories"
-              />
-            </section>
-          ) : null}
-
-          <HabitsSection
-            habits={habits.todayHabits}
-            logs={habits.logs}
-            today={habits.today}
-            loading={habits.loading}
-            signedIn={habits.auth === "signed-in"}
-            points={habits.points}
-            onToggle={(id, date) => void habits.toggle(id, date)}
-            onAdd={openNewHabit}
-            paused={habits.pausedHabits}
-            archived={habits.archivedHabits}
-            actions={{
-              onEdit: openEditHabit,
-              onPause: (id, until) => void habits.pauseHabit(id, until),
-              onResume: (id) => void habits.resumeHabit(id),
-              onArchive: (id) => void habits.archiveHabit(id),
-              onRestore: (id) => void habits.restoreHabit(id),
-              onDelete: (id) => void habits.deleteHabit(id),
-            }}
-          />
-
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
-              <div className="grid gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
-                <ProgressPanel
-                  score={score}
-                  onLog={() => setMetricsOpen(true)}
-                  logging={!trackers.hydrated}
-                />
-                {mapReady ? (
-                  <ConnectionMap
-                    nodes={map.nodes}
-                    links={map.links}
-                    name={firstName}
-                    loggedDays={map.loggedDays}
-                  />
-                ) : (
-                  <ConnectionMapSkeleton />
-                )}
-              </div>
-              <TrackersPanel readings={signalReadings} />
-              <div className="grid gap-5 md:grid-cols-2">
-                <FlowPanel
-                  items={flow}
-                  now={now}
-                  onToggleHabit={(id) => void habits.toggle(id)}
-                  times={flowTimes.times}
-                  onTimeChange={flowTimes.setTime}
-                  onResetTimes={flowTimes.reset}
-                  timesAreDefault={flowTimes.isDefault}
-                />
-                <InsightsPanel items={insights} loading={!insightsReady} />
-              </div>
+          <div className="grid gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-7 [&>*]:h-full">
+              {/* W4-1: the ASSESS step's door — the prototype's FocusCard
+                  in Bloom's build: segmented gold progress, the existing
+                  flow behind it, the PR #87 slab untouched. Renders only
+                  while the assessment is unfinished and undismissed; when
+                  it steps aside, the LevelCard takes the row alone. */}
+              <AssessmentPromptCard />
             </div>
-
-            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:content-start">
-              <FocusPanel
-                items={focus}
-                onToggleHabit={(id) => void habits.toggle(id)}
-                onAddHabit={openNewHabit}
-              />
-              {/* The page's one lever covers the phase card too: it self-gates
-                  on the period mode, but the onboarding opt-out lives only in
-                  effectiveCycleMode — without this, someone who opted out
-                  with the mode still on would meet the card here. */}
-              {effectiveCycleMode === "tracking" ? (
-                <PhaseCard analysis={cycle.analysis} today={today} />
-              ) : null}
-              <CoachPanel entries={mood.entries} habitsStore={habits} />
-              <ActivityPanel items={activity} />
+            <div className="lg:col-span-5 [&>*]:h-full">
+              <LevelCard />
             </div>
           </div>
 
+          <StatTiles overview={overview} ready={overviewReady} />
 
-          <footer className="hidden items-center justify-center gap-6 text-[length:var(--text-meta)] tracking-[var(--tracking-wide)] text-muted-foreground lg:flex">
-            <span className="font-display text-base tracking-[0.5em]">BLOOM</span>
-            <span className="h-px w-16 bg-border" />
-            <span>A CALMER YOU, A BRIGHTER TOMORROW</span>
+          <div className="grid gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-7 [&>*]:h-full">
+              {/* The week in ticks — real habit logs, this week vs the
+                  week before, in the prototype's chart language. */}
+              <WeekChart data={weekData} />
+            </div>
+            <div className="lg:col-span-5 [&>*]:h-full">
+              <ChangesCard overview={overview} ready={overviewReady} />
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-7 [&>*]:h-full">
+              <HabitsSection
+                habits={habits.todayHabits}
+                logs={habits.logs}
+                today={habits.today}
+                loading={habits.loading}
+                signedIn={habits.auth === "signed-in"}
+                onToggle={(id, date) => void habits.toggle(id, date)}
+                onAdd={openNewHabit}
+                paused={habits.pausedHabits}
+                archived={habits.archivedHabits}
+                actions={{
+                  onEdit: openEditHabit,
+                  onPause: (id, until) => void habits.pauseHabit(id, until),
+                  onResume: (id) => void habits.resumeHabit(id),
+                  onArchive: (id) => void habits.archiveHabit(id),
+                  onRestore: (id) => void habits.restoreHabit(id),
+                  onDelete: (id) => void habits.deleteHabit(id),
+                }}
+              />
+            </div>
+            <div id="mood" className="scroll-mt-20 lg:col-span-5 [&>*]:h-full">
+              <MoodCard
+                entry={moodEntry}
+                onPick={pickMoodFace}
+                onOpenComposer={() => setMoodOpen(true)}
+              />
+            </div>
+          </div>
+
+          <footer className="flex items-center justify-center gap-2 pt-2 text-[length:var(--text-caption)] text-muted-foreground">
+            <Leaf className="size-3" aria-hidden />
+            Last 7 days vs the 7 days before
           </footer>
         </div>
       </main>
 
-      {/* floating add-habit — always in reach, clears the tab bar on phones */}
-      <button
-        type="button"
-        onClick={openNewHabit}
-        aria-label="Add habit"
-        title="Add habit"
-       
-        data-testid="home-fab-add-habit"
-        className="home-fab inline-flex h-12 items-center gap-2 rounded-full bg-primary px-3.5 text-sm font-medium text-primary-foreground lg:hidden sm:h-13 sm:pl-4 sm:pr-5"
-      >
-        <Plus className="size-5" />
-        <span className="hidden sm:inline">Add habit</span>
-      </button>
-
-      {/* the same three entry surfaces the rest of Bloom uses — one data path each */}
+      {/* the same entry surfaces the rest of Bloom uses — one data path each */}
       <MetricsEntryModal
         store={trackers}
         open={metricsOpen}
@@ -824,39 +498,10 @@ function TodayPage() {
       />
       <HabitUndo undoable={habits.undoable} onUndo={habits.undo} onDismiss={habits.dismissUndo} />
 
-      {/* stories: today's rings, the creator, and the session */}
-      {space.userId ? (
-        <>
-          <StoryComposer
-            open={storyComposerOpen}
-            userId={space.userId}
-            defaultAccent={identity?.accent ?? "violet"}
-            defaultVisibility={space.identity?.privacy.storyVisibility ?? "private"}
-            moodEntries={mood.entries}
-            rewards={space.rewardsBlock?.status === "ready" ? space.rewardsBlock.data : []}
-            milestones={homeMilestones}
-            onPublish={publishHomeStory}
-            onClose={() => setStoryComposerOpen(false)}
-          />
-          <StoryViewer
-            target={storyViewer}
-            viewerName={identity?.displayName ?? "You"}
-            viewerAvatarPath={identity?.avatarPath ?? null}
-            accent={identity?.accent ?? "violet"}
-            userId={space.userId}
-            userName={identity?.displayName ?? null}
-            ownerId={space.userId}
-            onSeen={(story) => seenStore.mark(story.id)}
-            onDelete={storyViewer ? deleteHomeStory : undefined}
-            onClose={() => setStoryViewer(null)}
-          />
-        </>
-      ) : null}
-
       {/* No global "Loading" pill: the trackers store hydrates from a local
           read on mount, so the pill could only ever flash on arrival — and
-          every panel on this page already carries its own in-place loading
-          state (hero placeholder, map skeleton, panel reading lines). */}
+          every card on this page already carries its own in-place loading
+          state (hero placeholder, tile placeholders, habits skeleton). */}
     </div>
   );
 }

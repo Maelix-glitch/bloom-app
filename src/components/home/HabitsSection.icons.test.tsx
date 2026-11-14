@@ -50,7 +50,6 @@ function tileOf(h: HabitToday): HTMLElement {
       logs={[]}
       today="2026-11-07"
       loading={false}
-      points={null}
       onToggle={() => {}}
       onAdd={() => {}}
     />,

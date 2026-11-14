@@ -53,7 +53,6 @@ const renderSection = (props: { habits: HabitToday[]; loading: boolean; signedIn
       today="2026-11-12"
       loading={props.loading}
       signedIn={props.signedIn}
-      points={null}
       onToggle={() => {}}
       onAdd={() => {}}
     />,
