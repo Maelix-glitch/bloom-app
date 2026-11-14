@@ -180,7 +180,13 @@ nav.app-mobile-nav {
 /* ------------------- 4. overlay system on phones -------------------------
    One predictable behaviour: centred dialogs become bottom-anchored cards
    with a capped height and internal scroll; side sheets become bottom
-   sheets; everything respects the keyboard and the home indicator. */
+   sheets; everything respects the keyboard and the home indicator.
+   The cap is 88dvh everywhere in this section — the standing rule is that
+   a phone sheet never swallows the screen: the dimmed page must stay
+   visible above it. bloom-sheet.css sets 88dvh for BloomSheet itself;
+   these overrides must match it, never raise it (they once set 92dvh,
+   and 94dvh on short screens, which is what turned the assessment sheet
+   into a full-screen takeover). */
 
 /* Radix dialog content used across cycle/profile/history surfaces. */
 @media (max-width: 639px) {
@@ -198,7 +204,7 @@ nav.app-mobile-nav {
     width: 100% !important;
     max-width: 100% !important;
     /* vh then dvh — see .coach-canvas. */
-    max-height: 92vh;
+    max-height: 88vh;
     border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0 !important;
     border-bottom: 0 !important;
     padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
@@ -207,7 +213,7 @@ nav.app-mobile-nav {
   }
   @supports (height: 100dvh) {
     [data-bloom-dialog="true"] {
-      max-height: 92dvh;
+      max-height: 88dvh;
     }
   }
 }
@@ -223,7 +229,7 @@ nav.app-mobile-nav {
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
-    max-height: 92vh;
+    max-height: 88vh;
     border: 0 !important;
     border-top: 1px solid var(--border) !important;
     border-radius: var(--bloom-radius-sheet) var(--bloom-radius-sheet) 0 0;
@@ -234,7 +240,7 @@ nav.app-mobile-nav {
   @supports (height: 100dvh) {
     [data-bloom-side="left"],
     [data-bloom-side="right"] {
-      max-height: 92dvh;
+      max-height: 88dvh;
     }
   }
 }
@@ -242,27 +248,27 @@ nav.app-mobile-nav {
 /* BloomSheet on phones: capped, scrollable, keyboard-aware. */
 @media (max-width: 639px) {
   .bsheet--phone {
-    max-height: 92vh;
+    max-height: 88vh;
   }
   @supports (height: 100dvh) {
     .bsheet--phone {
-      max-height: 92dvh;
+      max-height: 88dvh;
     }
   }
 
   .bsheet--phone .bsheet-panel {
-    max-height: 92vh;
+    max-height: 88vh;
   }
   @supports (height: 100dvh) {
     .bsheet--phone .bsheet-panel {
-      max-height: 92dvh;
+      max-height: 88dvh;
     }
   }
 
   /* any direct scroll region inside a phone sheet owns the gesture */
   .bsheet--phone .bsheet-scroll {
-    max-height: calc(92vh - 120px);
-    max-height: calc(92dvh - 120px);
+    max-height: calc(88vh - 120px);
+    max-height: calc(88dvh - 120px);
   }
 }
 
@@ -445,7 +451,11 @@ textarea {
 /* ------------------- 8g. floating actions clear the chrome --------------- */
 
 .home-fab {
-  bottom: calc(1rem + var(--app-bottom-nav, 0px)) !important;
+  /* 1.5rem of air above the tab-bar token (which already carries the
+     safe-area inset) and in from the right edge, so the FAB never sits
+     on the nav, a card border, or the screen edge. */
+  bottom: calc(1.5rem + var(--app-bottom-nav, 0px)) !important;
+  right: 1.5rem;
   max-width: calc(100vw - 2rem);
 }
 
@@ -474,11 +484,11 @@ textarea {
 
 @media (max-height: 700px) {
   .bsheet--phone {
-    max-height: 94vh;
+    max-height: 88vh;
   }
   @supports (height: 100dvh) {
     .bsheet--phone {
-      max-height: 94dvh;
+      max-height: 88dvh;
     }
   }
 

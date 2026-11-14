@@ -1384,3 +1384,48 @@ describe("UI guard: reskin slice C3 — Profile in the owner's file pattern, in 
     expect(SESSIONS.text).toContain("pf-danger-label");
   });
 });
+
+describe("UI guard: mobile pass — sheets never swallow the screen", () => {
+  /* Mobile pass (2026-11-14) — the owner's phone screenshots: the
+     assessment sheet became a full-screen takeover and exposed a raw
+     scrollbar track; the Overview "This week" figure wrapped mid-phrase;
+     the FAB crowded the bottom nav. Root causes, pinned so they cannot
+     regrow: responsive.css re-raised BloomSheet's 88dvh cap to 92dvh
+     (94dvh on short screens) for every phone overlay surface; the sheet
+     scroller kept a visible thin scrollbar; the stat tile rendered its
+     whole "3 of 7 days" value as one wrappable line; the FAB sat only
+     1rem clear of the nav token. */
+  const RESPONSIVE = ALL_SOURCES.find((f) => f.rel === "styles/responsive.css")!;
+  const SHEET = ALL_SOURCES.find((f) => f.rel === "styles/bloom-sheet.css")!;
+  const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+  const OVERVIEW = ALL_SOURCES.find((f) => f.rel === "components/home/OverviewBand.tsx")!;
+
+  it("caps every phone overlay surface in responsive.css at 88dvh", () => {
+    expect(RESPONSIVE.text).not.toMatch(/max-height:\s*(?:calc\()?9[0-9](?:dvh|vh)/);
+    expect(RESPONSIVE.text).not.toMatch(/max-height:\s*(?:calc\()?100(dvh|vh)/);
+    expect(RESPONSIVE.text).toContain("max-height: 88dvh");
+  });
+
+  it("keeps BloomSheet's own phone cap at 88dvh and hides its scrollbar", () => {
+    expect(SHEET.text).toContain("max-height: 88dvh");
+    const scroll = SHEET.text.slice(SHEET.text.indexOf("\n.bsheet-scroll {"));
+    expect(scroll.slice(0, scroll.indexOf("}"))).toContain("scrollbar-width: none");
+  });
+
+  it("keeps the assessment scrollers scrollbar-free", () => {
+    for (const rel of ["components/assessment/AssessmentFlow.tsx", "components/assessment/AssessmentEntry.tsx"]) {
+      const f = ALL_SOURCES.find((x) => x.rel === rel)!;
+      expect(f.text, `${rel} scroller must hide its scrollbar`).toContain("no-scrollbar");
+    }
+  });
+
+  it("keeps the FAB 1.5rem clear of the bottom-nav token", () => {
+    expect(STYLES.text).toContain("bottom: calc(1.5rem + var(--app-bottom-nav, 0px))");
+    expect(RESPONSIVE.text).toContain("bottom: calc(1.5rem + var(--app-bottom-nav, 0px)) !important");
+  });
+
+  it("composes Overview figures no-wrap with the unit as a caption", () => {
+    expect(OVERVIEW.text).toContain("whitespace-nowrap");
+    expect(OVERVIEW.text).toContain("UNIT_FACT");
+  });
+});

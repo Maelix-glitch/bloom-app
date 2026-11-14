@@ -196,7 +196,12 @@
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
+  /* No raw scrollbar track inside a sheet — it read as an unfinished edge
+     on the owner's phone. Scrolling itself is untouched. */
+  scrollbar-width: none;
+}
+.bsheet-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* round icon buttons on glass */
