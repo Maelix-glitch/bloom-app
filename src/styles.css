@@ -1199,6 +1199,25 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   /* The model's button text sits on a gold fill. */
   --primary-foreground: oklch(0.19 0.02 150);
 }
+/* Today's mood card (Reskin slice A). The faces' own palette is re-scoped
+   here so MoodBlob renders on Today exactly as it does in the Composer
+   (`.bmood`) and on the Mood page (`.mood-page`); the prototype's five
+   mood tones live here as tokens — components reference them by name,
+   never by hex. */
+.home-mood-card {
+  --mp-happy: oklch(0.86 0.1 85);
+  --mp-calm: oklch(0.76 0.06 145);
+  --mp-neutral: oklch(0.62 0.01 160);
+  --mp-sad: oklch(0.72 0.06 250);
+  --mp-anxious: oklch(0.71 0.08 30);
+  --mp-angry: oklch(0.64 0.12 25);
+  --mood-tone-low: #8aa4c8;
+  --mood-tone-flat: #a9aebb;
+  --mood-tone-steady: #cdbd9a;
+  --mood-tone-good: #e6c27d;
+  --mood-tone-radiant: #e3919f;
+}
+
 .mp-panel {
   background-color: var(--surface);
   background-image: var(--glass-bg);

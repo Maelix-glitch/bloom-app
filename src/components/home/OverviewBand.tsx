@@ -1,267 +1,154 @@
 /**
- * The Overview band — Today's command centre.
+ * Today's Overview pieces, recomposed to the prototype stack (Reskin
+ * slice A). The synthesis in `lib/overview` still makes every decision —
+ * these components only present it, in the prototype's arrangement:
  *
- * Four answers, in order, all read off the record by the pure synthesis in
- * `lib/overview`: how you're doing (the headline + the state's own lines),
- * what changed (deltas against your own recent past, window labelled),
- * what matters today (one priority, with its reason), and the next
- * meaningful action (one button, paired with the priority).
+ *   · `StatTiles` — the state's headline and lines, then its fact tiles
+ *     (Days logged, This week, Day streak, Points when the record
+ *     carries a balance): eyebrow label, big tabular serif number,
+ *     counting up where the value is one stable integer.
+ *   · `ChangesCard` — "What changed": each real delta as its own row —
+ *     label, the synthesis's own sentence, and its DeltaPill (colour by
+ *     what the direction means, never an invented percentage).
  *
- * This component only presents and dispatches: every number and every
- * choice arrives already made. Its own state is just the two sheets it can
- * open — the assessment flow and the assessment summary — mirroring the
- * doors in `components/assessment/AssessmentEntry`.
+ * Slice A's recomposition retired the old band's priority strip from
+ * Today: the prototype stack has one Focus slot and Bloom's assessment
+ * card holds it. Every action the priority could name keeps its door in
+ * the stack — habit → the habits card, mood → the mood card, metrics →
+ * the hero chip, add-habit → the habits card footer, assessment → the
+ * FocusCard itself — so nothing the synthesis suggested lost its path.
+ * The synthesis still computes the priority; Today no longer renders it.
  */
 
-import { useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { X } from "lucide-react";
-
-import { BloomSheet } from "@/components/ui/bloom-sheet";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { useAssessment } from "@/hooks/useAssessment";
-import { summaryOf } from "@/lib/assessment/summary";
-import type { OverviewAction, OverviewSynthesis } from "@/lib/overview/synthesis";
-import { AssessmentFlow } from "@/components/assessment/AssessmentFlow";
-import { AssessmentSummaryView } from "@/components/assessment/AssessmentSummaryView";
+import type { OverviewSynthesis } from "@/lib/overview/synthesis";
 import { CountUp } from "./CountUp";
 import { DeltaPill } from "./DeltaPill";
-import { cn } from "@/lib/utils";
-
-export interface OverviewBandProps {
-  overview: OverviewSynthesis;
-  /** Latched readiness — while false the band holds shaped placeholders. */
-  ready: boolean;
-  onToggleHabit: (habitId: string) => void;
-  onLogMood: () => void;
-  onLogMetrics: () => void;
-  onAddHabit: () => void;
-}
 
 /** A fact whose whole value is one integer earns the count-up tile number. */
 const NUMERIC_FACT = /^\d+$/;
 
-export function OverviewBand({
+/* ------------------------------- stat tiles ------------------------------ */
+
+/**
+ * The prototype's StatTiles row, fed by the synthesis's own facts —
+ * the same facts the band has always shown (Days logged, This week,
+ * Day streak, and Points when the balance is known), each as a glass
+ * tile under the state's headline and lines.
+ */
+export function StatTiles({
   overview,
   ready,
-  onToggleHabit,
-  onLogMood,
-  onLogMetrics,
-  onAddHabit,
-}: OverviewBandProps) {
-  const { state: assessmentState } = useAssessment();
-  const [flowOpen, setFlowOpen] = useState(false);
-  /* Retake intent for the flow — display only, never a state write. The
-     completed assessment is demoted only by Begin inside the sheet. */
-  const [flowRetake, setFlowRetake] = useState(false);
-  const [summaryOpen, setSummaryOpen] = useState(false);
-  const summary = summaryOf(assessmentState);
-
-  const { state, changes, priority, action } = overview;
-
-  const runAction = (a: OverviewAction) => {
-    switch (a.kind) {
-      case "habit":
-        if (a.habitId) onToggleHabit(a.habitId);
-        break;
-      case "mood":
-        onLogMood();
-        break;
-      case "metrics":
-        onLogMetrics();
-        break;
-      case "add-habit":
-        onAddHabit();
-        break;
-      case "assessment":
-        setFlowRetake(assessmentState.status === "complete");
-        setFlowOpen(true);
-        break;
-      case "assessment-summary":
-        setSummaryOpen(true);
-        break;
-      case "link":
-        break; // rendered as a Link, never a button
-    }
-  };
-
+}: {
+  overview: OverviewSynthesis;
+  /** Latched readiness — while false the tiles hold shaped placeholders. */
+  ready: boolean;
+}) {
+  const { state } = overview;
   return (
     <section
-      className="home-band home-rise"
-      style={{ animationDelay: "30ms" }}
-      aria-labelledby="home-overview-title"
+      className="home-rise"
+      style={{ animationDelay: "70ms" }}
+      aria-label="Your record in numbers"
       aria-busy={!ready}
     >
-      <div className="home-band-head px-1">
-        <div>
-          <p className="home-eyebrow">Overview</p>
-          {ready ? (
-            <h2 id="home-overview-title" className="home-band-title">
-              {state.headline}
-            </h2>
-          ) : (
-            <>
-              <span id="home-overview-title" className="sr-only">
-                Overview
-              </span>
-              <span
-                className="mt-2 block h-[1.1em] w-72 max-w-[80%] animate-pulse rounded-full bg-surface-2/80 text-lg"
-                aria-hidden="true"
-              />
-            </>
-          )}
-        </div>
-        {ready ? (
-          <p className="home-band-note hidden sm:block">{changes.windowLabel}</p>
-        ) : null}
-      </div>
-
       {ready ? (
         <>
-          <div className="grid gap-4 px-1 pb-1 lg:grid-cols-2">
-            {/* How you're doing — the state's own lines, then the facts as
-                prototype stat tiles: eyebrow label, big tabular serif
-                number (counting up where the value is a stable total). */}
-            <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <ul className="space-y-1.5">
-                {state.lines.map((line) => (
-                  <li
-                    key={line}
-                    className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
-                  >
-                    {line}
-                  </li>
-                ))}
-              </ul>
-              <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-                {state.facts.map((fact) => (
-                  <div
-                    key={fact.id}
-                    className="rounded-2xl border border-white/[0.05] bg-white/[0.02] px-3 py-3"
-                  >
-                    <dt className="home-eyebrow">{fact.label}</dt>
-                    <dd className="mt-2 font-display text-2xl leading-none tabular-nums text-foreground">
-                      {NUMERIC_FACT.test(fact.value) ? (
-                        <CountUp value={Number(fact.value)} id={`overview-fact-${fact.id}`} />
-                      ) : (
-                        fact.value
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-
-            {/* What changed — every sentence carries its numbers and window,
-                and its delta pill: colour by what the direction means for
-                the person (see DeltaPill), never by raw sign alone. */}
-            <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <p className="home-eyebrow">What changed</p>
-              {changes.note ? (
-                <p className="mt-3 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                  {changes.note}
-                </p>
-              ) : (
-                <ul className="mt-3 space-y-2">
-                  {changes.deltas.map((delta) => (
-                    <li
-                      key={delta.id}
-                      className="flex items-start justify-between gap-3 rounded-2xl border border-white/[0.05] bg-white/[0.02] px-3.5 py-3"
-                    >
-                      <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                        {delta.sentence}
-                      </span>
-                      <DeltaPill id={delta.id} label={delta.label} direction={delta.direction} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-
-          {/* What matters today + the one next action — the prototype's
-              FocusCard language: gold eyebrow, serif title, warm glow rim,
-              gold primary action. */}
-          <div className="relative mt-4 flex flex-wrap items-center gap-4 overflow-hidden rounded-3xl border border-gold/25 bg-gold/5 px-5 py-4.5">
-            <div
-              className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-gold/10 blur-3xl"
-              aria-hidden
-            />
-            <div className="relative min-w-0 flex-1 basis-64">
-              <p className="home-eyebrow text-gold/80">What matters today</p>
-              <p className="mt-1.5 font-display text-[length:var(--text-title)] leading-snug text-foreground">
-                {priority.title}
-              </p>
-              <p className="mt-1 max-w-[58ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                {priority.reason}
-              </p>
-            </div>
-            {action.kind === "link" && action.to ? (
-              <Link
-                to={action.to}
-                className={cn(buttonVariants({ size: "sm" }), "relative shrink-0")}
-              >
-                {action.label}
-              </Link>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                className="relative shrink-0"
-                onClick={() => runAction(action)}
-              >
-                {action.label}
-              </Button>
-            )}
-          </div>
+          <p className="max-w-[62ch] px-1 font-display text-[length:var(--text-body)] italic leading-snug text-muted-foreground">
+            {state.headline}
+          </p>
+          {state.lines.length > 0 ? (
+            <ul className="mt-2 space-y-1 px-1">
+              {state.lines.map((line) => (
+                <li
+                  key={line}
+                  className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
+                >
+                  {line}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <dl className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {state.facts.map((fact) => (
+              <div key={fact.id} className="home-panel p-5">
+                <dt className="home-eyebrow">{fact.label}</dt>
+                <dd className="mt-3 font-display text-4xl font-light leading-none tracking-tight tabular-nums text-foreground">
+                  {NUMERIC_FACT.test(fact.value) ? (
+                    <CountUp value={Number(fact.value)} id={`overview-fact-${fact.id}`} />
+                  ) : (
+                    fact.value
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </>
       ) : (
-        <div className="space-y-3 px-1 pb-2" aria-hidden="true">
-          <span className="block h-3.5 w-full animate-pulse rounded-full bg-surface-2/70" />
-          <span className="block h-3.5 w-5/6 animate-pulse rounded-full bg-surface-2/70" />
-          <span className="block h-12 w-full animate-pulse rounded-xl bg-surface-2/50" />
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-hidden="true">
+          {[0, 1, 2, 3].map((i) => (
+            <span key={i} className="block h-24 animate-pulse rounded-3xl bg-surface-2/50" />
+          ))}
         </div>
       )}
+    </section>
+  );
+}
 
-      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} retake={flowRetake} />
+/* ------------------------------ what changed ----------------------------- */
 
-      <BloomSheet
-        open={summaryOpen}
-        onClose={() => setSummaryOpen(false)}
-        title="Your assessment summary"
-        size="lg"
-      >
-        <div className="flex max-h-[82vh] flex-col px-6 pb-6 pt-6 sm:px-7">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
-                Assessment
-              </p>
-              <h2 className="mt-2 font-display text-[length:var(--text-title)] leading-tight text-foreground">
-                Your summary
-              </h2>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setSummaryOpen(false)}
-              aria-label="Close"
-            >
-              <X className="size-4" aria-hidden />
-            </Button>
-          </div>
-          <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
-            {summary ? (
-              <AssessmentSummaryView summary={summary} />
-            ) : (
-              <p className="text-[length:var(--text-support)] text-muted-foreground">
-                No completed assessment yet.
-              </p>
-            )}
-          </div>
+/**
+ * The prototype's ChangesCard: "What changed" over the synthesis's own
+ * window ("Last 7 days vs the 7 days before" — the page footer's line).
+ * Each delta the synthesis earned is a row — its label, its own sentence
+ * (numbers and window included), and its DeltaPill. When no delta earned
+ * its place, the synthesis's honest note stands instead of a list.
+ */
+export function ChangesCard({ overview, ready }: { overview: OverviewSynthesis; ready: boolean }) {
+  const { changes } = overview;
+  return (
+    <section
+      className="home-panel home-rise flex h-full flex-col p-5 sm:p-7"
+      style={{ animationDelay: "150ms" }}
+      aria-labelledby="home-changes-title"
+      aria-busy={!ready}
+    >
+      <div>
+        <p className="home-eyebrow">What changed</p>
+        <h2 id="home-changes-title" className="home-band-title mt-1">
+          Momentum, week over week
+        </h2>
+      </div>
+      {ready ? (
+        changes.note ? (
+          <p className="mt-4 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            {changes.note}
+          </p>
+        ) : (
+          <ul className="mt-5 flex flex-1 flex-col justify-center gap-3">
+            {changes.deltas.map((delta) => (
+              <li
+                key={delta.id}
+                className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors duration-[var(--motion-standard)] hover:border-white/[0.14] hover:bg-white/[0.04]"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[length:var(--text-body)] font-medium text-foreground">
+                    {delta.label}
+                  </span>
+                  <DeltaPill id={delta.id} label={delta.label} direction={delta.direction} />
+                </div>
+                <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                  {delta.sentence}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : (
+        <div className="mt-5 space-y-3" aria-hidden="true">
+          <span className="block h-12 animate-pulse rounded-2xl bg-surface-2/50" />
+          <span className="block h-12 animate-pulse rounded-2xl bg-surface-2/50" />
         </div>
-      </BloomSheet>
+      )}
     </section>
   );
 }
