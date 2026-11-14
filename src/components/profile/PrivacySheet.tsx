@@ -67,8 +67,8 @@ export function PrivacySheet({
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
-              <SheetTitle className="display text-[17px]">Privacy</SheetTitle>
-              <SheetDescription className="mt-0.5 text-[12px] text-muted-foreground">
+              <SheetTitle className="display text-[length:var(--text-section)]">Privacy</SheetTitle>
+              <SheetDescription className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
                 Private by default. Only what you choose to share appears on your profile.
               </SheetDescription>
             </div>
@@ -116,7 +116,7 @@ export function PrivacySheet({
 
             <div className="mt-6 rounded-xl border border-border bg-surface/50 p-4">
               <p className="eyebrow mb-2">What stays private regardless</p>
-              <p className="text-[13px] leading-relaxed text-muted-foreground">
+              <p className="text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
                 Your mood record, trackers, cycle data, reflections, Coach conversations, and
                 rewards stay in your private Bloom space unless you turn something into a story and
                 choose to share it.
@@ -124,7 +124,7 @@ export function PrivacySheet({
             </div>
 
             {error ? (
-              <p role="alert" className="mt-4 text-[13px] text-rose">
+              <p role="alert" className="mt-4 text-[length:var(--text-support)] text-rose">
                 {error}
               </p>
             ) : null}
@@ -134,7 +134,7 @@ export function PrivacySheet({
             <button
               type="button"
               onClick={onPreview}
-              className="rounded-full px-3.5 py-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-full px-3.5 py-2 text-[length:var(--text-support)] text-muted-foreground transition-colors hover:text-foreground"
             >
               See what others see
             </button>
@@ -142,7 +142,7 @@ export function PrivacySheet({
               type="button"
               onClick={() => void save()}
               disabled={!dirty || saving}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-5 py-2 text-[13px] font-medium text-foreground transition-all enabled:hover:border-border-strong disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-5 py-2 text-[length:var(--text-support)] font-medium text-foreground transition-all enabled:hover:border-border-strong disabled:opacity-40"
             >
               {saving ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null}
               Save
@@ -191,8 +191,8 @@ function Choice({
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[13.5px] font-medium">{title}</span>
-        <span className="mt-0.5 block text-[12.5px] leading-relaxed text-muted-foreground">
+        <span className="block text-[length:var(--text-support)] font-medium">{title}</span>
+        <span className="mt-0.5 block text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
           {body}
         </span>
       </span>

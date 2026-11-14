@@ -199,19 +199,19 @@ export function ProfileHero({
             <DropdownMenuContent align="end" className="min-w-[210px] border-border bg-surface-2">
               <DropdownMenuItem
                 onClick={onPreview}
-                className="cursor-pointer gap-2.5 text-[13px] focus:bg-surface-3"
+                className="cursor-pointer gap-2.5 text-[length:var(--text-support)] focus:bg-surface-3"
               >
                 <Eye className="size-4 text-faint" /> Preview as others see it
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={onOpenArchive}
-                className="cursor-pointer gap-2.5 text-[13px] focus:bg-surface-3"
+                className="cursor-pointer gap-2.5 text-[length:var(--text-support)] focus:bg-surface-3"
               >
                 <Archive className="size-4 text-faint" /> Story archive
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={onOpenPrivacy}
-                className="cursor-pointer gap-2.5 text-[13px] focus:bg-surface-3"
+                className="cursor-pointer gap-2.5 text-[length:var(--text-support)] focus:bg-surface-3"
               >
                 <ShieldCheck className="size-4 text-faint" /> Privacy
               </DropdownMenuItem>
@@ -219,14 +219,14 @@ export function ProfileHero({
               {isSignedIn ? (
                 <DropdownMenuItem
                   onClick={onSignOut}
-                  className="cursor-pointer gap-2.5 text-[13px] text-muted-foreground focus:bg-surface-3 focus:text-rose"
+                  className="cursor-pointer gap-2.5 text-[length:var(--text-support)] text-muted-foreground focus:bg-surface-3 focus:text-rose"
                 >
                   <LogOut className="size-4" /> Sign out
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem
                   onClick={onSignIn}
-                  className="cursor-pointer gap-2.5 text-[13px] text-muted-foreground focus:bg-surface-3 focus:text-foreground"
+                  className="cursor-pointer gap-2.5 text-[length:var(--text-support)] text-muted-foreground focus:bg-surface-3 focus:text-foreground"
                 >
                   <LogIn className="size-4" /> Sign in
                 </DropdownMenuItem>

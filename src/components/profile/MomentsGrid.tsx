@@ -94,7 +94,7 @@ function MomentCard({
       />
 
       <span className="relative flex items-start justify-between p-2.5">
-        <span className="mono rounded-full bg-black/35 px-2 py-1 text-[8.5px] uppercase tracking-[0.09em] text-white/85 backdrop-blur-[3px]">
+        <span className="mono rounded-full bg-black/35 px-2 py-1 text-[length:var(--text-micro)] uppercase tracking-[0.09em] text-white/85 backdrop-blur-[3px]">
           {KIND_LABEL[story.kind]}
         </span>
         {active ? (
@@ -110,19 +110,19 @@ function MomentCard({
       </span>
 
       <span className="relative mt-auto block px-3 pb-3">
-        <span className="display line-clamp-2 text-[16px] leading-snug text-[var(--foreground)] drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]">
+        <span className="display line-clamp-2 text-[length:var(--text-card)] leading-snug text-[var(--foreground)] drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]">
           {story.title || "A moment"}
         </span>
         {story.title && story.body ? (
-          <span className="mt-1 line-clamp-2 block text-[12px] leading-snug text-white/75">
+          <span className="mt-1 line-clamp-2 block text-[length:var(--text-caption)] leading-snug text-white/75">
             {story.body}
           </span>
         ) : story.body ? (
-          <span className="line-clamp-3 text-[12.5px] leading-snug text-white/80">
+          <span className="line-clamp-3 text-[length:var(--text-caption)] leading-snug text-white/80">
             {story.body}
           </span>
         ) : null}
-        <span className="mono mt-1.5 block text-[9px] uppercase tracking-[0.08em] text-white/55">
+        <span className="mono mt-1.5 block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-white/55">
           {dateLabel(story.createdAt)}
         </span>
       </span>
@@ -141,20 +141,20 @@ function MomentCard({
           <DropdownMenuContent align="end" className="min-w-[180px] border-border bg-surface-2">
             <DropdownMenuItem
               onClick={() => onAddToHighlight(story)}
-              className="cursor-pointer gap-2 text-[13px] focus:bg-surface-3"
+              className="cursor-pointer gap-2 text-[length:var(--text-support)] focus:bg-surface-3"
             >
               <Star className="size-3.5 text-faint" /> Add to highlight
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onShareAgain(story)}
-              className="cursor-pointer gap-2 text-[13px] focus:bg-surface-3"
+              className="cursor-pointer gap-2 text-[length:var(--text-support)] focus:bg-surface-3"
             >
               <RotateCcw className="size-3.5 text-faint" aria-hidden /> Share again
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem
               onClick={() => onDelete(story)}
-              className="cursor-pointer gap-2 text-[13px] text-muted-foreground focus:bg-surface-3 focus:text-rose"
+              className="cursor-pointer gap-2 text-[length:var(--text-support)] text-muted-foreground focus:bg-surface-3 focus:text-rose"
             >
               Delete
             </DropdownMenuItem>
@@ -202,18 +202,18 @@ export function MomentsGrid({
       >
         <span
           aria-hidden
-          className="grid size-8 shrink-0 place-items-center rounded-full text-[15px] leading-none text-[var(--profile-accent,var(--violet))]"
+          className="grid size-8 shrink-0 place-items-center rounded-full text-[length:var(--text-body)] leading-none text-[var(--profile-accent,var(--violet))]"
           style={{
             background: "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
           }}
         >
           +
         </span>
-        <span className="min-w-0 flex-1 text-[13px] text-muted-foreground">
+        <span className="min-w-0 flex-1 text-[length:var(--text-support)] text-muted-foreground">
           <span className="font-medium text-foreground">No moments yet — that's okay.</span> Tap to
           keep the first one.
         </span>
-        <span className="mono shrink-0 text-[9.5px] uppercase tracking-[0.08em] text-faint transition-colors group-hover:text-foreground">
+        <span className="mono shrink-0 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors group-hover:text-foreground">
           New moment
         </span>
       </button>
@@ -237,7 +237,7 @@ export function MomentsGrid({
                 aria-selected={filter === f.key}
                 onClick={() => setFilter(f.key)}
                 className={cn(
-                  "mono shrink-0 rounded-full border px-3 py-1 text-[10px] tracking-[0.05em] uppercase transition-colors duration-[var(--motion-fast)]",
+                  "mono shrink-0 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[0.05em] uppercase transition-colors duration-[var(--motion-fast)]",
                   filter === f.key
                     ? "border-[color:var(--profile-accent-border)] bg-[color:var(--profile-accent-soft)] text-foreground"
                     : "border-border text-faint hover:border-border-strong hover:text-muted-foreground",
@@ -261,7 +261,7 @@ export function MomentsGrid({
       </div>
 
       {shown.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-[12.5px] text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-[length:var(--text-caption)] text-muted-foreground">
           Nothing under this filter yet.
         </p>
       ) : layout === "grid" ? (
@@ -298,15 +298,15 @@ export function MomentsGrid({
                     }}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-medium">
+                    <span className="block truncate text-[length:var(--text-support)] font-medium">
                       {story.title || `${KIND_LABEL[story.kind]} moment`}
                     </span>
-                    <span className="mono block text-[9.5px] uppercase tracking-[0.07em] text-faint">
+                    <span className="mono block text-[length:var(--text-micro)] uppercase tracking-[0.07em] text-faint">
                       {KIND_LABEL[story.kind]} · {dateLabel(story.createdAt)}
                     </span>
                   </span>
                   {isStoryActive(story) ? (
-                    <span className="mono rounded-full border border-[color:var(--profile-accent-border)] px-2 py-0.5 text-[8.5px] uppercase tracking-[0.08em] text-[var(--profile-accent,var(--violet))]">
+                    <span className="mono rounded-full border border-[color:var(--profile-accent-border)] px-2 py-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-[var(--profile-accent,var(--violet))]">
                       live
                     </span>
                   ) : null}

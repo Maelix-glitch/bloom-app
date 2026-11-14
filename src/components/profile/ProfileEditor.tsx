@@ -436,7 +436,7 @@ export function ProfileEditor({
                         themselves forbid. The @ sits directly against the
                         typed (or suggested) name, as a handle reads. */}
                     <span className="flex items-baseline">
-                      <span className="mono text-[14px] text-faint" aria-hidden>
+                      <span className="mono text-[length:var(--text-callout)] text-faint" aria-hidden>
                         @
                       </span>
                       <input
@@ -453,7 +453,7 @@ export function ProfileEditor({
                         }}
                         placeholder="quietlavender"
                         maxLength={30}
-                        className="bedit-field-input mono mt-0 text-[14px]"
+                        className="bedit-field-input mono mt-0 text-[length:var(--text-callout)]"
                         data-testid="profile-username"
                       />
                     </span>
@@ -480,7 +480,7 @@ export function ProfileEditor({
                 ) : null}
                 {suggestions.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-1.5" data-testid="username-suggestions">
-                    <span className="text-[11px] text-muted-foreground">Free instead:</span>
+                    <span className="text-[length:var(--text-meta)] text-muted-foreground">Free instead:</span>
                     {suggestions.map((candidate) => (
                       <button
                         key={candidate}
@@ -491,7 +491,7 @@ export function ProfileEditor({
                           setSuggestions([]);
                           setSaveError(null);
                         }}
-                        className="rounded-full border border-border px-2.5 py-1 text-[11.5px] text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                        className="rounded-full border border-border px-2.5 py-1 text-[length:var(--text-meta)] text-foreground transition-colors hover:border-primary/50 hover:text-primary"
                       >
                         @{candidate}
                       </button>
@@ -643,7 +643,7 @@ export function ProfileEditor({
                     <div className="mt-3 flex justify-end">
                       <button
                         type="button"
-                        className="bsheet-ghost h-8 px-3 text-[12px]"
+                        className="bsheet-ghost h-8 px-3 text-[length:var(--text-caption)]"
                         onClick={() => setPhotoOpen(false)}
                       >
                         {pending ? "Done" : "Close"}
@@ -691,7 +691,7 @@ export function ProfileEditor({
                       ) : null}
                     </button>
                   ))}
-                  <span className="ml-1 self-center text-[12.5px] text-muted-foreground">
+                  <span className="ml-1 self-center text-[length:var(--text-caption)] text-muted-foreground">
                     {ACCENT_LABELS[accent]}
                   </span>
                 </div>
@@ -705,7 +705,7 @@ export function ProfileEditor({
                   <button
                     type="button"
                     onClick={() => void handleSave()}
-                    className="bsheet-ghost h-8 px-3 text-[12px]"
+                    className="bsheet-ghost h-8 px-3 text-[length:var(--text-caption)]"
                   >
                     Try again
                   </button>
@@ -719,7 +719,7 @@ export function ProfileEditor({
 
         {/* footer — the same Save, reachable without scrolling back up */}
         <div className="bedit-footer">
-          <p className="bedit-footer-note flex items-center gap-2 text-[12px] text-faint">
+          <p className="bedit-footer-note flex items-center gap-2 text-[length:var(--text-caption)] text-faint">
             <Sparkles className="size-3.5" aria-hidden /> Nothing is saved until you press Save.
           </p>
           <div className="flex items-center gap-2">

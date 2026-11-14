@@ -11,7 +11,7 @@ import { trackerDef, type Correlation } from "@/lib/trackers/core";
 export function Correlations({ items }: { items: Correlation[] }) {
   if (items.length === 0) {
     return (
-      <p className="text-[12.5px] leading-relaxed ci-muted">
+      <p className="text-[length:var(--text-caption)] leading-relaxed ci-muted">
         Correlations appear once two trackers have at least five days logged side by side. Nothing
         here is filled in before that.
       </p>
@@ -28,10 +28,10 @@ export function Correlations({ items }: { items: Correlation[] }) {
         return (
           <li key={`${c.a}-${c.b}`}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-[12.5px] font-medium">
+              <p className="text-[length:var(--text-caption)] font-medium">
                 {a.name} <span className="ci-muted">and</span> {b.name}
               </p>
-              <p className="ci-num text-[11.5px] ci-muted">
+              <p className="ci-num text-[length:var(--text-meta)] ci-muted">
                 {positive ? "moves together" : "moves apart"} · r = {c.r.toFixed(2)} · {c.n} days
               </p>
             </div>
@@ -50,12 +50,14 @@ export function Correlations({ items }: { items: Correlation[] }) {
                 }}
               />
             </div>
-            <p className="mt-1.5 text-[12px] leading-relaxed ci-soft">{c.sentence}</p>
+            <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-soft">
+              {c.sentence}
+            </p>
           </li>
         );
       })}
       <li>
-        <p className="text-[11.5px] leading-relaxed ci-muted">
+        <p className="text-[length:var(--text-meta)] leading-relaxed ci-muted">
           These describe your own logged days. They are observations, not causes — and they are not
           advice.
         </p>

@@ -66,7 +66,7 @@ export function AssessmentPromptCard() {
               ? "Your assessment is part-finished"
               : "A short assessment, when you are ready"}
           </h2>
-          <p className="mt-1 max-w-[52ch] text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+          <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             {inProgress
               ? "Pick up where you left off. Your earlier answers are saved."
               : "Seven short sections on how you eat, move, sleep and recover. The summary is yours, and it is what any future plan will start from."}
@@ -123,7 +123,7 @@ export function AssessmentProfileCard() {
           <h2 className="pf-title">Your starting point</h2>
         </div>
       </div>
-      <p className="max-w-[56ch] text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+      <p className="max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
         How you eat, move, sleep and recover, what you want to change, and the safety answers that
         decide what Bloom will suggest. {statusLine}
       </p>

@@ -122,7 +122,7 @@ export function OverviewBand({
                 {state.lines.map((line) => (
                   <li
                     key={line}
-                    className="text-[13px] leading-[var(--leading-body)] text-muted-foreground"
+                    className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
                   >
                     {line}
                   </li>
@@ -131,7 +131,7 @@ export function OverviewBand({
               <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
                 {state.facts.map((fact) => (
                   <div key={fact.id}>
-                    <dt className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    <dt className="text-[length:var(--text-micro)] uppercase tracking-[0.14em] text-muted-foreground">
                       {fact.label}
                     </dt>
                     <dd className="mt-0.5 font-display text-lg leading-none text-foreground">
@@ -144,11 +144,11 @@ export function OverviewBand({
 
             {/* What changed — every sentence carries its numbers and window. */}
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <p className="text-[length:var(--text-micro)] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 What changed
               </p>
               {changes.note ? (
-                <p className="mt-2 max-w-[46ch] text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+                <p className="mt-2 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                   {changes.note}
                 </p>
               ) : (
@@ -162,7 +162,7 @@ export function OverviewBand({
                           strokeWidth={1.75}
                           aria-hidden
                         />
-                        <span className="text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+                        <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                           {delta.sentence}
                         </span>
                       </li>
@@ -180,7 +180,7 @@ export function OverviewBand({
               <p className="mt-1 font-display text-lg leading-snug text-foreground">
                 {priority.title}
               </p>
-              <p className="mt-0.5 max-w-[58ch] text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+              <p className="mt-0.5 max-w-[58ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                 {priority.reason}
               </p>
             </div>

@@ -118,14 +118,14 @@ export function ProfileShareSheet({
       <SheetBody className="pb-6">
         {/* eyebrow + title */}
         <SheetItem className="px-5 pr-14 pt-1 sm:px-6 sm:pr-16">
-          <p className="mono flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-faint">
+          <p className="mono flex items-center gap-1.5 text-[length:var(--text-micro)] uppercase tracking-[0.14em] text-faint">
             <Sparkles className="size-3" aria-hidden />
             Share your space
           </p>
           <h2 className="display mt-2 text-[22px] leading-tight tracking-tight">
             {needsUsername ? "Pick a name for your space" : "Your profile link"}
           </h2>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
             {needsUsername
               ? "A @username becomes the address of your Bloom. Choose one to make your profile shareable."
               : isPublic
@@ -159,20 +159,20 @@ export function ProfileShareSheet({
                 size={52}
               />
               <div className="min-w-0 flex-1">
-                <p className="display truncate text-[18px] leading-tight">{displayName}</p>
+                <p className="display truncate text-[length:var(--text-section)] leading-tight">{displayName}</p>
                 {username ? (
-                  <p className="mono mt-0.5 truncate text-[12px] text-faint">@{username}</p>
+                  <p className="mono mt-0.5 truncate text-[length:var(--text-caption)] text-faint">@{username}</p>
                 ) : (
-                  <p className="mono mt-0.5 text-[12px] text-amber">no @username yet</p>
+                  <p className="mono mt-0.5 text-[length:var(--text-caption)] text-amber">no @username yet</p>
                 )}
                 {bio ? (
-                  <p className="mt-2 line-clamp-2 max-w-[32ch] text-[12.5px] leading-snug text-muted-foreground">
+                  <p className="mt-2 line-clamp-2 max-w-[32ch] text-[length:var(--text-caption)] leading-snug text-muted-foreground">
                     {bio}
                   </p>
                 ) : null}
               </div>
               <span
-                className="mono hidden shrink-0 rounded-full border px-2.5 py-1 text-[9px] uppercase tracking-[0.08em] sm:inline-flex"
+                className="mono hidden shrink-0 rounded-full border px-2.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] sm:inline-flex"
                 style={{
                   borderColor: isPublic
                     ? "color-mix(in oklab, var(--sage) 30%, transparent)"
@@ -191,7 +191,7 @@ export function ProfileShareSheet({
             {url ? (
               <div className="mt-4 flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1.5 backdrop-blur">
                 <Link2 className="size-3.5 shrink-0 text-faint" aria-hidden />
-                <span className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-muted-foreground">
+                <span className="min-w-0 flex-1 truncate font-mono text-[length:var(--text-caption)] text-muted-foreground">
                   {url.replace(/^https?:\/\//, "")}
                 </span>
                 <button
@@ -221,11 +221,11 @@ export function ProfileShareSheet({
                   onClose();
                   onEditUsername();
                 }}
-                className="bsheet-primary h-11 w-full justify-center text-[14px]"
+                className="bsheet-primary h-11 w-full justify-center text-[length:var(--text-callout)]"
               >
                 Choose your @username
               </button>
-              <p className="text-center text-[11px] text-faint">
+              <p className="text-center text-[length:var(--text-meta)] text-faint">
                 You can change it later — old links stop working.
               </p>
             </div>
@@ -235,7 +235,7 @@ export function ProfileShareSheet({
                 <button
                   type="button"
                   onClick={() => void handleCopy()}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-surface-2 px-4 text-[13.5px] font-medium transition-colors hover:border-border-strong hover:text-foreground"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border bg-surface-2 px-4 text-[length:var(--text-support)] font-medium transition-colors hover:border-border-strong hover:text-foreground"
                 >
                   {copied ? (
                     <Check className="size-4 text-sage" aria-hidden />
@@ -248,7 +248,7 @@ export function ProfileShareSheet({
                   type="button"
                   onClick={() => void handleSystemShare()}
                   disabled={sharing}
-                  className="bsheet-primary h-11 justify-center text-[13.5px] disabled:opacity-60"
+                  className="bsheet-primary h-11 justify-center text-[length:var(--text-support)] disabled:opacity-60"
                 >
                   <Share2 className="size-4" aria-hidden />
                   {canShareSystem ? "Share…" : "Share"}
@@ -262,13 +262,13 @@ export function ProfileShareSheet({
                     // small delay so sheet exit finishes before preview opens
                     window.setTimeout(() => onPreview(), 220);
                   }}
-                  className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-border px-4 text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
+                  className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-border px-4 text-[length:var(--text-caption)] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Eye className="size-3.5" aria-hidden />
                   Preview as others see it
                 </button>
               </div>
-              <p className="text-center text-[11px] leading-relaxed text-faint">
+              <p className="text-center text-[length:var(--text-meta)] leading-relaxed text-faint">
                 Link opens at <span className="text-muted-foreground">/{username ? `@${username}` : ""}</span> ·{" "}
                 {isPublic ? "visible to anyone with the link" : "shows a private note until you make it public"}
               </p>

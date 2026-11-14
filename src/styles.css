@@ -235,11 +235,28 @@
   --text-section: 1.125rem;
   --text-card: 1rem;
   --text-body: 0.9375rem;
+  --text-callout: 0.875rem;
   --text-support: 0.8125rem;
+  --text-caption: 0.75rem;
   --text-meta: 0.6875rem;
+  --text-micro: 0.625rem; /* the floor: no UI text ships smaller (P2-1) */
   --leading-display: 1.05;
+  --leading-page: 1.12;
+  --leading-section: 1.25;
+  --leading-card: 1.35;
   --leading-body: 1.55;
+  --leading-callout: 1.45;
+  --leading-support: 1.5;
+  --leading-caption: 1.45;
+  --leading-meta: 1.4;
+  --leading-micro: 1.35;
+  --tracking-display: -0.02em;
+  --tracking-heading: -0.01em;
+  --tracking-body: 0em;
+  --tracking-label: 0.06em;
   --tracking-meta: 0.08em; /* small-caps metadata style */
+  --tracking-caps: 0.14em;
+  --tracking-wide: 0.2em;
 
   --primary: var(--gold);
   --primary-foreground: #0d0f16;
@@ -414,7 +431,15 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     line-height: 1.6;
+    /* Type rendering, one global recipe (P2-1): both smoothing engines,
+       legibility-first shaping, optical sizing where a face offers it, and
+       no automatic text inflation on mobile browsers. */
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-optical-sizing: auto;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     overflow-x: hidden;
   }
 
@@ -451,7 +476,7 @@
 
 @utility eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--faint);
@@ -460,14 +485,16 @@
 @utility numeric {
   font-family: var(--font-display);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-display);
   font-variant-numeric: tabular-nums;
+  font-optical-sizing: auto;
 }
 
 @utility display {
   font-family: var(--font-display);
   font-weight: 500;
   letter-spacing: -0.015em;
+  font-optical-sizing: auto;
 }
 
 /* The signature gesture: the italic gold keyword inside a display heading.
@@ -543,8 +570,8 @@
 .bloom-nav-link {
   color: var(--faint);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 450;
+  font-size: var(--text-support);
+  font-weight: 500;
   padding: 6px 11px;
   border-radius: var(--radius-control);
   transition:
@@ -778,7 +805,7 @@
 }
 .home-eyebrow {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--text-meta);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted-foreground);
@@ -786,12 +813,12 @@
 .home-band-title {
   margin: 2px 0 0;
   font-family: var(--font-display);
-  font-size: 1.125rem;
+  font-size: var(--text-section);
   line-height: 1.2;
 }
 .home-band-note {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--muted-foreground);
 }
 
@@ -807,7 +834,7 @@
   background: var(--surface-2);
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
-  font-size: 0.8125rem;
+  font-size: var(--text-support);
   line-height: 1.1;
   transition:
     border-color var(--motion-fast) ease,
@@ -933,7 +960,7 @@
   background: color-mix(in oklab, var(--surface) 94%, var(--foreground) 6%);
   box-shadow: var(--home-shadow-soft);
   color: var(--foreground);
-  font-size: 0.8125rem;
+  font-size: var(--text-support);
   transform: translateX(-50%);
   animation: home-rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -995,7 +1022,7 @@
   box-shadow: var(--mp-shadow-soft);
 }
 .mp-eyebrow {
-  font-size: 0.6875rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--muted-foreground);
@@ -1097,12 +1124,12 @@
 }
 .mood-page .mg-hub-label {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: var(--text-body);
   fill: var(--background);
   pointer-events: none;
 }
 .mood-page .mg-hub-sub {
-  font-size: 9.5px;
+  font-size: var(--text-micro);
   fill: color-mix(in oklab, var(--background) 75%, transparent);
   pointer-events: none;
 }
@@ -1149,13 +1176,13 @@
   fill: var(--mg-c);
 }
 .mood-page .mg-label {
-  font-size: 11px;
+  font-size: var(--text-meta);
   fill: var(--muted-foreground);
   transition: fill 0.3s ease;
   pointer-events: none;
 }
 .mood-page .mg-node-emotion .mg-label {
-  font-size: 10px;
+  font-size: var(--text-micro);
   font-style: italic;
 }
 .mood-page .mg-node:hover .mg-label,
@@ -1163,7 +1190,7 @@
   fill: var(--foreground);
 }
 .mood-page .mg-empty {
-  font-size: 11px;
+  font-size: var(--text-meta);
   fill: var(--muted-foreground);
   font-style: italic;
 }
@@ -1946,13 +1973,13 @@ nav.app-mobile-nav {
 }
 
 [data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-title] {
-  font-size: 14px;
+  font-size: var(--text-callout);
   font-weight: 600;
   line-height: 1.35;
 }
 
 [data-sonner-toaster] [data-sonner-toast][data-styled="true"] [data-description] {
-  font-size: 13px;
+  font-size: var(--text-support);
   line-height: 1.4;
   color: var(--muted-foreground);
 }
@@ -2128,7 +2155,7 @@ html[data-bloom-effect="fx-mist"] {
   background: color-mix(in oklab, var(--rank-tone, var(--gold)) 9%, transparent);
   color: color-mix(in oklab, var(--rank-tone, var(--gold)) 84%, var(--foreground));
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   vertical-align: middle;
@@ -2199,7 +2226,7 @@ body {
   }
   .mood-page [data-testid="mood-journey"] > div.relative p {
     max-width: 46rem;
-    font-size: 1rem;
+    font-size: var(--text-card);
   }
   .mood-page [data-testid="mood-journey"] > div.relative > div.relative > span {
     box-shadow:
@@ -2272,16 +2299,16 @@ body {
 @media (max-width: 40rem) {
   .coach-page .coach-composer-input,
   .coach-page .coach-conv-rename {
-    font-size: 16px;
+    font-size: var(--text-card);
   }
   textarea.bmood-note,
   input.bmood-input {
-    font-size: 16px;
+    font-size: var(--text-card);
   }
   .app-shell main:has(#relationships) input[type="search"],
   .app-shell main:has(#relationships) input[type="date"],
   .app-shell main:has(#relationships) select {
-    font-size: 16px;
+    font-size: var(--text-card);
   }
 }
 
@@ -2298,7 +2325,7 @@ body {
     font-size: 30px;
   }
   .coach-page .coach-welcome-copy {
-    font-size: 14px;
+    font-size: var(--text-callout);
   }
 }
 
@@ -2319,7 +2346,7 @@ body {
   margin-bottom: 4px;
 }
 .home-band[data-empty="true"] .home-band-title {
-  font-size: 1rem;
+  font-size: var(--text-card);
 }
 @media (min-width: 64rem) {
   .home-band[data-empty="true"] {

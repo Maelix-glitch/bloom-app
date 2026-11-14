@@ -125,7 +125,7 @@ export function ConnectionMapSkeleton({ rangeLabel = "Last 30 days" }: { rangeLa
         </div>
       </div>
 
-      <p className="mt-3 flex min-h-[2.5em] items-center justify-center gap-2 text-center text-[11.5px] text-muted-foreground">
+      <p className="mt-3 flex min-h-[2.5em] items-center justify-center gap-2 text-center text-[length:var(--text-meta)] text-muted-foreground">
         <span className="size-3 animate-spin rounded-full border border-border border-t-primary" />
         Reading your record…
       </p>
@@ -345,7 +345,7 @@ export function ConnectionMap({
         {spokes.map((n) => (
           <p
             key={`note-${n.id}`}
-            className="absolute hidden w-[104px] rounded-lg border border-border bg-surface-2/70 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground transition-opacity duration-300 2xl:block"
+            className="absolute hidden w-[104px] rounded-lg border border-border bg-surface-2/70 px-2 py-1.5 text-[length:var(--text-micro)] leading-snug text-muted-foreground transition-opacity duration-300 2xl:block"
             style={{
               top: `calc(50% + ${n.dy}px)`,
               [n.side === "left" ? "left" : "right"]: "-6px",
@@ -359,7 +359,7 @@ export function ConnectionMap({
 
       {/* the active relationship or the strongest one, in a sentence */}
       <p
-        className="mt-3 min-h-[2.5em] text-center text-[11.5px] leading-snug text-muted-foreground"
+        className="mt-3 min-h-[2.5em] text-center text-[length:var(--text-meta)] leading-snug text-muted-foreground"
         aria-live="polite"
       >
         {activeLink

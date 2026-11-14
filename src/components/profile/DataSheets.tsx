@@ -65,7 +65,9 @@ function SheetHead({ title, blurb }: { title: string; blurb: string }) {
   return (
     <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
       <h2 className="display text-[20px] leading-tight">{title}</h2>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{blurb}</p>
+      <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
+        {blurb}
+      </p>
     </SheetItem>
   );
 }
@@ -73,8 +75,8 @@ function SheetHead({ title, blurb }: { title: string; blurb: string }) {
 function LineRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-1.5">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
-      <span className="mono text-[12.5px] tabular-nums">{value}</span>
+      <span className="text-[length:var(--text-support)] text-muted-foreground">{label}</span>
+      <span className="mono text-[length:var(--text-caption)] tabular-nums">{value}</span>
     </div>
   );
 }
@@ -141,7 +143,7 @@ export function ExportSheet({
               setDone(true);
               toast("Downloaded.", { description: describeExport(bundle.counts) });
             }}
-            className="pf-btn pf-btn--primary h-11 w-full justify-center text-[13.5px]"
+            className="pf-btn pf-btn--primary h-11 w-full justify-center text-[length:var(--text-support)]"
           >
             {done ? (
               <Check className="size-4" aria-hidden />
@@ -150,7 +152,7 @@ export function ExportSheet({
             )}
             {done ? "Saved to your downloads" : "Download my data"}
           </button>
-          <p className="mt-3 text-[12px] leading-relaxed text-faint">
+          <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed text-faint">
             Keep it somewhere private: it contains everything you have logged.
           </p>
         </SheetItem>
@@ -188,7 +190,7 @@ export function RemindersSheet({
 
         {unsupported ? (
           <SheetItem className="px-5 pt-4 sm:px-6">
-            <p className="rounded-2xl border border-border bg-surface/50 px-4 py-3 text-[13px] text-muted-foreground">
+            <p className="rounded-2xl border border-border bg-surface/50 px-4 py-3 text-[length:var(--text-support)] text-muted-foreground">
               This browser can't show notifications. On iPhone, add Bloom to your home screen first
               — installed apps can.
             </p>
@@ -197,7 +199,7 @@ export function RemindersSheet({
 
         {blocked ? (
           <SheetItem className="px-5 pt-4 sm:px-6">
-            <p className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-[13px] text-muted-foreground">
+            <p className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-[length:var(--text-support)] text-muted-foreground">
               Notifications are blocked for Bloom in your browser settings. Allow them there, then
               come back.
             </p>
@@ -207,7 +209,7 @@ export function RemindersSheet({
         <SheetItem className="px-5 pt-4 sm:px-6">
           <div className="rounded-2xl border border-border bg-surface/50 px-4 py-3">
             <label className="flex items-center justify-between gap-4 py-1.5">
-              <span className="flex items-center gap-2.5 text-[13.5px]">
+              <span className="flex items-center gap-2.5 text-[length:var(--text-support)]">
                 {settings.enabled ? <Bell className="size-4" /> : <BellOff className="size-4" />}
                 Reminders
               </span>
@@ -232,7 +234,7 @@ export function RemindersSheet({
             {settings.enabled ? (
               <div className="mt-1 border-t border-border pt-1">
                 <label className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-[13.5px]">Habits, at their time</span>
+                  <span className="text-[length:var(--text-support)]">Habits, at their time</span>
                   <Switch
                     data-testid="pf-reminders-habits"
                     checked={settings.habits}
@@ -240,9 +242,9 @@ export function RemindersSheet({
                   />
                 </label>
                 <label className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-[13.5px]">
+                  <span className="text-[length:var(--text-support)]">
                     Cycle
-                    <span className="block text-[11.5px] text-faint">
+                    <span className="block text-[length:var(--text-meta)] text-faint">
                       two days before an expected period, and when it's late
                     </span>
                   </span>
@@ -253,9 +255,11 @@ export function RemindersSheet({
                   />
                 </label>
                 <label className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-[13.5px]">
+                  <span className="text-[length:var(--text-support)]">
                     Nothing logged today
-                    <span className="block text-[11.5px] text-faint">only on an empty day</span>
+                    <span className="block text-[length:var(--text-meta)] text-faint">
+                      only on an empty day
+                    </span>
                   </span>
                   <Switch
                     data-testid="pf-reminders-evening"
@@ -265,13 +269,13 @@ export function RemindersSheet({
                 </label>
                 {settings.evening ? (
                   <label className="flex items-center justify-between gap-4 py-2">
-                    <span className="text-[13.5px]">Evening nudge at</span>
+                    <span className="text-[length:var(--text-support)]">Evening nudge at</span>
                     <input
                       type="time"
                       data-testid="pf-reminders-time"
                       value={settings.eveningTime}
                       onChange={(e) => reminders.set("eveningTime", e.target.value)}
-                      className="h-9 rounded-lg border border-border bg-background px-2 text-[13px]"
+                      className="h-9 rounded-lg border border-border bg-background px-2 text-[length:var(--text-support)]"
                     />
                   </label>
                 ) : null}
@@ -285,12 +289,12 @@ export function RemindersSheet({
             <button
               type="button"
               onClick={() => void reminders.test()}
-              className="pf-btn h-9 px-3 text-[12.5px]"
+              className="pf-btn h-9 px-3 text-[length:var(--text-caption)]"
             >
               Show me one
             </button>
             {reminders.preview.length > 0 ? (
-              <p className="mt-3 text-[12px] text-faint">
+              <p className="mt-3 text-[length:var(--text-caption)] text-faint">
                 Due right now: {reminders.preview.map((r) => r.title).join(" · ")}
               </p>
             ) : null}
@@ -300,10 +304,10 @@ export function RemindersSheet({
         {!install.installed ? (
           <SheetItem className="px-5 pt-4 sm:px-6">
             <div className="rounded-2xl border border-border bg-surface/50 px-4 py-3">
-              <p className="flex items-center gap-2 text-[13.5px]">
+              <p className="flex items-center gap-2 text-[length:var(--text-support)]">
                 <Smartphone className="size-4" aria-hidden /> Install Bloom
               </p>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
                 {install.ios
                   ? "On iPhone: tap Share, then Add to Home Screen. Reminders can only fire from the installed app."
                   : "Add Bloom to your home screen — it opens without browser chrome and reminders keep working."}
@@ -313,12 +317,12 @@ export function RemindersSheet({
                   type="button"
                   data-testid="pf-install-go"
                   onClick={() => void install.install()}
-                  className="pf-btn mt-3 h-9 px-3 text-[12.5px]"
+                  className="pf-btn mt-3 h-9 px-3 text-[length:var(--text-caption)]"
                 >
                   <Smartphone className="size-3.5" aria-hidden /> Add to home screen
                 </button>
               ) : install.ios ? (
-                <p className="mono mt-3 flex items-center gap-1.5 text-[11.5px] text-faint">
+                <p className="mono mt-3 flex items-center gap-1.5 text-[length:var(--text-meta)] text-faint">
                   <Share className="size-3.5" aria-hidden /> Share → Add to Home Screen
                 </p>
               ) : null}
@@ -363,11 +367,11 @@ export function EraseSheet({
       <SheetClose onClose={onClose} />
       <SheetBody className="pb-5">
         <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
-          <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.08em] text-red-400">
+          <p className="flex items-center gap-2 text-[length:var(--text-caption)] uppercase tracking-[var(--tracking-meta)] text-red-400">
             <AlertTriangle className="size-3.5" aria-hidden /> This cannot be undone
           </p>
           <h2 className="display mt-2 text-[20px] leading-tight">Erase everything</h2>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
             {isSignedIn
               ? "Your record is deleted from this device and from your account, and you are signed out."
               : "Your record is deleted from this device. There is no account signed in, so there is nothing else to remove."}
@@ -380,14 +384,17 @@ export function EraseSheet({
               <LineRow key={c.label} label={c.label} value={String(c.value)} />
             ))}
           </div>
-          <p className="mt-3 text-[12.5px] leading-relaxed text-muted-foreground">
+          <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
             If you might want any of it later, download it first — the export sits one row above
             this one.
           </p>
         </SheetItem>
 
         <SheetItem className="px-5 pt-4 sm:px-6">
-          <label className="block text-[12.5px] text-muted-foreground" htmlFor="pf-erase-confirm">
+          <label
+            className="block text-[length:var(--text-caption)] text-muted-foreground"
+            htmlFor="pf-erase-confirm"
+          >
             Type <span className="mono text-foreground">{ERASE_PHRASE}</span> to confirm
           </label>
           <input
@@ -397,9 +404,11 @@ export function EraseSheet({
             onChange={(e) => setTyped(e.target.value)}
             autoComplete="off"
             spellCheck={false}
-            className="mt-2 h-11 w-full rounded-xl border border-border bg-background px-3 text-[14px] outline-none focus:border-red-400/60"
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-background px-3 text-[length:var(--text-callout)] outline-none focus:border-red-400/60"
           />
-          {problem ? <p className="mt-2 text-[12.5px] text-amber-400">{problem}</p> : null}
+          {problem ? (
+            <p className="mt-2 text-[length:var(--text-caption)] text-amber-400">{problem}</p>
+          ) : null}
           <button
             type="button"
             data-testid="pf-erase-go"
@@ -418,7 +427,7 @@ export function EraseSheet({
               });
             }}
             className={cn(
-              "mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[13.5px] transition-colors",
+              "mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[length:var(--text-support)] transition-colors",
               armed
                 ? "border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20"
                 : "cursor-not-allowed border-border text-faint",

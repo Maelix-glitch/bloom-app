@@ -133,7 +133,7 @@
   background: transparent;
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -165,7 +165,7 @@
 
 .wl-eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 46%, transparent);
@@ -183,7 +183,7 @@
 
 .wl-sub {
   margin-top: 14px;
-  font-size: 14px;
+  font-size: var(--text-callout);
   line-height: 1.6;
   color: color-mix(in oklab, var(--foreground) 64%, transparent);
   text-wrap: pretty;
@@ -311,14 +311,14 @@
 }
 
 .wl-card-title {
-  font-size: 14.5px;
+  font-size: var(--text-callout);
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--foreground);
 }
 
 .wl-card-sub {
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   line-height: 1.5;
   color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
@@ -368,7 +368,7 @@
   border: 1px solid color-mix(in oklab, var(--wl-accent, var(--violet)) 34%, transparent);
   background: color-mix(in oklab, var(--wl-accent, var(--violet)) 16%, transparent);
   color: var(--foreground);
-  font-size: 14px;
+  font-size: var(--text-callout);
   font-weight: 500;
   letter-spacing: -0.01em;
   transition:
@@ -421,7 +421,7 @@
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--surface) 50%, transparent);
   color: var(--foreground);
-  font-size: 16px; /* 16px, not smaller: below this iOS zooms the page on focus */
+  font-size: var(--text-card); /* 16px, not smaller: below this iOS zooms the page on focus */
   letter-spacing: -0.01em;
   transition:
     border-color 200ms ease,
@@ -452,7 +452,7 @@
   gap: 16px;
   padding: 11px 2px;
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 7%, transparent);
-  font-size: 12.5px;
+  font-size: var(--text-caption);
 }
 .wl-summary-row span:first-child {
   color: color-mix(in oklab, var(--foreground) 48%, transparent);

@@ -36,7 +36,7 @@ function EmotionsImpl({
             <button
               type="button"
               onClick={() => onFilter(null)}
-              className="mono rounded-full border border-violet/50 bg-[var(--dim-violet)] px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] text-violet transition-colors hover:border-violet"
+              className="mono rounded-full border border-violet/50 bg-[var(--dim-violet)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-violet transition-colors hover:border-violet"
             >
               clear filter · {filter}
             </button>
@@ -69,7 +69,7 @@ function EmotionsImpl({
                   />
                   <span
                     className={cn(
-                      "text-[13px] font-medium",
+                      "text-[length:var(--text-support)] font-medium",
                       on ? accentText[accent] : "text-foreground",
                     )}
                   >
@@ -89,7 +89,7 @@ function EmotionsImpl({
                   </span>
                 </span>
 
-                <span className="mono flex items-center gap-4 justify-self-end text-[11px]">
+                <span className="mono flex items-center gap-4 justify-self-end text-[length:var(--text-meta)]">
                   <span className="text-faint">{e.share.toFixed(0)}%</span>
                   <span className="w-9 text-right">{e.count}×</span>
                   <span className={cn("w-9 text-right", accentText[accent])}>
@@ -107,7 +107,7 @@ function EmotionsImpl({
               </button>
             );
           })}
-          <div className="mono flex justify-end gap-4 pt-3 text-[9px] uppercase tracking-[0.08em] text-faint">
+          <div className="mono flex justify-end gap-4 pt-3 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
             <span>share</span>
             <span>count</span>
             <span>avg mood</span>

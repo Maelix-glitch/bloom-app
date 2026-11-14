@@ -61,7 +61,7 @@ function HistoryImpl({
             type="button"
             onClick={exportJson}
             disabled={!entries.length}
-            className="mono inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-40"
+            className="mono inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-40"
           >
             <Download className="size-3" /> Export JSON
           </button>
@@ -76,7 +76,7 @@ function HistoryImpl({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search notes, tags, emotions…"
-            className="w-full bg-transparent text-[13px] text-foreground outline-none placeholder:text-faint"
+            className="w-full bg-transparent text-[length:var(--text-support)] text-foreground outline-none placeholder:text-faint"
           />
         </label>
         <div className="flex gap-1.5">
@@ -87,7 +87,7 @@ function HistoryImpl({
               onClick={() => setValence(v)}
               aria-pressed={valence === v}
               className={cn(
-                "mono rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] transition-all duration-300",
+                "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-300",
                 valence === v
                   ? "border-amber/60 bg-[var(--dim-amber)] text-amber"
                   : "border-border text-faint hover:text-muted-foreground",
@@ -113,26 +113,26 @@ function HistoryImpl({
             return (
               <div key={e.id} className="group flex flex-wrap items-center gap-x-4 gap-y-2 py-3.5">
                 <span
-                  className="numeric w-10 text-[16px]"
+                  className="numeric w-10 text-[length:var(--text-card)]"
                   style={{ color: accentVar[accent] }}
                   title={`Mood ${e.mood}/10`}
                 >
                   {e.mood.toFixed(0)}
                 </span>
-                <span className="mono w-[132px] text-[11px] text-faint">
+                <span className="mono w-[132px] text-[length:var(--text-meta)] text-faint">
                   {dayjs(e.timestamp).format("MMM D YYYY · HH:mm")}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] text-foreground">
+                  <span className="block truncate text-[length:var(--text-support)] text-foreground">
                     {e.note || e.tags.map((t) => `#${t}`).join(" ") || "—"}
                   </span>
                   {e.emotions.length ? (
-                    <span className="mono mt-0.5 block text-[10px] uppercase tracking-[0.08em] text-faint">
+                    <span className="mono mt-0.5 block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
                       {e.emotions.map((k) => EMOTION_MAP[k]?.label ?? k).join(" · ")}
                     </span>
                   ) : null}
                 </span>
-                <span className="mono hidden text-[11px] text-faint sm:block">
+                <span className="mono hidden text-[length:var(--text-meta)] text-faint sm:block">
                   <span className="text-sage">E{e.energy}</span> ·{" "}
                   <span className="text-rose">S{e.stress}</span>
                 </span>
@@ -164,14 +164,14 @@ function HistoryImpl({
                           onDelete(e.id);
                           setConfirmId(null);
                         }}
-                        className="mono rounded-full border border-rose/50 px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] text-rose transition-colors hover:bg-[var(--dim-rose)]"
+                        className="mono rounded-full border border-rose/50 px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-rose transition-colors hover:bg-[var(--dim-rose)]"
                       >
                         Confirm
                       </button>
                       <button
                         type="button"
                         onClick={() => setConfirmId(null)}
-                        className="mono rounded-full border border-border px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] text-faint hover:text-foreground"
+                        className="mono rounded-full border border-border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint hover:text-foreground"
                       >
                         Keep
                       </button>
@@ -191,7 +191,7 @@ function HistoryImpl({
             );
           })}
           {filtered.length > 60 ? (
-            <p className="mono pt-4 text-center text-[10px] uppercase tracking-[0.08em] text-faint">
+            <p className="mono pt-4 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
               Showing 60 of {filtered.length} — refine the search to narrow further
             </p>
           ) : null}

@@ -445,7 +445,7 @@ function HowToRead() {
 
 function Legend() {
   return (
-    <div className="relative mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border px-5 py-3 text-[11px] text-muted-foreground">
+    <div className="relative mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border px-5 py-3 text-[length:var(--text-meta)] text-muted-foreground">
       <span className="inline-flex items-center gap-2">
         <span className="h-2.5 w-2.5 rounded-full bg-gold" /> Mood
       </span>

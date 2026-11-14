@@ -62,7 +62,9 @@ export function ProgressRing({
         >
           {pct}%
         </p>
-        {caption ? <p className="mt-1 text-[10px] text-muted-foreground">{caption}</p> : null}
+        {caption ? (
+          <p className="mt-1 text-[length:var(--text-micro)] text-muted-foreground">{caption}</p>
+        ) : null}
       </div>
     </div>
   );

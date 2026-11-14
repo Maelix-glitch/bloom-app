@@ -175,7 +175,9 @@ export function HabitsSection({
     >
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Habits</p>
+          <p className="text-[length:var(--text-meta)] uppercase tracking-[0.2em] text-muted-foreground">
+            Habits
+          </p>
           <h2
             id="home-habits-title"
             className="mt-1 font-display text-xl leading-tight sm:text-3xl"
@@ -186,13 +188,19 @@ export function HabitsSection({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {points !== null ? (
-            <span className="home-chip text-[11px] tabular-nums" title="Bloom points">
+            <span
+              className="home-chip text-[length:var(--text-meta)] tabular-nums"
+              title="Bloom points"
+            >
               <Sparkles className="size-3.5" style={{ color: "var(--home-gold)" }} />
               {points.toLocaleString()} pts
             </span>
           ) : null}
           {bestStreak >= 2 ? (
-            <span className="home-chip text-[11px] tabular-nums" title="Longest current streak">
+            <span
+              className="home-chip text-[length:var(--text-meta)] tabular-nums"
+              title="Longest current streak"
+            >
               <Flame className="size-3.5" style={{ color: "var(--home-energy)" }} />
               {bestStreak}-day streak
             </span>
@@ -289,7 +297,7 @@ export function HabitsSection({
                     >
                       {h.name}
                     </span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[length:var(--text-meta)] text-muted-foreground">
                       <span>
                         {h.week
                           ? h.done
@@ -331,7 +339,7 @@ export function HabitsSection({
                   <button
                     type="button"
                     onClick={() => onToggle(h.id, h.missedYesterday!)}
-                    className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                    className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-[length:var(--text-meta)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
                     data-testid={`home-habit-yesterday-${h.id}`}
                     title="Forgot to tick it before bed? Add yesterday's tick and keep the streak."
                   >
@@ -347,7 +355,7 @@ export function HabitsSection({
       {paused.length > 0 || archived.length > 0 ? (
         <div className="mt-5 border-t border-border pt-4" data-testid="home-habits-aside">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-[length:var(--text-meta)] uppercase tracking-[0.2em] text-muted-foreground">
               {paused.length > 0 && archived.length > 0
                 ? "Paused & archived"
                 : paused.length > 0
@@ -375,7 +383,7 @@ export function HabitsSection({
                   <AsideGlyph habit={h} className="opacity-70" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
-                    <span className="block text-[11px] text-muted-foreground">
+                    <span className="block text-[length:var(--text-meta)] text-muted-foreground">
                       Paused until {h.pausedUntil ? formatDateShort(h.pausedUntil) : "—"} · streak
                       kept
                     </span>
@@ -383,7 +391,7 @@ export function HabitsSection({
                   {actions.onResume ? (
                     <button
                       type="button"
-                      className="home-chip text-[11px]"
+                      className="home-chip text-[length:var(--text-meta)]"
                       onClick={() => actions.onResume?.(h.id)}
                     >
                       <PlayCircle className="size-3.5" /> Resume
@@ -400,14 +408,14 @@ export function HabitsSection({
                   <AsideGlyph habit={h} className="opacity-60" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
-                    <span className="block text-[11px] text-muted-foreground">
+                    <span className="block text-[length:var(--text-meta)] text-muted-foreground">
                       Archived · history kept
                     </span>
                   </span>
                   {actions.onRestore ? (
                     <button
                       type="button"
-                      className="home-chip text-[11px]"
+                      className="home-chip text-[length:var(--text-meta)]"
                       onClick={() => actions.onRestore?.(h.id)}
                     >
                       <ArchiveRestore className="size-3.5" /> Restore

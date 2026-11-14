@@ -77,7 +77,7 @@ export function JourneyCard({
     );
   }
   if (journey.status === "error") {
-    return <p className="text-[12.5px] text-faint">{journey.message}</p>;
+    return <p className="text-[length:var(--text-caption)] text-faint">{journey.message}</p>;
   }
 
   const achieved = new Map(journey.milestones.achieved.map((m) => [m.id, m]));
@@ -148,11 +148,11 @@ export function JourneyCard({
 
       {next ? (
         <div>
-          <div className="mb-1.5 flex items-baseline justify-between gap-3 text-[12.5px]">
+          <div className="mb-1.5 flex items-baseline justify-between gap-3 text-[length:var(--text-caption)]">
             <span className="text-muted-foreground">
               Next: <span className="text-foreground">{next.label}</span>
             </span>
-            <span className="mono text-[11px] text-faint">
+            <span className="mono text-[length:var(--text-meta)] text-faint">
               {next.progress} / {next.of}
             </span>
           </div>
@@ -178,7 +178,9 @@ export function JourneyCard({
                   <span className="min-w-0">
                     <span className="block truncate">{a.text}</span>
                     {a.detail ? (
-                      <span className="block truncate text-[11.5px] text-faint">{a.detail}</span>
+                      <span className="block truncate text-[length:var(--text-meta)] text-faint">
+                        {a.detail}
+                      </span>
                     ) : null}
                   </span>
                   <span className="pf-activity-when">{formatRelativeDay(a.at)}</span>
@@ -188,7 +190,7 @@ export function JourneyCard({
           </div>
         </div>
       ) : (
-        <p className="text-[12.5px] text-faint">
+        <p className="text-[length:var(--text-caption)] text-faint">
           Nothing yet — the first mood, story or reward shows up here.
         </p>
       )}

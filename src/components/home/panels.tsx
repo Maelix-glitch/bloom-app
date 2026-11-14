@@ -46,7 +46,7 @@ export function ProgressPanel({
           label={`${score.overall}% ${score.caption}`}
         />
       </div>
-      <dl className="grid grid-cols-3 gap-2 text-center text-[10px] text-muted-foreground">
+      <dl className="grid grid-cols-3 gap-2 text-center text-[length:var(--text-micro)] text-muted-foreground">
         <div>
           <dt>Habits</dt>
           <dd className="tabular-nums text-foreground">{score.habitPct}%</dd>
@@ -122,7 +122,7 @@ export function FocusPanel({
                     : SIGNAL_ICON.energy;
             const body = (
               <>
-                <span className="grid size-6 shrink-0 place-items-center rounded-md border border-border bg-surface-2/60 text-[11px] text-muted-foreground">
+                <span className="grid size-6 shrink-0 place-items-center rounded-md border border-border bg-surface-2/60 text-[length:var(--text-meta)] text-muted-foreground">
                   {i + 1}
                 </span>
                 <Icon className="size-4 text-primary" />
@@ -232,8 +232,10 @@ export function TrackersPanel({ readings }: { readings: SignalReading[] }) {
                 </svg>
                 <Icon className="size-4" style={{ color, opacity: t.empty ? 0.55 : 1 }} />
               </Link>
-              <span className="text-[11px]">{t.label}</span>
-              <span className="text-[10px] tabular-nums text-muted-foreground">{t.value}</span>
+              <span className="text-[length:var(--text-meta)]">{t.label}</span>
+              <span className="text-[length:var(--text-micro)] tabular-nums text-muted-foreground">
+                {t.value}
+              </span>
             </li>
           );
         })}
@@ -296,13 +298,16 @@ export function FlowPanel({
           className="mt-3 rounded-xl border border-dashed border-border p-3"
           data-testid="home-flow-times"
         >
-          <p className="text-[11px] leading-snug text-muted-foreground">
+          <p className="text-[length:var(--text-meta)] leading-snug text-muted-foreground">
             When your day happens. Anything past its time reads as "missed", so set these to your
             own rhythm — a night shift can start at 21:00.
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {FLOW_TIME_LABELS.map(({ key, label }) => (
-              <label key={key} className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              <label
+                key={key}
+                className="flex flex-col gap-1 text-[length:var(--text-meta)] text-muted-foreground"
+              >
                 {label}
                 <input
                   type="time"
@@ -318,7 +323,7 @@ export function FlowPanel({
             <button
               type="button"
               onClick={onResetTimes}
-              className="mt-2 text-[11px] text-muted-foreground underline-offset-2 hover:underline"
+              className="mt-2 text-[length:var(--text-meta)] text-muted-foreground underline-offset-2 hover:underline"
             >
               Back to the defaults
             </button>
@@ -330,7 +335,7 @@ export function FlowPanel({
           const state = flowState(f, now);
           return (
             <li key={f.id} className="relative flex gap-4">
-              <span className="w-11 pt-0.5 text-[11px] tabular-nums text-muted-foreground">
+              <span className="w-11 pt-0.5 text-[length:var(--text-meta)] tabular-nums text-muted-foreground">
                 {state === "now" ? <span className="text-primary">Now</span> : f.time}
               </span>
               <span className="relative flex flex-col items-center">
@@ -413,8 +418,10 @@ export function InsightsPanel({
                   <Icon className="size-4" />
                 </span>
                 <span>
-                  <span className="block text-[13px] leading-snug">{ins.title}</span>
-                  <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">
+                  <span className="block text-[length:var(--text-support)] leading-snug">
+                    {ins.title}
+                  </span>
+                  <span className="mt-1 block text-[length:var(--text-meta)] leading-snug text-muted-foreground">
                     {ins.sub}
                   </span>
                 </span>
@@ -460,8 +467,12 @@ export function ActivityPanel({ items }: { items: ActivityItem[] }) {
                   <Icon className="size-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px]">{a.title}</span>
-                  <span className="block truncate text-[11px] text-muted-foreground">{a.sub}</span>
+                  <span className="block truncate text-[length:var(--text-support)]">
+                    {a.title}
+                  </span>
+                  <span className="block truncate text-[length:var(--text-meta)] text-muted-foreground">
+                    {a.sub}
+                  </span>
                 </span>
               </li>
             );

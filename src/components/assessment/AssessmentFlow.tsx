@@ -80,7 +80,7 @@ function ChoiceGroup<T extends string | number>({
               {option.label}
             </span>
             {option.hint ? (
-              <span className="mt-0.5 block text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+              <span className="mt-0.5 block text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                 {option.hint}
               </span>
             ) : null}
@@ -113,7 +113,7 @@ function MultiChoice({
             aria-pressed={selected}
             onClick={() => onToggle(option.value)}
             className={cn(
-              "rounded-pill border px-3.5 py-2 text-[13px] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
+              "rounded-pill border px-3.5 py-2 text-[length:var(--text-support)] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
               selected
                 ? "border-gold/60 bg-gold/10 text-foreground"
                 : "border-border bg-surface-2 text-muted-foreground hover:border-border-strong hover:text-foreground",
@@ -162,7 +162,7 @@ function TriChoice({
               onSelect(option.value === "yes" ? true : option.value === "no" ? false : null)
             }
             className={cn(
-              "rounded-pill border px-4 py-2 text-[13px] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
+              "rounded-pill border px-4 py-2 text-[length:var(--text-support)] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
               option.value !== "skip" && selected
                 ? "border-gold/60 bg-gold/10 text-foreground"
                 : "border-border bg-surface-2 text-muted-foreground hover:border-border-strong hover:text-foreground",
@@ -222,7 +222,7 @@ function NumberField({
             );
           }}
         />
-        <span className="text-[13px] text-muted-foreground">{unit}</span>
+        <span className="text-[length:var(--text-support)] text-muted-foreground">{unit}</span>
       </div>
     </div>
   );
@@ -463,7 +463,7 @@ export function AssessmentFlow({
                       <p className="text-[length:var(--text-support)] font-medium text-foreground">
                         {CONSENT_COPY[purpose].label}
                       </p>
-                      <p className="mt-1 text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+                      <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                         {CONSENT_COPY[purpose].description}
                       </p>
                     </div>
@@ -475,7 +475,7 @@ export function AssessmentFlow({
                   </div>
                 ))}
                 {!healthConsent ? (
-                  <p className="text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+                  <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                     Bloom needs the first permission to save your answers. Without it, this
                     assessment cannot be kept.
                   </p>
@@ -585,7 +585,7 @@ export function AssessmentFlow({
                     values={draft.conditions}
                     onToggle={(v) => toggleListValue("conditions", v)}
                   />
-                  <p className="text-[13px] text-muted-foreground">
+                  <p className="text-[length:var(--text-support)] text-muted-foreground">
                     Leave all unselected if none apply.
                   </p>
                 </div>
@@ -614,7 +614,7 @@ export function AssessmentFlow({
                     values={draft.symptoms}
                     onToggle={(v) => toggleListValue("symptoms", v)}
                   />
-                  <p className="text-[13px] text-muted-foreground">
+                  <p className="text-[length:var(--text-support)] text-muted-foreground">
                     Leave all unselected if none apply.
                   </p>
                 </div>
@@ -685,7 +685,7 @@ export function AssessmentFlow({
                   values={draft.cuisines}
                   onChange={(cuisines) => patch({ cuisines })}
                 />
-                <p className="text-[13px] leading-[var(--leading-body)] text-muted-foreground">
+                <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                   Separate items with commas. Leave a field empty if nothing applies.
                 </p>
               </SheetItem>

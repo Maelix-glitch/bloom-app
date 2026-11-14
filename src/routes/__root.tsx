@@ -44,7 +44,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[var(--tracking-meta)] text-gold">
+        <p className="text-center text-[length:var(--text-meta)] font-semibold uppercase tracking-[var(--tracking-meta)] text-gold">
           404 · Page not found
         </p>
         <EmptyState

@@ -104,7 +104,7 @@
 }
 .rewards-brand-section {
   color: var(--faint);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.13em;
   text-transform: uppercase;
 }
@@ -115,7 +115,7 @@
 }
 .rewards-nav-link {
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: var(--text-caption);
   text-decoration: none;
   transition: color 250ms ease;
 }
@@ -132,7 +132,7 @@
   padding: 7px 10px;
   color: var(--gold-soft);
   background: color-mix(in oklab, var(--gold) 8%, transparent);
-  font: 9px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   text-decoration: none;
@@ -275,7 +275,7 @@
   color: var(--faint);
   background: color-mix(in oklab, var(--surface-2) 60%, transparent);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-micro);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition:
@@ -419,7 +419,7 @@
   padding: 7px 10px;
   color: var(--amber);
   background: var(--dim-amber);
-  font: 9px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   white-space: nowrap;
@@ -537,7 +537,7 @@
 }
 .claim-cinematic-kicker {
   color: var(--amber);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -556,7 +556,7 @@
   max-width: 45ch;
   margin: 13px auto 0;
   color: color-mix(in oklab, var(--foreground) 62%, transparent);
-  font-size: 13px;
+  font-size: var(--text-support);
 }
 .claim-cinematic-reward {
   display: flex;
@@ -565,7 +565,7 @@
   gap: 15px;
   margin-top: 19px;
   color: var(--muted-foreground);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -710,7 +710,7 @@
   padding: 9px 12px;
   color: var(--muted-foreground);
   background: rgb(29 28 43 / 0.72);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   backdrop-filter: blur(12px);
@@ -769,7 +769,7 @@
   color: var(--amber);
   background: color-mix(in oklab, var(--amber) 7%, transparent);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-micro);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition:
@@ -821,7 +821,7 @@
   padding: 10px 13px;
   color: var(--gold-soft);
   background: color-mix(in oklab, var(--gold) 8%, transparent);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.07em;
   text-transform: uppercase;
   transition:
@@ -985,7 +985,7 @@
   gap: 7px;
   margin-top: 34px;
   color: var(--faint);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1056,7 +1056,7 @@
   padding: 8px 11px;
   color: var(--gold-soft);
   background: color-mix(in oklab, var(--gold) 8%, transparent);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -1171,7 +1171,7 @@
   align-items: center;
   gap: 9px;
   color: var(--faint);
-  font: 9px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1200,7 +1200,7 @@
   overflow: hidden;
   margin-top: 9px;
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: var(--text-caption);
   line-height: 1.65;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -1212,7 +1212,7 @@
   margin-top: auto;
   padding-top: 15px;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: var(--text-meta);
   transition: color 250ms ease;
 }
 .reward-delivery-card:hover .reward-delivery-card-footer {
@@ -1333,7 +1333,7 @@
   padding: 12px;
   color: var(--muted-foreground);
   background: color-mix(in oklab, var(--violet) 7%, transparent);
-  font-size: 12px;
+  font-size: var(--text-caption);
   line-height: 1.6;
 }
 .reward-delivery-message svg {
@@ -1350,7 +1350,7 @@
   flex-wrap: wrap;
   gap: 12px;
   color: var(--faint);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
 }
 .reward-delivery-dates span {
   display: inline-flex;
@@ -1373,7 +1373,7 @@
   align-items: center;
   gap: 8px;
   color: var(--sage);
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 /* Admin-only surface */
@@ -1412,7 +1412,7 @@
   align-items: center;
   gap: 8px;
   color: var(--foreground);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1436,12 +1436,12 @@
 }
 .reward-admin-field-label {
   color: var(--foreground);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 500;
 }
 .reward-admin-field-hint {
   color: var(--faint);
-  font: 10px/1.4 var(--font-mono);
+  font: var(--text-micro)/1.4 var(--font-mono);
 }
 .reward-admin-field input,
 .reward-admin-field textarea {
@@ -1452,7 +1452,7 @@
   outline: none;
   color: var(--foreground);
   background: var(--surface-2);
-  font-size: 12px;
+  font-size: var(--text-caption);
   transition:
     border-color 250ms ease,
     box-shadow 250ms ease;
@@ -1484,7 +1484,7 @@
   align-items: center;
   gap: 7px;
   color: var(--faint);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
 }
 .reward-admin-user-list {
   display: grid;
@@ -1541,14 +1541,14 @@
 .reward-admin-user-copy span {
   overflow: hidden;
   color: var(--foreground);
-  font-size: 12px;
+  font-size: var(--text-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .reward-admin-user-copy small {
   overflow: hidden;
   color: var(--faint);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1563,11 +1563,11 @@
 .reward-admin-no-users p {
   margin: 6px 0 0;
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 .reward-admin-no-users span {
   max-width: 28ch;
-  font: 10px/1.5 var(--font-mono);
+  font: var(--text-micro)/1.5 var(--font-mono);
 }
 .reward-admin-alert {
   display: flex;
@@ -1577,7 +1577,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px 14px;
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 .reward-admin-alert button {
   display: grid;
@@ -1638,7 +1638,7 @@
   gap: 11px;
   margin-top: 7px;
   color: var(--faint);
-  font: 9px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
 }
 .reward-admin-record-meta span {
   display: inline-flex;
@@ -1654,7 +1654,7 @@
 .reward-admin-record-actions .reward-secondary-button,
 .reward-admin-danger-button {
   padding: 8px 10px;
-  font-size: 10px;
+  font-size: var(--text-micro);
 }
 .reward-admin-danger-button {
   border: 1px solid color-mix(in oklab, var(--rose) 34%, var(--border));
@@ -1672,7 +1672,7 @@
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px 7px;
-  font: 9px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -1712,7 +1712,7 @@
   justify-content: space-between;
   gap: 12px;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: var(--text-meta);
 }
 .reward-admin-delivery select {
   border: 1px solid var(--border);
@@ -1720,7 +1720,7 @@
   padding: 5px 7px;
   color: var(--foreground);
   background: var(--surface-2);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
 }
 .reward-admin-empty {
   display: grid;
@@ -1735,7 +1735,7 @@
   color: var(--muted-foreground);
 }
 .reward-admin-empty span {
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
 }
 .reward-admin-denied {
   display: flex;
@@ -1884,7 +1884,7 @@
   border-radius: 10px;
   padding: 10px 12px;
   background: color-mix(in oklab, var(--surface-2) 70%, transparent);
-  font: 10px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1944,7 +1944,7 @@
 }
 
 .reward-admin-medal-option span {
-  font: 8px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1983,7 +1983,7 @@
   border: 0;
   color: var(--faint);
   background: transparent;
-  font: 9px var(--font-mono);
+  font: var(--text-micro) var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -2116,7 +2116,7 @@
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--text-caption);
   text-decoration: none;
   transition:
     transform 350ms var(--ease-out-expo),
@@ -2181,7 +2181,7 @@
   color: var(--foreground);
   background: color-mix(in oklab, var(--surface-2) 94%, var(--sage));
   box-shadow: 0 18px 45px -22px rgb(0 0 0 / 0.95);
-  font-size: 12px;
+  font-size: var(--text-caption);
   animation: reward-toast-in 400ms var(--ease-out-expo) both;
 }
 .reward-toast-icon {
@@ -2285,13 +2285,13 @@
   gap: 12px 24px;
 }
 .reward-points-unit {
-  font-size: 15px;
+  font-size: var(--text-body);
   color: var(--faint);
   letter-spacing: 0.01em;
 }
 .reward-points-week {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--faint);
@@ -2311,7 +2311,7 @@
   gap: 10px;
   padding: 8px 0;
   border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
-  font-size: 13px;
+  font-size: var(--text-support);
 }
 .reward-points-dot {
   width: 8px;
@@ -2325,7 +2325,7 @@
 }
 .reward-points-count {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.06em;
   color: var(--faint);
 }
@@ -2336,6 +2336,6 @@
 }
 .reward-points-empty {
   margin-top: 12px;
-  font-size: 13px;
+  font-size: var(--text-support);
   color: var(--faint);
 }

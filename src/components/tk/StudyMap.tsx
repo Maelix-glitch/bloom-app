@@ -70,7 +70,7 @@ export function StudyMap({
         ))}
       </div>
 
-      <div className="mt-3 flex items-center gap-2 text-[11px] ci-muted">
+      <div className="mt-3 flex items-center gap-2 text-[length:var(--text-meta)] ci-muted">
         <span>Less</span>
         {[0, 1, 2, 3, 4].map((l) => (
           <i key={l} aria-hidden className="tk-heat-swatch" data-level={l} />

@@ -70,7 +70,11 @@ export function SectionHead({
       <div>
         {eyebrow ? <p className="eyebrow mb-2">{eyebrow}</p> : null}
         <h2 className="display text-[20px] leading-tight sm:text-[23px]">{title}</h2>
-        {sub ? <p className="mt-1 max-w-[60ch] text-[13px] text-muted-foreground">{sub}</p> : null}
+        {sub ? (
+          <p className="mt-1 max-w-[60ch] text-[length:var(--text-support)] text-muted-foreground">
+            {sub}
+          </p>
+        ) : null}
       </div>
       {right}
     </div>
@@ -119,13 +123,13 @@ export function Delta({
   invert?: boolean;
 }) {
   if (value === null || Number.isNaN(value))
-    return <span className="mono text-[11px] text-faint">no baseline</span>;
+    return <span className="mono text-[length:var(--text-meta)] text-faint">no baseline</span>;
   const good = invert ? value < 0 : value > 0;
   const flat = Math.abs(value) < 0.05;
   return (
     <span
       className={cn(
-        "mono inline-flex items-center gap-1 text-[11px]",
+        "mono inline-flex items-center gap-1 text-[length:var(--text-meta)]",
         flat ? "text-faint" : good ? "text-sage" : "text-rose",
       )}
     >
@@ -148,7 +152,7 @@ export function EvidencePill({ evidence, n }: { evidence: Evidence; n?: number }
   return (
     <span
       className={cn(
-        "mono inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.08em]",
+        "mono inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)]",
         evidenceStyles[evidence],
       )}
     >
@@ -183,9 +187,13 @@ export function Metric({
         <span className={accentText[accent]}>
           {raw ?? (typeof value === "number" ? <CountUp value={value} decimals={decimals} /> : "—")}
         </span>
-        {suffix ? <span className="mono text-[11px] text-faint">{suffix}</span> : null}
+        {suffix ? (
+          <span className="mono text-[length:var(--text-meta)] text-faint">{suffix}</span>
+        ) : null}
       </p>
-      {sub ? <div className="text-[11px] text-muted-foreground">{sub}</div> : null}
+      {sub ? (
+        <div className="text-[length:var(--text-meta)] text-muted-foreground">{sub}</div>
+      ) : null}
     </div>
   );
 }
@@ -193,8 +201,10 @@ export function Metric({
 export function Insufficient({ children }: { children: ReactNode }) {
   return (
     <div className="rounded-[12px] border border-dashed border-border bg-surface-2/40 p-6 text-center">
-      <p className="display text-[15px] text-muted-foreground">Not enough data yet.</p>
-      <p className="mono mt-2 text-[11px] text-faint">{children}</p>
+      <p className="display text-[length:var(--text-body)] text-muted-foreground">
+        Not enough data yet.
+      </p>
+      <p className="mono mt-2 text-[length:var(--text-meta)] text-faint">{children}</p>
     </div>
   );
 }

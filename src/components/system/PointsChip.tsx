@@ -45,7 +45,7 @@ export function PointsChip({
       }
       title={title}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-2/60 px-2.5 py-1.5 text-[12px] font-medium tabular-nums text-foreground transition-colors hover:border-primary/40 hover:text-primary",
+        "inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-2/60 px-2.5 py-1.5 text-[length:var(--text-caption)] font-medium tabular-nums text-foreground transition-colors hover:border-primary/40 hover:text-primary",
         className,
       )}
       data-testid="points-chip"

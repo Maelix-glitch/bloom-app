@@ -50,7 +50,7 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
         </span>
       </h2>
 
-      <p className="mx-auto mt-4 max-w-[52ch] text-[14px] leading-relaxed text-muted-foreground">
+      <p className="mx-auto mt-4 max-w-[52ch] text-[length:var(--text-callout)] leading-relaxed text-muted-foreground">
         Every chart, correlation and insight on this page is computed only from your own check-ins.
         Log your first entry to begin your private Mood Intelligence record.
       </p>
@@ -59,7 +59,7 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
         <button
           type="button"
           onClick={onCompose}
-          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[13px] font-medium text-background transition-transform duration-500 hover:scale-[1.03]"
+          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-500 hover:scale-[1.03]"
           style={{
             background: "var(--grad-violet)",
             boxShadow: "var(--glow-violet)",
@@ -112,7 +112,7 @@ function MoodIntelligencePage() {
       <main className="relative min-w-0 w-full px-5 pb-28 pt-6 sm:px-8 sm:pt-7 lg:px-10 lg:pb-24 lg:pt-7">
         <Link
           to="/mood"
-          className="mono mb-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-foreground"
+          className="mono mb-8 inline-flex items-center gap-2 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" /> Mood
         </Link>
@@ -124,11 +124,13 @@ function MoodIntelligencePage() {
           <div className="panel mx-auto mt-12 max-w-[680px] p-7 text-center">
             <p className="eyebrow mb-3">Mood Intelligence</p>
             <h2 className="display text-[28px]">Your private record is waiting.</h2>
-            <p className="mt-3 text-[14px] text-muted-foreground">{authError}</p>
+            <p className="mt-3 text-[length:var(--text-callout)] text-muted-foreground">
+              {authError}
+            </p>
             <button
               type="button"
               onClick={openNew}
-              className="mono mt-6 rounded-full border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+              className="mono mt-6 rounded-full border border-border px-5 py-2.5 text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
             >
               Log an entry on this device
             </button>
@@ -136,7 +138,7 @@ function MoodIntelligencePage() {
         ) : loading ? (
           <div className="flex items-center justify-center gap-3 py-32 text-faint">
             <Loader2 className="size-4 animate-spin" />
-            <span className="mono text-[11px] uppercase tracking-[0.08em]">
+            <span className="mono text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-meta)]">
               Reading your record…
             </span>
           </div>
@@ -200,14 +202,14 @@ function MoodIntelligencePage() {
             </Reveal>
 
             <footer className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-faint">
+              <p className="mono text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
                 Bloom · your data is saved securely to your private account
               </p>
 
               <button
                 type="button"
                 onClick={() => setResetOpen(true)}
-                className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[10px] uppercase tracking-[0.08em] text-faint transition-colors hover:border-rose/50 hover:text-rose"
+                className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint transition-colors hover:border-rose/50 hover:text-rose"
               >
                 <RotateCcw className="size-3" /> Reset all data
               </button>

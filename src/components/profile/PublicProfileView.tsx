@@ -47,7 +47,7 @@ export function PublicProfileView({
       <div className="mx-auto max-w-[480px] rounded-2xl border border-border bg-surface/40 p-8 text-center">
         <Lock className="mx-auto size-5 text-faint" strokeWidth={1.5} aria-hidden />
         <p className="display mt-4 text-[20px]">This space is private.</p>
-        <p className="mx-auto mt-2 max-w-[42ch] text-[13.5px] leading-relaxed text-muted-foreground">
+        <p className="mx-auto mt-2 max-w-[42ch] text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
           {identity.username
             ? `${identity.displayName} keeps their Bloom to themselves right now — and that's okay.`
             : "This profile hasn't been shared yet."}
@@ -68,7 +68,7 @@ export function PublicProfileView({
       {asPreview ? (
         <p
           className={cn(
-            "mono mx-auto w-fit rounded-full border px-3.5 py-1 text-[10px] uppercase tracking-[0.1em]",
+            "mono mx-auto w-fit rounded-full border px-3.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[0.1em]",
             model.canBeShared ? "border-sage/40 text-sage" : "border-amber/40 text-amber",
           )}
         >
@@ -109,10 +109,12 @@ export function PublicProfileView({
           {identity.displayName}
         </h1>
         {identity.username ? (
-          <p className="mono mt-1 text-[12px] text-faint">@{identity.username}</p>
+          <p className="mono mt-1 text-[length:var(--text-caption)] text-faint">
+            @{identity.username}
+          </p>
         ) : null}
         {identity.bio ? (
-          <p className="mt-3 max-w-[44ch] text-[14px] leading-relaxed text-muted-foreground">
+          <p className="mt-3 max-w-[44ch] text-[length:var(--text-callout)] leading-relaxed text-muted-foreground">
             {identity.bio}
           </p>
         ) : null}
@@ -120,7 +122,7 @@ export function PublicProfileView({
           <button
             type="button"
             onClick={() => setViewer(0)}
-            className="mono mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] tracking-[0.06em] text-muted-foreground uppercase transition-colors hover:text-foreground"
+            className="mono mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[0.06em] text-muted-foreground uppercase transition-colors hover:text-foreground"
             style={{
               borderColor:
                 "color-mix(in oklab, var(--profile-accent, var(--violet)) 35%, transparent)",

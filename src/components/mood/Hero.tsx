@@ -37,7 +37,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
               measured precisely.
             </span>
           </h1>
-          <p className="mt-4 max-w-[62ch] text-[14px] text-muted-foreground">
+          <p className="mt-4 max-w-[62ch] text-[length:var(--text-callout)] text-muted-foreground">
             A command center for how you actually feel — trends, rhythms, correlations and anomalies
             derived only from what you have logged. Nothing invented, nothing assumed.
           </p>
@@ -47,7 +47,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           <button
             type="button"
             onClick={onCompose}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[13px] font-medium text-background transition-transform duration-500 hover:scale-[1.02]"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-500 hover:scale-[1.02]"
             style={{ background: "var(--grad-violet)", backgroundSize: "200% 200%", boxShadow: "var(--glow-violet)" }}
           >
             <span
@@ -66,7 +66,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
                 onClick={() => setRangeKey(r.key)}
                 aria-pressed={rangeKey === r.key}
                 className={cn(
-                  "mono rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.08em] transition-all duration-300",
+                  "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-300",
                   rangeKey === r.key
                     ? "border-violet/60 bg-[var(--dim-violet)] text-violet"
                     : "border-border text-faint hover:border-border-strong hover:text-muted-foreground",
@@ -77,7 +77,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             ))}
           </div>
           {rangeKey === "custom" ? (
-            <div className="mono flex items-center gap-2 text-[11px] text-faint">
+            <div className="mono flex items-center gap-2 text-[length:var(--text-meta)] text-faint">
               <input
                 type="date"
                 value={custom.start}
@@ -119,7 +119,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             suffix="%"
             accent="sage"
             sub={
-              <span className="mono text-[11px] text-faint">
+              <span className="mono text-[length:var(--text-meta)] text-faint">
                 avg daily change {a.volatility.avgDelta.toFixed(2)}
               </span>
             }
@@ -129,21 +129,21 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             raw={`${a.streak}`}
             suffix={a.streak === 1 ? "day" : "days"}
             accent="amber"
-            sub={<span className="mono text-[11px] text-faint">{a.consistency}% of days covered</span>}
+            sub={<span className="mono text-[length:var(--text-meta)] text-faint">{a.consistency}% of days covered</span>}
           />
           <Metric
             label="Current state"
             raw={a.days.length ? moodLabel(a.avg) : "—"}
             accent="sky"
             sub={
-              <span className="mono text-[11px] text-faint">
+              <span className="mono text-[length:var(--text-meta)] text-faint">
                 energy <CountUp value={a.avgEnergy} /> · stress <CountUp value={a.avgStress} />
               </span>
             }
           />
         </div>
         <div className="hairline" />
-        <div className="mono flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 text-[10px] uppercase tracking-[0.08em] text-faint">
+        <div className="mono flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint">
           <span className="flex items-center gap-2">
             <Sparkles className="size-3 text-violet" /> depth: {a.tier.current.label}
           </span>

@@ -250,10 +250,10 @@ export function TrackerModal({
         >
           <BloomIcon name="close" size={16} />
         </button>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="text-[length:var(--text-meta)] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Log {def.name}
         </p>
-        <p className="mt-2 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+        <p className="mt-2 text-center text-[length:var(--text-meta)] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           Target · {def.format(store.goals[def.goalKey])}
         </p>
 
@@ -288,7 +288,7 @@ export function TrackerModal({
                 variant={unit === u ? "default" : "outline"}
                 aria-pressed={unit === u}
                 onClick={() => switchUnit(u)}
-                className="rounded-full px-[18px] text-xs font-bold uppercase tracking-[0.08em]"
+                className="rounded-full px-[18px] text-xs font-bold uppercase tracking-[var(--tracking-meta)]"
               >
                 {u === "hrs" ? choice.altLabel : choice.baseLabel}
               </Button>

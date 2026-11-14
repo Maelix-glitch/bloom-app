@@ -76,7 +76,7 @@
 
 .ci-eyebrow {
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -133,7 +133,7 @@
   background: var(--ci-surface-2);
   color: var(--ci-text);
   font-family: var(--ci-font-sans);
-  font-size: 13px;
+  font-size: var(--text-support);
   font-weight: 500;
   padding: 9px 16px;
   cursor: pointer;
@@ -195,7 +195,7 @@
 
 .ci-btn--sm {
   padding: 8px 13px;
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 
 /* ---------------------------------- form ---------------------------------- */
@@ -210,7 +210,7 @@
   border: 1px solid var(--c-line, var(--ci-line-strong));
   background: var(--c-bg, transparent);
   color: var(--c-fg, var(--ci-text-soft));
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   font-weight: 500;
   letter-spacing: 0.01em;
   padding: 4px 10px;
@@ -254,13 +254,13 @@
 .ci-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: var(--text-support);
 }
 
 .ci-table th {
   text-align: left;
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -355,7 +355,7 @@
 .ci .ci-eyebrow {
   font-weight: 500;
   letter-spacing: 0.13em;
-  font-size: 10px;
+  font-size: var(--text-micro);
 }
 
 /* ==========================================================================
@@ -487,7 +487,7 @@
   margin-top: 3rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--tk2-rule);
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   line-height: 1.7;
   color: var(--ci-text-mute);
 }
@@ -512,7 +512,7 @@
 
 .at-kicker, .at-sectionhead {
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -530,7 +530,7 @@
 .at-lede {
   margin-top: 0.7rem;
   max-width: 52ch;
-  font-size: 14px;
+  font-size: var(--text-callout);
   line-height: 1.75;
   color: var(--ci-text-soft);
 }
@@ -545,7 +545,7 @@
   border: 1px solid var(--ci-hair-strong, color-mix(in oklab, var(--foreground) 0.16, transparent));
   border-radius: 999px;
   color: var(--ci-text-soft);
-  font-size: 12px;
+  font-size: var(--text-caption);
   letter-spacing: 0.01em;
   text-decoration: none;
   transition: border-color 0.18s ease, color 0.18s ease;
@@ -653,7 +653,7 @@
 
 .at-hour {
   font-family: var(--ci-font-mono);
-  font-size: 8px;
+  font-size: var(--text-micro);
   letter-spacing: 0.1em;
   text-anchor: middle;
   fill: var(--ci-text);
@@ -669,7 +669,7 @@
 
 .at-centre-label {
   font-family: var(--ci-font-mono);
-  font-size: 8.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-anchor: middle;
   text-transform: uppercase;
@@ -685,7 +685,7 @@
   padding: 0;
   list-style: none;
   font-family: var(--ci-font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -748,7 +748,7 @@
 
 .at-route-date {
   font-family: var(--ci-font-mono);
-  font-size: 8.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.06em;
   text-anchor: middle;
   fill: var(--ci-text);
@@ -782,7 +782,7 @@
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.35rem 0;
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   border-bottom: 1px dotted var(--tk2-rule);
 }
 
@@ -793,7 +793,7 @@
 
 .at-leaders li span:last-child {
   font-family: var(--ci-font-mono);
-  font-size: 11px;
+  font-size: var(--text-meta);
   color: var(--ci-text-soft);
 }
 
@@ -831,7 +831,7 @@
 
 .at-coord {
   font-family: var(--ci-font-mono);
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   font-variant-numeric: tabular-nums;
   color: var(--ci-text-soft);
 }
@@ -874,7 +874,7 @@
   gap: 0.5rem;
   margin-top: 0.35rem;
   font-family: var(--ci-font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.04em;
   color: var(--ci-text-mute);
 }
@@ -889,7 +889,7 @@
   border: 1px solid var(--tk2-rule);
   border-radius: 999px;
   font-family: var(--ci-font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   color: var(--ci-text-soft);
   cursor: pointer;
 }
@@ -903,7 +903,7 @@
   min-height: 1.2rem;
   margin-top: 1rem;
   font-family: var(--ci-font-mono);
-  font-size: 11px;
+  font-size: var(--text-meta);
   color: var(--ci-follicular);
 }
 
@@ -1000,7 +1000,7 @@
   padding: 0;
   list-style: none;
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   color: var(--ci-text-soft);
 }
 
@@ -1108,7 +1108,7 @@
 
 .at-finelist li, .at-observations li {
   padding: 0.35rem 0;
-  font-size: 13px;
+  font-size: var(--text-support);
   line-height: 1.7;
   color: var(--ci-text-soft);
 }
@@ -1121,7 +1121,7 @@
 
 .at-observations li span {
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   color: var(--ci-text-mute);
   padding-top: 0.3rem;
 }
@@ -1133,7 +1133,7 @@
 .at-fine {
   margin-top: 0.85rem;
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   line-height: 1.7;
   color: var(--ci-text-mute);
 }
@@ -1141,7 +1141,7 @@
 .at-loading {
   margin-top: 3rem;
   font-family: var(--ci-font-mono);
-  font-size: 11px;
+  font-size: var(--text-meta);
   color: var(--ci-text-mute);
 }
 
@@ -1233,7 +1233,7 @@
   gap: 0.25rem 0.75rem;
   margin: 0 0 0.6rem;
   font-family: var(--ci-font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -1241,7 +1241,7 @@
 
 .tk2-active-head span {
   font-family: inherit;
-  font-size: 11px;
+  font-size: var(--text-meta);
   letter-spacing: 0;
   text-transform: none;
   color: var(--ci-text-mute);
@@ -1267,7 +1267,7 @@
   background: transparent;
   color: var(--ci-text-mute);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-caption);
   cursor: pointer;
   transition:
   border-color 0.18s ease,
@@ -1355,7 +1355,7 @@
 
 .tk2-targets-grid label {
   font-family: var(--ci-font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -1376,7 +1376,7 @@
   background: transparent;
   color: var(--ci-text);
   font-family: var(--ci-font-mono);
-  font-size: 17px;
+  font-size: var(--text-section);
   font-variant-numeric: tabular-nums;
   transition: border-color 0.18s ease;
 }
@@ -1393,7 +1393,7 @@
 
 .tk2-target-field em {
   font-family: var(--ci-font-mono);
-  font-size: 10px;
+  font-size: var(--text-micro);
   font-style: normal;
   color: var(--ci-text-mute);
 }
@@ -1404,7 +1404,7 @@
   align-items: baseline;
   gap: 0.5rem 1rem;
   margin: 1rem 0 0;
-  font-size: 11.5px;
+  font-size: var(--text-meta);
   color: var(--ci-text-mute);
 }
 
@@ -1430,7 +1430,7 @@
 .tk2-badges-count {
   margin: 0 0 0.75rem;
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -1453,13 +1453,13 @@
 }
 
 .tk2-badge-name {
-  font-size: 12.5px;
+  font-size: var(--text-caption);
   color: var(--ci-text);
 }
 
 .tk2-badge-detail {
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   color: var(--ci-text-mute);
 }
 
@@ -1469,7 +1469,7 @@
   }
 
   .tk2-targets-grid input {
-    font-size: 15px;
+    font-size: var(--text-body);
   }
 }
 
@@ -1960,7 +1960,7 @@
   pointer-events: auto;
   background: var(--primary);
   color: var(--primary-foreground);
-  font-weight: 550;
+  font-weight: 600;
   text-transform: none;
   letter-spacing: 0.01em;
   font-size: 0.85rem;
@@ -2407,12 +2407,12 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   }
 
   .at-statement {
-    font-size: 17px;
+    font-size: var(--text-section);
     line-height: 1.45;
   }
 
   .tk2-footer {
-    font-size: 10.5px;
+    font-size: var(--text-micro);
     line-height: 1.6;
     margin-top: 2rem;
   }
@@ -2439,7 +2439,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .tk-heat-axis span {
   text-align: center;
-  font-size: 9px;
+  font-size: var(--text-micro);
   font-family: var(--ci-font-mono);
   opacity: 0.45;
 }

@@ -330,7 +330,7 @@ export function MetricsEntryModal({
             be a loud gradient band with bold white text.) */}
         <div className="relative border-b border-border px-5 pb-4 pt-5 sm:px-6">
           <div className="pr-12">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <p className="text-[length:var(--text-meta)] font-semibold uppercase tracking-[0.14em] text-primary">
               Reflect &amp; log today
             </p>
             <h2 className="mt-1.5 font-display text-[24px] leading-tight text-foreground">
@@ -366,7 +366,7 @@ export function MetricsEntryModal({
                       <span className={METRIC_COLOR[m.key].text}>
                         <BloomIcon name={m.key} size={16} />
                       </span>
-                      <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      <span className="text-[length:var(--text-meta)] font-semibold uppercase tracking-widest text-muted-foreground">
                         {m.label}
                       </span>
                     </div>
@@ -396,7 +396,7 @@ export function MetricsEntryModal({
                           tabIndex={-1}
                           className="w-full min-w-0 bg-transparent text-center text-xl font-semibold text-foreground outline-none placeholder:text-sm placeholder:font-normal placeholder:text-muted-foreground/60"
                         />
-                        <span className="mt-0.5 block text-[10px] tabular-nums text-muted-foreground">
+                        <span className="mt-0.5 block text-[length:var(--text-micro)] tabular-nums text-muted-foreground">
                           {m.unit}
                         </span>
                       </div>
@@ -411,7 +411,7 @@ export function MetricsEntryModal({
                       </button>
                     </div>
                     {err && (
-                      <p className="mt-1.5 flex items-start gap-1 text-[11px] leading-tight text-danger">
+                      <p className="mt-1.5 flex items-start gap-1 text-[length:var(--text-meta)] leading-tight text-danger">
                         <span className="mt-px shrink-0">
                           <BloomIcon name="error" size={12} />
                         </span>
@@ -425,7 +425,7 @@ export function MetricsEntryModal({
 
             {usualChips.length > 0 ? (
               <div className="mt-3 rounded-xl border border-dashed border-border p-3">
-                <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+                <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-widest text-muted-foreground">
                   Your usual · from your last logged days
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -434,7 +434,7 @@ export function MetricsEntryModal({
                       key={`usual-${def.key}`}
                       type="button"
                       onClick={() => setValue(def.key, strip(value / def.scale))}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors ${METRIC_COLOR[def.key].border} ${METRIC_COLOR[def.key].text}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[length:var(--text-meta)] font-medium transition-colors ${METRIC_COLOR[def.key].border} ${METRIC_COLOR[def.key].text}`}
                       title={`Fills ${def.label} with what you usually log — ${value} ${def.unit}`}
                     >
                       <Sparkles className="h-3 w-3" aria-hidden />
@@ -504,7 +504,9 @@ export function MetricsEntryModal({
                   <span className="text-sm font-bold text-foreground">
                     {filled(m.key) ? values[m.key] : "—"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">{m.unit}</span>
+                  <span className="text-[length:var(--text-micro)] text-muted-foreground">
+                    {m.unit}
+                  </span>
                 </div>
               ))}
             </div>

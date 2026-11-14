@@ -93,7 +93,9 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
     <section className="home-panel home-phase p-5 sm:p-6" aria-labelledby="home-phase-title">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Your cycle</p>
+          <p className="text-[length:var(--text-meta)] uppercase tracking-[0.2em] text-muted-foreground">
+            Your cycle
+          </p>
           <h2 id="home-phase-title" className="mt-1 font-display text-xl leading-tight sm:text-2xl">
             Day {analysis.cycleDay}
             {analysis.phaseLabel ? (
@@ -119,7 +121,9 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
       </div>
 
       {science ? (
-        <p className="mt-3 text-[13.5px] leading-relaxed text-muted-foreground">{science}</p>
+        <p className="mt-3 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
+          {science}
+        </p>
       ) : null}
 
       {easeAvailable ? (
@@ -144,12 +148,15 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {next ? (
-          <span className="home-chip text-[11px]" title="Estimated from your own record">
+          <span
+            className="home-chip text-[length:var(--text-meta)]"
+            title="Estimated from your own record"
+          >
             {next}
           </span>
         ) : null}
-        {hint ? <span className="home-chip text-[11px]">{hint}</span> : null}
-        <Link to="/cycle" className="home-chip text-[11px]">
+        {hint ? <span className="home-chip text-[length:var(--text-meta)]">{hint}</span> : null}
+        <Link to="/cycle" className="home-chip text-[length:var(--text-meta)]">
           Open Cycle
         </Link>
       </div>
@@ -173,7 +180,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
               {brief.map((row) => (
                 <div key={row.key}>
                   <dt
-                    className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                    className={`text-[length:var(--text-meta)] font-semibold uppercase tracking-[0.14em] ${
                       phaseKeyOf(analysis.phaseLabel) === row.key
                         ? "text-[var(--home-cycle,var(--gold))]"
                         : "text-muted-foreground/80"
@@ -182,7 +189,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
                     {row.label}
                     {phaseKeyOf(analysis.phaseLabel) === row.key ? " — today" : ""}
                   </dt>
-                  <dd className="mt-0.5 text-[12.5px] leading-relaxed text-muted-foreground">
+                  <dd className="mt-0.5 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
                     {row.line}
                   </dd>
                 </div>
