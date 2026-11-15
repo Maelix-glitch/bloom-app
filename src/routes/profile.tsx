@@ -35,6 +35,11 @@ import { seenStore } from "@/lib/stories/seen";
 import { objectUrl } from "@/lib/profile/profileService";
 import { resolveAvatar } from "@/lib/profile/presetAvatars";
 import { verificationStatus } from "@/lib/profile/verification";
+import {
+  loadVerificationFacts,
+  UNPROVEN_FACTS,
+  type VerificationFacts,
+} from "@/lib/profile/verificationService";
 import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { isStoryActive, type Milestone, type Story } from "@/lib/profile/types";
 import { StorySettings } from "@/components/stories/StorySettings";
@@ -153,6 +158,28 @@ function ProfilePage() {
     if (authState === "signed-in") setSignInOpen(false);
   }, [authState]);
 
+  /* Verification v2 facts — invite membership plus the stored record in
+     account_verifications. Read when the account settles and again
+     whenever the identity changes, so finishing the profile in the
+     editor is followed at once by the claim that records the tick (the
+     service asks; the server-side gates decide). Unproven until a read
+     lands, so the tick can appear late but never unproven. */
+  const [verificationFacts, setVerificationFacts] =
+    useState<VerificationFacts>(UNPROVEN_FACTS);
+  useEffect(() => {
+    if (authState !== "signed-in") {
+      setVerificationFacts(UNPROVEN_FACTS);
+      return;
+    }
+    let alive = true;
+    void loadVerificationFacts().then((facts) => {
+      if (alive) setVerificationFacts(facts);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [authState, identity]);
+
   // watch/unwatch state hydrates after mount (SSR-safe)
   useEffect(() => {
     const active = storiesByAge?.active ?? [];
@@ -230,19 +257,23 @@ function ProfilePage() {
   const avatarSrc = identity ? resolveAvatar(identity.identity.avatarPath, objectUrl) : null;
   const ambient = useAvatarAmbient(avatarSrc);
 
-  /* Account verification, derived from its two sources of truth: the auth
-     user's confirmed email (carried on the snapshot) and the profile
-     record's name + @username. No stored flag — see lib/profile/verification. */
+  /* Account verification (v2): the stored record is the tick, granted by
+     invitation only — the status combines the auth user's confirmed
+     email and the profile's name + @username (carried on the snapshot)
+     with the invite + record facts read above. See
+     lib/profile/verification. */
   const verification = useMemo(
     () =>
       identity
         ? verificationStatus({
+            invited: verificationFacts.invited,
             emailConfirmed: identity.emailConfirmed,
             displayName: identity.identity.displayName,
             username: identity.identity.username,
+            hasRecord: verificationFacts.hasRecord,
           })
         : null,
-    [identity],
+    [identity, verificationFacts],
   );
 
   /* the record — same stores the tracker pages read */
@@ -901,9 +932,11 @@ function ProfilePage() {
                   verification={
                     verification ??
                     verificationStatus({
+                      invited: false,
                       emailConfirmed: false,
                       displayName: null,
                       username: null,
+                      hasRecord: false,
                     })
                   }
                   privacy={identity.privacy}

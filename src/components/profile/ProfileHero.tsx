@@ -158,7 +158,7 @@ export function ProfileHero({
   /** The progression rank, shown beside the name (optional, real data only). */
   rankPill?: ReactNode;
   /**
-   * The derived verification status (see lib/profile/verification). The blue
+   * The verification status (see lib/profile/verification). The blue
    * tick renders beside the name only when it says verified — never as
    * decoration, and never from a hand-set boolean.
    */
