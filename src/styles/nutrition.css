@@ -146,6 +146,29 @@
   padding: var(--space-3) var(--space-4);
 }
 
+/* Meal banner (P3): one illustrative photograph per meal slot, heading
+   the meal's card. The frame's fixed ratio reserves the layout before
+   the image loads — and is the whole fallback if it fails: the img
+   drops out, the surface stays, nothing shifts. The photo is centred
+   on its subject; the wide crop keeps the plate, never a caption —
+   the suggestions beneath it carry the data, the picture never does. */
+.nut-meal-banner {
+  aspect-ratio: 21 / 9;
+  max-height: 220px;
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface-3);
+}
+.nut-meal-banner-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 /* --------------------------------- sheet -------------------------------- */
 
 .nut-group-label {

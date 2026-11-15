@@ -12,6 +12,10 @@
  * never derives a nutrient value. Logging a suggestion goes through the
  * hook into the lib's normal entry path, so the entry keeps the food's
  * provenance and records the plan as its source.
+ *
+ * P3: each meal card is headed by its slot's illustrative photograph
+ * (`MealBanner`). The picture is atmosphere, never data — it does not
+ * depict the suggestions beneath it, and its alt text says so.
  */
 
 import { useState } from "react";
@@ -22,7 +26,8 @@ import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/usePlan";
 import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
-import { provenanceLabel, type PlanMeal, type PlanSuggestion, type SuggestionLayer } from "@/lib/nutrition";
+import { provenanceLabel, type Meal, type PlanMeal, type PlanSuggestion, type SuggestionLayer } from "@/lib/nutrition";
+import { mealImage } from "@/lib/nutrition/mealImages";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { MEAL_LABEL, formatGrams, nutrientLine } from "./input";
 
@@ -43,6 +48,32 @@ function formatPlanDay(day: string): string {
 function joinNames(names: string[]): string {
   if (names.length <= 1) return names.join("");
   return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
+/**
+ * The meal's banner photograph (P3). The frame's fixed ratio reserves
+ * the layout before the image arrives — and is the whole fallback if
+ * it never does: a failed load drops the img and leaves the frame's
+ * surface in its place, so the card renders identically either way.
+ * Illustrative only — the alt text (owned by `mealImages`) names it an
+ * illustration, and no caption ties it to the suggestions below.
+ */
+function MealBanner({ meal }: { meal: Meal }) {
+  const image = mealImage(meal);
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className="nut-meal-banner">
+      {!failed ? (
+        <img
+          className="nut-meal-banner-img"
+          src={image.src}
+          alt={image.alt}
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      ) : null}
+    </div>
+  );
 }
 
 export function NutritionPlanSection() {
@@ -285,6 +316,7 @@ export function NutritionPlanSection() {
 
         {plan.meals.map((meal) => (
           <section key={meal.meal} aria-label={MEAL_LABEL[meal.meal]} className="nut-meal">
+            <MealBanner meal={meal.meal} />
             <div className="nut-meal-head">
               <h3 className="nut-meal-title">{MEAL_LABEL[meal.meal]}</h3>
               <span className="text-[length:var(--text-caption)] tabular-nums text-muted-foreground">

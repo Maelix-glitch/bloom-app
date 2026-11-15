@@ -47,6 +47,7 @@ import { toSafetyInput } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import { NutritionPlanSection } from "./NutritionPlanSection";
+import { MEAL_LABEL } from "./input";
 
 afterEach(cleanup);
 
@@ -215,5 +216,64 @@ describe("NutritionPlanSection", () => {
     render(<NutritionPlanSection />);
     expect(screen.getByText(/Since this plan was made/)).toBeTruthy();
     expect(screen.getByText(/your goal/)).toBeTruthy();
+  });
+});
+
+describe("NutritionPlanSection meal banners (P3)", () => {
+  /* The seeded profile answers no meals-per-day, so the plan carries
+     all four slots — one banner each. */
+  const SLOTS = [
+    ["breakfast", "Illustration — a balanced breakfast"],
+    ["lunch", "Illustration — a balanced lunch"],
+    ["dinner", "Illustration — a balanced dinner"],
+    ["snack", "Illustration — a balanced snack"],
+  ] as const;
+
+  function renderPlan() {
+    seedAssessment(COMPLETE);
+    const utils = render(<NutritionPlanSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    return utils;
+  }
+
+  it("heads every meal card with its own slot's illustration", () => {
+    const { container } = renderPlan();
+    const srcs = new Set<string>();
+    for (const [meal, alt] of SLOTS) {
+      const img = screen.getByAltText(alt) as HTMLImageElement;
+      expect(img.getAttribute("src")).toContain(`meal-${meal}`);
+      expect(img.getAttribute("loading")).toBe("lazy");
+      srcs.add(img.getAttribute("src")!);
+      /* The banner heads its own meal's section, above the meal title. */
+      const section = container.querySelector(
+        `section[aria-label="${MEAL_LABEL[meal]}"]`,
+      )!;
+      expect(section.querySelector(".nut-meal-banner")).not.toBeNull();
+      expect(section.contains(img)).toBe(true);
+    }
+    expect(srcs.size).toBe(SLOTS.length);
+    expect(container.querySelectorAll(".nut-meal-banner")).toHaveLength(SLOTS.length);
+  });
+
+  it("keeps the reserved banner frame when an image fails to load", () => {
+    const { container } = renderPlan();
+    const img = screen.getByAltText("Illustration — a balanced breakfast");
+    const frame = img.closest(".nut-meal-banner")!;
+    fireEvent.error(img);
+    /* The img drops out; the frame — the layout reservation — stays,
+       so the card renders identically and nothing shifts. */
+    expect(screen.queryByAltText("Illustration — a balanced breakfast")).toBeNull();
+    expect(frame.isConnected).toBe(true);
+    expect(container.querySelectorAll(".nut-meal-banner")).toHaveLength(SLOTS.length);
+  });
+
+  it("never captions the illustration as the suggested foods", () => {
+    const { container } = renderPlan();
+    expect(container.querySelectorAll("figcaption")).toHaveLength(0);
+    const imgs = container.querySelectorAll(".nut-meal-banner-img");
+    expect(imgs).toHaveLength(SLOTS.length);
+    for (const img of imgs) {
+      expect(img.getAttribute("alt")).toMatch(/^Illustration — /);
+    }
   });
 });
