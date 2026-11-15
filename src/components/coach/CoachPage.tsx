@@ -6,6 +6,7 @@ import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { isSignedIn, useSession } from "@/hooks/useSession";
 import {
   coachErrorMessage,
+  photoNoteFromReply,
   readCoachRecord,
   useCoachSystem,
   type CoachMemory,
@@ -519,11 +520,21 @@ export function CoachPage() {
           fellBackBecause: response.fellBackBecause,
         };
 
+        /* The photo's memory: when this answer read a photo, record what
+           the reply identified against the message that carried it, so
+           the thread keeps the identification after the image itself is
+           gone from the payload (see photoNoteFromReply). A regenerated
+           answer refreshes the note to the newest identification. */
+        const photoNote = media ? photoNoteFromReply(paragraphs) : undefined;
+
         coach.setMessages((current) => {
           const cleaned = replaceMessageId
             ? current.filter((m) => m.id !== replaceMessageId)
             : current;
-          return [...cleaned, coachMessage];
+          const noted = photoNote
+            ? cleaned.map((m) => (m.id === answerTo.id ? { ...m, photoNote } : m))
+            : cleaned;
+          return [...noted, coachMessage];
         });
         setFreshId(coachMessage.id);
 

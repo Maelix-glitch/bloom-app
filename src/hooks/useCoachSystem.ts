@@ -68,6 +68,17 @@ export interface CoachMessage {
   sources: string[];
   blocks: CoachBlock[];
   attachment?: CoachAttachmentPayload | undefined;
+  /**
+   * What Bloom identified in this message's photo, in one line — taken
+   * from the vision reply itself when it landed, never written any other
+   * way. This is the photo's memory: the image bytes are only ever sent
+   * with the turn that carries them, so without this note a follow-up
+   * ("what was the dish?") reached a coach whose history held the words
+   * around the photo but nothing of the photo — and it answered as if
+   * no image had ever been shared (owner-reported live, 2026-11-15).
+   * Persisted with the message, so it survives reloads with the thread.
+   */
+  photoNote?: string | undefined;
   status?: "sent" | "local" | "error" | undefined;
   /** Which brain produced this — shown quietly when it matters. */
   source?: "edge" | "local" | undefined;
@@ -412,6 +423,88 @@ function attachmentToMedia(
   if (!/^(image\/(jpeg|png|webp|gif)|application\/pdf)$/.test(type)) return undefined;
   if (!attachment.base64Data) return undefined;
   return { mediaType: type, dataBase64: attachment.base64Data };
+}
+
+/**
+ * The photo note for a message, distilled from the vision reply itself:
+ * its first paragraph — which for a photo answer is the identification
+ * ("That looks like a paneer thali…") — collapsed to one line and capped,
+ * so the note can ride in later history without crowding it. Taken from
+ * the actual reply, never composed anywhere else: if the reply said
+ * nothing, there is no note. Returns undefined when the reply is empty.
+ */
+export function photoNoteFromReply(paragraphs: string[]): string | undefined {
+  const first = paragraphs.map((p) => p.replace(/\s+/g, " ").trim()).find((p) => p.length > 0);
+  if (!first) return undefined;
+  return first.length > 300 ? `${first.slice(0, 299).trimEnd()}…` : first;
+}
+
+/**
+ * What the thread record can honestly say about a message's photo: the
+ * recorded identification, or "" when a vision file was shared but no
+ * identification was recorded (its reply failed, or the thread predates
+ * photo notes). null when the message carried no photo at all.
+ */
+function photoFact(message: CoachMessage): string | null {
+  if (message.role === "coach") return null;
+  const note = message.photoNote?.trim();
+  if (note) return note;
+  const type = message.attachment?.type.toLowerCase() ?? "";
+  if (/^(image\/(jpeg|png|webp|gif)|application\/pdf)$/.test(type)) return "";
+  return null;
+}
+
+/**
+ * The thread as the edge function hears it: the last eight usable turns,
+ * words only — plus the one thing words alone used to lose. A message
+ * that carried a photo says so, in a bracketed note carrying the
+ * recorded identification when there is one, so a follow-up about the
+ * photo is answered from the thread's own record instead of "I'm not
+ * sure — I don't see an image". And when the photo turn itself has
+ * scrolled out of the eight-turn window, the latest photo fact is
+ * restated on the newest turn rather than dropped: a photo shared in a
+ * thread stays part of that thread's working memory.
+ */
+export function toHistoryTurns(
+  messages: CoachMessage[],
+): Array<{ role: "user" | "assistant"; content: string }> {
+  const mapped = messages
+    .filter((m) => m.paragraphs.length > 0 || m.text)
+    .map((m) => {
+      const fact = photoFact(m);
+      let content = m.text ?? m.paragraphs.join("\n\n");
+      if (fact !== null) {
+        content += fact
+          ? `\n\n[Photo shared with this message — Bloom identified: ${fact}]`
+          : `\n\n[A photo was shared with this message.]`;
+      }
+      return {
+        turn: {
+          role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
+          content,
+        },
+        fact,
+      };
+    });
+  const recent = mapped.slice(-8);
+  if (recent.length > 0 && recent.every((entry) => entry.fact === null)) {
+    const earlier = [...mapped].reverse().find((entry) => entry.fact !== null);
+    if (earlier) {
+      const last = recent[recent.length - 1]!;
+      recent[recent.length - 1] = {
+        fact: last.fact,
+        turn: {
+          ...last.turn,
+          content:
+            last.turn.content +
+            (earlier.fact
+              ? `\n\n[Earlier in this thread the person shared a photo — Bloom identified: ${earlier.fact}]`
+              : `\n\n[Earlier in this thread the person shared a photo.]`),
+        },
+      };
+    }
+  }
+  return recent.map((entry) => entry.turn);
 }
 
 export function coachErrorMessage(error: unknown, fallback?: string): string {
@@ -908,13 +1001,10 @@ export function useCoachSystem() {
           mode: request.mode,
           record,
           context,
-          history: request.history
-            .filter((m) => m.paragraphs.length > 0 || m.text)
-            .slice(-8)
-            .map((m) => ({
-              role: m.role === "coach" ? ("assistant" as const) : ("user" as const),
-              content: m.text ?? m.paragraphs.join("\n\n"),
-            })),
+          /* The thread's turns, with photo facts carried (see
+             toHistoryTurns) — a photo shared earlier in the thread
+             stays in its working memory. */
+          history: toHistoryTurns(request.history),
           /* The picker's choice is honoured; "Best available" (auto) walks
              the best-first chain on the function. */
           provider: activeProvider().id,

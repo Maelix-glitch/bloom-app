@@ -98,6 +98,30 @@ export function budgetFor(question: string, opts: { greeting?: boolean } = {}): 
 }
 
 /**
+ * The floor a photo (or PDF) answer stands on, whatever the question's
+ * brevity says. A photo reply has a fixed shape — name what the photo
+ * shows, then the ≈ estimate line, then one short note — and a "brief"
+ * budget (one paragraph) amputated it to the estimate line alone: the
+ * person who asked "what is this dish" received only calories, protein,
+ * carbs and fat, because the identification paragraph was trimmed away
+ * before the reply was ever shown or stored (owner-reported live,
+ * 2026-11-15). So when media rides along, the register rises to at
+ * least "normal" — which also keeps the edge function's own length rule
+ * in step, since the register is what the client sends — and the reply
+ * keeps at least three paragraphs and 150 words. Plans and full answers
+ * already have more room and pass through untouched.
+ */
+export function withMediaFloor(budget: Budget): Budget {
+  if (budget.register === "plan" || budget.register === "full") return budget;
+  return {
+    register: "normal",
+    maxParagraphs: Math.max(budget.maxParagraphs, 3),
+    maxWords: Math.max(budget.maxWords, 150),
+    allowBlocks: true,
+  };
+}
+
+/**
  * Trim an answer to its budget.
  *
  * Cuts whole paragraphs first — a truncated sentence reads as a bug — and only
