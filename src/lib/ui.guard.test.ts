@@ -1480,3 +1480,65 @@ describe("UI guard: overnight S1 — Today alignment rhythm", () => {
     expect(STYLES.text).toContain("padding: 20px var(--space-5) 16px");
   });
 });
+
+describe("UI guard: legacy engines — layered surfaces carry a no-color-mix fallback", () => {
+  /* Washed-out / blank-panels report (2026-11-15, Vivo Y70, stock-era
+     browser): Bloom's glass system leans on color-mix (Chrome 111+),
+     and an engine without it drops a declaration containing color-mix
+     WHOLE. A source census found 362 background rules whose only
+     background was a color-mix line — but the shipped build rescues
+     almost all of them: Lightning transpiles a simple two-colour mix
+     into a solid first-colour rule ahead of the mix rule (verified in
+     the built CSS for .app-mobile-bar, nav.app-mobile-nav,
+     .cx-node-disc, .conn-notice and friends). What it does NOT rescue
+     is a LAYERED background — a var() gradient or image layer combined
+     with a color-mix layer is emitted as-is, so on a legacy engine the
+     whole background is invalid and the surface renders fully
+     transparent. Those layered structural surfaces are pinned here:
+     each carries a plain background declaration BEFORE its layered
+     color-mix one, so legacy engines paint a solid, correct surface
+     and modern engines still get the layered glass. A surface joins
+     this list only when its background is layered AND structural. */
+  const FILES: Record<string, string> = {
+    sheet: "styles/bloom-sheet.css",
+    coach: "styles/coach.css",
+  };
+  const CRITICAL: [keyof typeof FILES, string][] = [
+    ["sheet", ".bsheet-panel"],
+    ["sheet", ".bsheet-backdrop"],
+    ["coach", ".coach-composer"],
+    ["coach", ".coach-composer:focus-within"],
+  ];
+
+  function ruleBodies(text: string, selector: string): string[] {
+    const out: string[] = [];
+    let from = 0;
+    for (;;) {
+      const i = text.indexOf(`\n${selector} {`, from);
+      if (i < 0) return out;
+      const body = text.slice(i, text.indexOf("}", i));
+      out.push(body);
+      from = i + 1;
+    }
+  }
+
+  it("paints a plain background before the color-mix one on every critical surface", () => {
+    for (const [key, selector] of CRITICAL) {
+      const file = ALL_SOURCES.find((f) => f.rel === FILES[key])!;
+      const bodies = ruleBodies(file.text, selector).filter((b) => /background[^;]*color-mix/.test(b));
+      expect(bodies.length, `${FILES[key]} ${selector}: no color-mix background rule found`).toBeGreaterThan(0);
+      for (const body of bodies) {
+        /* comments out first: several rules explain the fallback in prose
+           that itself names backgrounds and carries semicolons */
+        const decls = body
+          .replace(/\/\*[\s\S]*?\*\//g, "")
+          .split(";")
+          .map((d, i) => (i === 0 ? d.slice(d.indexOf("{") + 1) : d).trim());
+        const bgIdx = decls.findIndex((d) => /^background/.test(d));
+        const cmIdx = decls.findIndex((d) => /^background/.test(d) && d.includes("color-mix"));
+        const fallback = decls.slice(bgIdx, cmIdx).some((d) => /^background/.test(d) && !d.includes("color-mix"));
+        expect(fallback, `${FILES[key]} ${selector}: color-mix background has no plain fallback before it`).toBe(true);
+      }
+    }
+  });
+});

@@ -2030,6 +2030,9 @@
   /* one subtle hairline — the composer is a single object, never a box
      containing another box */
   border: 1px solid rgb(240 236 226 / 0.1);
+  /* no-color-mix fallback (legacy-engine rule, see bloom-sheet.css
+     .bsheet-panel): a layered background is not build-rescued — solid first */
+  background: var(--surface-2);
   background:
     linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.014)),
     color-mix(in srgb, var(--surface-2) 92%, transparent);
@@ -2048,6 +2051,9 @@
    No ring is drawn around anything inside. */
 .coach-composer:focus-within {
   border-color: rgb(185 167 233 / 0.32);
+  /* no-color-mix fallback (legacy-engine rule, see bloom-sheet.css
+     .bsheet-panel) */
+  background: var(--surface-2);
   background:
     linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.016)),
     color-mix(in srgb, var(--surface-2) 94%, transparent);
