@@ -11,6 +11,11 @@ import { useEffect, useState } from "react";
 
 import { hasSupabaseConfig, supabase, watchAuth } from "@/lib/supabase";
 import { normalizeAccent, type BloomAccent } from "@/lib/profile/types";
+import {
+  loadVerificationFacts,
+  UNPROVEN_FACTS,
+  type VerificationFacts,
+} from "@/lib/profile/verificationService";
 import { syncPrefs } from "@/lib/prefs";
 
 export const PROFILE_CHANGED_EVENT = "bloom:profile-changed";
@@ -22,14 +27,22 @@ export type RailIdentity = {
   avatarPath: string | null;
   accent: BloomAccent;
   bio: string | null;
-  /** The @username from the same profile row — half of verification. */
+  /** The @username from the same profile row — one verification step. */
   username: string | null;
   /**
    * Whether the auth session's user has a confirmed email
-   * (`email_confirmed_at` set) — the other half of verification. Read from
-   * the local session, no extra request. False until proven.
+   * (`email_confirmed_at` set) — another verification step. Read from the
+   * local session, no extra request. False until proven.
    */
   emailConfirmed: boolean;
+  /**
+   * The stored half of verification (verification v2): whether the
+   * account email is on the invite list and whether a record exists in
+   * `account_verifications`. Read via the verification service in the
+   * same pass as the profile row; UNPROVEN (both false) until it lands,
+   * so the rail's tick can appear late but never show unproven.
+   */
+  verification: VerificationFacts;
 };
 
 const SIGNED_OUT: RailIdentity = {
@@ -40,6 +53,7 @@ const SIGNED_OUT: RailIdentity = {
   bio: null,
   username: null,
   emailConfirmed: false,
+  verification: UNPROVEN_FACTS,
 };
 
 /**
@@ -130,6 +144,11 @@ export function useRailIdentity(): RailIdentity {
       } catch {
         /* unproven stays unproven */
       }
+      /* The stored verification facts ride the same read. The service
+         never throws and degrades to UNPROVEN, and it claims the record
+         server-side when the invite gate passes — so a person who just
+         completed their profile sees the tick from this very pass. */
+      const verification = await loadVerificationFacts();
       const { data, error } = await supabase
         .from("profiles")
         .select("display_name, username, avatar_path, accent, bio")
@@ -137,7 +156,7 @@ export function useRailIdentity(): RailIdentity {
         .maybeSingle();
       if (!alive) return;
       if (error || !data) {
-        publishIdentity({ ...SIGNED_OUT, status: "signed-in", emailConfirmed });
+        publishIdentity({ ...SIGNED_OUT, status: "signed-in", emailConfirmed, verification });
         return;
       }
       const row = data as Row;
@@ -150,6 +169,7 @@ export function useRailIdentity(): RailIdentity {
         bio: row.bio?.trim() || null,
         username: row.username?.trim() || null,
         emailConfirmed,
+        verification,
       });
     }
 

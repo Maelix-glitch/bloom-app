@@ -178,15 +178,20 @@ function RailProfile() {
   const id = useRailIdentity();
   const wallet = useWallet();
   const signedIn = id.status === "signed-in";
-  /* The blue tick beside the rail name, from the same derived criteria as
-     the Profile hero (confirmed email + name + @username) — the badge
-     component itself renders nothing unless the status is verified. The
-     rail already maps a missing or placeholder name to null, which the
-     criteria read as "no name yet" — the conservative direction. */
+  /* The blue tick beside the rail name, from the same status as the
+     Profile hero — verification v2: an invite-gated record in
+     account_verifications plus the confirmed email and name + @username
+     it was granted for. The badge component itself renders nothing
+     unless the status is verified. The rail already maps a missing or
+     placeholder name to null, which the criteria read as "no name yet"
+     — the conservative direction, as are the unproven invite/record
+     facts the identity carries until its verification read lands. */
   const verification = verificationStatus({
+    invited: id.verification.invited,
     emailConfirmed: id.emailConfirmed,
     displayName: id.displayName,
     username: id.username,
+    hasRecord: id.verification.hasRecord,
   });
   // While the session is still restoring, the name holds the same neutral
   // placeholder the tagline below already uses — painting "Sign in" here

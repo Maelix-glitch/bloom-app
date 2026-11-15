@@ -33,6 +33,7 @@ const checking: RailIdentity = {
   bio: null,
   username: null,
   emailConfirmed: false,
+  verification: { invited: false, hasRecord: false },
 };
 
 const signedIn: RailIdentity = {
@@ -43,6 +44,7 @@ const signedIn: RailIdentity = {
   bio: null,
   username: "maelix",
   emailConfirmed: true,
+  verification: { invited: true, hasRecord: true },
 };
 
 const signedOut: RailIdentity = { ...checking, status: "signed-out" };
