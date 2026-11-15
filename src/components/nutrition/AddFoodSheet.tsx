@@ -36,6 +36,7 @@ import {
   type Meal,
 } from "@/lib/nutrition";
 import { MEAL_LABEL, mealForTime, nutrientLine, parseForgivingNumber } from "./input";
+import { FoodPhoto } from "./FoodPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 
 type View = "search" | "portion" | "custom";
@@ -417,7 +418,7 @@ function SearchStep({
           <h3 className="nut-group-label">USDA FoodData Central</h3>
           <ul className="mt-2 divide-y divide-border-subtle">
             {reference.map((food) => (
-              <FoodRow key={food.id} food={food} onChoose={() => onChoose(food, "search")} />
+              <FoodRow key={food.id} food={food} photo onChoose={() => onChoose(food, "search")} />
             ))}
           </ul>
         </section>
@@ -444,11 +445,23 @@ function SearchStep({
   );
 }
 
-function FoodRow({ food, onChoose }: { food: Food; onChoose: () => void }) {
+function FoodRow({
+  food,
+  onChoose,
+  photo = false,
+}: {
+  food: Food;
+  onChoose: () => void;
+  /** Reference-set rows show the food's real photograph (P3-R); the
+   *  user's own foods and recents never do — Bloom has no photograph
+   *  of a food it did not curate. */
+  photo?: boolean;
+}) {
   const labelled = labelledFoodNutrients(food);
   return (
     <li>
       <button type="button" className="nut-food-row" onClick={onChoose}>
+        {photo ? <FoodPhoto foodId={food.id} name={food.name} /> : null}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
             {food.name}

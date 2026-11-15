@@ -102,6 +102,27 @@
   padding: var(--space-3) 0;
 }
 
+/* ------------------------- food photographs --------------------------- */
+
+/* A reference food's real photograph (P3-R): a fixed square, reserved
+   before the image arrives so rows never jump; absent entirely — no
+   box, no placeholder — for foods without a photograph. */
+.nut-food-thumb {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-3);
+  object-fit: cover;
+}
+.nut-credit {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
 /* --------------------------- provenance badge --------------------------- */
 
 .nut-badge {

@@ -24,6 +24,7 @@ import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
 import { provenanceLabel, type PlanMeal, type PlanSuggestion, type SuggestionLayer } from "@/lib/nutrition";
 import { ProvenanceBadge } from "./ProvenanceBadge";
+import { FoodPhoto } from "./FoodPhoto";
 import { MEAL_LABEL, formatGrams, nutrientLine } from "./input";
 
 /** Layer display order and labels for a composed main meal (P2). Snack
@@ -179,6 +180,7 @@ export function NutritionPlanSection() {
     const isLogged = logged.has(key);
     return (
       <li key={key} className="nut-entry">
+        <FoodPhoto foodId={suggestion.foodId} name={suggestion.name} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-[length:var(--text-callout)] font-medium text-foreground">
