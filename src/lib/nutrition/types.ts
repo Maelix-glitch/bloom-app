@@ -65,7 +65,7 @@ export type Meal = "breakfast" | "lunch" | "dinner" | "snack";
 
 export const MEALS: readonly Meal[] = ["breakfast", "lunch", "dinner", "snack"];
 
-export type EntrySource = "search" | "custom" | "coach_photo" | "recent";
+export type EntrySource = "search" | "custom" | "coach_photo" | "recent" | "plan";
 
 export type Amount = { grams: number } | { servings: number; servingLabel: string };
 

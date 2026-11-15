@@ -146,3 +146,34 @@ export interface SafetyInput {
 
 export const SAFETY_DISCLAIMER =
   "Bloom Vitalis is a wellness tool, not a medical device. Safety states describe what Bloom will show you, not a medical assessment.";
+
+/**
+ * Rules that block on ABSENCE — the person was never asked, which is an
+ * information gap, not a finding about them. Every other blocking rule
+ * reports something substantive (a symptom, a history, a condition).
+ *
+ * Surfaces that fall back to a secondary target source when the gated
+ * engine refuses (the Nutrition tab; plan generation) share this one
+ * distinction: a block carrying ONLY absence rules is treated like a
+ * completeness refusal, while a block carrying any substantive rule is
+ * final — no fallback may resurrect a number the gate refused for a real
+ * reason. Defined here, beside the rule ids themselves, so the two
+ * consumers can never drift apart on what "absence" means.
+ */
+export const ABSENCE_BLOCK_RULE_IDS: ReadonlySet<SafetyRuleId> = new Set([
+  "age_missing",
+  "safety_answers_missing",
+]);
+
+/** True when a non-empty set of blocking rules is absence-only. */
+export function isAbsenceOnlyBlock(blockingRuleIds: readonly string[]): boolean {
+  return (
+    blockingRuleIds.length > 0 &&
+    blockingRuleIds.every((id) => ABSENCE_BLOCK_RULE_IDS.has(id as SafetyRuleId))
+  );
+}
+
+/** True when any blocking rule reports something substantive. */
+export function hasSubstantiveBlock(blockingRuleIds: readonly string[]): boolean {
+  return blockingRuleIds.some((id) => !ABSENCE_BLOCK_RULE_IDS.has(id as SafetyRuleId));
+}

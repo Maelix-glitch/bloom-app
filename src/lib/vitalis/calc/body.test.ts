@@ -51,9 +51,27 @@ describe("vitalis body adapter", () => {
     expect(legacy?.goal).toBe("lose");
   });
 
-  it("treats recomp and general health as maintenance, never as a deficit", () => {
-    expect(toLegacyBodyProfile(profile({ goal: "recomp" }))?.goal).toBe("maintain");
+  it("treats general health as maintenance, never as a deficit", () => {
     expect(toLegacyBodyProfile(profile({ goal: "general_health" }))?.goal).toBe("maintain");
+  });
+
+  it("gives recomposition its own profile: maintenance energy, highest protein", () => {
+    const p = profile({ goal: "recomp" });
+    expect(toLegacyBodyProfile(p)?.goal).toBe("recomp");
+    const outcome = targetsFor(p, safetyOf(p), "2026-06-01");
+    if (!outcome.ok) throw new Error(`expected targets, got ${outcome.reason}`);
+    const legacy = bodyTargetsOf(toLegacyBodyProfile(p)!, "2026-06-01")!;
+    /* The adapter still matches the legacy module field for field — the
+       recomp profile lives in the engine, not in a second derivation. */
+    expect(outcome.targets.calorieTargetKcal).toBe(legacy.calories);
+    expect(outcome.targets.proteinG).toBe(legacy.proteinG);
+    expect(outcome.targets.calorieTargetKcal).toBe(outcome.targets.tdeeKcal);
+    expect(outcome.targets.calorieDelta).toBe(0);
+    expect(outcome.targets.proteinG).toBe(Math.round(82 * 2.2));
+    const maintain = targetsFor(profile({ goal: "maintain" }), safetyOf(profile({ goal: "maintain" })), "2026-06-01");
+    if (!maintain.ok) throw new Error("expected maintenance targets");
+    expect(outcome.targets.calorieTargetKcal).toBe(maintain.targets.calorieTargetKcal);
+    expect(outcome.targets.proteinG).toBeGreaterThan(maintain.targets.proteinG);
   });
 
   it("uses the legacy BMI calculation, so the two cannot drift", () => {

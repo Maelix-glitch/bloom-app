@@ -7,6 +7,8 @@
  * N3: the USDA reference set (generated data + search + licence gate).
  * N5: the Coach photo-estimate handoff (`coachLog`) and the Overview
  * synthesis input (`overviewInput`). No UI lives here either.
+ * P1: goal-based plan generation (`plan`) — deterministic, safety-gated,
+ * suggestions only from the user's own foods and the reference set.
  */
 
 export * from "./types";
@@ -21,3 +23,4 @@ export * from "./log";
 export * from "./usdaReference";
 export * from "./coachLog";
 export * from "./overviewInput";
+export * from "./plan";

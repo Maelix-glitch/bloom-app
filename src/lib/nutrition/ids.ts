@@ -1,5 +1,5 @@
 /** Id generation, following the storyService/cycle precedent. */
-export function newNutritionId(prefix: "food" | "entry"): string {
+export function newNutritionId(prefix: "food" | "entry" | "plan"): string {
   const rand =
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()

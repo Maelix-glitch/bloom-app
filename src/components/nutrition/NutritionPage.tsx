@@ -28,6 +28,7 @@ import {
   type LogEntry,
 } from "@/lib/nutrition";
 import { AddFoodSheet } from "./AddFoodSheet";
+import { NutritionPlanSection } from "./NutritionPlanSection";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { MEAL_LABEL, amountLabel, formatGrams, nutrientLine } from "./input";
 
@@ -187,6 +188,10 @@ export function NutritionPage() {
           </p>
         )}
       </section>
+
+      {/* Today's plan — a plan is built for a day, so it belongs to the
+          today view; other days are the record, not the plan. */}
+      {isToday ? <NutritionPlanSection /> : null}
 
       {/* Actions */}
       <div className="mt-5 flex flex-wrap items-center gap-2">
