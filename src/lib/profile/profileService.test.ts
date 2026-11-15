@@ -42,7 +42,13 @@ const h = vi.hoisted(() => {
   const supabase = {
     auth: {
       getUser: async () => ({
-        data: { user: { email: "ivy@bloom.app", created_at: "2026-01-05T00:00:00Z" } },
+        data: {
+          user: {
+            email: "ivy@bloom.app",
+            created_at: "2026-01-05T00:00:00Z",
+            email_confirmed_at: "2026-01-05T00:10:00Z",
+          },
+        },
       }),
       refreshSession: async () => {
         refreshes += 1;
@@ -110,6 +116,9 @@ describe("loadMyProfile", () => {
     });
     expect(snap.email).toBe("ivy@bloom.app");
     expect(snap.memberSince).toBe("2026-01-05T00:00:00Z");
+    /* The verification input rides the same auth read: a set
+       email_confirmed_at on the auth user is a confirmed email. */
+    expect(snap.emailConfirmed).toBe(true);
     /* banner_path must be requested, or it can never come back */
     expect(h.selectOf("profiles")).toContain("banner_path");
   });

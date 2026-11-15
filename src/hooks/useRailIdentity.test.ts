@@ -31,6 +31,8 @@ const checking: RailIdentity = {
   avatarPath: null,
   accent: "violet",
   bio: null,
+  username: null,
+  emailConfirmed: false,
 };
 
 const signedIn: RailIdentity = {
@@ -39,6 +41,8 @@ const signedIn: RailIdentity = {
   avatarPath: null,
   accent: "violet",
   bio: null,
+  username: "maelix",
+  emailConfirmed: true,
 };
 
 const signedOut: RailIdentity = { ...checking, status: "signed-out" };

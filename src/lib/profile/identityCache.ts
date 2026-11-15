@@ -56,6 +56,9 @@ function normalize(snapshot: unknown): MyProfileSnapshot | null {
     },
     memberSince: typeof raw["memberSince"] === "string" ? raw["memberSince"] : null,
     email: typeof raw["email"] === "string" ? raw["email"] : null,
+    /* A snapshot written before this field existed reads as unconfirmed —
+       the fresh read behind it restores the real answer within the page. */
+    emailConfirmed: raw["emailConfirmed"] === true,
   };
 }
 

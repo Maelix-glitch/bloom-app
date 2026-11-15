@@ -22,6 +22,14 @@ export type RailIdentity = {
   avatarPath: string | null;
   accent: BloomAccent;
   bio: string | null;
+  /** The @username from the same profile row — half of verification. */
+  username: string | null;
+  /**
+   * Whether the auth session's user has a confirmed email
+   * (`email_confirmed_at` set) — the other half of verification. Read from
+   * the local session, no extra request. False until proven.
+   */
+  emailConfirmed: boolean;
 };
 
 const SIGNED_OUT: RailIdentity = {
@@ -30,6 +38,8 @@ const SIGNED_OUT: RailIdentity = {
   avatarPath: null,
   accent: "violet",
   bio: null,
+  username: null,
+  emailConfirmed: false,
 };
 
 /**
@@ -55,6 +65,7 @@ export function nullAnswerEndsSession(
 
 type Row = {
   display_name: string | null;
+  username: string | null;
   avatar_path: string | null;
   accent: string | null;
   bio: string | null;
@@ -109,14 +120,24 @@ export function useRailIdentity(): RailIdentity {
     let userId: string | null = null;
 
     async function read(uid: string) {
+      /* The session is local state — reading it costs no request and gives
+         the verification half the profile row cannot: whether the account
+         email is confirmed. A failed read leaves it unproven (false). */
+      let emailConfirmed = false;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        emailConfirmed = Boolean(sessionData.session?.user?.email_confirmed_at);
+      } catch {
+        /* unproven stays unproven */
+      }
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, avatar_path, accent, bio")
+        .select("display_name, username, avatar_path, accent, bio")
         .eq("id", uid)
         .maybeSingle();
       if (!alive) return;
       if (error || !data) {
-        publishIdentity({ ...SIGNED_OUT, status: "signed-in" });
+        publishIdentity({ ...SIGNED_OUT, status: "signed-in", emailConfirmed });
         return;
       }
       const row = data as Row;
@@ -127,6 +148,8 @@ export function useRailIdentity(): RailIdentity {
         avatarPath: row.avatar_path,
         accent: normalizeAccent(row.accent),
         bio: row.bio?.trim() || null,
+        username: row.username?.trim() || null,
+        emailConfirmed,
       });
     }
 

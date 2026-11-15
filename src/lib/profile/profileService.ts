@@ -57,6 +57,14 @@ export interface MyProfileSnapshot {
   privacy: ProfilePrivacy;
   memberSince: string | null;
   email: string | null;
+  /**
+   * Whether the auth user has confirmed this email (`email_confirmed_at`
+   * set on the Supabase auth user, read in the same `getUser()` call that
+   * supplies `email`). One half of account verification — see
+   * `lib/profile/verification.ts`. False whenever the auth read could not
+   * answer: an unproven confirmation must never read as a proven one.
+   */
+  emailConfirmed: boolean;
 }
 
 const FALLBACK_IDENTITY: ProfileIdentity = {
@@ -138,10 +146,12 @@ export async function loadMyProfile(userId: string): Promise<MyProfileSnapshot> 
      reason the profile fails, and with no project configured it throws. */
   let fallbackEmail: string | null = null;
   let fallbackMemberSince: string | null = null;
+  let emailConfirmed = false;
   try {
     const { data: authData } = await supabase.auth.getUser();
     fallbackEmail = authData.user?.email ?? null;
     fallbackMemberSince = authData.user?.created_at ?? null;
+    emailConfirmed = Boolean(authData.user?.email_confirmed_at);
   } catch (error) {
     report("profile:auth", error);
   }
@@ -151,6 +161,7 @@ export async function loadMyProfile(userId: string): Promise<MyProfileSnapshot> 
     privacy: FALLBACK_PRIVACY,
     memberSince: fallbackMemberSince,
     email: fallbackEmail,
+    emailConfirmed,
   };
 
   const readRow = (columns: string): Promise<SelectResult> =>
