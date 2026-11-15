@@ -11,6 +11,7 @@ import { LevelCard } from "@/components/home/LevelCard";
 import { MoodCard } from "@/components/home/MoodCard";
 import { TopBar } from "@/components/home/TopBar";
 import { WeekChart } from "@/components/home/WeekChart";
+import { ConnectionConstellation } from "@/components/home/ConnectionConstellation";
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
 import { summaryOf } from "@/lib/assessment/summary";
@@ -460,6 +461,15 @@ function TodayPage() {
               />
             </div>
           </div>
+
+          {/* The connection constellation (overnight Slice 2) — a NEW
+              design, closing the stack: it synthesises the very rows
+              above it (habits, mood, the week) into the correlations
+              between them, so it reads as the reflection after the
+              actions. Full width, behind the same latched settled gate
+              as the Overview pieces (overviewReady) plus its own cycle
+              store's settling, folded in by the component itself. */}
+          <ConnectionConstellation ready={overviewReady} />
 
           <footer className="flex items-center justify-center gap-2 pt-2 text-[length:var(--text-caption)] text-muted-foreground">
             <Leaf className="size-3" aria-hidden />
