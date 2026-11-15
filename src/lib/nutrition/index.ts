@@ -4,6 +4,7 @@
  * N1: types, strict parsers, pure math, target comparison, labelling.
  * N2: prefs storage (`health.foods.v1` / `health.foodlog.v1`), custom-food
  * CRUD, food-log operations, recents. No UI lives here.
+ * N3: the USDA reference set (generated data + search + licence gate).
  */
 
 export * from "./types";
@@ -15,3 +16,4 @@ export * from "./targets";
 export * from "./store";
 export * from "./foods";
 export * from "./log";
+export * from "./usdaReference";
