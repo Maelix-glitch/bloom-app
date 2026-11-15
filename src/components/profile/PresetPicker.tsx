@@ -1,7 +1,7 @@
 /**
  * The photographs Bloom offers instead of two grey initials.
  *
- * A horizontal rail rather than a grid: a grid of nine photos dominates the
+ * A horizontal rail rather than a grid: a grid of photos dominates the
  * sheet and makes "upload your own" look like the afterthought, whereas a rail
  * reads as a suggestion you can flick past. Each swatch borrows its own
  * dominant hue for the selected ring, so the choice looks intentional rather

@@ -82,6 +82,7 @@ const CACHED: MyProfileSnapshot = {
   privacy: { profileVisibility: "private", storyVisibility: "private" },
   memberSince: "2026-01-05T00:00:00Z",
   email: "ivy@bloom.app",
+  emailConfirmed: true,
 };
 
 const FRESH: MyProfileSnapshot = {

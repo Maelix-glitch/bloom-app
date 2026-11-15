@@ -78,4 +78,44 @@ describe("the preset set itself", () => {
       expect(p.tint).toMatch(/^#[0-9a-f]{6}$/i);
     }
   });
+
+  /* The curated family (2026-11-15): dark botanical, dusk light, gold
+     warmth — and nothing else. The retired ids stay retired: `bokeh` read
+     as stock speckle with a violet tint its photo does not contain, and
+     `lake` was a blue daylight landscape in a gold-and-ink app. */
+  it("is exactly the curated set, with the off-palette defaults retired", () => {
+    expect(PRESET_AVATARS.map((p) => p.id)).toEqual([
+      "leaf",
+      "botanical",
+      "petal",
+      "branch",
+      "window",
+      "dusk",
+      "candle",
+      "goldenhour",
+    ]);
+    expect(presetFor("preset:bokeh")).toBeNull();
+    expect(presetFor("preset:lake")).toBeNull();
+  });
+
+  it("serves only imagery already in the repo — no hotlinked defaults", () => {
+    for (const p of PRESET_AVATARS) {
+      expect(p.src).not.toMatch(/^https?:\/\//);
+      expect(p.src.length).toBeGreaterThan(0);
+    }
+    /* The one public-path member comes from the Rewards art campaign. */
+    expect(presetFor("preset:goldenhour")?.src).toBe("/rewards/art/golden-hour.jpg");
+  });
+
+  it("labels and tints match what the photos actually show", () => {
+    /* flower-detail.jpg is a white bloom on dark leaves — not a pink petal. */
+    const bloom = presetFor("preset:petal")!;
+    expect(bloom.label).toBe("White bloom");
+    expect(bloom.tint).not.toBe("#e0a9c8");
+    /* No tint may claim the violet/blue the curated family excludes. */
+    for (const p of PRESET_AVATARS) {
+      expect(p.tint.toLowerCase()).not.toBe("#a58bff");
+      expect(p.tint.toLowerCase()).not.toBe("#8fb6d9");
+    }
+  });
 });

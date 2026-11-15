@@ -181,6 +181,8 @@ export function useProfileSpace() {
           privacy: { profileVisibility: "private", storyVisibility: "private" },
           memberSince: null,
           email: null,
+          /* Signed out: there is no confirmed account email to verify. */
+          emailConfirmed: false,
         },
       });
       setProfileProblem(null);
@@ -230,6 +232,9 @@ export function useProfileSpace() {
           privacy: { profileVisibility: "private", storyVisibility: "private" },
           memberSince: null,
           email: null,
+          /* The device copy cannot prove the email is confirmed — the tick
+             waits for the fresh account read rather than guessing. */
+          emailConfirmed: false,
         };
       }
       return null;

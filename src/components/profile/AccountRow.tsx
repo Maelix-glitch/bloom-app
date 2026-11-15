@@ -20,7 +20,10 @@
 import { useState } from "react";
 import {
   Archive,
+  BadgeCheck,
   Bell,
+  Check,
+  ChevronDown,
   ChevronRight,
   Clock,
   Download,
@@ -43,6 +46,8 @@ import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useSound } from "@/hooks/useSound";
 import { SEX_LABEL } from "@/lib/onboarding/profileKind";
+import { VERIFIED_BLUE, type VerificationStatus } from "@/lib/profile/verification";
+import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 
 import type {
   AccountDetails,
@@ -266,6 +271,112 @@ function PersonalizationSection() {
   );
 }
 
+/**
+ * Verification — the settings face of the blue tick.
+ *
+ * The status is derived (lib/profile/verification): confirmed email + a
+ * complete basic profile. Verified, the row says so with the tick itself.
+ * Not yet, the row is expandable and each remaining step is named with what
+ * actually completes it — the profile step points at the existing
+ * edit-profile control rather than duplicating it. Nothing here can set or
+ * fake the state; it only reports it.
+ */
+function VerificationRow({
+  verification,
+  onEdit,
+}: {
+  verification: VerificationStatus;
+  onEdit: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  if (verification.verified) {
+    return (
+      <div className="pf-row" data-testid="pf-row-verification">
+        <span className="pf-row-icon" aria-hidden>
+          <VerifiedBadge status={verification} size={15} />
+        </span>
+        <span className="pf-row-text">
+          <span className="pf-row-label">Verification</span>
+          <span className="pf-row-hint">Email confirmed and profile complete.</span>
+        </span>
+        <span className="pf-row-value">Verified</span>
+        <span />
+      </div>
+    );
+  }
+
+  const remaining = verification.steps.filter((s) => !s.done);
+  return (
+    <>
+      <button
+        type="button"
+        className="pf-row"
+        data-testid="pf-row-verification"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="pf-row-icon" aria-hidden>
+          <BadgeCheck className="size-3.5" style={{ color: VERIFIED_BLUE }} />
+        </span>
+        <span className="pf-row-text">
+          <span className="pf-row-label">Verification</span>
+          <span className="pf-row-hint">
+            {verification.remaining === 1
+              ? "1 step left for the blue tick"
+              : `${verification.remaining} steps left for the blue tick`}
+          </span>
+        </span>
+        <span className="pf-row-value">
+          {verification.remaining} step{verification.remaining === 1 ? "" : "s"} left
+        </span>
+        {open ? (
+          <ChevronDown className="pf-row-chevron size-3.5" aria-hidden />
+        ) : (
+          <ChevronRight className="pf-row-chevron size-3.5" aria-hidden />
+        )}
+      </button>
+      {open ? (
+        <div className="pf-confirm" data-testid="pf-verification-steps">
+          <ul className="flex flex-col gap-2">
+            {verification.steps.map((step) => (
+              <li key={step.id} className="flex items-start gap-2.5">
+                <span
+                  aria-hidden
+                  className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border border-border"
+                  style={
+                    step.done
+                      ? { background: VERIFIED_BLUE, borderColor: VERIFIED_BLUE, color: "#fff" }
+                      : undefined
+                  }
+                >
+                  {step.done ? <Check className="size-2.5" strokeWidth={3.5} /> : null}
+                </span>
+                <span className="min-w-0 text-[length:var(--text-caption)] leading-snug">
+                  <span className={step.done ? "text-muted-foreground" : "text-foreground"}>
+                    {step.label}
+                    {step.done ? " — done" : ""}
+                  </span>
+                  {!step.done ? (
+                    <span className="block text-muted-foreground">{step.guidance}</span>
+                  ) : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {remaining.some((s) => s.id === "profile") ? (
+            <div className="pf-confirm-actions">
+              <button type="button" className="pf-confirm-btn" onClick={onEdit}>
+                Edit profile
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
   violet: "Violet",
   sky: "Sky",
@@ -277,6 +388,7 @@ const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
 export function AccountRow({
   identity,
   account,
+  verification,
   privacy,
   stories,
   isSignedIn,
@@ -297,6 +409,8 @@ export function AccountRow({
 }: {
   identity: ProfileIdentity;
   account: AccountDetails;
+  /** Derived verification status — the Account group's Verification row. */
+  verification: VerificationStatus;
   privacy: ProfilePrivacy;
   stories: Story[];
   highlights: HighlightItem[];
@@ -328,6 +442,7 @@ export function AccountRow({
           label="Email"
           value={account.email ?? "not connected"}
         />
+        <VerificationRow verification={verification} onEdit={onEdit} />
         <Row
           icon={<Clock className="size-3.5" />}
           label="Tracking since"

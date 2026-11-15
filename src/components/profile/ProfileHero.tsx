@@ -32,8 +32,10 @@ import {
 import { cn } from "@/lib/utils";
 import { formatRemaining } from "@/lib/profile/journey";
 import type { ProfileIdentity } from "@/lib/profile/types";
+import type { VerificationStatus } from "@/lib/profile/verification";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { StoryRing } from "@/components/profile/StoryRing";
+import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 
 /** Avatar diameter: 96 on phones, 124 above — mirrors --pf-avatar in profile.css. */
 function useAvatarSize(): number {
@@ -132,6 +134,7 @@ export function ProfileHero({
   completion,
   isSignedIn = true,
   rankPill = null,
+  verification = null,
 }: {
   identity: ProfileIdentity;
   story: HeroStoryState;
@@ -154,6 +157,12 @@ export function ProfileHero({
   isSignedIn?: boolean;
   /** The progression rank, shown beside the name (optional, real data only). */
   rankPill?: ReactNode;
+  /**
+   * The derived verification status (see lib/profile/verification). The blue
+   * tick renders beside the name only when it says verified — never as
+   * decoration, and never from a hand-set boolean.
+   */
+  verification?: VerificationStatus | null;
 }) {
   const ringState: "none" | "unseen" | "seen" | "prompt" =
     story.count > 0 ? (story.unseen > 0 ? "unseen" : "seen") : "prompt";
@@ -284,6 +293,13 @@ export function ProfileHero({
           <div className="min-w-0">
             <h1 className="pf-name">
               {identity.displayName}
+              {verification ? (
+                <VerifiedBadge
+                  status={verification}
+                  size={20}
+                  className="ml-2 inline-flex translate-y-[-2px] align-middle"
+                />
+              ) : null}
               {rankPill}
             </h1>
             <div className="pf-handle">

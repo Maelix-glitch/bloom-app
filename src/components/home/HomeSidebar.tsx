@@ -9,7 +9,9 @@ import { useRailIdentity } from "@/hooks/useRailIdentity";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useWallet } from "@/hooks/useWallet";
 import { rankFor } from "@/lib/progression/ranks";
+import { verificationStatus } from "@/lib/profile/verification";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import { BloomLogo } from "@/components/BloomLogo";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { PointsChip } from "@/components/system/PointsChip";
@@ -176,6 +178,16 @@ function RailProfile() {
   const id = useRailIdentity();
   const wallet = useWallet();
   const signedIn = id.status === "signed-in";
+  /* The blue tick beside the rail name, from the same derived criteria as
+     the Profile hero (confirmed email + name + @username) — the badge
+     component itself renders nothing unless the status is verified. The
+     rail already maps a missing or placeholder name to null, which the
+     criteria read as "no name yet" — the conservative direction. */
+  const verification = verificationStatus({
+    emailConfirmed: id.emailConfirmed,
+    displayName: id.displayName,
+    username: id.username,
+  });
   // While the session is still restoring, the name holds the same neutral
   // placeholder the tagline below already uses — painting "Sign in" here
   // flashed guest copy at signed-in users on every cold load.
@@ -214,8 +226,9 @@ function RailProfile() {
           ) : null}
         </span>
         <span className="min-w-0">
-          <span className="block truncate text-[length:var(--text-callout)] font-medium leading-[var(--leading-callout)] text-foreground">
-            {name}
+          <span className="flex items-center gap-1.5 text-[length:var(--text-callout)] font-medium leading-[var(--leading-callout)] text-foreground">
+            <span className="truncate">{name}</span>
+            {signedIn ? <VerifiedBadge status={verification} size={14} /> : null}
           </span>
           <span className="block truncate text-[length:var(--text-caption)] leading-[var(--leading-caption)] text-muted-foreground">
             {line}

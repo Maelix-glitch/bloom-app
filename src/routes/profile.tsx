@@ -34,6 +34,7 @@ import { EMOTION_MAP } from "@/lib/mood/types";
 import { seenStore } from "@/lib/stories/seen";
 import { objectUrl } from "@/lib/profile/profileService";
 import { resolveAvatar } from "@/lib/profile/presetAvatars";
+import { verificationStatus } from "@/lib/profile/verification";
 import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { isStoryActive, type Milestone, type Story } from "@/lib/profile/types";
 import { StorySettings } from "@/components/stories/StorySettings";
@@ -228,6 +229,21 @@ function ProfilePage() {
 
   const avatarSrc = identity ? resolveAvatar(identity.identity.avatarPath, objectUrl) : null;
   const ambient = useAvatarAmbient(avatarSrc);
+
+  /* Account verification, derived from its two sources of truth: the auth
+     user's confirmed email (carried on the snapshot) and the profile
+     record's name + @username. No stored flag — see lib/profile/verification. */
+  const verification = useMemo(
+    () =>
+      identity
+        ? verificationStatus({
+            emailConfirmed: identity.emailConfirmed,
+            displayName: identity.identity.displayName,
+            username: identity.identity.username,
+          })
+        : null,
+    [identity],
+  );
 
   /* the record — same stores the tracker pages read */
   const moodEntries = useMemo(
@@ -531,6 +547,7 @@ function ProfilePage() {
               {/* cover · avatar · name · actions */}
               <ProfileHero
                 identity={identity.identity}
+                verification={verification}
                 rankPill={<RankPill points={habits.points} />}
                 ambient={ambient}
                 pulse={record.pulse}
@@ -881,6 +898,14 @@ function ProfilePage() {
                 <AccountRow
                   identity={identity.identity}
                   account={{ email: identity.email, memberSince: identity.memberSince }}
+                  verification={
+                    verification ??
+                    verificationStatus({
+                      emailConfirmed: false,
+                      displayName: null,
+                      username: null,
+                    })
+                  }
                   privacy={identity.privacy}
                   stories={allStories}
                   highlights={highlights}
