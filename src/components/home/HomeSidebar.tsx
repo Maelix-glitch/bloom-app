@@ -49,8 +49,9 @@ export const HOME_NAV: {
  * with a gold tick on the rail's left edge and a gold glyph; the points
  * card in its richer form (RailPointsCard: balance, percent to the next
  * rank, gold-gradient track); Profile below it; and at the foot, over
- * Bloom's own botanical photograph, the sync line and the serif-italic
- * tagline above the identity strip.
+ * Bloom's own botanical photograph, the serif-italic tagline above the
+ * identity strip. (Sync state lives in the Today TopBar pill alone —
+ * the rail used to repeat it, and the duplicate was removed.)
  *
  * Alignment: the brand row is laid out exactly like a nav link (the same
  * 17px icon slot at the same x, the same gap), so the mark sits on the icon
@@ -136,9 +137,8 @@ export function HomeSidebar() {
 
       {/* Botanical footer: Bloom's own fern photograph, local to the foot
           of the rail now (it spanned the whole rail before the reskin),
-          under a dark gradient scrim. Over it: the sync line — Bloom's
-          "Synced with your account" element, kept — and the serif-italic
-          tagline, then the identity strip on a blurred dark band. */}
+          under a dark gradient scrim. Over it: the serif-italic tagline,
+          then the identity strip on a blurred dark band. */}
       <div className="relative mt-auto overflow-hidden">
         <div
           aria-hidden="true"
@@ -155,8 +155,7 @@ export function HomeSidebar() {
         </div>
         <div aria-hidden="true" className="app-sidebar-scrim absolute inset-0" />
         <div className="app-sidebar-quote relative px-7 pb-5 pt-20">
-          <RailSyncLine />
-          <p className="mt-3 font-display text-[length:var(--text-section)] italic leading-snug text-muted-foreground">
+          <p className="font-display text-[length:var(--text-section)] italic leading-snug text-muted-foreground">
             A calmer you, a brighter tomorrow.
           </p>
         </div>
@@ -167,42 +166,11 @@ export function HomeSidebar() {
 }
 
 /**
- * The sync line at the head of the botanical footer — the same honest
- * states the Today toolbar's sync line speaks, from the one wallet store:
- * the account balance read means the record is synced with the account;
- * a failed read says the device number is standing in; signed out, the
- * record lives on this device. Settled states only, like every Bloom sync
- * line — while the account read is in flight there is no line at all.
- */
-function RailSyncLine() {
-  const wallet = useWallet();
-  if (wallet.loading) return null;
-  const synced = wallet.source === "account";
-  const text = synced
-    ? "Synced with your account"
-    : wallet.degraded
-      ? "Account couldn't load — showing this device"
-      : "Saved on this device";
-  return (
-    <p
-      data-testid="rail-sync-line"
-      className="flex items-center gap-2 text-[length:var(--text-meta)] font-medium uppercase leading-[var(--leading-meta)] tracking-[var(--tracking-meta)] text-faint-strong"
-    >
-      <span
-        aria-hidden="true"
-        className={`h-[5px] w-[5px] shrink-0 rounded-full ${synced ? "bg-sage" : "bg-faint-strong"}`}
-      />
-      {text}
-    </p>
-  );
-}
-
-/**
  * The identity block at the foot of the rail, on the botanical footer's
  * blurred dark band: the avatar (with the sage dot while the account is
- * signed in — the synced state the line above names), the name, the
- * current rank from the real progression balance, and the settings
- * affordance. Signed out it invites you in, as before.
+ * signed in), the name, the current rank from the real progression
+ * balance, and the settings affordance. Signed out it invites you in,
+ * as before.
  */
 function RailProfile() {
   const id = useRailIdentity();

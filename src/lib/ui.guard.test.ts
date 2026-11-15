@@ -1176,6 +1176,7 @@ describe("UI guard: reskin chrome (R-2)", () => {
      appear). The chrome stays mounted ONCE by the root (PR #90): no page
      may render AppNav again. */
   const SIDEBAR = ALL_SOURCES.find((f) => f.rel === "components/home/HomeSidebar.tsx")!;
+  const TOPBAR = ALL_SOURCES.find((f) => f.rel === "components/home/TopBar.tsx")!;
   const CARD = ALL_SOURCES.find((f) => f.rel === "components/home/RailPointsCard.tsx")!;
   const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
   const RESPONSIVE = ALL_SOURCES.find((f) => f.rel === "styles/responsive.css")!;
@@ -1214,15 +1215,25 @@ describe("UI guard: reskin chrome (R-2)", () => {
     expect(fill.body).toContain("transition: width var(--motion-page) var(--ease-out-expo)");
   });
 
-  it("keeps Bloom's own footer: fern asset, tagline, synced line, rank identity strip", () => {
+  it("keeps Bloom's own footer: fern asset, tagline, rank identity strip", () => {
     expect(SIDEBAR.text).toContain("@/assets/home/sidebar-botanical.jpg");
     expect(SIDEBAR.text).toContain("A calmer you, a brighter tomorrow.");
-    expect(SIDEBAR.text).toContain("Synced with your account");
-    expect(SIDEBAR.text).toContain('data-testid="rail-sync-line"');
     expect(SIDEBAR.text).toContain('data-testid="rail-profile"');
     expect(SIDEBAR.text).not.toContain("Day 14");
     expect(STYLES.text).toContain(".app-sidebar-scrim");
     expect(STYLES.text).toContain(".app-sidebar-profile");
+  });
+
+  it("speaks sync once: the TopBar pill owns it, the rail never repeats it", () => {
+    /* The rail's botanical footer used to repeat the TopBar pill's
+       "Synced with your account" line — one state, two voices on the
+       same screen. The pill (with its honest pulse) is the only sync
+       surface on Today; the rail must never grow the line back. */
+    expect(SIDEBAR.text).not.toContain("Synced with your account");
+    expect(SIDEBAR.text).not.toContain("rail-sync-line");
+    expect(SIDEBAR.text).not.toContain("RailSyncLine");
+    expect(TOPBAR.text).toContain('data-testid="home-sync-pill"');
+    expect(TOPBAR.text).toContain("home-sync-dot--live");
   });
 
   it("floats the mobile nav as a pill with a white 7% active item", () => {
@@ -1427,5 +1438,45 @@ describe("UI guard: mobile pass — sheets never swallow the screen", () => {
   it("composes Overview figures no-wrap with the unit as a caption", () => {
     expect(OVERVIEW.text).toContain("whitespace-nowrap");
     expect(OVERVIEW.text).toContain("UNIT_FACT");
+  });
+});
+
+describe("UI guard: overnight S1 — Today alignment rhythm", () => {
+  /* Today polish pass: the stack's geometry runs on ONE rhythm token.
+     The paired rows used to hardcode gap-6 (24px) while .home-stack's
+     own gap is --bloom-section-gap (24px on phones, 32px from sm) — so
+     at desktop the column gutter disagreed with the row rhythm, and in
+     the tablet range cards inside a row sat closer than the rows
+     themselves. The hairline floated on one-off margins, the hero
+     photo panel wore a 28px radius against every card's 24px, and the
+     assessment band's padding left its content 8px deeper than the
+     other cards on phones. These pins keep the rhythm single-sourced. */
+  const TODAY = ALL_SOURCES.find((f) => f.rel === "routes/index.tsx")!;
+  const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+
+  it("gaps every paired Today row with the section-gap token", () => {
+    expect(TODAY.text).not.toContain("grid gap-6 lg:grid-cols-12");
+    const rows = TODAY.text.match(/grid gap-\[var\(--bloom-section-gap\)\] lg:grid-cols-12/g) ?? [];
+    expect(rows.length).toBe(3);
+  });
+
+  it("sits the hairline in the section rhythm, not on one-off margins", () => {
+    expect(TODAY.text).toContain('className="home-hairline"');
+    expect(TODAY.text).not.toContain("home-hairline mt-");
+    const rule = STYLES.text.slice(STYLES.text.indexOf("\n.home-hairline {"));
+    expect(rule.slice(0, rule.indexOf("}"))).toContain("margin-top: var(--bloom-section-gap)");
+  });
+
+  it("wears the card radius on the hero photo panel", () => {
+    expect(TODAY.text).not.toContain("rounded-[1.75rem]");
+    expect(TODAY.text).toContain("overflow-hidden rounded-card border");
+    expect(TODAY.text).toContain("absolute inset-0 rounded-card ring-1");
+  });
+
+  it("keeps the assessment band's effective inset on the card rhythm", () => {
+    const band = STYLES.text.slice(STYLES.text.indexOf("\n.home-band {"));
+    const bandBody = band.slice(0, band.indexOf("}"));
+    expect(bandBody).toContain("padding: var(--space-3) var(--space-3) var(--space-2)");
+    expect(STYLES.text).toContain("padding: 20px var(--space-5) 16px");
   });
 });
