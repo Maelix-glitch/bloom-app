@@ -45,6 +45,14 @@
  *     labelled from the row itself (amount + unit/modifier/description) with
  *     the gram weight explicit. Foods without portion rows ship with no
  *     servings — an absent serving is honest; an invented one is not.
+ *   • **Classification (P2).** Every pick also carries a food group and
+ *     dietary-pattern identity flags (containsEgg / containsDairy /
+ *     isFlesh / isFish), pinned per FDC id in CLASSIFICATION below. These
+ *     are identity facts about the curated food itself — eggs and dairy
+ *     are identifiable foods in this set — assigned here, at the data
+ *     layer, so the plan composer filters patterns on ingredients and
+ *     never guesses from a name at runtime. A pick with no classification
+ *     entry fails generation loudly, exactly like a renamed pick.
  *   • **Fingerprint.** The output carries a SHA-256 over the canonicalised
  *     foods array (the evidence seed's canonicalisation, reused), so any
  *     hand-edit of the generated file is detectable by `--check` and by the
@@ -177,6 +185,95 @@ const PICKS = [
   { fdcId: 334247, dataType: "Foundation", expect: "Sugars, granulated" },
   { fdcId: 173469, dataType: "SR Legacy", expect: "Vinegar, cider" },
 ];
+
+/* --------------------- the pinned classification (P2) --------------------- */
+
+/**
+ * One food group per pick (the ICMR-NIN DGI-2024 group framework as
+ * operationalised for the plan composer), plus the ingredient-identity
+ * flags dietary patterns filter on. Groups follow each food's culinary
+ * identity in this set: butter and ghee sit in fats_oils (their role in a
+ * meal is fat) but keep containsDairy — they are milk-derived, and a vegan
+ * pattern must exclude them; garlic and ginger are `other` (aromatics,
+ * never a vegetable portion); meats, fish and pantry items are `other`,
+ * with isFlesh / isFish carrying the pattern facts. Peas sit with the
+ * pulses, where the pick list's own legume run places them.
+ */
+const cls = (group, flags = {}) => ({
+  group,
+  containsEgg: false,
+  containsDairy: false,
+  isFlesh: false,
+  isFish: false,
+  ...flags,
+});
+const DAIRY = { containsDairy: true };
+const EGG = { containsEgg: true };
+const FLESH = { isFlesh: true };
+const FISH = { isFlesh: true, isFish: true };
+
+const CLASSIFICATION = {
+  // Cereals & grains (incl. flours and cornmeal)
+  2512381: cls("cereals_grains"), 2512380: cls("cereals_grains"),
+  2710825: cls("cereals_grains"), 2346396: cls("cereals_grains"),
+  2346397: cls("cereals_grains"), 2512379: cls("cereals_grains"),
+  2710842: cls("cereals_grains"), 2512378: cls("cereals_grains"),
+  168874: cls("cereals_grains"), 170284: cls("cereals_grains"),
+  168893: cls("cereals_grains"), 168936: cls("cereals_grains"),
+  168867: cls("cereals_grains"), 168886: cls("cereals_grains"),
+  // Pulses & legumes (dry)
+  2644283: cls("pulses_legumes"), 174284: cls("pulses_legumes"),
+  2644282: cls("pulses_legumes"), 173734: cls("pulses_legumes"),
+  175193: cls("pulses_legumes"), 173745: cls("pulses_legumes"),
+  175199: cls("pulses_legumes"), 174270: cls("pulses_legumes"),
+  172436: cls("pulses_legumes"), 174256: cls("pulses_legumes"),
+  174259: cls("pulses_legumes"), 170419: cls("pulses_legumes"),
+  // Dairy (milk, yogurt, cheeses)
+  322892: cls("dairy", DAIRY), 322559: cls("dairy", DAIRY),
+  2259793: cls("dairy", DAIRY), 330137: cls("dairy", DAIRY),
+  328637: cls("dairy", DAIRY), 329370: cls("dairy", DAIRY),
+  325036: cls("dairy", DAIRY), 328841: cls("dairy", DAIRY),
+  323444: cls("dairy", DAIRY),
+  // Fats & oils (butter and ghee are milk-derived fats: dairy flag set)
+  173410: cls("fats_oils", DAIRY), 171314: cls("fats_oils", DAIRY),
+  171413: cls("fats_oils"), 330458: cls("fats_oils"),
+  172336: cls("fats_oils"), 171411: cls("fats_oils"),
+  171410: cls("fats_oils"), 171025: cls("fats_oils"),
+  171016: cls("fats_oils"),
+  // Eggs
+  171287: cls("eggs", EGG), 172183: cls("eggs", EGG), 172184: cls("eggs", EGG),
+  // Meat & poultry — group `other`, flesh flag carries the pattern fact
+  2646170: cls("other", FLESH), 2646171: cls("other", FLESH),
+  168608: cls("other", FLESH), 2514745: cls("other", FLESH),
+  2646168: cls("other", FLESH), 174370: cls("other", FLESH),
+  2514747: cls("other", FLESH),
+  // Fish & seafood — flesh, and fish for the pescatarian pattern
+  2684441: cls("other", FISH), 2684444: cls("other", FISH),
+  2684442: cls("other", FISH), 333374: cls("other", FISH),
+  334194: cls("other", FISH), 175179: cls("other", FISH),
+  // Vegetables
+  2346401: cls("vegetables"), 2346404: cls("vegetables"),
+  790646: cls("vegetables"), 170457: cls("vegetables"),
+  2258586: cls("vegetables"), 321900: cls("vegetables"),
+  2685573: cls("vegetables"), 2346407: cls("vegetables"),
+  2346406: cls("vegetables"), 2710826: cls("vegetables"),
+  168462: cls("vegetables"), 170427: cls("vegetables"),
+  170108: cls("vegetables"), 1750347: cls("vegetables"),
+  2346400: cls("vegetables"), 2685577: cls("vegetables"),
+  // Fruits
+  173944: cls("fruits"), 171688: cls("fruits"), 746771: cls("fruits"),
+  169910: cls("fruits"), 327699: cls("fruits"), 174683: cls("fruits"),
+  171705: cls("fruits"), 167746: cls("fruits"), 167765: cls("fruits"),
+  169124: cls("fruits"), 746773: cls("fruits"),
+  // Nuts & seeds
+  2346393: cls("nuts_seeds"), 2346394: cls("nuts_seeds"),
+  2515374: cls("nuts_seeds"), 172430: cls("nuts_seeds"),
+  2515381: cls("nuts_seeds"), 2515380: cls("nuts_seeds"),
+  // Other — aromatics and pantry (honey, salt, sugar, vinegar, garlic, ginger)
+  1104647: cls("other"), 169231: cls("other"),
+  169640: cls("other"), 173468: cls("other"),
+  334247: cls("other"), 173469: cls("other"),
+};
 
 /* ------------------------------ source data ------------------------------- */
 
@@ -339,6 +436,12 @@ function extractFood(pick, tables) {
   if (per100g.sodiumMg !== undefined && !inRange(per100g.sodiumMg, 40000)) {
     throw new Error(`pick ${pick.fdcId} (${pick.expect}): sodium outside the parser's sane range`);
   }
+  const classification = CLASSIFICATION[pick.fdcId];
+  if (!classification) {
+    throw new Error(
+      `pick ${pick.fdcId} (${pick.expect}): no pinned classification — classify it in CLASSIFICATION before shipping`,
+    );
+  }
   return {
     id: `usda-${pick.fdcId}`,
     name: row.description,
@@ -350,6 +453,7 @@ function extractFood(pick, tables) {
       dataType: pick.dataType,
       label: "USDA FoodData Central",
     },
+    classification,
   };
 }
 
@@ -400,6 +504,9 @@ async function generate() {
     " * Licence: CC0 1.0 (evidence catalogue source `usda-fooddata-central`).",
     " * Every nutrient value below is a value USDA published for that food,",
     " * per 100 g; fibre and sodium appear only where the source row has them.",
+    " * Each entry also carries a food group + dietary-pattern classification,",
+    " * pinned per FDC id in the generator — identity facts about the curated",
+    " * food, not values read from USDA's tables.",
     " */",
     "",
     `export const USDA_REFERENCE_RETRIEVED_ON = ${JSON.stringify(retrievedOn)};`,
@@ -431,6 +538,27 @@ async function check() {
   if (raw.length !== PICKS.length) {
     console.error(`check failed: data file holds ${raw.length} foods, the pick list has ${PICKS.length}`);
     process.exit(1);
+  }
+  // The classification table must cover exactly the pick list — no pick
+  // unclassified, no classification pinned to a food that is not shipped.
+  const pickIds = new Set(PICKS.map((p) => String(p.fdcId)));
+  for (const id of pickIds) {
+    if (!CLASSIFICATION[Number(id)]) {
+      console.error(`check failed: pick ${id} has no pinned classification`);
+      process.exit(1);
+    }
+  }
+  for (const id of Object.keys(CLASSIFICATION)) {
+    if (!pickIds.has(id)) {
+      console.error(`check failed: classification pinned for ${id}, which is not a pick`);
+      process.exit(1);
+    }
+  }
+  for (const food of raw) {
+    if (!food.classification || !food.classification.group) {
+      console.error(`check failed: ${food.id} ships without a classification`);
+      process.exit(1);
+    }
   }
   const fingerprint = createHash("sha256").update(canonicalise(raw), "utf8").digest("hex");
   if (fingerprint !== data.USDA_REFERENCE_FINGERPRINT) {

@@ -129,6 +129,12 @@ describe("NutritionPlanSection", () => {
     expect(screen.getByText("Breakfast")).toBeTruthy();
     expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
 
+    /* P2: main meals render their composition layers, labelled. */
+    expect(screen.getAllByText("Base").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Protein").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Vegetables").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Finishing").length).toBeGreaterThan(0);
+
     /* Logging a suggestion writes a real entry through the lib. */
     const logButtons = screen.getAllByRole("button", { name: /^Log .+ to / });
     expect(logButtons.length).toBeGreaterThan(0);

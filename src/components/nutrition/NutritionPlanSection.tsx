@@ -1,6 +1,7 @@
 /**
  * NutritionPlanSection — today's goal-based plan, inside the Nutrition
- * tab (P1, spec §6/§10).
+ * tab (P1, spec §6/§10; P2 renders the composer's layers — Base /
+ * Protein / Vegetables / Finishing — and its day-level mix notes).
  *
  * Every state names its next action, and every refusal is rendered as
  * plainly as the engine states it: a safety block shows the classifier's
@@ -21,9 +22,18 @@ import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/usePlan";
 import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
-import { provenanceLabel, type PlanMeal, type PlanSuggestion } from "@/lib/nutrition";
+import { provenanceLabel, type PlanMeal, type PlanSuggestion, type SuggestionLayer } from "@/lib/nutrition";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { MEAL_LABEL, formatGrams, nutrientLine } from "./input";
+
+/** Layer display order and labels for a composed main meal (P2). Snack
+ *  items and pre-P2 plans carry no main-meal layers and render flat. */
+const LAYER_SECTIONS: readonly { layer: SuggestionLayer; label: string }[] = [
+  { layer: "base", label: "Base" },
+  { layer: "protein", label: "Protein" },
+  { layer: "vegetables", label: "Vegetables" },
+  { layer: "finishing", label: "Finishing" },
+];
 
 function formatPlanDay(day: string): string {
   const d = new Date(`${day}T12:00:00`);
@@ -164,6 +174,46 @@ export function NutritionPlanSection() {
     );
   }
 
+  const suggestionItem = (meal: PlanMeal, suggestion: PlanSuggestion) => {
+    const key = `${meal.meal}:${suggestion.foodId}`;
+    const isLogged = logged.has(key);
+    return (
+      <li key={key} className="nut-entry">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[length:var(--text-callout)] font-medium text-foreground">
+              {suggestion.name}
+            </p>
+            <ProvenanceBadge
+              kind={suggestion.provenance.kind}
+              label={provenanceLabel(suggestion.provenance)}
+            />
+          </div>
+          <p className="mt-0.5 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
+            {formatGrams(suggestion.grams)} g · {nutrientLine(suggestion.nutrients)}
+          </p>
+        </div>
+        <div className="shrink-0">
+          {isLogged ? (
+            <span className="nut-chip" data-selected>
+              <Check className="size-3.5" aria-hidden /> Logged
+            </span>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              aria-label={`Log ${suggestion.name} to ${MEAL_LABEL[meal.meal]}`}
+              onClick={() => log(meal, suggestion)}
+            >
+              <Plus className="size-4" aria-hidden /> Log this
+            </Button>
+          )}
+        </div>
+      </li>
+    );
+  };
+
   const { plan, staleness } = state;
   return (
     <section className="nut-day-card" aria-label="Your plan for today">
@@ -186,10 +236,20 @@ export function NutritionPlanSection() {
 
         {staleness.stale ? (
           <div className="nut-plan-stale" role="status">
-            <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
-              Since this plan was made, {joinNames(staleness.changed)} changed — the plan below
-              still uses the older numbers. Regenerate to bring it up to date.
-            </p>
+            {staleness.changed.includes("the plan method improved") ? (
+              <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+                The plan method improved since this plan was made — regenerate to get the new
+                composition.
+              </p>
+            ) : null}
+            {staleness.changed.filter((c) => c !== "the plan method improved").length > 0 ? (
+              <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+                Since this plan was made,{" "}
+                {joinNames(staleness.changed.filter((c) => c !== "the plan method improved"))}{" "}
+                changed — the plan below still uses the older numbers. Regenerate to bring it up
+                to date.
+              </p>
+            ) : null}
           </div>
         ) : null}
 
@@ -212,6 +272,17 @@ export function NutritionPlanSection() {
           </div>
         ) : null}
 
+        {plan.notes.length > 0 ? (
+          <div className="mt-3">
+            <p className="nut-group-label">Today's mix</p>
+            {plan.notes.map((note) => (
+              <p key={note} className="nut-note">
+                {note}
+              </p>
+            ))}
+          </div>
+        ) : null}
+
         {plan.meals.map((meal) => (
           <section key={meal.meal} aria-label={MEAL_LABEL[meal.meal]} className="nut-meal">
             <div className="nut-meal-head">
@@ -223,47 +294,27 @@ export function NutritionPlanSection() {
             {meal.suggestions.length === 0 ? (
               <p className="nut-note">{meal.note}</p>
             ) : (
-              <ul className="divide-y divide-border-subtle">
-                {meal.suggestions.map((suggestion) => {
-                  const key = `${meal.meal}:${suggestion.foodId}`;
-                  const isLogged = logged.has(key);
-                  return (
-                    <li key={key} className="nut-entry">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[length:var(--text-callout)] font-medium text-foreground">
-                            {suggestion.name}
-                          </p>
-                          <ProvenanceBadge
-                            kind={suggestion.provenance.kind}
-                            label={provenanceLabel(suggestion.provenance)}
-                          />
-                        </div>
-                        <p className="mt-0.5 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
-                          {formatGrams(suggestion.grams)} g · {nutrientLine(suggestion.nutrients)}
-                        </p>
+              <>
+                {meal.meal !== "snack" && meal.suggestions.some((s) => s.layer) ? (
+                  LAYER_SECTIONS.map(({ layer, label }) => {
+                    const items = meal.suggestions.filter((s) => s.layer === layer);
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={layer}>
+                        <p className="nut-group-label">{label}</p>
+                        <ul className="divide-y divide-border-subtle">
+                          {items.map((suggestion) => suggestionItem(meal, suggestion))}
+                        </ul>
                       </div>
-                      <div className="shrink-0">
-                        {isLogged ? (
-                          <span className="nut-chip" data-selected>
-                            <Check className="size-3.5" aria-hidden /> Logged
-                          </span>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            aria-label={`Log ${suggestion.name} to ${MEAL_LABEL[meal.meal]}`}
-                            onClick={() => log(meal, suggestion)}
-                          >
-                            <Plus className="size-4" aria-hidden /> Log this
-                          </Button>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                    );
+                  })
+                ) : (
+                  <ul className="divide-y divide-border-subtle">
+                    {meal.suggestions.map((suggestion) => suggestionItem(meal, suggestion))}
+                  </ul>
+                )}
+                {meal.note ? <p className="nut-note">{meal.note}</p> : null}
+              </>
             )}
           </section>
         ))}
