@@ -21,6 +21,9 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
+  /* no-color-mix fallback (legacy-engine rule, see .bsheet-panel):
+     --background at 72% as rgba, so the scrim never vanishes whole */
+  background: rgba(10, 11, 14, 0.72);
   background:
     radial-gradient(
       80% 60% at 50% 100%,
@@ -136,6 +139,16 @@
   /* Reskin foundation: the glass light (white 5% -> 1.8%) over a solid
      panel mix — the sheet keeps its PR #87 slab opacity, so nothing
      bleeds through, while its surface joins the glass system. */
+  /* Legacy-engine fallback (pinned by the UI guard): an engine without
+     color-mix (Chrome <111 — older Android WebViews and stock browsers)
+     drops a declaration containing color-mix WHOLE. Simple two-colour
+     mixes are rescued by the build (Lightning emits a solid first-colour
+     rule), but a LAYERED background like this one — a var() gradient over
+     a color-mix layer — is emitted as-is, so on such an engine the sheet
+     panel would render fully transparent: washed out, blank. The solid
+     panel declaration first keeps the slab painted; supporting engines
+     override it with the layered glass version. */
+  background: var(--surface);
   background:
     var(--glass-bg),
     color-mix(in oklab, var(--surface) 88%, transparent);
