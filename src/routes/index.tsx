@@ -369,10 +369,10 @@ function TodayPage() {
             ) : null}
           </div>
 
-          <figure className="group relative hidden overflow-hidden rounded-[1.75rem] border border-white/[0.08] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:block">
+          <figure className="group relative hidden overflow-hidden rounded-card border border-white/[0.08] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:block">
             <WallpaperFigure />
             <div
-              className="pointer-events-none absolute inset-0 rounded-[1.75rem] ring-1 ring-inset ring-white/10"
+              className="pointer-events-none absolute inset-0 rounded-card ring-1 ring-inset ring-white/10"
               aria-hidden
             />
             <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/20 to-black/10 p-5">
@@ -385,7 +385,7 @@ function TodayPage() {
           </figure>
         </header>
 
-        <div className="home-hairline mt-8 lg:mt-10" aria-hidden />
+        <div className="home-hairline" aria-hidden />
 
         {/* The prototype stack, exactly (Reskin slice A): Focus + Level,
             StatTiles, WeekChart + Changes, Habits + Mood, and the small
@@ -396,9 +396,11 @@ function TodayPage() {
             gone from Today; every one of those features keeps its own
             tab or page, untouched, and every priority the synthesis can
             name still has its door in this stack (habits card, mood
-            card, hero chips, assessment card). */}
+            card, hero chips, assessment card). Every row gap below is
+            the stack's own --bloom-section-gap token, so the column
+            gutter and the row rhythm can never drift apart. */}
         <div className="home-stack">
-          <div className="grid gap-6 lg:grid-cols-12">
+          <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
             <div className="lg:col-span-7 [&>*]:h-full">
               {/* W4-1: the ASSESS step's door — the prototype's FocusCard
                   in Bloom's build: segmented gold progress, the existing
@@ -414,7 +416,7 @@ function TodayPage() {
 
           <StatTiles overview={overview} ready={overviewReady} />
 
-          <div className="grid gap-6 lg:grid-cols-12">
+          <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
             <div className="lg:col-span-7 [&>*]:h-full">
               {/* The week in ticks — real habit logs, this week vs the
                   week before, in the prototype's chart language. Gated
@@ -428,7 +430,7 @@ function TodayPage() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-12">
+          <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
             <div className="lg:col-span-7 [&>*]:h-full">
               <HabitsSection
                 habits={habits.todayHabits}

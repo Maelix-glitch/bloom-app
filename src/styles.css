@@ -974,8 +974,20 @@
   background-image: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: calc(var(--radius) + 8px);
-  /* Reskin slice 3: the prototype's generous card padding rhythm. */
-  padding: 20px var(--space-5) 16px;
+  /* Card padding rhythm, shared with the .home-panel cards (p-5, then
+     p-7 from sm). The one band in the stack (the assessment prompt)
+     wraps its content in its own px-2 / pt-2 / pb-3 inner frame, so the
+     band's own padding is that frame short of the card rhythm: on
+     phones the effective inset lands on the panels' 20px, not 28px —
+     before this, the prompt's content sat 8px deeper than every other
+     card in the phone column. From sm the desktop values apply and the
+     effective inset is the panels' 28px, as before. */
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+@media (min-width: 40rem) {
+  .home-band {
+    padding: 20px var(--space-5) 16px;
+  }
 }
 /*
  * The assessment prompt wears the band's shape as a slab: the plain band's
@@ -1088,9 +1100,13 @@
 }
 
 /* The prototype's gradient hairline — a section break that fades at both
-   ends instead of ruling a hard line across the page. */
+   ends instead of ruling a hard line across the page. It sits in the
+   stack's own rhythm: the section gap above it (here) matches the gap
+   below it (.home-stack's margin-top) at every width — the old one-off
+   mt-8 / lg:mt-10 left the divider floating off-rhythm. */
 .home-hairline {
   height: 1px;
+  margin-top: var(--bloom-section-gap);
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
 }
 
