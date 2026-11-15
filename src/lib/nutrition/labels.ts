@@ -24,11 +24,14 @@ const KIND_FALLBACK: Record<FoodProvenance["kind"], string> = {
  *  user-entered values are always "Your value" — that is the badge the
  *  custom-food flow promises (design §4.2). */
 export function provenanceLabel(provenance: EntryProvenance): string {
+  // A whitespace-only stored label is no label — fall back rather than
+  // render a blank badge next to a number.
+  const stored = provenance.label.trim();
   if (provenance.kind === "coach_estimate") {
-    return provenance.label || "Estimate — based on your photo";
+    return stored || "Estimate — based on your photo";
   }
   if (provenance.kind === "user_entered") return USER_ENTERED_LABEL;
-  return provenance.label || KIND_FALLBACK[provenance.kind];
+  return stored || KIND_FALLBACK[provenance.kind];
 }
 
 export function isEstimateProvenance(provenance: EntryProvenance): boolean {

@@ -37,12 +37,16 @@ export interface FoodLogValue {
 }
 
 /** Strict envelope parse for the foods value. Null on a wrong envelope —
- *  `getPref` then falls back, so a corrupt value can never reach callers. */
+ *  `getPref` then falls back, so a corrupt value can never reach callers.
+ *  This key holds ONLY the user's own foods (§4.3), so a food carrying any
+ *  other provenance — a forged "usda" entry in a tampered or sync-merged
+ *  document — is dropped here: the store's contents can never lend a food
+ *  a source it did not come from. */
 export function parseFoodsValue(raw: unknown): Food[] | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const r = raw as Record<string, unknown>;
   if (r["version"] !== FOODS_VERSION) return null;
-  return parseFoodList(r["foods"]);
+  return parseFoodList(r["foods"]).filter((f) => f.provenance.kind === "user_entered");
 }
 
 /** Strict envelope parse for the food-log value. Entries are validated one

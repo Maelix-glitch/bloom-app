@@ -33,12 +33,17 @@ export function nutrientsForGrams(per100g: Nutrients, grams: number): Nutrients 
 }
 
 /** The gram weight an amount means for this food. Null when a serving
- *  amount names a serving the food does not define. */
+ *  amount names a serving the food does not define — and null whenever the
+ *  resolved weight is not a positive, finite number, so a negative, NaN or
+ *  weightless amount can never scale nutrients into nonsense downstream. */
 export function gramsForAmount(food: Food, amount: Amount): number | null {
-  if ("grams" in amount) return amount.grams;
+  if ("grams" in amount) {
+    return Number.isFinite(amount.grams) && amount.grams > 0 ? amount.grams : null;
+  }
   const serving = food.servings.find((s) => s.label === amount.servingLabel);
   if (!serving) return null;
-  return serving.grams * amount.servings;
+  const grams = serving.grams * amount.servings;
+  return Number.isFinite(grams) && grams > 0 ? grams : null;
 }
 
 /** Nutrients for an amount of a food. Null when the amount cannot resolve. */

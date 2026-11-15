@@ -28,6 +28,21 @@ const FOOD_KINDS: readonly FoodProvenanceKind[] = ["usda", "user_entered", "off"
 const ENTRY_SOURCES: readonly EntrySource[] = ["search", "custom", "coach_photo", "recent"];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** A day key must name a day that exists. The shape regex alone waves
+ *  through "2026-02-31" and "2026-13-01" — impossible dates that would
+ *  bucket into phantom days no calendar can render. Leap years follow the
+ *  Gregorian rule; future days are accepted (planning ahead is data, not
+ *  corruption). */
+function isRealDayKey(day: string): boolean {
+  const year = Number(day.slice(0, 4));
+  const month = Number(day.slice(5, 7));
+  const date = Number(day.slice(8, 10));
+  if (month < 1 || month > 12 || date < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]!;
+  return date <= daysInMonth;
+}
+
 export const MAX_FOODS = 500;
 export const MAX_LOG_ENTRIES = 5000;
 
@@ -53,24 +68,68 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[]): T | nul
     : null;
 }
 
+interface NutrientCaps {
+  kcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  fibreG: number;
+  sodiumMg: number;
+}
+
+/** Per-100 g caps (a Food's profile): the densest real foods sit well
+ *  inside them — pure oil is ~884 kcal and 100 g fat per 100 g. */
+const FOOD_NUTRIENT_CAPS: NutrientCaps = {
+  kcal: 2000,
+  proteinG: 100,
+  carbsG: 100,
+  fatG: 100,
+  fibreG: 100,
+  sodiumMg: 40000,
+};
+
+/** Entry caps: an entry is a whole portion, not 100 g — 500 g of chicken
+ *  breast legitimately carries 155 g of protein, and a large
+ *  Coach-estimated meal runs to ~2 500 kcal. Entry nutrients therefore get
+ *  their own generous-but-finite caps (hardening finding F1); beyond them
+ *  an entry is still refused outright, never clamped. */
+const ENTRY_NUTRIENT_CAPS: NutrientCaps = {
+  kcal: 10000,
+  proteinG: 1000,
+  carbsG: 1000,
+  fatG: 1000,
+  fibreG: 500,
+  sodiumMg: 100000,
+};
+
 /**
  * Nutrients are all-or-nothing on the four core values: a source that cannot
  * state kcal/protein/carbs/fat is not a food. Fibre and sodium ride along
  * only when present and valid.
  */
-export function parseNutrients(raw: unknown): Nutrients | null {
+function parseNutrientsWithCaps(raw: unknown, caps: NutrientCaps): Nutrients | null {
   if (!isRecord(raw)) return null;
-  const kcal = numIn(raw["kcal"], 0, 2000);
-  const proteinG = numIn(raw["proteinG"], 0, 100);
-  const carbsG = numIn(raw["carbsG"], 0, 100);
-  const fatG = numIn(raw["fatG"], 0, 100);
+  const kcal = numIn(raw["kcal"], 0, caps.kcal);
+  const proteinG = numIn(raw["proteinG"], 0, caps.proteinG);
+  const carbsG = numIn(raw["carbsG"], 0, caps.carbsG);
+  const fatG = numIn(raw["fatG"], 0, caps.fatG);
   if (kcal === null || proteinG === null || carbsG === null || fatG === null) return null;
   const out: Nutrients = { kcal, proteinG, carbsG, fatG };
-  const fibreG = numIn(raw["fibreG"], 0, 100);
+  const fibreG = numIn(raw["fibreG"], 0, caps.fibreG);
   if (fibreG !== null) out.fibreG = fibreG;
-  const sodiumMg = numIn(raw["sodiumMg"], 0, 40000);
+  const sodiumMg = numIn(raw["sodiumMg"], 0, caps.sodiumMg);
   if (sodiumMg !== null) out.sodiumMg = sodiumMg;
   return out;
+}
+
+/** Per-100 g nutrients — a Food's profile, held to FOOD_NUTRIENT_CAPS. */
+export function parseNutrients(raw: unknown): Nutrients | null {
+  return parseNutrientsWithCaps(raw, FOOD_NUTRIENT_CAPS);
+}
+
+/** A log entry's nutrients — a whole portion, held to ENTRY_NUTRIENT_CAPS. */
+export function parseEntryNutrients(raw: unknown): Nutrients | null {
+  return parseNutrientsWithCaps(raw, ENTRY_NUTRIENT_CAPS);
 }
 
 export function parseFoodProvenance(raw: unknown): FoodProvenance | null {
@@ -157,7 +216,7 @@ export function parseAmount(raw: unknown): Amount | null {
 function parseSnapshot(raw: unknown): EstimateSnapshot | null {
   if (!isRecord(raw)) return null;
   const name = text(raw["name"], 120);
-  const totals = parseNutrients(raw["totals"]);
+  const totals = parseEntryNutrients(raw["totals"]);
   if (!name || !totals) return null;
   return { name, totals };
 }
@@ -167,7 +226,7 @@ export function parseLogEntry(raw: unknown): LogEntry | null {
   const id = text(raw["id"], 80);
   if (!id) return null;
   const day = raw["day"];
-  if (typeof day !== "string" || !DAY_RE.test(day)) return null;
+  if (typeof day !== "string" || !DAY_RE.test(day) || !isRealDayKey(day)) return null;
   const meal: Meal | null = oneOf(raw["meal"], MEALS);
   if (!meal) return null;
   const source: EntrySource | null = oneOf(raw["source"], ENTRY_SOURCES);
@@ -176,7 +235,7 @@ export function parseLogEntry(raw: unknown): LogEntry | null {
   if (!name) return null;
   const amount = parseAmount(raw["amount"]);
   if (!amount) return null;
-  const nutrients = parseNutrients(raw["nutrients"]);
+  const nutrients = parseEntryNutrients(raw["nutrients"]);
   if (!nutrients) return null;
   const provenance = parseEntryProvenance(raw["provenance"]);
   if (!provenance) return null;
