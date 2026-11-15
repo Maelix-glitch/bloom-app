@@ -42,12 +42,53 @@ export interface FoodServing {
   grams: number;
 }
 
+/**
+ * Food groups for plan composition (P2), following the ICMR-NIN
+ * Dietary Guidelines for Indians (2024) group framework as operationalised
+ * in the balanced-diet composition research: one group per food, assigned
+ * at the data layer — for the USDA reference set, by the generator's
+ * pinned per-FDC-id classification, never guessed from a name at runtime.
+ */
+export type FoodGroup =
+  | "cereals_grains"
+  | "pulses_legumes"
+  | "eggs"
+  | "dairy"
+  | "vegetables"
+  | "fruits"
+  | "nuts_seeds"
+  | "fats_oils"
+  | "other";
+
+/**
+ * A food's identity for dietary-pattern filtering, stated as ingredient
+ * facts. Patterns are encoded on these flags, never on veg/non-veg
+ * labels: FSSAI legally classes egg as non-vegetarian, so a label-based
+ * filter would wrongly exclude eggs from an eggetarian plan (research
+ * §6). `isFish` is split out of `isFlesh` because the pescatarian pattern
+ * allows fish while excluding other flesh.
+ */
+export interface FoodClassification {
+  group: FoodGroup;
+  containsEgg: boolean;
+  containsDairy: boolean;
+  isFlesh: boolean;
+  isFish: boolean;
+}
+
 export interface Food {
   id: string;
   name: string;
   per100g: Nutrients;
   servings: FoodServing[];
   provenance: FoodProvenance;
+  /**
+   * Group + pattern identity. Present on reference foods, where the
+   * classification is pinned at the data layer; absent on user-entered
+   * foods — Bloom does not claim to know what is in a food it did not
+   * curate, and the plan composer treats an unclassified food accordingly.
+   */
+  classification?: FoodClassification;
 }
 
 /**

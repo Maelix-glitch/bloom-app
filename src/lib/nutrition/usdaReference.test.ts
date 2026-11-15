@@ -105,8 +105,58 @@ describe("the licence gate", () => {
   });
 });
 
-describe("search over the reference set", () => {
-  it("finds foods by name tokens, case-insensitively", () => {
+describe("food-group classification (P2)", () => {
+  it("every shipped food carries exactly one group and its ingredient flags", () => {
+    for (const food of USDA_REFERENCE_FOODS) {
+      expect(food.classification, food.name).toBeDefined();
+    }
+    const counts = new Map<string, number>();
+    for (const food of USDA_REFERENCE_FOODS) {
+      const group = food.classification!.group;
+      counts.set(group, (counts.get(group) ?? 0) + 1);
+    }
+    expect(Object.fromEntries(counts)).toEqual({
+      cereals_grains: 14,
+      pulses_legumes: 12,
+      dairy: 9,
+      fats_oils: 9,
+      eggs: 3,
+      vegetables: 16,
+      fruits: 11,
+      nuts_seeds: 6,
+      other: 19,
+    });
+  });
+
+  it("the ingredient flags agree with the groups and with each other", () => {
+    for (const food of USDA_REFERENCE_FOODS) {
+      const c = food.classification!;
+      if (c.group === "eggs") expect(c.containsEgg).toBe(true);
+      if (c.group === "dairy") expect(c.containsDairy).toBe(true);
+      /* Fish is flesh; nothing is fish without being flesh. */
+      if (c.isFish) expect(c.isFlesh).toBe(true);
+      /* Butter and ghee are dairy by ingredient, fats by group. */
+      if (food.name.startsWith("Butter")) expect(c.containsDairy).toBe(true);
+    }
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsEgg)).toHaveLength(3);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsDairy)).toHaveLength(11);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh)).toHaveLength(13);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFish)).toHaveLength(6);
+    expect(
+      USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh && !f.classification!.isFish),
+    ).toHaveLength(7);
+  });
+
+  it("an entry that loses its classification in parsing fails the set", () => {
+    const copy = JSON.parse(JSON.stringify(USDA_REFERENCE_FOODS_RAW)) as Array<Record<string, unknown>>;
+    delete copy[0]!["classification"];
+    const food = parseFood(copy[0]);
+    expect(food).not.toBeNull();
+    expect(food!.classification).toBeUndefined();
+  });
+});
+
+describe("search over the reference set", () => {  it("finds foods by name tokens, case-insensitively", () => {
     const rice = searchUsdaReference("rice");
     expect(rice.length).toBeGreaterThan(0);
     expect(rice.every((f) => f.name.toLowerCase().includes("rice"))).toBe(true);

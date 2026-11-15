@@ -21,9 +21,20 @@
  *
  * A plan is a dated daily structure: per-meal kcal/protein splits that sum
  * EXACTLY to the day's targets (largest-remainder reconciliation, pinned
- * by tests), plus up to two food suggestions per meal. A meal no clean
- * food fits stays empty with an honest note — the plan never pads itself
- * with a fabricated dish.
+ * by tests), plus food suggestions per meal.
+ *
+ * Composition (P2) is layered, patterned and capped, grounded in the
+ * balanced-diet composition research (ICMR-NIN My Plate / DGI-2024, ISSN
+ * protein distribution, BNF portions): each main meal is built as a grain
+ * base + a protein layer + at least two vegetables + a measured fat + a
+ * dairy extra, filtered by the person's dietary pattern (encoded on
+ * ingredient identity, never on veg/non-veg labels), sized inside hard
+ * per-food-group portion caps, rotated deterministically by day, and
+ * checked against the ICMR day floors it aims at — with any shortfall
+ * named on the plan rather than padded over. Where a rule below is an
+ * engine derivation rather than a guideline quotation, the comment says
+ * so. A meal no clean food fits stays empty with an honest note — the
+ * plan never pads itself with a fabricated dish.
  */
 
 import { getPref, setPref } from "@/lib/prefs";
@@ -49,7 +60,15 @@ import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
 import { nutritionTargetsFromOutcome, type NutritionTargets } from "./targets";
-import { MEALS, type Food, type FoodProvenance, type Meal, type Nutrients } from "./types";
+import {
+  MEALS,
+  type Food,
+  type FoodClassification,
+  type FoodGroup,
+  type FoodProvenance,
+  type Meal,
+  type Nutrients,
+} from "./types";
 
 /* --------------------------------- shapes --------------------------------- */
 
@@ -80,6 +99,13 @@ export interface PlanInputsSnapshot {
   targetsProteinG: number;
 }
 
+/** The composition layer a suggestion belongs to (P2). Main meals are
+ *  built in layers — a grain base, the protein layer, vegetables, and the
+ *  finishing touches (measured fat, dairy extra, breakfast fruit/nuts);
+ *  snack items carry `snack`. Absent on plans stored by the P1 composer,
+ *  which suggested without layers. */
+export type SuggestionLayer = "base" | "protein" | "vegetables" | "finishing" | "snack";
+
 export interface PlanSuggestion {
   foodId: string;
   name: string;
@@ -87,6 +113,7 @@ export interface PlanSuggestion {
   /** Computed by the lib's portion math at generation time. */
   nutrients: Nutrients;
   provenance: FoodProvenance;
+  layer?: SuggestionLayer;
 }
 
 export interface PlanMeal {
@@ -113,10 +140,24 @@ export interface DailyPlan {
   safetyClassification: SafetyClass;
   /** Non-blocking safety findings, in the classifier's own words. */
   cautions: string[];
+  /**
+   * Composition notes (P2): the day-level guideline aims the suggestions
+   * could not reach — a vegetable/fruit/milk floor missed, too few
+   * protein sources or food groups — named in plain words. A plan that
+   * meets every aim carries none. Absent (read as empty) on P1 plans.
+   */
+  notes: string[];
+  /** The composition method that built this plan. Plans from an older
+   *  method read as stale — see `planStaleness`. */
+  methodVersion: number;
   meals: PlanMeal[];
   inputs: PlanInputsSnapshot;
   fingerprint: string;
 }
+
+/** The current composition method: 1 = the P1 protein-density composer,
+ *  2 = the P2 layered composer (patterns, food groups, portion caps). */
+export const PLAN_METHOD_VERSION = 2;
 
 export type PlanRefusal =
   | {
@@ -210,9 +251,13 @@ const CHANGED_LABELS: readonly (readonly [keyof PlanInputsSnapshot, string])[] =
 
 /** Compare a stored plan's inputs with the current ones. Sex is compared
  *  through its effect: a sex change moves the targets, which is the
- *  change the plan actually embodies, so it reports as "your targets". */
+ *  change the plan actually embodies, so it reports as "your targets".
+ *  A plan built by an older composition method is stale on that ground
+ *  alone — the method improved, and regenerating is how the person gets
+ *  the better composition; the reason is named, never silent. */
 export function planStaleness(plan: DailyPlan, current: PlanInputsSnapshot): PlanStaleness {
   const changed: string[] = [];
+  if ((plan.methodVersion ?? 1) < PLAN_METHOD_VERSION) changed.push("the plan method improved");
   for (const [key, label] of CHANGED_LABELS) {
     if (plan.inputs[key] !== current[key]) changed.push(label);
   }
@@ -289,147 +334,669 @@ export function splitTargets(targets: NutritionTargets, slots: readonly Meal[]):
   }));
 }
 
+/* --------------------- dietary patterns (ingredient facts) ------------------ */
+
+/**
+ * Dietary patterns as first-class filters (P2). A pattern is a set of
+ * allowances over ingredient identity — egg, dairy, flesh, fish — read
+ * from each reference food's data-layer classification. Patterns are
+ * NEVER encoded on veg/non-veg labels: FSSAI legally classes egg as
+ * non-vegetarian food, so a label-based filter would exclude the eggs an
+ * eggetarian eats (composition research §6). The app's `vegetarian`
+ * answer carries its usual Indian meaning, lacto-vegetarian (dairy, no
+ * egg); `eggetarian` is lacto-ovo — no flesh of any kind, eggs and dairy
+ * allowed. `ovo_vegetarian` (eggs, no dairy) has no app answer today but
+ * is a distinct pattern in the literature and is encoded here so the
+ * filter table is complete rather than quietly conflated with another.
+ */
+export type PlanPattern =
+  | "vegetarian"
+  | "eggetarian"
+  | "vegan"
+  | "ovo_vegetarian"
+  | "pescatarian"
+  | "non_vegetarian";
+
+/** The plan pattern for a stated dietary pattern. `other` and unanswered
+ *  map to null — no pattern filter; allergies and dislikes still apply. */
+export function planPatternOf(pattern: DietaryPattern | null): PlanPattern | null {
+  switch (pattern) {
+    case "vegetarian":
+      return "vegetarian";
+    case "eggetarian":
+      return "eggetarian";
+    case "vegan":
+      return "vegan";
+    case "pescatarian":
+      return "pescatarian";
+    case "omnivore":
+      return "non_vegetarian";
+    default:
+      return null;
+  }
+}
+
+interface PatternAllowances {
+  egg: boolean;
+  dairy: boolean;
+  flesh: boolean;
+  fish: boolean;
+}
+
+const PATTERN_ALLOWANCES: Record<PlanPattern, PatternAllowances> = {
+  vegetarian: { egg: false, dairy: true, flesh: false, fish: false },
+  eggetarian: { egg: true, dairy: true, flesh: false, fish: false },
+  vegan: { egg: false, dairy: false, flesh: false, fish: false },
+  ovo_vegetarian: { egg: true, dairy: false, flesh: false, fish: false },
+  pescatarian: { egg: true, dairy: true, flesh: false, fish: true },
+  non_vegetarian: { egg: true, dairy: true, flesh: true, fish: true },
+};
+
+/** Whether a classified food's ingredient identity fits a pattern. */
+export function patternAllowsClassification(
+  pattern: PlanPattern | null,
+  classification: FoodClassification,
+): boolean {
+  if (pattern === null) return true;
+  const allow = PATTERN_ALLOWANCES[pattern];
+  if (classification.containsEgg && !allow.egg) return false;
+  if (classification.containsDairy && !allow.dairy) return false;
+  if (classification.isFish) return allow.fish;
+  if (classification.isFlesh) return allow.flesh;
+  return true;
+}
+
 /* ------------------------------- suggestions ------------------------------- */
 
 /**
- * Suggestion portions are sized to a meal's share of the day and kept
- * inside the range a person would actually serve: 25–500 g. A primary is
- * sized to ~65% of the meal so a second food can complete it; a food that
- * is essentially only fat (an oil, a butter) is a condiment, not a meal
- * base, so a primary must carry some protein or carbohydrate, and the
- * protein-completing second food must actually carry protein.
+ * The eligible pool: the user's own foods and the USDA reference set —
+ * the two sources whose values Bloom may plan with today. Anything else
+ * (an IFCT or OFF food arriving in the pool before its licence lands)
+ * is refused here, whatever assembled the pool. The dietary-pattern
+ * filter then judges every CLASSIFIED food by its ingredient identity.
+ * A person's own foods carry no classification — Bloom does not claim
+ * to know what is in a food it did not curate — so they pass the pattern
+ * filter; name-matching still drops foods the person said they are
+ * allergic to, cannot tolerate, or dislike — their own words against
+ * food names, nothing inferred.
  */
-const PRIMARY_SHARE_OF_MEAL = 0.65;
-const MIN_PORTION_GRAMS = 25;
-const MAX_PORTION_GRAMS = 500;
-const MIN_SECONDARY_GRAMS = 25;
-const MAX_SECONDARY_GRAMS = 400;
-/** Below this many kcal left over, a meal counts as covered. */
-const COVERED_WITHIN_KCAL = 60;
-
-const EMPTY_MEAL_NOTE =
-  "No food with known values fits this meal yet. Add a food you eat, then regenerate the plan.";
-
-interface PortionFit {
-  grams: number;
-  nutrients: Nutrients;
-  score: number;
-}
-
-/** The portion of `food` that best fits a kcal/protein budget, or null
- *  when no sane portion of it fits. Nutrients come from the lib's own
- *  portion math — never re-derived here. */
-function portionFit(
-  food: Food,
-  kcalBudget: number,
-  proteinBudget: number,
-  minGrams: number,
-  maxGrams: number,
-): PortionFit | null {
-  const per100g = food.per100g;
-  if (!(per100g.kcal > 0) || !(kcalBudget > 0)) return null;
-  const needed = (kcalBudget / per100g.kcal) * 100;
-  if (!Number.isFinite(needed)) return null;
-  const grams = Math.round(needed / 5) * 5;
-  if (grams < minGrams || grams > maxGrams) return null;
-  const nutrients = nutrientsForGrams(per100g, grams);
-  const score =
-    Math.abs(nutrients.kcal - kcalBudget) / kcalBudget +
-    (proteinBudget > 0 ? Math.abs(nutrients.proteinG - proteinBudget) / proteinBudget : 0);
-  return { grams, nutrients, score };
-}
-
-function toSuggestion(food: Food, fit: PortionFit): PlanSuggestion {
-  return {
-    foodId: food.id,
-    name: food.name,
-    grams: fit.grams,
-    nutrients: fit.nutrients,
-    provenance: food.provenance,
-  };
-}
-
-/** The eligible pool: the user's own foods and the USDA reference set —
- *  the two sources whose values Bloom may plan with today. Anything else
- *  (an IFCT or OFF food arriving in the pool before its licence lands)
- *  is refused here, whatever assembled the pool. Name-matching then drops
- *  foods the person said they are allergic to, cannot tolerate, or
- *  dislike — their own words against food names, nothing inferred. */
 function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Food[] {
   const terms = [...profile.dietary.allergies, ...profile.dietary.intolerances, ...profile.dietary.dislikedFoods]
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length >= 3);
+  const pattern = planPatternOf(profile.dietary.pattern);
   return foods.filter((food) => {
     if (food.provenance.kind !== "usda" && food.provenance.kind !== "user_entered") return false;
+    if (food.classification && !patternAllowsClassification(pattern, food.classification)) {
+      return false;
+    }
     const name = food.name.toLowerCase();
     return !terms.some((term) => name.includes(term));
   });
 }
 
-function bestFit(
-  pool: readonly Food[],
-  kcalBudget: number,
-  proteinBudget: number,
-  minGrams: number,
-  maxGrams: number,
-  require: (food: Food) => boolean,
-): { food: Food; fit: PortionFit } | null {
-  let best: { food: Food; fit: PortionFit } | null = null;
-  for (const food of pool) {
-    if (!require(food)) continue;
-    const fit = portionFit(food, kcalBudget, proteinBudget, minGrams, maxGrams);
-    if (!fit) continue;
-    /* Strictly better replaces; a tie keeps the earlier food, so pool
-       order (the caller's own foods first, then the reference set in its
-       curated order) is the deterministic tie-break. */
-    if (!best || fit.score < best.fit.score) best = { food, fit };
+/* ------------------------------ rotation ---------------------------------- */
+
+function fnv1a(text: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
   }
-  return best;
+  return h >>> 0;
 }
 
-const isMealBase = (food: Food) => food.per100g.proteinG >= 2 || food.per100g.carbsG >= 10;
-const isProteinSource = (food: Food) => food.per100g.proteinG >= 5;
+/**
+ * The day's rotation order over the pool: candidates sorted by a hash of
+ * (plan day, food id). Deterministic — the same day always composes the
+ * same plan, and regenerating a day never re-rolls it — while consecutive
+ * days order the pool differently, so grains, protein sources and
+ * vegetables rotate across days. The guidelines prescribe rotation
+ * across food types as the variety mechanism (ICMR-NIN DGI-2024
+ * Guideline 1 and the My Plate variety footnote; composition research
+ * §7); the per-day hash is the engine's operationalisation of that
+ * principle — a derivation, not a quoted rule.
+ */
+function rotationOrder(day: string, pool: readonly Food[]): Food[] {
+  return pool
+    .map((food) => ({ food, key: fnv1a(`${day}:${food.id}`) }))
+    .sort((a, b) => a.key - b.key || (a.food.id < b.food.id ? -1 : 1))
+    .map((entry) => entry.food);
+}
 
-/** Suggestions for one meal from `pool`. Deterministic: same pool, same
- *  budgets, same answer. */
-function suggestForMeal(
-  pool: readonly Food[],
-  split: MealSplit,
-): { suggestions: PlanSuggestion[]; usedIds: string[] } {
-  const primary = bestFit(
-    pool,
-    PRIMARY_SHARE_OF_MEAL * split.kcal,
-    PRIMARY_SHARE_OF_MEAL * split.proteinG,
-    MIN_PORTION_GRAMS,
-    MAX_PORTION_GRAMS,
-    isMealBase,
-  );
-  if (!primary) {
-    /* Nothing fits at 65% — try one food for the whole meal before
-       conceding the meal is empty. */
-    const single = bestFit(pool, split.kcal, split.proteinG, MIN_PORTION_GRAMS, MAX_PORTION_GRAMS, isMealBase);
-    if (!single) return { suggestions: [], usedIds: [] };
-    return { suggestions: [toSuggestion(single.food, single.fit)], usedIds: [single.food.id] };
+/* ---------------------------- portion caps (hard) --------------------------- */
+
+/**
+ * Per-meal portion caps, from the composition research (§5). These are
+ * hard constraints: a solver that meets a macro target by breaking one
+ * has failed at composition even when the numbers sum. The two cases
+ * that forced this rebuild — 235 g of dry lentils and 400 g of one
+ * vegetable in a single meal — are exactly what the pulse and vegetable
+ * caps exist to refuse.
+ */
+const CAP_GRAIN_DRY_G = 90; // dry cereals/millets per meal (brief; BNF dry rice portion 65 g, research flags >120 g)
+const CAP_UNCLASSIFIED_BASE_G = 200; // own foods: dry/cooked basis unknown — a middle bound, derivation
+const CAP_DRY_PULSES_G = 60; // dry pulses/legumes per meal; normal range 30–50 g, 85 g is the whole ICMR day
+const CAP_EGGS_G = 120; // ≈ 2 eggs (BNF: 2 eggs = 120 g, one protein portion)
+const CAP_DAIRY_PROTEIN_G = 100; // paneer-type dairy in the protein layer (BNF cottage-cheese portion 100 g; research flags >150 g)
+const CAP_HARD_CHEESE_G = 30; // hard grating cheeses are condiment-density foods — BNF portions hard cheese at 30 g
+const CAP_FLESH_G = 200; // a single meat/fish portion, derivation from BNF protein portions
+const CAP_UNCLASSIFIED_PROTEIN_G = 200; // own foods in the protein layer, derivation
+const CAP_SINGLE_VEGETABLE_G = 200; // one vegetable in one meal (research §5)
+const CAP_MEAL_VEGETABLES_G = 300; // all vegetables in one meal (research §5)
+const CAP_FAT_G = 14; // measured visible fat per meal ≈ 1 tbsp (research flags >15 g)
+const CAP_FINISHING_DAIRY_G = 250; // milk/curd extra per meal — the tighter of the research serving flags (curd 250 g, milk 300 ml)
+const CAP_FRUIT_G = 200; // one fruit portion per sitting, derivation (BNF fruit portion 80 g; ICMR day 100 g)
+const CAP_NUTS_G = 30; // nuts/seeds per sitting (BNF portion 20 g; ICMR day 35 g)
+/** Portions are sized in 5 g steps and never below this floor. */
+const MIN_PORTION_G = 5;
+
+/* Day floors from the ICMR-NIN My Plate (2,000 kcal reference day),
+   HELD — not linearly scaled — at higher energy needs, per the policy
+   brief's own scaling warning (composition research §1): the extra
+   energy and protein of a larger target go to cereals, pulses, dairy,
+   eggs and oils, not to ever-larger vegetable piles. */
+const FLOOR_VEGETABLES_G = 400;
+const FLOOR_FRUIT_G = 100;
+const FLOOR_MILK_CURD_G = 300;
+/** Diversity aims (research §1, §7): at least 8 food groups a day is the
+ *  ICMR floor; ≥3 distinct protein sources and the ≤40% single-source
+ *  share are the research's operationalisation — derivations. */
+const AIM_DISTINCT_PROTEIN_SOURCES = 3;
+const AIM_FOOD_GROUPS = 8;
+const MAX_SINGLE_FOOD_PROTEIN_SHARE = 0.4;
+
+/* Layer energy shares for a main meal — DERIVATIONS (composition
+   research §3): no guideline publishes per-meal layer shares; these
+   translate the ICMR day shares (cereals 42%E, pulses 14%E, milk 11%E,
+   oils 12%E) to a thali whose protein layer is enlarged, because a
+   high-protein target (~27%E of the day) cannot be met at the
+   general-population protein share. Vegetables are sized by grams, not
+   energy — they dominate plate volume, not calories. */
+const GRAIN_SHARE_OF_MEAL = 0.35;
+const FAT_SHARE_OF_MEAL = 0.1;
+/** The protein layer may not crowd out more than this share of a meal's
+ *  energy — a guard (derivation) against protein-dense picks eating the
+ *  whole plate; items after the first are sized down to respect it. */
+const PROTEIN_LAYER_MAX_MEAL_SHARE = 0.6;
+const MAX_PROTEIN_ITEMS_PER_MEAL = 4;
+/** Within this many grams, a meal's protein counts as landed. */
+const PROTEIN_CLOSE_ENOUGH_G = 3;
+
+const EMPTY_MEAL_NOTE =
+  "No food with known values fits this meal yet. Add a food you eat, then regenerate the plan.";
+
+/* --------------------------------- sizing --------------------------------- */
+
+interface SizedPortion {
+  grams: number;
+  nutrients: Nutrients;
+}
+
+/** Round a gram amount to the plan's 5 g steps, never above the cap. */
+function roundToStep(grams: number, capG: number): number {
+  const stepped = Math.round(grams / 5) * 5;
+  return stepped > capG ? Math.floor(capG / 5) * 5 : stepped;
+}
+
+/**
+ * Size a portion of `food` toward a kcal or protein aim, clamped to the
+ * layer's hard cap. Nutrients always come from the lib's own portion
+ * math — never re-derived here. Null when no sane portion exists: the
+ * food has no density to size by, or the sized portion falls below the
+ * 5 g floor.
+ */
+function sizedPortion(
+  food: Food,
+  aim: { kcal?: number; proteinG?: number },
+  capG: number,
+): SizedPortion | null {
+  let grams: number | null = null;
+  if (aim.proteinG !== undefined && food.per100g.proteinG > 0) {
+    grams = (aim.proteinG / food.per100g.proteinG) * 100;
+  } else if (aim.kcal !== undefined && food.per100g.kcal > 0) {
+    grams = (aim.kcal / food.per100g.kcal) * 100;
   }
-  const suggestions = [toSuggestion(primary.food, primary.fit)];
-  const usedIds = [primary.food.id];
-  const kcalLeft = split.kcal - primary.fit.nutrients.kcal;
-  const proteinLeft = Math.max(0, split.proteinG - primary.fit.nutrients.proteinG);
-  if (kcalLeft >= COVERED_WITHIN_KCAL) {
-    const secondary = bestFit(
-      pool.filter((f) => f.id !== primary.food.id),
-      kcalLeft,
-      proteinLeft,
-      MIN_SECONDARY_GRAMS,
-      MAX_SECONDARY_GRAMS,
-      isProteinSource,
+  if (grams === null || !Number.isFinite(grams)) return null;
+  grams = roundToStep(grams, capG);
+  if (grams < MIN_PORTION_G) return null;
+  return { grams, nutrients: nutrientsForGrams(food.per100g, grams) };
+}
+
+/* ------------------------------ composition ------------------------------- */
+
+const groupOf = (food: Food): FoodGroup | null => food.classification?.group ?? null;
+
+/** Milk/curd for the day floor and the finishing layer: the dairy group's
+ *  fluid and fermented foods. The protein-bearing dairy foods (Greek
+ *  yogurt, cottage cheese, hard cheeses) are protein-layer foods; what
+ *  remains in this set is milk and plain curd/yogurt — the foods the
+ *  ICMR 300 ml floor is stated in. */
+const isMilkOrCurd = (food: Food): boolean =>
+  groupOf(food) === "dairy" && food.per100g.proteinG < 5;
+
+/** Shared composition state for one day: the pool in rotation order, the
+ *  foods already suggested (variety prefers the unused), and the running
+ *  day-floor totals the later meals can react to. */
+interface ComposeContext {
+  ordered: readonly Food[];
+  pattern: PlanPattern | null;
+  used: Set<string>;
+  vegG: number;
+  fruitG: number;
+  milkCurdG: number;
+}
+
+function recordSuggestion(
+  ctx: ComposeContext,
+  food: Food,
+  portion: SizedPortion,
+  layer: SuggestionLayer,
+): PlanSuggestion {
+  ctx.used.add(food.id);
+  if (groupOf(food) === "vegetables") ctx.vegG += portion.grams;
+  if (groupOf(food) === "fruits") ctx.fruitG += portion.grams;
+  if (isMilkOrCurd(food)) ctx.milkCurdG += portion.grams;
+  return {
+    foodId: food.id,
+    name: food.name,
+    grams: portion.grams,
+    nutrients: portion.nutrients,
+    provenance: food.provenance,
+    layer,
+  };
+}
+
+/** First food in rotation order matching `pred`, preferring one not yet
+ *  suggested today; when every match is used, the first match (a repeated
+ *  food beats an empty layer when data exists — the P1 principle).
+ *  Foods already in the current meal are always excluded. */
+function pickFood(
+  ctx: ComposeContext,
+  inMeal: ReadonlySet<string>,
+  pred: (food: Food) => boolean,
+): Food | null {
+  let fallback: Food | null = null;
+  for (const food of ctx.ordered) {
+    if (inMeal.has(food.id) || !pred(food)) continue;
+    if (!ctx.used.has(food.id)) return food;
+    fallback ??= food;
+  }
+  return fallback;
+}
+
+/* ------------------------------ protein kinds ------------------------------ */
+
+type ProteinKind = "eggs" | "pulses" | "dairy" | "flesh" | "own";
+
+const PROTEIN_CAP_G: Record<ProteinKind, number> = {
+  eggs: CAP_EGGS_G,
+  pulses: CAP_DRY_PULSES_G,
+  dairy: CAP_DAIRY_PROTEIN_G,
+  flesh: CAP_FLESH_G,
+  own: CAP_UNCLASSIFIED_PROTEIN_G,
+};
+
+/** The protein-layer cap for one food. Dairy splits by the food's own
+ *  energy density: at ≥350 kcal per 100 g a dairy food is a hard grating
+ *  cheese (in this set, parmesan), portioned by BNF at 30 g — not a
+ *  paneer-type food, whose 100 g portion the wider cap comes from. The
+ *  density threshold is a derivation from the food's stated values. */
+function proteinCapG(food: Food, kind: ProteinKind): number {
+  if (kind === "dairy" && food.per100g.kcal >= 350) return CAP_HARD_CHEESE_G;
+  return PROTEIN_CAP_G[kind];
+}
+
+/** The protein-layer kind of a food, or null when it cannot carry a
+ *  meal's protein layer. Classified foods qualify by group; an own food
+ *  qualifies on its own stated values (≥5 g protein per 100 g — the P1
+ *  protein-source threshold, a fact about the food, not a guess at its
+ *  identity). */
+function proteinKindOf(food: Food): ProteinKind | null {
+  const group = groupOf(food);
+  if (group === "eggs") return "eggs";
+  if (group === "pulses_legumes") return "pulses";
+  if (group === "dairy") return food.per100g.proteinG >= 5 ? "dairy" : null;
+  if (group === "other") return food.classification?.isFlesh ? "flesh" : null;
+  if (group !== null) return null;
+  return food.per100g.proteinG >= 5 ? "own" : null;
+}
+
+/** Grain-base eligibility: classified cereals, or an own food whose own
+ *  stated values are predominantly carbohydrate (P1's meal-base rule). */
+function isGrainBase(food: Food): boolean {
+  const group = groupOf(food);
+  if (group !== null) return group === "cereals_grains";
+  return food.per100g.carbsG >= 10;
+}
+
+/* ------------------------------- main meals ------------------------------- */
+
+interface MainMealComposition {
+  suggestions: PlanSuggestion[];
+  /** Which expected layers produced nothing, in plain names. */
+  missingLayers: string[];
+}
+
+function composeMainMeal(
+  ctx: ComposeContext,
+  split: MealSplit,
+  opts: { vegTargetG: number; fruitAtBreakfast: boolean; isBreakfast: boolean },
+): MainMealComposition {
+  const suggestions: PlanSuggestion[] = [];
+  const inMeal = new Set<string>();
+  const missing: string[] = [];
+  let kcalTally = 0;
+  const add = (food: Food, portion: SizedPortion, layer: SuggestionLayer) => {
+    suggestions.push(recordSuggestion(ctx, food, portion, layer));
+    inMeal.add(food.id);
+    kcalTally += portion.nutrients.kcal;
+  };
+
+  /* (a) Grain base — ~35% of the meal's energy (derivation, §3). */
+  const grain = pickFood(ctx, inMeal, isGrainBase);
+  const grainPortion =
+    grain &&
+    sizedPortion(
+      grain,
+      { kcal: GRAIN_SHARE_OF_MEAL * split.kcal },
+      groupOf(grain) === "cereals_grains" ? CAP_GRAIN_DRY_G : CAP_UNCLASSIFIED_BASE_G,
     );
-    if (secondary) {
-      suggestions.push(toSuggestion(secondary.food, secondary.fit));
-      usedIds.push(secondary.food.id);
+  if (grain && grainPortion) add(grain, grainPortion, "base");
+  else missing.push("a grain base");
+
+  /* (b) Protein layer — up to four sources, distinct kinds first, each
+     sized toward the protein still owed and clamped to its group cap.
+     Items after the first are also sized down so the layer stays within
+     its share of the meal's energy. The meal's protein split is the
+     aim; the caps are the law. Where the split runs above what capped
+     whole foods can carry (a 220 g day puts 55 g+ into a meal, above
+     the classic 20–40 g serving band — research §4), the meal lands
+     under its split honestly rather than breaking a cap to reach it. */
+  let proteinLeft = split.proteinG;
+  let proteinKcal = 0;
+  const kindsUsed = new Set<ProteinKind>();
+  for (let slot = 0; slot < MAX_PROTEIN_ITEMS_PER_MEAL && proteinLeft > PROTEIN_CLOSE_ENOUGH_G; slot++) {
+    /* Rank candidates: unused-today before used, a new kind before a
+       repeat kind — rotation order breaks the remaining ties. */
+    let best: { food: Food; kind: ProteinKind; score: number } | null = null;
+    for (const food of ctx.ordered) {
+      if (inMeal.has(food.id)) continue;
+      const kind = proteinKindOf(food);
+      if (kind === null) continue;
+      const score = (ctx.used.has(food.id) ? 2 : 0) + (kindsUsed.has(kind) ? 1 : 0);
+      if (!best || score < best.score) best = { food, kind, score };
+    }
+    if (!best) break;
+    let portion = sizedPortion(best.food, { proteinG: proteinLeft }, proteinCapG(best.food, best.kind));
+    if (portion && slot > 0 && proteinKcal + portion.nutrients.kcal > PROTEIN_LAYER_MAX_MEAL_SHARE * split.kcal) {
+      portion = sizedPortion(
+        best.food,
+        { kcal: PROTEIN_LAYER_MAX_MEAL_SHARE * split.kcal - proteinKcal },
+        proteinCapG(best.food, best.kind),
+      );
+    }
+    /* A later protein item sized down to a garnish is not a source —
+       the layer stops instead of suggesting a token portion. */
+    if (portion && slot > 0 && portion.grams < 15) portion = null;
+    if (!portion) break;
+    add(best.food, portion, "protein");
+    kindsUsed.add(best.kind);
+    proteinLeft -= portion.nutrients.proteinG;
+    proteinKcal += portion.nutrients.kcal;
+  }
+  if (!suggestions.some((s) => s.layer === "protein")) missing.push("a protein food");
+
+  /* (c) Vegetables — at least two distinct when the pool allows, sized
+     by grams toward the day's 400 g floor spread across the main meals:
+     volume first, energy second (§3). */
+  let vegTotal = 0;
+  for (let i = 0; i < 2; i++) {
+    const veg = pickFood(ctx, inMeal, (f) => groupOf(f) === "vegetables");
+    if (!veg) break;
+    const room = Math.min(CAP_SINGLE_VEGETABLE_G, CAP_MEAL_VEGETABLES_G - vegTotal);
+    const target = i === 0 ? Math.ceil(opts.vegTargetG / 2) : opts.vegTargetG - vegTotal;
+    const grams = roundToStep(Math.min(target, room), room);
+    if (grams < MIN_PORTION_G) break;
+    add(veg, { grams, nutrients: nutrientsForGrams(veg.per100g, grams) }, "vegetables");
+    vegTotal += grams;
+  }
+  if (vegTotal === 0) missing.push("vegetables");
+
+  /* (d) Measured fat — ~10% of the meal's energy (derivation, §3),
+     inside the ~1 tbsp cap. Butter and ghee live in this group too;
+     the pattern filter has already judged them. */
+  const fat = pickFood(ctx, inMeal, (f) => groupOf(f) === "fats_oils");
+  const fatPortion = fat && sizedPortion(fat, { kcal: FAT_SHARE_OF_MEAL * split.kcal }, CAP_FAT_G);
+  if (fat && fatPortion) add(fat, fatPortion, "finishing");
+  else missing.push("a cooking fat");
+
+  /* (e) Finishing — the day's floor-carrying extras, lightest first so a
+     heavy extra cannot crowd the others out of the meal's tolerance:
+     at breakfast, fruit (when the day has no snack slot to carry the
+     fruit floor) and a small nuts/seeds item; then, at every main meal,
+     the dairy extra when the pattern allows it — milk or curd sized to
+     the meal's remaining energy, and sized up toward the 300 ml ICMR
+     floor while the day is short of it, provided the meal is not
+     already far over its split (both are aims; the floor is the one a
+     guideline numbers). When the pattern excludes dairy the dairy layer
+     is empty BY PATTERN, which is not a gap and is never noted as one.
+     Research §3 places fruit and nuts/seeds at breakfast/snacks. */
+  const withinTolerance = () => kcalTally <= 1.25 * split.kcal;
+  if (opts.isBreakfast) {
+    if (opts.fruitAtBreakfast) {
+      const fruit = pickFood(ctx, inMeal, (f) => groupOf(f) === "fruits");
+      if (fruit) {
+        const remaining = split.kcal - kcalTally;
+        let portion = remaining > 0 ? sizedPortion(fruit, { kcal: remaining }, CAP_FRUIT_G) : null;
+        if (ctx.fruitG < FLOOR_FRUIT_G && withinTolerance()) {
+          const want = Math.min(CAP_FRUIT_G, FLOOR_FRUIT_G - ctx.fruitG);
+          if (!portion || portion.grams < want) {
+            const grams = roundToStep(want, CAP_FRUIT_G);
+            if (grams >= 50) portion = { grams, nutrients: nutrientsForGrams(fruit.per100g, grams) };
+          }
+        }
+        if (portion && portion.grams >= 50) add(fruit, portion, "finishing");
+      }
+    }
+    const nuts = pickFood(ctx, inMeal, (f) => groupOf(f) === "nuts_seeds");
+    if (nuts) {
+      const remaining = split.kcal - kcalTally;
+      let portion =
+        remaining >= 60 ? sizedPortion(nuts, { kcal: Math.min(remaining, 120) }, CAP_NUTS_G) : null;
+      if (!portion && withinTolerance()) {
+        portion = { grams: 15, nutrients: nutrientsForGrams(nuts.per100g, 15) };
+      }
+      if (portion) add(nuts, portion, "finishing");
     }
   }
-  return { suggestions, usedIds };
+  const dairyAllowed = ctx.pattern === null || PATTERN_ALLOWANCES[ctx.pattern].dairy;
+  if (dairyAllowed) {
+    const dairy = pickFood(ctx, inMeal, isMilkOrCurd);
+    if (!dairy) {
+      missing.push("a dairy extra");
+    } else {
+      const remaining = split.kcal - kcalTally;
+      let portion =
+        remaining >= 60 ? sizedPortion(dairy, { kcal: remaining }, CAP_FINISHING_DAIRY_G) : null;
+      if (ctx.milkCurdG < FLOOR_MILK_CURD_G && withinTolerance()) {
+        const want = Math.min(CAP_FINISHING_DAIRY_G, FLOOR_MILK_CURD_G - ctx.milkCurdG);
+        if (!portion || portion.grams < want) {
+          const grams = roundToStep(want, CAP_FINISHING_DAIRY_G);
+          if (grams >= 50) portion = { grams, nutrients: nutrientsForGrams(dairy.per100g, grams) };
+        }
+      }
+      if (portion && portion.grams >= 50) add(dairy, portion, "finishing");
+    }
+  }
+
+  return { suggestions, missingLayers: missing };
+}
+
+/* --------------------------------- snacks --------------------------------- */
+
+function snackCapG(food: Food): number {
+  const group = groupOf(food);
+  if (group === "fruits") return CAP_FRUIT_G;
+  if (group === "nuts_seeds") return CAP_NUTS_G;
+  if (group === "eggs") return CAP_EGGS_G;
+  if (group === "dairy") return food.per100g.proteinG >= 5 ? CAP_DAIRY_PROTEIN_G : CAP_FINISHING_DAIRY_G;
+  return CAP_UNCLASSIFIED_PROTEIN_G;
+}
+
+const isSnackFood = (food: Food): boolean => {
+  const group = groupOf(food);
+  return (
+    group === "fruits" ||
+    group === "nuts_seeds" ||
+    group === "dairy" ||
+    group === "eggs" ||
+    group === null
+  );
+};
+
+/** A snack is one or two items — fruit, nuts, dairy or egg, per pattern
+ *  (the pattern filter has already run). The first item leans protein
+ *  when the snack's split carries real protein; the second prefers
+ *  fruit while the day is still short of the fruit floor. */
+function composeSnack(ctx: ComposeContext, split: MealSplit): PlanSuggestion[] {
+  const suggestions: PlanSuggestion[] = [];
+  const inMeal = new Set<string>();
+  let kcalTally = 0;
+  const add = (food: Food, portion: SizedPortion) => {
+    suggestions.push(recordSuggestion(ctx, food, portion, "snack"));
+    inMeal.add(food.id);
+    kcalTally += portion.nutrients.kcal;
+  };
+
+  const first =
+    (split.proteinG >= 10 &&
+      pickFood(ctx, inMeal, (f) => isSnackFood(f) && f.per100g.proteinG >= 5)) ||
+    pickFood(ctx, inMeal, isSnackFood);
+  const firstPortion =
+    first && sizedPortion(first, { kcal: 0.6 * split.kcal }, snackCapG(first));
+  if (first && firstPortion) add(first, firstPortion);
+
+  const remaining = split.kcal - kcalTally;
+  if (remaining >= 40) {
+    const second =
+      (ctx.fruitG < FLOOR_FRUIT_G && pickFood(ctx, inMeal, (f) => groupOf(f) === "fruits")) ||
+      pickFood(ctx, inMeal, isSnackFood);
+    const portion = second && sizedPortion(second, { kcal: remaining }, snackCapG(second));
+    if (second && portion) add(second, portion);
+  }
+  return suggestions;
+}
+
+/* --------------------------- day-level honesty ----------------------------- */
+
+/**
+ * No single food may supply more than ~40% of the day's protein
+ * (research §7 operationalisation — a derivation). Rotation and the
+ * portion caps make this rare; when a thin pool forces one food to
+ * dominate, later portions of it are trimmed (never below a real
+ * portion, and an item trimmed to nothing is removed) so the plan's
+ * protein is genuinely spread.
+ */
+function applyProteinDominanceCap(
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  targetProteinG: number,
+): void {
+  const cap = MAX_SINGLE_FOOD_PROTEIN_SHARE * targetProteinG;
+  const totals = new Map<string, number>();
+  for (const meal of meals) {
+    for (const s of meal.suggestions) {
+      totals.set(s.foodId, (totals.get(s.foodId) ?? 0) + s.nutrients.proteinG);
+    }
+  }
+  for (const [foodId, protein] of totals) {
+    if (protein <= cap) continue;
+    const food = byId.get(foodId);
+    if (!food || food.per100g.proteinG <= 0) continue;
+    let excess = protein - cap;
+    for (let i = meals.length - 1; i >= 0 && excess > 0; i--) {
+      const meal = meals[i]!;
+      const idx = meal.suggestions.findIndex((s) => s.foodId === foodId);
+      if (idx < 0) continue;
+      const suggestion = meal.suggestions[idx]!;
+      const cutG = Math.ceil(((excess / food.per100g.proteinG) * 100) / 5) * 5;
+      const newGrams = suggestion.grams - cutG;
+      if (newGrams < 10) {
+        excess -= suggestion.nutrients.proteinG;
+        meal.suggestions.splice(idx, 1);
+        if (meal.suggestions.length === 0) meal.note = EMPTY_MEAL_NOTE;
+      } else {
+        const nutrients = nutrientsForGrams(food.per100g, newGrams);
+        excess -= suggestion.nutrients.proteinG - nutrients.proteinG;
+        meal.suggestions[idx] = { ...suggestion, grams: newGrams, nutrients };
+      }
+    }
+  }
+}
+
+/**
+ * The plan's composition notes: every day-level aim the suggestions
+ * could not reach, named in plain words with the guideline it comes
+ * from. Floors are ICMR-NIN My Plate amounts (held, not scaled — §1);
+ * the diversity aims are the research's operationalisation (§7). A pool
+ * that simply does not contain a group is a pool fact and is worded as
+ * one — noted, never faked.
+ */
+function compositionNotes(
+  ctx: ComposeContext,
+  meals: readonly PlanMeal[],
+  pool: readonly Food[],
+): string[] {
+  const notes: string[] = [];
+  if (ctx.vegG < FLOOR_VEGETABLES_G) {
+    notes.push(
+      `Today's suggestions reach ${ctx.vegG} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
+    );
+  }
+  if (ctx.fruitG < FLOOR_FRUIT_G) {
+    notes.push(
+      `Today's suggestions reach ${ctx.fruitG} g of fruit — the ICMR-NIN guideline aims for at least 100 g across the day.`,
+    );
+  }
+  if (ctx.milkCurdG < FLOOR_MILK_CURD_G) {
+    notes.push(
+      `Today's suggestions reach ${ctx.milkCurdG} g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.`,
+    );
+  }
+  const proteinSources = new Set<string>();
+  const poolGroups = new Set<FoodGroup>();
+  for (const meal of meals) {
+    for (const s of meal.suggestions) {
+      if (s.layer === "protein" || (meal.meal === "snack" && s.nutrients.proteinG >= 5)) {
+        proteinSources.add(s.foodId);
+      }
+    }
+  }
+  for (const food of pool) {
+    if (food.classification) poolGroups.add(food.classification.group);
+  }
+  const suggestedGroups = new Set<FoodGroup>();
+  const byId = new Map(pool.map((f) => [f.id, f]));
+  for (const meal of meals) {
+    for (const s of meal.suggestions) {
+      const group = byId.get(s.foodId)?.classification?.group;
+      if (group) suggestedGroups.add(group);
+    }
+  }
+  if (proteinSources.size < AIM_DISTINCT_PROTEIN_SOURCES) {
+    notes.push(
+      `Today's protein comes from ${proteinSources.size} source${proteinSources.size === 1 ? "" : "s"} — three or more across the day is the aim, for variety.`,
+    );
+  }
+  if (suggestedGroups.size < AIM_FOOD_GROUPS) {
+    notes.push(
+      poolGroups.size < AIM_FOOD_GROUPS
+        ? `The foods Bloom can plan with today span ${poolGroups.size} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`
+        : `Today's suggestions span ${suggestedGroups.size} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`,
+    );
+  }
+  return notes;
 }
 
 /* ------------------------------- generation -------------------------------- */
@@ -527,25 +1094,54 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const splits = splitTargets(targets, mealSlotsFor(profile.dietary.mealsPerDay));
   const pool = eligiblePool(profile, input.foods);
 
-  /* Variety across the day first: each meal prefers foods no earlier meal
-     used. A meal that finds nothing unused retries against the whole
-     pool — a repeated food beats an empty meal when data exists. */
-  const used = new Set<string>();
+  /* Compose the day (P2): the pool in the day's rotation order, layered
+     per meal over shared day state — foods already suggested are
+     deprioritised (variety), and the floor totals accumulate so later
+     meals can react. The vegetable aim spreads the 400 g ICMR floor
+     across the main meals, held inside the per-meal caps. */
+  const ctx: ComposeContext = {
+    ordered: rotationOrder(input.day, pool),
+    pattern: planPatternOf(profile.dietary.pattern),
+    used: new Set<string>(),
+    vegG: 0,
+    fruitG: 0,
+    milkCurdG: 0,
+  };
+  const mainCount = splits.filter((s) => s.meal !== "snack").length;
+  const hasSnack = splits.some((s) => s.meal === "snack");
+  const vegTargetG =
+    mainCount > 0 ? Math.min(240, Math.max(130, Math.round(420 / mainCount))) : 0;
   const meals: PlanMeal[] = splits.map((split) => {
-    const unused = pool.filter((f) => !used.has(f.id));
-    let result = suggestForMeal(unused, split);
-    if (result.suggestions.length === 0 && unused.length !== pool.length) {
-      result = suggestForMeal(pool, split);
+    if (split.meal === "snack") {
+      const suggestions = composeSnack(ctx, split);
+      return {
+        meal: split.meal,
+        kcal: split.kcal,
+        proteinG: split.proteinG,
+        suggestions,
+        note: suggestions.length === 0 ? EMPTY_MEAL_NOTE : null,
+      };
     }
-    for (const id of result.usedIds) used.add(id);
+    const { suggestions, missingLayers } = composeMainMeal(ctx, split, {
+      vegTargetG,
+      fruitAtBreakfast: !hasSnack,
+      isBreakfast: split.meal === "breakfast",
+    });
     return {
       meal: split.meal,
       kcal: split.kcal,
       proteinG: split.proteinG,
-      suggestions: result.suggestions,
-      note: result.suggestions.length === 0 ? EMPTY_MEAL_NOTE : null,
+      suggestions,
+      note:
+        suggestions.length === 0
+          ? EMPTY_MEAL_NOTE
+          : missingLayers.length > 0
+            ? `Part of this meal is missing: ${missingLayers.join(", ")} — no food with known values fits yet. Add a food you eat, then regenerate the plan.`
+            : null,
     };
   });
+  applyProteinDominanceCap(meals, new Map(pool.map((f) => [f.id, f])), targets.proteinG);
+  const notes = compositionNotes(ctx, meals, pool);
 
   return {
     ok: true,
@@ -559,6 +1155,8 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       targetsSource,
       safetyClassification: safety.classification,
       cautions: safety.findings.filter((f) => !f.blocking).map((f) => f.summary),
+      notes,
+      methodVersion: PLAN_METHOD_VERSION,
       meals,
       inputs: snapshot,
       fingerprint: fingerprintOfInputs(snapshot),
@@ -617,6 +1215,13 @@ function numOrNull(value: unknown, min: number, max: number): number | null {
 
 const GOALS: readonly VitalisGoal[] = ["lose", "maintain", "gain", "recomp", "general_health"];
 const GOAL_PROFILES: readonly PlanGoalProfile[] = ["lose", "gain", "maintain", "recomp"];
+const SUGGESTION_LAYERS: readonly SuggestionLayer[] = [
+  "base",
+  "protein",
+  "vegetables",
+  "finishing",
+  "snack",
+];
 const ACTIVITIES: readonly ActivityLevel[] = ["sedentary", "light", "moderate", "active", "very_active"];
 const PATTERNS: readonly DietaryPattern[] = [
   "omnivore",
@@ -686,7 +1291,16 @@ function parseSuggestion(raw: unknown): PlanSuggestion | null {
   /* A stored suggestion may only carry a source the generator itself
      would use — a plan that claims IFCT values is not a plan Bloom made. */
   if (!provenance || (provenance.kind !== "usda" && provenance.kind !== "user_entered")) return null;
-  return { foodId, name, grams, nutrients, provenance };
+  const suggestion: PlanSuggestion = { foodId, name, grams, nutrients, provenance };
+  /* The composition layer (P2): absent on P1 plans, which suggested
+     without layers; present-but-invalid is a tamper and drops the
+     suggestion, like any other malformed field. */
+  if ("layer" in raw) {
+    const layer = oneOf(raw["layer"], SUGGESTION_LAYERS);
+    if (!layer) return null;
+    suggestion.layer = layer;
+  }
+  return suggestion;
 }
 
 function parsePlan(raw: unknown): DailyPlan | null {
@@ -718,6 +1332,22 @@ function parsePlan(raw: unknown): DailyPlan | null {
       if (line) cautions.push(line);
     }
   }
+  /* Composition notes (P2): absent on P1 plans, read as empty. */
+  const notes: string[] = [];
+  if (Array.isArray(raw["notes"])) {
+    for (const item of raw["notes"].slice(0, 8)) {
+      const line = text(item, 300);
+      if (line) notes.push(line);
+    }
+  }
+  /* The composition method (P2): absent on P1 plans, which are method 1
+     by definition; present-but-invalid is a tamper and refuses the plan. */
+  let methodVersion = 1;
+  if ("methodVersion" in raw) {
+    const parsed = numIn(raw["methodVersion"], 1, 999);
+    if (parsed === null || Math.round(parsed) !== parsed) return null;
+    methodVersion = parsed;
+  }
   if (!Array.isArray(raw["meals"]) || raw["meals"].length < 1 || raw["meals"].length > MEALS.length) {
     return null;
   }
@@ -733,7 +1363,7 @@ function parsePlan(raw: unknown): DailyPlan | null {
     if (mealKcal === null || mealProtein === null) return null;
     const suggestions: PlanSuggestion[] = [];
     if (Array.isArray(item["suggestions"])) {
-      for (const s of item["suggestions"].slice(0, 4)) {
+      for (const s of item["suggestions"].slice(0, 12)) {
         const suggestion = parseSuggestion(s);
         if (suggestion) suggestions.push(suggestion);
       }
@@ -767,6 +1397,8 @@ function parsePlan(raw: unknown): DailyPlan | null {
     targetsSource,
     safetyClassification,
     cautions,
+    notes,
+    methodVersion,
     meals,
     inputs,
     fingerprint,

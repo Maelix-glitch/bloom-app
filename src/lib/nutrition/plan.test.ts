@@ -218,7 +218,11 @@ describe("plan · suggestions", () => {
         expect(suggestion.nutrients).toEqual(nutrientsForGrams(food.per100g, suggestion.grams));
         expect(suggestion.nutrients).toEqual(entryNutrientsFor(food, { grams: suggestion.grams }));
         expect(suggestion.grams % 5).toBe(0);
-        expect(suggestion.grams).toBeGreaterThanOrEqual(25);
+        /* P2 portions run from a measured 5 g (a fat layer inside its
+           ~14 g cap) up; the P1 composer's 25 g floor went with it.
+           The per-group caps themselves are pinned in
+           planComposition.test.ts. */
+        expect(suggestion.grams).toBeGreaterThanOrEqual(5);
         expect(suggestion.grams).toBeLessThanOrEqual(500);
         expect(suggestion.provenance).toEqual(food.provenance);
       }

@@ -16,6 +16,8 @@ import {
   type EntrySource,
   type EstimateSnapshot,
   type Food,
+  type FoodClassification,
+  type FoodGroup,
   type FoodProvenance,
   type FoodProvenanceKind,
   type FoodServing,
@@ -25,6 +27,17 @@ import {
 } from "./types";
 
 const FOOD_KINDS: readonly FoodProvenanceKind[] = ["usda", "user_entered", "off", "ifct"];
+const FOOD_GROUPS: readonly FoodGroup[] = [
+  "cereals_grains",
+  "pulses_legumes",
+  "eggs",
+  "dairy",
+  "vegetables",
+  "fruits",
+  "nuts_seeds",
+  "fats_oils",
+  "other",
+];
 const ENTRY_SOURCES: readonly EntrySource[] = ["search", "custom", "coach_photo", "recent", "plan"];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -171,6 +184,30 @@ function parseServings(raw: unknown): FoodServing[] {
   return out;
 }
 
+/**
+ * A food's group + pattern identity (P2). The classification is data-layer
+ * fact (the USDA generator's pinned per-FDC-id table), so it is validated
+ * like any other shipped fact: a malformed classification is dropped whole
+ * — the food survives as unclassified rather than wearing a half-parsed
+ * identity a pattern filter might misread.
+ */
+export function parseFoodClassification(raw: unknown): FoodClassification | null {
+  if (!isRecord(raw)) return null;
+  const group = oneOf(raw["group"], FOOD_GROUPS);
+  if (!group) return null;
+  const flags = ["containsEgg", "containsDairy", "isFlesh", "isFish"] as const;
+  for (const flag of flags) {
+    if (typeof raw[flag] !== "boolean") return null;
+  }
+  return {
+    group,
+    containsEgg: raw["containsEgg"] as boolean,
+    containsDairy: raw["containsDairy"] as boolean,
+    isFlesh: raw["isFlesh"] as boolean,
+    isFish: raw["isFish"] as boolean,
+  };
+}
+
 export function parseFood(raw: unknown): Food | null {
   if (!isRecord(raw)) return null;
   const id = text(raw["id"], 80);
@@ -180,7 +217,10 @@ export function parseFood(raw: unknown): Food | null {
   if (!per100g) return null;
   const provenance = parseFoodProvenance(raw["provenance"]);
   if (!provenance) return null;
-  return { id, name, per100g, servings: parseServings(raw["servings"]), provenance };
+  const food: Food = { id, name, per100g, servings: parseServings(raw["servings"]), provenance };
+  const classification = parseFoodClassification(raw["classification"]);
+  if (classification) food.classification = classification;
+  return food;
 }
 
 /** Parse a stored food list: malformed entries drop, valid ones survive. */
