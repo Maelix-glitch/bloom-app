@@ -7,9 +7,11 @@ import { BloomSheet } from "@/components/ui/bloom-sheet";
 import type { CoachMessage } from "@/hooks/useCoachSystem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { copyText, messageTime, noticesFor, TREND_WORD } from "@/lib/coach/ui-helpers";
+import type { CoachPhotoEstimate } from "@/lib/nutrition/coachLog";
 import { cn } from "@/lib/utils";
 
 import { CoachGlyph, NoticeGlyph } from "./bloom-mark";
+import { CoachLogAction } from "./CoachLogAction";
 import { ResponseBlocks } from "./ResponseBlocks";
 
 /* ------------------------------- rich text --------------------------------- */
@@ -320,6 +322,7 @@ export function BloomMessage({
   onTellMeMore,
   onMakePlan,
   onBlockAction,
+  logEstimate,
 }: {
   message: CoachMessage;
   fresh: boolean;
@@ -330,6 +333,11 @@ export function BloomMessage({
   onTellMeMore: () => void;
   onMakePlan: () => void;
   onBlockAction: (action: string) => void;
+  /** The usable photo estimate this reply carries (N5), when the
+   *  thread says it read a photo and stated clean totals. Renders the
+   *  "Log this" handoff under the message; absent for every other
+   *  reply — Coach proposes nothing it cannot state plainly. */
+  logEstimate?: CoachPhotoEstimate | null | undefined;
 }) {
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [copied, setCopied] = useState(false);
@@ -413,6 +421,9 @@ export function BloomMessage({
             onTellMeMore={onTellMeMore}
             onMakePlan={onMakePlan}
           />
+          {logEstimate ? (
+            <CoachLogAction messageId={message.id} estimate={logEstimate} />
+          ) : null}
         </>
       )}
     </motion.article>

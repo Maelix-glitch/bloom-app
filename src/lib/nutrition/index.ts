@@ -5,6 +5,8 @@
  * N2: prefs storage (`health.foods.v1` / `health.foodlog.v1`), custom-food
  * CRUD, food-log operations, recents. No UI lives here.
  * N3: the USDA reference set (generated data + search + licence gate).
+ * N5: the Coach photo-estimate handoff (`coachLog`) and the Overview
+ * synthesis input (`overviewInput`). No UI lives here either.
  */
 
 export * from "./types";
@@ -17,3 +19,5 @@ export * from "./store";
 export * from "./foods";
 export * from "./log";
 export * from "./usdaReference";
+export * from "./coachLog";
+export * from "./overviewInput";
