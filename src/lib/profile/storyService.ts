@@ -337,6 +337,85 @@ export async function uploadStoryGif(
   return data.publicUrl;
 }
 
+/* --------------------- inline photo upload (publish) --------------------- */
+
+/**
+ * Decode a `data:` URL into a Blob without a network round-trip.
+ * Returns null for anything that is not a well-formed data URL.
+ */
+export function dataUrlToBlob(dataUrl: string): Blob | null {
+  const match = /^data:([^;,]+)?(;base64)?,([\s\S]*)$/.exec(dataUrl);
+  if (!match) return null;
+  const mime = match[1] || "application/octet-stream";
+  try {
+    if (match[2]) {
+      const binary = atob(match[3]!.replace(/\s/g, ""));
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+    return new Blob([decodeURIComponent(match[3]!)], { type: mime });
+  } catch {
+    return null;
+  }
+}
+
+const isInlinePhotoSrc = (src: string): boolean => src.startsWith("data:image/");
+
+/** Every inline photo payload in an element list, in encounter order. */
+export function inlinePhotoSrcs(elements: readonly StoryElement[]): string[] {
+  const found: string[] = [];
+  for (const el of elements) {
+    if (el.kind === "photo" && isInlinePhotoSrc(el.src)) found.push(el.src);
+  }
+  return found;
+}
+
+/** Swap resolved inline photo srcs for their storage URLs, immutably. */
+export function replaceInlinePhotoSrcs(
+  elements: readonly StoryElement[],
+  urls: ReadonlyMap<string, string>,
+): StoryElement[] {
+  return elements.map((el) => {
+    if (el.kind !== "photo") return el;
+    const url = urls.get(el.src);
+    return url ? { ...el, src: url } : el;
+  });
+}
+
+/** The same swap for a composed background's photo layer. */
+export function replaceCanvasPhotoSrc<T extends StoryCanvasState>(
+  canvas: T | null | undefined,
+  urls: ReadonlyMap<string, string>,
+): T | null {
+  if (!canvas?.photo) return canvas ?? null;
+  const url = urls.get(canvas.photo.src);
+  if (!url) return canvas;
+  return { ...canvas, photo: { ...canvas.photo, src: url } };
+}
+
+async function uploadInlineStoryPhoto(userId: string, blob: Blob): Promise<string> {
+  const ext =
+    blob.type === "image/png"
+      ? "png"
+      : blob.type === "image/webp"
+        ? "webp"
+        : blob.type === "image/gif"
+          ? "gif"
+          : "jpg";
+  const path = `${userId}/stories/el-${uuid()}.${ext}`;
+  const { error } = await supabase.storage
+    .from(PROFILE_MEDIA_BUCKET)
+    .upload(path, blob, { contentType: blob.type || "image/jpeg", upsert: false });
+
+  if (error) {
+    report("story:element-photo-upload", error);
+    throw new StoryServiceError("Couldn't upload one of your photos.");
+  }
+  const { data } = supabase.storage.from(PROFILE_MEDIA_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export async function createStory(userId: string, input: CreateStoryInput): Promise<Story> {
   if (!publishAllowed()) {
     throw new StoryServiceError(
@@ -393,6 +472,45 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
       return url ? { ...e, src: url } : e;
     });
   }
+
+  // Canvas photos (elements, slide elements, background photo layers) ride
+  // up to storage the same way. They used to be stored as the data URLs the
+  // editor produced — up to ~900k characters of base64 per photo inside the
+  // row's JSON, re-decoded from scratch on every view, and silently dropped
+  // by the sanitizer past that cap. Now the row carries an https URL:
+  // cacheable, CDN-served, and small. Each unique payload uploads once.
+  let resolvedCanvas = input.canvas ?? null;
+  let resolvedSlides = input.slides ?? null;
+  {
+    const inline = new Set<string>(inlinePhotoSrcs(pendingElements));
+    const collectCanvas = (canvas: StoryCanvasState | null | undefined) => {
+      if (canvas?.photo && isInlinePhotoSrc(canvas.photo.src)) inline.add(canvas.photo.src);
+    };
+    collectCanvas(resolvedCanvas);
+    for (const slide of resolvedSlides ?? []) {
+      for (const src of inlinePhotoSrcs(slide.elements)) inline.add(src);
+      collectCanvas(slide.canvas);
+    }
+    if (inline.size > 0) {
+      const urls = new Map<string, string>();
+      for (const src of inline) {
+        const blob = dataUrlToBlob(src);
+        if (!blob) {
+          throw new StoryServiceError("Couldn't read one of your photos. Try adding it again.");
+        }
+        urls.set(src, await uploadInlineStoryPhoto(userId, blob));
+      }
+      pendingElements = replaceInlinePhotoSrcs(pendingElements, urls);
+      resolvedCanvas = replaceCanvasPhotoSrc(resolvedCanvas, urls);
+      resolvedSlides = resolvedSlides
+        ? resolvedSlides.map((slide) => ({
+            ...slide,
+            elements: replaceInlinePhotoSrcs(slide.elements, urls),
+            canvas: replaceCanvasPhotoSrc(slide.canvas, urls),
+          }))
+        : null;
+    }
+  }
   const elements = sanitizeElements(pendingElements);
 
   // Own audio rides up to storage; the public URL becomes the track source.
@@ -432,11 +550,11 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
     filter_id: input.filterId ?? null,
     adjustments: input.adjustments ?? null,
     background_id: input.backgroundId ?? null,
-    canvas: input.canvas ?? null,
+    canvas: resolvedCanvas,
     music: music ?? null,
     alt_text: input.altText?.trim().slice(0, 300) || null,
     audience: input.audience ?? "all",
-    slides: prepareSlidesForWrite(input.slides),
+    slides: prepareSlidesForWrite(resolvedSlides),
   };
 
   // Three tiers, because "the backend is behind" is not one state:

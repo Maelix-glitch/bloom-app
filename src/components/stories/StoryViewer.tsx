@@ -41,13 +41,22 @@ import { GiftSheet, ReactionBar, ReplySheet, StoryInsightsSheet } from "./Intera
 import { GIFT_META } from "@/lib/stories/catalogs";
 import { recordView } from "@/lib/stories/interactions";
 import { slideDurationMs } from "@/lib/stories/slides";
-import { buildSegments, isRichSlide, segmentForStory, type Segment } from "./segments";
+import {
+  buildSegments,
+  isRichSlide,
+  segmentForStory,
+  adjacentImageUrls,
+  type Segment,
+} from "./segments";
 import { storyAge } from "@/lib/stories/time";
 import type { StoryGiftKind } from "@/lib/stories/types";
 import { normalizeAccent } from "@/lib/profile/types";
 import { toast } from "sonner";
 
 export type ViewerPhase = "closed" | "viewing" | "paused";
+
+/** URLs the prefetch has already warmed this session — warming is monotonic. */
+const warmedPrefetchUrls = new Set<string>();
 
 interface ViewTarget {
   stories: Story[];
@@ -279,19 +288,28 @@ export function StoryViewer({
     }
   }, [story, goTo, seg, open, onClose, segments.length]);
 
-  /* prefetch the next segment's media */
+  /* prefetch the adjacent segments' media — neighbours only, so opening a
+     rail never downloads all of it, and advancing never waits on a cold
+     fetch or a cold decode. Canvas photo elements and photo backgrounds
+     are warmed too: they are most of what a rich slide paints, and the old
+     effect only knew the legacy base mediaPath, so every canvas slide
+     arrived cold. */
   useEffect(() => {
     if (!open) return;
     const upcoming = segments[seg + 1]?.slide;
-    if (!upcoming?.mediaPath) return;
-    const url = storyMediaUrl(upcoming);
-    if (!url) return;
-    if (upcoming.mediaType === "video") {
-      const video = document.createElement("video");
-      video.preload = "auto";
-      video.src = url;
-    } else {
+    if (upcoming?.mediaPath && upcoming.mediaType === "video") {
+      const url = storyMediaUrl(upcoming);
+      if (url) {
+        const video = document.createElement("video");
+        video.preload = "auto";
+        video.src = url;
+      }
+    }
+    for (const url of adjacentImageUrls(segments, seg)) {
+      if (warmedPrefetchUrls.has(url)) continue;
+      warmedPrefetchUrls.add(url);
       const img = new Image();
+      img.decoding = "async";
       img.src = url;
     }
   }, [open, segments, seg]);

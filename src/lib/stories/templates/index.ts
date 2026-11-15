@@ -26,12 +26,12 @@ import {
 export * from "./dsl";
 
 /**
- * The production template library: exactly fifty curated designs.
+ * The production template library: exactly fourteen curated designs (v2).
  *
  * This array is the whole catalogue. There is no second list, no hidden
  * experimental shelf and no legacy set kept "just in case" — the collection
  * module is the only place templates are defined, and it asserts its own
- * count. `STORY_TEMPLATE_LIBRARY.length === 50` is checked in the test suite.
+ * count. `STORY_TEMPLATE_LIBRARY.length === 14` is checked in the test suite.
  */
 export const STORY_TEMPLATE_LIBRARY: StoryTemplateDef[] = STORY_TEMPLATE_COLLECTION;
 
@@ -66,13 +66,12 @@ export function templateSections(): {
 
 /* --------------------------------- search -------------------------------- */
 
-/** Phrases people actually type, mapped to what they mean here. */
 /**
  * Phrases people actually type, mapped onto the seven collections.
  *
- * Kept deliberately small. Search over fifty templates does not need twenty-six
- * intent rules; it needs the handful of things someone says when they half know
- * what they want.
+ * Kept deliberately small. Search over fourteen templates does not need
+ * twenty-six intent rules; it needs the handful of things someone says when
+ * they half know what they want.
  */
 const INTENTS: { match: RegExp; tags: string[]; categories?: TemplateCategoryId[] }[] = [
   {

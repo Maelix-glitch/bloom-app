@@ -2,7 +2,7 @@
 /**
  * A template preview with an unfilled photo slot must still look intentional.
  *
- * Every one of the 50 templates renders live from its composition, so on the
+ * Every one of the 14 templates renders live from its composition, so on the
  * shelf almost every preview has at least one empty photo slot in it. Those
  * slots used to be a fixed `rgba(148,142,168,0.16)` grey regardless of the
  * template — a smudge on the ivory designs and a hole in the obsidian ones,
@@ -85,8 +85,8 @@ describe("empty photo slots", () => {
     }
 
     /* If this drops, the templates stopped using photo slots and this test
-       stopped proving anything. */
-    expect(slots).toBeGreaterThan(20);
+       stopped proving anything. v2 has exactly twelve photo-led templates. */
+    expect(slots).toBe(12);
     /* Both dark and light templates must be covered, or one of them is
        silently getting the wrong tint. */
     expect(byTone.get("dark")).toBeGreaterThan(0);

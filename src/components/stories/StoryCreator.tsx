@@ -241,7 +241,7 @@ export function StoryCreator({
     setEditorSource({
       base: "background",
       backgroundId: "golden-hour",
-      templateId: "progress-small-win",
+      templateId: "progress-showed-up",
       storyKind: "win",
       accent: "amber",
     });

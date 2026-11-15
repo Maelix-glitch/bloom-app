@@ -1,15 +1,18 @@
 /**
- * The curated collection — exactly fifty templates.
+ * The v2 collection — exactly fourteen templates.
  *
- * This module is the single source of truth for what ships. Seven shelves,
- * fifty designs, and an assertion at the bottom that fails loudly if that
- * ever stops being true. The assertion is not decoration: the previous version
- * of this library grew to 294 templates across 26 categories, and nothing in
- * the code noticed or objected. Now something does.
+ * This module is the single source of truth for what ships. The v1 library
+ * held fifty templates, but the 2026-11-10 deep-dive found they collapsed
+ * into about five repeated compositions, half had no photo slot, and only
+ * five surfaced real Bloom data. v2 replaces breadth with depth: fourteen
+ * archetypes, twelve photo-first, eleven built around live data (habits,
+ * points, streak, mood, sleep, movement, energy), two genuinely
+ * typographic, all in the official reskin palette. An assertion at the
+ * bottom fails loudly if that ever stops being true.
  *
  * Counts per shelf:
- *   everyday 10 · memories 8 · mood 7 · progress 7
- *   wellness 6 · reflection 6 · celebration 6   = 50
+ *   everyday 3 · progress 3 · mood 2 · wellness 2
+ *   memories 2 · reflection 1 · celebration 1   = 14
  */
 
 import type { StoryTemplateDef } from "../dsl";
@@ -23,13 +26,13 @@ import { CELEBRATION_TEMPLATES } from "./celebration";
 
 /** How many templates each shelf holds. Checked below against the real arrays. */
 export const COLLECTION_SIZES = {
-  everyday: 10,
-  memories: 8,
-  mood: 7,
-  progress: 7,
-  wellness: 6,
-  reflection: 6,
-  celebration: 6,
+  everyday: 3,
+  memories: 2,
+  mood: 2,
+  progress: 3,
+  wellness: 2,
+  reflection: 1,
+  celebration: 1,
 } as const;
 
 /** The whole production library, in shelf order. */
@@ -44,7 +47,7 @@ export const STORY_TEMPLATE_COLLECTION: StoryTemplateDef[] = [
 ];
 
 /** The number the production library must always equal. */
-export const TEMPLATE_COUNT = 50;
+export const TEMPLATE_COUNT = 14;
 
 /**
  * Validate the collection. Returns a list of problems — empty when the
@@ -89,7 +92,7 @@ export function validateCollection(): string[] {
 }
 
 /**
- * Throws when the collection is not exactly fifty healthy templates.
+ * Throws when the collection is not exactly fourteen healthy templates.
  *
  * Called from the test suite, so a bad count fails the build rather than
  * shipping quietly.

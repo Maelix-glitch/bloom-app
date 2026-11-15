@@ -33,7 +33,12 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-import { loadImageElement, validateImageFile } from "@/lib/profile/media";
+import {
+  loadImageElement,
+  processStoryPhoto,
+  readAsDataUrl,
+  validateImageFile,
+} from "@/lib/profile/media";
 
 import { StoryCanvas, type CanvasMedia } from "./StoryCanvas";
 import { ElementLayer, pointInRect } from "./ElementLayer";
@@ -849,14 +854,6 @@ export function StoryEditor({
   /* ------------------------------ photo slots ----------------------------- */
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const [fillTarget, setFillTarget] = useState<string | null>(null);
-  const [objectUrls, setObjectUrls] = useState<string[]>([]);
-
-  useEffect(
-    () => () => {
-      for (const url of objectUrls) URL.revokeObjectURL(url);
-    },
-    [objectUrls],
-  );
 
   const requestPhotoFor = useCallback((id: string) => {
     setFillTarget(id);
@@ -929,57 +926,73 @@ export function StoryEditor({
         return;
       }
       try {
-        const img = await loadImageElement(URL.createObjectURL(file));
-        const reader = new FileReader();
-        reader.onload = () => {
-          const dataUrl = String(reader.result ?? "");
-          const url = URL.createObjectURL(file);
-          setObjectUrls((prev) => [...prev, url]);
-          if (fillTarget === "__background__") {
-            pushHistory();
-            setBackground((bg) => ({
-              ...bg,
-              mode: "photo",
-              photo: {
-                src: dataUrl,
-                fit: "fill",
-                blur: 0,
-                zoom: 1,
-                panX: 0,
-                panY: 0,
-                opacity: 1,
-              },
-            }));
-            setFillTarget(null);
-            if (photoInputRef.current) photoInputRef.current.value = "";
-            return;
+        // Every still photo goes through the shared processor first —
+        // capped long edge, re-encoded — so the element (and, at publish,
+        // the story row) carries the processed image. This path used to
+        // store the raw file's data URL verbatim: up to ~13 MB of base64
+        // per photo, silently dropped at publish when it passed the
+        // sanitizer's cap. GIFs are the one exception: re-encoding would
+        // flatten their animation, so they travel as picked and are
+        // uploaded as-is at publish.
+        let dataUrl: string;
+        let naturalWidth: number;
+        let naturalHeight: number;
+        if (file.type === "image/gif") {
+          dataUrl = await readAsDataUrl(file);
+          const probe = URL.createObjectURL(file);
+          try {
+            const img = await loadImageElement(probe);
+            naturalWidth = img.naturalWidth;
+            naturalHeight = img.naturalHeight;
+          } finally {
+            URL.revokeObjectURL(probe);
           }
-          const el = elements.find((e) => e.id === fillTarget);
-          const aspect = img.naturalWidth > 0 ? img.naturalHeight / img.naturalWidth : 1.4;
-          const slotW = el?.kind === "photo" ? el.w : undefined;
-          const slotH = el?.kind === "photo" ? el.h : undefined;
-          // A portrait slot stays portrait; a landscape one widens. Never
-          // stretches a photo to fit a shape it was not drawn for.
-          const resized =
-            typeof slotW === "number" && typeof slotH === "number"
-              ? aspect > 1.15 && slotH > slotW
-                ? { h: Math.min(0.92, slotW * aspect) }
-                : aspect < 0.87 && slotW > slotH
-                  ? { w: Math.min(0.94, slotH / aspect) }
-                  : {}
-              : {};
-          const patch: Partial<StoryPhotoElement> = {
-            src: dataUrl,
-            naturalWidth: img.naturalWidth,
-            naturalHeight: img.naturalHeight,
-          };
-          patchElement(fillTarget, { ...patch, ...resized });
-          setTool(null);
+        } else {
+          const processed = await processStoryPhoto(file);
+          dataUrl = processed.dataUrl;
+          naturalWidth = processed.width;
+          naturalHeight = processed.height;
+        }
+        if (fillTarget === "__background__") {
+          pushHistory();
+          setBackground((bg) => ({
+            ...bg,
+            mode: "photo",
+            photo: {
+              src: dataUrl,
+              fit: "fill",
+              blur: 0,
+              zoom: 1,
+              panX: 0,
+              panY: 0,
+              opacity: 1,
+            },
+          }));
+          return;
+        }
+        const el = elements.find((e) => e.id === fillTarget);
+        const aspect = naturalWidth > 0 ? naturalHeight / naturalWidth : 1.4;
+        const slotW = el?.kind === "photo" ? el.w : undefined;
+        const slotH = el?.kind === "photo" ? el.h : undefined;
+        // A portrait slot stays portrait; a landscape one widens. Never
+        // stretches a photo to fit a shape it was not drawn for.
+        const resized =
+          typeof slotW === "number" && typeof slotH === "number"
+            ? aspect > 1.15 && slotH > slotW
+              ? { h: Math.min(0.92, slotW * aspect) }
+              : aspect < 0.87 && slotW > slotH
+                ? { w: Math.min(0.94, slotH / aspect) }
+                : {}
+            : {};
+        const patch: Partial<StoryPhotoElement> = {
+          src: dataUrl,
+          naturalWidth,
+          naturalHeight,
         };
-        reader.onerror = () => toast.error("Couldn't read that photo.");
-        reader.readAsDataURL(file);
-      } catch {
-        toast.error("Couldn't open that photo.");
+        patchElement(fillTarget, { ...patch, ...resized });
+        setTool(null);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Couldn't open that photo.");
       } finally {
         setFillTarget(null);
         if (photoInputRef.current) photoInputRef.current.value = "";
