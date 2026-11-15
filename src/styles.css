@@ -2213,6 +2213,35 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
     animation-delay: 395ms;
   }
 
+  /* — Nutrition: the bowl draws, the foot follows, the sprout rises and opens. — */
+  .app-nav-link-active .app-nav-glyph[data-glyph="nutrition"] .bi-o,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="nutrition"] .bi-o {
+    stroke-dasharray: 1;
+    animation: bi-draw var(--motion-page) var(--ease-out-expo) both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="nutrition"] .bi-s,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="nutrition"] .bi-s {
+    stroke-dasharray: 1;
+    animation: bi-draw var(--motion-micro) var(--ease-out-expo) 140ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="nutrition"] .bi-stem,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="nutrition"] .bi-stem {
+    stroke-dasharray: 1;
+    animation: bi-draw var(--motion-micro) var(--ease-out-expo) 250ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="nutrition"] .bi-leaf,
+  .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="nutrition"] .bi-leaf {
+    animation: bi-unfold var(--motion-standard) var(--ease-out-expo) 340ms both;
+  }
+  .app-nav-link-active .app-nav-glyph[data-glyph="nutrition"] .bi-leaf ~ .bi-leaf,
+  .app-mobile-nav
+    > a[aria-current="page"]
+    .app-nav-glyph[data-glyph="nutrition"]
+    .bi-leaf
+    ~ .bi-leaf {
+    animation-delay: 395ms;
+  }
+
   /* — Profile: the head draws, the shoulders follow, the leaf settles. — */
   .app-nav-link-active .app-nav-glyph[data-glyph="profile"] .bi-o,
   .app-mobile-nav > a[aria-current="page"] .app-nav-glyph[data-glyph="profile"] .bi-o {
@@ -2293,12 +2322,20 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
     .bi-leaf,
   .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="coach"] .bi-leaf,
   .app-nav-link:focus-visible:not(.app-nav-link-active) .app-nav-glyph[data-glyph="coach"] .bi-leaf,
+  .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="nutrition"] .bi-leaf,
+  .app-nav-link:focus-visible:not(.app-nav-link-active)
+    .app-nav-glyph[data-glyph="nutrition"]
+    .bi-leaf,
   .app-nav-link:hover:not(.app-nav-link-active) .app-nav-glyph[data-glyph="profile"] .bi-leaf,
   .app-nav-link:focus-visible:not(.app-nav-link-active)
     .app-nav-glyph[data-glyph="profile"]
     .bi-leaf,
   .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="rewards"] .bi-leaf,
   .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="coach"] .bi-leaf,
+  .app-mobile-nav
+    > a:hover:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="nutrition"]
+    .bi-leaf,
   .app-mobile-nav > a:hover:not([aria-current="page"]) .app-nav-glyph[data-glyph="profile"] .bi-leaf,
   .app-mobile-nav
     > a:focus-visible:not([aria-current="page"])
@@ -2307,6 +2344,10 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   .app-mobile-nav
     > a:focus-visible:not([aria-current="page"])
     .app-nav-glyph[data-glyph="coach"]
+    .bi-leaf,
+  .app-mobile-nav
+    > a:focus-visible:not([aria-current="page"])
+    .app-nav-glyph[data-glyph="nutrition"]
     .bi-leaf,
   .app-mobile-nav
     > a:focus-visible:not([aria-current="page"])

@@ -48,6 +48,7 @@ import { buildViewModel, resolveFeatured } from "@/components/profile/ProfileVie
 import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
 import { ProfileHero } from "@/components/profile/ProfileHero";
 import { AssessmentProfileCard } from "@/components/assessment/AssessmentEntry";
+import { NutritionProfileCard } from "@/components/nutrition/NutritionEntryCards";
 import {
   ProfileProblemNotice,
   ProfileSwap,
@@ -624,6 +625,13 @@ function ProfilePage() {
                   read the summary, retake. */}
               <section className="pf-section" aria-label="Assessment">
                 <AssessmentProfileCard />
+              </section>
+
+              {/* W4-3: Nutrition's permanent home on Profile, beside the
+                  assessment's — today's log against the target, or the
+                  invitation to start. */}
+              <section className="pf-section" aria-label="Nutrition">
+                <NutritionProfileCard />
               </section>
 
               {/* the record: 12 weeks + what's being tracked */}
