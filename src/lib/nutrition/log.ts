@@ -54,7 +54,21 @@ export function updateLogEntry(
 ): LogEntry[] {
   const current = entries.find((e) => e.id === id);
   if (!current) return [...entries];
-  const next = parseLogEntry({ ...current, ...patch, id: current.id, day: current.day });
+  // Every field the patch type does not offer is pinned from the current
+  // entry AFTER the spread, so a caller smuggling extra keys into the
+  // patch object (a cast, a deserialised blob) cannot rewrite an entry's
+  // origin — the parser alone would accept a consistent forgery.
+  const next = parseLogEntry({
+    ...current,
+    ...patch,
+    id: current.id,
+    day: current.day,
+    foodId: current.foodId,
+    snapshot: current.snapshot,
+    provenance: current.provenance,
+    source: current.source,
+    createdAt: current.createdAt,
+  });
   if (!next) return [...entries];
   return entries.map((e) => (e.id === id ? next : e));
 }

@@ -18,17 +18,29 @@ export interface NutritionTargets {
   proteinG: number;
 }
 
+/**
+ * A target is only a target when it is a positive, finite number. The
+ * adapters and the comparison all fail closed on anything else — a NaN,
+ * zero or negative value arriving from a malformed engine outcome means
+ * "no targets", exactly like a refusal, never a NaN deficit on screen.
+ */
+function validTargets(kcal: number, proteinG: number): NutritionTargets | null {
+  if (!Number.isFinite(kcal) || !Number.isFinite(proteinG)) return null;
+  if (kcal <= 0 || proteinG <= 0) return null;
+  return { kcal, proteinG };
+}
+
 /** From the legacy engine output (`useBodyProfile`'s shape). */
 export function nutritionTargetsFromBodyTargets(targets: BodyTargets | null): NutritionTargets | null {
   if (!targets) return null;
-  return { kcal: targets.calories, proteinG: targets.proteinG };
+  return validTargets(targets.calories, targets.proteinG);
 }
 
 /** From the safety-gated Vitalis outcome. Any `ok: false` — safety_blocked
  *  or profile_incomplete — means no targets at all (§4.5). */
 export function nutritionTargetsFromOutcome(outcome: BodyTargetsOutcome): NutritionTargets | null {
   if (!outcome.ok) return null;
-  return { kcal: outcome.targets.calorieTargetKcal, proteinG: outcome.targets.proteinG };
+  return validTargets(outcome.targets.calorieTargetKcal, outcome.targets.proteinG);
 }
 
 export interface TotalsComparison {
@@ -46,6 +58,10 @@ export function compareTotalsToTargets(
   totals: Nutrients,
   targets: NutritionTargets | null,
 ): TotalsComparison {
+  // Re-validate at the comparison itself: a hand-built or deserialised
+  // targets object that never passed an adapter gets the refusal shape,
+  // not a computed deficit.
+  if (targets && !validTargets(targets.kcal, targets.proteinG)) targets = null;
   if (!targets) {
     return {
       totals,

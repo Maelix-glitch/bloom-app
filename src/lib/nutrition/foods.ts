@@ -11,7 +11,7 @@
 
 import { newNutritionId } from "./ids";
 import { USER_ENTERED_LABEL } from "./labels";
-import { parseFood } from "./parse";
+import { MAX_FOODS, parseFood } from "./parse";
 import { readFoods, writeFoods } from "./store";
 import type { Food, FoodServing, Nutrients } from "./types";
 
@@ -38,10 +38,30 @@ export function findFood(foods: readonly Food[], id: string): Food | null {
   return foods.find((f) => f.id === id) ?? null;
 }
 
-/** Add a food, replacing any existing food with the same id (ids stable). */
+/**
+ * Thrown when a NEW food would exceed the stored-list cap (MAX_FOODS).
+ * Creation refuses honestly at the cap instead of persisting a food the
+ * read-side cap would silently drop (hardening finding F2) — the UI
+ * surfaces this error's message, so nothing is ever lost without a word.
+ */
+export class FoodListFullError extends Error {
+  constructor() {
+    super("Food list is full");
+    this.name = "FoodListFullError";
+  }
+}
+
+/**
+ * Add a food, replacing any existing food with the same id (ids stable).
+ * Replacing at the cap is fine — the list does not grow. Adding a NEW food
+ * to a full list throws FoodListFullError rather than appending a food
+ * that would fall off on the next read.
+ */
 export function addFood(foods: readonly Food[], food: Food): Food[] {
   const valid = parseFood(food);
   if (!valid) return [...foods];
+  const isNew = !foods.some((f) => f.id === valid.id);
+  if (isNew && foods.length >= MAX_FOODS) throw new FoodListFullError();
   return [...foods.filter((f) => f.id !== valid.id), valid];
 }
 
@@ -80,7 +100,12 @@ export function listCustomFoods(): Food[] {
   return readFoods();
 }
 
-/** Create a custom food and persist it. Returns the stored food. */
+/**
+ * Create a custom food and persist it. Returns the stored food, or null
+ * when the input does not survive the strict parser. Throws
+ * FoodListFullError when the list is already at MAX_FOODS and this is a
+ * new food — in that case nothing is persisted.
+ */
 export function saveCustomFood(input: CustomFoodInput, id?: string): Food | null {
   const food = createCustomFood(input, id);
   if (!food) return null;
