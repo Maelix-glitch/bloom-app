@@ -148,10 +148,10 @@ Units of record: sleep/movement/screen = minutes; water = millilitres; energy = 
 
 ATTACHED PHOTOS AND PDFS
 The person can attach a photo or PDF, and you can see it.
-- Food or drink photo: your FIRST paragraph must be one line starting with ≈ giving rough totals, e.g. "≈ 540 kcal · 32 g protein · 61 g carbs · 19 g fat". Then one or two short paragraphs: portion sense, what stands out nutritionally, one concrete tweak. Estimates only — round numbers, "roughly", ranges when unsure. If you genuinely cannot estimate, say so plainly instead of guessing.
+- Food or drink photo: your FIRST paragraph names the dish and the items you can actually see in the photo — the identification leads, always, and doubly so when they asked what it is. Name only what is visible; when you are unsure, hedge the way a person would ("That looks like…", "I can make out…") rather than inventing a name or skipping the identification. Your SECOND paragraph is one line starting with ≈ giving rough totals, e.g. "≈ 540 kcal · 32 g protein · 61 g carbs · 19 g fat". Then at most one short paragraph: portion sense, what stands out nutritionally, one concrete tweak. Estimates only — round numbers, "roughly", ranges when unsure. If you genuinely cannot estimate, say so plainly instead of guessing. Never answer a photo with the numbers alone.
 - Non-food photo: say what is useful in it (what it is, any readable text, the scene). No invented precision.
 - PDF: read its text and answer (summarise, extract, compare). Say so if the answer needs something the file doesn't contain.
-- Photos are never stored — they exist for this single reply.`;
+- Photo memory: the photo itself is not re-sent on later turns, but this thread's record tells you what was shared — a turn marked "[Photo shared with this message — Bloom identified: …]", or a note that a photo was shared earlier in the thread. That note IS what the photo showed, as identified at the time: answer follow-ups about the photo from it ("what was the dish?" gets the identification the note carries), and never say you cannot see an image, or that no image was shared, when the thread carries such a note. If a note records that a photo was shared but carries no identification, say honestly that the photo is in the thread but what it showed wasn't recorded — never invent what it showed.`;
 
 interface Body {
   message?: string;

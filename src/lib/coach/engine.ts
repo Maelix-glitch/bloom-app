@@ -22,7 +22,7 @@
 
 import { answer as localAnswer, type CoachRecord, type CoachResponse } from "@/lib/coach/responder";
 import type { CoachContext, CoachMode } from "@/lib/coach/intelligence";
-import { budgetFor, fitToBudget, type Budget } from "@/lib/coach/brevity";
+import { budgetFor, fitToBudget, withMediaFloor, type Budget } from "@/lib/coach/brevity";
 import { detectTopics, isCareTopic, isTrackedTopic, type Topic } from "@/lib/coach/topics";
 import {
   askEdge,
@@ -444,7 +444,12 @@ export class CoachUnavailable extends Error {
 
 export async function ask(input: AskInput): Promise<CoachAnswer> {
   const { primary } = detectTopics(input.text);
-  const budget = budgetFor(input.text, { greeting: primary === "greeting" });
+  /* A photo answer stands on the media floor (see withMediaFloor): the
+     question's own brevity would trim it to the estimate line alone and
+     drop the identification the person actually asked for. */
+  const budget = input.image
+    ? withMediaFloor(budgetFor(input.text, { greeting: primary === "greeting" }))
+    : budgetFor(input.text, { greeting: primary === "greeting" });
 
   /* Online-only by design: there is no local path here, not even for
      greetings or a "local" provider id. */
