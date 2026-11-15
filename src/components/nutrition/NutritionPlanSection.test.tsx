@@ -37,8 +37,10 @@ import {
   type AssessmentState,
 } from "@/lib/assessment/state";
 import {
+  foodPhotoFor,
   generatePlan,
   readFoodLog,
+  readPlan,
   writePlan,
   type Food,
 } from "@/lib/nutrition";
@@ -215,5 +217,28 @@ describe("NutritionPlanSection", () => {
     render(<NutritionPlanSection />);
     expect(screen.getByText(/Since this plan was made/)).toBeTruthy();
     expect(screen.getByText(/your goal/)).toBeTruthy();
+  });
+});
+
+describe("NutritionPlanSection — food photographs (P3-R)", () => {
+  it("shows the real photograph on exactly the photographed suggestions", () => {
+    seedAssessment(COMPLETE);
+    const { container } = render(<NutritionPlanSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+
+    const plan = readPlan();
+    if (!plan) throw new Error("expected a stored plan");
+    const suggestions = plan.meals.flatMap((m) => m.suggestions);
+    const photographed = suggestions.filter((s) => foodPhotoFor(s.foodId) !== null);
+    /* The day plan is built from the reference set, so it must exercise
+       the photograph path — a vacuous pass here would prove nothing. */
+    expect(photographed.length).toBeGreaterThan(0);
+
+    const imgs = [...container.querySelectorAll("img.nut-food-thumb")];
+    expect(imgs.length).toBe(photographed.length);
+    const alts = imgs.map((img) => img.getAttribute("alt"));
+    for (const suggestion of photographed) {
+      expect(alts).toContain(suggestion.name);
+    }
   });
 });

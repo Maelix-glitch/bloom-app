@@ -21,6 +21,7 @@ export * from "./store";
 export * from "./foods";
 export * from "./log";
 export * from "./usdaReference";
+export * from "./foodImages";
 export * from "./coachLog";
 export * from "./overviewInput";
 export * from "./plan";

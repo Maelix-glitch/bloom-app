@@ -29,6 +29,7 @@ import {
 } from "@/lib/nutrition";
 import { AddFoodSheet } from "./AddFoodSheet";
 import { NutritionPlanSection } from "./NutritionPlanSection";
+import { PhotoCreditsSheet } from "./PhotoCreditsSheet";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { MEAL_LABEL, amountLabel, formatGrams, nutrientLine } from "./input";
 
@@ -43,6 +44,7 @@ export function NutritionPage() {
   const nutrition = useNutrition();
   const [day, setDay] = useState(nutrition.today);
   const [addOpen, setAddOpen] = useState(false);
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [editing, setEditing] = useState<LogEntry | null>(null);
   const [undoable, setUndoable] = useState<(Undoable & { entry: LogEntry }) | null>(null);
 
@@ -286,6 +288,21 @@ export function NutritionPage() {
           })}
         </div>
       )}
+
+      {/* Photo credits — the reference foods' photographs are real
+          photographs from Wikimedia Commons; their authors and licences
+          are credited in full, one tap away (P3-R). */}
+      <footer className="mt-10 border-t border-border-subtle pt-4">
+        <Button type="button" variant="ghost" size="sm" onClick={() => setCreditsOpen(true)}>
+          Photo credits
+        </Button>
+        <p className="nut-note">
+          Food photographs are real photographs from Wikimedia Commons, used under free
+          licences — each one credited to its photographer.
+        </p>
+      </footer>
+
+      <PhotoCreditsSheet open={creditsOpen} onClose={() => setCreditsOpen(false)} />
 
       <AddFoodSheet
         open={addOpen}

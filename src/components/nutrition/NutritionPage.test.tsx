@@ -38,6 +38,7 @@ import {
   emptyAssessmentState,
 } from "@/lib/assessment/state";
 import {
+  FOOD_PHOTO_CREDITS,
   MAX_FOODS,
   createCustomFood,
   createEntryFromFood,
@@ -337,5 +338,49 @@ describe("NutritionPage — delete, undo, copy", () => {
     expect(todayLog.entries[0]?.nutrients).toEqual(original.nutrients);
     expect(todayLog.entries[0]?.id).not.toBe(original.id);
     expect(screen.getByText("My Oats")).toBeTruthy();
+  });
+});
+
+describe("NutritionPage — food photographs & credits (P3-R)", () => {
+  it("shows photographs on USDA results, and never on the user's own foods", () => {
+    const own = saveCustomFood({
+      name: "Farm Egg Scramble Mix",
+      per100g: { kcal: 155, proteinG: 11, carbsG: 2, fatG: 11 },
+    });
+    if (!own) throw new Error("seed food refused");
+
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.change(within(sheet).getByLabelText("Search foods"), {
+      target: { value: "egg" },
+    });
+
+    const usdaSection = within(sheet).getByLabelText("USDA reference foods");
+    const eggRow = within(usdaSection).getByRole("button", {
+      name: /Egg, whole, raw, fresh/,
+    });
+    const img = eggRow.querySelector("img.nut-food-thumb");
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute("alt")).toBe("Egg, whole, raw, fresh");
+
+    const ownSection = within(sheet).getByLabelText("Your foods and recents");
+    expect(ownSection.querySelectorAll("img.nut-food-thumb").length).toBe(0);
+  });
+
+  it("credits every shipped photograph from the manifest, with its Commons link", () => {
+    render(<NutritionPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Photo credits" }));
+
+    const dialog = screen.getByRole("dialog");
+    const links = within(dialog).getAllByRole("link", {
+      name: /View on Wikimedia Commons/,
+    });
+    expect(links.length).toBe(FOOD_PHOTO_CREDITS.length);
+
+    const first = FOOD_PHOTO_CREDITS[0]!;
+    expect(within(dialog).getByText(first.foodName)).toBeTruthy();
+    expect(dialog.textContent).toContain(first.author);
+    expect(dialog.textContent).toContain(first.license);
+    expect(links.map((l) => l.getAttribute("href"))).toContain(first.pageUrl);
   });
 });
