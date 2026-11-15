@@ -368,16 +368,29 @@ export function useHabits(): HabitsStore {
   /* Keep the session cache in step with the settled account rows, so
      ticks and edits made on this mount are what a warm remount seeds
      (R15). Only a settled profile writes — a cold load in flight must
-     never cache its empty list. */
+     never cache its empty list. The `!loading` half of the guard is
+     load-bearing (round 3): on the commit where the load effect above
+     warm-seeds this mount, it has ALREADY set signedInLoaded (a ref,
+     updated synchronously) while this effect's closure still holds the
+     mount's initial state — habits [], points null — because the
+     seed's setState has not rendered yet. Without `!loading` that
+     commit overwrote the healthy cache with the empty list, and a
+     sibling instance mounting in the same flush (Profile mounts
+     several, Today two) warm-seeded the poison: an empty list with
+     loading=false — the settled-looking "No habits yet" flash that
+     survived PRs #95/#101. While this mount is loading, its state is
+     by definition not the settled rows, so it has nothing true to
+     cache; the write lands on the settled render instead. */
   useEffect(() => {
     if (
       auth === "signed-in" &&
       profileId &&
+      !loading &&
       signedInLoaded.current === profileId
     ) {
       sessionCache = { profileId, habits, logs, points };
     }
-  }, [auth, profileId, habits, logs, points]);
+  }, [auth, profileId, habits, logs, points, loading]);
 
   /* realtime: another device ticks a habit → this ring moves. Multiple
      consumers use this hook on the same screen, so the helper shares one
