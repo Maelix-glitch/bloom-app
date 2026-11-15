@@ -294,18 +294,53 @@ export function hasHabitCloud(): boolean {
   return hasSupabaseConfig;
 }
 
-export async function fetchHabits(profileId: string): Promise<Habit[]> {
-  const { data, error } = await pageAll<Row>((from, to) =>
-    supabase
-      .from("habits")
-      .select("*")
-      .eq("profile_id", profileId)
-      .order("created_at", { ascending: true })
-      .order("id", { ascending: true })
-      .range(from, to),
-  );
-  if (error) throw error;
-  return (data ?? []).map(rowToHabit).filter((h): h is Habit => h !== null);
+/**
+ * Every column `rowToHabit` reads — and no other. The fetch used to ask for
+ * `*`, which is how the 2026-11 egress incident happened: a column nobody
+ * was watching (`icon_url`, then carrying a 1.5 MB data: blob) rode along
+ * on every habits read. An explicit list means a future wide column cannot
+ * silently join the hottest read in the app; it also drops `profile_id`
+ * (the caller already knows it) and `updated_at` (nothing renders it).
+ */
+export const HABIT_COLUMNS =
+  "id, name, note, icon_type, icon_value, icon_url, color, frequency, days, times_per_week, goal_enabled, goal_target, goal_unit, point_value, priority, reminder_enabled, reminder_time, tags, start_date, is_archived, paused_from, paused_until, created_at";
+
+/**
+ * In-flight dedupe for the account reads below. Several `useHabits`
+ * instances mount on the same screen (Today mounts the hook itself plus
+ * consumers in the constellation and progression cards; Profile mounts
+ * three) and every one fires the same reads in the same commit — the
+ * session cache seeds their rendering, but until now each still paid for
+ * its own network pull of the same rows. Collapsing only CONCURRENT
+ * identical calls into one pull changes nothing else: the entry is dropped
+ * the moment the read settles, so the next sequential call fetches fresh.
+ */
+const inFlightReads = new Map<string, Promise<unknown>>();
+
+function shareInFlight<T>(key: string, run: () => Promise<T>): Promise<T> {
+  const existing = inFlightReads.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+  const promise = run().finally(() => {
+    if (inFlightReads.get(key) === promise) inFlightReads.delete(key);
+  });
+  inFlightReads.set(key, promise);
+  return promise;
+}
+
+export function fetchHabits(profileId: string): Promise<Habit[]> {
+  return shareInFlight(`habits:${profileId}`, async () => {
+    const { data, error } = await pageAll<Row>((from, to) =>
+      supabase
+        .from("habits")
+        .select(HABIT_COLUMNS)
+        .eq("profile_id", profileId)
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    );
+    if (error) throw error;
+    return (data ?? []).map(rowToHabit).filter((h): h is Habit => h !== null);
+  });
 }
 
 /**
@@ -316,25 +351,27 @@ export async function fetchHabits(profileId: string): Promise<Habit[]> {
 export const LOG_WINDOW_DAYS = 400;
 
 /** Every completion since `since` (YYYY-MM-DD) — the whole run, in pages. */
-export async function fetchLogs(profileId: string, since: string): Promise<HabitLog[]> {
-  const { data, error } = await pageAll<Row>((from, to) =>
-    supabase
-      .from("habit_logs")
-      .select("habit_id, date, completed_at")
-      .eq("profile_id", profileId)
-      .gte("date", since)
-      .order("date", { ascending: true })
-      .order("habit_id", { ascending: true })
-      .range(from, to),
-  );
-  if (error) throw error;
-  return (data ?? [])
-    .filter((l) => l["habit_id"] != null && typeof l["date"] === "string")
-    .map((l) => ({
-      habitId: String(l["habit_id"]),
-      date: String(l["date"]),
-      completedAt: str(l["completed_at"], `${String(l["date"])}T12:00:00.000Z`),
-    }));
+export function fetchLogs(profileId: string, since: string): Promise<HabitLog[]> {
+  return shareInFlight(`habit-logs:${profileId}:${since}`, async () => {
+    const { data, error } = await pageAll<Row>((from, to) =>
+      supabase
+        .from("habit_logs")
+        .select("habit_id, date, completed_at")
+        .eq("profile_id", profileId)
+        .gte("date", since)
+        .order("date", { ascending: true })
+        .order("habit_id", { ascending: true })
+        .range(from, to),
+    );
+    if (error) throw error;
+    return (data ?? [])
+      .filter((l) => l["habit_id"] != null && typeof l["date"] === "string")
+      .map((l) => ({
+        habitId: String(l["habit_id"]),
+        date: String(l["date"]),
+        completedAt: str(l["completed_at"], `${String(l["date"])}T12:00:00.000Z`),
+      }));
+  });
 }
 
 export async function insertLog(profileId: string, habitId: string, date: string): Promise<void> {
@@ -466,14 +503,16 @@ export async function adjustHabitPoints(
   };
 }
 
-export async function readPoints(profileId: string): Promise<number | null> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("total_points")
-    .eq("id", profileId)
-    .maybeSingle();
-  if (error || !data) return null;
-  return num((data as Row)["total_points"]);
+export function readPoints(profileId: string): Promise<number | null> {
+  return shareInFlight(`points:${profileId}`, async () => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("total_points")
+      .eq("id", profileId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return num((data as Row)["total_points"]);
+  });
 }
 
 /** The columns a draft maps onto — shared by insert and update. */
@@ -529,7 +568,7 @@ export function isDuplicateHabit(error: unknown): boolean {
 
 export async function insertHabit(profileId: string, draft: HabitDraft): Promise<Habit> {
   const payload = { profile_id: profileId, ...draftToColumns(draft) };
-  const { data, error } = await supabase.from("habits").insert(payload).select("*").single();
+  const { data, error } = await supabase.from("habits").insert(payload).select(HABIT_COLUMNS).single();
   if (error) throw error;
   const habit = rowToHabit(data as Row);
   if (!habit) throw new Error("The habit was saved but came back in an unexpected shape.");
@@ -547,7 +586,7 @@ export async function updateHabit(
     .update(payload)
     .eq("id", habitId)
     .eq("profile_id", profileId)
-    .select("*")
+    .select(HABIT_COLUMNS)
     .single();
   if (error) throw error;
   const habit = rowToHabit(data as Row);
