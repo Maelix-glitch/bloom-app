@@ -909,6 +909,89 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * Home — the connection constellation (overnight Slice 2, a NEW design:
+ * not the radial orbit above). Signals rest along one gentle arc in a
+ * wide 2:1 stage; the SVG links and the DOM nodes share the stage's
+ * coordinate space through percentages, and every size is in `cqw`
+ * (1cqw = 1% of the stage width) so the whole drawing — discs, labels,
+ * figures — scales as one unit at any panel width, phone included.
+ * Small text keeps a legible floor via max(), and rides --faint-strong,
+ * never the faded --faint (the reskin's small-text rule).
+ * ------------------------------------------------------------------------- */
+.cx-stage {
+  position: relative;
+  container-type: inline-size;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+}
+.cx-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--cx-d, 8cqw);
+  height: var(--cx-d, 8cqw);
+  border-radius: var(--radius-pill);
+  outline: none;
+}
+.cx-node:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--gold) 65%, transparent);
+}
+.cx-node-disc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--surface) 88%, transparent);
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+.cx-node:hover .cx-node-disc,
+.cx-node:focus-visible .cx-node-disc {
+  border-color: var(--gold);
+}
+.cx-node-icon {
+  width: 42%;
+  height: 42%;
+  stroke-width: 1.5;
+}
+.cx-node-label {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: max(2.5cqw, var(--text-micro));
+  line-height: var(--leading-micro);
+  white-space: nowrap;
+  color: var(--faint-strong);
+}
+.cx-node-value {
+  position: absolute;
+  top: calc(100% + 0.3rem + 1.05rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: max(2.3cqw, var(--text-micro));
+  line-height: var(--leading-micro);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* The strongest link's slow drift — motion only where the reader has
+   not asked for stillness; everything else on the stage is static. */
+@keyframes cx-drift {
+  to {
+    stroke-dashoffset: -240;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cx-link--strongest {
+    stroke-dasharray: 4 8;
+    animation: cx-drift 26s linear infinite;
+  }
+}
+
 /* One reading column + one vertical rhythm so Today isn't a scatter of
    little widgets with their own margins. */
 .home-main {
