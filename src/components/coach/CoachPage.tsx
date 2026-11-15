@@ -376,6 +376,11 @@ export function CoachPage() {
       media?: CoachMedia | null;
       userMessage?: CoachMessage | null;
       replaceMessageId?: string | null;
+      /* Called the moment the user message has been appended to the
+         thread — the send is accepted from there, whatever the reply
+         does. Lets the composer clear while the answer is still in
+         flight. Never called for a rejected send. */
+      onAccepted?: (() => void) | undefined;
     }): Promise<RequestOutcome> => {
       const {
         text,
@@ -386,6 +391,7 @@ export function CoachPage() {
         media,
         userMessage,
         replaceMessageId,
+        onAccepted,
       } = params;
       if (inFlightRef.current) {
         if (thinking) setNotice("Bloom is still finishing the last reply — one moment.");
@@ -442,6 +448,10 @@ export function CoachPage() {
         : [...baseHistory, answerTo];
 
       coach.setMessages(() => pendingHistory);
+      /* The message is in the thread now. Answered or failed, it stays
+         there — so the send is accepted, and the composer can let go of
+         its copy instead of holding the draft until the reply lands. */
+      onAccepted?.();
 
       try {
         const response = await coach.requestResponse({
@@ -632,6 +642,7 @@ export function CoachPage() {
       text: string,
       mode: CoachMode,
       attachment?: ComposerAttachment | null,
+      onAccepted?: () => void,
     ): Promise<RequestOutcome> => {
       if (!text.trim() && !attachment) return "rejected";
       const conversation = coach.activeConversation;
@@ -677,6 +688,7 @@ export function CoachPage() {
         attachment: meta,
         media,
         userMessage,
+        onAccepted,
       });
       /* Once the message is in the thread — answered OR failed with a
          Try again on it — the composer's copy has done its job. Keeping
@@ -949,21 +961,24 @@ export function CoachPage() {
                 </button>
               </div>
             ) : null}
-            <div><Composer
-              draft={draft}
-              onDraftChange={setDraft}
-              placeholder={placeholder}
-              thinking={thinking}
-              inputRef={textareaRef}
-              onSubmit={(text, attachment) => sendMessage(text, lens, attachment)}
-              onOpenCamera={() => setCameraOpen(true)}
-              onNotice={setNotice}
-              onOpenContext={() => openPanel("context")}
-              contextLabel={contextLabel}
-              contextLive={contextLive}
-              followUps={followUps}
-              onFollowUp={handleFollowUp}
-            />
+            <div>
+              <Composer
+                draft={draft}
+                onDraftChange={setDraft}
+                placeholder={placeholder}
+                thinking={thinking}
+                inputRef={textareaRef}
+                onSubmit={(text, attachment, onAccepted) =>
+                  sendMessage(text, lens, attachment, onAccepted)
+                }
+                onOpenCamera={() => setCameraOpen(true)}
+                onNotice={setNotice}
+                onOpenContext={() => openPanel("context")}
+                contextLabel={contextLabel}
+                contextLive={contextLive}
+                followUps={followUps}
+                onFollowUp={handleFollowUp}
+              />
             </div>
           </div>
         </div>

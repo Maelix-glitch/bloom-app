@@ -112,7 +112,16 @@ export function Composer({
   thinking: boolean;
   /** Forced focus from the page (starters, follow-ups). */
   inputRef: RefObject<HTMLTextAreaElement | null>;
-  onSubmit: (text: string, attachment: ComposerAttachment | null) => Promise<ComposerSubmitOutcome>;
+  /* The page calls `onAccepted` the moment the message has been appended
+     to the thread — from then on the words live there (with a Try again
+     if the reply fails), so the composer clears straight away instead of
+     holding the draft for the whole reply. A rejected send never calls
+     it, and the draft stays exactly as it was. */
+  onSubmit: (
+    text: string,
+    attachment: ComposerAttachment | null,
+    onAccepted: () => void,
+  ) => Promise<ComposerSubmitOutcome>;
   onOpenCamera: () => void;
   onNotice: (message: string | null) => void;
   onOpenContext: () => void;
@@ -291,13 +300,29 @@ export function Composer({
     setAttachment(null);
   };
 
+  /* An accepted send hands the attachment to the thread: the page keeps
+     the preview URL alive for the message it now owns (it tears it down
+     itself), so the chip is dropped WITHOUT revoking the URL — revoking
+     here would break the photo in the thread above. */
+  const releaseAttachment = () => {
+    urlRef.current = null;
+    setAttachment(null);
+  };
+
   const handleSubmit = async (event?: FormEvent) => {
     event?.preventDefault();
     if (thinking || busy) return;
     const text = draft.trim();
     if (!text && !attachment) return;
     setBusy(true);
-    const outcome = await onSubmit(text, attachment);
+    const outcome = await onSubmit(text, attachment, () => {
+      /* Accepted: the message is in the thread, so the composer lets go
+         of its copy now — not when the reply lands. For a photo that
+         was the whole ~25s wait with the caption and chip still sitting
+         here, looking for all the world like the send never happened. */
+      setDraftState("");
+      releaseAttachment();
+    });
     setBusy(false);
     if (outcome === "answered") {
       setDraftState("");
