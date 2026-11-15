@@ -7,6 +7,12 @@
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 export const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 export const AVATAR_OUTPUT = 512;
+/** Decode bombs are the failure a byte cap cannot see: a small file can
+ *  still claim enormous dimensions and exhaust a phone decoding it. */
+export const MAX_IMAGE_EDGE = 8192;
+export const MAX_IMAGE_PIXELS = 40_000_000;
+
+const ACCEPTED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 
 const DECORATIVE_QUALITY = 0.86;
 
@@ -14,7 +20,13 @@ export class MediaError extends Error {}
 
 /** Validate the raw file before we read anything from it. */
 export function validateImageFile(file: File): string | null {
-  if (!ACCEPTED_TYPES.includes(file.type)) {
+  /* Some Android pickers hand back an empty MIME type for a perfectly good
+     photo; the extension is the honest fallback, and the decode that follows
+     is the real gate — a file that is not an image fails there, out loud. */
+  const typeOk =
+    ACCEPTED_TYPES.includes(file.type) ||
+    (file.type === "" && ACCEPTED_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext)));
+  if (!typeOk) {
     return "That file isn't an image we can use. Try a JPG, PNG, or WEBP.";
   }
   if (file.size > MAX_UPLOAD_BYTES) {
@@ -22,6 +34,17 @@ export function validateImageFile(file: File): string | null {
   }
   if (file.size < 100) {
     return "That image looks empty. Try a different file.";
+  }
+  return null;
+}
+
+/** Validate decoded dimensions before any canvas work happens on them. */
+export function validateImageDimensions(width: number, height: number): string | null {
+  if (!width || !height) {
+    return "That image could not be read. Try a different file.";
+  }
+  if (width > MAX_IMAGE_EDGE || height > MAX_IMAGE_EDGE || width * height > MAX_IMAGE_PIXELS) {
+    return "That image is enormous. Pick a smaller copy of it.";
   }
   return null;
 }
@@ -45,6 +68,34 @@ export function loadImageElement(src: string): Promise<HTMLImageElement> {
     img.onerror = () => reject(new MediaError("That image could not be opened."));
     img.src = src;
   });
+}
+
+/**
+ * Decode a picked file through an object URL — never a base64 data URL.
+ *
+ * The old avatar path read the whole file with `readAsDataURL` first: a
+ * 10 MB photo became a ~13 MB string held in memory alongside the decoded
+ * bitmap, which is exactly the jank a low-end phone feels when the editor
+ * opens. An object URL is a handle, not a copy. The caller owns `url` and
+ * must revoke it (on replace, cancel, or unmount); the decoded `img` stays
+ * usable for canvas work after revocation in every browser Bloom targets,
+ * and the story editor already loads files this way.
+ *
+ * The preview data URLs that remain in this module are display-only, for
+ * the duration of an edit session — they are never written to the database,
+ * to prefs, or to local storage. That line is load-bearing: a base64 image
+ * in a data column is the egress incident's shape, and it must stay
+ * impossible here.
+ */
+export async function loadFileImage(file: File): Promise<{ img: HTMLImageElement; url: string }> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImageElement(url);
+    return { img, url };
+  } catch (error) {
+    URL.revokeObjectURL(url);
+    throw error;
+  }
 }
 
 export interface CropRect {
@@ -114,6 +165,21 @@ export async function processStoryPhoto(
 
 export function storagePathFor(userId: string, suffix: string): string {
   return `${userId}/${suffix}`;
+}
+
+/**
+ * The object path for one avatar upload: versioned by save, on purpose.
+ *
+ * The old path was stable (`uid/avatar.jpg`), so an upsert overwrote the
+ * object behind a URL that never changed — and browsers and the storage CDN
+ * happily kept serving the *previous* photo from cache at that URL, which
+ * read as "I changed my picture and nothing happened" lag. A fresh path per
+ * upload is a fresh URL: the new picture is simply the picture, everywhere,
+ * immediately. The superseded object is removed by the caller once the new
+ * path is saved, so versions never pile up.
+ */
+export function avatarObjectPath(userId: string, stamp: number): string {
+  return storagePathFor(userId, `avatar-${stamp}.jpg`);
 }
 
 /* ------------------------------ story video ----------------------------- */

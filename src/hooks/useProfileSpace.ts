@@ -30,6 +30,7 @@ import {
   type ProfilePatch,
 } from "@/lib/profile/profileService";
 import { localIdentity } from "@/lib/profile/localIdentity";
+import { isPreset } from "@/lib/profile/presetAvatars";
 import {
   createHighlight,
   createStory,
@@ -670,11 +671,17 @@ export function useProfileSpace() {
         );
       }
       if (!userId) throw authRequired();
-      // The object path is stable (uid/avatar.jpg), so uploading overwrites
-      // cleanly — no orphaned files to sweep.
+      // Uploads land at a versioned path (uid/avatar-<stamp>.jpg), so the
+      // new picture's URL is new — no stale cached photo anywhere. Once the
+      // new path is saved, the superseded upload is removed so versions
+      // never pile up in the bucket. A preset is not an object; skip it.
+      const previousPath = currentIdentity().avatarPath;
       const path = await uploadAvatar(userId, blob);
       patchIdentity((i) => ({ ...i, avatarPath: path }));
       await saveProfile(userId, { ...toPatch(currentIdentity()), avatarPath: path });
+      if (previousPath && previousPath !== path && !isPreset(previousPath)) {
+        void removeAvatar(previousPath);
+      }
       announceProfileChanged();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
