@@ -2827,6 +2827,142 @@
   color: var(--coach-lav);
 }
 
+/* --------------------- Coach "Log this" sheet (N5) ---------------------- */
+/* The photo-estimate confirm sheet: it rides CoachSheet, so the panel,
+   scrim and motion are the sheet system's; what follows is only the
+   form inside it, in the same token dialect as the sheet rows. */
+
+.coach-log-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.coach-log-hint {
+  font-size: var(--text-meta);
+  color: var(--faint-strong);
+}
+
+.coach-logged-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-meta);
+  color: var(--sage);
+}
+
+.coach-logged-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.coach-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: var(--space-1) 18px 18px;
+}
+
+.coach-log-note {
+  margin: 0;
+  font-size: var(--text-support);
+  line-height: 1.62;
+  color: var(--muted-foreground);
+}
+
+.coach-log-note-label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.coach-log-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.coach-log-label {
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: var(--faint-strong);
+}
+
+.coach-log-input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 var(--space-3);
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-size: var(--text-callout);
+  font-variant-numeric: tabular-nums;
+}
+
+.coach-log-input:focus {
+  outline: none;
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+
+.coach-log-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.coach-log-parse {
+  margin: 0;
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--faint-strong);
+}
+
+.coach-log-meals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.coach-log-chip {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: var(--text-meta);
+  cursor: pointer;
+  transition:
+    color var(--motion-micro) var(--ease-out-expo),
+    background var(--motion-micro) var(--ease-out-expo),
+    border-color var(--motion-micro) var(--ease-out-expo);
+}
+
+.coach-log-chip.is-on {
+  border-color: color-mix(in oklab, var(--sage) 32%, transparent);
+  background: color-mix(in oklab, var(--sage) 10%, transparent);
+  color: var(--foreground);
+}
+
+.coach-log-error {
+  margin: 0;
+  font-size: var(--text-support);
+  line-height: 1.62;
+  color: var(--rose);
+}
+
+.coach-log-confirm-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: 2px;
+}
+
 /* U6: the CoachSheet / context-panel / message-actions overlays now render
    inside BloomSheet (one overlay pattern, plan §5.2). The stack gives the
    portalled panel the definite height the old drawers had, so the pinned

@@ -47,6 +47,7 @@ import { averageMood, currentStreak } from "@/lib/stats";
 import { localDay, shiftDay } from "@/lib/localDay";
 import type { AssessmentState } from "@/lib/assessment/state";
 import type { AssessmentSummary } from "@/lib/assessment/summary";
+import type { OverviewNutrition } from "@/lib/nutrition/overviewInput";
 import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { SAFETY_CLASS_RANK } from "@/lib/vitalis/domain/safety";
 
@@ -72,6 +73,15 @@ export interface OverviewInput {
     /** The completed summary, or null while the assessment is unfinished. */
     summary: AssessmentSummary | null;
   };
+  /**
+   * Today's nutrition summary (W4-3 N5, design §4.6). Optional, and
+   * deliberately not spoken yet: the Overview feed that prints it is
+   * its own later slice, under the same delta discipline as every
+   * other input. The field exists now so that slice — and the caller
+   * that will populate it — needs no signature change, and so the
+   * shape (with its estimate flagging) is pinned by tests today.
+   */
+  nutrition?: OverviewNutrition | null | undefined;
 }
 
 /* --------------------------------- output -------------------------------- */

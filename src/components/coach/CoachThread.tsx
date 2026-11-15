@@ -3,6 +3,7 @@ import { ArrowDown } from "lucide-react";
 
 import type { CoachMessage } from "@/hooks/useCoachSystem";
 import type { Starter } from "@/lib/coach/ui-helpers";
+import { coachEstimateForMessage } from "@/lib/nutrition/coachLog";
 import { CoachGlyph } from "./bloom-mark";
 import { BloomMessage } from "./BloomMessage";
 import { UserMessage } from "./UserMessage";
@@ -164,6 +165,11 @@ export function CoachThread({
             const isCoach = message.role === "coach";
             const fresh = message.id === freshId;
             const isLastCoachMessage = isCoach && index === lastCoachIndex;
+            /* The photo-estimate this reply carries, if any (N5): the
+               nutrition lib decides from the thread itself — a recorded
+               photo identification behind the reply plus a parseable
+               ≈ totals line in it. Null for every other message. */
+            const logEstimate = isCoach ? coachEstimateForMessage(messages, index) : null;
             if (!isCoach) {
               return (
                 <UserMessage
@@ -193,6 +199,7 @@ export function CoachThread({
                 onTellMeMore={onTellMeMore}
                 onMakePlan={onMakePlan}
                 onBlockAction={onBlockAction}
+                logEstimate={logEstimate}
               />
             );
           })}
