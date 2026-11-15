@@ -8,13 +8,16 @@ import { VerifiedBadge, VERIFIED_BLUE } from "./VerifiedBadge";
 /**
  * The badge is the visible half of the verification claim, so its gating is
  * pinned at render: every unmet-criteria combination renders nothing, and
- * the one fully-met combination renders the blue tick.
+ * the one fully-met combination — invited, confirmed, complete, recorded —
+ * renders the blue tick.
  */
 
 const VERIFIED = verificationStatus({
+  invited: true,
   emailConfirmed: true,
   displayName: "Ivy",
   username: "ivy",
+  hasRecord: true,
 });
 
 afterEach(() => cleanup());
@@ -29,21 +32,36 @@ describe("VerifiedBadge", () => {
 
   it("renders nothing when the email is unconfirmed", () => {
     const status = verificationStatus({
+      invited: true,
       emailConfirmed: false,
       displayName: "Ivy",
       username: "ivy",
+      hasRecord: true,
     });
     const { container } = render(<VerifiedBadge status={status} />);
     expect(container.firstChild).toBeNull();
     expect(screen.queryByTestId("verified-badge")).toBeNull();
   });
 
+  it("renders nothing without an invite, and nothing without the record", () => {
+    for (const input of [
+      /* Not invited — even with a record, the tick refuses (owner's rule). */
+      { invited: false, emailConfirmed: true, displayName: "Ivy", username: "ivy", hasRecord: true },
+      /* Every step done but the grant not recorded yet — no tick. */
+      { invited: true, emailConfirmed: true, displayName: "Ivy", username: "ivy", hasRecord: false },
+    ]) {
+      const { container, unmount } = render(<VerifiedBadge status={verificationStatus(input)} />);
+      expect(container.firstChild).toBeNull();
+      unmount();
+    }
+  });
+
   it("renders nothing when the name or the handle is missing", () => {
     for (const input of [
-      { emailConfirmed: true, displayName: null, username: "ivy" },
-      { emailConfirmed: true, displayName: "Bloom User", username: "ivy" },
-      { emailConfirmed: true, displayName: "Ivy", username: null },
-      { emailConfirmed: false, displayName: null, username: null },
+      { invited: true, emailConfirmed: true, displayName: null, username: "ivy", hasRecord: true },
+      { invited: true, emailConfirmed: true, displayName: "Bloom User", username: "ivy", hasRecord: true },
+      { invited: true, emailConfirmed: true, displayName: "Ivy", username: null, hasRecord: true },
+      { invited: false, emailConfirmed: false, displayName: null, username: null, hasRecord: false },
     ]) {
       const { container, unmount } = render(<VerifiedBadge status={verificationStatus(input)} />);
       expect(container.firstChild).toBeNull();

@@ -274,12 +274,14 @@ function PersonalizationSection() {
 /**
  * Verification — the settings face of the blue tick.
  *
- * The status is derived (lib/profile/verification): confirmed email + a
+ * The status (lib/profile/verification) is a stored record, granted by
+ * invitation only, over three steps: invited member, confirmed email,
  * complete basic profile. Verified, the row says so with the tick itself.
  * Not yet, the row is expandable and each remaining step is named with what
  * actually completes it — the profile step points at the existing
  * edit-profile control rather than duplicating it. Nothing here can set or
- * fake the state; it only reports it.
+ * fake the state; it only reports it, and the record itself is granted
+ * server-side by claim_account_verification().
  */
 function VerificationRow({
   verification,
@@ -298,7 +300,7 @@ function VerificationRow({
         </span>
         <span className="pf-row-text">
           <span className="pf-row-label">Verification</span>
-          <span className="pf-row-hint">Email confirmed and profile complete.</span>
+          <span className="pf-row-hint">Invited member · email confirmed · profile complete.</span>
         </span>
         <span className="pf-row-value">Verified</span>
         <span />
@@ -322,13 +324,17 @@ function VerificationRow({
         <span className="pf-row-text">
           <span className="pf-row-label">Verification</span>
           <span className="pf-row-hint">
-            {verification.remaining === 1
-              ? "1 step left for the blue tick"
-              : `${verification.remaining} steps left for the blue tick`}
+            {verification.pendingRecord
+              ? "Every step is done — recording your verification"
+              : verification.remaining === 1
+                ? "1 step left for the blue tick"
+                : `${verification.remaining} steps left for the blue tick`}
           </span>
         </span>
         <span className="pf-row-value">
-          {verification.remaining} step{verification.remaining === 1 ? "" : "s"} left
+          {verification.pendingRecord
+            ? "Recording…"
+            : `${verification.remaining} step${verification.remaining === 1 ? "" : "s"} left`}
         </span>
         {open ? (
           <ChevronDown className="pf-row-chevron size-3.5" aria-hidden />
@@ -409,7 +415,7 @@ export function AccountRow({
 }: {
   identity: ProfileIdentity;
   account: AccountDetails;
-  /** Derived verification status — the Account group's Verification row. */
+  /** Verification status — the Account group's Verification row. */
   verification: VerificationStatus;
   privacy: ProfilePrivacy;
   stories: Story[];
