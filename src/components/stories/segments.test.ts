@@ -7,10 +7,23 @@
  * every existing story playing the way it always did.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { buildSegments, segmentForStory } from "./segments";
+/* Storage URL resolution needs a configured backend; the flattening rules
+   under test don't. A deterministic stand-in keeps them decoupled. */
+vi.mock("@/lib/profile/storyMeta", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/profile/storyMeta")>();
+  return {
+    ...actual,
+    storyMediaUrl: (story: { mediaPath?: string | null }) =>
+      story.mediaPath ? `https://storage.test/${story.mediaPath}` : null,
+  };
+});
+
+import { buildSegments, segmentForStory, segmentImageUrls, adjacentImageUrls } from "./segments";
 import { toSlide } from "@/lib/stories/slides";
+import { makeGifElement, makePhotoElement } from "@/lib/stories/elements";
+import { photoBackground } from "@/lib/stories/canvas/backgrounds";
 import type { Story } from "@/lib/profile/types";
 
 function story(id: string, overrides: Partial<Story> = {}): Story {
@@ -125,5 +138,80 @@ describe("segmentForStory", () => {
 
   it("falls back to the first active segment for an out-of-range index", () => {
     expect(segmentForStory(segments, 99)).toBe(0);
+  });
+});
+
+describe("prefetch image urls", () => {
+  const photoEl = {
+    ...makePhotoElement({ x: 0.5, y: 0.5, w: 0.6, h: 0.4 }),
+    src: "https://cdn.example.test/canvas-photo.jpg",
+  };
+  const gifEl = makeGifElement({
+    gifId: "g1",
+    src: "https://cdn.example.test/anim.gif",
+    width: 200,
+    height: 200,
+  })!;
+
+  it("collects everything a rich slide paints — not just its base media", () => {
+    const segments = buildSegments([
+      story("rich", {
+        slides: [
+          toSlide({
+            id: "s1",
+            mediaType: "none",
+            mediaPath: null,
+            elements: [photoEl, gifEl],
+            canvas: photoBackground("https://cdn.example.test/bg.jpg", "#ECE8E1"),
+          }),
+        ],
+      }),
+    ]);
+
+    const urls = segmentImageUrls(segments[0]!);
+    expect(urls).toContain("https://cdn.example.test/canvas-photo.jpg");
+    expect(urls).toContain("https://cdn.example.test/anim.gif");
+    expect(urls).toContain("https://cdn.example.test/bg.jpg");
+  });
+
+  it("resolves a legacy story's base media through storage", () => {
+    const segments = buildSegments([story("a")]);
+    const urls = segmentImageUrls(segments[0]!);
+    expect(urls).toHaveLength(1);
+    expect(urls[0]).toContain("photos/a.jpg");
+  });
+
+  it("warms only the neighbours — never the whole rail", () => {
+    const rail = ["a", "b", "c", "d", "e"].map((id) => story(id));
+    const segments = buildSegments(rail);
+
+    const around = adjacentImageUrls(segments, 2);
+    expect(around).toHaveLength(2);
+    expect(around.some((u) => u.includes("photos/b.jpg"))).toBe(true);
+    expect(around.some((u) => u.includes("photos/d.jpg"))).toBe(true);
+    expect(around.some((u) => u.includes("photos/a.jpg"))).toBe(false);
+    expect(around.some((u) => u.includes("photos/e.jpg"))).toBe(false);
+
+    // At the rail's edge only the one existing neighbour is warmed.
+    expect(adjacentImageUrls(segments, 0)).toHaveLength(1);
+    expect(adjacentImageUrls(segments, 4)).toHaveLength(1);
+  });
+
+  it("dedupes a photo used by both neighbours", () => {
+    const shared = {
+      ...makePhotoElement({ x: 0.5, y: 0.5, w: 0.6, h: 0.4 }),
+      src: "https://cdn.example.test/shared.jpg",
+    };
+    const segments = buildSegments([
+      story("x", {
+        slides: [
+          toSlide({ id: "s1", elements: [shared] }),
+          toSlide({ id: "s2" }),
+          toSlide({ id: "s3", elements: [shared] }),
+        ],
+      }),
+    ]);
+    const around = adjacentImageUrls(segments, 1);
+    expect(around.filter((u) => u.includes("shared.jpg"))).toHaveLength(1);
   });
 });

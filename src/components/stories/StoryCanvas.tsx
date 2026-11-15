@@ -323,10 +323,14 @@ function framePadding(el: StoryPhotoElement): { top: number; side: number; botto
 function PhotoPiece({
   el,
   editing,
+  defer,
   onAddPhoto,
 }: {
   el: StoryPhotoElement;
   editing: boolean;
+  /** Static renders (template previews, thumbnails) load lazily; the live
+      viewer and editor load eagerly — the viewer prefetches neighbours. */
+  defer?: boolean | undefined;
   onAddPhoto?: ((el: StoryPhotoElement) => void) | undefined;
 }) {
   const frame = frameById(el.frame);
@@ -449,6 +453,8 @@ function PhotoPiece({
                 alt=""
                 aria-hidden
                 draggable={false}
+                decoding="async"
+                loading={defer ? "lazy" : "eager"}
                 className="sphoto-blurfill"
                 style={{
                   position: "absolute",
@@ -461,7 +467,14 @@ function PhotoPiece({
                 }}
               />
             ) : null}
-            <img src={el.src} alt={el.alt || ""} draggable={false} style={imgStyle} />
+            <img
+              src={el.src}
+              alt={el.alt || ""}
+              draggable={false}
+              decoding="async"
+              loading={defer ? "lazy" : "eager"}
+              style={imgStyle}
+            />
             {filter.wash ? (
               <span
                 className="pointer-events-none absolute inset-0"
@@ -1385,6 +1398,7 @@ export function StoryCanvas({
               src={media.src}
               alt={alt ?? ""}
               draggable={false}
+              decoding="async"
               className="size-full object-cover"
               style={{ filter: combinedFilter }}
               onError={fail}
@@ -1440,6 +1454,7 @@ export function StoryCanvas({
             src={(el as Extract<StoryElement, { kind: "drawing" }>).src}
             alt=""
             draggable={false}
+            decoding="async"
             className="pointer-events-none absolute inset-0 size-full object-fill"
             style={{ zIndex: 10 + el.z }}
             aria-hidden
@@ -1464,7 +1479,12 @@ export function StoryCanvas({
             >
               {el.kind === "text" ? <TextPiece el={el} k={k} /> : null}
               {el.kind === "photo" ? (
-                <PhotoPiece el={el} editing={editing} onAddPhoto={onAddPhoto} />
+                <PhotoPiece
+                  el={el}
+                  editing={editing}
+                  defer={mode === "static"}
+                  onAddPhoto={onAddPhoto}
+                />
               ) : null}
               {el.kind === "shape" ? <ShapePiece el={el} k={k} /> : null}
               {el.kind === "data" ? <DataPiece el={el} data={data} k={k} /> : null}
@@ -1474,6 +1494,8 @@ export function StoryCanvas({
                     src={reducedMotion && el.still ? el.still : el.src}
                     alt=""
                     draggable={false}
+                    decoding="async"
+                    loading={mode === "static" ? "lazy" : "eager"}
                     style={{
                       width: Math.min(
                         180 * k,
@@ -1499,6 +1521,8 @@ export function StoryCanvas({
                   src={reducedMotion && el.still ? el.still : el.src}
                   alt=""
                   draggable={false}
+                  decoding="async"
+                  loading={mode === "static" ? "lazy" : "eager"}
                   style={{
                     width: Math.min(
                       200 * k,

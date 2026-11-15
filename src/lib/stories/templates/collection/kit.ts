@@ -1,53 +1,58 @@
 /**
- * Shared authoring helpers for the curated collection.
+ * Shared design kit for the v2 story template collection.
  *
- * Fifty templates that each spelled out their own gradient stops and colour
- * literals would be fifty chances to drift off-palette. Everything here exists
- * so a template definition reads as *composition* — where the photo sits, what
- * the caption says, how much air is around it — rather than as a pile of hex
- * codes.
+ * v2 is built entirely in Bloom's official reskin palette — ink, panel,
+ * gold, gold-soft, sage, rose, cream — plus shades derived from those same
+ * hues for depth on dark grounds and legibility on light ones. No other hue
+ * enters a template: the palette-conformance test pins every colour a
+ * template uses to `STORY_V2_PALETTE`, so a stray colour fails the suite
+ * rather than quietly shipping.
  *
- * The palette is Bloom's own (see BLOOM_PALETTE). Nothing in the collection
- * reaches outside it, which is what keeps 50 different compositions feeling
- * like one library.
+ * Layout follows the DSL: x/y are centres in unit space, text sizes are
+ * absolute points on the 390-wide reference canvas. Readable seeds (text,
+ * sticker, data) stay inside the vertical safe band — clear of the viewer's
+ * header and reply bar — which the collection test enforces.
  */
 
 import type { Paint, PaintStop } from "@/lib/stories/canvas/paint";
 import type { StoryBackgroundState } from "@/lib/stories/canvas/backgrounds";
 import { gradient, solid, type StoryTemplateDef } from "../dsl";
 
-/* --------------------------------- colour -------------------------------- */
-/* Bloom's palette, named. Referencing these rather than raw hex is what stops
-   one template drifting a shade off from the rest. */
+/* ------------------------- the official palette ------------------------- */
+
 export const C = {
-  ivory: "#F7F1E3",
-  champagne: "#EED9A4",
-  rose: "#E0A3B8",
-  lavender: "#B7A6E8",
-  sage: "#9DB89A",
-  mist: "#AEBFD2",
-  midnight: "#221D33",
-  forest: "#1D2B22",
-  obsidian: "#14111D",
-  blue: "#9FB6CF",
-  beige: "#D3B795",
-  terracotta: "#C07A5E",
-  peach: "#F0C6A8",
-  plum: "#4A2B45",
-  cloud: "#E8ECF4",
-  grey: "#C9C7D4",
-  butter: "#F4E3B2",
-  clay: "#B98A72",
-  ink: "#2B3348",
-  moss: "#6E8463",
-  charcoal: "#22201B",
+  /* The seven official colours (reskin spec, 2026-11-14). */
+  ink: "#0A0B0E",
+  panel: "#111318",
+  gold: "#DCC08F",
+  goldSoft: "#F2E4C6",
+  sage: "#8FC7A2",
+  rose: "#E3919F",
+  cream: "#ECE8E1",
+
+  /* In-family derivations: the gold gradient's own ends, panel lifts, and
+     deepened sage/rose grounds — same hues, darker or lighter stops. */
+  goldPale: "#F6E9CD",
+  goldDeep: "#C79D62",
+  bronze: "#97743F" /* dark gold: the only legible gold on light grounds */,
+  panelLift: "#171A21",
+  night: "#12151D",
+  fern: "#2F4A3A",
+  fernDeep: "#1C2B21",
+  sageDeep: "#476B52",
+  roseDeep: "#5C323E",
+  creamDim: "#B9B4A8",
 } as const;
 
-/** Ink for light grounds and dark grounds. */
-export const INK_DARK = "#22201B";
-export const INK_LIGHT = "#F7F1E3";
+/** Every hex a v2 template may use. The conformance test reads this list. */
+export const STORY_V2_PALETTE: readonly string[] = Object.values(C);
 
-/* --------------------------------- paint --------------------------------- */
+/** Ink on dark grounds. */
+export const INK_LIGHT = C.cream;
+/** Ink on light grounds. */
+export const INK_DARK = C.ink;
+
+/* ------------------------------- paints --------------------------------- */
 
 export const lin = (angle: number, stops: PaintStop[]): Paint => ({
   type: "linear",
@@ -64,28 +69,30 @@ export const rad = (cx: number, cy: number, rx: number, ry: number, stops: Paint
   stops,
 });
 
-/* ------------------------------ backgrounds ------------------------------ */
+/* ----------------------------- backgrounds ------------------------------ */
 
-/**
- * A gradient ground.
- *
- * `ink` is the text colour that reads against it — passing it explicitly keeps
- * every template honest about contrast instead of inheriting something that
- * happens to work on the template above it.
- */
+/** A gradient ground in the v2 language. `ink` is the text colour that reads against it. */
 export function ground(paint: Paint, ink: string): StoryBackgroundState {
   return gradient(paint, ink);
 }
 
-/** A flat ground, for the templates whose whole point is restraint. */
+/** A solid ground, for templates whose whole point is restraint. */
 export function flat(color: string, ink: string): StoryBackgroundState {
   return solid(color, ink);
 }
 
-/* ------------------------------ safe areas ------------------------------- */
-/* The viewer draws a header down the top and a reply bar along the bottom.
-   Anything meant to be read has to sit between them. These are the vertical
-   bounds every composition in the collection respects. */
+/** The same ground with a tactile finish — grain or paper, kept subtle. */
+export function textured(
+  bg: StoryBackgroundState,
+  texture: "grain" | "paper",
+  opacity = 0.14,
+): StoryBackgroundState {
+  return { ...bg, texture, textureOpacity: opacity };
+}
+
+/* ------------------------------ safe area ------------------------------- */
+
+/** Readable seeds stay between these — clear of viewer chrome. */
 export const SAFE_TOP = 0.11;
 export const SAFE_BOTTOM = 0.88;
 

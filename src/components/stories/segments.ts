@@ -15,6 +15,7 @@
  */
 
 import { isStoryActive, type Story } from "@/lib/profile/types";
+import { storyMediaUrl } from "@/lib/profile/storyMeta";
 import { storySlides, type StorySlide } from "@/lib/stories/slides";
 
 /** One slide of one story — the unit the viewer advances through. */
@@ -81,4 +82,49 @@ export function isRichSlide(slide: StorySlide): boolean {
     Boolean(slide.canvas) ||
     Boolean(slide.backgroundId)
   );
+}
+
+/**
+ * Every image a segment will paint: its base media, its photo elements,
+ * its GIF elements, and a photo background.
+ *
+ * The viewer's prefetch warms exactly these for the adjacent segments.
+ * Before this existed, the prefetch only knew the legacy `mediaPath`, so a
+ * canvas slide's photos — most of what it paints — were fetched and decoded
+ * cold on the tap that revealed the slide. That cold decode, on photos that
+ * could be ~900k characters of inline base64, was the visible hitch when
+ * moving through stories.
+ */
+export function segmentImageUrls(segment: Segment): string[] {
+  const urls = new Set<string>();
+  const { slide } = segment;
+  if (slide.mediaType === "image" && slide.mediaPath) {
+    // Bloom also runs with no backend configured, where URL resolution
+    // throws; a rail must never die because a prefetch couldn't resolve.
+    try {
+      const url = storyMediaUrl(slide);
+      if (url) urls.add(url);
+    } catch {
+      /* prefetch is best-effort */
+    }
+  }
+  for (const el of slide.elements) {
+    if (el.kind === "photo" && el.src) urls.add(el.src);
+    if (el.kind === "gif" && el.src) urls.add(el.src);
+  }
+  if (slide.canvas?.photo?.src) urls.add(slide.canvas.photo.src);
+  return [...urls];
+}
+
+/**
+ * Image URLs of the segments either side of `index` — and nothing further.
+ * Adjacency is the whole policy: opening a rail must not download it all.
+ */
+export function adjacentImageUrls(segments: readonly Segment[], index: number): string[] {
+  const urls = new Set<string>();
+  for (const i of [index - 1, index + 1]) {
+    const seg = segments[i];
+    if (seg) for (const url of segmentImageUrls(seg)) urls.add(url);
+  }
+  return [...urls];
 }

@@ -41,10 +41,10 @@ export function validateImageFile(file: File): string | null {
 /** Validate decoded dimensions before any canvas work happens on them. */
 export function validateImageDimensions(width: number, height: number): string | null {
   if (!width || !height) {
-    return "That image could not be read. Try a different file.";
+    return "That image could not be read — the file could not be opened. Try a different file.";
   }
   if (width > MAX_IMAGE_EDGE || height > MAX_IMAGE_EDGE || width * height > MAX_IMAGE_PIXELS) {
-    return "That image is enormous. Pick a smaller copy of it.";
+    return "That image is extremely large — enormous in pixel terms. Pick a smaller copy of it.";
   }
   return null;
 }
@@ -138,28 +138,65 @@ export async function exportAvatar(
   return { blob, dataUrl, width: AVATAR_OUTPUT, height: AVATAR_OUTPUT };
 }
 
+/** Pure sizing plan for a story photo: capped long edge, never upscaled. */
+export function storyPhotoPlan(
+  naturalWidth: number,
+  naturalHeight: number,
+  maxEdge = 1280,
+): { width: number; height: number; pixels: number } {
+  const pixels = Math.max(0, naturalWidth) * Math.max(0, naturalHeight);
+  const scale = Math.min(1, maxEdge / Math.max(naturalWidth, naturalHeight, 1));
+  return {
+    width: Math.max(1, Math.round(naturalWidth * scale)),
+    height: Math.max(1, Math.round(naturalHeight * scale)),
+    pixels,
+  };
+}
+
 /**
  * Story photos keep their composition: portrait/landscape/square render
  * fully inside the viewer, so we only re-encode (no crop) and cap the long
  * edge at 1280px.
+ *
+ * The returned `dataUrl` is the PROCESSED image — the same pixels as the
+ * blob. It used to be the original file's data URL (up to ~13 MB of base64
+ * for a 10 MB photo), and that original is what the editor stored and the
+ * viewer decoded on every open.
  */
 export async function processStoryPhoto(
   file: File,
   maxEdge = 1280,
 ): Promise<{ blob: Blob; dataUrl: string; width: number; height: number }> {
-  const dataUrl = await readAsDataUrl(file);
-  const img = await loadImageElement(dataUrl);
-  const scale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
-  const width = Math.max(1, Math.round(img.naturalWidth * scale));
-  const height = Math.max(1, Math.round(img.naturalHeight * scale));
+  let source: ImageBitmap | HTMLImageElement;
+  let naturalWidth: number;
+  let naturalHeight: number;
+  if (typeof createImageBitmap === "function") {
+    // Preferred decode: bitmap decoding happens off the main thread, where
+    // an <img> element's decode blocks the composer's first paint.
+    source = await createImageBitmap(file).catch(() => {
+      throw new MediaError("That image could not be opened.");
+    });
+    naturalWidth = source.width;
+    naturalHeight = source.height;
+  } else {
+    const originalUrl = await readAsDataUrl(file);
+    source = await loadImageElement(originalUrl);
+    naturalWidth = source.naturalWidth;
+    naturalHeight = source.naturalHeight;
+  }
+  const dimensionError = validateImageDimensions(naturalWidth, naturalHeight);
+  if (dimensionError) throw new MediaError(dimensionError);
+  const { width, height } = storyPhotoPlan(naturalWidth, naturalHeight, maxEdge);
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new MediaError("Could not prepare your image.");
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(img, 0, 0, width, height);
+  ctx.drawImage(source, 0, 0, width, height);
+  if (typeof ImageBitmap !== "undefined" && source instanceof ImageBitmap) source.close();
   const blob = await canvasToBlob(canvas);
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
   return { blob, dataUrl, width, height };
 }
 

@@ -8,6 +8,7 @@ import {
   storagePathFor,
   validateImageDimensions,
   validateImageFile,
+  storyPhotoPlan,
 } from "./media";
 
 /**
@@ -75,5 +76,42 @@ describe("avatarObjectPath", () => {
     /* A new upload is a new URL — no cache can serve the previous photo. */
     expect(a).not.toBe(b);
     expect(a.startsWith(storagePathFor("user-1", ""))).toBe(true);
+  });
+});
+
+describe("storyPhotoPlan", () => {
+  it("caps the long edge at 1280 by default and keeps the aspect", () => {
+    const plan = storyPhotoPlan(4032, 3024);
+    expect(plan.width).toBe(1280);
+    expect(plan.height).toBe(960);
+    expect(plan.pixels).toBe(4032 * 3024);
+  });
+
+  it("never upscales a small photo", () => {
+    const plan = storyPhotoPlan(800, 600);
+    expect(plan.width).toBe(800);
+    expect(plan.height).toBe(600);
+  });
+
+  it("honours a caller-provided cap", () => {
+    const plan = storyPhotoPlan(2000, 1000, 500);
+    expect(plan.width).toBe(500);
+    expect(plan.height).toBe(250);
+  });
+});
+
+describe("validateImageDimensions (story photo path)", () => {
+  it("accepts an ordinary phone photo", () => {
+    expect(validateImageDimensions(4032, 3024)).toBeNull();
+  });
+
+  it("rejects a decode-bomb honestly", () => {
+    const error = validateImageDimensions(12000, 9000);
+    expect(12000 * 9000).toBeGreaterThan(MAX_IMAGE_PIXELS);
+    expect(error).toMatch(/extremely large/i);
+  });
+
+  it("rejects an unreadable image", () => {
+    expect(validateImageDimensions(0, 0)).toMatch(/could not be opened/i);
   });
 });
