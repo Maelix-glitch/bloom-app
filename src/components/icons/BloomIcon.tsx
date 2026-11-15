@@ -73,6 +73,25 @@ const GLYPHS = {
       <circle className="bi-dot" cx="12" cy="14.6" r="1.2" />
     </>
   ),
+  /**
+   * Nutrition — a bowl with a young sprout rising from it: food, in the
+   * family's language. The bowl outline and the foot line carry
+   * pathLength={1} like the other nav drawables, so the sidebar
+   * choreography can draw them on evenly.
+   */
+  nutrition: (
+    <>
+      <path
+        className="bi-o"
+        pathLength={1}
+        d="M4 11.5h16c-.3 4.3-3.6 7.3-8 7.3s-7.7-3-8-7.3Z"
+      />
+      <path className="bi-s" pathLength={1} d="M8.5 21.3h7" />
+      <path className="bi-stem" pathLength={1} d="M12 11.5c-.1-1.9.2-3.5 1-4.9" />
+      <path className="bi-leaf bi-ro" d="M12.3 8.3c-1.9.2-3.4-.8-4.1-2.9 2.2.1 3.8 1.1 4.1 2.9Z" />
+      <path className="bi-leaf bi-lo" d="M13 7c.2-1.9 1.4-3.1 3.4-3.4-.1 2-1.3 3.2-3.4 3.4Z" />
+    </>
+  ),
   /** Cycle — a droplet with a leaf-vein running through it. */
   cycle: (
     <>

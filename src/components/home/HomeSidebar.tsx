@@ -30,6 +30,7 @@ export const HOME_NAV: {
 }[] = [
   { label: "Today", to: "/", icon: "today", match: (p) => p === "/" },
   { label: "Trackers", to: "/trackers", icon: "trackers", match: (p) => p.startsWith("/trackers") },
+  { label: "Nutrition", to: "/nutrition", icon: "nutrition", match: (p) => p.startsWith("/nutrition") },
   { label: "Cycle", to: "/cycle", icon: "cycle", match: (p) => p.startsWith("/cycle") },
   { label: "Mood", to: "/mood", icon: "mood", match: (p) => p.startsWith("/mood") },
   { label: "Rewards", to: "/rewards", icon: "rewards", match: (p) => p.startsWith("/rewards") },
@@ -288,7 +289,7 @@ export function HomeMobileBar() {
  * The phone tab bar — a floating pill (Reskin slice 2, after the owner's
  * prototype): inset from the screen edges, panel at 90% over a backdrop
  * blur, a heavy soft shadow; the geometry lives in src/styles/responsive.css
- * (§3) and the active pill in src/styles.css. Six destinations share the
+ * (§3) and the active pill in src/styles.css. Seven destinations share the
  * width equally (flex: 1) so every label always fits — even on a 320px
  * phone — and each item meets the 48px touch floor.
  */

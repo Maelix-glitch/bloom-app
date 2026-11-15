@@ -13,7 +13,7 @@
  *
  * The set below reproduces exactly the routes that rendered the chrome
  * when it lived in the pages:
- *   · the main sections — Today, Trackers, Cycle, Mood (incl.
+ *   · the main sections — Today, Trackers, Nutrition, Cycle, Mood (incl.
  *     intelligence), Rewards (incl. the Atelier), Coach, Profile, the
  *     weekly Report, and the admin progression page;
  *   · NOT the public surfaces — /privacy, /terms and the /@handle public
@@ -23,6 +23,7 @@
  */
 const APP_NAV_SECTIONS = [
   "/trackers",
+  "/nutrition",
   "/cycle",
   "/mood",
   "/rewards",

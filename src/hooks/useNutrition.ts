@@ -1,0 +1,251 @@
+/**
+ * Nutrition (W4-3 N4) — the UI's one door into the nutrition lib.
+ *
+ * Device-first and account-synced through the shared preferences document,
+ * exactly the pattern `useAssessment` / `useBodyProfile` set: reads come
+ * through `usePrefValue`, so a remount can never flicker, and writes go
+ * through the lib's pref-backed operations, which re-validate everything
+ * they store.
+ *
+ * Targets resolve through the safety-gated engine first (`targetsFor` over
+ * the Assessment's domain profile): a `safety_blocked` outcome means NO
+ * targets, ever — the body-profile fallback below it must not resurrect a
+ * number the gate refused (design §4.5). Only a completeness refusal falls
+ * back to `useBodyProfile`'s targets — the same computation /trackers
+ * shows, so the two surfaces can never disagree.
+ *
+ * One distinction inside `safety_blocked` matters: the classifier also
+ * blocks on ABSENCE — `age_missing` and `safety_answers_missing` fire when
+ * the person was never asked, which is an information gap, not a finding
+ * about them. A block carrying only absence rules is treated like the
+ * completeness refusal (the fallback applies — it is exactly the state of
+ * a person who only ever filled in Trackers). A block carrying any
+ * substantive rule (eating-disorder history, pregnancy, an urgent
+ * symptom, a high-risk condition…) is final: no target from any path.
+ */
+
+import { useCallback, useMemo } from "react";
+
+import { usePrefValue } from "@/lib/prefsStore";
+import { useAssessment } from "@/hooks/useAssessment";
+import { useBodyProfile } from "@/hooks/useBodyProfile";
+import { useSession } from "@/hooks/useSession";
+import { shiftDay, todayLocal } from "@/lib/localDay";
+import { toHealthProfile } from "@/lib/assessment/state";
+import { toSafetyInput } from "@/lib/vitalis/domain/profile";
+import { classifySafety } from "@/lib/vitalis/safety/classify";
+import { targetsFor } from "@/lib/vitalis/calc/body";
+import {
+  FOODS_KEY,
+  FOODLOG_KEY,
+  USDA_REFERENCE_FOODS,
+  compareTotalsToTargets,
+  createEntryFromFood,
+  dayLogOf,
+  deleteLogEntry,
+  editLogEntry,
+  entriesForDay,
+  entryNutrientsFor,
+  findUsdaReference,
+  logEntry,
+  nutritionTargetsFromBodyTargets,
+  nutritionTargetsFromOutcome,
+  parseFoodLogValue,
+  parseFoodsValue,
+  recentFoods,
+  saveCustomFood,
+  type Amount,
+  type CustomFoodInput,
+  type DayLog,
+  type EntrySource,
+  type Food,
+  type LogEntry,
+  type LogEntryPatch,
+  type Meal,
+  type NutritionTargets,
+  type TotalsComparison,
+} from "@/lib/nutrition";
+import { newNutritionId } from "@/lib/nutrition/ids";
+
+export type NutritionTargetState =
+  | { kind: "ready"; targets: NutritionTargets }
+  /** The safety gate refused: no targets and no deficit framing (§4.5). */
+  | { kind: "blocked" }
+  /** Not enough body information yet to compute an honest target. */
+  | { kind: "none" };
+
+export interface NutritionStore {
+  today: string;
+  /** The user's own foods (`health.foods.v1`). */
+  foods: Food[];
+  /** Every log entry, all days (`health.foodlog.v1`). */
+  entries: LogEntry[];
+  targetState: NutritionTargetState;
+  /** Recents resolved to foods, most recent first (own log only). */
+  recents: Food[];
+  dayLog: (day: string) => DayLog;
+  comparison: (day: string) => TotalsComparison;
+  /** Resolve any logged food id — own foods first, then the reference set. */
+  foodById: (id: string) => Food | null;
+  /** Log a food-backed entry. Null when the lib refuses the entry. */
+  logFood: (
+    food: Food,
+    amount: Amount,
+    meal: Meal,
+    day: string,
+    source: Exclude<EntrySource, "coach_photo">,
+  ) => LogEntry | null;
+  /** Persist a custom food. Null on a parser refusal; throws
+   *  FoodListFullError at the list cap — the sheet surfaces both. */
+  addCustomFood: (input: CustomFoodInput) => Food | null;
+  /** Edit an entry's meal and/or amount. Amount changes recompute the
+   *  stored nutrients through the lib's math, never in the component. */
+  editEntry: (entry: LogEntry, patch: { meal?: Meal; amount?: Amount }) => void;
+  removeEntry: (entry: LogEntry) => void;
+  /** Put a removed entry back, byte for byte — the undo path. */
+  restoreEntry: (entry: LogEntry) => void;
+  /** Copy one day's entries into another day (new ids, same foods,
+   *  amounts, meals and nutrients). Returns how many entries landed. */
+  copyDayInto: (fromDay: string, toDay: string) => number;
+}
+
+const NO_FOODS: Food[] = [];
+const NO_ENTRIES: LogEntry[] = [];
+
+/** Classifier rules that block on missing information rather than on
+ *  anything the person actually reported (see the header note). */
+const ABSENCE_BLOCK_RULES: ReadonlySet<string> = new Set([
+  "age_missing",
+  "safety_answers_missing",
+]);
+
+export function useNutrition(): NutritionStore {
+  const foods = usePrefValue(FOODS_KEY, parseFoodsValue, NO_FOODS);
+  const entries = usePrefValue(FOODLOG_KEY, parseFoodLogValue, NO_ENTRIES);
+  const assessment = useAssessment();
+  const body = useBodyProfile();
+  const session = useSession();
+  const today = todayLocal();
+
+  const targetState = useMemo<NutritionTargetState>(() => {
+    const profile = toHealthProfile(assessment.state, session.userId ?? "local");
+    const outcome = targetsFor(profile, classifySafety(toSafetyInput(profile)), today);
+    if (outcome.ok) {
+      const gated = nutritionTargetsFromOutcome(outcome);
+      if (gated) return { kind: "ready", targets: gated };
+    } else if (outcome.reason === "safety_blocked") {
+      const substantive = outcome.blockingFindings.some(
+        (rule) => !ABSENCE_BLOCK_RULES.has(rule),
+      );
+      /* A substantive refusal is final — no fallback may override it
+         (§4.5). An absence-only block falls through to the fallback. */
+      if (substantive) return { kind: "blocked" };
+    }
+    const fallback = nutritionTargetsFromBodyTargets(body.targets);
+    return fallback ? { kind: "ready", targets: fallback } : { kind: "none" };
+  }, [assessment.state, session.userId, body.targets, today]);
+
+  const targets = targetState.kind === "ready" ? targetState.targets : null;
+
+  const recents = useMemo(
+    () => recentFoods(entries, [...foods, ...USDA_REFERENCE_FOODS], 8),
+    [entries, foods],
+  );
+
+  const dayLog = useCallback((day: string) => dayLogOf(entries, day), [entries]);
+
+  const comparison = useCallback(
+    (day: string) => compareTotalsToTargets(dayLogOf(entries, day).totals, targets),
+    [entries, targets],
+  );
+
+  const foodById = useCallback(
+    (id: string) => foods.find((f) => f.id === id) ?? findUsdaReference(id),
+    [foods],
+  );
+
+  const logFood = useCallback<NutritionStore["logFood"]>((food, amount, meal, day, source) => {
+    const entry = createEntryFromFood({
+      food,
+      amount,
+      meal,
+      day,
+      source,
+      now: new Date().toISOString(),
+    });
+    if (!entry) return null;
+    logEntry(entry);
+    return entry;
+  }, []);
+
+  const addCustomFood = useCallback<NutritionStore["addCustomFood"]>((input) => {
+    return saveCustomFood(input);
+  }, []);
+
+  const editEntry = useCallback<NutritionStore["editEntry"]>(
+    (entry, patch) => {
+      const libPatch: LogEntryPatch = {};
+      if (patch.meal !== undefined) libPatch.meal = patch.meal;
+      if (patch.amount !== undefined) {
+        libPatch.amount = patch.amount;
+        /* The stored nutrients move with the portion, recomputed by the
+           lib from the food the entry came from. An entry whose food is
+           gone keeps its stored nutrients — history does not rewrite
+           itself around a deleted food. */
+        const food = entry.foodId ? foodById(entry.foodId) : null;
+        if (food) {
+          const nutrients = entryNutrientsFor(food, patch.amount);
+          if (nutrients) libPatch.nutrients = nutrients;
+        }
+      }
+      editLogEntry(entry.id, libPatch);
+    },
+    [foodById],
+  );
+
+  const removeEntry = useCallback<NutritionStore["removeEntry"]>((entry) => {
+    deleteLogEntry(entry.id);
+  }, []);
+
+  const restoreEntry = useCallback<NutritionStore["restoreEntry"]>((entry) => {
+    /* appendToLog replaces by id, so re-logging the removed entry restores
+       it exactly — same id, day, amount, nutrients and provenance. */
+    logEntry(entry);
+  }, []);
+
+  const copyDayInto = useCallback<NutritionStore["copyDayInto"]>(
+    (fromDay, toDay) => {
+      const now = new Date().toISOString();
+      let landed = 0;
+      for (const entry of entriesForDay(entries, fromDay)) {
+        const copy: LogEntry = { ...entry, id: newNutritionId("entry"), day: toDay, createdAt: now };
+        logEntry(copy);
+        landed += 1;
+      }
+      return landed;
+    },
+    [entries],
+  );
+
+  return {
+    today,
+    foods,
+    entries,
+    targetState,
+    recents,
+    dayLog,
+    comparison,
+    foodById,
+    logFood,
+    addCustomFood,
+    editEntry,
+    removeEntry,
+    restoreEntry,
+    copyDayInto,
+  };
+}
+
+/** The day before a day key — for the copy-yesterday action. */
+export function yesterdayOf(day: string): string {
+  return shiftDay(day, -1);
+}

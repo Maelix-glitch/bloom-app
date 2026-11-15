@@ -12,12 +12,13 @@ import { BLOOM_ICON_NAMES, BloomIcon, isBloomIconName, type BloomIconName } from
 afterEach(cleanup);
 
 describe("BloomIcon registry", () => {
-  it("carries the full v1 set: nav 7, trackers 6, habits 28, ranks 8, coach 5, system 11", () => {
-    expect(BLOOM_ICON_NAMES).toHaveLength(65);
+  it("carries the full v1 set: nav 8, trackers 6, habits 28, ranks 8, coach 5, system 11", () => {
+    expect(BLOOM_ICON_NAMES).toHaveLength(66);
     for (const name of [
       // nav
       "today",
       "trackers",
+      "nutrition",
       "cycle",
       "mood",
       "rewards",
@@ -77,13 +78,14 @@ describe("BloomIcon registry", () => {
     }
   });
 
-  it("carries the nav choreography hooks on the six sidebar glyphs", () => {
+  it("carries the nav choreography hooks on the sidebar glyphs", () => {
     // The sidebar's per-glyph choreography (styles.css) keys off these
     // hooks: pathLength-normalised drawables and named part classes.
     // Every other consumer renders the same markup with no animation.
     const hooks: Partial<Record<BloomIconName, string[]>> = {
       today: ["bi-o", "bi-s", "bi-h", "bi-stem", "bi-leaf"],
       trackers: ["bi-o", "bi-needle", "bi-dot"],
+      nutrition: ["bi-o", "bi-s", "bi-stem", "bi-leaf"],
       mood: ["bi-o", "bi-eye", "bi-s"],
       rewards: ["bi-petal", "bi-stem", "bi-leaf", "bi-dot"],
       coach: ["bi-o", "bi-stem", "bi-leaf"],

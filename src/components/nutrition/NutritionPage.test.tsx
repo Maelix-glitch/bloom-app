@@ -1,0 +1,341 @@
+// @vitest-environment jsdom
+/**
+ * Nutrition N4 — the tab, driven end to end against the real prefs
+ * document and the real lib: search ordering and badges, the preselected
+ * portion, logging into the day view, totals against the targets engine
+ * (and the safety refusal that must show no target at all), custom-food
+ * validation, the full-list error, undoable delete, copy-yesterday.
+ */
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({
+    to,
+    children,
+    ...rest
+  }: {
+    to: string;
+    children: React.ReactNode;
+  }) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
+vi.mock("@/hooks/useSession", () => ({
+  useSession: () => ({ userId: "user-1", ready: true }),
+}));
+
+import { setPref } from "@/lib/prefs";
+import { resetPrefCache } from "@/lib/prefsStore";
+import { shiftDay, todayLocal } from "@/lib/localDay";
+import { BODY_KEY, DEFAULT_BODY, bodyTargetsOf, type BodyProfile } from "@/lib/health/body";
+import {
+  ASSESSMENT_KEY,
+  EMPTY_ANSWERS,
+  emptyAssessmentState,
+} from "@/lib/assessment/state";
+import {
+  MAX_FOODS,
+  createCustomFood,
+  createEntryFromFood,
+  foodsValueOf,
+  logEntry,
+  readDayLog,
+  readFoodLog,
+  saveCustomFood,
+  searchUsdaReference,
+  type Food,
+  type LogEntry,
+} from "@/lib/nutrition";
+import { NutritionPage } from "./NutritionPage";
+import { MEAL_LABEL } from "./input";
+
+afterEach(cleanup);
+
+beforeEach(() => {
+  window.matchMedia =
+    window.matchMedia ??
+    ((query: string) =>
+      ({
+        matches: false,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        onchange: null,
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList);
+  window.localStorage.clear();
+  resetPrefCache();
+});
+
+const NOW = "2026-11-15T08:30:00.000Z";
+
+function seedBodyProfile(): BodyProfile {
+  const profile: BodyProfile = {
+    ...DEFAULT_BODY,
+    heightCm: 175,
+    weightKg: 82,
+    age: 30,
+    sex: "female",
+    activity: "light",
+    goal: "maintain",
+    updatedAt: NOW,
+  };
+  setPref(BODY_KEY, profile);
+  return profile;
+}
+
+function seedOats(): Food {
+  const food = saveCustomFood({
+    name: "My Oats",
+    per100g: { kcal: 380, proteinG: 13, carbsG: 60, fatG: 7 },
+    servings: [{ label: "1 bowl", grams: 80 }],
+  });
+  if (!food) throw new Error("seed food refused");
+  return food;
+}
+
+function logDirect(
+  food: Food,
+  grams: number,
+  day: string,
+  meal: LogEntry["meal"] = "breakfast",
+): LogEntry {
+  const entry = createEntryFromFood({
+    food,
+    amount: { grams },
+    meal,
+    day,
+    source: "search",
+    now: NOW,
+  });
+  if (!entry) throw new Error("seed entry refused");
+  logEntry(entry);
+  return entry;
+}
+
+function openSheet() {
+  fireEvent.click(screen.getByRole("button", { name: "Add food" }));
+  return screen.getByRole("dialog");
+}
+
+describe("NutritionPage — search & add flow", () => {
+  it("lists own foods and recents before the USDA set, every row badged before selection", () => {
+    const own = saveCustomFood({
+      name: "Homemade Rice Bowl",
+      per100g: { kcal: 210, proteinG: 6, carbsG: 38, fatG: 3 },
+    });
+    if (!own) throw new Error("seed food refused");
+    const usdaRice = searchUsdaReference("rice")[0]!;
+    logDirect(usdaRice, 100, shiftDay(todayLocal(), -1), "lunch");
+
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.change(within(sheet).getByLabelText("Search foods"), {
+      target: { value: "rice" },
+    });
+
+    const ownSection = within(sheet).getByLabelText("Your foods and recents");
+    const usdaSection = within(sheet).getByLabelText("USDA reference foods");
+    /* Own first: the USDA section starts after the own section ends. */
+    expect(
+      ownSection.compareDocumentPosition(usdaSection) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    /* The recent (the USDA rice, logged yesterday) rides in the own list,
+       and every row in both lists carries its badge before any tap. */
+    const ownBadges = within(ownSection).getAllByTestId("provenance-badge");
+    expect(ownBadges.map((b) => b.textContent)).toContain("Your value");
+    expect(ownBadges.map((b) => b.textContent)).toContain("USDA FoodData Central");
+    const usdaBadges = within(usdaSection).getAllByTestId("provenance-badge");
+    expect(usdaBadges.length).toBeGreaterThan(0);
+    expect(usdaBadges.every((b) => b.textContent === "USDA FoodData Central")).toBe(true);
+  });
+
+  it("preselects a default portion, so logging never needs an amount decision first", () => {
+    seedOats();
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.click(within(sheet).getByRole("button", { name: /My Oats/ }));
+
+    const chip = within(sheet).getByRole("button", { name: /1 bowl · 80 g/ });
+    expect(chip.getAttribute("aria-pressed")).toBe("true");
+    /* 80 g of 380 kcal/100 g = 304 kcal, previewed before logging. */
+    expect(within(sheet).getByText(/304 kcal/)).toBeTruthy();
+    expect(
+      (within(sheet).getByRole("button", { name: "Log it" }) as HTMLButtonElement).disabled,
+    ).toBe(false);
+  });
+
+  it("logs from the sheet into the day view, with the entry's badge attached", () => {
+    seedOats();
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.click(within(sheet).getByRole("button", { name: /My Oats/ }));
+    fireEvent.click(within(sheet).getByRole("button", { name: "Log it" }));
+
+    const today = todayLocal();
+    const stored = readDayLog(today);
+    expect(stored.entries).toHaveLength(1);
+    expect(stored.entries[0]?.provenance.kind).toBe("user_entered");
+
+    /* The day view shows the entry under its meal, badge attached. The
+       meal is the sheet's time-of-day default, so read it off the stored
+       entry rather than assuming an hour. */
+    const mealSection = screen.getByLabelText(
+      MEAL_LABEL[stored.entries[0]!.meal],
+    ) as HTMLElement;
+    expect(within(mealSection).getByText("My Oats")).toBeTruthy();
+    expect(within(mealSection).getByTestId("provenance-badge").textContent).toBe("Your value");
+    expect(within(mealSection).getByText(/304 kcal · 10\.4 g protein/)).toBeTruthy();
+  });
+});
+
+describe("NutritionPage — totals vs targets", () => {
+  it("measures the day against the same target Trackers computes", () => {
+    const profile = seedBodyProfile();
+    const oats = seedOats();
+    logDirect(oats, 100, todayLocal());
+    const targets = bodyTargetsOf(profile, todayLocal());
+    if (!targets) throw new Error("expected targets for the seeded profile");
+
+    render(<NutritionPage />);
+    expect(screen.getByText(`of your ~${targets.calories} kcal target`)).toBeTruthy();
+    expect(screen.getByText(/Targets are estimates/)).toBeTruthy();
+    expect(screen.getByRole("progressbar", { name: "Calories against target" })).toBeTruthy();
+  });
+
+  it("a safety refusal shows totals only — no target, no bar, no deficit framing", () => {
+    seedBodyProfile();
+    const blocked = emptyAssessmentState(NOW);
+    blocked.answers = { ...EMPTY_ANSWERS, eatingDisorderHistory: true };
+    setPref(ASSESSMENT_KEY, blocked);
+    const oats = seedOats();
+    logDirect(oats, 100, todayLocal());
+
+    render(<NutritionPage />);
+    /* The day's totals still show… */
+    expect(screen.getByText("380")).toBeTruthy();
+    /* …but nothing that frames them against a target. */
+    expect(screen.queryByText(/of your ~/)).toBeNull();
+    expect(screen.queryByRole("progressbar")).toBeNull();
+    expect(screen.getByText(/doesn't set calorie targets/)).toBeTruthy();
+  });
+
+  it("an absence-only block (safety questions never answered) still falls back to Trackers' target", () => {
+    const profile = seedBodyProfile();
+    const unanswered = emptyAssessmentState(NOW);
+    unanswered.answers = {
+      ...EMPTY_ANSWERS,
+      ageYears: 30,
+      heightCm: 175,
+      weightKg: 82,
+      activity: "light",
+      goal: "maintain",
+      /* pregnantOrBreastfeeding / eatingDisorderHistory stay null —
+         never asked, which the classifier blocks on as absence. */
+    };
+    setPref(ASSESSMENT_KEY, unanswered);
+    const oats = seedOats();
+    logDirect(oats, 100, todayLocal());
+    const targets = bodyTargetsOf(profile, todayLocal());
+    if (!targets) throw new Error("expected targets for the seeded profile");
+
+    render(<NutritionPage />);
+    expect(screen.getByText(`of your ~${targets.calories} kcal target`)).toBeTruthy();
+    expect(screen.queryByText(/doesn't set calorie targets/)).toBeNull();
+  });
+
+  it("with no body numbers, totals stand alone and the next step is named", () => {
+    const oats = seedOats();
+    logDirect(oats, 100, todayLocal());
+    render(<NutritionPage />);
+    expect(screen.queryByText(/of your ~/)).toBeNull();
+    expect(screen.getByText(/No target yet/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Add them on Trackers" })).toBeTruthy();
+  });
+});
+
+describe("NutritionPage — custom food form", () => {
+  it("explains invalid values inline, field by field", () => {
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.click(within(sheet).getByRole("button", { name: "Add your own food" }));
+    fireEvent.click(within(sheet).getByRole("button", { name: "Save & log it" }));
+
+    expect(within(sheet).getByText(/Give the food a name/)).toBeTruthy();
+    expect(within(sheet).getByText(/Energy: enter the number/)).toBeTruthy();
+
+    fireEvent.change(within(sheet).getByLabelText("Name"), { target: { value: "Test Milk" } });
+    fireEvent.change(within(sheet).getByLabelText("Energy (kcal)"), { target: { value: "60" } });
+    fireEvent.change(within(sheet).getByLabelText("Protein (g)"), { target: { value: "250" } });
+    fireEvent.change(within(sheet).getByLabelText("Carbs (g)"), { target: { value: "5" } });
+    fireEvent.change(within(sheet).getByLabelText("Fat (g)"), { target: { value: "3" } });
+    fireEvent.click(within(sheet).getByRole("button", { name: "Save & log it" }));
+    expect(within(sheet).getByText(/Protein: per 100 g, this can't be over 100 g/)).toBeTruthy();
+  });
+
+  it("surfaces the full-list error honestly instead of dropping the food", () => {
+    const many: Food[] = [];
+    for (let i = 0; i < MAX_FOODS; i += 1) {
+      const food = createCustomFood(
+        { name: `Seed food ${i}`, per100g: { kcal: 100, proteinG: 5, carbsG: 10, fatG: 2 } },
+        `seed-${i}`,
+      );
+      if (!food) throw new Error("seed food refused");
+      many.push(food);
+    }
+    setPref("health.foods.v1", foodsValueOf(many));
+
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.click(within(sheet).getByRole("button", { name: "Add your own food" }));
+    fireEvent.change(within(sheet).getByLabelText("Name"), { target: { value: "One too many" } });
+    fireEvent.change(within(sheet).getByLabelText("Energy (kcal)"), { target: { value: "60" } });
+    fireEvent.change(within(sheet).getByLabelText("Protein (g)"), { target: { value: "3" } });
+    fireEvent.change(within(sheet).getByLabelText("Carbs (g)"), { target: { value: "5" } });
+    fireEvent.change(within(sheet).getByLabelText("Fat (g)"), { target: { value: "3" } });
+    fireEvent.click(within(sheet).getByRole("button", { name: "Save & log it" }));
+
+    expect(within(sheet).getByText(/Your food list is full/)).toBeTruthy();
+  });
+});
+
+describe("NutritionPage — delete, undo, copy", () => {
+  it("delete is undoable and restores the identical entry", () => {
+    const oats = seedOats();
+    const entry = logDirect(oats, 100, todayLocal());
+    const before = readFoodLog();
+
+    render(<NutritionPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Remove My Oats" }));
+    expect(readFoodLog()).toHaveLength(0);
+    expect(screen.queryByText("My Oats")).toBeNull();
+
+    fireEvent.click(within(screen.getByTestId("nutrition-undo")).getByRole("button", { name: /Undo/ }));
+    expect(readFoodLog()).toEqual(before);
+    expect(readFoodLog()[0]).toEqual(entry);
+    expect(screen.getByText("My Oats")).toBeTruthy();
+  });
+
+  it("copy yesterday duplicates yesterday's entries into today under new ids", () => {
+    const oats = seedOats();
+    const yesterday = shiftDay(todayLocal(), -1);
+    const original = logDirect(oats, 100, yesterday, "dinner");
+
+    render(<NutritionPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy yesterday's meals" }));
+
+    const todayLog = readDayLog(todayLocal());
+    expect(todayLog.entries).toHaveLength(1);
+    expect(todayLog.entries[0]?.foodId).toBe(original.foodId);
+    expect(todayLog.entries[0]?.nutrients).toEqual(original.nutrients);
+    expect(todayLog.entries[0]?.id).not.toBe(original.id);
+    expect(screen.getByText("My Oats")).toBeTruthy();
+  });
+});

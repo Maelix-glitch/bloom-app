@@ -14,6 +14,7 @@ describe("routeShowsAppNav", () => {
     for (const p of [
       "/",
       "/trackers",
+      "/nutrition",
       "/cycle",
       "/mood",
       "/rewards",
@@ -44,7 +45,7 @@ describe("routeShowsAppNav", () => {
   });
 
   it("keeps the chrome off unmatched paths, so the 404 stands alone", () => {
-    for (const p of ["/nope", "/trackersx", "/moodboard", "/coaching"]) {
+    for (const p of ["/nope", "/trackersx", "/nutritionx", "/moodboard", "/coaching"]) {
       expect(routeShowsAppNav(p), p).toBe(false);
     }
   });

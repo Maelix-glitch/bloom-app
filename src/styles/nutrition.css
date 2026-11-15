@@ -1,0 +1,251 @@
+/*
+ * Nutrition (W4-3 N4) — route-scoped styles for the Nutrition tab, loaded
+ * via the ?url head-link pattern like trackers.css / coach.css, so the
+ * rest of the app never carries it. Everything here is built from the
+ * shared tokens (official palette, text scale, radii, motion) — no new
+ * colours, no stock look. Phone-width first: one column, figures that
+ * never wrap mid-number, touch targets at the app's floor.
+ */
+
+.nut-wrap {
+  max-width: 880px;
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) calc(var(--space-8, 4rem) + 84px);
+}
+@media (min-width: 640px) {
+  .nut-wrap {
+    padding-inline: var(--space-6);
+  }
+}
+@media (min-width: 1024px) {
+  .nut-wrap {
+    padding-bottom: var(--space-8, 4rem);
+  }
+}
+
+/* ------------------------------ day totals ------------------------------ */
+
+.nut-day-card {
+  margin-top: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: calc(var(--radius) + 8px);
+  box-shadow:
+    0 18px 40px -22px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 14%, transparent);
+  padding: var(--space-5);
+}
+
+.nut-big-number {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 1;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nut-big-unit {
+  margin-left: 0.35rem;
+  font-size: var(--text-section);
+  color: var(--muted-foreground);
+}
+
+.nut-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  overflow: hidden;
+}
+.nut-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-image: var(--gold-gradient);
+  transition: width var(--motion-signature, 600ms) var(--ease-out-expo);
+}
+
+.nut-note {
+  margin-top: var(--space-3);
+  font-size: var(--text-caption);
+  line-height: var(--leading-body);
+  color: var(--muted-foreground);
+  max-width: 58ch;
+}
+.nut-inline-link {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------- meal list ------------------------------ */
+
+.nut-meal {
+  margin-top: var(--space-6);
+}
+.nut-meal-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-strong);
+}
+.nut-meal-title {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  color: var(--foreground);
+}
+.nut-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+}
+
+/* --------------------------- provenance badge --------------------------- */
+
+.nut-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  padding: 0.1rem 0.55rem;
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.nut-badge[data-kind="usda"] {
+  border-color: color-mix(in oklab, var(--sage) 35%, transparent);
+  background: color-mix(in oklab, var(--sage) 12%, transparent);
+  color: var(--sage);
+}
+.nut-badge[data-kind="user_entered"] {
+  border-color: color-mix(in oklab, var(--gold) 35%, transparent);
+  background: color-mix(in oklab, var(--gold) 12%, transparent);
+  color: var(--gold);
+}
+.nut-badge[data-kind="coach_estimate"] {
+  border-color: color-mix(in oklab, var(--rose) 35%, transparent);
+  background: color-mix(in oklab, var(--rose) 12%, transparent);
+  color: var(--rose);
+  font-style: italic;
+}
+
+/* --------------------------------- sheet -------------------------------- */
+
+.nut-group-label {
+  font-size: var(--text-meta);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-meta);
+  color: var(--muted-foreground);
+}
+.nut-field-label {
+  display: block;
+  font-size: var(--text-meta);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-meta);
+  color: var(--muted-foreground);
+}
+.nut-food-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-1);
+  text-align: left;
+  border-radius: var(--radius-control);
+  transition: background-color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-food-row:hover {
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+.nut-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--text-support);
+  line-height: 1.1;
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-chip[data-selected] {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 12%, transparent);
+  color: var(--gold);
+}
+.nut-backlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--text-support);
+  color: var(--muted-foreground);
+  transition: color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-backlink:hover {
+  color: var(--foreground);
+}
+.nut-error {
+  font-size: var(--text-caption);
+  line-height: var(--leading-body);
+  color: var(--rose-bright);
+}
+
+/* --------------------------------- undo --------------------------------- */
+
+/* The undo strip after removing an entry — the home strip's shape, in the
+   nutrition surface's own scope (the home one is keyed to .home-page). */
+.nut-undo {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: min(92vw, 480px);
+  padding: 10px var(--space-3) 10px var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--elevation-float);
+  color: var(--foreground);
+  font-size: var(--text-support);
+  transform: translateX(-50%);
+}
+@media (min-width: 1024px) {
+  .nut-undo {
+    left: calc(50% + var(--app-rail, 0px) / 2);
+    bottom: 28px;
+  }
+}
+.nut-undo__bar {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gold);
+  transform-origin: left;
+  animation: nut-drain var(--nut-undo-ms, 8000ms) linear both;
+}
+@keyframes nut-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

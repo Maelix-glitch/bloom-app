@@ -6,6 +6,7 @@ import { useEverReady } from "@/hooks/useEverReady";
 import { HabitsSection } from "@/components/home/HabitsSection";
 import { HabitUndo } from "@/components/home/HabitUndo";
 import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
+import { NutritionTodayCard } from "@/components/nutrition/NutritionEntryCards";
 import { ChangesCard, StatTiles } from "@/components/home/OverviewBand";
 import { LevelCard } from "@/components/home/LevelCard";
 import { MoodCard } from "@/components/home/MoodCard";
@@ -461,6 +462,11 @@ function TodayPage() {
               />
             </div>
           </div>
+
+          {/* W4-3: Nutrition's door on Today — today's kcal against the
+              target when food is logged, an invitation when it isn't,
+              in the assessment card's language. */}
+          <NutritionTodayCard />
 
           {/* The connection constellation (overnight Slice 2) — a NEW
               design, closing the stack: it synthesises the very rows
