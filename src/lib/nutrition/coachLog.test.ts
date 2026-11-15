@@ -32,6 +32,7 @@ import {
   COACH_LOG_KEY,
   coachEstimateForMessage,
   coachPhotoEstimate,
+  dishNameFromPhotoNote,
   logCoachEstimate,
   loggedEntryIdFor,
   mealForHour,
@@ -116,8 +117,11 @@ describe("parseCoachEstimateTotals", () => {
 /* --------------------------- visibility (detection) ------------------------ */
 
 describe("coachPhotoEstimate — the visibility rule", () => {
-  it("a photo reply with a clean estimate offers it, name and totals verbatim", () => {
-    expect(coachPhotoEstimate(REPLY, PHOTO_NOTE)).toEqual({ name: PHOTO_NOTE, totals: TOTALS });
+  it("a photo reply with a clean estimate offers it — totals verbatim, name derived short", () => {
+    expect(coachPhotoEstimate(REPLY, PHOTO_NOTE)).toEqual({
+      name: "Classic chicken biryani",
+      totals: TOTALS,
+    });
   });
 
   it("no recorded identification → no offer, however clean the numbers", () => {
@@ -127,6 +131,68 @@ describe("coachPhotoEstimate — the visibility rule", () => {
 
   it("an identification with no parseable estimate → no offer", () => {
     expect(coachPhotoEstimate(["I can see a plate, but I can't estimate it."], PHOTO_NOTE)).toBeNull();
+  });
+});
+
+/* --------------------------- dish-name derivation -------------------------- */
+
+describe("dishNameFromPhotoNote — the sheet's name prefill", () => {
+  it("strips the framing and keeps the head dish (the live-sweep shape)", () => {
+    expect(
+      dishNameFromPhotoNote(
+        "That is chicken biryani served with a side of cucumber raita. You can see spiced basmati rice topped with crispy fried onions.",
+      ),
+    ).toBe("Chicken biryani");
+    expect(dishNameFromPhotoNote(PHOTO_NOTE)).toBe("Classic chicken biryani");
+  });
+
+  it("cuts a bare accompaniment with no framing phrase", () => {
+    expect(dishNameFromPhotoNote("Chicken biryani with cucumber raita")).toBe("Chicken biryani");
+  });
+
+  it("keeps a one-word dish, with or without its sentence end", () => {
+    expect(dishNameFromPhotoNote("Samosa")).toBe("Samosa");
+    expect(dishNameFromPhotoNote("Samosa.")).toBe("Samosa");
+  });
+
+  it("keeps a note with no framing phrase whole up to its sentence end", () => {
+    expect(dishNameFromPhotoNote("Grilled paneer tikka, charred at the edges.")).toBe(
+      "Grilled paneer tikka, charred at the edges",
+    );
+  });
+
+  it("strips every framing shape, case-insensitively, article included", () => {
+    expect(dishNameFromPhotoNote("This is a masala dosa with coconut chutney and sambar")).toBe(
+      "Masala dosa",
+    );
+    expect(dishNameFromPhotoNote("It's a Margherita pizza")).toBe("Margherita pizza");
+    expect(dishNameFromPhotoNote("It is pho bo")).toBe("Pho bo");
+    expect(dishNameFromPhotoNote("that looks like tomato soup")).toBe("Tomato soup");
+  });
+
+  it("stops at the first sentence even when later sentences add sides", () => {
+    expect(
+      dishNameFromPhotoNote("That is tomato soup. It comes with a grilled cheese sandwich."),
+    ).toBe("Tomato soup");
+  });
+
+  it("caps an over-long head at a word boundary, never mid-word", () => {
+    const name = dishNameFromPhotoNote(
+      "Oven roasted Mediterranean vegetable and halloumi platter generously drizzled",
+    );
+    expect(name).toBe("Oven roasted Mediterranean vegetable and halloumi platter");
+    expect(name.length).toBeLessThanOrEqual(60);
+  });
+
+  it("empty and whitespace notes derive nothing", () => {
+    expect(dishNameFromPhotoNote("")).toBe("");
+    expect(dishNameFromPhotoNote("   ")).toBe("");
+  });
+
+  it("falls back to the trimmed note when derivation leaves nothing usable", () => {
+    // The head before the first sentence end is empty — the note itself,
+    // verbatim, is the name rather than an invented one.
+    expect(dishNameFromPhotoNote(". Biryani")).toBe(". Biryani");
   });
 });
 
@@ -143,7 +209,10 @@ describe("coachEstimateForMessage — thread wiring", () => {
 
   it("the reply that read the photo offers its estimate", () => {
     const messages = [user({ photoNote: PHOTO_NOTE }), coach(REPLY)];
-    expect(coachEstimateForMessage(messages, 1)).toEqual({ name: PHOTO_NOTE, totals: TOTALS });
+    expect(coachEstimateForMessage(messages, 1)).toEqual({
+      name: "Classic chicken biryani",
+      totals: TOTALS,
+    });
   });
 
   it("a plain text reply with an ≈ line offers nothing — no photo behind it", () => {

@@ -32,7 +32,7 @@ vi.mock("@/lib/prefs", () => ({
 
 import { todayLocal } from "@/lib/localDay";
 import type { CoachPhotoEstimate } from "@/lib/nutrition/coachLog";
-import { logCoachEstimate } from "@/lib/nutrition/coachLog";
+import { coachPhotoEstimate, logCoachEstimate } from "@/lib/nutrition/coachLog";
 import { readFoodLog } from "@/lib/nutrition/store";
 import { resetPrefCache } from "@/lib/prefsStore";
 
@@ -114,6 +114,36 @@ describe("CoachLogAction", () => {
     expect(stored[0]!.day).toBe(todayLocal());
     expect(screen.getByText(/Logged to your food log/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Log this/ })).toBeNull();
+  });
+
+  it("prefills the short dish name when the estimate came from a photoNote paragraph", () => {
+    // The photoNote is the vision reply's whole first paragraph; the
+    // sheet must offer a food name, not a paragraph — while the
+    // estimate numbers stay digit-for-digit what Coach said.
+    const note =
+      "That looks like a classic chicken biryani served with a side of cucumber raita.";
+    const estimate = coachPhotoEstimate(
+      [note, "≈ 680 kcal · 42 g protein · 75 g carbs · 24 g fat"],
+      note,
+    );
+    expect(estimate).not.toBeNull();
+
+    render(<CoachLogAction messageId="m9" estimate={estimate!} />);
+    fireEvent.click(screen.getByRole("button", { name: /Log this/ }));
+
+    expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe(
+      "Classic chicken biryani",
+    );
+    expect((screen.getByLabelText("kcal") as HTMLInputElement).value).toBe("680");
+    expect((screen.getByLabelText("Protein (g)") as HTMLInputElement).value).toBe("42");
+    expect((screen.getByLabelText("Carbs (g)") as HTMLInputElement).value).toBe("75");
+    expect((screen.getByLabelText("Fat (g)") as HTMLInputElement).value).toBe("24");
+
+    fireEvent.click(screen.getByRole("button", { name: "Log it" }));
+    const stored = readFoodLog();
+    expect(stored).toHaveLength(1);
+    expect(stored[0]!.snapshot!.name).toBe("Classic chicken biryani");
+    expect(stored[0]!.nutrients).toEqual({ kcal: 680, proteinG: 42, carbsG: 75, fatG: 24 });
   });
 
   it("closing the sheet without confirming logs nothing", () => {
