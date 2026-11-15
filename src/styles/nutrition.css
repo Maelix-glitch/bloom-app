@@ -134,6 +134,18 @@
   font-style: italic;
 }
 
+/* ---------------------------------- plan --------------------------------- */
+
+/* The staleness banner: gold-tinted, quiet, impossible to mistake for an
+   error — the plan still works, it just predates a change. */
+.nut-plan-stale {
+  margin-top: var(--space-4);
+  border: 1px solid color-mix(in oklab, var(--gold) 40%, transparent);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+}
+
 /* --------------------------------- sheet -------------------------------- */
 
 .nut-group-label {

@@ -17,7 +17,7 @@
 export type BodyUnits = "metric" | "imperial";
 export type BodySex = "female" | "male" | "unspecified";
 export type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very-active";
-export type BodyGoal = "lose" | "maintain" | "gain";
+export type BodyGoal = "lose" | "maintain" | "gain" | "recomp";
 
 export interface BodyProfile {
   units: BodyUnits;
@@ -66,6 +66,7 @@ export const GOAL_LABEL: Record<BodyGoal, string> = {
   lose: "Lose weight",
   maintain: "Maintain",
   gain: "Gain weight",
+  recomp: "Body recomposition",
 };
 
 export type BmiBand = "underweight" | "healthy" | "overweight" | "obese";
@@ -151,13 +152,28 @@ export function bodyTargetsOf(profile: BodyProfile, today: string): BodyTargets 
   const tdee = round(bmr * ACTIVITY_FACTOR[profile.activity]);
 
   const rate = Math.min(1, Math.max(0.25, profile.rateKgPerWeek || 0.5));
-  const rawDelta = profile.goal === "maintain" ? 0 : round((rate * 7700) / 7);
+  /* Recomposition is maintenance energy by definition — the same weight,
+     differently composed — so it takes no rate delta, exactly like
+     maintain. Only its protein band differs (below). */
+  const rawDelta =
+    profile.goal === "maintain" || profile.goal === "recomp" ? 0 : round((rate * 7700) / 7);
   const rawCalories = profile.goal === "lose" ? tdee - rawDelta : profile.goal === "gain" ? tdee + rawDelta : tdee;
   const floor = calorieFloor(profile.sex);
   const floorApplied = rawCalories < floor;
   const calories = Math.max(floor, Math.min(4500, round(rawCalories)));
 
-  const proteinPerKg = profile.goal === "lose" ? 1.8 : profile.goal === "gain" ? 1.6 : 1.4;
+  /* Protein bands (g per kg body weight): lose 1.8 (a deficit needs the
+     most protection per calorie), gain 1.6, maintain 1.4. Recomposition
+     gets 2.2 — the highest band of the four, because it asks for fat loss
+     and muscle gain at maintenance energy, the most protein-demanding
+     combination. 2.2 g/kg is the upper confidence bound in Morton et al.'s
+     2018 meta-analysis of protein and lean mass (BJSM), and sits inside
+     the ISSN position stand's range for maximising lean mass; the safety
+     classifier separately blocks the profiles for whom a high-protein
+     target needs a clinician (chronic kidney disease, pregnancy,
+     eating-disorder history), so the band never reaches them from here. */
+  const proteinPerKg =
+    profile.goal === "lose" ? 1.8 : profile.goal === "gain" ? 1.6 : profile.goal === "recomp" ? 2.2 : 1.4;
   const proteinG = round(weightKg * proteinPerKg);
 
   /* 35 ml/kg is the common adult maintenance estimate; activity adds a
@@ -178,13 +194,15 @@ export function bodyTargetsOf(profile: BodyProfile, today: string): BodyTargets 
   const targetWeightKg =
     profile.targetWeightKg && profile.targetWeightKg >= 30
       ? profile.targetWeightKg
-      : profile.goal === "maintain"
+      : profile.goal === "maintain" || profile.goal === "recomp"
         ? weightKg
         : null;
 
   let weeksToGoal: number | null = null;
   let goalDate: string | null = null;
-  if (targetWeightKg && profile.goal !== "maintain") {
+  /* A timeline is projected only for goals that move the scale. Maintain
+     and recomp hold the current weight, so neither gets a goal date. */
+  if (targetWeightKg && (profile.goal === "lose" || profile.goal === "gain")) {
     const diff = Math.abs(weightKg - targetWeightKg);
     if (diff >= 0.2 && rate > 0) {
       weeksToGoal = Math.ceil(diff / rate);
@@ -249,7 +267,7 @@ export function parseBodyProfile(raw: unknown): BodyProfile | null {
   ).includes(r["activity"] as ActivityLevel)
     ? (r["activity"] as ActivityLevel)
     : "light";
-  const goal = (["lose", "maintain", "gain"] as BodyGoal[]).includes(r["goal"] as BodyGoal)
+  const goal = (["lose", "maintain", "gain", "recomp"] as BodyGoal[]).includes(r["goal"] as BodyGoal)
     ? (r["goal"] as BodyGoal)
     : "maintain";
   const rate = typeof r["rateKgPerWeek"] === "number" ? r["rateKgPerWeek"] : 0.5;

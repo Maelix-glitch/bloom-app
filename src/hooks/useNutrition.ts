@@ -33,6 +33,7 @@ import { useSession } from "@/hooks/useSession";
 import { shiftDay, todayLocal } from "@/lib/localDay";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { toSafetyInput } from "@/lib/vitalis/domain/profile";
+import { hasSubstantiveBlock } from "@/lib/vitalis/domain/safety";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import {
@@ -112,13 +113,6 @@ export interface NutritionStore {
 const NO_FOODS: Food[] = [];
 const NO_ENTRIES: LogEntry[] = [];
 
-/** Classifier rules that block on missing information rather than on
- *  anything the person actually reported (see the header note). */
-const ABSENCE_BLOCK_RULES: ReadonlySet<string> = new Set([
-  "age_missing",
-  "safety_answers_missing",
-]);
-
 export function useNutrition(): NutritionStore {
   const foods = usePrefValue(FOODS_KEY, parseFoodsValue, NO_FOODS);
   const entries = usePrefValue(FOODLOG_KEY, parseFoodLogValue, NO_ENTRIES);
@@ -134,12 +128,11 @@ export function useNutrition(): NutritionStore {
       const gated = nutritionTargetsFromOutcome(outcome);
       if (gated) return { kind: "ready", targets: gated };
     } else if (outcome.reason === "safety_blocked") {
-      const substantive = outcome.blockingFindings.some(
-        (rule) => !ABSENCE_BLOCK_RULES.has(rule),
-      );
       /* A substantive refusal is final — no fallback may override it
-         (§4.5). An absence-only block falls through to the fallback. */
-      if (substantive) return { kind: "blocked" };
+         (§4.5). An absence-only block falls through to the fallback.
+         The absence/substantive distinction itself lives in the safety
+         domain (`hasSubstantiveBlock`), shared with plan generation. */
+      if (hasSubstantiveBlock(outcome.blockingFindings)) return { kind: "blocked" };
     }
     const fallback = nutritionTargetsFromBodyTargets(body.targets);
     return fallback ? { kind: "ready", targets: fallback } : { kind: "none" };

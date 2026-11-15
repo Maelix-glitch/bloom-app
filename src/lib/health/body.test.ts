@@ -66,6 +66,25 @@ describe("body · energy and water", () => {
     expect(bodyTargetsOf({ ...profile, targetWeightKg: null }, "2026-10-30")!.weeksToGoal).toBeNull();
   });
 
+  it("gives recomposition maintenance energy at the highest protein band", () => {
+    const recomp = bodyTargetsOf({ ...profile, goal: "recomp" }, "2026-10-30")!;
+    const maintain = bodyTargetsOf({ ...profile, goal: "maintain" }, "2026-10-30")!;
+    /* Same energy as maintenance — no deficit, no surplus, floor intact. */
+    expect(recomp.calories).toBe(recomp.tdee);
+    expect(recomp.calories).toBe(maintain.calories);
+    expect(recomp.calorieDelta).toBe(0);
+    /* 2.2 g/kg — above lose (1.8), gain (1.6) and maintain (1.4). */
+    expect(recomp.proteinG).toBe(Math.round(82 * 2.2));
+    expect(recomp.proteinG).toBeGreaterThan(bodyTargetsOf(profile, "2026-10-30")!.proteinG);
+    expect(recomp.proteinG).toBeGreaterThan(maintain.proteinG);
+    /* No scale timeline, even with an explicit goal weight on file; with
+       none, the target weight is the current weight, as for maintain. */
+    expect(recomp.targetWeightKg).toBe(70);
+    expect(recomp.weeksToGoal).toBeNull();
+    expect(recomp.goalDate).toBeNull();
+    expect(bodyTargetsOf({ ...profile, goal: "recomp", targetWeightKg: null }, "2026-10-30")!.targetWeightKg).toBe(82);
+  });
+
   it("turns water left into glasses, and closes at target", () => {
     const status = hydrationStatus(2700, 1200);
     expect(status.remaining).toBe(1500);

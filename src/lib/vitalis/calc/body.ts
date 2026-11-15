@@ -31,7 +31,11 @@ import {
 import type { SafetyAssessment } from "../domain/safety";
 
 export const BODY_TARGETS_METHOD = "bloom-body-targets";
-export const BODY_TARGETS_METHOD_VERSION = "1.0.0";
+/* 1.1.0 (P1): the engine gained a recomposition profile — maintenance
+   energy at the 2.2 g/kg protein band. The other goals' numbers are
+   unchanged from 1.0.0; the bump exists so a target computed before the
+   profile existed is distinguishable from one computed after. */
+export const BODY_TARGETS_METHOD_VERSION = "1.1.0";
 
 const LEGACY_ACTIVITY: Record<ActivityLevel, LegacyActivityLevel> = {
   sedentary: "sedentary",
@@ -42,11 +46,13 @@ const LEGACY_ACTIVITY: Record<ActivityLevel, LegacyActivityLevel> = {
 };
 
 /**
- * `recomp` and `general_health` have no legacy goal. Both map to `maintain`,
- * which is the honest reading: no deficit, no surplus.
+ * `general_health` has no legacy goal and maps to `maintain`, which is the
+ * honest reading: no deficit, no surplus. `recomp` has its own legacy goal
+ * since P1 — maintenance energy at the highest protein band (see
+ * `bodyTargetsOf`), not maintenance values with a note.
  */
 function legacyGoal(goal: VitalisGoal | null): BodyGoal {
-  if (goal === "lose" || goal === "gain" || goal === "maintain") return goal;
+  if (goal === "lose" || goal === "gain" || goal === "maintain" || goal === "recomp") return goal;
   return "maintain";
 }
 

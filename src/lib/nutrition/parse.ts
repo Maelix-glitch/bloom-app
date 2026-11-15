@@ -25,7 +25,7 @@ import {
 } from "./types";
 
 const FOOD_KINDS: readonly FoodProvenanceKind[] = ["usda", "user_entered", "off", "ifct"];
-const ENTRY_SOURCES: readonly EntrySource[] = ["search", "custom", "coach_photo", "recent"];
+const ENTRY_SOURCES: readonly EntrySource[] = ["search", "custom", "coach_photo", "recent", "plan"];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A day key must name a day that exists. The shape regex alone waves
@@ -33,7 +33,7 @@ const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
  *  bucket into phantom days no calendar can render. Leap years follow the
  *  Gregorian rule; future days are accepted (planning ahead is data, not
  *  corruption). */
-function isRealDayKey(day: string): boolean {
+export function isRealDayKey(day: string): boolean {
   const year = Number(day.slice(0, 4));
   const month = Number(day.slice(5, 7));
   const date = Number(day.slice(8, 10));
