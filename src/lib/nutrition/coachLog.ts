@@ -106,12 +106,57 @@ export function parseCoachEstimateTotals(paragraphs: readonly string[]): Nutrien
   return null;
 }
 
+/* ------------------------- dish-name derivation -------------------------- */
+
+const NAME_MAX = 60;
+const FRAMING_RE = /^(?:that looks like|this looks like|that is|this is|it is|it's)\s+/i;
+const ARTICLE_RE = /^(?:a|an|the)\s+/i;
+const ACCOMPANIMENT_RE = /\s+(?:served\s+with|with)\s+/i;
+
+/**
+ * The short dish name for the confirm sheet, derived from the recorded
+ * identification. The photoNote is the vision reply's whole first
+ * paragraph ("That is chicken biryani served with a side of cucumber
+ * raita. You can see spiced basmati rice topped with…") — right as
+ * Coach's memory, wrong as a food name. The derivation only ever
+ * shortens what Coach actually said: a leading framing phrase ("That
+ * is", "This looks like", …) and its article go; everything from the
+ * first sentence end or the first accompaniment (" served with ",
+ * " with ") onward goes; the result is capped at NAME_MAX characters
+ * on a word boundary, first letter capitalised. When nothing usable
+ * survives, the trimmed note itself is the name — the pre-derivation
+ * behaviour — never an invented one. The photoNote stored on the
+ * message is untouched; this only shapes the prefill.
+ */
+export function dishNameFromPhotoNote(photoNote: string): string {
+  const note = photoNote.trim().replace(/\s+/g, " ");
+  if (!note) return "";
+  let head = note;
+  const framing = FRAMING_RE.exec(head);
+  if (framing) head = head.slice(framing[0].length).replace(ARTICLE_RE, "");
+  const sentenceEnd = head.search(/[.!?]/);
+  if (sentenceEnd >= 0) head = head.slice(0, sentenceEnd);
+  const accompaniment = ACCOMPANIMENT_RE.exec(head);
+  if (accompaniment) head = head.slice(0, accompaniment.index);
+  head = head.trim().replace(/[\s,;:]+$/, "");
+  if (!head) return note;
+  if (head.length > NAME_MAX) {
+    const window = head.slice(0, NAME_MAX);
+    const lastSpace = window.lastIndexOf(" ");
+    head = (lastSpace > 0 ? window.slice(0, lastSpace) : window).replace(/[\s,;:]+$/, "");
+  }
+  if (!head) return note;
+  return head.charAt(0).toUpperCase() + head.slice(1);
+}
+
 /* --------------------------- estimate detection -------------------------- */
 
 export interface CoachPhotoEstimate {
-  /** Prefill for the confirm sheet's name field: the identification the
-   *  reply itself recorded, verbatim. The user confirms or edits it —
-   *  "Lunch — photo estimate" is not a food name (§4.4). */
+  /** Prefill for the confirm sheet's name field: a short dish name
+   *  derived from the identification the reply recorded (see
+   *  `dishNameFromPhotoNote`). The photoNote itself stays whole on
+   *  the message — it is Coach's memory, not a food name (§4.4).
+   *  The user confirms or edits the prefill before anything logs. */
   name: string;
   /** Coach's totals for the photographed portion, exactly as stated. */
   totals: Nutrients;
@@ -126,11 +171,11 @@ export function coachPhotoEstimate(
   paragraphs: readonly string[],
   photoNote: string | undefined,
 ): CoachPhotoEstimate | null {
-  const name = photoNote?.trim();
-  if (!name) return null;
+  const note = photoNote?.trim();
+  if (!note) return null;
   const totals = parseCoachEstimateTotals(paragraphs);
   if (!totals) return null;
-  return { name, totals };
+  return { name: dishNameFromPhotoNote(note), totals };
 }
 
 /** The slice of a thread message this module reads — structural, so the
