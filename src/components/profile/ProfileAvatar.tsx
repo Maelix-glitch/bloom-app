@@ -61,6 +61,7 @@ export function ProfileAvatar({
   overrideFrame?: string | null;
 }) {
   const [broken, setBroken] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [frameId, setFrameId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -81,6 +82,12 @@ export function ProfileAvatar({
   /* Handles both a `preset:` photo shipped with the app and an upload. */
   const src = resolveAvatar(avatarPath, objectUrl);
   const varAccent = accentVar[accent];
+
+  /* A new source starts unloaded again, so the fade below is per-photo. */
+  useEffect(() => {
+    setLoaded(false);
+    setBroken(false);
+  }, [src]);
 
   const showImage = Boolean(src) && !broken;
   const activeFrame = overrideFrame !== null ? overrideFrame : frameId;
@@ -118,40 +125,48 @@ export function ProfileAvatar({
         />
       ) : null}
 
+      {/* The initials mark is always the base layer: while a photo is still
+          loading the circle is never blank or shifting, and if the photo
+          fails it is simply what remains. The photo fades in over it once
+          decoded — no flash of empty circle in rails and lists. */}
+      <span
+        role="img"
+        aria-label={`${name}'s profile mark`}
+        className="grid size-full place-items-center rounded-full"
+        style={{
+          background: `radial-gradient(115% 105% at 50% -5%, color-mix(in oklab, ${varAccent} 15%, var(--surface-2)), var(--surface) 62%)`,
+          border: "1px solid var(--border)",
+          boxShadow:
+            "inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent), 0 10px 30px -18px rgba(0,0,0,0.8)",
+        }}
+      >
+        <span
+          className="display select-none leading-none"
+          style={{
+            color: `color-mix(in oklab, ${varAccent} 72%, var(--foreground))`,
+            fontSize: size * 0.4,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          {initialsFor(name)}
+        </span>
+      </span>
       {showImage ? (
         <img
           src={src!}
           alt=""
           width={size}
           height={size}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
           onError={() => setBroken(true)}
-          className="size-full rounded-full object-cover"
-          style={{ border: "1px solid color-mix(in oklab, var(--border-strong) 80%, transparent)" }}
-        />
-      ) : (
-        <span
-          role="img"
-          aria-label={`${name}'s profile mark`}
-          className="grid size-full place-items-center rounded-full"
+          className="absolute inset-0 size-full rounded-full object-cover transition-opacity duration-[var(--motion-page)] ease-out-expo"
           style={{
-            background: `radial-gradient(115% 105% at 50% -5%, color-mix(in oklab, ${varAccent} 15%, var(--surface-2)), var(--surface) 62%)`,
-            border: "1px solid var(--border)",
-            boxShadow:
-              "inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent), 0 10px 30px -18px rgba(0,0,0,0.8)",
+            opacity: loaded ? 1 : 0,
+            border: "1px solid color-mix(in oklab, var(--border-strong) 80%, transparent)",
           }}
-        >
-          <span
-            className="display select-none leading-none"
-            style={{
-              color: `color-mix(in oklab, ${varAccent} 72%, var(--foreground))`,
-              fontSize: size * 0.4,
-              letterSpacing: "-0.03em",
-            }}
-          >
-            {initialsFor(name)}
-          </span>
-        </span>
-      )}
+        />
+      ) : null}
     </span>
   );
 }

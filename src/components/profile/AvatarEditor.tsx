@@ -11,8 +11,8 @@ import { ImagePlus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   exportAvatar,
-  loadImageElement,
-  readAsDataUrl,
+  loadFileImage,
+  validateImageDimensions,
   validateImageFile,
 } from "@/lib/profile/media";
 import { toast } from "sonner";
@@ -32,6 +32,10 @@ export function AvatarEditor({
   onRemove?: (() => void | Promise<void>) | undefined;
 }) {
   const fileRef = useRef<HTMLInputElement | null>(null);
+  /* The picked file rides as an object URL (see loadFileImage) — a handle,
+     not a base64 copy. This ref owns its lifetime: revoked when the photo
+     is replaced, cancelled, or the editor unmounts. */
+  const rawUrlRef = useRef<string | null>(null);
   const [rawUrl, setRawUrl] = useState<string | null>(null);
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -40,27 +44,46 @@ export function AvatarEditor({
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const exportTimer = useRef<number | undefined>(undefined);
 
-  const chooseFile = useCallback(async (file: File | null) => {
-    if (!file) return;
-    const invalid = validateImageFile(file);
-    if (invalid) {
-      toast.error(invalid);
-      return;
-    }
-    setBusy(true);
-    try {
-      const url = await readAsDataUrl(file);
-      const el = await loadImageElement(url);
-      setRawUrl(url);
-      setImg(el);
-      setZoom(1);
-      setOffset({ x: 0, y: 0 });
-    } catch {
-      toast.error("Couldn't open that image. Try another one.");
-    } finally {
-      setBusy(false);
+  const releaseRaw = useCallback(() => {
+    if (rawUrlRef.current) {
+      URL.revokeObjectURL(rawUrlRef.current);
+      rawUrlRef.current = null;
     }
   }, []);
+
+  useEffect(() => releaseRaw, [releaseRaw]);
+
+  const chooseFile = useCallback(
+    async (file: File | null) => {
+      if (!file) return;
+      const invalid = validateImageFile(file);
+      if (invalid) {
+        toast.error(invalid);
+        return;
+      }
+      setBusy(true);
+      try {
+        const { img: el, url } = await loadFileImage(file);
+        const dims = validateImageDimensions(el.naturalWidth, el.naturalHeight);
+        if (dims) {
+          URL.revokeObjectURL(url);
+          toast.error(dims);
+          return;
+        }
+        releaseRaw();
+        rawUrlRef.current = url;
+        setRawUrl(url);
+        setImg(el);
+        setZoom(1);
+        setOffset({ x: 0, y: 0 });
+      } catch {
+        toast.error("Couldn't open that image. Try another one.");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [releaseRaw],
+  );
 
   /* geometry: at zoom z the crop square spans min(iw, ih)/z source pixels */
   const geo = (() => {
@@ -201,6 +224,7 @@ export function AvatarEditor({
             <button
               type="button"
               onClick={() => {
+                releaseRaw();
                 setImg(null);
                 setRawUrl(null);
               }}

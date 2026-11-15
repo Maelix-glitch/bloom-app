@@ -4,21 +4,28 @@
  * Uploading a photo is friction: you have to find one, crop it, and decide
  * whether you want your face in an app about your moods. Most people skip it
  * and end up as two grey initials forever. So Bloom ships a small set of real
- * photographs — the same photography the rest of the app is built from — that
- * can be chosen in one tap and still look considered.
+ * photographs that can be chosen in one tap and still look considered.
  *
- * The set is curated as ONE family (owner directive, 2026-11-15: the old
- * defaults "are random photos"): dark botanical, dusk light, gold warmth —
- * Bloom's palette, drawn only from imagery already in the repo (the mood and
- * home photography, plus the Rewards art campaign under
- * `public/rewards/art/`). Two of the original nine were cut for breaking the
- * family: `bokeh` (busy gold speckle that reads as stock party lights at
- * avatar size, and its ring tint was a violet the photo does not contain)
- * and `lake` (a blue daylight landscape, off-palette). Labels and tints are
- * checked against what each photo actually shows — `petal` is a white bloom
- * on dark leaves, not a pink petal, and is labelled and tinted so. A profile
- * still holding a retired preset id falls back to initials via
- * `resolveAvatar` — never a broken image, never a substitute face.
+ * The 2026-11-15 rework (owner: "change the profile pictures… replace them
+ * with high quality") rebuilt the set as ONE family — dark botanical, dusk
+ * light, gold warmth, Bloom's palette — and, just as importantly, as
+ * dedicated avatar editions: every preset is a square 896px WebP derivative
+ * under `src/assets/avatars/`, cropped on its subject and re-encoded for the
+ * sizes an avatar is actually shown at (29–106 KB). Before this, presets
+ * pointed at the full landscape originals shared with other screens — and
+ * `goldenhour` at a 223 KB public original — so a 40px rail avatar decoded
+ * the same pixels as a full-screen hero.
+ *
+ * Sources, all committed in-repo (no hotlinks, ever): six are Bloom's own
+ * photography (the mood/home sets and the Rewards art campaign), re-cropped;
+ * two (`fern`, `bloom`) are new photographs made for this set in the same
+ * language. Two S3 ids were retired for reading as dark smudges at avatar
+ * size — `botanical` (mostly black negative space, ferns only along the
+ * bottom edge) and `dusk` (a wide interior scene) — and a profile still
+ * holding a retired id falls back to initials via `resolveAvatar`: never a
+ * broken image, never a substitute face. Labels and tints describe what
+ * each photo actually shows (`branch` is a cream blossom, tinted warm
+ * cream-gold — not the pink its predecessor claimed).
  *
  * They are stored in the *same field* as an uploaded avatar (`avatarPath`),
  * distinguished by a `preset:` prefix. That keeps one code path for "what is
@@ -28,13 +35,14 @@
  * Supabase storage URL for anything else.
  */
 
-import candle from "@/assets/mood/candle.jpg";
-import flowerBranch from "@/assets/mood/flower-branch.jpg";
-import flowerDetail from "@/assets/mood/flower-detail.jpg";
-import heroWindow from "@/assets/mood/hero-window.jpg";
-import leafDark from "@/assets/home/leaf-dark.jpg";
-import windowDusk from "@/assets/home/window-dusk.jpg";
-import sidebarBotanical from "@/assets/home/sidebar-botanical.jpg";
+import bloom from "@/assets/avatars/bloom.webp";
+import branch from "@/assets/avatars/branch.webp";
+import candle from "@/assets/avatars/candle.webp";
+import fern from "@/assets/avatars/fern.webp";
+import goldenhour from "@/assets/avatars/goldenhour.webp";
+import leaf from "@/assets/avatars/leaf.webp";
+import petal from "@/assets/avatars/petal.webp";
+import windowMorning from "@/assets/avatars/window.webp";
 
 export const PRESET_PREFIX = "preset:";
 
@@ -48,16 +56,14 @@ export interface PresetAvatar {
 }
 
 export const PRESET_AVATARS: PresetAvatar[] = [
-  { id: "leaf", label: "Dark leaf", src: leafDark, tint: "#7fb8a6" },
-  { id: "botanical", label: "Fern", src: sidebarBotanical, tint: "#8fa98a" },
-  { id: "petal", label: "White bloom", src: flowerDetail, tint: "#c9d4ae" },
-  { id: "branch", label: "Blossom branch", src: flowerBranch, tint: "#d79bb4" },
-  { id: "window", label: "Morning window", src: heroWindow, tint: "#c9a88a" },
-  { id: "dusk", label: "Dusk window", src: windowDusk, tint: "#a88ca0" },
+  { id: "leaf", label: "Dark leaf", src: leaf, tint: "#7fb8a6" },
+  { id: "fern", label: "Fern at dusk", src: fern, tint: "#8fa15f" },
+  { id: "petal", label: "White bloom", src: petal, tint: "#c9d4ae" },
+  { id: "branch", label: "Blossom branch", src: branch, tint: "#d9c39a" },
+  { id: "window", label: "Morning window", src: windowMorning, tint: "#c9a88a" },
   { id: "candle", label: "Candlelight", src: candle, tint: "#e6b088" },
-  /* From the Rewards art campaign (public/rewards/art) — a public path, not
-     a bundled import, exactly as the rewards catalogue references it. */
-  { id: "goldenhour", label: "Golden hour", src: "/rewards/art/golden-hour.jpg", tint: "#d9a05a" },
+  { id: "bloom", label: "Golden bloom", src: bloom, tint: "#d99a3d" },
+  { id: "goldenhour", label: "Golden hour", src: goldenhour, tint: "#d9a05a" },
 ];
 
 const BY_ID = new Map(PRESET_AVATARS.map((p) => [p.id, p]));

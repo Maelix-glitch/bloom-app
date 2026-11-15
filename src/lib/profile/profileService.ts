@@ -4,6 +4,7 @@
  */
 
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
+import { avatarObjectPath } from "./media";
 import { report } from "./errors";
 import { classifyError, type ProfileProblem } from "./problems";
 import { normalizeUsername } from "./validation";
@@ -393,10 +394,15 @@ export async function suggestUsernames(base: string): Promise<string[]> {
 }
 
 export async function uploadAvatar(userId: string, blob: Blob): Promise<string> {
-  const path = `${userId}/avatar.jpg`;
+  /* A versioned path per upload (see avatarObjectPath): the URL changes
+     with the picture, so no cache anywhere can serve the previous photo
+     for the new one. The long cache lifetime is safe precisely because
+     the path is unique — and it makes every later load of this avatar
+     cheaper. The caller removes the superseded object after saving. */
+  const path = avatarObjectPath(userId, Date.now());
   const { error } = await supabase.storage
     .from(PROFILE_MEDIA_BUCKET)
-    .upload(path, blob, { contentType: "image/jpeg", upsert: true });
+    .upload(path, blob, { contentType: "image/jpeg", upsert: true, cacheControl: "31536000" });
 
   if (error) {
     report("profile:avatar-upload", error);

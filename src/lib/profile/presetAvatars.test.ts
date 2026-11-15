@@ -79,32 +79,72 @@ describe("the preset set itself", () => {
     }
   });
 
-  /* The curated family (2026-11-15): dark botanical, dusk light, gold
-     warmth — and nothing else. The retired ids stay retired: `bokeh` read
-     as stock speckle with a violet tint its photo does not contain, and
-     `lake` was a blue daylight landscape in a gold-and-ink app. */
+  /* The curated family (2026-11-15 rework): dark botanical, dusk light,
+     gold warmth — and nothing else. The retired ids stay retired: `bokeh`
+     read as stock speckle with a violet tint its photo does not contain,
+     `lake` was a blue daylight landscape in a gold-and-ink app, and the
+     rework retired `botanical` (mostly black negative space) and `dusk`
+     (a wide interior scene) for reading as smudges at avatar size. */
   it("is exactly the curated set, with the off-palette defaults retired", () => {
     expect(PRESET_AVATARS.map((p) => p.id)).toEqual([
       "leaf",
-      "botanical",
+      "fern",
       "petal",
       "branch",
       "window",
-      "dusk",
       "candle",
+      "bloom",
       "goldenhour",
     ]);
     expect(presetFor("preset:bokeh")).toBeNull();
     expect(presetFor("preset:lake")).toBeNull();
+    expect(presetFor("preset:botanical")).toBeNull();
+    expect(presetFor("preset:dusk")).toBeNull();
+  });
+
+  it("retired ids resolve to initials, never a broken image", () => {
+    const remote = vi.fn(() => "https://example.com/should-not-be-used");
+    expect(resolveAvatar("preset:botanical", remote)).toBeNull();
+    expect(resolveAvatar("preset:dusk", remote)).toBeNull();
+    expect(remote).not.toHaveBeenCalled();
   });
 
   it("serves only imagery already in the repo — no hotlinked defaults", () => {
     for (const p of PRESET_AVATARS) {
       expect(p.src).not.toMatch(/^https?:\/\//);
       expect(p.src.length).toBeGreaterThan(0);
+      /* Every member is a bundled avatar edition now — the 2026-11-15
+         rework replaced the last public-path original (goldenhour's
+         223 KB landscape) with an optimised square derivative. */
+      expect(p.src.startsWith("/rewards/")).toBe(false);
     }
-    /* The one public-path member comes from the Rewards art campaign. */
-    expect(presetFor("preset:goldenhour")?.src).toBe("/rewards/art/golden-hour.jpg");
+  });
+
+  it("tints stay in the gold / botanical family", () => {
+    const hueOf = (hex: string): number => {
+      const n = parseInt(hex.slice(1), 16);
+      const r = (n >> 16) / 255;
+      const g = ((n >> 8) & 0xff) / 255;
+      const b = (n & 0xff) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      if (max === min) return 0;
+      const d = max - min;
+      const h =
+        max === r
+          ? ((g - b) / d + (g < b ? 6 : 0)) * 60
+          : max === g
+            ? ((b - r) / d + 2) * 60
+            : ((r - g) / d + 4) * 60;
+      return h;
+    };
+    for (const p of PRESET_AVATARS) {
+      const hue = hueOf(p.tint);
+      /* Ambers and golds live ~20–55°, botanical greens ~60–170°.
+         Violet, blue and pink (200–360°) are outside the family. */
+      expect(hue, `${p.id} tint ${p.tint}`).toBeGreaterThanOrEqual(15);
+      expect(hue, `${p.id} tint ${p.tint}`).toBeLessThanOrEqual(170);
+    }
   });
 
   it("labels and tints match what the photos actually show", () => {
