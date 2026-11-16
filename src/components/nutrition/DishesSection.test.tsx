@@ -231,7 +231,7 @@ describe("DishesSection — the detail sheet and logging", () => {
     expect(within(dialog).getByText(/Red lentils \(masoor dal\)/)).toBeTruthy();
     expect(within(dialog).getAllByText(/मसूर दाल/).length).toBeGreaterThan(1);
     /* The method is there, numbered steps from the recipe itself. */
-    expect(within(dialog).getByText(/pressure-cook/)).toBeTruthy();
+    expect(within(dialog).getByText(/pressure-cook/i)).toBeTruthy();
 
     fireEvent.click(within(dialog).getByRole("button", { name: /^Log this dish/ }));
     expect(within(dialog).getByText("Logged")).toBeTruthy();
