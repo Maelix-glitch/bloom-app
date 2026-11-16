@@ -1088,6 +1088,91 @@
     0 18px 40px -22px rgba(0, 0, 0, 0.75),
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 14%, transparent);
 }
+/*
+ * The completion celebration (AssessmentEntry): the slot is the stage.
+ * The ghost — the prompt card at its fullest — sits over the slot and
+ * fades as it shrinks a breath; a fixed constellation of orbs scatters
+ * out of it; the starting-point card flies in from beyond the page's
+ * top-right and settles with a small overshoot on the expo curve.
+ * Transform and opacity only, so the whole show is compositor work.
+ * The body already hides overflow-x, and the flight's transforms never
+ * touch layout, so the slot's height is the settled card's from the
+ * first frame — no blank frame, no jump.
+ */
+.assess-slot {
+  position: relative;
+}
+.assess-ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  animation: assess-ghost-out var(--motion-standard) var(--ease-out-expo) forwards;
+}
+@keyframes assess-ghost-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+.assess-orbs {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.assess-orb {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
+  animation: assess-orb-break var(--motion-signature) var(--ease-out-expo) forwards;
+}
+@keyframes assess-orb-break {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  16% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--orb-x), var(--orb-y)) scale(0.2);
+  }
+}
+.assess-fly {
+  position: relative;
+  z-index: 2;
+  animation: assess-fly-in var(--motion-signature) var(--ease-out-expo) both;
+  animation-delay: var(--motion-micro);
+}
+@keyframes assess-fly-in {
+  0% {
+    opacity: 0;
+    transform: translate(46vw, -32vh) rotate(1.5deg) scale(0.94);
+  }
+  45% {
+    opacity: 1;
+  }
+  76% {
+    transform: translate(-10px, 6px) rotate(0deg) scale(1.004);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+}
+/* Reduced motion never sees the show — the host swaps the settled card
+   in directly — and this is the backstop if a class ever lands anyway. */
+@media (prefers-reduced-motion: reduce) {
+  .assess-ghost,
+  .assess-fly {
+    animation: none;
+  }
+  .assess-orb {
+    display: none;
+  }
+}
 .home-band-head {
   display: flex;
   align-items: baseline;
