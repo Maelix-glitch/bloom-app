@@ -25,6 +25,14 @@ vi.mock("@tanstack/react-router", () => ({
 
 import { setPref } from "@/lib/prefs";
 import { BODY_KEY, bodyTargetsOf, type BodyProfile } from "@/lib/health/body";
+import {
+  ASSESSMENT_KEY,
+  beginAssessment,
+  completeAssessment,
+  emptyAssessmentState,
+  saveStep,
+  type AssessmentState,
+} from "@/lib/assessment/state";
 import { yesterdayOf } from "@/hooks/useNutrition";
 import { todayLocal } from "@/lib/localDay";
 import { createEntryFromFood } from "@/lib/nutrition/entries";
@@ -54,6 +62,19 @@ beforeEach(() => {
 });
 
 afterEach(() => cleanup());
+
+/** A completed Assessment whose About-you answers differ from PROFILE on
+ *  every field, so precedence between the two stores is observable. */
+function completedAssessment(): AssessmentState {
+  let s = beginAssessment(emptyAssessmentState("2026-11-10T10:00:00.000Z"), "2026-11-10T10:00:00.000Z");
+  s = saveStep(
+    s,
+    { ageYears: 41, sex: "female", heightCm: 165, weightKg: 60 },
+    "summary",
+    "2026-11-10T10:05:00.000Z",
+  );
+  return completeAssessment(s, "2026-11-12T09:30:00.000Z");
+}
 
 function log(food: Food, grams: number, day: string) {
   const entry = createEntryFromFood({
@@ -98,6 +119,47 @@ describe("NutritionReportPage", () => {
     /* USDA energy share of the week: 143 / 523 ≈ 27%. */
     expect(screen.getByText("27%")).toBeTruthy();
     expect(screen.getByText(/not a prescription/)).toBeTruthy();
+  });
+
+  it("renders Age, Sex, Height and Weight as their own rows from the body profile", () => {
+    setPref(BODY_KEY, PROFILE);
+    render(<NutritionReportPage endDay={todayLocal()} />);
+    expect(screen.getByText("Age")).toBeTruthy();
+    expect(screen.getByText("30 years")).toBeTruthy();
+    expect(screen.getByText("Sex")).toBeTruthy();
+    expect(screen.getByText("male")).toBeTruthy();
+    expect(screen.getByText("Height")).toBeTruthy();
+    expect(screen.getByText("178 cm")).toBeTruthy();
+    expect(screen.getByText("Weight")).toBeTruthy();
+    expect(screen.getByText("72 kg")).toBeTruthy();
+  });
+
+  it("reads Age, Sex, Height and Weight from the Assessment when they live there", () => {
+    /* The owner's case: the answers sit in the completed Assessment and
+       the Trackers body profile was never filled — the report must not
+       call them "Not recorded". */
+    setPref(ASSESSMENT_KEY, completedAssessment());
+    render(<NutritionReportPage endDay={todayLocal()} />);
+    expect(screen.getByText("41 years")).toBeTruthy();
+    expect(screen.getByText("female")).toBeTruthy();
+    expect(screen.getByText("165 cm")).toBeTruthy();
+    expect(screen.getByText("60 kg")).toBeTruthy();
+    expect(screen.queryByText("Not recorded")).toBeNull();
+  });
+
+  it("the Assessment's answers win where both stores hold a value", () => {
+    setPref(BODY_KEY, PROFILE);
+    setPref(ASSESSMENT_KEY, completedAssessment());
+    render(<NutritionReportPage endDay={todayLocal()} />);
+    expect(screen.getByText("41 years")).toBeTruthy();
+    expect(screen.getByText("165 cm")).toBeTruthy();
+    expect(screen.queryByText("30 years")).toBeNull();
+    expect(screen.queryByText("178 cm")).toBeNull();
+  });
+
+  it("a field no store holds reads Not recorded — never a plausible invention", () => {
+    render(<NutritionReportPage endDay={todayLocal()} />);
+    expect(screen.getAllByText("Not recorded").length).toBe(4);
   });
 
   it("an empty week renders honestly — every day stated, no averages invented", () => {

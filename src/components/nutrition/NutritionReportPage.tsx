@@ -6,11 +6,20 @@
  * fibre or sodium rests on foods that did not report it. The profile
  * grid shows only what Bloom genuinely holds; a value it does not hold
  * reads "Not recorded", never a plausible invention.
+ *
+ * Age, sex, height and weight each get their own row, resolved the way
+ * the rest of the app resolves the person: the Assessment's answers
+ * first (the profile of record — targets, plan and dishes all read
+ * `toHealthProfile` before anything else), the Trackers body profile
+ * as the per-field fallback. Reading only the body profile here left
+ * the report saying "Not recorded" for people whose answers live in
+ * their completed Assessment — the owner-reported defect this fixes.
  */
 
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Printer } from "lucide-react";
 
+import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { ACTIVITY_LABEL, GOAL_LABEL } from "@/lib/health/body";
@@ -48,6 +57,7 @@ const SODIUM_CEILING_MG = 2000;
 export function NutritionReportPage({ endDay }: { endDay: string }) {
   const nutrition = useNutrition();
   const body = useBodyProfile();
+  const assessment = useAssessment();
   const end = isRealDayKey(endDay) ? endDay : nutrition.today;
   const start = shiftDay(end, -6);
   const targets = nutrition.targetState.kind === "ready" ? nutrition.targetState.targets : null;
@@ -62,28 +72,19 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
   });
 
   const profile = body.profile;
+  /* The person's identity numbers, per field: the Assessment's answer
+     wins, the body profile fills what the Assessment never recorded,
+     and a field neither store holds reads "Not recorded". */
+  const answers = assessment.state.answers;
+  const age = answers.ageYears ?? profile.age;
+  const sex = answers.sex !== "unspecified" ? answers.sex : profile.sex;
+  const heightCm = answers.heightCm ?? profile.heightCm;
+  const weightKg = answers.weightKg ?? profile.weightKg;
   const guides: { label: string; value: string }[] = [
-    {
-      label: "Age / sex",
-      value:
-        profile.age !== null || profile.sex !== "unspecified"
-          ? [profile.age !== null ? `${profile.age} years` : null, profile.sex !== "unspecified" ? profile.sex : null]
-              .filter(Boolean)
-              .join(" · ")
-          : "Not recorded",
-    },
-    {
-      label: "Height / weight",
-      value:
-        profile.heightCm !== null || profile.weightKg !== null
-          ? [
-              profile.heightCm !== null ? `${profile.heightCm} cm` : null,
-              profile.weightKg !== null ? `${profile.weightKg} kg` : null,
-            ]
-              .filter(Boolean)
-              .join(" · ")
-          : "Not recorded",
-    },
+    { label: "Age", value: age !== null ? `${age} years` : "Not recorded" },
+    { label: "Sex", value: sex !== "unspecified" ? sex : "Not recorded" },
+    { label: "Height", value: heightCm !== null ? `${heightCm} cm` : "Not recorded" },
+    { label: "Weight", value: weightKg !== null ? `${weightKg} kg` : "Not recorded" },
     { label: "Activity", value: ACTIVITY_LABEL[profile.activity] },
     { label: "Goal", value: GOAL_LABEL[profile.goal] },
     {
