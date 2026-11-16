@@ -229,6 +229,35 @@ const PICKS = [
   { fdcId: 170169, dataType: "SR Legacy", expect: "Nuts, coconut meat, raw" },
   { fdcId: 167763, dataType: "SR Legacy", expect: "Tamarinds, raw" },
   { fdcId: 172337, dataType: "SR Legacy", expect: "Oil, mustard" },
+  /* ---- Dishes-expansion foundation: Kerala & South staples, plus the
+   * international high-protein anchors the expansion waves compose
+   * from. Same rules as every block above: pinned by id + exact
+   * description, Foundation first where a record exists (the underripe
+   * plantain). Searched in both downloads and NOT present — never
+   * substituted: elephant yam (Amorphophallus; USDA's "Yam, raw" is
+   * Dioscorea, a different genus), snake gourd, kokum, kudampuli
+   * (Malabar tamarind), banana stem, curry leaves, skyr, and a distinct
+   * unripe-mango record (only ripe-mango records exist; the ripe fruit
+   * is already picked). Coconut milk is picked in its genuine raw form
+   * (liquid expressed from grated meat and water) — the sweetened,
+   * fortified beverage record is a different product and is not used.
+   * Drumstick pods and leaves, long assumed absent, ARE in SR Legacy
+   * and are picked below. Beef and pork records exist upstream but no
+   * new ones are picked — a deliberate curation omission. */
+  { fdcId: 169985, dataType: "SR Legacy", expect: "Cassava, raw" },
+  { fdcId: 2710818, dataType: "Foundation", expect: "Plantains, underripe, raw" },
+  { fdcId: 174687, dataType: "SR Legacy", expect: "Jackfruit, raw" },
+  { fdcId: 170172, dataType: "SR Legacy", expect: "Nuts, coconut milk, raw (liquid expressed from grated meat and water)" },
+  { fdcId: 169308, dataType: "SR Legacy", expect: "Taro, raw" },
+  { fdcId: 170069, dataType: "SR Legacy", expect: "Waxgourd, (chinese preserving melon), raw" },
+  { fdcId: 170483, dataType: "SR Legacy", expect: "Drumstick pods, raw" },
+  { fdcId: 168416, dataType: "SR Legacy", expect: "Drumstick leaves, raw" },
+  { fdcId: 172448, dataType: "SR Legacy", expect: "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)" },
+  { fdcId: 174272, dataType: "SR Legacy", expect: "Tempeh" },
+  { fdcId: 168410, dataType: "SR Legacy", expect: "Edamame, frozen, unprepared" },
+  { fdcId: 171098, dataType: "SR Legacy", expect: "Turkey, whole, breast, meat only, raw" },
+  { fdcId: 175139, dataType: "SR Legacy", expect: "Fish, sardine, Atlantic, canned in oil, drained solids with bone" },
+  { fdcId: 175119, dataType: "SR Legacy", expect: "Fish, mackerel, Atlantic, raw" },
 ];
 
 /* --------------------- the pinned classification (P2) --------------------- */
@@ -340,6 +369,24 @@ const CLASSIFICATION = {
   168933: cls("cereals_grains"), 173758: cls("pulses_legumes"),
   170150: cls("nuts_seeds"), 170169: cls("nuts_seeds"),
   167763: cls("fruits"), 172337: cls("fats_oils"),
+  // Dishes-expansion foundation — the Kerala & South staples are
+  // vegetables where the kitchen treats them so: cassava, taro, wax
+  // gourd, drumstick pods and drumstick leaves with the vegetables;
+  // the underripe plantain with the potatoes (a starchy staple cooked
+  // as a vegetable — the ripe banana stays a fruit). Jackfruit is a
+  // fruit; coconut milk sits with the nuts & seeds, FDC's own grouping
+  // for coconut. Tofu, tempeh and edamame are soy foods and sit with
+  // the pulses (the green-peas precedent), flesh-free, so the pattern
+  // filters treat them as the plant proteins they are. Turkey breast
+  // is flesh; sardines and mackerel are fish.
+  169985: cls("vegetables"), 2710818: cls("vegetables"),
+  169308: cls("vegetables"), 170069: cls("vegetables"),
+  170483: cls("vegetables"), 168416: cls("vegetables"),
+  174687: cls("fruits"), 170172: cls("nuts_seeds"),
+  172448: cls("pulses_legumes"), 174272: cls("pulses_legumes"),
+  168410: cls("pulses_legumes"),
+  171098: cls("other", FLESH),
+  175139: cls("other", FISH), 175119: cls("other", FISH),
 };
 
 /* ------------------------------ source data ------------------------------- */

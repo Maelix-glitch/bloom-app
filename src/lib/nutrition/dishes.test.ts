@@ -230,6 +230,36 @@ describe("the dish parser — strict, drops rather than repairs", () => {
   });
 });
 
+describe("the cuisine tag — optional, preserved when present", () => {
+  it("a dish carrying a cuisine round-trips the parser with the tag intact", () => {
+    const tagged: Dish = { ...byId("dish-jeera-rice"), cuisine: "north-indian" };
+    const roundTripped = parseDish(JSON.parse(JSON.stringify(tagged)));
+    expect(roundTripped).toEqual(tagged);
+    expect(roundTripped?.cuisine).toBe("north-indian");
+    expect(parseDishList([tagged]).map((d) => d.cuisine)).toEqual(["north-indian"]);
+  });
+
+  it("a cuisine tag is not a completeness problem — the dish still validates clean", () => {
+    const tagged: Dish = { ...byId("dish-aloo-gobi"), cuisine: "kerala" };
+    expect(validateDish(tagged)).toEqual([]);
+  });
+
+  it("a dish without a cuisine parses with the tag absent, never invented", () => {
+    const parsed = parseDish(JSON.parse(JSON.stringify(byId("dish-jeera-rice"))));
+    expect(parsed).not.toBeNull();
+    expect(parsed?.cuisine).toBeUndefined();
+    expect("cuisine" in (parsed ?? {})).toBe(false);
+  });
+
+  it("an unusable cuisine value (not text) is dropped, not repaired into a tag", () => {
+    const raw = JSON.parse(JSON.stringify(byId("dish-jeera-rice"))) as Record<string, unknown>;
+    raw["cuisine"] = 42;
+    const parsed = parseDish(raw);
+    expect(parsed).not.toBeNull();
+    expect(parsed?.cuisine).toBeUndefined();
+  });
+});
+
 describe("the licence discipline", () => {
   it("recipe provenance is not registry reference data — the gate fails closed on it", () => {
     expect(referenceProvenanceGate(dishProvenance(byId("dish-jeera-rice")))).toBe(false);

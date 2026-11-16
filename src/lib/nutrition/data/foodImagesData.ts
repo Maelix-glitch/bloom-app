@@ -110,7 +110,7 @@ import appleCiderVinegar from "../../../assets/foods/apple-cider-vinegar.webp";
 export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-16";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "38a79c845855128005bc7de7d9ef9e25dc7fea62fccd17501bc1b8bcf1ab646a";
+export const FOOD_IMAGES_FINGERPRINT = "0a3bfe4d68701ceee5318865d6d30547c86bf5172127feeec153e2f1a07769c2";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -263,4 +263,18 @@ export const FOOD_IMAGE_PHOTOLESS: readonly FoodImagePhotoless[] = [
   { "foodId": "usda-170169", "foodName": "Nuts, coconut meat, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
   { "foodId": "usda-167763", "foodName": "Tamarinds, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
   { "foodId": "usda-172337", "foodName": "Oil, mustard", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-169985", "foodName": "Cassava, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-2710818", "foodName": "Plantains, underripe, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-174687", "foodName": "Jackfruit, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170172", "foodName": "Nuts, coconut milk, raw (liquid expressed from grated meat and water)", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-169308", "foodName": "Taro, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170069", "foodName": "Waxgourd, (chinese preserving melon), raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170483", "foodName": "Drumstick pods, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-168416", "foodName": "Drumstick leaves, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-172448", "foodName": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-174272", "foodName": "Tempeh", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-168410", "foodName": "Edamame, frozen, unprepared", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171098", "foodName": "Turkey, whole, breast, meat only, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-175139", "foodName": "Fish, sardine, Atlantic, canned in oil, drained solids with bone", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-175119", "foodName": "Fish, mackerel, Atlantic, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
 ];
