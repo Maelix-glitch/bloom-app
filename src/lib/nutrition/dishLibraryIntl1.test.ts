@@ -4,6 +4,7 @@ import { DISH_LIBRARY } from "./data/dishLibrary";
 import { INTL1_DISHES } from "./data/dishLibraryIntl1";
 import { INTL2_DISHES } from "./data/dishLibraryIntl2";
 import { INTL3_DISHES } from "./data/dishLibraryIntl3";
+import { INTL4_DISHES } from "./data/dishLibraryIntl4";
 import {
   dishNutrients,
   parseDishList,
@@ -52,7 +53,13 @@ describe("wave X-1 — international high-protein dishes", () => {
       /* The only library entries carrying a wave id are the wave itself. */
       expect(INTL1_DISHES).toContain(dish);
     }
-    expect(DISH_LIBRARY.length).toBe(360 + INTL1_DISHES.length + INTL2_DISHES.length + INTL3_DISHES.length);
+    expect(DISH_LIBRARY.length).toBe(
+      360 +
+        INTL1_DISHES.length +
+        INTL2_DISHES.length +
+        INTL3_DISHES.length +
+        INTL4_DISHES.length,
+    );
   });
 
   it("is complete against the reference set — every dish validates clean", () => {
