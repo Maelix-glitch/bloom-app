@@ -25,6 +25,8 @@ import { Route as AdminProgressionRouteImport } from './routes/admin/progression
 import { Route as AdminRewardsRouteImport } from './routes/admin/rewards'
 import { Route as MoodIndexRouteImport } from './routes/mood/index'
 import { Route as MoodIntelligenceRouteImport } from './routes/mood/intelligence'
+import { Route as NutritionIndexRouteImport } from './routes/nutrition.index'
+import { Route as NutritionReportRouteImport } from './routes/nutrition.report'
 import { Route as RewardsIndexRouteImport } from './routes/rewards.index'
 import { Route as RewardsAtelierRouteImport } from './routes/rewards.atelier'
 
@@ -108,6 +110,16 @@ const MoodIntelligenceRoute = MoodIntelligenceRouteImport.update({
   path: '/mood/intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NutritionIndexRoute = NutritionIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => NutritionRoute,
+} as any)
+const NutritionReportRoute = NutritionReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => NutritionRoute,
+} as any)
 const RewardsIndexRoute = RewardsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -125,7 +137,7 @@ export interface FileRoutesByFullPath {
   '/coach': typeof CoachRoute
   '/cycle': typeof CycleRoute
   '/dashboard': typeof DashboardRoute
-  '/nutrition': typeof NutritionRoute
+  '/nutrition': typeof NutritionRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
@@ -135,8 +147,10 @@ export interface FileRoutesByFullPath {
   '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
+  '/nutrition/report': typeof NutritionReportRoute
   '/rewards/atelier': typeof RewardsAtelierRoute
   '/mood/': typeof MoodIndexRoute
+  '/nutrition/': typeof NutritionIndexRoute
   '/rewards/': typeof RewardsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -145,7 +159,6 @@ export interface FileRoutesByTo {
   '/coach': typeof CoachRoute
   '/cycle': typeof CycleRoute
   '/dashboard': typeof DashboardRoute
-  '/nutrition': typeof NutritionRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
@@ -154,8 +167,10 @@ export interface FileRoutesByTo {
   '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
+  '/nutrition/report': typeof NutritionReportRoute
   '/rewards/atelier': typeof RewardsAtelierRoute
   '/mood': typeof MoodIndexRoute
+  '/nutrition': typeof NutritionIndexRoute
   '/rewards': typeof RewardsIndexRoute
 }
 export interface FileRoutesById {
@@ -165,7 +180,7 @@ export interface FileRoutesById {
   '/coach': typeof CoachRoute
   '/cycle': typeof CycleRoute
   '/dashboard': typeof DashboardRoute
-  '/nutrition': typeof NutritionRoute
+  '/nutrition': typeof NutritionRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
@@ -175,8 +190,10 @@ export interface FileRoutesById {
   '/admin/progression': typeof AdminProgressionRoute
   '/admin/rewards': typeof AdminRewardsRoute
   '/mood/intelligence': typeof MoodIntelligenceRoute
+  '/nutrition/report': typeof NutritionReportRoute
   '/rewards/atelier': typeof RewardsAtelierRoute
   '/mood/': typeof MoodIndexRoute
+  '/nutrition/': typeof NutritionIndexRoute
   '/rewards/': typeof RewardsIndexRoute
 }
 export interface FileRouteTypes {
@@ -197,8 +214,10 @@ export interface FileRouteTypes {
     | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
+    | '/nutrition/report'
     | '/rewards/atelier'
     | '/mood/'
+    | '/nutrition/'
     | '/rewards/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -207,7 +226,6 @@ export interface FileRouteTypes {
     | '/coach'
     | '/cycle'
     | '/dashboard'
-    | '/nutrition'
     | '/privacy'
     | '/profile'
     | '/report'
@@ -216,8 +234,10 @@ export interface FileRouteTypes {
     | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
+    | '/nutrition/report'
     | '/rewards/atelier'
     | '/mood'
+    | '/nutrition'
     | '/rewards'
   id:
     | '__root__'
@@ -236,8 +256,10 @@ export interface FileRouteTypes {
     | '/admin/progression'
     | '/admin/rewards'
     | '/mood/intelligence'
+    | '/nutrition/report'
     | '/rewards/atelier'
     | '/mood/'
+    | '/nutrition/'
     | '/rewards/'
   fileRoutesById: FileRoutesById
 }
@@ -247,7 +269,7 @@ export interface RootRouteChildren {
   CoachRoute: typeof CoachRoute
   CycleRoute: typeof CycleRoute
   DashboardRoute: typeof DashboardRoute
-  NutritionRoute: typeof NutritionRoute
+  NutritionRoute: typeof NutritionRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
@@ -374,6 +396,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoodIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nutrition/': {
+      id: '/nutrition/'
+      path: '/'
+      fullPath: '/nutrition/'
+      preLoaderRoute: typeof NutritionIndexRouteImport
+      parentRoute: typeof NutritionRoute
+    }
+    '/nutrition/report': {
+      id: '/nutrition/report'
+      path: '/report'
+      fullPath: '/nutrition/report'
+      preLoaderRoute: typeof NutritionReportRouteImport
+      parentRoute: typeof NutritionRoute
+    }
     '/rewards/': {
       id: '/rewards/'
       path: '/'
@@ -390,6 +426,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface NutritionRouteChildren {
+  NutritionReportRoute: typeof NutritionReportRoute
+  NutritionIndexRoute: typeof NutritionIndexRoute
+}
+
+const NutritionRouteChildren: NutritionRouteChildren = {
+  NutritionReportRoute: NutritionReportRoute,
+  NutritionIndexRoute: NutritionIndexRoute,
+}
+
+const NutritionRouteWithChildren = NutritionRoute._addFileChildren(
+  NutritionRouteChildren,
+)
 
 interface RewardsRouteChildren {
   RewardsAtelierRoute: typeof RewardsAtelierRoute
@@ -410,7 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachRoute: CoachRoute,
   CycleRoute: CycleRoute,
   DashboardRoute: DashboardRoute,
-  NutritionRoute: NutritionRoute,
+  NutritionRoute: NutritionRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,

@@ -282,3 +282,447 @@
     transform: scaleX(0);
   }
 }
+
+/* ============================ N-UI (prototype port) ============================
+ * The rebuilt tab's surface system, ported from the owner's luxury
+ * prototype onto Bloom's official tokens: card / card-gold surfaces, the
+ * gold hairline, the button + chip family, the Rings / Bar / MiniBars
+ * motion (rise, grow-x, grow-y, ring-in — all on the house easing, all
+ * stilled by prefers-reduced-motion), the date strip, the log dialog
+ * and the clinician report. Values are Bloom's; only the composition
+ * is the prototype's.
+ */
+
+.nut-card {
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent),
+    0 24px 48px -28px rgba(0, 0, 0, 0.8);
+  padding: var(--space-5);
+}
+@media (min-width: 640px) {
+  .nut-card {
+    padding: var(--space-6);
+  }
+}
+.nut-card-gold {
+  border-color: color-mix(in oklab, var(--gold) 28%, transparent);
+  background:
+    radial-gradient(120% 90% at 85% -10%, color-mix(in oklab, var(--gold) 13%, transparent), transparent 55%),
+    linear-gradient(180deg, var(--surface-2), var(--surface));
+}
+
+.nut-hairline {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--gold) 45%, transparent),
+    transparent
+  );
+}
+
+.nut-gold-text {
+  background-image: var(--gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ------------------------------- buttons -------------------------------- */
+
+.nut-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-callout);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-btn:active {
+  transform: scale(0.98);
+}
+.nut-btn:disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.nut-btn-gold {
+  background-image: var(--gold-gradient);
+  color: var(--gold-ink);
+  box-shadow: 0 10px 24px -12px color-mix(in oklab, var(--gold) 65%, transparent);
+}
+.nut-btn-ghost {
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  background: color-mix(in oklab, var(--foreground) 3%, transparent);
+}
+.nut-btn-ghost:hover {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+}
+.nut-btn-sm {
+  min-height: 32px;
+  padding: 0.3rem 0.8rem;
+  font-size: var(--text-caption);
+}
+.nut-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn-sm);
+  height: var(--icon-btn-sm);
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-icon-btn:hover {
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+.nut-icon-btn[data-active] {
+  background: color-mix(in oklab, var(--gold) 16%, transparent);
+  border-color: color-mix(in oklab, var(--gold) 50%, transparent);
+  color: var(--gold);
+}
+.nut-icon-btn-danger:hover {
+  color: var(--rose);
+  border-color: color-mix(in oklab, var(--rose) 45%, transparent);
+}
+
+/* Chips with the prototype's solid active state (goal + role chips). */
+.nut-chip-solid[data-selected] {
+  background-image: var(--gold-gradient);
+  border-color: transparent;
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+
+/* ------------------------------- motion --------------------------------- */
+
+@keyframes nut-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.nut-rise {
+  animation: nut-rise 700ms var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes nut-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.nut-fade {
+  animation: nut-fade 250ms var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes nut-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.nut-pop {
+  animation: nut-pop 350ms var(--ease-out-expo) both;
+}
+@keyframes nut-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.nut-grow-x {
+  transform-origin: left;
+  animation: nut-grow-x 1100ms var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes nut-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.nut-grow-y {
+  transform-origin: bottom;
+  animation: nut-grow-y 1000ms var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes nut-ring-in {
+  from {
+    stroke-dashoffset: var(--circ);
+  }
+  to {
+    stroke-dashoffset: var(--len);
+  }
+}
+.nut-ring-arc {
+  animation: nut-ring-in 1400ms var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nut-rise,
+  .nut-fade,
+  .nut-pop,
+  .nut-grow-x,
+  .nut-grow-y,
+  .nut-ring-arc {
+    animation: none;
+  }
+}
+
+/* ------------------------------- date nav ------------------------------- */
+
+.nut-datenav {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.nut-daycell {
+  flex: 1 1 0;
+  min-width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) 2px var(--space-2);
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  color: var(--muted-foreground);
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-daycell:hover {
+  color: var(--foreground);
+}
+.nut-daycell[data-selected] {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+  color: var(--foreground);
+}
+.nut-daycell-weekday {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-meta);
+}
+.nut-daycell-num {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  line-height: var(--leading-micro);
+  color: var(--foreground);
+}
+
+/* --------------------------------- bars --------------------------------- */
+
+.nut-track {
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  overflow: hidden;
+}
+.nut-track-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* The provenance ledger's stacked bar. */
+.nut-ledger {
+  display: flex;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+.nut-ledger > span {
+  display: block;
+  height: 100%;
+}
+
+/* ------------------------------- timeline ------------------------------- */
+
+.nut-grams-btn {
+  font: inherit;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.nut-grams-input {
+  width: 5rem;
+  background: var(--surface-3);
+  border: 1px solid color-mix(in oklab, var(--gold) 50%, transparent);
+  border-radius: var(--radius-control);
+  padding: 0.15rem 0.45rem;
+  font-size: var(--text-callout);
+  color: var(--foreground);
+}
+.nut-swaps {
+  border: 1px solid color-mix(in oklab, var(--gold) 30%, transparent);
+  background: color-mix(in oklab, var(--gold) 6%, transparent);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+}
+
+/* -------------------------------- dialog -------------------------------- */
+
+.nut-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+@media (min-width: 640px) {
+  .nut-dialog-backdrop {
+    align-items: center;
+    padding: var(--space-4);
+  }
+}
+/* The mobile sheet rule: capped height, solid surface, the page still
+   visible above — never a full-screen takeover. */
+.nut-dialog-panel {
+  width: 100%;
+  max-width: 660px;
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--gold) 25%, transparent);
+  border-bottom: 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  box-shadow: var(--elevation-dialog);
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .nut-dialog-panel {
+    border-bottom: 1px solid color-mix(in oklab, var(--gold) 25%, transparent);
+    border-radius: var(--radius-dialog);
+  }
+}
+.nut-dialog-scroll {
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--gold) 35%, transparent) transparent;
+}
+.nut-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+  outline: none;
+}
+.nut-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background-image: var(--gold-gradient);
+  border: 2px solid var(--gold-ink);
+  cursor: pointer;
+}
+.nut-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background-image: var(--gold-gradient);
+  border: 2px solid var(--gold-ink);
+  cursor: pointer;
+}
+
+/* -------------------------------- report -------------------------------- */
+
+.nut-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.nut-report-table th,
+.nut-report-table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: right;
+  font-size: var(--text-callout);
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+.nut-report-table th:first-child,
+.nut-report-table td:first-child {
+  text-align: left;
+}
+.nut-report-table thead th {
+  font-size: var(--text-meta);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-meta);
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.nut-report-table tfoot td {
+  border-top: 2px solid color-mix(in oklab, var(--gold) 55%, transparent);
+  border-bottom: 0;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+@media print {
+  .nut-report {
+    --report-ink: #17150f;
+    --report-line: #d8d2c4;
+    --report-bg: #ffffff;
+    background: var(--report-bg);
+    color: var(--report-ink);
+  }
+  .nut-report .nut-card {
+    background: var(--report-bg);
+    border-color: var(--report-line);
+    box-shadow: none;
+  }
+  .nut-report .nut-report-table th,
+  .nut-report .nut-report-table td {
+    border-color: var(--report-line);
+  }
+  .nut-report-print-hide {
+    display: none !important;
+  }
+}

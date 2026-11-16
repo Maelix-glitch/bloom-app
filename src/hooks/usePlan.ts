@@ -19,30 +19,40 @@
 
 import { useCallback, useMemo } from "react";
 
+import { getPref, setPref } from "@/lib/prefs";
 import { usePrefValue } from "@/lib/prefsStore";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { useSession } from "@/hooks/useSession";
 import { todayLocal } from "@/lib/localDay";
-import { toHealthProfile } from "@/lib/assessment/state";
-import { toSafetyInput, type HealthProfile } from "@/lib/vitalis/domain/profile";
+import {
+  ASSESSMENT_KEY,
+  parseAssessmentState,
+  toHealthProfile,
+} from "@/lib/assessment/state";
+import { toSafetyInput, type HealthProfile, type VitalisGoal } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor, type BodyTargetsOutcome } from "@/lib/vitalis/calc/body";
 import type { SafetyAssessment } from "@/lib/vitalis/domain/safety";
 import {
   PLAN_KEY,
+  PLAN_LOG_KEY,
   USDA_REFERENCE_FOODS,
   generatePlan,
   nutritionTargetsFromBodyTargets,
+  parsePlanLogValue,
   parsePlanValue,
   planInputsSnapshotOf,
+  planLoggedEntryIdFrom,
   planStaleness,
+  recordPlanLog,
   writePlan,
   type DailyPlan,
   type LogEntry,
   type NutritionTargets,
   type PlanGenerationInput,
+  type PlanGoalProfile,
   type PlanMeal,
   type PlanOutcome,
   type PlanRefusal,
@@ -59,13 +69,31 @@ export type PlanSectionState =
 export interface PlanStore {
   today: string;
   state: PlanSectionState;
+  /** The goal the engine currently reads (Assessment first, body
+   *  profile as its seed) — what the goal chips show as active. */
+  currentGoal: VitalisGoal | null;
+  /** Set the goal through the SAME sources the engine reads: the body
+   *  profile always (it is the seed), and the Assessment's answers too
+   *  once the Assessment has been started — status and step untouched.
+   *  The stored plan is NOT regenerated: it goes stale by name, and the
+   *  person's own tap on "Compose again" rebuilds it (no silent
+   *  changes, §10/§13). */
+  setGoal: (goal: PlanGoalProfile) => void;
   /** Generate today's plan from the current inputs and save it. The
    *  outcome is returned so the caller can surface a refusal directly. */
   generate: () => PlanOutcome;
   /** Log a plan suggestion into today's food log, through the nutrition
    *  lib's normal entry path — the entry keeps the food's provenance and
-   *  records `plan` as its source. Null when the food is gone. */
+   *  records `plan` as its source. Duplicate-safe via the plan-log
+   *  record: re-logging a suggestion whose entry is still in the log
+   *  returns that entry instead of writing a second copy. Null when
+   *  the food is gone. */
   logSuggestion: (meal: PlanMeal, suggestion: PlanSuggestion) => LogEntry | null;
+  /** Whether this suggestion's plan entry is currently in today's log. */
+  suggestionLogged: (meal: PlanMeal, suggestion: PlanSuggestion) => boolean;
+  /** Log every not-yet-logged suggestion of a meal (the meal card's
+   *  "Log this meal"). Returns how many entries were written. */
+  logMeal: (meal: PlanMeal) => number;
 }
 
 interface AssembledInputs {
@@ -81,6 +109,7 @@ export function usePlan(): PlanStore {
   const session = useSession();
   const nutrition = useNutrition();
   const plan = usePrefValue(PLAN_KEY, parsePlanValue, null);
+  const planLog = usePrefValue(PLAN_LOG_KEY, parsePlanLogValue, NO_PLAN_LOG);
   const today = todayLocal();
 
   const assembled = useMemo<AssembledInputs>(() => {
@@ -144,14 +173,75 @@ export function usePlan(): PlanStore {
     return outcome;
   }, [buildInput]);
 
-  const logSuggestion = useCallback<PlanStore["logSuggestion"]>(
-    (meal, suggestion) => {
-      const food = nutrition.foodById(suggestion.foodId);
-      if (!food) return null;
-      return nutrition.logFood(food, { grams: suggestion.grams }, meal.meal, today, "plan");
+  const setGoal = useCallback<PlanStore["setGoal"]>(
+    (goal) => {
+      body.save({ goal });
+      /* The Assessment's answers outrank the body profile in the
+         engine's read, so once an Assessment exists its goal must move
+         too — a surgical answers patch that preserves status, step,
+         consents and every other answer exactly. */
+      const current = getPref(ASSESSMENT_KEY, parseAssessmentState, null);
+      if (current && (current.startedAt !== null || current.answers.goal !== null)) {
+        setPref(ASSESSMENT_KEY, {
+          ...current,
+          answers: { ...current.answers, goal },
+          updatedAt: new Date().toISOString(),
+        });
+      }
     },
-    [nutrition, today],
+    [body],
   );
 
-  return { today, state, generate, logSuggestion };
+  const logSuggestion = useCallback<PlanStore["logSuggestion"]>(
+    (meal, suggestion) => {
+      const existingId = planLoggedEntryIdFrom(
+        planLog,
+        nutrition.entries,
+        today,
+        meal.meal,
+        suggestion.foodId,
+      );
+      if (existingId) {
+        return nutrition.entries.find((e) => e.id === existingId) ?? null;
+      }
+      const food = nutrition.foodById(suggestion.foodId);
+      if (!food) return null;
+      const entry = nutrition.logFood(food, { grams: suggestion.grams }, meal.meal, today, "plan");
+      if (entry) recordPlanLog(today, meal.meal, suggestion.foodId, entry.id);
+      return entry;
+    },
+    [nutrition, planLog, today],
+  );
+
+  const suggestionLogged = useCallback<PlanStore["suggestionLogged"]>(
+    (meal, suggestion) =>
+      planLoggedEntryIdFrom(planLog, nutrition.entries, today, meal.meal, suggestion.foodId) !==
+      null,
+    [nutrition.entries, planLog, today],
+  );
+
+  const logMeal = useCallback<PlanStore["logMeal"]>(
+    (meal) => {
+      let logged = 0;
+      for (const suggestion of meal.suggestions) {
+        if (suggestionLogged(meal, suggestion)) continue;
+        if (logSuggestion(meal, suggestion)) logged += 1;
+      }
+      return logged;
+    },
+    [logSuggestion, suggestionLogged],
+  );
+
+  return {
+    today,
+    state,
+    currentGoal: assembled.profile.goal,
+    setGoal,
+    generate,
+    logSuggestion,
+    suggestionLogged,
+    logMeal,
+  };
 }
+
+const NO_PLAN_LOG: Record<string, string> = {};

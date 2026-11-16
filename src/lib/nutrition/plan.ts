@@ -419,8 +419,12 @@ export function patternAllowsClassification(
  * filter; name-matching still drops foods the person said they are
  * allergic to, cannot tolerate, or dislike — their own words against
  * food names, nothing inferred.
+ *
+ * Exported for the Nutrition tab's swap suggestions (N-UI): a swap is a
+ * one-food plan decision, so it is held to exactly this filter — same
+ * provenance gate, same pattern judgement, same name-matching.
  */
-function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Food[] {
+export function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Food[] {
   const terms = [...profile.dietary.allergies, ...profile.dietary.intolerances, ...profile.dietary.dislikedFoods]
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length >= 3);

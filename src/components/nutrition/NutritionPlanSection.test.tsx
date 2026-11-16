@@ -125,8 +125,9 @@ describe("NutritionPlanSection", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
 
-    /* The plan renders: the goal, the day's targets, meal sections. */
-    expect(screen.getByText("Lose weight")).toBeTruthy();
+    /* The plan renders: the goal (title + the active goal chip), the
+       day's targets, meal sections. */
+    expect(screen.getAllByText("Lose weight").length).toBeGreaterThan(0);
     expect(screen.getByText(/across the day/)).toBeTruthy();
     expect(screen.getByText("Breakfast")).toBeTruthy();
     expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
@@ -240,5 +241,46 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
     for (const suggestion of photographed) {
       expect(alts).toContain(suggestion.name);
     }
+  });
+});
+
+describe("NutritionPlanSection — N-UI plan panel", () => {
+  it("goal chips write the goal the engine reads — the plan goes stale, never silently rebuilt", () => {
+    seedAssessment(COMPLETE);
+    render(<NutritionPlanSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    expect(screen.queryByText(/Since this plan was made/)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Maintain my weight" }));
+
+    /* The stored plan is untouched; the staleness banner names the change. */
+    expect(readPlan()?.goal).toBe("lose");
+    expect(screen.getByText(/Since this plan was made/)).toBeTruthy();
+    expect(screen.getByText(/your goal/)).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Maintain my weight" }).getAttribute("data-selected"),
+    ).toBe("true");
+  });
+
+  it("'Log this meal' bulk-logs the meal's suggestions once, then reads as logged", () => {
+    seedAssessment(COMPLETE);
+    render(<NutritionPlanSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+
+    const plan = readPlan();
+    if (!plan) throw new Error("plan was not created");
+    const firstMeal = plan.meals[0]!;
+    const expected = firstMeal.suggestions.length;
+    expect(expected).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Log this meal" })).toHaveLength(4);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Log this meal" })[0]!);
+
+    const entries = readFoodLog().filter((e) => e.day === todayLocal());
+    expect(entries).toHaveLength(expected);
+    expect(entries.every((e) => e.source === "plan")).toBe(true);
+    expect(entries.every((e) => e.meal === firstMeal.meal)).toBe(true);
+    expect(screen.getByText("Already logged")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Log this meal" })).toHaveLength(3);
   });
 });

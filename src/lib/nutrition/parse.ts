@@ -88,10 +88,19 @@ interface NutrientCaps {
   fatG: number;
   fibreG: number;
   sodiumMg: number;
+  potassiumMg: number;
+  magnesiumMg: number;
+  calciumMg: number;
+  ironMg: number;
+  vitaminCMg: number;
 }
 
 /** Per-100 g caps (a Food's profile): the densest real foods sit well
- *  inside them — pure oil is ~884 kcal and 100 g fat per 100 g. */
+ *  inside them — pure oil is ~884 kcal and 100 g fat per 100 g. The
+ *  micronutrient caps are the same kind of sanity ceiling, set above the
+ *  densest real foods (parmesan ~1 200 mg calcium, pumpkin seeds
+ *  ~590 mg magnesium, acerola ~1 700 mg vitamin C per 100 g) and far
+ *  below any value that could only be a data error. */
 const FOOD_NUTRIENT_CAPS: NutrientCaps = {
   kcal: 2000,
   proteinG: 100,
@@ -99,6 +108,11 @@ const FOOD_NUTRIENT_CAPS: NutrientCaps = {
   fatG: 100,
   fibreG: 100,
   sodiumMg: 40000,
+  potassiumMg: 10000,
+  magnesiumMg: 2000,
+  calciumMg: 5000,
+  ironMg: 1000,
+  vitaminCMg: 5000,
 };
 
 /** Entry caps: an entry is a whole portion, not 100 g — 500 g of chicken
@@ -113,7 +127,24 @@ const ENTRY_NUTRIENT_CAPS: NutrientCaps = {
   fatG: 1000,
   fibreG: 500,
   sodiumMg: 100000,
+  potassiumMg: 50000,
+  magnesiumMg: 10000,
+  calciumMg: 25000,
+  ironMg: 5000,
+  vitaminCMg: 25000,
 };
+
+/** The optional fields and the cap each is held to — one list, so a new
+ *  optional nutrient joins the parser by joining this list and the caps. */
+const OPTIONAL_FIELDS = [
+  "fibreG",
+  "sodiumMg",
+  "potassiumMg",
+  "magnesiumMg",
+  "calciumMg",
+  "ironMg",
+  "vitaminCMg",
+] as const;
 
 /**
  * Nutrients are all-or-nothing on the four core values: a source that cannot
@@ -128,10 +159,10 @@ function parseNutrientsWithCaps(raw: unknown, caps: NutrientCaps): Nutrients | n
   const fatG = numIn(raw["fatG"], 0, caps.fatG);
   if (kcal === null || proteinG === null || carbsG === null || fatG === null) return null;
   const out: Nutrients = { kcal, proteinG, carbsG, fatG };
-  const fibreG = numIn(raw["fibreG"], 0, caps.fibreG);
-  if (fibreG !== null) out.fibreG = fibreG;
-  const sodiumMg = numIn(raw["sodiumMg"], 0, caps.sodiumMg);
-  if (sodiumMg !== null) out.sodiumMg = sodiumMg;
+  for (const key of OPTIONAL_FIELDS) {
+    const value = numIn(raw[key], 0, caps[key]);
+    if (value !== null) out[key] = value;
+  }
   return out;
 }
 

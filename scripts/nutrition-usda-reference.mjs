@@ -292,8 +292,36 @@ const DATASETS = [
   },
 ];
 
-/** Nutrient ids in the FDC CSVs (nutrient.csv), the values Bloom ships. */
-const NUTRIENT_IDS = { proteinG: 1003, fatG: 1004, carbsG: 1005, fibreG: 1079, sodiumMg: 1093 };
+/** Nutrient ids in the FDC CSVs (nutrient.csv), the values Bloom ships.
+ *  The micronutrient panel (N-UI) rides the same rule as fibre and
+ *  sodium: shipped only where the source row publishes it, held to the
+ *  strict parser's per-100 g caps (see OPTIONAL_RANGES below). Ids
+ *  verified against the datasets' own nutrient.csv: 1087 Calcium (nbr
+ *  301), 1089 Iron (303), 1090 Magnesium (304), 1092 Potassium (306),
+ *  1162 Vitamin C (401). */
+const NUTRIENT_IDS = {
+  proteinG: 1003,
+  fatG: 1004,
+  carbsG: 1005,
+  fibreG: 1079,
+  sodiumMg: 1093,
+  potassiumMg: 1092,
+  magnesiumMg: 1090,
+  calciumMg: 1087,
+  ironMg: 1089,
+  vitaminCMg: 1162,
+};
+/** The optional nutrients and the parser's per-100 g cap for each — a
+ *  published value outside its cap fails generation, like the core four. */
+const OPTIONAL_RANGES = {
+  fibreG: 100,
+  sodiumMg: 40000,
+  potassiumMg: 10000,
+  magnesiumMg: 2000,
+  calciumMg: 5000,
+  ironMg: 1000,
+  vitaminCMg: 5000,
+};
 /** Energy is a choice among USDA-published values, in this order. */
 const ENERGY_IDS = [1008, 2048, 2047];
 
@@ -428,13 +456,14 @@ function extractFood(pick, tables) {
       !inRange(per100g.carbsG, 100) || !inRange(per100g.fatG, 100)) {
     throw new Error(`pick ${pick.fdcId} (${pick.expect}): core value outside the parser's sane range`);
   }
-  if (values.has(NUTRIENT_IDS.fibreG)) per100g.fibreG = values.get(NUTRIENT_IDS.fibreG);
-  if (values.has(NUTRIENT_IDS.sodiumMg)) per100g.sodiumMg = values.get(NUTRIENT_IDS.sodiumMg);
-  if (per100g.fibreG !== undefined && !inRange(per100g.fibreG, 100)) {
-    throw new Error(`pick ${pick.fdcId} (${pick.expect}): fibre outside the parser's sane range`);
-  }
-  if (per100g.sodiumMg !== undefined && !inRange(per100g.sodiumMg, 40000)) {
-    throw new Error(`pick ${pick.fdcId} (${pick.expect}): sodium outside the parser's sane range`);
+  for (const [key, cap] of Object.entries(OPTIONAL_RANGES)) {
+    const id = NUTRIENT_IDS[key];
+    if (!values.has(id)) continue;
+    const value = values.get(id);
+    if (!inRange(value, cap)) {
+      throw new Error(`pick ${pick.fdcId} (${pick.expect}): ${key} outside the parser's sane range`);
+    }
+    per100g[key] = value;
   }
   const classification = CLASSIFICATION[pick.fdcId];
   if (!classification) {
@@ -503,7 +532,9 @@ async function generate() {
     " * (2025-04-24 release) and SR Legacy (2018-04 release), fdc.nal.usda.gov.",
     " * Licence: CC0 1.0 (evidence catalogue source `usda-fooddata-central`).",
     " * Every nutrient value below is a value USDA published for that food,",
-    " * per 100 g; fibre and sodium appear only where the source row has them.",
+    " * per 100 g; fibre, sodium and the micronutrient panel (potassium,",
+    " * magnesium, calcium, iron, vitamin C) appear only where the source",
+    " * row has them — absent means not reported, never zero.",
     " * Each entry also carries a food group + dietary-pattern classification,",
     " * pinned per FDC id in the generator — identity facts about the curated",
     " * food, not values read from USDA's tables.",

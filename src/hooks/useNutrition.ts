@@ -45,6 +45,7 @@ import {
   dayLogOf,
   deleteLogEntry,
   editLogEntry,
+  eligiblePool,
   entriesForDay,
   entryNutrientsFor,
   findUsdaReference,
@@ -55,6 +56,8 @@ import {
   parseFoodsValue,
   recentFoods,
   saveCustomFood,
+  swapLogEntry,
+  swapsFor,
   type Amount,
   type CustomFoodInput,
   type DayLog,
@@ -64,6 +67,9 @@ import {
   type LogEntryPatch,
   type Meal,
   type NutritionTargets,
+  type SpectrumSex,
+  type SwapFocus,
+  type SwapOption,
   type TotalsComparison,
 } from "@/lib/nutrition";
 import { newNutritionId } from "@/lib/nutrition/ids";
@@ -108,6 +114,16 @@ export interface NutritionStore {
   /** Copy one day's entries into another day (new ids, same foods,
    *  amounts, meals and nutrients). Returns how many entries landed. */
   copyDayInto: (fromDay: string, toDay: string) => number;
+  /** The sex the micronutrient spectrum's sex-specific reference
+   *  intakes key on: the Assessment's stated sex, else the body
+   *  profile's, else null (the spectrum's stated default applies). */
+  spectrumSex: SpectrumSex;
+  /** Calorie-matched swap options for a USDA-backed entry, from the
+   *  plan-eligible USDA pool (pattern + allergy filters applied). */
+  swapsForEntry: (entry: LogEntry, focus: SwapFocus) => SwapOption[];
+  /** Apply a swap through the lib's validated write path. Null when
+   *  the swap is refused (either side not USDA-backed). */
+  applySwap: (entry: LogEntry, option: SwapOption) => LogEntry | null;
 }
 
 const NO_FOODS: Food[] = [];
@@ -220,6 +236,29 @@ export function useNutrition(): NutritionStore {
     [entries],
   );
 
+  const spectrumSex = useMemo<SpectrumSex>(() => {
+    const assessed = toHealthProfile(assessment.state, session.userId ?? "local").sex;
+    if (assessed === "female" || assessed === "male") return assessed;
+    if (body.profile.sex === "female" || body.profile.sex === "male") return body.profile.sex;
+    return null;
+  }, [assessment.state, session.userId, body.profile.sex]);
+
+  const swapsForEntry = useCallback<NutritionStore["swapsForEntry"]>(
+    (entry, focus) => {
+      if (!entry.foodId) return [];
+      const entryFood = foodById(entry.foodId);
+      if (!entryFood) return [];
+      const profile = toHealthProfile(assessment.state, session.userId ?? "local");
+      const pool = eligiblePool(profile, USDA_REFERENCE_FOODS);
+      return swapsFor(entry, entryFood, pool, focus);
+    },
+    [assessment.state, session.userId, foodById],
+  );
+
+  const applySwap = useCallback<NutritionStore["applySwap"]>((entry, option) => {
+    return swapLogEntry(entry, option);
+  }, []);
+
   return {
     today,
     foods,
@@ -235,6 +274,9 @@ export function useNutrition(): NutritionStore {
     removeEntry,
     restoreEntry,
     copyDayInto,
+    spectrumSex,
+    swapsForEntry,
+    applySwap,
   };
 }
 

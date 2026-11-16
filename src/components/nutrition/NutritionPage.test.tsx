@@ -166,11 +166,12 @@ describe("NutritionPage — search & add flow", () => {
 
     const chip = within(sheet).getByRole("button", { name: /1 bowl · 80 g/ });
     expect(chip.getAttribute("aria-pressed")).toBe("true");
-    /* 80 g of 380 kcal/100 g = 304 kcal, previewed before logging. */
-    expect(within(sheet).getByText(/304 kcal/)).toBeTruthy();
-    expect(
-      (within(sheet).getByRole("button", { name: "Log it" }) as HTMLButtonElement).disabled,
-    ).toBe(false);
+    /* 80 g of 380 kcal/100 g = 304 kcal, previewed before logging —
+       the N-UI portion step carries it in the submit button itself. */
+    const submit = within(sheet).getByRole("button", {
+      name: /Log to .* · 304 kcal/,
+    }) as HTMLButtonElement;
+    expect(submit.disabled).toBe(false);
   });
 
   it("logs from the sheet into the day view, with the entry's badge attached", () => {
@@ -178,7 +179,7 @@ describe("NutritionPage — search & add flow", () => {
     render(<NutritionPage />);
     const sheet = openSheet();
     fireEvent.click(within(sheet).getByRole("button", { name: /My Oats/ }));
-    fireEvent.click(within(sheet).getByRole("button", { name: "Log it" }));
+    fireEvent.click(within(sheet).getByRole("button", { name: /Log to / }));
 
     const today = todayLocal();
     const stored = readDayLog(today);
@@ -193,7 +194,10 @@ describe("NutritionPage — search & add flow", () => {
     ) as HTMLElement;
     expect(within(mealSection).getByText("My Oats")).toBeTruthy();
     expect(within(mealSection).getByTestId("provenance-badge").textContent).toBe("Your value");
-    expect(within(mealSection).getByText(/304 kcal · 10\.4 g protein/)).toBeTruthy();
+    /* The prototype's row format: kcal · P · C · F (the meal header
+       repeats the kcal as the meal's own summary). */
+    expect(within(mealSection).getAllByText(/304 kcal/).length).toBeGreaterThan(0);
+    expect(within(mealSection).getByText(/P 10\.4 C 48 F 5\.6/)).toBeTruthy();
   });
 });
 
@@ -206,7 +210,7 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    expect(screen.getByText(`of your ~${targets.calories} kcal target`)).toBeTruthy();
+    expect(screen.getByText(`of ~${targets.calories} kcal`)).toBeTruthy();
     expect(screen.getByText(/Targets are estimates/)).toBeTruthy();
     expect(screen.getByRole("progressbar", { name: "Calories against target" })).toBeTruthy();
   });
@@ -220,10 +224,10 @@ describe("NutritionPage — totals vs targets", () => {
     logDirect(oats, 100, todayLocal());
 
     render(<NutritionPage />);
-    /* The day's totals still show… */
-    expect(screen.getByText("380")).toBeTruthy();
+    /* The day's totals still show (hero centre, week average)… */
+    expect(screen.getAllByText("380").length).toBeGreaterThan(0);
     /* …but nothing that frames them against a target. */
-    expect(screen.queryByText(/of your ~/)).toBeNull();
+    expect(screen.queryByText(/of ~/)).toBeNull();
     expect(screen.queryByRole("progressbar")).toBeNull();
     expect(screen.getByText(/doesn't set calorie targets/)).toBeTruthy();
   });
@@ -248,7 +252,7 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    expect(screen.getByText(`of your ~${targets.calories} kcal target`)).toBeTruthy();
+    expect(screen.getByText(`of ~${targets.calories} kcal`)).toBeTruthy();
     expect(screen.queryByText(/doesn't set calorie targets/)).toBeNull();
   });
 
@@ -256,7 +260,7 @@ describe("NutritionPage — totals vs targets", () => {
     const oats = seedOats();
     logDirect(oats, 100, todayLocal());
     render(<NutritionPage />);
-    expect(screen.queryByText(/of your ~/)).toBeNull();
+    expect(screen.queryByText(/of ~/)).toBeNull();
     expect(screen.getByText(/No target yet/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Add them on Trackers" })).toBeTruthy();
   });

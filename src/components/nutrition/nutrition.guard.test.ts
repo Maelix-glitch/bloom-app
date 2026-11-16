@@ -68,8 +68,14 @@ describe("Nutrition guard: the surface consumes the lib, never re-derives it", (
   });
 
   it("every nutrient number in the day view arrives via a labelled bundle", () => {
-    const page = readFileSync(join(SRC, "components", "nutrition", "NutritionPage.tsx"), "utf8");
-    expect(page).toContain("labelledEntryNutrients");
+    /* N-UI moved the entry rows from the page into the Timeline; the
+       rule is unchanged — the component that renders entry numbers
+       reads them through the labelled bundle. */
+    const timeline = readFileSync(
+      join(SRC, "components", "nutrition", "NutritionTimeline.tsx"),
+      "utf8",
+    );
+    expect(timeline).toContain("labelledEntryNutrients");
     const sheet = readFileSync(join(SRC, "components", "nutrition", "AddFoodSheet.tsx"), "utf8");
     expect(sheet).toContain("labelledFoodNutrients");
   });
