@@ -714,11 +714,11 @@ function FoodRow({
 }) {
   const labelled = labelledFoodNutrients(food);
   return (
-    <li>
-      <button type="button" className="nut-food-row" onClick={onChoose}>
-        {food.provenance.kind === "usda" ? (
-          <FoodPhoto foodId={food.id} name={food.name} />
-        ) : null}
+    <li className="nut-food-row">
+      {food.provenance.kind === "usda" ? (
+        <FoodPhoto foodId={food.id} name={food.name} />
+      ) : null}
+      <button type="button" className="nut-food-row-main" onClick={onChoose}>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
             {food.name}
