@@ -16,6 +16,10 @@
  *                         European and Middle Eastern high-protein
  *                         mains and breakfasts (≥25 g protein/serving,
  *                         computed and pinned in dishesIntl2.test.ts)
+ *   - dishLibraryIntl3.ts international wave X-3 — East/South-East
+ *                         Asian, American and Latin high-protein mains
+ *                         and breakfasts (≥25 g protein/serving,
+ *                         computed and pinned in dishLibraryIntl3.test.ts)
  */
 import type { Dish } from "../dishes";
 import { DISHES_MAINS } from "./dishesMains";
@@ -24,6 +28,7 @@ import { DISHES_SIDES } from "./dishesSides";
 import { KERALA_DISHES } from "./dishLibraryKerala";
 import { INTL1_DISHES } from "./dishLibraryIntl1";
 import { INTL2_DISHES } from "./dishLibraryIntl2";
+import { INTL3_DISHES } from "./dishLibraryIntl3";
 import { PROOF_DISHES } from "./proofDishes";
 
 export const DISH_LIBRARY: readonly Dish[] = [
@@ -34,6 +39,7 @@ export const DISH_LIBRARY: readonly Dish[] = [
   ...KERALA_DISHES,
   ...INTL1_DISHES,
   ...INTL2_DISHES,
+  ...INTL3_DISHES,
 ];
 
 const BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
