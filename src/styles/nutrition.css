@@ -155,9 +155,17 @@
 /* The photo lightbox: the dialog chrome below at a higher layer (a
    photo can open from inside the add-food or credits sheets), with the
    photograph large above its name and credit. The panel keeps the
-   sheet rule — capped at 88dvh, solid surface, page visible around it. */
+   sheet rule — capped at 88dvh, solid surface, page visible around it.
+   The lightbox is portaled to the document body (see FoodPhoto), so
+   its layer must clear every host it can open over: the add-food
+   sheet's chrome sits at 60, and a BloomSheet's backdrop and panel sit
+   at 2000/2001 — 2100 keeps the photograph above all of them.
+   pointer-events is restated because a modal BloomSheet locks the
+   body's pointer events off; the portaled lightbox is a body child
+   and must stay tappable above its host. */
 .nut-lightbox-backdrop {
-  z-index: 80;
+  z-index: 2100;
+  pointer-events: auto;
 }
 .nut-lightbox-panel {
   width: 100%;
@@ -178,15 +186,29 @@
     border-radius: var(--radius-dialog);
   }
 }
+/* The one lightbox photograph rule, shared by both lightboxes: the
+   food lightbox's flex panel (the image takes the height the meta row
+   leaves, shrinking freely — min-height 0 — so the row is never
+   cropped) and the dish lightbox's in-sheet image (no flex parent;
+   the same 62dvh cap binds). Either way the photograph never exceeds
+   its panel's width, its height is capped, and the bitmap sits
+   centred inside its box, whole — contain, never cropped. */
 .nut-lightbox-img {
+  display: block;
   width: 100%;
+  max-width: 100%;
   min-height: 0;
   flex: 1 1 auto;
-  object-fit: contain;
+  max-height: 62dvh;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
   background: var(--surface-3);
+  object-fit: contain;
+  object-position: center;
 }
 .nut-lightbox-meta {
   display: flex;
+  flex-shrink: 0;
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4);
@@ -293,14 +315,8 @@
   background: var(--surface-3);
   object-fit: cover;
 }
-.nut-lightbox-img {
-  width: 100%;
-  max-height: 62dvh;
-  border-radius: var(--radius-control);
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-3);
-  object-fit: contain;
-}
+/* The dish lightbox's photograph wears the single .nut-lightbox-img
+   rule in the lightbox section above — no second definition here. */
 
 /* ---------------------------------- plan --------------------------------- */
 

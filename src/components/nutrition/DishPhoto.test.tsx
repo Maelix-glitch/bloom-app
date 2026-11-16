@@ -9,10 +9,11 @@
  * manifest arrived — same component, same honesty rule.)
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { DISH_LIBRARY, dishPhotoFor } from "@/lib/nutrition";
 import { DishPhoto } from "./DishPhoto";
+import { DishDetailSheet } from "./DishDetailSheet";
 
 afterEach(cleanup);
 
@@ -59,5 +60,38 @@ describe("DishPhoto", () => {
     );
     expect(container.querySelector("img")).toBeNull();
     expect(container.innerHTML).toBe("");
+  });
+
+  it("the detail sheet's photo lightbox stacks above the detail sheet", () => {
+    /* The dish lightbox is a BloomSheet opened from inside another
+       BloomSheet (the detail sheet). Both panels share the sheet
+       z-index, so the later portal in document order is the one that
+       paints on top — pin that the lightbox is that later panel, with
+       the photograph and its credit inside it. */
+    const dish = DISH_LIBRARY.find((d) => dishPhotoFor(d.id) !== null)!;
+    const photo = dishPhotoFor(dish.id)!;
+    render(
+      <DishDetailSheet
+        dish={dish}
+        day="2026-11-16"
+        onClose={() => {}}
+        onLog={() => true}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: `View photo of ${dish.name.en}` }),
+    );
+    const panels = [...document.querySelectorAll<HTMLElement>(".bsheet")];
+    expect(panels).toHaveLength(2);
+    const [detailPanel, lightboxPanel] = panels;
+    expect(detailPanel!.querySelector("img.nut-lightbox-img")).toBeNull();
+    const big = lightboxPanel!.querySelector("img.nut-lightbox-img");
+    expect(big).not.toBeNull();
+    expect(big?.getAttribute("src")).toBe(photo.src);
+    expect(
+      within(lightboxPanel!).getByText(
+        `Photo by ${photo.author} · ${photo.license}`,
+      ),
+    ).toBeTruthy();
   });
 });

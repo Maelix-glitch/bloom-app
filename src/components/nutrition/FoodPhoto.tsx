@@ -17,6 +17,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,18 @@ export function FoodPhoto({ foodId, name }: { foodId: string; name: string }) {
  * listener runs in the capture phase and stops the event: a photo can
  * be opened from inside the add-food sheet or the credits sheet, and
  * Escape must close the photograph, not the sheet underneath it.
+ *
+ * The lightbox is portaled to the document body. Rendered inline, it
+ * would inherit its host's geometry: inside a BloomSheet (the credits
+ * sheet) the sheet panel is a containing block for fixed descendants,
+ * so the "full-screen" backdrop resolved against the sheet's own box,
+ * inside its scrollable list, at a layer the sheet's 2000/2001
+ * stacking context owns — the photograph opened where the user
+ * couldn't see it. At the body, the backdrop covers the viewport and
+ * .nut-lightbox-backdrop's z-index (2100, above the sheet's 2001)
+ * paints it over every host; the portal still bubbles through this
+ * component tree, so the host sheet reads taps on the photograph as
+ * its own content and stays open beneath it.
  */
 function FoodPhotoLightbox({
   photo,
@@ -83,7 +96,8 @@ function FoodPhotoLightbox({
     };
   }, [onClose]);
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="nut-dialog-backdrop nut-lightbox-backdrop" onClick={onClose}>
       <div
         className="nut-lightbox-panel"
@@ -121,6 +135,7 @@ function FoodPhotoLightbox({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
