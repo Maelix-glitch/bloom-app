@@ -76,7 +76,7 @@ function cardOf(dish: Dish) {
 describe("DishesSection — browsing", () => {
   it("renders the library with bilingual names and computed per-serving numbers", () => {
     render(<DishesSection day={todayLocal()} />);
-    expect(screen.getByText(/492 dishes/)).toBeTruthy();
+    expect(screen.getByText(/624 dishes/)).toBeTruthy();
     const card = cardOf(dal);
     expect(within(card).getByText(/मसूर दाल तड़का/)).toBeTruthy();
     const perServing = dishNutrients(dal).nutrients;
@@ -117,7 +117,7 @@ describe("DishesSection — browsing", () => {
     });
     expect(screen.getByText(/No dishes match — try clearing a filter/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText(/492 dishes/)).toBeTruthy();
+    expect(screen.getByText(/624 dishes/)).toBeTruthy();
   });
 
   it("the shelf follows the person's own pattern — silently, with no pattern or budget controls", () => {
@@ -137,7 +137,7 @@ describe("DishesSection — browsing", () => {
     render(<DishesSection day={todayLocal()} />);
     expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
     expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
-    expect(screen.getByText(/492 dishes/)).toBeTruthy();
+    expect(screen.getByText(/624 dishes/)).toBeTruthy();
   });
 
   it("a stated budget keeps dishes above the tier off the shelf", () => {
