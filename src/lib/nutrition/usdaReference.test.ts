@@ -26,7 +26,7 @@ import {
 
 describe("the USDA reference set", () => {
   it("ships a curated staple set, parsed whole by the strict N1 parser", () => {
-    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(128);
+    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(142);
     // Nothing drops: every generated entry survives parsing.
     expect(USDA_REFERENCE_FOODS.length).toBe(USDA_REFERENCE_FOODS_RAW.length);
     const ids = new Set(USDA_REFERENCE_FOODS.map((f) => f.id));
@@ -117,14 +117,14 @@ describe("food-group classification (P2)", () => {
     }
     expect(Object.fromEntries(counts)).toEqual({
       cereals_grains: 17,
-      pulses_legumes: 13,
+      pulses_legumes: 16,
       dairy: 9,
       fats_oils: 10,
       eggs: 3,
-      vegetables: 20,
-      fruits: 12,
-      nuts_seeds: 8,
-      other: 36,
+      vegetables: 26,
+      fruits: 13,
+      nuts_seeds: 9,
+      other: 39,
     });
   });
 
@@ -140,11 +140,11 @@ describe("food-group classification (P2)", () => {
     }
     expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsEgg)).toHaveLength(3);
     expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsDairy)).toHaveLength(11);
-    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh)).toHaveLength(13);
-    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFish)).toHaveLength(6);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh)).toHaveLength(16);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFish)).toHaveLength(8);
     expect(
       USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh && !f.classification!.isFish),
-    ).toHaveLength(7);
+    ).toHaveLength(8);
   });
 
   it("an entry that loses its classification in parsing fails the set", () => {

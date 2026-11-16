@@ -288,7 +288,13 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
        the photograph path — a vacuous pass here would prove nothing. */
     expect(photographed.length).toBeGreaterThan(0);
 
-    const imgs = [...container.querySelectorAll("img.nut-food-thumb")];
+    /* Suggestion thumbnails only: the meal cards also carry a dish-idea
+       row whose DishPhoto shares the .nut-food-thumb class — those are
+       dish photographs, not suggestion photographs, and live outside the
+       suggestion <ul>s this assertion is about. (With the reference set
+       at 142 foods the day's dish ideas include photographed dishes, so
+       an unscoped count no longer equals the photographed suggestions.) */
+    const imgs = [...container.querySelectorAll("ul img.nut-food-thumb")];
     expect(imgs.length).toBe(photographed.length);
     const alts = imgs.map((img) => img.getAttribute("alt"));
     for (const suggestion of photographed) {

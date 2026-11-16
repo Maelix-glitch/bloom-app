@@ -81,6 +81,11 @@ export interface Dish {
    *  50 g extra paneer"). Required when `enriched` is true — an
    *  unstated boost is not a claim Bloom makes. */
   enrichment?: string;
+  /** The cuisine the dish belongs to, as a free-form tag ("kerala",
+   *  "north-indian", "south-indian", "pan-indian", "international").
+   *  Optional: dishes authored before the tag existed carry none, and
+   *  absence claims nothing about the dish. */
+  cuisine?: string;
 }
 
 /** The provenance a dish's computed nutrients travel under. */
@@ -291,6 +296,10 @@ export function parseDish(raw: unknown): Dish | null {
     enriched,
   };
   if (enriched) dish.enrichment = enrichment;
+  /* The cuisine tag is optional metadata: preserved when a dish carries
+   *  a usable one, absent otherwise — absence is not an error. */
+  const cuisine = text(raw["cuisine"], 60);
+  if (cuisine) dish.cuisine = cuisine;
   return dish;
 }
 

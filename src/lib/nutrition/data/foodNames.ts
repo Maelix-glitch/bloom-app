@@ -53,6 +53,9 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-173745": { display: "Navy beans", hindi: "सफ़ेद राजमा" },
   "usda-175199": { display: "Pinto beans", hindi: "पिंटो बीन्स" },
   "usda-174270": { display: "Soybeans", hindi: "सोयाबीन" },
+  "usda-172448": { display: "Tofu (firm)", hindi: "टोफू" },
+  "usda-174272": { display: "Tempeh", hindi: "टेम्पेह" },
+  "usda-168410": { display: "Edamame", hindi: "एडामामे" },
   "usda-172436": { display: "Pigeon peas (arhar dal)", hindi: "अरहर दाल" },
   "usda-174256": { display: "Mung beans (moong dal)", hindi: "मूंग दाल" },
   "usda-174259": { display: "Black gram (urad dal)", hindi: "उड़द दाल" },
@@ -85,11 +88,14 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-2646168": { display: "Pork loin", hindi: "पोर्क" },
   "usda-174370": { display: "Ground lamb (mutton keema)", hindi: "मटन कीमा" },
   "usda-2514747": { display: "Ground turkey", hindi: "टर्की कीमा" },
+  "usda-171098": { display: "Turkey breast", hindi: "टर्की ब्रेस्ट" },
   "usda-2684441": { display: "Salmon", hindi: "सैल्मन मछली" },
   "usda-2684444": { display: "Cod", hindi: "कॉड मछली" },
   "usda-2684442": { display: "Tilapia", hindi: "तिलापिया मछली" },
   "usda-333374": { display: "Haddock", hindi: "हैडॉक मछली" },
   "usda-334194": { display: "Tuna (canned)", hindi: "टूना मछली" },
+  "usda-175139": { display: "Sardines (canned)", hindi: "सार्डिन मछली" },
+  "usda-175119": { display: "Mackerel", hindi: "मैकेरल मछली" },
   "usda-175179": { display: "Shrimp (prawns)", hindi: "झींगा" },
 
   /* Oils */
@@ -123,6 +129,12 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-170106": { display: "Red chilli", hindi: "लाल मिर्च" },
   "usda-169260": { display: "Okra (bhindi)", hindi: "भिंडी" },
   "usda-168393": { display: "Bitter gourd (karela)", hindi: "करेला" },
+  "usda-169985": { display: "Cassava (tapioca)", hindi: "कसावा" },
+  "usda-2710818": { display: "Plantain (raw banana)", hindi: "कच्चा केला" },
+  "usda-169308": { display: "Taro (arbi)", hindi: "अरबी" },
+  "usda-170069": { display: "Ash gourd (petha)", hindi: "पेठा" },
+  "usda-170483": { display: "Drumstick pods", hindi: "सहजन की फली" },
+  "usda-168416": { display: "Moringa leaves (drumstick leaves)", hindi: "सहजन के पत्ते" },
 
   /* Fruits */
   "usda-173944": { display: "Banana", hindi: "केला" },
@@ -137,6 +149,7 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-169124": { display: "Pineapple", hindi: "अनानास" },
   "usda-746773": { display: "Pear", hindi: "नाशपाती" },
   "usda-167763": { display: "Tamarind", hindi: "इमली" },
+  "usda-174687": { display: "Jackfruit", hindi: "कटहल" },
 
   /* Nuts and seeds */
   "usda-2346393": { display: "Almonds", hindi: "बादाम" },
@@ -147,6 +160,7 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-2515380": { display: "Pumpkin seeds (pepitas)", hindi: "कद्दू के बीज" },
   "usda-170150": { display: "Sesame seeds (til)", hindi: "तिल" },
   "usda-170169": { display: "Coconut (fresh)", hindi: "नारियल" },
+  "usda-170172": { display: "Coconut milk", hindi: "नारियल का दूध" },
 
   /* Spices and aromatics */
   "usda-1104647": { display: "Garlic", hindi: "लहसुन" },

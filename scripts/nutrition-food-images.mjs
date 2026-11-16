@@ -206,6 +206,25 @@ const PHOTOLESS = [
   [170169, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
   [167763, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
   [172337, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  /* Dishes-expansion foundation additions: these foods joined the
+     reference set after the Commons photo pass, and no photograph has
+     been sourced or reviewed for them yet. Recorded here so the
+     coverage rule holds — a photo is pinned only after the usual
+     search, licence check and eyeball review, never silently skipped. */
+  [169985, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [2710818, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [174687, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [170172, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [169308, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [170069, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [170483, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [168416, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [172448, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [174272, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [168410, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [171098, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [175139, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [175119, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
 ];
 
 /* ------------------------------ Commons API ------------------------------ */
