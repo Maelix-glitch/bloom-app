@@ -15,7 +15,7 @@ import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
  */
 describe("the dish library", () => {
   it("clears the owner's 200-dish bar", () => {
-    expect(DISH_LIBRARY.length).toBe(898);
+    expect(DISH_LIBRARY.length).toBe(1040);
     expect(DISH_LIBRARY.length).toBeGreaterThanOrEqual(200);
   });
 

@@ -5,6 +5,7 @@ import { INTL1_DISHES } from "./data/dishLibraryIntl1";
 import { INTL2_DISHES } from "./data/dishLibraryIntl2";
 import { INTL3_DISHES } from "./data/dishLibraryIntl3";
 import { INTL4_DISHES } from "./data/dishLibraryIntl4";
+import { INDIA_DISHES } from "./data/dishLibraryIndia";
 import {
   dishNutrients,
   parseDishList,
@@ -58,7 +59,8 @@ describe("wave X-1 — international high-protein dishes", () => {
         INTL1_DISHES.length +
         INTL2_DISHES.length +
         INTL3_DISHES.length +
-        INTL4_DISHES.length,
+        INTL4_DISHES.length +
+        INDIA_DISHES.length,
     );
   });
 
