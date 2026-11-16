@@ -12,6 +12,10 @@
  *   - dishesSides.ts      sides, chutneys, raitas, desserts, drinks
  *   - dishLibraryKerala.ts the Kerala wave (dishes expansion WAVE I-1)
  *   - dishLibraryIntl1.ts international high-protein wave (X-1)
+ *   - dishLibraryIntl2.ts international wave X-2 — Mediterranean,
+ *                         European and Middle Eastern high-protein
+ *                         mains and breakfasts (≥25 g protein/serving,
+ *                         computed and pinned in dishesIntl2.test.ts)
  */
 import type { Dish } from "../dishes";
 import { DISHES_MAINS } from "./dishesMains";
@@ -19,6 +23,7 @@ import { DISHES_RICE_BREAD } from "./dishesRiceBread";
 import { DISHES_SIDES } from "./dishesSides";
 import { KERALA_DISHES } from "./dishLibraryKerala";
 import { INTL1_DISHES } from "./dishLibraryIntl1";
+import { INTL2_DISHES } from "./dishLibraryIntl2";
 import { PROOF_DISHES } from "./proofDishes";
 
 export const DISH_LIBRARY: readonly Dish[] = [
@@ -28,6 +33,7 @@ export const DISH_LIBRARY: readonly Dish[] = [
   ...DISHES_SIDES,
   ...KERALA_DISHES,
   ...INTL1_DISHES,
+  ...INTL2_DISHES,
 ];
 
 const BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
