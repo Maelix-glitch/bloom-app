@@ -150,9 +150,13 @@ function fnv1a(text: string): number {
  * and dinner from mains; a snack gets no dish idea. Qualification is
  * the plan's own: the dish suits the person's pattern (when they have
  * stated one) and every ingredient line is in the plan's eligible pool
- * for their profile. Among the qualifiers, the pick is the first in
- * the day's FNV-1a rotation order over `day:dishId` — deterministic
- * within the day, rotating across days.
+ * for their profile. When the person has stated a meal budget (in the
+ * assessment, and only there), qualifiers at or under their tier are
+ * preferred; if none qualifies in-budget, the pick falls back to any
+ * qualifier — a budget preference never empties the row. Among the
+ * preferred set, the pick is the first in the day's FNV-1a rotation
+ * order over `day:dishId` — deterministic within the day, rotating
+ * across days.
  */
 export function dishIdeaFor(
   profile: HealthProfile,
@@ -171,7 +175,11 @@ export function dishIdeaFor(
     return dish.lines.every((line) => eligible.has(line.foodId));
   });
   if (qualifiers.length === 0) return null;
-  const ordered = qualifiers
+  const budgetTier = profile.dietary.budgetTier;
+  const inBudget =
+    budgetTier === null ? [] : qualifiers.filter((dish) => dish.budgetTier <= budgetTier);
+  const pool = inBudget.length > 0 ? inBudget : qualifiers;
+  const ordered = pool
     .map((dish) => ({ dish, key: fnv1a(`${day}:dish:${dish.id}`) }))
     .sort((a, b) => a.key - b.key || (a.dish.id < b.dish.id ? -1 : 1));
   return ordered[0]!.dish;

@@ -23,6 +23,7 @@ import {
   STEP_INTRO,
   STEP_TITLE,
   ACTIVITY_OPTIONS,
+  BUDGET_OPTIONS,
   CONDITION_OPTIONS,
   DIETARY_OPTIONS,
   GOAL_OPTIONS,
@@ -641,6 +642,15 @@ export function AssessmentFlow({
                     options={DIETARY_OPTIONS}
                     value={draft.dietaryPattern}
                     onSelect={(dietaryPattern) => patch({ dietaryPattern })}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>What should your meal suggestions aim for?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Meal budget"
+                    options={BUDGET_OPTIONS}
+                    value={draft.foodBudget}
+                    onSelect={(choice) => patch({ foodBudget: choice === 0 ? null : choice })}
                   />
                 </div>
                 <div className="flex flex-col gap-2">

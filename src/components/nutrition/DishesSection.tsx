@@ -1,16 +1,20 @@
 /**
  * DishesSection — the dish library on the Nutrition tab (D4): search,
- * filter, browse, open, log.
+ * browse, open, log.
  *
  * The library is Bloom's recipes — Indian dishes first — each one a
  * set of USDA ingredient lines whose per-serving numbers are computed
  * by the lib and labelled with the recipe provenance. Nothing here
- * derives a number: cards read `browseDishes`' labelled bundles, the
- * filters are the lib's pure filter logic, and the pattern filter
- * opens on the signed-in person's own dietary pattern when they have
- * stated one — the library as it applies to them, changeable in one
- * tap. Budget tiers are the lib's stated ingredient-cost ESTIMATE and
- * are labelled as one wherever they appear.
+ * derives a number: cards read `browseDishes`' labelled bundles.
+ *
+ * Which dishes are on the shelf is governed silently by the person's
+ * assessment answers: their dietary pattern is a hard filter, and a
+ * stated meal budget keeps dishes above their tier off the shelf.
+ * Pattern and budget are asked in the assessment and nowhere else, so
+ * this section offers no controls for them — search, category and the
+ * enriched toggle are the only filters here, and the status line says
+ * what is being shown. Budget tiers are the lib's stated
+ * ingredient-cost ESTIMATE and are labelled as one wherever they appear.
  */
 
 import { useMemo, useState } from "react";
@@ -21,7 +25,6 @@ import { useAssessment } from "@/hooks/useAssessment";
 import { useSession } from "@/hooks/useSession";
 import { toHealthProfile } from "@/lib/assessment/state";
 import {
-  ALL_PLAN_PATTERNS,
   DISH_CATEGORIES,
   DISH_CATEGORY_LABEL,
   PLAN_PATTERN_LABEL,
@@ -32,57 +35,51 @@ import {
   type DishBrowseFilters,
   type DishCategory,
   type Meal,
-  type PlanPattern,
 } from "@/lib/nutrition";
 import { DishDetailSheet } from "./DishDetailSheet";
 import { DishPhoto } from "./DishPhoto";
 import { formatGrams } from "./input";
-
-const BUDGET_CHIPS: readonly { tier: 1 | 2 | 3 | null; label: string }[] = [
-  { tier: null, label: "Any budget" },
-  { tier: 1, label: "Everyday ₹" },
-  { tier: 2, label: "Moderate ₹₹" },
-  { tier: 3, label: "Rich ₹₹₹" },
-];
 
 export function DishesSection({ day }: { day: string }) {
   const assessment = useAssessment();
   const session = useSession();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<DishCategory | null>(null);
-  /* "unset" = not chosen yet: the filter follows the person's own
-     stated pattern (or All when they have stated none). Once they tap
-     a chip, their choice stands. */
-  const [patternChoice, setPatternChoice] = useState<PlanPattern | null | "unset">("unset");
-  const [budgetTier, setBudgetTier] = useState<1 | 2 | 3 | null>(null);
   const [enrichedOnly, setEnrichedOnly] = useState(false);
   const [selected, setSelected] = useState<Dish | null>(null);
 
-  const ownPattern = useMemo(() => {
-    const profile = toHealthProfile(assessment.state, session.userId ?? "local");
-    return planPatternOf(profile.dietary.pattern);
-  }, [assessment.state, session.userId]);
-
-  const pattern = patternChoice === "unset" ? ownPattern : patternChoice;
+  /* The shelf is the person's assessment answers, read through the
+     domain profile: their pattern, and their meal budget when they
+     stated one. Neither is a control here — both are changed in the
+     assessment, and only there. */
+  const profile = useMemo(
+    () => toHealthProfile(assessment.state, session.userId ?? "local"),
+    [assessment.state, session.userId],
+  );
+  const pattern = planPatternOf(profile.dietary.pattern);
+  const budgetTier = profile.dietary.budgetTier;
 
   const filters: DishBrowseFilters = useMemo(
-    () => ({ query, category, pattern, budgetTier, enrichedOnly }),
-    [query, category, pattern, budgetTier, enrichedOnly],
+    () => ({ query, category, pattern, budgetTier: null, enrichedOnly }),
+    [query, category, pattern, enrichedOnly],
   );
-  const rows = useMemo(() => browseDishes(filters), [filters]);
+  const browsed = useMemo(() => browseDishes(filters), [filters]);
+  /* The budget keeps dishes ABOVE the person's tier off the shelf
+     (at or under it stays) — the lib's budget filter is an exact-tier
+     match for other callers, so the at-or-under rule is applied here. */
+  const rows = useMemo(
+    () =>
+      budgetTier === null
+        ? browsed
+        : browsed.filter((row) => row.dish.budgetTier <= budgetTier),
+    [browsed, budgetTier],
+  );
 
-  const anyFilter =
-    query.trim() !== "" ||
-    category !== null ||
-    pattern !== null ||
-    budgetTier !== null ||
-    enrichedOnly;
+  const anyFilter = query.trim() !== "" || category !== null || enrichedOnly;
 
   const clearFilters = () => {
     setQuery("");
     setCategory(null);
-    setPatternChoice(null);
-    setBudgetTier(null);
     setEnrichedOnly(false);
   };
 
@@ -143,37 +140,8 @@ export function DishesSection({ day }: { day: string }) {
         })),
       ])}
 
-      {chipRow("Pattern", [
-        {
-          key: "all",
-          label: "All",
-          selected: pattern === null,
-          onSelect: () => setPatternChoice(null),
-        },
-        ...ALL_PLAN_PATTERNS.map((p) => ({
-          key: p,
-          label: PLAN_PATTERN_LABEL[p],
-          selected: pattern === p,
-          onSelect: () => setPatternChoice(p),
-        })),
-      ])}
-
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="nut-group-label w-16 shrink-0">Budget</span>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Budget">
-          {BUDGET_CHIPS.map((chip) => (
-            <button
-              key={chip.label}
-              type="button"
-              className="nut-chip nut-chip-solid"
-              data-selected={budgetTier === chip.tier || undefined}
-              aria-pressed={budgetTier === chip.tier}
-              onClick={() => setBudgetTier(chip.tier)}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
+        <span className="nut-group-label w-16 shrink-0">Enriched</span>
         <button
           type="button"
           className="nut-chip nut-chip-solid"
@@ -187,9 +155,11 @@ export function DishesSection({ day }: { day: string }) {
 
       <p className="mt-4 text-[length:var(--text-caption)] tabular-nums text-muted-foreground" role="status">
         {rows.length} {rows.length === 1 ? "dish" : "dishes"}
-        {patternChoice === "unset" && ownPattern ? (
-          <> · showing what suits your {PLAN_PATTERN_LABEL[ownPattern].toLowerCase()} pattern</>
+        {pattern ? (
+          <> · showing what suits you — {PLAN_PATTERN_LABEL[pattern].toLowerCase()} pattern</>
         ) : null}
+        {budgetTier === 1 ? <> · kept to an everyday ₹ budget</> : null}
+        {budgetTier === 2 ? <> · kept to a moderate ₹₹ budget</> : null}
       </p>
 
       {rows.length === 0 ? (

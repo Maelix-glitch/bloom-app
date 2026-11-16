@@ -18,8 +18,9 @@
  * Reduced motion skips the show entirely: the settled card is simply
  * there.
  *
- * Profile: the permanent home — take it, continue it, read the summary,
- * retake it. The summary opens in the same sheet chrome as the flow.
+ * Profile: the permanent home — take it, continue it, read the summary.
+ * (There is deliberately no Retake button here — owner directive
+ * 2026-11-16. The summary opens in the same sheet chrome as the flow.)
  */
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -415,10 +416,6 @@ export function AssessmentPromptCard() {
 export function AssessmentProfileCard() {
   const { state } = useAssessment();
   const [flowOpen, setFlowOpen] = useState(false);
-  /* Set at click time, read by the flow when it opens. Opening with retake
-     intent must not write state — the completed assessment is demoted only
-     when the person presses Begin inside the sheet. */
-  const [flowRetake, setFlowRetake] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const summary = summaryOf(state);
 
@@ -443,37 +440,17 @@ export function AssessmentProfileCard() {
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {state.status === "complete" ? (
-          <>
-            <Button type="button" size="sm" onClick={() => setSummaryOpen(true)}>
-              View summary
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setFlowRetake(true);
-                setFlowOpen(true);
-              }}
-            >
-              Retake
-            </Button>
-          </>
+          <Button type="button" size="sm" onClick={() => setSummaryOpen(true)}>
+            View summary
+          </Button>
         ) : (
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => {
-              setFlowRetake(false);
-              setFlowOpen(true);
-            }}
-          >
+          <Button type="button" size="sm" onClick={() => setFlowOpen(true)}>
             {state.status === "in_progress" ? "Continue assessment" : "Take the assessment"}
           </Button>
         )}
       </div>
 
-      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} retake={flowRetake} />
+      <AssessmentFlow open={flowOpen} onClose={() => setFlowOpen(false)} />
 
       <BloomSheet
         open={summaryOpen}

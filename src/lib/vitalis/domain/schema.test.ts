@@ -46,6 +46,20 @@ describe("health profile schema", () => {
     expect(profile.constraints.pregnantOrBreastfeeding).toBeNull();
   });
 
+  it("carries a stated budget tier, and rejects a tier that does not exist", () => {
+    const stated = parseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, pattern: "omnivore", budgetTier: 2 },
+    });
+    expect(stated.dietary.budgetTier).toBe(2);
+    expect(parseHealthProfile(validProfile()).dietary.budgetTier).toBeNull();
+    const bad = safeParseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, budgetTier: 4 },
+    });
+    expect(bad.ok).toBe(false);
+  });
+
   it("rejects a measurement whose unit has the wrong dimension", () => {
     const result = safeParseHealthProfile({ ...validProfile(), weight: measurement(82, "cm") });
     expect(result.ok).toBe(false);
