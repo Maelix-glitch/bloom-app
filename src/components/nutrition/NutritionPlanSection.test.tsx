@@ -10,14 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    to,
-    children,
-    ...rest
-  }: {
-    to: string;
-    children: React.ReactNode;
-  }) => (
+  Link: ({ to, children, ...rest }: { to: string; children: React.ReactNode }) => (
     <a href={to} {...rest}>
       {children}
     </a>
@@ -31,11 +24,7 @@ vi.mock("@/hooks/useSession", () => ({
 import { setPref } from "@/lib/prefs";
 import { resetPrefCache } from "@/lib/prefsStore";
 import { shiftDay, todayLocal } from "@/lib/localDay";
-import {
-  ASSESSMENT_KEY,
-  EMPTY_ANSWERS,
-  type AssessmentState,
-} from "@/lib/assessment/state";
+import { ASSESSMENT_KEY, EMPTY_ANSWERS, type AssessmentState } from "@/lib/assessment/state";
 import {
   displayNameForFoodId,
   foodPhotoFor,
@@ -51,6 +40,7 @@ import { toSafetyInput } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import { NutritionPlanSection } from "./NutritionPlanSection";
+import { MEAL_LABEL } from "./input";
 
 afterEach(cleanup);
 
@@ -158,6 +148,24 @@ describe("NutritionPlanSection", () => {
     expect(entries[0]!.day).toBe(todayLocal());
     expect(entries[0]!.provenance.kind).toBe("usda");
     expect(screen.getByText("Logged")).toBeTruthy();
+  });
+
+  it("meal card headers show the composed sum of the listed suggestions, not the target split (P3)", () => {
+    seedAssessment(COMPLETE);
+    render(<NutritionPlanSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+
+    const plan = readPlan();
+    if (!plan) throw new Error("expected a stored plan");
+    for (const meal of plan.meals) {
+      const card = screen.getByLabelText(`${MEAL_LABEL[meal.meal]} plan`);
+      const headerNumber = card.querySelector("p.shrink-0 span")?.textContent;
+      const composed = meal.suggestions.reduce((sum, s) => sum + s.nutrients.kcal, 0);
+      /* The header is the sum of what is actually listed on the card.
+         Pre-P3 it showed meal.kcal — the meal's share of the day
+         target — while the listed foods summed to something else. */
+      expect(headerNumber).toBe(String(Math.round(composed)));
+    }
   });
 
   it("renders the plan's day notes under Today's mix, apart from the targets line", () => {
@@ -288,13 +296,11 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
        the photograph path — a vacuous pass here would prove nothing. */
     expect(photographed.length).toBeGreaterThan(0);
 
-    /* Suggestion thumbnails only: the meal cards also carry a dish-idea
-       row whose DishPhoto shares the .nut-food-thumb class — those are
-       dish photographs, not suggestion photographs, and live outside the
-       suggestion <ul>s this assertion is about. (With the reference set
-       at 142 foods the day's dish ideas include photographed dishes, so
-       an unscoped count no longer equals the photographed suggestions.) */
-    const imgs = [...container.querySelectorAll("ul img.nut-food-thumb")];
+    /* Suggestion rows only (li.nut-entry): the dish-idea rows share
+       the nut-food-thumb class through DishPhoto, and P3's distinct
+       per-meal dish ideas can carry photographs of their own — they
+       are not plan suggestions and must not enter this count. */
+    const imgs = [...container.querySelectorAll("li.nut-entry img.nut-food-thumb")];
     expect(imgs.length).toBe(photographed.length);
     const alts = imgs.map((img) => img.getAttribute("alt"));
     for (const suggestion of photographed) {

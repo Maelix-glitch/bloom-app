@@ -15,9 +15,7 @@ describe("browseDishes — the Dishes section's filter logic", () => {
   it("with no filters, returns the whole library in a deterministic order", () => {
     const rows = browseDishes(NO_DISH_FILTERS);
     expect(rows).toHaveLength(DISH_LIBRARY.length);
-    expect(browseDishes(NO_DISH_FILTERS).map((r) => r.dish.id)).toEqual(
-      rows.map((r) => r.dish.id),
-    );
+    expect(browseDishes(NO_DISH_FILTERS).map((r) => r.dish.id)).toEqual(rows.map((r) => r.dish.id));
     /* Category order first (mains lead), then name within a category. */
     const categories = rows.map((r) => r.dish.category);
     expect(categories.indexOf("main")).toBeLessThan(categories.indexOf("drink"));
@@ -68,9 +66,7 @@ describe("browseDishes — the Dishes section's filter logic", () => {
   });
 
   it("combines filters — and an impossible combination is honestly empty", () => {
-    const rows = browseDishes(
-      filters({ category: "main", pattern: "vegan", budgetTier: 1 }),
-    );
+    const rows = browseDishes(filters({ category: "main", pattern: "vegan", budgetTier: 1 }));
     expect(
       rows.every(
         (r) =>
@@ -141,6 +137,33 @@ describe("dishIdeaFor — the plan's dish idea", () => {
     expect(picks.size).toBeGreaterThan(1);
   });
 
+  it("never repeats a dish across a day's meals when the used ids are threaded through (P3)", () => {
+    const p = profile({ pattern: "eggetarian" });
+    for (const day of DAYS) {
+      /* The defect, pinned: lunch and dinner share a category and a
+         rotation order, so unthreaded picks are the same dish. */
+      expect(dishIdeaFor(p, day, "lunch")!.id).toBe(dishIdeaFor(p, day, "dinner")!.id);
+      /* The section's fix: pick in meal order, excluding each pick
+         from the next slot — the day's ideas are then all distinct. */
+      const used = new Set<string>();
+      const picks: string[] = [];
+      for (const meal of ["breakfast", "lunch", "dinner"] as const) {
+        const idea = dishIdeaFor(p, day, meal, undefined, used);
+        if (!idea) continue;
+        picks.push(idea.id);
+        used.add(idea.id);
+      }
+      expect(picks.length).toBe(3);
+      expect(new Set(picks).size).toBe(picks.length);
+      /* Excluding the day's top pick moves lunch to the next qualifier
+         rather than repeating it. */
+      const top = dishIdeaFor(p, day, "lunch")!;
+      const next = dishIdeaFor(p, day, "lunch", undefined, new Set([top.id]));
+      expect(next).not.toBeNull();
+      expect(next!.id).not.toBe(top.id);
+    }
+  });
+
   it("suits the person's pattern — an eggetarian never gets a flesh dish", () => {
     const p = profile({ pattern: "eggetarian" });
     for (const day of DAYS) {
@@ -160,9 +183,7 @@ describe("dishIdeaFor — the plan's dish idea", () => {
     for (const day of DAYS) {
       const idea = dishIdeaFor(p, day, "lunch");
       expect(idea).not.toBeNull();
-      const lineNames = idea!.lines.map(
-        (line) => findDishLineName(line.foodId),
-      );
+      const lineNames = idea!.lines.map((line) => findDishLineName(line.foodId));
       expect(lineNames.some((name) => name.includes("lentils"))).toBe(false);
     }
     expect(dishIdeaFor(p, "2026-11-16", "lunch")!.id).not.toBe("dish-masoor-dal-tadka");

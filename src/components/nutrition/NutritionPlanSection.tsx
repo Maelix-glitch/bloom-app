@@ -13,6 +13,12 @@
  * through the same goal source the engine reads (see usePlan.setGoal)
  * and never regenerate silently — the plan goes stale by name until
  * the explicit Compose again tap.
+ *
+ * P3: a meal card's header shows the composed sum of its listed
+ * suggestions — never the meal's target split dressed up as a total
+ * (the day's targets stay in the section header as the guide) — and
+ * the day's dish ideas are picked once, in meal order, each excluded
+ * from the next slot so the same dish is never offered twice in a day.
  */
 
 import { useMemo, useState } from "react";
@@ -178,9 +184,8 @@ export function NutritionPlanSection() {
             ))}
             {refusal.requiresProfessionalReview ? (
               <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
-                The right next step is a conversation with a qualified professional — your
-                doctor or a registered dietitian — who can set targets with your full picture
-                in view.
+                The right next step is a conversation with a qualified professional — your doctor or
+                a registered dietitian — who can set targets with your full picture in view.
               </p>
             ) : null}
             <p className="nut-note">
@@ -233,8 +238,8 @@ export function NutritionPlanSection() {
           </h2>
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             Bloom computes your daily targets deterministically — no AI, no invented numbers —
-            splits them across your meals, and suggests foods only from your own foods and
-            USDA reference data, each one labelled with its source.
+            splits them across your meals, and suggests foods only from your own foods and USDA
+            reference data, each one labelled with its source.
           </p>
           <GoalChips currentGoal={chipGoal} onSelect={setGoal} />
           <div className="mt-4">
@@ -259,8 +264,8 @@ export function NutritionPlanSection() {
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             It aimed at ~{Math.round(plan.targets.kcal)} kcal and{" "}
             {formatGrams(plan.targets.proteinG)} g of protein for{" "}
-            {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day — create
-            today's to follow it now.
+            {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day — create today's
+            to follow it now.
           </p>
           <div className="mt-4">
             <Button type="button" onClick={() => generate()}>
@@ -273,6 +278,23 @@ export function NutritionPlanSection() {
   }
 
   const { plan, staleness } = state;
+
+  /* The day's dish ideas, picked in meal order with each pick excluded
+     from the next (P3): lunch and dinner draw on the same dish
+     category and the same day rotation, so independent per-card picks
+     served the same dish twice in one day. */
+  const dishIdeas = new Map<PlanMeal["meal"], Dish>();
+  {
+    const usedDishIds = new Set<string>();
+    for (const meal of plan.meals) {
+      if (meal.meal === "snack") continue;
+      const idea = dishIdeaFor(profile, plan.day, meal.meal, undefined, usedDishIds);
+      if (idea) {
+        dishIdeas.set(meal.meal, idea);
+        usedDishIds.add(idea.id);
+      }
+    }
+  }
 
   const suggestionRow = (meal: PlanMeal, suggestion: PlanSuggestion) => {
     const isLogged = suggestionLogged(meal, suggestion);
@@ -324,22 +346,27 @@ export function NutritionPlanSection() {
     const sums = sumNutrients(meal.suggestions.map((s) => s.nutrients));
     const allLogged =
       meal.suggestions.length > 0 && meal.suggestions.every((s) => suggestionLogged(meal, s));
-    const layered =
-      meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
+    const layered = meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
     return (
       <article key={meal.meal} className="nut-card" aria-label={`${MEAL_LABEL[meal.meal]} plan`}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="eyebrow">{MEAL_LABEL[meal.meal]}</p>
             {dish ? (
-              <h3 className="mt-1.5 truncate font-display text-[21px] leading-tight text-foreground" title={dish}>
+              <h3
+                className="mt-1.5 truncate font-display text-[21px] leading-tight text-foreground"
+                title={dish}
+              >
                 {dish}
               </h3>
             ) : null}
           </div>
+          {/* The header shows what the listed suggestions actually add
+              up to (P3) — the meal's target share lives in the section
+              header's day guide, not dressed up as this card's total. */}
           <p className="shrink-0 text-right">
             <span className="font-display text-[20px] text-foreground tabular-nums">
-              {Math.round(meal.kcal)}
+              {Math.round(sums.kcal)}
             </span>{" "}
             <span className="text-[length:var(--text-caption)] text-muted-foreground">kcal</span>
           </p>
@@ -405,7 +432,7 @@ export function NutritionPlanSection() {
      qualifying dish → no row — the card is never padded. */
   const dishIdeaRow = (meal: PlanMeal) => {
     if (meal.meal === "snack") return null;
-    const idea = dishIdeaFor(profile, plan.day, meal.meal);
+    const idea = dishIdeas.get(meal.meal) ?? null;
     if (!idea) return null;
     const nutrients = dishNutrients(idea).nutrients;
     const logged = nutrition.entries.some(
@@ -426,8 +453,8 @@ export function NutritionPlanSection() {
               {idea.name.en} <span className="nut-hindi">({idea.name.hindi})</span>
             </p>
             <p className="mt-0.5 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
-              {Math.round(nutrients.kcal)} kcal · {formatGrams(nutrients.proteinG)} g protein
-              per serving
+              {Math.round(nutrients.kcal)} kcal · {formatGrams(nutrients.proteinG)} g protein per
+              serving
             </p>
           </div>
           {logged ? (
@@ -502,17 +529,16 @@ export function NutritionPlanSection() {
           {staleness.changed.filter((c) => c !== "the plan method improved").length > 0 ? (
             <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
               Since this plan was made,{" "}
-              {joinNames(staleness.changed.filter((c) => c !== "the plan method improved"))}{" "}
-              changed — the plan below still uses the older numbers. Regenerate to bring it up
-              to date.
+              {joinNames(staleness.changed.filter((c) => c !== "the plan method improved"))} changed
+              — the plan below still uses the older numbers. Regenerate to bring it up to date.
             </p>
           ) : null}
         </div>
       ) : null}
 
       <p className="nut-note">
-        Targets are estimates from your body numbers (Mifflin–St Jeor) — a guide for the day,
-        not a prescription.
+        Targets are estimates from your body numbers (Mifflin–St Jeor) — a guide for the day, not a
+        prescription.
         {plan.targetsSource === "body_profile"
           ? " This plan is built from your Trackers body numbers — the same targets that page shows."
           : ""}
@@ -549,8 +575,8 @@ export function NutritionPlanSection() {
       ) : null}
 
       <p className="nut-note">
-        Plans are composed from USDA-labelled foods and your own, against your targets. They
-        are a starting point — log what you actually eat and your totals follow that.
+        Plans are composed from USDA-labelled foods and your own, against your targets. They are a
+        starting point — log what you actually eat and your totals follow that.
       </p>
     </section>
   );
