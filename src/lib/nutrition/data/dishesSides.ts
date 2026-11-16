@@ -33,6 +33,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Bhindi Fry", hindi: "भिंडी फ्राई" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169260", grams: 600 }, // okra
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -59,6 +60,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Baingan Masala", hindi: "बैंगन मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2685577", grams: 550 }, // eggplant
       { foodId: "usda-790646", grams: 150 }, // onion
@@ -90,6 +92,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Gajar Matar", hindi: "गाजर मटर" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2258586", grams: 400 }, // carrot
       { foodId: "usda-170419", grams: 300 }, // green peas
@@ -119,6 +122,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Beans Poriyal", hindi: "बीन्स पोरियाल" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346400", grams: 500 }, // green beans
       { foodId: "usda-170169", grams: 40 }, // coconut (grated in the method)
@@ -143,6 +147,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Cabbage Poriyal", hindi: "पत्तागोभी पोरियाल" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346407", grams: 600 }, // cabbage
       { foodId: "usda-170169", grams: 40 }, // coconut (grated in the method)
@@ -168,6 +173,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Aloo Beans", hindi: "आलू बीन्स" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 400 }, // potato
       { foodId: "usda-2346400", grams: 300 }, // green beans
@@ -196,6 +202,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Karela Fry", hindi: "करेला फ्राई" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168393", grams: 500 }, // bitter gourd
       { foodId: "usda-790646", grams: 200 }, // onion
@@ -222,6 +229,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Palak Saag", hindi: "पालक साग" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168462", grams: 600 }, // spinach
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -250,6 +258,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Sookhi Gobi Masala", hindi: "सूखी गोबी मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2685573", grams: 650 }, // cauliflower
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -280,6 +289,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Broccoli Masala", hindi: "ब्रोकली मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-321900", grams: 600 }, // broccoli
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -307,6 +317,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Mixed Veg Dry", hindi: "मिक्स वेज सब्ज़ी" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2258586", grams: 150 }, // carrot
       { foodId: "usda-2346400", grams: 200 }, // green beans
@@ -338,6 +349,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Aloo Fry", hindi: "आलू फ्राई" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 700 }, // potato
       { foodId: "usda-172337", grams: 30 }, // mustard oil
@@ -365,6 +377,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shakarkandi Masala", hindi: "शकरकंदी मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346404", grams: 700 }, // sweet potato
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -392,6 +405,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Mushroom Pepper Fry", hindi: "मशरूम काली मिर्च फ्राई" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-1750347", grams: 500 }, // mushrooms
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -420,6 +434,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Sprouted Moong", hindi: "अंकुरित मूंग" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 200 }, // mung beans (sprouted in the method)
       { foodId: "usda-2346406", grams: 150 }, // cucumber
@@ -447,6 +462,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Lobia Usal", hindi: "लोबिया उसल" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-173758", grams: 200 }, // cowpeas (lobia), dry
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -478,6 +494,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Sookha Chana", hindi: "सूखा चना" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2644282", grams: 200 }, // chickpeas, dry
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -508,6 +525,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Masala Corn", hindi: "मसाला कॉर्न" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2710826", grams: 500 }, // sweet corn
       { foodId: "usda-173410", grams: 15 }, // butter
@@ -533,6 +551,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shimla Mirch Masala", hindi: "शिमला मिर्च मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170427", grams: 400 }, // green pepper
       { foodId: "usda-170108", grams: 200 }, // red pepper
@@ -562,6 +581,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Onion-Tomato Masala", hindi: "प्याज़-टमाटर मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-790646", grams: 400 }, // onion
       { foodId: "usda-170457", grams: 400 }, // tomato
@@ -592,6 +612,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Soya Masala", hindi: "सोया मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174270", grams: 150 }, // soybeans, dry
       { foodId: "usda-790646", grams: 150 }, // onion
@@ -622,6 +643,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Corn Palak", hindi: "कॉर्न पालक" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168462", grams: 400 }, // spinach
       { foodId: "usda-2710826", grams: 300 }, // sweet corn
@@ -649,6 +671,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Vangi Masala", hindi: "वांगी मसाला" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2685577", grams: 600 }, // eggplant
       { foodId: "usda-172430", grams: 40 }, // peanuts (ground in the method)
@@ -679,6 +702,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shahi Mixed Veg", hindi: "शाही मिक्स वेज" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-328841", grams: 150 }, // cottage cheese (paneer stand-in)
       { foodId: "usda-2515374", grams: 30 }, // cashews (ground in the method)
@@ -716,6 +740,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Aloo Matar Dry", hindi: "आलू मटर" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 400 }, // potato
       { foodId: "usda-170419", grams: 250 }, // green peas
@@ -746,6 +771,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shahi Paneer-Style (Cottage Cheese)", hindi: "शाही पनीर" },
     category: "side",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-328841", grams: 250 }, // cottage cheese (paneer stand-in)
       { foodId: "usda-170457", grams: 250 }, // tomato
@@ -783,6 +809,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Coconut Chutney", hindi: "नारियल चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170169", grams: 100 }, // coconut
       { foodId: "usda-170497", grams: 5 }, // green chilli
@@ -806,6 +833,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Tomato Chutney", hindi: "टमाटर चटनी" },
     category: "chutney",
     servings: 6,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170457", grams: 250 }, // tomato
       { foodId: "usda-790646", grams: 50 }, // onion
@@ -833,6 +861,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Peanut Chutney", hindi: "मूंगफली चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-172430", grams: 50 }, // peanuts
       { foodId: "usda-170169", grams: 20 }, // coconut
@@ -859,6 +888,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Imli Chutney", hindi: "इमली चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-167763", grams: 60 }, // tamarind
       { foodId: "usda-334247", grams: 50 }, // sugar (the set has no jaggery — see header)
@@ -882,6 +912,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Onion Chutney", hindi: "प्याज़ चटनी" },
     category: "chutney",
     servings: 6,
+    cuisine: "india",
     lines: [
       { foodId: "usda-790646", grams: 200 }, // onion
       { foodId: "usda-170457", grams: 80 }, // tomato
@@ -908,6 +939,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Lahsun Chutney (Dry Garlic)", hindi: "लहसुन चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-1104647", grams: 50 }, // garlic
       { foodId: "usda-170150", grams: 25 }, // sesame seeds
@@ -932,6 +964,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Dhaniya Chutney", hindi: "धनिया चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169997", grams: 80 }, // fresh coriander leaves
       { foodId: "usda-170457", grams: 60 }, // tomato
@@ -958,6 +991,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Pudina Dahi Dip", hindi: "पुदीना दही डिप" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 180 }, // yogurt (dahi)
       { foodId: "usda-173475", grams: 20 }, // mint leaves
@@ -982,6 +1016,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Chilli-Garlic Oil", hindi: "मिर्च-लहसुन तेल" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-171016", grams: 35 }, // sesame oil
       { foodId: "usda-1104647", grams: 30 }, // garlic
@@ -1005,6 +1040,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Til Chutney", hindi: "तिल चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170150", grams: 45 }, // sesame seeds
       { foodId: "usda-170169", grams: 20 }, // coconut
@@ -1030,6 +1066,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Mango Chutney", hindi: "आम की चटनी" },
     category: "chutney",
     servings: 6,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169910", grams: 250 }, // mango
       { foodId: "usda-334247", grams: 40 }, // sugar
@@ -1055,6 +1092,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Sunflower Seed Chutney", hindi: "सूरजमुखी के बीज की चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2515381", grams: 45 }, // sunflower seeds
       { foodId: "usda-170169", grams: 25 }, // coconut
@@ -1079,6 +1117,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shahi Coconut Chutney", hindi: "शाही नारियल चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170169", grams: 70 }, // coconut
       { foodId: "usda-2515374", grams: 20 }, // cashews
@@ -1107,6 +1146,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Boondi Raita", hindi: "बूंदी रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 60 }, // besan (chickpea flour)
       { foodId: "usda-171025", grams: 15 }, // sunflower oil (what the boondi absorbs)
@@ -1133,6 +1173,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Mixed Veg Raita", hindi: "मिक्स वेज रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 300 }, // yogurt (dahi)
       { foodId: "usda-2346406", grams: 80 }, // cucumber
@@ -1160,6 +1201,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Onion-Tomato Raita", hindi: "प्याज़-टमाटर रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 350 }, // yogurt (dahi)
       { foodId: "usda-790646", grams: 80 }, // onion
@@ -1184,6 +1226,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Fruit Raita", hindi: "फ्रूट रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 300 }, // yogurt (dahi)
       { foodId: "usda-173944", grams: 100 }, // banana
@@ -1209,6 +1252,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Palak Raita", hindi: "पालक रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 350 }, // yogurt (dahi)
       { foodId: "usda-168462", grams: 150 }, // spinach
@@ -1233,6 +1277,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Aloo Raita", hindi: "आलू रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 300 }, // yogurt (dahi)
       { foodId: "usda-2346401", grams: 200 }, // potato
@@ -1258,6 +1303,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Pineapple Raita", hindi: "अनानास रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 350 }, // yogurt (dahi)
       { foodId: "usda-169124", grams: 150 }, // pineapple
@@ -1282,6 +1328,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Burhani Raita", hindi: "बुरहानी रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 400 }, // yogurt (dahi)
       { foodId: "usda-1104647", grams: 8 }, // garlic
@@ -1307,6 +1354,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Gajar Raita", hindi: "गाजर रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 350 }, // yogurt (dahi)
       { foodId: "usda-2258586", grams: 150 }, // carrot
@@ -1332,6 +1380,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Greek Yogurt Raita", hindi: "ग्रीक दही रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-330137", grams: 350 }, // Greek yogurt
       { foodId: "usda-2346406", grams: 120 }, // cucumber
@@ -1357,6 +1406,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Corn Raita", hindi: "कॉर्न रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 350 }, // yogurt (dahi)
       { foodId: "usda-2710826", grams: 150 }, // sweet corn
@@ -1383,6 +1433,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Rice Kheer", hindi: "चावल की खीर" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 60 }, // white rice
       { foodId: "usda-322892", grams: 800 }, // milk
@@ -1407,6 +1458,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Sooji Halwa", hindi: "सूजी का हलवा" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168933", grams: 150 }, // semolina (sooji)
       { foodId: "usda-171314", grams: 45 }, // ghee
@@ -1432,6 +1484,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Gajar Halwa", hindi: "गाजर का हलवा" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2258586", grams: 600 }, // carrot
       { foodId: "usda-322892", grams: 400 }, // milk
@@ -1457,6 +1510,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Moong Dal Halwa", hindi: "मूंग दाल का हलवा" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 150 }, // mung beans (moong dal)
       { foodId: "usda-171314", grams: 55 }, // ghee
@@ -1481,6 +1535,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Fruit Salad with Spiced Yogurt", hindi: "मसालेदार दही फ्रूट सलाद" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-173944", grams: 150 }, // banana
       { foodId: "usda-171688", grams: 150 }, // apple
@@ -1507,6 +1562,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Besan Ladoo", hindi: "बेसन के लड्डू" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 150 }, // besan (chickpea flour)
       { foodId: "usda-171314", grams: 60 }, // ghee
@@ -1530,6 +1586,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Coconut Ladoo", hindi: "नारियल के लड्डू" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170169", grams: 200 }, // coconut
       { foodId: "usda-322892", grams: 150 }, // milk
@@ -1553,6 +1610,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shrikhand", hindi: "श्रीखंड" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-330137", grams: 400 }, // Greek yogurt (the hung-curd stand-in)
       { foodId: "usda-334247", grams: 60 }, // sugar
@@ -1577,6 +1635,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Atta Halwa", hindi: "आटे का हलवा" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 120 }, // whole wheat flour (atta)
       { foodId: "usda-171314", grams: 50 }, // ghee
@@ -1598,6 +1657,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Oats Kheer", hindi: "जई की खीर" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346396", grams: 80 }, // rolled oats
       { foodId: "usda-322892", grams: 700 }, // milk
@@ -1622,6 +1682,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shahi Kheer", hindi: "शाही खीर" },
     category: "dessert",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 50 }, // white rice
       { foodId: "usda-322892", grams: 800 }, // milk
@@ -1653,6 +1714,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Masala Chaas", hindi: "मसाला छाछ" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 200 }, // yogurt (dahi)
       { foodId: "usda-170923", grams: 1 }, // cumin seeds (roasted in the method)
@@ -1677,6 +1739,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Sweet Lassi", hindi: "मीठी लस्सी" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 300 }, // yogurt (dahi)
       { foodId: "usda-322892", grams: 100 }, // milk
@@ -1697,6 +1760,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Namkeen Lassi", hindi: "नमकीन लस्सी" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 300 }, // yogurt (dahi)
       { foodId: "usda-173468", grams: 2 }, // salt
@@ -1718,6 +1782,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Mango Lassi", hindi: "मैंगो लस्सी" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169910", grams: 200 }, // mango
       { foodId: "usda-2259793", grams: 250 }, // yogurt (dahi)
@@ -1739,6 +1804,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Shikanji", hindi: "शिकंजी" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-167746", grams: 60 }, // lemon
       { foodId: "usda-334247", grams: 25 }, // sugar
@@ -1761,6 +1827,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Haldi Doodh", hindi: "हल्दी दूध" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-322892", grams: 400 }, // milk
       { foodId: "usda-172231", grams: 3 }, // turmeric
@@ -1784,6 +1851,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Jeera Shikanji", hindi: "जीरा शिकंजी" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170923", grams: 4 }, // cumin seeds (roasted in the method)
       { foodId: "usda-167746", grams: 20 }, // lemon (for its juice)
@@ -1806,6 +1874,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Badam Doodh", hindi: "बादाम दूध" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-322892", grams: 350 }, // milk
       { foodId: "usda-2346393", grams: 20 }, // almonds
@@ -1832,6 +1901,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Pudina Chaas", hindi: "पुदीना छाछ" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 200 }, // yogurt (dahi)
       { foodId: "usda-173475", grams: 15 }, // mint leaves
@@ -1855,6 +1925,7 @@ export const DISHES_SIDES: Dish[] = [
     name: { en: "Tarbooz Sharbat", hindi: "तरबूज़ शरबत" },
     category: "drink",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-167765", grams: 400 }, // watermelon
       { foodId: "usda-167746", grams: 15 }, // lemon (for its juice)

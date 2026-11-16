@@ -81,10 +81,11 @@ export interface Dish {
    *  50 g extra paneer"). Required when `enriched` is true — an
    *  unstated boost is not a claim Bloom makes. */
   enrichment?: string;
-  /** The cuisine the dish belongs to, as a free-form tag ("kerala",
-   *  "north-indian", "south-indian", "pan-indian", "international").
-   *  Optional: dishes authored before the tag existed carry none, and
-   *  absence claims nothing about the dish. */
+  /** The cuisine the dish belongs to, as a free-form tag. The shipped
+   *  library uses exactly three values — "india", "kerala" and
+   *  "international" — and every library dish carries one (pinned in
+   *  dishLibrary.test.ts); the field stays a free string so stored
+   *  user dishes may name finer cuisines ("north-indian"). */
   cuisine?: string;
 }
 

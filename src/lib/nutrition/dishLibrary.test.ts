@@ -44,6 +44,22 @@ describe("the dish library", () => {
     }
   });
 
+  it("tags every dish with a cuisine from the three-value taxonomy", () => {
+    /* Counts computed from the assembled library and pinned: the
+       original 229 dishes and the India wave carry "india" (371), the
+       Kerala wave is its own shelf (131), and the four international
+       waves carry "international" (538). No dish is untagged, and no
+       dish carries a value outside the taxonomy. */
+    const counts: Record<string, number> = { india: 0, kerala: 0, international: 0 };
+    for (const dish of DISH_LIBRARY) {
+      expect(dish.cuisine, dish.id).toBeDefined();
+      expect(Object.keys(counts), dish.id).toContain(dish.cuisine);
+      const tag = dish.cuisine as string;
+      counts[tag] = (counts[tag] ?? 0) + 1;
+    }
+    expect(counts).toEqual({ india: 371, kerala: 131, international: 538 });
+  });
+
   it("covers every category", () => {
     for (const category of DISH_CATEGORIES) {
       const count = DISH_LIBRARY.filter((d) => d.category === category).length;

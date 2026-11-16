@@ -2,7 +2,7 @@
 /**
  * Nutrition D4 — the Dishes section: the library rendered with
  * bilingual names and computed per-serving numbers, the lib's filters
- * on the chips that remain (search, category, enriched), the detail
+ * on the chips that remain (search, category, cuisine, enriched), the detail
  * sheet (recipe provenance, friendly ingredient names, method), and
  * logging a dish into the real food log as a recipe-provenance
  * snapshot entry. Which dishes are on the shelf is governed by the
@@ -68,6 +68,7 @@ function seedAnswers(answers: Partial<AssessmentState["answers"]>): void {
 
 const dal = findDish("dish-masoor-dal-tadka")!;
 const chickenCurry = findDish("dish-chicken-curry")!;
+const avial = findDish("dish-avial")!;
 
 function cardOf(dish: Dish) {
   return screen.getByRole("button", { name: `${dish.name.en} — view recipe` });
@@ -96,6 +97,65 @@ describe("DishesSection — browsing", () => {
     expect(
       screen.getByRole("button", { name: /Mint-Coriander Chutney — view recipe/ }),
     ).toBeTruthy();
+  });
+
+  it("offers cuisine chips with live counts counted from the shelf", () => {
+    render(<DishesSection day={todayLocal()} />);
+    const group = screen.getByRole("group", { name: "Cuisine" });
+    expect(within(group).getByRole("button", { name: "All · 1040" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "Indian · 371" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "Kerala · 131" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "International · 538" })).toBeTruthy();
+  });
+
+  it("selecting a cuisine shows only that cuisine's dishes", () => {
+    render(<DishesSection day={todayLocal()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Kerala · 131" }));
+    expect(screen.getByText(/131 dishes/)).toBeTruthy();
+    expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
+    expect(cardOf(avial)).toBeTruthy();
+    /* An Indian dish and an international dish both fall away. */
+    expect(screen.queryByRole("button", { name: `${dal.name.en} — view recipe` })).toBeNull();
+    expect(
+      screen.queryByRole("button", {
+        name: "Herb-Grilled Chicken with Broccoli — view recipe",
+      }),
+    ).toBeNull();
+  });
+
+  it("the cuisine filter composes with search — an impossible pairing is honestly empty", () => {
+    render(<DishesSection day={todayLocal()} />);
+    fireEvent.click(screen.getByRole("button", { name: "International · 538" }));
+    fireEvent.change(screen.getByLabelText("Search dishes"), {
+      target: { value: "masoor" },
+    });
+    /* Masoor dal is Indian — under International there is nothing to
+       show, and the section says so instead of padding the list. */
+    expect(screen.getByText(/0 dishes/)).toBeTruthy();
+    expect(screen.getByText(/No dishes match — try clearing a filter/)).toBeTruthy();
+    /* Clearing restores the whole library, cuisine included. */
+    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.getByText(/1040 dishes/)).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "All · 1040" }).getAttribute("aria-pressed"),
+    ).toBe("true");
+  });
+
+  it("the cuisine filter sits under the silent pattern governance", () => {
+    seedAnswers({ dietaryPattern: "vegan" });
+    render(<DishesSection day={todayLocal()} />);
+    /* The chip counts are counted from the governed shelf: of the 131
+       Kerala dishes, 76 suit a vegan pattern. */
+    fireEvent.click(screen.getByRole("button", { name: "Kerala · 76" }));
+    expect(screen.getByText(/76 dishes/)).toBeTruthy();
+    expect(screen.getByText(/showing what suits you — vegan pattern/)).toBeTruthy();
+    expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
+    /* Avial carries curd — the pattern keeps it off the shelf even
+       inside its own cuisine. */
+    expect(screen.queryByRole("button", { name: "Avial — view recipe" })).toBeNull();
+    /* And still no pattern or budget controls appear alongside. */
+    expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
   });
 
   it("searches by Hindi name", () => {

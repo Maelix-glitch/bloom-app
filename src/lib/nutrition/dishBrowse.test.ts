@@ -48,6 +48,23 @@ describe("browseDishes — the Dishes section's filter logic", () => {
     expect(rows.every((r) => r.dish.category === "chutney")).toBe(true);
   });
 
+  it("filters by cuisine — only dishes carrying the tag", () => {
+    const kerala = browseDishes(filters({ cuisine: "kerala" }));
+    expect(kerala).toHaveLength(131);
+    expect(kerala.every((r) => r.dish.cuisine === "kerala")).toBe(true);
+    expect(kerala.map((r) => r.dish.id)).toContain("dish-avial");
+    expect(kerala.map((r) => r.dish.id)).not.toContain("dish-masoor-dal-tadka");
+  });
+
+  it("the cuisine filter composes with the other filters — it only ever narrows", () => {
+    const india = browseDishes(filters({ cuisine: "india", query: "masoor" }));
+    expect(india.map((r) => r.dish.id)).toContain("dish-masoor-dal-tadka");
+    /* The same search under another cuisine is honestly empty. */
+    expect(browseDishes(filters({ cuisine: "international", query: "masoor" }))).toEqual([]);
+    /* And it sits under the pattern judgement like every other filter. */
+    expect(browseDishes(filters({ cuisine: "kerala", pattern: "vegan" }))).toHaveLength(76);
+  });
+
   it("filters by pattern — only dishes whose derived patterns include it", () => {
     const rows = browseDishes(filters({ pattern: "vegan" }));
     expect(rows.length).toBeGreaterThan(0);

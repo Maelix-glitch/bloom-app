@@ -26,6 +26,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Vegetable Pulao", hindi: "सब्ज़ी पुलाव" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-170419", grams: 100 }, // green peas
@@ -55,6 +56,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Peas Pulao", hindi: "मटर पुलाव" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-170419", grams: 150 }, // green peas
@@ -80,6 +82,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Mushroom Pulao", hindi: "मशरूम पुलाव" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-1750347", grams: 250 }, // button mushrooms
@@ -109,6 +112,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Moong Dal Khichdi", hindi: "मूंग दाल खिचड़ी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 200 }, // white rice, dry
       { foodId: "usda-174256", grams: 150 }, // mung beans (moong dal), dry
@@ -134,6 +138,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Khichdi", hindi: "मसाला खिचड़ी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 200 }, // white rice, dry
       { foodId: "usda-174256", grams: 120 }, // mung beans (moong dal), dry
@@ -168,6 +173,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Vegetable Biryani", hindi: "सब्ज़ी बिरयानी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-2259793", grams: 150 }, // yogurt (dahi)
@@ -207,6 +213,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Egg Biryani", hindi: "अंडा बिरयानी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-171287", grams: 300 }, // eggs (6 large)
@@ -242,6 +249,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Chicken Biryani", hindi: "चिकन बिरयानी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-2646171", grams: 400 }, // chicken thigh, boneless
@@ -280,6 +288,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Chicken Pulao", hindi: "चिकन पुलाव" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-2646170", grams: 300 }, // chicken breast, boneless
@@ -311,6 +320,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Lemon Rice", hindi: "नींबू चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-171410", grams: 20 }, // peanut (groundnut) oil
@@ -340,6 +350,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Tamarind Rice (Puliyodharai)", hindi: "इमली चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-167763", grams: 40 }, // tamarind
@@ -370,6 +381,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Curd Rice", hindi: "दही चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 250 }, // white rice, dry
       { foodId: "usda-2259793", grams: 400 }, // yogurt (dahi)
@@ -399,6 +411,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Tomato Rice", hindi: "टमाटर चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-170457", grams: 300 }, // tomato
@@ -429,6 +442,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Coconut Rice", hindi: "नारियल चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-170169", grams: 80 }, // fresh coconut
@@ -457,6 +471,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Jeera Matar Rice", hindi: "जीरा मटर चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-170419", grams: 120 }, // green peas
@@ -483,6 +498,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Ven Pongal", hindi: "वेन पोंगल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 200 }, // white rice, dry
       { foodId: "usda-174256", grams: 100 }, // mung beans (moong dal), dry
@@ -509,6 +525,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Soya Pulao", hindi: "सोया पुलाव" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 250 }, // white rice, dry
       { foodId: "usda-174270", grams: 100 }, // soybeans, dry
@@ -538,6 +555,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Millet Khichdi", hindi: "बाजरा खिचड़ी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512379", grams: 200 }, // millet, whole grain
       { foodId: "usda-174256", grams: 100 }, // mung beans (moong dal), dry
@@ -565,6 +583,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Egg Fried Rice", hindi: "अंडा फ्राइड राइस" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-171287", grams: 200 }, // eggs (4 large)
@@ -594,6 +613,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Cottage Cheese Pulao", hindi: "कॉटेज चीज़ पुलाव" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-328841", grams: 200 }, // cottage cheese (paneer stand-in)
@@ -624,6 +644,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Enriched Vegetable Biryani", hindi: "खास सब्ज़ी बिरयानी" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-328841", grams: 150 }, // cottage cheese (paneer stand-in)
@@ -663,6 +684,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Phulka (Roti)", hindi: "फुल्का रोटी" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
       { foodId: "usda-171314", grams: 4 }, // ghee, for brushing
@@ -683,6 +705,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Whole Wheat Paratha", hindi: "गेहूं का पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 280 }, // whole wheat flour (atta)
       { foodId: "usda-171314", grams: 30 }, // ghee
@@ -703,6 +726,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Aloo Paratha", hindi: "आलू पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
       { foodId: "usda-2346401", grams: 300 }, // potato
@@ -731,6 +755,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Gobi Paratha", hindi: "गोबी पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
       { foodId: "usda-2685573", grams: 300 }, // cauliflower
@@ -757,6 +782,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Poori", hindi: "पूरी" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
       { foodId: "usda-168933", grams: 20 }, // semolina (sooji), for crispness
@@ -778,6 +804,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Bhatura", hindi: "भटूरा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168936", grams: 240 }, // refined wheat flour (maida)
       { foodId: "usda-2259793", grams: 100 }, // yogurt (dahi)
@@ -801,6 +828,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Naan", hindi: "नान" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168936", grams: 280 }, // refined wheat flour (maida)
       { foodId: "usda-2259793", grams: 80 }, // yogurt (dahi)
@@ -824,6 +852,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Garlic Naan", hindi: "लहसुन नान" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168936", grams: 280 }, // refined wheat flour (maida)
       { foodId: "usda-1104647", grams: 25 }, // garlic
@@ -848,6 +877,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Cheese Naan", hindi: "चीज़ नान" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168936", grams: 280 }, // refined wheat flour (maida)
       { foodId: "usda-329370", grams: 120 }, // mozzarella
@@ -873,6 +903,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Missi Roti", hindi: "मिस्सी रोटी" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 120 }, // chickpea flour (besan)
       { foodId: "usda-168893", grams: 120 }, // whole wheat flour (atta)
@@ -900,6 +931,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Makki di Roti", hindi: "मक्की दी रोटी" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168867", grams: 280 }, // cornmeal (makki ka atta)
       { foodId: "usda-171314", grams: 15 }, // ghee
@@ -920,6 +952,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Paratha", hindi: "मसाला पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 280 }, // whole wheat flour (atta)
       { foodId: "usda-171314", grams: 25 }, // ghee
@@ -945,6 +978,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Spinach Paratha (Palak Paratha)", hindi: "पालक पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 260 }, // whole wheat flour (atta)
       { foodId: "usda-168462", grams: 150 }, // spinach
@@ -969,6 +1003,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Lachha Paratha", hindi: "लच्छा पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 280 }, // whole wheat flour (atta)
       { foodId: "usda-171314", grams: 40 }, // ghee
@@ -989,6 +1024,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Onion Paratha (Pyaaz Paratha)", hindi: "प्याज़ पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
       { foodId: "usda-790646", grams: 200 }, // onion
@@ -1014,6 +1050,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Cottage Cheese Paratha", hindi: "कॉटेज चीज़ पराठा" },
     category: "bread",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
       { foodId: "usda-328841", grams: 200 }, // cottage cheese (paneer stand-in)
@@ -1041,6 +1078,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Rava Upma", hindi: "रवा उपमा" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168933", grams: 200 }, // semolina (sooji)
       { foodId: "usda-171025", grams: 15 }, // sunflower oil
@@ -1071,6 +1109,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Vegetable Upma", hindi: "सब्ज़ी उपमा" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168933", grams: 200 }, // semolina (sooji)
       { foodId: "usda-2258586", grams: 80 }, // carrot
@@ -1102,6 +1141,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Idli", hindi: "इडली" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169714", grams: 200 }, // rice flour
       { foodId: "usda-174259", grams: 100 }, // black gram (urad dal), dry
@@ -1124,6 +1164,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Dosa", hindi: "डोसा" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169714", grams: 200 }, // rice flour
       { foodId: "usda-174259", grams: 80 }, // black gram (urad dal), dry
@@ -1147,6 +1188,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Dosa", hindi: "मसाला डोसा" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169714", grams: 200 }, // rice flour
       { foodId: "usda-174259", grams: 80 }, // black gram (urad dal), dry
@@ -1177,6 +1219,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Onion Uttapam", hindi: "प्याज़ उत्तपम" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169714", grams: 200 }, // rice flour
       { foodId: "usda-174259", grams: 80 }, // black gram (urad dal), dry
@@ -1203,6 +1246,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Adai-Style Mixed Dal Dosa", hindi: "अदाई डोसा" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169714", grams: 100 }, // rice flour
       { foodId: "usda-174256", grams: 60 }, // mung beans (moong dal), dry
@@ -1230,6 +1274,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Besan Chilla", hindi: "बेसन चीला" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 120 }, // chickpea flour (besan)
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1257,6 +1302,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Moong Dal Chilla", hindi: "मूंग दाल चीला" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 200 }, // mung beans (moong dal), dry
       { foodId: "usda-168462", grams: 60 }, // spinach
@@ -1283,6 +1329,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Cottage Cheese Besan Chilla", hindi: "कॉटेज चीज़ बेसन चीला" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 120 }, // chickpea flour (besan)
       { foodId: "usda-328841", grams: 100 }, // cottage cheese (paneer stand-in)
@@ -1311,6 +1358,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Oats Porridge with Banana", hindi: "ओट्स पोरिज" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346396", grams: 160 }, // rolled oats
       { foodId: "usda-322892", grams: 400 }, // whole milk
@@ -1334,6 +1382,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Enriched Protein Oats", hindi: "प्रोटीन ओट्स" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346396", grams: 160 }, // rolled oats
       { foodId: "usda-330137", grams: 200 }, // Greek yogurt (hung curd)
@@ -1358,6 +1407,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Oats", hindi: "मसाला ओट्स" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346396", grams: 160 }, // rolled oats
       { foodId: "usda-170419", grams: 60 }, // green peas
@@ -1388,6 +1438,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Overnight Oats", hindi: "रात भर भिगोए ओट्स" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346396", grams: 100 }, // rolled oats
       { foodId: "usda-330137", grams: 200 }, // Greek yogurt (hung curd)
@@ -1412,6 +1463,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Barley Porridge", hindi: "जौ का दलिया" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-170284", grams: 160 }, // barley
       { foodId: "usda-322892", grams: 300 }, // whole milk
@@ -1434,6 +1486,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Quinoa Upma", hindi: "किनोआ उपमा" },
     category: "breakfast",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-168874", grams: 160 }, // quinoa
       { foodId: "usda-170419", grams: 50 }, // green peas
@@ -1463,6 +1516,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Boiled Egg Breakfast Plate", hindi: "उबले अंडे का नाश्ता" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-171287", grams: 200 }, // eggs (4 large)
       { foodId: "usda-170457", grams: 100 }, // tomato
@@ -1485,6 +1539,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Omelette", hindi: "मसाला ऑमलेट" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-171287", grams: 200 }, // eggs (4 large)
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1510,6 +1565,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Egg Bhurji", hindi: "अंडा भुर्जी" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-171287", grams: 200 }, // eggs (4 large)
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -1537,6 +1593,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Sprouted Moong Bowl", hindi: "अंकुरित मूंग कटोरा" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 120 }, // mung beans (moong dal), dry, for sprouting
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1563,6 +1620,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Fruit and Curd Bowl", hindi: "फल दही कटोरा" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 300 }, // yogurt (dahi)
       { foodId: "usda-173944", grams: 120 }, // banana
@@ -1586,6 +1644,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Enriched Fruit and Curd Bowl", hindi: "खास फल दही कटोरा" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-330137", grams: 250 }, // Greek yogurt (hung curd)
       { foodId: "usda-173944", grams: 100 }, // banana
@@ -1611,6 +1670,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Sweet Potato", hindi: "मसाला शकरकंद" },
     category: "breakfast",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346404", grams: 400 }, // sweet potato
       { foodId: "usda-167746", grams: 30 }, // lemon
@@ -1636,6 +1696,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Roasted Chana", hindi: "भुना चना" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2644282", grams: 120 }, // chickpeas (kabuli chana), dry
       { foodId: "usda-170923", grams: 2 }, // cumin seeds
@@ -1657,6 +1718,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Sprouts Chaat", hindi: "अंकुरित मूंग चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 100 }, // mung beans (moong dal), dry, for sprouting
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1683,6 +1745,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Besan Pakora", hindi: "बेसन पकोड़ा" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 150 }, // chickpea flour (besan)
       { foodId: "usda-790646", grams: 150 }, // onion
@@ -1709,6 +1772,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Onion Pakora (Kanda Bhaji)", hindi: "प्याज़ पकोड़ा" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-790646", grams: 400 }, // onion
       { foodId: "usda-174288", grams: 120 }, // chickpea flour (besan)
@@ -1735,6 +1799,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Cottage Cheese Pakora", hindi: "कॉटेज चीज़ पकोड़ा" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 120 }, // chickpea flour (besan)
       { foodId: "usda-328841", grams: 200 }, // cottage cheese (paneer stand-in)
@@ -1761,6 +1826,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Aloo Tikki", hindi: "आलू टिक्की" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 500 }, // potato
       { foodId: "usda-170419", grams: 80 }, // green peas
@@ -1789,6 +1855,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Vegetable Cutlet", hindi: "सब्ज़ी कटलेट" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 400 }, // potato
       { foodId: "usda-2258586", grams: 100 }, // carrot
@@ -1820,6 +1887,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Steamed Besan Dhokla-Style", hindi: "बेसन ढोकला" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 200 }, // chickpea flour (besan)
       { foodId: "usda-2259793", grams: 100 }, // yogurt (dahi)
@@ -1849,6 +1917,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Corn Chaat", hindi: "मकई चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2710826", grams: 300 }, // sweet corn kernels
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1876,6 +1945,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Peanut Chaat", hindi: "मूंगफली चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-172430", grams: 120 }, // peanuts
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1902,6 +1972,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Fruit Chaat", hindi: "फलों की चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-171688", grams: 150 }, // apple
       { foodId: "usda-173944", grams: 120 }, // banana
@@ -1926,6 +1997,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Egg Chaat", hindi: "अंडा चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-171287", grams: 200 }, // eggs (4 large)
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -1952,6 +2024,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Chana Chaat", hindi: "चना चाट" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2644282", grams: 200 }, // chickpeas (kabuli chana), dry
       { foodId: "usda-2346401", grams: 150 }, // potato
@@ -1979,6 +2052,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Lobia Chaat", hindi: "लोबिया चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-173758", grams: 120 }, // cowpeas (lobia), dry
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -2005,6 +2079,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Moong Sundal", hindi: "मूंग सुंडल" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 100 }, // mung beans (moong dal), dry
       { foodId: "usda-170169", grams: 25 }, // fresh coconut
@@ -2033,6 +2108,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Chana Sundal", hindi: "चना सुंडल" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2644282", grams: 120 }, // chickpeas (kabuli chana), dry
       { foodId: "usda-170169", grams: 25 }, // fresh coconut
@@ -2061,6 +2137,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Aloo Chaat", hindi: "आलू चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 300 }, // potato
       { foodId: "usda-790646", grams: 60 }, // onion
@@ -2088,6 +2165,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Shakarkandi Chaat (Sweet Potato)", hindi: "शकरकंद चाट" },
     category: "snack",
     servings: 2,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346404", grams: 350 }, // sweet potato
       { foodId: "usda-167746", grams: 30 }, // lemon
@@ -2112,6 +2190,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     name: { en: "Masala Seed and Nut Mix", hindi: "मसाला बीज मिश्रण" },
     category: "snack",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2515380", grams: 40 }, // pumpkin seeds (pepitas)
       { foodId: "usda-2515381", grams: 40 }, // sunflower seeds
