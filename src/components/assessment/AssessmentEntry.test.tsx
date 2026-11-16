@@ -4,13 +4,18 @@
  *
  * History: this file once pinned the retake demotion (2026-11-14 sweep:
  * a completed assessment lost its completed status merely by opening
- * the Retake sheet and closing it untouched). The Retake door itself
- * is gone now — owner directive 2026-11-16 removed the Retake button
- * from Profile; the flow's internal retake support remains, but no
- * door on this card offers it. What this file pins today: a completed
- * assessment offers "View summary" and no Retake; opening and closing
- * the summary is navigation, not a decision, and moves no stored byte;
- * a part-finished assessment still resumes at its stored step; and the
+ * the Retake sheet and closing it untouched). PR #134 then removed the
+ * Retake button from Profile entirely; the owner corrected that the
+ * same day ("I told you to ADD the retake button, not remove"), so the
+ * door is restored. What this file pins today: a completed assessment
+ * offers "View summary" AND "Retake"; Retake opens the flow on its
+ * intro step through the flow's retake intent, and opening + closing
+ * it untouched moves no stored byte (the demotion stays fixed); Begin
+ * on that intro is the commitment that starts the retake — the stored
+ * state flips to in_progress, keeping completedAt and the answers
+ * until the new run finishes; opening and closing the summary is
+ * navigation, not a decision, and moves no stored byte either; a
+ * part-finished assessment still resumes at its stored step; and the
  * flow's meal-budget question (asked in the assessment, and only
  * there) renders with the eating-pattern question and stores its
  * answer — including "No preference", which stores null.
@@ -103,13 +108,53 @@ function seed(state: AssessmentState): void {
 }
 
 describe("AssessmentProfileCard — the Profile doors", () => {
-  it("a completed assessment offers View summary and no Retake", () => {
+  it("a completed assessment offers View summary and Retake", () => {
     seed(completedState());
     render(<AssessmentProfileCard />);
     expect(screen.getByRole("button", { name: "View summary" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Retake" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Retake" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Continue assessment" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Take the assessment" })).toBeNull();
+  });
+
+  it("Retake opens the flow on its intro step, and closing it untouched moves no stored byte", () => {
+    const done = completedState();
+    seed(done);
+    const before = window.localStorage.getItem(PREFS_KEY);
+
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Retake" }));
+
+    /* The retake intent lands on the intro step — not the summary a
+       plain open of a completed assessment would show — with Begin as
+       the only way forward. */
+    expect(screen.getByText(/you can retake it at any time/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Begin" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Your summary" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+
+    /* Looking at the retake never demotes the completed assessment. */
+    expect(window.localStorage.getItem(PREFS_KEY)).toBe(before);
+    expect(readAssessmentState()).toEqual(done);
+  });
+
+  it("Begin on the Retake intro starts the retake — in progress, completion and answers kept", () => {
+    const done = completedState();
+    seed(done);
+
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Retake" }));
+    fireEvent.click(screen.getByRole("button", { name: "Begin" }));
+
+    const now = readAssessmentState();
+    expect(now.status).toBe("in_progress");
+    expect(now.step).toBe("identity");
+    /* The last completion stands until the retake finishes, and the
+       previous answers are the draft the new run starts from. */
+    expect(now.completedAt).toBe(done.completedAt);
+    expect(now.answers.ageYears).toBe(34);
+    expect(now.answers.heightCm).toBe(172);
   });
 
   it("open + close View summary untouched leaves the completed state byte-identical", () => {
