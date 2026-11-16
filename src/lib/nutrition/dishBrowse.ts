@@ -157,12 +157,20 @@ function fnv1a(text: string): number {
  * preferred set, the pick is the first in the day's FNV-1a rotation
  * order over `day:dishId` — deterministic within the day, rotating
  * across days.
+ *
+ * `excludeIds` carries the dish ids already offered for earlier meals
+ * the same day (P3): lunch and dinner draw from the same category and
+ * the same rotation order, so without it both slots served the same
+ * dish. Callers thread the day's used ids through in meal order; a
+ * slot whose qualifiers are all used gets no idea rather than a
+ * repeat.
  */
 export function dishIdeaFor(
   profile: HealthProfile,
   day: string,
   meal: Meal,
   dishes: readonly Dish[] = DISH_LIBRARY,
+  excludeIds: ReadonlySet<string> = new Set(),
 ): Dish | null {
   if (meal === "snack") return null;
   const categories: readonly DishCategory[] =
@@ -170,6 +178,7 @@ export function dishIdeaFor(
   const pattern = planPatternOf(profile.dietary.pattern);
   const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
   const qualifiers = dishes.filter((dish) => {
+    if (excludeIds.has(dish.id)) return false;
     if (!categories.includes(dish.category)) return false;
     if (pattern !== null && !dishPatterns(dish).includes(pattern)) return false;
     return dish.lines.every((line) => eligible.has(line.foodId));

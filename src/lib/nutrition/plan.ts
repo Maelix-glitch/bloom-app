@@ -35,6 +35,14 @@
  * engine derivation rather than a guideline quotation, the comment says
  * so. A meal no clean food fits stays empty with an honest note — the
  * plan never pads itself with a fabricated dish.
+ *
+ * Maturity (P3) then reconciles what composition produced: each main
+ * meal is capped at a plate a person assembles (8 suggestions), a
+ * protein shortfall under 95% of the target is actively closed
+ * (resize → swap → add, inside the same caps), and the day's energy is
+ * trimmed or fed back to within ±3% of its guide — floors unbroken,
+ * protein and vegetables never trimmed. Whatever still misses is
+ * named in the plan's notes with its true figure.
  */
 
 import { getPref, setPref } from "@/lib/prefs";
@@ -156,8 +164,11 @@ export interface DailyPlan {
 }
 
 /** The current composition method: 1 = the P1 protein-density composer,
- *  2 = the P2 layered composer (patterns, food groups, portion caps). */
-export const PLAN_METHOD_VERSION = 2;
+ *  2 = the P2 layered composer (patterns, food groups, portion caps),
+ *  3 = the P3 maturity pass (energy reconciliation back to the target,
+ *  protein-gap closing, an 8-item plate cap, egg-part portions, honest
+ *  protein/energy shortfall notes). */
+export const PLAN_METHOD_VERSION = 3;
 
 export type PlanRefusal =
   | {
@@ -289,7 +300,9 @@ const SLOT_PRIORITY: readonly Meal[] = ["lunch", "dinner", "breakfast", "snack"]
  *  meals-per-day gets the full four-slot structure. */
 export function mealSlotsFor(mealsPerDay: number | null): Meal[] {
   const n =
-    mealsPerDay === null ? MEALS.length : Math.min(MEALS.length, Math.max(1, Math.floor(mealsPerDay)));
+    mealsPerDay === null
+      ? MEALS.length
+      : Math.min(MEALS.length, Math.max(1, Math.floor(mealsPerDay)));
   const chosen = new Set(SLOT_PRIORITY.slice(0, n));
   return MEALS.filter((meal) => chosen.has(meal));
 }
@@ -350,12 +363,7 @@ export function splitTargets(targets: NutritionTargets, slots: readonly Meal[]):
  * filter table is complete rather than quietly conflated with another.
  */
 export type PlanPattern =
-  | "vegetarian"
-  | "eggetarian"
-  | "vegan"
-  | "ovo_vegetarian"
-  | "pescatarian"
-  | "non_vegetarian";
+  "vegetarian" | "eggetarian" | "vegan" | "ovo_vegetarian" | "pescatarian" | "non_vegetarian";
 
 /** The plan pattern for a stated dietary pattern. `other` and unanswered
  *  map to null — no pattern filter; allergies and dislikes still apply. */
@@ -425,7 +433,11 @@ export function patternAllowsClassification(
  * provenance gate, same pattern judgement, same name-matching.
  */
 export function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Food[] {
-  const terms = [...profile.dietary.allergies, ...profile.dietary.intolerances, ...profile.dietary.dislikedFoods]
+  const terms = [
+    ...profile.dietary.allergies,
+    ...profile.dietary.intolerances,
+    ...profile.dietary.dislikedFoods,
+  ]
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length >= 3);
   const pattern = planPatternOf(profile.dietary.pattern);
@@ -482,6 +494,8 @@ const CAP_GRAIN_DRY_G = 90; // dry cereals/millets per meal (brief; BNF dry rice
 const CAP_UNCLASSIFIED_BASE_G = 200; // own foods: dry/cooked basis unknown — a middle bound, derivation
 const CAP_DRY_PULSES_G = 60; // dry pulses/legumes per meal; normal range 30–50 g, 85 g is the whole ICMR day
 const CAP_EGGS_G = 120; // ≈ 2 eggs (BNF: 2 eggs = 120 g, one protein portion)
+const CAP_EGG_PART_G = 60; // egg yolk / egg white alone (P3): the parts are components a cook
+// folds into a dish, not standalone portions — 120 g of yolk is ~7 yolks. Whole egg keeps 120 g.
 const CAP_DAIRY_PROTEIN_G = 100; // paneer-type dairy in the protein layer (BNF cottage-cheese portion 100 g; research flags >150 g)
 const CAP_HARD_CHEESE_G = 30; // hard grating cheeses are condiment-density foods — BNF portions hard cheese at 30 g
 const CAP_FLESH_G = 200; // a single meat/fish portion, derivation from BNF protein portions
@@ -641,6 +655,28 @@ const PROTEIN_CAP_G: Record<ProteinKind, number> = {
   own: CAP_UNCLASSIFIED_PROTEIN_G,
 };
 
+/** An egg part — yolk or white alone — as opposed to the whole egg. The
+ *  reference set's eggs group holds exactly three foods (whole, white,
+ *  yolk) with the part named in the pinned USDA description; a food in
+ *  the group whose name does not say "whole" is a part. Parts are
+ *  capped tighter (P3) and lose rotation ties to the whole egg: a plan
+ *  suggests eggs a person cracks, not bowls of separated yolks. */
+function isEggPart(food: Food): boolean {
+  return groupOf(food) === "eggs" && !/whole/i.test(food.name);
+}
+
+/** A seasoning-class vegetable (P3): in this reference set, the hot
+ *  chillies — "Peppers, hot chili, …" — whose pinned USDA names carry
+ *  their heat in the name. They belong to the vegetables group in the
+ *  data (a cook buys them there; the dish library prices their tadka
+ *  lines there), but a plan's vegetables layer serves portions, and a
+ *  chilli is never a portion. The name test is exact for the pinned
+ *  set: the sweet peppers ("Peppers, sweet, …") do not match and stay
+ *  eligible, as they should — they are eaten by the piece. */
+function isSeasoningClass(food: Food): boolean {
+  return groupOf(food) === "vegetables" && /hot chili|chilli/i.test(food.name);
+}
+
 /** The protein-layer cap for one food. Dairy splits by the food's own
  *  energy density: at ≥350 kcal per 100 g a dairy food is a hard grating
  *  cheese (in this set, parmesan), portioned by BNF at 30 g — not a
@@ -648,6 +684,7 @@ const PROTEIN_CAP_G: Record<ProteinKind, number> = {
  *  density threshold is a derivation from the food's stated values. */
 function proteinCapG(food: Food, kind: ProteinKind): number {
   if (kind === "dairy" && food.per100g.kcal >= 350) return CAP_HARD_CHEESE_G;
+  if (kind === "eggs" && isEggPart(food)) return CAP_EGG_PART_G;
   return PROTEIN_CAP_G[kind];
 }
 
@@ -720,20 +757,35 @@ function composeMainMeal(
   let proteinLeft = split.proteinG;
   let proteinKcal = 0;
   const kindsUsed = new Set<ProteinKind>();
-  for (let slot = 0; slot < MAX_PROTEIN_ITEMS_PER_MEAL && proteinLeft > PROTEIN_CLOSE_ENOUGH_G; slot++) {
+  for (
+    let slot = 0;
+    slot < MAX_PROTEIN_ITEMS_PER_MEAL && proteinLeft > PROTEIN_CLOSE_ENOUGH_G;
+    slot++
+  ) {
     /* Rank candidates: unused-today before used, a new kind before a
-       repeat kind — rotation order breaks the remaining ties. */
+       repeat kind — rotation order breaks the remaining ties. An egg
+       part also loses to the whole egg at equal standing (P3): parts
+       are components, and the whole egg is the portion a person eats. */
     let best: { food: Food; kind: ProteinKind; score: number } | null = null;
     for (const food of ctx.ordered) {
       if (inMeal.has(food.id)) continue;
       const kind = proteinKindOf(food);
       if (kind === null) continue;
-      const score = (ctx.used.has(food.id) ? 2 : 0) + (kindsUsed.has(kind) ? 1 : 0);
+      const score =
+        (ctx.used.has(food.id) ? 4 : 0) + (kindsUsed.has(kind) ? 2 : 0) + (isEggPart(food) ? 1 : 0);
       if (!best || score < best.score) best = { food, kind, score };
     }
     if (!best) break;
-    let portion = sizedPortion(best.food, { proteinG: proteinLeft }, proteinCapG(best.food, best.kind));
-    if (portion && slot > 0 && proteinKcal + portion.nutrients.kcal > PROTEIN_LAYER_MAX_MEAL_SHARE * split.kcal) {
+    let portion = sizedPortion(
+      best.food,
+      { proteinG: proteinLeft },
+      proteinCapG(best.food, best.kind),
+    );
+    if (
+      portion &&
+      slot > 0 &&
+      proteinKcal + portion.nutrients.kcal > PROTEIN_LAYER_MAX_MEAL_SHARE * split.kcal
+    ) {
       portion = sizedPortion(
         best.food,
         { kcal: PROTEIN_LAYER_MAX_MEAL_SHARE * split.kcal - proteinKcal },
@@ -753,10 +805,15 @@ function composeMainMeal(
 
   /* (c) Vegetables — at least two distinct when the pool allows, sized
      by grams toward the day's 400 g floor spread across the main meals:
-     volume first, energy second (§3). */
+     volume first, energy second (§3). Seasoning-class vegetables (the
+     hot chillies) are excluded: they sit in the vegetables group in
+     the reference data — a cook buys them there, and the dish library
+     prices them there — but nobody eats 70 g of fresh chilli as a
+     vegetable portion (P3). Sweet peppers are eaten in portions and
+     stay eligible. */
   let vegTotal = 0;
   for (let i = 0; i < 2; i++) {
-    const veg = pickFood(ctx, inMeal, (f) => groupOf(f) === "vegetables");
+    const veg = pickFood(ctx, inMeal, (f) => groupOf(f) === "vegetables" && !isSeasoningClass(f));
     if (!veg) break;
     const room = Math.min(CAP_SINGLE_VEGETABLE_G, CAP_MEAL_VEGETABLES_G - vegTotal);
     const target = i === 0 ? Math.ceil(opts.vegTargetG / 2) : opts.vegTargetG - vegTotal;
@@ -797,7 +854,8 @@ function composeMainMeal(
           const want = Math.min(CAP_FRUIT_G, FLOOR_FRUIT_G - ctx.fruitG);
           if (!portion || portion.grams < want) {
             const grams = roundToStep(want, CAP_FRUIT_G);
-            if (grams >= 50) portion = { grams, nutrients: nutrientsForGrams(fruit.per100g, grams) };
+            if (grams >= 50)
+              portion = { grams, nutrients: nutrientsForGrams(fruit.per100g, grams) };
           }
         }
         if (portion && portion.grams >= 50) add(fruit, portion, "finishing");
@@ -843,8 +901,9 @@ function snackCapG(food: Food): number {
   const group = groupOf(food);
   if (group === "fruits") return CAP_FRUIT_G;
   if (group === "nuts_seeds") return CAP_NUTS_G;
-  if (group === "eggs") return CAP_EGGS_G;
-  if (group === "dairy") return food.per100g.proteinG >= 5 ? CAP_DAIRY_PROTEIN_G : CAP_FINISHING_DAIRY_G;
+  if (group === "eggs") return isEggPart(food) ? CAP_EGG_PART_G : CAP_EGGS_G;
+  if (group === "dairy")
+    return food.per100g.proteinG >= 5 ? CAP_DAIRY_PROTEIN_G : CAP_FINISHING_DAIRY_G;
   return CAP_UNCLASSIFIED_PROTEIN_G;
 }
 
@@ -877,8 +936,7 @@ function composeSnack(ctx: ComposeContext, split: MealSplit): PlanSuggestion[] {
     (split.proteinG >= 10 &&
       pickFood(ctx, inMeal, (f) => isSnackFood(f) && f.per100g.proteinG >= 5)) ||
     pickFood(ctx, inMeal, isSnackFood);
-  const firstPortion =
-    first && sizedPortion(first, { kcal: 0.6 * split.kcal }, snackCapG(first));
+  const firstPortion = first && sizedPortion(first, { kcal: 0.6 * split.kcal }, snackCapG(first));
   if (first && firstPortion) add(first, firstPortion);
 
   const remaining = split.kcal - kcalTally;
@@ -939,33 +997,546 @@ function applyProteinDominanceCap(
   }
 }
 
+/* --------------------- P3 maturity passes (post-compose) -------------------- */
+
+/** A main meal a person can actually assemble: at most this many
+ *  suggestions. The P2 composer could stack eleven (base + four protein
+ *  items + two vegetables + fat + fruit + nuts + dairy at breakfast) —
+ *  a spreadsheet, not a plate. Snacks keep their own 1–2 item shape. */
+const MAX_MAIN_MEAL_ITEMS = 8;
+/** Protein closing (P3): below this share of the target the gap is
+ *  worth closing actively; the notes name whatever remains below it. */
+const PROTEIN_CLOSE_FRACTION = 0.95;
+/** Energy reconciliation (P3): composition may land within ±3% of the
+ *  target untouched; outside that, the trim/add-back passes work it
+ *  back toward the target. The notes judge the result at ±5%. */
+const ENERGY_TRIM_TRIGGER = 1.03;
+const ENERGY_ADD_TRIGGER = 0.97;
+const ENERGY_NOTE_BAND = 0.05;
+
+const dayKcalOf = (meals: readonly PlanMeal[]): number =>
+  meals.reduce((sum, m) => sum + m.suggestions.reduce((a, s) => a + s.nutrients.kcal, 0), 0);
+
+const dayProteinOf = (meals: readonly PlanMeal[]): number =>
+  meals.reduce((sum, m) => sum + m.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0), 0);
+
+/** The day's ICMR floor totals as the meals NOW stand — recomputed from
+ *  the suggestions themselves, so post-composition passes (and the
+ *  notes that judge them) always speak about the plan's real numbers,
+ *  never the composer's running tally. */
+function floorTotalsOf(
+  meals: readonly PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+): { vegG: number; fruitG: number; milkCurdG: number } {
+  let vegG = 0;
+  let fruitG = 0;
+  let milkCurdG = 0;
+  for (const meal of meals) {
+    for (const s of meal.suggestions) {
+      const food = byId.get(s.foodId);
+      if (!food) continue;
+      if (groupOf(food) === "vegetables") vegG += s.grams;
+      if (groupOf(food) === "fruits") fruitG += s.grams;
+      if (isMilkOrCurd(food)) milkCurdG += s.grams;
+    }
+  }
+  return { vegG, fruitG, milkCurdG };
+}
+
+/** Replace a suggestion's portion, recomputing its nutrients through
+ *  the lib's portion math — the only way grams ever change (P3). */
+function setPortion(meal: PlanMeal, idx: number, food: Food, grams: number): void {
+  const suggestion = meal.suggestions[idx]!;
+  meal.suggestions[idx] = {
+    ...suggestion,
+    grams,
+    nutrients: nutrientsForGrams(food.per100g, grams),
+  };
+}
+
+const floor5 = (grams: number): number => Math.floor(grams / 5) * 5;
+const ceil5 = (grams: number): number => Math.ceil(grams / 5) * 5;
+
+/**
+ * The plate cap (P3): trim each main meal to at most eight suggestions.
+ * What goes, in order: the nuts extra (the one finishing item no floor
+ * or layer needs); a garnish protein item (≤8 g of protein — a token,
+ * not a source); a dairy or fruit extra the day's floor can spare;
+ * the weakest remaining protein item; and only then a floor-carrying
+ * extra. The base, the vegetables, the measured fat and the protein
+ * anchor (the meal's strongest protein item) are never dropped, and a
+ * meal is never emptied.
+ */
+function applyItemCap(meals: PlanMeal[], byId: ReadonlyMap<string, Food>): void {
+  for (const meal of meals) {
+    if (meal.meal === "snack") continue;
+    while (meal.suggestions.length > MAX_MAIN_MEAL_ITEMS) {
+      const victim = itemCapVictim(meal, meals, byId);
+      if (victim < 0) break;
+      meal.suggestions.splice(victim, 1);
+    }
+    if (meal.suggestions.length === 0) meal.note = EMPTY_MEAL_NOTE;
+  }
+}
+
+function itemCapVictim(
+  meal: PlanMeal,
+  meals: readonly PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+): number {
+  const items = meal.suggestions;
+  const foodAt = (i: number) => byId.get(items[i]!.foodId);
+  let anchor = -1;
+  let anchorProtein = -1;
+  items.forEach((s, i) => {
+    if (s.layer === "protein" && s.nutrients.proteinG > anchorProtein) {
+      anchor = i;
+      anchorProtein = s.nutrients.proteinG;
+    }
+  });
+  const droppable = (i: number): boolean => {
+    const layer = items[i]!.layer;
+    if (layer === "base" || layer === "vegetables") return false;
+    if (groupOf(foodAt(i)!) === "fats_oils") return false;
+    return i !== anchor;
+  };
+  const totals = floorTotalsOf(meals, byId);
+  /* 1. The nuts/seeds extra — no floor, no layer depends on it. */
+  for (let i = 0; i < items.length; i++) {
+    if (droppable(i) && groupOf(foodAt(i)!) === "nuts_seeds") return i;
+  }
+  /* 2. A garnish protein item — present, but not a source. */
+  let garnish = -1;
+  let garnishProtein = Infinity;
+  items.forEach((s, i) => {
+    if (
+      droppable(i) &&
+      s.layer === "protein" &&
+      s.nutrients.proteinG <= 8 &&
+      s.nutrients.proteinG < garnishProtein
+    ) {
+      garnish = i;
+      garnishProtein = s.nutrients.proteinG;
+    }
+  });
+  if (garnish >= 0) return garnish;
+  /* 3. A floor-carrying extra the day can spare. */
+  for (let i = 0; i < items.length; i++) {
+    const food = foodAt(i)!;
+    if (!droppable(i) || items[i]!.layer !== "finishing") continue;
+    if (isMilkOrCurd(food) && totals.milkCurdG - items[i]!.grams >= FLOOR_MILK_CURD_G) return i;
+    if (groupOf(food) === "fruits" && totals.fruitG - items[i]!.grams >= FLOOR_FRUIT_G) return i;
+  }
+  /* 4. The weakest remaining protein item. */
+  let weakest = -1;
+  let weakestProtein = Infinity;
+  items.forEach((s, i) => {
+    if (droppable(i) && s.layer === "protein" && s.nutrients.proteinG < weakestProtein) {
+      weakest = i;
+      weakestProtein = s.nutrients.proteinG;
+    }
+  });
+  if (weakest >= 0) return weakest;
+  /* 5. A floor-carrying extra, when nothing else can go. */
+  for (let i = 0; i < items.length; i++) {
+    const food = foodAt(i)!;
+    if (!droppable(i) || items[i]!.layer !== "finishing") continue;
+    if (isMilkOrCurd(food) || groupOf(food) === "fruits") return i;
+  }
+  return -1;
+}
+
+/* ---------------------------- protein closing ------------------------------ */
+
+const proteinLayerKcal = (meal: PlanMeal): number =>
+  meal.suggestions
+    .filter((s) => s.layer === "protein")
+    .reduce((sum, s) => sum + s.nutrients.kcal, 0);
+
+/** Size a swap/add candidate into a meal's protein layer exactly the
+ *  way the composer sizes its own later items: toward the protein aim,
+ *  inside the food's cap, then down to the layer's energy share. */
+function layerPortion(
+  meal: PlanMeal,
+  food: Food,
+  proteinAimG: number,
+  replacedKcal: number,
+): SizedPortion | null {
+  const kind = proteinKindOf(food);
+  if (kind === null) return null;
+  let portion = sizedPortion(food, { proteinG: proteinAimG }, proteinCapG(food, kind));
+  if (!portion) return null;
+  const layerKcal = proteinLayerKcal(meal) - replacedKcal + portion.nutrients.kcal;
+  if (layerKcal > PROTEIN_LAYER_MAX_MEAL_SHARE * meal.kcal) {
+    portion = sizedPortion(
+      food,
+      { kcal: PROTEIN_LAYER_MAX_MEAL_SHARE * meal.kcal - (proteinLayerKcal(meal) - replacedKcal) },
+      proteinCapG(food, kind),
+    );
+  }
+  return portion;
+}
+
+/** Eligible protein candidates for a meal, in closing order: the
+ *  density band first (foods whose at-cap protein is within 80% of the
+ *  best available — density leads, but near-equals keep the day's
+ *  rotation, so consecutive days do not converge on one food), each
+ *  band ordered unused-today first, then by rotation order. */
+function proteinCandidates(ctx: ComposeContext, meal: PlanMeal): Food[] {
+  const inMeal = new Set(meal.suggestions.map((s) => s.foodId));
+  const eligible = ctx.ordered.filter((food) => {
+    if (inMeal.has(food.id)) return false;
+    const kind = proteinKindOf(food);
+    return kind !== null;
+  });
+  const effective = (food: Food): number => {
+    const kind = proteinKindOf(food)!;
+    return nutrientsForGrams(food.per100g, proteinCapG(food, kind)).proteinG;
+  };
+  const best = eligible.reduce((max, food) => Math.max(max, effective(food)), 0);
+  const inBand = (food: Food) => effective(food) >= 0.8 * best;
+  const band = eligible
+    .filter(inBand)
+    .sort((a, b) => Number(ctx.used.has(a.id)) - Number(ctx.used.has(b.id)));
+  const rest = eligible.filter((food) => !inBand(food)).sort((a, b) => effective(b) - effective(a));
+  return [...band, ...rest];
+}
+
+/** Resize every protein item that sits below its cap up as far as the
+ *  cap and the layer's energy share allow. Returns true if any moved. */
+function resizeProteinItems(meals: PlanMeal[], byId: ReadonlyMap<string, Food>): boolean {
+  let moved = false;
+  for (const meal of meals) {
+    if (meal.meal === "snack") continue;
+    meal.suggestions.forEach((s, idx) => {
+      if (s.layer !== "protein") return;
+      const food = byId.get(s.foodId);
+      if (!food) return;
+      const kind = proteinKindOf(food);
+      if (kind === null) return;
+      const cap = proteinCapG(food, kind);
+      if (s.grams >= cap || food.per100g.kcal <= 0) return;
+      const headroomKcal = PROTEIN_LAYER_MAX_MEAL_SHARE * meal.kcal - proteinLayerKcal(meal);
+      if (headroomKcal <= 0) return;
+      const maxGrams = s.grams + headroomKcal / (food.per100g.kcal / 100);
+      const newGrams = Math.min(cap, floor5(maxGrams));
+      if (newGrams >= s.grams + 5) {
+        setPortion(meal, idx, food, newGrams);
+        moved = true;
+      }
+    });
+  }
+  return moved;
+}
+
+/** Swap a meal's protein items for denser eligible sources when the
+ *  swap honestly gains (≥2 g of protein after caps and the layer
+ *  energy share). Items are tried weakest-first — the weakest is where
+ *  the gain lives, but when its slot cannot take a denser food (the
+ *  layer's energy share binds), the next item gets its chance. One
+ *  swap per meal per call. */
+function swapWeakestProteinItems(
+  ctx: ComposeContext,
+  meals: PlanMeal[],
+  targetProteinG: number,
+): boolean {
+  let moved = false;
+  for (const meal of meals) {
+    if (meal.meal === "snack") continue;
+    if (dayProteinOf(meals) >= targetProteinG) break;
+    const proteinIdx = meal.suggestions
+      .map((s, i) => ({ s, i }))
+      .filter(({ s }) => s.layer === "protein")
+      .sort((a, b) => a.s.nutrients.proteinG - b.s.nutrients.proteinG);
+    let swapped = false;
+    for (const { s: item, i } of proteinIdx) {
+      if (swapped) break;
+      const deficit = targetProteinG - dayProteinOf(meals);
+      for (const candidate of proteinCandidates(ctx, meal)) {
+        const portion = layerPortion(
+          meal,
+          candidate,
+          item.nutrients.proteinG + deficit,
+          item.nutrients.kcal,
+        );
+        if (!portion) continue;
+        if (portion.nutrients.proteinG - item.nutrients.proteinG < 2) continue;
+        meal.suggestions[i] = recordSuggestion(ctx, candidate, portion, "protein");
+        moved = true;
+        swapped = true;
+        break;
+      }
+    }
+  }
+  return moved;
+}
+
+/** Add a protein source to a meal that still has room — under the
+ *  protein-item limit and the plate cap — when swaps and resizes were
+ *  not enough. A garnish is not an add: the portion must carry ≥3 g. */
+function addProteinItems(ctx: ComposeContext, meals: PlanMeal[], targetProteinG: number): boolean {
+  let moved = false;
+  for (const meal of meals) {
+    if (meal.meal === "snack") continue;
+    if (dayProteinOf(meals) >= targetProteinG) break;
+    const proteinItems = meal.suggestions.filter((s) => s.layer === "protein").length;
+    if (proteinItems >= MAX_PROTEIN_ITEMS_PER_MEAL) continue;
+    if (meal.suggestions.length >= MAX_MAIN_MEAL_ITEMS) continue;
+    const deficit = targetProteinG - dayProteinOf(meals);
+    for (const candidate of proteinCandidates(ctx, meal)) {
+      const portion = layerPortion(meal, candidate, deficit, 0);
+      if (!portion || portion.nutrients.proteinG < 3) continue;
+      meal.suggestions.push(recordSuggestion(ctx, candidate, portion, "protein"));
+      moved = true;
+      break;
+    }
+  }
+  return moved;
+}
+
+/**
+ * Protein closing (P3): the P2 composer aims each meal at its protein
+ * split but stops at four capped items, so a high-protein day landed
+ * at 80–95% of its guide with nothing said. When the composed day
+ * falls below 95% of the target, this pass works it toward the full
+ * target — resizes first (the rotation's own foods, grown to their
+ * caps), then swaps (the weakest item in a meal for a denser source),
+ * then adds (a further source where the plate has room) — always
+ * inside the portion caps and the protein layer's energy share. What
+ * it cannot close, the plan's notes name with the true figure.
+ */
+function closeProteinGap(
+  ctx: ComposeContext,
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  targetProteinG: number,
+): void {
+  if (dayProteinOf(meals) >= PROTEIN_CLOSE_FRACTION * targetProteinG) return;
+  for (let round = 0; round < 8; round++) {
+    if (dayProteinOf(meals) >= targetProteinG) break;
+    let moved = resizeProteinItems(meals, byId);
+    if (dayProteinOf(meals) >= targetProteinG) break;
+    moved = swapWeakestProteinItems(ctx, meals, targetProteinG) || moved;
+    if (dayProteinOf(meals) >= targetProteinG) break;
+    moved = addProteinItems(ctx, meals, targetProteinG) || moved;
+    if (!moved) break;
+  }
+}
+
+/* --------------------------- energy reconciliation -------------------------- */
+
+/**
+ * Energy reconciliation (P3): the P2 composer stacked its layers and
+ * floor-chasing extras and never reconciled — the owner's day landed
+ * at 108–114% of its energy guide. After composition, a day over
+ * +3% is trimmed back, in an order that costs the day the least of
+ * what it values: finishing extras beyond the day's floors first
+ * (within a food, the least protein per kcal goes first), then grain
+ * bases (never below 60 g), then measured oils (never below 5 g). A
+ * day under −3% is fed back up: oils to their cap, then nuts/seeds,
+ * then dairy extras, then bases. Vegetables and protein items are
+ * never trimmed, and a floor once met is never broken by trimming.
+ */
+function reconcileEnergy(
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  targets: NutritionTargets,
+): void {
+  const kcal = dayKcalOf(meals);
+  if (kcal > ENERGY_TRIM_TRIGGER * targets.kcal) trimEnergy(meals, byId, targets);
+  else if (kcal < ENERGY_ADD_TRIGGER * targets.kcal) addEnergy(meals, byId, targets);
+}
+
+function trimEnergy(
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  targets: NutritionTargets,
+): void {
+  let excess = dayKcalOf(meals) - ENERGY_TRIM_TRIGGER * targets.kcal;
+  const kcalPerGram = (food: Food) => food.per100g.kcal / 100;
+  const proteinPerKcal = (s: PlanSuggestion) =>
+    s.nutrients.kcal > 0 ? s.nutrients.proteinG / s.nutrients.kcal : Infinity;
+
+  /* A cut target: the meal plus the suggestion OBJECT. Cuts replace or
+     remove suggestions, shifting indices — the object is re-located by
+     identity at cut time, so a caller's ordering is never staled. */
+  interface Ref {
+    meal: PlanMeal;
+    s: PlanSuggestion;
+  }
+  const refsWhere = (pred: (s: PlanSuggestion, food: Food) => boolean): Ref[] => {
+    const refs: Ref[] = [];
+    for (const meal of meals) {
+      for (const s of meal.suggestions) {
+        const food = byId.get(s.foodId);
+        if (food && pred(s, food)) refs.push({ meal, s });
+      }
+    }
+    return refs;
+  };
+  /* Cut one item by up to `maxCutG` grams (in 5 g steps toward the
+     excess), keeping at least `minG`; an item the cut would take under
+     `removeBelowG` is removed whole instead. Returns the kcal saved,
+     measured on the stored (rounded) nutrients the plan displays. */
+  const cut = (ref: Ref, maxCutG: number, minG: number, removeBelowG: number): number => {
+    const idx = ref.meal.suggestions.indexOf(ref.s);
+    if (idx < 0) return 0;
+    const food = byId.get(ref.s.foodId);
+    if (!food || kcalPerGram(food) <= 0) return 0;
+    const wanted = Math.min(maxCutG, ceil5(excess / kcalPerGram(food)));
+    if (wanted <= 0) return 0;
+    const newGrams = ref.s.grams - wanted;
+    if (newGrams < removeBelowG) {
+      const saved = ref.s.nutrients.kcal;
+      ref.meal.suggestions.splice(idx, 1);
+      if (ref.meal.suggestions.length === 0) ref.meal.note = EMPTY_MEAL_NOTE;
+      return saved;
+    }
+    const kept = Math.max(minG, newGrams);
+    if (kept >= ref.s.grams) return 0;
+    const before = ref.s.nutrients.kcal;
+    setPortion(ref.meal, idx, food, kept);
+    return before - ref.meal.suggestions[idx]!.nutrients.kcal;
+  };
+  const cutCategory = (
+    refs: Ref[],
+    maxCutOf: (s: PlanSuggestion) => number,
+    minG: number,
+    removeBelowG: number,
+  ): void => {
+    for (const ref of refs) {
+      if (excess <= 0) return;
+      excess -= cut(ref, maxCutOf(ref.s), minG, removeBelowG);
+    }
+  };
+  const byProteinPerKcal = (a: Ref, b: Ref) => proteinPerKcal(a.s) - proteinPerKcal(b.s);
+  const byKcalDesc = (a: Ref, b: Ref) => b.s.nutrients.kcal - a.s.nutrients.kcal;
+
+  /* 1a. Nuts/seeds extras — no floor rides on them. An item cut under
+     15 g is a garnish; it goes whole rather than shrinking to one. */
+  cutCategory(
+    refsWhere((s, food) => groupOf(food) === "nuts_seeds").sort(byKcalDesc),
+    () => Infinity,
+    15,
+    15,
+  );
+  /* 1b. Fruit beyond the day's floor — only the surplus is cut (the
+     cap is re-read per item, so the floor itself is never crossed),
+     and a fruit portion is never trimmed below a real portion. */
+  if (excess > 0 && floorTotalsOf(meals, byId).fruitG > FLOOR_FRUIT_G) {
+    cutCategory(
+      refsWhere((s, food) => groupOf(food) === "fruits").sort(byProteinPerKcal),
+      () => floorTotalsOf(meals, byId).fruitG - FLOOR_FRUIT_G,
+      50,
+      0,
+    );
+  }
+  /* 1c. Milk/curd beyond the day's floor — same discipline. */
+  if (excess > 0 && floorTotalsOf(meals, byId).milkCurdG > FLOOR_MILK_CURD_G) {
+    cutCategory(
+      refsWhere((s, food) => isMilkOrCurd(food)).sort(byProteinPerKcal),
+      () => floorTotalsOf(meals, byId).milkCurdG - FLOOR_MILK_CURD_G,
+      50,
+      0,
+    );
+  }
+  /* 2. Grain bases, least protein per kcal first, never below 60 g. */
+  if (excess > 0) {
+    cutCategory(
+      refsWhere((s) => s.layer === "base").sort(byProteinPerKcal),
+      (s) => s.grams - 60,
+      60,
+      0,
+    );
+  }
+  /* 3. Measured oils, never below 5 g. */
+  if (excess > 0) {
+    cutCategory(
+      refsWhere((s, food) => groupOf(food) === "fats_oils").sort(byKcalDesc),
+      (s) => s.grams - 5,
+      5,
+      0,
+    );
+  }
+}
+
+function addEnergy(
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  targets: NutritionTargets,
+): void {
+  const ceiling = (ENERGY_TRIM_TRIGGER - 0.01) * targets.kcal;
+  const grow = (
+    pred: (s: PlanSuggestion, food: Food) => boolean,
+    capOf: (food: Food) => number,
+  ) => {
+    for (const meal of meals) {
+      for (let idx = 0; idx < meal.suggestions.length; idx++) {
+        if (dayKcalOf(meals) >= targets.kcal) return;
+        const s = meal.suggestions[idx]!;
+        const food = byId.get(s.foodId);
+        if (!food || !pred(s, food) || food.per100g.kcal <= 0) continue;
+        const headroom = capOf(food) - s.grams;
+        if (headroom < 5) continue;
+        const room = ceiling - dayKcalOf(meals);
+        if (room <= 0) return;
+        const add = Math.min(headroom, floor5(room / (food.per100g.kcal / 100)));
+        if (add >= 5) setPortion(meal, idx, food, s.grams + add);
+      }
+    }
+  };
+  grow(
+    (s, food) => groupOf(food) === "fats_oils",
+    () => CAP_FAT_G,
+  );
+  grow(
+    (s, food) => groupOf(food) === "nuts_seeds",
+    () => CAP_NUTS_G,
+  );
+  grow(
+    (s, food) => isMilkOrCurd(food),
+    () => CAP_FINISHING_DAIRY_G,
+  );
+  grow(
+    (s) => s.layer === "base",
+    (food) => (groupOf(food) === "cereals_grains" ? CAP_GRAIN_DRY_G : CAP_UNCLASSIFIED_BASE_G),
+  );
+}
+
 /**
  * The plan's composition notes: every day-level aim the suggestions
  * could not reach, named in plain words with the guideline it comes
  * from. Floors are ICMR-NIN My Plate amounts (held, not scaled — §1);
  * the diversity aims are the research's operationalisation (§7). A pool
  * that simply does not contain a group is a pool fact and is worded as
- * one — noted, never faked.
+ * one — noted, never faked. Since P3 the notes also judge the day's
+ * own targets: a protein total still under 95% of the guide after
+ * closing, or an energy total outside ±5% after reconciliation, is
+ * named with its true figure. Every number here is recomputed from
+ * the final suggestions — the notes describe the plan as it stands,
+ * never as it was first composed.
  */
 function compositionNotes(
-  ctx: ComposeContext,
   meals: readonly PlanMeal[],
   pool: readonly Food[],
+  targets: NutritionTargets,
 ): string[] {
   const notes: string[] = [];
-  if (ctx.vegG < FLOOR_VEGETABLES_G) {
+  const byId = new Map(pool.map((f) => [f.id, f]));
+  const totals = floorTotalsOf(meals, byId);
+  if (totals.vegG < FLOOR_VEGETABLES_G) {
     notes.push(
-      `Today's suggestions reach ${ctx.vegG} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
+      `Today's suggestions reach ${totals.vegG} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
     );
   }
-  if (ctx.fruitG < FLOOR_FRUIT_G) {
+  if (totals.fruitG < FLOOR_FRUIT_G) {
     notes.push(
-      `Today's suggestions reach ${ctx.fruitG} g of fruit — the ICMR-NIN guideline aims for at least 100 g across the day.`,
+      `Today's suggestions reach ${totals.fruitG} g of fruit — the ICMR-NIN guideline aims for at least 100 g across the day.`,
     );
   }
-  if (ctx.milkCurdG < FLOOR_MILK_CURD_G) {
+  if (totals.milkCurdG < FLOOR_MILK_CURD_G) {
     notes.push(
-      `Today's suggestions reach ${ctx.milkCurdG} g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.`,
+      `Today's suggestions reach ${totals.milkCurdG} g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.`,
     );
   }
   const proteinSources = new Set<string>();
@@ -981,7 +1552,6 @@ function compositionNotes(
     if (food.classification) poolGroups.add(food.classification.group);
   }
   const suggestedGroups = new Set<FoodGroup>();
-  const byId = new Map(pool.map((f) => [f.id, f]));
   for (const meal of meals) {
     for (const s of meal.suggestions) {
       const group = byId.get(s.foodId)?.classification?.group;
@@ -998,6 +1568,22 @@ function compositionNotes(
       poolGroups.size < AIM_FOOD_GROUPS
         ? `The foods Bloom can plan with today span ${poolGroups.size} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`
         : `Today's suggestions span ${suggestedGroups.size} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`,
+    );
+  }
+  const protein = dayProteinOf(meals);
+  if (protein < PROTEIN_CLOSE_FRACTION * targets.proteinG) {
+    notes.push(
+      `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the portion caps bind before the target does.`,
+    );
+  }
+  const kcal = dayKcalOf(meals);
+  if (kcal > (1 + ENERGY_NOTE_BAND) * targets.kcal) {
+    notes.push(
+      `Today's suggestions reach about ${Math.round(kcal)} kcal — above your ${Math.round(targets.kcal)} kcal guide. The day's guideline floors and layers add up past it.`,
+    );
+  } else if (kcal < (1 - ENERGY_NOTE_BAND) * targets.kcal) {
+    notes.push(
+      `Today's suggestions reach about ${Math.round(kcal)} kcal — below your ${Math.round(targets.kcal)} kcal guide. The portion caps bind before the target does.`,
     );
   }
   return notes;
@@ -1038,9 +1624,15 @@ function missingNames(profile: HealthProfile, extra: readonly string[]): string[
   const wanted = new Set<string>(extra);
   if (profile.goal === null) wanted.add("goal");
   for (const field of missingBodyFields(profile)) wanted.add(field);
-  const ordered = ["goal", "ageYears", "height", "weight", "activity", "safetyAnswers", "body"].filter(
-    (key) => wanted.has(key),
-  );
+  const ordered = [
+    "goal",
+    "ageYears",
+    "height",
+    "weight",
+    "activity",
+    "safetyAnswers",
+    "body",
+  ].filter((key) => wanted.has(key));
   return ordered.map((key) => MISSING_LABEL[key]!);
 }
 
@@ -1087,10 +1679,18 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   if (!targets || profile.goal === null) {
     const extra: string[] = [];
     if (!targets && blockingIds.includes("safety_answers_missing")) extra.push("safetyAnswers");
-    if (!targets && extra.length === 0 && missingBodyFields(profile).length === 0 && profile.goal !== null) {
+    if (
+      !targets &&
+      extra.length === 0 &&
+      missingBodyFields(profile).length === 0 &&
+      profile.goal !== null
+    ) {
       extra.push("body");
     }
-    return { ok: false, refusal: { kind: "insufficient_data", missing: missingNames(profile, extra) } };
+    return {
+      ok: false,
+      refusal: { kind: "insufficient_data", missing: missingNames(profile, extra) },
+    };
   }
 
   const goal = profile.goal;
@@ -1113,8 +1713,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   };
   const mainCount = splits.filter((s) => s.meal !== "snack").length;
   const hasSnack = splits.some((s) => s.meal === "snack");
-  const vegTargetG =
-    mainCount > 0 ? Math.min(240, Math.max(130, Math.round(420 / mainCount))) : 0;
+  const vegTargetG = mainCount > 0 ? Math.min(240, Math.max(130, Math.round(420 / mainCount))) : 0;
   const meals: PlanMeal[] = splits.map((split) => {
     if (split.meal === "snack") {
       const suggestions = composeSnack(ctx, split);
@@ -1144,8 +1743,16 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
             : null,
     };
   });
-  applyProteinDominanceCap(meals, new Map(pool.map((f) => [f.id, f])), targets.proteinG);
-  const notes = compositionNotes(ctx, meals, pool);
+  const byId = new Map(pool.map((f) => [f.id, f]));
+  /* P3 maturity: cap the plate, close the protein gap toward the
+     target, reconcile the day's energy back to its guide, then hold
+     the dominance line — in that order, so each pass judges the plan
+     the previous one left, and the notes judge them all. */
+  applyItemCap(meals, byId);
+  closeProteinGap(ctx, meals, byId, targets.proteinG);
+  reconcileEnergy(meals, byId, targets);
+  applyProteinDominanceCap(meals, byId, targets.proteinG);
+  const notes = compositionNotes(meals, pool, targets);
 
   return {
     ok: true,
@@ -1226,7 +1833,13 @@ const SUGGESTION_LAYERS: readonly SuggestionLayer[] = [
   "finishing",
   "snack",
 ];
-const ACTIVITIES: readonly ActivityLevel[] = ["sedentary", "light", "moderate", "active", "very_active"];
+const ACTIVITIES: readonly ActivityLevel[] = [
+  "sedentary",
+  "light",
+  "moderate",
+  "active",
+  "very_active",
+];
 const PATTERNS: readonly DietaryPattern[] = [
   "omnivore",
   "vegetarian",
@@ -1258,7 +1871,8 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   if (rateKgPerWeek === null) return null;
   const mealsPerDay = numOrNull(raw["mealsPerDay"], 1, 12);
   if (raw["mealsPerDay"] !== null && mealsPerDay === null) return null;
-  const dietaryPattern = raw["dietaryPattern"] === null ? null : oneOf(raw["dietaryPattern"], PATTERNS);
+  const dietaryPattern =
+    raw["dietaryPattern"] === null ? null : oneOf(raw["dietaryPattern"], PATTERNS);
   if (raw["dietaryPattern"] !== null && dietaryPattern === null) return null;
   const safetyClassification = oneOf(raw["safetyClassification"], SAFETY_CLASSES);
   if (!safetyClassification) return null;
@@ -1294,7 +1908,8 @@ function parseSuggestion(raw: unknown): PlanSuggestion | null {
   const provenance = parseFoodProvenance(raw["provenance"]);
   /* A stored suggestion may only carry a source the generator itself
      would use — a plan that claims IFCT values is not a plan Bloom made. */
-  if (!provenance || (provenance.kind !== "usda" && provenance.kind !== "user_entered")) return null;
+  if (!provenance || (provenance.kind !== "usda" && provenance.kind !== "user_entered"))
+    return null;
   const suggestion: PlanSuggestion = { foodId, name, grams, nutrients, provenance };
   /* The composition layer (P2): absent on P1 plans, which suggested
      without layers; present-but-invalid is a tamper and drops the
@@ -1352,7 +1967,11 @@ function parsePlan(raw: unknown): DailyPlan | null {
     if (parsed === null || Math.round(parsed) !== parsed) return null;
     methodVersion = parsed;
   }
-  if (!Array.isArray(raw["meals"]) || raw["meals"].length < 1 || raw["meals"].length > MEALS.length) {
+  if (
+    !Array.isArray(raw["meals"]) ||
+    raw["meals"].length < 1 ||
+    raw["meals"].length > MEALS.length
+  ) {
     return null;
   }
   const meals: PlanMeal[] = [];
