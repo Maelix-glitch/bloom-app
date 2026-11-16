@@ -3,6 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, LifeBuoy, Loader2, SendHorizontal } from "lucide-react";
 
 import { useCoachSystem, type CoachMessage } from "@/hooks/useCoachSystem";
+import {
+  useCoachSystemContext,
+  type CoachSystem,
+} from "@/components/coach/CoachSystemProvider";
 import { buildCoachContext, type CoachHabitData } from "@/lib/coach/intelligence";
 import type { MoodEntry } from "@/lib/mood/types";
 import type { HabitsStore } from "@/hooks/useHabits";
@@ -13,15 +17,32 @@ const DRAFT_KEY = "bloom-coach-draft";
  * A short read from the real Coach: the same grounded responder that powers
  * /coach, fed today's record. One question here continues on the Coach page
  * with the same thread (messages are saved through the same hook).
+ *
+ * The store comes from the app-wide provider when one is mounted (the
+ * root layout mounts it, so this panel, the Coach tab and the orb share
+ * one store instance); outside the provider the panel falls back to its
+ * own instance, as before.
  */
-export function CoachPanel({
+export function CoachPanel(props: { entries: MoodEntry[]; habitsStore: HabitsStore }) {
+  const shared = useCoachSystemContext();
+  if (shared) return <CoachPanelView {...props} coach={shared} />;
+  return <CoachPanelStandalone {...props} />;
+}
+
+function CoachPanelStandalone(props: { entries: MoodEntry[]; habitsStore: HabitsStore }) {
+  const coach = useCoachSystem();
+  return <CoachPanelView {...props} coach={coach} />;
+}
+
+function CoachPanelView({
   entries,
   habitsStore,
+  coach,
 }: {
   entries: MoodEntry[];
   habitsStore: HabitsStore;
+  coach: CoachSystem;
 }) {
-  const coach = useCoachSystem();
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
   const [reply, setReply] = useState<CoachMessage | null>(null);

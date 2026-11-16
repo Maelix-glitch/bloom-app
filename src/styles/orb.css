@@ -1,0 +1,484 @@
+/*
+ * The Coach orb — the floating Bloom mark and its chat panel.
+ *
+ * Geometry, stated once:
+ *   · The button is 56px, 20–24px in from the right. Below the lg
+ *     breakpoint the phone tab bar owns the bottom of the screen, so
+ *     the button rides the same measure the chrome reserves for it —
+ *     76px of bar + air (the `--app-bottom-nav` value) plus the
+ *     safe-area inset — with 16px of air above that. At lg there is no
+ *     bottom bar and the button settles 24px off the corner.
+ *   · The button's z-index (60) sits above the tab bar (20), Today's
+ *     dormant FAB tier (30) and the Trackers dock (40), and below every
+ *     sheet (2000/2001): an open sheet simply covers the orb, which is
+ *     the "hidden while a sheet is open" behaviour, for free.
+ *   · The panel is a bottom sheet on phones — capped at 88dvh, solid
+ *     panel surface, real backdrop, page dimmed above it, never a
+ *     full-screen takeover — and a 400px floating panel anchored above
+ *     the button on wider screens.
+ *
+ * Collision lifts: two bottom-anchored controls can share the right
+ * side on narrow screens — Today's "Add habit" FAB (`.home-fab`, whose
+ * styles outlive its current markup) and the Trackers action dock
+ * (centred, but wide enough on a small phone to reach the corner).
+ * When either is on screen below lg, the orb steps one control-height
+ * up rather than overlapping it.
+ *
+ * Motion: the idle breath is the boot splash's own (2.6s, soft) on the
+ * halo only — the mark itself never moves. Reduced motion — by media
+ * query or by the component's `data-reduced-motion` mirror of it —
+ * stops the breath entirely; panel entrances collapse to a plain fade.
+ */
+
+.coach-orb {
+  position: fixed;
+  right: 20px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px);
+  z-index: 60;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  background: var(--panel);
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  box-shadow: var(--elevation-float);
+  color: var(--gold);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    box-shadow var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo);
+}
+
+.coach-orb:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--gold) 70%, transparent);
+}
+
+.coach-orb:active {
+  transform: scale(0.96);
+}
+
+.coach-orb:focus-visible,
+.coach-orb-panel :focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 80%, transparent);
+  outline-offset: 2px;
+}
+
+/* The breathing halo — a soft gold pool behind the mark, nothing more. */
+.coach-orb-halo {
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--gold) 20%, transparent),
+    transparent 70%
+  );
+  animation: coach-orb-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes coach-orb-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@media (min-width: 64rem) {
+  .coach-orb {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+
+/* Collision lifts (see the header note): one control-height + air. */
+@media (max-width: 63.99rem) {
+  body:has(.home-fab) .coach-orb {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px + 72px);
+  }
+  body:has(.premium-action-dock) .coach-orb {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px + 76px);
+  }
+}
+
+/* ------------------------------------------------------------- panel */
+
+.coach-orb-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  /* no-color-mix fallback first, as the sheet kit does it: the scrim
+     never vanishes whole on an engine without color-mix */
+  background: rgba(10, 11, 14, 0.72);
+  background: color-mix(in oklab, var(--background) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: coach-orb-fade var(--motion-standard) var(--ease-out-expo);
+}
+
+.coach-orb-panel {
+  position: fixed;
+  z-index: 2001;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  /* Solid, opaque — the mobile-sheet rule: no bleed-through, ever. */
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-bottom: none;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  box-shadow: var(--elevation-dialog);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: min(600px, 88vh);
+  height: min(600px, 88dvh);
+  max-height: 88vh;
+  max-height: 88dvh;
+  outline: none;
+  animation: coach-orb-rise var(--motion-page) var(--ease-out-expo);
+}
+
+@keyframes coach-orb-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes coach-orb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@media (min-width: 40rem) {
+  .coach-orb-panel {
+    left: auto;
+    right: 20px;
+    /* Above the button: its bottom offset + 56px of button + 12px air. */
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 84px);
+    width: min(400px, calc(100vw - 40px));
+    height: min(620px, calc(100vh - 150px));
+    height: min(620px, calc(100dvh - 150px));
+    max-height: calc(100dvh - 150px);
+    border-bottom: 1px solid var(--border-strong);
+    border-radius: var(--radius-dialog);
+    padding-bottom: 0;
+  }
+}
+
+@media (min-width: 64rem) {
+  .coach-orb-panel {
+    right: 24px;
+    bottom: 92px;
+  }
+}
+
+/* -------------------------------------------------------------- head */
+
+.coach-orb-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.coach-orb-head-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.coach-orb-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1.15;
+  color: var(--foreground);
+}
+
+.coach-orb-sub {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coach-orb-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+
+.coach-orb-icon-btn:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+
+/* ------------------------------------------------------------ thread */
+
+.coach-orb-thread {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--foreground) 10%, transparent) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.coach-orb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 18px 24px;
+}
+
+.coach-orb-center {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-size: 13.5px;
+}
+
+.coach-orb-welcome {
+  padding: 30px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.coach-orb-welcome-greeting {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--foreground);
+  margin-top: 8px;
+}
+
+.coach-orb-welcome-line {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.coach-orb-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.coach-orb-starter {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 7px 12px;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+
+.coach-orb-starter:hover {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+}
+
+.coach-orb-thinking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+/* The listen affordance under each of Bloom's replies. */
+.coach-orb-listen-row {
+  display: flex;
+  margin-top: 8px;
+}
+
+.coach-orb-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  padding: 5px 10px 5px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+
+.coach-orb-listen:hover {
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+}
+
+.coach-orb-listen[aria-pressed="true"] {
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}
+
+/* ------------------------------------------------------------ notice */
+
+.coach-orb-notice {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 14px 8px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.coach-orb-notice-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.coach-orb-notice-link {
+  color: var(--gold);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.coach-orb-notice-dismiss {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------- composer */
+
+.coach-orb-composer {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 4px 12px 12px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 22px;
+  background: var(--surface-2);
+}
+
+.coach-orb-composer:focus-within {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+
+.coach-orb-input {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  padding: 7px 0;
+  max-height: 120px;
+}
+
+.coach-orb-input::placeholder {
+  color: color-mix(in oklab, var(--muted-foreground) 75%, transparent);
+}
+
+.coach-orb-mic[data-listening="true"] {
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}
+
+.coach-orb-send {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold) 55%, var(--gold-champagne));
+  color: var(--gold-ink);
+  transition:
+    opacity var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-micro) var(--ease-out-expo);
+}
+
+.coach-orb-send:active {
+  transform: scale(0.94);
+}
+
+.coach-orb-send:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-orb-halo {
+    animation: none;
+  }
+  .coach-orb,
+  .coach-orb:hover,
+  .coach-orb:active {
+    transition: none;
+    transform: none;
+  }
+  .coach-orb-panel {
+    animation: coach-orb-fade var(--motion-standard) ease;
+  }
+  .coach-orb-backdrop {
+    animation: none;
+  }
+}
+
+/* The component mirrors the media query into data-reduced-motion (its
+   own listener), so the state is assertable and stays correct even if
+   the query changes mid-session. */
+.coach-orb[data-reduced-motion="true"] .coach-orb-halo {
+  animation: none;
+}
+
+.coach-orb-panel[data-reduced-motion="true"] {
+  animation: coach-orb-fade var(--motion-standard) ease;
+}
