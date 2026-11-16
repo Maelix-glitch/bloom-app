@@ -203,11 +203,87 @@ import jeeraShikanji from "../../../assets/dishes/jeera-shikanji.webp";
 import badamDoodh from "../../../assets/dishes/badam-doodh.webp";
 import pudinaChaas from "../../../assets/dishes/pudina-chaas.webp";
 import tarboozSharbat from "../../../assets/dishes/tarbooz-sharbat.webp";
+import varutharachaSambar from "../../../assets/dishes/varutharacha-sambar.webp";
+import murungakkaiSambar from "../../../assets/dishes/murungakkai-sambar.webp";
+import keralaParippuCurry from "../../../assets/dishes/kerala-parippu-curry.webp";
+import moruCurry from "../../../assets/dishes/moru-curry.webp";
+import kumbalangaPulissery from "../../../assets/dishes/kumbalanga-pulissery.webp";
+import mambazhaPulissery from "../../../assets/dishes/mambazha-pulissery.webp";
+import keralaMuttaCurry from "../../../assets/dishes/kerala-mutta-curry.webp";
+import muttaRoast from "../../../assets/dishes/mutta-roast.webp";
+import kadalaCurry from "../../../assets/dishes/kadala-curry.webp";
+import kadalaCurryEnriched from "../../../assets/dishes/kadala-curry-enriched.webp";
+import pavakkaTheeyal from "../../../assets/dishes/pavakka-theeyal.webp";
+import nadanMeenCurry from "../../../assets/dishes/nadan-meen-curry.webp";
+import mathiCurry from "../../../assets/dishes/mathi-curry.webp";
+import thengaArachaMeenCurry from "../../../assets/dishes/thenga-aracha-meen-curry.webp";
+import mangaMeenCurry from "../../../assets/dishes/manga-meen-curry.webp";
+import meenVaruthathu from "../../../assets/dishes/meen-varuthathu.webp";
+import chemmeenCurry from "../../../assets/dishes/chemmeen-curry.webp";
+import chemmeenRoast from "../../../assets/dishes/chemmeen-roast.webp";
+import nadanKozhiCurry from "../../../assets/dishes/nadan-kozhi-curry.webp";
+import kozhiVarutharachaCurry from "../../../assets/dishes/kozhi-varutharacha-curry.webp";
+import keralaChickenStew from "../../../assets/dishes/kerala-chicken-stew.webp";
+import kozhiPorichathu from "../../../assets/dishes/kozhi-porichathu.webp";
+import keralaVegStew from "../../../assets/dishes/kerala-veg-stew.webp";
+import thakkaliCurry from "../../../assets/dishes/thakkali-curry.webp";
+import kozhikodePidi from "../../../assets/dishes/kozhikode-pidi.webp";
+import thakkaliRasam from "../../../assets/dishes/thakkali-rasam.webp";
+import kurumulakuRasam from "../../../assets/dishes/kurumulaku-rasam.webp";
+import avial from "../../../assets/dishes/avial.webp";
+import olan from "../../../assets/dishes/olan.webp";
+import kalan from "../../../assets/dishes/kalan.webp";
+import kayaErissery from "../../../assets/dishes/kaya-erissery.webp";
+import koottuCurry from "../../../assets/dishes/koottu-curry.webp";
+import carrotThoran from "../../../assets/dishes/carrot-thoran.webp";
+import cheeraThoran from "../../../assets/dishes/cheera-thoran.webp";
+import kappaPuzhukku from "../../../assets/dishes/kappa-puzhukku.webp";
+import vellarikkaPachadi from "../../../assets/dishes/vellarikka-pachadi.webp";
+import vendakkaKichadi from "../../../assets/dishes/vendakka-kichadi.webp";
+import kayaVaruthathu from "../../../assets/dishes/kaya-varuthathu.webp";
+import injipuli from "../../../assets/dishes/injipuli.webp";
+import narangaAchar from "../../../assets/dishes/naranga-achar.webp";
+import appam from "../../../assets/dishes/appam.webp";
+import kallappam from "../../../assets/dishes/kallappam.webp";
+import idiyappam from "../../../assets/dishes/idiyappam.webp";
+import puttu from "../../../assets/dishes/puttu.webp";
+import gothambuPuttu from "../../../assets/dishes/gothambu-puttu.webp";
+import muttaAppam from "../../../assets/dishes/mutta-appam.webp";
+import pathiri from "../../../assets/dishes/pathiri.webp";
+import keralaParotta from "../../../assets/dishes/kerala-parotta.webp";
+import thalasseryChickenBiryani from "../../../assets/dishes/thalassery-chicken-biryani.webp";
+import neyChoru from "../../../assets/dishes/ney-choru.webp";
+import meenBiryani from "../../../assets/dishes/meen-biryani.webp";
+import chemmeenBiryani from "../../../assets/dishes/chemmeen-biryani.webp";
+import vattayappam from "../../../assets/dishes/vattayappam.webp";
+import kinnathappam from "../../../assets/dishes/kinnathappam.webp";
+import kozhukatta from "../../../assets/dishes/kozhukatta.webp";
+import ottada from "../../../assets/dishes/ottada.webp";
+import unniyappam from "../../../assets/dishes/unniyappam.webp";
+import pazhamPori from "../../../assets/dishes/pazham-pori.webp";
+import uzhunnuVada from "../../../assets/dishes/uzhunnu-vada.webp";
+import parippuVada from "../../../assets/dishes/parippu-vada.webp";
+import sukhiyan from "../../../assets/dishes/sukhiyan.webp";
+import muttaBajji from "../../../assets/dishes/mutta-bajji.webp";
+import vazhakkaiBajji from "../../../assets/dishes/vazhakkai-bajji.webp";
+import irachiPathiri from "../../../assets/dishes/irachi-pathiri.webp";
+import achappam from "../../../assets/dishes/achappam.webp";
+import kuzhalappam from "../../../assets/dishes/kuzhalappam.webp";
+import kayaUpperi from "../../../assets/dishes/kaya-upperi.webp";
+import kappaUpperi from "../../../assets/dishes/kappa-upperi.webp";
+import avalosePodi from "../../../assets/dishes/avalose-podi.webp";
+import unnakkaya from "../../../assets/dishes/unnakkaya.webp";
+import parippuPayasam from "../../../assets/dishes/parippu-payasam.webp";
+import chakkaPayasam from "../../../assets/dishes/chakka-payasam.webp";
+import pazhamHalwa from "../../../assets/dishes/pazham-halwa.webp";
+import muttaMala from "../../../assets/dishes/mutta-mala.webp";
+import chattiPathiri from "../../../assets/dishes/chatti-pathiri.webp";
+import sambaram from "../../../assets/dishes/sambaram.webp";
 
 export const DISH_IMAGES_RETRIEVED_ON = "2026-11-16";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const DISH_IMAGES_FINGERPRINT = "fbc76e635f36cf3e3e2e14182eac2bbd1d7a92ffe1baf023edb7e448bb21348f";
+export const DISH_IMAGES_FINGERPRINT = "ee848634caaac8b247c13ab814296730c1b834f7fa998b8e1f6af559a8a43eac";
 
 export interface DishImageRaw {
   dishId: string;
@@ -413,6 +489,82 @@ export const DISH_IMAGES_RAW: readonly DishImageRaw[] = [
   { "dishId": "dish-badam-doodh", "dishName": "Badam Doodh", "slug": "badam-doodh", "src": badamDoodh, "commonsTitle": "File:Badam Milk Drink.jpg", "author": "Shabnam Shamsuddin", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Badam_Milk_Drink.jpg" },
   { "dishId": "dish-pudina-chaas", "dishName": "Pudina Chaas", "slug": "pudina-chaas", "src": pudinaChaas, "commonsTitle": "File:Mint masala chaas.JPG", "author": "Nithyasrm", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Mint_masala_chaas.JPG" },
   { "dishId": "dish-tarbooz-sharbat", "dishName": "Tarbooz Sharbat", "slug": "tarbooz-sharbat", "src": tarboozSharbat, "commonsTitle": "File:Water Pump Ka Sharbat e Tarbooz.JPG", "author": "Miansari66", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Water_Pump_Ka_Sharbat_e_Tarbooz.JPG" },
+  { "dishId": "dish-varutharacha-sambar", "dishName": "Varutharacha Sambar", "slug": "varutharacha-sambar", "src": varutharachaSambar, "commonsTitle": "File:Sambar 2.jpg", "author": "KARANK21", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Sambar_2.jpg" },
+  { "dishId": "dish-murungakkai-sambar", "dishName": "Murungakkai Sambar", "slug": "murungakkai-sambar", "src": murungakkaiSambar, "commonsTitle": "File:Sambar (drumstick).jpg", "author": "Booradleyp1", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Sambar_(drumstick).jpg" },
+  { "dishId": "dish-kerala-parippu-curry", "dishName": "Parippu Curry", "slug": "kerala-parippu-curry", "src": keralaParippuCurry, "commonsTitle": "File:Kerala-Style Parippu Curry – Traditional Lentil Curry of Kerala.jpg", "author": "Varghesepunnamada", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kerala-Style_Parippu_Curry_–_Traditional_Lentil_Curry_of_Kerala.jpg" },
+  { "dishId": "dish-moru-curry", "dishName": "Moru Curry", "slug": "moru-curry", "src": moruCurry, "commonsTitle": "File:Butter milk curry closeup.jpg", "author": "Ranjithsiji", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Butter_milk_curry_closeup.jpg" },
+  { "dishId": "dish-kumbalanga-pulissery", "dishName": "Kumbalanga Pulissery", "slug": "kumbalanga-pulissery", "src": kumbalangaPulissery, "commonsTitle": "File:Pulissery.jpg", "author": "Ks.mini", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Pulissery.jpg" },
+  { "dishId": "dish-mambazha-pulissery", "dishName": "Mambazha Pulissery", "slug": "mambazha-pulissery", "src": mambazhaPulissery, "commonsTitle": "File:Mambazha Pulisseri.jpg", "author": "Shabnam Shamsuddin", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Mambazha_Pulisseri.jpg" },
+  { "dishId": "dish-kerala-mutta-curry", "dishName": "Kerala Mutta Curry", "slug": "kerala-mutta-curry", "src": keralaMuttaCurry, "commonsTitle": "File:Egg curry - kerala style - 2576.JPG", "author": "Rameshng", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Egg_curry_-_kerala_style_-_2576.JPG" },
+  { "dishId": "dish-mutta-roast", "dishName": "Mutta Roast", "slug": "mutta-roast", "src": muttaRoast, "commonsTitle": "File:Kerala style egg roast.JPG", "author": "Renupradhul", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kerala_style_egg_roast.JPG" },
+  { "dishId": "dish-kadala-curry", "dishName": "Kadala Curry", "slug": "kadala-curry", "src": kadalaCurry, "commonsTitle": "File:Kadala curry.jpg", "author": "Mproopesh", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kadala_curry.jpg" },
+  { "dishId": "dish-kadala-curry-enriched", "dishName": "Kadala Curry (Enriched)", "slug": "kadala-curry-enriched", "src": kadalaCurryEnriched, "commonsTitle": "File:Kadala curry.jpg", "author": "Mproopesh", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kadala_curry.jpg" },
+  { "dishId": "dish-pavakka-theeyal", "dishName": "Pavakka Theeyal", "slug": "pavakka-theeyal", "src": pavakkaTheeyal, "commonsTitle": "File:Bitter melon curry of Kerala.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Bitter_melon_curry_of_Kerala.jpg" },
+  { "dishId": "dish-nadan-meen-curry", "dishName": "Nadan Meen Curry", "slug": "nadan-meen-curry", "src": nadanMeenCurry, "commonsTitle": "File:Fish Curry Kerala.jpg", "author": "Samphotography", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fish_Curry_Kerala.jpg" },
+  { "dishId": "dish-mathi-curry", "dishName": "Mathi Curry", "slug": "mathi-curry", "src": mathiCurry, "commonsTitle": "File:Mathi curry.JPG", "author": "Shobha Elizabeth John", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Mathi_curry.JPG" },
+  { "dishId": "dish-thenga-aracha-meen-curry", "dishName": "Thenga Aracha Meen Curry", "slug": "thenga-aracha-meen-curry", "src": thengaArachaMeenCurry, "commonsTitle": "File:Meen curry (fish curry) from Kerala, traditionally prepared in earthern pot.jpg", "author": "Sandra Sivanandan", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Meen_curry_(fish_curry)_from_Kerala,_traditionally_prepared_in_earthern_pot.jpg" },
+  { "dishId": "dish-manga-meen-curry", "dishName": "Manga Meen Curry", "slug": "manga-meen-curry", "src": mangaMeenCurry, "commonsTitle": "File:Fish Mango curry IMG20260606220805.jpg", "author": "SijiR", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fish_Mango_curry_IMG20260606220805.jpg" },
+  { "dishId": "dish-meen-varuthathu", "dishName": "Meen Varuthathu", "slug": "meen-varuthathu", "src": meenVaruthathu, "commonsTitle": "File:Kerala Fish Fry.jpg", "author": "Reshmi R S", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kerala_Fish_Fry.jpg" },
+  { "dishId": "dish-chemmeen-curry", "dishName": "Chemmeen Curry", "slug": "chemmeen-curry", "src": chemmeenCurry, "commonsTitle": "File:Kappa with Chemmeen curry.jpg", "author": "Hafees", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kappa_with_Chemmeen_curry.jpg" },
+  { "dishId": "dish-chemmeen-roast", "dishName": "Chemmeen Roast", "slug": "chemmeen-roast", "src": chemmeenRoast, "commonsTitle": "File:Shrimp roast.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Shrimp_roast.jpg" },
+  { "dishId": "dish-nadan-kozhi-curry", "dishName": "Nadan Kozhi Curry", "slug": "nadan-kozhi-curry", "src": nadanKozhiCurry, "commonsTitle": "File:Kerala (Naadan) Chicken Curry.jpg", "author": "Emilabe", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kerala_(Naadan)_Chicken_Curry.jpg" },
+  { "dishId": "dish-kozhi-varutharacha-curry", "dishName": "Kozhi Varutharacha Curry", "slug": "kozhi-varutharacha-curry", "src": kozhiVarutharachaCurry, "commonsTitle": "File:Varutharacha Chicken Curry (15914732965).jpg", "author": "Yummy O Yummy", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Varutharacha_Chicken_Curry_(15914732965).jpg" },
+  { "dishId": "dish-kerala-chicken-stew", "dishName": "Kerala Chicken Stew", "slug": "kerala-chicken-stew", "src": keralaChickenStew, "commonsTitle": "File:Chicken Stew (1205814362).jpg", "author": "rovingI", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Chicken_Stew_(1205814362).jpg" },
+  { "dishId": "dish-kozhi-porichathu", "dishName": "Kozhi Porichathu", "slug": "kozhi-porichathu", "src": kozhiPorichathu, "commonsTitle": "File:Chicken fry of Kerala.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Chicken_fry_of_Kerala.jpg" },
+  { "dishId": "dish-kerala-veg-stew", "dishName": "Kerala Vegetable Stew", "slug": "kerala-veg-stew", "src": keralaVegStew, "commonsTitle": "File:Appam and stew.jpg", "author": "Nithajay", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Appam_and_stew.jpg" },
+  { "dishId": "dish-thakkali-curry", "dishName": "Thakkali Curry", "slug": "thakkali-curry", "src": thakkaliCurry, "commonsTitle": "File:Thakkalikkary 02.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Thakkalikkary_02.jpg" },
+  { "dishId": "dish-kozhikode-pidi", "dishName": "Kozhikode Pidi", "slug": "kozhikode-pidi", "src": kozhikodePidi, "commonsTitle": "File:Pidiyum Kozhiyum.jpg", "author": "Jisstom123", "license": "Public domain", "pageUrl": "https://commons.wikimedia.org/wiki/File:Pidiyum_Kozhiyum.jpg" },
+  { "dishId": "dish-thakkali-rasam", "dishName": "Thakkali Rasam", "slug": "thakkali-rasam", "src": thakkaliRasam, "commonsTitle": "File:Tomato Rasam - Home Made.JPG", "author": "Mailz2kumar", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Tomato_Rasam_-_Home_Made.JPG" },
+  { "dishId": "dish-kurumulaku-rasam", "dishName": "Kurumulaku Rasam", "slug": "kurumulaku-rasam", "src": kurumulakuRasam, "commonsTitle": "File:Tamarind Rasam with pepper.jpg", "author": "Irudayaraj", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Tamarind_Rasam_with_pepper.jpg" },
+  { "dishId": "dish-avial", "dishName": "Avial", "slug": "avial", "src": avial, "commonsTitle": "File:Aviyal,Kerala cuisine.jpg", "author": "Samphotography", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Aviyal,Kerala_cuisine.jpg" },
+  { "dishId": "dish-olan", "dishName": "Olan", "slug": "olan", "src": olan, "commonsTitle": "File:Olan.jpg", "author": "Kavya Manohar", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Olan.jpg" },
+  { "dishId": "dish-kalan", "dishName": "Kalan", "slug": "kalan", "src": kalan, "commonsTitle": "File:Kaalan Curry during Onam celebration1.JPG", "author": "Rameshng", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kaalan_Curry_during_Onam_celebration1.JPG" },
+  { "dishId": "dish-kaya-erissery", "dishName": "Kaya Erissery", "slug": "kaya-erissery", "src": kayaErissery, "commonsTitle": "File:Erisseri.jpg", "author": "Kavya Manohar", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Erisseri.jpg" },
+  { "dishId": "dish-koottu-curry", "dishName": "Koottu Curry", "slug": "koottu-curry", "src": koottuCurry, "commonsTitle": "File:Traditional Koottu Curry of Kerala.JPG", "author": "Nairdeepa", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Traditional_Koottu_Curry_of_Kerala.JPG" },
+  { "dishId": "dish-carrot-thoran", "dishName": "Carrot Thoran", "slug": "carrot-thoran", "src": carrotThoran, "commonsTitle": "File:Carrot Thoran.jpg", "author": "Samphotography", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Carrot_Thoran.jpg" },
+  { "dishId": "dish-cheera-thoran", "dishName": "Cheera Thoran", "slug": "cheera-thoran", "src": cheeraThoran, "commonsTitle": "File:Cheera Thoran India.jpg", "author": "Divya Kudua", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cheera_Thoran_India.jpg" },
+  { "dishId": "dish-kappa-puzhukku", "dishName": "Kappa Puzhukku", "slug": "kappa-puzhukku", "src": kappaPuzhukku, "commonsTitle": "File:Kappa Kuzhachathu.jpg", "author": "Samphotography", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kappa_Kuzhachathu.jpg" },
+  { "dishId": "dish-vellarikka-pachadi", "dishName": "Vellarikka Pachadi", "slug": "vellarikka-pachadi", "src": vellarikkaPachadi, "commonsTitle": "File:Cucumber pachadi- My home Bangalore -Karnataka -pic 08.jpg", "author": "Shruthi Gaurav Alva", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cucumber_pachadi-_My_home_Bangalore_-Karnataka_-pic_08.jpg" },
+  { "dishId": "dish-vendakka-kichadi", "dishName": "Vendakka Kichadi", "slug": "vendakka-kichadi", "src": vendakkaKichadi, "commonsTitle": "File:Pachadi (ladies finger).jpg", "author": "Booradleyp1", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Pachadi_(ladies_finger).jpg" },
+  { "dishId": "dish-kaya-varuthathu", "dishName": "Kaya Varuthathu", "slug": "kaya-varuthathu", "src": kayaVaruthathu, "commonsTitle": "File:Raw banana fry.JPG", "author": "Shobha Elizabeth John", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Raw_banana_fry.JPG" },
+  { "dishId": "dish-injipuli", "dishName": "Injipuli", "slug": "injipuli", "src": injipuli, "commonsTitle": "File:Puliyinchi with a face.jpg", "author": "Minicherian", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Puliyinchi_with_a_face.jpg" },
+  { "dishId": "dish-naranga-achar", "dishName": "Naranga Achar", "slug": "naranga-achar", "src": narangaAchar, "commonsTitle": "File:Lemon Pickle in Oil.JPG", "author": "Miansari66", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Lemon_Pickle_in_Oil.JPG" },
+  { "dishId": "dish-appam", "dishName": "Appam", "slug": "appam", "src": appam, "commonsTitle": "File:Appam (Kerala dish).jpg", "author": "Asif Saleh", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Appam_(Kerala_dish).jpg" },
+  { "dishId": "dish-kallappam", "dishName": "Kallappam", "slug": "kallappam", "src": kallappam, "commonsTitle": "File:Topdown shot of Kallappam with pork curry.jpg", "author": "Aiwin Soji", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Topdown_shot_of_Kallappam_with_pork_curry.jpg" },
+  { "dishId": "dish-idiyappam", "dishName": "Idiyappam", "slug": "idiyappam", "src": idiyappam, "commonsTitle": "File:Idiyappam.jpg", "author": "Sundar", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Idiyappam.jpg" },
+  { "dishId": "dish-puttu", "dishName": "Puttu", "slug": "puttu", "src": puttu, "commonsTitle": "File:Puttu (Rice Flour steamed cake).jpg", "author": "Mathew Jibin", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Puttu_(Rice_Flour_steamed_cake).jpg" },
+  { "dishId": "dish-gothambu-puttu", "dishName": "Gothambu Puttu", "slug": "gothambu-puttu", "src": gothambuPuttu, "commonsTitle": "File:Wheat Puttu - Kerala - IMG 20210331 085016.jpg", "author": "Varghese K James", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Wheat_Puttu_-_Kerala_-_IMG_20210331_085016.jpg" },
+  { "dishId": "dish-mutta-appam", "dishName": "Mutta Appam", "slug": "mutta-appam", "src": muttaAppam, "commonsTitle": "File:Appam with egg.jpg", "author": "Northwalker", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Appam_with_egg.jpg" },
+  { "dishId": "dish-pathiri", "dishName": "Pathiri", "slug": "pathiri", "src": pathiri, "commonsTitle": "File:Patthiri.jpg", "author": "ARUNKUMAR P.R", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Patthiri.jpg" },
+  { "dishId": "dish-kerala-parotta", "dishName": "Kerala Parotta", "slug": "kerala-parotta", "src": keralaParotta, "commonsTitle": "File:Kerala Porotta.jpg", "author": "Dr. Chinchu C", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kerala_Porotta.jpg" },
+  { "dishId": "dish-thalassery-chicken-biryani", "dishName": "Thalassery Chicken Biryani", "slug": "thalassery-chicken-biryani", "src": thalasseryChickenBiryani, "commonsTitle": "File:Prepared Thalassery Biriyani.jpg", "author": "Samira Khan", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Prepared_Thalassery_Biriyani.jpg" },
+  { "dishId": "dish-ney-choru", "dishName": "Ney Choru", "slug": "ney-choru", "src": neyChoru, "commonsTitle": "File:Ghee Rice and Beef Kondattam.jpg", "author": "Ayshamarjana", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Ghee_Rice_and_Beef_Kondattam.jpg" },
+  { "dishId": "dish-meen-biryani", "dishName": "Meen Biryani", "slug": "meen-biryani", "src": meenBiryani, "commonsTitle": "File:Fish Biriyani.jpg", "author": "Ashok Kumar P S", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fish_Biriyani.jpg" },
+  { "dishId": "dish-chemmeen-biryani", "dishName": "Chemmeen Biryani", "slug": "chemmeen-biryani", "src": chemmeenBiryani, "commonsTitle": "File:Prawn Biriyani.jpg", "author": "Tirthankar.Bachhar", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Prawn_Biriyani.jpg" },
+  { "dishId": "dish-vattayappam", "dishName": "Vattayappam", "slug": "vattayappam", "src": vattayappam, "commonsTitle": "File:Vattayappam.jpg", "author": "Cholena Nashan", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Vattayappam.jpg" },
+  { "dishId": "dish-kinnathappam", "dishName": "Kinnathappam", "slug": "kinnathappam", "src": kinnathappam, "commonsTitle": "File:Kinnathappam 02.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kinnathappam_02.jpg" },
+  { "dishId": "dish-kozhukatta", "dishName": "Kozhukatta", "slug": "kozhukatta", "src": kozhukatta, "commonsTitle": "File:Kozhukatta - Kerala cuisine.jpg", "author": "Devika Varier", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kozhukatta_-_Kerala_cuisine.jpg" },
+  { "dishId": "dish-ottada", "dishName": "Ottada", "slug": "ottada", "src": ottada, "commonsTitle": "File:Ila ada 02.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Ila_ada_02.jpg" },
+  { "dishId": "dish-unniyappam", "dishName": "Unniyappam", "slug": "unniyappam", "src": unniyappam, "commonsTitle": "File:Unni Appam malabar.jpg", "author": "Sidheeq", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Unni_Appam_malabar.jpg" },
+  { "dishId": "dish-pazham-pori", "dishName": "Pazham Pori", "slug": "pazham-pori", "src": pazhamPori, "commonsTitle": "File:Banana Fritters and tea.jpg", "author": "Iloveporotta", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Banana_Fritters_and_tea.jpg" },
+  { "dishId": "dish-uzhunnu-vada", "dishName": "Uzhunnu Vada", "slug": "uzhunnu-vada", "src": uzhunnuVada, "commonsTitle": "File:Uzhunnu Vada (ഉഴുന്ന് വട).jpg", "author": "Jyothis Thaliath", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Uzhunnu_Vada_(ഉഴുന്ന്_വട).jpg" },
+  { "dishId": "dish-parippu-vada", "dishName": "Parippu Vada", "slug": "parippu-vada", "src": parippuVada, "commonsTitle": "File:Parippuvada.JPG", "author": "RanjithSiji", "license": "CC BY 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Parippuvada.JPG" },
+  { "dishId": "dish-sukhiyan", "dishName": "Sukhiyan", "slug": "sukhiyan", "src": sukhiyan, "commonsTitle": "File:Sukhiyan 01.jpg", "author": "Sidheeq", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Sukhiyan_01.jpg" },
+  { "dishId": "dish-mutta-bajji", "dishName": "Mutta Bajji", "slug": "mutta-bajji", "src": muttaBajji, "commonsTitle": "File:Egg bajji.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Egg_bajji.jpg" },
+  { "dishId": "dish-vazhakkai-bajji", "dishName": "Vazhakkai Bajji", "slug": "vazhakkai-bajji", "src": vazhakkaiBajji, "commonsTitle": "File:Kaya bhajji.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kaya_bhajji.jpg" },
+  { "dishId": "dish-irachi-pathiri", "dishName": "Irachi Pathiri", "slug": "irachi-pathiri", "src": irachiPathiri, "commonsTitle": "File:Chicken pathiri.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Chicken_pathiri.jpg" },
+  { "dishId": "dish-achappam", "dishName": "Achappam", "slug": "achappam", "src": achappam, "commonsTitle": "File:Achappam.jpg", "author": "John C", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Achappam.jpg" },
+  { "dishId": "dish-kuzhalappam", "dishName": "Kuzhalappam", "slug": "kuzhalappam", "src": kuzhalappam, "commonsTitle": "File:കുഴലപ്പം.jpg", "author": "Original uploaded by Manjithkaini", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:കുഴലപ്പം.jpg" },
+  { "dishId": "dish-kaya-upperi", "dishName": "Kaya Upperi", "slug": "kaya-upperi", "src": kayaUpperi, "commonsTitle": "File:Kerala banana chips Upperi varuthath.jpg", "author": "Ramesh NG", "license": "CC BY-SA 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kerala_banana_chips_Upperi_varuthath.jpg" },
+  { "dishId": "dish-kappa-upperi", "dishName": "Kappa Upperi", "slug": "kappa-upperi", "src": kappaUpperi, "commonsTitle": "File:Tapioca Chips 2.jpg", "author": "Gaurav Dhwaj Khadka", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Tapioca_Chips_2.jpg" },
+  { "dishId": "dish-avalose-podi", "dishName": "Avalose Podi", "slug": "avalose-podi", "src": avalosePodi, "commonsTitle": "File:Avalose Podi അവലോസ് പൊടി.JPG", "author": "Seena Viovin", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Avalose_Podi_അവലോസ്_പൊടി.JPG" },
+  { "dishId": "dish-unnakkaya", "dishName": "Unnakkaya", "slug": "unnakkaya", "src": unnakkaya, "commonsTitle": "File:Unnakkaya 04.jpg", "author": "Vis M", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Unnakkaya_04.jpg" },
+  { "dishId": "dish-parippu-payasam", "dishName": "Parippu Payasam", "slug": "parippu-payasam", "src": parippuPayasam, "commonsTitle": "File:Dal-payasam.JPG", "author": "Navaneeth Krishnan S", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Dal-payasam.JPG" },
+  { "dishId": "dish-chakka-payasam", "dishName": "Chakka Payasam", "slug": "chakka-payasam", "src": chakkaPayasam, "commonsTitle": "File:Traditional Chakka (Jackfruit) Prathaman of Kerala.JPG", "author": "Nairdeepa", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Traditional_Chakka_(Jackfruit)_Prathaman_of_Kerala.JPG" },
+  { "dishId": "dish-pazham-halwa", "dishName": "Pazham Halwa", "slug": "pazham-halwa", "src": pazhamHalwa, "commonsTitle": "File:Banana Halwa South India Sweets.jpg", "author": "Divya Kudua", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Banana_Halwa_South_India_Sweets.jpg" },
+  { "dishId": "dish-mutta-mala", "dishName": "Mutta Mala", "slug": "mutta-mala", "src": muttaMala, "commonsTitle": "File:മുട്ടമാല.jpg", "author": "Sahad mangadavan", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:മുട്ടമാല.jpg" },
+  { "dishId": "dish-chatti-pathiri", "dishName": "Chatti Pathiri", "slug": "chatti-pathiri", "src": chattiPathiri, "commonsTitle": "File:Chatti pathiri.JPG", "author": "Silsilah Ali", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Chatti_pathiri.JPG" },
+  { "dishId": "dish-sambaram", "dishName": "Sambaram", "slug": "sambaram", "src": sambaram, "commonsTitle": "File:Sambaram picture.JPG", "author": "Nithyasrm", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Sambaram_picture.JPG" },
 ];
 
 export interface DishImagePhotoless {
@@ -461,137 +613,61 @@ export const DISH_IMAGE_PHOTOLESS: readonly DishImagePhotoless[] = [
   { "dishId": "dish-corn-raita", "dishName": "Corn Raita", "reason": "No free-licence photograph verifiably showing a corn raita was found." },
   { "dishId": "dish-oats-kheer", "dishName": "Oats Kheer", "reason": "No free-licence photograph of oats kheer (payasam) was found on Commons." },
   { "dishId": "dish-haldi-doodh", "dishName": "Haldi Doodh", "reason": "The candidates were the turmeric plant, turmeric powder and a branded mix packet — no photograph of the drink itself under a free licence." },
-  { "dishId": "dish-varutharacha-sambar", "dishName": "Varutharacha Sambar", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-murungakkai-sambar", "dishName": "Murungakkai Sambar", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kerala-parippu-curry", "dishName": "Parippu Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-moru-curry", "dishName": "Moru Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kumbalanga-pulissery", "dishName": "Kumbalanga Pulissery", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mambazha-pulissery", "dishName": "Mambazha Pulissery", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kerala-mutta-curry", "dishName": "Kerala Mutta Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mutta-roast", "dishName": "Mutta Roast", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kadala-curry", "dishName": "Kadala Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kadala-curry-enriched", "dishName": "Kadala Curry (Enriched)", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-cherupayar-curry", "dishName": "Cherupayar Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vanpayar-curry", "dishName": "Vanpayar Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vendakka-theeyal", "dishName": "Vendakka Theeyal", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pavakka-theeyal", "dishName": "Pavakka Theeyal", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ulli-theeyal", "dishName": "Ulli Theeyal", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chemmeen-theeyal", "dishName": "Chemmeen Theeyal", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-nadan-meen-curry", "dishName": "Nadan Meen Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mathi-curry", "dishName": "Mathi Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-thenga-aracha-meen-curry", "dishName": "Thenga Aracha Meen Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-manga-meen-curry", "dishName": "Manga Meen Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-meen-varuthathu", "dishName": "Meen Varuthathu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chemmeen-curry", "dishName": "Chemmeen Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chemmeen-roast", "dishName": "Chemmeen Roast", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-nadan-kozhi-curry", "dishName": "Nadan Kozhi Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhi-varutharacha-curry", "dishName": "Kozhi Varutharacha Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kerala-chicken-stew", "dishName": "Kerala Chicken Stew", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhi-porichathu", "dishName": "Kozhi Porichathu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhi-perattu", "dishName": "Kozhi Perattu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-koon-curry", "dishName": "Koon Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-urulakizhangu-curry", "dishName": "Urulakizhangu Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kerala-veg-stew", "dishName": "Kerala Vegetable Stew", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-thakkali-curry", "dishName": "Thakkali Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kappa-curry", "dishName": "Kappa Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chembu-curry", "dishName": "Chembu Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-murungakkai-curry", "dishName": "Murungakkai Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ulli-curry", "dishName": "Ulli Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhikode-pidi", "dishName": "Kozhikode Pidi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-thakkali-rasam", "dishName": "Thakkali Rasam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kurumulaku-rasam", "dishName": "Kurumulaku Rasam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-avial", "dishName": "Avial", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-olan", "dishName": "Olan", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kalan", "dishName": "Kalan", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kaya-erissery", "dishName": "Kaya Erissery", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-koottu-curry", "dishName": "Koottu Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kaya-thoran", "dishName": "Kaya Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-carrot-thoran", "dishName": "Carrot Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-cheera-thoran", "dishName": "Cheera Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-muringa-ila-thoran", "dishName": "Muringa Ila Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vendakka-thoran", "dishName": "Vendakka Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chembu-thoran", "dishName": "Chembu Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-cherupayar-thoran", "dishName": "Cherupayar Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vanpayar-thoran", "dishName": "Vanpayar Thoran", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kappa-puzhukku", "dishName": "Kappa Puzhukku", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chembu-puzhukku", "dishName": "Chembu Puzhukku", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pineapple-pachadi", "dishName": "Pineapple Pachadi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mambazha-pachadi", "dishName": "Mambazha Pachadi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vellarikka-pachadi", "dishName": "Vellarikka Pachadi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vendakka-kichadi", "dishName": "Vendakka Kichadi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pavakka-kichadi", "dishName": "Pavakka Kichadi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mathi-peera", "dishName": "Mathi Peera", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ayala-peera", "dishName": "Ayala Peera", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-manga-curry", "dishName": "Manga Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-muringa-ila-curry", "dishName": "Muringa Ila Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kaya-varuthathu", "dishName": "Kaya Varuthathu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-urulakizhangu-mezhukkupuratti", "dishName": "Urulakizhangu Mezhukkupuratti", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-carrot-mezhukkupuratti", "dishName": "Carrot Mezhukkupuratti", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kumbalanga-curry", "dishName": "Kumbalanga Curry", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-thenga-chammanthi", "dishName": "Thenga Chammanthi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ulli-chammanthi", "dishName": "Ulli Chammanthi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chuvanna-thenga-chammanthi", "dishName": "Chuvanna Thenga Chammanthi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pudina-chammanthi", "dishName": "Pudina Chammanthi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mulaku-chammanthi", "dishName": "Mulaku Chammanthi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-injipuli", "dishName": "Injipuli", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-naranga-achar", "dishName": "Naranga Achar", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-inji-achar", "dishName": "Inji Achar", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chammanthi-podi", "dishName": "Chammanthi Podi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-appam", "dishName": "Appam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kallappam", "dishName": "Kallappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-idiyappam", "dishName": "Idiyappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-puttu", "dishName": "Puttu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-gothambu-puttu", "dishName": "Gothambu Puttu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pazham-puttu", "dishName": "Pazham Puttu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mutta-appam", "dishName": "Mutta Appam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mutta-stew", "dishName": "Mutta Stew", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pazhankanji", "dishName": "Pazhankanji", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pathiri", "dishName": "Pathiri", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-orotti", "dishName": "Orotti", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kerala-parotta", "dishName": "Kerala Parotta", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-poricha-pathiri", "dishName": "Poricha Pathiri", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-thalassery-chicken-biryani", "dishName": "Thalassery Chicken Biryani", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ney-choru", "dishName": "Ney Choru", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-meen-biryani", "dishName": "Meen Biryani", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chemmeen-biryani", "dishName": "Chemmeen Biryani", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vattayappam", "dishName": "Vattayappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kinnathappam", "dishName": "Kinnathappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhukatta", "dishName": "Kozhukatta", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ottada", "dishName": "Ottada", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chakka-ottada", "dishName": "Chakka Ottada", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-unniyappam", "dishName": "Unniyappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pazham-pori", "dishName": "Pazham Pori", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-uzhunnu-vada", "dishName": "Uzhunnu Vada", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-parippu-vada", "dishName": "Parippu Vada", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-sukhiyan", "dishName": "Sukhiyan", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mutta-bajji", "dishName": "Mutta Bajji", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-vazhakkai-bajji", "dishName": "Vazhakkai Bajji", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhi-cutlet", "dishName": "Kozhi Cutlet", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-irachi-pathiri", "dishName": "Irachi Pathiri", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kozhi-ada", "dishName": "Kozhi Ada", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-achappam", "dishName": "Achappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kuzhalappam", "dishName": "Kuzhalappam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kaya-upperi", "dishName": "Kaya Upperi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pavakka-upperi", "dishName": "Pavakka Upperi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kappa-upperi", "dishName": "Kappa Upperi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-diamond-cuts", "dishName": "Diamond Cuts", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-avalose-podi", "dishName": "Avalose Podi", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kerala-mixture", "dishName": "Kerala Mixture", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-ammini-kozhukatta", "dishName": "Ammini Kozhukatta", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-unnakkaya", "dishName": "Unnakkaya", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-parippu-payasam", "dishName": "Parippu Payasam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chakka-payasam", "dishName": "Chakka Payasam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pazham-payasam", "dishName": "Pazham Payasam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-kadala-payasam", "dishName": "Kadala Payasam", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pazham-halwa", "dishName": "Pazham Halwa", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chakka-varattiyathu", "dishName": "Chakka Varattiyathu", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-mutta-mala", "dishName": "Mutta Mala", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-chatti-pathiri", "dishName": "Chatti Pathiri", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-sambaram", "dishName": "Sambaram", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-inji-naranga-juice", "dishName": "Inji Naranga Juice", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-pineapple-sarbath", "dishName": "Pineapple Sarbath", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-munthiri-juice", "dishName": "Munthiri Juice", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
-  { "dishId": "dish-orange-sarbath", "dishName": "Orange Sarbath", "reason": "New in the Kerala wave — no photograph has been hunted for this dish yet; it is recorded photo-less rather than given a picture of a different dish." },
+  { "dishId": "dish-cherupayar-curry", "dishName": "Cherupayar Curry", "reason": "Hunted 2026-11-16 (English and Malayalam searches): the only depiction is a meal plate with the curry mounded on rice beside puttu — no photograph of the curry itself under a free licence." },
+  { "dishId": "dish-vanpayar-curry", "dishName": "Vanpayar Curry", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a red-cowpea curry was found on Commons." },
+  { "dishId": "dish-vendakka-theeyal", "dishName": "Vendakka Theeyal", "reason": "Hunted 2026-11-16: the only theeyal photographs on Commons are breadfruit and bitter-melon (the bitter-melon one is pinned to Pavakka Theeyal) — no okra theeyal." },
+  { "dishId": "dish-ulli-theeyal", "dishName": "Ulli Theeyal", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of an onion/shallot theeyal was found." },
+  { "dishId": "dish-chemmeen-theeyal", "dishName": "Chemmeen Theeyal", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a prawn theeyal was found." },
+  { "dishId": "dish-kozhi-perattu", "dishName": "Kozhi Perattu", "reason": "Hunted 2026-11-16: dry chicken-roast searches returned no verifiable Kerala chicken perattu photograph." },
+  { "dishId": "dish-koon-curry", "dishName": "Koon Curry", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a Kerala mushroom curry was found — results were wild-mushroom specimens." },
+  { "dishId": "dish-urulakizhangu-curry", "dishName": "Urulakizhangu Curry", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a Kerala coconut potato curry was found." },
+  { "dishId": "dish-kappa-curry", "dishName": "Kappa Curry", "reason": "Hunted 2026-11-16: kappa photographs show boiled tapioca served WITH fish or prawn curry, never kappa cooked as a curry itself." },
+  { "dishId": "dish-chembu-curry", "dishName": "Chembu Curry", "reason": "Hunted 2026-11-16: Commons holds only colocasia plant and corm photographs — no cooked chembu curry." },
+  { "dishId": "dish-murungakkai-curry", "dishName": "Murungakkai Curry", "reason": "Hunted 2026-11-16: drumstick-curry photographs are other regional masala styles — no Kerala coconut-milk drumstick curry." },
+  { "dishId": "dish-ulli-curry", "dishName": "Ulli Curry", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a Kerala onion curry was found." },
+  { "dishId": "dish-kaya-thoran", "dishName": "Kaya Thoran", "reason": "Hunted 2026-11-16: thoran photographs on Commons are of other vegetables (beans, carrot, cabbage, banana stem, papaya, jackfruit) — no raw-banana thoran." },
+  { "dishId": "dish-muringa-ila-thoran", "dishName": "Muringa Ila Thoran", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a drumstick-leaf thoran was found." },
+  { "dishId": "dish-vendakka-thoran", "dishName": "Vendakka Thoran", "reason": "Hunted 2026-11-16: only okra plant and flower photographs — no vendakka thoran." },
+  { "dishId": "dish-chembu-thoran", "dishName": "Chembu Thoran", "reason": "Hunted 2026-11-16: no photograph of a taro thoran was found." },
+  { "dishId": "dish-cherupayar-thoran", "dishName": "Cherupayar Thoran", "reason": "Hunted 2026-11-16: payar-thoran photographs are long-bean thoran, a different payar — no whole-moong thoran." },
+  { "dishId": "dish-vanpayar-thoran", "dishName": "Vanpayar Thoran", "reason": "Hunted 2026-11-16: no photograph of a cowpea thoran was found." },
+  { "dishId": "dish-chembu-puzhukku", "dishName": "Chembu Puzhukku", "reason": "Hunted 2026-11-16: no photograph of a taro puzhukku was found." },
+  { "dishId": "dish-pineapple-pachadi", "dishName": "Pineapple Pachadi", "reason": "Hunted 2026-11-16 (English and Malayalam searches): pachadi photographs on Commons are beetroot, cucumber and raw-mango — no pineapple pachadi." },
+  { "dishId": "dish-mambazha-pachadi", "dishName": "Mambazha Pachadi", "reason": "Hunted 2026-11-16: only raw-mango pachadi photographs exist; the ripe-mango curd curry photograph found is a pulissery and is pinned to Mambazha Pulissery, a different dish." },
+  { "dishId": "dish-pavakka-kichadi", "dishName": "Pavakka Kichadi", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a bitter-gourd kichadi/pachadi was found." },
+  { "dishId": "dish-mathi-peera", "dishName": "Mathi Peera", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a sardine peera was found." },
+  { "dishId": "dish-ayala-peera", "dishName": "Ayala Peera", "reason": "Hunted 2026-11-16: no photograph of a mackerel peera was found." },
+  { "dishId": "dish-manga-curry", "dishName": "Manga Curry", "reason": "Hunted 2026-11-16: ripe-mango curry photographs are the curd-based pulissery or fish-mango curries — no ripe-mango coconut curry." },
+  { "dishId": "dish-muringa-ila-curry", "dishName": "Muringa Ila Curry", "reason": "Hunted 2026-11-16: no photograph of a drumstick-leaf curry was found." },
+  { "dishId": "dish-urulakizhangu-mezhukkupuratti", "dishName": "Urulakizhangu Mezhukkupuratti", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a Kerala potato mezhukkupuratti was found." },
+  { "dishId": "dish-carrot-mezhukkupuratti", "dishName": "Carrot Mezhukkupuratti", "reason": "Hunted 2026-11-16: the carrot photograph found is a thoran (pinned to Carrot Thoran); the oil-fried mezhukkupuratti has no photograph of its own." },
+  { "dishId": "dish-kumbalanga-curry", "dishName": "Kumbalanga Curry", "reason": "Hunted 2026-11-16: ash-gourd photographs on Commons are the olan and the pulissery, both pinned to those dishes — no plain kumbalanga curry." },
+  { "dishId": "dish-thenga-chammanthi", "dishName": "Thenga Chammanthi", "reason": "Hunted 2026-11-16: coconut-chutney photographs are the runny dosa accompaniment, a different consistency — the firm sadhya chammanthi has no photograph." },
+  { "dishId": "dish-ulli-chammanthi", "dishName": "Ulli Chammanthi", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of an onion chammanthi was found." },
+  { "dishId": "dish-chuvanna-thenga-chammanthi", "dishName": "Chuvanna Thenga Chammanthi", "reason": "Hunted 2026-11-16: no photograph of a red coconut chammanthi was found." },
+  { "dishId": "dish-pudina-chammanthi", "dishName": "Pudina Chammanthi", "reason": "Hunted 2026-11-16: no photograph of a mint chammanthi was found (mint chutney photographs belong to the North-Indian-style chutney already in the library)." },
+  { "dishId": "dish-mulaku-chammanthi", "dishName": "Mulaku Chammanthi", "reason": "Hunted 2026-11-16: no photograph of a chilli chammanthi was found." },
+  { "dishId": "dish-inji-achar", "dishName": "Inji Achar", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a Kerala ginger pickle was found." },
+  { "dishId": "dish-chammanthi-podi", "dishName": "Chammanthi Podi", "reason": "Hunted 2026-11-16: the only podi photograph is an unverifiable generic chutney powder — no verified coconut chammanthi podi." },
+  { "dishId": "dish-pazham-puttu", "dishName": "Pazham Puttu", "reason": "Hunted 2026-11-16: puttu-and-banana photographs show banana served alongside the puttu, never steamed into it as pazham puttu is." },
+  { "dishId": "dish-mutta-stew", "dishName": "Mutta Stew", "reason": "Hunted 2026-11-16: egg-stew searches return Filipino sinigang and generic stews — no Kerala egg stew in coconut milk." },
+  { "dishId": "dish-pazhankanji", "dishName": "Pazhankanji", "reason": "Hunted 2026-11-16 (English and Malayalam searches): the only kanji-titled photograph proved to be a banana-leaf meals plate, not rice kanji." },
+  { "dishId": "dish-orotti", "dishName": "Orotti", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of an orotti was found; one file titled Ottada shows unwrapped discs that could not be verified as either dish." },
+  { "dishId": "dish-poricha-pathiri", "dishName": "Poricha Pathiri", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a fried pathiri was found." },
+  { "dishId": "dish-chakka-ottada", "dishName": "Chakka Ottada", "reason": "Hunted 2026-11-16: the only jackfruit ada photographs are kumbilappam, the bay-leaf-wrapped sibling — no banana-leaf chakka ottada." },
+  { "dishId": "dish-kozhi-cutlet", "dishName": "Kozhi Cutlet", "reason": "Hunted 2026-11-16: chicken-cutlet photographs on Commons are Western, Polish and Japanese cutlets — no Kerala kozhi cutlet." },
+  { "dishId": "dish-kozhi-ada", "dishName": "Kozhi Ada", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a kozhi ada was found." },
+  { "dishId": "dish-pavakka-upperi", "dishName": "Pavakka Upperi", "reason": "Hunted 2026-11-16: the single true candidate (bitter-gourd chips) carries a blog watermark, so it cannot ship — no clean free photograph." },
+  { "dishId": "dish-diamond-cuts", "dishName": "Diamond Cuts", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of Kerala diamond cuts was found." },
+  { "dishId": "dish-kerala-mixture", "dishName": "Kerala Mixture", "reason": "Hunted 2026-11-16: only Bombay-mixture photographs exist, a differently-named mixture — no verified Kerala bakery mixture photograph." },
+  { "dishId": "dish-ammini-kozhukatta", "dishName": "Ammini Kozhukatta", "reason": "Hunted 2026-11-16: only full-size kozhukatta photographs exist (pinned to Kozhukatta) — no miniature ammini kozhukatta." },
+  { "dishId": "dish-pazham-payasam", "dishName": "Pazham Payasam", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a banana payasam was found." },
+  { "dishId": "dish-kadala-payasam", "dishName": "Kadala Payasam", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of a chickpea payasam was found." },
+  { "dishId": "dish-chakka-varattiyathu", "dishName": "Chakka Varattiyathu", "reason": "Hunted 2026-11-16 (English and Malayalam searches): no photograph of chakka varattiyathu (jackfruit preserve) was found." },
+  { "dishId": "dish-inji-naranga-juice", "dishName": "Inji Naranga Juice", "reason": "Hunted 2026-11-16: the only Kerala lemon-drink photograph is kulukki sarbath, a differently-named sibling whose credit title would not match this dish." },
+  { "dishId": "dish-pineapple-sarbath", "dishName": "Pineapple Sarbath", "reason": "Hunted 2026-11-16: no photograph of a pineapple sarbath was found." },
+  { "dishId": "dish-munthiri-juice", "dishName": "Munthiri Juice", "reason": "Hunted 2026-11-16: no photograph of a Kerala grape juice was found." },
+  { "dishId": "dish-orange-sarbath", "dishName": "Orange Sarbath", "reason": "Hunted 2026-11-16: no photograph of an orange sarbath was found." },
   { "dishId": "dish-intl-herb-grilled-chicken", "dishName": "Herb-Grilled Chicken with Broccoli", "reason": "Added in the international high-protein expansion wave (2026-11); no photograph has been sourced for this dish yet — it stays photo-less until a real, free-licence photograph of the dish is reviewed and pinned." },
   { "dishId": "dish-intl-lemon-garlic-chicken", "dishName": "Lemon Garlic Chicken with Spinach", "reason": "Added in the international high-protein expansion wave (2026-11); no photograph has been sourced for this dish yet — it stays photo-less until a real, free-licence photograph of the dish is reviewed and pinned." },
   { "dishId": "dish-intl-chicken-fajitas", "dishName": "Chicken Fajitas", "reason": "Added in the international high-protein expansion wave (2026-11); no photograph has been sourced for this dish yet — it stays photo-less until a real, free-licence photograph of the dish is reviewed and pinned." },

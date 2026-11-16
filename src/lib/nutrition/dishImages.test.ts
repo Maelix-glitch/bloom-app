@@ -90,6 +90,7 @@ describe("dish photograph manifest", () => {
       ["dish-shahi-paneer", "dish-shahi-paneer-style"],
       ["dish-coconut-chutney", "dish-shahi-coconut-chutney"],
       ["dish-shikanji", "dish-jeera-shikanji"],
+      ["dish-kadala-curry", "dish-kadala-curry-enriched"],
     ];
     const slugs = DISH_PHOTOS.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
