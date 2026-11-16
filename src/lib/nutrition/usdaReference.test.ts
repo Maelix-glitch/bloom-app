@@ -26,7 +26,7 @@ import {
 
 describe("the USDA reference set", () => {
   it("ships a curated staple set, parsed whole by the strict N1 parser", () => {
-    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(99);
+    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(128);
     // Nothing drops: every generated entry survives parsing.
     expect(USDA_REFERENCE_FOODS.length).toBe(USDA_REFERENCE_FOODS_RAW.length);
     const ids = new Set(USDA_REFERENCE_FOODS.map((f) => f.id));
@@ -116,15 +116,15 @@ describe("food-group classification (P2)", () => {
       counts.set(group, (counts.get(group) ?? 0) + 1);
     }
     expect(Object.fromEntries(counts)).toEqual({
-      cereals_grains: 14,
-      pulses_legumes: 12,
+      cereals_grains: 17,
+      pulses_legumes: 13,
       dairy: 9,
-      fats_oils: 9,
+      fats_oils: 10,
       eggs: 3,
-      vegetables: 16,
-      fruits: 11,
-      nuts_seeds: 6,
-      other: 19,
+      vegetables: 20,
+      fruits: 12,
+      nuts_seeds: 8,
+      other: 36,
     });
   });
 

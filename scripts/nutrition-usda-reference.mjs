@@ -40,6 +40,9 @@
  *     are excluded by design (label data is a different dataset's job), and
  *     no prepared dishes are included: this is an ingredients set, not a
  *     cuisine database, and it must never be dressed up as Indian dish data.
+ *     The D1 extension (dishes foundation) adds Indian-kitchen spices,
+ *     aromatics and staples under the same pinning rules — ingredients a
+ *     recipe composes from, still never dish data.
  *   • **Servings.** Taken only where USDA publishes portion data
  *     (food_portion.csv): up to two portions per food, in USDA's order,
  *     labelled from the row itself (amount + unit/modifier/description) with
@@ -184,6 +187,48 @@ const PICKS = [
   { fdcId: 173468, dataType: "SR Legacy", expect: "Salt, table" },
   { fdcId: 334247, dataType: "Foundation", expect: "Sugars, granulated" },
   { fdcId: 173469, dataType: "SR Legacy", expect: "Vinegar, cider" },
+  /* ---- D1 (dishes foundation): the Indian-kitchen extension. ----------
+   * Spices, aromatics and staples a dish library composes from, added
+   * under exactly the same rules as the original set: SR Legacy records
+   * pinned by id + exact description, Foundation first where a record
+   * exists (none of these has one). Wished-for items with NO record in
+   * either download are NOT picked and never substituted — garam masala,
+   * asafoetida, curry leaves, fenugreek leaves, jaggery, basmati rice,
+   * chana dal as a distinct split record, drumstick (moringa) pods and
+   * paneer (no defensible generic fresh-cheese record) are absent from
+   * FoodData Central and stay absent here; the D1 report lists them.
+   * Two form notes: mustard seed ships in FDC's ground form (the only
+   * mustard-seed record), and split peas exist only as cooked records,
+   * so neither whole mustard seed nor dry split peas is picked. */
+  { fdcId: 172231, dataType: "SR Legacy", expect: "Spices, turmeric, ground" },
+  { fdcId: 170923, dataType: "SR Legacy", expect: "Spices, cumin seed" },
+  { fdcId: 170922, dataType: "SR Legacy", expect: "Spices, coriander seed" },
+  { fdcId: 170929, dataType: "SR Legacy", expect: "Spices, mustard seed, ground" },
+  { fdcId: 170932, dataType: "SR Legacy", expect: "Spices, pepper, red or cayenne" },
+  { fdcId: 171319, dataType: "SR Legacy", expect: "Spices, chili powder" },
+  { fdcId: 170924, dataType: "SR Legacy", expect: "Spices, curry powder" },
+  { fdcId: 171324, dataType: "SR Legacy", expect: "Spices, fenugreek seed" },
+  { fdcId: 170919, dataType: "SR Legacy", expect: "Spices, cardamom" },
+  { fdcId: 171321, dataType: "SR Legacy", expect: "Spices, cloves, ground" },
+  { fdcId: 171320, dataType: "SR Legacy", expect: "Spices, cinnamon, ground" },
+  { fdcId: 170917, dataType: "SR Legacy", expect: "Spices, bay leaf" },
+  { fdcId: 171323, dataType: "SR Legacy", expect: "Spices, fennel seed" },
+  { fdcId: 170931, dataType: "SR Legacy", expect: "Spices, pepper, black" },
+  { fdcId: 171330, dataType: "SR Legacy", expect: "Spices, poppy seed" },
+  { fdcId: 169997, dataType: "SR Legacy", expect: "Coriander (cilantro) leaves, raw" },
+  { fdcId: 173475, dataType: "SR Legacy", expect: "Spearmint, fresh" },
+  { fdcId: 170497, dataType: "SR Legacy", expect: "Peppers, hot chili, green, raw" },
+  { fdcId: 170106, dataType: "SR Legacy", expect: "Peppers, hot chili, red, raw" },
+  { fdcId: 169260, dataType: "SR Legacy", expect: "Okra, raw" },
+  { fdcId: 168393, dataType: "SR Legacy", expect: "Balsam-pear (bitter gourd), pods, raw" },
+  { fdcId: 174288, dataType: "SR Legacy", expect: "Chickpea flour (besan)" },
+  { fdcId: 169714, dataType: "SR Legacy", expect: "Rice flour, white, unenriched" },
+  { fdcId: 168933, dataType: "SR Legacy", expect: "Semolina, unenriched" },
+  { fdcId: 173758, dataType: "SR Legacy", expect: "Cowpeas, common (blackeyes, crowder, southern), mature seeds, raw" },
+  { fdcId: 170150, dataType: "SR Legacy", expect: "Seeds, sesame seeds, whole, dried" },
+  { fdcId: 170169, dataType: "SR Legacy", expect: "Nuts, coconut meat, raw" },
+  { fdcId: 167763, dataType: "SR Legacy", expect: "Tamarinds, raw" },
+  { fdcId: 172337, dataType: "SR Legacy", expect: "Oil, mustard" },
 ];
 
 /* --------------------- the pinned classification (P2) --------------------- */
@@ -273,6 +318,28 @@ const CLASSIFICATION = {
   1104647: cls("other"), 169231: cls("other"),
   169640: cls("other"), 173468: cls("other"),
   334247: cls("other"), 173469: cls("other"),
+  // D1 Indian-kitchen extension — spices and fresh aromatics are `other`
+  // (identity facts, never a vegetable portion), like garlic and ginger;
+  // the chillies are vegetables, where the sweet peppers already sit.
+  172231: cls("other"), 170923: cls("other"),
+  170922: cls("other"), 170929: cls("other"),
+  170932: cls("other"), 171319: cls("other"),
+  170924: cls("other"), 171324: cls("other"),
+  170919: cls("other"), 171321: cls("other"),
+  171320: cls("other"), 170917: cls("other"),
+  171323: cls("other"), 170931: cls("other"),
+  171330: cls("other"), 169997: cls("other"),
+  173475: cls("other"),
+  170497: cls("vegetables"), 170106: cls("vegetables"),
+  169260: cls("vegetables"), 168393: cls("vegetables"),
+  // D1 flours and staples — besan, rice flour and semolina sit with the
+  // other flours in cereals_grains; cowpeas (lobia) with the pulses;
+  // sesame and coconut with the nuts & seeds, FDC's own grouping for
+  // coconut; tamarind is a fruit pod; mustard oil with the fats & oils.
+  174288: cls("cereals_grains"), 169714: cls("cereals_grains"),
+  168933: cls("cereals_grains"), 173758: cls("pulses_legumes"),
+  170150: cls("nuts_seeds"), 170169: cls("nuts_seeds"),
+  167763: cls("fruits"), 172337: cls("fats_oils"),
 };
 
 /* ------------------------------ source data ------------------------------- */

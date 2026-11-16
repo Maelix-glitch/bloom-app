@@ -172,6 +172,40 @@ const PHOTOLESS = [
   [334194, "Only branded cans, supermarket-shelf packaging and prepared tuna dishes exist under free licences — packaging is not the food, so no photograph is pinned."],
   [2514747, "The only free-licence depiction is ground turkey already browning in a skillet, and the USDA candidate photographs proved to be unrelated market scenes — no verifiable photograph of raw ground turkey."],
   [2515380, "Free-licence photographs show pumpkin seeds only in their hulls, or as mixed-seed piles — the hulled green pepita kernel itself is not verifiably depicted."],
+  /* D1 (dishes foundation) additions: these foods joined the reference
+     set after the Commons photo pass, and no photograph has been
+     sourced or reviewed for them yet. Recorded here so the coverage
+     rule holds — a photo is pinned only after the usual search,
+     licence check and eyeball review, never silently skipped. */
+  [172231, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170923, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170922, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170929, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170932, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [171319, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170924, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [171324, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170919, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [171321, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [171320, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170917, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [171323, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170931, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [171330, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [169997, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [173475, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170497, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170106, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [169260, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [168393, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [174288, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [169714, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [168933, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [173758, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170150, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [170169, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [167763, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
+  [172337, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
 ];
 
 /* ------------------------------ Commons API ------------------------------ */
