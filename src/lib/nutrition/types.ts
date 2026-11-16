@@ -136,7 +136,7 @@ export type Meal = "breakfast" | "lunch" | "dinner" | "snack";
 
 export const MEALS: readonly Meal[] = ["breakfast", "lunch", "dinner", "snack"];
 
-export type EntrySource = "search" | "custom" | "coach_photo" | "recent" | "plan";
+export type EntrySource = "search" | "custom" | "coach_photo" | "recent" | "plan" | "dish";
 
 export type Amount = { grams: number } | { servings: number; servingLabel: string };
 
@@ -152,9 +152,11 @@ export interface LogEntry {
   /** Local day key (`YYYY-MM-DD`, via src/lib/localDay.ts conventions). */
   day: string;
   meal: Meal;
-  /** The reusable Food this entry came from. Null for estimate entries. */
+  /** The reusable Food this entry came from. Null for snapshot entries
+   *  (Coach estimates, dishes). */
   foodId: string | null;
-  /** Inline snapshot for estimate entries. Null for food-backed entries. */
+  /** Inline snapshot for estimate and dish entries — the portion's
+   *  totals, stored with the entry. Null for food-backed entries. */
   snapshot: EstimateSnapshot | null;
   /** Display name captured at log time (the food's name, or the name the
    *  user gave an estimate). */

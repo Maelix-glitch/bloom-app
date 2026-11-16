@@ -133,7 +133,7 @@ describe("Timeline — swaps", () => {
     expect(screen.getByText(/Calorie-matched swaps/)).toBeTruthy();
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Swap Egg, whole, raw, fresh for Egg, white, raw, fresh",
+        name: "Swap Egg for Egg white",
       }),
     );
     const stored = readFoodLog();
@@ -152,11 +152,12 @@ describe("Timeline — photo lightbox", () => {
     log(egg, 100, todayLocal());
     render(<NutritionPage />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "View photo of Egg, whole, raw, fresh" }),
-    );
+    /* D4: timeline entries render under the friendly display name, so
+       the photo button and the lightbox carry "Egg", not the raw USDA
+       description (which stays in the provenance layer). */
+    fireEvent.click(screen.getByRole("button", { name: "View photo of Egg" }));
     const dialog = screen.getByRole("dialog");
-    expect(dialog.getAttribute("aria-label")).toBe("Egg, whole, raw, fresh");
+    expect(dialog.getAttribute("aria-label")).toBe("Egg");
     expect(
       within(dialog).getByText(`Photo by ${credit.author} · ${credit.license}`),
     ).toBeTruthy();

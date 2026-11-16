@@ -31,6 +31,7 @@ import {
   MEALS,
   USDA_REFERENCE_FOODS,
   entryNutrientsFor,
+  foodDisplayName,
   labelledFoodNutrients,
   searchUsdaReference,
   type Amount,
@@ -275,7 +276,7 @@ export function LogDialog({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-display text-[24px] text-foreground">
-                  {selection.food.name}
+                  {foodDisplayName(selection.food).en}
                 </h3>
                 <ProvenanceBadge
                   kind={selection.food.provenance.kind}
@@ -713,15 +714,20 @@ function FoodRow({
   onChoose: () => void;
 }) {
   const labelled = labelledFoodNutrients(food);
+  /* Reference foods render under their friendly display name, Hindi
+     alongside (D4); the raw USDA description stays in the provenance
+     layer. A user's own food keeps the name its owner gave it. */
+  const display = foodDisplayName(food);
   return (
     <li className="nut-food-row">
       {food.provenance.kind === "usda" ? (
-        <FoodPhoto foodId={food.id} name={food.name} />
+        <FoodPhoto foodId={food.id} name={display.en} />
       ) : null}
       <button type="button" className="nut-food-row-main" onClick={onChoose}>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
-            {food.name}
+            {display.en}
+            {display.hindi ? <span className="nut-hindi"> ({display.hindi})</span> : null}
           </span>
           <span className="mt-0.5 block text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
             Per 100 g · {nutrientLine(labelled.nutrients)}
