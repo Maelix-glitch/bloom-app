@@ -120,3 +120,25 @@ export function verificationStatus(input: VerificationInput): VerificationStatus
     steps,
   };
 }
+
+/**
+ * The status of SOMEONE ELSE, from the one public fact about their tick:
+ * whether a record exists in `account_verifications`.
+ *
+ * Their steps are not ours to see — the invite list is never readable by
+ * clients and another person's email state is private — and they do not
+ * need re-checking here: a record can only have been created by
+ * `claim_account_verification()`, which ran every gate server-side before
+ * granting. So for anyone but the signed-in user, the record is not one
+ * input among several; it is the whole truth, and this is the one place
+ * that says so. `steps` is empty because there are no steps to report —
+ * not because they were skipped.
+ */
+export function verificationStatusFromRecord(hasRecord: boolean): VerificationStatus {
+  return {
+    verified: hasRecord,
+    remaining: 0,
+    pendingRecord: false,
+    steps: [],
+  };
+}
