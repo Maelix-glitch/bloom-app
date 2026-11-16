@@ -15,23 +15,33 @@
  * the explicit Compose again tap.
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useAssessment } from "@/hooks/useAssessment";
+import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
+import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
+import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
 import {
+  dishIdeaFor,
+  dishNutrients,
+  displayNameForFoodId,
   goalProfileOf,
+  logDish,
   provenanceLabel,
   sumNutrients,
+  type Dish,
   type PlanGoalProfile,
   type PlanMeal,
   type PlanSuggestion,
   type SuggestionLayer,
 } from "@/lib/nutrition";
+import { DishPhoto } from "./DishPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { FoodPhoto } from "./FoodPhoto";
 import { MEAL_LABEL, formatGrams } from "./input";
@@ -57,23 +67,24 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 }
 
-const shortName = (name: string) => name.split(",")[0]!.trim();
-
 /**
  * The meal card's dish title, derived mechanically from the meal's own
- * items: the base item "with" its protein items, named by their short
- * (pre-comma) names. Nothing is invented — a meal with no base is
- * titled by its protein items, a snack by its items, and a meal with
- * no items gets no title at all (its note renders instead).
+ * items: the base item "with" its protein items, named by their
+ * friendly display names (D4 — the cook's names, not the USDA source
+ * descriptions those stay in the provenance layer). Nothing is
+ * invented — a meal with no base is titled by its protein items, a
+ * snack by its items, and a meal with no items gets no title at all
+ * (its note renders instead).
  */
 function dishTitleFor(meal: PlanMeal): string | null {
   if (meal.suggestions.length === 0) return null;
+  const nameOf = (s: PlanSuggestion) => displayNameForFoodId(s.foodId, s.name).en;
   const base = meal.suggestions.filter((s) => s.layer === "base");
   const protein = meal.suggestions.filter((s) => s.layer === "protein");
   if (base.length > 0 && protein.length > 0) {
-    return `${shortName(base[0]!.name)} with ${joinNames(protein.map((s) => shortName(s.name)))}`;
+    return `${nameOf(base[0]!)} with ${joinNames(protein.map(nameOf))}`;
   }
-  const named = (protein.length > 0 ? protein : meal.suggestions).map((s) => shortName(s.name));
+  const named = (protein.length > 0 ? protein : meal.suggestions).map(nameOf);
   return joinNames(named);
 }
 
@@ -109,13 +120,24 @@ function GoalChips({
 export function NutritionPlanSection() {
   const { state, generate, logSuggestion, suggestionLogged, logMeal, currentGoal, setGoal } =
     usePlan();
+  const assessment = useAssessment();
+  const session = useSession();
+  const nutrition = useNutrition();
   const [logError, setLogError] = useState<string | null>(null);
+
+  /* The profile the dish idea is judged against — the same assembly
+     the swap suggestions use (the Assessment's domain profile), so a
+     dish idea and a swap can never apply different rules. */
+  const profile = useMemo(
+    () => toHealthProfile(assessment.state, session.userId ?? "local"),
+    [assessment.state, session.userId],
+  );
 
   const log = (meal: PlanMeal, suggestion: PlanSuggestion) => {
     const entry = logSuggestion(meal, suggestion);
     if (!entry) {
       setLogError(
-        `“${suggestion.name}” isn't in your foods any more, so it can't be logged. Regenerate the plan and Bloom will suggest from what you have now.`,
+        `“${displayNameForFoodId(suggestion.foodId, suggestion.name).en}” isn't in your foods any more, so it can't be logged. Regenerate the plan and Bloom will suggest from what you have now.`,
       );
       return;
     }
@@ -254,16 +276,18 @@ export function NutritionPlanSection() {
 
   const suggestionRow = (meal: PlanMeal, suggestion: PlanSuggestion) => {
     const isLogged = suggestionLogged(meal, suggestion);
+    const display = displayNameForFoodId(suggestion.foodId, suggestion.name);
     return (
       <li key={suggestion.foodId} className="nut-entry">
-        <FoodPhoto foodId={suggestion.foodId} name={suggestion.name} />
+        <FoodPhoto foodId={suggestion.foodId} name={display.en} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p
               className="truncate text-[length:var(--text-callout)] font-medium text-foreground"
-              title={suggestion.name}
+              title={display.en}
             >
-              {shortName(suggestion.name)}
+              {display.en}
+              {display.hindi ? <span className="nut-hindi"> ({display.hindi})</span> : null}
             </p>
             <ProvenanceBadge
               kind={suggestion.provenance.kind}
@@ -284,7 +308,7 @@ export function NutritionPlanSection() {
             <button
               type="button"
               className="nut-icon-btn"
-              aria-label={`Log ${suggestion.name} to ${MEAL_LABEL[meal.meal]}`}
+              aria-label={`Log ${display.en} to ${MEAL_LABEL[meal.meal]}`}
               onClick={() => log(meal, suggestion)}
             >
               <Plus className="size-4" aria-hidden />
@@ -368,8 +392,71 @@ export function NutritionPlanSection() {
             </div>
           </>
         )}
+        {dishIdeaRow(meal)}
       </article>
     );
+  };
+
+  /* One dish idea per main meal (D4): a library dish that suits the
+     person's pattern and passes the plan's own allergy/dislike gates,
+     rotating by day. The layered ingredient suggestions above are the
+     plan; this is a cookable alternative for the same slot, logged
+     through the dish path (a recipe-provenance portion snapshot). No
+     qualifying dish → no row — the card is never padded. */
+  const dishIdeaRow = (meal: PlanMeal) => {
+    if (meal.meal === "snack") return null;
+    const idea = dishIdeaFor(profile, plan.day, meal.meal);
+    if (!idea) return null;
+    const nutrients = dishNutrients(idea).nutrients;
+    const logged = nutrition.entries.some(
+      (e) =>
+        e.day === plan.day &&
+        e.meal === meal.meal &&
+        e.source === "dish" &&
+        e.provenance.kind === "recipe" &&
+        e.provenance.sourceId === idea.id,
+    );
+    return (
+      <div className="mt-4 border-t border-border-subtle pt-3.5">
+        <p className="nut-group-label">Dish idea</p>
+        <div className="mt-2 flex items-center gap-3">
+          <DishPhoto dishId={idea.id} name={idea.name.en} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[length:var(--text-callout)] font-medium text-foreground">
+              {idea.name.en} <span className="nut-hindi">({idea.name.hindi})</span>
+            </p>
+            <p className="mt-0.5 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
+              {Math.round(nutrients.kcal)} kcal · {formatGrams(nutrients.proteinG)} g protein
+              per serving
+            </p>
+          </div>
+          {logged ? (
+            <span className="nut-chip" data-selected>
+              <Check className="size-3.5" aria-hidden /> Logged
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="nut-btn nut-btn-gold nut-btn-sm"
+              onClick={() => logDishIdea(meal, idea)}
+            >
+              Log this dish
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const logDishIdea = (meal: PlanMeal, dish: Dish) => {
+    const entry = logDish(dish, meal.meal, plan.day);
+    if (!entry) {
+      setLogError(
+        `“${dish.name.en}” couldn't be logged — its values fall outside the range the log can store.`,
+      );
+      return;
+    }
+    setLogError(null);
   };
 
   return (

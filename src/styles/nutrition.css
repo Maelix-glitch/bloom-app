@@ -229,6 +229,78 @@
   color: var(--rose);
   font-style: italic;
 }
+.nut-badge[data-kind="recipe"] {
+  border-color: color-mix(in oklab, var(--sky) 35%, transparent);
+  background: color-mix(in oklab, var(--sky) 12%, transparent);
+  color: var(--sky);
+}
+
+/* --------------------------------- dishes -------------------------------- */
+
+/* A Hindi kitchen name rides after the English one, smaller and quieter
+   (D4) — the same name, in the script the kitchen uses. */
+.nut-hindi {
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.nut-hindi-title {
+  font-size: 0.62em;
+  color: var(--muted-foreground);
+}
+
+/* A dish card in the browse grid: the tab's row language, widened into
+   a card — photo (when the dish has one), bilingual name, the serving's
+   numbers. The whole card is the button that opens the dish. */
+.nut-dish-card {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  text-align: left;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+.nut-dish-card:hover {
+  border-color: color-mix(in oklab, var(--gold) 35%, transparent);
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+
+/* The photograph as its own tap target (FoodPhoto's lightbox pattern,
+   for dishes): the button is invisible chrome around the image. */
+.nut-photo-btn {
+  flex-shrink: 0;
+  border-radius: var(--radius-control);
+  line-height: 0;
+}
+.nut-dish-photo-btn-lg {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-control);
+  line-height: 0;
+}
+.nut-dish-photo-lg {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-3);
+  object-fit: cover;
+}
+.nut-lightbox-img {
+  width: 100%;
+  max-height: 62dvh;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-3);
+  object-fit: contain;
+}
 
 /* ---------------------------------- plan --------------------------------- */
 

@@ -37,6 +37,7 @@ import {
   type AssessmentState,
 } from "@/lib/assessment/state";
 import {
+  displayNameForFoodId,
   foodPhotoFor,
   generatePlan,
   readFoodLog,
@@ -291,7 +292,9 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
     expect(imgs.length).toBe(photographed.length);
     const alts = imgs.map((img) => img.getAttribute("alt"));
     for (const suggestion of photographed) {
-      expect(alts).toContain(suggestion.name);
+      /* D4: the photograph's alt is the food's friendly display name —
+         the name the row renders — not the raw USDA description. */
+      expect(alts).toContain(displayNameForFoodId(suggestion.foodId, suggestion.name).en);
     }
   });
 });

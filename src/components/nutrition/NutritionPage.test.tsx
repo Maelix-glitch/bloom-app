@@ -360,19 +360,15 @@ describe("NutritionPage — food photographs & credits (P3-R)", () => {
     });
 
     const usdaSection = within(sheet).getByLabelText("USDA reference foods");
-    const eggRow = within(usdaSection)
-      .getAllByRole("listitem")
-      .find((li) => li.textContent?.includes("Egg, whole, raw, fresh"));
-    expect(eggRow).toBeTruthy();
-    const img = eggRow!.querySelector("img.nut-food-thumb");
-    expect(img).not.toBeNull();
-    expect(img?.getAttribute("alt")).toBe("Egg, whole, raw, fresh");
-    /* The photograph is its own button now — it opens the lightbox —
-       beside the row's choose button, never nested inside it. */
+    /* D4 + wide: picker rows render under the friendly display name
+       (Hindi alongside); the photograph is its own button — it opens
+       the lightbox — beside the row's choose button, never nested
+       inside it. The row's photo is found by its alt, the friendly
+       name, which is what this test is about. */
+    const img = within(usdaSection).getByAltText("Egg");
+    expect(img.classList.contains("nut-food-thumb")).toBe(true);
     expect(
-      within(eggRow!).getByRole("button", {
-        name: "View photo of Egg, whole, raw, fresh",
-      }),
+      within(usdaSection).getByRole("button", { name: "View photo of Egg" }),
     ).toBeTruthy();
 
     const ownSection = within(sheet).getByLabelText("Your foods and recents");

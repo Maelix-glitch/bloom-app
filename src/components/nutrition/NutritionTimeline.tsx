@@ -13,7 +13,9 @@ import { ArrowLeftRight, Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useNutrition } from "@/hooks/useNutrition";
 import {
   MEALS,
+  displayNameForFoodId,
   entryClock,
+  foodDisplayName,
   labelledEntryNutrients,
   swapFocusFor,
   sumNutrients,
@@ -123,6 +125,11 @@ export function NutritionTimeline({
                 {mealEntries.map((entry) => {
                   const labelled = labelledEntryNutrients(entry);
                   const n = labelled.nutrients;
+                  /* A reference food renders under its friendly name
+                     (D4) — the stored name keeps the source's words;
+                     estimates and own foods keep the name they were
+                     logged under. */
+                  const entryName = displayNameForFoodId(entry.foodId, entry.name).en;
                   const clock = entryClock(entry);
                   const swappable = entry.provenance.kind === "usda" && entry.foodId !== null;
                   const swapsOpen = swapOpenFor === entry.id;
@@ -133,12 +140,12 @@ export function NutritionTimeline({
                     <li key={entry.id} className="py-3">
                       <div className="flex items-start gap-3">
                         {entry.foodId ? (
-                          <FoodPhoto foodId={entry.foodId} name={entry.name} />
+                          <FoodPhoto foodId={entry.foodId} name={entryName} />
                         ) : null}
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-[length:var(--text-callout)] font-semibold text-foreground">
-                              {entry.name}
+                              {entryName}
                             </p>
                             <ProvenanceBadge
                               kind={entry.provenance.kind}
@@ -153,7 +160,7 @@ export function NutritionTimeline({
                                   <input
                                     className="nut-grams-input"
                                     inputMode="decimal"
-                                    aria-label={`Grams for ${entry.name}`}
+                                    aria-label={`Grams for ${entryName}`}
                                     value={gramsText}
                                     autoFocus
                                     onChange={(e) => setGramsText(e.target.value)}
@@ -183,7 +190,7 @@ export function NutritionTimeline({
                                 <button
                                   type="button"
                                   className="nut-grams-btn"
-                                  aria-label={`Edit grams for ${entry.name}`}
+                                  aria-label={`Edit grams for ${entryName}`}
                                   onClick={() => {
                                     setEditingGramsFor(entry.id);
                                     setGramsText(
@@ -227,18 +234,20 @@ export function NutritionTimeline({
                                 </p>
                               ) : (
                                 <ul className="mt-2 space-y-2">
-                                  {options.map((option) => (
+                                  {options.map((option) => {
+                                    const optionName = foodDisplayName(option.food).en;
+                                    return (
                                     <li
                                       key={option.food.id}
                                       className="flex items-center gap-3"
                                     >
                                       <FoodPhoto
                                         foodId={option.food.id}
-                                        name={option.food.name}
+                                        name={optionName}
                                       />
                                       <span className="min-w-0 flex-1">
                                         <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
-                                          {option.food.name}
+                                          {optionName}
                                         </span>
                                         <span className="block text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
                                           {formatGrams(option.grams)} g ·{" "}
@@ -252,7 +261,7 @@ export function NutritionTimeline({
                                       <button
                                         type="button"
                                         className="nut-btn nut-btn-ghost nut-btn-sm"
-                                        aria-label={`Swap ${entry.name} for ${option.food.name}`}
+                                        aria-label={`Swap ${entryName} for ${optionName}`}
                                         onClick={() => {
                                           nutrition.applySwap(entry, option);
                                           setSwapOpenFor(null);
@@ -261,7 +270,8 @@ export function NutritionTimeline({
                                         Swap
                                       </button>
                                     </li>
-                                  ))}
+                                    );
+                                  })}
                                 </ul>
                               )}
                             </div>
@@ -274,7 +284,7 @@ export function NutritionTimeline({
                               type="button"
                               className="nut-icon-btn"
                               data-active={swapsOpen || undefined}
-                              aria-label={`Swaps for ${entry.name}`}
+                              aria-label={`Swaps for ${entryName}`}
                               aria-expanded={swapsOpen}
                               onClick={() => setSwapOpenFor(swapsOpen ? null : entry.id)}
                             >
@@ -284,7 +294,7 @@ export function NutritionTimeline({
                           <button
                             type="button"
                             className="nut-icon-btn"
-                            aria-label={`Edit ${entry.name}`}
+                            aria-label={`Edit ${entryName}`}
                             onClick={() => onEdit(entry)}
                           >
                             <Pencil className="size-4" aria-hidden />
@@ -292,7 +302,7 @@ export function NutritionTimeline({
                           <button
                             type="button"
                             className="nut-icon-btn nut-icon-btn-danger"
-                            aria-label={`Remove ${entry.name}`}
+                            aria-label={`Remove ${entryName}`}
                             onClick={() => onRemove(entry)}
                           >
                             <Trash2 className="size-4" aria-hidden />

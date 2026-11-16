@@ -19,6 +19,8 @@
     "seed:usda:check": "node scripts/nutrition-usda-reference.mjs --check",
     "seed:food-images": "node scripts/nutrition-food-images.mjs",
     "seed:food-images:check": "node scripts/nutrition-food-images.mjs --check",
+    "seed:dish-images": "node scripts/nutrition-dish-images.mjs",
+    "seed:dish-images:check": "node scripts/nutrition-dish-images.mjs --check",
     "preview:prod": "npm run build && npx wrangler --cwd .output/server dev",
     "deploy": "npm run build:worker && npx wrangler deploy",
     "deploy:name": "npm run build && npx wrangler --cwd .output/server deploy --name bloom-app",

@@ -35,6 +35,7 @@ import {
 } from "@/lib/nutrition";
 import { AddFoodSheet } from "./AddFoodSheet";
 import { DateNav, NutritionHero } from "./NutritionHero";
+import { DishesSection } from "./DishesSection";
 import { PatternLab, Spectrum, WeekPanel } from "./NutritionPanels";
 import { NutritionPlanSection } from "./NutritionPlanSection";
 import { NutritionTimeline } from "./NutritionTimeline";
@@ -228,6 +229,11 @@ export function NutritionPage() {
       {/* Today's plan — a plan is built for a day, so it belongs to the
           today view; other days are the record, not the plan. */}
       {isToday ? <NutritionPlanSection /> : null}
+
+      {/* The dish library (D4) — browsing and logging a recipe belong
+          to every day's view; a dish logged from here lands on the day
+          being viewed. */}
+      <DishesSection day={day} />
 
       <PatternLab patterns={patterns} />
 

@@ -38,7 +38,14 @@ const FOOD_GROUPS: readonly FoodGroup[] = [
   "fats_oils",
   "other",
 ];
-const ENTRY_SOURCES: readonly EntrySource[] = ["search", "custom", "coach_photo", "recent", "plan"];
+const ENTRY_SOURCES: readonly EntrySource[] = [
+  "search",
+  "custom",
+  "coach_photo",
+  "recent",
+  "plan",
+  "dish",
+];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A day key must name a day that exists. The shape regex alone waves
@@ -318,6 +325,12 @@ export function parseLogEntry(raw: unknown): LogEntry | null {
     // estimate provenance and its inline snapshot, and it must not point at
     // a reusable Food (an estimate never becomes reference data, §4.4).
     if (provenance.kind !== "coach_estimate" || !snapshot || foodId !== null) return null;
+  } else if (source === "dish") {
+    // A dish entry (D4) is a portion snapshot like an estimate, under the
+    // recipe provenance: the dish's computed per-serving nutrients, stored
+    // inline — never a per-100 g profile invented for the dish, and never
+    // a pointer at a reusable Food (a dish is a recipe, not a food).
+    if (provenance.kind !== "recipe" || !snapshot || foodId !== null) return null;
   } else {
     // A food-backed entry must name its food and inherit a food provenance.
     if (provenance.kind === "coach_estimate" || !foodId || snapshot !== null) return null;
