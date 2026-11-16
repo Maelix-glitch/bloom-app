@@ -18,6 +18,7 @@ const KIND_FALLBACK: Record<FoodProvenance["kind"], string> = {
   user_entered: USER_ENTERED_LABEL,
   off: "Open Food Facts",
   ifct: "ICMR-NIN IFCT",
+  recipe: "Built from USDA ingredient data",
 };
 
 /** The display label for a provenance. A source's own shipped label wins;

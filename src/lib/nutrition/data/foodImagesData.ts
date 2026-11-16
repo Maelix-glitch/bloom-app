@@ -107,10 +107,10 @@ import salt from "../../../assets/foods/salt.webp";
 import sugar from "../../../assets/foods/sugar.webp";
 import appleCiderVinegar from "../../../assets/foods/apple-cider-vinegar.webp";
 
-export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-15";
+export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-16";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "5f142f8bd27fa2cfe14cb4d7c2830cf7d813f393aa2da4104f8b5b9f29aee953";
+export const FOOD_IMAGES_FINGERPRINT = "38a79c845855128005bc7de7d9ef9e25dc7fea62fccd17501bc1b8bcf1ab646a";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -234,4 +234,33 @@ export const FOOD_IMAGE_PHOTOLESS: readonly FoodImagePhotoless[] = [
   { "foodId": "usda-2514747", "foodName": "Turkey, ground, 93% lean/ 7% fat, raw", "reason": "The only free-licence depiction is ground turkey already browning in a skillet, and the USDA candidate photographs proved to be unrelated market scenes — no verifiable photograph of raw ground turkey." },
   { "foodId": "usda-334194", "foodName": "Fish, tuna, light, canned in water, drained solids", "reason": "Only branded cans, supermarket-shelf packaging and prepared tuna dishes exist under free licences — packaging is not the food, so no photograph is pinned." },
   { "foodId": "usda-2515380", "foodName": "Seeds, pumpkin seeds (pepitas), raw", "reason": "Free-licence photographs show pumpkin seeds only in their hulls, or as mixed-seed piles — the hulled green pepita kernel itself is not verifiably depicted." },
+  { "foodId": "usda-172231", "foodName": "Spices, turmeric, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170923", "foodName": "Spices, cumin seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170922", "foodName": "Spices, coriander seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170929", "foodName": "Spices, mustard seed, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170932", "foodName": "Spices, pepper, red or cayenne", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171319", "foodName": "Spices, chili powder", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170924", "foodName": "Spices, curry powder", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171324", "foodName": "Spices, fenugreek seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170919", "foodName": "Spices, cardamom", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171321", "foodName": "Spices, cloves, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171320", "foodName": "Spices, cinnamon, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170917", "foodName": "Spices, bay leaf", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171323", "foodName": "Spices, fennel seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170931", "foodName": "Spices, pepper, black", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-171330", "foodName": "Spices, poppy seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-169997", "foodName": "Coriander (cilantro) leaves, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-173475", "foodName": "Spearmint, fresh", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170497", "foodName": "Peppers, hot chili, green, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170106", "foodName": "Peppers, hot chili, red, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-169260", "foodName": "Okra, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-168393", "foodName": "Balsam-pear (bitter gourd), pods, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-174288", "foodName": "Chickpea flour (besan)", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-169714", "foodName": "Rice flour, white, unenriched", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-168933", "foodName": "Semolina, unenriched", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-173758", "foodName": "Cowpeas, common (blackeyes, crowder, southern), mature seeds, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170150", "foodName": "Seeds, sesame seeds, whole, dried", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-170169", "foodName": "Nuts, coconut meat, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-167763", "foodName": "Tamarinds, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-172337", "foodName": "Oil, mustard", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
 ];

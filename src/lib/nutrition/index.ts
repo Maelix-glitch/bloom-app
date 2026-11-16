@@ -29,3 +29,5 @@ export * from "./dayView";
 export * from "./swaps";
 export * from "./patterns";
 export * from "./planLog";
+export * from "./dishes";
+export * from "./data/foodNames";
