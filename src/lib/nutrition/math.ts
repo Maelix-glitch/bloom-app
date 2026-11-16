@@ -9,10 +9,31 @@
  * as zero.
  */
 
-import type { Amount, DayLog, Food, LogEntry, Nutrients } from "./types";
+import {
+  OPTIONAL_NUTRIENT_KEYS,
+  type Amount,
+  type DayLog,
+  type Food,
+  type LogEntry,
+  type Nutrients,
+  type OptionalNutrientKey,
+} from "./types";
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 const round0 = (n: number) => Math.round(n);
+
+/** Display rounding per optional field: gram and large-milligram values
+ *  print whole; the small-milligram traces (iron, vitamin C) keep a
+ *  decimal, where a whole-milligram rounding would erase them. */
+const OPTIONAL_ROUND: Record<OptionalNutrientKey, (n: number) => number> = {
+  fibreG: round1,
+  sodiumMg: round0,
+  potassiumMg: round0,
+  magnesiumMg: round0,
+  calciumMg: round0,
+  ironMg: round1,
+  vitaminCMg: round1,
+};
 
 function scaleNutrients(per100g: Nutrients, grams: number): Nutrients {
   const f = grams / 100;
@@ -22,8 +43,10 @@ function scaleNutrients(per100g: Nutrients, grams: number): Nutrients {
     carbsG: round1(per100g.carbsG * f),
     fatG: round1(per100g.fatG * f),
   };
-  if (per100g.fibreG !== undefined) out.fibreG = round1(per100g.fibreG * f);
-  if (per100g.sodiumMg !== undefined) out.sodiumMg = round0(per100g.sodiumMg * f);
+  for (const key of OPTIONAL_NUTRIENT_KEYS) {
+    const value = per100g[key];
+    if (value !== undefined) out[key] = OPTIONAL_ROUND[key](value * f);
+  }
   return out;
 }
 
@@ -53,33 +76,45 @@ export function entryNutrientsFor(food: Food, amount: Amount): Nutrients | null 
   return scaleNutrients(food.per100g, grams);
 }
 
-/** Sum stored entry nutrients. Absence is preserved per optional field. */
+/** Sum stored entry nutrients. Absence is preserved per optional field:
+ *  a field appears in the total only when at least one input carries it,
+ *  summed over the inputs that do. */
 export function sumNutrients(list: readonly Nutrients[]): Nutrients {
   const out: Nutrients = { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 };
-  let fibre = 0;
-  let fibreSeen = false;
-  let sodium = 0;
-  let sodiumSeen = false;
+  const optional = new Map<OptionalNutrientKey, number>();
   for (const n of list) {
     out.kcal += n.kcal;
     out.proteinG += n.proteinG;
     out.carbsG += n.carbsG;
     out.fatG += n.fatG;
-    if (n.fibreG !== undefined) {
-      fibre += n.fibreG;
-      fibreSeen = true;
-    }
-    if (n.sodiumMg !== undefined) {
-      sodium += n.sodiumMg;
-      sodiumSeen = true;
+    for (const key of OPTIONAL_NUTRIENT_KEYS) {
+      const value = n[key];
+      if (value !== undefined) optional.set(key, (optional.get(key) ?? 0) + value);
     }
   }
   out.kcal = round0(out.kcal);
   out.proteinG = round1(out.proteinG);
   out.carbsG = round1(out.carbsG);
   out.fatG = round1(out.fatG);
-  if (fibreSeen) out.fibreG = round1(fibre);
-  if (sodiumSeen) out.sodiumMg = round0(sodium);
+  for (const [key, total] of optional) out[key] = OPTIONAL_ROUND[key](total);
+  return out;
+}
+
+/**
+ * Which optional fields a set of nutrient bundles is INCOMPLETE in: a
+ * field is incomplete when at least one bundle does not carry it — the
+ * summed total for that field is then a floor over the foods that
+ * reported it, not the day's whole intake. An empty set is incomplete
+ * in nothing (there is no total to misread).
+ */
+export function incompleteOptionalFields(
+  list: readonly Nutrients[],
+): ReadonlySet<OptionalNutrientKey> {
+  const out = new Set<OptionalNutrientKey>();
+  if (list.length === 0) return out;
+  for (const key of OPTIONAL_NUTRIENT_KEYS) {
+    if (list.some((n) => n[key] === undefined)) out.add(key);
+  }
   return out;
 }
 

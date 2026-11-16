@@ -1,0 +1,287 @@
+/**
+ * NutritionReportPage — the clinician report (N-UI): seven days of
+ * intake, with sources, printable. Built entirely from the same real
+ * aggregates the tab shows — week totals per day, provenance shares,
+ * the body's own guides — with incompleteness marked wherever a day's
+ * fibre or sodium rests on foods that did not report it. The profile
+ * grid shows only what Bloom genuinely holds; a value it does not hold
+ * reads "Not recorded", never a plausible invention.
+ */
+
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft, Printer } from "lucide-react";
+
+import { useBodyProfile } from "@/hooks/useBodyProfile";
+import { useNutrition } from "@/hooks/useNutrition";
+import { ACTIVITY_LABEL, GOAL_LABEL } from "@/lib/health/body";
+import { shiftDay } from "@/lib/localDay";
+import {
+  incompleteOptionalFields,
+  isRealDayKey,
+  kcalByProvenance,
+  sumNutrients,
+  weekAggregates,
+  type LogEntry,
+} from "@/lib/nutrition";
+import { formatGrams } from "./input";
+
+function longDate(day: string): string {
+  return new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function dayShort(day: string): string {
+  return new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
+const FIBRE_REFERENCE_G = 30;
+const SODIUM_CEILING_MG = 2000;
+
+export function NutritionReportPage({ endDay }: { endDay: string }) {
+  const nutrition = useNutrition();
+  const body = useBodyProfile();
+  const end = isRealDayKey(endDay) ? endDay : nutrition.today;
+  const start = shiftDay(end, -6);
+  const targets = nutrition.targetState.kind === "ready" ? nutrition.targetState.targets : null;
+  const week = weekAggregates(nutrition.entries, end, targets?.proteinG ?? null);
+
+  const entriesInWindow = nutrition.entries.filter((e) => e.day >= start && e.day <= end);
+  const weekShares = kcalByProvenance(entriesInWindow);
+  const loggedDays = week.days.filter((d) => d.totals !== null);
+  const anyFibreIncomplete = week.days.some((d) => {
+    const dayEntries = entriesInWindow.filter((e) => e.day === d.day);
+    return dayEntries.length > 0 && incompleteOptionalFields(dayEntries.map((e) => e.nutrients)).has("fibreG");
+  });
+
+  const profile = body.profile;
+  const guides: { label: string; value: string }[] = [
+    {
+      label: "Age / sex",
+      value:
+        profile.age !== null || profile.sex !== "unspecified"
+          ? [profile.age !== null ? `${profile.age} years` : null, profile.sex !== "unspecified" ? profile.sex : null]
+              .filter(Boolean)
+              .join(" · ")
+          : "Not recorded",
+    },
+    {
+      label: "Height / weight",
+      value:
+        profile.heightCm !== null || profile.weightKg !== null
+          ? [
+              profile.heightCm !== null ? `${profile.heightCm} cm` : null,
+              profile.weightKg !== null ? `${profile.weightKg} kg` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          : "Not recorded",
+    },
+    { label: "Activity", value: ACTIVITY_LABEL[profile.activity] },
+    { label: "Goal", value: GOAL_LABEL[profile.goal] },
+    {
+      label: "Energy guide",
+      value: targets ? `~${Math.round(targets.kcal)} kcal / day` : "Not set",
+    },
+    {
+      label: "Protein guide",
+      value: targets ? `~${formatGrams(targets.proteinG)} g / day` : "Not set",
+    },
+    { label: "Fibre guide", value: `${FIBRE_REFERENCE_G} g / day` },
+    { label: "Sodium ceiling", value: `${SODIUM_CEILING_MG.toLocaleString("en-IN")} mg / day` },
+  ];
+
+  const dayRow = (day: string, entries: LogEntry[]) => {
+    const totals = sumNutrients(entries.map((e) => e.nutrients));
+    const incomplete = incompleteOptionalFields(entries.map((e) => e.nutrients));
+    const shares = kcalByProvenance(entries);
+    return { totals, incomplete, shares };
+  };
+
+  const provenanceCards: { label: string; kcal: number; color: string; blurb: string }[] = [
+    {
+      label: "USDA FoodData Central",
+      kcal: weekShares.usdaKcal,
+      color: "var(--sage)",
+      blurb: "Reference values published by the USDA (CC0), pinned per food in Bloom's reference set.",
+    },
+    {
+      label: "Your value",
+      kcal: weekShares.ownKcal,
+      color: "var(--gold)",
+      blurb: "Values you copied from packet labels yourself. Bloom stores them as stated — it does not verify them.",
+    },
+    {
+      label: "Estimate — based on your photo",
+      kcal: weekShares.estimateKcal,
+      color: "var(--rose)",
+      blurb: "Coach's estimate from a meal photo, confirmed by you before logging. An approximation, never a measurement.",
+    },
+  ];
+
+  return (
+    <div className="nut-wrap nut-report">
+      <div className="nut-report-print-hide flex items-center justify-between gap-3">
+        <Link to="/nutrition" className="nut-btn nut-btn-ghost nut-btn-sm">
+          <ArrowLeft className="size-3.5" aria-hidden /> Back to nutrition
+        </Link>
+        <button
+          type="button"
+          className="nut-btn nut-btn-gold nut-btn-sm"
+          onClick={() => window.print()}
+        >
+          <Printer className="size-3.5" aria-hidden /> Print
+        </button>
+      </div>
+
+      <header className="mt-6">
+        <p className="eyebrow">Clinician report</p>
+        <h1 className="mt-2 font-display text-[clamp(28px,4vw,38px)] leading-[1.08] text-foreground">
+          Seven days of intake, <em className="nut-gold-text">with sources</em>
+        </h1>
+        <p className="mt-2 text-[length:var(--text-callout)] text-muted-foreground">
+          {longDate(start)} to {longDate(end)} · from your Bloom food log
+        </p>
+      </header>
+
+      <section className="nut-card mt-6" aria-label="Profile and guides">
+        <h2 className="eyebrow">Profile &amp; guides</h2>
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
+          {guides.map((guide) => (
+            <div key={guide.label}>
+              <dt className="text-[length:var(--text-caption)] text-muted-foreground">
+                {guide.label}
+              </dt>
+              <dd className="mt-0.5 font-display text-[18px] capitalize text-foreground">
+                {guide.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="nut-note">
+          Guides are estimates from Mifflin–St Jeor and common reference intakes. They are
+          not a prescription.
+        </p>
+      </section>
+
+      <section className="nut-card mt-4" aria-label="Daily intake">
+        <h2 className="eyebrow">Daily intake</h2>
+        <div className="mt-3 overflow-x-auto">
+          <table className="nut-report-table">
+            <thead>
+              <tr>
+                <th scope="col">Day</th>
+                <th scope="col">kcal</th>
+                <th scope="col">Protein g</th>
+                <th scope="col">Carbs g</th>
+                <th scope="col">Fat g</th>
+                <th scope="col">Fibre g</th>
+                <th scope="col">Sodium mg</th>
+                <th scope="col">Verified</th>
+              </tr>
+            </thead>
+            <tbody>
+              {week.days.map((weekDay) => {
+                const dayEntries = entriesInWindow.filter((e) => e.day === weekDay.day);
+                if (dayEntries.length === 0) {
+                  return (
+                    <tr key={weekDay.day}>
+                      <td>{dayShort(weekDay.day)}</td>
+                      <td colSpan={7} className="text-muted-foreground">
+                        Nothing logged
+                      </td>
+                    </tr>
+                  );
+                }
+                const { totals, incomplete, shares } = dayRow(weekDay.day, dayEntries);
+                return (
+                  <tr key={weekDay.day}>
+                    <td>{dayShort(weekDay.day)}</td>
+                    <td>{Math.round(totals.kcal)}</td>
+                    <td>{formatGrams(totals.proteinG)}</td>
+                    <td>{formatGrams(totals.carbsG)}</td>
+                    <td>{formatGrams(totals.fatG)}</td>
+                    <td>
+                      {totals.fibreG !== undefined ? formatGrams(totals.fibreG) : "—"}
+                      {incomplete.has("fibreG") ? "*" : ""}
+                    </td>
+                    <td>
+                      {totals.sodiumMg !== undefined
+                        ? Math.round(totals.sodiumMg).toLocaleString("en-IN")
+                        : "—"}
+                      {incomplete.has("sodiumMg") ? "*" : ""}
+                    </td>
+                    <td>
+                      {shares.verifiedShare !== null
+                        ? `${Math.round(shares.verifiedShare * 100)}%`
+                        : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>Average of {loggedDays.length} logged days</td>
+                <td>{week.avgKcal ?? "—"}</td>
+                <td>{week.avgProteinG !== null ? formatGrams(week.avgProteinG) : "—"}</td>
+                <td>{week.avgCarbsG !== null ? formatGrams(week.avgCarbsG) : "—"}</td>
+                <td>{week.avgFatG !== null ? formatGrams(week.avgFatG) : "—"}</td>
+                <td>—</td>
+                <td>—</td>
+                <td>
+                  {weekShares.verifiedShare !== null
+                    ? `${Math.round(weekShares.verifiedShare * 100)}%`
+                    : "—"}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        {anyFibreIncomplete ? (
+          <p className="nut-note">
+            * Some logged foods don't report fibre. Those days' fibre totals are floors over
+            the foods that did — not whole-day claims.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="nut-card mt-4" aria-label="Data provenance">
+        <h2 className="eyebrow">Data provenance</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          {provenanceCards.map((card) => (
+            <article
+              key={card.label}
+              className="rounded-[var(--radius-control)] border border-border-subtle p-4"
+            >
+              <p className="flex items-center gap-2 text-[length:var(--text-callout)] font-medium text-foreground">
+                <span className="size-2 rounded-full" style={{ background: card.color }} aria-hidden />
+                {card.label}
+              </p>
+              <p className="mt-2 font-display text-[30px] text-foreground tabular-nums">
+                {weekShares.totalKcal > 0
+                  ? `${Math.round((card.kcal / weekShares.totalKcal) * 100)}%`
+                  : "—"}
+              </p>
+              <p className="mt-1 text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
+                {card.blurb}
+              </p>
+            </article>
+          ))}
+        </div>
+        <p className="nut-note">
+          Self-reported intake is inherently imprecise — portions are weighed or estimated by
+          the person eating, and photo estimates carry a natural margin. This report is
+          informational and does not constitute medical advice.
+        </p>
+      </section>
+    </div>
+  );
+}

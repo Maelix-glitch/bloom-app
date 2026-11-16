@@ -21,7 +21,35 @@ export interface Nutrients {
   fibreG?: number;
   /** Only when the source provides it. Absent is not zero. */
   sodiumMg?: number;
+  /**
+   * The micronutrient panel (N-UI): potassium, magnesium, calcium, iron
+   * and vitamin C, in milligrams. Same absence rule as fibre and sodium —
+   * a field exists only when the source published it for that food;
+   * absent means "not reported", never zero. USDA reference foods carry
+   * them where FoodData Central publishes them; a user's own foods and
+   * Coach estimates carry only what was actually stated for them.
+   */
+  potassiumMg?: number;
+  magnesiumMg?: number;
+  calciumMg?: number;
+  ironMg?: number;
+  vitaminCMg?: number;
 }
+
+/** The optional nutrient fields — everything beyond the core four. A day
+ *  total can be INCOMPLETE in any of these: at least one logged food did
+ *  not report it, so the total is a floor, not a claim. */
+export const OPTIONAL_NUTRIENT_KEYS = [
+  "fibreG",
+  "sodiumMg",
+  "potassiumMg",
+  "magnesiumMg",
+  "calciumMg",
+  "ironMg",
+  "vitaminCMg",
+] as const;
+
+export type OptionalNutrientKey = (typeof OPTIONAL_NUTRIENT_KEYS)[number];
 
 export type FoodProvenanceKind = "usda" | "user_entered" | "off" | "ifct";
 
