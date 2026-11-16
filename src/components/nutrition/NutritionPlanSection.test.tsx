@@ -7,7 +7,7 @@
  * with the food's provenance intact.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -41,6 +41,7 @@ import {
   generatePlan,
   readFoodLog,
   readPlan,
+  USDA_REFERENCE_FOODS,
   writePlan,
   type Food,
 } from "@/lib/nutrition";
@@ -126,9 +127,16 @@ describe("NutritionPlanSection", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
 
     /* The plan renders: the goal (title + the active goal chip), the
-       day's targets, meal sections. */
+       day's targets, meal sections. The targets query names the header
+       sentence itself ("…across the day — your guide is…"): the bare
+       phrase "across the day" also ends the day notes under "Today's
+       mix" whenever a rotation misses an ICMR floor — for this profile
+       the 2026-11-16 rotation falls short on milk and curd, so the
+       unscoped query matched two correct elements and threw. The notes
+       are pinned per-day in planComposition.test.ts, and their rendering
+       is pinned in the "Today's mix" test below. */
     expect(screen.getAllByText("Lose weight").length).toBeGreaterThan(0);
-    expect(screen.getByText(/across the day/)).toBeTruthy();
+    expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
     expect(screen.getByText("Breakfast")).toBeTruthy();
     expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
 
@@ -149,6 +157,50 @@ describe("NutritionPlanSection", () => {
     expect(entries[0]!.day).toBe(todayLocal());
     expect(entries[0]!.provenance.kind).toBe("usda");
     expect(screen.getByText("Logged")).toBeTruthy();
+  });
+
+  it("renders the plan's day notes under Today's mix, apart from the targets line", () => {
+    seedAssessment(COMPLETE);
+    const state = {
+      version: 1 as const,
+      status: "complete" as const,
+      step: "summary" as const,
+      answers: { ...EMPTY_ANSWERS, ...COMPLETE },
+      consents: [],
+      startedAt: null,
+      completedAt: "2026-11-10T03:05:00.000Z",
+      updatedAt: "2026-11-10T03:05:00.000Z",
+    };
+    const profile = toHealthProfile(state, "user-1");
+    const safety = classifySafety(toSafetyInput(profile));
+    /* The fixture's composition is fixed by an explicit day string —
+       the 2026-11-16 rotation, whose milk-and-curd shortfall note is
+       the one that used to collide with the targets line. Only the day
+       label is re-stamped to today so the section shows it as today's
+       plan; the inputs snapshot carries no day, so nothing reads stale. */
+    const outcome = generatePlan({
+      profile,
+      safety,
+      gatedOutcome: targetsFor(profile, safety, "2026-11-16"),
+      fallbackTargets: null,
+      foods: USDA_REFERENCE_FOODS,
+      day: "2026-11-16",
+      now: "2026-11-16T03:00:00.000Z",
+      id: "plan-mix-fixture",
+    });
+    if (!outcome.ok) throw new Error("expected a plan");
+    expect(outcome.plan.notes.some((n) => n.includes("milk and curd"))).toBe(true);
+    writePlan({ ...outcome.plan, day: todayLocal() });
+
+    render(<NutritionPlanSection />);
+    const mix = screen.getByText("Today's mix").parentElement!;
+    expect(
+      within(mix).getByText(
+        /milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day/,
+      ),
+    ).toBeTruthy();
+    /* The targets line still matches on its own sentence alone. */
+    expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
   });
 
   it("shows a past plan as history, not as today's plan", () => {
