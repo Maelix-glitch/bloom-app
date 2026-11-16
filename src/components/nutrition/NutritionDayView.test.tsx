@@ -29,6 +29,7 @@ import { BODY_KEY, type BodyProfile } from "@/lib/health/body";
 import { yesterdayOf } from "@/hooks/useNutrition";
 import { shiftDay, todayLocal } from "@/lib/localDay";
 import { createEntryFromFood } from "@/lib/nutrition/entries";
+import { foodPhotoFor } from "@/lib/nutrition/foodImages";
 import { saveCustomFood } from "@/lib/nutrition/foods";
 import { logEntry } from "@/lib/nutrition/log";
 import { readFoodLog } from "@/lib/nutrition/store";
@@ -141,6 +142,30 @@ describe("Timeline — swaps", () => {
     expect(stored[0]!.foodId).toBe("usda-172183");
     expect(stored[0]!.provenance.kind).toBe("usda");
     expect(stored[0]!.nutrients.kcal).toBe(143);
+  });
+});
+
+describe("Timeline — photo lightbox", () => {
+  it("opens the entry's photograph full-size with its credit, and Escape closes it", () => {
+    const egg = findUsdaReference("usda-171287")!;
+    const credit = foodPhotoFor("usda-171287")!;
+    log(egg, 100, todayLocal());
+    render(<NutritionPage />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "View photo of Egg, whole, raw, fresh" }),
+    );
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.getAttribute("aria-label")).toBe("Egg, whole, raw, fresh");
+    expect(
+      within(dialog).getByText(`Photo by ${credit.author} · ${credit.license}`),
+    ).toBeTruthy();
+    expect(dialog.querySelector("img.nut-lightbox-img")).not.toBeNull();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    /* The entry itself is untouched by the viewing. */
+    expect(readFoodLog()).toHaveLength(1);
   });
 });
 

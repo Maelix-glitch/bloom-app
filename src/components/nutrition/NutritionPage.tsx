@@ -124,7 +124,7 @@ export function NutritionPage() {
   const yesterdayCount = nutrition.dayLog(yesterday).entries.length;
 
   return (
-    <div className="nut-wrap">
+    <div className="nut-wrap nut-page">
       <header className="nut-rise">
         <p className="eyebrow">Nutrition</p>
         <h1 className="mt-2 font-display text-[clamp(30px,4.6vw,44px)] leading-[1.05] text-foreground">

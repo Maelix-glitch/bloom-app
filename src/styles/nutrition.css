@@ -23,6 +23,23 @@
   }
 }
 
+/* The tab page takes the prototype's wide measure — max-width 1120px,
+   20px gutters, 48px from lg — because its cards were drawn wide: the
+   rings hero spans the page and the timeline sits beside the week and
+   spectrum panels instead of crowding them. Scoped to .nut-page (the
+   tab only): the clinician report shares .nut-wrap but keeps the
+   880px document measure above — a page to read and print, not a
+   dashboard — and no other route loads this stylesheet at all. */
+.nut-wrap.nut-page {
+  max-width: 1120px;
+  padding-inline: var(--space-5);
+}
+@media (min-width: 1024px) {
+  .nut-wrap.nut-page {
+    padding-inline: var(--space-12);
+  }
+}
+
 /* ------------------------------ day totals ------------------------------ */
 
 .nut-day-card {
@@ -116,6 +133,64 @@
   background: var(--surface-3);
   object-fit: cover;
 }
+
+/* The thumbnail is a button: tapping it opens the photograph full-size
+   (the lightbox below). The button is bare chrome around the same fixed
+   48px box, so rows keep their exact geometry. */
+.nut-food-thumb-btn {
+  flex-shrink: 0;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: var(--radius-control);
+  cursor: zoom-in;
+  line-height: 0;
+}
+.nut-food-thumb-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* The photo lightbox: the dialog chrome below at a higher layer (a
+   photo can open from inside the add-food or credits sheets), with the
+   photograph large above its name and credit. The panel keeps the
+   sheet rule — capped at 88dvh, solid surface, page visible around it. */
+.nut-lightbox-backdrop {
+  z-index: 80;
+}
+.nut-lightbox-panel {
+  width: 100%;
+  max-width: min(94vw, 640px);
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--gold) 25%, transparent);
+  border-bottom: 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
+  box-shadow: var(--elevation-dialog);
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .nut-lightbox-panel {
+    border-bottom: 1px solid color-mix(in oklab, var(--gold) 25%, transparent);
+    border-radius: var(--radius-dialog);
+  }
+}
+.nut-lightbox-img {
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  object-fit: contain;
+  background: var(--surface-3);
+}
+.nut-lightbox-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
 .nut-credit {
   display: flex;
   align-items: flex-start;
@@ -196,6 +271,18 @@
 }
 .nut-food-row:hover {
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+/* The row's choose action, beside the photo: the photograph is its own
+   button (it opens the lightbox), so the name, values and badge live in
+   a sibling button rather than wrapping the photo in one. */
+.nut-food-row-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
 }
 .nut-chip {
   display: inline-flex;
