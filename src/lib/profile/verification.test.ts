@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { verificationStatus } from "./verification";
+import { verificationStatus, verificationStatusFromRecord } from "./verification";
 
 /**
  * The tick is a claim, so the criteria behind it are pinned combination by
@@ -127,5 +127,24 @@ describe("verificationStatus", () => {
     expect(status.steps.find((s) => s.id === "invite")?.guidance).toContain("invit");
     expect(status.steps.find((s) => s.id === "email")?.guidance).toContain("sign-in link");
     expect(status.steps.find((s) => s.id === "profile")?.guidance).toContain("Edit profile");
+  });
+});
+
+describe("verificationStatusFromRecord", () => {
+  /* For someone else, the record is the whole public truth: it could
+     only have been granted after every gate passed server-side, and
+     their steps (invite, email state) are private. People search renders
+     its tick from exactly this. */
+  it("verifies when the record exists", () => {
+    const status = verificationStatusFromRecord(true);
+    expect(status.verified).toBe(true);
+    expect(status.remaining).toBe(0);
+    expect(status.pendingRecord).toBe(false);
+    expect(status.steps).toEqual([]);
+  });
+
+  it("does not verify when there is no record", () => {
+    const status = verificationStatusFromRecord(false);
+    expect(status.verified).toBe(false);
   });
 });

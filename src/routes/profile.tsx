@@ -70,6 +70,7 @@ import { useReminders } from "@/hooks/useReminders";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
 import { ProfileShareSheet } from "@/components/profile/ProfileShareSheet";
+import { UserSearchSheet } from "@/components/profile/UserSearchSheet";
 import { hasSupabaseConfig } from "@/lib/supabase";
 import { SignedOutProfile } from "@/components/profile/SignedOutProfile";
 import { StoryComposer } from "@/components/stories/StoryComposer";
@@ -144,6 +145,7 @@ function ProfilePage() {
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
   const [highlightsAll, setHighlightsAll] = useState(false);
   const [tab, setTab] = useState<ProfileTab>("moments");
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
@@ -602,6 +604,9 @@ function ProfilePage() {
                 }
                 onEdit={() => setEditorOpen(true)}
                 onShare={() => void handleShare()}
+                {...(authState === "signed-in"
+                  ? { onSearchPeople: () => setUserSearchOpen(true) }
+                  : {})}
                 onPreview={() => setPreviewOpen(true)}
                 onOpenArchive={() => setArchiveOpen(true)}
                 onOpenPrivacy={() => setPrivacyOpen(true)}
@@ -1067,6 +1072,15 @@ function ProfilePage() {
             onPreview={() => {
               setPrivacyOpen(false);
               setPreviewOpen(true);
+            }}
+          />
+          <UserSearchSheet
+            open={userSearchOpen}
+            onClose={() => setUserSearchOpen(false)}
+            currentUserId={userId}
+            onOpenProfile={(username) => {
+              setUserSearchOpen(false);
+              void navigate({ to: "/$handle", params: { handle: username } });
             }}
           />
           <ProfileShareSheet

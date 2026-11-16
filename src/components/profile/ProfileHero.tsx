@@ -18,6 +18,7 @@ import {
   MoreHorizontal,
   Pencil,
   Plus,
+  Search,
   Share2,
   ShieldCheck,
 } from "lucide-react";
@@ -124,6 +125,7 @@ export function ProfileHero({
   memberSince,
   onEdit,
   onShare,
+  onSearchPeople,
   onPreview,
   onOpenArchive,
   onOpenPrivacy,
@@ -146,6 +148,12 @@ export function ProfileHero({
   memberSince: string | null;
   onEdit: () => void;
   onShare: () => void;
+  /**
+   * Opens people search (the magnifying glass in the cover actions).
+   * Optional: pages that cannot search — signed-out previews — simply
+   * do not pass it and the button is absent.
+   */
+  onSearchPeople?: (() => void) | undefined;
   onPreview: () => void;
   onOpenArchive: () => void;
   onOpenPrivacy: () => void;
@@ -196,10 +204,21 @@ export function ProfileHero({
           </div>
         ) : null}
         <div className="pf-cover-actions">
+          {onSearchPeople ? (
+            <button
+              type="button"
+              onClick={onSearchPeople}
+              className="pf-icon-btn"
+              aria-label="Search people"
+              title="Search people"
+            >
+              <Search className="size-4" />
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onShare}
-           
+
             className="pf-icon-btn"
             aria-label="Share profile"
             title="Share profile"
