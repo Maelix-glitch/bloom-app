@@ -1,13 +1,19 @@
 // @vitest-environment jsdom
 /**
- * The retake demotion, pinned at the door.
+ * The Profile card's doors, pinned.
  *
- * Live defect (2026-11-14 sweep): a completed assessment lost its completed
- * status merely by opening the Retake sheet and closing it untouched — the
- * doors called a persisting retake() at click time, before the sheet even
- * opened. Opening a sheet is navigation, not a decision: the stored state
- * may only move when the person presses Begin inside the flow. These tests
- * drive the real Profile card + flow against the real prefs document.
+ * History: this file once pinned the retake demotion (2026-11-14 sweep:
+ * a completed assessment lost its completed status merely by opening
+ * the Retake sheet and closing it untouched). The Retake door itself
+ * is gone now — owner directive 2026-11-16 removed the Retake button
+ * from Profile; the flow's internal retake support remains, but no
+ * door on this card offers it. What this file pins today: a completed
+ * assessment offers "View summary" and no Retake; opening and closing
+ * the summary is navigation, not a decision, and moves no stored byte;
+ * a part-finished assessment still resumes at its stored step; and the
+ * flow's meal-budget question (asked in the assessment, and only
+ * there) renders with the eating-pattern question and stores its
+ * answer — including "No preference", which stores null.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -44,7 +50,6 @@ beforeEach(() => {
         media: query,
         addEventListener: () => {},
         removeEventListener: () => {},
-        addListener: () => {},
         removeListener: () => {},
         onchange: null,
         dispatchEvent: () => false,
@@ -97,45 +102,32 @@ function seed(state: AssessmentState): void {
   resetPrefCache();
 }
 
-describe("AssessmentProfileCard — retake never demotes on open", () => {
-  it("open + close Retake untouched leaves the completed state byte-identical", () => {
+describe("AssessmentProfileCard — the Profile doors", () => {
+  it("a completed assessment offers View summary and no Retake", () => {
+    seed(completedState());
+    render(<AssessmentProfileCard />);
+    expect(screen.getByRole("button", { name: "View summary" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Retake" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue assessment" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Take the assessment" })).toBeNull();
+  });
+
+  it("open + close View summary untouched leaves the completed state byte-identical", () => {
     const done = completedState();
     seed(done);
     const before = window.localStorage.getItem(PREFS_KEY);
 
     render(<AssessmentProfileCard />);
-    fireEvent.click(screen.getByRole("button", { name: "Retake" }));
+    fireEvent.click(screen.getByRole("button", { name: "View summary" }));
 
-    /* The sheet really opened — at the intro step, Begin on offer. */
-    expect(screen.getByRole("button", { name: "Begin" })).toBeTruthy();
+    /* The summary really opened. */
+    expect(screen.getByRole("heading", { name: "Your summary" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
 
-    /* Not one byte of the stored document moved… */
+    /* Not one byte of the stored document moved. */
     expect(window.localStorage.getItem(PREFS_KEY)).toBe(before);
     expect(readAssessmentState()).toEqual(done);
-    /* …and the card still reads the assessment as completed. (hidden: true —
-       Radix's exit animation never finishes in jsdom, so the closed dialog
-       lingers and keeps the page behind it aria-hidden.) */
-    expect(screen.getByRole("button", { name: "Retake", hidden: true })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Continue assessment", hidden: true })).toBeNull();
-  });
-
-  it("pressing Begin in the retake sitting is what starts the retake", () => {
-    const done = completedState();
-    seed(done);
-
-    render(<AssessmentProfileCard />);
-    fireEvent.click(screen.getByRole("button", { name: "Retake" }));
-    fireEvent.click(screen.getByRole("button", { name: "Begin" }));
-
-    const now = readAssessmentState();
-    expect(now.status).toBe("in_progress");
-    expect(now.step).toBe("identity");
-    /* The previous completion stands until the retake finishes. */
-    expect(now.completedAt).toBe(T2);
-    expect(now.answers).toEqual(done.answers);
-    expect(screen.getByRole("heading", { name: "About you" })).toBeTruthy();
   });
 
   it("a part-finished assessment still resumes at its stored step", () => {
@@ -152,5 +144,57 @@ describe("AssessmentProfileCard — retake never demotes on open", () => {
     expect(now.status).toBe("in_progress");
     expect(now.step).toBe("safety");
     expect(now.answers.ageYears).toBe(41);
+  });
+});
+
+describe("AssessmentFlow — the meal budget question", () => {
+  function seedAtNutrition(foodBudget: 1 | 2 | 3 | null): void {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(
+      s,
+      { dietaryPattern: "eggetarian", mealsPerDay: 3, foodBudget },
+      "nutrition",
+      T1,
+    );
+    seed(s);
+  }
+
+  it("renders beside the eating-pattern question, shows the stored answer, and stores a new one", () => {
+    seedAtNutrition(3);
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+
+    /* Same step as the pattern question — "How you eat". */
+    expect(screen.getByRole("heading", { name: "How you eat" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "Eating pattern" })).toBeTruthy();
+    expect(screen.getByText("What should your meal suggestions aim for?")).toBeTruthy();
+    const budgetGroup = screen.getByRole("radiogroup", { name: "Meal budget" });
+    expect(budgetGroup).toBeTruthy();
+    /* The stored tier is the selected one. */
+    expect(screen.getByRole("radio", { name: /No limit/ }).getAttribute("aria-checked")).toBe(
+      "true",
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /Moderate/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(readAssessmentState().answers.foodBudget).toBe(2);
+  });
+
+  it("“No preference” stores null — the honest unanswered", () => {
+    seedAtNutrition(1);
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    fireEvent.click(screen.getByRole("radio", { name: /No preference/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(readAssessmentState().answers.foodBudget).toBeNull();
+  });
+
+  it("continuing past the step without answering leaves the budget unanswered", () => {
+    seedAtNutrition(null);
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(readAssessmentState().answers.foodBudget).toBeNull();
   });
 });

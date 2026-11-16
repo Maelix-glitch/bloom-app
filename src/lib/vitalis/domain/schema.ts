@@ -77,6 +77,7 @@ export const dietaryProfileSchema = z
     dislikedFoods: textList(50, 60),
     cuisines: textList(20, 60),
     mealsPerDay: z.number().int().min(1).max(12).nullable(),
+    budgetTier: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
   })
   .strict();
 

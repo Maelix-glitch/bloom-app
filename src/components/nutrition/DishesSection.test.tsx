@@ -2,10 +2,13 @@
 /**
  * Nutrition D4 — the Dishes section: the library rendered with
  * bilingual names and computed per-serving numbers, the lib's filters
- * on the chips, the pattern filter opening on the person's own stated
- * pattern, the detail sheet (recipe provenance, friendly ingredient
- * names, method), and logging a dish into the real food log as a
- * recipe-provenance snapshot entry.
+ * on the chips that remain (search, category, enriched), the detail
+ * sheet (recipe provenance, friendly ingredient names, method), and
+ * logging a dish into the real food log as a recipe-provenance
+ * snapshot entry. Which dishes are on the shelf is governed by the
+ * person's assessment answers — pattern, and budget when stated —
+ * with no controls for either here (owner directive 2026-11-16:
+ * pattern and budget are asked in the assessment and nowhere else).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
@@ -49,12 +52,12 @@ beforeEach(() => {
   resetPrefCache();
 });
 
-function seedPattern(pattern: AssessmentState["answers"]["dietaryPattern"]): void {
+function seedAnswers(answers: Partial<AssessmentState["answers"]>): void {
   const state: AssessmentState = {
     version: 1,
     status: "complete",
     step: "summary",
-    answers: { ...EMPTY_ANSWERS, dietaryPattern: pattern },
+    answers: { ...EMPTY_ANSWERS, ...answers },
     consents: [],
     startedAt: "2026-11-10T03:00:00.000Z",
     completedAt: "2026-11-10T03:05:00.000Z",
@@ -64,6 +67,7 @@ function seedPattern(pattern: AssessmentState["answers"]["dietaryPattern"]): voi
 }
 
 const dal = findDish("dish-masoor-dal-tadka")!;
+const chickenCurry = findDish("dish-chicken-curry")!;
 
 function cardOf(dish: Dish) {
   return screen.getByRole("button", { name: `${dish.name.en} — view recipe` });
@@ -116,19 +120,41 @@ describe("DishesSection — browsing", () => {
     expect(screen.getByText(/229 dishes/)).toBeTruthy();
   });
 
-  it("opens on the person's own pattern when they have stated one", () => {
-    seedPattern("vegan");
+  it("the shelf follows the person's own pattern — silently, with no pattern or budget controls", () => {
+    seedAnswers({ dietaryPattern: "vegan" });
     render(<DishesSection day={todayLocal()} />);
-    expect(screen.getByText(/showing what suits your vegan pattern/)).toBeTruthy();
+    expect(screen.getByText(/showing what suits you — vegan pattern/)).toBeTruthy();
     /* The ghee tadka is not vegan — it is not on the shelf. */
     expect(screen.queryByRole("button", { name: `${dal.name.en} — view recipe` })).toBeNull();
-    /* One tap on All brings the whole library back. */
-    fireEvent.click(
-      within(screen.getByRole("group", { name: "Pattern" })).getByRole("button", {
-        name: "All",
-      }),
-    );
+    /* Pattern and budget are assessment answers, not filters: this
+       section renders no controls for either, for anyone. */
+    expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Any budget" })).toBeNull();
+  });
+
+  it("offers no pattern or budget controls when nothing is stated, either", () => {
+    render(<DishesSection day={todayLocal()} />);
+    expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
+    expect(screen.getByText(/229 dishes/)).toBeTruthy();
+  });
+
+  it("a stated budget keeps dishes above the tier off the shelf", () => {
+    seedAnswers({ foodBudget: 1 });
+    render(<DishesSection day={todayLocal()} />);
+    expect(screen.getByText(/kept to an everyday ₹ budget/)).toBeTruthy();
+    /* The tier-1 dal stays; the tier-3 curry is off the shelf. */
     expect(cardOf(dal)).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: `${chickenCurry.name.en} — view recipe` }),
+    ).toBeNull();
+  });
+
+  it("with no budget stated, every tier is on the shelf", () => {
+    render(<DishesSection day={todayLocal()} />);
+    expect(cardOf(chickenCurry)).toBeTruthy();
+    expect(screen.queryByText(/kept to an .* budget/)).toBeNull();
   });
 });
 

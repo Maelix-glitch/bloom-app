@@ -177,6 +177,42 @@ describe("dishIdeaFor — the plan's dish idea", () => {
     const veg = profile({ pattern: "vegetarian" });
     expect(dishIdeaFor(veg, "2026-11-16", "lunch", [dal])!.id).toBe(dal.id);
   });
+
+  describe("the person's stated budget", () => {
+    it("prefers dishes at or under the stated tier, at every meal", () => {
+      const p = profile({ pattern: null, budgetTier: 1 });
+      for (const day of DAYS) {
+        for (const meal of ["breakfast", "lunch", "dinner"] as const) {
+          const idea = dishIdeaFor(p, day, meal);
+          expect(idea).not.toBeNull();
+          expect(idea!.budgetTier).toBeLessThanOrEqual(1);
+        }
+      }
+    });
+
+    it("an over-budget rotation winner steps aside for an in-budget dish", () => {
+      const dal = findDish("dish-masoor-dal-tadka")!; /* tier 1 */
+      const curry = findDish("dish-chicken-curry")!; /* tier 3 */
+      expect(dal.budgetTier).toBe(1);
+      expect(curry.budgetTier).toBe(3);
+      const shelf = [dal, curry];
+      const noBudget = profile({ pattern: null });
+      const tier1 = profile({ pattern: null, budgetTier: 1 });
+      /* Find a day whose no-budget rotation winner is the curry; on
+         that day, the person with a tier-1 budget gets the dal. */
+      const day = DAYS.find(
+        (d) => dishIdeaFor(noBudget, d, "lunch", shelf)?.id === curry.id,
+      );
+      expect(day).toBeDefined();
+      expect(dishIdeaFor(tier1, day!, "lunch", shelf)?.id).toBe(dal.id);
+    });
+
+    it("falls back to any qualifier when nothing qualifies in-budget — never null for budget alone", () => {
+      const curry = findDish("dish-chicken-curry")!; /* tier 3, the only dish */
+      const p = profile({ pattern: null, budgetTier: 1 });
+      expect(dishIdeaFor(p, "2026-11-16", "lunch", [curry])?.id).toBe(curry.id);
+    });
+  });
 });
 
 function findDishLineName(foodId: string): string {

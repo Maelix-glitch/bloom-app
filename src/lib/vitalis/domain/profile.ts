@@ -51,6 +51,9 @@ export interface DietaryProfile {
   readonly dislikedFoods: readonly string[];
   readonly cuisines: readonly string[];
   readonly mealsPerDay: number | null;
+  /** Meal-suggestion budget tier (1–3, the dish heuristic's bands in
+   *  `lib/nutrition/dishes.ts`); null means no preference stated. */
+  readonly budgetTier: 1 | 2 | 3 | null;
 }
 
 export interface HealthConstraints {
@@ -90,6 +93,7 @@ export const EMPTY_DIETARY: DietaryProfile = {
   dislikedFoods: [],
   cuisines: [],
   mealsPerDay: null,
+  budgetTier: null,
 };
 
 export const EMPTY_CONSTRAINTS: HealthConstraints = {

@@ -61,6 +61,9 @@ export interface AssessmentAnswers {
   /* nutrition + preferences — domain: DietaryProfile */
   dietaryPattern: DietaryPattern | null;
   mealsPerDay: number | null;
+  /** Meal-suggestion budget tier (1–3, the dish heuristic's bands);
+   *  null = no preference stated. Asked here and nowhere else. */
+  foodBudget: 1 | 2 | 3 | null;
   allergies: string[];
   intolerances: string[];
   dislikedFoods: string[];
@@ -103,6 +106,7 @@ export const EMPTY_ANSWERS: AssessmentAnswers = {
   symptoms: [],
   dietaryPattern: null,
   mealsPerDay: null,
+  foodBudget: null,
   allergies: [],
   intolerances: [],
   dislikedFoods: [],
@@ -145,6 +149,11 @@ function intOrNull(value: unknown, min: number, max: number): number | null {
 
 function boolOrNull(value: unknown): boolean | null {
   return value === true || value === false ? value : null;
+}
+
+/** A budget tier is exactly 1, 2 or 3 — anything else is not a tier. */
+function tierOrNull(value: unknown): 1 | 2 | 3 | null {
+  return value === 1 || value === 2 || value === 3 ? value : null;
 }
 
 function textList(value: unknown, maxItems: number, maxLength: number): string[] {
@@ -198,6 +207,7 @@ export function parseAnswers(raw: unknown): AssessmentAnswers {
     symptoms,
     dietaryPattern: oneOf(r["dietaryPattern"], DIETARY_PATTERNS),
     mealsPerDay: intOrNull(r["mealsPerDay"], 1, 12),
+    foodBudget: tierOrNull(r["foodBudget"]),
     allergies: textList(r["allergies"], 30, 60),
     intolerances: textList(r["intolerances"], 30, 60),
     dislikedFoods: textList(r["dislikedFoods"], 50, 60),
@@ -382,6 +392,7 @@ export function toHealthProfile(state: AssessmentState, userId: string): HealthP
       dislikedFoods: a.dislikedFoods,
       cuisines: a.cuisines,
       mealsPerDay: a.mealsPerDay,
+      budgetTier: a.foodBudget,
     },
     constraints: {
       conditions: a.conditions,

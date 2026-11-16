@@ -141,4 +141,17 @@ describe("summaryOf", () => {
     expect(activity?.lines).toEqual([]);
     expect(summary?.bmi).toBeNull();
   });
+
+  it("reads back a stated meal budget in the nutrition section — and only then", () => {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(s, { dietaryPattern: "vegan", foodBudget: 2 }, "summary", T1);
+    s = completeAssessment(s, T2);
+    const nutrition = summaryOf(s)?.sections.find((sec) => sec.section === "nutrition");
+    expect(nutrition?.lines).toContain("Meal budget: moderate — about ₹45 a serving.");
+
+    /* No budget stated → no budget line; the section does not guess. */
+    const unanswered = summaryOf(completedFull());
+    const lines = unanswered?.sections.find((sec) => sec.section === "nutrition")?.lines ?? [];
+    expect(lines.some((l) => l.startsWith("Meal budget"))).toBe(false);
+  });
 });

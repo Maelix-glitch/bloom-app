@@ -32,6 +32,7 @@ import {
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import {
   ACTIVITY_LABEL,
+  BUDGET_LABEL,
   DIETARY_LABEL,
   GOAL_LABEL,
   RESTEDNESS_LABEL,
@@ -163,6 +164,9 @@ export function summaryOf(
     nutritionLines.push(
       a.mealsPerDay === 1 ? "Usually 1 meal a day." : `Usually ${a.mealsPerDay} meals a day.`,
     );
+  }
+  if (a.foodBudget !== null) {
+    nutritionLines.push(`Meal budget: ${BUDGET_LABEL[a.foodBudget].toLowerCase()}.`);
   }
 
   const preferenceLines: string[] = [];

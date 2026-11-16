@@ -90,6 +90,53 @@ describe("parseAssessmentState", () => {
     expect(parsed?.answers.symptoms).toEqual(["chest_pain"]);
     expect(parsed?.answers.dietaryPattern).toBeNull();
   });
+
+  it("parses a stated food budget; a legacy state without one reads as no preference", () => {
+    const withBudget = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { foodBudget: 2 },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(withBudget?.answers.foodBudget).toBe(2);
+
+    /* States written before the budget question existed carry no
+       foodBudget key at all. The version is unchanged, so they must
+       parse cleanly — as no preference — with nothing else lost. */
+    const legacy = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { dietaryPattern: "vegan", mealsPerDay: 3 },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(legacy?.answers.foodBudget).toBeNull();
+    expect(legacy?.answers.dietaryPattern).toBe("vegan");
+    expect(legacy?.answers.mealsPerDay).toBe(3);
+  });
+
+  it("drops a malformed food budget instead of repairing it", () => {
+    for (const bad of [0, 4, 2.5, "2", true]) {
+      const parsed = parseAssessmentState({
+        version: 1,
+        status: "in_progress",
+        step: "nutrition",
+        answers: { foodBudget: bad },
+        consents: [],
+        startedAt: T0,
+        completedAt: null,
+        updatedAt: T0,
+      });
+      expect(parsed?.answers.foodBudget).toBeNull();
+    }
+  });
 });
 
 describe("transitions", () => {
@@ -172,6 +219,13 @@ describe("toHealthProfile", () => {
     expect(profile.height).toBeNull();
     expect(profile.goal).toBeNull();
     expect(profile.rateKgPerWeek).toBe(0.5);
+  });
+
+  it("maps the food budget onto the profile's dietary budget tier", () => {
+    const s = saveStep(answeredState(), { foodBudget: 1 }, "summary", T1);
+    expect(toHealthProfile(s, "user-1").dietary.budgetTier).toBe(1);
+    /* Unanswered stays unanswered — no tier is invented. */
+    expect(toHealthProfile(answeredState(), "user-1").dietary.budgetTier).toBeNull();
   });
 
   it("domain completeness sees the mapped profile the way the flow intends", () => {

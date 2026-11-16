@@ -170,8 +170,11 @@ const COST_BAND_PER_GRAM: Record<FoodGroup, number> = {
   other: 0.8,
 };
 
-const TIER_1_MAX_PER_SERVING = 20;
-const TIER_2_MAX_PER_SERVING = 45;
+/** Per-serving ₹ ceilings for budget tiers 1 and 2 (tier 3 is above
+ *  the second). Exported so the assessment's budget question quotes
+ *  the same numbers the heuristic buckets by — never a forked copy. */
+export const BUDGET_TIER_1_MAX_PER_SERVING = 20;
+export const BUDGET_TIER_2_MAX_PER_SERVING = 45;
 
 /** The estimated ingredient cost of one serving, in ₹ (heuristic above). */
 export function dishCostPerServingEstimate(
@@ -193,8 +196,8 @@ export function computeBudgetTier(
   foods: readonly Food[] = USDA_REFERENCE_FOODS,
 ): 1 | 2 | 3 {
   const perServing = dishCostPerServingEstimate(dish, foods);
-  if (perServing <= TIER_1_MAX_PER_SERVING) return 1;
-  if (perServing <= TIER_2_MAX_PER_SERVING) return 2;
+  if (perServing <= BUDGET_TIER_1_MAX_PER_SERVING) return 1;
+  if (perServing <= BUDGET_TIER_2_MAX_PER_SERVING) return 2;
   return 3;
 }
 

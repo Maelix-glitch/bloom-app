@@ -13,6 +13,10 @@
 
 import type { ActivityLevel, DietaryPattern, VitalisGoal } from "@/lib/vitalis/domain/profile";
 import {
+  BUDGET_TIER_1_MAX_PER_SERVING,
+  BUDGET_TIER_2_MAX_PER_SERVING,
+} from "@/lib/nutrition/dishes";
+import {
   HIGH_RISK_CONDITIONS,
   HIGH_RISK_CONDITION_LABEL,
   URGENT_SYMPTOMS,
@@ -151,6 +155,39 @@ export const MEALS_OPTIONS: readonly { value: number; label: string }[] = [
   { value: 5, label: "5" },
   { value: 6, label: "6 or more" },
 ];
+
+/**
+ * The meal-budget question. Values are the dish library's budget tiers
+ * (1–3); 0 is the "no preference" choice and is stored as null — the
+ * honest "not answered", exactly like the tri-choice skips. The ₹
+ * figures are the dish heuristic's own per-serving ceilings, imported
+ * from `lib/nutrition/dishes.ts` so the question can never quote
+ * different numbers than the tiers it selects.
+ */
+export const BUDGET_OPTIONS: readonly {
+  value: 0 | 1 | 2 | 3;
+  label: string;
+  hint?: string;
+}[] = [
+  {
+    value: 1,
+    label: "Keep it light · ₹",
+    hint: `About ₹${BUDGET_TIER_1_MAX_PER_SERVING} a serving`,
+  },
+  {
+    value: 2,
+    label: "Moderate · ₹₹",
+    hint: `About ₹${BUDGET_TIER_2_MAX_PER_SERVING} a serving`,
+  },
+  { value: 3, label: "No limit · ₹₹₹" },
+  { value: 0, label: "No preference" },
+];
+
+export const BUDGET_LABEL: Record<1 | 2 | 3, string> = {
+  1: `Keep it light — about ₹${BUDGET_TIER_1_MAX_PER_SERVING} a serving`,
+  2: `Moderate — about ₹${BUDGET_TIER_2_MAX_PER_SERVING} a serving`,
+  3: "No limit",
+};
 
 export const CONDITION_OPTIONS: readonly { value: string; label: string }[] =
   HIGH_RISK_CONDITIONS.map((code) => ({ value: code, label: HIGH_RISK_CONDITION_LABEL[code] }));
