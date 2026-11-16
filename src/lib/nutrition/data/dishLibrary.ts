@@ -26,6 +26,11 @@
  *                         remaining Latin high-protein mains and
  *                         breakfasts (≥25 g protein/serving, computed
  *                         and pinned in dishLibraryIntl4.test.ts)
+ *   - dishLibraryIndia.ts the India wave (dishes expansion WAVE I-2) —
+ *                         the rest of India beyond the pan-Indian set
+ *                         and the Kerala wave: North, West, East,
+ *                         Central and the non-Kerala South, in the
+ *                         full category range
  */
 import type { Dish } from "../dishes";
 import { DISHES_MAINS } from "./dishesMains";
@@ -36,6 +41,7 @@ import { INTL1_DISHES } from "./dishLibraryIntl1";
 import { INTL2_DISHES } from "./dishLibraryIntl2";
 import { INTL3_DISHES } from "./dishLibraryIntl3";
 import { INTL4_DISHES } from "./dishLibraryIntl4";
+import { INDIA_DISHES } from "./dishLibraryIndia";
 import { PROOF_DISHES } from "./proofDishes";
 
 export const DISH_LIBRARY: readonly Dish[] = [
@@ -48,6 +54,7 @@ export const DISH_LIBRARY: readonly Dish[] = [
   ...INTL2_DISHES,
   ...INTL3_DISHES,
   ...INTL4_DISHES,
+  ...INDIA_DISHES,
 ];
 
 const BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
