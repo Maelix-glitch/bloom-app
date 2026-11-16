@@ -19,6 +19,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     name: { en: "Masoor Dal Tadka", hindi: "मसूर दाल तड़का" },
     category: "main",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-174284", grams: 200 }, // red lentils (masoor dal), dry
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -49,6 +50,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     name: { en: "Jeera Rice", hindi: "जीरा चावल" },
     category: "rice",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
       { foodId: "usda-171314", grams: 10 }, // ghee
@@ -72,6 +74,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     name: { en: "Mint-Coriander Chutney", hindi: "पुदीना-धनिया चटनी" },
     category: "chutney",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-169997", grams: 50 }, // fresh coriander leaves
       { foodId: "usda-173475", grams: 25 }, // mint leaves
@@ -95,6 +98,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     name: { en: "Cucumber Raita", hindi: "खीरे का रायता" },
     category: "raita",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2259793", grams: 400 }, // yogurt (dahi)
       { foodId: "usda-2346406", grams: 200 }, // cucumber
@@ -118,6 +122,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     name: { en: "Aloo Gobi", hindi: "आलू गोबी" },
     category: "main",
     servings: 4,
+    cuisine: "india",
     lines: [
       { foodId: "usda-2346401", grams: 400 }, // potato
       { foodId: "usda-2685573", grams: 400 }, // cauliflower

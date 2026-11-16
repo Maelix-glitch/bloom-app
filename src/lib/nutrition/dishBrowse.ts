@@ -2,10 +2,10 @@
  * Nutrition — browsing the dish library, and the plan's dish idea (D4).
  *
  * Pure filter logic for the Dishes section: a search over the English
- * and Hindi names, the category / pattern / budget filters and the
- * enriched-only toggle, over a deterministic sort — the same filters
- * always yield the same list in the same order, so the section never
- * reshuffles under the reader.
+ * and Hindi names, the category / cuisine / pattern / budget filters
+ * and the enriched-only toggle, over a deterministic sort — the same
+ * filters always yield the same list in the same order, so the section
+ * never reshuffles under the reader.
  *
  * The plan's dish idea reuses the plan engine's own gates rather than
  * inventing parallel ones: a dish qualifies for a meal only when it
@@ -34,10 +34,27 @@ import type { Meal } from "./types";
 
 /* ------------------------------- browsing -------------------------------- */
 
+/**
+ * The library's cuisine taxonomy — the three values every shipped
+ * dish carries in its `cuisine` tag (the tag itself stays a free
+ * string on the Dish model; these are the values the library uses
+ * and the Dishes section offers as a filter).
+ */
+export type DishCuisine = "india" | "kerala" | "international";
+
+export const DISH_CUISINES: readonly DishCuisine[] = ["india", "kerala", "international"];
+
+export const DISH_CUISINE_LABEL: Record<DishCuisine, string> = {
+  india: "Indian",
+  kerala: "Kerala",
+  international: "International",
+};
+
 export interface DishBrowseFilters {
   /** Free text, matched against the English and Hindi names. */
   query: string;
   category: DishCategory | null;
+  cuisine: DishCuisine | null;
   pattern: PlanPattern | null;
   budgetTier: 1 | 2 | 3 | null;
   enrichedOnly: boolean;
@@ -46,6 +63,7 @@ export interface DishBrowseFilters {
 export const NO_DISH_FILTERS: DishBrowseFilters = {
   query: "",
   category: null,
+  cuisine: null,
   pattern: null,
   budgetTier: null,
   enrichedOnly: false,
@@ -75,6 +93,7 @@ export function browseDishes(
   const rows: DishBrowseRow[] = [];
   for (const dish of dishes) {
     if (filters.category !== null && dish.category !== filters.category) continue;
+    if (filters.cuisine !== null && dish.cuisine !== filters.cuisine) continue;
     if (filters.budgetTier !== null && dish.budgetTier !== filters.budgetTier) continue;
     if (filters.enrichedOnly && !dish.enriched) continue;
     if (

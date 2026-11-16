@@ -11,9 +11,9 @@
  * assessment answers: their dietary pattern is a hard filter, and a
  * stated meal budget keeps dishes above their tier off the shelf.
  * Pattern and budget are asked in the assessment and nowhere else, so
- * this section offers no controls for them — search, category and the
- * enriched toggle are the only filters here, and the status line says
- * what is being shown. Budget tiers are the lib's stated
+ * this section offers no controls for them — search, category, cuisine
+ * and the enriched toggle are the only filters here, and the status
+ * line says what is being shown. Budget tiers are the lib's stated
  * ingredient-cost ESTIMATE and are labelled as one wherever they appear.
  */
 
@@ -27,6 +27,8 @@ import { toHealthProfile } from "@/lib/assessment/state";
 import {
   DISH_CATEGORIES,
   DISH_CATEGORY_LABEL,
+  DISH_CUISINES,
+  DISH_CUISINE_LABEL,
   PLAN_PATTERN_LABEL,
   browseDishes,
   logDish,
@@ -34,6 +36,7 @@ import {
   type Dish,
   type DishBrowseFilters,
   type DishCategory,
+  type DishCuisine,
   type Meal,
 } from "@/lib/nutrition";
 import { DishDetailSheet } from "./DishDetailSheet";
@@ -45,6 +48,7 @@ export function DishesSection({ day }: { day: string }) {
   const session = useSession();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<DishCategory | null>(null);
+  const [cuisine, setCuisine] = useState<DishCuisine | null>(null);
   const [enrichedOnly, setEnrichedOnly] = useState(false);
   const [selected, setSelected] = useState<Dish | null>(null);
 
@@ -59,27 +63,44 @@ export function DishesSection({ day }: { day: string }) {
   const pattern = planPatternOf(profile.dietary.pattern);
   const budgetTier = profile.dietary.budgetTier;
 
+  /* The shelf is browsed with no cuisine chosen: the cuisine chips
+     count from the shelf, so a chip's number is exactly the number of
+     dishes choosing it would show, and the cuisine choice then
+     narrows the shelf like every other filter — it never widens it. */
   const filters: DishBrowseFilters = useMemo(
-    () => ({ query, category, pattern, budgetTier: null, enrichedOnly }),
+    () => ({ query, category, pattern, budgetTier: null, enrichedOnly, cuisine: null }),
     [query, category, pattern, enrichedOnly],
   );
   const browsed = useMemo(() => browseDishes(filters), [filters]);
   /* The budget keeps dishes ABOVE the person's tier off the shelf
      (at or under it stays) — the lib's budget filter is an exact-tier
      match for other callers, so the at-or-under rule is applied here. */
-  const rows = useMemo(
+  const shelf = useMemo(
     () =>
       budgetTier === null
         ? browsed
         : browsed.filter((row) => row.dish.budgetTier <= budgetTier),
     [browsed, budgetTier],
   );
+  const cuisineCounts = useMemo(() => {
+    const counts: Record<DishCuisine, number> = { india: 0, kerala: 0, international: 0 };
+    for (const row of shelf) {
+      const tag = row.dish.cuisine;
+      if (tag === "india" || tag === "kerala" || tag === "international") counts[tag] += 1;
+    }
+    return counts;
+  }, [shelf]);
+  const rows = useMemo(
+    () => (cuisine === null ? shelf : shelf.filter((row) => row.dish.cuisine === cuisine)),
+    [shelf, cuisine],
+  );
 
-  const anyFilter = query.trim() !== "" || category !== null || enrichedOnly;
+  const anyFilter = query.trim() !== "" || category !== null || cuisine !== null || enrichedOnly;
 
   const clearFilters = () => {
     setQuery("");
     setCategory(null);
+    setCuisine(null);
     setEnrichedOnly(false);
   };
 
@@ -140,6 +161,21 @@ export function DishesSection({ day }: { day: string }) {
         })),
       ])}
 
+      {chipRow("Cuisine", [
+        {
+          key: "all",
+          label: `All · ${shelf.length}`,
+          selected: cuisine === null,
+          onSelect: () => setCuisine(null),
+        },
+        ...DISH_CUISINES.map((c) => ({
+          key: c,
+          label: `${DISH_CUISINE_LABEL[c]} · ${cuisineCounts[c]}`,
+          selected: cuisine === c,
+          onSelect: () => setCuisine(c),
+        })),
+      ])}
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span className="nut-group-label w-16 shrink-0">Enriched</span>
         <button
@@ -160,6 +196,7 @@ export function DishesSection({ day }: { day: string }) {
         ) : null}
         {budgetTier === 1 ? <> · kept to an everyday ₹ budget</> : null}
         {budgetTier === 2 ? <> · kept to a moderate ₹₹ budget</> : null}
+        {cuisine ? <> · {DISH_CUISINE_LABEL[cuisine]} dishes only</> : null}
       </p>
 
       {rows.length === 0 ? (

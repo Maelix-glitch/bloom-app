@@ -245,7 +245,12 @@ describe("the cuisine tag — optional, preserved when present", () => {
   });
 
   it("a dish without a cuisine parses with the tag absent, never invented", () => {
-    const parsed = parseDish(JSON.parse(JSON.stringify(byId("dish-jeera-rice"))));
+    /* Jeera rice carries the library's "india" tag now, so the
+       untagged case is built by removing it — the parser must then
+       leave the tag absent rather than inventing one. */
+    const raw = JSON.parse(JSON.stringify(byId("dish-jeera-rice"))) as Record<string, unknown>;
+    delete raw["cuisine"];
+    const parsed = parseDish(raw);
     expect(parsed).not.toBeNull();
     expect(parsed?.cuisine).toBeUndefined();
     expect("cuisine" in (parsed ?? {})).toBe(false);
