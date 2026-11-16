@@ -32,6 +32,8 @@ import { PointsAwardToast } from "@/components/system/PointsAwardToast";
 import { RemindersEngine } from "@/components/system/RemindersEngine";
 import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
+import { CoachSystemProvider } from "@/components/coach/CoachSystemProvider";
+import { CoachOrbGate } from "@/components/coach/CoachOrb";
 
 /**
  * The two screens every lost or unlucky visitor is guaranteed to meet, so
@@ -384,13 +386,25 @@ function RootComponent() {
         </div>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <AccessControl>
-          {/* The one app chrome, mounted once for the whole session —
-              see AppNavGate. Inside AccessControl so the invite gate
-              still replaces the whole app, chrome included. */}
-          <AppNavGate />
-          <div key={pathname} className="bloom-page-enter">
-            <Outlet />
-          </div>
+          {/* The one Coach store for the whole session: the provider
+              instantiates useCoachSystem once, here, so the Coach tab,
+              the Today panel and the orb all read and write the same
+              conversation — a message sent anywhere is simply there,
+              everywhere. Mounted inside AccessControl so the invite
+              gate still replaces the whole app, store included. */}
+          <CoachSystemProvider>
+            {/* The one app chrome, mounted once for the whole session —
+                see AppNavGate. Inside AccessControl so the invite gate
+                still replaces the whole app, chrome included. */}
+            <AppNavGate />
+            <div key={pathname} className="bloom-page-enter">
+              <Outlet />
+            </div>
+            {/* The Coach orb — the floating door to the same Coach, on
+                the app routes only (CoachOrbGate applies the nav rule
+                and hides it on /coach itself). */}
+            <CoachOrbGate />
+          </CoachSystemProvider>
         </AccessControl>
         {/* First run only: covers the app until the person has told us who they are. */}
         <WelcomeGate />

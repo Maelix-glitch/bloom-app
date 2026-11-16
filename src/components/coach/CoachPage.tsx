@@ -5,25 +5,19 @@ import { BloomIcon } from "@/components/icons/BloomIcon";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { isSignedIn, useSession } from "@/hooks/useSession";
 import {
-  coachErrorMessage,
-  photoNoteFromReply,
   readCoachRecord,
   useCoachSystem,
   type CoachMemory,
   type CoachMessage,
   type CoachMode,
 } from "@/hooks/useCoachSystem";
-import { buildCoachContext } from "@/lib/coach/intelligence";
-import { answerLocally } from "@/lib/coach/engine";
-import type { CoachMedia } from "@/lib/coach/edge";
-import { isVisionType, fileToCoachMedia } from "@/lib/coach/media";
-import { parseSidecars } from "@/lib/coach/sidecar";
-import { executeCoachTool } from "@/lib/coach/tools";
+import { useCoachChat } from "@/hooks/useCoachChat";
 import { followUpPrompts, starterPrompts, type Starter } from "@/lib/coach/ui-helpers";
 import { todayKey } from "@/lib/cycle/predict";
 import { phaseScienceLine } from "@/lib/cycle/phaseScience";
 import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 
+import { useCoachSystemContext, type CoachSystem } from "./CoachSystemProvider";
 import { CoachSidebar, CoachSidebarContent } from "./CoachSidebar";
 import { CoachHeader } from "./CoachHeader";
 import { CoachThread } from "./CoachThread";
@@ -33,43 +27,13 @@ import { CoachSheet } from "./CoachSheet";
 import { QuickPalette } from "./QuickPalette";
 import { CoachCamera } from "./CoachCamera";
 
-const SESSION_NOTICE = "Your session needs to be refreshed.";
 const DRAFT_MAP_KEY = "bloom.coach.drafts.v2";
 const RAIL_KEY = "bloom.coach.rail";
-
-interface AttachmentMeta {
-  name: string;
-  type: string;
-  size: number;
-}
-
-interface PendingRequest {
-  conversationId: string;
-  mode: CoachMode;
-  text: string;
-  attachment: AttachmentMeta | null;
-  /* The actual vision bytes, held in memory only (photos are never
-     stored). Without this, "Try again" resent the words alone and the
-     coach answered as if no photo had ever been attached. */
-  media: CoachMedia | null;
-  userMessageId: string;
-  errorMessageId: string;
-}
 
 /** How a request ended, so the composer knows what to do with its draft:
  *  "answered" — a reply landed; "failed" — the message is safely in the
  *  thread with a Try again on it; "rejected" — nothing was sent at all. */
 type RequestOutcome = ComposerSubmitOutcome;
-
-function memoriesToContext(memories: CoachMemory[]) {
-  return memories.map((memory) => ({
-    id: memory.id,
-    category: memory.category,
-    text: memory.text,
-    pinned: memory.pinned,
-    learnedAt: memory.learnedAt ?? "",
-  }));
-}
 
 function readDraftMap(): Record<string, string> {
   try {
@@ -88,44 +52,51 @@ function writeDraftMap(map: Record<string, string>) {
   }
 }
 
-function newMessageId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+/**
+ * The Coach page. The conversation store comes from the app-wide
+ * provider when one is mounted (the root layout mounts it, so the page,
+ * the Today panel and the orb all share one store); rendered outside
+ * the provider — a unit test, an isolated preview — the page falls back
+ * to its own store instance, exactly as it behaved before the provider
+ * existed.
+ */
+export function CoachPage() {
+  const shared = useCoachSystemContext();
+  if (shared) return <CoachPageView coach={shared} />;
+  return <CoachPageStandalone />;
 }
 
-export function CoachPage() {
-  const moodSystem = useMoodSystem();
+function CoachPageStandalone() {
   const coach = useCoachSystem();
+  return <CoachPageView coach={coach} />;
+}
+
+function CoachPageView({ coach }: { coach: CoachSystem }) {
+  const moodSystem = useMoodSystem();
   const session = useSession();
   const { entries, analytics } = moodSystem;
 
   const [fallbackLens, setFallbackLens] = useState<CoachMode>("ask");
   const [draft, setDraft] = useState("");
-  const [thinking, setThinking] = useState(false);
-  const [responseSlow, setResponseSlow] = useState(false);
-  const [freshId, setFreshId] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<CoachPanelTab>("context");
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [signInRequired, setSignInRequired] = useState(false);
-  const [previews, setPreviews] = useState<Record<string, string>>({});
   const [record, setRecord] = useState(() => readCoachRecord([]));
   /* Who the page is talking to — read once per mount; refreshes on reload. */
   const [personalVoice] = useState(() => readPersonalVoice());
   const [railExpanded, setRailExpanded] = useState(true);
 
-  const mountedRef = useRef(true);
-  const slowTimerRef = useRef<number | null>(null);
-  const inFlightRef = useRef(false);
-  const lastFailedRef = useRef<PendingRequest | null>(null);
-  /* Vision bytes by user-message id, this session only — lets a retry or
-     a regenerate re-send the photo the person attached instead of quietly
-     dropping it. Capped so a long session can't grow it without bound. */
-  const mediaByMessageRef = useRef(new Map<string, CoachMedia>());
+  /* The request pipeline — shared with the orb, so both surfaces send
+     through the same path into the same store (see useCoachChat). The
+     page keeps only its chrome state: drafts, rail, panels, camera. */
+  const chat = useCoachChat({ coach, entries, record });
+  const { thinking, responseSlow, freshId, notice, signInRequired, previews } = chat;
+  const setFreshId = chat.setFreshId;
+  const setNotice = chat.setNotice;
+
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const objectUrlsRef = useRef<string[]>([]);
   const activeDraftKeyRef = useRef<string>("new");
   const draftRef = useRef("");
   draftRef.current = draft;
@@ -136,7 +107,6 @@ export function CoachPage() {
 
   /* --------------------------------- rail --------------------------------- */
   useEffect(() => {
-    mountedRef.current = true;
     try {
       const saved = window.localStorage.getItem(RAIL_KEY);
       if (saved !== null) setRailExpanded(saved === "1");
@@ -144,9 +114,6 @@ export function CoachPage() {
     } catch {
       /* storage blocked */
     }
-    return () => {
-      mountedRef.current = false;
-    };
   }, []);
 
   /* Keep the composer above the phone keyboard. iOS doesn't shrink dvh when
@@ -225,19 +192,9 @@ export function CoachPage() {
       } catch {
         /* ignore */
       }
-      if (slowTimerRef.current) window.clearTimeout(slowTimerRef.current);
-      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
-      objectUrlsRef.current = [];
     },
     [],
   );
-
-  /* stale blockers clear once a profile is present */
-  useEffect(() => {
-    if (!coach.profileId) return;
-    setSignInRequired(false);
-    setNotice((current) => (current === SESSION_NOTICE ? null : current));
-  }, [coach.profileId]);
 
   /* ⌘K — quick palette */
   useEffect(() => {
@@ -361,293 +318,12 @@ export function CoachPage() {
     [activeConversation, coach],
   );
 
-  /* ---------------------------- request pipeline --------------------------- */
-  /**
-   * One answer at a time. `history` is the conversation as it stands; when a
-   * previous reply is being replaced (retry / regenerate) pass its id and the
-   * matching user message stays exactly where it is.
-   */
-  const requestAnswer = useCallback(
-    async (params: {
-      text: string;
-      mode: CoachMode;
-      history: CoachMessage[];
-      conversationId: string;
-      attachment?: AttachmentMeta | null;
-      media?: CoachMedia | null;
-      userMessage?: CoachMessage | null;
-      replaceMessageId?: string | null;
-      /* Called the moment the user message has been appended to the
-         thread — the send is accepted from there, whatever the reply
-         does. Lets the composer clear while the answer is still in
-         flight. Never called for a rejected send. */
-      onAccepted?: (() => void) | undefined;
-    }): Promise<RequestOutcome> => {
-      const {
-        text,
-        mode,
-        history,
-        conversationId,
-        attachment,
-        media,
-        userMessage,
-        replaceMessageId,
-        onAccepted,
-      } = params;
-      if (inFlightRef.current) {
-        if (thinking) setNotice("Bloom is still finishing the last reply — one moment.");
-        return "rejected";
-      }
-      if (thinking) return "rejected";
-      inFlightRef.current = true;
-      setThinking(true);
-      setResponseSlow(false);
-      setNotice(null);
-      slowTimerRef.current = window.setTimeout(() => {
-        if (mountedRef.current) setResponseSlow(true);
-      }, 12_000);
-
-      const profileAtStart = coach.profileId;
-      const baseHistory = replaceMessageId
-        ? history.filter((m) => m.id !== replaceMessageId)
-        : history;
-
-      /* find the user message this answer belongs to — never duplicate it */
-      let answerTo: CoachMessage | undefined = userMessage ?? undefined;
-      if (!answerTo && replaceMessageId) {
-        const at = history.findIndex((m) => m.id === replaceMessageId);
-        const previous = at > 0 ? history[at - 1] : undefined;
-        if (previous && (previous.role === "user" || previous.role === "you")) answerTo = previous;
-      }
-      if (!answerTo) {
-        answerTo = {
-          id: newMessageId("user"),
-          role: "user",
-          time: new Date().toISOString(),
-          paragraphs: [text],
-          sources: [],
-          blocks: [],
-          attachment: attachment
-            ? { name: attachment.name, type: attachment.type, size: attachment.size }
-            : undefined,
-          status: "sent",
-        };
-      }
-      if (!answerTo) return "rejected";
-      /* Remember the photo against its message for this session, so a
-         retry or regenerate can send it again (see mediaByMessageRef). */
-      if (media) {
-        mediaByMessageRef.current.set(answerTo.id, media);
-        while (mediaByMessageRef.current.size > 12) {
-          const oldest = mediaByMessageRef.current.keys().next().value;
-          if (oldest === undefined) break;
-          mediaByMessageRef.current.delete(oldest);
-        }
-      }
-      const pendingHistory = baseHistory.some((m) => m.id === answerTo.id)
-        ? baseHistory
-        : [...baseHistory, answerTo];
-
-      coach.setMessages(() => pendingHistory);
-      /* The message is in the thread now. Answered or failed, it stays
-         there — so the send is accepted, and the composer can let go of
-         its copy instead of holding the draft until the reply lands. */
-      onAccepted?.();
-
-      try {
-        const response = await coach.requestResponse({
-          text,
-          mode,
-          context: buildCoachContext(
-            entries,
-            memoriesToContext(coach.memories),
-            coach.habitData,
-            mode,
-            text,
-            attachment?.type,
-          ),
-          history: pendingHistory,
-          attachment: media
-            ? { fileType: media.mediaType, base64Data: media.dataBase64 }
-            : undefined,
-        });
-        if (!mountedRef.current || profileAtStart !== coach.profileId) return "answered";
-
-        /*
-         * Model replies may carry structured sidecars: things to remember,
-         * things to forget, and app actions to run. They are executed here —
-         * after the reply is in hand — and stripped from the text, so the
-         * thread only ever shows prose plus one honest outcome line.
-         */
-        const parsed = parseSidecars(response.paragraphs.join("\n\n"));
-        let paragraphs = parsed.text
-          ? parsed.text
-              .split(/\n{2,}/)
-              .map((part) => part.trim())
-              .filter(Boolean)
-          : [];
-        /* A reply that is ONLY directives (a native tool call or memory
-           write) has no prose — never let a raw [BLOOM_…] tag render. */
-        const hasDirectives =
-          parsed.tools.length + parsed.memories.length + parsed.forgets.length > 0;
-        if (paragraphs.length === 0 && !hasDirectives) {
-          paragraphs = response.paragraphs.length > 0 ? [...response.paragraphs] : [];
-        }
-        for (const memory of parsed.memories.slice(0, 3)) {
-          void coach.rememberMemory(memory.text, memory.category);
-        }
-        for (const forget of parsed.forgets.slice(0, 3)) {
-          void coach.forgetMemoryText(forget.text);
-        }
-        const tool = parsed.tools[0];
-        if (tool) {
-          const outcome = await executeCoachTool(tool, coach.profileId);
-          paragraphs = [...paragraphs, outcome.outcome];
-        }
-        if (paragraphs.length === 0) {
-          paragraphs = ["Sorry — I lost my train of thought there. Ask me again?"];
-        }
-
-        const coachMessage: CoachMessage = {
-          id: newMessageId("coach"),
-          role: "coach",
-          time: new Date().toISOString(),
-          paragraphs,
-          sources: response.sources,
-          blocks: response.blocks,
-          status: "sent",
-          source: response.source,
-          fellBackBecause: response.fellBackBecause,
-        };
-
-        /* The photo's memory: when this answer read a photo, record what
-           the reply identified against the message that carried it, so
-           the thread keeps the identification after the image itself is
-           gone from the payload (see photoNoteFromReply). A regenerated
-           answer refreshes the note to the newest identification. */
-        const photoNote = media ? photoNoteFromReply(paragraphs) : undefined;
-
-        coach.setMessages((current) => {
-          const cleaned = replaceMessageId
-            ? current.filter((m) => m.id !== replaceMessageId)
-            : current;
-          const noted = photoNote
-            ? cleaned.map((m) => (m.id === answerTo.id ? { ...m, photoNote } : m))
-            : cleaned;
-          return [...noted, coachMessage];
-        });
-        setFreshId(coachMessage.id);
-
-        if (coach.profileId) {
-          try {
-            const saved = await Promise.all([
-              coach.saveMessage(answerTo),
-              coach.saveMessage(coachMessage),
-            ]);
-            if (saved.some((result) => !result)) {
-              setNotice("Your conversation couldn't be saved to your account right now.");
-            }
-          } catch (error) {
-            console.error("Coach conversation save failed:", error);
-          }
-        }
-        lastFailedRef.current = null;
-        return "answered";
-      } catch (error) {
-        if (error instanceof Error && error.name === "CoachCancelled") return "answered";
-        console.error("Coach response failed:", error);
-        if (!mountedRef.current || profileAtStart !== coach.profileId) return "answered";
-        const userFacingError = coachErrorMessage(error);
-        const errorMessage: CoachMessage = {
-          id: newMessageId("coach-error"),
-          role: "coach",
-          time: new Date().toISOString(),
-          paragraphs: [userFacingError],
-          sources: [],
-          blocks: [],
-          status: "error",
-        };
-        coach.setMessages((current) => {
-          const cleaned = replaceMessageId
-            ? current.filter((m) => m.id !== replaceMessageId)
-            : current;
-          return [...cleaned, errorMessage];
-        });
-        if (userFacingError === SESSION_NOTICE) {
-          setSignInRequired(true);
-          setNotice(SESSION_NOTICE);
-        } else {
-          lastFailedRef.current = {
-            conversationId,
-            mode,
-            text,
-            attachment: attachment ?? null,
-            media: media ?? null,
-            userMessageId: answerTo.id,
-            errorMessageId: errorMessage.id,
-          };
-        }
-        return "failed";
-      } finally {
-        if (slowTimerRef.current) {
-          window.clearTimeout(slowTimerRef.current);
-          slowTimerRef.current = null;
-        }
-        inFlightRef.current = false;
-        if (mountedRef.current) {
-          setThinking(false);
-          setResponseSlow(false);
-        }
-      }
-    },
-    [coach, entries, thinking],
-  );
-
-  /* The offline knowledge path. When a send fails, the person can ask the
-     deterministic engine on this device instead — clearly labelled as such
-     in the thread, never dressed up as the online coach. No network, no
-     invented numbers: the engine answers from Bloom's built-in topics and
-     the record that lives in this browser. */
-  const answerFromKnowledge = useCallback(
-    (message: CoachMessage) => {
-      const pending = lastFailedRef.current;
-      if (!pending || pending.errorMessageId !== message.id) return;
-      const context = buildCoachContext(
-        entries,
-        memoriesToContext(coach.memories),
-        coach.habitData,
-        pending.mode,
-        pending.text,
-      );
-      const result = answerLocally({
-        text: pending.text,
-        mode: pending.mode,
-        record,
-        context,
-        history: [],
-        provider: "local",
-      });
-      coach.setMessages((current) =>
-        current.map((m) =>
-          m.id === pending.errorMessageId
-            ? {
-                ...m,
-                paragraphs: result.paragraphs.length > 0 ? result.paragraphs : m.paragraphs,
-                sources: result.sources,
-                blocks: result.blocks,
-                status: "sent" as const,
-                source: "local" as const,
-                fellBackBecause: "offline",
-              }
-            : m,
-        ),
-      );
-      lastFailedRef.current = null;
-    },
-    [coach, entries, record],
-  );
-
   /* ------------------------------- send paths ------------------------------ */
+  /* The pipeline itself lives in useCoachChat (shared with the orb);
+     the page's half is only the draft bookkeeping: once a send is
+     accepted — answered OR failed with a Try again on it — the
+     composer's copy has done its job, and keeping it invited an
+     accidental duplicate send. Only a rejected send keeps the draft. */
   const sendMessage = useCallback(
     async (
       text: string,
@@ -655,109 +331,14 @@ export function CoachPage() {
       attachment?: ComposerAttachment | null,
       onAccepted?: () => void,
     ): Promise<RequestOutcome> => {
-      if (!text.trim() && !attachment) return "rejected";
-      const conversation = coach.activeConversation;
-      const history = conversation?.messages ?? [];
-      const meta: AttachmentMeta | null = attachment
-        ? { name: attachment.name, type: attachment.type, size: attachment.size }
-        : null;
-
-      /* Photos (and readable PDFs) become vision input for the online coach. */
-      let media: CoachMedia | null = null;
-      if (attachment?.file && isVisionType(attachment.file.type)) {
-        try {
-          media = await fileToCoachMedia(attachment.file);
-        } catch {
-          media = null;
-        }
-      }
-
-      let userMessage: CoachMessage | null = null;
-      if (attachment) {
-        userMessage = {
-          id: newMessageId("user"),
-          role: "user",
-          time: new Date().toISOString(),
-          paragraphs: [text.trim() || "Please review this attachment."],
-          sources: [],
-          blocks: [],
-          attachment: meta ?? undefined,
-          status: "sent",
-        };
-        if (attachment.previewUrl) {
-          const url = attachment.previewUrl;
-          objectUrlsRef.current.push(url);
-          setPreviews((current) => ({ ...current, [userMessage!.id]: url }));
-        }
-      }
-
-      const outcome = await requestAnswer({
-        text: text.trim(),
-        mode,
-        history,
-        conversationId: conversation?.id ?? "",
-        attachment: meta,
-        media,
-        userMessage,
-        onAccepted,
-      });
-      /* Once the message is in the thread — answered OR failed with a
-         Try again on it — the composer's copy has done its job. Keeping
-         it invited an accidental duplicate send; the words stay safe in
-         the thread either way. Only a rejected send keeps the draft. */
+      const conversationId = coach.activeConversation?.id ?? null;
+      const outcome = await chat.sendMessage(text, mode, attachment, onAccepted);
       if (outcome !== "rejected") {
-        clearDraftFor(conversation?.id ?? null);
+        clearDraftFor(conversationId);
       }
       return outcome;
     },
-    [coach, requestAnswer, clearDraftFor],
-  );
-
-  const retryFailed = useCallback(
-    async (message: CoachMessage) => {
-      const pending = lastFailedRef.current;
-      const conversation = coach.activeConversation;
-      if (!conversation || !pending || pending.conversationId !== conversation.id) return;
-      if (pending.errorMessageId !== message.id) return;
-      await requestAnswer({
-        text: pending.text,
-        mode: pending.mode,
-        history: conversation.messages,
-        conversationId: conversation.id,
-        attachment: pending.attachment,
-        /* The fix for the blind retry: the photo rides along again,
-           exactly as it did on the first send. */
-        media: pending.media,
-        replaceMessageId: pending.errorMessageId,
-      });
-    },
-    [coach, requestAnswer],
-  );
-
-  const regenerateLast = useCallback(
-    async (message: CoachMessage) => {
-      const conversation = coach.activeConversation;
-      if (!conversation || thinking) return;
-      const index = conversation.messages.findIndex((m) => m.id === message.id);
-      if (index < 0 || conversation.messages[index]?.role !== "coach") return;
-      const user = conversation.messages[index - 1];
-      const text =
-        user && (user.role === "user" || user.role === "you")
-          ? (user.text ?? user.paragraphs.join(" ")).trim()
-          : "";
-      if (!text) return;
-      await requestAnswer({
-        text,
-        mode: conversation.mode,
-        history: conversation.messages,
-        conversationId: conversation.id,
-        /* If the original message carried a photo and its bytes are
-           still held this session, the regenerated answer sees it too. */
-        media: user ? (mediaByMessageRef.current.get(user.id) ?? null) : null,
-        replaceMessageId: message.id,
-      });
-    },
-    [coach, requestAnswer, thinking],
+    [chat, coach.activeConversation, clearDraftFor],
   );
 
   const startStarter = useCallback(
@@ -907,9 +488,9 @@ export function CoachPage() {
     welcomePhaseLine,
     welcomeMemory,
     onStart: startStarter,
-    onRetry: (message: CoachMessage) => void retryFailed(message),
-    onOfflineAnswer: answerFromKnowledge,
-    onRegenerate: (message: CoachMessage) => void regenerateLast(message),
+    onRetry: (message: CoachMessage) => void chat.retryFailed(message),
+    onOfflineAnswer: chat.answerFromKnowledge,
+    onRegenerate: (message: CoachMessage) => void chat.regenerateLast(message),
     onTellMeMore: tellMeMore,
     onMakePlan: makePlan,
     onBlockAction: handleBlockAction,
@@ -962,10 +543,7 @@ export function CoachPage() {
                 <button
                   type="button"
                   className="coach-notice-dismiss"
-                  onClick={() => {
-                    setNotice(null);
-                    setSignInRequired(false);
-                  }}
+                  onClick={() => chat.dismissNotice()}
                   aria-label="Dismiss notice"
                 >
                   <BloomIcon name="close" size={12} />
