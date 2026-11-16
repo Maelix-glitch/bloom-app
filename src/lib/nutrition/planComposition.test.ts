@@ -14,6 +14,7 @@ import { quantity } from "@/lib/vitalis/domain/units";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import {
+  COOKED_SOY_FORM_IDS,
   generatePlan,
   parsePlanValue,
   planPatternOf,
@@ -265,7 +266,12 @@ function expectCapsHold(plan: DailyPlan, targetProteinG: number) {
       const group = groupOf(s);
       const food = BY_ID.get(s.foodId)!;
       if (group === "cereals_grains") expect(s.grams).toBeLessThanOrEqual(90);
-      if (group === "pulses_legumes") expect(s.grams).toBeLessThanOrEqual(60);
+      if (group === "pulses_legumes") {
+        /* P4: the cooked soy forms (tofu, tempeh, edamame) are eaten
+           cooked and portion at 120 g; every dry pulse — lentils,
+           beans, dry soybeans — keeps the 60 g dry cap. */
+        expect(s.grams).toBeLessThanOrEqual(COOKED_SOY_FORM_IDS.has(food.id) ? 120 : 60);
+      }
       if (group === "eggs") {
         /* P3: the split parts are components, capped at 60 g; only the
            whole egg keeps the 120 g portion. */
@@ -338,17 +344,20 @@ describe("plan · day floors", () => {
   /* P3 note, updated at integration with the 142-food pool: the ICMR
      floors (vegetables, fruit, milk/curd) are still all reached on the
      owner's day. The P3 item cap (8 per main meal) drops the day's
-     garnish extras, so the day spans 6 groups and says so; and with
-     the soy anchors (tofu, tempeh, edamame) in the pool the closing
-     pass now lifts this day's protein to 211 g — over the 95% bar, so
-     no shortfall note fires. The one remaining miss is named. */
+     garnish extras; and with the soy anchors (tofu, tempeh, edamame)
+     in the pool the closing pass lifts this day's protein over the
+     95% bar, so no shortfall note fires. P4 update: with the cooked
+     soy forms portioned at their real 120 g serving (they were halved
+     by the dry-pulse cap), tempeh now carries breakfast and lunch, the
+     day's protein rises to 213 g and the reshaped plate spans 7 food
+     groups. The one remaining miss — the 8-group aim — is named. */
   it("the owner's day reaches every ICMR floor; the one remaining miss is named", () => {
     const plan = gen(ownerProfile(), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
       day: "2026-11-15",
     });
     expect(plan.notes).toEqual([
-      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -359,7 +368,7 @@ describe("plan · day floors", () => {
       .reduce((sum, s) => sum + s.grams, 0);
     expect(fruit).toBeGreaterThanOrEqual(100);
     const groups = new Set(allSuggestions(plan).map((s) => groupOf(s)));
-    expect(groups.size).toBe(6);
+    expect(groups.size).toBe(7);
     const proteinSources = new Set(
       plan.meals.flatMap((m) =>
         m.suggestions.filter((s) => s.layer === "protein").map((s) => s.foodId),
@@ -606,6 +615,57 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
            "portion" off the plate. */
         expect(groupOf(s), `${day}: ${food.name}`).toBe("vegetables");
         expect(food.name.toLowerCase()).not.toMatch(/chilli|chili/);
+      }
+    }
+  });
+});
+
+/* ------------------------------- P4 soy caps ------------------------------- */
+
+describe("plan · P4 soy-form portion caps", () => {
+  it("the cooked-soy set names exactly the three FDC soy forms, all in the pulses group", () => {
+    /* Keyed on the pinned reference ids (usda-<fdcId>): firm tofu
+       172448, tempeh 174272, edamame 168410. If the pool changes, this
+       fails loudly rather than the wider cap silently no-opping. */
+    expect([...COOKED_SOY_FORM_IDS].sort()).toEqual(["usda-168410", "usda-172448", "usda-174272"]);
+    for (const id of COOKED_SOY_FORM_IDS) {
+      expect(BY_ID.get(id)?.classification?.group, id).toBe("pulses_legumes");
+    }
+    /* Dry soybeans are a dry seed, not a cooked soy form. */
+    const soybeans = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Soybeans"))!;
+    expect(COOKED_SOY_FORM_IDS.has(soybeans.id)).toBe(false);
+  });
+
+  it("a composed meal may carry a full 120 g serving of tempeh", () => {
+    /* The owner's 2026-11-15: under the dry-pulse cap tempeh stopped
+       at 60 g (half a serving, ~12 g protein); portioned as the cooked
+       food it is, breakfast and lunch each carry the full 120 g. */
+    const plan = gen(ownerProfile(), {
+      fallbackTargets: { kcal: 3288, proteinG: 220 },
+      day: "2026-11-15",
+    });
+    const tempeh = allSuggestions(plan).filter((s) => s.foodId === "usda-174272");
+    expect(tempeh.length).toBeGreaterThanOrEqual(2);
+    expect(tempeh.every((s) => s.layer === "protein")).toBe(true);
+    expect(Math.max(...tempeh.map((s) => s.grams))).toBe(120);
+  });
+
+  it("dry pulses keep the 60 g cap across the owner week; soy forms never pass 120 g", () => {
+    for (const day of [
+      "2026-11-15",
+      "2026-11-16",
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22",
+    ]) {
+      const plan = gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 }, day });
+      for (const s of allSuggestions(plan)) {
+        if (groupOf(s) !== "pulses_legumes") continue;
+        const cap = COOKED_SOY_FORM_IDS.has(s.foodId) ? 120 : 60;
+        expect(s.grams, `${day}: ${BY_ID.get(s.foodId)?.name}`).toBeLessThanOrEqual(cap);
       }
     }
   });

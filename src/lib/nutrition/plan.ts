@@ -167,8 +167,10 @@ export interface DailyPlan {
  *  2 = the P2 layered composer (patterns, food groups, portion caps),
  *  3 = the P3 maturity pass (energy reconciliation back to the target,
  *  protein-gap closing, an 8-item plate cap, egg-part portions, honest
- *  protein/energy shortfall notes). */
-export const PLAN_METHOD_VERSION = 3;
+ *  protein/energy shortfall notes), 4 = the P4 soy-form portion fix
+ *  (cooked soy forms — tofu, tempeh, edamame — portioned as the cooked
+ *  foods they are, not under the dry-pulse cap). */
+export const PLAN_METHOD_VERSION = 4;
 
 export type PlanRefusal =
   | {
@@ -493,6 +495,9 @@ function rotationOrder(day: string, pool: readonly Food[]): Food[] {
 const CAP_GRAIN_DRY_G = 90; // dry cereals/millets per meal (brief; BNF dry rice portion 65 g, research flags >120 g)
 const CAP_UNCLASSIFIED_BASE_G = 200; // own foods: dry/cooked basis unknown — a middle bound, derivation
 const CAP_DRY_PULSES_G = 60; // dry pulses/legumes per meal; normal range 30–50 g, 85 g is the whole ICMR day
+const CAP_COOKED_SOY_G = 120; // cooked soy forms per meal (P4) — tofu/tempeh/edamame are eaten
+// cooked, at cooked portions: 120 g is a normal serving of tempeh or a bowl of edamame,
+// where the 60 g dry-pulse cap (60 g dry ≈ 180 g cooked) silently halved them.
 const CAP_EGGS_G = 120; // ≈ 2 eggs (BNF: 2 eggs = 120 g, one protein portion)
 const CAP_EGG_PART_G = 60; // egg yolk / egg white alone (P3): the parts are components a cook
 // folds into a dish, not standalone portions — 120 g of yolk is ~7 yolks. Whole egg keeps 120 g.
@@ -677,6 +682,23 @@ function isSeasoningClass(food: Food): boolean {
   return groupOf(food) === "vegetables" && /hot chili|chilli/i.test(food.name);
 }
 
+/** The cooked soy forms in the reference set (P4): the foods the USDA
+ *  set carries as ready-to-eat soy — firm tofu (FDC 172448), tempeh
+ *  (FDC 174272) and edamame (FDC 168410), keyed by their pinned
+ *  reference ids (`usda-<fdcId>`). They sit in the pulses_legumes
+ *  group, but unlike the group's dry seeds they are eaten cooked, so
+ *  the dry-pulse cap misapplies to them (60 g of tempeh is half a
+ *  serving). Keyed on id, not name: the ids are the stable FDC
+ *  identity the generator pins. If a further cooked soy form joins
+ *  the set, it joins this list with its FDC id — dry soybeans
+ *  (FDC 174270) deliberately do not: they are a dry seed and keep the
+ *  dry cap. */
+export const COOKED_SOY_FORM_IDS: ReadonlySet<string> = new Set([
+  "usda-172448", // Tofu, firm — FDC 172448
+  "usda-174272", // Tempeh — FDC 174272
+  "usda-168410", // Edamame, frozen — FDC 168410
+]);
+
 /** The protein-layer cap for one food. Dairy splits by the food's own
  *  energy density: at ≥350 kcal per 100 g a dairy food is a hard grating
  *  cheese (in this set, parmesan), portioned by BNF at 30 g — not a
@@ -685,6 +707,7 @@ function isSeasoningClass(food: Food): boolean {
 function proteinCapG(food: Food, kind: ProteinKind): number {
   if (kind === "dairy" && food.per100g.kcal >= 350) return CAP_HARD_CHEESE_G;
   if (kind === "eggs" && isEggPart(food)) return CAP_EGG_PART_G;
+  if (kind === "pulses" && COOKED_SOY_FORM_IDS.has(food.id)) return CAP_COOKED_SOY_G;
   return PROTEIN_CAP_G[kind];
 }
 
