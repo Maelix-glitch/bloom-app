@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  EMPTY_ANSWERS,
+  toHealthProfile,
+  type AssessmentState,
+} from "@/lib/assessment/state";
+import {
   EMPTY_CONSTRAINTS,
   EMPTY_DIETARY,
   emptyProfile,
@@ -342,6 +347,62 @@ describe("plan · rotation", () => {
     const proteinOf = (p: DailyPlan) =>
       new Set(p.meals.flatMap((m) => m.suggestions.filter((s) => s.layer === "protein").map((s) => s.foodId)));
     expect(proteinOf(a)).not.toEqual(proteinOf(b));
+  });
+
+  it("day notes follow the rotation: the 2026-11-16 shortfall the UI test met", () => {
+    /* The exact person the NutritionPlanSection suite seeds (female,
+       30, 175 cm, 82 kg, lose, light, safety answered) — built through
+       the Assessment mapping, as the component builds her. Her targets
+       never rotate; her composition and its day notes do. */
+    const state: AssessmentState = {
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: {
+        ...EMPTY_ANSWERS,
+        ageYears: 30,
+        heightCm: 175,
+        weightKg: 82,
+        sex: "female",
+        goal: "lose",
+        activity: "light",
+        pregnantOrBreastfeeding: false,
+        eatingDisorderHistory: false,
+        unexplainedWeightChange: false,
+      },
+      consents: [],
+      startedAt: "2026-11-10T03:00:00.000Z",
+      completedAt: "2026-11-10T03:05:00.000Z",
+      updatedAt: "2026-11-10T03:05:00.000Z",
+    };
+    const profile = toHealthProfile(state, "user-1");
+    const d15 = gen(profile, { day: "2026-11-15" });
+    const d16 = gen(profile, { day: "2026-11-16" });
+    const d17 = gen(profile, { day: "2026-11-17" });
+
+    for (const plan of [d15, d16, d17]) {
+      expect(plan.targets).toEqual({ kcal: 1654, proteinG: 148 });
+    }
+    const ids = (p: DailyPlan) => allSuggestions(p).map((s) => s.foodId).join(",");
+    expect(ids(d15)).not.toBe(ids(d16));
+
+    /* 2026-11-15 meets every ICMR floor: no day notes at all — the day
+       the component test happened to pass. */
+    expect(d15.notes).toEqual([]);
+    /* 2026-11-16 rotates to a mix that reaches only 250 g of milk and
+       curd and spans 6 food groups — both shortfalls are named, and the
+       milk note ends in the same "across the day" phrase as the plan
+       header's targets sentence. Both are correct, in different homes;
+       that collision is what the component test now scopes around. */
+    expect(d16.notes).toContain(
+      "Today's suggestions reach 250 g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.",
+    );
+    expect(d16.notes).toContain(
+      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+    );
+    expect(d17.notes).toContain(
+      "Today's suggestions reach 250 g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.",
+    );
   });
 });
 
