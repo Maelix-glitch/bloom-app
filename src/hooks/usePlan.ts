@@ -26,11 +26,7 @@ import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { useSession } from "@/hooks/useSession";
 import { todayLocal } from "@/lib/localDay";
-import {
-  ASSESSMENT_KEY,
-  parseAssessmentState,
-  toHealthProfile,
-} from "@/lib/assessment/state";
+import { ASSESSMENT_KEY, parseAssessmentState, toHealthProfile } from "@/lib/assessment/state";
 import { toSafetyInput, type HealthProfile, type VitalisGoal } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor, type BodyTargetsOutcome } from "@/lib/vitalis/calc/body";
@@ -39,7 +35,10 @@ import {
   DISH_LIBRARY,
   PLAN_KEY,
   PLAN_LOG_KEY,
+  TARGET_ADJUSTMENT_KEY,
   USDA_REFERENCE_FOODS,
+  clearTargetAdjustment,
+  parseTargetAdjustment,
   generatePlan,
   nutritionTargetsFromBodyTargets,
   parsePlanLogValue,
@@ -61,6 +60,7 @@ import {
   type PlanRefusal,
   type PlanStaleness,
   type PlanSuggestion,
+  type TargetAdjustment,
 } from "@/lib/nutrition";
 
 export type PlanSectionState =
@@ -103,6 +103,17 @@ export interface PlanStore {
   /** Log every not-yet-logged suggestion of a meal (the meal card's
    *  "Log this meal"). Returns how many entries were written. */
   logMeal: (meal: PlanMeal) => number;
+  /** The engine's maintenance estimate (TDEE) behind the current
+   *  targets — the gated outcome's, or the body profile's — or null
+   *  when the engine cannot speak. The expenditure proposal derives
+   *  its delta against this number, never against the goal target. */
+  engineTdeeKcal: number | null;
+  /** The user-confirmed target adjustment currently in force, or
+   *  null. Its delta is already inside the plan's targets. */
+  targetAdjustment: TargetAdjustment | null;
+  /** Remove the confirmed adjustment: targets return to the
+   *  engine's, and an existing plan goes stale by name. */
+  clearTargetAdjustment: () => void;
 }
 
 interface AssembledInputs {
@@ -119,6 +130,7 @@ export function usePlan(): PlanStore {
   const nutrition = useNutrition();
   const plan = usePrefValue(PLAN_KEY, parsePlanValue, null);
   const planLog = usePrefValue(PLAN_LOG_KEY, parsePlanLogValue, NO_PLAN_LOG);
+  const targetAdjustment = usePrefValue(TARGET_ADJUSTMENT_KEY, parseTargetAdjustment, null);
   const today = todayLocal();
 
   const assembled = useMemo<AssembledInputs>(() => {
@@ -151,10 +163,16 @@ export function usePlan(): PlanStore {
          days are logged. The preview reads the same log, so what the
          section explains is the plan the tap will actually save. */
       recentLog: nutrition.entries,
+      /* P7: the stored plan rides along too — the learning pass
+         judges the dishes it served and the portions it serves —
+         and a confirmed target adjustment shifts the resolved
+         targets inside the engine, never around it. */
+      storedPlan: plan,
+      ...(targetAdjustment ? { targetAdjustmentKcal: targetAdjustment.kcalDelta } : {}),
       day: today,
       now,
     }),
-    [assembled, nutrition.foods, nutrition.entries, today],
+    [assembled, nutrition.foods, nutrition.entries, plan, targetAdjustment, today],
   );
 
   /* The preview runs the real generator and discards the plan — the
@@ -262,6 +280,10 @@ export function usePlan(): PlanStore {
     [logSuggestion, suggestionLogged],
   );
 
+  const engineTdeeKcal = assembled.gatedOutcome.ok
+    ? assembled.gatedOutcome.targets.tdeeKcal
+    : (body.targets?.tdee ?? null);
+
   return {
     today,
     state,
@@ -272,6 +294,9 @@ export function usePlan(): PlanStore {
     logSuggestion,
     suggestionLogged,
     logMeal,
+    engineTdeeKcal,
+    targetAdjustment,
+    clearTargetAdjustment,
   };
 }
 

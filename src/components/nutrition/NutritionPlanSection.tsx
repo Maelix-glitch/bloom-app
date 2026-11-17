@@ -36,6 +36,7 @@ import { Check, ChevronDown, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAssessment } from "@/hooks/useAssessment";
+import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { useSession } from "@/hooks/useSession";
@@ -43,14 +44,19 @@ import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
 import {
+  MAX_TARGET_ADJUSTMENT_KCAL,
+  adjustedTargets,
+  confirmTargetAdjustment,
   dishIdeaFor,
   dishNutrients,
   displayNameForFoodId,
+  estimateExpenditure,
   findDish,
   findUsdaReference,
   foodDisplayName,
   goalProfileOf,
   logDish,
+  planLearningFor,
   provenanceLabel,
   sumNutrients,
   type Dish,
@@ -147,12 +153,27 @@ function GoalChips({
 }
 
 export function NutritionPlanSection() {
-  const { state, generate, logSuggestion, suggestionLogged, logMeal, currentGoal, setGoal } =
-    usePlan();
+  const {
+    state,
+    generate,
+    logSuggestion,
+    suggestionLogged,
+    logMeal,
+    currentGoal,
+    setGoal,
+    engineTdeeKcal,
+    targetAdjustment,
+    clearTargetAdjustment,
+  } = usePlan();
   const assessment = useAssessment();
   const session = useSession();
   const nutrition = useNutrition();
+  const body = useBodyProfile();
   const [logError, setLogError] = useState<string | null>(null);
+  /* P7: the dismissed expenditure proposal's fingerprint — dismissing
+     stores nothing; the card simply stays away while the estimate
+     behind it is unchanged. */
+  const [dismissedProposal, setDismissedProposal] = useState<string | null>(null);
   /* P5: which plan dish's ingredients are unfolded, and which dish's
      full recipe sheet is open (with the plan meal it belongs to, so
      the sheet's Log button files it into the plan's meal). */
@@ -327,6 +348,64 @@ export function NutritionPlanSection() {
 
   const { plan, staleness } = state;
 
+  /* P7: what the log has taught, and the expenditure proposal. The
+     learning is recomputed from the same log the composer read, so
+     the surface explains the plan above it — and the proposal is a
+     proposal: it renders numbers and two buttons, and only the
+     Confirm button writes anything (the confirmed delta, through
+     targetAdjustment's strict path). */
+  const learning = planLearningFor(nutrition.entries, plan.day, plan.targets, {
+    storedPlan: plan,
+    sex: profile.sex === "unspecified" ? null : profile.sex,
+  });
+  const expenditure = estimateExpenditure(nutrition.entries, body.weighIns, plan.day);
+  const estimate = expenditure.kind === "ready" ? expenditure.estimate : null;
+  const activeDelta = targetAdjustment?.kcalDelta ?? 0;
+  const engineTargetKcal = plan.targets.kcal - activeDelta;
+  const proposalDelta =
+    estimate && engineTdeeKcal !== null ? estimate.maintenanceKcal - engineTdeeKcal : null;
+  const proposalKey =
+    estimate && proposalDelta !== null
+      ? `${estimate.fromDate}:${estimate.toDate}:${estimate.maintenanceKcal}:${engineTdeeKcal}`
+      : null;
+  const proposedTargetKcal = proposalDelta !== null ? engineTargetKcal + proposalDelta : null;
+  const proposalApplicable =
+    proposalDelta !== null &&
+    Math.abs(proposalDelta) <= MAX_TARGET_ADJUSTMENT_KCAL &&
+    adjustedTargets({ kcal: engineTargetKcal, proteinG: plan.targets.proteinG }, proposalDelta) !==
+      null;
+  const showProposal =
+    estimate !== null &&
+    proposalDelta !== null &&
+    Math.abs(proposalDelta) >= 25 &&
+    targetAdjustment?.kcalDelta !== proposalDelta &&
+    dismissedProposal !== proposalKey;
+  const confirmProposal = () => {
+    if (!estimate || proposalDelta === null || engineTdeeKcal === null) return;
+    confirmTargetAdjustment({
+      kcalDelta: proposalDelta,
+      confirmedAt: new Date().toISOString(),
+      basedOn: {
+        maintenanceKcal: estimate.maintenanceKcal,
+        engineTdeeKcal,
+        loggedDays: estimate.loggedDays,
+        spanDays: estimate.spanDays,
+        weightChangeKg: estimate.weightChangeKg,
+      },
+    });
+  };
+  const shortDay = (dayKey: string) =>
+    new Date(`${dayKey}T12:00:00`).toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+    });
+  const weightPhrase =
+    estimate === null || estimate.weightChangeKg === 0
+      ? "held steady"
+      : estimate.weightChangeKg > 0
+        ? `rose by ${estimate.weightChangeKg} kg`
+        : `fell by ${Math.abs(estimate.weightChangeKg)} kg`;
+
   /* The day's dish ideas, picked in meal order with each pick excluded
      from the next (P3): lunch and dinner draw on the same dish
      category and the same day rotation, so independent per-card picks
@@ -337,9 +416,7 @@ export function NutritionPlanSection() {
      repeats a dish the plan already serves. */
   const dishIdeas = new Map<PlanMeal["meal"], Dish>();
   {
-    const usedDishIds = new Set<string>(
-      plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId)),
-    );
+    const usedDishIds = new Set<string>(plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId)));
     for (const meal of plan.meals) {
       if (meal.meal === "snack") continue;
       if (meal.dishes.length > 0) continue;
@@ -461,10 +538,7 @@ export function NutritionPlanSection() {
               })}
             </ul>
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <ProvenanceBadge
-                kind="recipe"
-                label={provenanceLabel(planDish.provenance)}
-              />
+              <ProvenanceBadge kind="recipe" label={provenanceLabel(planDish.provenance)} />
               <span className="text-[length:var(--text-caption)] text-muted-foreground">
                 Computed from these ingredients' USDA data.
               </span>
@@ -509,8 +583,7 @@ export function NutritionPlanSection() {
       (meal.suggestions.length > 0 || meal.dishes.length > 0) &&
       meal.suggestions.every((s) => suggestionLogged(meal, s)) &&
       meal.dishes.every((d) => planDishLogged(meal, d));
-    const layered =
-      !dishComposed && meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
+    const layered = !dishComposed && meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
     const topups = meal.suggestions.filter((s) => s.layer === "topup");
     const foodSuggestions = dishComposed
       ? meal.suggestions.filter((s) => s.layer !== "topup")
@@ -772,6 +845,150 @@ export function NutritionPlanSection() {
         </div>
       ) : null}
 
+      {showProposal && estimate && proposalDelta !== null && engineTdeeKcal !== null ? (
+        <div className="nut-proposal" role="status">
+          <p className="nut-group-label">Your real maintenance, from your record</p>
+          <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            Over {estimate.spanDays} days ({shortDay(estimate.fromDate)} –{" "}
+            {shortDay(estimate.toDate)}) you logged {estimate.loggedDays} days averaging{" "}
+            {Math.round(estimate.avgIntakeKcal).toLocaleString("en-US")} kcal, and your weight{" "}
+            {weightPhrase}. That puts your maintenance near{" "}
+            <span className="font-semibold">
+              {estimate.maintenanceKcal.toLocaleString("en-US")} kcal
+            </span>{" "}
+            a day — {Math.abs(proposalDelta).toLocaleString("en-US")} kcal{" "}
+            {proposalDelta > 0 ? "above" : "below"} the {engineTdeeKcal.toLocaleString("en-US")}{" "}
+            kcal formula estimate behind your plan.
+          </p>
+          {proposalApplicable && proposedTargetKcal !== null ? (
+            <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+              Confirming shifts your daily target by {proposalDelta > 0 ? "+" : "−"}
+              {Math.abs(proposalDelta).toLocaleString("en-US")} kcal, to{" "}
+              {proposedTargetKcal.toLocaleString("en-US")} kcal — your goal pace stays the same, and
+              the plan above keeps its current numbers until you compose again.
+            </p>
+          ) : (
+            <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+              That gap is too large to apply with one tap. It is worth checking your body numbers in
+              Trackers first — if they are right, a fresh plan can be built from them.
+            </p>
+          )}
+          <p className="nut-note">
+            An estimate from your logged days and weigh-ins, with weight change counted at 7,700
+            kcal per kg — not a measurement. Nothing changes unless you confirm.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {proposalApplicable ? (
+              <button
+                type="button"
+                className="nut-btn nut-btn-gold nut-btn-sm"
+                onClick={confirmProposal}
+              >
+                Confirm new target
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="nut-btn nut-btn-ghost nut-btn-sm"
+              onClick={() => setDismissedProposal(proposalKey)}
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {learning ||
+      targetAdjustment ||
+      (expenditure.kind === "insufficient" &&
+        (expenditure.loggedDays > 0 || expenditure.weightPoints > 0)) ||
+      (estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25) ? (
+        <div className="mt-5">
+          <p className="nut-group-label">What your plan learned</p>
+          {learning?.adherence ? (
+            <p className="nut-note">
+              Over your last {learning.adherence.days} logged days you averaged{" "}
+              {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")} kcal and{" "}
+              {Math.round(learning.adherence.avgProteinG)} g protein a day, against targets of{" "}
+              {Math.round(plan.targets.kcal).toLocaleString("en-US")} kcal and{" "}
+              {formatGrams(plan.targets.proteinG)} g.
+            </p>
+          ) : null}
+          {learning && learning.favouredDishes.length > 0 ? (
+            <p className="nut-note">
+              Dishes you return to:{" "}
+              {learning.favouredDishes
+                .slice(0, 5)
+                .map((d) => `${d.name} (logged ${d.count} times)`)
+                .join(", ")}
+              {learning.favouredDishes.length > 5
+                ? `, and ${learning.favouredDishes.length - 5} more`
+                : ""}
+              . They lead the picks.
+            </p>
+          ) : null}
+          {learning && learning.deprioritisedDishes.length > 0 ? (
+            <p className="nut-note">
+              Served by an earlier plan but never logged:{" "}
+              {learning.deprioritisedDishes
+                .slice(0, 5)
+                .map((d) => d.name)
+                .join(", ")}
+              . They sit further back.
+            </p>
+          ) : null}
+          {learning?.microGaps.map((gap) => (
+            <p key={gap.key} className="nut-note">
+              {gap.label} averaged{" "}
+              {gap.unit === "g" ? Math.round(gap.avg * 10) / 10 : Math.round(gap.avg)} {gap.unit} a
+              day over {gap.days} logged days, against the {gap.reference} {gap.unit} reference —
+              dishes richer in {gap.label.toLowerCase()} are favoured.
+            </p>
+          ))}
+          {learning?.portionSignals.map((signal) => (
+            <p key={signal.foodId} className="nut-note">
+              You usually log {signal.typicalGrams} g of {signal.name}; the plan serves{" "}
+              {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned — the
+              choice is yours.
+            </p>
+          ))}
+          {estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25 ? (
+            <p className="nut-note">
+              Your record puts your maintenance near{" "}
+              {estimate.maintenanceKcal.toLocaleString("en-US")} kcal — in line with your current
+              target, so no change is proposed.
+            </p>
+          ) : null}
+          {expenditure.kind === "insufficient" &&
+          (expenditure.loggedDays > 0 || expenditure.weightPoints > 0) ? (
+            <p className="nut-note">
+              Maintenance estimate: still gathering — {expenditure.loggedDays} of 10 logged days and{" "}
+              {expenditure.weightPoints} {expenditure.weightPoints === 1 ? "weigh-in" : "weigh-ins"}{" "}
+              on record. It needs 2 weigh-ins spanning at least 10 days, with 10 logged days between
+              them.
+            </p>
+          ) : null}
+          {targetAdjustment ? (
+            <p className="nut-note">
+              Your energy target includes your confirmed{" "}
+              {targetAdjustment.kcalDelta > 0 ? "+" : "−"}
+              {Math.abs(targetAdjustment.kcalDelta).toLocaleString("en-US")} kcal adjustment —
+              maintenance estimated at{" "}
+              {targetAdjustment.basedOn.maintenanceKcal.toLocaleString("en-US")} kcal from{" "}
+              {targetAdjustment.basedOn.loggedDays} logged days over a{" "}
+              {targetAdjustment.basedOn.spanDays}-day window.{" "}
+              <button
+                type="button"
+                className="nut-inline-link"
+                onClick={() => clearTargetAdjustment()}
+              >
+                Remove adjustment
+              </button>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       {logError ? (
         <p className="nut-error mt-3" role="alert">
           {logError}
@@ -779,10 +996,9 @@ export function NutritionPlanSection() {
       ) : null}
 
       <p className="nut-note">
-        Plans are built from real dishes in Bloom's library — each dish's numbers are computed
-        from its ingredients' USDA data — topped up with simple foods only where the dishes leave
-        the day short. They are a starting point — log what you actually eat and your totals
-        follow that.
+        Plans are built from real dishes in Bloom's library — each dish's numbers are computed from
+        its ingredients' USDA data — topped up with simple foods only where the dishes leave the day
+        short. They are a starting point — log what you actually eat and your totals follow that.
       </p>
 
       {selectedDish ? (

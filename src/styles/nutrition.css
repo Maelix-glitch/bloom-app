@@ -357,6 +357,17 @@
   padding: var(--space-3) var(--space-4);
 }
 
+/* The expenditure proposal card (P7): the same gold-tinted callout
+   recipe as the staleness banner — a suggestion the record supports,
+   quiet until the person confirms it. */
+.nut-proposal {
+  margin-top: var(--space-5);
+  border: 1px solid color-mix(in oklab, var(--gold) 40%, transparent);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  border-radius: var(--radius-control);
+  padding: var(--space-4);
+}
+
 /* --------------------------------- sheet -------------------------------- */
 
 .nut-group-label {

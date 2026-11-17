@@ -39,7 +39,9 @@ import { targetsFor } from "@/lib/vitalis/calc/body";
 import {
   FOODS_KEY,
   FOODLOG_KEY,
+  TARGET_ADJUSTMENT_KEY,
   USDA_REFERENCE_FOODS,
+  adjustedTargets,
   compareTotalsToTargets,
   createEntryFromFood,
   dayLogOf,
@@ -54,6 +56,7 @@ import {
   nutritionTargetsFromOutcome,
   parseFoodLogValue,
   parseFoodsValue,
+  parseTargetAdjustment,
   recentFoods,
   saveCustomFood,
   swapLogEntry,
@@ -132,6 +135,7 @@ const NO_ENTRIES: LogEntry[] = [];
 export function useNutrition(): NutritionStore {
   const foods = usePrefValue(FOODS_KEY, parseFoodsValue, NO_FOODS);
   const entries = usePrefValue(FOODLOG_KEY, parseFoodLogValue, NO_ENTRIES);
+  const targetAdjustment = usePrefValue(TARGET_ADJUSTMENT_KEY, parseTargetAdjustment, null);
   const assessment = useAssessment();
   const body = useBodyProfile();
   const session = useSession();
@@ -140,9 +144,20 @@ export function useNutrition(): NutritionStore {
   const targetState = useMemo<NutritionTargetState>(() => {
     const profile = toHealthProfile(assessment.state, session.userId ?? "local");
     const outcome = targetsFor(profile, classifySafety(toSafetyInput(profile)), today);
+    /* A user-confirmed expenditure adjustment (P7) applies LAST, on
+       top of whichever path resolved the targets — the same rule
+       the plan engine applies (targetAdjustment.ts), so the day
+       view and the plan can never disagree about the target. */
+    const applyAdjustment = (targets: NutritionTargets): NutritionTargetState =>
+      targetAdjustment
+        ? {
+            kind: "ready",
+            targets: adjustedTargets(targets, targetAdjustment.kcalDelta) ?? targets,
+          }
+        : { kind: "ready", targets };
     if (outcome.ok) {
       const gated = nutritionTargetsFromOutcome(outcome);
-      if (gated) return { kind: "ready", targets: gated };
+      if (gated) return applyAdjustment(gated);
     } else if (outcome.reason === "safety_blocked") {
       /* A substantive refusal is final — no fallback may override it
          (§4.5). An absence-only block falls through to the fallback.
@@ -151,8 +166,8 @@ export function useNutrition(): NutritionStore {
       if (hasSubstantiveBlock(outcome.blockingFindings)) return { kind: "blocked" };
     }
     const fallback = nutritionTargetsFromBodyTargets(body.targets);
-    return fallback ? { kind: "ready", targets: fallback } : { kind: "none" };
-  }, [assessment.state, session.userId, body.targets, today]);
+    return fallback ? applyAdjustment(fallback) : { kind: "none" };
+  }, [assessment.state, session.userId, body.targets, targetAdjustment, today]);
 
   const targets = targetState.kind === "ready" ? targetState.targets : null;
 
@@ -227,7 +242,12 @@ export function useNutrition(): NutritionStore {
       const now = new Date().toISOString();
       let landed = 0;
       for (const entry of entriesForDay(entries, fromDay)) {
-        const copy: LogEntry = { ...entry, id: newNutritionId("entry"), day: toDay, createdAt: now };
+        const copy: LogEntry = {
+          ...entry,
+          id: newNutritionId("entry"),
+          day: toDay,
+          createdAt: now,
+        };
         logEntry(copy);
         landed += 1;
       }
