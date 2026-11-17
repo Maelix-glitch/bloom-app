@@ -34,6 +34,7 @@ import {
   foodDisplayName,
   labelledFoodNutrients,
   searchUsdaReference,
+  usdaDataStamp,
   type Amount,
   type EntrySource,
   type Food,
@@ -288,6 +289,14 @@ export function LogDialog({
                   ? `${selection.food.servings[0]!.label} ≈ ${selection.food.servings[0]!.grams} g · Per 100 g: ${nutrientLine(labelledFoodNutrients(selection.food).nutrients)}`
                   : `Per 100 g reference · ${nutrientLine(labelledFoodNutrients(selection.food).nutrients)}`}
               </p>
+              {usdaDataStamp(selection.food) ? (
+                <p
+                  className="mt-1 text-[length:var(--text-caption)] text-muted-foreground"
+                  data-testid="usda-data-stamp"
+                >
+                  {usdaDataStamp(selection.food)}
+                </p>
+              ) : null}
 
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-3">
                 <p className="font-display text-[56px] leading-none text-foreground tabular-nums">
