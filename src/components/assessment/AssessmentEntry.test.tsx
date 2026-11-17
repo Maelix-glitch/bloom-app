@@ -36,6 +36,7 @@ import {
   saveStep,
   type AssessmentState,
 } from "@/lib/assessment/state";
+import { ASSESSMENT_HISTORY_KEY } from "@/lib/assessment/history";
 import { AssessmentProfileCard } from "./AssessmentEntry";
 
 /*
@@ -189,6 +190,57 @@ describe("AssessmentProfileCard — the Profile doors", () => {
     expect(now.status).toBe("in_progress");
     expect(now.step).toBe("safety");
     expect(now.answers.ageYears).toBe(41);
+  });
+});
+
+describe("AssessmentProfileCard — previous assessments", () => {
+  it("lists the archived assessments with their dates and goals", () => {
+    seed(completedState());
+    setPref(ASSESSMENT_HISTORY_KEY, {
+      version: 1,
+      entries: [
+        {
+          completedAt: "2026-09-01T09:00:00.000Z",
+          answers: { ...emptyAssessmentState(T0).answers, goal: "gain" },
+        },
+        {
+          completedAt: "2026-06-15T09:00:00.000Z",
+          answers: { ...emptyAssessmentState(T0).answers, goal: "maintain" },
+        },
+      ],
+      pending: null,
+    });
+    resetPrefCache();
+
+    render(<AssessmentProfileCard />);
+    expect(screen.getByText("Previous assessments")).toBeTruthy();
+    /* formatDate is locale-shaped; pin the day, month and year either way. */
+    expect(screen.getByText(/1 September 2026|September 1, 2026/)).toBeTruthy();
+    expect(screen.getByText("Gain weight")).toBeTruthy();
+    expect(screen.getByText(/15 June 2026|June 15, 2026/)).toBeTruthy();
+    expect(screen.getByText("Maintain my weight")).toBeTruthy();
+  });
+
+  it("shows no history section when nothing has been archived", () => {
+    seed(completedState());
+    render(<AssessmentProfileCard />);
+    expect(screen.queryByText("Previous assessments")).toBeNull();
+  });
+
+  it("a pending snapshot (a retake in progress) is not shown as history", () => {
+    seed(completedState());
+    setPref(ASSESSMENT_HISTORY_KEY, {
+      version: 1,
+      entries: [],
+      pending: {
+        completedAt: "2026-09-01T09:00:00.000Z",
+        answers: { ...emptyAssessmentState(T0).answers, goal: "gain" },
+      },
+    });
+    resetPrefCache();
+
+    render(<AssessmentProfileCard />);
+    expect(screen.queryByText("Previous assessments")).toBeNull();
   });
 });
 

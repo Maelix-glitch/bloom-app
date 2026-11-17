@@ -82,6 +82,14 @@ export interface EdgeRequest {
    */
   facts?: EdgeFacts;
   /**
+   * A compact digest of the person's completed Assessment (goal,
+   * pattern, budget, the safety facts they recorded) — see
+   * lib/coach/assessmentDigest. Coach mode only: Vitalis reads the
+   * Assessment through its own scoped context and never sends this.
+   * Absent when no Assessment has been completed.
+   */
+  assessmentDigest?: string;
+  /**
    * Which identity answers. Absent (or "coach") is the Coach, exactly as
    * always. "vitalis" runs the orb's Vitalis prompt with the scoped
    * Nutrition + Assessment context — a separate mode of the same

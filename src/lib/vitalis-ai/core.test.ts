@@ -8,6 +8,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  COACH_ASSESSMENT_DIGEST_CAP,
+  coachAssessmentSection,
   DeliberationUnavailable,
   checkEnjoyment,
   checkRules,
@@ -488,5 +490,39 @@ describe("looksLikePlanRequest", () => {
     expect(looksLikePlanRequest("How much protein have I had today?")).toBe(false);
     expect(looksLikePlanRequest("What is in my assessment?")).toBe(false);
     expect(looksLikePlanRequest("Why is protein important?")).toBe(false);
+  });
+});
+
+describe("coachAssessmentSection — the Coach's Assessment fold", () => {
+  const DIGEST = "Assessment completed on 2026-11-02.\nGoal: Build strength and muscle.\nAllergies: peanut.";
+
+  it("folds a provided digest into a section carrying the digest verbatim", () => {
+    const section = coachAssessmentSection(DIGEST);
+    expect(section).not.toBeNull();
+    expect(section!.startsWith("FROM THEIR ASSESSMENT\n")).toBe(true);
+    expect(section).toContain(DIGEST);
+    /* The discipline the Coach answers under: only what is written. */
+    expect(section).toContain("Never state anything about their assessment beyond what is written here");
+  });
+
+  it("is omitted — null — when no digest was provided", () => {
+    expect(coachAssessmentSection(undefined)).toBeNull();
+    expect(coachAssessmentSection(null)).toBeNull();
+    expect(coachAssessmentSection("")).toBeNull();
+    expect(coachAssessmentSection("   \n  ")).toBeNull();
+  });
+
+  it("refuses non-string payloads rather than stringifying them", () => {
+    expect(coachAssessmentSection(42)).toBeNull();
+    expect(coachAssessmentSection({ digest: DIGEST })).toBeNull();
+    expect(coachAssessmentSection([DIGEST])).toBeNull();
+  });
+
+  it("caps an overlong digest at the section cap", () => {
+    const huge = `Goal: gain. ${"x".repeat(COACH_ASSESSMENT_DIGEST_CAP * 3)}`;
+    const section = coachAssessmentSection(huge)!;
+    expect(section).not.toBeNull();
+    expect(section.length).toBeLessThan(COACH_ASSESSMENT_DIGEST_CAP + 400);
+    expect(section).toContain("Goal: gain.");
   });
 });
