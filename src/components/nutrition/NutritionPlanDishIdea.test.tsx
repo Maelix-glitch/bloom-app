@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 /**
- * Nutrition D4 — the plan's dish idea: each main meal card gains one
- * deterministic dish from the library that suits the person's pattern
- * and passes the plan's own allergy gates, with "Log this dish"
- * writing a recipe-provenance snapshot entry into the real food log.
+ * Nutrition P5 — dish-first plan cards: a main meal IS its dishes.
+ * Each dish renders as a row; tapping it unfolds the dish's
+ * ingredients (the raw things, per serving) underneath it, and "Log
+ * this dish" writes a recipe-provenance snapshot entry through the
+ * dish logging path. A meal the dish pool could not fill — a stored
+ * food-composed plan — keeps the D4 dish idea row instead.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
@@ -33,10 +35,25 @@ import { todayLocal } from "@/lib/localDay";
 import {
   ASSESSMENT_KEY,
   EMPTY_ANSWERS,
+  toHealthProfile,
   type AssessmentState,
 } from "@/lib/assessment/state";
-import { dishNutrients, findDish, readFoodLog } from "@/lib/nutrition";
+import { toSafetyInput } from "@/lib/vitalis/domain/profile";
+import { classifySafety } from "@/lib/vitalis/safety/classify";
+import { targetsFor } from "@/lib/vitalis/calc/body";
+import {
+  dishNutrients,
+  findDish,
+  findUsdaReference,
+  foodDisplayName,
+  generatePlan,
+  readFoodLog,
+  readPlan,
+  USDA_REFERENCE_FOODS,
+  writePlan,
+} from "@/lib/nutrition";
 import { NutritionPlanSection } from "./NutritionPlanSection";
+import { formatGrams } from "./input";
 
 afterEach(cleanup);
 
@@ -83,20 +100,49 @@ const COMPLETE = {
   unexplainedWeightChange: false,
 };
 
-describe("NutritionPlanSection — the dish idea (D4)", () => {
-  it("offers one dish idea on a main meal card and logs it as a dish entry", () => {
+describe("NutritionPlanSection — dish-first meals (P5)", () => {
+  it("a main meal is its dishes: tapping the anchor unfolds its ingredients, and Log this dish writes the dish entry", () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
 
-    const lunch = screen.getByLabelText("Lunch plan");
-    expect(within(lunch).getByText("Dish idea")).toBeTruthy();
-    const logButton = within(lunch).getByRole("button", { name: "Log this dish" });
-    /* The idea names a real library dish, bilingually. */
-    const ideaText = within(lunch).getByText(/per serving/).textContent ?? "";
-    expect(ideaText).toMatch(/\d+ kcal/);
+    const plan = readPlan();
+    if (!plan) throw new Error("expected a stored plan");
+    const lunchPlan = plan.meals.find((m) => m.meal === "lunch");
+    if (!lunchPlan || lunchPlan.dishes.length === 0) {
+      throw new Error("expected lunch to be dish-composed");
+    }
+    const anchor = lunchPlan.dishes.find((d) => d.role === "anchor") ?? lunchPlan.dishes[0]!;
+    const dish = findDish(anchor.dishId);
+    if (!dish) throw new Error("anchor is not a library dish");
 
-    fireEvent.click(logButton);
+    const lunch = screen.getByLabelText("Lunch plan");
+    /* A dish-composed meal carries no separate "Dish idea" — it IS
+       the dishes. */
+    expect(within(lunch).queryByText("Dish idea")).toBeNull();
+
+    /* The anchor dish is a row naming the dish and its computed
+       numbers; its ingredients are not shown until it is tapped. */
+    const row = within(lunch).getByRole("button", {
+      name: `${anchor.name} — show ingredients`,
+    });
+    expect(within(lunch).queryByText("Ingredients · per serving")).toBeNull();
+
+    fireEvent.click(row);
+
+    /* The raw things appear underneath: the first ingredient by its
+       display name, with its per-serving grams — the same figures
+       the dish detail sheet lists. */
+    expect(within(lunch).getByText("Ingredients · per serving")).toBeTruthy();
+    const firstLine = dish.lines[0]!;
+    const firstFood = findUsdaReference(firstLine.foodId);
+    if (!firstFood) throw new Error("ingredient not in the reference set");
+    expect(within(lunch).getByText(foodDisplayName(firstFood).en, { exact: false })).toBeTruthy();
+    expect(
+      within(lunch).getByText(`${formatGrams(firstLine.grams / dish.servings)} g`),
+    ).toBeTruthy();
+
+    fireEvent.click(within(lunch).getByRole("button", { name: "Log this dish" }));
 
     const entries = readFoodLog().filter((e) => e.day === todayLocal());
     expect(entries).toHaveLength(1);
@@ -105,25 +151,66 @@ describe("NutritionPlanSection — the dish idea (D4)", () => {
     expect(entry.meal).toBe("lunch");
     expect(entry.provenance.kind).toBe("recipe");
     if (entry.provenance.kind !== "recipe") throw new Error("expected recipe provenance");
-    const dish = findDish(entry.provenance.sourceId);
-    expect(dish).not.toBeNull();
-    expect(entry.name).toBe(dish!.name.en);
-    expect(entry.nutrients).toEqual(dishNutrients(dish!).nutrients);
+    expect(entry.provenance.sourceId).toBe(dish.id);
+    expect(entry.name).toBe(dish.name.en);
+    expect(entry.nutrients).toEqual(dishNutrients(dish).nutrients);
 
-    /* The row now reads Logged — the entry is in the log, so the
-       surface says so (scoped to the card: suggestion chips elsewhere
-       use the same word). */
+    /* The unfolded dish now reads Logged. */
     expect(within(lunch).getByText("Logged")).toBeTruthy();
     expect(within(lunch).queryByRole("button", { name: "Log this dish" })).toBeNull();
   });
 
-  it("the snack card carries no dish idea", () => {
+  it("a stored food-composed plan keeps the D4 dish idea on its main meals", () => {
+    seedAssessment(COMPLETE);
+    const state = {
+      version: 1 as const,
+      status: "complete" as const,
+      step: "summary" as const,
+      answers: { ...EMPTY_ANSWERS, ...COMPLETE },
+      consents: [],
+      startedAt: null,
+      completedAt: "2026-11-10T03:05:00.000Z",
+      updatedAt: "2026-11-10T03:05:00.000Z",
+    };
+    const profile = toHealthProfile(state, "user-1");
+    const safety = classifySafety(toSafetyInput(profile));
+    /* A plan composed without the dish library — the fallback path —
+       re-stamped to today so the section shows it as today's plan. */
+    const outcome = generatePlan({
+      profile,
+      safety,
+      gatedOutcome: targetsFor(profile, safety, "2026-11-16"),
+      fallbackTargets: null,
+      foods: USDA_REFERENCE_FOODS,
+      day: "2026-11-16",
+      now: "2026-11-16T03:00:00.000Z",
+      id: "plan-food-fixture",
+    });
+    if (!outcome.ok) throw new Error("expected a plan");
+    expect(outcome.plan.meals.every((m) => m.dishes.length === 0)).toBe(true);
+    writePlan({ ...outcome.plan, day: todayLocal() });
+
+    render(<NutritionPlanSection />);
+    const lunch = screen.getByLabelText("Lunch plan");
+    expect(within(lunch).queryByRole("button", { name: /— show ingredients$/ })).toBeNull();
+    expect(within(lunch).getByText("Dish idea")).toBeTruthy();
+
+    fireEvent.click(within(lunch).getByRole("button", { name: "Log this dish" }));
+    const entries = readFoodLog().filter((e) => e.day === todayLocal());
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.source).toBe("dish");
+    expect(entries[0]!.meal).toBe("lunch");
+    expect(entries[0]!.provenance.kind).toBe("recipe");
+  });
+
+  it("the snack card carries no dishes and no dish idea", () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
     const snack = screen.queryByLabelText("Snack plan");
     if (snack) {
       expect(within(snack).queryByText("Dish idea")).toBeNull();
+      expect(within(snack).queryByRole("button", { name: /— show ingredients$/ })).toBeNull();
     }
   });
 });

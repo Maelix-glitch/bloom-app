@@ -131,11 +131,15 @@ describe("NutritionPlanSection", () => {
     expect(screen.getByText("Breakfast")).toBeTruthy();
     expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
 
-    /* P2: main meals render their composition layers, labelled. */
-    expect(screen.getAllByText("Base").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Protein").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Vegetables").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Finishing").length).toBeGreaterThan(0);
+    /* P5: main meals are built from dishes — each carries dish rows
+       whose tap target unfolds the dish's ingredients. (P2's layer
+       labels survive only on a meal the dish pool could not fill.) */
+    expect(
+      screen.getAllByRole("button", { name: /— show ingredients$/ }).length,
+    ).toBeGreaterThan(0);
+    const stored = readPlan();
+    if (!stored) throw new Error("expected a stored plan");
+    expect(stored.meals.some((m) => m.dishes.length > 0)).toBe(true);
 
     /* Logging a suggestion writes a real entry through the lib. */
     const logButtons = screen.getAllByRole("button", { name: /^Log .+ to / });
@@ -150,7 +154,7 @@ describe("NutritionPlanSection", () => {
     expect(screen.getByText("Logged")).toBeTruthy();
   });
 
-  it("meal card headers show the composed sum of the listed suggestions, not the target split (P3)", () => {
+  it("meal card headers show the composed sum of the listed dishes and foods, not the target split (P3, P5)", () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
@@ -160,10 +164,12 @@ describe("NutritionPlanSection", () => {
     for (const meal of plan.meals) {
       const card = screen.getByLabelText(`${MEAL_LABEL[meal.meal]} plan`);
       const headerNumber = card.querySelector("p.shrink-0 span")?.textContent;
-      const composed = meal.suggestions.reduce((sum, s) => sum + s.nutrients.kcal, 0);
+      const composed =
+        meal.suggestions.reduce((sum, s) => sum + s.nutrients.kcal, 0) +
+        meal.dishes.reduce((sum, d) => sum + d.nutrients.kcal, 0);
       /* The header is the sum of what is actually listed on the card.
          Pre-P3 it showed meal.kcal — the meal's share of the day
-         target — while the listed foods summed to something else. */
+         target — while the listed items summed to something else. */
       expect(headerNumber).toBe(String(Math.round(composed)));
     }
   });
@@ -329,7 +335,7 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
     ).toBe("true");
   });
 
-  it("'Log this meal' bulk-logs the meal's suggestions once, then reads as logged", () => {
+  it("'Log this meal' bulk-logs the meal's dishes and foods once, then reads as logged", () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
@@ -337,7 +343,9 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
     const plan = readPlan();
     if (!plan) throw new Error("plan was not created");
     const firstMeal = plan.meals[0]!;
-    const expected = firstMeal.suggestions.length;
+    /* P5: the meal's entries are its dishes (through the dish path)
+       plus its food suggestions (through the plan path). */
+    const expected = firstMeal.suggestions.length + firstMeal.dishes.length;
     expect(expected).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "Log this meal" })).toHaveLength(4);
 
@@ -345,7 +353,8 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
 
     const entries = readFoodLog().filter((e) => e.day === todayLocal());
     expect(entries).toHaveLength(expected);
-    expect(entries.every((e) => e.source === "plan")).toBe(true);
+    expect(entries.filter((e) => e.source === "dish")).toHaveLength(firstMeal.dishes.length);
+    expect(entries.filter((e) => e.source === "plan")).toHaveLength(firstMeal.suggestions.length);
     expect(entries.every((e) => e.meal === firstMeal.meal)).toBe(true);
     expect(screen.getByText("Already logged")).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Log this meal" })).toHaveLength(3);

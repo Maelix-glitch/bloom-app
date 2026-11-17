@@ -76,8 +76,28 @@ export interface EdgeRequest {
    * A compact, *derived* view of the person's record: averages, streaks, the
    * current phase. Never raw entries — the function doesn't need someone's
    * whole diary to answer a question about their week.
+   *
+   * Absent in Vitalis mode: Vitalis sends `vitalisContext` instead, and
+   * the function ignores facts entirely on that path.
    */
-  facts: EdgeFacts;
+  facts?: EdgeFacts;
+  /**
+   * Which identity answers. Absent (or "coach") is the Coach, exactly as
+   * always. "vitalis" runs the orb's Vitalis prompt with the scoped
+   * Nutrition + Assessment context — a separate mode of the same
+   * function, never a shared thread or prompt.
+   */
+  mode?: "coach" | "vitalis";
+  /** The scoped record for Vitalis mode (see lib/vitalis-ai/context). */
+  vitalisContext?: string;
+  /** The structured twin of `vitalisContext` (schema v1), validated
+   *  server-side. Vitalis mode only; the Coach never sends it. */
+  vitalisRecord?: unknown;
+  /** Vitalis only: run the deliberation pipeline for this request.
+   *  The function answers flagged requests with an NDJSON stage
+   *  stream — callers that set this use the streaming transport in
+   *  lib/vitalis-ai/stream, not askEdge. */
+  deliberate?: boolean;
   /** Which model to use. "auto" (default) = best-first chain on the function. */
   provider?: string;
   /** An attached photo or PDF for the vision model. */
@@ -122,9 +142,41 @@ export interface EdgeFacts {
   } | null;
 }
 
+/** The Vitalis-only extras a vitalis-mode response may carry, read
+ *  tolerantly off the body: validated action proposals, deliberation
+ *  stage summaries, and the lockdown flag. The Coach ignores them. */
+export interface VitalisExtras {
+  actions: unknown[];
+  stages: { stage: string; ms: number }[];
+  locked: boolean;
+  deliberated: boolean;
+}
+
 export type EdgeResult =
-  | { ok: true; paragraphs: string[]; provider: string }
+  | { ok: true; paragraphs: string[]; provider: string; vitalis?: VitalisExtras }
   | { ok: false; reason: "unconfigured" | "timeout" | "aborted" | "error"; detail?: string };
+
+/** Read the Vitalis extras off a response body, tolerantly. */
+export function readVitalisExtras(data: unknown): VitalisExtras | undefined {
+  if (!data || typeof data !== "object") return undefined;
+  const d = data as Record<string, unknown>;
+  if (!("actions" in d) && !("vitalisLocked" in d) && !("stages" in d)) return undefined;
+  const stages = Array.isArray(d["stages"])
+    ? (d["stages"] as unknown[]).filter(
+        (s): s is { stage: string; ms: number } =>
+          Boolean(s) &&
+          typeof s === "object" &&
+          typeof (s as { stage?: unknown }).stage === "string" &&
+          typeof (s as { ms?: unknown }).ms === "number",
+      )
+    : [];
+  return {
+    actions: Array.isArray(d["actions"]) ? (d["actions"] as unknown[]) : [],
+    stages,
+    locked: d["vitalisLocked"] === true,
+    deliberated: d["deliberated"] === true,
+  };
+}
 
 /** Strip a `CoachRecord` down to what the function actually needs. */
 export function toFacts(record: CoachRecord): EdgeFacts {
@@ -226,7 +278,10 @@ async function askEdgeOnce(request: EdgeRequest, signal?: AbortSignal): Promise<
 
     const provider =
       (data as Record<string, unknown> | null)?.["provider"] ?? request.provider ?? "edge";
-    return { ok: true, paragraphs, provider: String(provider) };
+    const vitalis = readVitalisExtras(data);
+    return vitalis
+      ? { ok: true, paragraphs, provider: String(provider), vitalis }
+      : { ok: true, paragraphs, provider: String(provider) };
   } catch (err) {
     if (signal?.aborted) return { ok: false, reason: "aborted" };
     if (timer.signal.aborted) return { ok: false, reason: "timeout" };

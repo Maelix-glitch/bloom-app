@@ -4,14 +4,17 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Nutrition layout — the wide measure is the tab's alone (N-WIDE).
+ * Nutrition layout — the wide measure is the tab page's alone (N-WIDE).
  *
- * The owner drew the Nutrition cards wide (prototype page container:
- * max-width 1120px, 20px gutters, 48px from lg) and Bloom's tab was
- * rendering in the 880px document measure the clinician report uses.
- * The widening is therefore scoped to a page class the tab's root
- * carries and the report does not: the base .nut-wrap measure stays
- * 880px, the 1120px value exists only under .nut-page, and the
+ * The Nutrition cards were drawn wide, so the tab page takes a wider
+ * measure than the 880px document measure the clinician report uses:
+ * the app-wide 1280px desktop measure — the owner's 2026-11-17
+ * directive ("the cards are not wide enough") raised every main tab
+ * page from its old cap (1120px here) to 1280px. A cap that wide can
+ * only bind at desktop widths, so phone and tablet rendering is
+ * exactly as it was. The widening is scoped to a page class the tab's
+ * root carries and the report does not: the base .nut-wrap measure
+ * stays 880px, the 1280px value exists only under .nut-page, and the
  * stylesheet itself is loaded only by the /nutrition route — no other
  * tab can pick the width up.
  */
@@ -30,19 +33,23 @@ describe("Nutrition layout: the wide measure is scoped to the tab page", () => {
     const base = block(/\.nut-wrap\s*\{([^}]*)\}/);
     expect(base).toContain("max-width: 880px");
     expect(base).not.toContain("1120px");
+    expect(base).not.toContain("1280px");
   });
 
-  it("the wide measure lives only under .nut-page, at the prototype's values", () => {
+  it("the wide measure lives only under .nut-page, at 1280px", () => {
     const wide = block(/\.nut-wrap\.nut-page\s*\{([^}]*)\}/);
-    expect(wide).toContain("max-width: 1120px");
+    expect(wide).toContain("max-width: 1280px");
+    expect(wide).not.toContain("1120px");
     expect(wide).toContain("padding-inline: var(--space-5)");
     const wideLg = block(
       /@media \(min-width: 1024px\)\s*\{\s*\.nut-wrap\.nut-page\s*\{([^}]*)\}/,
     );
     expect(wideLg).toContain("padding-inline: var(--space-12)");
-    /* The declaration occurs once in the whole stylesheet — under the
-       page scope, nowhere else. */
-    expect(css.match(/max-width: 1120px/g)).toHaveLength(1);
+    /* The wide declaration occurs once in the whole stylesheet —
+       under the page scope, nowhere else — and the old 1120px page
+       measure is gone entirely. */
+    expect(css.match(/max-width: 1280px/g)).toHaveLength(1);
+    expect(css.match(/max-width: 1120px/g)).toBeNull();
   });
 
   it("the tab page carries the scope and the report does not", () => {

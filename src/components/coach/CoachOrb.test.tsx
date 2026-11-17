@@ -1,23 +1,26 @@
 // @vitest-environment jsdom
 /**
- * The Coach orb — a door to the same Coach, pinned end to end:
+ * The Vitalis window (the orb), pinned end to end:
  *
  *   · it renders on the app tabs and is gone on /coach;
  *   · its popup opens and closes by button, backdrop and Escape, with
  *     focus moved in on open and returned to the orb on close;
- *   · the popup and the shared store are ONE conversation — a seeded
- *     thread shows in both, and a message sent from the popup lands in
- *     the store (the surface the Coach tab reads) through the real
- *     pipeline, with the edge responder faked at the engine seam;
- *   · voice is offered only when the platform has it: no
- *     speechSynthesis → no Listen button; with it, Listen speaks the
- *     reply's own words and Stop cancels;
- *   · dictation is offered only when a recognition constructor exists,
- *     and reduced motion is mirrored onto the orb for the stylesheet.
+ *   · SESSION ISOLATION: a Coach thread seeded under the Coach store's
+ *     own keys never appears in the window, is never sent as history,
+ *     and is byte-identical after a Vitalis conversation — and the
+ *     component source names none of the Coach thread machinery;
+ *   · the conversation is fresh per open: close and reopen and the
+ *     previous exchange is gone, and the next send's history is empty;
+ *   · replies arrive through `askVitalis` (mode "vitalis") with a
+ *     Nutrition + Assessment context, render as Vitalis, and are
+ *     SPOKEN automatically — there is no Listen button anywhere, only
+ *     the header's mute toggle;
+ *   · reduced motion is mirrored onto the orb for the stylesheet.
  */
+import { readFileSync } from "node:fs";
 import { createElement, forwardRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   createMemoryHistory,
   createRootRoute,
@@ -55,10 +58,9 @@ vi.mock("motion/react", () => {
   };
 });
 
-/* The store runs as a signed-in profile (device-first, as in the app):
-   watchAuth answers immediately, and the account tables resolve empty.
-   The chainable stub covers the selects, inserts and updates the hook
-   and the pipeline make; nothing here leaves the test. */
+/* The account layer, stubbed as elsewhere in the suite: watchAuth
+   answers immediately and the account tables resolve empty, so the
+   data hooks (Assessment, Nutrition, Plan) run on empty stores. */
 vi.mock("@/lib/supabase", () => {
   const chain: Record<string, unknown> = {};
   const self = () => chain;
@@ -85,45 +87,43 @@ vi.mock("@/lib/supabase", () => {
   };
 });
 
-vi.mock("@/hooks/useMoodSystem", () => ({
-  useMoodSystem: () => ({
-    entries: [],
-    analytics: { periodEntries: [], avg: null, avgEnergy: null, avgStress: null },
-    range: { label: "30 days" },
-  }),
+/* The Vitalis seams, faked: the edge call and the speaker. Everything
+   else — context assembly, the window, the session — runs for real. */
+const hoisted = vi.hoisted(() => ({
+  askVitalis: vi.fn(),
+  speak: vi.fn(),
+  setMuted: vi.fn(),
+  stop: vi.fn(),
 }));
-
-/* The edge responder, faked at the engine seam: the real store and the
-   real send pipeline run; only the network answer is canned. */
-const hoisted = vi.hoisted(() => ({ ask: vi.fn() }));
-vi.mock("@/lib/coach/engine", () => ({
-  ask: hoisted.ask,
-  answerLocally: () => ({ paragraphs: ["From my own knowledge."], sources: [], blocks: [] }),
-  CoachUnavailable: class CoachUnavailable extends Error {},
+vi.mock("@/lib/vitalis-ai/client", () => ({
+  askVitalis: hoisted.askVitalis,
+  VitalisUnavailable: class VitalisUnavailable extends Error {},
 }));
+vi.mock("@/lib/vitalis-ai/voice", async () => {
+  const actual =
+    await vi.importActual<typeof import("@/lib/vitalis-ai/voice")>("@/lib/vitalis-ai/voice");
+  class FakeVitalisSpeaker {
+    speak(text: string) {
+      hoisted.speak(text);
+    }
+    setMuted(muted: boolean) {
+      hoisted.setMuted(muted);
+    }
+    stop() {
+      hoisted.stop();
+    }
+  }
+  return { ...actual, VitalisSpeaker: FakeVitalisSpeaker };
+});
 
 import { CoachOrbGate } from "./CoachOrb";
-import { CoachSystemProvider, useCoachSystemContext } from "./CoachSystemProvider";
-
-/* A stand-in for every other store consumer (the Coach tab, the Today
-   panel): whatever it shows is what those surfaces show, because all of
-   them read this one context. */
-function StoreProbe() {
-  const coach = useCoachSystemContext();
-  return (
-    <output data-testid="coach-store-probe">
-      {(coach?.messages ?? []).map((m) => `${m.role}:${m.paragraphs.join(" ")}`).join(" | ")}
-    </output>
-  );
-}
 
 const rootRoute = createRootRoute({
   component: () => (
-    <CoachSystemProvider>
-      <StoreProbe />
+    <>
       <CoachOrbGate />
       <Outlet />
-    </CoachSystemProvider>
+    </>
   ),
 });
 const indexRoute = createRoute({
@@ -150,65 +150,40 @@ function renderApp(path = "/") {
   return render(<RouterProvider router={router} />);
 }
 
-const STORE_KEY = "bloom.coach.conversations.v1.profile-test";
+/* The Coach thread's own storage keys (useCoachSystem) — seeded with
+   marker text Vitalis must never show, send, or disturb. */
+const COACH_STORE_KEY = "bloom.coach.conversations.v1.profile-test";
+const COACH_LEGACY_KEY = "bloom.coach.thread.profile-test";
+const COACH_MARKER = "Coach thread marker — never Vitalis's";
 
-function seedConversation() {
-  window.localStorage.setItem(
-    STORE_KEY,
-    JSON.stringify({
-      v: 1,
-      activeId: "conv-seed",
-      conversations: [
-        {
-          id: "conv-seed",
-          title: "How did I sleep?",
-          mode: "ask",
-          createdAt: "2026-11-16T05:00:00.000Z",
-          updatedAt: "2026-11-16T05:01:00.000Z",
-          messages: [
-            {
-              id: "seed-user",
-              role: "user",
-              time: "2026-11-16T05:00:00.000Z",
-              paragraphs: ["How did I sleep?"],
-              sources: [],
-              blocks: [],
-              status: "sent",
-            },
-            {
-              id: "seed-coach",
-              role: "coach",
-              time: "2026-11-16T05:01:00.000Z",
-              paragraphs: ["Seeded reply from Bloom."],
-              sources: [],
-              blocks: [],
-              status: "sent",
-            },
-          ],
-        },
-      ],
-    }),
-  );
-}
-
-class FakeUtterance {
-  onend: (() => void) | null = null;
-  onerror: (() => void) | null = null;
-  constructor(public text: string) {}
-}
-
-function installSpeechSynthesis() {
-  const speak = vi.fn();
-  const cancel = vi.fn();
-  Object.defineProperty(window, "speechSynthesis", {
-    value: { speak, cancel },
-    configurable: true,
+function seedCoachThread() {
+  const value = JSON.stringify({
+    v: 1,
+    activeId: "conv-seed",
+    conversations: [
+      {
+        id: "conv-seed",
+        title: COACH_MARKER,
+        mode: "ask",
+        createdAt: "2026-11-16T05:00:00.000Z",
+        updatedAt: "2026-11-16T05:01:00.000Z",
+        messages: [
+          {
+            id: "seed-user",
+            role: "user",
+            time: "2026-11-16T05:00:00.000Z",
+            paragraphs: [COACH_MARKER],
+            sources: [],
+            blocks: [],
+            status: "sent",
+          },
+        ],
+      },
+    ],
   });
-  Object.defineProperty(window, "SpeechSynthesisUtterance", {
-    value: FakeUtterance,
-    configurable: true,
-  });
-  return { speak, cancel };
+  window.localStorage.setItem(COACH_STORE_KEY, value);
+  window.localStorage.setItem(COACH_LEGACY_KEY, value);
+  return value;
 }
 
 let reducedMotion = false;
@@ -217,13 +192,14 @@ beforeEach(() => {
   reducedMotion = false;
   window.localStorage.clear();
   window.sessionStorage.clear();
-  hoisted.ask.mockReset();
-  hoisted.ask.mockResolvedValue({
-    paragraphs: ["Canned reply from Bloom."],
-    sources: [],
-    blocks: [],
+  hoisted.askVitalis.mockReset();
+  hoisted.askVitalis.mockResolvedValue({
+    paragraphs: ["Canned Vitalis reply."],
     source: "edge",
   });
+  hoisted.speak.mockReset();
+  hoisted.setMuted.mockReset();
+  hoisted.stop.mockReset();
   window.matchMedia = ((query: string) =>
     ({
       matches: query.includes("prefers-reduced-motion") ? reducedMotion : false,
@@ -241,58 +217,54 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  Reflect.deleteProperty(window, "speechSynthesis");
-  Reflect.deleteProperty(window, "SpeechSynthesisUtterance");
-  Reflect.deleteProperty(window, "webkitSpeechRecognition");
 });
 
-const orbButton = () => screen.getByRole("button", { name: "Ask Bloom" });
+const orbButton = () => screen.getByRole("button", { name: "Ask Vitalis" });
 
 async function openPopup() {
   fireEvent.click(orbButton());
-  const dialog = await screen.findByRole("dialog");
-  return dialog;
+  return screen.findByRole("dialog", { name: "Vitalis" });
 }
 
-describe("CoachOrb — placement", () => {
-  it("renders the orb on a main tab", async () => {
+async function sendMessage(text: string) {
+  const textarea = screen.getByLabelText("Message Vitalis") as HTMLTextAreaElement;
+  fireEvent.change(textarea, { target: { value: text } });
+  const form = document.querySelector(".coach-orb-composer");
+  if (!form) throw new Error("orb composer missing");
+  fireEvent.submit(form);
+}
+
+describe("Vitalis orb — placement", () => {
+  it("renders the orb on a main tab and on Trackers", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     expect(orbButton()).toBeTruthy();
-  });
-
-  it("renders the orb on Trackers too", async () => {
+    cleanup();
     renderApp("/trackers");
     await screen.findByText("Trackers page");
     expect(orbButton()).toBeTruthy();
   });
 
-  it("is hidden on /coach, where the conversation already fills the screen", async () => {
+  it("is hidden on /coach", async () => {
     renderApp("/coach");
     await screen.findByText("Coach page");
-    expect(screen.queryByRole("button", { name: "Ask Bloom" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Ask Vitalis" })).toBeNull();
   });
 
-  it("mirrors reduced motion onto the orb so the stylesheet can stand the breath down", async () => {
+  it("mirrors reduced motion onto the orb", async () => {
     reducedMotion = true;
     renderApp("/");
     await screen.findByText("Today page");
     expect(orbButton().getAttribute("data-reduced-motion")).toBe("true");
   });
-
-  it("carries no reduced-motion marker when motion is welcome", async () => {
-    renderApp("/");
-    await screen.findByText("Today page");
-    expect(orbButton().getAttribute("data-reduced-motion")).toBeNull();
-  });
 });
 
-describe("CoachOrb — the popup", () => {
+describe("Vitalis window — the popup", () => {
   it("opens on tap, takes focus, and closes by its close button, returning focus to the orb", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
-    const textarea = screen.getByLabelText("Message Bloom");
+    const textarea = screen.getByLabelText("Message Vitalis");
     expect(document.activeElement).toBe(textarea);
 
     fireEvent.click(screen.getByRole("button", { name: "Close chat" }));
@@ -300,17 +272,13 @@ describe("CoachOrb — the popup", () => {
     expect(document.activeElement).toBe(orbButton());
   });
 
-  it("closes on Escape", async () => {
+  it("closes on Escape and on a backdrop tap", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-  });
 
-  it("closes when the backdrop is tapped", async () => {
-    renderApp("/");
-    await screen.findByText("Today page");
     await openPopup();
     const backdrop = document.querySelector(".coach-orb-backdrop");
     if (!backdrop) throw new Error("backdrop missing");
@@ -318,117 +286,406 @@ describe("CoachOrb — the popup", () => {
     fireEvent.click(backdrop);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
-});
 
-describe("CoachOrb — one conversation, shared with the Coach tab", () => {
-  it("shows the stored thread in the popup and in the store alike", async () => {
-    seedConversation();
-    renderApp("/");
-    await screen.findByText("Today page");
-    /* The store (what the Coach tab reads) already holds the thread… */
-    await waitFor(() =>
-      expect(screen.getByTestId("coach-store-probe").textContent).toContain(
-        "Seeded reply from Bloom.",
-      ),
-    );
-    /* …and the popup shows the very same thread. */
-    await openPopup();
-    expect(await screen.findByText("Seeded reply from Bloom.")).toBeTruthy();
-    expect(screen.getByText("How did I sleep?")).toBeTruthy();
-  });
-
-  it("sends through the shared pipeline: the reply lands in the store and the popup", async () => {
-    seedConversation();
+  it("greets as Vitalis, states its scope, and offers the mute toggle — never a Listen button", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
-
-    const textarea = screen.getByLabelText("Message Bloom") as HTMLTextAreaElement;
-    fireEvent.change(textarea, { target: { value: "A question from the orb" } });
-    const form = document.querySelector(".coach-orb-composer");
-    if (!form) throw new Error("orb composer missing");
-    fireEvent.submit(form);
-
-    /* The composer's copy clears the moment the send is accepted… */
-    await waitFor(() => expect(textarea.value).toBe(""));
-    /* …the question and the answer join the one shared store… */
-    await waitFor(() => {
-      const probe = screen.getByTestId("coach-store-probe").textContent ?? "";
-      expect(probe).toContain("user:A question from the orb");
-      expect(probe).toContain("coach:Canned reply from Bloom.");
-    });
-    /* …and the popup thread shows the same exchange. */
-    expect(await screen.findByText("Canned reply from Bloom.")).toBeTruthy();
-    expect(hoisted.ask).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Vitalis", { selector: ".coach-orb-title" })).toBeTruthy();
+    expect(screen.getByText(/Nutrition & assessment · fresh each time/)).toBeTruthy();
+    expect(screen.getByText(/I look after the food side of Bloom/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Mute Vitalis's voice" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /listen/i })).toBeNull();
   });
 });
 
-describe("CoachOrb — voice", () => {
-  it("offers no Listen button when the platform has no speech synthesis", async () => {
-    seedConversation();
+describe("Vitalis window — session isolation from the Coach thread", () => {
+  it("never shows the seeded Coach thread, and leaves its storage byte-identical", async () => {
+    const seeded = seedCoachThread();
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
-    expect(await screen.findByText("Seeded reply from Bloom.")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Listen to this reply" })).toBeNull();
+    /* The welcome stands where a shared thread would have rendered. */
+    expect(screen.getByText(/I look after the food side of Bloom/)).toBeTruthy();
+    expect(screen.queryByText(COACH_MARKER)).toBeNull();
+
+    await sendMessage("How is my protein today?");
+    expect(await screen.findByText("Canned Vitalis reply.")).toBeTruthy();
+    expect(screen.queryByText(COACH_MARKER)).toBeNull();
+    /* The history Vitalis sent was its own (empty at first send)… */
+    const firstCall = hoisted.askVitalis.mock.calls[0]?.[0] as { history: unknown[] };
+    expect(firstCall.history).toEqual([]);
+    /* …and the Coach store was never written. */
+    expect(window.localStorage.getItem(COACH_STORE_KEY)).toBe(seeded);
+    expect(window.localStorage.getItem(COACH_LEGACY_KEY)).toBe(seeded);
   });
 
-  it("speaks the reply's own words on Listen, and Stop cancels", async () => {
-    const { speak, cancel } = installSpeechSynthesis();
-    seedConversation();
+  it("starts fresh on every open: close, reopen, and the exchange is gone", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
+    await sendMessage("First session question");
+    expect(await screen.findByText("Canned Vitalis reply.")).toBeTruthy();
 
-    fireEvent.click(await screen.findByRole("button", { name: "Listen to this reply" }));
-    expect(speak).toHaveBeenCalledTimes(1);
-    const utterance = speak.mock.calls[0]?.[0] as FakeUtterance;
-    expect(utterance.text).toContain("Seeded reply from Bloom.");
-
-    fireEvent.click(screen.getByRole("button", { name: "Stop listening" }));
-    expect(cancel).toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Listen to this reply" })).toBeTruthy();
-  });
-
-  it("closing the popup stops the playback", async () => {
-    const { cancel } = installSpeechSynthesis();
-    seedConversation();
-    renderApp("/");
-    await screen.findByText("Today page");
-    await openPopup();
-    fireEvent.click(await screen.findByRole("button", { name: "Listen to this reply" }));
     fireEvent.click(screen.getByRole("button", { name: "Close chat" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(cancel).toHaveBeenCalled();
+
+    await openPopup();
+    expect(screen.getByText(/I look after the food side of Bloom/)).toBeTruthy();
+    expect(screen.queryByText("First session question")).toBeNull();
+    expect(screen.queryByText("Canned Vitalis reply.")).toBeNull();
+
+    /* And the next send carries no history from the closed session. */
+    await sendMessage("Second session question");
+    await waitFor(() => expect(hoisted.askVitalis).toHaveBeenCalledTimes(2));
+    const secondCall = hoisted.askVitalis.mock.calls[1]?.[0] as { history: unknown[] };
+    expect(secondCall.history).toEqual([]);
   });
 
-  it("offers dictation only when a recognition constructor exists — and never auto-sends", async () => {
-    seedConversation();
+  it("pins the source: the window names none of the Coach thread machinery", () => {
+    const source = readFileSync("src/components/coach/CoachOrb.tsx", "utf8");
+    for (const banned of [
+      "bloom.coach.conversations",
+      "bloom.coach.thread",
+      "bloom.coach.memories",
+      "useCoachSystem",
+      "CoachSystemProvider",
+      "useCoachChat",
+    ]) {
+      expect(source.includes(banned), `CoachOrb.tsx must not reference ${banned}`).toBe(false);
+    }
+    expect(source).toContain("buildVitalisContext");
+    expect(source).toContain("askVitalis");
+  });
+});
+
+describe("Vitalis window — sending and auto-voice", () => {
+  it("sends with a Nutrition + Assessment context and speaks the reply automatically", async () => {
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("How is my protein today?");
+
+    expect(await screen.findByText("How is my protein today?")).toBeTruthy();
+    expect(await screen.findByText("Canned Vitalis reply.")).toBeTruthy();
+
+    expect(hoisted.askVitalis).toHaveBeenCalledTimes(1);
+    const call = hoisted.askVitalis.mock.calls[0]?.[0] as {
+      text: string;
+      contextText: string;
+    };
+    expect(call.text).toBe("How is my protein today?");
+    expect(call.contextText).toContain("THE PERSON — FROM THEIR ASSESSMENT");
+    expect(call.contextText).toContain("TARGETS");
+
+    /* Spoken without being asked — and there is still no Listen button. */
+    expect(hoisted.speak).toHaveBeenCalledTimes(1);
+    expect(hoisted.speak).toHaveBeenCalledWith("Canned Vitalis reply.");
+    expect(screen.queryByRole("button", { name: /listen/i })).toBeNull();
+  });
+
+  it("the mute toggle silences the speaker for the session", async () => {
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    const toggle = screen.getByRole("button", { name: "Mute Vitalis's voice" });
+    fireEvent.click(toggle);
+    expect(hoisted.setMuted).toHaveBeenCalledWith(true);
+    expect(screen.getByRole("button", { name: "Unmute Vitalis's voice" })).toBeTruthy();
+  });
+
+  it("a failed send keeps the words and offers a retry that succeeds", async () => {
+    hoisted.askVitalis.mockRejectedValueOnce(new Error("offline"));
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("Retry me");
+    expect(await screen.findByText(/couldn’t connect right now/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("Canned Vitalis reply.")).toBeTruthy();
+    /* The question was not duplicated by the retry. */
+    expect(screen.getAllByText("Retry me")).toHaveLength(1);
+  });
+
+  it("offers dictation only when a recognition constructor exists", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
     expect(screen.queryByRole("button", { name: "Dictate your message" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Close chat" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+});
 
-    class FakeRecognition {
-      lang = "";
-      interimResults = false;
-      continuous = false;
-      onresult = null;
-      onend = null;
-      onerror = null;
-      start() {}
-      stop() {}
-      abort() {}
-    }
-    Object.defineProperty(window, "webkitSpeechRecognition", {
-      value: FakeRecognition,
-      configurable: true,
+/* ------------------------- phases 3–5 ------------------------- */
+
+import { resetPrefCache } from "@/lib/prefsStore";
+
+describe("CoachOrb — deliberation, actions and the lock", () => {
+  function seedPref(key: string, value: unknown) {
+    const raw = window.localStorage.getItem("bloom.prefs.v1");
+    const doc = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+    doc[key] = { value, updatedAt: "2026-11-17T00:00:00.000Z" };
+    window.localStorage.setItem("bloom.prefs.v1", JSON.stringify(doc));
+    /* prefsStore caches per key at module level and survives across
+       tests in this file — a raw storage write must drop the cache
+       or the hooks keep serving the earlier (empty) value. */
+    resetPrefCache();
+  }
+
+  function readPref(key: string): unknown {
+    const raw = window.localStorage.getItem("bloom.prefs.v1");
+    if (!raw) return undefined;
+    return (JSON.parse(raw) as Record<string, { value: unknown }>)[key]?.value;
+  }
+
+  function foodLogEntries(): unknown[] {
+    const value = readPref("health.foodlog.v1") as { entries?: unknown[] } | undefined;
+    return value?.entries ?? [];
+  }
+
+  function seedCustomFood() {
+    seedPref("health.foods.v1", {
+      version: 1,
+      foods: [
+        {
+          id: "food-shake",
+          name: "My Protein Shake",
+          per100g: {
+            kcal: 120,
+            proteinG: 20,
+            carbsG: 5,
+            fatG: 2,
+            fiberG: 1,
+            sugarG: 3,
+            sodiumMg: 90,
+          },
+          servings: [],
+          provenance: { kind: "user_entered", sourceId: "user", label: "Entered by you" },
+        },
+      ],
     });
+  }
+
+  it("shows the deliberation stages as the server reports them, in order", async () => {
+    let resolveReply: (value: unknown) => void = () => {};
+    hoisted.askVitalis.mockImplementation(
+      (params: { onStage?: (stage: { stage: string; label: string }) => void }) => {
+        params.onStage?.({ stage: "drafting", label: "Drafting your answer" });
+        params.onStage?.({
+          stage: "verifying",
+          label: "Checking every number against your record",
+        });
+        params.onStage?.({ stage: "rules", label: "Checking allergies, pattern and safety" });
+        return new Promise((resolve) => {
+          resolveReply = resolve;
+        });
+      },
+    );
+    renderApp("/");
+    await screen.findByText("Today page");
     await openPopup();
-    expect(screen.getByRole("button", { name: "Dictate your message" })).toBeTruthy();
-    /* Nothing was sent by merely offering the microphone. */
-    expect(hoisted.ask).not.toHaveBeenCalled();
+    await sendMessage("Build me a plan for today");
+    const panel = await screen.findByLabelText("Vitalis is working");
+    const items = [...panel.querySelectorAll(".coach-orb-stage")].map((li) => li.textContent);
+    expect(items).toEqual([
+      "Drafting your answer",
+      "Checking every number against your record",
+      "Checking allergies, pattern and safety",
+    ]);
+    await act(async () => {
+      resolveReply({ paragraphs: ["Your plan checks out."] });
+    });
+    expect(await screen.findByText("Your plan checks out.")).toBeTruthy();
+    expect(screen.queryByLabelText("Vitalis is working")).toBeNull();
+  }, 20_000);
+
+  it("logs a dish only after the confirm tap — never on arrival", async () => {
+    hoisted.askVitalis.mockImplementation(
+      (params: { record?: { dishes: { id: string }[] } }) => {
+        const dish = params.record?.dishes[0];
+        return Promise.resolve({
+          paragraphs: ["Shall I log it for dinner?"],
+          actions: dish ? [{ action: "log_dish", dishId: dish.id, meal: "dinner" }] : [],
+        });
+      },
+    );
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("What should I have for dinner?");
+    expect(await screen.findByText("Shall I log it for dinner?")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Log it" })).toBeTruthy();
+    expect(foodLogEntries()).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Log it" }));
+    expect(foodLogEntries()).toHaveLength(1);
+    expect(await screen.findByText(/is in today's food log/)).toBeTruthy();
+  });
+
+  it("logs a custom food only after the confirm tap", async () => {
+    seedCustomFood();
+    hoisted.askVitalis.mockResolvedValue({
+      paragraphs: ["Your shake fits as a snack."],
+      actions: [{ action: "log_food", foodId: "food-shake", grams: 250, meal: "snack" }],
+    });
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("Can I have my shake?");
+    expect(await screen.findByText("Log My Protein Shake", undefined, { timeout: 5000 })).toBeTruthy();
+    expect(foodLogEntries()).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Log it" }));
+    expect(foodLogEntries()).toHaveLength(1);
+    expect(await screen.findByText(/My Protein Shake is in today's food log/, undefined, { timeout: 5000 })).toBeTruthy();
+  }, 20_000);
+
+  it("dismissing a card writes nothing", async () => {
+    hoisted.askVitalis.mockImplementation(
+      (params: { record?: { dishes: { id: string }[] } }) => {
+        const dish = params.record?.dishes[0];
+        return Promise.resolve({
+          paragraphs: ["Shall I log it?"],
+          actions: dish ? [{ action: "log_dish", dishId: dish.id, meal: "lunch" }] : [],
+        });
+      },
+    );
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("What should I have for lunch?");
+    expect(await screen.findByText("Shall I log it?")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Not now" }));
+    expect(await screen.findByText("Dismissed — nothing changed.")).toBeTruthy();
+    expect(foodLogEntries()).toHaveLength(0);
+  });
+
+  it("never renders a forged non-allowlisted action as a card", async () => {
+    hoisted.askVitalis.mockImplementation(
+      (params: { record?: { dishes: { id: string }[] } }) => {
+        const dish = params.record?.dishes[0];
+        return Promise.resolve({
+          paragraphs: ["Here you go."],
+          actions: [
+            { action: "create_habit", name: "Morning run" },
+            { action: "award_points", points: 900 },
+            ...(dish ? [{ action: "log_dish", dishId: dish.id, meal: "lunch" }] : []),
+          ],
+        });
+      },
+    );
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("What should I have for lunch?");
+    expect(await screen.findByText("Here you go.")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Log it" })).toHaveLength(1);
+    expect(screen.queryByText(/Morning run/)).toBeNull();
+    expect(foodLogEntries()).toHaveLength(0);
+  });
+
+  it("composes today's plan only after the confirm tap", async () => {
+    seedPref("health.body.v1", {
+      units: "metric",
+      heightCm: 178,
+      weightKg: 80,
+      targetWeightKg: null,
+      age: 30,
+      sex: "male",
+      activity: "moderate",
+      goal: "maintain",
+      rateKgPerWeek: 0,
+      updatedAt: "2026-11-17T00:00:00.000Z",
+    });
+    hoisted.askVitalis.mockResolvedValue({
+      paragraphs: ["I can compose today's plan."],
+      actions: [{ action: "compose_plan" }],
+    });
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("Make me a plan for today");
+    expect(await screen.findByText("Compose today's plan", undefined, { timeout: 5000 })).toBeTruthy();
+    expect(readPref("health.plan.v1")).toBeUndefined();
+    fireEvent.click(screen.getByRole("button", { name: "Compose plan" }));
+    expect(await screen.findByText(/today's plan is composed/, undefined, { timeout: 5000 })).toBeTruthy();
+    expect(readPref("health.plan.v1")).toBeDefined();
+  }, 20_000);
+
+  it("swaps a plan dish only after the confirm tap", async () => {
+    seedPref("health.body.v1", {
+      units: "metric",
+      heightCm: 178,
+      weightKg: 80,
+      targetWeightKg: null,
+      age: 30,
+      sex: "male",
+      activity: "moderate",
+      goal: "maintain",
+      rateKgPerWeek: 0,
+      updatedAt: "2026-11-17T00:00:00.000Z",
+    });
+    let phase = 0;
+    hoisted.askVitalis.mockImplementation(
+      (params: {
+        record?: {
+          dishes: { id: string }[];
+          plan: { meals: { meal: string; dishIds: string[] }[] } | null;
+        };
+      }) => {
+        phase += 1;
+        if (phase === 1) {
+          return Promise.resolve({
+            paragraphs: ["I can compose today's plan."],
+            actions: [{ action: "compose_plan" }],
+          });
+        }
+        const meal = params.record?.plan?.meals.find((m) => m.dishIds.length > 0);
+        const fromDishId = meal?.dishIds[0];
+        const toDish = params.record?.dishes.find((d) => !meal?.dishIds.includes(d.id));
+        return Promise.resolve({
+          paragraphs: ["I can swap that dish."],
+          actions:
+            meal && fromDishId && toDish
+              ? [{ action: "swap_dish", meal: meal.meal, fromDishId, toDishId: toDish.id }]
+              : [],
+        });
+      },
+    );
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("Make me a plan for today");
+    expect(await screen.findByText("Compose today's plan", undefined, { timeout: 5000 })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Compose plan" }));
+    expect(await screen.findByText(/today's plan is composed/, undefined, { timeout: 5000 })).toBeTruthy();
+    const before = readPref("health.plan.v1") as { plan: { meals: { dishes: { dishId: string }[] }[] } };
+    const beforeIds = before.plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId));
+    expect(beforeIds.length).toBeGreaterThan(0);
+    await sendMessage("I don't like one of those dishes");
+    expect(await screen.findByText(/Swap .+ for .+/, undefined, { timeout: 5000 })).toBeTruthy();
+    /* Nothing has moved yet — the card is a proposal, not a deed. */
+    expect(readPref("health.plan.v1")).toEqual(before);
+    fireEvent.click(screen.getByRole("button", { name: "Swap dish" }));
+    expect(await screen.findByText(/Swapped —/, undefined, { timeout: 5000 })).toBeTruthy();
+    const after = readPref("health.plan.v1") as { plan: { meals: { dishes: { dishId: string }[] }[] } };
+    const afterIds = after.plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId));
+    expect(afterIds).not.toEqual(beforeIds);
+    expect(afterIds.length).toBe(beforeIds.length);
+  }, 30_000);
+
+  it("shows the locked notice and closes the composer when the server reports the lock", async () => {
+    hoisted.askVitalis.mockResolvedValue({
+      paragraphs: [
+        "Vitalis is paused for now.",
+        "Sign in again and Vitalis will be back. The rest of Bloom is unaffected.",
+      ],
+      locked: true,
+    });
+    renderApp("/");
+    await screen.findByText("Today page");
+    await openPopup();
+    await sendMessage("Hello?");
+    expect(await screen.findByText("Vitalis is paused for now.")).toBeTruthy();
+    const textarea = document.querySelector<HTMLTextAreaElement>("#coach-orb-input");
+    expect(textarea?.disabled).toBe(true);
+    expect(textarea?.placeholder).toContain("Vitalis is paused");
   });
 });

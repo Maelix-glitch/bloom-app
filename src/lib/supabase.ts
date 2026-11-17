@@ -10,6 +10,13 @@ const supabaseAnonKey = import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | un
  */
 export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
 
+/** The project URL and anon key, for the one transport that cannot go
+ *  through supabase-js (the Vitalis deliberation NDJSON stream). The
+ *  anon key is a public client key by design; the caller's session
+ *  token still rides along as the Authorization header. */
+export const SUPABASE_URL = supabaseUrl ?? "";
+export const SUPABASE_ANON_KEY = supabaseAnonKey ?? "";
+
 /**
  * A human-readable reason the cloud is unavailable, or null when it's fine.
  * Surfaced in the UI so "nothing saves" is never a silent mystery.

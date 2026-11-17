@@ -19,11 +19,20 @@
  * (the day's targets stay in the section header as the guide) — and
  * the day's dish ideas are picked once, in meal order, each excluded
  * from the next slot so the same dish is never offered twice in a day.
+ *
+ * P5: a dish-composed meal card IS its dishes — the anchor dish is
+ * the card's title, each dish a row with its photo and computed
+ * numbers, and tapping a dish unfolds its ingredients (the raw
+ * things, per serving) underneath it, with the full recipe one tap
+ * further in the dish detail sheet. Simple foods appear only in the
+ * subordinate "To complete the day" top-up group. A meal the dish
+ * pool could not fill keeps the layered food rendering above, and
+ * its D4 dish idea with it.
  */
 
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Plus, RefreshCw } from "lucide-react";
+import { Check, ChevronDown, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAssessment } from "@/hooks/useAssessment";
@@ -37,16 +46,21 @@ import {
   dishIdeaFor,
   dishNutrients,
   displayNameForFoodId,
+  findDish,
+  findUsdaReference,
+  foodDisplayName,
   goalProfileOf,
   logDish,
   provenanceLabel,
   sumNutrients,
   type Dish,
+  type PlanDish,
   type PlanGoalProfile,
   type PlanMeal,
   type PlanSuggestion,
   type SuggestionLayer,
 } from "@/lib/nutrition";
+import { DishDetailSheet } from "./DishDetailSheet";
 import { DishPhoto } from "./DishPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { FoodPhoto } from "./FoodPhoto";
@@ -60,6 +74,15 @@ const LAYER_SECTIONS: readonly { layer: SuggestionLayer; label: string }[] = [
   { layer: "vegetables", label: "Vegetables" },
   { layer: "finishing", label: "Finishing" },
 ];
+
+/** Dish role labels for a dish-composed meal (P5). The anchor needs no
+ *  tag — it is the card's title; the dishes that join it say what they
+ *  are. */
+const DISH_ROLE_LABEL: Record<PlanDish["role"], string> = {
+  anchor: "Main dish",
+  base: "Base",
+  side: "Side",
+};
 
 const GOAL_CHIPS: readonly PlanGoalProfile[] = ["lose", "maintain", "gain", "recomp"];
 
@@ -130,6 +153,11 @@ export function NutritionPlanSection() {
   const session = useSession();
   const nutrition = useNutrition();
   const [logError, setLogError] = useState<string | null>(null);
+  /* P5: which plan dish's ingredients are unfolded, and which dish's
+     full recipe sheet is open (with the plan meal it belongs to, so
+     the sheet's Log button files it into the plan's meal). */
+  const [expandedDish, setExpandedDish] = useState<string | null>(null);
+  const [selectedDish, setSelectedDish] = useState<{ dish: Dish; meal: PlanMeal } | null>(null);
 
   /* The profile the dish idea is judged against — the same assembly
      the swap suggestions use (the Assessment's domain profile), so a
@@ -151,9 +179,17 @@ export function NutritionPlanSection() {
   };
 
   const logWholeMeal = (meal: PlanMeal) => {
+    /* P5: a dish-composed meal logs its dishes through the dish path
+       as well as its food suggestions through the meal path. */
+    let failed = false;
+    for (const planDish of meal.dishes) {
+      if (planDishLogged(meal, planDish)) continue;
+      const dish = findDish(planDish.dishId);
+      if (!dish || !logDish(dish, meal.meal, plan.day)) failed = true;
+    }
     const pending = meal.suggestions.filter((s) => !suggestionLogged(meal, s));
     const logged = logMeal(meal);
-    if (logged < pending.length) {
+    if (failed || logged < pending.length) {
       setLogError(
         "One or more of those foods aren't in your foods any more, so they couldn't be logged. Regenerate the plan and Bloom will suggest from what you have now.",
       );
@@ -161,6 +197,18 @@ export function NutritionPlanSection() {
       setLogError(null);
     }
   };
+
+  /* A plan dish counts as logged when today's log for this meal holds
+     its dish entry (the dish idea row's own check). */
+  const planDishLogged = (meal: PlanMeal, planDish: PlanDish): boolean =>
+    nutrition.entries.some(
+      (e) =>
+        e.day === plan.day &&
+        e.meal === meal.meal &&
+        e.source === "dish" &&
+        e.provenance.kind === "recipe" &&
+        e.provenance.sourceId === planDish.dishId,
+    );
 
   const chipGoal = currentGoal ? goalProfileOf(currentGoal) : null;
 
@@ -238,8 +286,8 @@ export function NutritionPlanSection() {
           </h2>
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             Bloom computes your daily targets deterministically — no AI, no invented numbers —
-            splits them across your meals, and suggests foods only from your own foods and USDA
-            reference data, each one labelled with its source.
+            splits them across your meals, and builds each meal around a real dish from the dish
+            library, its numbers computed from its ingredients and labelled with their source.
           </p>
           <GoalChips currentGoal={chipGoal} onSelect={setGoal} />
           <div className="mt-4">
@@ -282,12 +330,19 @@ export function NutritionPlanSection() {
   /* The day's dish ideas, picked in meal order with each pick excluded
      from the next (P3): lunch and dinner draw on the same dish
      category and the same day rotation, so independent per-card picks
-     served the same dish twice in one day. */
+     served the same dish twice in one day. P5: an idea is offered
+     only on a meal the dish composer could not fill (a dish-composed
+     meal IS its dishes — an "idea" beside them would double-offer),
+     and the day's plan dishes are excluded up front so an idea never
+     repeats a dish the plan already serves. */
   const dishIdeas = new Map<PlanMeal["meal"], Dish>();
   {
-    const usedDishIds = new Set<string>();
+    const usedDishIds = new Set<string>(
+      plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId)),
+    );
     for (const meal of plan.meals) {
       if (meal.meal === "snack") continue;
+      if (meal.dishes.length > 0) continue;
       const idea = dishIdeaFor(profile, plan.day, meal.meal, undefined, usedDishIds);
       if (idea) {
         dishIdeas.set(meal.meal, idea);
@@ -341,29 +396,144 @@ export function NutritionPlanSection() {
     );
   };
 
+  /* One plan dish (P5): a row with the dish's photo and its computed
+     numbers; tapping it unfolds the dish's ingredients — the raw
+     things, per serving, exactly as the dish detail sheet lists them
+     — with the dish's own log button and the full recipe one tap
+     further. A dish the library no longer holds renders nothing (the
+     plan's stored numbers still stand in the header sums). */
+  const dishRow = (meal: PlanMeal, planDish: PlanDish) => {
+    const dish = findDish(planDish.dishId);
+    if (!dish) return null;
+    const key = `${meal.meal}:${planDish.dishId}`;
+    const expanded = expandedDish === key;
+    const logged = planDishLogged(meal, planDish);
+    return (
+      <li key={planDish.dishId}>
+        <button
+          type="button"
+          className="nut-dish-row"
+          aria-expanded={expanded}
+          aria-label={`${planDish.name} — show ingredients`}
+          onClick={() => setExpandedDish(expanded ? null : key)}
+        >
+          <DishPhoto dishId={planDish.dishId} name={planDish.name} />
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
+              {planDish.name} <span className="nut-hindi">({planDish.hindi})</span>
+            </span>
+            <span className="mt-0.5 block text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
+              {Math.round(planDish.nutrients.kcal)} kcal ·{" "}
+              {formatGrams(planDish.nutrients.proteinG)} g protein per serving
+            </span>
+          </span>
+          {planDish.role !== "anchor" ? (
+            <span className="nut-chip shrink-0">{DISH_ROLE_LABEL[planDish.role]}</span>
+          ) : null}
+          <ChevronDown
+            className={`size-4 shrink-0 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`}
+            aria-hidden
+          />
+        </button>
+        {expanded ? (
+          <div className="nut-dish-ingredients">
+            <p className="nut-group-label">Ingredients · per serving</p>
+            <ul className="mt-1 divide-y divide-border-subtle">
+              {dish.lines.map((line) => {
+                const food = findUsdaReference(line.foodId);
+                const names = food
+                  ? foodDisplayName(food)
+                  : { en: line.foodId, hindi: null as string | null };
+                return (
+                  <li
+                    key={line.foodId}
+                    className="flex items-baseline justify-between gap-3 py-1.5"
+                  >
+                    <span className="min-w-0 text-[length:var(--text-callout)] text-foreground">
+                      {names.en}
+                      {names.hindi ? <span className="nut-hindi"> ({names.hindi})</span> : null}
+                    </span>
+                    <span className="shrink-0 text-[length:var(--text-callout)] tabular-nums text-muted-foreground">
+                      {formatGrams((line.grams / dish.servings) * planDish.servings)} g
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <ProvenanceBadge
+                kind="recipe"
+                label={provenanceLabel(planDish.provenance)}
+              />
+              <span className="text-[length:var(--text-caption)] text-muted-foreground">
+                Computed from these ingredients' USDA data.
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {logged ? (
+                <span className="nut-chip" data-selected>
+                  <Check className="size-3.5" aria-hidden /> Logged
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="nut-btn nut-btn-gold nut-btn-sm"
+                  onClick={() => logPlanDish(meal, planDish)}
+                >
+                  Log this dish
+                </button>
+              )}
+              <button
+                type="button"
+                className="nut-btn nut-btn-ghost nut-btn-sm"
+                onClick={() => setSelectedDish({ dish, meal })}
+              >
+                Full recipe
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </li>
+    );
+  };
+
   const mealCard = (meal: PlanMeal) => {
-    const dish = dishTitleFor(meal);
-    const sums = sumNutrients(meal.suggestions.map((s) => s.nutrients));
+    const dishComposed = meal.dishes.length > 0;
+    const anchor = meal.dishes.find((d) => d.role === "anchor");
+    const title = dishComposed ? (anchor?.name ?? meal.dishes[0]?.name) : dishTitleFor(meal);
+    const sums = sumNutrients([
+      ...meal.suggestions.map((s) => s.nutrients),
+      ...meal.dishes.map((d) => d.nutrients),
+    ]);
     const allLogged =
-      meal.suggestions.length > 0 && meal.suggestions.every((s) => suggestionLogged(meal, s));
-    const layered = meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
+      (meal.suggestions.length > 0 || meal.dishes.length > 0) &&
+      meal.suggestions.every((s) => suggestionLogged(meal, s)) &&
+      meal.dishes.every((d) => planDishLogged(meal, d));
+    const layered =
+      !dishComposed && meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
+    const topups = meal.suggestions.filter((s) => s.layer === "topup");
+    const foodSuggestions = dishComposed
+      ? meal.suggestions.filter((s) => s.layer !== "topup")
+      : meal.suggestions;
+    const empty = meal.dishes.length === 0 && meal.suggestions.length === 0;
     return (
       <article key={meal.meal} className="nut-card" aria-label={`${MEAL_LABEL[meal.meal]} plan`}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="eyebrow">{MEAL_LABEL[meal.meal]}</p>
-            {dish ? (
+            {title ? (
               <h3
                 className="mt-1.5 truncate font-display text-[21px] leading-tight text-foreground"
-                title={dish}
+                title={title}
               >
-                {dish}
+                {title}
               </h3>
             ) : null}
           </div>
-          {/* The header shows what the listed suggestions actually add
-              up to (P3) — the meal's target share lives in the section
-              header's day guide, not dressed up as this card's total. */}
+          {/* The header shows what the listed dishes and foods actually
+              add up to (P3) — the meal's target share lives in the
+              section header's day guide, not dressed up as this card's
+              total. */}
           <p className="shrink-0 text-right">
             <span className="font-display text-[20px] text-foreground tabular-nums">
               {Math.round(sums.kcal)}
@@ -372,11 +542,32 @@ export function NutritionPlanSection() {
           </p>
         </div>
 
-        {meal.suggestions.length === 0 ? (
+        {empty ? (
           <p className="nut-note">{meal.note}</p>
         ) : (
           <>
-            {layered ? (
+            {dishComposed ? (
+              <ul className="mt-2 divide-y divide-border-subtle">
+                {meal.dishes.map((d) => dishRow(meal, d))}
+              </ul>
+            ) : null}
+            {dishComposed ? (
+              <>
+                {foodSuggestions.length > 0 ? (
+                  <ul className="mt-2 divide-y divide-border-subtle">
+                    {foodSuggestions.map((s) => suggestionRow(meal, s))}
+                  </ul>
+                ) : null}
+                {topups.length > 0 ? (
+                  <div className="mt-3">
+                    <p className="nut-group-label">To complete the day</p>
+                    <ul className="divide-y divide-border-subtle">
+                      {topups.map((s) => suggestionRow(meal, s))}
+                    </ul>
+                  </div>
+                ) : null}
+              </>
+            ) : layered ? (
               LAYER_SECTIONS.map(({ layer, label }) => {
                 const items = meal.suggestions.filter((s) => s.layer === layer);
                 if (items.length === 0) return null;
@@ -475,15 +666,28 @@ export function NutritionPlanSection() {
     );
   };
 
-  const logDishIdea = (meal: PlanMeal, dish: Dish) => {
+  const logDishIdea = (meal: PlanMeal, dish: Dish): boolean => {
     const entry = logDish(dish, meal.meal, plan.day);
     if (!entry) {
       setLogError(
         `“${dish.name.en}” couldn't be logged — its values fall outside the range the log can store.`,
       );
-      return;
+      return false;
     }
     setLogError(null);
+    return true;
+  };
+
+  /* A plan dish logs through the same dish path as a dish idea — one
+     serving of the library dish, a recipe-provenance snapshot of its
+     computed totals, filed into the plan's meal on the plan's day. */
+  const logPlanDish = (meal: PlanMeal, planDish: PlanDish) => {
+    const dish = findDish(planDish.dishId);
+    if (!dish) {
+      setLogError(`“${planDish.name}” isn't in the dish library any more, so it can't be logged.`);
+      return;
+    }
+    logDishIdea(meal, dish);
   };
 
   return (
@@ -575,9 +779,20 @@ export function NutritionPlanSection() {
       ) : null}
 
       <p className="nut-note">
-        Plans are composed from USDA-labelled foods and your own, against your targets. They are a
-        starting point — log what you actually eat and your totals follow that.
+        Plans are built from real dishes in Bloom's library — each dish's numbers are computed
+        from its ingredients' USDA data — topped up with simple foods only where the dishes leave
+        the day short. They are a starting point — log what you actually eat and your totals
+        follow that.
       </p>
+
+      {selectedDish ? (
+        <DishDetailSheet
+          dish={selectedDish.dish}
+          day={plan.day}
+          onClose={() => setSelectedDish(null)}
+          onLog={(dish) => logDishIdea(selectedDish.meal, dish)}
+        />
+      ) : null}
     </section>
   );
 }

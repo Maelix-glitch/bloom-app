@@ -534,7 +534,7 @@ function ProfilePage() {
     >
       <Atmosphere />
 
-      <main className="relative mx-auto w-full max-w-[1120px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
+      <main className="relative mx-auto w-full max-w-[1280px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
         {/*
           The wait and the page share one grid cell, so the swap between them
           has no layout shift: the skeleton stands in the page's own layout
