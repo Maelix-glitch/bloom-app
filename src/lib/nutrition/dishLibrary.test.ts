@@ -15,7 +15,7 @@ import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
  */
 describe("the dish library", () => {
   it("clears the owner's 200-dish bar", () => {
-    expect(DISH_LIBRARY.length).toBe(1040);
+    expect(DISH_LIBRARY.length).toBe(941);
     expect(DISH_LIBRARY.length).toBeGreaterThanOrEqual(200);
   });
 
@@ -46,9 +46,9 @@ describe("the dish library", () => {
 
   it("tags every dish with a cuisine from the three-value taxonomy", () => {
     /* Counts computed from the assembled library and pinned: the
-       original 229 dishes and the India wave carry "india" (371), the
-       Kerala wave is its own shelf (131), and the four international
-       waves carry "international" (538). No dish is untagged, and no
+       original dishes and the India wave carry "india" (313), the
+       Kerala wave is its own shelf (98), and the four international
+       waves carry "international" (530). No dish is untagged, and no
        dish carries a value outside the taxonomy. */
     const counts: Record<string, number> = { india: 0, kerala: 0, international: 0 };
     for (const dish of DISH_LIBRARY) {
@@ -57,13 +57,16 @@ describe("the dish library", () => {
       const tag = dish.cuisine as string;
       counts[tag] = (counts[tag] ?? 0) + 1;
     }
-    expect(counts).toEqual({ india: 371, kerala: 131, international: 538 });
+    expect(counts).toEqual({ india: 313, kerala: 98, international: 530 });
   });
 
   it("covers every category", () => {
     for (const category of DISH_CATEGORIES) {
       const count = DISH_LIBRARY.filter((d) => d.category === category).length;
-      expect(count, category).toBeGreaterThanOrEqual(5);
+      /* Dessert is the deliberate exception: the owner's unhealthy-dish
+         removal took the sweets out of the library, leaving only the
+         fruit salad — every other category keeps its breadth floor. */
+      expect(count, category).toBeGreaterThanOrEqual(category === "dessert" ? 1 : 5);
     }
   });
 

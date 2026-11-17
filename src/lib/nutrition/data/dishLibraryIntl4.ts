@@ -2640,31 +2640,6 @@ export const INTL4_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-ng-akara",
-    name: { en: "Nigerian Cowpea Fritters (Akara)", hindi: "नाइजीरियाई लोबिया पकोड़े (अकारा)" },
-    category: "breakfast",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-173758", grams: 480 }, // cowpeas, dry weight
-      { foodId: "usda-790646", grams: 200 }, // onion
-      { foodId: "usda-170106", grams: 30 }, // red hot chili peppers
-      { foodId: "usda-171410", grams: 60 }, // peanut oil, for frying
-      { foodId: "usda-173468", grams: 6 }, // salt
-    ],
-    method: [
-      "Soak the cowpeas for 1 hour and rub off the skins in water, as for moi moi — akara batter is made from peeled beans.",
-      "Blend the peeled cowpeas with the onion, red chilies and just enough water to make a very thick, fluffy batter; whisk it for 2 minutes to beat in air — light akara is whipped akara.",
-      "Season with the salt only at the end, so the batter stays airy.",
-      "Heat the peanut oil in a deep pan to about 175°C — a drop of batter should sizzle and rise at once.",
-      "Drop spoonfuls of batter into the oil and fry 3–4 minutes, turning, until deep golden and crisp outside and steamed soft inside.",
-      "Drain on a rack and serve immediately, while the crust crackles.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-ke-githeri",
     name: { en: "Kenyan Beans and Corn (Githeri)", hindi: "केन्याई बीन्स मक्का (गिथेरी)" },
     category: "main",

@@ -22,7 +22,7 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  */
 describe("wave X-4 international high-protein dishes", () => {
   it("ships 135–145 dishes", () => {
-    expect(INTL4_DISHES.length).toBe(139);
+    expect(INTL4_DISHES.length).toBe(138);
     expect(INTL4_DISHES.length).toBeGreaterThanOrEqual(135);
     expect(INTL4_DISHES.length).toBeLessThanOrEqual(145);
   });

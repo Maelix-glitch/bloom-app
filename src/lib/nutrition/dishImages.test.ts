@@ -74,6 +74,15 @@ describe("dish photograph manifest", () => {
        listed here. The generator enforces the same list on its side
        (SHARED_FILES); a new share must be added to both, deliberately. */
     const EXPECTED_SHARES: readonly (readonly string[])[] = [
+      ["dish-chicken-shawarma-plate", "dish-intl-chicken-shawarma"],
+      ["dish-intl-blackened-tilapia", "dish-us-blackened-tilapia"],
+      ["dish-ar-pollo-crema", "dish-chicken-fricassee"],
+      ["dish-cu-arroz-con-pollo", "dish-intl-spanish-chicken-rice"],
+      ["dish-chicken-souvlaki", "dish-intl-greek-chicken-souvlaki"],
+      ["dish-intl-tuna-white-bean-salad", "dish-tonno-fagioli"],
+      ["dish-intl-shakshuka", "dish-shakshuka"],
+      ["dish-garbanzos-espinacas", "dish-intl-chickpea-spinach-stew"],
+      ["dish-intl-black-eyed-pea-stew", "dish-mavromatika-fasolia"],
       ["dish-chole-masala", "dish-chole-enriched"],
       ["dish-rajma-masala", "dish-rajma-enriched"],
       ["dish-matar-paneer", "dish-matar-paneer-enriched"],
@@ -89,7 +98,6 @@ describe("dish photograph manifest", () => {
       ["dish-moong-khichdi", "dish-moong-dal-khichdi"],
       ["dish-shahi-paneer", "dish-shahi-paneer-style"],
       ["dish-coconut-chutney", "dish-shahi-coconut-chutney"],
-      ["dish-shikanji", "dish-jeera-shikanji"],
       ["dish-kadala-curry", "dish-kadala-curry-enriched"],
     ];
     const slugs = DISH_PHOTOS.map((p) => p.slug);

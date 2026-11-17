@@ -22,10 +22,10 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  * Patterns are computed from the ingredient lines, never asserted.
  */
 describe("wave I-2 India dishes", () => {
-  it("ships 140–150 dishes", () => {
-    expect(INDIA_DISHES.length).toBe(142);
-    expect(INDIA_DISHES.length).toBeGreaterThanOrEqual(140);
-    expect(INDIA_DISHES.length).toBeLessThanOrEqual(150);
+  it("ships 100–110 dishes", () => {
+    expect(INDIA_DISHES.length).toBe(103);
+    expect(INDIA_DISHES.length).toBeGreaterThanOrEqual(100);
+    expect(INDIA_DISHES.length).toBeLessThanOrEqual(110);
   });
 
   it("every dish carries cuisine india", () => {
@@ -36,6 +36,9 @@ describe("wave I-2 India dishes", () => {
 
   it("uses the full category range", () => {
     const categories = new Set<Dish["category"]>(INDIA_DISHES.map((d) => d.category));
+    /* Dessert is absent by design: the owner's unhealthy-dish removal
+       took this wave's sweets (mithai, kheer, payasam-style desserts)
+       out of the library. Every other category is still represented. */
     const expected: readonly Dish["category"][] = [
       "main",
       "side",
@@ -44,7 +47,6 @@ describe("wave I-2 India dishes", () => {
       "breakfast",
       "snack",
       "chutney",
-      "dessert",
       "drink",
     ];
     for (const category of expected) {

@@ -15,7 +15,7 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  */
 describe("wave X-3 international high-protein dishes", () => {
   it("ships 120–140 dishes", () => {
-    expect(INTL3_DISHES.length).toBe(135);
+    expect(INTL3_DISHES.length).toBe(128);
     expect(INTL3_DISHES.length).toBeGreaterThanOrEqual(120);
     expect(INTL3_DISHES.length).toBeLessThanOrEqual(140);
   });

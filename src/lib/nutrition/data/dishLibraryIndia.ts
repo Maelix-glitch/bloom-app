@@ -88,104 +88,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-amritsari-machhi",
-    name: { en: "Amritsari Machhi (Fish Fry)", hindi: "अमृतसरी मछली" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2684442", grams: 500 }, // tilapia
-      { foodId: "usda-174288", grams: 80 }, // besan (chickpea flour)
-      { foodId: "usda-169714", grams: 30 }, // rice flour
-      { foodId: "usda-1104647", grams: 10 }, // garlic
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-167746", grams: 30 }, // lemon
-      { foodId: "usda-172231", grams: 2 }, // turmeric
-      { foodId: "usda-171319", grams: 3 }, // chili powder
-      { foodId: "usda-170932", grams: 3 }, // cayenne
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Cut the tilapia into thick fingers, pat very dry, and rub with the lemon juice, half the salt and the turmeric; rest 15 minutes.",
-      "Grind the garlic and ginger to a paste and rub it over the fish with the chili powder, cayenne and cumin; rest 15 minutes more.",
-      "Stir the besan and rice flour together with the remaining salt and just enough water to make a batter that coats the back of a spoon.",
-      "Heat the oil in a wide pan to 180°C — a drop of batter should sizzle and rise at once.",
-      "Dip each fish finger in batter, let the excess drip off, and lower into the oil without crowding; fry 3–4 minutes until deep golden and crisp.",
-      "Turn once halfway; the fish is done when the crust is rigid and the flesh flakes white at the centre.",
-      "Drain on a rack, rest 2 minutes so the crust sets, and serve hot with lemon and onion.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-punjabi-kadhi-pakodi",
-    name: { en: "Punjabi Kadhi Pakodi", hindi: "पंजाबी कढ़ी पकोड़ी" },
-    category: "main",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2259793", grams: 500 }, // yogurt
-      { foodId: "usda-174288", grams: 90 }, // besan
-      { foodId: "usda-790646", grams: 100 }, // onion
-      { foodId: "usda-2346401", grams: 100 }, // potato, for the pakodis
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-172231", grams: 2 }, // turmeric
-      { foodId: "usda-170106", grams: 4 }, // red chilli
-      { foodId: "usda-170929", grams: 2 }, // mustard seed
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-171324", grams: 1 }, // fenugreek seed
-      { foodId: "usda-171025", grams: 30 }, // sunflower oil
-      { foodId: "usda-169997", grams: 8 }, // coriander leaves
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Whisk the yogurt with 60 g of the besan, the turmeric and 900 ml water until completely smooth — any lump now is a lump forever.",
-      "Pour into a deep pot and bring to a boil over medium heat, stirring constantly in one direction so the kadhi does not split.",
-      "Drop to a low simmer and cook 25–30 minutes, stirring now and then, until the raw besan smell leaves and it coats a spoon.",
-      "Meanwhile stir the remaining besan with the grated potato, half the onion, ginger, a pinch of salt and a splash of water into a thick dropping batter.",
-      "Fry spoonfuls of the batter in hot oil 3 minutes until the pakodis are deep gold and cooked through; drain.",
-      "Slide the pakodis into the kadhi with the salt and simmer 5 minutes so they drink in the gravy and soften at the edges.",
-      "Temper the mustard, cumin, fenugreek and red chillies in the remaining oil until the mustard crackles, pour over, scatter coriander and serve over rice.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-dahi-bhalla",
-    name: { en: "Dahi Bhalla", hindi: "दही भल्ला" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174259", grams: 200 }, // mungo beans (urad)
-      { foodId: "usda-2259793", grams: 400 }, // yogurt
-      { foodId: "usda-167763", grams: 30 }, // tamarind
-      { foodId: "usda-334247", grams: 20 }, // sugar
-      { foodId: "usda-170923", grams: 3 }, // cumin seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-169997", grams: 8 }, // coriander leaves
-      { foodId: "usda-173475", grams: 8 }, // mint
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Soak the urad 6 hours or overnight, drain, and grind with almost no water to a thick, fluffy batter — it should hold a soft peak.",
-      "Whisk the batter hard for 3–4 minutes until pale and aerated; a spoonful dropped in water should float. Stir in half the salt.",
-      "Soak the tamarind in 100 ml warm water 10 minutes, squeeze and strain; simmer the juice with the sugar 3 minutes into a glossy chutney and cool.",
-      "Fry tablespoonfuls of batter in oil at 170°C for 3–4 minutes, turning, until pale gold and cooked to the centre.",
-      "Drop the hot bhallas straight into a bowl of warm salted water for 15 minutes, then squeeze each gently between your palms — this is what makes them melt.",
-      "Whisk the yogurt smooth with a pinch of salt and sugar until pourable; arrange the bhallas in a dish and flood them with the yogurt.",
-      "Dry-roast and crush the cumin. Drizzle the tamarind chutney over, dust with cumin and cayenne, scatter coriander and mint, and serve cool.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-langarwali-dal",
     name: { en: "Langarwali Dal (Whole Urad)", hindi: "लंगरवाली दाल" },
     category: "main",
@@ -215,64 +117,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 70,
     budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-pinni",
-    name: { en: "Pinni", hindi: "पिन्नी" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 250 }, // whole wheat flour
-      { foodId: "usda-171314", grams: 120 }, // ghee
-      { foodId: "usda-334247", grams: 150 }, // sugar
-      { foodId: "usda-2346393", grams: 40 }, // almonds
-      { foodId: "usda-322892", grams: 30 }, // whole milk
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-    ],
-    method: [
-      "Melt the ghee in a heavy pan and add the flour; roast on low heat, stirring constantly, for 18–22 minutes.",
-      "The flour is ready when it turns deep golden, smells like toasted biscuits and the ghee begins to pool at the edges.",
-      "Take the pan off the heat and stir in the milk a spoon at a time — it will hiss and bubble; keep stirring until absorbed.",
-      "Stir in the sugar and cardamom off the heat; the mixture will loosen, then firm as it cools.",
-      "Fold in the slivered almonds and let the mixture cool until it can be handled but is still warm, about 10 minutes.",
-      "Grease your palms with ghee and press the mixture into 12 tight oval pinnis; a loose pinni crumbles, so squeeze firmly.",
-      "Rest at least 1 hour to set. Pinnis keep two weeks in a tin — they are winter fuel, made to last.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-amritsari-paneer-fry",
-    name: { en: "Amritsari Paneer Fry", hindi: "अमृतसरी पनीर फ्राई" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-328841", grams: 400 }, // cottage cheese, standing in for paneer
-      { foodId: "usda-174288", grams: 70 }, // besan
-      { foodId: "usda-169714", grams: 20 }, // rice flour
-      { foodId: "usda-1104647", grams: 8 }, // garlic
-      { foodId: "usda-167746", grams: 20 }, // lemon
-      { foodId: "usda-172231", grams: 2 }, // turmeric
-      { foodId: "usda-170932", grams: 3 }, // cayenne
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Cut the cottage cheese into thick fingers and pat dry — the Amritsari crust only grips a dry surface. Bloom's set carries cottage cheese where paneer would be; the dish is built on it openly.",
-      "Rub the fingers with the lemon, garlic paste, turmeric, cayenne, cumin and salt; rest 15 minutes.",
-      "Stir the besan and rice flour with a pinch of salt and just enough water for a batter that clings without dripping.",
-      "Heat the oil to 180°C; a drop of batter should crisp on contact.",
-      "Dip each finger, let the excess fall, and fry in batches 2–3 minutes until the crust is deep amber and rigid.",
-      "Drain on a rack rather than paper so the crust stays crisp underneath.",
-      "Serve at once with a squeeze of lemon — the centre should be soft against the shattering crust.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 1,
     enriched: false,
   },
   {
@@ -478,32 +322,6 @@ export const INDIA_DISHES: Dish[] = [
     budgetTier: 3,
     enriched: false,
   },
-  {
-    id: "dish-phirni",
-    name: { en: "Phirni", hindi: "फिरनी" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 60 }, // rice flour
-      { foodId: "usda-322892", grams: 800 }, // whole milk
-      { foodId: "usda-334247", grams: 90 }, // sugar
-      { foodId: "usda-2346393", grams: 20 }, // almonds
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-    ],
-    method: [
-      "Slake the rice flour in 100 ml of the cold milk to a smooth, lump-free slurry.",
-      "Bring the remaining milk to a boil in a heavy pan, then lower to a simmer and reduce 10 minutes, stirring, until it smells sweet and coats the spoon.",
-      "Pour in the slurry in a thin stream, whisking constantly, and cook 5–6 minutes until the phirni thickens to a slow, ribboning pour.",
-      "Stir in the sugar and ground cardamom and cook 2 minutes more; it should mound softly on a spoon, looser than you want it set — it firms as it chills.",
-      "Pour into small earthen or glass bowls while hot and skim-free.",
-      "Scatter slivered almonds over the surface and chill at least 3 hours, until set with a delicate skin.",
-      "Serve cold, straight from the bowl it set in — phirni is never unmoulded.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 2,
-    enriched: false,
-  },
   /* ========================== AWADHI / UP ========================== */
   {
     id: "dish-galouti-kebab",
@@ -638,37 +456,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-moong-dal-kachori",
-    name: { en: "Moong Dal Kachori", hindi: "मूंग दाल कचौड़ी" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168936", grams: 250 }, // white flour
-      { foodId: "usda-174256", grams: 100 }, // mung beans (moong dal)
-      { foodId: "usda-171323", grams: 3 }, // fennel seed
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170922", grams: 4 }, // coriander seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-171025", grams: 60 }, // sunflower oil
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Soak the moong dal 2 hours, drain thoroughly, and grind coarse without water — a wet filling makes a soggy kachori.",
-      "Rub 30 g of the oil into the flour with a pinch of salt until it holds when squeezed (the moyan); knead with about 110 ml water to a stiff dough and rest 30 minutes.",
-      "Dry-roast the ground moong in a spoon of oil with the fennel, cumin, coriander seed, cayenne, turmeric, ginger and salt for 5 minutes until nutty and completely dry; cool.",
-      "Divide the dough into 12; cup each, fill with the moong mixture, pleat shut and roll gently to a 7 cm disc, sealing every seam.",
-      "Heat the oil to a moderate 160°C — kachori fry slow and low; too hot and the crust blisters before the inside cooks.",
-      "Fry in batches 6–8 minutes, turning, until deep golden, hollow-sounding and crisp all the way through.",
-      "Drain and rest 5 minutes; serve with tamarind chutney. A good kachori shatters, and keeps its crunch for hours.",
-    ],
-    timeMinutes: 75,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-sheermal-style",
     name: { en: "Sheermal-Style Milk Bread", hindi: "शीरमाल" },
     category: "bread",
@@ -763,56 +550,6 @@ export const INDIA_DISHES: Dish[] = [
       "Scatter coriander leaves and serve with rice — a winter UP dish that tastes of the pea harvest itself.",
     ],
     timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-agra-petha-style",
-    name: { en: "Agra Petha-Style (Waxgourd Candy)", hindi: "आगरा पेठा" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-170069", grams: 800 }, // waxgourd
-      { foodId: "usda-334247", grams: 500 }, // sugar
-      { foodId: "usda-167746", grams: 15 }, // lemon
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-    ],
-    method: [
-      "Petha is Agra's translucent waxgourd candy. The classic sets the gourd with lime water; lime is not in Bloom's verified set, so this version firms the pieces by long soaking and blanching instead — stated, and named -Style.",
-      "Peel the waxgourd, remove the spongy seed core, and cut the firm flesh into thick fingers; prick each all over with a fork.",
-      "Soak the pieces in plenty of water for 4 hours, changing the water twice; drain and rinse well.",
-      "Blanch in boiling water 5 minutes until just translucent at the edges; drain and cool in cold water, then squeeze gently.",
-      "Make a syrup of the sugar with 300 ml water; add the lemon juice and skim until the syrup runs clear.",
-      "Add the gourd pieces and simmer gently 20–25 minutes, until they turn glassy and translucent all the way through and the syrup is thick.",
-      "Lift the pieces onto a rack, sprinkle with cardamom, and rest at least 4 hours until the surface is dry and faintly crisp; the centre should stay juicy.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-mathura-peda",
-    name: { en: "Mathura Peda", hindi: "मथुरा पेड़ा" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-322892", grams: 1000 }, // whole milk
-      { foodId: "usda-334247", grams: 120 }, // sugar
-      { foodId: "usda-171314", grams: 15 }, // ghee
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-    ],
-    method: [
-      "Mathura's peda begins as milk reduced to khoya. Boil the milk in a wide, heavy pan and lower to a steady simmer.",
-      "Reduce for 45–55 minutes, stirring and scraping the bottom constantly, until the milk becomes a thick, grainy mass that leaves the sides of the pan — this is the khoya, and there is no shortcut.",
-      "Stir in the ghee and keep cooking 5 minutes until the khoya is golden at the edges and smells caramelised.",
-      "Take off the heat, stir in the sugar and cardamom, and keep stirring as it cools — the sugar will melt, then the mixture will firm.",
-      "When cool enough to handle but still warm, grease your palms and roll into 12 balls; press each flat and mark the top with a thumb or a peda stamp.",
-      "Rest 2 hours to set fully. The centre should stay soft and milky against the firmer, caramel-dark outside.",
-      "Serve at room temperature; Mathura pedas keep a week in a tin and travel as prasad and gifts.",
-    ],
-    timeMinutes: 90,
     budgetTier: 2,
     enriched: false,
   },
@@ -943,62 +680,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   /* ============================= DELHI ============================= */
-  {
-    id: "dish-ram-laddu-style",
-    name: { en: "Ram Laddu-Style (Moong Fritters)", hindi: "राम लड्डू" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174256", grams: 200 }, // mung beans (moong dal)
-      { foodId: "usda-2258586", grams: 80 }, // carrot, grated over
-      { foodId: "usda-169997", grams: 15 }, // coriander leaves
-      { foodId: "usda-173475", grams: 10 }, // mint
-      { foodId: "usda-170497", grams: 8 }, // green chilli
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-167746", grams: 20 }, // lemon
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Delhi's ram laddu are moong fritters buried under grated radish and green chutney. Radish is not in Bloom's verified set; sweet carrot is grated over in its place — the fritters and chutney are the real thing, the garnish is stated.",
-      "Soak the moong dal 3 hours, drain, and grind with almost no water to a thick batter; whisk hard 3 minutes until pale and fluffy.",
-      "Stir in the ginger, half the green chilli and the salt.",
-      "Fry small spoonfuls in oil at 170°C for 3–4 minutes, turning, until golden and cooked through; drain. These are the 'laddus'.",
-      "Grind the coriander, mint, remaining green chilli, lemon juice, cumin and a pinch of salt into a thin, fiery chutney.",
-      "Pile the hot fritters in bowls and cover them completely with the grated carrot, as the Delhi carts do.",
-      "Flood with the green chutney and serve at once, while the fritters are still crisp under their garnish.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-daulat-ki-chaat",
-    name: { en: "Daulat ki Chaat", hindi: "दौलत की चाट" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-322892", grams: 700 }, // whole milk
-      { foodId: "usda-334247", grams: 60 }, // sugar
-      { foodId: "usda-2346393", grams: 10 }, // almonds
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-    ],
-    method: [
-      "Daulat ki chaat is Old Delhi's winter cloud: milk foam set by the cold night air, gone by spring. Saffron is not in Bloom's set, so this version is cardamom only — stated, never faked.",
-      "Chill the milk thoroughly — the foam only holds if everything is cold; chill the bowl and whisk too.",
-      "Whisk the milk hard for 10–15 minutes, skimming the foam that rises into a separate chilled bowl each time it forms, and re-whisking the milk below.",
-      "Fold the sugar and cardamom gently through the collected foam — stir and it collapses; fold, once or twice only.",
-      "Spoon the foam into small bowls in soft mounds; it should sit like fresh snow and weigh almost nothing.",
-      "Chill 30 minutes to firm the set, then scatter slivered almonds.",
-      "Serve immediately and eat with a spoon in minutes — daulat ki chaat melts back to milk as it warms, which is its whole romance.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
   {
     id: "dish-kulle-chaat",
     name: { en: "Kulle Chaat (Stuffed Fruit Cups)", hindi: "कुल्ले चाट" },
@@ -1238,31 +919,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-sukhdi",
-    name: { en: "Sukhdi", hindi: "सुखड़ी" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 200 }, // whole wheat flour
-      { foodId: "usda-171314", grams: 100 }, // ghee
-      { foodId: "usda-334247", grams: 110 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-    ],
-    method: [
-      "Sukhdi is Gujarat's three-ingredient sweet, classically set with jaggery; jaggery is not in Bloom's verified set, so the set's sugar is used and stated — the method and the crumb are unchanged.",
-      "Melt the ghee in a heavy pan and add the flour; roast on low heat, stirring constantly, for 15–18 minutes.",
-      "The flour is ready when it is deep golden, pours like wet sand and smells richly toasted.",
-      "Take the pan off the heat — this matters; sugar added on the heat turns to caramel and the sukhdi hardens.",
-      "Stir in the sugar and cardamom quickly and evenly; the residual heat melts the sugar into the roast.",
-      "Tip at once into a greased plate, level the top with the back of a spoon, and score into diamonds while warm.",
-      "Cool 30 minutes to set, then cut along the scores. Sukhdi should snap cleanly and melt to a grainy richness on the tongue.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-anda-ghotala",
     name: { en: "Anda Ghotala (Surat Egg Curry)", hindi: "अंडा घोटाला" },
     category: "breakfast",
@@ -1432,33 +1088,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-puran-poli",
-    name: { en: "Puran Poli", hindi: "पुरण पोळी" },
-    category: "bread",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 200 }, // whole wheat flour
-      { foodId: "usda-172436", grams: 150 }, // pigeon peas (toor dal), for the puran
-      { foodId: "usda-334247", grams: 120 }, // sugar
-      { foodId: "usda-171314", grams: 30 }, // ghee
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-173468", grams: 1 }, // salt
-    ],
-    method: [
-      "The classic puran is chana dal and jaggery; neither is in Bloom's verified set. This puran poli is built on toor dal and the set's sugar — a real regional reading of the dish, stated openly rather than passed off.",
-      "Pressure-cook the toor dal in just enough water to cover for 3 whistles until completely soft; drain off every drop of liquid — wet puran bursts the poli.",
-      "Cook the dal in a pan with the sugar and cardamom, stirring, for 8–10 minutes until it becomes a thick, dry, mouldable paste that leaves the pan; cool fully.",
-      "Knead the flour with the salt and about 110 ml water into a very soft dough, slick it with a spoon of ghee, and rest 1 hour — the dough must be softer than the filling.",
-      "Divide both into 8. Wrap a ball of dough around a ball of puran, seal, and roll gently to a 13 cm disc, flouring lightly.",
-      "Cook on a hot tawa 1 minute a side until freckled, then brush generously with ghee.",
-      "Serve hot, torn open and flooded with more melted ghee or warm milk — the centre should be sweet, soft and steaming.",
-    ],
-    timeMinutes: 75,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-malvani-chicken-curry",
     name: { en: "Malvani Chicken Curry", hindi: "मालवणी चिकन करी" },
     category: "main",
@@ -1523,33 +1152,6 @@ export const INDIA_DISHES: Dish[] = [
       "Serve at once with lemon and rice — the crust must reach the table still crackling.",
     ],
     timeMinutes: 40,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-ukdiche-modak",
-    name: { en: "Ukdiche Modak", hindi: "उकडीचे मोदक" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 200 }, // rice flour
-      { foodId: "usda-170169", grams: 150 }, // coconut meat
-      { foodId: "usda-334247", grams: 100 }, // sugar
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-171314", grams: 10 }, // ghee
-      { foodId: "usda-173468", grams: 1 }, // salt
-    ],
-    method: [
-      "The classic modak filling is sweetened with jaggery, which is not in Bloom's verified set; the set's sugar stands in and is stated — the coconut, cardamom and steamed rice shell are untouched.",
-      "Make the filling: cook the grated coconut with the sugar and cardamom in a pan for 5 minutes, stirring, until the mixture is moist, glossy and holds together; cool.",
-      "Boil 250 ml water with the salt and ghee; rain in the rice flour, stirring hard, then cover and rest off the heat 5 minutes.",
-      "Knead the warm dough while it is still steamy until smooth and soft — this cooked dough, the ukad, is the modak's whole craft.",
-      "With greased hands, shape a ball of dough into a thin cup, fill with a spoon of coconut, and pleat the rim together into the modak's pointed bud.",
-      "Steam the modaks over boiling water for 10–12 minutes, until the shells turn glossy and slightly translucent.",
-      "Serve warm with a spoon of melted ghee poured over — Ganpati's own sweet, eaten the day it is steamed.",
-    ],
-    timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
   },
@@ -1730,34 +1332,6 @@ export const INDIA_DISHES: Dish[] = [
     budgetTier: 3,
     enriched: false,
   },
-  {
-    id: "dish-bebinca-style",
-    name: { en: "Bebinca-Style Layered Pudding", hindi: "बेबिंका" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-172184", grams: 170 }, // egg yolk
-      { foodId: "usda-170172", grams: 400 }, // coconut milk
-      { foodId: "usda-168936", grams: 100 }, // white flour
-      { foodId: "usda-334247", grams: 200 }, // sugar
-      { foodId: "usda-171314", grams: 40 }, // ghee
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-173468", grams: 1 }, // salt
-    ],
-    method: [
-      "Bebinca is Goa's queen of desserts: a coconut-egg pudding baked layer upon layer. This -Style version bakes in a home oven in the same layered way; nothing in it is substituted, only the hearth is different.",
-      "Whisk the egg yolks with the sugar until pale and thick; whisk in the coconut milk, then the flour, cardamom and salt, and strain the batter smooth.",
-      "Divide the batter into two bowls and leave one plain. For the other, whisk 2 spoons of sugar in a dry pan to a dark caramel and stir it through — the two tones are how the layers will read.",
-      "Grease a deep baking tin thickly with ghee and heat the oven to 180°C with the grill ready.",
-      "Pour a thin ladle of the dark batter into the hot tin, brush with ghee, and bake 8–10 minutes until just set; pour a thin ladle of plain batter over, brush with ghee, and bake again.",
-      "Repeat until the batter is used — seven layers is the classic count — letting each set before the next goes on.",
-      "Cool completely in the tin, then unmould and slice. The layers should read like the rings of a tree, caramel against gold.",
-    ],
-    timeMinutes: 90,
-    budgetTier: 3,
-    enriched: false,
-  },
   /* ========================== RAJASTHANI ========================== */
   {
     id: "dish-dal-baati",
@@ -1886,69 +1460,6 @@ export const INDIA_DISHES: Dish[] = [
       "Brush with ghee and serve at once with laal maas or dal — bajra roti hardens as it cools, so it goes from tawa to plate without pause.",
     ],
     timeMinutes: 30,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-pyaaz-kachori",
-    name: { en: "Pyaaz Kachori", hindi: "प्याज़ कचौड़ी" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168936", grams: 250 }, // white flour
-      { foodId: "usda-790646", grams: 250 }, // onion
-      { foodId: "usda-171323", grams: 3 }, // fennel seed
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170922", grams: 4 }, // coriander seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-171025", grams: 60 }, // sunflower oil
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Rub 30 g of the oil into the flour with a pinch of salt until it holds when squeezed; knead with about 110 ml water to a stiff dough and rest 30 minutes — Jodhpur's kachori crust must be flaky, and the moyan is how.",
-      "Cook the sliced onion in a spoon of oil over medium heat for 10 minutes until soft and sweet, not browned.",
-      "Add the fennel, cumin, ground coriander, cayenne, turmeric, ginger and salt; cook 2 minutes and cool the filling completely — it should be dry and intensely savoury.",
-      "Divide the dough into 12; cup each, fill with onion, pleat shut and roll gently to a 7 cm disc, sealing well.",
-      "Heat the oil to 160°C and fry the kachoris in batches for 6–8 minutes, turning, until deep golden and crisp through.",
-      "Drain and rest 5 minutes; the crust should shatter in flakes over the soft onion.",
-      "Serve hot with tamarind chutney — in Jodhpur these are breakfast, eaten standing at the shop counter.",
-    ],
-    timeMinutes: 75,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-mirchi-vada-style",
-    name: { en: "Mirchi Vada-Style (Stuffed Pepper Fritters)", hindi: "मिर्ची वडा" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-170427", grams: 300 }, // green pepper, standing in for Bhavnagari chillies
-      { foodId: "usda-2346401", grams: 250 }, // potato
-      { foodId: "usda-174288", grams: 120 }, // besan
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170922", grams: 3 }, // coriander seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-167746", grams: 15 }, // lemon
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Jodhpur's mirchi vada stuffs the big, mild Bhavnagari chilli; that chilli is not in Bloom's verified set, so sweet green peppers — the same shape and mildness — stand in, stated in the open.",
-      "Boil the potatoes until tender, mash rough, and season with the ginger, ground coriander, cumin, cayenne, lemon and salt; cool.",
-      "Slit each pepper down one side, scrape out the seeds, and pack the potato firmly inside.",
-      "Whisk the besan with the turmeric, a pinch of salt and enough water for a batter that coats thickly and holds.",
-      "Heat the oil to 175°C. Dip each stuffed pepper in batter, coating it completely, and lower it into the oil seam-side down.",
-      "Fry 4–5 minutes, turning once, until the crust is deep golden and crisp and the pepper inside is just tender.",
-      "Drain and serve hot with chutney — crisp batter, soft pepper, spiced potato, in that order in every bite.",
-    ],
-    timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
   },
@@ -2170,32 +1681,6 @@ export const INDIA_DISHES: Dish[] = [
     budgetTier: 3,
     enriched: false,
   },
-  {
-    id: "dish-lagan-nu-custard",
-    name: { en: "Lagan nu Custard", hindi: "लगन नु कस्टर्ड" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-322892", grams: 600 }, // whole milk
-      { foodId: "usda-171287", grams: 150 }, // egg
-      { foodId: "usda-334247", grams: 90 }, // sugar
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-2346393", grams: 15 }, // almonds
-    ],
-    method: [
-      "Lagan nu custard — 'wedding custard' — is the Parsi celebration pudding: milk and eggs baked gently with cardamom, never boiled, never rushed.",
-      "Reduce the milk in a wide pan for 20 minutes, stirring, until it has thickened slightly and turned ivory; cool to warm.",
-      "Whisk the eggs with the sugar until just combined — whisk in air and the custard will puff and fall; stir, do not froth.",
-      "Pour the warm milk over the eggs in a stream, whisking, and stir in the cardamom; strain into a baking dish.",
-      "Set the dish in a roasting tin of hot water and bake at 160°C for 35–40 minutes, until the custard is just set with a gentle wobble at the centre.",
-      "Scatter slivered almonds and cool completely, then chill at least 2 hours.",
-      "Serve cold in slices or spoonfuls — silky, barely sweet, and scented with cardamom all the way through.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 2,
-    enriched: false,
-  },
   /* ============================ BENGALI ============================ */
   {
     id: "dish-shorshe-machh",
@@ -2415,85 +1900,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-mishti-doi",
-    name: { en: "Mishti Doi", hindi: "मिष्टी दोई" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2259793", grams: 500 }, // yogurt
-      { foodId: "usda-322892", grams: 200 }, // whole milk
-      { foodId: "usda-334247", grams: 100 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-    ],
-    method: [
-      "Caramelise half the sugar in a dry pan over medium heat, swirling, until it turns deep amber — this caramel is mishti doi's colour and its toffee soul.",
-      "Carefully pour in the milk (it will surge and hiss) and stir until the caramel dissolves completely; add the remaining sugar and simmer 5 minutes to a sweet, tan milk. Cool to warm.",
-      "Whisk the yogurt completely smooth and stir it through the warm milk with the cardamom — the mixture should be at blood heat, never hot, or the culture dies.",
-      "Pour into small earthen or glass bowls, cover, and set in a warm, undisturbed place for 8–10 hours, until firmly set with a clean wobble.",
-      "Chill at least 3 hours before serving.",
-      "Serve in the bowl it set in, with its amber surface unbroken — mishti doi is judged by the spoon standing in it.",
-      "It keeps three days refrigerated and deepens in flavour.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-rasgulla",
-    name: { en: "Rasgulla", hindi: "रसगुल्ला" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-328841", grams: 400 }, // cottage cheese (chhena)
-      { foodId: "usda-334247", grams: 300 }, // sugar
-      { foodId: "usda-168933", grams: 10 }, // semolina
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-    ],
-    method: [
-      "Rasgulla are chhena dumplings poached in syrup. Bloom's set carries cottage cheese, which is chhena's close kin; drain it well in cloth for 30 minutes until it is moist but not wet — the kneading below does the rest.",
-      "Knead the cottage cheese with the semolina on a flat surface for 8–10 minutes, pushing with the heel of the palm, until it turns smooth, soft and slightly greasy — a grainy chhena makes a grainy rasgulla.",
-      "Roll into 12 smooth, crack-free balls the size of a walnut; any crack now becomes a split later.",
-      "Make a thin syrup of the sugar with 800 ml water and the cardamom and bring it to a rolling boil in a wide, deep pan.",
-      "Slide the balls in one by one, cover, and boil hard for 15 minutes, sprinkling a little water every 5 minutes to keep the syrup thin; the rasgullas will double in size.",
-      "They are done when they bounce back when pressed and a cut one is spongy and even-textured to the centre, with no dense core.",
-      "Cool completely in the syrup and chill; serve two per bowl with their syrup — light as foam, sweet as syrup, never heavy.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-patashipta",
-    name: { en: "Patishapta", hindi: "पटिसापटा" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 120 }, // rice flour
-      { foodId: "usda-168936", grams: 40 }, // white flour
-      { foodId: "usda-168933", grams: 20 }, // semolina
-      { foodId: "usda-322892", grams: 250 }, // whole milk
-      { foodId: "usda-170169", grams: 120 }, // coconut meat
-      { foodId: "usda-334247", grams: 100 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-171314", grams: 10 }, // ghee
-    ],
-    method: [
-      "The classic patishapta filling is sweetened with date-palm jaggery, which is not in Bloom's verified set; the set's sugar stands in, stated, and the coconut-cardamom heart of the filling is unchanged.",
-      "Cook the coconut with 60 g of the sugar and the cardamom for 5 minutes, stirring, until moist and holding together; cool — this is the filling.",
-      "Whisk the rice flour, white flour, semolina and remaining sugar with the milk into a thin, smooth batter; rest 30 minutes.",
-      "Heat a non-stick pan and brush it with the barest film of ghee.",
-      "Pour a small ladle of batter and swirl it into a thin crepe; cook 1–2 minutes until set and lacy at the edges — patishapta are not flipped.",
-      "Lay a spoon of coconut filling along one side and roll the crepe over it; slide out and keep warm.",
-      "Repeat with the remaining batter and serve warm — soft, milky crepes around a sweet coconut core, Bengal's winter sweet.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-ghugni",
     name: { en: "Ghugni (Chickpea Curry)", hindi: "घुगनी" },
     category: "snack",
@@ -2700,64 +2106,6 @@ export const INDIA_DISHES: Dish[] = [
     budgetTier: 1,
     enriched: false,
   },
-  {
-    id: "dish-chhena-poda",
-    name: { en: "Chhena Poda", hindi: "छेना पोड़ा" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-328841", grams: 500 }, // cottage cheese (chhena)
-      { foodId: "usda-334247", grams: 150 }, // sugar
-      { foodId: "usda-168933", grams: 30 }, // semolina
-      { foodId: "usda-2515374", grams: 20 }, // cashews
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-171314", grams: 10 }, // ghee
-    ],
-    method: [
-      "Chhena poda — 'burnt cheese' — is Odisha's baked chhena cake, and the only Indian cheese dessert baked like a cake. Bloom's set carries cottage cheese for the chhena; drain it in cloth 30 minutes so the cake is moist, not wet.",
-      "Knead the cottage cheese with the sugar, semolina and cardamom for 5 minutes until smooth and uniform.",
-      "Fold in the chopped cashews and let the mixture rest 15 minutes; it should be thick and spoonable.",
-      "Line a cake tin, grease it with the ghee, and pour the mixture in, levelling the top.",
-      "Bake at 180°C for 40–45 minutes, until the top is deep golden-brown — nearly burnt at the edges, which is exactly right and where the name comes from.",
-      "Cool in the tin for 20 minutes, then unmould; the centre should be set, moist and faintly caramelised.",
-      "Serve in wedges at room temperature. In Puri it is said to be Lord Jagannath's favourite; it keeps three days and improves.",
-    ],
-    timeMinutes: 75,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-kanika",
-    name: { en: "Kanika (Odia Sweet Rice)", hindi: "कनिका" },
-    category: "rice",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2512381", grams: 280 }, // white rice
-      { foodId: "usda-171314", grams: 25 }, // ghee
-      { foodId: "usda-334247", grams: 30 }, // sugar
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-171320", grams: 1 }, // cinnamon
-      { foodId: "usda-171321", grams: 1 }, // cloves
-      { foodId: "usda-170917", grams: 1 }, // bay leaf
-      { foodId: "usda-2515374", grams: 20 }, // cashews
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Kanika is Odisha's sweet ghee rice, part of the Jagannath temple's mahaprasad. Rinse the rice and soak 20 minutes; drain well.",
-      "Melt the ghee and fry the cashews to gold; lift out. Bloom the bay, cinnamon, cloves and cardamom in the same ghee.",
-      "Add the rice and fry gently for 2 minutes until the grains are glossy and separate.",
-      "Add the turmeric, sugar, salt and 560 ml hot water; bring to a boil.",
-      "Cover and cook on the lowest heat 12 minutes, until the water is absorbed and the grains are tender and tinted pale gold.",
-      "Rest covered 10 minutes, then fluff with a fork, lifting so the grains stay whole.",
-      "Scatter the cashews and serve as the sweet counterpoint in an Odia meal — kanika is festive rice, never a dessert.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 1,
-    enriched: false,
-  },
   /* =========================== ASSAMESE =========================== */
   {
     id: "dish-masor-tenga",
@@ -2815,59 +2163,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 25,
     budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-black-rice-kheer",
-    name: { en: "Black Rice Kheer (Chak-Hao Style)", hindi: "काले चावल की खीर" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2710825", grams: 120 }, // black rice
-      { foodId: "usda-322892", grams: 800 }, // whole milk
-      { foodId: "usda-334247", grams: 90 }, // sugar
-      { foodId: "usda-2515374", grams: 15 }, // cashews
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-171314", grams: 5 }, // ghee
-    ],
-    method: [
-      "Chak-hao is Manipur's fragrant black rice, cooked into a kheer that sets violet-black. Bloom's set carries black rice; this is its kheer in the same spirit, named for the grain it honours.",
-      "Rinse the black rice and soak 4 hours or overnight — the grains are hard and need the soak; the water will turn deep purple and is kept.",
-      "Cook the rice in its soaking water plus 300 ml more for 25–30 minutes, until the grains are tender and bursting; the pot will be inky violet.",
-      "Add the milk and simmer gently for 20 minutes, stirring often, until the kheer thickens to a slow pour and the rice is silky through it.",
-      "Stir in the sugar and cardamom and cook 5 minutes more; it will loosen, then settle — keep it looser than you want it, as it firms on cooling.",
-      "Fry the cashews in the ghee to gold and stir them in.",
-      "Serve warm or chilled; the kheer should be a deep, glossy purple-black, the grains tender, the milk sweet and cardamom-scented.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-til-pitha",
-    name: { en: "Til Pitha", hindi: "तिल पीठा" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 250 }, // rice flour
-      { foodId: "usda-170150", grams: 60 }, // sesame seeds
-      { foodId: "usda-334247", grams: 80 }, // sugar
-      { foodId: "usda-170169", grams: 40 }, // coconut meat
-      { foodId: "usda-171314", grams: 10 }, // ghee
-    ],
-    method: [
-      "Til pitha is Assam's Bihu pancake: a rice crepe folded over sesame and coconut. The classic sweetener is jaggery, which is not in Bloom's verified set; the set's sugar stands in, stated openly.",
-      "Dry-roast the sesame until it pops and smells nutty; crush it coarse with the sugar and grated coconut — this is the filling.",
-      "Whisk the rice flour with about 300 ml water and a pinch of salt into a thin, smooth batter; rest 20 minutes.",
-      "Heat a cast-iron tawa and brush it with the barest film of ghee.",
-      "Pour a small ladle of batter and swirl it into a thin pancake; cook 1 minute until the surface sets and the edges lift.",
-      "Scatter a spoon of the sesame filling over one half and fold the pancake over it; press gently and cook 30 seconds more.",
-      "Serve warm, as they are made — til pitha are eaten fresh off the tawa through the Bihu days, crisp-edged and sesame-sweet.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 2,
     enriched: false,
   },
   /* ============================= BIHARI ============================= */
@@ -2965,34 +2260,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 50,
     budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-thekua",
-    name: { en: "Thekua", hindi: "ठेकुआ" },
-    category: "snack",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 250 }, // whole wheat flour
-      { foodId: "usda-334247", grams: 130 }, // sugar
-      { foodId: "usda-170169", grams: 40 }, // coconut meat
-      { foodId: "usda-171323", grams: 3 }, // fennel seed
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-322892", grams: 40 }, // whole milk
-      { foodId: "usda-171314", grams: 60 }, // ghee, for the dough and frying
-    ],
-    method: [
-      "Thekua is Bihar's Chhath biscuit, classically sweetened with jaggery; jaggery is not in Bloom's verified set, so the set's sugar is used and stated — the fennel, coconut and ghee are thekua's true flavour.",
-      "Make a syrup of the sugar with the milk, heating just until dissolved; cool to warm.",
-      "Rub 20 g of the ghee into the flour, then stir in the grated coconut, crushed fennel and cardamom.",
-      "Knead with the warm syrup into a stiff dough — thekua dough barely holds together and must not be soft.",
-      "Pinch off balls and press each into a flat disc; press a wooden thekua mould — or the back of a fork or a leaf — into the top to mark the pattern.",
-      "Fry in the remaining ghee over medium-low heat for 4–5 minutes, turning, until deep golden-brown and hard; thekua fry slow or the centre stays raw.",
-      "Cool completely — they crisp fully only when cold. Thekua keep for weeks and are made by the hundred for Chhath.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 2,
     enriched: false,
   },
   {
@@ -3229,36 +2496,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-ratlami-sev-style",
-    name: { en: "Ratlami Sev-Style", hindi: "रतलामी सेव" },
-    category: "snack",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174288", grams: 250 }, // besan
-      { foodId: "usda-170931", grams: 3 }, // black pepper
-      { foodId: "usda-171321", grams: 1 }, // cloves
-      { foodId: "usda-171323", grams: 2 }, // fennel seed
-      { foodId: "usda-170932", grams: 3 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-167746", grams: 10 }, // lemon
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Ratlami sev is Madhya Pradesh's peppery besan noodle, hot with black pepper and clove. The genuine article is pressed on an industrial scale; this -Style home version uses a sev press and the same spice architecture.",
-      "Grind the black pepper, cloves and fennel coarse — the spices should be felt as well as tasted.",
-      "Knead the besan with the ground spices, cayenne, turmeric, lemon, salt, a spoon of the oil and just enough water into a stiff, smooth dough; rest 15 minutes.",
-      "Load the dough into a sev press with the medium disc.",
-      "Heat the oil to 170°C and press the sev in loose coils directly into the oil, in batches.",
-      "Fry 1–2 minutes, turning once, until the sev is crisp and pale gold — it darkens a shade as it cools, so lift it early.",
-      "Drain and cool completely; the sev should shatter. Store airtight — it keeps two weeks and improves every chaat it touches.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-khopra-patties",
     name: { en: "Khopra Patties (Indore Coconut-Potato)", hindi: "खोपरा पैटीज़" },
     category: "snack",
@@ -3288,35 +2525,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 50,
     budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-garadu-chaat-style",
-    name: { en: "Garadu-Style Chaat (Spiced Taro)", hindi: "गराड़ू चाट" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169308", grams: 450 }, // taro
-      { foodId: "usda-167746", grams: 20 }, // lemon
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-171025", grams: 40 }, // sunflower oil, for frying
-      { foodId: "usda-169997", grams: 8 }, // coriander leaves
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Garadu is Indore's winter yam, deep-fried and drowned in lemon and spice. The true garadu yam is not in Bloom's verified set; taro — its close, earthy cousin — stands in, stated in the open.",
-      "Boil the taro in its skin until just tender, 15 minutes; cool, peel and cut into thick chunks. (Taro must be cooked through; never serve it underdone.)",
-      "Heat the oil to 180°C and fry the taro chunks in batches for 4–5 minutes, until crisp and deep golden at the edges.",
-      "Drain briefly — the chunks should stay crisp-skinned and floury inside.",
-      "While hot, shower them with the salt, cayenne and roasted, ground cumin.",
-      "Pour the lemon juice and grated ginger over and toss once — the garadu style is to be almost pickled in lemon.",
-      "Scatter coriander leaves and serve at once, in paper cones if you can — this is Sarafa bazaar food, eaten standing in the winter crowd.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 1,
     enriched: false,
   },
   /* ========================= CHHATTISGARH ========================= */
@@ -3411,34 +2619,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 35,
     budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-dehrori",
-    name: { en: "Dehrori", hindi: "देहरोरी" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 180 }, // rice flour
-      { foodId: "usda-2259793", grams: 100 }, // yogurt
-      { foodId: "usda-334247", grams: 110 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-171323", grams: 1 }, // fennel seed
-      { foodId: "usda-2346393", grams: 10 }, // almonds
-      { foodId: "usda-171314", grams: 40 }, // ghee, for frying
-    ],
-    method: [
-      "Dehrori is Chhattisgarh's fermented rice-flour fritter, soaked in syrup. Stir the rice flour with the yogurt and a spoon of the sugar into a thick batter; cover and ferment overnight in a warm place — the batter should rise slightly and smell gently sour.",
-      "Make a syrup of the remaining sugar with 200 ml water and the cardamom; keep it warm — dehrori drink warm syrup, never hot.",
-      "Stir the crushed fennel through the fermented batter; it should drop thickly from a spoon.",
-      "Heat the ghee in a wide pan to 170°C and drop small spoonfuls of batter in, in batches.",
-      "Fry 3–4 minutes, turning, until the dehrori are deep golden and crisp outside with a soft, fermented crumb.",
-      "Drain for a few seconds and drop straight into the warm syrup; soak 5 minutes, turning once.",
-      "Serve warm with slivered almonds — crisp shell, syrup-soaked crumb, a whisper of sourness under the sweet.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
     enriched: false,
   },
   {
@@ -3616,34 +2796,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-sakkarai-pongal",
-    name: { en: "Sakkarai Pongal", hindi: "सक्करै पोंगल" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2512381", grams: 180 }, // white rice
-      { foodId: "usda-174256", grams: 60 }, // mung beans (moong dal)
-      { foodId: "usda-334247", grams: 150 }, // sugar
-      { foodId: "usda-322892", grams: 150 }, // whole milk
-      { foodId: "usda-171314", grams: 35 }, // ghee
-      { foodId: "usda-2515374", grams: 20 }, // cashews
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-    ],
-    method: [
-      "Sakkarai pongal is the sweet pongal of the harvest festival, classically sweetened with jaggery; jaggery is not in Bloom's verified set, so the set's sugar is used and stated — the rice, moong, ghee and cardamom are the dish.",
-      "Dry-roast the moong dal for 3 minutes until it smells nutty; rinse it with the rice.",
-      "Pressure-cook the rice and dal with 600 ml water for 4 whistles, until completely soft and porridge-like; mash lightly.",
-      "Stir in the milk and cook 3 minutes, keeping the pongal loose and flowing.",
-      "Add the sugar and cardamom and stir until dissolved; the pongal will loosen, then gloss.",
-      "Fry the cashews in the ghee until golden and pour the ghee and cashews over the pongal; stir once.",
-      "Serve warm in bowls, with extra ghee at the table — sakkarai pongal should be soft, sweet and shining with ghee, never dry.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-kuzhi-paniyaram",
     name: { en: "Kuzhi Paniyaram", hindi: "कुझी पनियारम" },
     category: "breakfast",
@@ -3672,131 +2824,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 40,
     budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-mysore-bonda",
-    name: { en: "Mysore Bonda", hindi: "मैसूर बोंडा" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174259", grams: 180 }, // mungo beans (urad)
-      { foodId: "usda-169714", grams: 20 }, // rice flour
-      { foodId: "usda-170497", grams: 8 }, // green chilli
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-170169", grams: 30 }, // coconut meat
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-169997", grams: 8 }, // coriander leaves
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Soak the urad 3 hours, drain, and grind with almost no water to a thick, fluffy batter — the bonda's lightness is ground in, not leavened.",
-      "Whisk the batter hard for 3 minutes until pale; a drop in water should float.",
-      "Fold in the rice flour, chopped coconut, green chilli, ginger, cumin, black pepper, coriander and salt.",
-      "Heat the oil to 175°C.",
-      "With wet hands, drop walnut-sized balls of batter into the oil in batches; fry 3–4 minutes, turning, until evenly deep golden.",
-      "The bonda are done when they sound hollow and feel light for their size; a dense bonda was an under-whisked batter.",
-      "Drain and serve hot with coconut chutney — crisp shell giving way to a cloud-soft, coconut-flecked centre.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-thattai",
-    name: { en: "Thattai", hindi: "थट्टाई" },
-    category: "snack",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 250 }, // rice flour
-      { foodId: "usda-174288", grams: 40 }, // besan
-      { foodId: "usda-172430", grams: 40 }, // peanuts
-      { foodId: "usda-170150", grams: 8 }, // sesame seeds
-      { foodId: "usda-170106", grams: 4 }, // red chilli
-      { foodId: "usda-1104647", grams: 6 }, // garlic
-      { foodId: "usda-173410", grams: 20 }, // butter
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Thattai are Tamil Nadu's crisp rice discs, made for festivals and kept in tins. Stir the rice flour and besan with the salt, sesame and crushed red chillies and garlic.",
-      "Rub in the butter, then knead with just enough warm water into a stiff, smooth dough; fold in the crushed peanuts.",
-      "Rest the dough 15 minutes under a damp cloth.",
-      "Grease a sheet of parchment; press small balls of dough into thin 6 cm discs with your fingers — the edges may crack a little, which is right.",
-      "Heat the oil to 170°C and slide the discs in, in batches.",
-      "Fry 3–4 minutes, turning once, until pale gold and completely crisp — an underdone thattai bends; a done one snaps.",
-      "Cool fully before storing; thattai keep two weeks in an airtight tin and are eaten with coffee, one after another.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-arisi-murukku",
-    name: { en: "Arisi Murukku", hindi: "अरिसि मुरुक्कु" },
-    category: "snack",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 250 }, // rice flour
-      { foodId: "usda-174288", grams: 50 }, // besan
-      { foodId: "usda-173410", grams: 25 }, // butter
-      { foodId: "usda-170150", grams: 8 }, // sesame seeds
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170932", grams: 1 }, // cayenne
-      { foodId: "usda-171025", grams: 55 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Murukku is the coiled, crunchy rice snack of every Tamil home. Stir the rice flour and besan with the sesame, cumin, cayenne and salt.",
-      "Rub in the butter until the mixture resembles crumbs, then knead with warm water, a little at a time, into a soft, pliable dough — too stiff and it breaks in the press, too soft and it drinks oil.",
-      "Load the dough into a murukku press with the star disc.",
-      "Press spirals of dough directly onto a greased ladle or small squares of parchment.",
-      "Heat the oil to 170°C and slide the spirals in, in batches; fry 2–3 minutes, turning once, until the furious bubbling calms and the murukku are pale gold.",
-      "Drain and cool completely — murukku crisp fully only as they cool.",
-      "Store airtight; they keep two weeks, if they survive the first evening.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-chicken-65-style",
-    name: { en: "Chicken 65-Style", hindi: "चिकन 65" },
-    category: "main",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2646170", grams: 550 }, // chicken breast
-      { foodId: "usda-2259793", grams: 60 }, // yogurt
-      { foodId: "usda-171287", grams: 50 }, // egg
-      { foodId: "usda-169714", grams: 25 }, // rice flour
-      { foodId: "usda-171319", grams: 5 }, // chili powder
-      { foodId: "usda-170932", grams: 3 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-169231", grams: 12 }, // ginger
-      { foodId: "usda-1104647", grams: 12 }, // garlic
-      { foodId: "usda-170106", grams: 6 }, // red chilli
-      { foodId: "usda-167746", grams: 15 }, // lemon
-      { foodId: "usda-171025", grams: 45 }, // sunflower oil
-      { foodId: "usda-169997", grams: 6 }, // coriander leaves
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Chicken 65 is Chennai's fiery bar snack, born at the Buhari hotel. Curry leaves are scattered over the classic; they are not in Bloom's verified set and are not claimed here — the red chillies and garlic carry the finish instead.",
-      "Cut the chicken into bite-size pieces and marinate with the yogurt, chili powder, cayenne, turmeric, ginger, garlic, lemon and salt for 1 hour.",
-      "Stir in the beaten egg and rice flour to make a thin, clinging batter.",
-      "Heat the oil to 180°C and fry the chicken in batches for 4–5 minutes, until deep red-gold, crisp at the edges and cooked through.",
-      "Drain briefly; the pieces should be dry and crackling, never sauced.",
-      "In a spoon of the hot oil, fry the whole red chillies and a little extra garlic for 30 seconds and pour over the chicken.",
-      "Serve at once with lemon and onion — chicken 65 should be aggressively hot, crisp and gone in minutes.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 3,
     enriched: false,
   },
   {
@@ -3832,33 +2859,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 40,
     budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-athirasam-style",
-    name: { en: "Athirasam-Style", hindi: "अतिरसम" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 250 }, // rice flour
-      { foodId: "usda-334247", grams: 180 }, // sugar
-      { foodId: "usda-170919", grams: 2 }, // cardamom
-      { foodId: "usda-170150", grams: 5 }, // sesame seeds
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-171314", grams: 40 }, // ghee, for frying
-    ],
-    method: [
-      "Athirasam is Tamil Nadu's ancient temple sweet: rice flour and jaggery, fermented and fried. Jaggery is not in Bloom's verified set, so this -Style version uses the set's sugar syrup — stated openly; the fermentation and method are the sweet's own.",
-      "Make a syrup of the sugar with 120 ml water, boiling it to the one-string stage — a drop between finger and thumb pulls a single thread.",
-      "Rain the rice flour into the hot syrup off the heat, stirring hard, with the cardamom, sesame and black pepper; knead into a soft dough.",
-      "Cover and rest the dough at least overnight, ideally two days — the slight fermentation is athirasam's soul and cannot be skipped.",
-      "Divide into small balls; flatten each on a greased leaf or parchment into a 6 cm disc, neither thick nor thin.",
-      "Fry in ghee over medium-low heat, 2 minutes a side, pressing gently, until deep golden-brown and puffed at the centre.",
-      "Drain and cool; a true athirasam is crisp at the rim, soft and almost fudgy inside, and keeps for a week.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 2,
     enriched: false,
   },
   {
@@ -4067,32 +3067,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-ariselu",
-    name: { en: "Ariselu", hindi: "अरिसेलु" },
-    category: "dessert",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 250 }, // rice flour
-      { foodId: "usda-334247", grams: 170 }, // sugar
-      { foodId: "usda-170150", grams: 15 }, // sesame seeds
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-171314", grams: 45 }, // ghee, for frying
-    ],
-    method: [
-      "Ariselu are Andhra's sesame rice discs, classically made with jaggery; jaggery is not in Bloom's verified set, so the set's sugar syrup is used and stated — the sesame, cardamom and slow frying are unchanged.",
-      "Make a syrup of the sugar with 100 ml water, boiling it to the one-string stage — a drop between finger and thumb pulls a single thread.",
-      "Rain the rice flour into the hot syrup off the heat with the cardamom, stirring hard into a soft dough; cover and rest 1 hour.",
-      "Divide into small balls and roll each in the sesame seeds.",
-      "Flatten each ball on a greased leaf or parchment into a thin 7 cm disc, pressing the sesame in.",
-      "Fry in ghee over medium-low heat, 2 minutes a side, pressing gently with the skimmer, until golden and just crisp at the edges — ariselu scorch fast, so the heat stays patient.",
-      "Drain and cool; they firm as they cool, staying chewy at the centre. Ariselu keep a week and are Sankranti's sweet in Andhra homes.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-royyala-vepudu",
     name: { en: "Royyala Vepudu (Andhra Prawn Fry)", hindi: "रोय्याला वेपुडु" },
     category: "main",
@@ -4234,36 +3208,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 40,
     budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-punugulu",
-    name: { en: "Punugulu", hindi: "पुनुगुलु" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 150 }, // rice flour
-      { foodId: "usda-174259", grams: 80 }, // mungo beans (urad)
-      { foodId: "usda-790646", grams: 60 }, // onion
-      { foodId: "usda-170497", grams: 8 }, // green chilli
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-169997", grams: 10 }, // coriander leaves
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Punugulu are Andhra's fried batter balls, made from idli-style batter. Soak the urad 3 hours, grind to a fluffy batter, and stir in the rice flour and salt with enough water for a thick dropping batter; ferment overnight until risen and sour.",
-      "Fold in the finely chopped onion, green chilli, ginger, cumin and coriander.",
-      "Heat the oil to 175°C.",
-      "Drop small spoonfuls — or squeeze the batter through your fist, as the street vendors do — into the oil in batches.",
-      "Fry 3–4 minutes, turning, until deep golden and crisp all over; the centre should be soft and faintly sour.",
-      "Drain briefly and serve hot with coconut or ginger chutney.",
-      "Punugulu forgive nothing about timing: eaten in the minute they leave the oil, they are crisp clouds; left standing, they are just fritters.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 1,
     enriched: false,
   },
   /* =========================== KARNATAKA =========================== */
@@ -4498,34 +3442,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-kesari-bath",
-    name: { en: "Kesari Bath", hindi: "केसरी भात" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168933", grams: 150 }, // semolina
-      { foodId: "usda-334247", grams: 130 }, // sugar
-      { foodId: "usda-171314", grams: 40 }, // ghee
-      { foodId: "usda-322892", grams: 100 }, // whole milk
-      { foodId: "usda-2515374", grams: 20 }, // cashews
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-172231", grams: 1 }, // turmeric, a pinch for colour
-    ],
-    method: [
-      "Kesari bath is Karnataka's saffron semolina pudding, half of the famous chow chow bath. Saffron is not in Bloom's verified set; a pinch of turmeric gives the golden colour, as many homes do, and it is stated rather than hidden.",
-      "Dry-roast the semolina in a spoon of the ghee for 4 minutes until it smells nutty and turns faintly golden; tip out.",
-      "Boil 350 ml water with the milk and turmeric.",
-      "Rain the semolina into the boiling liquid, stirring constantly and fast — kesari lumps in the first ten seconds or not at all.",
-      "Cook 3 minutes, stirring, until it thickens to a soft mass; add the sugar and cardamom and stir until it loosens and glosses.",
-      "Beat in the remaining ghee a spoon at a time until the kesari shines and leaves the sides of the pan.",
-      "Fry the cashews in a little ghee to gold, scatter over, and serve warm and soft — kesari should mound gently, never slice.",
-    ],
-    timeMinutes: 25,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-akki-rotti",
     name: { en: "Akki Rotti", hindi: "अक्की रोट्टी" },
     category: "breakfast",
@@ -4553,38 +3469,6 @@ export const INDIA_DISHES: Dish[] = [
       "Serve hot with chutney or pickle — in Bengaluru homes akki rotti is breakfast, made one at a time and eaten as it lands.",
     ],
     timeMinutes: 35,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-maddur-vada",
-    name: { en: "Maddur Vada", hindi: "मद्दूर वडा" },
-    category: "snack",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169714", grams: 150 }, // rice flour
-      { foodId: "usda-168936", grams: 60 }, // white flour
-      { foodId: "usda-168933", grams: 40 }, // semolina
-      { foodId: "usda-790646", grams: 100 }, // onion
-      { foodId: "usda-172430", grams: 30 }, // peanuts
-      { foodId: "usda-170497", grams: 8 }, // green chilli
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-169997", grams: 10 }, // coriander leaves
-      { foodId: "usda-170150", grams: 5 }, // sesame seeds
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Maddur vada is the crisp, onion-flecked fritter of Maddur, sold at the railway station to generations of travellers. Mix the rice flour, white flour and semolina with the salt and sesame.",
-      "Stir in the finely sliced onion, crushed peanuts, green chilli, ginger and coriander.",
-      "Add a spoon of hot oil and just enough water to bind a stiff dough — the onion will release moisture as it rests, so keep the dough drier than you think.",
-      "Rest 10 minutes; the dough should hold together when pressed and feel firm.",
-      "With wet hands, flatten small balls into thin 6 cm discs — thin is crisp, and crisp is the whole point.",
-      "Fry in oil at 175°C in batches for 3–4 minutes, turning, until deep golden and rigid.",
-      "Cool on a rack; maddur vada should stay crisp for hours and travel for days — that is what they were invented for.",
-    ],
-    timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
   },

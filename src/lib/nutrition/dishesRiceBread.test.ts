@@ -41,7 +41,7 @@ describe("the rice/bread/breakfast/snack library", () => {
       rice: 21,
       bread: 16,
       breakfast: 23,
-      snack: 19,
+      snack: 16,
     });
   });
 
@@ -117,9 +117,9 @@ describe("the rice/bread/breakfast/snack library", () => {
     }
   });
 
-  it("carries exactly 8 enriched dishes, each stating its boost", () => {
+  it("carries exactly 7 enriched dishes, each stating its boost", () => {
     const enriched = DISHES_RICE_BREAD.filter((d) => d.enriched);
-    expect(enriched).toHaveLength(8);
+    expect(enriched).toHaveLength(7);
     for (const dish of enriched) {
       expect(dish.enrichment, dish.id).toBeTruthy();
       expect(dish.enrichment!.length, dish.id).toBeGreaterThan(20);
@@ -172,12 +172,12 @@ describe("derived patterns — representatives", () => {
       for (const p of patterns) spread.set(p, (spread.get(p) ?? 0) + 1);
     }
     expect(Object.fromEntries(spread)).toEqual({
-      vegetarian: 71,
-      eggetarian: 77,
-      vegan: 35,
-      ovo_vegetarian: 39,
-      pescatarian: 77,
-      non_vegetarian: 79,
+      vegetarian: 68,
+      eggetarian: 74,
+      vegan: 33,
+      ovo_vegetarian: 37,
+      pescatarian: 74,
+      non_vegetarian: 76,
     });
   });
 });
