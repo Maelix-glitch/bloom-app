@@ -87,6 +87,7 @@ import {
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
+import { planAdaptationFor } from "./planAdaptation";
 import { nutritionTargetsFromOutcome, type NutritionTargets } from "./targets";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 import {
@@ -95,6 +96,7 @@ import {
   type FoodClassification,
   type FoodGroup,
   type FoodProvenance,
+  type LogEntry,
   type Meal,
   type Nutrients,
 } from "./types";
@@ -231,8 +233,13 @@ export interface DailyPlan {
  *  foods they are, not under the dry-pulse cap), 5 = the P5 dish-first
  *  composer (meals built from library dishes — a protein anchor, a
  *  base and a side — with simple foods demoted to a top-up layer and
- *  the layered food composition kept as the per-slot fallback). */
-export const PLAN_METHOD_VERSION = 5;
+ *  the layered food composition kept as the per-slot fallback),
+ *  6 = the log-adaptive pass (the recent logged days bias selection —
+ *  protein-first anchors and top-ups after a protein-shortfall log,
+ *  no energy top-ups after an energy-overshoot log; targets, splits
+ *  and every composition rule untouched, and with too little log the
+ *  output is the P5 composer's exactly). */
+export const PLAN_METHOD_VERSION = 6;
 
 export type PlanRefusal =
   | {
@@ -670,6 +677,11 @@ interface ComposeContext {
   vegG: number;
   fruitG: number;
   milkCurdG: number;
+  /** Log-adaptive bias (P6): the person's recent logged days averaged
+   *  well under their protein target, so protein-bearing choices are
+   *  ranked by protein density first. Absent/false = the unbiased
+   *  composer, exactly as before P6. */
+  proteinFirst?: boolean;
 }
 
 function recordSuggestion(
@@ -1846,26 +1858,46 @@ const ANCHOR_DENSITY_AIM = 6;
 
 /** The ordered preference list for a slot's anchor: the protein band,
  *  density-preferred inside it, in the day's rotation order. Shared by
- *  the composer and the pure pick so the two can never drift. */
-function anchorPickList(cands: readonly DishCandidate[], aim: number): DishCandidate[] {
+ *  the composer and the pure pick so the two can never drift.
+ *  Protein-first (P6, the log-adaptive bias): the same list, ordered
+ *  by protein density — the band and its protein aim are never traded
+ *  away; density only orders, now strictly, and the sort is stable so
+ *  equal densities keep the day's rotation order. */
+function anchorPickList(
+  cands: readonly DishCandidate[],
+  aim: number,
+  proteinFirst = false,
+): DishCandidate[] {
   const band = anchorBand(cands, aim);
   const pool = band.length > 0 ? band : [...cands];
   const dense = pool.filter(
     (c) => c.nutrients.kcal > 0 && (c.nutrients.proteinG / c.nutrients.kcal) * 100 >= ANCHOR_DENSITY_AIM,
   );
-  return dense.length > 0 ? dense : pool;
+  const list = dense.length > 0 ? dense : pool;
+  if (!proteinFirst) return list;
+  const density = (c: DishCandidate) =>
+    c.nutrients.kcal > 0 ? c.nutrients.proteinG / c.nutrients.kcal : 0;
+  return [...list].sort((a, b) => density(b) - density(a));
 }
 
 /**
  * The anchor a slot would get on a given day with nothing else known
  * — the pure pick. Today's composer sits yesterday's pure pick out
  * (when the band offers an alternative), so an anchor never repeats
- * on consecutive days by construction, not by luck.
+ * on consecutive days by construction, not by luck. The simulation
+ * runs under the same protein-first bias as today's composition, so
+ * the sit-out names the anchor yesterday's biased composer would
+ * actually have served.
  */
-function pureAnchorId(data: DishPoolData, day: string, meal: Meal): string | null {
+function pureAnchorId(
+  data: DishPoolData,
+  day: string,
+  meal: Meal,
+  proteinFirst = false,
+): string | null {
   const aim = meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
   const cands = anchorCandidates(orderDishesForDay(data.candidates, day), meal, new Set());
-  return anchorPickList(cands, aim)[0]?.dish.id ?? null;
+  return anchorPickList(cands, aim, proteinFirst)[0]?.dish.id ?? null;
 }
 
 function toPlanDish(candidate: DishCandidate, role: PlanDishRole): PlanDish {
@@ -1952,12 +1984,13 @@ function composeDishMeal(
   used: Set<string>,
   day: string,
   split: MealSplit,
+  proteinFirst = false,
 ): PlanDish[] | null {
   const aim = split.meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
   const cands = anchorCandidates(ordered, split.meal, used);
-  let pickList = anchorPickList(cands, aim);
+  let pickList = anchorPickList(cands, aim, proteinFirst);
   /* Yesterday's anchor sits this slot out when an alternative exists. */
-  const yesterday = pureAnchorId(data, prevDayKey(day), split.meal);
+  const yesterday = pureAnchorId(data, prevDayKey(day), split.meal, proteinFirst);
   if (yesterday !== null && pickList.length > 1) {
     const without = pickList.filter((c) => c.dish.id !== yesterday);
     if (without.length > 0) pickList = without;
@@ -2048,6 +2081,11 @@ function addOneTopUp(
   const bestDensity = eligible.reduce((max, f) => Math.max(max, density(f)), 0);
   const candidates = eligible.sort((a, b) => {
     if (proteinMode) {
+      /* Protein-first (P6): density decides outright, not just beyond
+         the band — after a shortfall log, the densest protein the
+         caps allow is the honest purchase. The used/egg-part order
+         below still breaks the ties. */
+      if (ctx.proteinFirst && density(a) !== density(b)) return density(b) - density(a);
       const bandA = density(a) >= 0.8 * bestDensity ? 0 : 1;
       const bandB = density(b) >= 0.8 * bestDensity ? 0 : 1;
       if (bandA !== bandB) return bandA - bandB;
@@ -2092,6 +2130,7 @@ function addTopUps(
   ctx: ComposeContext,
   meals: PlanMeal[],
   targets: NutritionTargets,
+  skipEnergyTopUps = false,
 ): void {
   const mains = meals.filter((m) => m.meal !== "snack");
   const topUpCount = (m: PlanMeal) => m.suggestions.filter((s) => s.layer === "topup").length;
@@ -2125,9 +2164,14 @@ function addTopUps(
     if (!added) break;
   }
 
+  /* The energy round is skipped whole on an energy-overshoot log
+     (P6): the person's logged days already run over the guide, so the
+     plan does not spend top-ups pushing a dish day up toward it —
+     reconciliation still fine-tunes what the dishes themselves left,
+     and the day's notes judge the result honestly either way. */
   for (
     let round = 0;
-    round < 12 && dayKcalOf(meals) < ENERGY_ADD_TRIGGER * targets.kcal;
+    round < 12 && !skipEnergyTopUps && dayKcalOf(meals) < ENERGY_ADD_TRIGGER * targets.kcal;
     round++
   ) {
     const room = targets.kcal - dayKcalOf(meals);
@@ -2168,6 +2212,12 @@ export interface PlanGenerationInput {
    *  Absent or empty, composition is the layered food composition
    *  alone — the behaviour every plan before P5 was built with. */
   dishes?: readonly Dish[];
+  /** The person's food log (P6): when supplied, the recent logged
+   *  days bias composition (see planAdaptation) — protein-first
+   *  selection after a protein-shortfall log, no energy top-ups
+   *  after an energy-overshoot log. Targets are never touched.
+   *  Absent, or too little logged, composition is exactly P5's. */
+  recentLog?: readonly LogEntry[];
   /** The day the plan is for. */
   day: string;
   now: string;
@@ -2263,6 +2313,14 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const splits = splitTargets(targets, mealSlotsFor(profile.dietary.mealsPerDay));
   const pool = eligiblePool(profile, input.foods);
 
+  /* P6: the log-adaptive bias. The recent logged days are judged
+     against the targets just resolved — the targets themselves are
+     never moved by what the log shows; only selection is biased,
+     and only when at least two completed logged days speak. */
+  const adaptation = input.recentLog
+    ? planAdaptationFor(input.recentLog, input.day, targets)
+    : null;
+
   /* Compose the day (P2): the pool in the day's rotation order, layered
      per meal over shared day state — foods already suggested are
      deprioritised (variety), and the floor totals accumulate so later
@@ -2275,6 +2333,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     vegG: 0,
     fruitG: 0,
     milkCurdG: 0,
+    proteinFirst: adaptation?.proteinShortfall ?? false,
   };
   const mainCount = splits.filter((s) => s.meal !== "snack").length;
   const hasSnack = splits.some((s) => s.meal === "snack");
@@ -2300,7 +2359,14 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       };
     }
     if (dishData) {
-      const dishes = composeDishMeal(dishData, dishOrdered, usedDishIds, input.day, split);
+      const dishes = composeDishMeal(
+        dishData,
+        dishOrdered,
+        usedDishIds,
+        input.day,
+        split,
+        adaptation?.proteinShortfall ?? false,
+      );
       if (dishes) {
         return {
           meal: split.meal,
@@ -2343,10 +2409,17 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      fine-tunes the whole. */
   applyItemCap(meals, byId, dishById);
   closeProteinGap(ctx, meals, byId, targets.proteinG);
-  if (meals.some((m) => m.dishes.length > 0)) addTopUps(ctx, meals, targets);
+  if (meals.some((m) => m.dishes.length > 0)) {
+    addTopUps(ctx, meals, targets, adaptation?.energyOvershoot ?? false);
+  }
   reconcileEnergy(meals, byId, targets, dishById);
   applyProteinDominanceCap(meals, byId, targets.proteinG);
-  const notes = compositionNotes(meals, pool, targets, dishById);
+  /* The adaptation's explanations lead the notes: they say why this
+     plan leans the way it does, before the notes judge the result. */
+  const notes = [
+    ...(adaptation?.notes ?? []),
+    ...compositionNotes(meals, pool, targets, dishById),
+  ];
 
   return {
     ok: true,

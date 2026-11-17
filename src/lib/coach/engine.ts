@@ -31,6 +31,8 @@ import {
   type CoachTurn,
   type EdgeResult,
 } from "@/lib/coach/edge";
+import { buildAssessmentDigest } from "@/lib/coach/assessmentDigest";
+import { readAssessmentState } from "@/lib/assessment/state";
 import { APP_FACT_SOURCE, appFactFor } from "@/lib/coach/knowledge";
 import { pick } from "@/lib/voice/messages";
 import { compose, openHanded } from "@/lib/coach/compose";
@@ -451,6 +453,13 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
     ? withMediaFloor(budgetFor(input.text, { greeting: primary === "greeting" }))
     : budgetFor(input.text, { greeting: primary === "greeting" });
 
+  /* The Assessment digest rides along whenever one exists: the Coach
+     reads what the person recorded in their Assessment (goal, pattern,
+     budget, safety facts) instead of asking them to repeat it. Read
+     synchronously at send time, like the record itself — an assessment
+     completed a minute ago is in this request. */
+  const assessmentDigest = buildAssessmentDigest(readAssessmentState());
+
   /* Online-only by design: there is no local path here, not even for
      greetings or a "local" provider id. */
   const result = await askEdge(
@@ -458,6 +467,7 @@ export async function ask(input: AskInput): Promise<CoachAnswer> {
       message: input.text,
       history: input.history.slice(-8),
       facts: toFacts(input.record),
+      ...(assessmentDigest ? { assessmentDigest } : {}),
       provider: input.provider,
       register: budget.register,
       topic: primary,

@@ -21,6 +21,13 @@ import {
   type AssessmentAnswers,
   type AssessmentState,
 } from "@/lib/assessment/state";
+import {
+  commitPending,
+  readAssessmentHistoryValue,
+  snapshotOf,
+  withPending,
+  writeAssessmentHistoryValue,
+} from "@/lib/assessment/history";
 import type { AssessmentStep } from "@/lib/assessment/questions";
 import type { ConsentRecord } from "@/lib/vitalis/domain/consent";
 
@@ -64,6 +71,14 @@ export function useAssessment(): AssessmentStore {
 
   const begin = useCallback(() => {
     const s = current();
+    /* A retake of a completed assessment: capture the completed
+       snapshot as the history's pending entry BEFORE the flow can
+       overwrite any of it. It becomes history only if this retake
+       completes — begin and abandon archives nothing. */
+    const snapshot = snapshotOf(s);
+    if (snapshot) {
+      writeAssessmentHistoryValue(withPending(readAssessmentHistoryValue(), snapshot));
+    }
     setPref(ASSESSMENT_KEY, beginAssessment(s, nowIso(), s.startedAt === null ? seed : undefined));
   }, [seed]);
 
@@ -81,6 +96,9 @@ export function useAssessment(): AssessmentStore {
 
   const complete = useCallback(() => {
     setPref(ASSESSMENT_KEY, completeAssessment(current(), nowIso()));
+    /* The retake finished: the snapshot it replaced becomes history. */
+    const history = readAssessmentHistoryValue();
+    if (history.pending) writeAssessmentHistoryValue(commitPending(history));
   }, []);
 
   const restart = useCallback(() => {

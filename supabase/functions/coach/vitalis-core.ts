@@ -26,8 +26,42 @@
  *   · the deliberation orchestrator itself, with the model caller
  *     injected, so the staged draft → verify → revise loop (bounded
  *     at two revises, then an honest fallback) runs identically in
- *     tests and in the function.
+ *     tests and in the function;
+ *   · the Coach's Assessment section — the fold of the client-built
+ *     assessment digest into the Coach's context (the maturity pass:
+ *     the Coach reads the Assessment too, under the same
+ *     use-only-what-is-written discipline as everything else here).
  */
+
+/* ================================================================== */
+/*  The Coach's Assessment section                                     */
+/* ================================================================== */
+
+/** The whole digest the Coach may ever be handed, however long the
+ *  client's assessment runs: a compact summary, not a transcript.
+ *  The client caps its own lines too — this is the outer guard, so a
+ *  forged or bloated payload still lands as a bounded section. */
+export const COACH_ASSESSMENT_DIGEST_CAP = 1500;
+
+/**
+ * Fold the client's assessment digest into a Coach context section,
+ * or return null — the section is omitted entirely — when no usable
+ * digest was sent. The digest itself is built on the client from the
+ * person's completed Assessment (goal, eating pattern, budget tier,
+ * the safety facts they recorded); this fold adds the discipline the
+ * Coach answers under: use only what is written here, never invent
+ * an assessment fact beyond it.
+ */
+export function coachAssessmentSection(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const digest = raw.trim().slice(0, COACH_ASSESSMENT_DIGEST_CAP).trim();
+  if (!digest) return null;
+  return [
+    "FROM THEIR ASSESSMENT",
+    digest,
+    "These are facts the person recorded in their Bloom Assessment. Use them when they are relevant — above all their goal, their eating pattern and their safety facts (allergies, conditions, pregnancy, medication). Never state anything about their assessment beyond what is written here, and never present an unlisted fact as something their assessment says.",
+  ].join("\n");
+}
 
 /* ================================================================== */
 /*  The structured record (schema v1)                                  */

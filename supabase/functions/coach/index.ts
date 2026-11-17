@@ -114,6 +114,7 @@
 // @ts-nocheck - Deno runtime, not part of the app's TS project.
 
 import {
+  coachAssessmentSection,
   DeliberationUnavailable,
   VITALIS_ACTION_ALLOWLIST,
   looksLikePlanRequest,
@@ -216,6 +217,11 @@ interface Body {
   message?: string;
   history?: Array<{ role: string; content: string }>;
   facts?: unknown;
+  /** A compact digest of the person's completed Assessment, built on
+   *  the client (lib/coach/assessmentDigest). Coach mode only — folded
+   *  into the Coach's context by the shared core; Vitalis reads the
+   *  Assessment through its own scoped context and ignores this. */
+  assessmentDigest?: unknown;
   provider?: string;
   register?: string;
   topic?: string;
@@ -1442,9 +1448,15 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    /* The Assessment digest, when the client sent one: a section of
+       its own in the Coach's context, absent entirely when there is
+       no completed Assessment — every pre-existing section is
+       byte-identical either way. */
+    const assessmentSection = coachAssessmentSection(body.assessmentDigest);
     const systemText = [
       SYSTEM,
       `THEIR RECORD\n${factsToPrompt(body.facts)}`,
+      ...(assessmentSection ? [assessmentSection] : []),
       `LENGTH\n${rule}`,
       ...(register === "plan" ? [PLAN_STRUCTURE] : []),
     ].join("\n\n");

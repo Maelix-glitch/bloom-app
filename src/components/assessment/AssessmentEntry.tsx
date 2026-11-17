@@ -47,6 +47,11 @@ import {
   type AssessmentState,
   type AssessmentStatus,
 } from "@/lib/assessment/state";
+import {
+  ASSESSMENT_HISTORY_KEY,
+  EMPTY_HISTORY_ENTRIES,
+  parseAssessmentHistoryEntries,
+} from "@/lib/assessment/history";
 import { summaryOf } from "@/lib/assessment/summary";
 import { GOAL_LABEL, QUESTION_STEPS } from "@/lib/assessment/questions";
 import { AssessmentFlow } from "./AssessmentFlow";
@@ -419,6 +424,11 @@ export function AssessmentPromptCard() {
 
 export function AssessmentProfileCard() {
   const { state } = useAssessment();
+  const history = usePrefValue(
+    ASSESSMENT_HISTORY_KEY,
+    parseAssessmentHistoryEntries,
+    EMPTY_HISTORY_ENTRIES,
+  );
   const [flowOpen, setFlowOpen] = useState(false);
   /* Which door opened the flow: a retake of a completed assessment opens
      on the intro step (the flow's retake intent); take/continue opens at
@@ -478,6 +488,25 @@ export function AssessmentProfileCard() {
           </Button>
         )}
       </div>
+
+      {history.length > 0 ? (
+        <div className="mt-5 border-t border-border/60 pt-4">
+          <p className="pf-eyebrow">Previous assessments</p>
+          <ul className="mt-2 space-y-1.5">
+            {history.map((entry) => (
+              <li
+                key={entry.completedAt}
+                className="flex flex-wrap items-baseline justify-between gap-x-3 text-[length:var(--text-support)] leading-[var(--leading-body)]"
+              >
+                <span className="text-foreground">{formatDate(entry.completedAt)}</span>
+                <span className="text-muted-foreground">
+                  {entry.answers.goal ? GOAL_LABEL[entry.answers.goal] : "No goal stated"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <AssessmentFlow open={flowOpen} retake={flowRetake} onClose={() => setFlowOpen(false)} />
 

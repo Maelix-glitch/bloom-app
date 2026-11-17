@@ -25,6 +25,7 @@ export * from "./foodImages";
 export * from "./coachLog";
 export * from "./overviewInput";
 export * from "./plan";
+export * from "./planAdaptation";
 export * from "./dayView";
 export * from "./swaps";
 export * from "./patterns";

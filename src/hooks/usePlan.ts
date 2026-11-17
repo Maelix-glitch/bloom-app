@@ -146,10 +146,15 @@ export function usePlan(): PlanStore {
       /* P5: the plan composes dish-first from the shipped library;
          the engine judges every dish against the person's own gates. */
       dishes: DISH_LIBRARY,
+      /* P6: the food log rides along — the recent logged days bias
+         composition (never the targets) when at least two completed
+         days are logged. The preview reads the same log, so what the
+         section explains is the plan the tap will actually save. */
+      recentLog: nutrition.entries,
       day: today,
       now,
     }),
-    [assembled, nutrition.foods, today],
+    [assembled, nutrition.foods, nutrition.entries, today],
   );
 
   /* The preview runs the real generator and discards the plan — the
