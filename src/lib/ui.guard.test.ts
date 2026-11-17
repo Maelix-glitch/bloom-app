@@ -1409,6 +1409,7 @@ describe("UI guard: mobile pass — sheets never swallow the screen", () => {
   const RESPONSIVE = ALL_SOURCES.find((f) => f.rel === "styles/responsive.css")!;
   const SHEET = ALL_SOURCES.find((f) => f.rel === "styles/bloom-sheet.css")!;
   const STYLES = ALL_SOURCES.find((f) => f.rel === "styles.css")!;
+  const COACH = ALL_SOURCES.find((f) => f.rel === "styles/coach.css")!;
   const OVERVIEW = ALL_SOURCES.find((f) => f.rel === "components/home/OverviewBand.tsx")!;
 
   it("caps every phone overlay surface in responsive.css at 88dvh", () => {
@@ -1421,6 +1422,15 @@ describe("UI guard: mobile pass — sheets never swallow the screen", () => {
     expect(SHEET.text).toContain("max-height: 88dvh");
     const scroll = SHEET.text.slice(SHEET.text.indexOf("\n.bsheet-scroll {"));
     expect(scroll.slice(0, scroll.indexOf("}"))).toContain("scrollbar-width: none");
+  });
+
+  it("caps the Coach camera card at 88dvh (sheet audit, item #53)", () => {
+    /* The camera card was the one hand-rolled overlay panel with no cap
+       of its own: its stage carries a 320px floor, so on a short phone
+       the head and actions could be pushed off the viewport with no way
+       to scroll to them. The card now carries the family cap itself. */
+    const card = COACH.text.slice(COACH.text.indexOf("\n.coach-camera {"));
+    expect(card.slice(0, card.indexOf("}"))).toContain("max-height: 88dvh");
   });
 
   it("keeps the assessment scrollers scrollbar-free", () => {
@@ -1502,12 +1512,33 @@ describe("UI guard: legacy engines — layered surfaces carry a no-color-mix fal
   const FILES: Record<string, string> = {
     sheet: "styles/bloom-sheet.css",
     coach: "styles/coach.css",
+    stories: "styles/stories.css",
+    admin: "styles/admin-panel.css",
+    progression: "styles/progression.css",
   };
   const CRITICAL: [keyof typeof FILES, string][] = [
     ["sheet", ".bsheet-panel"],
     ["sheet", ".bsheet-backdrop"],
     ["coach", ".coach-composer"],
     ["coach", ".coach-composer:focus-within"],
+    /* Sheet audit (production item #53): the Coach quick palette and the
+       Coach camera card are overlay panels whose only background was a
+       layered gradient with color-mix stops — the same whole-declaration
+       drop left both fully transparent on legacy engines. */
+    ["coach", ".coach-palette"],
+    ["coach", ".coach-camera"],
+    /* Sheet audit (#53), continued: the build-emitted first-colour
+       fallback the census verified for the global bundle does NOT reach
+       the route-scoped stylesheets — checked against the built CSS,
+       .ssheet, .adm-panel, .adm-scrim and .pg-ceremony shipped with no
+       fallback rule at all, so their color-mix-only backgrounds left
+       them fully transparent on legacy engines. They carry the plain
+       declaration in source now, like the surfaces above. */
+    ["stories", ".ssheet"],
+    ["admin", ".adm-panel"],
+    ["admin", ".adm-scrim"],
+    ["admin", ".adm-bar"],
+    ["progression", ".pg-ceremony"],
   ];
 
   function ruleBodies(text: string, selector: string): string[] {

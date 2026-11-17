@@ -21,6 +21,8 @@
 .adm-scrim {
   position: absolute;
   inset: 0;
+  /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel) */
+  background: rgba(5, 4, 10, 0.72);
   background: color-mix(in oklab, var(--ap-scrim) 72%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -36,6 +38,8 @@
   overflow: hidden;
   border-radius: var(--radius-dialog);
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
+  /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel) */
+  background: var(--ap-panel);
   background: color-mix(in oklab, var(--surface) 94%, transparent);
   backdrop-filter: blur(28px) saturate(1.2);
   -webkit-backdrop-filter: blur(28px) saturate(1.2);
@@ -289,6 +293,10 @@
  */
 
 .adm-bar {
+  /* The bar mounts at the app root, outside .adm — the token is defined
+     here too, or the background below never resolves and the pill paints
+     transparent on every engine (sheet audit, production item #53). */
+  --ap-panel: #0d0b12;
   position: fixed;
   left: 12px;
   bottom: calc(12px + env(safe-area-inset-bottom));
@@ -299,6 +307,8 @@
   padding: 5px 7px 5px 9px;
   border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--amber) 34%, transparent);
+  /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel) */
+  background: var(--ap-panel);
   background: color-mix(in oklab, var(--ap-panel) 82%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
