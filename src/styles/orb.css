@@ -1,5 +1,5 @@
 /*
- * The Coach orb — the floating Bloom mark and its chat panel.
+ * The Vitalis orb — the floating Bloom mark and its Vitalis window.
  *
  * Geometry, stated once:
  *   · The button is 56px, 20–24px in from the right. Below the lg
@@ -253,17 +253,6 @@
   padding: 20px 18px 24px;
 }
 
-.coach-orb-center {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: var(--muted-foreground);
-  font-size: 13.5px;
-}
-
 .coach-orb-welcome {
   padding: 30px 22px 24px;
   display: flex;
@@ -319,71 +308,240 @@
   font-size: 13px;
 }
 
-/* The listen affordance under each of Bloom's replies. */
-.coach-orb-listen-row {
+/* Deliberation stages (phase 3) — a calm checklist inside the sheet,
+   filled only with stages the server actually reported, in order.
+   Content height, no overlay of its own: the sheet's own cap and
+   solid surface carry it. */
+
+.coach-orb-stages {
   display: flex;
-  margin-top: 8px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--card);
 }
 
-.coach-orb-listen {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: var(--radius-pill);
-  padding: 5px 10px 5px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted-foreground);
-  transition:
-    color var(--motion-standard) var(--ease-out-expo),
-    background-color var(--motion-standard) var(--ease-out-expo);
-}
-
-.coach-orb-listen:hover {
-  color: var(--gold);
-  background: color-mix(in oklab, var(--gold) 10%, transparent);
-}
-
-.coach-orb-listen[aria-pressed="true"] {
-  color: var(--gold);
-  background: color-mix(in oklab, var(--gold) 14%, transparent);
-}
-
-/* ------------------------------------------------------------ notice */
-
-.coach-orb-notice {
-  flex: none;
+.coach-orb-stages-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 14px 8px;
-  padding: 8px 10px 8px 12px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.coach-orb-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.coach-orb-stage {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  animation: coach-orb-fade var(--motion-standard) ease;
+}
+
+.coach-orb-stage[data-current="true"] {
+  color: var(--foreground);
+}
+
+.coach-orb-stage-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--accent);
+}
+
+.coach-orb-stage-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: coach-orb-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes coach-orb-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* Action confirm cards (phase 4) — a proposal is inert text until
+   the person taps its card. */
+
+.coach-orb-action-card {
+  margin-top: 10px;
+  padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  background: var(--surface-2);
-  font-size: 12.5px;
-  line-height: 1.4;
+  border-radius: var(--radius-control);
+  background: var(--card);
+}
+
+.coach-orb-action-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.coach-orb-action-detail {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--muted-foreground);
 }
 
-.coach-orb-notice-text {
+.coach-orb-action-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.coach-orb-action-confirm {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--gold-foreground);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.coach-orb-action-dismiss {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.coach-orb-action-result {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.coach-orb-action-card[data-status="failed"] .coach-orb-action-result {
+  color: var(--destructive, var(--muted-foreground));
+}
+
+/* The lockdown notice (phase 5) reads as a Vitalis reply with a
+   quieter frame — same sheet, same surface. */
+.coach-orb-reply[data-locked="true"] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 12px 14px;
+}
+
+.coach-orb-input:disabled {
+  opacity: 0.55;
+}
+
+/* A Vitalis reply. There is deliberately NO listen affordance here —
+   replies are spoken automatically; the only voice control in the
+   window is the mute toggle in the header. */
+
+.coach-orb-reply-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+
+.coach-orb-reply-author {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.coach-orb-reply-p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--foreground);
+}
+
+.coach-orb-reply-p + .coach-orb-reply-p {
+  margin-top: 8px;
+}
+
+.coach-orb-reply[data-fresh="true"] {
+  animation: coach-orb-reply-in var(--motion-long) var(--ease-out-expo);
+}
+
+@keyframes coach-orb-reply-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* A failed send keeps the person's words and offers one retry. */
+.coach-orb-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+.coach-orb-error-copy {
   flex: 1;
   min-width: 0;
 }
 
-.coach-orb-notice-link {
-  color: var(--gold);
+.coach-orb-error-title {
   font-weight: 600;
-  white-space: nowrap;
+  color: var(--foreground);
 }
 
-.coach-orb-notice-dismiss {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
+.coach-orb-retry {
   flex: none;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo);
+}
+
+.coach-orb-retry:hover {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+}
+
+/* The header's mute toggle reads muted at a glance. */
+.coach-orb-icon-btn[data-muted="true"] {
   color: var(--muted-foreground);
 }
 
@@ -458,6 +616,12 @@
   .coach-orb-halo {
     animation: none;
   }
+  .coach-orb-stage-pulse {
+    animation: none;
+  }
+  .coach-orb-stage {
+    animation: none;
+  }
   .coach-orb,
   .coach-orb:hover,
   .coach-orb:active {
@@ -481,4 +645,8 @@
 
 .coach-orb-panel[data-reduced-motion="true"] {
   animation: coach-orb-fade var(--motion-standard) ease;
+}
+
+.coach-orb-panel[data-reduced-motion="true"] .coach-orb-stage-pulse {
+  animation: none;
 }

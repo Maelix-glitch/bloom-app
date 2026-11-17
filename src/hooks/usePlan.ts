@@ -36,6 +36,7 @@ import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor, type BodyTargetsOutcome } from "@/lib/vitalis/calc/body";
 import type { SafetyAssessment } from "@/lib/vitalis/domain/safety";
 import {
+  DISH_LIBRARY,
   PLAN_KEY,
   PLAN_LOG_KEY,
   USDA_REFERENCE_FOODS,
@@ -44,12 +45,14 @@ import {
   parsePlanLogValue,
   parsePlanValue,
   planInputsSnapshotOf,
+  planWithDishSwapped,
   planLoggedEntryIdFrom,
   planStaleness,
   recordPlanLog,
   writePlan,
   type DailyPlan,
   type LogEntry,
+  type Meal,
   type NutritionTargets,
   type PlanGenerationInput,
   type PlanGoalProfile,
@@ -82,6 +85,12 @@ export interface PlanStore {
   /** Generate today's plan from the current inputs and save it. The
    *  outcome is returned so the caller can surface a refusal directly. */
   generate: () => PlanOutcome;
+  /** Swap one dish in the stored plan for another library dish (the
+   *  apply path for Vitalis's confirmed swap_dish card): the plan's
+   *  targets and inputs are untouched, only the plate changes. False
+   *  when there is no stored plan, the dish is not in that meal, or
+   *  the replacement is unknown or already in the meal. */
+  swapPlanDish: (meal: Meal, fromDishId: string, toDishId: string) => boolean;
   /** Log a plan suggestion into today's food log, through the nutrition
    *  lib's normal entry path — the entry keeps the food's provenance and
    *  records `plan` as its source. Duplicate-safe via the plan-log
@@ -134,6 +143,9 @@ export function usePlan(): PlanStore {
     (now: string): PlanGenerationInput => ({
       ...assembled,
       foods: [...nutrition.foods, ...USDA_REFERENCE_FOODS],
+      /* P5: the plan composes dish-first from the shipped library;
+         the engine judges every dish against the person's own gates. */
+      dishes: DISH_LIBRARY,
       day: today,
       now,
     }),
@@ -172,6 +184,19 @@ export function usePlan(): PlanStore {
     if (outcome.ok) writePlan(outcome.plan);
     return outcome;
   }, [buildInput]);
+
+  const swapPlanDish = useCallback<PlanStore["swapPlanDish"]>(
+    (meal, fromDishId, toDishId) => {
+      if (!plan) return false;
+      const dish = DISH_LIBRARY.find((d) => d.id === toDishId);
+      if (!dish) return false;
+      const next = planWithDishSwapped(plan, meal, fromDishId, dish);
+      if (!next) return false;
+      writePlan(next);
+      return true;
+    },
+    [plan],
+  );
 
   const setGoal = useCallback<PlanStore["setGoal"]>(
     (goal) => {
@@ -238,6 +263,7 @@ export function usePlan(): PlanStore {
     currentGoal: assembled.profile.goal,
     setGoal,
     generate,
+    swapPlanDish,
     logSuggestion,
     suggestionLogged,
     logMeal,

@@ -12,7 +12,11 @@
   --bt-line: var(--border);
   --bt-fill: var(--surface);
   width: 100%;
-  max-width: 1120px;
+  /* The app-wide 1280px desktop measure (owner directive 2026-11-17:
+     the cards were not wide enough), matching the Trackers page around
+     it. A cap this wide can only bind at desktop widths, so phone and
+     tablet rendering is unchanged. */
+  max-width: 1280px;
   margin: var(--space-10) auto 0;
   padding: 1.35rem;
   border: 1px solid var(--bt-line);

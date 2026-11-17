@@ -43,6 +43,19 @@
  * trimmed or fed back to within ±3% of its guide — floors unbroken,
  * protein and vegetables never trimmed. Whatever still misses is
  * named in the plan's notes with its true figure.
+ *
+ * Dish-first (P5): when the caller supplies the dish library, a main
+ * meal is composed from DISHES first — a protein anchor dish, plus a
+ * rice/bread base and a side where the meal's energy share calls for
+ * them — chosen under the same gates the plan applies everywhere
+ * (the dish suits the person's pattern, every ingredient line sits in
+ * the eligible pool, the person's stated budget tier is a hard cap).
+ * A dish's numbers are its computed `dishNutrients` — the day's totals
+ * are the dishes' totals, so the plan and the dish library can never
+ * disagree. Simple foods return only as a subordinate top-up layer
+ * that closes the day's remaining protein/energy gap, and the layered
+ * food composition above survives as the per-meal fallback for a slot
+ * no suitable dish can fill — never an empty meal while food fits.
  */
 
 import { getPref, setPref } from "@/lib/prefs";
@@ -64,10 +77,18 @@ import {
   type SafetyClass,
 } from "@/lib/vitalis/domain/safety";
 import { missingBodyFields, type BodyTargetsOutcome } from "@/lib/vitalis/calc/body";
+import {
+  dishNutrients,
+  dishPatterns,
+  dishProvenance,
+  type Dish,
+  type DishCategory,
+} from "./dishes";
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
 import { nutritionTargetsFromOutcome, type NutritionTargets } from "./targets";
+import { USDA_REFERENCE_FOODS } from "./usdaReference";
 import {
   MEALS,
   type Food,
@@ -110,9 +131,16 @@ export interface PlanInputsSnapshot {
 /** The composition layer a suggestion belongs to (P2). Main meals are
  *  built in layers — a grain base, the protein layer, vegetables, and the
  *  finishing touches (measured fat, dairy extra, breakfast fruit/nuts);
- *  snack items carry `snack`. Absent on plans stored by the P1 composer,
- *  which suggested without layers. */
-export type SuggestionLayer = "base" | "protein" | "vegetables" | "finishing" | "snack";
+ *  snack items carry `snack`; P5 top-up foods — the simple foods that
+ *  close a dish-composed day's remaining gap — carry `topup`. Absent on
+ *  plans stored by the P1 composer, which suggested without layers. */
+export type SuggestionLayer =
+  | "base"
+  | "protein"
+  | "vegetables"
+  | "finishing"
+  | "snack"
+  | "topup";
 
 export interface PlanSuggestion {
   foodId: string;
@@ -124,11 +152,42 @@ export interface PlanSuggestion {
   layer?: SuggestionLayer;
 }
 
+/** The role a dish plays in a dish-composed meal (P5): the anchor is
+ *  the meal's protein centrepiece; a base (rice/bread) and a side join
+ *  it where the meal's energy share calls for them. */
+export type PlanDishRole = "anchor" | "base" | "side";
+
+/**
+ * One dish placed in a plan meal (P5). The dish is served whole — one
+ * serving of the library recipe — and its nutrients are the dish's own
+ * computed `dishNutrients` at generation time, under the recipe
+ * provenance: the plan's numbers ARE the library's numbers for the
+ * same dish, by construction.
+ */
+export interface PlanDish {
+  dishId: string;
+  /** The dish's English name, as the library states it. */
+  name: string;
+  /** The dish's Hindi name, as the library states it. */
+  hindi: string;
+  role: PlanDishRole;
+  /** Servings of the dish in this meal. The P5 composer serves 1. */
+  servings: number;
+  /** `dishNutrients(dish)` for `servings` servings, computed at
+   *  generation time — never stored on the dish itself. */
+  nutrients: Nutrients;
+  provenance: FoodProvenance;
+}
+
 export interface PlanMeal {
   meal: Meal;
   /** This meal's share of the day's targets. Meals sum exactly to them. */
   kcal: number;
   proteinG: number;
+  /** The meal's dishes (P5) — the meal itself, when a suitable dish
+   *  filled its slots. Empty on food-composed meals (the fallback, and
+   *  every plan stored before P5). */
+  dishes: PlanDish[];
   suggestions: PlanSuggestion[];
   /** Set when no clean food fits this meal — the honest empty state. */
   note: string | null;
@@ -169,8 +228,11 @@ export interface DailyPlan {
  *  protein-gap closing, an 8-item plate cap, egg-part portions, honest
  *  protein/energy shortfall notes), 4 = the P4 soy-form portion fix
  *  (cooked soy forms — tofu, tempeh, edamame — portioned as the cooked
- *  foods they are, not under the dry-pulse cap). */
-export const PLAN_METHOD_VERSION = 4;
+ *  foods they are, not under the dry-pulse cap), 5 = the P5 dish-first
+ *  composer (meals built from library dishes — a protein anchor, a
+ *  base and a side — with simple foods demoted to a top-up layer and
+ *  the layered food composition kept as the per-slot fallback). */
+export const PLAN_METHOD_VERSION = 5;
 
 export type PlanRefusal =
   | {
@@ -1010,7 +1072,9 @@ function applyProteinDominanceCap(
       if (newGrams < 10) {
         excess -= suggestion.nutrients.proteinG;
         meal.suggestions.splice(idx, 1);
-        if (meal.suggestions.length === 0) meal.note = EMPTY_MEAL_NOTE;
+        if (meal.suggestions.length === 0 && meal.dishes.length === 0) {
+          meal.note = EMPTY_MEAL_NOTE;
+        }
       } else {
         const nutrients = nutrientsForGrams(food.per100g, newGrams);
         excess -= suggestion.nutrients.proteinG - nutrients.proteinG;
@@ -1038,29 +1102,55 @@ const ENERGY_ADD_TRIGGER = 0.97;
 const ENERGY_NOTE_BAND = 0.05;
 
 const dayKcalOf = (meals: readonly PlanMeal[]): number =>
-  meals.reduce((sum, m) => sum + m.suggestions.reduce((a, s) => a + s.nutrients.kcal, 0), 0);
+  meals.reduce(
+    (sum, m) =>
+      sum +
+      m.suggestions.reduce((a, s) => a + s.nutrients.kcal, 0) +
+      m.dishes.reduce((a, d) => a + d.nutrients.kcal, 0),
+    0,
+  );
 
 const dayProteinOf = (meals: readonly PlanMeal[]): number =>
-  meals.reduce((sum, m) => sum + m.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0), 0);
+  meals.reduce(
+    (sum, m) =>
+      sum +
+      m.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0) +
+      m.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0),
+    0,
+  );
 
 /** The day's ICMR floor totals as the meals NOW stand — recomputed from
  *  the suggestions themselves, so post-composition passes (and the
  *  notes that judge them) always speak about the plan's real numbers,
- *  never the composer's running tally. */
+ *  never the composer's running tally. P5: a plan dish contributes its
+ *  ingredient lines' grams (per serving, at the servings the plan
+ *  serves) under each line food's group — a vegetable curry's
+ *  vegetables are vegetables, wherever they were composed. */
 function floorTotalsOf(
   meals: readonly PlanMeal[],
   byId: ReadonlyMap<string, Food>,
+  dishById: ReadonlyMap<string, Dish> = new Map(),
 ): { vegG: number; fruitG: number; milkCurdG: number } {
   let vegG = 0;
   let fruitG = 0;
   let milkCurdG = 0;
+  const addFood = (food: Food, grams: number) => {
+    if (groupOf(food) === "vegetables") vegG += grams;
+    if (groupOf(food) === "fruits") fruitG += grams;
+    if (isMilkOrCurd(food)) milkCurdG += grams;
+  };
   for (const meal of meals) {
     for (const s of meal.suggestions) {
       const food = byId.get(s.foodId);
-      if (!food) continue;
-      if (groupOf(food) === "vegetables") vegG += s.grams;
-      if (groupOf(food) === "fruits") fruitG += s.grams;
-      if (isMilkOrCurd(food)) milkCurdG += s.grams;
+      if (food) addFood(food, s.grams);
+    }
+    for (const planDish of meal.dishes) {
+      const dish = dishById.get(planDish.dishId);
+      if (!dish) continue;
+      for (const line of dish.lines) {
+        const food = byId.get(line.foodId);
+        if (food) addFood(food, (line.grams / dish.servings) * planDish.servings);
+      }
     }
   }
   return { vegG, fruitG, milkCurdG };
@@ -1090,15 +1180,21 @@ const ceil5 = (grams: number): number => Math.ceil(grams / 5) * 5;
  * anchor (the meal's strongest protein item) are never dropped, and a
  * meal is never emptied.
  */
-function applyItemCap(meals: PlanMeal[], byId: ReadonlyMap<string, Food>): void {
+function applyItemCap(
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  dishById: ReadonlyMap<string, Dish> = new Map(),
+): void {
   for (const meal of meals) {
     if (meal.meal === "snack") continue;
     while (meal.suggestions.length > MAX_MAIN_MEAL_ITEMS) {
-      const victim = itemCapVictim(meal, meals, byId);
+      const victim = itemCapVictim(meal, meals, byId, dishById);
       if (victim < 0) break;
       meal.suggestions.splice(victim, 1);
     }
-    if (meal.suggestions.length === 0) meal.note = EMPTY_MEAL_NOTE;
+    if (meal.suggestions.length === 0 && meal.dishes.length === 0) {
+      meal.note = EMPTY_MEAL_NOTE;
+    }
   }
 }
 
@@ -1106,6 +1202,7 @@ function itemCapVictim(
   meal: PlanMeal,
   meals: readonly PlanMeal[],
   byId: ReadonlyMap<string, Food>,
+  dishById: ReadonlyMap<string, Dish> = new Map(),
 ): number {
   const items = meal.suggestions;
   const foodAt = (i: number) => byId.get(items[i]!.foodId);
@@ -1123,7 +1220,7 @@ function itemCapVictim(
     if (groupOf(foodAt(i)!) === "fats_oils") return false;
     return i !== anchor;
   };
-  const totals = floorTotalsOf(meals, byId);
+  const totals = floorTotalsOf(meals, byId, dishById);
   /* 1. The nuts/seeds extra — no floor, no layer depends on it. */
   for (let i = 0; i < items.length; i++) {
     if (droppable(i) && groupOf(foodAt(i)!) === "nuts_seeds") return i;
@@ -1301,6 +1398,10 @@ function addProteinItems(ctx: ComposeContext, meals: PlanMeal[], targetProteinG:
   let moved = false;
   for (const meal of meals) {
     if (meal.meal === "snack") continue;
+    /* P5: a dish-composed meal's protein closing belongs to the
+       top-up pass — this pass must not stock its plate with raw
+       protein foods behind the dishes' back. */
+    if (meal.dishes.length > 0) continue;
     if (dayProteinOf(meals) >= targetProteinG) break;
     const proteinItems = meal.suggestions.filter((s) => s.layer === "protein").length;
     if (proteinItems >= MAX_PROTEIN_ITEMS_PER_MEAL) continue;
@@ -1364,9 +1465,10 @@ function reconcileEnergy(
   meals: PlanMeal[],
   byId: ReadonlyMap<string, Food>,
   targets: NutritionTargets,
+  dishById: ReadonlyMap<string, Dish> = new Map(),
 ): void {
   const kcal = dayKcalOf(meals);
-  if (kcal > ENERGY_TRIM_TRIGGER * targets.kcal) trimEnergy(meals, byId, targets);
+  if (kcal > ENERGY_TRIM_TRIGGER * targets.kcal) trimEnergy(meals, byId, targets, dishById);
   else if (kcal < ENERGY_ADD_TRIGGER * targets.kcal) addEnergy(meals, byId, targets);
 }
 
@@ -1374,6 +1476,7 @@ function trimEnergy(
   meals: PlanMeal[],
   byId: ReadonlyMap<string, Food>,
   targets: NutritionTargets,
+  dishById: ReadonlyMap<string, Dish> = new Map(),
 ): void {
   let excess = dayKcalOf(meals) - ENERGY_TRIM_TRIGGER * targets.kcal;
   const kcalPerGram = (food: Food) => food.per100g.kcal / 100;
@@ -1412,7 +1515,9 @@ function trimEnergy(
     if (newGrams < removeBelowG) {
       const saved = ref.s.nutrients.kcal;
       ref.meal.suggestions.splice(idx, 1);
-      if (ref.meal.suggestions.length === 0) ref.meal.note = EMPTY_MEAL_NOTE;
+      if (ref.meal.suggestions.length === 0 && ref.meal.dishes.length === 0) {
+        ref.meal.note = EMPTY_MEAL_NOTE;
+      }
       return saved;
     }
     const kept = Math.max(minG, newGrams);
@@ -1446,19 +1551,19 @@ function trimEnergy(
   /* 1b. Fruit beyond the day's floor — only the surplus is cut (the
      cap is re-read per item, so the floor itself is never crossed),
      and a fruit portion is never trimmed below a real portion. */
-  if (excess > 0 && floorTotalsOf(meals, byId).fruitG > FLOOR_FRUIT_G) {
+  if (excess > 0 && floorTotalsOf(meals, byId, dishById).fruitG > FLOOR_FRUIT_G) {
     cutCategory(
       refsWhere((s, food) => groupOf(food) === "fruits").sort(byProteinPerKcal),
-      () => floorTotalsOf(meals, byId).fruitG - FLOOR_FRUIT_G,
+      () => floorTotalsOf(meals, byId, dishById).fruitG - FLOOR_FRUIT_G,
       50,
       0,
     );
   }
   /* 1c. Milk/curd beyond the day's floor — same discipline. */
-  if (excess > 0 && floorTotalsOf(meals, byId).milkCurdG > FLOOR_MILK_CURD_G) {
+  if (excess > 0 && floorTotalsOf(meals, byId, dishById).milkCurdG > FLOOR_MILK_CURD_G) {
     cutCategory(
       refsWhere((s, food) => isMilkOrCurd(food)).sort(byProteinPerKcal),
-      () => floorTotalsOf(meals, byId).milkCurdG - FLOOR_MILK_CURD_G,
+      () => floorTotalsOf(meals, byId, dishById).milkCurdG - FLOOR_MILK_CURD_G,
       50,
       0,
     );
@@ -1543,10 +1648,11 @@ function compositionNotes(
   meals: readonly PlanMeal[],
   pool: readonly Food[],
   targets: NutritionTargets,
+  dishById: ReadonlyMap<string, Dish> = new Map(),
 ): string[] {
   const notes: string[] = [];
   const byId = new Map(pool.map((f) => [f.id, f]));
-  const totals = floorTotalsOf(meals, byId);
+  const totals = floorTotalsOf(meals, byId, dishById);
   if (totals.vegG < FLOOR_VEGETABLES_G) {
     notes.push(
       `Today's suggestions reach ${totals.vegG} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
@@ -1566,9 +1672,16 @@ function compositionNotes(
   const poolGroups = new Set<FoodGroup>();
   for (const meal of meals) {
     for (const s of meal.suggestions) {
-      if (s.layer === "protein" || (meal.meal === "snack" && s.nutrients.proteinG >= 5)) {
-        proteinSources.add(s.foodId);
-      }
+      /* Protein-layer items count by role; top-ups and snack items
+         count when they carry real protein (≥5 g). */
+      if (s.layer === "protein") proteinSources.add(s.foodId);
+      else if (s.nutrients.proteinG >= 5) proteinSources.add(s.foodId);
+    }
+    /* P5: a plan dish carrying real protein is a protein source, and
+       its ingredient lines speak for their food groups — a dish-based
+       day is judged by the same diversity aims as a food-based one. */
+    for (const planDish of meal.dishes) {
+      if (planDish.nutrients.proteinG >= 5) proteinSources.add(`dish:${planDish.dishId}`);
     }
   }
   for (const food of pool) {
@@ -1579,6 +1692,14 @@ function compositionNotes(
     for (const s of meal.suggestions) {
       const group = byId.get(s.foodId)?.classification?.group;
       if (group) suggestedGroups.add(group);
+    }
+    for (const planDish of meal.dishes) {
+      const dish = dishById.get(planDish.dishId);
+      if (!dish) continue;
+      for (const line of dish.lines) {
+        const group = byId.get(line.foodId)?.classification?.group;
+        if (group) suggestedGroups.add(group);
+      }
     }
   }
   if (proteinSources.size < AIM_DISTINCT_PROTEIN_SOURCES) {
@@ -1612,6 +1733,422 @@ function compositionNotes(
   return notes;
 }
 
+/* ------------------------- P5 dish-first composition ----------------------- */
+
+interface DishCandidate {
+  dish: Dish;
+  /** Per-serving nutrients, computed — the only way they exist. */
+  nutrients: Nutrients;
+}
+
+interface DishPoolData {
+  candidates: DishCandidate[];
+  byId: Map<string, Dish>;
+}
+
+/**
+ * The dishes a plan may serve this person, judged by the plan's own
+ * gates — the qualification the plan's dish idea has always used,
+ * tightened where a plan (followed daily) must be stricter than an
+ * idea (an occasional alternative):
+ *  · the dish suits the person's dietary pattern — `dishPatterns`,
+ *    every ingredient line judged by its classification;
+ *  · every ingredient line sits in the eligible pool for the reference
+ *    set — the provenance gate, the pattern judgement and the person's
+ *    own allergy / intolerance / dislike name-matching, applied to the
+ *    dish's line foods exactly as the plan applies them to foods;
+ *  · the budget tier the person stated in the Assessment (and only
+ *    there) is a HARD cap — the dish idea treats it as a preference,
+ *    but a plan is followed, so it holds.
+ * A dish Bloom cannot price — a line naming a food outside the
+ * reference set — is skipped, never guessed at.
+ */
+function dishPoolFor(profile: HealthProfile, dishes: readonly Dish[]): DishPoolData | null {
+  const pattern = planPatternOf(profile.dietary.pattern);
+  const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
+  const budgetTier = profile.dietary.budgetTier;
+  const candidates: DishCandidate[] = [];
+  const byId = new Map<string, Dish>();
+  for (const dish of dishes) {
+    if (budgetTier !== null && dish.budgetTier > budgetTier) continue;
+    if (!dish.lines.every((line) => eligible.has(line.foodId))) continue;
+    try {
+      if (pattern !== null && !dishPatterns(dish).includes(pattern)) continue;
+      candidates.push({ dish, nutrients: dishNutrients(dish).nutrients });
+      byId.set(dish.id, dish);
+    } catch {
+      /* An unresolvable line — the dish is not planned with. */
+      continue;
+    }
+  }
+  return candidates.length > 0 ? { candidates, byId } : null;
+}
+
+/** The day's rotation order over dish candidates: FNV-1a over
+ *  `day:dish:id` — the dish idea's discipline (D4), so the same day
+ *  always orders the pool the same way and consecutive days differ. */
+function orderDishesForDay(candidates: readonly DishCandidate[], day: string): DishCandidate[] {
+  return candidates
+    .map((c) => ({ c, key: fnv1a(`${day}:dish:${c.dish.id}`) }))
+    .sort((a, b) => a.key - b.key || (a.c.dish.id < b.c.dish.id ? -1 : 1))
+    .map((entry) => entry.c);
+}
+
+/** The anchor protein aims: a main meal's centrepiece carries at
+ *  least ~25 g of protein where the pool offers one (the dish waves'
+ *  own bar); breakfast, a lighter meal, aims at ~20 g. */
+const ANCHOR_AIM_MAIN_G = 25;
+const ANCHOR_AIM_BREAKFAST_G = 20;
+
+/**
+ * The anchor band for a slot: the dishes at or above the slot's
+ * protein aim when the pool offers any; otherwise the pool's top band
+ * (≥70% of its best) — the density-band discipline the P3 protein
+ * closing uses, so a thin pool still anchors on its strongest dish
+ * rather than a random one.
+ */
+function anchorBand(cands: readonly DishCandidate[], aim: number): DishCandidate[] {
+  if (cands.length === 0) return [];
+  const best = cands.reduce((max, c) => Math.max(max, c.nutrients.proteinG), 0);
+  const threshold = best >= aim ? Math.max(aim, 0.7 * best) : 0.7 * best;
+  return cands.filter((c) => c.nutrients.proteinG >= threshold);
+}
+
+/** The slot's candidates in pick order: for breakfast, the breakfast
+ *  category leads and mains are the overflow; lunch and dinner draw
+ *  on mains alone. */
+function anchorCandidates(
+  ordered: readonly DishCandidate[],
+  meal: Meal,
+  used: ReadonlySet<string>,
+): DishCandidate[] {
+  const free = ordered.filter((c) => !used.has(c.dish.id));
+  if (meal === "breakfast") {
+    const breakfast = free.filter((c) => c.dish.category === "breakfast");
+    const mains = free.filter((c) => c.dish.category === "main");
+    return [...breakfast, ...mains];
+  }
+  return free.filter((c) => c.dish.category === "main");
+}
+
+function prevDayKey(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Within the anchor band, dishes carrying at least this much protein
+ *  per 100 kcal are preferred (a derivation): at a high-protein guide
+ *  the day's energy budget is the binding constraint, and a band pick
+ *  at 4 g/100 kcal spends it twice as fast as one at 8. The band's
+ *  protein aim is never traded away — density only orders the band. */
+const ANCHOR_DENSITY_AIM = 6;
+
+/** The ordered preference list for a slot's anchor: the protein band,
+ *  density-preferred inside it, in the day's rotation order. Shared by
+ *  the composer and the pure pick so the two can never drift. */
+function anchorPickList(cands: readonly DishCandidate[], aim: number): DishCandidate[] {
+  const band = anchorBand(cands, aim);
+  const pool = band.length > 0 ? band : [...cands];
+  const dense = pool.filter(
+    (c) => c.nutrients.kcal > 0 && (c.nutrients.proteinG / c.nutrients.kcal) * 100 >= ANCHOR_DENSITY_AIM,
+  );
+  return dense.length > 0 ? dense : pool;
+}
+
+/**
+ * The anchor a slot would get on a given day with nothing else known
+ * — the pure pick. Today's composer sits yesterday's pure pick out
+ * (when the band offers an alternative), so an anchor never repeats
+ * on consecutive days by construction, not by luck.
+ */
+function pureAnchorId(data: DishPoolData, day: string, meal: Meal): string | null {
+  const aim = meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
+  const cands = anchorCandidates(orderDishesForDay(data.candidates, day), meal, new Set());
+  return anchorPickList(cands, aim)[0]?.dish.id ?? null;
+}
+
+function toPlanDish(candidate: DishCandidate, role: PlanDishRole): PlanDish {
+  return {
+    dishId: candidate.dish.id,
+    name: candidate.dish.name.en,
+    hindi: candidate.dish.name.hindi,
+    role,
+    servings: 1,
+    nutrients: candidate.nutrients,
+    provenance: dishProvenance(candidate.dish),
+  };
+}
+
+/** Scale a per-serving nutrient panel by a serving count — every field
+ *  the source published, absence preserved (absent is not zero). */
+function scaleNutrientPanel(perServing: Nutrients, servings: number): Nutrients {
+  if (servings === 1) return perServing;
+  const out: Record<string, number> = {};
+  for (const [key, value] of Object.entries(perServing)) {
+    if (typeof value === "number") out[key] = Math.round(value * servings * 10) / 10;
+  }
+  return out as unknown as Nutrients;
+}
+
+/**
+ * The dish-swap seam (Vitalis's swap_dish tool, 2026-11-17): the same
+ * plan with ONE dish in ONE meal replaced by another library dish —
+ * the replacement the person confirmed on Vitalis's card. The new
+ * PlanDish is built exactly as the composer builds one (computed
+ * `dishNutrients`, recipe provenance, the old dish's role and
+ * servings); targets, meal shares, inputs and the plan's fingerprint
+ * are untouched — a swap changes what is on the plate, never what the
+ * day aims for. Null when the meal or the from-dish is not in the
+ * plan, or the replacement is already in that meal.
+ */
+export function planWithDishSwapped(
+  plan: DailyPlan,
+  meal: Meal,
+  fromDishId: string,
+  dish: Dish,
+): DailyPlan | null {
+  const mealIndex = plan.meals.findIndex((m) => m.meal === meal);
+  if (mealIndex < 0) return null;
+  const target = plan.meals[mealIndex]!;
+  const dishIndex = target.dishes.findIndex((d) => d.dishId === fromDishId);
+  if (dishIndex < 0) return null;
+  if (target.dishes.some((d) => d.dishId === dish.id)) return null;
+  const old = target.dishes[dishIndex]!;
+  const replacement: PlanDish = {
+    dishId: dish.id,
+    name: dish.name.en,
+    hindi: dish.name.hindi,
+    role: old.role,
+    servings: old.servings,
+    nutrients: scaleNutrientPanel(dishNutrients(dish).nutrients, old.servings),
+    provenance: dishProvenance(dish),
+  };
+  const dishes = target.dishes.map((d, i) => (i === dishIndex ? replacement : d));
+  const meals = plan.meals.map((m, i) => (i === mealIndex ? { ...m, dishes } : m));
+  return { ...plan, meals };
+}
+
+/** A main meal's energy-share thresholds for joining dishes —
+ *  derivations, in the P2 spirit: the anchor alone carries a meal
+ *  whose share it nearly meets; below ~75% of the share a base joins,
+ *  and below ~85% a side joins. A plate is anchor + base + side at
+ *  most — three dishes, never a buffet. */
+const DISH_BASE_JOIN_SHARE = 0.75;
+const DISH_SIDE_JOIN_SHARE = 0.85;
+const BASE_CATEGORIES: readonly DishCategory[] = ["rice", "bread"];
+const SIDE_CATEGORIES: readonly DishCategory[] = ["side", "raita", "chutney"];
+
+/**
+ * Compose one main meal from dishes: the protein anchor first, then
+ * a rice/bread base and a side where the meal's energy share calls
+ * for them. Null when no suitable anchor exists for the slot — the
+ * caller falls back to the layered food composition for that meal,
+ * so a slot the dish pool cannot fill is composed, never empty.
+ */
+function composeDishMeal(
+  data: DishPoolData,
+  ordered: readonly DishCandidate[],
+  used: Set<string>,
+  day: string,
+  split: MealSplit,
+): PlanDish[] | null {
+  const aim = split.meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
+  const cands = anchorCandidates(ordered, split.meal, used);
+  let pickList = anchorPickList(cands, aim);
+  /* Yesterday's anchor sits this slot out when an alternative exists. */
+  const yesterday = pureAnchorId(data, prevDayKey(day), split.meal);
+  if (yesterday !== null && pickList.length > 1) {
+    const without = pickList.filter((c) => c.dish.id !== yesterday);
+    if (without.length > 0) pickList = without;
+  }
+  const anchor = pickList[0];
+  if (!anchor) return null;
+  const dishes: PlanDish[] = [toPlanDish(anchor, "anchor")];
+  used.add(anchor.dish.id);
+  let kcal = anchor.nutrients.kcal;
+  if (kcal < DISH_BASE_JOIN_SHARE * split.kcal) {
+    /* Bases join in the meal's own idiom — breads lead at breakfast,
+       rice at lunch and dinner — and a protein-carrying base (≥10 g)
+       is preferred where the pool offers one: the base is a third of
+       the plate, and its protein is not free. */
+    const bases = ordered.filter(
+      (c) => BASE_CATEGORIES.includes(c.dish.category) && !used.has(c.dish.id),
+    );
+    const lead: DishCategory = split.meal === "breakfast" ? "bread" : "rice";
+    const base =
+      bases.find((c) => c.dish.category === lead && c.nutrients.proteinG >= 10) ??
+      bases.find((c) => c.nutrients.proteinG >= 10) ??
+      bases.find((c) => c.dish.category === lead) ??
+      bases[0];
+    if (base) {
+      dishes.push(toPlanDish(base, "base"));
+      used.add(base.dish.id);
+      kcal += base.nutrients.kcal;
+    }
+  }
+  if (kcal < DISH_SIDE_JOIN_SHARE * split.kcal) {
+    /* A protein-carrying side (≥8 g — a soya or paneer side, not a
+       chutney) is preferred where the pool offers one. */
+    const sides = ordered.filter(
+      (c) => SIDE_CATEGORIES.includes(c.dish.category) && !used.has(c.dish.id),
+    );
+    const side = sides.find((c) => c.nutrients.proteinG >= 8) ?? sides[0];
+    if (side) {
+      dishes.push(toPlanDish(side, "side"));
+      used.add(side.dish.id);
+      kcal += side.nutrients.kcal;
+    }
+  }
+  return dishes;
+}
+
+/* ------------------------------ P5 top-ups -------------------------------- */
+
+/** At most this many top-up foods join one meal — they complete a
+ *  day; they never become the meal. */
+const MAX_TOPUPS_PER_MEAL = 3;
+
+/**
+ * Add one top-up food to a meal, sized toward the aim inside the
+ * food's own portion cap — the composer's caps bind top-ups exactly
+ * as they bind composition — and inside the day's remaining energy
+ * room: a top-up that would push the day past its guide is sized
+ * down to the room or not added at all. Protein mode draws on the
+ * protein-bearing dairy and egg foods, ranked by protein density
+ * (the P3 band idiom: within 80% of the best density, the day's
+ * rotation decides; beyond the band, density decides) — at a
+ * high-protein guide, protein bought at 17 g/100 kcal and protein
+ * bought at 8 are different purchases. Energy mode draws on
+ * milk/curd and nuts/seeds. Unused-today first, the whole egg ahead
+ * of its parts. Returns false when nothing honest can be added.
+ */
+function addOneTopUp(
+  ctx: ComposeContext,
+  meal: PlanMeal,
+  aim: { kcal?: number; proteinG?: number },
+  roomKcal: number,
+): boolean {
+  if (roomKcal < 25) return false;
+  const inMeal = new Set(meal.suggestions.map((s) => s.foodId));
+  const proteinMode = aim.proteinG !== undefined;
+  const eligible = ctx.ordered.filter((food) => {
+    if (inMeal.has(food.id)) return false;
+    const group = groupOf(food);
+    if (proteinMode) {
+      /* Egg parts are excluded outright: a top-up is a food a person
+         eats (a yogurt, an egg), never a separated component — the
+         P3 parts principle, held at the top-up layer too. */
+      return (group === "dairy" || group === "eggs") && proteinKindOf(food) !== null && !isEggPart(food);
+    }
+    return isMilkOrCurd(food) || group === "nuts_seeds";
+  });
+  const density = (food: Food): number =>
+    food.per100g.kcal > 0 ? food.per100g.proteinG / food.per100g.kcal : 0;
+  const bestDensity = eligible.reduce((max, f) => Math.max(max, density(f)), 0);
+  const candidates = eligible.sort((a, b) => {
+    if (proteinMode) {
+      const bandA = density(a) >= 0.8 * bestDensity ? 0 : 1;
+      const bandB = density(b) >= 0.8 * bestDensity ? 0 : 1;
+      if (bandA !== bandB) return bandA - bandB;
+      if (bandA === 1 && density(a) !== density(b)) return density(b) - density(a);
+    }
+    return (
+      Number(ctx.used.has(a.id)) - Number(ctx.used.has(b.id)) ||
+      Number(isEggPart(a)) - Number(isEggPart(b))
+    );
+  });
+  for (const food of candidates) {
+    let portion: SizedPortion | null;
+    if (proteinMode) {
+      const kind = proteinKindOf(food)!;
+      portion = sizedPortion(food, aim, proteinCapG(food, kind));
+      if (portion && portion.nutrients.kcal > roomKcal) {
+        portion = sizedPortion(food, { kcal: roomKcal }, proteinCapG(food, kind));
+      }
+      if (portion && portion.nutrients.proteinG < 3) continue;
+    } else {
+      const cap = isMilkOrCurd(food) ? CAP_FINISHING_DAIRY_G : CAP_NUTS_G;
+      portion = sizedPortion(food, { kcal: Math.min(aim.kcal ?? 0, roomKcal) }, cap);
+      if (portion && portion.nutrients.kcal < 40) continue;
+    }
+    if (!portion) continue;
+    meal.suggestions.push(recordSuggestion(ctx, food, portion, "topup"));
+    return true;
+  }
+  return false;
+}
+
+/**
+ * The top-up pass (P5): when dishes alone leave the day short, a few
+ * simple foods close the gap — protein first (toward the full guide,
+ * meal by meal from the largest split deficit), then energy (toward
+ * the reconciliation trigger, after which `reconcileEnergy` fine-tunes
+ * as it always has). Top-ups are sized inside the same portion caps
+ * as composed foods, and what they cannot close, the day's notes name
+ * with its true figure — the P3 honesty, unchanged.
+ */
+function addTopUps(
+  ctx: ComposeContext,
+  meals: PlanMeal[],
+  targets: NutritionTargets,
+): void {
+  const mains = meals.filter((m) => m.meal !== "snack");
+  const topUpCount = (m: PlanMeal) => m.suggestions.filter((s) => s.layer === "topup").length;
+  const byDeficit = (key: (m: PlanMeal) => number) =>
+    mains
+      .filter((m) => topUpCount(m) < MAX_TOPUPS_PER_MEAL)
+      .sort((a, b) => key(b) - key(a));
+
+  /* Protein top-ups may spend the day up to its note band (+5%) —
+     the same tolerance the day's energy is judged at — and no
+     further: protein bought past the guide is not closing, it is
+     overshooting, and the shortfall note exists for what the room
+     cannot buy. */
+  for (let round = 0; round < 12 && dayProteinOf(meals) < targets.proteinG; round++) {
+    const room = (1 + ENERGY_NOTE_BAND) * targets.kcal - dayKcalOf(meals);
+    if (room < 25) break;
+    const gap = targets.proteinG - dayProteinOf(meals);
+    const ordered = byDeficit(
+      (m) =>
+        m.proteinG -
+        (m.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0) +
+          m.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0)),
+    );
+    let added = false;
+    for (const meal of ordered) {
+      if (addOneTopUp(ctx, meal, { proteinG: gap }, room)) {
+        added = true;
+        break;
+      }
+    }
+    if (!added) break;
+  }
+
+  for (
+    let round = 0;
+    round < 12 && dayKcalOf(meals) < ENERGY_ADD_TRIGGER * targets.kcal;
+    round++
+  ) {
+    const room = targets.kcal - dayKcalOf(meals);
+    if (room < 25) break;
+    const ordered = byDeficit(
+      (m) =>
+        m.kcal -
+        (m.suggestions.reduce((a, s) => a + s.nutrients.kcal, 0) +
+          m.dishes.reduce((a, d) => a + d.nutrients.kcal, 0)),
+    );
+    let added = false;
+    for (const meal of ordered) {
+      if (addOneTopUp(ctx, meal, { kcal: Math.min(room, meal.kcal) }, room)) {
+        added = true;
+        break;
+      }
+    }
+    if (!added) break;
+  }
+}
+
 /* ------------------------------- generation -------------------------------- */
 
 export interface PlanGenerationInput {
@@ -1626,6 +2163,11 @@ export interface PlanGenerationInput {
   /** The suggestion pool: the user's own foods first, then the USDA
    *  reference set. Eligibility is re-checked inside regardless. */
   foods: readonly Food[];
+  /** The dish library (P5): when supplied, main meals are composed
+   *  dish-first and foods serve as top-ups and the per-slot fallback.
+   *  Absent or empty, composition is the layered food composition
+   *  alone — the behaviour every plan before P5 was built with. */
+  dishes?: readonly Dish[];
   /** The day the plan is for. */
   day: string;
   now: string;
@@ -1737,6 +2279,14 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const mainCount = splits.filter((s) => s.meal !== "snack").length;
   const hasSnack = splits.some((s) => s.meal === "snack");
   const vegTargetG = mainCount > 0 ? Math.min(240, Math.max(130, Math.round(420 / mainCount))) : 0;
+  /* P5: the dish pool, judged once against the person's own gates.
+     When it can fill a main meal's anchor slot the meal is composed
+     of dishes; where it cannot, the layered food composition fills
+     that meal — the two never mix within a meal's main structure. */
+  const dishData =
+    input.dishes && input.dishes.length > 0 ? dishPoolFor(profile, input.dishes) : null;
+  const dishOrdered = dishData ? orderDishesForDay(dishData.candidates, input.day) : [];
+  const usedDishIds = new Set<string>();
   const meals: PlanMeal[] = splits.map((split) => {
     if (split.meal === "snack") {
       const suggestions = composeSnack(ctx, split);
@@ -1744,9 +2294,23 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
         meal: split.meal,
         kcal: split.kcal,
         proteinG: split.proteinG,
+        dishes: [],
         suggestions,
         note: suggestions.length === 0 ? EMPTY_MEAL_NOTE : null,
       };
+    }
+    if (dishData) {
+      const dishes = composeDishMeal(dishData, dishOrdered, usedDishIds, input.day, split);
+      if (dishes) {
+        return {
+          meal: split.meal,
+          kcal: split.kcal,
+          proteinG: split.proteinG,
+          dishes,
+          suggestions: [],
+          note: null,
+        };
+      }
     }
     const { suggestions, missingLayers } = composeMainMeal(ctx, split, {
       vegTargetG,
@@ -1757,6 +2321,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       meal: split.meal,
       kcal: split.kcal,
       proteinG: split.proteinG,
+      dishes: [],
       suggestions,
       note:
         suggestions.length === 0
@@ -1767,15 +2332,21 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     };
   });
   const byId = new Map(pool.map((f) => [f.id, f]));
+  const dishById = dishData?.byId ?? new Map<string, Dish>();
   /* P3 maturity: cap the plate, close the protein gap toward the
      target, reconcile the day's energy back to its guide, then hold
      the dominance line — in that order, so each pass judges the plan
-     the previous one left, and the notes judge them all. */
-  applyItemCap(meals, byId);
+     the previous one left, and the notes judge them all. P5 inserts
+     its top-up pass between the protein closing and the energy
+     reconciliation: the closing works the food-composed meals, the
+     top-ups complete the dish-composed day, and reconciliation then
+     fine-tunes the whole. */
+  applyItemCap(meals, byId, dishById);
   closeProteinGap(ctx, meals, byId, targets.proteinG);
-  reconcileEnergy(meals, byId, targets);
+  if (meals.some((m) => m.dishes.length > 0)) addTopUps(ctx, meals, targets);
+  reconcileEnergy(meals, byId, targets, dishById);
   applyProteinDominanceCap(meals, byId, targets.proteinG);
-  const notes = compositionNotes(meals, pool, targets);
+  const notes = compositionNotes(meals, pool, targets, dishById);
 
   return {
     ok: true,
@@ -1855,7 +2426,9 @@ const SUGGESTION_LAYERS: readonly SuggestionLayer[] = [
   "vegetables",
   "finishing",
   "snack",
+  "topup",
 ];
+const PLAN_DISH_ROLES: readonly PlanDishRole[] = ["anchor", "base", "side"];
 const ACTIVITIES: readonly ActivityLevel[] = [
   "sedentary",
   "light",
@@ -1945,6 +2518,27 @@ function parseSuggestion(raw: unknown): PlanSuggestion | null {
   return suggestion;
 }
 
+/** A stored plan dish (P5): absent on plans stored before P5, read as
+ *  an empty list. The provenance must be the recipe provenance the
+ *  generator itself writes, naming the dish it prices — anything else
+ *  is a tamper and drops the dish, like any other malformed field. */
+function parsePlanDish(raw: unknown): PlanDish | null {
+  if (!isRecord(raw)) return null;
+  const dishId = text(raw["dishId"], 80);
+  const name = text(raw["name"], 120);
+  if (!dishId || !name) return null;
+  const hindi = text(raw["hindi"], 120);
+  const role = oneOf(raw["role"], PLAN_DISH_ROLES);
+  if (!role) return null;
+  const servings = numIn(raw["servings"], 0.25, 10);
+  if (servings === null) return null;
+  const nutrients = parseEntryNutrients(raw["nutrients"]);
+  if (!nutrients) return null;
+  const provenance = parseFoodProvenance(raw["provenance"]);
+  if (!provenance || provenance.kind !== "recipe" || provenance.sourceId !== dishId) return null;
+  return { dishId, name, hindi, role, servings, nutrients, provenance };
+}
+
 function parsePlan(raw: unknown): DailyPlan | null {
   if (!isRecord(raw)) return null;
   const id = text(raw["id"], 80);
@@ -2014,10 +2608,20 @@ function parsePlan(raw: unknown): DailyPlan | null {
         if (suggestion) suggestions.push(suggestion);
       }
     }
+    /* The meal's dishes (P5): absent on plans stored before P5, read
+       as empty — a pre-P5 plan is a food-composed plan, whole. */
+    const dishes: PlanDish[] = [];
+    if (Array.isArray(item["dishes"])) {
+      for (const d of item["dishes"].slice(0, 6)) {
+        const dish = parsePlanDish(d);
+        if (dish) dishes.push(dish);
+      }
+    }
     meals.push({
       meal,
       kcal: Math.round(mealKcal),
       proteinG: round1(mealProtein),
+      dishes,
       suggestions,
       note: item["note"] === null ? null : text(item["note"], 240) || null,
     });

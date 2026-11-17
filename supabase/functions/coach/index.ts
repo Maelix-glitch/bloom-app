@@ -47,6 +47,55 @@
  *   supabase secrets set GROQ_API_KEY=...           # Groq (optional)
  *   supabase secrets set APINEX_API_KEY=...          # APINEX (optional)
  *   supabase secrets set HF_TOKEN=...              # HF Qwen (optional)
+ *   supabase secrets set ELEVENLABS_API_KEY=...    # ElevenLabs (Vitalis voice)
+ *
+ * VITALIS MODE (the orb's AI — a distinct identity from the Coach):
+ *   A request with `mode: "vitalis"` runs the SAME provider chain under
+ *   the VITALIS_SYSTEM prompt instead of SYSTEM, and its record section
+ *   is the client-assembled `vitalisContext` — Nutrition + Assessment
+ *   data only, built by `buildVitalisContext` on the client. The Coach
+ *   mode is untouched by it: no shared prompt, no shared thread.
+ *
+ * VITALIS PHASES 3–5 (deliberation, tool control, tamper lockdown):
+ *   The pure logic lives in ./vitalis-core.ts (shared verbatim with the
+ *   app and its tests): record schema validation, number verification,
+ *   rule checks, action-proposal allowlist, and the deliberation
+ *   orchestrator. This file wires it to the provider chain.
+ *   · Deliberation: a vitalis request flagged `deliberate` by the
+ *     client (or escalated server-side when the message is plan-shaped
+ *     AND a valid structured record rides along) runs draft → number
+ *     verification → rule checks → enjoyment check, with at most two
+ *     revise passes, then an honest fallback. Flagged requests are
+ *     answered as an NDJSON stream of stage events followed by the
+ *     result, so the client's loading screen shows the real stages as
+ *     they happen; escalated-but-unflagged requests deliberate too and
+ *     return plain JSON carrying the stage summaries. Ordinary
+ *     questions keep the single-call fast path.
+ *   · Actions: Vitalis may end a reply with ONE fenced `bloom-action`
+ *     JSON block proposing log_dish / log_food / compose_plan /
+ *     swap_dish / propose_assessment_change. Proposals are validated against the
+ *     structured record here and stripped from the spoken prose; the
+ *     client re-validates, shows a confirm card, and applies ONLY on
+ *     the person's tap. Nothing here writes anything.
+ *   · Lockdown: a present-but-malformed `vitalisRecord`, a malformed
+ *     `vitalis-action-result` report, or an invalid action proposal
+ *     surviving into a final reply each record a strike against a
+ *     hash of the caller's credential (in-memory, per isolate — the
+ *     same best-effort footing as the provider breaker). At 3 strikes
+ *     Vitalis locks for 30 minutes: vitalis mode answers with an
+ *     honest locked notice and never calls a provider. Message CONTENT
+ *     never strikes; the Coach and the rest of the app are untouched.
+ *     A fresh sign-in presents a new credential → a clean slate.
+ *
+ * TTS ACTION (Vitalis auto-voice):
+ *   A request with `action: "tts"` and `text` returns spoken audio for
+ *   that text from ElevenLabs (model eleven_flash_v2_5, default voice
+ *   Sarah). The key is read from the ELEVENLABS_API_KEY secret at
+ *   request time and never logged; when the secret is absent the action
+ *   answers a clean { error: "voice_unavailable" } (503) and the client
+ *   simply carries on in text. Audio is returned as
+ *   application/octet-stream — supabase-js hands octet-stream responses
+ *   back as a Blob; the client re-wraps it as audio/mpeg for playback.
  *
  * Optional tuning (all server-side secrets):
  *   COACH_PROVIDER_ORDER=apinex,grok,huggingface-qwen   # gemini = Google-direct, optional
@@ -63,6 +112,16 @@
  */
 /* eslint-disable */
 // @ts-nocheck - Deno runtime, not part of the app's TS project.
+
+import {
+  DeliberationUnavailable,
+  VITALIS_ACTION_ALLOWLIST,
+  looksLikePlanRequest,
+  parseActionBlocks,
+  runDeliberation,
+  sanitizeProposals,
+  validateVitalisRecord,
+} from "./vitalis-core.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -161,6 +220,132 @@ interface Body {
   register?: string;
   topic?: string;
   image?: { mediaType?: string; dataBase64?: string };
+  /** "vitalis" runs the Vitalis prompt + scoped context (see below).
+   *  Anything else (including absent) is the Coach, exactly as before. */
+  mode?: string;
+  /** The Nutrition + Assessment record Vitalis answers from, assembled
+   *  on the client by buildVitalisContext. Vitalis mode only. */
+  vitalisContext?: string;
+  /** The structured twin of `vitalisContext` (schema v1), validated
+   *  against the shared core's schema. Vitalis mode only. */
+  vitalisRecord?: unknown;
+  /** Client flag: this request wants the deliberation pipeline (and
+   *  its NDJSON stage stream). Vitalis mode only. */
+  deliberate?: boolean;
+  /** For `action: "vitalis-action-result"`: the client's report of a
+   *  confirmed action's outcome, shape-validated server-side. */
+  actionResult?: unknown;
+  /** TTS action: `action: "tts"` speaks `text` instead of answering. */
+  action?: string;
+  text?: string;
+  voiceId?: string;
+}
+
+/* ============================================================================
+   VITALIS — the orb's AI. A distinct identity from the Coach above: its
+   own prompt, its own (client-held, per-open) session, and a record that
+   contains Nutrition + Assessment data ONLY. The provider chain, health
+   handling and failure contract are shared; nothing else is.
+   ========================================================================== */
+const VITALIS_SYSTEM = `You are Vitalis, the nutrition intelligence inside Bloom Vitalis.
+
+WHO YOU ARE
+You are Vitalis — not the Coach, not a chatbot bolted onto an app. You look after one person's food life: their assessment, their eating pattern, their plan and what they actually eat. You are warm and engaging, personal and unhurried — you bring the attentiveness of a good clinician to this person's own body and history. You are not a doctor, and you never claim to be one: you never diagnose, never name a condition as theirs, never interpret symptoms or lab values as findings. When something sounds medical — a symptom, a medication question, a worrying change — you say plainly, once and without alarm, that a clinician is the right person for that, and you return to what food can genuinely do.
+
+YOUR WORLD IS NUTRITION AND ASSESSMENT — ONLY
+Everything you know about this person is in the record below: their Assessment answers, their targets, their current plan, their food log and the dishes and foods Bloom's library offers them. You know nothing about their habits, points, mood, sleep or anything else in Bloom — that is the Coach's side of the app, and it is not yours. If they ask about those, say so in one friendly sentence and offer the food angle if there is one. Never pretend to know something the record does not contain.
+
+NUMBERS — THE ONE HARD RULE
+You may only quote numbers that appear in the record you are given: their targets, their plan's values, their logged totals, a dish's or food's stated nutrition. Never invent a number, a target, a portion or a nutrition value, and never recompute one in your head and present it as Bloom's. If the record does not carry a number the answer needs, say that plainly ("I don't have today's protein logged yet") and help from what IS there. Estimates from general knowledge must be labelled as rough estimates, never dressed as their data.
+
+RECOMMENDATIONS
+Recommend only from two sources: this person's own record, and the dishes and foods listed in the record's library section — those are computed from verified ingredients and they are the dishes Bloom can actually serve them. Respect their stated pattern, allergies, dislikes and budget absolutely: never suggest a food that breaks them. When data is missing — no assessment yet, nothing logged, no targets — do not fill the gap with assumptions: ask for the one thing that would unlock the answer, or say honestly that the answer needs it. A shorter honest answer beats a confident invented one.
+
+HOW YOU SPEAK
+Your replies are read aloud by a voice, so write for the ear: short, natural sentences, no markdown, no tables, no lists with symbols, no emoji. Two to four short paragraphs at most, usually fewer. Lead with the person and their question, reach for their numbers second, and quote at most a couple of figures per reply unless they ask for detail. You may end with one genuine question when it opens something real. Never emit bracketed directives or tags of any kind — no [BLOOM_...] lines, ever.
+
+ACTING — THE ONE THING YOU MAY PROPOSE
+When the person clearly asks you to DO one of these five things, end your reply with exactly one fenced block in exactly this shape:
+\`\`\`bloom-action
+{"action":"log_dish","dishId":"the dish id printed in the record","meal":"dinner"}
+\`\`\`
+The allowed actions are only these: log_dish (dishId from the record's dish list; meal one of breakfast, lunch, dinner, snack), log_food (foodId from their own foods in the record; grams as a number; meal), compose_plan (no fields — Bloom composes today's plan itself), swap_dish (meal; fromDishId — a dish id that is in that meal of the plan printed in the record; toDishId — a replacement from the record's dish list, similar in role and protein to the dish it replaces; propose this when the person says they do not like or do not want a dish in their plan), and propose_assessment_change (field one of goal, dietaryPattern, mealsPerDay, foodBudget, addDislikedFood, addAllergy, with a value that fits the field). The block is a PROPOSAL, never a deed: Bloom shows it to the person as a confirm card, and nothing happens unless they tap confirm — so never write that you have logged, changed or composed anything; say you are proposing it and they can confirm. Never invent a dish or food id: only the ids printed in the record exist. If what they ask for sits outside these five actions — habits, mood, points, profile, anything else — emit no block at all, and say in one sentence that those live elsewhere in Bloom.`;
+
+/** Appended to the Vitalis system text ONLY on the deliberation path:
+    the draft will be machine-checked before the person sees it. */
+const VITALIS_DELIBERATION_ADDENDUM = `DELIBERATION
+This answer will be checked before it is shown: every number traced to the record, every suggestion tested against the person's allergies, dislikes and eating pattern, every proposal validated. Write the answer you can defend first time — quote only record numbers exactly, suggest only what the record offers, and keep it in your own voice.`;
+
+/** What a locked Vitalis says — honest about what happened, clear
+    that the rest of Bloom is unaffected and how the lock lifts. */
+const VITALIS_LOCKED_PARAGRAPHS = [
+  "Vitalis is paused for this account right now.",
+  "Some requests reaching Bloom didn't match the shape Vitalis expects — that can mean a tampered or corrupted client — so Vitalis locks itself rather than guess with your health data. The rest of Bloom is completely unaffected. Signing out and back in starts a fresh session and lifts the lock.",
+];
+
+/* ============================================================================
+   TTS — ElevenLabs speech for Vitalis replies.
+   The API key lives ONLY in the ELEVENLABS_API_KEY secret, is read at
+   request time, and is never logged, never returned, never echoed.
+   ========================================================================== */
+/** Sarah — Mature, Reassuring, Confident. The Vitalis voice. */
+const ELEVENLABS_DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
+const ELEVENLABS_MODEL_ID = "eleven_flash_v2_5";
+/** One request speaks one sentence-sized chunk; this is the hard ceiling
+ *  whatever the client sends, so a stray long text can't burn the quota. */
+const TTS_MAX_TEXT_CHARS = 1000;
+
+async function handleTts(body: Body, rid: string): Promise<Response> {
+  const apiKey = Deno.env.get("ELEVENLABS_API_KEY") ?? "";
+  if (!apiKey) {
+    /* No secret configured yet — a clean, expected state the client
+       treats as "voice unavailable", never as a broken conversation. */
+    return json({ error: "voice_unavailable" }, 503);
+  }
+  const text = typeof body.text === "string" ? body.text.trim().slice(0, TTS_MAX_TEXT_CHARS) : "";
+  if (!text) return json({ error: "empty text" }, 400);
+  const voiceId =
+    typeof body.voiceId === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(body.voiceId)
+      ? body.voiceId
+      : ELEVENLABS_DEFAULT_VOICE_ID;
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: "POST",
+      headers: {
+        "xi-api-key": apiKey,
+        "Content-Type": "application/json",
+        Accept: "audio/mpeg",
+      },
+      body: JSON.stringify({
+        text,
+        model_id: ELEVENLABS_MODEL_ID,
+        voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) {
+      /* Status only — the response body can carry account detail and the
+         key must never reach a log line. */
+      console.error(`coach request=${rid} tts status=${res.status}`);
+      return json({ error: "voice_unavailable" }, 502);
+    }
+    const audio = await res.arrayBuffer();
+    if (audio.byteLength === 0) return json({ error: "voice_unavailable" }, 502);
+    return new Response(audio, {
+      status: 200,
+      headers: {
+        ...CORS,
+        /* octet-stream on purpose: supabase-js returns octet-stream
+           responses as a Blob (see the header note). The bytes are MP3;
+           the client re-wraps them as audio/mpeg for the player. */
+        "Content-Type": "application/octet-stream",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch {
+    console.error(`coach request=${rid} tts status=network_error`);
+    return json({ error: "voice_unavailable" }, 502);
+  }
 }
 
 /** Optional vision input, validated once. */
@@ -811,6 +996,377 @@ function requestId(): string {
   }
 }
 
+/* ============================================================================
+   VITALIS LOCKDOWN (phase 5) — a per-caller strike counter.
+   In-memory, per isolate, exactly like the provider breaker above:
+   best-effort by design, and honest about it. The key is a SHA-256
+   hash of the caller's Authorization header — the credential itself
+   is never stored, logged or returned. A fresh sign-in presents a
+   new credential, hence a clean key: the lock is session-scoped in
+   effect, and also expires on its own after VITALIS_LOCK_MS.
+   Strikes come ONLY from structural violations: a present-but-
+   malformed structured record, a malformed action-result report, or
+   an invalid action proposal surviving into a final reply. Message
+   content can never strike, and nothing here touches Coach mode.
+   ========================================================================== */
+const VITALIS_STRIKE_LIMIT = 3;
+const VITALIS_LOCK_MS = 30 * 60 * 1000;
+const vitalisStrikes = new Map<string, { strikes: number; lockedUntil: number }>();
+
+async function vitalisCallerKey(req: Request): Promise<string> {
+  const auth = req.headers.get("authorization") ?? "";
+  if (!auth) return "no-auth";
+  try {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(auth));
+    return [...new Uint8Array(digest)]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("")
+      .slice(0, 32);
+  } catch {
+    return "no-auth";
+  }
+}
+
+function vitalisIsLocked(key: string): boolean {
+  const state = vitalisStrikes.get(key);
+  return Boolean(state && state.strikes >= VITALIS_STRIKE_LIMIT && Date.now() < state.lockedUntil);
+}
+
+function recordVitalisStrike(key: string, rid: string, why: string): number {
+  const state = vitalisStrikes.get(key) ?? { strikes: 0, lockedUntil: 0 };
+  state.strikes += 1;
+  if (state.strikes >= VITALIS_STRIKE_LIMIT) {
+    state.lockedUntil = Date.now() + VITALIS_LOCK_MS;
+  }
+  vitalisStrikes.set(key, state);
+  /* Sanitized: the why is a fixed structural label, never payload data. */
+  console.error(
+    `coach request=${rid} vitalis_strike count=${state.strikes} why=${why} locked=${state.strikes >= VITALIS_STRIKE_LIMIT}`,
+  );
+  return state.strikes;
+}
+
+/* ============================================================================
+   Provider chain — extracted so the deliberation pipeline can call
+   the chain once per stage with its own system text and turns. The
+   behaviour (order, cooldown probing, attempts, deadline, sanitized
+   diagnostics) is exactly the handler's original loop.
+   ========================================================================== */
+function computeProviderOrder(media: Media | null, devPin: ProviderId | null): ProviderId[] {
+  const order = providerOrder().filter(
+    (id) =>
+      (media ? REGISTRY[id].vision : true) &&
+      REGISTRY[id].enabled() &&
+      Deno.env.get(REGISTRY[id].secret),
+  );
+  if (devPin && REGISTRY[devPin] && order.includes(devPin)) {
+    order.splice(order.indexOf(devPin), 1);
+    order.unshift(devPin);
+  }
+  return order;
+}
+
+interface ChainResult {
+  text: string | null;
+  provider: ProviderId | null;
+  diagnostics: string[];
+}
+
+async function runProviderChain(params: {
+  systemText: string;
+  turns: Array<{ role: "user" | "assistant"; content: string }>;
+  media: Media | null;
+  order: ProviderId[];
+  deadline: number;
+  rid: string;
+}): Promise<ChainResult> {
+  const { systemText, turns, media, order, deadline, rid } = params;
+  const maxAttempts = MAX_PROVIDER_ATTEMPTS();
+  const attempted = new Set<ProviderId>();
+  const diagnostics: string[] = [];
+
+  /* Immediate retries must not hard-fail just because the best provider is
+     mid-cooldown: if every candidate is cooling from a TRANSIENT failure we
+     probe the best one. Auth/model-unavailable cooldowns are never probed. */
+  const transientOnly = (id: ProviderId): boolean => {
+    const st = stateFor(id);
+    return (
+      !st.lastCategory || (st.lastCategory !== "auth" && st.lastCategory !== "model_unavailable")
+    );
+  };
+  const ready = order.filter(
+    (id) => !isCoolingDown(id) || (order.every(isCoolingDown) && transientOnly(id)),
+  );
+  for (const id of ready) {
+    if (attempted.size >= maxAttempts) break;
+    if (attempted.has(id)) continue;
+    const remaining = deadline - Date.now();
+    if (remaining < 1000) break;
+    attempted.add(id);
+    const def = REGISTRY[id];
+    const key = Deno.env.get(def.secret) ?? "";
+    if (!key) continue;
+    const attemptStart = Date.now();
+    try {
+      const signal = AbortSignal.timeout(
+        Math.min(media ? MEDIA_PROVIDER_TIMEOUT_MS() : PROVIDER_TIMEOUT_MS(), Math.max(1000, remaining - 700)),
+      );
+      const text = await callProvider(def, key, systemText, turns, media, signal);
+      recordSuccess(id);
+      diagnostics.push(
+        `provider=${id} attempt=${attempted.size} result=success latencyMs=${Date.now() - attemptStart}`,
+      );
+      return { text, provider: id, diagnostics };
+    } catch (err) {
+      const category = classifyError(err);
+      recordFailure(id, category);
+      const latencyMs = Date.now() - attemptStart;
+      const status = err instanceof HttpError ? err.status : "-";
+      const detail =
+        err instanceof HttpError
+          ? err.body.slice(0, 200)
+          : err instanceof Error
+            ? err.message.slice(0, 200)
+            : "";
+      diagnostics.push(
+        `provider=${id} attempt=${attempted.size} result=${category} status=${status} latencyMs=${latencyMs}`,
+      );
+      /* Sanitized log: never prompts, never personal data, never secrets. */
+      console.error(
+        `coach request=${rid} provider=${id} category=${category} status=${status} latencyMs=${latencyMs}` +
+          (envBool("COACH_LOG_DETAIL", false)
+            ? ` detail=${detail.replace(/[^\x20-\x7e]/g, "?")}`
+            : ""),
+      );
+    }
+  }
+  return { text: null, provider: null, diagnostics };
+}
+
+/** The whole deliberation budget: draft + up to two revise calls. */
+const DELIB_TOTAL_TIMEOUT_MS = () => envInt("COACH_DELIB_TOTAL_TIMEOUT_MS", 110_000);
+
+const NDJSON_HEADERS = {
+  ...CORS,
+  "Content-Type": "application/x-ndjson",
+  "Cache-Control": "no-store",
+  "X-Accel-Buffering": "no",
+};
+
+/** A one-event NDJSON stream (the locked reply on a streamed request). */
+function ndjsonResult(payload: Record<string, unknown>): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start: (controller) => {
+      controller.enqueue(encoder.encode(`${JSON.stringify({ type: "result", ...payload })}\n`));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: NDJSON_HEADERS });
+}
+
+/* ============================================================================
+   VITALIS CHAT (phases 3–5) — lock check, record validation,
+   deliberation, proposal validation. The Coach never reaches here.
+   ========================================================================== */
+async function handleVitalisChat(params: {
+  body: Body;
+  req: Request;
+  rid: string;
+  message: string;
+  turns: Array<{ role: "user" | "assistant"; content: string }>;
+  recordText: string;
+  rule: string;
+  devPin: ProviderId | null;
+}): Promise<Response> {
+  const { body, req, rid, message, turns, recordText, rule, devPin } = params;
+  const key = await vitalisCallerKey(req);
+  const wantsStream = body.deliberate === true;
+  const order = computeProviderOrder(null, devPin);
+  const systemText = [
+    VITALIS_SYSTEM,
+    `THEIR RECORD — NUTRITION AND ASSESSMENT ONLY\n${recordText}`,
+    `LENGTH\n${rule}`,
+  ].join("\n\n");
+
+  const lockedResponse = (): Response => {
+    const payload = {
+      paragraphs: VITALIS_LOCKED_PARAGRAPHS,
+      actions: [],
+      stages: [],
+      vitalisLocked: true,
+    };
+    return wantsStream
+      ? ndjsonResult(payload)
+      : json({ ...payload, provider: "vitalis-guard" }, 200);
+  };
+
+  if (vitalisIsLocked(key)) return lockedResponse();
+
+  /* The structured record: present-but-malformed is a structural
+     forgery signal and strikes. Absent is a legacy client — served
+     from the text record alone; no checks are possible and none are
+     pretended. */
+  let record = null;
+  if (body.vitalisRecord !== undefined) {
+    const validated = validateVitalisRecord(body.vitalisRecord);
+    if (!validated.ok) {
+      const strikes = recordVitalisStrike(key, rid, "malformed_record");
+      if (strikes >= VITALIS_STRIKE_LIMIT) return lockedResponse();
+      return json({ error: "invalid_record" }, 400);
+    }
+    record = validated.record;
+  }
+
+  const deliberate =
+    record !== null && (body.deliberate === true || looksLikePlanRequest(message));
+
+  if (deliberate && record) {
+    const deliberationSystem = [
+      VITALIS_SYSTEM,
+      `THEIR RECORD — NUTRITION AND ASSESSMENT ONLY\n${recordText}`,
+      VITALIS_DELIBERATION_ADDENDUM,
+      `LENGTH\n${rule}`,
+    ].join("\n\n");
+    const startedAt = Date.now();
+    const runIt = async (
+      onStage?: (stage: string, label: string) => void,
+    ) => {
+      const outcome = await runDeliberation({
+        callModel: async (sys: string, t: Array<{ role: "user" | "assistant"; content: string }>) => {
+          if (Date.now() - startedAt > DELIB_TOTAL_TIMEOUT_MS()) return null;
+          const result = await runProviderChain({
+            systemText: sys,
+            turns: t,
+            media: null,
+            order,
+            deadline: Date.now() + TOTAL_TIMEOUT_MS(),
+            rid,
+          });
+          return result.text;
+        },
+        draftSystem: deliberationSystem,
+        reviseSystem: deliberationSystem,
+        turns,
+        record,
+        contextText: recordText,
+        userMessage: message,
+        onStage: onStage as never,
+      });
+      if (outcome.invalidProposals > 0) {
+        recordVitalisStrike(key, rid, "invalid_proposal");
+      }
+      return outcome;
+    };
+
+    if (wantsStream) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start: async (controller) => {
+          const emit = (obj: Record<string, unknown>) => {
+            try {
+              controller.enqueue(encoder.encode(`${JSON.stringify(obj)}\n`));
+            } catch {
+              /* the client went away — the work simply ends */
+            }
+          };
+          try {
+            const outcome = await runIt((stage, label) => emit({ type: "stage", stage, label }));
+            emit({
+              type: "result",
+              paragraphs: outcome.paragraphs,
+              actions: outcome.actions,
+              stages: outcome.stages,
+              deliberated: true,
+              fellBack: outcome.fellBack,
+            });
+          } catch {
+            emit({ type: "error", error: "unavailable" });
+          }
+          try {
+            controller.close();
+          } catch {
+            /* already closed */
+          }
+        },
+      });
+      return new Response(stream, { headers: NDJSON_HEADERS });
+    }
+
+    try {
+      const outcome = await runIt(undefined);
+      return json(
+        {
+          paragraphs: outcome.paragraphs,
+          provider: "vitalis",
+          actions: outcome.actions,
+          stages: outcome.stages,
+          deliberated: true,
+          fellBack: outcome.fellBack,
+        },
+        200,
+      );
+    } catch {
+      return json({ error: "unavailable", requestId: rid }, 502);
+    }
+  }
+
+  /* Fast path — one provider call, exactly the phases 1+2 behaviour.
+     Proposals in the reply are still parsed out of the spoken prose
+     and validated against the record; an invalid one strikes. */
+  const result = await runProviderChain({
+    systemText,
+    turns,
+    media: null,
+    order,
+    deadline: Date.now() + TOTAL_TIMEOUT_MS(),
+    rid,
+  });
+  if (!result.text) return json({ error: "unavailable", requestId: rid }, 502);
+  let paragraphs = result.text
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  let actions: unknown[] = [];
+  if (record) {
+    const parsed = parseActionBlocks(result.text);
+    const clean = sanitizeProposals(parsed.rawProposals, record);
+    if (clean.invalidCount + parsed.malformedBlocks > 0) {
+      recordVitalisStrike(key, rid, "invalid_proposal");
+    }
+    actions = clean.proposals;
+    paragraphs = parsed.prose
+      .split(/\n{2,}/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+  if (paragraphs.length === 0 && actions.length === 0) {
+    return json({ error: "unavailable", requestId: rid }, 502);
+  }
+  return json({ paragraphs, provider: result.provider, actions, stages: [] }, 200);
+}
+
+/** The client's report of a confirmed action's outcome. Shape only —
+    the report carries no payload data, and a malformed one strikes. */
+async function handleVitalisActionResult(body: Body, req: Request, rid: string): Promise<Response> {
+  const key = await vitalisCallerKey(req);
+  if (vitalisIsLocked(key)) return json({ error: "vitalis_locked" }, 403);
+  const r = body.actionResult;
+  const valid =
+    Boolean(r) &&
+    typeof r === "object" &&
+    !Array.isArray(r) &&
+    typeof (r as Record<string, unknown>)["action"] === "string" &&
+    VITALIS_ACTION_ALLOWLIST.includes((r as Record<string, unknown>)["action"] as string) &&
+    typeof (r as Record<string, unknown>)["ok"] === "boolean";
+  if (!valid) {
+    const strikes = recordVitalisStrike(key, rid, "malformed_action_result");
+    if (strikes >= VITALIS_STRIKE_LIMIT) return json({ error: "vitalis_locked" }, 403);
+    return json({ error: "invalid_action_result" }, 400);
+  }
+  return json({ ok: true }, 200);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   const rid = requestId();
@@ -818,6 +1374,14 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body: Body = await req.json();
+    /* The TTS action speaks text instead of answering — it returns
+       before any message validation or provider is touched. */
+    if (body.action === "tts") return await handleTts(body, rid);
+    /* A Vitalis action-result report is shape-validated on its own
+       path — it carries no message and touches no provider. */
+    if (body.action === "vitalis-action-result") {
+      return await handleVitalisActionResult(body, req, rid);
+    }
     const message = typeof body.message === "string" ? body.message.trim() : "";
     if (!message) return json({ error: "empty message" }, 400);
 
@@ -842,12 +1406,14 @@ Deno.serve(async (req: Request) => {
 
     const register = body.register ?? "normal";
     const rule = LENGTH_RULE[register] ?? LENGTH_RULE.normal;
-    const systemText = [
-      SYSTEM,
-      `THEIR RECORD\n${factsToPrompt(body.facts)}`,
-      `LENGTH\n${rule}`,
-      ...(register === "plan" ? [PLAN_STRUCTURE] : []),
-    ].join("\n\n");
+    /* Vitalis mode: its own prompt, and its record is the scoped
+       Nutrition + Assessment context the client assembled — the Coach
+       facts path below is not read, and the Coach prompt never runs. */
+    const isVitalis = body.mode === "vitalis";
+    const vitalisRecordText =
+      typeof body.vitalisContext === "string" && body.vitalisContext.trim()
+        ? body.vitalisContext.trim().slice(0, 12_000)
+        : "Nothing yet: this person has not completed an Assessment and has no food logged. Say so honestly, and invite them to begin — do not invent a record for them.";
     const turns = [
       ...sanitizeHistory(body.history),
       { role: "user" as const, content: message.slice(0, 4000) },
@@ -861,95 +1427,51 @@ Deno.serve(async (req: Request) => {
         ? (body.provider as ProviderId)
         : null;
 
-    /* Vision narrows the chain to providers that can actually see. */
-    const order = providerOrder().filter(
-      (id) =>
-        (media ? REGISTRY[id].vision : true) &&
-        REGISTRY[id].enabled() &&
-        Deno.env.get(REGISTRY[id].secret),
-    );
-    if (devPin && REGISTRY[devPin] && order.includes(devPin)) {
-      order.splice(order.indexOf(devPin), 1);
-      order.unshift(devPin);
+    /* Vitalis chat runs its own pipeline (lockdown, validation,
+       deliberation) and returns from there. */
+    if (isVitalis) {
+      return await handleVitalisChat({
+        body,
+        req,
+        rid,
+        message,
+        turns,
+        recordText: vitalisRecordText,
+        rule,
+        devPin,
+      });
     }
+
+    const systemText = [
+      SYSTEM,
+      `THEIR RECORD\n${factsToPrompt(body.facts)}`,
+      `LENGTH\n${rule}`,
+      ...(register === "plan" ? [PLAN_STRUCTURE] : []),
+    ].join("\n\n");
+
+    /* Vision narrows the chain to providers that can actually see. */
+    const order = computeProviderOrder(media, devPin);
     if (media && order.length === 0) {
       /* No vision-capable provider available — never fake an image answer. */
       return json({ error: "unavailable", requestId: rid }, 502);
     }
 
-    const deadline = started + TOTAL_TIMEOUT_MS();
-    const maxAttempts = MAX_PROVIDER_ATTEMPTS();
-    const attempted = new Set<ProviderId>();
-    let answered = "";
-    let answeredBy: ProviderId | null = null;
-    const diagnostics: string[] = [];
-
-    /* Immediate retries must not hard-fail just because the best provider is
-       mid-cooldown: if every candidate is cooling from a TRANSIENT failure we
-       probe the best one. Auth/model-unavailable cooldowns are never probed. */
-    const transientOnly = (id: ProviderId): boolean => {
-      const st = stateFor(id);
-      return (
-        !st.lastCategory || (st.lastCategory !== "auth" && st.lastCategory !== "model_unavailable")
-      );
-    };
-    const ready = order.filter(
-      (id) => !isCoolingDown(id) || (order.every(isCoolingDown) && transientOnly(id)),
-    );
-    for (const id of ready) {
-      if (attempted.size >= maxAttempts) break;
-      if (attempted.has(id)) continue;
-      const remaining = deadline - Date.now();
-      if (remaining < 1000) break;
-      attempted.add(id);
-      const def = REGISTRY[id];
-      const key = Deno.env.get(def.secret) ?? "";
-      if (!key) continue;
-      const attemptStart = Date.now();
-      try {
-        const signal = AbortSignal.timeout(
-          Math.min(media ? MEDIA_PROVIDER_TIMEOUT_MS() : PROVIDER_TIMEOUT_MS(), Math.max(1000, remaining - 700)),
-        );
-        const text = await callProvider(def, key, systemText, turns, media, signal);
-        recordSuccess(id);
-        answered = text;
-        answeredBy = id;
-        diagnostics.push(
-          `provider=${id} attempt=${attempted.size} result=success latencyMs=${Date.now() - attemptStart}`,
-        );
-        break;
-      } catch (err) {
-        const category = classifyError(err);
-        recordFailure(id, category);
-        const latencyMs = Date.now() - attemptStart;
-        const status = err instanceof HttpError ? err.status : "-";
-        const detail =
-          err instanceof HttpError
-            ? err.body.slice(0, 200)
-            : err instanceof Error
-              ? err.message.slice(0, 200)
-              : "";
-        diagnostics.push(
-          `provider=${id} attempt=${attempted.size} result=${category} status=${status} latencyMs=${latencyMs}`,
-        );
-        /* Sanitized log: never prompts, never personal data, never secrets. */
-        console.error(
-          `coach request=${rid} provider=${id} category=${category} status=${status} latencyMs=${latencyMs}` +
-            (envBool("COACH_LOG_DETAIL", false)
-              ? ` detail=${detail.replace(/[^\x20-\x7e]/g, "?")}`
-              : ""),
-        );
-      }
-    }
-
-    if (!answeredBy || !answered) {
+    const result = await runProviderChain({
+      systemText,
+      turns,
+      media,
+      order,
+      deadline: started + TOTAL_TIMEOUT_MS(),
+      rid,
+    });
+    if (!result.text || !result.provider) {
       console.error(
-        `coach request=${rid} all_providers_failed attempts=${diagnostics.join(" | ")}`,
+        `coach request=${rid} all_providers_failed attempts=${result.diagnostics.join(" | ")}`,
       );
       return json({ error: "unavailable", requestId: rid }, 502);
     }
 
-    const paragraphs = answered
+    const paragraphs = result.text
       .split(/\n{2,}/)
       .map((part) => part.trim())
       .filter(Boolean);
@@ -957,9 +1479,9 @@ Deno.serve(async (req: Request) => {
       return json({ error: "unavailable", requestId: rid }, 502);
     }
     if (envBool("COACH_LOG_DETAIL", false)) {
-      console.info(`coach request=${rid} ${diagnostics.join(" | ")}`);
+      console.info(`coach request=${rid} ${result.diagnostics.join(" | ")}`);
     }
-    return json({ paragraphs, provider: answeredBy }, 200);
+    return json({ paragraphs, provider: result.provider }, 200);
   } catch (err) {
     console.error(`coach request=${rid} error=${err instanceof Error ? err.name : "unknown"}`);
     return json({ error: "unavailable", requestId: rid }, 502);

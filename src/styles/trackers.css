@@ -500,8 +500,11 @@
    ATLAS — a map of the day
    ========================================================================== */
 
+/* The page measure is the app-wide 1280px (owner directive 2026-11-17:
+   the cards were not wide enough). A cap this wide can only bind at
+   desktop widths, so phone and tablet rendering is unchanged. */
 .at {
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-12) var(--space-5) 4rem;
 }

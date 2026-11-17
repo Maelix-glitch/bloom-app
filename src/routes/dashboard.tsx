@@ -73,7 +73,7 @@ function DashboardRoute() {
     <>
       <BloomHeader />
       <main className="min-h-dvh bg-background">
-        <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="mx-auto max-w-[1280px] px-4 py-10">
           {/* Hero — the same greeting shape as Today */}
           <header className="mb-10 text-center">
             <h1 className="font-display text-3xl leading-tight text-foreground sm:text-5xl">

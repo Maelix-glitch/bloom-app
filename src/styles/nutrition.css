@@ -23,15 +23,19 @@
   }
 }
 
-/* The tab page takes the prototype's wide measure — max-width 1120px,
-   20px gutters, 48px from lg — because its cards were drawn wide: the
-   rings hero spans the page and the timeline sits beside the week and
-   spectrum panels instead of crowding them. Scoped to .nut-page (the
-   tab only): the clinician report shares .nut-wrap but keeps the
-   880px document measure above — a page to read and print, not a
-   dashboard — and no other route loads this stylesheet at all. */
+/* The tab page takes the wide desktop measure because its cards were
+   drawn wide: the rings hero spans the page and the timeline sits
+   beside the week and spectrum panels instead of crowding them. The
+   measure is the app-wide 1280px (20px gutters, 48px from lg) — the
+   owner's 2026-11-17 "cards are not wide enough" directive, applied
+   to every main tab page. A cap this wide can only bind at desktop
+   widths, so phone and tablet rendering is exactly as it was.
+   Scoped to .nut-page (the tab only): the clinician report shares
+   .nut-wrap but keeps the 880px document measure above — a page to
+   read and print, not a dashboard — and no other route loads this
+   stylesheet at all. */
 .nut-wrap.nut-page {
-  max-width: 1120px;
+  max-width: 1280px;
   padding-inline: var(--space-5);
 }
 @media (min-width: 1024px) {
@@ -117,6 +121,29 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-3) 0;
+}
+
+
+/* ------------------------- plan dish rows (P5) ----------------------- */
+
+/* A plan meal's dish: the whole row is the tap target that unfolds
+   the dish's ingredients underneath it. Mirrors .nut-entry's rhythm
+   so dishes and foods read as one list, at button semantics. */
+.nut-dish-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The unfolded ingredients sit indented under their dish — the raw
+   things belong to the dish above them, visually and in reading
+   order. */
+.nut-dish-ingredients {
+  padding: 0 0 var(--space-3) calc(48px + var(--space-2));
 }
 
 /* ------------------------- food photographs --------------------------- */
