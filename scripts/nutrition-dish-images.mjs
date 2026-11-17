@@ -141,7 +141,6 @@ const PINS = [
   ["dish-veg-pulao", "VEGETABLE PULAO ~ An Indian cuisine made from fried rice mixed with fried vegetables.jpg", "veg-pulao"],
   ["dish-matar-pulao", "Mattar Pulao (Peas Pullao).JPG", "matar-pulao"],
   ["dish-mushroom-pulao", "Mushroom pulao.jpg", "mushroom-pulao"],
-  ["dish-moong-dal-khichdi", "MoongDal Khichdi.jpg", "moong-dal-khichdi"],
   ["dish-masala-khichdi", "Masala Khichadi.jpg", "masala-khichdi"],
   ["dish-veg-biryani", "Vegetable biryani 03.JPG", "veg-biryani"],
   ["dish-egg-biryani", "Egg Biryani.JPG", "egg-biryani"],
@@ -152,7 +151,6 @@ const PINS = [
   ["dish-curd-rice", "Curd Rice.jpg", "curd-rice"],
   ["dish-tomato-rice", "Tomato Rice up-close (1862224148).jpg", "tomato-rice"],
   ["dish-coconut-rice", "Coconut rice with crispies.jpg", "coconut-rice"],
-  ["dish-jeera-matar-rice", "Jeera rice with peas.JPG", "jeera-matar-rice"],
   ["dish-ven-pongal", "Pongalpot.jpg", "ven-pongal"],
   ["dish-soya-pulao", "Pulav with vegetables and soya chunks.jpg", "soya-pulao"],
   ["dish-millet-khichdi", "Kodo millet khichdi.jpg", "millet-khichdi"],
@@ -163,8 +161,6 @@ const PINS = [
   ["dish-whole-wheat-paratha", "Paratha and Lassi-Chennai-Tamilnadu-IMG 1796.jpg", "whole-wheat-paratha"],
   ["dish-aloo-paratha", "Aloo Paratha North Indian.jpg", "aloo-paratha"],
   ["dish-gobi-paratha", "Picture of tasty Gobi paratha.JPG", "gobi-paratha"],
-  ["dish-poori", "Puri.jpg", "poori"],
-  ["dish-bhatura", "Bhatura.jpg", "bhatura"],
   ["dish-naan", "Naan 2.jpg", "naan"],
   ["dish-garlic-naan", "Garlic Butter Naan Food by Ms Ujwala Kasambe DSCN1136 (1).jpg", "garlic-naan"],
   ["dish-cheese-naan", "Cheese naan and Curry 03.jpg", "cheese-naan"],
@@ -188,11 +184,8 @@ const PINS = [
   ["dish-overnight-oats", "-2019-02-07 Overnight Oats, Cromer.JPG", "overnight-oats"],
   ["dish-boiled-egg-plate", "-2019-12-06 Boiled egg with toasted soliders, Trimingham.JPG", "boiled-egg-plate"],
   ["dish-masala-omelette", "Masala Cheese Omlette.jpg", "masala-omelette"],
-  ["dish-egg-bhurji", "Spicy egg bhurji @ the eggfactory.jpg", "egg-bhurji"],
-  ["dish-sprouted-moong-bowl", "Sprouted Moong Salad.JPG", "sprouted-moong-bowl"],
   ["dish-fruit-curd-bowl", "Lancaster, United States (Unsplash).jpg", "fruit-curd-bowl"],
   ["dish-enriched-fruit-curd-bowl", "Lancaster, United States (Unsplash).jpg", "enriched-fruit-curd-bowl"],
-  ["dish-masala-sweet-potato", "Roasted Shakarkand Chaat, Gun Hill Chaat Centre, Mussoorie, Uttarakhand.jpg", "masala-sweet-potato"],
   ["dish-roasted-chana", "Roasted Chickpea Chana with Salt and Turmeric.jpg", "roasted-chana"],
   ["dish-sprouts-chaat", "Sprout chaat.jpg", "sprouts-chaat"],
   ["dish-aloo-tikki", "Aloo Tikki served with chutneys.jpg", "aloo-tikki"],
@@ -217,7 +210,6 @@ const PINS = [
   ["dish-mixed-veg-dry", "Mix veg Bhaja.jpg", "mixed-veg-dry"],
   ["dish-aloo-fry", "Potato fry Andhra Style.jpg", "aloo-fry"],
   ["dish-mushroom-pepper-fry", "Ghee Pepper Mushroom Fry.jpg", "mushroom-pepper-fry"],
-  ["dish-sprouted-moong", "Spicy Sprouted Moong.JPG", "sprouted-moong"],
   ["dish-sookha-chana", "DRY KALA CHANA MASALA.jpg", "sookha-chana"],
   ["dish-masala-corn", "Masala sweet corn.jpg", "masala-corn"],
   ["dish-shimla-mirch-masala", "Capsicum Masala.jpg", "shimla-mirch-masala"],
@@ -225,7 +217,6 @@ const PINS = [
   ["dish-corn-palak", "Corn spinach- makai malai palak.JPG", "corn-palak"],
   ["dish-vangi-masala", "Stuffed Brinjal Spicy Masala.JPG", "vangi-masala"],
   ["dish-aloo-matar-dry", "Aloo matar.jpg", "aloo-matar-dry"],
-  ["dish-shahi-paneer-style", "Shahi Paneer with mint.jpg", "shahi-paneer-style"],
   ["dish-coconut-chutney", "Coconut Chutney - Home Made.JPG", "coconut-chutney"],
   ["dish-tomato-chutney", "Tomato Chatni.jpg", "tomato-chutney"],
   ["dish-peanut-chutney", "Coconut Peanut Chutney.jpg", "peanut-chutney"],
@@ -233,7 +224,6 @@ const PINS = [
   ["dish-lahsun-chutney", "Picture of south indian Garlic chutney.JPG", "lahsun-chutney"],
   ["dish-dhaniya-chutney", "Green Chutney.jpg", "dhaniya-chutney"],
   ["dish-pudina-dahi-dip", "Raita with cucumber and mint.jpg", "pudina-dahi-dip"],
-  ["dish-mango-chutney", "Unripe Mango Chutney - Kolkata 2011-02-23 1714.JPG", "mango-chutney"],
   ["dish-shahi-coconut-chutney", "Coconut Chutney - Home Made.JPG", "shahi-coconut-chutney"],
   ["dish-boondi-raita", "Boondi Raita.JPG", "boondi-raita"],
   ["dish-mixed-veg-raita", "Vegetable Raita.jpg", "mixed-veg-raita"],
@@ -286,7 +276,6 @@ const PINS = [
   ["dish-vellarikka-pachadi", "Cucumber pachadi- My home Bangalore -Karnataka -pic 08.jpg", "vellarikka-pachadi"],
   ["dish-vendakka-kichadi", "Pachadi (ladies finger).jpg", "vendakka-kichadi"],
   ["dish-kaya-varuthathu", "Raw banana fry.JPG", "kaya-varuthathu"],
-  ["dish-injipuli", "Puliyinchi with a face.jpg", "injipuli"],
   ["dish-naranga-achar", "Lemon Pickle in Oil.JPG", "naranga-achar"],
   ["dish-appam", "Appam (Kerala dish).jpg", "appam"],
   ["dish-kallappam", "Topdown shot of Kallappam with pork curry.jpg", "kallappam"],
@@ -303,7 +292,6 @@ const PINS = [
   ["dish-irachi-pathiri", "Chicken pathiri.jpg", "irachi-pathiri"],
   ["dish-sambaram", "Sambaram picture.JPG", "sambaram"],
   ["dish-amritsari-kulcha", "Amritsari Kulcha at Monu Kulcha Hut.JPG", "amritsari-kulcha"],
-  ["dish-bedmi-poori", "Bedai and Sabzi.JPG", "bedmi-poori"],
   ["dish-chicken-patiala", "Chicken Patiala.JPG", "chicken-patiala"],
   ["dish-galouti-kebab", "Tunday Kebab, Lucknow (8716416557).jpg", "galouti-kebab"],
   ["dish-gushtaba", "Gushtaba.JPG", "gushtaba"],
@@ -336,12 +324,10 @@ const PINS = [
   ["dish-bajra-roti", "Bajre ki roti.jpg", "bajra-roti"],
   ["dish-sindhi-kadhi", "Sindhi Kadhi.JPG", "sindhi-kadhi"],
   ["dish-sai-bhaji", "Sindhi Sai Bhaji.JPG", "sai-bhaji"],
-  ["dish-dal-pakwan-style", "Dal Pakwan - Sindhi Food - 7.jpg", "dal-pakwan-style"],
   ["dish-dhansak-style", "Dhansak.JPG", "dhansak-style"],
   ["dish-shorshe-machh", "Hilsha fish in mustard paste.jpg", "shorshe-machh"],
   ["dish-chingri-malakari", "Prawn Malai Curry.jpg", "chingri-malakari"],
   ["dish-kosha-lamb-style", "Mutton Kosha.jpg", "kosha-lamb-style"],
-  ["dish-luchi", "Fulko luchi - Home Made - Howrah - West Bengal - 019.jpg", "luchi"],
   ["dish-aloo-posto", "Aloo Posto.jpg", "aloo-posto"],
   ["dish-shukto", "Shukto (তেতো শুক্তো).jpg", "shukto"],
   ["dish-begun-bhaja", "Begun Bhaja.jpg", "begun-bhaja"],
@@ -382,17 +368,13 @@ const PINS = [
   ["dish-akki-rotti", "Akki roti.jpg", "akki-rotti"],
   ["dish-pineapple-gojju", "Pineapple (Ananas) Gojju.jpg", "pineapple-gojju"],
   ["dish-intl-chicken-fajitas", "Chicken fajitas - La Hacienda - Sarah Stierch.jpg", "intl-chicken-fajitas"],
-  ["dish-intl-chicken-shawarma", "Chicken Shawarma Platter - Lavash 2025-02-10.jpg", "intl-chicken-shawarma"],
   ["dish-intl-jerk-chicken", "Jerk chicken plate.jpg", "intl-jerk-chicken"],
-  ["dish-intl-peri-peri-chicken", "2018-02-03 Chicken Piri-Piri, Albufeira (1).JPG", "intl-peri-peri-chicken"],
   ["dish-intl-ginger-chicken-stir-fry", "Kai phat khing.jpg", "intl-ginger-chicken-stir-fry"],
   ["dish-intl-chicken-caesar-salad", "Caesar salad with chicken, homemade - Massachusetts.jpg", "intl-chicken-caesar-salad"],
   ["dish-intl-chicken-vegetable-soup", "Chicken Vegetable Soup (8731954951).jpg", "intl-chicken-vegetable-soup"],
-  ["dish-intl-chicken-cacciatore", "Chicken cacciatore (cropped).jpg", "intl-chicken-cacciatore"],
   ["dish-intl-chicken-satay", "Chicken Satay With Peanut Sauce.jpg", "intl-chicken-satay"],
   ["dish-intl-chicken-schnitzel", "Classic chicken schnitzel - Schnitzel & Co. 2026-05-16.jpg", "intl-chicken-schnitzel"],
   ["dish-intl-roast-chicken-vegetables", "Butterfly chicken with roasted vegetables - Massachusetts.jpg", "intl-roast-chicken-vegetables"],
-  ["dish-intl-spanish-chicken-rice", "Arroz-con-Pollo.jpg", "intl-spanish-chicken-rice"],
   ["dish-intl-chicken-parmigiana", "Chicken parmigiana.jpg", "intl-chicken-parmigiana"],
   ["dish-intl-thai-green-chicken-curry", "Thai green chicken curry and roti.jpg", "intl-thai-green-chicken-curry"],
   ["dish-intl-chicken-enchilada-bake", "Chicken Enchilada (15891630965).jpg", "intl-chicken-enchilada-bake"],
@@ -422,11 +404,9 @@ const PINS = [
   ["dish-intl-shrimp-egg-fried-rice", "Shrimp Fried Rice (Taiwan).jpg", "intl-shrimp-egg-fried-rice"],
   ["dish-intl-mixed-seafood-stew", "Cioppino.jpg", "intl-mixed-seafood-stew"],
   ["dish-intl-shakshuka", "Shakshuka Dish.jpg", "intl-shakshuka"],
-  ["dish-intl-huevos-rancheros", "Huevos Rancheros (11494813583).jpg", "intl-huevos-rancheros"],
   ["dish-intl-tuscan-white-bean-soup", "Tuscan kale and white bean soup in personalized bowls with spoons on a decorative tree cross cut (16085794138).jpg", "intl-tuscan-white-bean-soup"],
   ["dish-intl-overnight-oats", "Protein overnight oats.jpg", "intl-overnight-oats"],
   ["dish-intl-tofu-scramble", "Tofu Scramble in New Orleans.jpg", "intl-tofu-scramble"],
-  ["dish-intl-breakfast-burrito", "Breakfast burrito, Marfa, Texas.JPG", "intl-breakfast-burrito"],
   ["dish-intl-herb-grilled-chicken", "Roasted Chicken Dinner Plate, Broccoli, Demi Glace.jpg", "intl-herb-grilled-chicken"],
   ["dish-intl-lemon-garlic-chicken", "Chicken breast with lemon sauce (17238222455).jpg", "intl-lemon-garlic-chicken"],
   ["dish-intl-creamy-garlic-chicken", "Creamy Mushroom Chicken with Mojitos.jpg", "intl-creamy-garlic-chicken"],
@@ -459,10 +439,8 @@ const PINS = [
   ["dish-intl-french-cheese-omelette", "Omelette Mont Saint-Michel.jpg", "intl-french-cheese-omelette"],
   ["dish-intl-cottage-egg-flatbread", "Scandinavian Kitchen, Fitzrovia, London (6346476387).jpg", "intl-cottage-egg-flatbread"],
   ["dish-intl-socca-egg-spinach", "Farinata (spinach base, roasted courgette & superstraccia) - Caccia and Tails 2025-04-24.jpg", "intl-socca-egg-spinach"],
-  ["dish-intl-cilbir", "Çılbır - Cafe Rust 2025-03-31.jpg", "intl-cilbir"],
   ["dish-intl-salmon-spinach-omelette", "Salmon omelette with potato, Florence, 82nd St.jpg", "intl-salmon-spinach-omelette"],
   ["dish-intl-egg-avocado-flatbread", "Avocado toast with eggs (28508171495).jpg", "intl-egg-avocado-flatbread"],
-  ["dish-intl-spinach-cheese-frittata", "Фритата со спанаќ (02).jpg", "intl-spinach-cheese-frittata"],
   ["dish-intl-breakfast-sandwich", "Egg and cheese breakfast sandwich.jpg", "intl-breakfast-sandwich"],
   ["dish-intl-salmon-egg-breakfast", "Irish Breakfast Salmon Scrambled Eggs.JPG", "intl-salmon-egg-breakfast"],
   ["dish-intl-protein-oatmeal", "Oatmeal porridge 1-minute with additional ingredients.jpg", "intl-protein-oatmeal"],
@@ -482,11 +460,9 @@ const PINS = [
   ["dish-risotto-salmone", "Risotto with salmon pepper & beer (6052247597).jpg", "risotto-salmone"],
   ["dish-frittata-spinach-mozzarella", "Frittata2.jpg", "frittata-spinach-mozzarella"],
   ["dish-frittata-patate", "Frittata di patate.jpg", "frittata-patate"],
-  ["dish-tonno-fagioli", "Insalata di Fagioli e Tonno – Bohnensalat mit Thunfisch (7327273414).jpg", "tonno-fagioli"],
   ["dish-ribollita", "Ribollita toscana.JPG", "ribollita"],
   ["dish-zuppa-lenticchie", "Lentil soup.JPG", "zuppa-lenticchie"],
   ["dish-stracciatella-soup", "Stracciatella soup example.jpg", "stracciatella-soup"],
-  ["dish-tortilla-espanola", "Tortilla Española (Plato).JPG", "tortilla-espanola"],
   ["dish-gambas-ajillo", "Gambas Al Ajillo (Spanish Garlic Shrimp).jpg", "gambas-ajillo"],
   ["dish-cod-tomato-spanish", "Bacalao con salsa de tomate (España).jpg", "cod-tomato-spanish"],
   ["dish-lentejas-estofadas", "Lentejas 04.JPG", "lentejas-estofadas"],
@@ -525,7 +501,6 @@ const PINS = [
   ["dish-falafel-baked", "Falafel 1.JPG", "falafel-baked"],
   ["dish-shish-tawook", "Shish Taouk.JPG", "shish-tawook"],
   ["dish-chicken-shawarma-plate", "Chicken Shawarma Platter - Lavash 2025-02-10.jpg", "chicken-shawarma-plate"],
-  ["dish-shakshuka", "Shakshuka Dish.jpg", "shakshuka"],
   ["dish-fatteh-hummus", "Fatethomos.JPG", "fatteh-hummus"],
   ["dish-mujadara", "Mujaddara.jpg", "mujadara"],
   ["dish-sayadieh", "Fish Sayadieh.jpg", "sayadieh"],
@@ -559,14 +534,12 @@ const PINS = [
   ["dish-kr-egg-fried-rice", "Korean style fried rice.jpg", "kr-egg-fried-rice"],
   ["dish-cn-white-cut-chicken", "White cut chicken at Xiaoshaoxing, Shanghai (20191113183809).jpg", "cn-white-cut-chicken"],
   ["dish-cn-tomato-egg-stirfry", "Hunan cuisine, stir-fried tomato with eggs.jpg", "cn-tomato-egg-stirfry"],
-  ["dish-cn-shrimp-egg-fried-rice", "HK 北區 North District 上水中心 Sheung Shui Centre 商場 shopping mall shop 上海姥姥 Shanghai Lao Lao Restaurant food 虾仁炒飯 Peeled prawn fried rice with egg September 2022 Px3 04.jpg", "cn-shrimp-egg-fried-rice"],
   ["dish-cn-hot-sour-soup", "Hot-and-Sour-Soup-Bowl.jpg", "cn-hot-sour-soup"],
   ["dish-cn-prawn-wontons", "Shrimp wonton noodle soup.jpg", "cn-prawn-wontons"],
   ["dish-cn-salt-pepper-shrimp", "Pepper salt prawns.jpeg", "cn-salt-pepper-shrimp"],
   ["dish-cn-home-style-tofu", "Hunan cuisine, Fried Tofu, Home Style.jpg", "cn-home-style-tofu"],
   ["dish-cn-steamed-egg-prawns", "Cuisine of Guangdong 6.jpg", "cn-steamed-egg-prawns"],
   ["dish-cn-hainanese-chicken-rice", "Hainanese chicken rice.jpg", "cn-hainanese-chicken-rice"],
-  ["dish-cn-cashew-chicken", "Cashewchickenphoto.jpg", "cn-cashew-chicken"],
   ["dish-cn-moo-goo-gai-pan", "Plate of moo goo gai pan.jpg", "cn-moo-goo-gai-pan"],
   ["dish-cn-egg-foo-young", "Egg Foo Young in Hong Kong.jpg", "cn-egg-foo-young"],
   ["dish-cn-gong-bao-chicken", "Kung Pao Chicken at Yujiayan Restaurant (20230510123120).jpg", "cn-gong-bao-chicken"],
@@ -591,7 +564,6 @@ const PINS = [
   ["dish-vn-banh-cuon", "Banh Cuon 3.jpg", "vn-banh-cuon"],
   ["dish-id-chicken-rendang", "RENDANG AYAM.jpg", "id-chicken-rendang"],
   ["dish-id-nasi-lemak", "Nasi Lemak with Fried Chicken - Village Park Restaurant (4589845661).jpg", "id-nasi-lemak"],
-  ["dish-id-chicken-satay", "Chicken Satay (54029806221).jpg", "id-chicken-satay"],
   ["dish-id-gado-gado", "Gado gado jakarta.jpg", "id-gado-gado"],
   ["dish-id-soto-ayam", "Soto Ayam home-made.JPG", "id-soto-ayam"],
   ["dish-id-bakso-ayam", "Bakso Indonesian Meatball Soup from Solo.jpg", "id-bakso-ayam"],
@@ -602,7 +574,6 @@ const PINS = [
   ["dish-id-nasi-goreng", "Nasi Goreng Udang Istimewa.JPG", "id-nasi-goreng"],
   ["dish-id-sambal-telur", "Sambal Tumis Telur.jpg", "id-sambal-telur"],
   ["dish-id-mie-goreng", "Mie Goreng in Bali.jpg", "id-mie-goreng"],
-  ["dish-us-herb-grilled-chicken", "Hähnchenbrust Burgwirt Deggendorf.jpg", "us-herb-grilled-chicken"],
   ["dish-us-turkey-chilli", "Chili con carne (4431800858).jpg", "us-turkey-chilli"],
   ["dish-us-salmon-cakes", "Salmon cakes bento (5012941523).jpg", "us-salmon-cakes"],
   ["dish-us-yogurt-tuna-salad", "NorthOntarioMethodistChurchBazaarLunch.jpg", "us-yogurt-tuna-salad"],
@@ -613,7 +584,6 @@ const PINS = [
   ["dish-us-shrimp-grits", "Shrimp & Grits at Patois, Uptown New Orleans.jpg", "us-shrimp-grits"],
   ["dish-us-jambalaya", "Jambalaya on plate.jpg", "us-jambalaya"],
   ["dish-us-chicken-gumbo", "Gumbo - Kate 2012.jpg", "us-chicken-gumbo"],
-  ["dish-us-blackened-tilapia", "Blackened tilapia with Cajun spices, lemon and lime juice.jpg", "us-blackened-tilapia"],
   ["dish-us-eggs-royale", "Eggs Royale.jpg", "us-eggs-royale"],
   ["dish-us-tuna-noodle-casserole", "Tuna Casserole2.jpg", "us-tuna-noodle-casserole"],
   ["dish-us-chicken-dumplings", "ChickenDumplings.jpg", "us-chicken-dumplings"],
@@ -625,7 +595,6 @@ const PINS = [
   ["dish-mx-chicken-enchiladas", "Enchiladas Desmenuzadas.jpg", "mx-chicken-enchiladas"],
   ["dish-mx-chicken-quesadillas", "Chicken quesadilla.jpg", "mx-chicken-quesadillas"],
   ["dish-mx-bean-cheese-burritos", "Bean and cheese burrito.jpg", "mx-bean-cheese-burritos"],
-  ["dish-mx-arroz-con-pollo", "Arroz con pollo tico.jpg", "mx-arroz-con-pollo"],
   ["dish-mx-pollo-guisado", "\"Rostit\",ajadas de pollo guisado con cebolla.jpg", "mx-pollo-guisado"],
   ["dish-mx-turkey-picadillo", "Picadillo and rice.jpg", "mx-turkey-picadillo"],
   ["dish-mx-shrimp-ceviche", "Ceviche de camarón El Peñol.jpg", "mx-shrimp-ceviche"],
@@ -685,7 +654,6 @@ const PINS = [
   ["dish-jm-escovitch-fish", "Escovitch fish, fried plaintains, and vegetables on top of rice.jpg", "jm-escovitch-fish"],
   ["dish-de-linsensuppe", "20221217 lentil soup Katowice Panewniki.jpg", "de-linsensuppe"],
   ["dish-hu-babgulyas-style", "2013-06-22 19-12-22 WMF Dinner Budapest Bean Goulash 095.jpg", "hu-babgulyas-style"],
-  ["dish-cu-picadillo-style", "Cuban Picadillo.jpg", "cu-picadillo-style"],
   ["dish-dk-smorrebrod", "Flickr - cyclonebill - Rejemad.jpg", "dk-smorrebrod"],
   ["dish-tt-fish-bake-style", "Bake and Shark with hot sauce and cabbage Natalie's famous Bake and Shark Maracas Bay Trinidad.jpg", "tt-fish-bake-style"],
   ["dish-pl-krupnik", "Zupa krupnik w Poznaniu - listopad 2018.jpg", "pl-krupnik"],
@@ -759,6 +727,173 @@ const PINS = [
   ["dish-se-toast-skagen-style", "Toast Skagen at Lucy in the Sky.jpg", "se-toast-skagen-style"],
   ["dish-ve-pabellon-style", "Pabellón Criollo Venezolano.jpg", "ve-pabellon-style"],
   ["dish-cz-kulajda-style", "Kulajda-Suppe.JPG", "cz-kulajda-style"],
+  ["dish-shake-greek-yogurt-banana", "Banana Smoothie.jpg", "shake-banana-smoothie"],
+  ["dish-shake-milk-greek-yogurt-banana", "Banna Yogurt Smoothie.jpg", "shake-banana-yogurt-smoothie"],
+  ["dish-shake-double-dairy-banana", "Banana Milkshake.jpg", "shake-banana-milkshake"],
+  ["dish-shake-mixed-seed-banana", "Melon and banana vegan shake (7448919266).jpg", "shake-melon-banana"],
+  ["dish-shake-sesame-banana-greek-yogurt", "Vegan Banana Lassi (348299818).jpg", "shake-banana-lassi"],
+  ["dish-shake-cottage-cheese-oats-banana", "Banana smoothie with weetbix.jpeg", "shake-oat-banana-smoothie"],
+  ["dish-shake-peanut-banana-greek-yogurt", "Fruit and peanut butter smoothie.jpg", "shake-peanut-butter-smoothie"],
+  ["dish-shake-peanut-strawberry-greek-yogurt", "Fruit and peanut butter smoothie. 1.jpg", "shake-peanut-fruit-smoothie"],
+  ["dish-shake-greek-yogurt-mango", "Mango Banana Smoothie.jpg", "shake-mango-banana-smoothie"],
+  ["dish-shake-cottage-cheese-mango", "Fresh-mango-smoothie 01.jpg", "shake-mango-smoothie"],
+  ["dish-shake-milk-greek-yogurt-mango", "Batido de mango.jpg", "shake-batido-de-mango"],
+  ["dish-shake-oat-mango-greek-yogurt", "Mango smoothie homemade.jpg", "shake-mango-smoothie-bowl"],
+  ["dish-shake-cashew-mango-greek-yogurt", "Mango Lassi .jpg", "shake-mango-lassi"],
+  ["dish-shake-pumpkin-seed-mango", "Tasty Mango lassi picture.JPG", "shake-mango-lassi-bowl"],
+  ["dish-shake-whey-mango-milk", "Mango Lassi and Butter Milk - Vel South Indian Kitchen + Bar.jpg", "shake-mango-lassi-bottles"],
+  ["dish-shake-soy-milk-mango-pumpkin-seed", "Mango Chia Smoothie.jpg", "shake-mango-chia-smoothie"],
+  ["dish-shake-greek-yogurt-strawberry", "Plain yoghurt and strawberry smoothie (5700145998).jpg", "shake-strawberry-yogurt-smoothie"],
+  ["dish-shake-greek-yogurt-strawberry-banana", "Strawberry and banana smoothie 1 (14084474069).jpg", "shake-strawberry-banana-smoothie"],
+  ["dish-shake-greek-yogurt-cottage-cheese-strawberry", "Strawberry and banana milkshake, May 2005.jpg", "shake-strawberry-banana-milkshake"],
+  ["dish-shake-cottage-cheese-strawberry", "Glass of strawberry smoothie (6828826294).jpg", "shake-strawberry-smoothie-glass"],
+  ["dish-shake-sunflower-strawberry", "Looking down at a strawberry-lemon smoothie (14266944557).jpg", "shake-strawberry-smoothie-top"],
+  ["dish-shake-greek-yogurt-jackfruit", "Jackfruit Seed Shake Kerala 20190414 220040.jpg", "shake-jackfruit-shake"],
+  ["dish-shake-greek-yogurt-orange-cardamom", "Apple orange smoothie (34365737850).jpg", "shake-orange-smoothie"],
+  ["dish-shake-overnight-oat-banana", "Protein overnight oats.jpg", "shake-overnight-oats"],
+  ["dish-shake-almond-banana-greek-yogurt", "Bapatla Badam Milk.jpg", "shake-badam-milk-cup"],
+  ["dish-shake-almond-cardamom", "Badam Milk Drink.jpg", "shake-badam-milk"],
+  ["dish-shake-spinach-banana-greek-yogurt", "Green Smoothie.jpg", "shake-green-smoothie-glass"],
+  ["dish-shake-tofu-spinach-mango", "Green smoothie (8222465502).jpg", "shake-green-smoothie-lemon"],
+  ["dish-shake-avocado-greek-yogurt-lemon", "Green smoothie.jpg", "shake-green-smoothie-herbs"],
+  ["dish-shake-carrot-orange-greek-yogurt", "Carrot Smoothie.jpg", "shake-carrot-smoothie"],
+  ["dish-shake-soy-milk-banana", "Soy milk (2).jpg", "shake-soy-milk"],
+  ["dish-shake-whey-banana-milk", "Protein shake.jpg", "shake-protein-shake"],
+  ["dish-shake-cottage-cheese-banana", "Banana Smoothie.jpg", "shake-banana-smoothie-cottage-cheese"],
+  ["dish-shake-ricotta-banana", "Banana Smoothie.jpg", "shake-banana-smoothie-ricotta"],
+  ["dish-shake-whey-cottage-cheese-banana", "Banana Milkshake.jpg", "shake-banana-milkshake-whey"],
+  ["dish-shake-whey-oat-banana", "Banana Milkshake.jpg", "shake-banana-milkshake-oat"],
+  ["dish-shake-walnut-banana-greek-yogurt", "Melon and banana vegan shake (7448919266).jpg", "shake-melon-banana-walnut"],
+  ["dish-shake-coconut-banana-greek-yogurt", "Melon and banana vegan shake (7448919266).jpg", "shake-melon-banana-coconut"],
+  ["dish-shake-oat-peanut-banana", "Banana smoothie with weetbix.jpeg", "shake-oat-banana-peanut"],
+  ["dish-shake-soy-powder-banana-oat-peanut", "Banana smoothie with weetbix.jpeg", "shake-oat-banana-soy"],
+  ["dish-shake-whey-peanut-banana", "Fruit and peanut butter smoothie.jpg", "shake-peanut-butter-whey"],
+  ["dish-shake-soy-powder-mango-coconut", "Fresh-mango-smoothie 01.jpg", "shake-mango-smoothie-soy"],
+  ["dish-shake-ricotta-strawberry", "Glass of strawberry smoothie (6828826294).jpg", "shake-strawberry-smoothie-ricotta"],
+  ["dish-shake-whey-strawberry-greek-yogurt", "Plain yoghurt and strawberry smoothie (5700145998).jpg", "shake-strawberry-yogurt-whey"],
+  ["dish-shake-soy-powder-strawberry-almond", "Looking down at a strawberry-lemon smoothie (14266944557).jpg", "shake-strawberry-smoothie-soy"],
+  ["dish-shake-cottage-cheese-orange", "Apple orange smoothie (34365737850).jpg", "shake-orange-smoothie-cottage-cheese"],
+  ["dish-pw2-baked-fish-fingers", "Fishfinger classic fried 1.jpg", "pw2-baked-fish-fingers"],
+  ["dish-pw2-banh-mi-sandwich", "Bánh mì.jpg", "pw2-banh-mi-sandwich"],
+  ["dish-pw2-bolon-verde", "Bolón de verde Santa cruz 2021-11-14.jpg", "pw2-bolon-verde"],
+  ["dish-pw2-buckwheat-galette", "Buckwheat galette (46959860324).jpg", "pw2-buckwheat-galette"],
+  ["dish-pw2-chicken-kari-dosa", "Chicken masala dosa.jpg", "pw2-chicken-kari-dosa"],
+  ["dish-pw2-chicken-kathi-roll", "Chicken Kathi Roll (5646735923).jpg", "pw2-chicken-kathi-roll"],
+  ["dish-pw2-corn-cottage-fritters", "Pelas Jagung in Bojonegoro.jpg", "pw2-corn-cottage-fritters"],
+  ["dish-pw2-croque-madame", "Croque Madame, Paris July 6, 2011 (cropped).jpg", "pw2-croque-madame"],
+  ["dish-pw2-dan-bing", "Dan Bing (Taiwanese egg crepe).jpg", "pw2-dan-bing"],
+  ["dish-pw2-devilled-eggs", "Deviled Eggs on Plate.jpg", "pw2-devilled-eggs"],
+  ["dish-pw2-gozleme", "GözlemeAusbacken.jpg", "pw2-gozleme"],
+  ["dish-pw2-huevos-rotos", "Huevos rotos con patatas fritas.jpg", "pw2-huevos-rotos"],
+  ["dish-pw2-kuku-sabzi", "Kookoo-sabzi.jpg", "pw2-kuku-sabzi"],
+  ["dish-pw2-martabak-telur", "Martabak telur Palembang.jpg", "pw2-martabak-telur"],
+  ["dish-pw2-masala-vada-patties", "Paruppu Vadai - Homemade- Chennai-TN.jpg", "pw2-masala-vada-patties"],
+  ["dish-pw2-migas", "Migas.jpg", "pw2-migas"],
+  ["dish-pw2-mozzarella-sticks", "Mozzarella 394.jpg", "pw2-mozzarella-sticks"],
+  ["dish-pw2-mughlai-egg-paratha", "Mughlai Paratha.jpg", "pw2-mughlai-egg-paratha"],
+  ["dish-pw2-nasi-uduk", "Nasi Uduk Betawi.jpg", "pw2-nasi-uduk"],
+  ["dish-pw2-okonomiyaki", "FOOD Okonomiyaki.jpg", "pw2-okonomiyaki"],
+  ["dish-pw2-paneer-pea-samosas", "Shingara 01.jpg", "pw2-paneer-pea-samosas"],
+  ["dish-pw2-roti-john", "Roti John - served.jpg", "pw2-roti-john"],
+  ["dish-pw2-ros-omelette", "Ros omelette.jpg", "pw2-ros-omelette"],
+  ["dish-pw2-shrimp-cakes", "Shrimp Cakes.jpg", "pw2-shrimp-cakes"],
+  ["dish-pw2-soboro-bowl", "Tori-soboro-don,seasoned-chicken-powder,japan.JPG", "pw2-soboro-bowl"],
+  ["dish-pw2-strammer-max", "Strammer Max auf blauem Teller, Ausschnitt-2433.jpg", "pw2-strammer-max"],
+  ["dish-pw2-stuffed-mushrooms", "Stuffed mushrooms.jpg", "pw2-stuffed-mushrooms"],
+  ["dish-pw2-syrniki", "Syrniki with fruits.jpg", "pw2-syrniki"],
+  ["dish-pw2-tamago-sando", "Tamago Sando elaborado en Argentina.jpg", "pw2-tamago-sando"],
+  ["dish-pw2-tortang-talong", "Tortang talong.jpg", "pw2-tortang-talong"],
+  ["dish-pw2-turkey-chorizo-eggs", "Scrambled eggs with chorizo, cannelini beans and cherry tomatoes.jpg", "pw2-turkey-chorizo-eggs"],
+  ["dish-pw2-turkey-eggwhite-bake", "Frittata slice.jpg", "pw2-turkey-eggwhite-bake"],
+  ["dish-pw2-turkey-loco-moco", "Loco moco (32605169782).jpg", "pw2-turkey-loco-moco"],
+  ["dish-pw2-white-bean-dip-eggs", "White bean dip with garnish.jpg", "pw2-white-bean-dip-eggs"],
+  ["dish-pw2-xoi-xeo", "Xôi xéo.jpg", "pw2-xoi-xeo"],
+  ["dish-ayala-varutharacha-curry", "Ayala Meen Curry by Preeti Tamilarasan.jpg", "ayala-varutharacha-curry"],
+  ["dish-ayala-mulakittathu", "MEEN MULAKITTATHU.jpg", "ayala-mulakittathu"],
+  ["dish-mathi-pepper-fry", "Spicy fried sardines.jpg", "mathi-pepper-fry"],
+  ["dish-vella-kadala-curry", "White Chana in a Ground Coconut Sauce Thengayaracha Vella Kadala Curry (15727675520).jpg", "vella-kadala-curry"],
+  ["dish-mutta-thoran", "Mutta Thoran(Scrambled Egg with Spicy Coconut Masala) 01.JPG", "mutta-thoran"],
+  ["dish-meen-mappas", "Fish Moilee Kerala Style.JPG", "meen-mappas"],
+  ["dish-kozhi-mappas", "Chicken Mappas (15728728659).jpg", "kozhi-mappas"],
+  ["dish-kozhi-thoran", "Chicken shallot thoran - kerala style.jpg", "kozhi-thoran"],
+  ["dish-paneer-jalfrezi", "Paneer Jalfrezi.jpg", "paneer-jalfrezi"],
+  ["dish-paneer-tikka", "Panir Tikka Indian cheese grilled.jpg", "paneer-tikka"],
+  ["dish-mushroom-paneer-masala", "Paneer mushroom gravy.JPG", "mushroom-paneer-masala"],
+  ["dish-egg-pepper-fry", "Pepper egg fries.jpg", "egg-pepper-fry"],
+  ["dish-egg-poached-curry", "Egg drop curry - my home Bangalore - Karnataka -pic 11.jpg", "egg-poached-curry"],
+  ["dish-egg-tadka-dal", "Egg tadka.jpg", "egg-tadka-dal"],
+  ["dish-chole-palak", "Spinach-Chickpea Curry (3117324894).jpg", "chole-palak"],
+  ["dish-chana-paneer", "Chole Paneer.jpg", "chana-paneer"],
+  ["dish-kaju-masala", "Cashew Curry.JPG", "kaju-masala"],
+  ["dish-kaju-paneer", "Cashew paneer.jpg", "kaju-paneer"],
+  ["dish-chicken-do-pyaza", "Chicken do pyaza.JPG", "chicken-do-pyaza"],
+  ["dish-chicken-kolhapuri", "Kolhapuri Chicken.JPG", "chicken-kolhapuri"],
+  ["dish-chicken-rezala", "Chicken Rezala - Kolkata 2011-08-02 4546.JPG", "chicken-rezala"],
+  ["dish-ph-chicken-adobo-style", "Chicken adobo.jpg", "ph-chicken-adobo-style"],  // CC BY 2.0; author: dbgg1979 on flickr
+  ["dish-ph-tinola", "Chicken Tinola, Feb 2024.jpg", "ph-tinola"],  // CC BY-SA 4.0; author: Ralff Nestor Nacor
+  ["dish-ph-sinigang-shrimp", "3615Sinigang na Hipon sa Sampalok at Tanglad 03.jpg", "ph-sinigang-shrimp"],  // CC0; author: Judgefloro
+  ["dish-ph-ginataang-manok", "3146Ginataang Tinanglarang Manok 21.jpg", "ph-ginataang-manok"],  // CC0; author: Judgefloro
+  ["dish-ph-monggo", "3778Ginisang monggo, sugpo at tokwa sa kamias 12.jpg", "ph-monggo"],  // CC0; author: Judgefloro
+  ["dish-ph-tortang-talong", "Tortang Talong, Apr 2026.jpg", "ph-tortang-talong"],  // CC BY-SA 4.0; author: Ralff Nestor Nacor
+  ["dish-ph-pinakbet-style", "Ginisang Pinakbet with Shrimp, Aug 2026.jpg", "ph-pinakbet-style"],  // CC BY-SA 4.0; author: Ralff Nestor Nacor
+  ["dish-jp-oyakodon", "Golden chicken and egg bowl of Nakau.jpg", "jp-oyakodon"],  // CC0; author: 毒島みるく
+  ["dish-jp-chikuzenni", "がめ煮（筑前煮）P1010424.jpg", "jp-chikuzenni"],  // CC BY-SA 4.0; author: 南無観自在
+  ["dish-jp-mabo-nasu", "Ma-bonasu.jpg", "jp-mabo-nasu"],  // CC BY-SA 3.0; author: Hykw-a4
+  ["dish-jp-nikujaga-style", "Nikujaga.jpg", "jp-nikujaga-style"],  // CC BY 4.0; author: ノボホショコロトソ
+  ["dish-jp-teriyaki-style", "Chicken teriyaki, Fried chicken, Asian cuisine in Krasnoyarsk, Russia.jpg", "jp-teriyaki-style"],  // CC BY 4.0; author: Vyacheslav Argenberg
+  ["dish-th-tom-kha-gai", "Thom Kha Gai Soup.jpg", "th-tom-kha-gai"],  // CC BY-SA 4.0; author: Christian Michelides
+  ["dish-th-tom-yum-style", "Siam Garden Tom yum goong ac.jpg", "th-tom-yum-style"],  // CC BY-SA 4.0; author: Asturio Cantabrio
+  ["dish-th-pad-kra-pao-style", "Kao Rad Pad Kra-pao with chicken and fried egg - Unithai 2025-07-30.jpg", "th-pad-kra-pao-style"],  // CC0; author: Andy Li
+  ["dish-th-gaeng-pa", "Gang Pa Thai Jungle Curry close-up - Ying Thai Lygon AUD12.90 (2170431637).jpg", "th-gaeng-pa"],  // CC BY-SA 2.0; author: Alpha
+  ["dish-th-pla-neung-manao-style", "Thai steamed fish with lime juice-2.jpg", "th-pla-neung-manao-style"],  // Public domain; author: Mattes (talk) *derivative work: an-d (talk)
+  ["dish-vn-ca-kho-to-style", "Cá kho tộ, cá hú.jpg", "vn-ca-kho-to-style"],  // CC BY-SA 2.0; author: Charles Haynes
+  ["dish-kh-fish-amok-style", "Fish Amok with Rice.jpg", "kh-fish-amok-style"],  // CC0; author: sharonang
+  ["dish-kr-dak-yukgaejang", "Korean Yukgaejang.jpg", "kr-dak-yukgaejang"],  // CC BY 3.0; author: Shene81
+  ["dish-kr-chicken-bulgogi-style", "Dak-bulgogi.jpg", "kr-chicken-bulgogi-style"],  // CC BY 2.0; author: Debbie Tingzon
+  ["dish-id-sate-lilit", "Sate lilit.jpg", "id-sate-lilit"],  // CC BY-SA 4.0; author: lifestyle.okezone.com
+  ["dish-id-ayam-betutu-style", "Ayam betutu khas Gilimanuk.jpg", "id-ayam-betutu-style"],  // CC BY-SA 4.0; author: Ezagren (bicara / talk)
+  ["dish-id-pepes-tofu-tempeh", "Pèpès tahu 2.jpg", "id-pepes-tofu-tempeh"],  // CC BY-SA 4.0; author: User:Affandy Murad
+  ["dish-cn-yu-xiang-eggplant", "Yuxiangqiezi.jpg", "cn-yu-xiang-eggplant"],  // CC BY-SA 2.0; author: Ewan-M of Flickr
+  ["dish-cn-lions-head-style", "Lions head meatballs in brown sauce.jpg", "cn-lions-head-style"],  // CC BY-SA 4.0; author: Jpatokal
+  ["dish-cn-chicken-black-bean", "Chicken with black bean sauce.JPG", "cn-chicken-black-bean"],  // CC BY-SA 3.0; author: BrokenSphere
+  ["dish-cn-salt-pepper-tofu", "Salt and Pepper Tofu.jpg", "cn-salt-pepper-tofu"],  // CC BY 4.0; author: Neodymium+Nd
+  ["dish-tw-sesame-oil-chicken", "Sesame oil chicken (4849352485).jpg", "tw-sesame-oil-chicken"],  // CC BY 2.0; author: jeffreyw
+  ["dish-np-chicken-choila-style", "Chhwela.jpg", "np-chicken-choila-style"],  // CC BY-SA 4.0; author: Rajivkilanashrestha
+  ["dish-pt-bacalhau-bras-style", "Bacalhau a Bras.jpg", "pt-bacalhau-bras-style"],  // CC BY-SA 3.0; author: Fpenteado at en.wikipedia
+  ["dish-es-marmitako", "Marmitako de atún (España).jpg", "es-marmitako"],  // CC BY-SA 4.0; author: Juan Emilio Prades Bel
+  ["dish-pt-arroz-de-marisco-style", "Arroz de marisco in Lisbon.jpg", "pt-arroz-de-marisco-style"],  // CC BY-SA 4.0; author: Kritzolina
+  ["dish-pt-cataplana-style", "Seafood Cataplana at World Heritage Cuisine Summit & Food Festival 2018 (Day 2) - 20.jpg", "pt-cataplana-style"],  // CC BY-SA 4.0; author: Satdeep Gill
+  ["dish-be-waterzooi", "Waterzooi, 2010.jpg", "be-waterzooi"],  // CC BY 2.0; author: Smabs Sputzer
+  ["dish-al-tave-kosi-style", "TAVE KOSI- agnello allo yogurt albanese.jpg", "al-tave-kosi-style"],  // CC BY 2.0; author: fugzu
+  ["dish-al-fergese-style", "Fërgesë me speca dhe gjizë.jpg", "al-fergese-style"],  // CC BY-SA 4.0; author: Rrezjaediellit
+  ["dish-ro-ciorba-perisoare", "Ciorbă cu perișoare.jpg", "ro-ciorba-perisoare"],  // CC BY-SA 4.0; author: Sacha47
+  ["dish-ba-begova-corba", "Begova Čorba (Baščaršija in Sarajevo, Bosnia).JPG", "ba-begova-corba"],  // CC BY-SA 4.0; author: BiHVolim
+  ["dish-gr-turkey-stifado-style", "Stifado.JPG", "gr-turkey-stifado-style"],  // CC BY-SA 3.0; author: Fajardoalacant
+  ["dish-ir-tahchin-style", "Making Tahchin.jpg", "ir-tahchin-style"],  // CC BY-SA 4.0; author: Roozitaa
+  ["dish-ye-saltah-style", "Saltah.jpg", "ye-saltah-style"],  // CC BY-SA 4.0; author: Rania al-Bahara
+  ["dish-dz-chorba-style", "Chorba frik algerienne.jpg", "dz-chorba-style"],  // CC BY-SA 4.0; author: Slothtysloth
+  ["dish-il-gefilte-style", "Gefilte fish topped with slices of carrot.jpg", "il-gefilte-style"],  // CC BY-SA 4.0; author: Mushki Brichta
+  ["dish-lb-shish-barak-style", "Shish barak.jpg", "lb-shish-barak-style"],  // CC BY-SA 4.0; author: Peteravivangel
+  ["dish-eg-hawawshi-style", "Hawawshi Main 2 Mohamed Moheyeldin.jpg", "eg-hawawshi-style"],  // CC BY-SA 4.0; author: Mohamed Moheyeldin
+  ["dish-ng-chicken-suya", "Suya chicken meat.jpg", "ng-chicken-suya"],  // CC BY-SA 4.0; author: MOIBARDE
+  ["dish-ng-efo-riro-style", "Efo riro.jpg", "ng-efo-riro-style"],  // CC BY-SA 4.0; author: Bukky658
+  ["dish-cm-ndole-style", "Ndole.jpg", "cm-ndole-style"],  // CC0; author: Adesolive
+  ["dish-ci-kedjenou", "Kedjenou de Poulet.jpg", "ci-kedjenou"],  // CC BY-SA 4.0; author: Liliane.logbo
+  ["dish-ug-matoke-turkey", "Matoke with stew.jpg", "ug-matoke-turkey"],  // CC BY-SA 4.0; author: Rokie7
+  ["dish-ao-calulu-style", "Calulu.jpg", "ao-calulu-style"],  // CC BY 3.0; author: elingunnur
+  ["dish-mz-zambeziana-style", "Frango a Zambeziana acompanhado de Salada e Batatas Fritas.jpg", "mz-zambeziana-style"],  // CC BY-SA 4.0; author: Nalikilal
+  ["dish-gt-pepian", "Pepián Guatemala.jpg", "gt-pepian"],  // CC BY 2.0; author: Josué Goge from Guatemala
+  ["dish-mx-chiles-nogada-style", "Chile en nogada in Mexico City.jpg", "mx-chiles-nogada-style"],  // CC BY-SA 4.0; author: Jj saezdeo
+  ["dish-br-bobo-camarao", "Bobo a Dish from Brazil.JPG", "br-bobo-camarao"],  // CC BY-SA 3.0; author: Victorgrigas
+  ["dish-pe-carapulcra-style", "2020-10-18 carapulcra.jpg", "pe-carapulcra-style"],  // CC BY-SA 4.0; author: MiguelAlanCS (finisher re-pin 2026-11-17: the original pin, "Carapulcra definitiva.jpg", carries a blog watermark in frame)
+  ["dish-ge-lobiani-style", "Lobiani, Restaurant Aragvi.jpg", "ge-lobiani-style"],  // CC BY-SA 2.0; author: Sandra C from Canada
+  ["dish-az-dovga-style", "Dovga e-citizen.JPG", "az-dovga-style"],  // CC BY-SA 3.0; author: Moonsun1981
+  ["dish-lt-cepelinai-style", "Cepelinai 2019.jpg", "lt-cepelinai-style"],  // CC BY-SA 4.0; author: Bdx
+  ["dish-kh-samlor-korko-style", "Samlor Korko Khmer at Peace Cafe.jpg", "kh-samlor-korko-style"],  // CC0; author: Mx. Granger
+  ["dish-id-woku-style", "Woku rahang tuna.jpg", "id-woku-style"],  // CC0; author: NazlyBiya
+  ["dish-cn-shui-zhu-style", "Shuizhufish.jpg", "cn-shui-zhu-style"],  // Public domain; author: Princevegetam at English Wikipedia
+  ["dish-ir-gheymeh-style", "Gheyme.jpg", "ir-gheymeh-style"],  // CC BY-SA 4.0; author: Diako1971
+  ["dish-tr-etli-bamya", "Etli bamya.jpg", "tr-etli-bamya"],  // CC BY-SA 4.0; author: E4024
 ];
 
 /**
@@ -768,19 +903,14 @@ const PINS = [
  * siblings. Any other reuse of a title fails generation and check.
  */
 const SHARED_FILES = [
-  ["Chicken Shawarma Platter - Lavash 2025-02-10.jpg", ["dish-chicken-shawarma-plate", "dish-intl-chicken-shawarma"]],
   ["Chicken souvlaki at Hellenic 2.jpg", ["dish-chicken-souvlaki", "dish-intl-greek-chicken-souvlaki"]],
-  ["Insalata di Fagioli e Tonno \u2013 Bohnensalat mit Thunfisch (7327273414).jpg", ["dish-intl-tuna-white-bean-salad", "dish-tonno-fagioli"]],
-  ["Shakshuka Dish.jpg", ["dish-intl-shakshuka", "dish-shakshuka"]],
   ["GarbanzosConEspinacas.jpg", ["dish-garbanzos-espinacas", "dish-intl-chickpea-spinach-stew"]],
   ["Black eyed Peas Curry and Pulav.JPG", ["dish-intl-black-eyed-pea-stew", "dish-mavromatika-fasolia"]],
-  ["MoongDal Khichdi.jpg", ["dish-moong-khichdi", "dish-moong-dal-khichdi"]],
   ["Dal Makhani..JPG", ["dish-dal-makhani", "dish-dal-makhani-enriched"]],
   ["Rajma.jpg", ["dish-rajma-masala", "dish-rajma-enriched"]],
   ["Chole Masala India.jpg", ["dish-chole-masala", "dish-chole-enriched"]],
   ["Matar-Paneer.JPG", ["dish-matar-paneer", "dish-matar-paneer-enriched"]],
   ["Palak Paneer (Cottage cheese in spinach gravy).jpg", ["dish-palak-paneer", "dish-palak-paneer-enriched"]],
-  ["Shahi Paneer with mint.jpg", ["dish-shahi-paneer", "dish-shahi-paneer-style"]],
   ["Spicy Anda Curry.jpg", ["dish-egg-curry", "dish-egg-curry-enriched"]],
   ["Chicken curry Trivandrum.jpg", ["dish-chicken-curry", "dish-chicken-curry-enriched"]],
   ["Goan Fish Curry Rice (5905244921).jpg", ["dish-goan-fish-curry", "dish-goan-fish-curry-enriched"]],
@@ -790,9 +920,20 @@ const SHARED_FILES = [
   ["Lancaster, United States (Unsplash).jpg", ["dish-fruit-curd-bowl", "dish-enriched-fruit-curd-bowl"]],
   ["Coconut Chutney - Home Made.JPG", ["dish-coconut-chutney", "dish-shahi-coconut-chutney"]],
   ["Kadala curry.jpg", ["dish-kadala-curry", "dish-kadala-curry-enriched"]],
-  ["Blackened tilapia with Cajun spices, lemon and lime juice.jpg", ["dish-intl-blackened-tilapia", "dish-us-blackened-tilapia"]],
-  ["Arroz-con-Pollo.jpg", ["dish-cu-arroz-con-pollo", "dish-intl-spanish-chicken-rice"]],
   ["Chicken fricassee-01.jpg", ["dish-ar-pollo-crema", "dish-chicken-fricassee"]],
+  ["Banana Smoothie.jpg", ["dish-shake-cottage-cheese-banana", "dish-shake-greek-yogurt-banana", "dish-shake-ricotta-banana"]],
+  ["Banana Milkshake.jpg", ["dish-shake-double-dairy-banana", "dish-shake-whey-cottage-cheese-banana", "dish-shake-whey-oat-banana"]],
+  ["Melon and banana vegan shake (7448919266).jpg", ["dish-shake-coconut-banana-greek-yogurt", "dish-shake-mixed-seed-banana", "dish-shake-walnut-banana-greek-yogurt"]],
+  ["Banana smoothie with weetbix.jpeg", ["dish-shake-cottage-cheese-oats-banana", "dish-shake-oat-peanut-banana", "dish-shake-soy-powder-banana-oat-peanut"]],
+  ["Fruit and peanut butter smoothie.jpg", ["dish-shake-peanut-banana-greek-yogurt", "dish-shake-whey-peanut-banana"]],
+  ["Fresh-mango-smoothie 01.jpg", ["dish-shake-cottage-cheese-mango", "dish-shake-soy-powder-mango-coconut"]],
+  ["Glass of strawberry smoothie (6828826294).jpg", ["dish-shake-cottage-cheese-strawberry", "dish-shake-ricotta-strawberry"]],
+  ["Plain yoghurt and strawberry smoothie (5700145998).jpg", ["dish-shake-greek-yogurt-strawberry", "dish-shake-whey-strawberry-greek-yogurt"]],
+  ["Looking down at a strawberry-lemon smoothie (14266944557).jpg", ["dish-shake-soy-powder-strawberry-almond", "dish-shake-sunflower-strawberry"]],
+  ["Apple orange smoothie (34365737850).jpg", ["dish-shake-cottage-cheese-orange", "dish-shake-greek-yogurt-orange-cardamom"]],
+  ["Tasty Mango lassi picture.JPG", ["dish-mango-lassi", "dish-shake-pumpkin-seed-mango"]],
+  ["Badam Milk Drink.jpg", ["dish-badam-doodh", "dish-shake-almond-cardamom"]],
+  ["Protein overnight oats.jpg", ["dish-intl-overnight-oats", "dish-shake-overnight-oat-banana"]],
 ];
 
 /**
@@ -878,10 +1019,8 @@ const PHOTOLESS = [
   ["dish-intl-chicken-black-bean-chili", "Hunted 2026-11-17: enchiladas, salads, market pots and la zi ji, but no chicken and black bean chili under a free licence."],
   ["dish-intl-buffalo-chicken-strips", "Hunted 2026-11-17: Commons' free buffalo-chicken photographs are all bone-in wings; no boneless strips or tenders photograph was found, and wings are a different form."],
   ["dish-intl-turkey-vegetable-stir-fry", "Hunted 2026-11-17: the only hit is a Brueghel painting ('Turkey' the country swamps the search); no food photograph of a turkey stir-fry exists on Commons."],
-  ["dish-intl-turkey-meatloaf", "Hunted 2026-11-17: the classic public-domain meatloaf photograph does not state its meat, the sliced loaf is Czech sekaná (beef and pork), and the rest are foil-wrapped loaves of unstated meat; no verifiable turkey meatloaf."],
   ["dish-intl-turkey-taco-cups", "Hunted 2026-11-17: only USDA school-lunch tortilla wraps; no cabbage or lettuce cup photograph with a verifiable turkey filling."],
   ["dish-intl-turkey-stuffed-peppers", "Hunted 2026-11-17: Balkan stuffed peppers exist (Albanian speca, Macedonian polneti piperki) but their fillings are beef or lamb with rice; nothing verifiably turkey and quinoa."],
-  ["dish-intl-salmon-cakes", "Hunted 2026-11-17: Commons offers salmon burgers and sandwiches, one salmon-and-crab cake (crab is not in this dish) and a bento box; no photograph of plain salmon cakes."],
   ["dish-intl-tuna-stuffed-peppers", "Hunted 2026-11-17: the tuna-filled peppers on Commons are filled with guacamole or topped with anchovies (cold Catalan style); none is the baked tuna, quinoa and mozzarella pepper."],
   ["dish-intl-sardine-chickpea-salad", "Hunted 2026-11-17: several sardine salads under free licences, but chickpeas could not be verified in any of them."],
   ["dish-intl-mackerel-potato-salad", "Hunted 2026-11-17: apple salads, a whole smoked-mackerel platter and an ingredients flat-lay; no mackerel and potato salad."],
@@ -902,13 +1041,11 @@ const PHOTOLESS = [
   ["dish-intl-hummus-egg-plate", "Hunted 2026-11-17: sabich pitas and breakfast spreads; no plate of hummus with eggs."],
   ["dish-intl-warm-lentil-egg-salad", "Hunted 2026-11-17: only Indian dal-and-roti plates; no lentil and egg salad under a free licence."],
   ["dish-intl-peanut-chickpea-stew", "Hunted 2026-11-17: no photograph of a peanut and chickpea stew was found on Commons under a free licence."],
-  ["dish-intl-tomato-mozzarella-chicken", "Hunted 2026-11-17: only chicken sandwiches and burgers with mozzarella; no baked caprese chicken breast."],
   ["dish-intl-spinach-ricotta-chicken", "Hunted 2026-11-17: no photograph of a spinach-stuffed chicken breast was found on Commons under a free licence."],
   ["dish-intl-cheesy-bean-bake", "Hunted 2026-11-17: BBQ trays where baked beans are a side, and a jacket potato with beans; no cheesy bean and tomato bake."],
   ["dish-intl-black-bean-burgers", "Hunted 2026-11-17: generic veggie burgers, several cheese-stacked; a black bean patty cannot be verified in any of them."],
   ["dish-intl-edamame-egg-fried-rice", "Hunted 2026-11-17: a peanut fried rice and set meals; no edamame fried rice."],
   ["dish-intl-turkey-rice-bowl", "Hunted 2026-11-17: Chiayi turkey rice (a distinct shredded-turkey dish) and a gravy-smothered turkey rice; neither is the turkey, broccoli and brown rice bowl."],
-  ["dish-intl-denver-turkey-omelette", "Hunted 2026-11-17: Commons' Denver omelettes are the classic ham version; this dish is turkey, and ham cannot be told apart from turkey in a folded omelette."],
   ["dish-intl-egg-white-turkey-scramble", "Hunted 2026-11-17: no photograph of a turkey egg scramble was found on Commons under a free licence."],
   ["dish-intl-eggs-benedict-style", "Hunted 2026-11-17: every Commons benedict is the classic ham build on a muffin; this dish is turkey on flatbread, and the meat hides unverifiably under the hollandaise."],
   ["dish-intl-turkey-sweet-potato-hash", "Hunted 2026-11-17: a plain hash-browns-and-eggs skillet (turkey and sweet potato unverifiable) and military chow-line photographs."],
@@ -945,13 +1082,11 @@ const PHOTOLESS = [
   ["dish-insalata-di-mare", "Seafood-salad photographs are mixed shellfish or prawn salads with asparagus/avocado; none shows this shrimp, cucumber and pepper salad."],
   ["dish-pollo-diavola", "No photograph of chilli-grilled chicken alla diavola found under a free licence."],
   ["dish-gnocchi-turkey-ragu", "Gnocchi photographs name beef ragù or cream sauces; none shows a tomato turkey ragù."],
-  ["dish-sardine-bake-italian", "Identical build to the Greek sardine bake; the only sardine-bake photograph has branded tins in frame and olives the recipe lacks."],
   ["dish-tilapia-livornese", "Livornese photographs are cacciucco (mixed fish stew) or name other fish."],
   ["dish-pollo-ajillo", "Every pollo al ajillo photograph is dominated by fries, rice or takeout packaging the recipe does not have."],
   ["dish-cod-galician", "No photograph of Galician cod with potatoes and peas found."],
   ["dish-pollo-pepitoria", "The only pepitoria photograph serves the chicken with a pile of fries the recipe does not have."],
   ["dish-albondigas-pavo-almendras", "No photograph of meatballs in almond sauce exists."],
-  ["dish-alubias-blancas", "White-bean photographs are fabada/cassoulet with pork and sausage; this stew is plain beans, carrot and tomato."],
   ["dish-albondigas-cordero", "The albóndigas tapa photograph is full of peas, which this recipe does not contain."],
   ["dish-salmon-pisto", "Griddled-salmon photographs come with fries or potatoes, never with pisto."],
   ["dish-salade-nicoise", "Every niçoise photograph includes olives (and usually anchovies); this recipe contains neither."],
@@ -1056,13 +1191,154 @@ const PHOTOLESS = [
   ["dish-dubki-kadhi", "Hunted 2026-11-16 and re-hunted 2026-11-17: no photograph of dubki kadhi was found on Commons (the 'Dubki' files are a Russian village and its park)."],
   ["dish-vazhakkai-varuval", "Hunted 2026-11-16 and re-hunted 2026-11-17: the vazhakkai photographs on Commons are the batter-fried bajji and the finely diced poriyal — neither is the spice-roasted thick-round varuval, so the dish stays photo-less rather than borrow a sibling."],
   ["dish-ennegai", "Hunted 2026-11-16 and re-hunted 2026-11-17 (ennegai and badanekai searches): the only stuffed-brinjal photographs on Commons are already pinned to their own regional dishes (bharli vangi, gutti vankaya) — no verifiable ennegai photograph."],
+  ["dish-shake-boiled-egg-banana", "Hunted 2026-11-17: Commons has no photograph of a blended egg shake — searches surface plated egg dishes (eggs benedict, frittata) only, and a plated-egg photo would misrepresent a blended drink."],
+  ["dish-shake-boiled-egg-mango", "Hunted 2026-11-17: Commons has no photograph of a blended egg shake — searches surface plated egg dishes (eggs benedict, frittata) only, and a plated-egg photo would misrepresent a blended drink."],
+  ["dish-shake-egg-oat-breakfast", "Hunted 2026-11-17: Commons has no photograph of a blended egg shake — searches surface plated egg dishes (eggs benedict, frittata) only, and a plated-egg photo would misrepresent a blended drink."],
+  ["dish-shake-egg-cottage-cheese-banana", "Hunted 2026-11-17: Commons has no photograph of a blended egg shake — searches surface plated egg dishes (eggs benedict, frittata) only, and a plated-egg photo would misrepresent a blended drink."],
+  ["dish-shake-tofu-banana-peanut", "Hunted 2026-11-17: no Commons photograph depicts a tofu smoothie; the tofu photographs there are salads and plated dishes, which do not depict a blended drink."],
+  ["dish-shake-tofu-mango-pumpkin-seed", "Hunted 2026-11-17: no Commons photograph depicts a tofu smoothie; the tofu photographs there are salads and plated dishes, which do not depict a blended drink."],
+  ["dish-shake-tofu-strawberry-almond", "Hunted 2026-11-17: no Commons photograph depicts a tofu smoothie; the tofu photographs there are salads and plated dishes, which do not depict a blended drink."],
+  ["dish-shake-tofu-oat-banana-peanut", "Hunted 2026-11-17: no Commons photograph depicts a tofu smoothie; the tofu photographs there are salads and plated dishes, which do not depict a blended drink."],
+  ["dish-shake-tofu-pineapple-coconut", "Hunted 2026-11-17: one piña colada smoothie photograph exists (a vegan diner snapshot) but its blend could not be verified as tofu-based, so the shake stays photo-less rather than borrow an unverified photo."],
+  ["dish-shake-tempeh-banana-peanut", "Hunted 2026-11-17: no Commons photograph of a tempeh smoothie exists — tempeh searches return plated tempeh dishes only."],
+  ["dish-shake-tempeh-mango-oat", "Hunted 2026-11-17: no Commons photograph of a tempeh smoothie exists — tempeh searches return plated tempeh dishes only."],
+  ["dish-shake-tempeh-strawberry-oat", "Hunted 2026-11-17: no Commons photograph of a tempeh smoothie exists — tempeh searches return plated tempeh dishes only."],
+  ["dish-shake-edamame-tofu-banana", "Hunted 2026-11-17: no Commons photograph of an edamame smoothie exists."],
+  ["dish-shake-edamame-tofu-mango-mint", "Hunted 2026-11-17: no Commons photograph of an edamame smoothie exists."],
+  ["dish-shake-edamame-peanut-oat-banana", "Hunted 2026-11-17: no Commons photograph of an edamame smoothie exists."],
+  ["dish-shake-quinoa-banana", "Hunted 2026-11-17: no Commons photograph of a quinoa smoothie exists."],
+  ["dish-shake-quinoa-mango", "Hunted 2026-11-17: no Commons photograph of a quinoa smoothie exists."],
+  ["dish-shake-sattu-banana", "Hunted 2026-11-17: the only Commons photograph of a sattu drink (Sattu Ghol) repeatedly refused download (HTTP 429) so it could not be eyeballed or licence-verified; sattu powder and sattu paratha photographs do not depict the shake."],
+  ["dish-shake-sattu-mango", "Hunted 2026-11-17: the only Commons photograph of a sattu drink (Sattu Ghol) repeatedly refused download (HTTP 429) so it could not be eyeballed or licence-verified; sattu powder and sattu paratha photographs do not depict the shake."],
+  ["dish-shake-sattu-oat", "Hunted 2026-11-17: the only Commons photograph of a sattu drink (Sattu Ghol) repeatedly refused download (HTTP 429) so it could not be eyeballed or licence-verified; sattu powder and sattu paratha photographs do not depict the shake."],
+  ["dish-shake-sattu-tofu-banana", "Hunted 2026-11-17: the only Commons photograph of a sattu drink (Sattu Ghol) repeatedly refused download (HTTP 429) so it could not be eyeballed or licence-verified; sattu powder and sattu paratha photographs do not depict the shake."],
+  ["dish-shake-sattu-cottage-cheese-banana", "Hunted 2026-11-17: the only Commons photograph of a sattu drink (Sattu Ghol) repeatedly refused download (HTTP 429) so it could not be eyeballed or licence-verified; sattu powder and sattu paratha photographs do not depict the shake."],
+  ["dish-shake-turmeric-milk-greek-yogurt", "Hunted 2026-11-17: Commons golden-milk photographs are a branded product packet, a dessert ramekin, or turmeric powder spooned over milk — none depicts the finished blended shake."],
+  ["dish-shake-greek-yogurt-watermelon-mint", "Hunted 2026-11-17: the only watermelon smoothie photograph shows a dark berry-coloured drink, which contradicts this pale pink watermelon-yogurt shake, so it was rejected on inspection."],
+  ["dish-shake-greek-yogurt-apple-cinnamon", "Hunted 2026-11-17: Commons apple smoothie photographs are carrot-apple or apple-orange blends whose colour contradicts this pale apple-cinnamon shake."],
+  ["dish-shake-oat-apple-greek-yogurt", "Hunted 2026-11-17: Commons apple smoothie photographs are carrot-apple or apple-orange blends whose colour contradicts this pale apple-oat shake."],
+  ["dish-shake-greek-yogurt-pear-ginger", "Hunted 2026-11-17: no Commons photograph of a pear smoothie exists; generic fruit-preparation photographs do not depict the drink."],
+  ["dish-shake-sweet-potato-greek-yogurt", "Hunted 2026-11-17: no Commons photograph of a sweet potato smoothie exists."],
+  ["dish-shake-greek-yogurt-cottage-cheese-oat", "Hunted 2026-11-17: the only oatmeal-smoothie photograph on Commons shows a person drinking streetside with the drink itself barely visible — no photograph depicts the shake itself."],
+  ["dish-pw2-bombay-masala-toast", "Hunted 2026-11-17: Commons results for masala toast are generic cheese toasts and full breakfast plates — none verifiably this egg-and-paneer masala toast."],
+  ["dish-pw2-chakka-puzhukku-eggs", "Hunted 2026-11-17: no free-licence photograph of chakka puzhukku (mashed jackfruit) with eggs exists on Commons; results are raw jackfruit and jackfruit curries."],
+  ["dish-pw2-chemmeen-mutta-thoran", "Hunted 2026-11-17: the only prawn-and-egg photographs on Commons are sauced omelettes and curries — none shows this dry Kerala thoran."],
+  ["dish-pw2-chicken-egg-drop-soup", "Hunted 2026-11-17: Commons egg-drop soup photographs are plain sweetcorn soups without chicken, or restaurant bowls that could not be verified as this soup."],
+  ["dish-pw2-chicken-kothu-parotta", "Hunted 2026-11-17: kothu parotta photographs on Commons are stall scenes and mutton kothu — no verifiable chicken kothu parotta plate under a free licence."],
+  ["dish-pw2-chicken-reshmi-kebabs", "Hunted 2026-11-17: kebab photographs on Commons are seekh, tikka or doner — none verifiably reshmi kebabs."],
+  ["dish-pw2-chicken-silog", "Hunted 2026-11-17: silog photographs on Commons are tapsilog/longsilog (different proteins) or plain garlic rice — no chicken silog plate."],
+  ["dish-pw2-cottage-blintzes", "Hunted 2026-11-17: the only blintz photographs are a frozen packaged product being fried and dessert blintzes with jam — rejected as branded/sweet."],
+  ["dish-pw2-cuscuz-nordestino", "Hunted 2026-11-17: Commons cuscuz photographs are Moroccan couscous dishes and cuscuz paulista — not the steamed cornmeal cuscuz nordestino with egg."],
+  ["dish-pw2-dimer-chop", "Hunted 2026-11-17: no free-licence photograph of dimer chop (Bengali egg devil) was found; results are devilled eggs and unrelated chops."],
+  ["dish-pw2-egg-bread-upma", "Hunted 2026-11-17: bread upma photographs on Commons could not be verified as the egg version; results are plain bread upma and poha."],
+  ["dish-pw2-egg-tadka", "Hunted 2026-11-17: dhaba egg tadka photographs on Commons are dal tadka bowls without visible egg — none verifiably this dish."],
+  ["dish-pw2-eggplant-cottage-rolls", "Hunted 2026-11-17: eggplant roll photographs on Commons are rollatini with ricotta in tomato sauce — a different dish from these paneer-stuffed rolls."],
+  ["dish-pw2-garlic-shrimp-skewers", "Hunted 2026-11-17: shrimp skewer photographs on Commons are barbecue-grill scenes with mixed meats or raw product shots — no clean plate of garlic shrimp skewers."],
+  ["dish-pw2-grechka-tofu", "Hunted 2026-11-17: grechka photographs on Commons are plain boiled groats (one result was a portrait, not food) — none shows the tofu-and-egg bowl."],
+  ["dish-pw2-khai-yat-sai", "Hunted 2026-11-17: no free-licence photograph of khai yat sai (Thai stuffed omelette) was found on Commons."],
+  ["dish-pw2-khao-tom", "Hunted 2026-11-17: the only khao tom photograph on Commons is a plain rice soup without the chicken and egg — rejected as not this dish."],
+  ["dish-pw2-kothu-idiyappam", "Hunted 2026-11-17: no free-licence photograph of kothu idiyappam (egg kothu string hoppers) was found on Commons."],
+  ["dish-pw2-lentil-walnut-pate", "Hunted 2026-11-17: no free-licence photograph of a lentil-walnut pâté was found; results are meat pâtés and generic dips."],
+  ["dish-pw2-mackerel-pate-toasts", "Hunted 2026-11-17: Commons offers whole smoked mackerel plates, but no photograph of mackerel pâté on toast."],
+  ["dish-pw2-mamaliga", "Hunted 2026-11-17: mamaliga photographs on Commons are plain polenta mounds and full banquet plates — none shows this egg-and-cheese serving."],
+  ["dish-pw2-masala-edamame-chaat", "Hunted 2026-11-17: edamame photographs on Commons are plain salted pods in restaurant bowls — none shows the masala chaat toss."],
+  ["dish-pw2-masala-egg-idli", "Hunted 2026-11-17: idli photographs on Commons are plain steamed idli plates with sambar — none shows chopped masala-fried idli with egg."],
+  ["dish-pw2-oats-cottage-patties", "Hunted 2026-11-17: no free-licence photograph of oat-and-cottage-cheese patties was found; results are oatcakes and veggie burgers."],
+  ["dish-pw2-perkedel", "Hunted 2026-11-17: perkedel photographs on Commons are potato-only fritters or stall scenes — none verifiably the chicken-and-potato cakes."],
+  ["dish-pw2-quinoa-black-bean-bites", "Hunted 2026-11-17: no free-licence photograph of quinoa black-bean bites was found; results are falafel and generic bean burgers."],
+  ["dish-pw2-rajma-kebabs", "Hunted 2026-11-17: no free-licence photograph of rajma kebabs was found on Commons; results are rajma curries."],
+  ["dish-pw2-roasted-soya-nuts", "Hunted 2026-11-17: roasted soybean photographs on Commons are raw/dried soybean product shots — none shows the spiced roasted snack served."],
+  ["dish-pw2-roti-telur", "Hunted 2026-11-17: roti telur photographs on Commons are murtabak and roti canai shots — none verifiably the plain egg roti."],
+  ["dish-pw2-sali-par-eedu", "Hunted 2026-11-17: no free-licence photograph of sali par eedu (Parsi eggs on potato straws) exists on Commons."],
+  ["dish-pw2-salmon-crepe-rolls", "Hunted 2026-11-17: smoked salmon crepe photographs on Commons are dessert crepes and salmon platters — none shows these savoury rolls."],
+  ["dish-pw2-sardine-egg-toasts", "Hunted 2026-11-17: sardine toast photographs on Commons are plain sardines on toast without egg, or tinned-product shots — rejected."],
+  ["dish-pw2-soya-bean-kebabs", "Hunted 2026-11-17: soya kebab search results on Commons are doner and meat kebabs — no verifiable soya kebab photograph."],
+  ["dish-pw2-tofu-peanut-congee", "Hunted 2026-11-17: congee photographs on Commons are topped with pork floss or century egg — none shows this vegan tofu-and-peanut congee."],
+  ["dish-pw2-tofu-satay", "Hunted 2026-11-17: every satay photograph on Commons is chicken satay — no tofu satay under a free licence."],
+  ["dish-pw2-tuna-egg-rice-bowl", "Hunted 2026-11-17: no free-licence photograph of a tuna-and-egg rice bowl was found; results are poke bowls and tuna salads."],
+  ["dish-pw2-tuna-potato-kebabs", "Hunted 2026-11-17: tuna cutlet/kebab searches on Commons return only scanned cookbooks — no food photograph exists."],
+  ["dish-pw2-turkey-biscuits-gravy", "Hunted 2026-11-17: biscuits-and-gravy photographs on Commons are pork-sausage versions in diners — none verifiably turkey."],
+  ["dish-pw2-turkey-pinwheels", "Hunted 2026-11-17: pinwheel photographs on Commons are dessert swiss rolls and party platters with ham — none shows these turkey tortilla pinwheels."],
+  ["dish-muringakka-meen-curry", "Hunted 2026-11-17: Kerala fish-curry photographs are plentiful, but none verifiably shows the drumstick pieces that define this curry — the dish stays photo-less rather than borrow a plain meen curry."],
+  ["dish-chemmeen-thoran", "Hunted 2026-11-17: Commons' chemmeen photographs are curries, fries and mango curries — no prawn thoran with its crushed coconut under a free licence."],
+  ["dish-chemmeen-mulakittathu", "Hunted 2026-11-17: the one Malabar prawn curry photograph carries a baked-in text overlay, and the other candidate is a coconut-milk prawn curry — neither is the fiery chilli mulakittathu."],
+  ["dish-kozhi-pepper-fry", "Hunted 2026-11-17: the Kerala chicken-fry photographs are generic or battered fries — none shows the dry black-pepper coating of a pepper fry."],
+  ["dish-erachi-varattiyathu", "Hunted 2026-11-17: the verifiable varattiyathu/ularthiyathu photographs are beef fry — a different meat from this lamb dish, so it stays photo-less rather than borrow beef."],
+  ["dish-erachi-ishtu", "Hunted 2026-11-17: ishtu photographs on Commons are potato and chicken stews — no lamb ishtu under a free licence."],
+  ["dish-kappa-erachi", "Hunted 2026-11-17: kappa-and-meat photographs are beef kappa biriyani — a different meat from this lamb preparation, so the dish stays photo-less."],
+  ["dish-kadala-varutharacha-curry", "Hunted 2026-11-17: the verifiable kadala-curry photographs are already pinned to the library's kadala curry or show the pale coconut-milk style — none shows the dark roasted-coconut varutharacha gravy."],
+  ["dish-kadala-thoran", "Hunted 2026-11-17: dry kadala photographs are roasts and fries without the grated coconut that defines a thoran."],
+  ["dish-soya-varutharacha-curry", "Hunted 2026-11-17: every soya-curry photograph on Commons depicts TVP soya chunks; this dish cooks whole soybeans, and no whole-bean curry photograph was found."],
+  ["dish-soya-pepper-fry-kerala", "Hunted 2026-11-17: soya-fry results are TVP-chunk dishes and unrelated plates — no whole-soybean pepper fry photograph."],
+  ["dish-soya-thenga-pal-curry", "Hunted 2026-11-17: as with the other whole-soybean dishes, the only soya-curry photographs depict TVP chunks, not whole beans in coconut milk."],
+  ["dish-cherupayar-puzhukku", "Hunted 2026-11-17: the only puzhukku photographs are Thiruvathira puzhukku, a mixed-tuber festival mash — a different dish from this green-gram puzhukku."],
+  ["dish-mutta-varutharacha-curry", "Hunted 2026-11-17: Kerala egg-curry photographs show the standard onion-tomato masala served with idiyappam — none verifiably shows the roasted-coconut varutharacha gravy."],
+  ["dish-kadala-mutta-curry", "Hunted 2026-11-17: kadala photographs are puttu plates with kadala curry alone — none shows the egg-and-kadala combination."],
+  ["dish-mutta-mappas", "Hunted 2026-11-17: 'mappas' searches return cartography rather than food, and egg-molee variants found nothing — no photograph of mutta mappas under a free licence."],
+  ["dish-choora-curry", "Hunted 2026-11-17: the one verifiable South-Indian tuna-curry photograph is already pinned to tuna-potato curry, a different dish; no other tuna curry photograph was found."],
+  ["dish-paneer-korma", "Hunted 2026-11-17: the file titled 'Paneer Korma with Gravy' actually depicts a dry paneer starter with chutneys, and the 'Shahi Paneer Korma' shot is too blurred to verify — no truthful paneer korma photograph."],
+  ["dish-paneer-chaman", "Hunted 2026-11-17: the methi paneer chaman file shows only its buffet serving pot, and the remaining 'Chaman' files are unrelated — no photograph of the dish itself."],
+  ["dish-paneer-chettinad", "Hunted 2026-11-17: Chettinad results are chicken, fish and kadai paneer — no paneer Chettinad photograph under a free licence."],
+  ["dish-paneer-kadhi", "Hunted 2026-11-17: kadhi photographs are the plain kadhi or the pakora kadhi — none shows paneer cubes in kadhi."],
+  ["dish-paneer-makai-masala", "Hunted 2026-11-17: no corn-and-paneer curry photograph exists on Commons — the makai results were tortillas and thalis."],
+  ["dish-egg-korma", "Hunted 2026-11-17: the egg kurma photographs show the potato variant in a thin yellow gravy — not this cashew-yogurt korma — so the dish stays photo-less."],
+  ["dish-egg-keema-masala", "Hunted 2026-11-17: the candidates are meat-keema plates topped with whole eggs — a different dish from this grated-egg keema masala."],
+  ["dish-egg-vindaloo", "Hunted 2026-11-17: the only vindaloo photograph found is a beef vindaloo — no egg vindaloo under a free licence."],
+  ["dish-egg-pulusu", "Hunted 2026-11-17: the one egg-pulusu photograph is a bhagara-rice thali where the pulusu is a small side portion — no photograph of the pulusu itself."],
+  ["dish-egg-masoor-dal", "Hunted 2026-11-17: no photograph of egg cooked with masoor dal was found — the plates found keep egg curry and dal as separate items."],
+  ["dish-doi-dim", "Hunted 2026-11-17: no photograph of doi dim (egg in yogurt gravy) was found on Commons under a free licence."],
+  ["dish-palak-egg-curry", "Hunted 2026-11-17: the one green egg curry photograph carries a photographer's signature watermark across the dish — rejected; no clean alternative was found."],
+  ["dish-mushroom-egg-curry", "Hunted 2026-11-17: no photograph of a mushroom egg curry was found — the results were Thai night-market and unrelated plates."],
+  ["dish-paneer-egg-bhurji", "Hunted 2026-11-17: bhurji photographs are paneer-cube masala or egg-only crumble — none shows the combined paneer-and-egg bhurji."],
+  ["dish-tofu-masala", "Hunted 2026-11-17: tofu-curry photographs are Thai red curries or tofu tikka masala — none shows this onion-tomato masala."],
+  ["dish-tofu-bhurji", "Hunted 2026-11-17: no photograph of tofu bhurji was found across repeated hunts — the scramble photographs are Western plates."],
+  ["dish-palak-tofu", "Hunted 2026-11-17: the one file titled palak tofu is a meal-prep tub of rice and spinach with no tofu visible."],
+  ["dish-mushroom-tofu-masala", "Hunted 2026-11-17: the one tofu-and-mushroom curry file is a rice don bowl where the curry is a sauce over rice — not this masala."],
+  ["dish-tempeh-masala", "Hunted 2026-11-17: every file titled 'Tempeh curry' in the candidate set is a raw-tempeh preparation shot on a chopping board — no photograph of the cooked curry."],
+  ["dish-tempeh-pepper-fry", "Hunted 2026-11-17: fried-tempeh photographs are plain fries with dipping sauces or a watermarked paprika stir-fry — no pepper fry."],
+  ["dish-tempeh-palak", "Hunted 2026-11-17: no photograph of tempeh with spinach was found on Commons."],
+  ["dish-edamame-masala", "Hunted 2026-11-17: no photograph of an edamame curry was found — the only hit was a sambar."],
+  ["dish-edamame-paneer-masala", "Hunted 2026-11-17: no photograph of edamame with paneer was found on Commons."],
+  ["dish-soya-palak", "Hunted 2026-11-17: no photograph of a whole-soybean and spinach curry was found; soya results depict TVP chunks."],
+  ["dish-soya-chettinad", "Hunted 2026-11-17: no photograph of soya Chettinad was found on Commons."],
+  ["dish-mushroom-soya-masala", "Hunted 2026-11-17: no photograph of a mushroom and whole-soybean masala was found on Commons."],
+  ["dish-soya-egg-curry", "Hunted 2026-11-17: soya-egg results are Chinese soy-sauce eggs and noodle plates — no soya egg curry photograph."],
+  ["dish-tofu-egg-bhurji", "Hunted 2026-11-17: the one tofu scramble photograph is a Western spinach scramble, not an Indian masala bhurji."],
+  ["dish-paneer-soya-masala", "Hunted 2026-11-17: the one soya-with-paneer photograph is a dry granule salad tub — not this gravy masala."],
+  ["dish-dal-amti", "Hunted 2026-11-17: amti appears on Commons only inside full Maharashtrian thali spreads, never as the dish itself."],
+  ["dish-mangodi-ki-sabzi", "Hunted 2026-11-17: no photograph of mangodi ki sabzi was found — the one vadi file is a distant thali photograph."],
+  ["dish-dal-paneer", "Hunted 2026-11-17: dal-and-paneer appears only as separate items inside thali spreads — no photograph of dal paneer itself."],
+  ["dish-peanut-amti", "Hunted 2026-11-17: shengdana/peanut-curry searches return raw peanuts, plants and snacks — no photograph of the amti."],
+  ["dish-peanut-paneer", "Hunted 2026-11-17: no photograph of peanut paneer was found — the results were peanut-butter sandwiches and unrelated plates."],
+  ["dish-chana-egg-curry", "Hunted 2026-11-17: no photograph of a chickpea and egg curry was found on Commons."],
+  ["dish-fish-korma", "Hunted 2026-11-17: no photograph of fish korma was found — the single hit was a doi machh, a different dish."],
+  ["dish-doi-maach", "Hunted 2026-11-17: the one doi machh photograph shows a dark spiced fish curry served with rice, not the pale yogurt gravy that defines doi maach."],
+  ["dish-lk-ambul-thiyal-style", "Hunted 2026-11-17 (ambul thiyal and intitle sweeps): Commons returns only unrelated 'ambul' files — a Lithuanian village, a German clinic seal, a flower — no photograph of the sour fish curry."],
+  ["dish-az-buglama-style", "Hunted 2026-11-17 (buglama and buğlama, English and Azerbaijani spellings, intitle sweeps): no photograph of the dish exists on Commons under a free licence."],
+  ["dish-id-rendang-eggs", "Hunted 2026-11-17: the candidates were nasi lemak and nasi padang plates where the egg rendang is a minor side, and randang talua — the crispy flattened-egg preparation, a different dish — no photograph of whole eggs in rendang sauce."],
+  ["dish-id-tempeh-bacem", "Hunted 2026-11-17: every bacem photograph on Commons is tahu (tofu) bacem or a mixed restaurant spread — no verifiable tempeh bacem photograph under a free licence."],
+  ["dish-cn-steamed-tofu-shrimp", "Hunted 2026-11-17: the candidates were dim-sum baskets, prawn cheung fun and kaiseki courses — no photograph of steamed tofu-egg custard with shrimp under a free licence."],
+  ["dish-ke-maharagwe", "Hunted 2026-11-17 (maharagwe, maharagwe wa nazi, Kenyan coconut beans): Commons returns only bean plants, pods and seed photographs — no photograph of the cooked dish."],
+  ["dish-gt-jocon-style", "Hunted 2026-11-17 (jocón and jocon de pollo): every result is the French commune of Joucou — no photograph of the Guatemalan green chicken stew exists on Commons."],
+  ["dish-br-frango-quiabo", "Hunted 2026-11-17: the candidates were a restaurant table where the dish cannot be isolated, an American fried-chicken-and-okra plate and a live chicken — no verifiable frango com quiabo photograph."],
+  ["dish-iq-tashreeb-style", "Hunted 2026-11-17: the only dish photographs are Foodista-watermarked or show tashreeb gus (red meat) — no watermark-free photograph of a chicken tashreeb under a free licence."],
+  ["dish-br-xinxim-style", "Hunted 2026-11-17 and re-checked at finishing: both free photographs of xinxim are restaurant scenes with branded items legible in frame (a Guaraná bottle label in one, a branded menu stand and sauce bottle in the other) — no clean photograph of the dish under a free licence."],
 ];
 
 /* ------------------------------ Commons API ------------------------------ */
 
 async function api(params, tries = 6) {
   for (let attempt = 0; attempt < tries; attempt++) {
-    const res = await fetch(`${API}?${params}`, { headers: UA });
+    let res;
+    try {
+      res = await fetch(`${API}?${params}`, { headers: UA });
+    } catch {
+      /* Network-level failure (socket drop, DNS blip) — retry with the
+         same backoff as a 429 instead of killing the run (2026-11-17). */
+      if (attempt === tries - 1) throw new Error("Commons API unreachable after retries");
+      await sleep(3000 * (attempt + 1));
+      continue;
+    }
     if (res.status === 429 || res.status === 503) {
       await sleep(3000 * (attempt + 1));
       continue;
@@ -1164,7 +1440,7 @@ im.save(sys.argv[2], "WEBP", quality=80)
 /** The dish library, in library order (the data modules are
  *  type-only importers, so Node's type stripping loads them directly). */
 async function dishLibrary() {
-  const [proof, mains, riceBread, sides, kerala, intl1, intl2, intl3, intl4, india] = await Promise.all([
+  const [proof, mains, riceBread, sides, kerala, intl1, intl2, intl3, intl4, india, shakes, proteinBreakfasts, proteinIndia, proteinIntl] = await Promise.all([
     load("src/lib/nutrition/data/proofDishes.ts"),
     load("src/lib/nutrition/data/dishesMains.ts"),
     load("src/lib/nutrition/data/dishesRiceBread.ts"),
@@ -1175,6 +1451,10 @@ async function dishLibrary() {
     load("src/lib/nutrition/data/dishLibraryIntl3.ts"),
     load("src/lib/nutrition/data/dishLibraryIntl4.ts"),
     load("src/lib/nutrition/data/dishLibraryIndia.ts"),
+    load("src/lib/nutrition/data/dishLibraryShakes.ts"),
+    load("src/lib/nutrition/data/dishLibraryProteinBreakfasts.ts"),
+    load("src/lib/nutrition/data/dishLibraryProteinIndia.ts"),
+    load("src/lib/nutrition/data/dishLibraryProteinIntl.ts"),
   ]);
   return [
     ...proof.PROOF_DISHES,
@@ -1187,6 +1467,10 @@ async function dishLibrary() {
     ...intl3.INTL3_DISHES,
     ...intl4.INTL4_DISHES,
     ...india.INDIA_DISHES,
+    ...shakes.SHAKES_DISHES,
+    ...proteinBreakfasts.PW2_DISHES,
+    ...proteinIndia.PROTEIN_INDIA_DISHES,
+    ...proteinIntl.PROTEIN_INTL_DISHES,
   ].map((d) => ({ dishId: d.id, dishName: d.name.en }));
 }
 
@@ -1257,15 +1541,35 @@ async function generate() {
     if (!downloaded.has(pin.title)) {
       const tmp = join(tmpdir(), `bloom-dish-${createHash("sha256").update(pin.title).digest("hex").slice(0, 12)}.bin`);
       let bytes = null;
-      for (let attempt = 0; attempt < 5 && !bytes; attempt++) {
-        const res = await fetch(meta.thumburl, { headers: UA });
+      /* Retry patience hardened 2026-11-17 (PW-1 shakes wave): Commons
+         rate-limit windows repeatedly outlasted the old 5-attempt/~30 s
+         grace and killed whole runs on a null buffer; 12 attempts with a
+         longer backoff rides out a window without changing any pin,
+         licence decision, or output. */
+      for (let attempt = 0; attempt < 12 && !bytes; attempt++) {
+        let res;
+        try {
+          res = await fetch(meta.thumburl, { headers: UA });
+          if (res.status !== 429 && res.status !== 503 && res.ok)
+            bytes = Buffer.from(await res.arrayBuffer());
+        } catch {
+          /* Network-level failure (socket drop, incl. mid-body) — same
+             retry/backoff as a 429 rather than an uncaught exception
+             (2026-11-17). */
+          await sleep(5000 * (attempt + 1));
+          continue;
+        }
+        if (bytes) break;
         if (res.status === 429 || res.status === 503) {
-          await sleep(3000 * (attempt + 1));
+          await sleep(5000 * (attempt + 1));
           continue;
         }
         if (!res.ok) throw new Error(`download failed for "${pin.title}": HTTP ${res.status}`);
-        bytes = Buffer.from(await res.arrayBuffer());
       }
+      if (!bytes)
+        throw new Error(
+          `download did not complete for "${pin.title}" after 12 attempts (rate limit did not clear)`,
+        );
       writeFileSync(tmp, bytes);
       downloaded.set(pin.title, tmp);
       await sleep(200);

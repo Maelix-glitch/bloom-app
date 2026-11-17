@@ -113,33 +113,6 @@ export const DISHES_RICE_BREAD: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-moong-dal-khichdi",
-    name: { en: "Moong Dal Khichdi", hindi: "मूंग दाल खिचड़ी" },
-    category: "rice",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2512381", grams: 200 }, // white rice, dry
-      { foodId: "usda-174256", grams: 150 }, // mung beans (moong dal), dry
-      { foodId: "usda-171314", grams: 12 }, // ghee
-      { foodId: "usda-172231", grams: 2 }, // turmeric
-      { foodId: "usda-170923", grams: 3 }, // cumin seeds
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Rinse the 200 g rice and 150 g moong dal together until the water runs clear; soak 20 minutes and drain.",
-      "Put them in a pressure cooker with about 900 ml water, the turmeric, ginger and salt; cook for 3 whistles (or simmer about 25 minutes) until very soft.",
-      "Whisk lightly so the khichdi turns creamy and porridge-like; add hot water a little at a time if it is too thick — it should slump off the spoon.",
-      "Heat the 12 g ghee in a small pan and sizzle the cumin until it darkens a shade.",
-      "Pour the tempering over the khichdi and stir it in.",
-      "Rest 5 minutes and serve hot.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-masala-khichdi",
     name: { en: "Masala Khichdi", hindi: "मसाला खिचड़ी" },
     category: "rice",
@@ -495,34 +468,6 @@ export const DISHES_RICE_BREAD: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-jeera-matar-rice",
-    name: { en: "Jeera Matar Rice", hindi: "जीरा मटर चावल" },
-    category: "rice",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2512381", grams: 300 }, // white rice, dry
-      { foodId: "usda-170419", grams: 120 }, // green peas
-      { foodId: "usda-790646", grams: 80 }, // onion
-      { foodId: "usda-171314", grams: 12 }, // ghee
-      { foodId: "usda-170923", grams: 4 }, // cumin seeds
-      { foodId: "usda-170917", grams: 1 }, // bay leaf
-      { foodId: "usda-171320", grams: 1 }, // cinnamon
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Rinse the 300 g rice and soak for 20 minutes; drain.",
-      "Heat the 12 g ghee in a heavy pot; add the bay leaf, cinnamon and cumin and let the cumin sizzle and darken a shade.",
-      "Add the 80 g onion and cook until golden at the edges, 4–5 minutes.",
-      "Add the 120 g peas, rice and salt with about 550 ml hot water; bring to a boil.",
-      "Cover and cook on the lowest heat for 10 minutes without lifting the lid.",
-      "Rest 10 minutes covered and fluff with a fork.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-ven-pongal",
     name: { en: "Ven Pongal", hindi: "वेन पोंगल" },
     category: "rice",
@@ -822,56 +767,6 @@ export const DISHES_RICE_BREAD: Dish[] = [
       "Brush with ghee and cook a few seconds more until crisp at the edges; serve hot.",
     ],
     timeMinutes: 40,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-poori",
-    name: { en: "Poori", hindi: "पूरी" },
-    category: "bread",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
-      { foodId: "usda-168933", grams: 20 }, // semolina (sooji), for crispness
-      { foodId: "usda-171025", grams: 40 }, // sunflower oil, for deep frying
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Knead the 240 g atta, 20 g semolina and salt with about 130 ml water into a STIFF dough — stiffer than roti dough, or the pooris will drink oil.",
-      "Rest the dough, covered, for 15 minutes.",
-      "Divide into 12 small balls and roll each into a disc about 10 cm across, without flour if you can — a drop of oil on the board helps.",
-      "Heat the 40 g oil in a kadhai until very hot — a small piece of dough should sizzle and rise at once.",
-      "Slide in one poori at a time and press gently with a slotted spoon until it puffs up like a balloon.",
-      "Flip, cook a few seconds more until pale gold, drain on paper, and serve at once.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-bhatura",
-    name: { en: "Bhatura", hindi: "भटूरा" },
-    category: "bread",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168936", grams: 240 }, // refined wheat flour (maida)
-      { foodId: "usda-2259793", grams: 100 }, // yogurt (dahi)
-      { foodId: "usda-168933", grams: 20 }, // semolina (sooji)
-      { foodId: "usda-334247", grams: 5 }, // sugar
-      { foodId: "usda-171025", grams: 40 }, // sunflower oil, for deep frying
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Knead the 240 g maida, 20 g semolina, sugar and salt with the 100 g yogurt and a little warm water into a soft dough.",
-      "Rest, covered, for at least 2 hours, until the dough looks puffy and feels light.",
-      "Divide into 8 balls and roll each into an oval about 15 cm long.",
-      "Heat the 40 g oil in a kadhai until very hot — a small piece of dough should sizzle and rise at once.",
-      "Slide in one bhatura at a time and press gently with a slotted spoon until it balloons.",
-      "Flip once, cook until pale gold with light spots, drain, and serve hot.",
-    ],
-    timeMinutes: 150,
     budgetTier: 1,
     enriched: false,
   },
@@ -1664,65 +1559,6 @@ export const DISHES_RICE_BREAD: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-egg-bhurji",
-    name: { en: "Egg Bhurji", hindi: "अंडा भुर्जी" },
-    category: "breakfast",
-    servings: 2,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-171287", grams: 200 }, // eggs (4 large)
-      { foodId: "usda-790646", grams: 100 }, // onion
-      { foodId: "usda-170457", grams: 100 }, // tomato
-      { foodId: "usda-170497", grams: 10 }, // green chilli
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-170923", grams: 2 }, // cumin seeds
-      { foodId: "usda-171025", grams: 15 }, // sunflower oil
-      { foodId: "usda-173468", grams: 3 }, // salt
-      { foodId: "usda-169997", grams: 10 }, // fresh coriander leaves
-    ],
-    method: [
-      "Beat the 4 eggs lightly with the salt.",
-      "Heat the 15 g oil in a wide pan; sizzle the cumin, then add the ginger, green chilli and 100 g onion and cook until golden, 5–6 minutes.",
-      "Add the 100 g tomato and turmeric; cook until the tomato melts and the oil glistens.",
-      "Pour in the eggs and let them set for 20 seconds without stirring.",
-      "Stir gently into large, soft curds and cook just until softly set — bhurji dries out fast, so stop while it still looks moist.",
-      "Finish with the coriander leaves and serve at once.",
-    ],
-    timeMinutes: 15,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-sprouted-moong-bowl",
-    name: { en: "Sprouted Moong Bowl", hindi: "अंकुरित मूंग कटोरा" },
-    category: "breakfast",
-    servings: 2,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174256", grams: 120 }, // mung beans (moong dal), dry, for sprouting
-      { foodId: "usda-790646", grams: 60 }, // onion
-      { foodId: "usda-170457", grams: 60 }, // tomato
-      { foodId: "usda-2346406", grams: 80 }, // cucumber
-      { foodId: "usda-167746", grams: 30 }, // lemon
-      { foodId: "usda-170497", grams: 5 }, // green chilli
-      { foodId: "usda-170923", grams: 1 }, // cumin seeds
-      { foodId: "usda-173468", grams: 2 }, // salt
-      { foodId: "usda-169997", grams: 10 }, // fresh coriander leaves
-    ],
-    method: [
-      "Soak the 120 g moong for 8 hours; drain, tie in a damp cloth, and leave in a warm place for 12–24 hours until white sprouts appear.",
-      "Steam the sprouts for 3–4 minutes until just tender but still crunchy (or serve raw if the sprouts are fresh and well rinsed).",
-      "Tip the sprouts into a bowl and let them cool a little.",
-      "Toss with the finely chopped 60 g onion, 60 g tomato, 80 g cucumber and green chilli.",
-      "Dry-roast the cumin, crush it coarsely, and sprinkle it over with the salt.",
-      "Finish with the lemon juice and coriander leaves; serve fresh.",
-    ],
-    timeMinutes: 15,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-fruit-curd-bowl",
     name: { en: "Fruit and Curd Bowl", hindi: "फल दही कटोरा" },
     category: "breakfast",
@@ -1775,33 +1611,6 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Greek yogurt instead of plain curd, plus walnuts and pumpkin seeds, over the plain fruit and curd bowl",
-  },
-  {
-    id: "dish-masala-sweet-potato",
-    name: { en: "Masala Sweet Potato", hindi: "मसाला शकरकंद" },
-    category: "breakfast",
-    servings: 2,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2346404", grams: 400 }, // sweet potato
-      { foodId: "usda-167746", grams: 30 }, // lemon
-      { foodId: "usda-170923", grams: 2 }, // cumin seeds
-      { foodId: "usda-170932", grams: 1 }, // cayenne (red chilli powder)
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-173468", grams: 3 }, // salt
-      { foodId: "usda-169997", grams: 10 }, // fresh coriander leaves
-    ],
-    method: [
-      "Boil the 400 g sweet potatoes in their skins until tender right through, 20–25 minutes (or roast them whole); cool slightly.",
-      "Peel and cut into chunky cubes.",
-      "Dry-roast the cumin in a small dry pan until fragrant and crush it coarsely.",
-      "Toss the warm cubes with the crushed cumin, cayenne, black pepper and salt.",
-      "Finish with the lemon juice and coriander leaves.",
-      "Serve warm.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 2,
-    enriched: false,
   },
   /* ------------------------------ SNACKS ------------------------------ */
   {

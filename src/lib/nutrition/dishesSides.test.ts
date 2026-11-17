@@ -49,9 +49,13 @@ const fatPerServing = (dish: Dish): number =>
 describe("the sides library — coverage", () => {
   it("ships at least 50 dishes across the five categories, and only those", () => {
     expect(DISHES_SIDES.length).toBeGreaterThanOrEqual(50);
-    expect(DISHES_SIDES.length).toBe(55);
-    expect(countBy("side")).toBe(26);
-    expect(countBy("chutney")).toBe(10);
+    /* 52 dishes / 24 sides after the 2026-11-17 dedupe removed the
+       shahi paneer-style and sprouted moong duplicates (55 / 26 before)
+       and the same day's borderline removal took mango chutney
+       (chutneys 10 → 9). */
+    expect(DISHES_SIDES.length).toBe(52);
+    expect(countBy("side")).toBe(24);
+    expect(countBy("chutney")).toBe(9);
     expect(countBy("raita")).toBe(11);
     expect(countBy("dessert")).toBe(1);
     expect(countBy("drink")).toBe(7);
@@ -153,9 +157,12 @@ describe("the sides library — sane portions", () => {
 });
 
 describe("the sides library — enriched variants", () => {
-  it("ships five enriched dishes, each stating its boost", () => {
+  it("ships four enriched dishes, each stating its boost", () => {
+    /* Four since the 2026-11-17 dedupe removed dish-shahi-paneer-style,
+       the fifth: it duplicated the mains library's Shahi Paneer (same
+       dish, same photograph), so its enriched side entry went with it. */
     const enriched = DISHES_SIDES.filter((d) => d.enriched);
-    expect(enriched.length).toBe(5);
+    expect(enriched.length).toBe(4);
     for (const dish of enriched) {
       expect(dish.enrichment?.trim().length, dish.id).toBeGreaterThan(0);
     }
@@ -164,7 +171,6 @@ describe("the sides library — enriched variants", () => {
       "dish-greek-yogurt-raita",
       "dish-shahi-coconut-chutney",
       "dish-shahi-mixed-veg",
-      "dish-shahi-paneer-style",
     ]);
   });
 });
@@ -204,13 +210,17 @@ describe("the sides library — patterns are derived, never asserted", () => {
         spread[pattern] = (spread[pattern] ?? 0) + 1;
       }
     }
+    /* Spread recomputed after the 2026-11-17 dedupe removed two
+       dishes from this file (55 dishes before, 53 then), and again
+       after the same day's borderline removal took mango chutney
+       (52 now). */
     expect(spread).toEqual({
-      vegetarian: 55,
-      eggetarian: 55,
-      vegan: 31,
-      ovo_vegetarian: 31,
-      pescatarian: 55,
-      non_vegetarian: 55,
+      vegetarian: 52,
+      eggetarian: 52,
+      vegan: 29,
+      ovo_vegetarian: 29,
+      pescatarian: 52,
+      non_vegetarian: 52,
     });
   });
 });

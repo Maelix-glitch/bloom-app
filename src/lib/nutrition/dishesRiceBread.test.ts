@@ -31,16 +31,19 @@ const byId = (id: string): Dish => {
 const foodById = new Map(USDA_REFERENCE_FOODS.map((f) => [f.id, f]));
 
 describe("the rice/bread/breakfast/snack library", () => {
-  it("holds at least 70 dishes across the four categories", () => {
-    expect(DISHES_RICE_BREAD.length).toBeGreaterThanOrEqual(70);
+  it("holds at least 69 dishes across the four categories", () => {
+    expect(DISHES_RICE_BREAD.length).toBeGreaterThanOrEqual(69);
     const counts = new Map<string, number>();
     for (const dish of DISHES_RICE_BREAD) {
       counts.set(dish.category, (counts.get(dish.category) ?? 0) + 1);
     }
+    /* Rice 19 / breakfast 20 after the 2026-11-17 dedupe removed five
+       duplicates from this file (21 / 23 before); bread 16 → 14 after
+       the same day's borderline removal took poori and bhatura. */
     expect(Object.fromEntries(counts)).toEqual({
-      rice: 21,
-      bread: 16,
-      breakfast: 23,
+      rice: 19,
+      bread: 14,
+      breakfast: 20,
       snack: 16,
     });
   });
@@ -137,7 +140,10 @@ describe("derived patterns — representatives", () => {
   });
 
   it("egg dishes suit eggetarian and ovo, never vegetarian or vegan", () => {
-    const bhurji = dishPatterns(byId("dish-egg-bhurji")); // oil, no dairy
+    /* Representative was dish-egg-bhurji until the 2026-11-17 dedupe
+       removed it as a duplicate of Anda Bhurji (mains); egg fried rice
+       is this file's remaining oil-only egg dish. */
+    const bhurji = dishPatterns(byId("dish-egg-fried-rice")); // oil, no dairy
     expect(bhurji).toContain("eggetarian");
     expect(bhurji).toContain("ovo_vegetarian");
     expect(bhurji).not.toContain("vegetarian");
@@ -171,13 +177,17 @@ describe("derived patterns — representatives", () => {
       expect(patterns.length, dish.id).toBeGreaterThan(0);
       for (const p of patterns) spread.set(p, (spread.get(p) ?? 0) + 1);
     }
+    /* Spread recomputed after the 2026-11-17 dedupe removed five
+       dishes from this file (76 dishes before, 71 then), and again
+       after the same day's borderline removal took poori and bhatura
+       (69 now). */
     expect(Object.fromEntries(spread)).toEqual({
-      vegetarian: 68,
-      eggetarian: 74,
-      vegan: 33,
-      ovo_vegetarian: 37,
-      pescatarian: 74,
-      non_vegetarian: 76,
+      vegetarian: 62,
+      eggetarian: 67,
+      vegan: 30,
+      ovo_vegetarian: 33,
+      pescatarian: 67,
+      non_vegetarian: 69,
     });
   });
 });

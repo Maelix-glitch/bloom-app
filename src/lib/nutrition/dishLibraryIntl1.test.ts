@@ -6,6 +6,10 @@ import { INTL2_DISHES } from "./data/dishLibraryIntl2";
 import { INTL3_DISHES } from "./data/dishLibraryIntl3";
 import { INTL4_DISHES } from "./data/dishLibraryIntl4";
 import { INDIA_DISHES } from "./data/dishLibraryIndia";
+import { SHAKES_DISHES } from "./data/dishLibraryShakes";
+import { PW2_DISHES } from "./data/dishLibraryProteinBreakfasts";
+import { PROTEIN_INDIA_DISHES } from "./data/dishLibraryProteinIndia";
+import { PROTEIN_INTL_DISHES } from "./data/dishLibraryProteinIntl";
 import {
   dishNutrients,
   parseDishList,
@@ -35,7 +39,9 @@ const FRESH_SOY_IDS = new Set(["usda-172448", "usda-174272", "usda-168410"]);
 
 describe("wave X-1 — international high-protein dishes", () => {
   it("holds 120–140 dishes, every one international, main or breakfast", () => {
-    expect(INTL1_DISHES.length).toBe(132);
+    /* 120 after the 2026-11-17 dedupe removed 12 X-1 dishes that
+       later waves had re-authored (132 before). */
+    expect(INTL1_DISHES.length).toBe(120);
     expect(INTL1_DISHES.length).toBeGreaterThanOrEqual(120);
     expect(INTL1_DISHES.length).toBeLessThanOrEqual(140);
     for (const dish of INTL1_DISHES) {
@@ -54,13 +60,24 @@ describe("wave X-1 — international high-protein dishes", () => {
       /* The only library entries carrying a wave id are the wave itself. */
       expect(INTL1_DISHES).toContain(dish);
     }
+    /* Base 297 = mains + rice/bread + sides (195) + Kerala (97) +
+       proof (5); 308 originally, 301 after the dedupe took 7 dishes
+       from the base files, and 297 after the 2026-11-17 borderline
+       removal took poori, bhatura and mango chutney from the base
+       files and injipuli from Kerala. */
     expect(DISH_LIBRARY.length).toBe(
-      308 +
+      297 +
         INTL1_DISHES.length +
         INTL2_DISHES.length +
         INTL3_DISHES.length +
         INTL4_DISHES.length +
-        INDIA_DISHES.length,
+        INDIA_DISHES.length +
+        /* The 2026-11-17 protein waves (300 authored; 299 after the
+           cross-wave bacalhau duplicate was removed at integration). */
+        SHAKES_DISHES.length +
+        PW2_DISHES.length +
+        PROTEIN_INDIA_DISHES.length +
+        PROTEIN_INTL_DISHES.length,
     );
   });
 

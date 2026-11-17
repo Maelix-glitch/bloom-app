@@ -146,10 +146,10 @@ import tempeh from "../../../assets/foods/tempeh.webp";
 import edamame from "../../../assets/foods/edamame.webp";
 import atlanticMackerel from "../../../assets/foods/atlantic-mackerel.webp";
 
-export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-16";
+export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-17";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "e9956cb18db413a5d775138358e4355222edf6dce96a4588962485eee0a612eb";
+export const FOOD_IMAGES_FINGERPRINT = "efd519ad6ca46a396ac63bfee4fd2d560c68d7ebdb08f3fcfdc1d4978d2fc030";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -316,4 +316,6 @@ export const FOOD_IMAGE_PHOTOLESS: readonly FoodImagePhotoless[] = [
   { "foodId": "usda-170932", "foodName": "Spices, pepper, red or cayenne", "reason": "Hunted 2026-11 (including the Cayenne pepper category and multilingual searches): ground cayenne appears only in branded jars and packets and in multi-powder scenes; every other depiction is the whole fresh or dried pepper, a different form." },
   { "foodId": "usda-171098", "foodName": "Turkey, whole, breast, meat only, raw", "reason": "Hunted 2026-11 (English, German, French, Italian and Spanish searches): turkey breast appears under free licences only cooked, roasted, in sandwiches and wraps, or as packaged retail product — no verifiable photograph of the raw breast meat itself." },
   { "foodId": "usda-175139", "foodName": "Fish, sardine, Atlantic, canned in oil, drained solids with bone", "reason": "Hunted 2026-11 (multilingual and category searches): canned sardines appear only as closed branded tins or restaurant servings — no open, unbranded depiction of the fish themselves under a free licence." },
+  { "foodId": "usda-173177", "foodName": "Beverages, Whey protein powder isolate", "reason": "Hunted 2026-11-17: whey protein powder isolate appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record." },
+  { "foodId": "usda-173181", "foodName": "Beverages, Protein powder soy based", "reason": "Hunted 2026-11-17: soy-based protein powder appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record." },
 ];

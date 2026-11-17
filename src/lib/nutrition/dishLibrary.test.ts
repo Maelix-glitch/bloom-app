@@ -15,7 +15,16 @@ import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
  */
 describe("the dish library", () => {
   it("clears the owner's 200-dish bar", () => {
-    expect(DISH_LIBRARY.length).toBe(941);
+    /* 1,202 after the 2026-11-17 protein waves added 300 dishes (PW-1
+       shakes, PW-2 breakfasts & snacks, PW-3 Indian/Kerala mains, PW-4
+       international mains) to the cleaned 903, minus one cross-wave
+       duplicate found at integration (PW-2's bacalhau à brás duplicated
+       PW-4's main-course version). 903 after the borderline removal took
+       out 7 dishes the owner delegated to Muse's call (sugar-defined
+       condiments and deep-fried breads); 910 before that, after the same
+       day's duplicate audit removed 31 twice-authored dishes (941 before
+       the dedupe). */
+    expect(DISH_LIBRARY.length).toBe(1202);
     expect(DISH_LIBRARY.length).toBeGreaterThanOrEqual(200);
   });
 
@@ -46,10 +55,14 @@ describe("the dish library", () => {
 
   it("tags every dish with a cuisine from the three-value taxonomy", () => {
     /* Counts computed from the assembled library and pinned: the
-       original dishes and the India wave carry "india" (313), the
-       Kerala wave is its own shelf (98), and the four international
-       waves carry "international" (530). No dish is untagged, and no
-       dish carries a value outside the taxonomy. */
+       original dishes and the India wave carry "india" (300), the
+       Kerala wave is its own shelf (97), and the four international
+       waves carry "international" (506). No dish is untagged, and no
+       dish carries a value outside the taxonomy. (India 313 → 306 and
+       international 530 → 506 in the 2026-11-17 dedupe: 7 Indian and
+       24 international duplicates removed; then india 306 → 300 and
+       kerala 98 → 97 in the same day's borderline removal of 6 Indian
+       and 1 Kerala dish.) */
     const counts: Record<string, number> = { india: 0, kerala: 0, international: 0 };
     for (const dish of DISH_LIBRARY) {
       expect(dish.cuisine, dish.id).toBeDefined();
@@ -57,7 +70,7 @@ describe("the dish library", () => {
       const tag = dish.cuisine as string;
       counts[tag] = (counts[tag] ?? 0) + 1;
     }
-    expect(counts).toEqual({ india: 313, kerala: 98, international: 530 });
+    expect(counts).toEqual({ india: 375, kerala: 125, international: 702 });
   });
 
   it("covers every category", () => {

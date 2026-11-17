@@ -258,6 +258,19 @@ const PICKS = [
   { fdcId: 171098, dataType: "SR Legacy", expect: "Turkey, whole, breast, meat only, raw" },
   { fdcId: 175139, dataType: "SR Legacy", expect: "Fish, sardine, Atlantic, canned in oil, drained solids with bone" },
   { fdcId: 175119, dataType: "SR Legacy", expect: "Fish, mackerel, Atlantic, raw" },
+  /* ---- Protein-wave foundation (PW-1): the generic protein powders
+   * the shake wave composes from. Both downloads were searched:
+   * Foundation carries no protein-powder record at all; SR Legacy
+   * carries three UNBRANDED beverage-powder records — whey isolate,
+   * whey-based and soy-based — alongside branded ones (Abbott EAS and
+   * the like), which are not picked, by the same rule that excludes
+   * the whole Branded dataset. The isolate and the soy-based powder
+   * are picked; the whey-based record fills the isolate's role at a
+   * lower strength and is left out. Dried whey (171281/171283) is a
+   * dairy ingredient at ~13% protein, not a protein powder, and is
+   * not dressed up as one. */
+  { fdcId: 173177, dataType: "SR Legacy", expect: "Beverages, Whey protein powder isolate" },
+  { fdcId: 173181, dataType: "SR Legacy", expect: "Beverages, Protein powder soy based" },
 ];
 
 /* --------------------- the pinned classification (P2) --------------------- */
@@ -387,6 +400,16 @@ const CLASSIFICATION = {
   168410: cls("pulses_legumes"),
   171098: cls("other", FLESH),
   175139: cls("other", FISH), 175119: cls("other", FISH),
+  // Protein-wave foundation (PW-1) — the two generic protein powders
+  // are pantry supplements, not servings of dairy or pulses, so they
+  // sit in `other` with the spices and pantry items; that band also
+  // prices them honestly in the budget heuristic (a scoop of whey
+  // costs nothing like a glass of milk). The identity flags still
+  // tell the truth: whey is milk-derived, so containsDairy is set and
+  // a vegan pattern excludes it; the soy-based powder is a plant
+  // product and carries no animal flags.
+  173177: cls("other", DAIRY),
+  173181: cls("other"),
 };
 
 /* ------------------------------ source data ------------------------------- */

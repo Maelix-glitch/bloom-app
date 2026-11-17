@@ -22,7 +22,9 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  */
 describe("wave X-4 international high-protein dishes", () => {
   it("ships 135–145 dishes", () => {
-    expect(INTL4_DISHES.length).toBe(138);
+    /* 137 after the 2026-11-17 dedupe removed the Cuban picadillo-style
+       duplicate of the X-3 turkey picadillo (138 before). */
+    expect(INTL4_DISHES.length).toBe(137);
     expect(INTL4_DISHES.length).toBeGreaterThanOrEqual(135);
     expect(INTL4_DISHES.length).toBeLessThanOrEqual(145);
   });

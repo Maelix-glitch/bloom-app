@@ -107,38 +107,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-intl-chicken-shawarma",
-    name: { en: "Chicken Shawarma Plate", hindi: "चिकन शावरमा प्लेट" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 600 }, // chicken thigh
-      { foodId: "usda-330137", grams: 200 }, // Greek yogurt
-      { foodId: "usda-1104647", grams: 10 }, // garlic
-      { foodId: "usda-170923", grams: 3 }, // cumin seeds
-      { foodId: "usda-172231", grams: 2 }, // turmeric
-      { foodId: "usda-170932", grams: 1 }, // cayenne
-      { foodId: "usda-167746", grams: 40 }, // lemon
-      { foodId: "usda-171413", grams: 20 }, // olive oil
-      { foodId: "usda-2346406", grams: 200 }, // cucumber
-      { foodId: "usda-170457", grams: 200 }, // tomato
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Grind the cumin; whisk half the Greek yogurt with the cumin, turmeric, cayenne, crushed garlic, lemon juice, olive oil and salt into a marinade.",
-      "Slice the chicken thighs into wide strips, coat thoroughly in the marinade, and rest for at least 30 minutes (overnight in the fridge is better).",
-      "Whisk the remaining yogurt with a pinch of salt and a squeeze more lemon juice for the sauce; chill.",
-      "Dice the cucumber and tomato into a rough salad; season lightly with salt.",
-      "Heat a heavy skillet over high heat; cook the chicken in a single layer for 5–6 minutes per side until charred at the edges and cooked through.",
-      "Rest 5 minutes, then slice across the grain into ribbons.",
-      "Serve the chicken over the cucumber-tomato salad with the yogurt sauce spooned over.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-intl-jerk-chicken",
     name: { en: "Jerk Chicken", hindi: "जर्क चिकन" },
     category: "main",
@@ -167,34 +135,6 @@ export const INTL1_DISHES: readonly Dish[] = [
       "Rest 5–10 minutes before serving so the meat stays juicy; serve with the pan juices spooned over.",
     ],
     timeMinutes: 60,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-intl-peri-peri-chicken",
-    name: { en: "Peri-Peri Chicken", hindi: "पेरी-पेरी चिकन" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 700 }, // chicken thigh
-      { foodId: "usda-170108", grams: 150 }, // red sweet pepper
-      { foodId: "usda-170106", grams: 20 }, // hot red chilli
-      { foodId: "usda-1104647", grams: 15 }, // garlic
-      { foodId: "usda-167746", grams: 50 }, // lemon
-      { foodId: "usda-171413", grams: 25 }, // olive oil
-      { foodId: "usda-173469", grams: 15 }, // cider vinegar
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Char the red pepper directly over a flame or under a hot grill until blackened in patches; rest 10 minutes, then peel off the loose skin.",
-      "Blend the pepper with the chillies, garlic, lemon juice, vinegar, olive oil and salt into a smooth peri-peri sauce.",
-      "Coat the chicken thighs in two-thirds of the sauce and marinate for at least 1 hour (overnight for deeper heat).",
-      "Heat the oven to 210°C; arrange the chicken in a single layer in a roasting pan.",
-      "Roast for 30–35 minutes, basting twice with the pan juices, until the edges char and the thickest part reaches 74°C.",
-      "Rest 5 minutes; warm the reserved sauce, pour it over the chicken, and serve.",
-    ],
-    timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
   },
@@ -351,36 +291,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-intl-chicken-cacciatore",
-    name: { en: "Chicken Cacciatore", hindi: "चिकन काचियातोरे" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 700 }, // chicken thigh
-      { foodId: "usda-170457", grams: 400 }, // tomato
-      { foodId: "usda-790646", grams: 200 }, // onion
-      { foodId: "usda-1750347", grams: 200 }, // mushrooms
-      { foodId: "usda-170427", grams: 150 }, // green sweet pepper
-      { foodId: "usda-1104647", grams: 15 }, // garlic
-      { foodId: "usda-171413", grams: 20 }, // olive oil
-      { foodId: "usda-170931", grams: 2 }, // black pepper
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Season the chicken thighs with the salt and black pepper; heat half the olive oil in a heavy pot over medium-high heat and brown the chicken for 4 minutes per side; remove.",
-      "Add the remaining oil; cook the onion and green pepper for 5 minutes until soft at the edges.",
-      "Add the sliced mushrooms; cook 4 minutes until they give up their water and begin to colour.",
-      "Add the garlic for 30 seconds, then the chopped tomato and 100 ml water; scrape up the browned bits.",
-      "Return the chicken and its juices, nestling the pieces into the sauce; cover and simmer on low heat for 30 minutes.",
-      "Uncover and simmer 5–10 minutes more until the sauce is thick and the chicken pulls easily from the bone.",
-      "Adjust the salt and serve with the sauce spooned generously over.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-intl-creamy-garlic-chicken",
     name: { en: "Creamy Garlic Chicken", hindi: "क्रीमी गार्लिक चिकन" },
     category: "main",
@@ -521,38 +431,6 @@ export const INTL1_DISHES: readonly Dish[] = [
       "Serve the chicken over the vegetables with the juices spooned over.",
     ],
     timeMinutes: 55,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-intl-spanish-chicken-rice",
-    name: { en: "Spanish-Style Chicken & Rice", hindi: "स्पैनिश-स्टाइल चिकन एंड राइस" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646170", grams: 500 }, // chicken breast
-      { foodId: "usda-2512381", grams: 240 }, // white rice, dry
-      { foodId: "usda-170419", grams: 150 }, // green peas
-      { foodId: "usda-170108", grams: 150 }, // red sweet pepper
-      { foodId: "usda-170457", grams: 200 }, // tomato
-      { foodId: "usda-790646", grams: 150 }, // onion
-      { foodId: "usda-1104647", grams: 10 }, // garlic
-      { foodId: "usda-172231", grams: 2 }, // turmeric
-      { foodId: "usda-171413", grams: 20 }, // olive oil
-      { foodId: "usda-167746", grams: 40 }, // lemon
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Cut the chicken into large chunks; season with the salt. Heat the olive oil in a wide, heavy pan over medium-high heat and brown the chicken for 4 minutes; remove.",
-      "In the same pan, cook the onion and red pepper for 5 minutes until soft; add the garlic and turmeric for 30 seconds.",
-      "Add the grated or finely chopped tomato; cook 4 minutes until dark and thick.",
-      "Stir in the rice until every grain is coated; pour in 600 ml hot water, stir once, and spread the rice evenly.",
-      "Nestle the chicken and its juices into the rice; cover and cook on the lowest heat for 15 minutes without lifting the lid.",
-      "Scatter the peas over the top, cover again, and cook 5 minutes more until the rice is tender and the liquid absorbed.",
-      "Rest, covered and off the heat, for 10 minutes; fluff the edges with a fork and serve with the lemon wedges.",
-    ],
-    timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
   },
@@ -829,37 +707,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-intl-turkey-meatloaf",
-    name: { en: "Turkey Meatloaf", hindi: "टर्की मीटलोफ़" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2514747", grams: 700 }, // ground turkey
-      { foodId: "usda-171287", grams: 100 }, // egg, whole (2 eggs)
-      { foodId: "usda-2346396", grams: 60 }, // rolled oats
-      { foodId: "usda-790646", grams: 150 }, // onion
-      { foodId: "usda-170457", grams: 150 }, // tomato
-      { foodId: "usda-1104647", grams: 10 }, // garlic
-      { foodId: "usda-170929", grams: 3 }, // mustard seed, ground
-      { foodId: "usda-322892", grams: 50 }, // whole milk
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Soak the oats in the milk for 10 minutes — this is what keeps a lean turkey loaf moist.",
-      "Heat the oven to 180°C. Finely chop the onion and tomato.",
-      "Mix the turkey with the soaked oats, beaten eggs, onion, half the tomato, garlic, ground mustard, salt and black pepper until evenly combined, without overworking.",
-      "Shape into a loaf in a lined baking pan, pressing it firm so it slices cleanly.",
-      "Spread the remaining tomato, finely chopped, over the top as a glaze.",
-      "Bake for 45–50 minutes until the centre reads 74°C and the juices run clear.",
-      "Rest 10 minutes before slicing into thick slabs; serve with the pan juices.",
-    ],
-    timeMinutes: 70,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-intl-turkey-taco-cups",
     name: { en: "Turkey Taco Cabbage Cups", hindi: "टर्की टैको कैबेज कप्स" },
     category: "main",
@@ -1038,35 +885,6 @@ export const INTL1_DISHES: readonly Dish[] = [
       "Serve at once with every drop of the pan glaze spooned over.",
     ],
     timeMinutes: 20,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-intl-salmon-cakes",
-    name: { en: "Salmon Cakes", hindi: "सैल्मन केक्स" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2684441", grams: 300 }, // Atlantic salmon
-      { foodId: "usda-171287", grams: 50 }, // egg, whole (1 egg)
-      { foodId: "usda-168936", grams: 40 }, // white wheat flour
-      { foodId: "usda-790646", grams: 60 }, // onion
-      { foodId: "usda-167746", grams: 30 }, // lemon
-      { foodId: "usda-170929", grams: 2 }, // mustard seed, ground
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-171025", grams: 15 }, // sunflower oil
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Poach or steam the salmon for 6–7 minutes until just cooked; cool slightly, then flake into large pieces, discarding skin and bones.",
-      "Mix the flakes gently with the beaten egg, flour, finely chopped onion, ground mustard, salt, black pepper and the lemon zest grated from the lemon (save the juice for serving).",
-      "Shape into 4 cakes about 2 cm thick; chill for 20 minutes so they firm up.",
-      "Heat the oil in a skillet over medium heat; fry the cakes for 3–4 minutes per side until deep golden and crisp.",
-      "Rest the fried cakes on a rack for 2 minutes so the crust sets and the centres stay moist and flaky.",
-      "Drain briefly on a rack; serve with the lemon cut into wedges.",
-    ],
-    timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
   },
@@ -1766,7 +1584,7 @@ export const INTL1_DISHES: readonly Dish[] = [
   {
     id: "dish-intl-shakshuka",
     name: { en: "Shakshuka", hindi: "शकशुका" },
-    category: "main",
+    category: "breakfast",
     servings: 2,
     cuisine: "international",
     lines: [
@@ -1792,35 +1610,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     ],
     timeMinutes: 35,
     budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-intl-spinach-cheese-frittata",
-    name: { en: "Spinach & Mozzarella Frittata", hindi: "स्पिनच एंड मोज़ेरेला फ्रिटाटा" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-171287", grams: 300 }, // egg, whole (6 eggs)
-      { foodId: "usda-172183", grams: 132 }, // egg white (4 whites)
-      { foodId: "usda-168462", grams: 150 }, // spinach
-      { foodId: "usda-329370", grams: 60 }, // mozzarella
-      { foodId: "usda-790646", grams: 60 }, // onion
-      { foodId: "usda-1104647", grams: 5 }, // garlic
-      { foodId: "usda-171413", grams: 10 }, // olive oil
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Heat the olive oil in an oven-safe skillet over medium heat; cook the onion for 4 minutes until soft.",
-      "Add the garlic and the spinach a handful at a time; cook 2 minutes until completely wilted; spread evenly over the pan.",
-      "Whisk the eggs and egg whites with the salt until just combined — over-whisking makes a frittata puff and then collapse.",
-      "Pour the eggs over the spinach; scatter the mozzarella over in pieces.",
-      "Cook on low heat for 4–5 minutes, drawing the edges in once or twice, until the base is set but the top is still wet.",
-      "Grill (broil) for 3–4 minutes until the top is set and golden in spots.",
-      "Rest 5 minutes — the frittata firms as it stands — then slide out and cut into wedges.",
-    ],
-    timeMinutes: 25,
-    budgetTier: 2,
     enriched: false,
   },
   {
@@ -2707,33 +2496,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-intl-tomato-mozzarella-chicken",
-    name: { en: "Tomato Mozzarella Chicken", hindi: "टोमैटो मोज़ेरेला चिकन" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646170", grams: 300 }, // chicken breast
-      { foodId: "usda-329370", grams: 80 }, // mozzarella
-      { foodId: "usda-170457", grams: 250 }, // tomato
-      { foodId: "usda-1104647", grams: 8 }, // garlic
-      { foodId: "usda-171413", grams: 12 }, // olive oil
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Butterfly the chicken breasts and flatten to an even 1.5 cm; season with the salt and black pepper.",
-      "Sear in the olive oil over medium-high heat for 4 minutes per side until golden and cooked through (74°C); remove to a plate.",
-      "In the same pan, cook the garlic for 20 seconds; add the chopped tomato and a pinch of salt; simmer 5 minutes into a chunky sauce.",
-      "Return the chicken to the pan; lay the mozzarella slices over each piece.",
-      "Cover and cook on low heat for 2–3 minutes until the mozzarella melts and slumps over the chicken.",
-      "Spoon the tomato sauce around and serve.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-intl-spinach-ricotta-chicken",
     name: { en: "Spinach & Ricotta Stuffed Chicken", hindi: "स्पिनच एंड रिकोटा स्टफ़्ड चिकन" },
     category: "main",
@@ -3113,33 +2875,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-intl-denver-turkey-omelette",
-    name: { en: "Denver-Style Turkey Omelette", hindi: "डेनवर-स्टाइल टर्की ऑमलेट" },
-    category: "breakfast",
-    servings: 1,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-171287", grams: 150 }, // egg, whole (3 eggs)
-      { foodId: "usda-171098", grams: 50 }, // turkey breast
-      { foodId: "usda-328637", grams: 20 }, // cheddar
-      { foodId: "usda-170427", grams: 40 }, // green sweet pepper
-      { foodId: "usda-790646", grams: 30 }, // onion
-      { foodId: "usda-173410", grams: 5 }, // butter
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Dice the cooked turkey breast small (or poach a raw piece for 8 minutes first and dice it).",
-      "Melt the butter in a 20 cm non-stick pan over medium heat; cook the onion and green pepper for 3 minutes until soft.",
-      "Add the turkey; cook 1 minute until hot; spread evenly over the pan.",
-      "Whisk the eggs with the salt; pour over the filling; draw the setting edges to the centre for 2 minutes until softly set.",
-      "Scatter the cheddar over; fold the omelette in half and cook 30 seconds more.",
-      "Slide onto a warm plate and serve at once.",
-    ],
-    timeMinutes: 15,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-intl-cottage-spinach-omelette",
     name: { en: "Cottage Cheese & Spinach Omelette", hindi: "कॉटेज चीज़ एंड स्पिनच ऑमलेट" },
     category: "breakfast",
@@ -3215,33 +2950,6 @@ export const INTL1_DISHES: readonly Dish[] = [
       "Take off the heat at once, crack the black pepper over, and serve.",
     ],
     timeMinutes: 10,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-intl-breakfast-burrito",
-    name: { en: "Breakfast Burrito", hindi: "ब्रेकफ़ास्ट बुरिटो" },
-    category: "breakfast",
-    servings: 1,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-171287", grams: 150 }, // egg, whole (3 eggs)
-      { foodId: "usda-173734", grams: 40 }, // black beans, dry
-      { foodId: "usda-168936", grams: 50 }, // white wheat flour (the wrap)
-      { foodId: "usda-328637", grams: 25 }, // cheddar
-      { foodId: "usda-170457", grams: 60 }, // tomato
-      { foodId: "usda-171319", grams: 2 }, // chili powder
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Soak the black beans for 8 hours; simmer for 45–60 minutes until tender; mash roughly with the chili powder and half the salt into a chunky spread. (A small batch keeps 3 days in the fridge.)",
-      "Make the wrap: knead the flour with about 30 ml warm water and a pinch of salt into a soft dough; rest 15 minutes; roll into a 22 cm round and cook on a dry hot pan for 1 minute per side until puffed in spots.",
-      "Scramble the eggs in a non-stick pan over low heat for 3 minutes into soft curds; season with the remaining salt.",
-      "Warm the wrap; spread the bean mash down the centre.",
-      "Top with the eggs, grated cheddar and diced tomato.",
-      "Fold in the sides, roll up tightly, and toast seam-side down in the dry pan for 1 minute to seal; serve hot.",
-    ],
-    timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
   },
@@ -3537,34 +3245,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-intl-huevos-rancheros",
-    name: { en: "Huevos Rancheros", hindi: "हुएवोस रैंचेरोस" },
-    category: "breakfast",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-171287", grams: 300 }, // egg, whole (6 eggs)
-      { foodId: "usda-173734", grams: 80 }, // black beans, dry
-      { foodId: "usda-168936", grams: 80 }, // white wheat flour (2 tortillas)
-      { foodId: "usda-170457", grams: 250 }, // tomato
-      { foodId: "usda-790646", grams: 80 }, // onion
-      { foodId: "usda-170497", grams: 8 }, // green hot chilli
-      { foodId: "usda-328637", grams: 30 }, // cheddar
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Soak the black beans for 8 hours; simmer for 45–60 minutes until tender; mash roughly with a pinch of the salt. (A small batch keeps 3 days in the fridge.)",
-      "Make the salsa: cook the onion and sliced green chilli in a dry pan for 3 minutes; add the chopped tomato and remaining salt; simmer 8 minutes into a chunky, fiery sauce.",
-      "Make the tortillas: knead the flour with about 50 ml warm water and a pinch of salt; rest 15 minutes; divide in two, roll into 18 cm rounds and cook on a dry hot pan for 1 minute per side.",
-      "Fry the eggs in a non-stick pan over medium heat for 3 minutes until the whites are set and the yolks runny.",
-      "Spread the bean mash over the warm tortillas.",
-      "Top with the fried eggs, spoon the salsa over, scatter the cheddar, and serve at once.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-intl-breakfast-sandwich",
     name: { en: "Egg & Cheese Breakfast Sandwich", hindi: "एग एंड चीज़ ब्रेकफ़ास्ट सैंडविच" },
     category: "breakfast",
@@ -3642,33 +3322,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     ],
     timeMinutes: 45,
     budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-intl-cilbir",
-    name: { en: "Çılbır (Turkish Eggs)", hindi: "चिलबिर (टर्किश एग्स)" },
-    category: "breakfast",
-    servings: 1,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-171287", grams: 150 }, // egg, whole (3 eggs)
-      { foodId: "usda-330137", grams: 180 }, // Greek yogurt
-      { foodId: "usda-168936", grams: 40 }, // white wheat flour (the flatbread)
-      { foodId: "usda-173410", grams: 12 }, // butter
-      { foodId: "usda-171319", grams: 2 }, // chili powder
-      { foodId: "usda-1104647", grams: 3 }, // garlic
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Make the flatbread: knead the flour with about 25 ml warm water and a pinch of salt; rest 15 minutes; roll into a 16 cm round and cook on a dry hot pan for 1 minute per side; keep warm.",
-      "Stir the grated garlic and half the salt into the Greek yogurt; spread it over a serving plate in a thick swirl and let it come to room temperature — cold yogurt under hot eggs is the classic mistake.",
-      "Poach the eggs in gently simmering water for 3 minutes until the whites are set and the yolks runny; lift out and drain on a cloth.",
-      "Melt the butter in a small pan until it foams; take off the heat and stir in the chili powder — the butter should turn brick red and nutty, not burn.",
-      "Set the poached eggs over the yogurt.",
-      "Spoon the chilli butter over the eggs so it pools in the yogurt; serve with the flatbread for scooping.",
-    ],
-    timeMinutes: 25,
-    budgetTier: 3,
     enriched: false,
   },
   {

@@ -15,7 +15,9 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  */
 describe("wave X-3 international high-protein dishes", () => {
   it("ships 120–140 dishes", () => {
-    expect(INTL3_DISHES.length).toBe(128);
+    /* 122 after the 2026-11-17 dedupe removed 6 X-3 dishes that
+       duplicated X-1 or sibling X-3 entries (128 before). */
+    expect(INTL3_DISHES.length).toBe(122);
     expect(INTL3_DISHES.length).toBeGreaterThanOrEqual(120);
     expect(INTL3_DISHES.length).toBeLessThanOrEqual(140);
   });

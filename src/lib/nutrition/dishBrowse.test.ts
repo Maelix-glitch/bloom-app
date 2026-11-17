@@ -25,7 +25,9 @@ describe("browseDishes — the Dishes section's filter logic", () => {
 
   it("bundles each row with its computed per-serving nutrients and derived patterns", () => {
     const row = browseDishes(filters({ query: "masoor" }))[0]!;
-    expect(row.dish.id).toBe("dish-masoor-dal-tadka");
+    /* "Egg Masoor Dal" (PW-3) sorts ahead of "Masoor Dal Tadka" in the
+       name order since the protein waves landed. */
+    expect(row.dish.id).toBe("dish-egg-masoor-dal");
     expect(row.labelled.nutrients).toEqual(dishNutrients(row.dish).nutrients);
     expect(row.labelled.label).toBe("Built from USDA ingredient data");
     expect(row.patterns).toEqual(dishPatterns(row.dish));
@@ -50,7 +52,7 @@ describe("browseDishes — the Dishes section's filter logic", () => {
 
   it("filters by cuisine — only dishes carrying the tag", () => {
     const kerala = browseDishes(filters({ cuisine: "kerala" }));
-    expect(kerala).toHaveLength(98);
+    expect(kerala).toHaveLength(125);
     expect(kerala.every((r) => r.dish.cuisine === "kerala")).toBe(true);
     expect(kerala.map((r) => r.dish.id)).toContain("dish-avial");
     expect(kerala.map((r) => r.dish.id)).not.toContain("dish-masoor-dal-tadka");
@@ -62,7 +64,7 @@ describe("browseDishes — the Dishes section's filter logic", () => {
     /* The same search under another cuisine is honestly empty. */
     expect(browseDishes(filters({ cuisine: "international", query: "masoor" }))).toEqual([]);
     /* And it sits under the pattern judgement like every other filter. */
-    expect(browseDishes(filters({ cuisine: "kerala", pattern: "vegan" }))).toHaveLength(57);
+    expect(browseDishes(filters({ cuisine: "kerala", pattern: "vegan" }))).toHaveLength(63);
   });
 
   it("filters by pattern — only dishes whose derived patterns include it", () => {

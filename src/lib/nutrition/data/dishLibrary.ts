@@ -26,6 +26,24 @@
  *                         remaining Latin high-protein mains and
  *                         breakfasts (≥25 g protein/serving, computed
  *                         and pinned in dishLibraryIntl4.test.ts)
+ *   - dishLibraryProteinIntl.ts protein wave PW-4 — international
+ *                         high-protein mains from the cuisines and
+ *                         preparations X-1..X-4 did not reach (≥25 g
+ *                         protein/serving, computed and pinned in
+ *                         dishLibraryProteinIntl.test.ts)
+ *   - dishLibraryShakes.ts protein wave PW-1 — protein shakes &
+ *                         smoothies (≥25 g protein/serving, computed
+ *                         and pinned in dishLibraryShakes.test.ts),
+ *                         built on whole ingredients and the two
+ *                         generic USDA protein powders
+ *   - dishLibraryProteinBreakfasts.ts protein wave PW-2 — high-protein
+ *                         breakfasts and protein snacks (≥25 g
+ *                         protein/serving, computed and pinned in
+ *                         dishLibraryProteinBreakfasts.test.ts)
+ *   - dishLibraryProteinIndia.ts protein wave PW-3 — high-protein
+ *                         Indian and Kerala mains (≥25 g protein/
+ *                         serving, computed and pinned in
+ *                         dishLibraryProteinIndia.test.ts)
  *   - dishLibraryIndia.ts the India wave (dishes expansion WAVE I-2) —
  *                         the rest of India beyond the pan-Indian set
  *                         and the Kerala wave: North, West, East,
@@ -41,6 +59,10 @@ import { INTL1_DISHES } from "./dishLibraryIntl1";
 import { INTL2_DISHES } from "./dishLibraryIntl2";
 import { INTL3_DISHES } from "./dishLibraryIntl3";
 import { INTL4_DISHES } from "./dishLibraryIntl4";
+import { PROTEIN_INTL_DISHES } from "./dishLibraryProteinIntl";
+import { SHAKES_DISHES } from "./dishLibraryShakes";
+import { PW2_DISHES } from "./dishLibraryProteinBreakfasts";
+import { PROTEIN_INDIA_DISHES } from "./dishLibraryProteinIndia";
 import { INDIA_DISHES } from "./dishLibraryIndia";
 import { PROOF_DISHES } from "./proofDishes";
 
@@ -54,6 +76,10 @@ export const DISH_LIBRARY: readonly Dish[] = [
   ...INTL2_DISHES,
   ...INTL3_DISHES,
   ...INTL4_DISHES,
+  ...PROTEIN_INTL_DISHES,
+  ...SHAKES_DISHES,
+  ...PW2_DISHES,
+  ...PROTEIN_INDIA_DISHES,
   ...INDIA_DISHES,
 ];
 

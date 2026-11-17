@@ -2372,37 +2372,6 @@ export const KERALA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-injipuli",
-    name: { en: "Injipuli", hindi: "इंजिपुली" },
-    category: "chutney",
-    servings: 6,
-    cuisine: "kerala",
-    lines: [
-      { foodId: "usda-169231", grams: 120 }, // ginger
-      { foodId: "usda-167763", grams: 60 }, // tamarind
-      { foodId: "usda-170497", grams: 8 }, // green chilli
-      { foodId: "usda-334247", grams: 40 }, // sugar
-      { foodId: "usda-171016", grams: 25 }, // sesame oil
-      { foodId: "usda-170929", grams: 2 }, // mustard seeds
-      { foodId: "usda-171324", grams: 1 }, // fenugreek seeds
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-170106", grams: 3 }, // red chilli
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Peel the ginger and chop it very fine — injipuli is a dish of tiny ginger dice suspended in tamarind.",
-      "Soak the tamarind in 250 ml warm water 15 minutes; squeeze and strain into a thick juice.",
-      "Heat the sesame oil, crackle the mustard and fenugreek, and add the red chillies and green chillies; fry 30 seconds.",
-      "Add the ginger and fry on medium heat 5–6 minutes, until it softens and turns golden at the edges.",
-      "Pour in the tamarind juice with the turmeric, sugar and salt; bring to a boil.",
-      "Simmer on low heat 15–20 minutes, stirring now and then, until the mixture thickens to a glossy, jammy relish and the oil begins to shine at the edges.",
-      "Cool completely — injipuli keeps for weeks refrigerated and deepens with age. Serve a spoonful with sadhya or any rice meal: sour, sweet, hot and gingery at once.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-naranga-achar",
     name: { en: "Naranga Achar", hindi: "नारंगा अचार" },
     category: "chutney",

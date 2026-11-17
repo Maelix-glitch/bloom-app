@@ -220,6 +220,15 @@ const PHOTOLESS = [
   [170932, "Hunted 2026-11 (including the Cayenne pepper category and multilingual searches): ground cayenne appears only in branded jars and packets and in multi-powder scenes; every other depiction is the whole fresh or dried pepper, a different form."],
   [171098, "Hunted 2026-11 (English, German, French, Italian and Spanish searches): turkey breast appears under free licences only cooked, roasted, in sandwiches and wraps, or as packaged retail product — no verifiable photograph of the raw breast meat itself."],
   [175139, "Hunted 2026-11 (multilingual and category searches): canned sardines appear only as closed branded tins or restaurant servings — no open, unbranded depiction of the fish themselves under a free licence."],
+  /* Protein-wave foundation (PW-1): the two generic protein powders.
+     Hunted 2026-11-17 — Commons' protein-powder photography is
+     branded tubs and product containers almost without exception, and
+     the few unbranded frames show a flavoured product or a closed
+     container: packaging, not the food. A scoop of one powder is also
+     visually indistinguishable from another, so no photograph could
+     truthfully depict either record. */
+  [173177, "Hunted 2026-11-17: whey protein powder isolate appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record."],
+  [173181, "Hunted 2026-11-17: soy-based protein powder appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record."],
 ];
 
 /* ------------------------------ Commons API ------------------------------ */
