@@ -47,14 +47,14 @@ const fatPerServing = (dish: Dish): number =>
     .reduce((sum, line) => sum + line.grams, 0) / dish.servings;
 
 describe("the sides library — coverage", () => {
-  it("ships at least 65 dishes across the five categories, and only those", () => {
-    expect(DISHES_SIDES.length).toBeGreaterThanOrEqual(65);
-    expect(DISHES_SIDES.length).toBe(71);
+  it("ships at least 50 dishes across the five categories, and only those", () => {
+    expect(DISHES_SIDES.length).toBeGreaterThanOrEqual(50);
+    expect(DISHES_SIDES.length).toBe(55);
     expect(countBy("side")).toBe(26);
-    expect(countBy("chutney")).toBe(13);
+    expect(countBy("chutney")).toBe(10);
     expect(countBy("raita")).toBe(11);
-    expect(countBy("dessert")).toBe(11);
-    expect(countBy("drink")).toBe(10);
+    expect(countBy("dessert")).toBe(1);
+    expect(countBy("drink")).toBe(7);
     for (const dish of DISHES_SIDES) {
       expect(["side", "chutney", "raita", "dessert", "drink"], dish.id).toContain(dish.category);
     }
@@ -153,9 +153,9 @@ describe("the sides library — sane portions", () => {
 });
 
 describe("the sides library — enriched variants", () => {
-  it("ships six enriched dishes, each stating its boost", () => {
+  it("ships five enriched dishes, each stating its boost", () => {
     const enriched = DISHES_SIDES.filter((d) => d.enriched);
-    expect(enriched.length).toBe(6);
+    expect(enriched.length).toBe(5);
     for (const dish of enriched) {
       expect(dish.enrichment?.trim().length, dish.id).toBeGreaterThan(0);
     }
@@ -163,7 +163,6 @@ describe("the sides library — enriched variants", () => {
       "dish-badam-doodh",
       "dish-greek-yogurt-raita",
       "dish-shahi-coconut-chutney",
-      "dish-shahi-kheer",
       "dish-shahi-mixed-veg",
       "dish-shahi-paneer-style",
     ]);
@@ -206,12 +205,12 @@ describe("the sides library — patterns are derived, never asserted", () => {
       }
     }
     expect(spread).toEqual({
-      vegetarian: 71,
-      eggetarian: 71,
-      vegan: 37,
-      ovo_vegetarian: 37,
-      pescatarian: 71,
-      non_vegetarian: 71,
+      vegetarian: 55,
+      eggetarian: 55,
+      vegan: 31,
+      ovo_vegetarian: 31,
+      pescatarian: 55,
+      non_vegetarian: 55,
     });
   });
 });

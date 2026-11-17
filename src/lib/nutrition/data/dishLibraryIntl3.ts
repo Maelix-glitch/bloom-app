@@ -97,34 +97,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-jp-chicken-shio-karaage",
-    name: { en: "Chicken Shio Karaage (Salt-Fried Chicken)", hindi: "चिकन शियो करागे" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 700 }, // chicken thigh
-      { foodId: "usda-168936", grams: 80 }, // wheat flour, for dusting
-      { foodId: "usda-169231", grams: 20 }, // ginger, grated
-      { foodId: "usda-1104647", grams: 10 }, // garlic, grated
-      { foodId: "usda-173468", grams: 6 }, // salt
-      { foodId: "usda-171025", grams: 30 }, // sunflower oil, for frying
-      { foodId: "usda-167746", grams: 40 }, // lemon, for wedges
-    ],
-    method: [
-      "Cut the chicken thigh into bite-size pieces of even thickness so they fry at the same rate.",
-      "Massage in the grated ginger, garlic and salt; rest 30 minutes so the seasoning reaches the centre — shio karaage is seasoned with salt and aromatics only.",
-      "Dust each piece lightly with flour, shaking off the excess; a thin coat crisps, a thick one goes doughy.",
-      "Heat the oil in a deep pan to about 170°C — a pinch of flour should sizzle steadily, not violently.",
-      "Fry in batches for 3 minutes, rest the pieces 2 minutes, then fry again for 1 minute until deeply golden — the double fry is what makes karaage shatter-crisp.",
-      "Drain on a rack, not paper, so the crust stays crisp; rest 2 minutes.",
-      "Serve hot with lemon wedges.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-jp-tamagoyaki",
     name: { en: "Tamagoyaki (Japanese Rolled Omelette)", hindi: "तमागोयाकी" },
     category: "breakfast",
@@ -394,34 +366,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
   },
-  {
-    id: "dish-jp-shrimp-tempura",
-    name: { en: "Shrimp & Vegetable Tempura", hindi: "झींगा टेम्पुरा" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-175179", grams: 440 }, // shrimp (prawns)
-      { foodId: "usda-168936", grams: 100 }, // wheat flour, for the batter
-      { foodId: "usda-171287", grams: 60 }, // egg, whole, for the batter
-      { foodId: "usda-2346404", grams: 200 }, // sweet potato, sliced
-      { foodId: "usda-2346400", grams: 100 }, // green beans
-      { foodId: "usda-171025", grams: 40 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Peel and devein the shrimp, leaving the tails on; make two shallow cuts on the underside of each so they fry straight instead of curling.",
-      "Slice the sweet potato into 5 mm rounds and cut the beans into short lengths; pat everything completely dry — water is tempura's enemy.",
-      "Whisk the flour, egg and about 150 ml ice-cold water into a thin, lumpy batter; lumps are correct — overmixing makes it heavy.",
-      "Heat the oil to 175°C; a drop of batter should sink, then rise immediately, sizzling.",
-      "Dip the shrimp and vegetables in the batter one at a time and fry in small batches for 2–3 minutes until pale gold and crisp, never crowded.",
-      "Drain on a rack and season with salt while hot.",
-      "Serve immediately — tempura waits for no one; the crust should shatter and the shrimp stay juicy.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 3,
-    enriched: false,
-  },
   /* ------------------------------- Korean ------------------------------- */
   {
     id: "dish-kr-chicken-bibimbap",
@@ -645,32 +589,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     ],
     timeMinutes: 45,
     budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-kr-crispy-fried-chicken",
-    name: { en: "Korean Crispy Fried Chicken", hindi: "कोरियाई क्रिस्पी फ्राइड चिकन" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 700 }, // chicken thigh
-      { foodId: "usda-168936", grams: 90 }, // wheat flour, for dusting
-      { foodId: "usda-1104647", grams: 15 }, // garlic, grated
-      { foodId: "usda-170931", grams: 3 }, // black pepper
-      { foodId: "usda-173468", grams: 6 }, // salt
-      { foodId: "usda-171025", grams: 40 }, // sunflower oil, for frying
-    ],
-    method: [
-      "Cut the chicken into even pieces and season with the salt, black pepper and grated garlic; rest 30 minutes.",
-      "Dust each piece thoroughly with flour, pressing it on so the coating clings; shake off only the loose excess.",
-      "Heat the oil in a deep pan to about 170°C — a pinch of flour should sizzle steadily.",
-      "Fry the chicken in batches for 6–7 minutes until pale gold; lift out and rest 3 minutes — this first fry cooks the chicken through.",
-      "Raise the heat slightly and fry a second time for 2–3 minutes until the crust is deep golden and audibly crisp — the double fry is the Korean fried-chicken signature.",
-      "Drain on a rack and rest 2 minutes; serve hot, in the salt-and-pepper yetnal tongdak style.",
-    ],
-    timeMinutes: 55,
-    budgetTier: 3,
     enriched: false,
   },
   {
@@ -2092,33 +2010,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-id-tahu-isi",
-    name: { en: "Tahu Isi (Stuffed Tofu)", hindi: "ताहू इसी" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-172448", grams: 480 }, // tofu, firm, in blocks
-      { foodId: "usda-174288", grams: 70 }, // chickpea flour (besan), for batter
-      { foodId: "usda-2258586", grams: 80 }, // carrots, julienned
-      { foodId: "usda-2346407", grams: 80 }, // cabbage, shredded
-      { foodId: "usda-2346400", grams: 60 }, // green beans, finely sliced
-      { foodId: "usda-171411", grams: 15 }, // soybean oil, for frying
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Cut the tofu into large triangles or blocks and fry them whole until golden and puffed; cool slightly, then slit one side and scoop out a little of the centre to make a pocket.",
-      "Stir-fry the carrot, cabbage and beans with a pinch of salt for 2 minutes until just softened; mix in the scooped-out tofu.",
-      "Stuff the vegetable mixture generously into each tofu pocket.",
-      "Whisk the besan with salt and enough water into a batter the thickness of double cream.",
-      "Dip each stuffed tofu in the batter and fry in hot oil for 2–3 minutes until the coating is crisp and deep golden.",
-      "Drain and serve hot, the crust shattering over the soft filling.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-id-ikan-bakar",
     name: { en: "Ikan Bakar (Grilled Fish with Sambal)", hindi: "इकान बकर" },
     category: "main",
@@ -2141,34 +2032,6 @@ export const INTL3_DISHES: readonly Dish[] = [
       "Serve with lemon wedges, the sambal glaze dark and sticky on the crisped skin.",
     ],
     timeMinutes: 35,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-id-ayam-goreng",
-    name: { en: "Ayam Goreng (Spiced Fried Chicken)", hindi: "आयम गोरेंग" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 700 }, // chicken thigh
-      { foodId: "usda-172231", grams: 6 }, // turmeric
-      { foodId: "usda-170922", grams: 6 }, // coriander seed, ground
-      { foodId: "usda-170923", grams: 3 }, // cumin seed, ground
-      { foodId: "usda-1104647", grams: 20 }, // garlic, pounded
-      { foodId: "usda-168936", grams: 40 }, // wheat flour, light dusting
-      { foodId: "usda-171025", grams: 35 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 6 }, // salt
-    ],
-    method: [
-      "Pound the garlic with the turmeric, coriander, cumin and salt; rub all over the chicken and marinate at least 1 hour — ayam goreng is seasoned to the bone before it ever sees oil.",
-      "Simmer the chicken in a little water for 10 minutes until just cooked through; lift out and cool — this pre-cook is what makes the fried chicken tender inside its crisp crust.",
-      "Dust the cooled chicken lightly with flour.",
-      "Heat the oil and fry the chicken for 4–5 minutes until deep golden and crisp all over, the spice paste darkening on the skin.",
-      "Drain on a rack and rest 3 minutes.",
-      "Serve hot with rice and sambal if you have it.",
-    ],
-    timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
   },
@@ -3058,35 +2921,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-mx-fish-tacos",
-    name: { en: "Baja Fish Tacos", hindi: "मछली टाकोस" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2684442", grams: 550 }, // tilapia
-      { foodId: "usda-168936", grams: 80 }, // wheat flour, for batter
-      { foodId: "usda-168867", grams: 180 }, // cornmeal, for tortillas
-      { foodId: "usda-2346407", grams: 200 }, // cabbage, shredded
-      { foodId: "usda-330137", grams: 150 }, // Greek yogurt, for crema
-      { foodId: "usda-167746", grams: 50 }, // lemon
-      { foodId: "usda-171319", grams: 5 }, // chili powder
-      { foodId: "usda-171025", grams: 25 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Make the tortillas: mix the cornmeal with warm water and a pinch of salt into a soft dough, rest 15 minutes, roll into small thin rounds and cook on a dry hot pan 1 minute per side. Keep wrapped and warm.",
-      "Stir the Greek yogurt with lemon juice and a pinch of salt into a crema; toss half of it through the shredded cabbage as a slaw.",
-      "Whisk the flour with the chili powder, salt and enough cold water into a thin batter.",
-      "Cut the fish into finger-size strips, dip in the batter, and fry in hot oil for 3 minutes until crisp and deep golden; drain and salt while hot.",
-      "Warm the tortillas again and fill each with slaw and a strip or two of fried fish.",
-      "Finish with a spoonful of the remaining crema and a squeeze of lemon; serve immediately, while the fish is still crackling.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-mx-huevos-rancheros",
     name: { en: "Huevos Rancheros", hindi: "हुएवोस रैंचेरोस" },
     category: "breakfast",
@@ -3741,34 +3575,6 @@ export const INTL3_DISHES: readonly Dish[] = [
       "Serve from the pot over rice, the broth spooned over everything.",
     ],
     timeMinutes: 40,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-br-coxinha",
-    name: { en: "Coxinha (Brazilian Chicken Croquettes)", hindi: "कोशिन्या" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646170", grams: 500 }, // chicken breast
-      { foodId: "usda-168936", grams: 280 }, // wheat flour, for the dough
-      { foodId: "usda-322892", grams: 200 }, // milk, whole, for the dough
-      { foodId: "usda-328841", grams: 80 }, // cottage cheese, in the filling
-      { foodId: "usda-790646", grams: 80 }, // onion
-      { foodId: "usda-1104647", grams: 8 }, // garlic
-      { foodId: "usda-171025", grams: 25 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Poach the chicken in salted water for 12 minutes; reserve the broth and shred the chicken very finely. Soften the onion and garlic and fold through the chicken with the cottage cheese; season — the filling should be moist and savoury.",
-      "Make the dough: bring the milk and about 250 ml of the chicken broth to a boil with the salt, then add all the flour at once and stir vigorously over the heat for 2–3 minutes until it forms a smooth ball that leaves the pan — this cooked dough is coxinha's signature.",
-      "Knead the warm dough briefly until smooth; keep it covered so it does not skin.",
-      "Take walnut-size pieces of dough, flatten in your palm, fill with a spoonful of chicken, and mould into the classic teardrop — a little drumstick shape with a point at the top.",
-      "Chill the shaped coxinhas for 15 minutes so they hold in the oil.",
-      "Fry in hot oil for 3–4 minutes until deep golden and crisp; drain and serve hot, the crust shattering over the creamy chicken filling.",
-    ],
-    timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
   },

@@ -55,7 +55,7 @@ describe("wave X-1 — international high-protein dishes", () => {
       expect(INTL1_DISHES).toContain(dish);
     }
     expect(DISH_LIBRARY.length).toBe(
-      360 +
+      308 +
         INTL1_DISHES.length +
         INTL2_DISHES.length +
         INTL3_DISHES.length +

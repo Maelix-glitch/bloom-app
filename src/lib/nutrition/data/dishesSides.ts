@@ -929,32 +929,6 @@ export const DISHES_SIDES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-imli-chutney",
-    name: { en: "Imli Chutney", hindi: "इमली चटनी" },
-    category: "chutney",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-167763", grams: 60 }, // tamarind
-      { foodId: "usda-334247", grams: 50 }, // sugar (the set has no jaggery — see header)
-      { foodId: "usda-170923", grams: 2 }, // cumin seeds (roasted in the method)
-      { foodId: "usda-170932", grams: 1 }, // cayenne (red chilli powder)
-      { foodId: "usda-169231", grams: 5 }, // ginger
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Soak the 60 g tamarind in 250 ml warm water for 15 minutes; squeeze and strain the pulp.",
-      "Dry-roast the cumin and crush it coarsely.",
-      "Put the tamarind pulp in a pan with the 50 g sugar, grated ginger, cayenne and salt.",
-      "Simmer for 8–10 minutes, stirring, until it thickens to a pouring sauce.",
-      "Stir in the roasted cumin.",
-      "Cool — it thickens further as it cools; store in a clean jar in the fridge.",
-    ],
-    timeMinutes: 20,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-onion-chutney",
     name: { en: "Onion Chutney", hindi: "प्याज़ चटनी" },
     category: "chutney",
@@ -1067,32 +1041,6 @@ export const DISHES_SIDES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-chilli-garlic-oil",
-    name: { en: "Chilli-Garlic Oil", hindi: "मिर्च-लहसुन तेल" },
-    category: "chutney",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-171016", grams: 35 }, // sesame oil
-      { foodId: "usda-1104647", grams: 30 }, // garlic
-      { foodId: "usda-170932", grams: 4 }, // cayenne (red chilli powder)
-      { foodId: "usda-171319", grams: 3 }, // chilli powder
-      { foodId: "usda-170150", grams: 10 }, // sesame seeds
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Slice the 30 g garlic thinly.",
-      "Dry-roast the 10 g sesame seeds until golden.",
-      "Heat the 35 g sesame oil gently in a small pan.",
-      "Fry the garlic on low heat until pale gold — do not let it brown, it turns bitter.",
-      "Take off the heat; stir in the cayenne, chilli powder, sesame seeds and salt — the oil will turn deep red.",
-      "Cool and store in a jar; spoon over rice, noodles or grilled vegetables.",
-    ],
-    timeMinutes: 10,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-til-chutney",
     name: { en: "Til Chutney", hindi: "तिल चटनी" },
     category: "chutney",
@@ -1145,34 +1093,6 @@ export const DISHES_SIDES: Dish[] = [
       "Cool and store in a clean jar in the fridge.",
     ],
     timeMinutes: 30,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-magaj-chutney",
-    name: { en: "Sunflower Seed Chutney", hindi: "सूरजमुखी के बीज की चटनी" },
-    category: "chutney",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2515381", grams: 45 }, // sunflower seeds
-      { foodId: "usda-170169", grams: 25 }, // coconut
-      { foodId: "usda-170497", grams: 4 }, // green chilli
-      { foodId: "usda-1104647", grams: 6 }, // garlic
-      { foodId: "usda-167746", grams: 15 }, // lemon (for its juice)
-      { foodId: "usda-173468", grams: 3 }, // salt
-      { foodId: "usda-170929", grams: 1 }, // mustard seeds
-      { foodId: "usda-171025", grams: 6 }, // sunflower oil
-    ],
-    method: [
-      "Dry-roast the 45 g sunflower seeds until lightly golden; cool.",
-      "Blend the seeds, 25 g coconut, green chilli, garlic and salt with a little water to a thick paste.",
-      "Stir in the lemon juice.",
-      "Heat the 6 g oil in a small pan.",
-      "Add the mustard seeds; when they crackle, pour the tempering over the chutney.",
-      "Mix and serve fresh.",
-    ],
-    timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
   },
@@ -1517,112 +1437,6 @@ export const DISHES_SIDES: Dish[] = [
 
   /* ------------------------------ desserts ------------------------------ */
   {
-    id: "dish-rice-kheer",
-    name: { en: "Rice Kheer", hindi: "चावल की खीर" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2512381", grams: 60 }, // white rice
-      { foodId: "usda-322892", grams: 800 }, // milk
-      { foodId: "usda-334247", grams: 60 }, // sugar (the set has no jaggery — see header)
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2346393", grams: 15 }, // almonds
-      { foodId: "usda-2515374", grams: 10 }, // cashews
-    ],
-    method: [
-      "Rinse the 60 g rice and soak for 20 minutes; drain and crush it lightly.",
-      "Bring the 800 ml milk to a boil in a heavy pan; add the rice.",
-      "Simmer on low heat for 30–35 minutes, stirring often and scraping the base, until the rice is soft and the milk has thickened.",
-      "Add the 60 g sugar and crushed cardamom; simmer 5 minutes more.",
-      "Sliver the almonds and cashews.",
-      "Serve warm or chilled, topped with the slivered nuts.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-sooji-halwa",
-    name: { en: "Sooji Halwa", hindi: "सूजी का हलवा" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168933", grams: 150 }, // semolina (sooji)
-      { foodId: "usda-171314", grams: 45 }, // ghee
-      { foodId: "usda-334247", grams: 80 }, // sugar
-      { foodId: "usda-322892", grams: 100 }, // milk
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2515374", grams: 15 }, // cashews
-      { foodId: "usda-2346393", grams: 10 }, // almonds
-    ],
-    method: [
-      "Heat the 45 g ghee; fry the cashews and almonds until golden; lift out.",
-      "In the same ghee, roast the 150 g semolina on low heat for 8–10 minutes, stirring constantly, until golden and nutty-smelling.",
-      "Warm the 100 ml milk with 250 ml water.",
-      "Pour the warm liquid into the semolina slowly, stirring fast so no lumps form.",
-      "Add the 80 g sugar and crushed cardamom; stir until the halwa thickens and leaves the sides of the pan, about 3–4 minutes.",
-      "Serve hot, topped with the fried nuts.",
-    ],
-    timeMinutes: 25,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-gajar-halwa",
-    name: { en: "Gajar Halwa", hindi: "गाजर का हलवा" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2258586", grams: 600 }, // carrot
-      { foodId: "usda-322892", grams: 400 }, // milk
-      { foodId: "usda-171314", grams: 30 }, // ghee
-      { foodId: "usda-334247", grams: 70 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2346393", grams: 15 }, // almonds
-      { foodId: "usda-2515374", grams: 15 }, // cashews
-    ],
-    method: [
-      "Grate the 600 g carrots coarsely.",
-      "Cook the carrots in the 400 ml milk in a heavy pan on medium heat, stirring often, until the milk is almost absorbed — 25–30 minutes.",
-      "Add the 70 g sugar; cook, stirring, until the mixture thickens again and turns glossy.",
-      "Add the 30 g ghee and crushed cardamom; fry 5 minutes more until the halwa leaves the sides of the pan.",
-      "Sliver the almonds and cashews.",
-      "Serve warm, topped with the slivered nuts.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-moong-dal-halwa",
-    name: { en: "Moong Dal Halwa", hindi: "मूंग दाल का हलवा" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174256", grams: 150 }, // mung beans (moong dal)
-      { foodId: "usda-171314", grams: 55 }, // ghee
-      { foodId: "usda-334247", grams: 80 }, // sugar
-      { foodId: "usda-322892", grams: 200 }, // milk
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2346393", grams: 15 }, // almonds
-    ],
-    method: [
-      "Soak the 150 g mung beans for 4 hours (or overnight); drain and grind to a coarse paste with very little water.",
-      "Heat the 55 g ghee; add the paste.",
-      "Roast on low heat for 20–25 minutes, stirring constantly, until golden and nutty and the ghee begins to separate.",
-      "Warm the 200 ml milk with 100 ml water; add it slowly to the paste, stirring fast.",
-      "Add the 80 g sugar and crushed cardamom; stir until the halwa thickens and leaves the sides of the pan.",
-      "Serve hot, topped with slivered almonds.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
     id: "dish-fruit-salad-spiced-yogurt",
     name: { en: "Fruit Salad with Spiced Yogurt", hindi: "मसालेदार दही फ्रूट सलाद" },
     category: "dessert",
@@ -1650,164 +1464,6 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
-  },
-  {
-    id: "dish-besan-ladoo",
-    name: { en: "Besan Ladoo", hindi: "बेसन के लड्डू" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174288", grams: 150 }, // besan (chickpea flour)
-      { foodId: "usda-171314", grams: 60 }, // ghee
-      { foodId: "usda-334247", grams: 70 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2346393", grams: 10 }, // almonds
-    ],
-    method: [
-      "Sift the 150 g besan.",
-      "Powder the 70 g sugar and crush the cardamom.",
-      "Heat the 60 g ghee; add the besan and roast on low heat for 15–18 minutes, stirring constantly, until deep golden and nutty and the ghee glistens.",
-      "Cool until warm — not hot — then mix in the sugar and cardamom.",
-      "Roll into small balls while still warm; press a sliver of almond on each.",
-      "Rest until firm; store in a dry jar.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-coconut-ladoo",
-    name: { en: "Coconut Ladoo", hindi: "नारियल के लड्डू" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-170169", grams: 200 }, // coconut
-      { foodId: "usda-322892", grams: 150 }, // milk
-      { foodId: "usda-334247", grams: 70 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-171314", grams: 10 }, // ghee
-    ],
-    method: [
-      "Grate the 200 g coconut (or chop it very finely).",
-      "Heat the 10 g ghee in a heavy pan; add the coconut and fry 2–3 minutes.",
-      "Add the 150 ml milk and 70 g sugar.",
-      "Cook on low heat, stirring often, for 10–12 minutes until the mixture thickens and comes together.",
-      "Add the crushed cardamom; cook 1 minute more, then cool until you can handle it.",
-      "Roll into small balls; rest until firm.",
-    ],
-    timeMinutes: 25,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-shrikhand",
-    name: { en: "Shrikhand", hindi: "श्रीखंड" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-330137", grams: 400 }, // Greek yogurt (the hung-curd stand-in)
-      { foodId: "usda-334247", grams: 60 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2346393", grams: 10 }, // almonds
-      { foodId: "usda-2515374", grams: 10 }, // cashews
-      { foodId: "usda-322892", grams: 20 }, // milk
-    ],
-    method: [
-      "Powder the 60 g sugar and crush the cardamom.",
-      "Whisk the 400 g Greek yogurt with the sugar until glossy and smooth — it is already thick, like hung curd.",
-      "Loosen with the 20 ml milk, a spoonful at a time, to a soft, spoonable consistency.",
-      "Fold in the cardamom.",
-      "Chill for at least an hour.",
-      "Serve topped with slivered almonds and cashews.",
-    ],
-    timeMinutes: 15,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-atta-halwa",
-    name: { en: "Atta Halwa", hindi: "आटे का हलवा" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 120 }, // whole wheat flour (atta)
-      { foodId: "usda-171314", grams: 50 }, // ghee
-      { foodId: "usda-334247", grams: 70 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-    ],
-    method: [
-      "Heat the 50 g ghee in a heavy pan.",
-      "Add the 120 g flour and roast on low heat for 10–12 minutes, stirring constantly, until deep golden-brown and nutty.",
-      "Warm 300 ml water.",
-      "Add the water slowly to the flour, stirring fast so no lumps form.",
-      "Add the 70 g sugar and crushed cardamom; stir until the halwa thickens, turns glossy and leaves the sides of the pan.",
-      "Serve hot.",
-    ],
-    timeMinutes: 25,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-oats-kheer",
-    name: { en: "Oats Kheer", hindi: "जई की खीर" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2346396", grams: 80 }, // rolled oats
-      { foodId: "usda-322892", grams: 700 }, // milk
-      { foodId: "usda-334247", grams: 50 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-2346393", grams: 10 }, // almonds
-      { foodId: "usda-2515374", grams: 10 }, // cashews
-    ],
-    method: [
-      "Dry-roast the 80 g oats for 2–3 minutes until fragrant.",
-      "Bring the 700 ml milk to a boil; add the oats.",
-      "Simmer on low heat for 12–15 minutes, stirring often, until the oats are soft and the milk has thickened.",
-      "Add the 50 g sugar and crushed cardamom; simmer 3 minutes more.",
-      "Sliver the almonds and cashews.",
-      "Serve warm or chilled, topped with the slivered nuts.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-shahi-kheer",
-    name: { en: "Shahi Kheer", hindi: "शाही खीर" },
-    category: "dessert",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-2512381", grams: 50 }, // white rice
-      { foodId: "usda-322892", grams: 800 }, // milk
-      { foodId: "usda-2515374", grams: 20 }, // cashews
-      { foodId: "usda-2346393", grams: 20 }, // almonds
-      { foodId: "usda-2346394", grams: 10 }, // walnuts
-      { foodId: "usda-171330", grams: 5 }, // poppy seed
-      { foodId: "usda-334247", grams: 60 }, // sugar
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-171320", grams: 1 }, // cinnamon
-    ],
-    method: [
-      "Rinse the 50 g rice and soak for 20 minutes; drain.",
-      "Soak the 5 g poppy seed in a little warm milk for 15 minutes and grind to a paste.",
-      "Bring the 800 ml milk to a boil in a heavy pan with the cinnamon; add the rice.",
-      "Simmer on low heat for 35–40 minutes, stirring often, until the rice is soft and the milk thick and creamy.",
-      "Stir in the poppy-seed paste, 60 g sugar and crushed cardamom; simmer 5 minutes.",
-      "Sliver the cashews, almonds and walnuts.",
-      "Serve warm or chilled, generously topped with the slivered nuts.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 2,
-    enriched: true,
-    enrichment:
-      "Extra cashews, almonds and walnuts with poppy seed — the festive, enriched kheer, richer than the everyday rice kheer.",
   },
 
   /* ------------------------------- drinks ------------------------------- */
@@ -1913,32 +1569,6 @@ export const DISHES_SIDES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-shikanji",
-    name: { en: "Shikanji", hindi: "शिकंजी" },
-    category: "drink",
-    servings: 2,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-167746", grams: 60 }, // lemon
-      { foodId: "usda-334247", grams: 25 }, // sugar
-      { foodId: "usda-173468", grams: 1 }, // salt
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-170923", grams: 1 }, // cumin seeds (roasted in the method)
-      { foodId: "usda-173475", grams: 4 }, // mint leaves
-    ],
-    method: [
-      "Dry-roast the cumin and crush it coarsely.",
-      "Squeeze the lemons.",
-      "Stir the juice into 500 ml cold water with the 25 g sugar and salt until dissolved.",
-      "Add the cumin and black pepper and stir.",
-      "Fill tall glasses with ice and pour the shikanji over.",
-      "Serve with the mint leaves.",
-    ],
-    timeMinutes: 10,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-haldi-doodh",
     name: { en: "Haldi Doodh", hindi: "हल्दी दूध" },
     category: "drink",
@@ -1962,31 +1592,6 @@ export const DISHES_SIDES: Dish[] = [
     ],
     timeMinutes: 10,
     budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-jeera-shikanji",
-    name: { en: "Jeera Shikanji", hindi: "जीरा शिकंजी" },
-    category: "drink",
-    servings: 2,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-170923", grams: 4 }, // cumin seeds (roasted in the method)
-      { foodId: "usda-167746", grams: 20 }, // lemon (for its juice)
-      { foodId: "usda-173468", grams: 1 }, // salt
-      { foodId: "usda-173475", grams: 3 }, // mint leaves
-      { foodId: "usda-169640", grams: 15 }, // honey
-    ],
-    method: [
-      "Dry-roast the 4 g cumin until dark and fragrant.",
-      "Crush it coarsely.",
-      "Soak the crushed cumin in 400 ml water for 10 minutes (or simmer 2 minutes for a stronger flavour); strain.",
-      "Stir in the lemon juice, honey and salt until the honey dissolves.",
-      "Chill well, or pour over ice.",
-      "Serve with the mint leaves.",
-    ],
-    timeMinutes: 10,
-    budgetTier: 1,
     enriched: false,
   },
   {
@@ -2042,32 +1647,6 @@ export const DISHES_SIDES: Dish[] = [
     ],
     timeMinutes: 10,
     budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-tarbooz-sharbat",
-    name: { en: "Tarbooz Sharbat", hindi: "तरबूज़ शरबत" },
-    category: "drink",
-    servings: 2,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-167765", grams: 400 }, // watermelon
-      { foodId: "usda-167746", grams: 15 }, // lemon (for its juice)
-      { foodId: "usda-173475", grams: 5 }, // mint leaves
-      { foodId: "usda-170931", grams: 1 }, // black pepper
-      { foodId: "usda-173468", grams: 1 }, // salt
-      { foodId: "usda-334247", grams: 10 }, // sugar
-    ],
-    method: [
-      "Cut the 400 g watermelon flesh into chunks, removing the seeds.",
-      "Blend with the lemon juice, 10 g sugar and salt until smooth; do not over-blend.",
-      "Taste — watermelon varies; the sharbat should be sweet with a salty edge.",
-      "Strain if you like it clear.",
-      "Pour into chilled glasses.",
-      "Serve with the mint and a pinch of black pepper.",
-    ],
-    timeMinutes: 10,
-    budgetTier: 2,
     enriched: false,
   },
 ];
