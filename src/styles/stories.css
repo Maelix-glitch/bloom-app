@@ -399,6 +399,11 @@
   max-height: 82vh;
   display: flex;
   flex-direction: column;
+  /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel):
+     this route stylesheet gets no build-emitted fallback, so the mix
+     line alone would leave the sheet fully transparent on engines
+     without color-mix (sheet audit, production item #53) */
+  background: var(--surface);
   background: color-mix(in oklab, var(--surface) 94%, transparent);
   border: 1px solid var(--border);
   border-bottom: none;

@@ -1392,6 +1392,11 @@
   display: grid;
   place-items: center;
   padding: var(--space-6);
+  /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel):
+     this route stylesheet gets no build-emitted fallback, so the mix
+     line alone would leave the ceremony scrim fully transparent on
+     engines without color-mix (sheet audit, production item #53) */
+  background: var(--pg-scrim);
   background: color-mix(in oklab, var(--pg-scrim) 92%, transparent);
   backdrop-filter: blur(18px);
   animation: pg-fade-in var(--motion-signature) var(--ease-out-expo) forwards;
