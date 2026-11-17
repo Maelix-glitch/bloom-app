@@ -26,6 +26,8 @@ export * from "./coachLog";
 export * from "./overviewInput";
 export * from "./plan";
 export * from "./planAdaptation";
+export * from "./expenditure";
+export * from "./targetAdjustment";
 export * from "./dayView";
 export * from "./swaps";
 export * from "./patterns";

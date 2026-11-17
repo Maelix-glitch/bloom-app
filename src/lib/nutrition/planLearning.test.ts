@@ -46,7 +46,11 @@ function ownerProfile(): HealthProfile {
     activity: "moderate",
     rateKgPerWeek: 0.25,
     dietary: { ...EMPTY_DIETARY, pattern: "eggetarian", mealsPerDay: 3, budgetTier: null },
-    constraints: { ...EMPTY_CONSTRAINTS, pregnantOrBreastfeeding: null, eatingDisorderHistory: null },
+    constraints: {
+      ...EMPTY_CONSTRAINTS,
+      pregnantOrBreastfeeding: null,
+      eatingDisorderHistory: null,
+    },
   };
 }
 
@@ -129,7 +133,7 @@ describe("no usable log — the P5 plan, unchanged", () => {
   const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: OWNER_TARGETS });
 
   it("no recentLog field at all", () => {
-    expect(base.methodVersion).toBe(6);
+    expect(base.methodVersion).toBe(7);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
@@ -206,10 +210,7 @@ describe("an energy-overshoot log", () => {
     findDish("dish-urad-dal")!,
   ];
   const targets = { kcal: 2000, proteinG: 40 };
-  const overshootLog: LogEntry[] = [
-    entry("2026-11-16", 2300, 45),
-    entry("2026-11-17", 2300, 45),
-  ];
+  const overshootLog: LogEntry[] = [entry("2026-11-16", 2300, 45), entry("2026-11-17", 2300, 45)];
   const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: targets, dishes });
   const biased = gen(ownerProfile(), {
     day: OWNER_DAY,
