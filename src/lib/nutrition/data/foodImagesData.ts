@@ -106,11 +106,50 @@ import honey from "../../../assets/foods/honey.webp";
 import salt from "../../../assets/foods/salt.webp";
 import sugar from "../../../assets/foods/sugar.webp";
 import appleCiderVinegar from "../../../assets/foods/apple-cider-vinegar.webp";
+import turmeric from "../../../assets/foods/turmeric.webp";
+import cuminSeed from "../../../assets/foods/cumin-seed.webp";
+import corianderSeed from "../../../assets/foods/coriander-seed.webp";
+import chiliPowder from "../../../assets/foods/chili-powder.webp";
+import curryPowder from "../../../assets/foods/curry-powder.webp";
+import fenugreekSeed from "../../../assets/foods/fenugreek-seed.webp";
+import cardamom from "../../../assets/foods/cardamom.webp";
+import cloves from "../../../assets/foods/cloves.webp";
+import cinnamon from "../../../assets/foods/cinnamon.webp";
+import bayLeaf from "../../../assets/foods/bay-leaf.webp";
+import fennelSeed from "../../../assets/foods/fennel-seed.webp";
+import blackPepper from "../../../assets/foods/black-pepper.webp";
+import poppySeed from "../../../assets/foods/poppy-seed.webp";
+import cilantro from "../../../assets/foods/cilantro.webp";
+import spearmint from "../../../assets/foods/spearmint.webp";
+import greenChili from "../../../assets/foods/green-chili.webp";
+import redChili from "../../../assets/foods/red-chili.webp";
+import okra from "../../../assets/foods/okra.webp";
+import bitterGourd from "../../../assets/foods/bitter-gourd.webp";
+import besan from "../../../assets/foods/besan.webp";
+import riceFlour from "../../../assets/foods/rice-flour.webp";
+import semolina from "../../../assets/foods/semolina.webp";
+import cowpeas from "../../../assets/foods/cowpeas.webp";
+import sesameSeeds from "../../../assets/foods/sesame-seeds.webp";
+import coconutMeat from "../../../assets/foods/coconut-meat.webp";
+import tamarind from "../../../assets/foods/tamarind.webp";
+import mustardOil from "../../../assets/foods/mustard-oil.webp";
+import cassava from "../../../assets/foods/cassava.webp";
+import plantains from "../../../assets/foods/plantains.webp";
+import jackfruit from "../../../assets/foods/jackfruit.webp";
+import coconutMilk from "../../../assets/foods/coconut-milk.webp";
+import taro from "../../../assets/foods/taro.webp";
+import waxGourd from "../../../assets/foods/wax-gourd.webp";
+import drumstickPods from "../../../assets/foods/drumstick-pods.webp";
+import drumstickLeaves from "../../../assets/foods/drumstick-leaves.webp";
+import tofu from "../../../assets/foods/tofu.webp";
+import tempeh from "../../../assets/foods/tempeh.webp";
+import edamame from "../../../assets/foods/edamame.webp";
+import atlanticMackerel from "../../../assets/foods/atlantic-mackerel.webp";
 
 export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-16";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "0a3bfe4d68701ceee5318865d6d30547c86bf5172127feeec153e2f1a07769c2";
+export const FOOD_IMAGES_FINGERPRINT = "e9956cb18db413a5d775138358e4355222edf6dce96a4588962485eee0a612eb";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -220,6 +259,45 @@ export const FOOD_IMAGES_RAW: readonly FoodImageRaw[] = [
   { "foodId": "usda-173468", "foodName": "Salt, table", "slug": "salt", "src": salt, "commonsTitle": "File:Table salt fine grain V1.jpg", "author": "Poyraz 72", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Table_salt_fine_grain_V1.jpg" },
   { "foodId": "usda-334247", "foodName": "Sugars, granulated", "slug": "sugar", "src": sugar, "commonsTitle": "File:A Bowl of Sugar 2.jpg", "author": "Sparkveela", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:A_Bowl_of_Sugar_2.jpg" },
   { "foodId": "usda-173469", "foodName": "Vinegar, cider", "slug": "apple-cider-vinegar", "src": appleCiderVinegar, "commonsTitle": "File:Apple Cider Vinegar (4108653248).jpg", "author": "Veganbaking.net from USA", "license": "CC BY-SA 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Apple_Cider_Vinegar_(4108653248).jpg" },
+  { "foodId": "usda-172231", "foodName": "Spices, turmeric, ground", "slug": "turmeric", "src": turmeric, "commonsTitle": "File:Turmeric Powder on a Spoon - Black Background.jpg", "author": "formulatehealth", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Turmeric_Powder_on_a_Spoon_-_Black_Background.jpg" },
+  { "foodId": "usda-170923", "foodName": "Spices, cumin seed", "slug": "cumin-seed", "src": cuminSeed, "commonsTitle": "File:Dried cumin seeds.jpg", "author": "Fumikas Sagisavas", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Dried_cumin_seeds.jpg" },
+  { "foodId": "usda-170922", "foodName": "Spices, coriander seed", "slug": "coriander-seed", "src": corianderSeed, "commonsTitle": "File:Coriander Seeds.jpg", "author": "Sanjay Acharya", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Coriander_Seeds.jpg" },
+  { "foodId": "usda-171319", "foodName": "Spices, chili powder", "slug": "chili-powder", "src": chiliPowder, "commonsTitle": "File:Red Chili Powder (Lall Mirch) (49695826571).jpg", "author": "Ajay Suresh from New York, NY, USA", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Red_Chili_Powder_(Lall_Mirch)_(49695826571).jpg" },
+  { "foodId": "usda-170924", "foodName": "Spices, curry powder", "slug": "curry-powder", "src": curryPowder, "commonsTitle": "File:Nahrungsmittel 2012-07-08-9517.jpg", "author": "Slick", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Nahrungsmittel_2012-07-08-9517.jpg" },
+  { "foodId": "usda-171324", "foodName": "Spices, fenugreek seed", "slug": "fenugreek-seed", "src": fenugreekSeed, "commonsTitle": "File:Fenugreek seeds(মেথি).JPG", "author": "Atudu", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fenugreek_seeds(মেথি).JPG" },
+  { "foodId": "usda-170919", "foodName": "Spices, cardamom", "slug": "cardamom", "src": cardamom, "commonsTitle": "File:Cardamom Pods (4157454523).jpg", "author": "Veganbaking.net from USA", "license": "CC BY-SA 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cardamom_Pods_(4157454523).jpg" },
+  { "foodId": "usda-171321", "foodName": "Spices, cloves, ground", "slug": "cloves", "src": cloves, "commonsTitle": "File:Groundcloves.jpg", "author": "Kitchenshaman", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Groundcloves.jpg" },
+  { "foodId": "usda-171320", "foodName": "Spices, cinnamon, ground", "slug": "cinnamon", "src": cinnamon, "commonsTitle": "File:Cinnamon powder.jpg", "author": "Quatrostein", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cinnamon_powder.jpg" },
+  { "foodId": "usda-170917", "foodName": "Spices, bay leaf", "slug": "bay-leaf", "src": bayLeaf, "commonsTitle": "File:Dried bay leaves (20240502).jpg", "author": "Fumikas Sagisavas", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Dried_bay_leaves_(20240502).jpg" },
+  { "foodId": "usda-171323", "foodName": "Spices, fennel seed", "slug": "fennel-seed", "src": fennelSeed, "commonsTitle": "File:Fennel seeds 01.jpg", "author": "NanaYawBotar", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fennel_seeds_01.jpg" },
+  { "foodId": "usda-170931", "foodName": "Spices, pepper, black", "slug": "black-pepper", "src": blackPepper, "commonsTitle": "File:Ground black pepper.jpg", "author": "Eliška Jindříšková", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Ground_black_pepper.jpg" },
+  { "foodId": "usda-171330", "foodName": "Spices, poppy seed", "slug": "poppy-seed", "src": poppySeed, "commonsTitle": "File:Poppy seeds.jpg", "author": "Odedr", "license": "Public domain", "pageUrl": "https://commons.wikimedia.org/wiki/File:Poppy_seeds.jpg" },
+  { "foodId": "usda-169997", "foodName": "Coriander (cilantro) leaves, raw", "slug": "cilantro", "src": cilantro, "commonsTitle": "File:Coriander Leaves.jpg", "author": "Rupeshm364", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Coriander_Leaves.jpg" },
+  { "foodId": "usda-173475", "foodName": "Spearmint, fresh", "slug": "spearmint", "src": spearmint, "commonsTitle": "File:Mint leaves (Mentha spicata).jpg", "author": "Commonists", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Mint_leaves_(Mentha_spicata).jpg" },
+  { "foodId": "usda-170497", "foodName": "Peppers, hot chili, green, raw", "slug": "green-chili", "src": greenChili, "commonsTitle": "File:Green chili peppers.jpg", "author": "Shalu Sharma", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Green_chili_peppers.jpg" },
+  { "foodId": "usda-170106", "foodName": "Peppers, hot chili, red, raw", "slug": "red-chili", "src": redChili, "commonsTitle": "File:Red Hot Chili harvest.jpg", "author": "Mwewannie D", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Red_Hot_Chili_harvest.jpg" },
+  { "foodId": "usda-169260", "foodName": "Okra, raw", "slug": "okra", "src": okra, "commonsTitle": "File:Bucket of raw okra pods.jpg", "author": "Bill Tarpenning", "license": "Public domain", "pageUrl": "https://commons.wikimedia.org/wiki/File:Bucket_of_raw_okra_pods.jpg" },
+  { "foodId": "usda-168393", "foodName": "Balsam-pear (bitter gourd), pods, raw", "slug": "bitter-gourd", "src": bitterGourd, "commonsTitle": "File:Bitter Melons.jpg", "author": "Mike Licht", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Bitter_Melons.jpg" },
+  { "foodId": "usda-174288", "foodName": "Chickpea flour (besan)", "slug": "besan", "src": besan, "commonsTitle": "File:Gram flour AvL.jpg", "author": "AlexanderVanLoon", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Gram_flour_AvL.jpg" },
+  { "foodId": "usda-169714", "foodName": "Rice flour, white, unenriched", "slug": "rice-flour", "src": riceFlour, "commonsTitle": "File:Rice Flour (Pitha Guri).jpg", "author": "দিব্য দত্ত", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Rice_Flour_(Pitha_Guri).jpg" },
+  { "foodId": "usda-168933", "foodName": "Semolina, unenriched", "slug": "semolina", "src": semolina, "commonsTitle": "File:Semolina 300260.jpg", "author": "Rillke", "license": "CC BY-SA 3.0 de", "pageUrl": "https://commons.wikimedia.org/wiki/File:Semolina_300260.jpg" },
+  { "foodId": "usda-173758", "foodName": "Cowpeas, common (blackeyes, crowder, southern), mature seeds, raw", "slug": "cowpeas", "src": cowpeas, "commonsTitle": "File:BlackEyedPeas.JPG", "author": "Toby Hudson", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:BlackEyedPeas.JPG" },
+  { "foodId": "usda-170150", "foodName": "Seeds, sesame seeds, whole, dried", "slug": "sesame-seeds", "src": sesameSeeds, "commonsTitle": "File:Sa white sesame seeds.jpg", "author": "Sanjay ach", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Sa_white_sesame_seeds.jpg" },
+  { "foodId": "usda-170169", "foodName": "Nuts, coconut meat, raw", "slug": "coconut-meat", "src": coconutMeat, "commonsTitle": "File:Fresh coconut flesh.jpg", "author": "Mmaua1", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fresh_coconut_flesh.jpg" },
+  { "foodId": "usda-167763", "foodName": "Tamarinds, raw", "slug": "tamarind", "src": tamarind, "commonsTitle": "File:Tamarind pods.JPG", "author": "Wicki", "license": "Public domain", "pageUrl": "https://commons.wikimedia.org/wiki/File:Tamarind_pods.JPG" },
+  { "foodId": "usda-172337", "foodName": "Oil, mustard", "slug": "mustard-oil", "src": mustardOil, "commonsTitle": "File:Mustard Oil & Seeds - Kolkata 2003-10-31 00537.JPG", "author": "Biswarup Ganguly", "license": "CC BY 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Mustard_Oil_&_Seeds_-_Kolkata_2003-10-31_00537.JPG" },
+  { "foodId": "usda-169985", "foodName": "Cassava, raw", "slug": "cassava", "src": cassava, "commonsTitle": "File:PeeLawPeeNam Cassava root Yuca Manioc.jpg", "author": "စာကလေး SarKaLay", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:PeeLawPeeNam_Cassava_root_Yuca_Manioc.jpg" },
+  { "foodId": "usda-2710818", "foodName": "Plantains, underripe, raw", "slug": "plantains", "src": plantains, "commonsTitle": "File:Green Plantains (Unsplash).jpg", "author": "Henry Doe henrydoe", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Green_Plantains_(Unsplash).jpg" },
+  { "foodId": "usda-174687", "foodName": "Jackfruit, raw", "slug": "jackfruit", "src": jackfruit, "commonsTitle": "File:Jackfruit Flesh.jpg", "author": "Mullookkaaran", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Jackfruit_Flesh.jpg" },
+  { "foodId": "usda-170172", "foodName": "Nuts, coconut milk, raw (liquid expressed from grated meat and water)", "slug": "coconut-milk", "src": coconutMilk, "commonsTitle": "File:Cononut milk.JPG", "author": "S Sepp", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cononut_milk.JPG" },
+  { "foodId": "usda-169308", "foodName": "Taro, raw", "slug": "taro", "src": taro, "commonsTitle": "File:Taro sold in supermarkets.jpg", "author": "Fumikas Sagisavas", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Taro_sold_in_supermarkets.jpg" },
+  { "foodId": "usda-170069", "foodName": "Waxgourd, (chinese preserving melon), raw", "slug": "wax-gourd", "src": waxGourd, "commonsTitle": "File:Large wax gourd in supermarket.jpg", "author": "Pieceofmetalwork", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Large_wax_gourd_in_supermarket.jpg" },
+  { "foodId": "usda-170483", "foodName": "Drumstick pods, raw", "slug": "drumstick-pods", "src": drumstickPods, "commonsTitle": "File:Moringa oleifera drumstick pods.JPG", "author": "Erector", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Moringa_oleifera_drumstick_pods.JPG" },
+  { "foodId": "usda-168416", "foodName": "Drumstick leaves, raw", "slug": "drumstick-leaves", "src": drumstickLeaves, "commonsTitle": "File:Moringa Leaves Farm Philippines 2018.jpg", "author": "JMSA2018", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Moringa_Leaves_Farm_Philippines_2018.jpg" },
+  { "foodId": "usda-172448", "foodName": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)", "slug": "tofu", "src": tofu, "commonsTitle": "File:Japanese SilkyTofu (Kinugoshi Tofu).JPG", "author": "DryPot", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Japanese_SilkyTofu_(Kinugoshi_Tofu).JPG" },
+  { "foodId": "usda-174272", "foodName": "Tempeh", "slug": "tempeh", "src": tempeh, "commonsTitle": "File:Tempeh 003.jpg", "author": "Ocdp", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Tempeh_003.jpg" },
+  { "foodId": "usda-168410", "foodName": "Edamame, frozen, unprepared", "slug": "edamame", "src": edamame, "commonsTitle": "File:Shelled edamame beans.jpg", "author": "Fumikas Sagisavas", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Shelled_edamame_beans.jpg" },
+  { "foodId": "usda-175119", "foodName": "Fish, mackerel, Atlantic, raw", "slug": "atlantic-mackerel", "src": atlanticMackerel, "commonsTitle": "File:Atlantic mackerel (Scomber scombrus).jpg", "author": "Petar Milošević", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Atlantic_mackerel_(Scomber_scombrus).jpg" },
 ];
 
 export interface FoodImagePhotoless {
@@ -230,51 +308,12 @@ export interface FoodImagePhotoless {
 
 /** Reference foods with no suitable free photograph, and why. */
 export const FOOD_IMAGE_PHOTOLESS: readonly FoodImagePhotoless[] = [
-  { "foodId": "usda-174370", "foodName": "Lamb, ground, raw", "reason": "No photograph verifiably depicting raw ground lamb exists on Wikimedia Commons under a free licence — the search found only a cooked lamb dish, generic ground-meat graphics and packaged mince." },
-  { "foodId": "usda-2514747", "foodName": "Turkey, ground, 93% lean/ 7% fat, raw", "reason": "The only free-licence depiction is ground turkey already browning in a skillet, and the USDA candidate photographs proved to be unrelated market scenes — no verifiable photograph of raw ground turkey." },
-  { "foodId": "usda-334194", "foodName": "Fish, tuna, light, canned in water, drained solids", "reason": "Only branded cans, supermarket-shelf packaging and prepared tuna dishes exist under free licences — packaging is not the food, so no photograph is pinned." },
-  { "foodId": "usda-2515380", "foodName": "Seeds, pumpkin seeds (pepitas), raw", "reason": "Free-licence photographs show pumpkin seeds only in their hulls, or as mixed-seed piles — the hulled green pepita kernel itself is not verifiably depicted." },
-  { "foodId": "usda-172231", "foodName": "Spices, turmeric, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170923", "foodName": "Spices, cumin seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170922", "foodName": "Spices, coriander seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170929", "foodName": "Spices, mustard seed, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170932", "foodName": "Spices, pepper, red or cayenne", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171319", "foodName": "Spices, chili powder", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170924", "foodName": "Spices, curry powder", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171324", "foodName": "Spices, fenugreek seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170919", "foodName": "Spices, cardamom", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171321", "foodName": "Spices, cloves, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171320", "foodName": "Spices, cinnamon, ground", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170917", "foodName": "Spices, bay leaf", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171323", "foodName": "Spices, fennel seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170931", "foodName": "Spices, pepper, black", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171330", "foodName": "Spices, poppy seed", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-169997", "foodName": "Coriander (cilantro) leaves, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-173475", "foodName": "Spearmint, fresh", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170497", "foodName": "Peppers, hot chili, green, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170106", "foodName": "Peppers, hot chili, red, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-169260", "foodName": "Okra, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-168393", "foodName": "Balsam-pear (bitter gourd), pods, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-174288", "foodName": "Chickpea flour (besan)", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-169714", "foodName": "Rice flour, white, unenriched", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-168933", "foodName": "Semolina, unenriched", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-173758", "foodName": "Cowpeas, common (blackeyes, crowder, southern), mature seeds, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170150", "foodName": "Seeds, sesame seeds, whole, dried", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170169", "foodName": "Nuts, coconut meat, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-167763", "foodName": "Tamarinds, raw", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-172337", "foodName": "Oil, mustard", "reason": "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-169985", "foodName": "Cassava, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-2710818", "foodName": "Plantains, underripe, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-174687", "foodName": "Jackfruit, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170172", "foodName": "Nuts, coconut milk, raw (liquid expressed from grated meat and water)", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-169308", "foodName": "Taro, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170069", "foodName": "Waxgourd, (chinese preserving melon), raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-170483", "foodName": "Drumstick pods, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-168416", "foodName": "Drumstick leaves, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-172448", "foodName": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-174272", "foodName": "Tempeh", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-168410", "foodName": "Edamame, frozen, unprepared", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-171098", "foodName": "Turkey, whole, breast, meat only, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-175139", "foodName": "Fish, sardine, Atlantic, canned in oil, drained solids with bone", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
-  { "foodId": "usda-175119", "foodName": "Fish, mackerel, Atlantic, raw", "reason": "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass." },
+  { "foodId": "usda-174370", "foodName": "Lamb, ground, raw", "reason": "No photograph verifiably depicting raw ground lamb exists on Wikimedia Commons under a free licence — searches (including a 2026-11 re-hunt) found only cooked lamb dishes, a garnished kibbeh nayyeh plate, generic ground-meat graphics and packaged mince." },
+  { "foodId": "usda-2514747", "foodName": "Turkey, ground, 93% lean/ 7% fat, raw", "reason": "The only free-licence depictions are ground turkey already browning in a skillet and photographs of live turkeys — no verifiable photograph of raw ground turkey. (Re-hunted 2026-11.)" },
+  { "foodId": "usda-334194", "foodName": "Fish, tuna, light, canned in water, drained solids", "reason": "Only branded cans, supermarket-shelf packaging and prepared tuna dishes exist under free licences — packaging is not the food, so no photograph is pinned. (Re-hunted 2026-11.)" },
+  { "foodId": "usda-2515380", "foodName": "Seeds, pumpkin seeds (pepitas), raw", "reason": "Free-licence photographs show pumpkin seeds in their hulls, or the hulled kernels roasted and salted — the raw hulled pepita kernel itself is not verifiably depicted. (Re-hunted 2026-11.)" },
+  { "foodId": "usda-170929", "foodName": "Spices, mustard seed, ground", "reason": "Hunted 2026-11 (English, French, German, Dutch, Italian and Polish searches, plus title searches): ground mustard seed appears under free licences only in vintage branded tins and pharmacy jars — packaging — or as whole seeds; no photograph of the ground spice itself." },
+  { "foodId": "usda-170932", "foodName": "Spices, pepper, red or cayenne", "reason": "Hunted 2026-11 (including the Cayenne pepper category and multilingual searches): ground cayenne appears only in branded jars and packets and in multi-powder scenes; every other depiction is the whole fresh or dried pepper, a different form." },
+  { "foodId": "usda-171098", "foodName": "Turkey, whole, breast, meat only, raw", "reason": "Hunted 2026-11 (English, German, French, Italian and Spanish searches): turkey breast appears under free licences only cooked, roasted, in sandwiches and wraps, or as packaged retail product — no verifiable photograph of the raw breast meat itself." },
+  { "foodId": "usda-175139", "foodName": "Fish, sardine, Atlantic, canned in oil, drained solids with bone", "reason": "Hunted 2026-11 (multilingual and category searches): canned sardines appear only as closed branded tins or restaurant servings — no open, unbranded depiction of the fish themselves under a free licence." },
 ];

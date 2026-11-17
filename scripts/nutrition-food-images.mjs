@@ -161,6 +161,47 @@ const PINS = [
   [173468, "Table salt fine grain V1.jpg", "salt"],
   [334247, "A Bowl of Sugar 2.jpg", "sugar"],
   [173469, "Apple Cider Vinegar (4108653248).jpg", "apple-cider-vinegar"],
+  /* Photo wave 2 (2026-11): the D1 and dishes-expansion foods, hunted
+     on Commons under the same rules — see the wave report. */
+  [172231, "Turmeric Powder on a Spoon - Black Background.jpg", "turmeric"],
+  [170923, "Dried cumin seeds.jpg", "cumin-seed"],
+  [170922, "Coriander Seeds.jpg", "coriander-seed"],
+  [171319, "Red Chili Powder (Lall Mirch) (49695826571).jpg", "chili-powder"],
+  [170924, "Nahrungsmittel 2012-07-08-9517.jpg", "curry-powder"],
+  [171324, "Fenugreek seeds(মেথি).JPG", "fenugreek-seed"],
+  [170919, "Cardamom Pods (4157454523).jpg", "cardamom"],
+  [171320, "Cinnamon powder.jpg", "cinnamon"],
+  [170917, "Dried bay leaves (20240502).jpg", "bay-leaf"],
+  [171323, "Fennel seeds 01.jpg", "fennel-seed"],
+  [170931, "Ground black pepper.jpg", "black-pepper"],
+  [171330, "Poppy seeds.jpg", "poppy-seed"],
+  [171321, "Groundcloves.jpg", "cloves"],
+  [169997, "Coriander Leaves.jpg", "cilantro"],
+  [173475, "Mint leaves (Mentha spicata).jpg", "spearmint"],
+  [170497, "Green chili peppers.jpg", "green-chili"],
+  [170106, "Red Hot Chili harvest.jpg", "red-chili"],
+  [169260, "Bucket of raw okra pods.jpg", "okra"],
+  [168393, "Bitter Melons.jpg", "bitter-gourd"],
+  [174288, "Gram flour AvL.jpg", "besan"],
+  [169714, "Rice Flour (Pitha Guri).jpg", "rice-flour"],
+  [168933, "Semolina 300260.jpg", "semolina"],
+  [173758, "BlackEyedPeas.JPG", "cowpeas"],
+  [170150, "Sa white sesame seeds.jpg", "sesame-seeds"],
+  [170169, "Fresh coconut flesh.jpg", "coconut-meat"],
+  [167763, "Tamarind pods.JPG", "tamarind"],
+  [172337, "Mustard Oil & Seeds - Kolkata 2003-10-31 00537.JPG", "mustard-oil"],
+  [169985, "PeeLawPeeNam Cassava root Yuca Manioc.jpg", "cassava"],
+  [2710818, "Green Plantains (Unsplash).jpg", "plantains"],
+  [174687, "Jackfruit Flesh.jpg", "jackfruit"],
+  [170172, "Cononut milk.JPG", "coconut-milk"],
+  [169308, "Taro sold in supermarkets.jpg", "taro"],
+  [170069, "Large wax gourd in supermarket.jpg", "wax-gourd"],
+  [170483, "Moringa oleifera drumstick pods.JPG", "drumstick-pods"],
+  [168416, "Moringa Leaves Farm Philippines 2018.jpg", "drumstick-leaves"],
+  [172448, "Japanese SilkyTofu (Kinugoshi Tofu).JPG", "tofu"],
+  [174272, "Tempeh 003.jpg", "tempeh"],
+  [168410, "Shelled edamame beans.jpg", "edamame"],
+  [175119, "Atlantic mackerel (Scomber scombrus).jpg", "atlantic-mackerel"],
 ];
 
 /**
@@ -168,63 +209,17 @@ const PINS = [
  * reason, never silently omitted and never given a substitute image.
  */
 const PHOTOLESS = [
-  [174370, "No photograph verifiably depicting raw ground lamb exists on Wikimedia Commons under a free licence — the search found only a cooked lamb dish, generic ground-meat graphics and packaged mince."],
-  [334194, "Only branded cans, supermarket-shelf packaging and prepared tuna dishes exist under free licences — packaging is not the food, so no photograph is pinned."],
-  [2514747, "The only free-licence depiction is ground turkey already browning in a skillet, and the USDA candidate photographs proved to be unrelated market scenes — no verifiable photograph of raw ground turkey."],
-  [2515380, "Free-licence photographs show pumpkin seeds only in their hulls, or as mixed-seed piles — the hulled green pepita kernel itself is not verifiably depicted."],
-  /* D1 (dishes foundation) additions: these foods joined the reference
-     set after the Commons photo pass, and no photograph has been
-     sourced or reviewed for them yet. Recorded here so the coverage
-     rule holds — a photo is pinned only after the usual search,
-     licence check and eyeball review, never silently skipped. */
-  [172231, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170923, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170922, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170929, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170932, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [171319, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170924, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [171324, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170919, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [171321, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [171320, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170917, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [171323, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170931, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [171330, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [169997, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [173475, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170497, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170106, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [169260, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [168393, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [174288, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [169714, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [168933, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [173758, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170150, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [170169, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [167763, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  [172337, "No photograph sourced yet — this food joined the reference set in the D1 dishes-foundation extension, after the Commons photo pass."],
-  /* Dishes-expansion foundation additions: these foods joined the
-     reference set after the Commons photo pass, and no photograph has
-     been sourced or reviewed for them yet. Recorded here so the
-     coverage rule holds — a photo is pinned only after the usual
-     search, licence check and eyeball review, never silently skipped. */
-  [169985, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [2710818, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [174687, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [170172, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [169308, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [170069, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [170483, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [168416, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [172448, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [174272, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [168410, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [171098, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [175139, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
-  [175119, "No photograph sourced yet — this food joined the reference set in the dishes-expansion foundation extension, after the Commons photo pass."],
+  [174370, "No photograph verifiably depicting raw ground lamb exists on Wikimedia Commons under a free licence — searches (including a 2026-11 re-hunt) found only cooked lamb dishes, a garnished kibbeh nayyeh plate, generic ground-meat graphics and packaged mince."],
+  [334194, "Only branded cans, supermarket-shelf packaging and prepared tuna dishes exist under free licences — packaging is not the food, so no photograph is pinned. (Re-hunted 2026-11.)"],
+  [2514747, "The only free-licence depictions are ground turkey already browning in a skillet and photographs of live turkeys — no verifiable photograph of raw ground turkey. (Re-hunted 2026-11.)"],
+  [2515380, "Free-licence photographs show pumpkin seeds in their hulls, or the hulled kernels roasted and salted — the raw hulled pepita kernel itself is not verifiably depicted. (Re-hunted 2026-11.)"],
+  /* Photo wave 2 (2026-11) hunted the D1 and dishes-expansion foods;
+     most were pinned (see PINS). The entries below were hunted hard
+     and stay photo-less for the reasons given. */
+  [170929, "Hunted 2026-11 (English, French, German, Dutch, Italian and Polish searches, plus title searches): ground mustard seed appears under free licences only in vintage branded tins and pharmacy jars — packaging — or as whole seeds; no photograph of the ground spice itself."],
+  [170932, "Hunted 2026-11 (including the Cayenne pepper category and multilingual searches): ground cayenne appears only in branded jars and packets and in multi-powder scenes; every other depiction is the whole fresh or dried pepper, a different form."],
+  [171098, "Hunted 2026-11 (English, German, French, Italian and Spanish searches): turkey breast appears under free licences only cooked, roasted, in sandwiches and wraps, or as packaged retail product — no verifiable photograph of the raw breast meat itself."],
+  [175139, "Hunted 2026-11 (multilingual and category searches): canned sardines appear only as closed branded tins or restaurant servings — no open, unbranded depiction of the fish themselves under a free licence."],
 ];
 
 /* ------------------------------ Commons API ------------------------------ */
