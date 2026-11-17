@@ -77,7 +77,7 @@ function cardOf(dish: Dish) {
 describe("DishesSection — browsing", () => {
   it("renders the library with bilingual names and computed per-serving numbers", () => {
     render(<DishesSection day={todayLocal()} />);
-    expect(screen.getByText(/941 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1202 dishes/)).toBeTruthy();
     const card = cardOf(dal);
     expect(within(card).getByText(/मसूर दाल तड़का/)).toBeTruthy();
     const perServing = dishNutrients(dal).nutrients;
@@ -99,19 +99,26 @@ describe("DishesSection — browsing", () => {
     ).toBeTruthy();
   });
 
+  /* Chip counts pin the integrated library: 1,202 dishes (Indian 375,
+     Kerala 125, International 702) after the 2026-11-17 protein waves
+     added 299 dishes to the borderline-trimmed 903 (Indian 300, Kerala
+     97, International 506; the borderline removal took out 7
+     sugar-defined / deep-fried dishes; 910 / 306 / 98 after the same
+     day's duplicate audit removed 31 twice-authored dishes; 941 / 313 /
+     530 before that). */
   it("offers cuisine chips with live counts counted from the shelf", () => {
     render(<DishesSection day={todayLocal()} />);
     const group = screen.getByRole("group", { name: "Cuisine" });
-    expect(within(group).getByRole("button", { name: "All · 941" })).toBeTruthy();
-    expect(within(group).getByRole("button", { name: "Indian · 313" })).toBeTruthy();
-    expect(within(group).getByRole("button", { name: "Kerala · 98" })).toBeTruthy();
-    expect(within(group).getByRole("button", { name: "International · 530" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "All · 1202" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "Indian · 375" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "Kerala · 125" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "International · 702" })).toBeTruthy();
   });
 
   it("selecting a cuisine shows only that cuisine's dishes", () => {
     render(<DishesSection day={todayLocal()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Kerala · 98" }));
-    expect(screen.getByText(/98 dishes/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Kerala · 125" }));
+    expect(screen.getByText(/125 dishes/)).toBeTruthy();
     expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
     expect(cardOf(avial)).toBeTruthy();
     /* An Indian dish and an international dish both fall away. */
@@ -125,7 +132,7 @@ describe("DishesSection — browsing", () => {
 
   it("the cuisine filter composes with search — an impossible pairing is honestly empty", () => {
     render(<DishesSection day={todayLocal()} />);
-    fireEvent.click(screen.getByRole("button", { name: "International · 530" }));
+    fireEvent.click(screen.getByRole("button", { name: "International · 702" }));
     fireEvent.change(screen.getByLabelText("Search dishes"), {
       target: { value: "masoor" },
     });
@@ -135,19 +142,19 @@ describe("DishesSection — browsing", () => {
     expect(screen.getByText(/No dishes match — try clearing a filter/)).toBeTruthy();
     /* Clearing restores the whole library, cuisine included. */
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText(/941 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1202 dishes/)).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "All · 941" }).getAttribute("aria-pressed"),
+      screen.getByRole("button", { name: "All · 1202" }).getAttribute("aria-pressed"),
     ).toBe("true");
   });
 
   it("the cuisine filter sits under the silent pattern governance", () => {
     seedAnswers({ dietaryPattern: "vegan" });
     render(<DishesSection day={todayLocal()} />);
-    /* The chip counts are counted from the governed shelf: of the 98
-       Kerala dishes, 57 suit a vegan pattern. */
-    fireEvent.click(screen.getByRole("button", { name: "Kerala · 57" }));
-    expect(screen.getByText(/57 dishes/)).toBeTruthy();
+    /* The chip counts are counted from the governed shelf: of the 97
+       Kerala dishes, 56 suit a vegan pattern. */
+    fireEvent.click(screen.getByRole("button", { name: "Kerala · 63" }));
+    expect(screen.getByText(/63 dishes/)).toBeTruthy();
     expect(screen.getByText(/showing what suits you — vegan pattern/)).toBeTruthy();
     expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
     /* Avial carries curd — the pattern keeps it off the shelf even
@@ -177,7 +184,7 @@ describe("DishesSection — browsing", () => {
     });
     expect(screen.getByText(/No dishes match — try clearing a filter/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText(/941 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1202 dishes/)).toBeTruthy();
   });
 
   it("the shelf follows the person's own pattern — silently, with no pattern or budget controls", () => {
@@ -197,7 +204,7 @@ describe("DishesSection — browsing", () => {
     render(<DishesSection day={todayLocal()} />);
     expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
     expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
-    expect(screen.getByText(/941 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1202 dishes/)).toBeTruthy();
   });
 
   it("a stated budget keeps dishes above the tier off the shelf", () => {

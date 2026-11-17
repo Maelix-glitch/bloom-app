@@ -394,36 +394,6 @@ export const INDIA_DISHES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-bedmi-poori",
-    name: { en: "Bedmi Poori", hindi: "बेड़मी पूरी" },
-    category: "breakfast",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168893", grams: 300 }, // whole wheat flour
-      { foodId: "usda-174259", grams: 80 }, // mungo beans (urad), filling
-      { foodId: "usda-171323", grams: 3 }, // fennel seed
-      { foodId: "usda-170923", grams: 2 }, // cumin seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-171025", grams: 50 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Soak the urad 4 hours, drain, and grind coarse with almost no water — the bedmi filling should be gritty, never a paste.",
-      "Grind the fennel and cumin; stir through the urad with the cayenne, turmeric, ginger and half the salt; the filling must be dry enough to pinch.",
-      "Knead the flour with the remaining salt, a spoon of oil and about 160 ml water into a firm dough; rest 30 minutes.",
-      "Divide into 12 balls; cup each, fill with a spoon of urad, pleat shut and roll to a 10 cm disc, sealing well — a leaking bedmi will not puff.",
-      "Heat the oil to 185°C. Slide in a disc, press gently with the skimmer until it balloons, flip and fry 30 seconds more to pale gold.",
-      "Drain upright so the oil runs off; the shell should be crisp and faintly blistered, the filling steamed inside.",
-      "Serve hot with rasedaar aloo — bedmi is the great UP breakfast pairing, made for a runny potato curry.",
-    ],
-    timeMinutes: 60,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-rasedaar-aloo",
     name: { en: "Rasedaar Aloo", hindi: "रसेदार आलू" },
     category: "main",
@@ -1537,39 +1507,6 @@ export const INDIA_DISHES: Dish[] = [
     budgetTier: 2,
     enriched: false,
   },
-  {
-    id: "dish-dal-pakwan-style",
-    name: { en: "Dal Pakwan-Style", hindi: "दाल पकवान" },
-    category: "breakfast",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-172436", grams: 200 }, // pigeon peas (toor dal)
-      { foodId: "usda-168936", grams: 200 }, // white flour, for the pakwan
-      { foodId: "usda-170457", grams: 80 }, // tomato
-      { foodId: "usda-790646", grams: 60 }, // onion
-      { foodId: "usda-169231", grams: 8 }, // ginger
-      { foodId: "usda-170923", grams: 3 }, // cumin seed
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-167746", grams: 15 }, // lemon
-      { foodId: "usda-171025", grams: 45 }, // sunflower oil
-      { foodId: "usda-169997", grams: 8 }, // coriander leaves
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Dal pakwan is Sindh's great breakfast: crisp fried flatbread under a soft, spiced dal. The classic dal is chana dal, which is not in Bloom's verified set; toor dal carries it here, stated, and the pakwan is unchanged.",
-      "Pressure-cook the toor dal with the turmeric and 500 ml water for 4 whistles until soft but not dissolved; season with salt and lemon and keep it thick.",
-      "Cook the tomato and ginger into the dal for 5 minutes so it turns savoury and slightly tangy.",
-      "Knead the flour with a pinch of salt, the cumin and about 100 ml water into a stiff dough; rest 20 minutes.",
-      "Roll into thin 12 cm discs, prick all over with a fork, and fry in hot oil 1–2 minutes a side until crisp and pale gold — the pakwan.",
-      "Lay a pakwan on each plate and spoon the hot dal generously over it, letting the edges stay crisp.",
-      "Scatter raw onion, coriander leaves and a dusting of cayenne, and eat at once with a spoon and your hands — crisp below, soft dal above.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 1,
-    enriched: false,
-  },
   /* ============================= PARSI ============================= */
   {
     id: "dish-dhansak-style",
@@ -1781,31 +1718,6 @@ export const INDIA_DISHES: Dish[] = [
     ],
     timeMinutes: 75,
     budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-luchi",
-    name: { en: "Luchi", hindi: "लुची" },
-    category: "bread",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-168936", grams: 250 }, // white flour
-      { foodId: "usda-171314", grams: 10 }, // ghee, for the dough
-      { foodId: "usda-171025", grams: 40 }, // sunflower oil, for frying
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Rub the ghee and salt into the flour, then knead with about 120 ml warm water into a soft, smooth dough; rest 30 minutes under a damp cloth.",
-      "Divide into 16 small balls — a luchi is small, white and perfect, never a poori's size.",
-      "Roll each ball to a thin, even 8 cm disc, keeping the rest covered so they do not skin over.",
-      "Heat the oil to 190°C — hotter than for poori; a luchi must puff in seconds.",
-      "Slide in a disc, press it gently under the oil with the skimmer until it balloons into a ball, flip once, and lift out within 30 seconds, still pale.",
-      "Drain upright. A correct luchi is ivory-white, blistered and soft, with no brown spots.",
-      "Serve immediately in a pile with kosha mangsho or aloo — luchi wait for no one.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 1,
     enriched: false,
   },
   {

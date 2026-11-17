@@ -28,7 +28,7 @@ import {
 
 describe("the USDA reference set", () => {
   it("ships a curated staple set, parsed whole by the strict N1 parser", () => {
-    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(142);
+    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(144);
     // Nothing drops: every generated entry survives parsing.
     expect(USDA_REFERENCE_FOODS.length).toBe(USDA_REFERENCE_FOODS_RAW.length);
     const ids = new Set(USDA_REFERENCE_FOODS.map((f) => f.id));
@@ -156,7 +156,7 @@ describe("food-group classification (P2)", () => {
       vegetables: 26,
       fruits: 13,
       nuts_seeds: 9,
-      other: 39,
+      other: 41,
     });
   });
 
@@ -171,7 +171,7 @@ describe("food-group classification (P2)", () => {
       if (food.name.startsWith("Butter")) expect(c.containsDairy).toBe(true);
     }
     expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsEgg)).toHaveLength(3);
-    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsDairy)).toHaveLength(11);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsDairy)).toHaveLength(12);
     expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh)).toHaveLength(16);
     expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFish)).toHaveLength(8);
     expect(

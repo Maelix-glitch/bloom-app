@@ -128,6 +128,7 @@ export const DISH_CATEGORY_LABEL: Record<DishCategory, string> = {
   breakfast: "Breakfast",
   dessert: "Desserts",
   drink: "Drinks",
+  shake: "Shakes",
 };
 
 export const PLAN_PATTERN_LABEL: Record<PlanPattern, string> = {

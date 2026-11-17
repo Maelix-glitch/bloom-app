@@ -23,7 +23,9 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  */
 describe("wave I-2 India dishes", () => {
   it("ships 100–110 dishes", () => {
-    expect(INDIA_DISHES.length).toBe(103);
+    /* 103 as authored; 100 after the 2026-11-17 borderline removal took
+       bedmi poori, dal pakwan-style and luchi out of this wave. */
+    expect(INDIA_DISHES.length).toBe(100);
     expect(INDIA_DISHES.length).toBeGreaterThanOrEqual(100);
     expect(INDIA_DISHES.length).toBeLessThanOrEqual(110);
   });

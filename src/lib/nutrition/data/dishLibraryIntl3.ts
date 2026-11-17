@@ -776,33 +776,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-cn-shrimp-egg-fried-rice",
-    name: { en: "Shrimp & Egg Fried Rice", hindi: "झींगा अंडा फ्राइड राइस" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-175179", grams: 200 }, // shrimp (prawns)
-      { foodId: "usda-171287", grams: 150 }, // egg, whole
-      { foodId: "usda-2512381", grams: 180 }, // white rice, dry
-      { foodId: "usda-170419", grams: 80 }, // peas, green
-      { foodId: "usda-790646", grams: 60 }, // onion, finely diced
-      { foodId: "usda-171411", grams: 12 }, // soybean oil
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Cook the rice and cool it thoroughly, ideally spread on a tray for 30 minutes — cold, dry grains are the whole secret of fried rice.",
-      "Season the shrimp with a pinch of the salt; sear in a smoking wok with a little of the oil for 1 minute until just pink, then lift out.",
-      "Scramble the eggs in the same wok into soft curds and lift out with the shrimp.",
-      "Add the remaining oil, stir-fry the onion and peas for 1 minute, then add the rice and toss over the highest heat for 3–4 minutes until the grains dance and toast at the edges.",
-      "Return the shrimp and egg, season with the remaining salt, and toss for 1 minute to combine.",
-      "Serve immediately, while the rice still crackles faintly from the wok.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-cn-hot-sour-soup",
     name: { en: "Hot & Sour Soup with Chicken", hindi: "गरम खट्टा सूप" },
     category: "main",
@@ -987,34 +960,6 @@ export const INTL3_DISHES: readonly Dish[] = [
       "Slice the chicken thickly, serve over the rice with cucumber slices and the chilli sauce alongside.",
     ],
     timeMinutes: 50,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
-    id: "dish-cn-cashew-chicken",
-    name: { en: "Cashew Chicken", hindi: "काजू चिकन" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646170", grams: 550 }, // chicken breast
-      { foodId: "usda-2515374", grams: 60 }, // cashew nuts
-      { foodId: "usda-170427", grams: 150 }, // green sweet pepper
-      { foodId: "usda-170108", grams: 150 }, // red sweet pepper
-      { foodId: "usda-790646", grams: 150 }, // onion
-      { foodId: "usda-1104647", grams: 10 }, // garlic
-      { foodId: "usda-171411", grams: 12 }, // soybean oil
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Cut the chicken into bite-size cubes and season with salt; cut the peppers and onion into matching squares.",
-      "Toast the cashews in a dry wok until golden and fragrant; set aside — they go in last so they stay crisp.",
-      "Heat the wok until smoking, add the oil, and sear the chicken in batches until just cooked and lightly golden; lift out.",
-      "Stir-fry the onion and peppers for 2 minutes, keeping them crisp-tender and bright.",
-      "Return the chicken with the garlic and a splash of water; toss over high heat for 1 minute until everything glistens.",
-      "Fold in the cashews, toss once, and serve immediately.",
-    ],
-    timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
   },
@@ -1867,36 +1812,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-id-chicken-satay",
-    name: { en: "Chicken Satay with Peanut Sauce", hindi: "चिकन साटे" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646170", grams: 600 }, // chicken breast
-      { foodId: "usda-172430", grams: 120 }, // peanuts, for the sauce
-      { foodId: "usda-170172", grams: 150 }, // coconut milk
-      { foodId: "usda-172231", grams: 5 }, // turmeric
-      { foodId: "usda-170922", grams: 5 }, // coriander seed, ground
-      { foodId: "usda-334247", grams: 12 }, // sugar
-      { foodId: "usda-167763", grams: 20 }, // tamarind
-      { foodId: "usda-1104647", grams: 15 }, // garlic
-      { foodId: "usda-170106", grams: 10 }, // red hot chilli
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Slice the chicken into long thin strips and marinate with the turmeric, coriander, garlic, half the sugar and the salt for at least 30 minutes.",
-      "Thread the strips onto soaked skewers in loose waves so the edges char.",
-      "Make the sauce: blend the peanuts coarsely, then simmer with the coconut milk, tamarind liquor, remaining sugar, chilli and a pinch of salt for 5–8 minutes until it thickens and the oil glistens on top.",
-      "Grill the skewers over high heat for 2–3 minutes per side, until charred at the edges and just cooked — satay should be a little smoky, never dry.",
-      "Rest the skewers 2 minutes.",
-      "Serve with the warm peanut sauce for dipping, and cucumber and rice if you have them.",
-    ],
-    timeMinutes: 45,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-id-gado-gado",
     name: { en: "Gado Gado with Peanut Sauce", hindi: "गाडो गाडो" },
     category: "main",
@@ -2210,32 +2125,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   /* ------------------------------- American ------------------------------ */
-  {
-    id: "dish-us-herb-grilled-chicken",
-    name: { en: "Herb Grilled Chicken", hindi: "हर्ब ग्रिल्ड चिकन" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646170", grams: 320 }, // chicken breast
-      { foodId: "usda-171413", grams: 15 }, // olive oil
-      { foodId: "usda-1104647", grams: 10 }, // garlic, minced
-      { foodId: "usda-167746", grams: 40 }, // lemon
-      { foodId: "usda-170931", grams: 3 }, // black pepper, cracked
-      { foodId: "usda-173468", grams: 4 }, // salt
-    ],
-    method: [
-      "Pound the chicken breasts to an even 2 cm thickness so they grill evenly; season with salt and cracked pepper.",
-      "Rub with the olive oil, garlic and lemon juice; rest 20 minutes.",
-      "Heat a grill or cast-iron pan until very hot; lay the chicken down and do not touch it for 5–6 minutes — the crust needs time.",
-      "Flip once and grill 4–5 minutes more, until the juices run clear and the thickest part is just cooked.",
-      "Rest 5 minutes under foil so the juices return to the meat.",
-      "Slice across the grain and serve with the lemon wedges and any resting juices poured over.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 3,
-    enriched: false,
-  },
   {
     id: "dish-us-turkey-chilli",
     name: { en: "Turkey Chilli", hindi: "टर्की चिली" },
@@ -2638,33 +2527,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-us-blackened-tilapia",
-    name: { en: "Blackened Tilapia", hindi: "ब्लैकन्ड तिलापिया" },
-    category: "main",
-    servings: 2,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2684442", grams: 340 }, // tilapia
-      { foodId: "usda-171319", grams: 6 }, // chili powder
-      { foodId: "usda-170932", grams: 2 }, // cayenne
-      { foodId: "usda-1104647", grams: 8 }, // garlic, grated to a paste
-      { foodId: "usda-173410", grams: 15 }, // butter
-      { foodId: "usda-167746", grams: 30 }, // lemon
-      { foodId: "usda-173468", grams: 3 }, // salt
-    ],
-    method: [
-      "Mix the chili powder, cayenne, garlic paste and salt into a dry rub.",
-      "Pat the tilapia completely dry and coat both sides thickly with the rub, pressing it on.",
-      "Heat a cast-iron pan until it is genuinely smoking — blackening is done at fierce heat, so open a window.",
-      "Add the butter; the moment it melts and foams, lay in the fish.",
-      "Cook 3 minutes without moving until the crust is nearly black and crisp; flip and cook 2 minutes more.",
-      "Serve at once with lemon — the crust should be dark and fiery, the flesh white and moist.",
-    ],
-    timeMinutes: 15,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-us-eggs-royale",
     name: { en: "Eggs Royale (Salmon Benedict)", hindi: "एग्स रॉयल" },
     category: "breakfast",
@@ -3061,37 +2923,6 @@ export const INTL3_DISHES: readonly Dish[] = [
     ],
     timeMinutes: 45,
     budgetTier: 2,
-    enriched: false,
-  },
-  {
-    id: "dish-mx-arroz-con-pollo",
-    name: { en: "Arroz con Pollo", hindi: "अर्रोज़ कॉन पोलो" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2646171", grams: 650 }, // chicken thigh
-      { foodId: "usda-2512381", grams: 320 }, // white rice, dry
-      { foodId: "usda-170419", grams: 150 }, // peas, green
-      { foodId: "usda-170108", grams: 150 }, // red sweet pepper
-      { foodId: "usda-170427", grams: 100 }, // green sweet pepper
-      { foodId: "usda-170457", grams: 200 }, // tomatoes
-      { foodId: "usda-790646", grams: 150 }, // onion
-      { foodId: "usda-1104647", grams: 12 }, // garlic
-      { foodId: "usda-172231", grams: 3 }, // turmeric, for colour
-      { foodId: "usda-171410", grams: 12 }, // peanut oil
-      { foodId: "usda-173468", grams: 6 }, // salt
-    ],
-    method: [
-      "Season the chicken with salt and brown it well in the oil in a wide, heavy pot; lift out — the browned base is the rice's flavour.",
-      "Soften the onion and peppers in the same pot; add the garlic, turmeric and chopped tomatoes and cook 3 minutes into a sofrito.",
-      "Stir in the rice until every grain is coated and glossy.",
-      "Pour in about 650 ml water, season with salt, and nestle the chicken pieces into the rice.",
-      "Cover and cook on the lowest heat for 18 minutes without lifting the lid.",
-      "Scatter the peas over the top, cover again and rest off the heat for 10 minutes; fluff the rice around the chicken and serve from the pot.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 3,
     enriched: false,
   },
   {

@@ -964,33 +964,6 @@ export const INTL2_DISHES: readonly Dish[] = [
     cuisine: "international",
   },
   {
-    id: "dish-tonno-fagioli",
-    name: { en: "Tonno e Fagioli (Tuna and White Bean Salad)", hindi: "तोनो ए फाजोली (टूना एंड व्हाइट बीन सैलड)" },
-    category: "main",
-    servings: 2,
-    lines: [
-      { foodId: "usda-334194", grams: 300 }, // Fish, tuna
-      { foodId: "usda-173745", grams: 240 }, // Beans, navy
-      { foodId: "usda-790646", grams: 80 }, // Onions, yellow
-      { foodId: "usda-171413", grams: 20 }, // Oil, olive
-      { foodId: "usda-167746", grams: 40 }, // Lemons, raw
-      { foodId: "usda-169997", grams: 10 }, // Coriander (cilantro) leaves, raw
-      { foodId: "usda-173468", grams: 3 }, // Salt, table
-    ],
-    method: [
-      "Soak the beans overnight; drain, cover with fresh water and simmer 35-45 minutes until completely tender; drain and cool slightly.",
-      "Slice the onion very thinly and soak in cold water for 10 minutes to take off its raw bite; drain well.",
-      "Drain the tuna and break into large flakes — keep the pieces chunky so the salad eats like a main course.",
-      "Fold the warm beans, tuna and onion together with the olive oil, lemon juice and salt; warm beans drink up the dressing.",
-      "Rest 10 minutes so the flavours settle; taste and add more lemon if it seems flat.",
-      "Scatter with the coriander leaves and serve warm or at room temperature.",
-    ],
-    timeMinutes: 50,
-    budgetTier: 3,
-    enriched: false,
-    cuisine: "international",
-  },
-  {
     id: "dish-minestrone-fagioli",
     name: { en: "Minestrone with Kidney Beans", hindi: "मिनेस्त्रोने विथ किडनी बीन्स" },
     category: "main",
@@ -1211,33 +1184,6 @@ export const INTL2_DISHES: readonly Dish[] = [
     cuisine: "international",
   },
   {
-    id: "dish-sardine-bake-italian",
-    name: { en: "Italian Baked Sardines with Tomato and Lemon", hindi: "इटैलियन बेक्ड सार्डिन्स विथ टोमैटो एंड लेमन" },
-    category: "main",
-    servings: 2,
-    lines: [
-      { foodId: "usda-175139", grams: 300 }, // Fish, sardine
-      { foodId: "usda-170457", grams: 200 }, // Tomatoes, red
-      { foodId: "usda-790646", grams: 100 }, // Onions, yellow
-      { foodId: "usda-171413", grams: 15 }, // Oil, olive
-      { foodId: "usda-167746", grams: 40 }, // Lemons, raw
-      { foodId: "usda-1104647", grams: 6 }, // Garlic, raw
-      { foodId: "usda-173468", grams: 3 }, // Salt, table
-    ],
-    method: [
-      "Heat the oven to 200°C. Scatter the sliced onion over a small baking dish and drizzle with half the oil.",
-      "Drain the sardines and pat them dry so the tomato juices bake into a sauce instead of steaming the fish.",
-      "Arrange the sardines over the onion and season well.",
-      "Spoon the chopped tomato and garlic over the fish and drizzle with the remaining oil.",
-      "Bake 15-18 minutes until the sardines are firm and the tomato juices bubble.",
-      "Finish with the lemon juice, rest 2 minutes, and serve with bread to catch the juices.",
-    ],
-    timeMinutes: 30,
-    budgetTier: 3,
-    enriched: false,
-    cuisine: "international",
-  },
-  {
     id: "dish-tilapia-livornese",
     name: { en: "Tilapia alla Livornese (Fish in Tomato Sauce)", hindi: "तिलापिया आला लिवोरनेसे (फिश इन टोमैटो सॉस)" },
     category: "main",
@@ -1260,32 +1206,6 @@ export const INTL2_DISHES: readonly Dish[] = [
       "Serve each fillet with plenty of sauce and bread alongside.",
     ],
     timeMinutes: 35,
-    budgetTier: 3,
-    enriched: false,
-    cuisine: "international",
-  },
-  {
-    id: "dish-tortilla-espanola",
-    name: { en: "Tortilla Española (Spanish Potato Omelette)", hindi: "तोर्तीया एस्पानोला (स्पैनिश पोटैटो ऑमलेट)" },
-    category: "breakfast",
-    servings: 2,
-    lines: [
-      { foodId: "usda-171287", grams: 250 }, // Egg, whole
-      { foodId: "usda-172183", grams: 150 }, // Egg, white
-      { foodId: "usda-2346401", grams: 400 }, // Potatoes, russet
-      { foodId: "usda-790646", grams: 150 }, // Onions, yellow
-      { foodId: "usda-171413", grams: 40 }, // Oil, olive
-      { foodId: "usda-173468", grams: 4 }, // Salt, table
-    ],
-    method: [
-      "Slice the potatoes and onion thinly. Cook gently in the olive oil over medium-low heat for 20-25 minutes, stirring now and then, until completely soft and silky but not browned — this slow confit is the soul of the tortilla.",
-      "Drain the potato mixture through a sieve set over a bowl, reserving the oil; season well.",
-      "Whisk the eggs and whites, fold in the warm potato and onion, and rest 10 minutes so the egg soaks in.",
-      "Heat a film of the reserved oil in a non-stick pan, pour in the mixture and cook on low heat for 6-8 minutes until the edges are set and the centre still wobbles.",
-      "Invert onto a plate and slide back into the pan to cook the other side for 3-4 minutes — the centre should stay juicy, never dry.",
-      "Rest 5 minutes and cut into wedges; tortilla is eaten warm or at room temperature, never straight from the pan.",
-    ],
-    timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
@@ -1639,34 +1559,6 @@ export const INTL2_DISHES: readonly Dish[] = [
     ],
     timeMinutes: 40,
     budgetTier: 3,
-    enriched: false,
-    cuisine: "international",
-  },
-  {
-    id: "dish-alubias-blancas",
-    name: { en: "Alubias Blancas Estofadas (Spanish White Bean Stew)", hindi: "आलूबियास ब्लांकास एस्तोफादास (स्पैनिश व्हाइट बीन स्टू)" },
-    category: "main",
-    servings: 4,
-    lines: [
-      { foodId: "usda-173745", grams: 480 }, // Beans, navy
-      { foodId: "usda-2258586", grams: 150 }, // Carrots, mature
-      { foodId: "usda-790646", grams: 150 }, // Onions, yellow
-      { foodId: "usda-170457", grams: 200 }, // Tomatoes, red
-      { foodId: "usda-171413", grams: 25 }, // Oil, olive
-      { foodId: "usda-1104647", grams: 10 }, // Garlic, raw
-      { foodId: "usda-170917", grams: 1 }, // Spices, bay leaf
-      { foodId: "usda-173468", grams: 6 }, // Salt, table
-    ],
-    method: [
-      "Soak the beans overnight; drain, cover with fresh water, boil 10 minutes and drain again.",
-      "Return to the pot with fresh water, the bay leaf and the chopped carrot; simmer gently for 45 minutes.",
-      "Soften the onion and garlic in the olive oil for 7 minutes; add the tomato and cook 8 minutes into a sofrito.",
-      "Stir the sofrito into the beans and simmer 20-25 minutes more until the beans are completely tender and the broth creamy.",
-      "Season at the end, remove the bay leaf, and rest 10 minutes.",
-      "Serve in deep bowls with a thread of raw olive oil.",
-    ],
-    timeMinutes: 90,
-    budgetTier: 2,
     enriched: false,
     cuisine: "international",
   },
@@ -2902,36 +2794,6 @@ export const INTL2_DISHES: readonly Dish[] = [
       "Rest 5 minutes and serve straight from the dish with lemon.",
     ],
     timeMinutes: 55,
-    budgetTier: 3,
-    enriched: false,
-    cuisine: "international",
-  },
-  {
-    id: "dish-shakshuka",
-    name: { en: "Shakshuka (Eggs in Spiced Tomato Sauce)", hindi: "शकशुका (एग्स इन स्पाइस्ड टोमैटो सॉस)" },
-    category: "breakfast",
-    servings: 2,
-    lines: [
-      { foodId: "usda-171287", grams: 250 }, // Egg, whole
-      { foodId: "usda-172183", grams: 150 }, // Egg, white
-      { foodId: "usda-170457", grams: 400 }, // Tomatoes, red
-      { foodId: "usda-170108", grams: 150 }, // Peppers, sweet
-      { foodId: "usda-790646", grams: 150 }, // Onions, yellow
-      { foodId: "usda-171413", grams: 20 }, // Oil, olive
-      { foodId: "usda-170923", grams: 2 }, // Spices, cumin seed
-      { foodId: "usda-171319", grams: 2 }, // Spices, chili powder
-      { foodId: "usda-1104647", grams: 8 }, // Garlic, raw
-      { foodId: "usda-173468", grams: 4 }, // Salt, table
-    ],
-    method: [
-      "Soften the onion and red pepper in the olive oil for 8 minutes until sweet and soft.",
-      "Add the garlic, cumin and chilli powder for 1 minute until fragrant.",
-      "Add the chopped tomatoes and salt and simmer 12-15 minutes, crushing the tomatoes, until the sauce is thick and the oil glistens at the edges.",
-      "Make wells in the sauce and crack the eggs into them; spoon the egg whites around the pan so every serving gets its share.",
-      "Cover and cook on low heat for 6-8 minutes until the whites are set and the yolks are still runny and glossy.",
-      "Serve straight from the pan with warm bread for the sauce and yolks.",
-    ],
-    timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
     cuisine: "international",

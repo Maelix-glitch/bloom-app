@@ -40,7 +40,8 @@ export type DishCategory =
   | "snack"
   | "breakfast"
   | "dessert"
-  | "drink";
+  | "drink"
+  | "shake";
 
 export const DISH_CATEGORIES: readonly DishCategory[] = [
   "main",
@@ -53,6 +54,7 @@ export const DISH_CATEGORIES: readonly DishCategory[] = [
   "breakfast",
   "dessert",
   "drink",
+  "shake",
 ];
 
 export interface DishLine {

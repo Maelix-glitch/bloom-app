@@ -188,6 +188,8 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-173468": { display: "Table salt", hindi: "नमक" },
   "usda-334247": { display: "Sugar", hindi: "चीनी" },
   "usda-173469": { display: "Apple cider vinegar", hindi: "सेब का सिरका" },
+  "usda-173177": { display: "Whey protein powder (isolate)", hindi: "व्हे प्रोटीन पाउडर" },
+  "usda-173181": { display: "Soy protein powder", hindi: "सोया प्रोटीन पाउडर" },
 };
 
 /** The display + Hindi names for a reference food id, or null when the

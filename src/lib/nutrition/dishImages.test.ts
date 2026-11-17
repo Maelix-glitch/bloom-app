@@ -74,13 +74,8 @@ describe("dish photograph manifest", () => {
        listed here. The generator enforces the same list on its side
        (SHARED_FILES); a new share must be added to both, deliberately. */
     const EXPECTED_SHARES: readonly (readonly string[])[] = [
-      ["dish-chicken-shawarma-plate", "dish-intl-chicken-shawarma"],
-      ["dish-intl-blackened-tilapia", "dish-us-blackened-tilapia"],
       ["dish-ar-pollo-crema", "dish-chicken-fricassee"],
-      ["dish-cu-arroz-con-pollo", "dish-intl-spanish-chicken-rice"],
       ["dish-chicken-souvlaki", "dish-intl-greek-chicken-souvlaki"],
-      ["dish-intl-tuna-white-bean-salad", "dish-tonno-fagioli"],
-      ["dish-intl-shakshuka", "dish-shakshuka"],
       ["dish-garbanzos-espinacas", "dish-intl-chickpea-spinach-stew"],
       ["dish-intl-black-eyed-pea-stew", "dish-mavromatika-fasolia"],
       ["dish-chole-masala", "dish-chole-enriched"],
@@ -95,10 +90,21 @@ describe("dish photograph manifest", () => {
       ["dish-veg-biryani", "dish-enriched-veg-biryani"],
       ["dish-fruit-curd-bowl", "dish-enriched-fruit-curd-bowl"],
       ["dish-khichdi-enriched", "dish-masala-khichdi"],
-      ["dish-moong-khichdi", "dish-moong-dal-khichdi"],
-      ["dish-shahi-paneer", "dish-shahi-paneer-style"],
       ["dish-coconut-chutney", "dish-shahi-coconut-chutney"],
       ["dish-kadala-curry", "dish-kadala-curry-enriched"],
+      ["dish-shake-cottage-cheese-banana", "dish-shake-greek-yogurt-banana", "dish-shake-ricotta-banana"],
+      ["dish-shake-double-dairy-banana", "dish-shake-whey-cottage-cheese-banana", "dish-shake-whey-oat-banana"],
+      ["dish-shake-coconut-banana-greek-yogurt", "dish-shake-mixed-seed-banana", "dish-shake-walnut-banana-greek-yogurt"],
+      ["dish-shake-cottage-cheese-oats-banana", "dish-shake-oat-peanut-banana", "dish-shake-soy-powder-banana-oat-peanut"],
+      ["dish-shake-peanut-banana-greek-yogurt", "dish-shake-whey-peanut-banana"],
+      ["dish-shake-cottage-cheese-mango", "dish-shake-soy-powder-mango-coconut"],
+      ["dish-shake-cottage-cheese-strawberry", "dish-shake-ricotta-strawberry"],
+      ["dish-shake-greek-yogurt-strawberry", "dish-shake-whey-strawberry-greek-yogurt"],
+      ["dish-shake-soy-powder-strawberry-almond", "dish-shake-sunflower-strawberry"],
+      ["dish-shake-cottage-cheese-orange", "dish-shake-greek-yogurt-orange-cardamom"],
+      ["dish-mango-lassi", "dish-shake-pumpkin-seed-mango"],
+      ["dish-badam-doodh", "dish-shake-almond-cardamom"],
+      ["dish-intl-overnight-oats", "dish-shake-overnight-oat-banana"],
     ];
     const slugs = DISH_PHOTOS.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);

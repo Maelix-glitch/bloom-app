@@ -14,10 +14,10 @@
  * food, not values read from USDA's tables.
  */
 
-export const USDA_REFERENCE_RETRIEVED_ON = "2026-11-16";
+export const USDA_REFERENCE_RETRIEVED_ON = "2026-11-17";
 
 /** SHA-256 over the canonicalised foods array (see the generator). */
-export const USDA_REFERENCE_FINGERPRINT = "e630a668a733f68e5699025c8ce755bb5880ed8b57bcfe6a5160dbd8a061de3a";
+export const USDA_REFERENCE_FINGERPRINT = "6d0c375ca1e8a12789a73006f3d1b76aa0acf36ab3e24e84ec7d0e10ff85a829";
 
 /** The reference foods, raw — read them through `../usdaReference`,
  *  which parses every entry with the strict N1 parser. */
@@ -164,4 +164,6 @@ export const USDA_REFERENCE_FOODS_RAW: readonly unknown[] = [
   {"id":"usda-171098","name":"Turkey, whole, breast, meat only, raw","per100g":{"kcal":114,"proteinG":23.66,"carbsG":0.14,"fatG":1.48,"fibreG":0,"sodiumMg":113,"potassiumMg":242,"magnesiumMg":28,"calciumMg":11,"ironMg":0.73,"vitaminCMg":0},"servings":[{"label":"4 oz","grams":113},{"label":"1 breast","grams":1769}],"provenance":{"kind":"usda","sourceId":"171098","dataType":"SR Legacy","label":"USDA FoodData Central"},"classification":{"group":"other","containsEgg":false,"containsDairy":false,"isFlesh":true,"isFish":false}},
   {"id":"usda-175139","name":"Fish, sardine, Atlantic, canned in oil, drained solids with bone","per100g":{"kcal":208,"proteinG":24.62,"carbsG":0,"fatG":11.45,"fibreG":0,"sodiumMg":307,"potassiumMg":397,"magnesiumMg":39,"calciumMg":382,"ironMg":2.92,"vitaminCMg":0},"servings":[{"label":"1 cup, drained","grams":149},{"label":"1 oz","grams":28.35}],"provenance":{"kind":"usda","sourceId":"175139","dataType":"SR Legacy","label":"USDA FoodData Central"},"classification":{"group":"other","containsEgg":false,"containsDairy":false,"isFlesh":true,"isFish":true}},
   {"id":"usda-175119","name":"Fish, mackerel, Atlantic, raw","per100g":{"kcal":205,"proteinG":18.6,"carbsG":0,"fatG":13.89,"fibreG":0,"sodiumMg":90,"potassiumMg":314,"magnesiumMg":76,"calciumMg":12,"ironMg":1.63,"vitaminCMg":0.4},"servings":[{"label":"1 fillet","grams":112},{"label":"3 oz","grams":85}],"provenance":{"kind":"usda","sourceId":"175119","dataType":"SR Legacy","label":"USDA FoodData Central"},"classification":{"group":"other","containsEgg":false,"containsDairy":false,"isFlesh":true,"isFish":true}},
+  {"id":"usda-173177","name":"Beverages, Whey protein powder isolate","per100g":{"kcal":359,"proteinG":58.14,"carbsG":29.07,"fatG":1.16,"fibreG":0,"sodiumMg":372,"potassiumMg":872,"magnesiumMg":233,"calciumMg":698,"ironMg":1.26,"vitaminCMg":34.9},"servings":[{"label":"3 scoop","grams":86}],"provenance":{"kind":"usda","sourceId":"173177","dataType":"SR Legacy","label":"USDA FoodData Central"},"classification":{"group":"other","containsEgg":false,"containsDairy":true,"isFlesh":false,"isFish":false}},
+  {"id":"usda-173181","name":"Beverages, Protein powder soy based","per100g":{"kcal":388,"proteinG":55.56,"carbsG":28.89,"fatG":5.56,"fibreG":6.7,"sodiumMg":733,"potassiumMg":933,"magnesiumMg":64,"calciumMg":178,"ironMg":12,"vitaminCMg":0},"servings":[{"label":"1 scoop","grams":45}],"provenance":{"kind":"usda","sourceId":"173181","dataType":"SR Legacy","label":"USDA FoodData Central"},"classification":{"group":"other","containsEgg":false,"containsDairy":false,"isFlesh":false,"isFish":false}},
 ];

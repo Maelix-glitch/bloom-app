@@ -3207,37 +3207,6 @@ export const INTL4_DISHES: readonly Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-cu-picadillo-style",
-    name: { en: "Cuban Turkey Picadillo-Style", hindi: "क्यूबाई टर्की पिकाडियो-स्टाइल" },
-    category: "main",
-    servings: 4,
-    cuisine: "international",
-    lines: [
-      { foodId: "usda-2514747", grams: 640 }, // ground turkey
-      { foodId: "usda-2346401", grams: 300 }, // potatoes, diced small
-      { foodId: "usda-170457", grams: 300 }, // tomatoes
-      { foodId: "usda-170427", grams: 200 }, // green pepper
-      { foodId: "usda-790646", grams: 200 }, // onion
-      { foodId: "usda-174683", grams: 100 }, // grapes, standing in for raisins
-      { foodId: "usda-1104647", grams: 15 }, // garlic
-      { foodId: "usda-170923", grams: 5 }, // cumin seed
-      { foodId: "usda-173469", grams: 20 }, // cider vinegar
-      { foodId: "usda-171025", grams: 30 }, // sunflower oil
-      { foodId: "usda-173468", grams: 5 }, // salt
-    ],
-    method: [
-      "Picadillo is ground beef with olives and raisins; beef is outside this wave and olives and raisins are outside the verified set — turkey and grapes carry this version, and the name says it is a style.",
-      "Brown the ground turkey in the sunflower oil for 8 minutes, breaking it into small crumbs.",
-      "Add the onion, green pepper and garlic and cook 6 minutes, then the cumin for 30 seconds.",
-      "Add the tomatoes, potato dice and cider vinegar and simmer 15 minutes, until the potato is tender and the sauce thick.",
-      "Stir in the halved grapes and simmer 2 minutes — they should stay distinct, little bursts of sweetness in the savoury mince.",
-      "Adjust the salt and serve the picadillo glossy and richly spiced.",
-    ],
-    timeMinutes: 40,
-    budgetTier: 3,
-    enriched: false,
-  },
-  {
     id: "dish-cu-moros",
     name: { en: "Cuban Black Beans and Rice (Moros y Cristianos)", hindi: "क्यूबाई काली बीन्स चावल (मोरोस)" },
     category: "main",

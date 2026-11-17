@@ -11,7 +11,7 @@
  *   are sweetened with the set's granulated sugar or honey. That is a
  *   substitution of the sweetener only, stated here, never hidden.
  * - There is NO paneer in the set; cottage cheese stands in for it
- *   (the shahi paneer-style side says so in its enrichment text).
+ *   (the mains library's Shahi Paneer notes the stand-in on its lines).
  * - There is no tea and no coffee in the set, so there is no masala
  *   chai and no filter coffee here — a drink Bloom cannot cost or
  *   compute honestly is not invented.
@@ -449,35 +449,6 @@ export const DISHES_SIDES: Dish[] = [
     enriched: false,
   },
   {
-    id: "dish-sprouted-moong",
-    name: { en: "Sprouted Moong", hindi: "अंकुरित मूंग" },
-    category: "side",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-174256", grams: 200 }, // mung beans (sprouted in the method)
-      { foodId: "usda-2346406", grams: 150 }, // cucumber
-      { foodId: "usda-170457", grams: 100 }, // tomato
-      { foodId: "usda-790646", grams: 50 }, // onion
-      { foodId: "usda-167746", grams: 30 }, // lemon (for its juice)
-      { foodId: "usda-170497", grams: 5 }, // green chilli
-      { foodId: "usda-169997", grams: 15 }, // fresh coriander leaves
-      { foodId: "usda-173468", grams: 3 }, // salt
-      { foodId: "usda-170923", grams: 2 }, // cumin seeds (roasted in the method)
-    ],
-    method: [
-      "Soak the 200 g mung beans overnight, drain, tie in a cloth and leave in a warm place for 12–24 hours until sprouted.",
-      "Steam or blanch the sprouts for 3–4 minutes if you prefer them softer; cool.",
-      "Dry-roast the cumin and crush it coarsely.",
-      "Chop the 150 g cucumber, 100 g tomato and 50 g onion finely.",
-      "Mix the chopped vegetables with the sprouts, green chilli and coriander leaves.",
-      "Dress with lemon juice, the roasted cumin and salt just before serving.",
-    ],
-    timeMinutes: 20,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
     id: "dish-lobia-usal",
     name: { en: "Lobia Usal", hindi: "लोबिया उसल" },
     category: "side",
@@ -802,44 +773,6 @@ export const DISHES_SIDES: Dish[] = [
     budgetTier: 2,
     enriched: false,
   },
-  {
-    id: "dish-shahi-paneer-style",
-    name: { en: "Shahi Paneer-Style (Cottage Cheese)", hindi: "शाही पनीर" },
-    category: "side",
-    servings: 4,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-328841", grams: 250 }, // cottage cheese (paneer stand-in)
-      { foodId: "usda-170457", grams: 250 }, // tomato
-      { foodId: "usda-790646", grams: 100 }, // onion
-      { foodId: "usda-2515374", grams: 25 }, // cashews
-      { foodId: "usda-171314", grams: 20 }, // ghee
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-1104647", grams: 10 }, // garlic
-      { foodId: "usda-170497", grams: 4 }, // green chilli
-      { foodId: "usda-172231", grams: 1 }, // turmeric
-      { foodId: "usda-171319", grams: 2 }, // chilli powder
-      { foodId: "usda-171320", grams: 1 }, // cinnamon
-      { foodId: "usda-170919", grams: 1 }, // cardamom
-      { foodId: "usda-173468", grams: 4 }, // salt
-      { foodId: "usda-169997", grams: 8 }, // fresh coriander leaves
-      { foodId: "usda-322892", grams: 50 }, // milk
-    ],
-    method: [
-      "Soak the 25 g cashews in warm water for 15 minutes.",
-      "Blend the 250 g tomato, 100 g onion, ginger, garlic and cashews to a smooth paste with a little water.",
-      "Melt the 20 g ghee; add the cinnamon and cardamom.",
-      "Add the paste, turmeric, chilli powder and salt.",
-      "Cook the paste on medium heat for 10–12 minutes, stirring often, until thick and glossy and the ghee glistens at the edges.",
-      "Add the 50 ml milk and a splash of water; simmer 2 minutes. Add the cottage cheese cubes and green chilli and warm through gently for 3 minutes — do not boil hard.",
-      "Finish with the coriander leaves and serve hot.",
-    ],
-    timeMinutes: 35,
-    budgetTier: 2,
-    enriched: true,
-    enrichment:
-      "A cashew-tomato gravy and a ghee finish make this the rich, festive version; cottage cheese stands in for paneer.",
-  },
 
   /* ------------------------------ chutneys ------------------------------ */
   {
@@ -1065,34 +998,6 @@ export const DISHES_SIDES: Dish[] = [
       "Mix and serve fresh.",
     ],
     timeMinutes: 15,
-    budgetTier: 1,
-    enriched: false,
-  },
-  {
-    id: "dish-mango-chutney",
-    name: { en: "Mango Chutney", hindi: "आम की चटनी" },
-    category: "chutney",
-    servings: 6,
-    cuisine: "india",
-    lines: [
-      { foodId: "usda-169910", grams: 250 }, // mango
-      { foodId: "usda-334247", grams: 40 }, // sugar
-      { foodId: "usda-173469", grams: 15 }, // cider vinegar
-      { foodId: "usda-169231", grams: 10 }, // ginger
-      { foodId: "usda-170932", grams: 1 }, // cayenne (red chilli powder)
-      { foodId: "usda-171320", grams: 1 }, // cinnamon
-      { foodId: "usda-171321", grams: 1 }, // cloves
-      { foodId: "usda-173468", grams: 2 }, // salt
-    ],
-    method: [
-      "Peel the 250 g mango and cut the flesh into small cubes; grate the ginger.",
-      "Put the mango in a pan with the 40 g sugar, 15 ml cider vinegar, ginger, cayenne, cinnamon, cloves and salt.",
-      "Add 100 ml water and bring to a simmer.",
-      "Cook on low heat for 20–25 minutes, stirring now and then.",
-      "It is ready when thick and jammy and the mango is soft — a spoon dragged through it leaves a trail.",
-      "Cool and store in a clean jar in the fridge.",
-    ],
-    timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
   },
