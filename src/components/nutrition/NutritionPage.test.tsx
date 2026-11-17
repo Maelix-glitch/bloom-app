@@ -48,6 +48,7 @@ import {
   readFoodLog,
   saveCustomFood,
   searchUsdaReference,
+  usdaDataStamp,
   type Food,
   type LogEntry,
 } from "@/lib/nutrition";
@@ -156,6 +157,36 @@ describe("NutritionPage — search & add flow", () => {
     const usdaBadges = within(usdaSection).getAllByTestId("provenance-badge");
     expect(usdaBadges.length).toBeGreaterThan(0);
     expect(usdaBadges.every((b) => b.textContent === "USDA FoodData Central")).toBe(true);
+  });
+
+  it("shows the USDA data-version stamp on a reference food, and none on an own food (audit #29)", () => {
+    const own = saveCustomFood({
+      name: "Homemade Rice Bowl",
+      per100g: { kcal: 210, proteinG: 6, carbsG: 38, fatG: 3 },
+    });
+    if (!own) throw new Error("seed food refused");
+    const usdaRice = searchUsdaReference("rice")[0]!;
+
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    fireEvent.change(within(sheet).getByLabelText("Search foods"), {
+      target: { value: "rice" },
+    });
+
+    const usdaSection = within(sheet).getByLabelText("USDA reference foods");
+    const row = usdaSection.querySelector("button.nut-food-row-main");
+    expect(row).not.toBeNull();
+    fireEvent.click(row!);
+    /* The portion step names the dataset release the numbers came from. */
+    expect(within(sheet).getByTestId("usda-data-stamp").textContent).toBe(
+      usdaDataStamp(usdaRice),
+    );
+
+    fireEvent.click(within(sheet).getByRole("button", { name: "Back to search" }));
+    fireEvent.click(within(sheet).getByRole("button", { name: /Homemade Rice Bowl/ }));
+    /* An own food has no dataset version — no stamp, its badge already
+       says whose value it is. */
+    expect(within(sheet).queryByTestId("usda-data-stamp")).toBeNull();
   });
 
   it("preselects a default portion, so logging never needs an amount decision first", () => {

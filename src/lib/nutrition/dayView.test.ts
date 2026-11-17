@@ -158,4 +158,16 @@ describe("spectrumForDay", () => {
       spectrumForDay([], "female").find((r) => r.key === "magnesiumMg")!.reference,
     ).toBe(310);
   });
+
+  it("vitamin C is the ICMR-NIN RDA 2020 adult value — 80 mg, not sex-specific", () => {
+    /* Audit #27: the panel once showed 90 mg. The RDA states a single
+       adult value of 80 mg, so every sex selection must agree. */
+    for (const sex of [null, "male", "female"] as const) {
+      expect(spectrumForDay([], sex).find((r) => r.key === "vitaminCMg")).toMatchObject({
+        reference: 80,
+        unit: "mg",
+        limit: false,
+      });
+    }
+  });
 });

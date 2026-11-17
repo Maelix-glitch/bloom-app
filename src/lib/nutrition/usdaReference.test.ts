@@ -8,13 +8,15 @@ import { canonicalise } from "../vitalis/evidence/seed/canonical";
 import { USDA_REFERENCE_FOODS_RAW, USDA_REFERENCE_FINGERPRINT } from "./data/usdaReferenceData";
 import { provenanceLabel } from "./labels";
 import { parseFood } from "./parse";
-import type { FoodProvenance } from "./types";
+import type { Food, FoodProvenance } from "./types";
 import {
   USDA_REFERENCE_FOODS,
+  USDA_REFERENCE_RETRIEVED_ON,
   findUsdaReference,
   referenceProvenanceGate,
   registrySourceGate,
   searchUsdaReference,
+  usdaDataStamp,
 } from "./usdaReference";
 
 /**
@@ -62,6 +64,36 @@ describe("the USDA reference set", () => {
     );
     const fingerprint = createHash("sha256").update(canonicalise(tampered), "utf8").digest("hex");
     expect(fingerprint).not.toBe(USDA_REFERENCE_FINGERPRINT);
+  });
+});
+
+describe("the data-version stamp (audit #29)", () => {
+  it("names the release each dataset's values came from, and when Bloom retrieved the set", () => {
+    const foundation = USDA_REFERENCE_FOODS.find((f) => f.provenance.dataType === "Foundation");
+    expect(foundation).toBeDefined();
+    expect(usdaDataStamp(foundation!)).toBe(
+      `USDA FoodData Central · Foundation · 2025-04-24 release · retrieved ${USDA_REFERENCE_RETRIEVED_ON}`,
+    );
+    const legacy = USDA_REFERENCE_FOODS.find((f) => f.provenance.dataType === "SR Legacy");
+    expect(legacy).toBeDefined();
+    expect(usdaDataStamp(legacy!)).toBe(
+      `USDA FoodData Central · SR Legacy · 2018-04 release · retrieved ${USDA_REFERENCE_RETRIEVED_ON}`,
+    );
+  });
+
+  it("stamps every reference food — none ships without a version line", () => {
+    for (const food of USDA_REFERENCE_FOODS) {
+      expect(usdaDataStamp(food)).toMatch(/^USDA FoodData Central · /);
+    }
+  });
+
+  it("is null for a food that did not come from the dataset", () => {
+    const own: Food = {
+      ...USDA_REFERENCE_FOODS[0]!,
+      id: "own-1",
+      provenance: { kind: "user_entered", sourceId: "own-1", label: "Your value" },
+    };
+    expect(usdaDataStamp(own)).toBeNull();
   });
 });
 

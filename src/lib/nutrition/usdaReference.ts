@@ -36,6 +36,37 @@ export function findUsdaReference(id: string): Food | null {
 }
 
 /**
+ * The FoodData Central releases this set was generated from, keyed by the
+ * data type each food's provenance carries — as recorded in the generated
+ * data's header. FoodData Central publishes no single version number
+ * spanning both datasets, so the honest stamp names the release of the
+ * dataset the food actually came from, never an invented umbrella version.
+ */
+const USDA_RELEASE_BY_DATA_TYPE: Readonly<Record<string, string>> = {
+  Foundation: "2025-04-24 release",
+  "SR Legacy": "2018-04 release",
+};
+
+/**
+ * The data-version line shown wherever a reference food's provenance is
+ * displayed: the source, the release its values came from, and the date
+ * Bloom retrieved the set — e.g. "USDA FoodData Central · Foundation ·
+ * 2025-04-24 release · retrieved 2026-11-16". Null for anything that is
+ * not a USDA reference food: a user's own food has no dataset version to
+ * stamp, and its badge already says whose value it is.
+ */
+export function usdaDataStamp(food: Food): string | null {
+  if (food.provenance.kind !== "usda") return null;
+  const dataType = food.provenance.dataType;
+  const release = dataType ? USDA_RELEASE_BY_DATA_TYPE[dataType] : undefined;
+  return [
+    "USDA FoodData Central",
+    ...(dataType ? [release ? `${dataType} · ${release}` : dataType] : []),
+    `retrieved ${USDA_REFERENCE_RETRIEVED_ON}`,
+  ].join(" · ");
+}
+
+/**
  * Name search over the reference set, for the N4 add-food flow (which ranks
  * the user's own foods above these, per design §3.1). Every query token must
  * appear in the food's name; results rank a name that starts with the query
