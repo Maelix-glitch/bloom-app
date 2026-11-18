@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  DIETARY_PATTERNS,
   EMPTY_CONSTRAINTS,
   EMPTY_DIETARY,
   emptyProfile,
   toSafetyInput,
+  type CuisinePreference,
   type DietaryPattern,
   type HealthProfile,
 } from "@/lib/vitalis/domain/profile";
@@ -17,21 +19,28 @@ import { dishNutrients, dishPatterns, type Dish } from "./dishes";
 import {
   generatePlan,
   parsePlanValue,
+  planPatternOf,
   planValueOf,
   type DailyPlan,
   type PlanMeal,
 } from "./plan";
+import { dishRegion } from "./regions";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
-import type { Food } from "./types";
+import type { Food, Nutrients } from "./types";
 
 /**
- * P5 acceptance: the dish-first composer. A main meal is a plate of
- * library dishes — a protein anchor, a base and a side where the
- * meal's energy share calls for them — under the plan's own gates
- * (pattern, eligible lines, budget as a hard cap), with simple foods
- * demoted to a top-up layer and the layered food composition kept as
- * the per-slot fallback. The owner's day is the worked example: gain,
- * ~3,288 kcal, ~220 g protein, eggetarian, three meals.
+ * P8 acceptance: the single-dish composer. A main meal is ONE library
+ * dish, portion-scaled in quarter-serving steps (0.5–2.0) to fit the
+ * meal's share of the day — never the P5 stack of anchor + base +
+ * side, which composed plates no kitchen serves and left the day's
+ * totals unrepairable (the owner's worked example under P7 composed
+ * 3,454 kcal and 201 g protein against a 3,288 kcal / 220 g guide).
+ * Selection is a protein-weighted fit cost with the P6/P7 learning
+ * signals and the Assessment's cuisine preference as ranking terms;
+ * a day guard then repairs the scales (and, failing that, re-picks
+ * the worst meal) until the day sits inside its bands — energy
+ * ±5%, protein 95–110% — whenever the pool allows. The pattern gate
+ * is re-verified on the composed plan itself before it is returned.
  */
 
 const NOW = "2026-11-17T03:00:00.000Z";
@@ -39,7 +48,7 @@ const PROVENANCE = { source: "user_reported", recordedAt: "2026-06-01T07:00:00Z"
 
 function fullProfile(
   pattern: DietaryPattern | null,
-  opts: { mealsPerDay?: number; budgetTier?: 1 | 2 | 3 | null } = {},
+  opts: { mealsPerDay?: number; budgetTier?: 1 | 2 | 3 | null; cuisinePreference?: CuisinePreference | null } = {},
 ): HealthProfile {
   return {
     ...emptyProfile("user-1", "2026-06-01T07:00:00Z"),
@@ -55,6 +64,7 @@ function fullProfile(
       pattern,
       mealsPerDay: opts.mealsPerDay ?? 3,
       budgetTier: opts.budgetTier ?? null,
+      cuisinePreference: opts.cuisinePreference ?? null,
     },
     constraints: {
       ...EMPTY_CONSTRAINTS,
@@ -67,9 +77,9 @@ function fullProfile(
 /** The owner's shape: eggetarian, 100 kg, gain — safety questions
  *  unanswered (absence-only block), so targets come from the
  *  body-profile fallback, exactly as his live plan does. */
-function ownerProfile(): HealthProfile {
+function ownerProfile(cuisinePreference: CuisinePreference | null = null): HealthProfile {
   return {
-    ...fullProfile("eggetarian"),
+    ...fullProfile("eggetarian", { cuisinePreference }),
     weight: observation(quantity(100, "kg"), PROVENANCE),
     goal: "gain",
     rateKgPerWeek: 0.25,
@@ -88,6 +98,7 @@ function gen(
     foods?: readonly Food[];
     dishes?: readonly Dish[];
     fallbackTargets?: { kcal: number; proteinG: number };
+    storedPlan?: DailyPlan | null;
   } = {},
 ): DailyPlan {
   const day = opts.day ?? "2026-11-17";
@@ -99,16 +110,18 @@ function gen(
     fallbackTargets: opts.fallbackTargets ?? null,
     foods: opts.foods ?? USDA_REFERENCE_FOODS,
     dishes: opts.dishes ?? DISH_LIBRARY,
+    ...(opts.storedPlan !== undefined ? { storedPlan: opts.storedPlan } : {}),
     day,
     now: NOW,
-    id: "plan-p5",
+    id: "plan-p8",
   });
   if (!outcome.ok) throw new Error(`plan refused: ${JSON.stringify(outcome.refusal)}`);
   return outcome.plan;
 }
 
+const OWNER_TARGETS = { kcal: 3288, proteinG: 220 };
 const ownerDay = (day: string): DailyPlan =>
-  gen(ownerProfile(), { day, fallbackTargets: { kcal: 3288, proteinG: 220 } });
+  gen(ownerProfile(), { day, fallbackTargets: OWNER_TARGETS });
 
 const dayTotals = (plan: DailyPlan) => ({
   kcal: plan.meals.reduce(
@@ -129,45 +142,117 @@ const dayTotals = (plan: DailyPlan) => ({
 
 const mainMeals = (plan: DailyPlan): PlanMeal[] => plan.meals.filter((m) => m.meal !== "snack");
 
-describe("plan · P5 dish-first composition", () => {
-  it("every main meal is anchored by a real library dish", () => {
+/** The day's bands, asserted strictly — the fixtures below are the
+ *  ones the pool CAN land, so there is no honesty escape hatch. */
+function expectDayInBand(plan: DailyPlan, targets: { kcal: number; proteinG: number }) {
+  const { kcal, proteinG } = dayTotals(plan);
+  expect(Math.abs(kcal - targets.kcal), `${plan.day} kcal ${Math.round(kcal)}`).toBeLessThanOrEqual(
+    0.05 * targets.kcal,
+  );
+  expect(proteinG, `${plan.day} protein ${proteinG.toFixed(0)}`).toBeGreaterThanOrEqual(
+    0.95 * targets.proteinG,
+  );
+  expect(proteinG, `${plan.day} protein ${proteinG.toFixed(0)}`).toBeLessThanOrEqual(
+    1.1 * targets.proteinG,
+  );
+}
+
+const NUTRIENT_FIELDS = [
+  "kcal",
+  "proteinG",
+  "carbsG",
+  "fatG",
+  "fibreG",
+  "sodiumMg",
+  "potassiumMg",
+  "calciumMg",
+  "ironMg",
+  "magnesiumMg",
+  "vitaminCMg",
+] as const satisfies readonly (keyof Nutrients)[];
+
+describe("plan · P8 single-dish composition", () => {
+  it("every main meal is exactly ONE real library dish", () => {
     const plan = ownerDay("2026-11-17");
     for (const meal of mainMeals(plan)) {
-      expect(meal.dishes.length, meal.meal).toBeGreaterThanOrEqual(1);
-      expect(meal.dishes.length, meal.meal).toBeLessThanOrEqual(3);
-      const anchor = meal.dishes.find((d) => d.role === "anchor");
-      expect(anchor, meal.meal).toBeDefined();
-      /* The anchor is a dish from the shipped library — not a food,
-         not an invention. */
-      expect(findDish(anchor!.dishId)).not.toBeNull();
-      expect(anchor!.provenance.kind).toBe("recipe");
-      expect(anchor!.provenance.sourceId).toBe(anchor!.dishId);
+      expect(meal.dishes.length, meal.meal).toBe(1);
+      const dish = meal.dishes[0]!;
+      expect(dish.role, meal.meal).toBe("anchor");
+      /* A dish from the shipped library — not a food, not an invention. */
+      expect(findDish(dish.dishId)).not.toBeNull();
+      expect(dish.provenance.kind).toBe("recipe");
+      expect(dish.provenance.sourceId).toBe(dish.dishId);
     }
   });
 
-  it("the anchor is each meal's largest protein source", () => {
+  it("the dish is the meal's protein headline", () => {
     const plan = ownerDay("2026-11-17");
     for (const meal of mainMeals(plan)) {
-      const anchor = meal.dishes.find((d) => d.role === "anchor")!;
-      for (const other of meal.dishes) {
-        if (other !== anchor) expect(anchor.nutrients.proteinG).toBeGreaterThanOrEqual(other.nutrients.proteinG);
-      }
+      const dish = meal.dishes[0]!;
       for (const s of meal.suggestions) {
-        expect(anchor.nutrients.proteinG).toBeGreaterThanOrEqual(s.nutrients.proteinG);
+        expect(dish.nutrients.proteinG).toBeGreaterThanOrEqual(s.nutrients.proteinG);
       }
+      /* And it covers the bulk of its meal's share itself — the
+         top-up layer completes the day, it does not carry a meal. */
+      expect(dish.nutrients.kcal, meal.meal).toBeGreaterThanOrEqual(0.6 * meal.kcal);
     }
   });
 
-  it("plan dish numbers ARE the library's numbers for the same dish", () => {
+  it("plan dish numbers ARE the library's numbers, scaled by the stated servings", () => {
     const plan = ownerDay("2026-11-17");
     for (const meal of plan.meals) {
       for (const planDish of meal.dishes) {
         const dish = findDish(planDish.dishId)!;
-        expect(planDish.nutrients).toEqual(dishNutrients(dish).nutrients);
+        const perServing = dishNutrients(dish).nutrients;
+        /* The scale is a quarter step inside [0.5, 2.0]. */
+        expect(planDish.servings).toBeGreaterThanOrEqual(0.5);
+        expect(planDish.servings).toBeLessThanOrEqual(2);
+        expect(Math.abs(planDish.servings * 4 - Math.round(planDish.servings * 4))).toBeLessThan(1e-9);
+        /* Every field is the library's per-serving value × servings,
+           to the engine's own 0.1 rounding — never an invented panel. */
+        for (const field of NUTRIENT_FIELDS) {
+          expect(
+            Math.abs((planDish.nutrients[field] ?? 0) - (perServing[field] ?? 0) * planDish.servings),
+            `${dish.name.en} ${field}`,
+          ).toBeLessThanOrEqual(0.1);
+        }
         expect(planDish.name).toBe(dish.name.en);
       }
     }
   });
+
+  it("the owner's week lands inside the day bands, one dish per meal", () => {
+    const days = [
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22",
+      "2026-11-23",
+    ];
+    for (const day of days) {
+      const plan = ownerDay(day);
+      expectDayInBand(plan, OWNER_TARGETS);
+      for (const meal of mainMeals(plan)) expect(meal.dishes.length, `${day} ${meal.meal}`).toBe(1);
+    }
+  }, 60_000);
+
+  it("the screenshot fixture (2,964 kcal / 165 g) lands inside the day bands", () => {
+    const targets = { kcal: 2964, proteinG: 165 };
+    for (const day of ["2026-11-17", "2026-11-18", "2026-11-19"]) {
+      const plan = gen(ownerProfile(), { day, fallbackTargets: targets });
+      expectDayInBand(plan, targets);
+      for (const meal of mainMeals(plan)) expect(meal.dishes.length, `${day} ${meal.meal}`).toBe(1);
+      for (const meal of plan.meals) {
+        for (const planDish of meal.dishes) {
+          expect(dishPatterns(findDish(planDish.dishId)!), `${day}: ${planDish.name}`).toContain(
+            "eggetarian",
+          );
+        }
+      }
+    }
+  }, 60_000);
 
   it("the day reconciles: energy within ±5% of the guide, protein met or honestly named", () => {
     const plan = ownerDay("2026-11-17");
@@ -196,6 +281,33 @@ describe("plan · P5 dish-first composition", () => {
     }
   });
 
+  it("pattern matrix: every stated pattern × target levels — zero violating dishes", () => {
+    const levels = [
+      { kcal: 2400, proteinG: 130 },
+      { kcal: 3288, proteinG: 220 },
+    ];
+    for (const pattern of DIETARY_PATTERNS) {
+      const planPattern = planPatternOf(pattern);
+      for (const targets of levels) {
+        for (const day of ["2026-11-17", "2026-11-19"]) {
+          const plan = gen(fullProfile(pattern), { day, fallbackTargets: targets });
+          for (const meal of mainMeals(plan)) {
+            expect(meal.dishes.length, `${pattern}/${targets.kcal}/${day} ${meal.meal}`).toBeLessThanOrEqual(1);
+          }
+          if (planPattern === null) continue;
+          for (const meal of plan.meals) {
+            for (const planDish of meal.dishes) {
+              expect(
+                dishPatterns(findDish(planDish.dishId)!),
+                `${pattern}/${targets.kcal}/${day}: ${planDish.name}`,
+              ).toContain(planPattern);
+            }
+          }
+        }
+      }
+    }
+  }, 120_000);
+
   it("a stated budget tier is a hard cap on plan dishes", () => {
     const plan = gen(fullProfile("eggetarian", { budgetTier: 1 }), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
@@ -214,7 +326,7 @@ describe("plan · P5 dish-first composition", () => {
     expect(JSON.stringify(a.notes)).toBe(JSON.stringify(b.notes));
   });
 
-  it("no dish repeats within a day, and no anchor repeats on consecutive days", () => {
+  it("no dish repeats within a day; the week rotates through the pool", () => {
     const days = [
       "2026-11-17",
       "2026-11-18",
@@ -228,18 +340,108 @@ describe("plan · P5 dish-first composition", () => {
       const ids = plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId));
       expect(new Set(ids).size, plan.day).toBe(ids.length);
     }
-    for (let i = 1; i < days.length; i++) {
-      for (const meal of mainMeals(days[i]!)) {
-        const anchor = meal.dishes.find((d) => d.role === "anchor");
-        const prev = mainMeals(days[i - 1]!).find((m) => m.meal === meal.meal)?.dishes.find(
-          (d) => d.role === "anchor",
-        );
-        if (anchor && prev) {
-          expect(anchor.dishId, `${days[i]!.day} ${meal.meal}`).not.toBe(prev.dishId);
+    /* The P5–P7 pin — no anchor repeats on consecutive days — is
+       retired with the mechanism that made it true: order-driven
+       picks inside a protein band. Under a fit-argmin it cannot be
+       kept honestly (a sit-out simulation names the unconstrained
+       winner, never the dish actually served — the displaced dish
+       repeats; see the build log). What P8 guarantees instead is
+       measured variety: the near-tie band + day rotation spread the
+       week across the pool. On this fixture the week serves 12
+       distinct dishes; breakfasts and dinners rotate through 6
+       each. Lunch is the documented exception IN THIS UNCHAINED
+       WEEK: at a 1,279 kcal share one dish (Kulajda-style, 632
+       kcal / 44 g protein per serving) beats the runner-up by
+       ~0.45 of pick cost, so it leads every day here. This test
+       passes no stored plan; the app always composes with the
+       previous day's plan stored, and the chained week — pinned
+       in the two tests below — is where the served-yesterday
+       penalty turns that lead into an alternation. */
+    const bySlot = new Map<string, Set<string>>();
+    const all = new Set<string>();
+    for (const plan of days) {
+      for (const meal of mainMeals(plan)) {
+        for (const d of meal.dishes) {
+          all.add(d.dishId);
+          if (!bySlot.has(meal.meal)) bySlot.set(meal.meal, new Set());
+          bySlot.get(meal.meal)!.add(d.dishId);
         }
       }
     }
+    expect(all.size).toBeGreaterThanOrEqual(12);
+    expect(bySlot.get("breakfast")!.size).toBeGreaterThanOrEqual(6);
+    expect(bySlot.get("dinner")!.size).toBeGreaterThanOrEqual(6);
+  }, 60_000);
+
+  it("yesterday's dish sits out when a within-band alternative exists", () => {
+    /* The app composes each day with the previous day's plan as
+       the stored plan (usePlan passes it straight through). The
+       first day crowns the lunch share's standout fit and a
+       back-to-back dinner; the second day — same profile, same
+       targets — must move BOTH slots on, because at both shares
+       the pool holds credible alternatives the penalty can reach.
+       The day still lands strictly in band. */
+    const day1 = ownerDay("2026-11-17");
+    const day2 = gen(ownerProfile(), {
+      day: "2026-11-18",
+      fallbackTargets: OWNER_TARGETS,
+      storedPlan: day1,
+    });
+    const dishOf = (plan: DailyPlan, meal: string) =>
+      plan.meals.find((m) => m.meal === meal)?.dishes[0]?.dishId;
+    expect(dishOf(day1, "lunch")).toBeDefined();
+    expect(dishOf(day2, "lunch")).toBeDefined();
+    expect(dishOf(day2, "lunch")).not.toBe(dishOf(day1, "lunch"));
+    expect(dishOf(day2, "dinner")).toBeDefined();
+    expect(dishOf(day2, "dinner")).not.toBe(dishOf(day1, "dinner"));
+    expectDayInBand(day2, OWNER_TARGETS);
   });
+
+  it("the app's chained week: no slot repeats a dish on consecutive days, lunch rotates", () => {
+    /* The week as the app actually composes it: each day's plan
+       becomes the next day's stored plan. The served-yesterday
+       penalty turns the unchained week's lunch lock (one standout
+       soup all seven days) into an alternation — the standout
+       still leads the days it is not sitting out, which is the
+       pool's honest truth at a 1,279 kcal share, but it never
+       serves twice in a row, and the cluster behind it (16 dishes
+       within +0.65 of its fit) rotates through the off days. */
+    const days = [
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22",
+      "2026-11-23",
+    ];
+    const plans: DailyPlan[] = [];
+    let prev: DailyPlan | null = null;
+    for (const day of days) {
+      const plan = gen(ownerProfile(), {
+        day,
+        fallbackTargets: OWNER_TARGETS,
+        storedPlan: prev,
+      });
+      plans.push(plan);
+      prev = plan;
+    }
+    for (const plan of plans) {
+      expectDayInBand(plan, OWNER_TARGETS);
+      for (const meal of mainMeals(plan)) {
+        expect(meal.dishes.length, `${plan.day} ${meal.meal}`).toBe(1);
+      }
+    }
+    const slotSeq = (slot: string) =>
+      plans.map((p) => p.meals.find((m) => m.meal === slot)?.dishes[0]?.dishId);
+    for (const slot of ["breakfast", "lunch", "dinner"]) {
+      const seq = slotSeq(slot);
+      for (let i = 1; i < seq.length; i++) {
+        expect(seq[i], `${slot} on ${days[i]}`).not.toBe(seq[i - 1]);
+      }
+    }
+    expect(new Set(slotSeq("lunch")).size).toBeGreaterThanOrEqual(4);
+  }, 60_000);
 
   it("top-ups stay subordinate: few, simple, and never the meal's headline", () => {
     const plan = ownerDay("2026-11-17");
@@ -249,12 +451,16 @@ describe("plan · P5 dish-first composition", () => {
       /* Every food suggestion on a dish-composed meal is a top-up —
          the layered composition does not leak back in. */
       expect(meal.suggestions.every((s) => s.layer === "topup")).toBe(true);
+      /* And the top-ups never outweigh the dish they complete. */
+      const dishKcal = meal.dishes.reduce((a, d) => a + d.nutrients.kcal, 0);
+      const topUpKcal = topUps.reduce((a, s) => a + s.nutrients.kcal, 0);
+      expect(topUpKcal).toBeLessThanOrEqual(dishKcal);
     }
   });
 
-  it("the layered food composition is the fallback when no dish can anchor", () => {
-    /* A pool of desserts only: nothing can anchor, base or side a
-       main meal, so every main meal falls back to foods. */
+  it("the layered food composition is the fallback when no dish can headline", () => {
+    /* A pool of desserts only: no dish can headline a main meal, so
+       every main meal falls back to foods. */
     const desserts = DISH_LIBRARY.filter((d) => d.category === "dessert");
     const plan = gen(ownerProfile(), {
       dishes: desserts,
@@ -281,7 +487,44 @@ describe("plan · P5 dish-first composition", () => {
     expect(parsed).toEqual(plan);
   });
 
-  it("worked example — the owner's week, dish-first", () => {
+  it("the cuisine preference leans the week south — as a bonus, never a filter", () => {
+    const days = [
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22",
+      "2026-11-23",
+    ];
+    const southCount = (plan: DailyPlan) =>
+      plan.meals
+        .flatMap((m) => m.dishes)
+        .filter((d) => dishRegion(findDish(d.dishId)!) === "south_indian").length;
+    let plain = 0;
+    let preferred = 0;
+    for (const day of days) {
+      plain += southCount(ownerDay(day));
+      const plan = gen(ownerProfile("south_indian"), { day, fallbackTargets: OWNER_TARGETS });
+      preferred += southCount(plan);
+      /* The preference never breaks the day's guarantees. */
+      expectDayInBand(plan, OWNER_TARGETS);
+      for (const meal of plan.meals) {
+        for (const planDish of meal.dishes) {
+          expect(dishPatterns(findDish(planDish.dishId)!), `${day}: ${planDish.name}`).toContain(
+            "eggetarian",
+          );
+        }
+      }
+    }
+    /* Measured on this fixture: 1 south dish without the preference,
+       14 with it. The pin keeps a wide margin under the measurement —
+       what it forbids is the preference going inert. */
+    expect(preferred).toBeGreaterThan(plain);
+    expect(preferred).toBeGreaterThanOrEqual(10);
+  }, 120_000);
+
+  it("worked example — the owner's week, one dish per meal", () => {
     const days = [
       "2026-11-17",
       "2026-11-18",
@@ -295,12 +538,12 @@ describe("plan · P5 dish-first composition", () => {
     for (const day of days) {
       const plan = ownerDay(day);
       const { kcal, proteinG } = dayTotals(plan);
-      const anchors = mainMeals(plan).map((m) => {
-        const anchor = m.dishes.find((d) => d.role === "anchor");
-        return `${m.meal}: ${anchor ? anchor.name : "(food fallback)"}`;
+      const meals = mainMeals(plan).map((m) => {
+        const dish = m.dishes[0];
+        return `${m.meal}: ${dish ? `${dish.name} ×${dish.servings}` : "(food fallback)"}`;
       });
       lines.push(
-        `${day} — ${Math.round(kcal)} kcal · ${proteinG.toFixed(0)} g protein | ${anchors.join(" | ")}`,
+        `${day} — ${Math.round(kcal)} kcal · ${proteinG.toFixed(0)} g protein | ${meals.join(" | ")}`,
       );
       /* Every day of the week: energy inside ±5% or the miss is named
          on the plan; the same honesty for protein at 95%. */
@@ -312,5 +555,5 @@ describe("plan · P5 dish-first composition", () => {
       }
     }
     console.log(`\nWORKED EXAMPLE — owner fixture (3,288 kcal / 220 g, eggetarian, 3 meals)\n${lines.join("\n")}`);
-  });
+  }, 60_000);
 });

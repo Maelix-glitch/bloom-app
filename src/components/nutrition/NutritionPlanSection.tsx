@@ -28,9 +28,17 @@
  * subordinate "To complete the day" top-up group. A meal the dish
  * pool could not fill keeps the layered food rendering above, and
  * its D4 dish idea with it.
+ *
+ * P8: composing runs behind a designed loading state, scoped to
+ * this section (never a full-screen takeover): the three honest
+ * steps of the work — reading the record, choosing the dishes,
+ * balancing the day — shown in order while generation runs, with a
+ * short minimum display so the plan's reveal is a reveal, not a
+ * flicker. The steps name what the engine actually does; nothing
+ * is claimed to happen that does not.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, ChevronDown, Plus, RefreshCw } from "lucide-react";
 
@@ -94,6 +102,15 @@ const DISH_ROLE_LABEL: Record<PlanDish["role"], string> = {
 };
 
 const GOAL_CHIPS: readonly PlanGoalProfile[] = ["lose", "maintain", "gain", "recomp"];
+
+/** The composing sequence (P8): the steps shown while a plan is
+ *  built, and the rhythm they advance on. Generation itself is
+ *  synchronous and fast; the minimum display (~1.4 s in total) is
+ *  what lets a person register that real work happened — the same
+ *  honesty as the Vitalis deliberation stages, at plan scale. */
+const COMPOSE_STEPS = ["Reading your record", "Choosing your dishes", "Balancing your day"] as const;
+const COMPOSE_STEP_MS = 450;
+const COMPOSE_MIN_MS = 1400;
 
 function formatPlanDay(day: string): string {
   const d = new Date(`${day}T12:00:00`);
@@ -171,6 +188,19 @@ export function NutritionPlanSection() {
   const assessment = useAssessment();
   const session = useSession();
 
+  /* P8: the composing sequence — the step currently on show, or
+     null when no composition is running. The timers are the
+     sequence's whole machinery; unmounting clears them, so a
+     composition never lands on a section that has gone away. */
+  const [composeStep, setComposeStep] = useState<number | null>(null);
+  const composeTimers = useRef<number[]>([]);
+  useEffect(
+    () => () => {
+      for (const t of composeTimers.current) window.clearTimeout(t);
+    },
+    [],
+  );
+
   /* Money System: composing an adaptive plan is a Premium feature.
      A KNOWN free entitlement meets the paywall instead of a new
      plan; an unread entitlement never blocks. The existing plan
@@ -184,7 +214,20 @@ export function NutritionPlanSection() {
       requestPaywall("nutrition_plan");
       return;
     }
-    generate();
+    if (composeStep !== null) return;
+    setComposeStep(0);
+    composeTimers.current = [
+      window.setTimeout(() => setComposeStep(1), COMPOSE_STEP_MS),
+      window.setTimeout(() => setComposeStep(2), COMPOSE_STEP_MS * 2),
+      window.setTimeout(() => {
+        try {
+          generate();
+        } finally {
+          composeTimers.current = [];
+          setComposeStep(null);
+        }
+      }, COMPOSE_MIN_MS),
+    ];
   };
   const nutrition = useNutrition();
   const body = useBodyProfile();
@@ -251,6 +294,41 @@ export function NutritionPlanSection() {
     );
 
   const chipGoal = currentGoal ? goalProfileOf(currentGoal) : null;
+
+  /* P8: while a composition runs, the section IS the loading state
+     — the plan (or the refusal) renders only when the sequence
+     completes. Section-scoped: the rest of the page never moves. */
+  if (composeStep !== null) {
+    return (
+      <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
+        <p className="eyebrow">Your plan</p>
+        <div className="mt-2">
+          <h2 className="font-display text-[length:var(--text-section)] text-foreground">
+            Building your plan
+          </h2>
+          <ul className="nut-compose-steps" role="status" aria-label="Building your plan">
+            {COMPOSE_STEPS.map((label, i) => (
+              <li
+                key={label}
+                className="nut-compose-step"
+                data-state={i < composeStep ? "done" : i === composeStep ? "active" : "pending"}
+              >
+                {i < composeStep ? (
+                  <Check className="nut-compose-check size-4" aria-hidden />
+                ) : (
+                  <span className="nut-compose-dot" aria-hidden />
+                )}
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="nut-note">
+            Built from your record and the dish library — no AI, no invented numbers.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   if (state.kind === "refused") {
     const refusal = state.refusal;

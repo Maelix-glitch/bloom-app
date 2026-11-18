@@ -21,7 +21,7 @@
  * answer — including "No preference", which stores null.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { PREFS_KEY, setPref } from "@/lib/prefs";
 import { resetPrefCache } from "@/lib/prefsStore";
@@ -282,7 +282,11 @@ describe("AssessmentFlow — the meal budget question", () => {
     seedAtNutrition(1);
     render(<AssessmentProfileCard />);
     fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
-    fireEvent.click(screen.getByRole("radio", { name: /No preference/ }));
+    /* Scoped to the budget group: the cuisine question on the same step
+       carries its own "No preference" radio (v8) — the two must never
+       be confused, in the test or by a screen reader. */
+    const budgetGroup = screen.getByRole("radiogroup", { name: "Meal budget" });
+    fireEvent.click(within(budgetGroup).getByRole("radio", { name: /No preference/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(readAssessmentState().answers.foodBudget).toBeNull();
   });

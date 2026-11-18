@@ -118,7 +118,7 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     const base = gen({ day: OWNER_DAY });
     const withEmpty = gen({ day: OWNER_DAY, recentLog: [], storedPlan: null });
     expect(withEmpty).toEqual(base);
-    expect(base.methodVersion).toBe(7);
+    expect(base.methodVersion).toBe(8);
   });
 
   it("an on-target log with no dish history changes nothing", () => {

@@ -19,8 +19,10 @@
 
 import { getPref, setPref } from "@/lib/prefs";
 import {
+  CUISINE_PREFERENCES,
   DIETARY_PATTERNS,
   type ActivityLevel,
+  type CuisinePreference,
   type DietaryPattern,
   type HealthProfile,
   type Sex,
@@ -64,6 +66,11 @@ export interface AssessmentAnswers {
   /** Meal-suggestion budget tier (1–3, the dish heuristic's bands);
    *  null = no preference stated. Asked here and nowhere else. */
   foodBudget: 1 | 2 | 3 | null;
+  /** North/South Indian cuisine preference; null = never asked or
+   *  unanswered. Asked here and nowhere else, exactly like the
+   *  pattern and the budget — a living-assessment delta can never
+   *  carry it (see living.ts). */
+  cuisinePreference: CuisinePreference | null;
   allergies: string[];
   intolerances: string[];
   dislikedFoods: string[];
@@ -107,6 +114,7 @@ export const EMPTY_ANSWERS: AssessmentAnswers = {
   dietaryPattern: null,
   mealsPerDay: null,
   foodBudget: null,
+  cuisinePreference: null,
   allergies: [],
   intolerances: [],
   dislikedFoods: [],
@@ -208,6 +216,7 @@ export function parseAnswers(raw: unknown): AssessmentAnswers {
     dietaryPattern: oneOf(r["dietaryPattern"], DIETARY_PATTERNS),
     mealsPerDay: intOrNull(r["mealsPerDay"], 1, 12),
     foodBudget: tierOrNull(r["foodBudget"]),
+    cuisinePreference: oneOf(r["cuisinePreference"], CUISINE_PREFERENCES),
     allergies: textList(r["allergies"], 30, 60),
     intolerances: textList(r["intolerances"], 30, 60),
     dislikedFoods: textList(r["dislikedFoods"], 50, 60),
@@ -393,6 +402,7 @@ export function toHealthProfile(state: AssessmentState, userId: string): HealthP
       cuisines: a.cuisines,
       mealsPerDay: a.mealsPerDay,
       budgetTier: a.foodBudget,
+      cuisinePreference: a.cuisinePreference,
     },
     constraints: {
       conditions: a.conditions,

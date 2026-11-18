@@ -15,9 +15,11 @@ import { z } from "zod";
 
 import { CONSENT_POLICY_VERSION, type ConsentRecord } from "./consent";
 import {
+  CUISINE_PREFERENCES,
   DIETARY_PATTERNS,
   HEALTH_PROFILE_VERSION,
   type ActivityLevel,
+  type CuisinePreference,
   type DietaryPattern,
   type HealthProfile,
   type Sex,
@@ -78,6 +80,7 @@ export const dietaryProfileSchema = z
     cuisines: textList(20, 60),
     mealsPerDay: z.number().int().min(1).max(12).nullable(),
     budgetTier: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
+    cuisinePreference: enumOf<CuisinePreference>(CUISINE_PREFERENCES).nullable(),
   })
   .strict();
 

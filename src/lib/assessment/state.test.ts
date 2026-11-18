@@ -137,6 +137,52 @@ describe("parseAssessmentState", () => {
       expect(parsed?.answers.foodBudget).toBeNull();
     }
   });
+
+  it("parses a stated cuisine preference; a legacy state without one reads as unanswered", () => {
+    for (const value of ["north_indian", "south_indian", "both", "no_preference"] as const) {
+      const parsed = parseAssessmentState({
+        version: 1,
+        status: "complete",
+        step: "summary",
+        answers: { cuisinePreference: value },
+        consents: [],
+        startedAt: T0,
+        completedAt: T2,
+        updatedAt: T2,
+      });
+      expect(parsed?.answers.cuisinePreference).toBe(value);
+    }
+    /* States written before the cuisine question existed carry no
+       key at all — they parse as unanswered, nothing else lost. */
+    const legacy = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { dietaryPattern: "eggetarian" },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(legacy?.answers.cuisinePreference).toBeNull();
+    expect(legacy?.answers.dietaryPattern).toBe("eggetarian");
+  });
+
+  it("drops a malformed cuisine preference instead of repairing it", () => {
+    for (const bad of ["international", "north", "INDIAN", 2, true]) {
+      const parsed = parseAssessmentState({
+        version: 1,
+        status: "in_progress",
+        step: "nutrition",
+        answers: { cuisinePreference: bad },
+        consents: [],
+        startedAt: T0,
+        completedAt: null,
+        updatedAt: T0,
+      });
+      expect(parsed?.answers.cuisinePreference).toBeNull();
+    }
+  });
 });
 
 describe("transitions", () => {
@@ -219,6 +265,13 @@ describe("toHealthProfile", () => {
     expect(profile.height).toBeNull();
     expect(profile.goal).toBeNull();
     expect(profile.rateKgPerWeek).toBe(0.5);
+  });
+
+  it("maps the cuisine preference onto the profile's dietary profile", () => {
+    const s = saveStep(answeredState(), { cuisinePreference: "south_indian" }, "summary", T1);
+    expect(toHealthProfile(s, "user-1").dietary.cuisinePreference).toBe("south_indian");
+    const unanswered = toHealthProfile(emptyAssessmentState(T0), "user-1");
+    expect(unanswered.dietary.cuisinePreference).toBeNull();
   });
 
   it("maps the food budget onto the profile's dietary budget tier", () => {

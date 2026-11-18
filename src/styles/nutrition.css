@@ -357,6 +357,62 @@
   padding: var(--space-3) var(--space-4);
 }
 
+/* The composing sequence (P8): the three honest steps while a plan
+   is built, inside the plan card — a section-scoped loading state,
+   never a full-screen takeover. The active step carries the softly
+   pulsing sage dot (the house "work is happening" signal, as on the
+   TopBar's sync pill); finished steps settle to a sage check. */
+.nut-compose-steps {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.nut-compose-step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  color: var(--muted-foreground);
+}
+.nut-compose-step[data-state="active"] {
+  color: var(--foreground);
+}
+.nut-compose-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  flex: none;
+}
+.nut-compose-step[data-state="active"] .nut-compose-dot {
+  background: var(--sage);
+  border-color: transparent;
+  animation: nut-compose-pulse 1.2s ease-in-out infinite;
+}
+.nut-compose-check {
+  color: var(--sage);
+  flex: none;
+}
+@keyframes nut-compose-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nut-compose-step[data-state="active"] .nut-compose-dot {
+    animation: none;
+  }
+}
+
 /* The expenditure proposal card (P7): the same gold-tinted callout
    recipe as the staleness banner — a suggestion the record supports,
    quiet until the person confirms it. */
