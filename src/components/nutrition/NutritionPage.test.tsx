@@ -55,6 +55,7 @@ import {
 } from "@/lib/nutrition";
 import { NutritionPage } from "./NutritionPage";
 import { MEAL_LABEL } from "./input";
+import { fmtKcalApprox } from "@/lib/format";
 
 afterEach(cleanup);
 
@@ -254,7 +255,7 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    expect(screen.getByText(`of ~${targets.calories} kcal`)).toBeTruthy();
+    expect(screen.getByText(`of ${fmtKcalApprox(targets.calories)}`)).toBeTruthy();
     expect(screen.getByText(/Targets are estimates/)).toBeTruthy();
     expect(screen.getByRole("progressbar", { name: "Calories against target" })).toBeTruthy();
   });
@@ -296,7 +297,7 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    expect(screen.getByText(`of ~${targets.calories} kcal`)).toBeTruthy();
+    expect(screen.getByText(`of ${fmtKcalApprox(targets.calories)}`)).toBeTruthy();
     expect(screen.queryByText(/doesn't set calorie targets/)).toBeNull();
   });
 

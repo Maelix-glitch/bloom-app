@@ -23,13 +23,14 @@ import { Clock, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useSession } from "@/hooks/useSession";
+import { DIETARY_LABEL } from "@/lib/assessment/questions";
 import { toHealthProfile } from "@/lib/assessment/state";
+import { fmtCount } from "@/lib/format";
 import {
   DISH_CATEGORIES,
   DISH_CATEGORY_LABEL,
   DISH_CUISINES,
   DISH_CUISINE_LABEL,
-  PLAN_PATTERN_LABEL,
   browseDishes,
   logDish,
   planPatternOf,
@@ -190,9 +191,19 @@ export function DishesSection({ day }: { day: string }) {
       </div>
 
       <p className="mt-4 text-[length:var(--text-caption)] tabular-nums text-muted-foreground" role="status">
-        {rows.length} {rows.length === 1 ? "dish" : "dishes"}
-        {pattern ? (
-          <> · showing what suits you — {PLAN_PATTERN_LABEL[pattern].toLowerCase()} pattern</>
+        {fmtCount(rows.length)} {rows.length === 1 ? "dish" : "dishes"}
+        {pattern && profile.dietary.pattern ? (
+          /* The person's pattern is named in the Assessment's own words
+             (DIETARY_LABEL — "Omnivore"), never in the dish-suitability
+             vocabulary ("non-vegetarian"). And the sentence must be
+             true: the omnivore pattern filters nothing out (pinned in
+             dishBrowse.test.ts), so it says so instead of implying a
+             selection happened. */
+          pattern === "non_vegetarian" ? (
+            <> · your pattern is {DIETARY_LABEL[profile.dietary.pattern]} — it excludes nothing</>
+          ) : (
+            <> · showing what suits you — {DIETARY_LABEL[profile.dietary.pattern]} pattern</>
+          )
         ) : null}
         {budgetTier === 1 ? <> · kept to an everyday ₹ budget</> : null}
         {budgetTier === 2 ? <> · kept to a moderate ₹₹ budget</> : null}

@@ -76,12 +76,31 @@ export function ModesSection() {
               <div className="flex items-start justify-between gap-3">
                 <h3 className="text-[length:var(--text-body)] font-medium text-foreground">
                   {def.name}
+                  {def.informationOnly ? (
+                    <span className="ml-2 inline-flex items-center rounded-pill border border-border-subtle bg-surface-3 px-2 py-0.5 align-middle text-[length:var(--text-meta)] font-medium text-muted-foreground">
+                      Not available yet
+                    </span>
+                  ) : null}
                 </h3>
-                <Switch
-                  checked={on}
-                  onCheckedChange={(checked) => toggle(def.id, checked)}
-                  aria-label={`${def.name} mode`}
-                />
+                {def.informationOnly ? (
+                  /* An information-only mode checks nothing — Bloom's food
+                     data carries none of the nutrients it would judge by —
+                     so it must not present a live switch. The control is
+                     disabled and off, the badge says why it is here at
+                     all, and the dataNote below names the missing data.
+                     Stored prefs are never rewritten by this rendering. */
+                  <Switch
+                    checked={false}
+                    disabled
+                    aria-label={`${def.name} mode — not available yet`}
+                  />
+                ) : (
+                  <Switch
+                    checked={on}
+                    onCheckedChange={(checked) => toggle(def.id, checked)}
+                    aria-label={`${def.name} mode`}
+                  />
+                )}
               </div>
               {def.ruleLines.map((line) => (
                 <p

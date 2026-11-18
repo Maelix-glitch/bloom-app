@@ -73,4 +73,17 @@ describe("HouseholdSection", () => {
     expect(browse.getAttribute("href")).toBe("/nutrition");
     expect(screen.queryByText(/more\. The Dishes tab/)).toBeNull();
   });
+
+  it("states the count honestly for a table of one: All, and 'you', not 'everyone'", () => {
+    /* No stored members and no Assessment answers: nothing is filtered
+       out, and the table is the owner alone — the sentence must say
+       both plainly (rulebook D-T7), with the count grouped. */
+    render(<HouseholdSection />);
+    expect(screen.getByText("Cooks for you")).toBeTruthy();
+    expect(
+      screen.getByText(`All ${DISH_LIBRARY.length.toLocaleString("en-IN")} dishes`),
+    ).toBeTruthy();
+    expect(screen.getByText(/suit you — your pattern from your Assessment/)).toBeTruthy();
+    expect(screen.queryByText(/suit everyone at your table/)).toBeNull();
+  });
 });

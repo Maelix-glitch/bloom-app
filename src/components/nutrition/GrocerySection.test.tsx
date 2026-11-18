@@ -92,7 +92,10 @@ describe("GrocerySection", () => {
     store.values[PLAN_KEY] = planWith([planDish(dal.id, dal.name.en)]);
     render(<GrocerySection />);
     expect(screen.getByText(dalFirstFood.name)).toBeTruthy();
-    expect(screen.getByText(/from your plan for 2026-11-18/i)).toBeTruthy();
+    /* The plan day renders in the house date format — never the raw
+       ISO key (M-30). */
+    expect(screen.getByText(/from your plan for 18 Nov 2026/i)).toBeTruthy();
+    expect(screen.queryByText(/2026-11-18/)).toBeNull();
   });
 
   it("the pantry deduction is shown in plain words", () => {

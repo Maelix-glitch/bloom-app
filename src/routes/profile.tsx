@@ -24,6 +24,7 @@ import profileCss from "../styles/profile.css?url";
 import storiesCss from "../styles/stories.css?url";
 import storiesFontsCss from "../styles/fonts-stories.css?url";
 
+import { fmtCount } from "@/lib/format";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { useProfileRecord } from "@/hooks/useProfileRecord";
 import { useHabits } from "@/hooks/useHabits";
@@ -635,11 +636,12 @@ function ProfilePage() {
 
               {/* numbers only logging can move — held on their skeletons
                   until every record behind them has settled (record.settled
-                  is latched, and the rewards figures wait for the journey),
-                  so the first values shown are the final ones, shown once */}
+                  is latched), so the first values shown are the final ones,
+                  shown once. The points tile reads the same habits ledger
+                  total the TopBar pill shows — one figure, one source. */}
               <RecordNumbers
                 totals={record.settled ? record.totals : null}
-                stats={journey.status === "ready" ? journey.stats : null}
+                points={habits.points}
                 loading={!record.settled || journey.status === "loading"}
               />
 
@@ -680,7 +682,10 @@ function ProfilePage() {
                       </div>
                       <p className="text-[length:var(--text-caption)] text-faint">
                         {record.settled ? (
-                          `${record.totals.last30} of the last 30 days`
+                          /* The grid's own window — the twelve weeks the
+                             title names — never a different window's
+                             figure over this grid. */
+                          `${fmtCount(record.grid.filter((d) => d.count > 0).length)} of ${fmtCount(record.grid.filter((d) => d.date <= record.today).length)} days`
                         ) : (
                           <span
                             className="pf-skel inline-block h-3 w-24 align-middle"

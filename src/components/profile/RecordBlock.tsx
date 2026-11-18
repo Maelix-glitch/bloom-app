@@ -1,7 +1,7 @@
 /**
  * RecordBlock — the part that says "this is a tracker's profile".
  *
- *   · four numbers only real logging can move (days, streak, best, this week)
+ *   · four numbers (days logged, streak, this week, points)
  *   · a twelve-week grid, one cell per day, brighter the fuller the day
  *   · what is being tracked right now, as tappable chips
  *
@@ -13,6 +13,8 @@ import { Link } from "@tanstack/react-router";
 import { CalendarDays, Flame, Sparkles, Trophy } from "lucide-react";
 
 import { CountUp } from "@/components/mood/primitives";
+import { fmtCount, fmtDate } from "@/lib/format";
+import { rankFor } from "@/lib/progression/ranks";
 import { cn } from "@/lib/utils";
 import {
   RECORD_WEEKS,
@@ -20,7 +22,6 @@ import {
   type RecordTotals,
   type TrackedThing,
 } from "@/lib/profile/record";
-import type { ProfileStats } from "@/lib/profile/types";
 
 const DAY_LABELS = ["M", "", "W", "", "F", "", "S"];
 
@@ -44,17 +45,25 @@ function fmtDay(date: string): string {
 
 export function RecordNumbers({
   totals,
-  stats,
+  points,
   loading,
 }: {
   totals: RecordTotals | null;
-  /** The original four (kept for the check-ins / rewards figures). */
-  stats: ProfileStats | null;
+  /**
+   * The points balance — the SAME figure the TopBar pill and the rank
+   * pill show (useHabits' ledger total), passed in rather than derived
+   * here, so the number can never disagree with itself across the app.
+   * A tile's sub-line may only elaborate the tile's own metric: the
+   * points tile's sub is progress to the next rank, nothing else.
+   */
+  points: number | null;
   loading: boolean;
 }) {
+  const rankState = points !== null ? rankFor(points) : null;
   const tiles: {
     key: string;
     value: number;
+    suffix?: string;
     label: string;
     sub: string;
     icon: typeof Flame;
@@ -64,12 +73,7 @@ export function RecordNumbers({
       key: "days",
       value: totals?.daysLogged ?? 0,
       label: "Days logged",
-      sub: totals?.firstDay
-        ? `since ${new Date(`${totals.firstDay}T12:00:00`).toLocaleDateString(undefined, {
-            month: "short",
-            year: "numeric",
-          })}`
-        : "anything counts",
+      sub: totals?.firstDay ? `since ${fmtDate(totals.firstDay)}` : "anything counts",
       icon: CalendarDays,
       to: "/trackers",
     },
@@ -87,16 +91,17 @@ export function RecordNumbers({
     {
       key: "week",
       value: totals?.last7 ?? 0,
+      suffix: " of 7",
       label: "Of last 7 days",
-      sub: totals ? `${totals.last30} of last 30` : "",
+      sub: totals ? `${fmtCount(totals.last30)} of the last 30 days` : "",
       icon: Sparkles,
       to: "/mood",
     },
     {
-      key: "rewards",
-      value: stats?.rewardsEarned ?? 0,
-      label: "Rewards",
-      sub: stats ? `${stats.checkIns.toLocaleString()} mood check-ins` : "",
+      key: "points",
+      value: points ?? 0,
+      label: "Points",
+      sub: rankState ? `${Math.round(rankState.progress * 100)}% to ${rankState.next.name}` : "",
       icon: Trophy,
       to: "/rewards",
     },
@@ -126,7 +131,10 @@ export function RecordNumbers({
                   <span className="sr-only">Loading</span>
                 </>
               ) : (
-                <CountUp value={t.value} decimals={0} />
+                <>
+                  <CountUp value={t.value} decimals={0} />
+                  {t.suffix ? <span className="pf-number-suffix">{t.suffix}</span> : null}
+                </>
               )}
             </span>
             {t.sub ? <span className="pf-number-sub">{t.sub}</span> : null}
@@ -223,9 +231,9 @@ export function RecordGrid({
         </div>
       </div>
       <div className="pf-grid-legend">
-        <span>
-          {logged} of {days.filter((d) => d.date <= today).length} days
-        </span>
+        {/* The count lives in the card header above (one window, stated
+            once); the legend carries only the colour scale. The grid's
+            aria-label above still speaks the count for screen readers. */}
         <span className="pf-grid-legend-scale" aria-hidden>
           less
           {[0, 1, 2, 3, 4].map((l) => (

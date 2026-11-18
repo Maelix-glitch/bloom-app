@@ -23,6 +23,7 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
+import { fmtKcalApprox } from "@/lib/format";
 import { setPref } from "@/lib/prefs";
 import { BODY_KEY, bodyTargetsOf, type BodyProfile } from "@/lib/health/body";
 import {
@@ -106,7 +107,9 @@ describe("NutritionReportPage", () => {
     expect(screen.getByText(/Seven days of intake/)).toBeTruthy();
 
     const targets = bodyTargetsOf(PROFILE, today)!;
-    expect(screen.getByText(`~${targets.calories} kcal / day`)).toBeTruthy();
+    /* The guide is an estimate: shown rounded to the nearest 50 with
+       the tilde (fmtKcalApprox), never as four exact digits. */
+    expect(screen.getByText(`${fmtKcalApprox(targets.calories)} / day`)).toBeTruthy();
     expect(screen.getByText("30 g / day")).toBeTruthy(); /* fibre guide */
     expect(screen.getByText("2,000 mg / day")).toBeTruthy(); /* sodium ceiling */
 

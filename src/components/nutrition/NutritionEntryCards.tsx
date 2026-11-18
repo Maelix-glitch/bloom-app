@@ -14,6 +14,7 @@ import { Link } from "@tanstack/react-router";
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { Button } from "@/components/ui/button";
 import { useNutrition } from "@/hooks/useNutrition";
+import { fmtCount, fmtKcalApprox } from "@/lib/format";
 import { formatGrams } from "./input";
 
 function useTodaySummary() {
@@ -51,7 +52,7 @@ export function NutritionTodayCard() {
           <h2 id="home-nutrition-title" className="home-band-title mt-1">
             {hasData
               ? targets
-                ? `${Math.round(totals.kcal)} of your ~${Math.round(targets.kcal)} kcal target`
+                ? `${fmtCount(totals.kcal)} of your ${fmtKcalApprox(targets.kcal)} target`
                 : `${Math.round(totals.kcal)} kcal logged today`
               : "What did you eat today?"}
           </h2>
@@ -80,7 +81,7 @@ export function NutritionProfileCard() {
 
   const statusLine = hasData
     ? `Today: ${summaryLine(count, totals.kcal, totals.proteinG)}${
-        targets ? `, against a ~${Math.round(targets.kcal)} kcal target (an estimate from your body numbers)` : ""
+        targets ? `, against a ${fmtKcalApprox(targets.kcal)} target (an estimate from your body numbers)` : ""
       }.`
     : "Nothing logged today yet.";
 

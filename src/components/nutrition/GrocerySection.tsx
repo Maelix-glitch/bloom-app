@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePantry } from "@/hooks/usePantry";
+import { fmtDate } from "@/lib/format";
 import { usePrefValue } from "@/lib/prefsStore";
 import {
   DISH_LIBRARY,
@@ -124,7 +125,7 @@ export function GrocerySection() {
       ) : (
         <>
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            From your plan for {result.days.join(", ")} — the ingredients of every dish in
+            From your plan for {result.days.map((d) => fmtDate(d)).join(", ")} — the ingredients of every dish in
             it, added up per food. Amounts are grams, the units the plan itself uses.
           </p>
 

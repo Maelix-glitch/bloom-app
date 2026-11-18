@@ -22,6 +22,7 @@ import { ArrowLeft, Printer } from "lucide-react";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
+import { fmtKcalApprox } from "@/lib/format";
 import { ACTIVITY_LABEL, GOAL_LABEL } from "@/lib/health/body";
 import { shiftDay } from "@/lib/localDay";
 import {
@@ -89,7 +90,7 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
     { label: "Goal", value: GOAL_LABEL[profile.goal] },
     {
       label: "Energy guide",
-      value: targets ? `~${Math.round(targets.kcal)} kcal / day` : "Not set",
+      value: targets ? `${fmtKcalApprox(targets.kcal)} / day` : "Not set",
     },
     {
       label: "Protein guide",

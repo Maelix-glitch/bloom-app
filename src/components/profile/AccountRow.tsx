@@ -218,7 +218,7 @@ function PersonalizationSection() {
   const sexValue = state.sex ? SEX_LABEL[state.sex] : "Not answered";
 
   return (
-    <Group label="Personalization">
+    <Group label="Personalisation">
       <SwitchRow
         icon={<Droplet className="size-3.5" />}
         label="Cycle tracking"
