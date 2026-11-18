@@ -70,7 +70,8 @@ import {
   describeProposal,
   reportActionResult,
 } from "@/lib/vitalis-ai/actions";
-import { askVitalis } from "@/lib/vitalis-ai/client";
+import { askVitalis, VitalisUnavailable } from "@/lib/vitalis-ai/client";
+import { requestPaywall } from "@/lib/billing/paywall";
 import { buildVitalisContext, type VitalisPlanSlice } from "@/lib/vitalis-ai/context";
 import { VitalisSpeaker } from "@/lib/vitalis-ai/voice";
 import {
@@ -116,6 +117,9 @@ interface VitalisTurn {
   actions?: ProposalView[];
   /** This turn is the lockdown notice (phase 5), not a reply. */
   lockedNotice?: boolean;
+  /** This turn is the Money System's pause (out of AI credits) — it
+   *  offers Premium instead of a retry. */
+  paywall?: boolean;
 }
 
 function newTurnId(prefix: string) {
@@ -493,8 +497,29 @@ export function CoachOrb() {
            the person has muted Vitalis for this session. Proposals
            are never part of the spoken paragraphs. */
         speaker.speak(reply.paragraphs.join(" "));
-      } catch {
+      } catch (err) {
         if (controller.signal.aborted) return;
+        /* Money System: an out-of-credits refusal is a pause, not a
+           connection failure — its own turn, a Premium button, and
+           no retry (the same words would meet the same balance). */
+        const billingRefusal =
+          err instanceof VitalisUnavailable &&
+          (err.reason === "insufficient_credits" || err.reason === "premium_required");
+        if (billingRefusal) {
+          const turn: VitalisTurn = {
+            id: newTurnId("vitalis-paywall"),
+            role: "vitalis",
+            time: new Date().toISOString(),
+            paragraphs: [
+              "You've used this month's AI credits, so I pause here. Premium refills the allowance every month — your record, plans and trackers keep working either way.",
+            ],
+            status: "error",
+            paywall: true,
+          };
+          applyTurns([...turnsRef.current, turn]);
+          lastFailedRef.current = null;
+          return;
+        }
         const turn: VitalisTurn = {
           id: newTurnId("vitalis-error"),
           role: "vitalis",
@@ -790,11 +815,21 @@ export function CoachOrb() {
                         <CoachGlyph size={14} />
                         <div className="coach-orb-error-copy">
                           <p className="coach-orb-error-title">
-                            Vitalis couldn&rsquo;t connect right now.
+                            {turn.paywall
+                              ? "Vitalis is paused for now."
+                              : "Vitalis couldn\u2019t connect right now."}
                           </p>
                           <p>{turn.paragraphs[0]}</p>
                         </div>
-                        {turn.id === errorTurnId ? (
+                        {turn.paywall ? (
+                          <button
+                            type="button"
+                            className="coach-orb-retry"
+                            onClick={() => requestPaywall("vitalis_credits")}
+                          >
+                            See Premium
+                          </button>
+                        ) : turn.id === errorTurnId ? (
                           <button type="button" className="coach-orb-retry" onClick={retry}>
                             Try again
                           </button>

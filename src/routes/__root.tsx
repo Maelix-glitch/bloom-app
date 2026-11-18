@@ -34,6 +34,7 @@ import { RouteProgress } from "@/components/system/RouteProgress";
 import { BloomSkin } from "@/components/rewards/BloomSkin";
 import { CoachSystemProvider } from "@/components/coach/CoachSystemProvider";
 import { CoachOrbGate } from "@/components/coach/CoachOrb";
+import { PaywallHost } from "@/components/billing/PaywallSheet";
 
 /**
  * The two screens every lost or unlucky visitor is guaranteed to meet, so
@@ -412,6 +413,9 @@ function RootComponent() {
         <AdminBar />
         {/* Only when there is no database: says so, instead of failing silently. */}
         <ConnectionNotice />
+        {/* Money System: the one paywall sheet for the whole app —
+            surfaces ask via requestPaywall(), this host renders it. */}
+        <PaywallHost />
         {/* Equipped Atelier look → app-wide skin (no-op until something is equipped). */}
         <BloomSkin />
         {/* Reminder delivery: fires due nudges from boot on every route. */}

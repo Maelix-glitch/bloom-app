@@ -13,6 +13,16 @@ project_id = "replace-with-your-project-ref"
 # asks "Deploy without Docker? [Y/n]" just answer y.
 enabled = true
 
+[functions.billing]
+# Money System checkout + webhook (supabase/functions/billing/index.ts).
+# verify_jwt is false: the Razorpay webhook cannot carry a Supabase JWT,
+# so the function authenticates every path itself — checkout via the
+# caller's session (getUser), the webhook via its HMAC signature.
+# Provider secrets (RAZORPAY_*) live in the Supabase vault; while they
+# are absent the function answers a clean payments_not_configured state.
+enabled = true
+verify_jwt = false
+
 [functions.giphy]
 # Deployed from supabase/functions/giphy/index.ts with:
 #   supabase functions deploy giphy

@@ -20,6 +20,7 @@
  */
 
 import { COACH_FUNCTION, readVitalisExtras, type EdgeRequest } from "@/lib/coach/edge";
+import { invalidateEntitlement } from "@/lib/billing/entitlement";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, hasSupabaseConfig, supabase } from "@/lib/supabase";
 
 export interface VitalisStreamStage {
@@ -36,7 +37,19 @@ export type VitalisStreamResult =
       locked: boolean;
       deliberated: boolean;
     }
-  | { ok: false; reason: "unconfigured" | "timeout" | "aborted" | "error"; detail?: string };
+  | {
+      ok: false;
+      reason:
+        | "unconfigured"
+        | "timeout"
+        | "aborted"
+        | "error"
+        /* The Money System gate refused before any provider ran —
+           the UI turns this into an upgrade prompt, never a retry. */
+        | "insufficient_credits"
+        | "premium_required";
+      detail?: string;
+    };
 
 /** Deliberation legitimately takes longer than a chat reply — the
  *  server budget is ~110 s; the client gives up a little after it. */
@@ -69,6 +82,18 @@ export async function streamVitalis(
       signal: timer.signal,
     });
     if (!res.ok) {
+      /* The Money System gate answers 402 before the stream starts;
+         name it so the orb can offer Premium instead of a retry. */
+      if (res.status === 402) {
+        let refusal: "insufficient_credits" | "premium_required" = "insufficient_credits";
+        try {
+          const body = (await res.clone().json()) as Record<string, unknown>;
+          if (body["error"] === "premium_required") refusal = "premium_required";
+        } catch {
+          /* the status alone carries the meaning */
+        }
+        return { ok: false, reason: refusal };
+      }
       return { ok: false, reason: "error", detail: `http ${res.status}` };
     }
 
@@ -118,6 +143,7 @@ export async function streamVitalis(
     if (buffer.trim()) handleLine(buffer);
 
     if (!result) return { ok: false, reason: "error", detail: "stream ended without a result" };
+    noteStreamSettled(result);
     return result;
   } catch (err) {
     if (signal?.aborted) return { ok: false, reason: "aborted" };
@@ -131,6 +157,14 @@ export async function streamVitalis(
     clearTimeout(timeout);
     signal?.removeEventListener("abort", onAbort);
   }
+}
+
+/** A settled stream that produced an answer cost credits
+ *  server-side — refresh the cached balance for every entitlement
+ *  reader. (A function boundary, because the caller's `result` is
+ *  closure-assigned and TS narrows it to null at the read site.) */
+function noteStreamSettled(result: VitalisStreamResult): void {
+  if (result.ok) invalidateEntitlement();
 }
 
 function resultFromJson(data: Record<string, unknown>): VitalisStreamResult {

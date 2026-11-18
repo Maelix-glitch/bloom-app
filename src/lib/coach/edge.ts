@@ -25,6 +25,7 @@
  */
 
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
+import { invalidateEntitlement } from "@/lib/billing/entitlement";
 import type { CoachRecord } from "@/lib/coach/responder";
 
 export const COACH_FUNCTION =
@@ -162,7 +163,20 @@ export interface VitalisExtras {
 
 export type EdgeResult =
   | { ok: true; paragraphs: string[]; provider: string; vitalis?: VitalisExtras }
-  | { ok: false; reason: "unconfigured" | "timeout" | "aborted" | "error"; detail?: string };
+  | {
+      ok: false;
+      reason:
+        | "unconfigured"
+        | "timeout"
+        | "aborted"
+        | "error"
+        /* The Money System gate refused before any provider ran:
+           out of AI credits, or a Premium-only feature on Free. The
+           UI turns these into an upgrade prompt, never a retry. */
+        | "insufficient_credits"
+        | "premium_required";
+      detail?: string;
+    };
 
 /** Read the Vitalis extras off a response body, tolerantly. */
 export function readVitalisExtras(data: unknown): VitalisExtras | undefined {
@@ -222,6 +236,28 @@ export function toFacts(record: CoachRecord): EdgeFacts {
   };
 }
 
+/**
+ * The Money System gate answers 402 with a JSON body naming the
+ * refusal. supabase-js hands the raw Response over as the invoke
+ * error's `context` — read the refusal off it so the UI can offer
+ * Premium instead of a generic failure. A 402 from this function is
+ * always the billing gate; an unreadable body still maps to the
+ * credits refusal, the gate's common case.
+ */
+async function billingRefusal(
+  error: unknown,
+): Promise<"insufficient_credits" | "premium_required" | null> {
+  const ctx = (error as { context?: Response } | null)?.context;
+  if (!ctx || typeof ctx.status !== "number" || ctx.status !== 402) return null;
+  try {
+    const body = (await ctx.clone().json()) as Record<string, unknown>;
+    if (body["error"] === "premium_required") return "premium_required";
+  } catch {
+    /* the status alone carries the meaning */
+  }
+  return "insufficient_credits";
+}
+
 /** Coerce whatever the function returned into paragraphs, or fail cleanly. */
 function readBody(data: unknown): string[] | null {
   if (!data || typeof data !== "object") return null;
@@ -255,9 +291,17 @@ export async function askEdge(request: EdgeRequest, signal?: AbortSignal): Promi
   /* One quiet retry: a single transient failure (a provider chain landing
      on cooldowns, a cold start) shouldn't reach the person as an error
      card when a second ask a breath later would simply work. The manual
-     "Try again" remains for anything that fails twice. */
+     "Try again" remains for anything that fails twice. A billing
+     refusal is never retried — it is a state, not a transient. */
   let result = await askEdgeOnce(request, signal);
-  if (!result.ok && result.reason !== "aborted" && !signal?.aborted && !request.image) {
+  if (
+    !result.ok &&
+    result.reason !== "aborted" &&
+    result.reason !== "insufficient_credits" &&
+    result.reason !== "premium_required" &&
+    !signal?.aborted &&
+    !request.image
+  ) {
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
     if (!signal?.aborted) result = await askEdgeOnce(request, signal);
   }
@@ -279,10 +323,15 @@ async function askEdgeOnce(request: EdgeRequest, signal?: AbortSignal): Promise<
     });
 
     if (error) {
+      const refusal = await billingRefusal(error);
+      if (refusal) return { ok: false, reason: refusal };
       return { ok: false, reason: "error", detail: error.message };
     }
     const paragraphs = readBody(data);
     if (!paragraphs) return { ok: false, reason: "error", detail: "empty response" };
+    /* A real answer cost credits server-side — the cached balance
+       just moved; let entitlement readers refetch. */
+    invalidateEntitlement();
 
     const provider =
       (data as Record<string, unknown> | null)?.["provider"] ?? request.provider ?? "edge";

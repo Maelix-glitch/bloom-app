@@ -1,0 +1,206 @@
+/* ---------------------------------------------------------------------------
+ * Money System — the paywall sheet and the Profile membership card.
+ * Scoped under .bill-* so the pricing surfaces carry the house tokens
+ * (gold gradient CTA, glass surfaces, the type scale) without leaking
+ * into other routes. Imported by the billing components themselves.
+ * ------------------------------------------------------------------------- */
+
+.bill-stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.bill-eyebrow {
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.bill-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-heading);
+  margin-top: var(--space-2);
+}
+
+.bill-body {
+  font-size: var(--text-callout);
+  line-height: var(--leading-callout);
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+}
+
+.bill-status {
+  border: 1px solid color-mix(in oklab, var(--gold) 40%, transparent);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-callout);
+  line-height: var(--leading-callout);
+}
+
+/* Monthly / yearly switch — a quiet segmented control. */
+.bill-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+}
+.bill-toggle button {
+  min-height: 32px;
+  padding: 0.3rem 0.95rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-callout);
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition:
+    background-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo);
+}
+.bill-toggle button[aria-pressed="true"] {
+  background: var(--surface-3);
+  color: var(--foreground);
+}
+.bill-toggle .bill-save {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.bill-cards {
+  display: grid;
+  gap: var(--space-3);
+}
+@media (min-width: 40rem) {
+  .bill-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.bill-card {
+  border: 1px solid var(--glass-border);
+  background-color: var(--surface);
+  background-image: var(--glass-bg);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.bill-card--featured {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+}
+
+.bill-card-name {
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.bill-price {
+  font-family: var(--font-display);
+  font-size: var(--text-page);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-display);
+}
+.bill-price small {
+  font-family: var(--font-sans);
+  font-size: var(--text-callout);
+  color: var(--muted-foreground);
+  letter-spacing: var(--tracking-body);
+}
+
+.bill-equivalent {
+  font-size: var(--text-caption);
+  color: var(--faint-strong);
+}
+
+.bill-features {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-callout);
+  line-height: var(--leading-callout);
+  color: var(--text-secondary);
+}
+.bill-features li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.bill-features svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--gold);
+  transform: translateY(2px);
+}
+
+.bill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-callout);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo);
+}
+.bill-btn:active {
+  transform: scale(0.98);
+}
+.bill-btn:disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.bill-btn-gold {
+  background-image: var(--gold-gradient);
+  color: var(--gold-ink);
+  box-shadow: 0 10px 24px -12px color-mix(in oklab, var(--gold) 65%, transparent);
+}
+.bill-btn-ghost {
+  border: 1px solid var(--border-strong);
+  color: var(--foreground);
+}
+
+.bill-note {
+  font-size: var(--text-callout);
+  line-height: var(--leading-callout);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+}
+
+.bill-foot {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--faint-strong);
+}
+
+/* Profile membership card — the credits meter. */
+.bill-meter {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.bill-meter-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-image: var(--gold-gradient);
+  transition: width var(--motion-page) var(--ease-out-expo);
+}

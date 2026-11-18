@@ -53,6 +53,28 @@ import {
   parseAssessmentHistoryEntries,
 } from "@/lib/assessment/history";
 import { summaryOf } from "@/lib/assessment/summary";
+import { peekEntitlement } from "@/lib/billing/entitlement";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { canUse } from "@/lib/billing/plans";
+
+/**
+ * Money System: starting (or retaking) the Assessment is a Premium
+ * feature. A KNOWN free entitlement opens the paywall instead of
+ * the flow and reports false; anything else — Premium, or an
+ * entitlement that could not be read — opens as always. A completed
+ * assessment stays fully readable on Free; only a new run is gated.
+ */
+function assessmentGateOpen(): boolean {
+  const entitlement = peekEntitlement();
+  if (
+    entitlement?.kind === "ready" &&
+    !canUse(entitlement.entitlement.tier, "assessment_plan")
+  ) {
+    requestPaywall("assessment");
+    return false;
+  }
+  return true;
+}
 import { GOAL_LABEL, QUESTION_STEPS } from "@/lib/assessment/questions";
 import { AssessmentFlow } from "./AssessmentFlow";
 import { AssessmentSummaryView } from "./AssessmentSummaryView";
@@ -370,6 +392,7 @@ export function AssessmentPromptCard() {
   }, [celebration]);
 
   const openFlow = () => {
+    if (!assessmentGateOpen()) return;
     flowOpenedRef.current = true;
     setFlowOpen(true);
   };
@@ -468,6 +491,7 @@ export function AssessmentProfileCard() {
               size="sm"
               variant="ghost"
               onClick={() => {
+                if (!assessmentGateOpen()) return;
                 setFlowRetake(true);
                 setFlowOpen(true);
               }}
@@ -480,6 +504,7 @@ export function AssessmentProfileCard() {
             type="button"
             size="sm"
             onClick={() => {
+              if (!assessmentGateOpen()) return;
               setFlowRetake(false);
               setFlowOpen(true);
             }}

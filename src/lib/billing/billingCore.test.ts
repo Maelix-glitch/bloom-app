@@ -1,0 +1,180 @@
+/**
+ * The coach function's billing gate — the exact pure module the
+ * deployed function bundles (supabase/functions/coach/billing-core.ts),
+ * exercised the way vitalis-core is. The properties that matter:
+ * the gate decides BEFORE any provider call, failures are never
+ * charged (the charge happens in index.ts only after success), a
+ * free photo is refused as a feature regardless of balance, and an
+ * unanswered entitlement RPC leaves the gate INACTIVE — the
+ * deliberate dark-launch seam, pinned here so it can never quietly
+ * become a client-controlled bypass.
+ */
+import { describe, expect, it } from "vitest";
+
+import {
+  CREDIT_COSTS,
+  TIER_ALLOWANCES,
+  costFor,
+  decideGate,
+  gateErrorBody,
+  parseEntitlementRows,
+  type EntitlementSnapshot,
+} from "../../../supabase/functions/coach/billing-core";
+import { monthlyCreditsFor } from "./plans";
+
+const snap = (over: Partial<EntitlementSnapshot> = {}): EntitlementSnapshot => ({
+  tier: "free",
+  status: "none",
+  creditBalance: 20,
+  monthlyAllowance: 20,
+  currentPeriodEnd: null,
+  ...over,
+});
+
+describe("flat credit costs", () => {
+  it("coach message 1 · coach photo 3 · vitalis 2 · tts 1", () => {
+    expect(costFor("coach", false)).toEqual({ cost: 1, reason: "coach_message" });
+    expect(costFor("coach", true)).toEqual({ cost: 3, reason: "coach_photo" });
+    expect(costFor("vitalis", false)).toEqual({ cost: 2, reason: "vitalis_message" });
+    expect(costFor("vitalis", true)).toEqual({ cost: 2, reason: "vitalis_message" });
+    expect(costFor("tts", false)).toEqual({ cost: 1, reason: "tts_request" });
+    expect(CREDIT_COSTS).toEqual({
+      coach_message: 1,
+      coach_photo: 3,
+      vitalis_message: 2,
+      tts_request: 1,
+    });
+  });
+
+  it("server allowances mirror the client plan constants exactly", () => {
+    expect(TIER_ALLOWANCES.free).toBe(monthlyCreditsFor("free"));
+    expect(TIER_ALLOWANCES.premium).toBe(monthlyCreditsFor("premium"));
+    expect(TIER_ALLOWANCES.premium_plus).toBe(monthlyCreditsFor("premium_plus"));
+  });
+});
+
+describe("decideGate", () => {
+  it("billing inactive (RPC silent) → allow uncharged, every action", () => {
+    for (const action of ["coach", "vitalis", "tts"] as const) {
+      expect(decideGate({ entitlement: null, action, hasMedia: false })).toEqual({
+        kind: "allow_uncharged",
+      });
+    }
+    expect(decideGate({ entitlement: null, action: "coach", hasMedia: true })).toEqual({
+      kind: "allow_uncharged",
+    });
+  });
+
+  it("free + photo → premium_required no matter the balance", () => {
+    expect(decideGate({ entitlement: snap({ creditBalance: 20 }), action: "coach", hasMedia: true })).toEqual({
+      kind: "deny_premium",
+      feature: "food_photo_analysis",
+      tier: "free",
+    });
+    expect(decideGate({ entitlement: snap({ creditBalance: 0 }), action: "coach", hasMedia: true }).kind).toBe(
+      "deny_premium",
+    );
+  });
+
+  it("balance below the flat cost → insufficient, with the numbers", () => {
+    expect(decideGate({ entitlement: snap({ creditBalance: 0 }), action: "coach", hasMedia: false })).toEqual({
+      kind: "deny_insufficient",
+      cost: 1,
+      balance: 0,
+      tier: "free",
+    });
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium", creditBalance: 2, monthlyAllowance: 300 }),
+        action: "coach",
+        hasMedia: true,
+      }),
+    ).toEqual({ kind: "deny_insufficient", cost: 3, balance: 2, tier: "premium" });
+    expect(decideGate({ entitlement: snap({ creditBalance: 1 }), action: "vitalis", hasMedia: false })).toEqual({
+      kind: "deny_insufficient",
+      cost: 2,
+      balance: 1,
+      tier: "free",
+    });
+    expect(decideGate({ entitlement: snap({ creditBalance: 0 }), action: "tts", hasMedia: false }).kind).toBe(
+      "deny_insufficient",
+    );
+  });
+
+  it("balance at or above the cost → allow with that exact cost", () => {
+    expect(decideGate({ entitlement: snap({ creditBalance: 1 }), action: "coach", hasMedia: false })).toEqual({
+      kind: "allow",
+      cost: 1,
+      reason: "coach_message",
+    });
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium", creditBalance: 3, monthlyAllowance: 300 }),
+        action: "coach",
+        hasMedia: true,
+      }),
+    ).toEqual({ kind: "allow", cost: 3, reason: "coach_photo" });
+    expect(decideGate({ entitlement: snap({ creditBalance: 2 }), action: "vitalis", hasMedia: false })).toEqual({
+      kind: "allow",
+      cost: 2,
+      reason: "vitalis_message",
+    });
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium_plus", creditBalance: 800, monthlyAllowance: 800 }),
+        action: "coach",
+        hasMedia: true,
+      }).kind,
+    ).toBe("allow");
+  });
+});
+
+describe("gateErrorBody — the 402 the client renders as an upgrade prompt", () => {
+  it("insufficient carries error/needed/balance/tier/requestId", () => {
+    const decision = decideGate({ entitlement: snap({ creditBalance: 0 }), action: "coach", hasMedia: false });
+    expect(gateErrorBody(decision, "req-1")).toEqual({
+      error: "insufficient_credits",
+      needed: 1,
+      balance: 0,
+      tier: "free",
+      requestId: "req-1",
+    });
+  });
+
+  it("premium refusal names the feature", () => {
+    const decision = decideGate({ entitlement: snap(), action: "coach", hasMedia: true });
+    expect(gateErrorBody(decision, "req-2")).toEqual({
+      error: "premium_required",
+      feature: "food_photo_analysis",
+      tier: "free",
+      requestId: "req-2",
+    });
+  });
+
+  it("allows produce no error body", () => {
+    expect(gateErrorBody({ kind: "allow", cost: 1, reason: "coach_message" }, "r")).toBeNull();
+    expect(gateErrorBody({ kind: "allow_uncharged" }, "r")).toBeNull();
+  });
+});
+
+describe("parseEntitlementRows (server copy)", () => {
+  it("parses a row; unknown tier reads free; malformed reads null", () => {
+    expect(
+      parseEntitlementRows([
+        { tier: "premium", status: "active", credit_balance: 42, monthly_allowance: 300, current_period_end: null },
+      ]),
+    ).toEqual({
+      tier: "premium",
+      status: "active",
+      creditBalance: 42,
+      monthlyAllowance: 300,
+      currentPeriodEnd: null,
+    });
+    expect(
+      parseEntitlementRows([{ tier: "gold", credit_balance: 5 }])?.tier,
+    ).toBe("free");
+    expect(parseEntitlementRows([])).toBeNull();
+    expect(parseEntitlementRows([{ status: "active" }])).toBeNull();
+    expect(parseEntitlementRows(null)).toBeNull();
+  });
+});

@@ -97,6 +97,19 @@
  *   application/octet-stream — supabase-js hands octet-stream responses
  *   back as a Blob; the client re-wraps it as audio/mpeg for playback.
  *
+ * MONEY SYSTEM GATE (billing-core.ts):
+ *   Every AI path — Coach chat, Vitalis chat, TTS — is gated on the
+ *   caller's entitlement BEFORE any provider is called, and charged
+ *   AFTER a successful answer: flat costs (Coach 1, photo 3, Vitalis
+ *   2, speech 1) against the monthly credit allowance, via the
+ *   get_my_entitlement / spend_credits RPCs under the caller's own
+ *   JWT. Insufficient credits or a Premium-only feature on the free
+ *   tier answer 402 ({ error: "insufficient_credits" |
+ *   "premium_required" }) and no provider is ever called. When the
+ *   billing RPC does not answer (migration not yet applied) the gate
+ *   is inactive and requests proceed uncharged — a dark-launch seam,
+ *   logged as billing=inactive.
+ *
  * Optional tuning (all server-side secrets):
  *   COACH_PROVIDER_ORDER=apinex,grok,huggingface-qwen   # gemini = Google-direct, optional
  *   COACH_GEMINI_ENABLED=true  COACH_GROK_ENABLED=true  COACH_HF_ENABLED=true
@@ -123,6 +136,14 @@ import {
   sanitizeProposals,
   validateVitalisRecord,
 } from "./vitalis-core.ts";
+import {
+  decideGate,
+  gateErrorBody,
+  parseEntitlementRows,
+  type BillingAction,
+  type EntitlementSnapshot,
+  type GateDecision,
+} from "./billing-core.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -301,7 +322,7 @@ const ELEVENLABS_MODEL_ID = "eleven_flash_v2_5";
  *  whatever the client sends, so a stray long text can't burn the quota. */
 const TTS_MAX_TEXT_CHARS = 1000;
 
-async function handleTts(body: Body, rid: string): Promise<Response> {
+async function handleTts(body: Body, req: Request, rid: string): Promise<Response> {
   const apiKey = Deno.env.get("ELEVENLABS_API_KEY") ?? "";
   if (!apiKey) {
     /* No secret configured yet — a clean, expected state the client
@@ -310,6 +331,13 @@ async function handleTts(body: Body, rid: string): Promise<Response> {
   }
   const text = typeof body.text === "string" ? body.text.trim().slice(0, TTS_MAX_TEXT_CHARS) : "";
   if (!text) return json({ error: "empty text" }, 400);
+  /* Money System gate: speech costs a credit like any AI call. The
+     voice client treats any failure as silence by design, so a denial
+     here simply quiets the voice — the words themselves arrive via
+     the chat path, whose gate is where the upgrade prompt lives. */
+  const gate = await billingGateCheck(req, "tts", false, rid);
+  const gateError = gateErrorBody(gate, rid);
+  if (gateError) return json(gateError, 402);
   const voiceId =
     typeof body.voiceId === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(body.voiceId)
       ? body.voiceId
@@ -337,6 +365,7 @@ async function handleTts(body: Body, rid: string): Promise<Response> {
     }
     const audio = await res.arrayBuffer();
     if (audio.byteLength === 0) return json({ error: "voice_unavailable" }, 502);
+    await billingCharge(req, gate, rid);
     return new Response(audio, {
       status: 200,
       headers: {
@@ -352,6 +381,78 @@ async function handleTts(body: Body, rid: string): Promise<Response> {
     console.error(`coach request=${rid} tts status=network_error`);
     return json({ error: "voice_unavailable" }, 502);
   }
+}
+
+/* ============================================================================
+   MONEY SYSTEM GATE — entitlement + AI credits, checked BEFORE any
+   provider is called and deducted AFTER a successful answer. The
+   decisions live in billing-core.ts (pure, unit-tested); this section
+   is only the transport: the caller's own JWT drives the RPCs, so
+   auth.uid() inside them is always the person being charged — there
+   is no service-role key in this function and no client-sent input
+   to the decision. When the RPC does not answer (the billing
+   migration not yet applied) the gate is inactive and requests
+   proceed uncharged — see billing-core.ts for why that seam exists.
+   ========================================================================== */
+async function billingRpc(
+  req: Request,
+  fn: string,
+  args: Record<string, unknown>,
+): Promise<unknown | null> {
+  const url = Deno.env.get("SUPABASE_URL") ?? "";
+  const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const auth = req.headers.get("authorization") ?? "";
+  if (!url || !anon || !auth) return null;
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      headers: {
+        apikey: anon,
+        Authorization: auth,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(args),
+      signal: AbortSignal.timeout(4_000),
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function billingEntitlement(req: Request): Promise<EntitlementSnapshot | null> {
+  const rows = await billingRpc(req, "get_my_entitlement", {});
+  return parseEntitlementRows(rows);
+}
+
+async function billingGateCheck(
+  req: Request,
+  action: BillingAction,
+  hasMedia: boolean,
+  rid: string,
+): Promise<GateDecision> {
+  const entitlement = await billingEntitlement(req);
+  const decision = decideGate({ entitlement, action, hasMedia });
+  if (!entitlement) {
+    console.info(`coach request=${rid} billing=inactive action=${action}`);
+  }
+  return decision;
+}
+
+/** Deduct after success. Best-effort by design: the answer is already
+ *  earned, so a failed or raced deduct is logged, never surfaced —
+ *  the next request's gate sees the true balance. */
+async function billingCharge(req: Request, decision: GateDecision, rid: string): Promise<void> {
+  if (decision.kind !== "allow") return;
+  const rows = await billingRpc(req, "spend_credits", {
+    p_amount: decision.cost,
+    p_reason: decision.reason,
+  });
+  const row = Array.isArray(rows) && rows.length > 0 ? (rows[0] as Record<string, unknown>) : null;
+  console.info(
+    `coach request=${rid} billing_charge cost=${decision.cost} reason=${decision.reason} ok=${row?.["ok"] ?? "unknown"} balance=${row?.["balance"] ?? "unknown"}`,
+  );
 }
 
 /** Optional vision input, validated once. */
@@ -1184,8 +1285,12 @@ async function handleVitalisChat(params: {
   recordText: string;
   rule: string;
   devPin: ProviderId | null;
+  /** Money System: invoked exactly once per request that produced a
+   *  real answer (fast path or deliberation, streamed or not) — the
+   *  credit deduct. Locked and refused requests never reach it. */
+  onSuccess?: () => Promise<void>;
 }): Promise<Response> {
-  const { body, req, rid, message, turns, recordText, rule, devPin } = params;
+  const { body, req, rid, message, turns, recordText, rule, devPin, onSuccess } = params;
   const key = await vitalisCallerKey(req);
   const wantsStream = body.deliberate === true;
   const order = computeProviderOrder(null, devPin);
@@ -1278,6 +1383,7 @@ async function handleVitalisChat(params: {
           };
           try {
             const outcome = await runIt((stage, label) => emit({ type: "stage", stage, label }));
+            await onSuccess?.();
             emit({
               type: "result",
               paragraphs: outcome.paragraphs,
@@ -1301,6 +1407,7 @@ async function handleVitalisChat(params: {
 
     try {
       const outcome = await runIt(undefined);
+      await onSuccess?.();
       return json(
         {
           paragraphs: outcome.paragraphs,
@@ -1349,6 +1456,7 @@ async function handleVitalisChat(params: {
   if (paragraphs.length === 0 && actions.length === 0) {
     return json({ error: "unavailable", requestId: rid }, 502);
   }
+  await onSuccess?.();
   return json({ paragraphs, provider: result.provider, actions, stages: [] }, 200);
 }
 
@@ -1382,7 +1490,7 @@ Deno.serve(async (req: Request) => {
     const body: Body = await req.json();
     /* The TTS action speaks text instead of answering — it returns
        before any message validation or provider is touched. */
-    if (body.action === "tts") return await handleTts(body, rid);
+    if (body.action === "tts") return await handleTts(body, req, rid);
     /* A Vitalis action-result report is shape-validated on its own
        path — it carries no message and touches no provider. */
     if (body.action === "vitalis-action-result") {
@@ -1433,6 +1541,14 @@ Deno.serve(async (req: Request) => {
         ? (body.provider as ProviderId)
         : null;
 
+    /* Money System gate — BEFORE any provider is called, for both
+       chat paths. A denial is a clean 402 the client turns into an
+       upgrade prompt; the deduct happens only after a real answer
+       exists (Coach: below; Vitalis: its onSuccess callback). */
+    const gate = await billingGateCheck(req, isVitalis ? "vitalis" : "coach", Boolean(media), rid);
+    const gateError = gateErrorBody(gate, rid);
+    if (gateError) return json(gateError, 402);
+
     /* Vitalis chat runs its own pipeline (lockdown, validation,
        deliberation) and returns from there. */
     if (isVitalis) {
@@ -1445,6 +1561,7 @@ Deno.serve(async (req: Request) => {
         recordText: vitalisRecordText,
         rule,
         devPin,
+        onSuccess: () => billingCharge(req, gate, rid),
       });
     }
 
@@ -1493,6 +1610,7 @@ Deno.serve(async (req: Request) => {
     if (envBool("COACH_LOG_DETAIL", false)) {
       console.info(`coach request=${rid} ${result.diagnostics.join(" | ")}`);
     }
+    await billingCharge(req, gate, rid);
     return json({ paragraphs, provider: result.provider }, 200);
   } catch (err) {
     console.error(`coach request=${rid} error=${err instanceof Error ? err.name : "unknown"}`);

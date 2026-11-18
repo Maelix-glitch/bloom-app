@@ -507,6 +507,13 @@ export function toHistoryTurns(
   return recent.map((entry) => entry.turn);
 }
 
+/** The Money System's two refusal lines — states, not failures, so
+ *  they get their own honest copy instead of the connection line. */
+export const CREDITS_EXHAUSTED_MESSAGE =
+  "You've used this month's AI credits — the Coach pauses here. Premium refills the allowance every month, and everything else in Bloom keeps working.";
+export const PHOTO_PREMIUM_MESSAGE =
+  "Reading a photo of your plate is a Premium feature — tell me about the meal in words and we'll work it out together.";
+
 export function coachErrorMessage(error: unknown, fallback?: string): string {
   /*
    * Strictly online: every failure to reach the coach is one honest state —
@@ -516,7 +523,11 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
    */
   const down =
     "It didn't go through — your words are safe. Try again and we'll pick it right back up.";
-  if (error instanceof CoachUnavailable) return down;
+  if (error instanceof CoachUnavailable) {
+    if (error.reason === "insufficient_credits") return CREDITS_EXHAUSTED_MESSAGE;
+    if (error.reason === "premium_required") return PHOTO_PREMIUM_MESSAGE;
+    return down;
+  }
   const raw =
     error && typeof error === "object" && "message" in error
       ? String((error as { message: unknown }).message ?? "")
