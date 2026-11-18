@@ -55,3 +55,82 @@ describe("cue vocabulary", () => {
     expect(() => mod.play("tap")).not.toThrow();
   });
 });
+
+describe("score quality", () => {
+  /* The recipes are pure data (SOUND_SCORE), so the qualities the ear cares
+     about — soft waveforms, short notes, quiet peaks, gentle pitch motion —
+     are pinned here without an AudioContext. The regression these guard is
+     the old tap: a bare 880 Hz sine pip that read as an ugly click. */
+
+  it("scores every cue in the vocabulary", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    for (const cue of [
+      "tap", "toggleOn", "toggleOff", "success", "celebrate",
+      "open", "close", "delete", "warn", "navigate",
+    ] as const) {
+      expect(SOUND_SCORE[cue].length).toBeGreaterThan(0);
+    }
+  });
+
+  it("uses only soft waveforms — never square or sawtooth", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    for (const notes of Object.values(SOUND_SCORE)) {
+      for (const n of notes) {
+        expect(["sine", "triangle", undefined]).toContain(n.type);
+      }
+    }
+  });
+
+  it("keeps every note short and every cue under ~320 ms", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    for (const notes of Object.values(SOUND_SCORE)) {
+      for (const n of notes) {
+        expect(n.d).toBeGreaterThanOrEqual(0.04);
+        expect(n.d).toBeLessThanOrEqual(0.25);
+      }
+      const total = Math.max(...notes.map((n) => n.t + n.d));
+      expect(total).toBeLessThanOrEqual(0.32);
+    }
+  });
+
+  it("keeps peaks quiet — felt more than heard, never startling", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    for (const notes of Object.values(SOUND_SCORE)) {
+      for (const n of notes) {
+        expect(n.v).toBeGreaterThanOrEqual(0.03);
+        expect(n.v).toBeLessThanOrEqual(0.16);
+      }
+    }
+  });
+
+  it("glides gently when it glides — no swoops", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    for (const notes of Object.values(SOUND_SCORE)) {
+      for (const n of notes) {
+        if (n.g !== undefined) {
+          expect(n.g / n.f).toBeGreaterThanOrEqual(0.5);
+          expect(n.g / n.f).toBeLessThanOrEqual(2);
+        }
+        if (n.h !== undefined) {
+          expect(n.h).toBeGreaterThan(0);
+          expect(n.h).toBeLessThanOrEqual(0.4);
+        }
+      }
+    }
+  });
+
+  it("the tap is a low falling thock, not a high static pip", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    const tap = SOUND_SCORE.tap[0];
+    if (!tap) throw new Error("the tap cue must have a note");
+    expect(tap.f).toBeLessThanOrEqual(700);
+    expect(tap.g).toBeDefined();
+    expect(tap.g).toBeLessThan(tap.f);
+  });
+
+  it("warn never repeats the same note — no alarm-beep pattern", async () => {
+    const { SOUND_SCORE } = await import("./sound");
+    const freqs = SOUND_SCORE.warn.map((n) => n.f);
+    expect(new Set(freqs).size).toBe(freqs.length);
+  });
+});
