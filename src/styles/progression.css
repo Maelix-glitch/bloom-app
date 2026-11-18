@@ -967,7 +967,7 @@
 }
 
 .pg-goal-value.is-muted {
-  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 
 .pg-goal-length,

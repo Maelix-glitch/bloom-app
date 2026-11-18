@@ -168,7 +168,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 46%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 
 .wl-title {
@@ -428,7 +428,7 @@
     background-color var(--motion-standard) var(--ease-out-expo);
 }
 .wl-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 30%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .wl-input:focus {
   outline: none;
@@ -455,7 +455,7 @@
   font-size: var(--text-caption);
 }
 .wl-summary-row span:first-child {
-  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .wl-summary-row span:last-child {
   color: var(--foreground);

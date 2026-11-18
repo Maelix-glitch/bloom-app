@@ -2372,7 +2372,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .tk2-sheet-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 0.2, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 
 @media (max-width: 460px) {

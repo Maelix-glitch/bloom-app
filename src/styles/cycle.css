@@ -446,7 +446,11 @@
 }
 
 .ci-input::placeholder {
-  color: color-mix(in oklab, var(--ci-text-mute) 80%, transparent);
+  /* Full token, not the old 80% mix: the mix measured 3.84:1 (nocturne) /
+     4.12:1 (orchid) on --ci-input-bg — below WCAG AA. The full token
+     measures 5.38:1 / 5.78:1 (contrast audit, 2026-11-18; pinned by
+     src/lib/contrast.guard.test.ts). */
+  color: var(--ci-text-mute);
 }
 
 .ci-input:hover:not(:disabled) {

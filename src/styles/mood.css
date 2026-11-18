@@ -269,7 +269,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 
 .bmood-emotions {
@@ -340,7 +340,7 @@
     box-shadow var(--motion-page) var(--ease-out-expo);
 }
 .bmood-note::placeholder {
-  color: color-mix(in oklab, var(--foreground) 34%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .bmood-note:focus {
   background: color-mix(in oklab, var(--foreground) 7%, transparent);
@@ -378,7 +378,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-label);
-  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .bmood-more-chevron {
   transition: rotate var(--motion-page) var(--ease-out-expo);
@@ -412,7 +412,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 46%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .bmood-input {
   width: 100%;
@@ -428,7 +428,7 @@
     box-shadow var(--motion-standard) var(--ease-out-expo);
 }
 .bmood-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 30%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .bmood-input:focus {
   border-color: color-mix(in oklab, var(--bmood-accent) 50%, transparent);
@@ -445,7 +445,7 @@ select.bmood-input {
 .bmood-unit {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
-  color: color-mix(in oklab, var(--foreground) 40%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .bmood-slider {
   width: 100%;
@@ -546,7 +546,7 @@ select.bmood-input {
   border: 0;
   background: transparent;
   font-size: var(--text-caption);
-  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
   cursor: pointer;
   transition: color var(--motion-fast) var(--ease-out-expo);
 }
