@@ -116,6 +116,29 @@
   font-size: var(--text-section);
   color: var(--foreground);
 }
+/* A list GROUP title (system slice): sans, small, caps — serif marks
+   meaning (H1/H2, one hero numeral), it does not carry list data like
+   "Produce" or "Dairy & eggs". */
+.nut-group-title {
+  font-family: var(--font-sans);
+  font-size: var(--text-support);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The shopping list (system slice, diagnosis §J): groups flow in
+   bounded columns so a name and its quantity are never separated by
+   the full width of the card; a group never splits across columns. */
+.shop-groups {
+  columns: 2 24rem;
+  column-gap: var(--space-12);
+  margin-top: var(--space-4);
+}
+.shop-group {
+  break-inside: avoid;
+  margin-bottom: var(--space-6);
+}
 .nut-entry {
   display: flex;
   align-items: flex-start;
@@ -277,6 +300,12 @@
   background: color-mix(in oklab, var(--rose) 12%, transparent);
   color: var(--rose);
   font-style: italic;
+}
+/* The source-chip rule (system slice, diagnosis §N): a SOLID outline
+   means measured, a DASHED outline means estimated — on every chip,
+   everywhere. Users learn it once and trust it from then on. */
+.nut-badge[data-estimate="true"] {
+  border-style: dashed;
 }
 .nut-badge[data-kind="recipe"] {
   border-color: color-mix(in oklab, var(--sky) 35%, transparent);
@@ -627,10 +656,14 @@
   opacity: 0.55;
   pointer-events: none;
 }
+/* One flat gold (system slice; rulebook §9.1): no gradient, no glow —
+   the same flat primary as everywhere else in the app. */
 .nut-btn-gold {
-  background-image: var(--gold-gradient);
+  background: var(--gold);
   color: var(--gold-ink);
-  box-shadow: 0 10px 24px -12px color-mix(in oklab, var(--gold) 65%, transparent);
+}
+.nut-btn-gold:hover {
+  background: var(--gold-soft);
 }
 .nut-btn-ghost {
   border: 1px solid var(--border-strong);

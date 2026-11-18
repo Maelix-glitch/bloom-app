@@ -438,12 +438,14 @@
 .pf-btn:active {
   transform: scale(0.98);
 }
+/* One flat gold (system slice; rulebook §9.1): the gradient-plus-glow
+   primary is retired — a flat gold with a clean hover reads more
+   refined, and there is now exactly one gold button style app-wide. */
 .pf-btn--primary {
   border-color: transparent;
-  background: var(--gold-gradient);
+  background: var(--gold);
   color: var(--gold-ink);
   font-weight: 600;
-  box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--gold) 55%, transparent);
 }
 .pf-btn--primary:hover {
   filter: brightness(1.08);
@@ -558,6 +560,16 @@ button.pf-number:hover {
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   color: var(--faint-strong);
+}
+/* A sub-heading INSIDE a profile card (system slice): sentence-case
+   sans, never a second mono eyebrow — one eyebrow per card (TY7), and
+   serif is for the card title, not its subheads. */
+.pf-subhead {
+  font-family: var(--font-sans);
+  font-size: var(--text-callout);
+  font-weight: 600;
+  line-height: var(--leading-callout);
+  color: var(--foreground);
 }
 .pf-title {
   margin-top: var(--space-1);

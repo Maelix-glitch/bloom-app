@@ -1372,7 +1372,11 @@ describe("UI guard: reskin slice C3 — Profile in the owner's file pattern, in 
     const top = blockFor(PROFILE.text, '.pf-cell[data-level="4"]')!;
     expect(top.body).toContain("background: var(--gold)");
     const primary = blockFor(PROFILE.text, ".pf-btn--primary")!;
-    expect(primary.body).toContain("background: var(--gold-gradient)");
+    /* System slice (rulebook §9.1): the primary is ONE FLAT gold — the
+       gradient-plus-glow this pin used to require is retired. */
+    expect(primary.body).toContain("background: var(--gold)");
+    expect(primary.body).not.toContain("gold-gradient");
+    expect(primary.body).not.toContain("box-shadow");
     expect(primary.body).toContain("color: var(--gold-ink)");
     const tab = blockFor(PROFILE.text, '.pf-tab[aria-selected="true"]::after')!;
     expect(tab.body).toContain("linear-gradient(90deg, var(--gold), var(--gold-soft))");

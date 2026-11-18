@@ -14,9 +14,16 @@
  * records says "No record" — the same words the engine uses.
  */
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAssessment } from "@/hooks/useAssessment";
 import { useProgrammes } from "@/hooks/useProgrammes";
-import { PROGRAMMES, targetKindLabel } from "@/lib/programmes/definitions";
+import { fmtDate } from "@/lib/format";
+import {
+  PROGRAMMES,
+  programmeMatchesGoal,
+  targetKindLabel,
+} from "@/lib/programmes/definitions";
 import type { ProgrammeProgress, WeekState } from "@/lib/programmes/programmes";
 
 const WEEK_STATE_LABEL: Record<WeekState, string> = {
@@ -32,7 +39,7 @@ function ActiveProgramme({ progress, onQuit }: { progress: ProgrammeProgress; on
     progress.currentWeek !== null ? progress.weeks[progress.currentWeek - 1] : undefined;
   return (
     <div className="mt-3">
-      <h3 className="font-display text-[length:var(--text-section)] text-foreground">
+      <h3 className="text-[length:var(--text-section)] font-semibold text-foreground">
         {progress.definition.name}
         {progress.currentWeek !== null
           ? ` — Week ${progress.currentWeek} of ${progress.definition.weeks.length}`
@@ -91,6 +98,7 @@ function ActiveProgramme({ progress, onQuit }: { progress: ProgrammeProgress; on
 
 export function ProgrammesSection() {
   const { activeProgress, history, enrol, quit } = useProgrammes();
+  const { state: assessment } = useAssessment();
   const pastRuns = history.filter((p) => !activeProgress || p.run.id !== activeProgress.run.id);
 
   return (
@@ -104,27 +112,40 @@ export function ProgrammesSection() {
         <ActiveProgramme progress={activeProgress} onQuit={() => quit(activeProgress.run.id)} />
       ) : (
         <div className="mt-3 space-y-4">
-          {PROGRAMMES.map((programme) => (
-            <div key={programme.id}>
-              <h3 className="font-display text-[length:var(--text-section)] text-foreground">
-                {programme.name} · {programme.weeks.length} weeks
-              </h3>
-              <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                {programme.blurb}
-              </p>
-              <div className="mt-2">
-                <Button type="button" size="sm" onClick={() => enrol(programme.id)}>
-                  Enrol
-                </Button>
+          {PROGRAMMES.map((programme) => {
+            /* Button hierarchy (system slice): equal options are
+               secondary — only the programme whose declared goals
+               include the person's own stated goal earns the primary
+               and the badge. No stated goal, no recommendation. */
+            const matched = programmeMatchesGoal(programme, assessment.answers.goal);
+            return (
+              <div key={programme.id}>
+                <h3 className="flex flex-wrap items-center gap-2 text-[length:var(--text-section)] font-semibold text-foreground">
+                  {programme.name} · {programme.weeks.length} weeks
+                  {matched ? <Badge variant="gold">Matches your goal</Badge> : null}
+                </h3>
+                <p className="mt-1 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                  {programme.blurb}
+                </p>
+                <div className="mt-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={matched ? "default" : "secondary"}
+                    onClick={() => enrol(programme.id)}
+                  >
+                    Enrol
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {pastRuns.length > 0 ? (
         <div className="mt-5 border-t border-border-subtle pt-3">
-          <p className="eyebrow">Past runs</p>
+          <h3 className="nut-group-title">Past runs</h3>
           <ul className="mt-2 space-y-1.5">
             {pastRuns.map((p) => (
               <li
@@ -133,7 +154,7 @@ export function ProgrammesSection() {
               >
                 <span className="text-foreground">{p.definition.name}</span>
                 <span className="text-muted-foreground">
-                  {p.run.startedOn} · {p.state === "quit" ? "Quit" : "Completed"} ·{" "}
+                  {fmtDate(p.run.startedOn)} · {p.state === "quit" ? "Quit" : "Completed"} ·{" "}
                   {p.summary.weeksMet} of {p.definition.weeks.length} weeks met
                 </span>
               </li>

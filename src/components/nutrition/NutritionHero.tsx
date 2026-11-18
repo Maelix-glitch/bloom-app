@@ -33,6 +33,7 @@ import {
 import type { NutritionTargetState } from "@/hooks/useNutrition";
 import { formatGrams } from "./input";
 import { Bar, Rings } from "./NutritionPrimitives";
+import { EstimateChip } from "./ProvenanceBadge";
 
 /* --------------------------------- dates -------------------------------- */
 
@@ -361,7 +362,7 @@ export function NutritionHero({
 
       {targetState.kind === "ready" ? (
         <p className="nut-note">
-          Targets are estimates from your body numbers (Mifflin–St Jeor
+          <EstimateChip /> Targets are estimates from your body numbers (Mifflin–St Jeor
           {bmr !== null && tdee !== null
             ? `, ${Math.round(bmr)} kcal at rest, ${fmtKcalApprox(tdee)} with activity`
             : ""}

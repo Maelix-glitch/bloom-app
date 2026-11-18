@@ -42,8 +42,11 @@ import { parseForgivingNumber } from "./input";
 
 function GroceryRow({ item }: { item: GroceryItem }) {
   return (
-    <li className="nut-entry">
-      <div className="min-w-0 flex-1">
+    /* A bounded pair row (system slice): name and quantity stay next to
+       each other inside the shop column — and the quantity is sans with
+       tabular numerals, never serif (serif marks meaning, not data). */
+    <li className="kv-row kv-row--pair">
+      <div className="min-w-0">
         <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
           {item.name}
         </p>
@@ -61,9 +64,7 @@ function GroceryRow({ item }: { item: GroceryItem }) {
           </p>
         ) : null}
       </div>
-      <p className="shrink-0 font-display text-[length:var(--text-support)] text-foreground">
-        {formatGramAmount(item.neededGrams)}
-      </p>
+      <p className="kv-qty">{formatGramAmount(item.neededGrams)}</p>
     </li>
   );
 }
@@ -118,13 +119,13 @@ export function GrocerySection() {
       </div>
 
       {result.status === "no_plan" ? (
-        <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+        <p className="mt-2 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
           {result.reason} Generate your plan above and this list will be built from it —
           every ingredient, added up.
         </p>
       ) : (
         <>
-          <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+          <p className="mt-2 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             From your plan for {result.days.map((d) => fmtDate(d)).join(", ")} — the ingredients of every dish in
             it, added up per food. Amounts are grams, the units the plan itself uses.
           </p>
@@ -136,20 +137,22 @@ export function GrocerySection() {
             </p>
           ) : null}
 
-          {result.groups.map((group) => (
-            <div key={group.category} className="mt-4">
-              <h3 className="nut-meal-title">{group.label}</h3>
-              <ul>
-                {group.items.map((item) => (
-                  <GroceryRow key={item.foodId} item={item} />
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="shop-groups">
+            {result.groups.map((group) => (
+              <div key={group.category} className="shop-group">
+                <h3 className="nut-group-title">{group.label}</h3>
+                <ul>
+                  {group.items.map((item) => (
+                    <GroceryRow key={item.foodId} item={item} />
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
 
           {result.unlisted.length > 0 ? (
             <div className="mt-4">
-              <h3 className="nut-meal-title">Couldn&apos;t be listed</h3>
+              <h3 className="nut-group-title">Couldn&apos;t be listed</h3>
               <ul className="mt-2 list-disc pl-5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
                 {result.unlisted.map((entry, index) => (
                   <li key={`${entry.name}-${index}`}>
@@ -168,14 +171,14 @@ export function GrocerySection() {
       )}
 
       <div className="mt-6 border-t border-border-subtle pt-4">
-        <h3 className="nut-meal-title">Your pantry</h3>
+        <h3 className="nut-group-title">Your pantry</h3>
         {pantry.items.length === 0 ? (
           <p className="nut-note">
             Nothing recorded yet. Add what you already have at home and the list above
             will deduct it — with the deduction shown, never hidden.
           </p>
         ) : (
-          <ul>
+          <ul className="kv-bound">
             {pantry.items.map((item) => (
               <li key={item.id} className="nut-entry">
                 <div className="min-w-0 flex-1">
@@ -226,7 +229,16 @@ export function GrocerySection() {
               }}
             />
           </div>
-          <Button type="button" size="sm" onClick={addPantryItem} disabled={!name.trim()}>
+          {/* Never dimmed gold (system slice): an empty form gets a
+              neutral secondary, and the button turns primary — flat
+              gold — the moment the name makes it valid. */}
+          <Button
+            type="button"
+            size="sm"
+            variant={name.trim() ? "default" : "secondary"}
+            onClick={addPantryItem}
+            disabled={!name.trim()}
+          >
             <Plus className="size-4" aria-hidden /> Add
           </Button>
         </div>

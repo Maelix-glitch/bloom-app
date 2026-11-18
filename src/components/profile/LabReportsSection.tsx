@@ -14,8 +14,10 @@
  */
 
 import { useState } from "react";
+import { Info } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { fmtDate } from "@/lib/format";
 import { usePrefValue } from "@/lib/prefsStore";
 import {
   EMPTY_LABS,
@@ -32,12 +34,6 @@ import {
 
 function fmtValue(n: number): string {
   return Number.isInteger(n) ? String(n) : String(parseFloat(n.toFixed(2)));
-}
-
-function fmtDate(isoDate: string): string {
-  const d = new Date(`${isoDate}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return isoDate;
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 function fmtChange(change: number, unit: string): string {
@@ -101,10 +97,17 @@ export function LabReportsSection() {
         </div>
       </div>
 
-      <p className="text-[length:var(--text-caption)] text-faint">{LABS_DISCLAIMER}</p>
+      {/* The safety sentence is the most important text on this card,
+          so it renders as a note (system slice): full-contrast 14px on
+          a surface-2 ground with a rule — never the smallest, dimmest
+          line here (diagnosis finding #15). */}
+      <p className="note">
+        <Info className="size-4" aria-hidden />
+        <span>{LABS_DISCLAIMER}</span>
+      </p>
 
       {groups.length === 0 ? (
-        <p className="mt-4 text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
+        <p className="mt-4 max-w-[var(--measure)] text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
           No results yet. Add the values from a printed report and Bloom will keep them here,
           each shown against the range printed on that report.
         </p>
