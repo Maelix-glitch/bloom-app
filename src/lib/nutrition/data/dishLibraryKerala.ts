@@ -90,6 +90,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-murungakkai-sambar",
@@ -127,6 +128,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-kerala-parippu-curry",
@@ -157,6 +159,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-moru-curry",
@@ -189,6 +192,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kumbalanga-pulissery",
@@ -221,6 +225,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mambazha-pulissery",
@@ -254,6 +259,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kerala-mutta-curry",
@@ -290,6 +296,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mutta-roast",
@@ -325,6 +332,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kadala-curry",
@@ -361,6 +369,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-kadala-curry-enriched",
@@ -400,6 +409,7 @@ export const KERALA_DISHES: Dish[] = [
     enriched: true,
     enrichment:
       "50 g extra chickpeas and 100 g coconut milk stirred through the classic kadala curry — more protein per serving and a richer gravy.",
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-cherupayar-curry",
@@ -432,6 +442,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-vanpayar-curry",
@@ -463,6 +474,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-vendakka-theeyal",
@@ -497,6 +509,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pavakka-theeyal",
@@ -531,6 +544,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ulli-theeyal",
@@ -564,6 +578,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chemmeen-theeyal",
@@ -597,6 +612,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* --------------------------- fish & seafood --------------------------- */
   {
@@ -634,6 +650,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mathi-curry",
@@ -669,6 +686,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-thenga-aracha-meen-curry",
@@ -706,6 +724,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-manga-meen-curry",
@@ -742,6 +761,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-meen-varuthathu",
@@ -774,6 +794,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chemmeen-curry",
@@ -810,6 +831,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chemmeen-roast",
@@ -846,6 +868,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ------------------------------ chicken ------------------------------ */
   {
@@ -886,6 +909,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kozhi-varutharacha-curry",
@@ -924,6 +948,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kerala-chicken-stew",
@@ -960,6 +985,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kozhi-porichathu",
@@ -994,6 +1020,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kozhi-perattu",
@@ -1030,6 +1057,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ------------------------- more vegetable mains ------------------------- */
   {
@@ -1066,6 +1094,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-urulakizhangu-curry",
@@ -1098,6 +1127,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kerala-veg-stew",
@@ -1132,6 +1162,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-thakkali-curry",
@@ -1164,6 +1195,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kappa-curry",
@@ -1195,6 +1227,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chembu-curry",
@@ -1227,6 +1260,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-murungakkai-curry",
@@ -1260,6 +1294,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ulli-curry",
@@ -1292,6 +1327,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kozhikode-pidi",
@@ -1327,6 +1363,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-thakkali-rasam",
@@ -1360,6 +1397,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kurumulaku-rasam",
@@ -1391,6 +1429,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ sadhya sides ------------------------------ */
   {
@@ -1426,6 +1465,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-olan",
@@ -1454,6 +1494,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kalan",
@@ -1487,6 +1528,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kaya-erissery",
@@ -1518,6 +1560,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-koottu-curry",
@@ -1550,6 +1593,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-kaya-thoran",
@@ -1581,6 +1625,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-carrot-thoran",
@@ -1611,6 +1656,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 22,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cheera-thoran",
@@ -1642,6 +1688,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 18,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-muringa-ila-thoran",
@@ -1673,6 +1720,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-vendakka-thoran",
@@ -1703,6 +1751,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 22,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chembu-thoran",
@@ -1733,6 +1782,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cherupayar-thoran",
@@ -1764,6 +1814,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-vanpayar-thoran",
@@ -1794,6 +1845,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kappa-puzhukku",
@@ -1824,6 +1876,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chembu-puzhukku",
@@ -1852,6 +1905,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pineapple-pachadi",
@@ -1883,6 +1937,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 22,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mambazha-pachadi",
@@ -1914,6 +1969,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-vellarikka-pachadi",
@@ -1943,6 +1999,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 18,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-vendakka-kichadi",
@@ -1971,6 +2028,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pavakka-kichadi",
@@ -2000,6 +2058,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mathi-peera",
@@ -2032,6 +2091,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ayala-peera",
@@ -2064,6 +2124,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-manga-curry",
@@ -2095,6 +2156,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-muringa-ila-curry",
@@ -2126,6 +2188,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kaya-varuthathu",
@@ -2154,6 +2217,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-urulakizhangu-mezhukkupuratti",
@@ -2183,6 +2247,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-carrot-mezhukkupuratti",
@@ -2211,6 +2276,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 22,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kumbalanga-curry",
@@ -2242,6 +2308,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* --------------------------- chammanthi & achar --------------------------- */
   {
@@ -2270,6 +2337,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 12,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ulli-chammanthi",
@@ -2294,6 +2362,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 12,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chuvanna-thenga-chammanthi",
@@ -2320,6 +2389,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 12,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pudina-chammanthi",
@@ -2346,6 +2416,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mulaku-chammanthi",
@@ -2370,6 +2441,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-naranga-achar",
@@ -2402,6 +2474,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-inji-achar",
@@ -2433,6 +2506,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chammanthi-podi",
@@ -2461,6 +2535,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* --------------------------- breakfast & breads --------------------------- */
   {
@@ -2488,6 +2563,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kallappam",
@@ -2514,6 +2590,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-idiyappam",
@@ -2537,6 +2614,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-puttu",
@@ -2560,6 +2638,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gothambu-puttu",
@@ -2582,6 +2661,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pazham-puttu",
@@ -2607,6 +2687,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 22,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mutta-appam",
@@ -2632,6 +2713,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mutta-stew",
@@ -2664,6 +2746,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pazhankanji",
@@ -2689,6 +2772,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-pathiri",
@@ -2712,6 +2796,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-orotti",
@@ -2735,6 +2820,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kerala-parotta",
@@ -2762,6 +2848,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-poricha-pathiri",
@@ -2789,6 +2876,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- biryanis -------------------------------- */
   {
@@ -2834,6 +2922,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ney-choru",
@@ -2865,6 +2954,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-meen-biryani",
@@ -2904,6 +2994,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chemmeen-biryani",
@@ -2943,6 +3034,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 65,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* --------------------------------- snacks --------------------------------- */
   {
@@ -2979,6 +3071,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-irachi-pathiri",
@@ -3013,6 +3106,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kozhi-ada",
@@ -3044,6 +3138,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ammini-kozhukatta",
@@ -3072,6 +3167,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------------------- drinks --------------------------------- */
   {
@@ -3097,5 +3193,7 @@ export const KERALA_DISHES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["fridge"],
+    noCook: true,
   },
 ];

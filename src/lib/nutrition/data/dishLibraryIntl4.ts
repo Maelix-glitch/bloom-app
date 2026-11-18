@@ -56,6 +56,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pl-kotlety-mielone",
@@ -84,6 +85,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-pl-bigos-style",
@@ -113,6 +115,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pl-golabki",
@@ -141,6 +144,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 90,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pl-pierogi-ruskie-style",
@@ -168,6 +172,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pl-zurek-style",
@@ -196,6 +201,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pl-krupnik",
@@ -223,6 +229,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- German ------------------------------- */
   {
@@ -252,6 +259,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-de-konigsberger-klopse-style",
@@ -280,6 +288,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-de-linsensuppe",
@@ -308,6 +317,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-de-senfeier",
@@ -335,6 +345,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-de-bauernfruhstuck",
@@ -361,6 +372,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Austrian ------------------------------ */
   {
@@ -388,6 +400,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-at-spinat-eier",
@@ -414,6 +427,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Hungarian ------------------------------ */
   {
@@ -442,6 +456,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-hu-gulyas-style",
@@ -471,6 +486,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-hu-babgulyas-style",
@@ -499,6 +515,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-hu-lecso",
@@ -526,6 +543,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-hu-rakott-krumpli-style",
@@ -553,6 +571,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-hu-ujhazi",
@@ -580,6 +599,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 65,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Czech -------------------------------- */
   {
@@ -608,6 +628,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cz-cockova",
@@ -636,6 +657,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cz-kulajda-style",
@@ -666,6 +688,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cz-kure-na-smetane-style",
@@ -693,6 +716,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ------------------------------- Balkan ------------------------------- */
   {
@@ -722,6 +746,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-blk-grah",
@@ -749,6 +774,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-blk-raznjici",
@@ -775,6 +801,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-blk-cevapi-style",
@@ -803,6 +830,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-blk-prebranac",
@@ -829,6 +857,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-blk-kavarma",
@@ -857,6 +886,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   /* ------------------------------- Nordic ------------------------------- */
   {
@@ -886,6 +916,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-fi-lohikeitto",
@@ -913,6 +944,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-no-fiskesuppe",
@@ -941,6 +973,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-dk-smorrebrod",
@@ -968,6 +1001,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-dk-honsesalat",
@@ -995,6 +1029,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-dk-aeggekage",
@@ -1021,6 +1056,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-is-plokkfiskur",
@@ -1048,6 +1084,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-se-gravlax-style",
@@ -1074,6 +1111,8 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["fridge"],
+    noCook: true,
   },
   {
     id: "dish-no-farikal-style",
@@ -1099,6 +1138,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 105,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-no-lapskaus-style",
@@ -1125,6 +1165,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-se-janssons-style",
@@ -1151,6 +1192,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-se-laxagg",
@@ -1176,6 +1218,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-se-toast-skagen-style",
@@ -1203,6 +1246,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-fi-kaalilaatikko-style",
@@ -1230,6 +1274,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-no-sodd-style",
@@ -1257,6 +1302,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-no-fiskegrateng",
@@ -1284,6 +1330,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-dk-stegt-kylling",
@@ -1312,6 +1359,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-se-sjomansbiff-style",
@@ -1339,6 +1387,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   /* ---------------------------- British & Irish ---------------------------- */
   {
@@ -1367,6 +1416,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-cullen-skink-style",
@@ -1393,6 +1443,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-lancashire-hotpot-style",
@@ -1421,6 +1472,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 105,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven"],
   },
   {
     id: "dish-gb-fish-pie",
@@ -1450,6 +1502,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-gb-kedgeree",
@@ -1479,6 +1532,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-scotch-eggs-style",
@@ -1505,6 +1559,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-chicken-mushroom-pie",
@@ -1532,6 +1587,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven", "fridge"],
   },
   {
     id: "dish-gb-coronation-chicken",
@@ -1559,6 +1615,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-gb-welsh-rarebit-style",
@@ -1586,6 +1643,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-gb-ploughmans-style",
@@ -1614,6 +1672,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-ie-seafood-chowder",
@@ -1643,6 +1702,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ie-boxty-style",
@@ -1669,6 +1729,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-fish-chips-style",
@@ -1697,6 +1758,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-gb-cawl-style",
@@ -1724,6 +1786,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-mulligatawny-style",
@@ -1753,6 +1816,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gb-potted-shrimp-style",
@@ -1780,6 +1844,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven", "fridge"],
   },
   {
     id: "dish-gb-skirlie-egg",
@@ -1806,6 +1871,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ie-dublin-coddle-style",
@@ -1833,6 +1899,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------- Central Asia & Caucasus ------------------------- */
   {
@@ -1861,6 +1928,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-uz-lagman-style",
@@ -1892,6 +1960,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kz-beshbarmak-style",
@@ -1919,6 +1988,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ge-khachapuri-style",
@@ -1946,6 +2016,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["oven"],
   },
   {
     id: "dish-ge-chakhokhbili",
@@ -1973,6 +2044,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ge-kharcho-style",
@@ -2003,6 +2075,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ge-lobio",
@@ -2031,6 +2104,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-am-harisa-style",
@@ -2056,6 +2130,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 120,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-uz-manti",
@@ -2084,6 +2159,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ge-satsivi",
@@ -2113,6 +2189,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-ge-chirbuli",
@@ -2141,6 +2218,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-am-lahmacun-style",
@@ -2171,6 +2249,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven"],
   },
   {
     id: "dish-uz-dimlama",
@@ -2200,6 +2279,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 65,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-am-khorovats-style",
@@ -2227,6 +2307,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-uz-samsa",
@@ -2256,6 +2337,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven", "fridge"],
   },
   {
     id: "dish-uz-moshkichiri",
@@ -2283,6 +2365,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ge-shkmeruli",
@@ -2308,6 +2391,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kz-kespe-style",
@@ -2335,6 +2419,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-am-spas-style",
@@ -2362,6 +2447,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* -------------------------------- African -------------------------------- */
   {
@@ -2393,6 +2479,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-et-misir-wat",
@@ -2420,6 +2507,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-et-shiro-wat",
@@ -2447,6 +2535,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-et-chicken-tibs",
@@ -2476,6 +2565,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gh-groundnut-stew",
@@ -2504,6 +2594,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-gh-waakye",
@@ -2529,6 +2620,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gh-jollof",
@@ -2558,6 +2650,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ng-egusi-style",
@@ -2585,6 +2678,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ng-pepper-soup",
@@ -2612,6 +2706,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ng-moi-moi",
@@ -2638,6 +2733,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ke-githeri",
@@ -2665,6 +2761,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ke-nyama-choma-style",
@@ -2691,6 +2788,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-za-bobotie-style",
@@ -2721,6 +2819,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-za-chakalaka",
@@ -2751,6 +2850,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-za-peri-peri",
@@ -2778,6 +2878,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gh-red-red",
@@ -2805,6 +2906,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ng-shrimp-okra",
@@ -2832,6 +2934,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ke-pilau",
@@ -2862,6 +2965,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-et-azifa",
@@ -2889,6 +2993,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-za-bunny-chow-style",
@@ -2917,6 +3022,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-et-lentil-sambusa-style",
@@ -2944,6 +3050,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sn-yassa",
@@ -2972,6 +3079,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tz-kuku-paka",
@@ -3002,6 +3110,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-zw-chicken-sadza-style",
@@ -3029,6 +3138,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Caribbean ------------------------------- */
   {
@@ -3059,6 +3169,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jm-brown-stew-chicken",
@@ -3089,6 +3200,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jm-stew-peas-style",
@@ -3116,6 +3228,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jm-escovitch-fish",
@@ -3145,6 +3258,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cu-fricase-de-pollo",
@@ -3175,6 +3289,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cu-arroz-con-pollo",
@@ -3205,6 +3320,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cu-moros",
@@ -3234,6 +3350,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tt-pelau",
@@ -3263,6 +3380,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tt-doubles",
@@ -3294,6 +3412,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tt-fish-bake-style",
@@ -3322,6 +3441,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jm-run-down-style",
@@ -3351,6 +3471,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cu-black-bean-soup",
@@ -3380,6 +3501,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tt-corn-soup",
@@ -3408,6 +3530,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------------- Remaining Latin --------------------------- */
   {
@@ -3436,6 +3559,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ar-pollo-crema",
@@ -3463,6 +3587,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ar-locro-style",
@@ -3490,6 +3615,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 65,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cl-cazuela",
@@ -3518,6 +3644,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cl-pastel-choclo-style",
@@ -3546,6 +3673,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-cl-charquican-style",
@@ -3573,6 +3701,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-co-ajiaco-style",
@@ -3599,6 +3728,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-co-frijoles-style",
@@ -3627,6 +3757,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-co-sancocho",
@@ -3655,6 +3786,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ve-pabellon-style",
@@ -3684,6 +3816,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ve-perico",
@@ -3710,6 +3843,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ar-parrilla-style",
@@ -3738,6 +3872,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-co-changua",
@@ -3763,6 +3898,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ar-carbonada-style",
@@ -3791,6 +3927,7 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ve-cachapas-style",
@@ -3818,5 +3955,6 @@ export const INTL4_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
 ];

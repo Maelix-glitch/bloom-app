@@ -86,6 +86,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 90,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-langarwali-dal",
@@ -118,6 +119,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-chicken-patiala",
@@ -155,6 +157,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ============================ KASHMIRI ============================ */
   {
@@ -191,6 +194,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-yakhni",
@@ -223,6 +227,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kashmiri-pulao",
@@ -257,6 +262,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kashmiri-dum-aloo",
@@ -289,6 +295,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-gushtaba",
@@ -321,6 +328,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* ========================== AWADHI / UP ========================== */
   {
@@ -356,6 +364,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-vegetable-tehri",
@@ -392,6 +401,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-rasedaar-aloo",
@@ -424,6 +434,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sheermal-style",
@@ -452,6 +463,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 90,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-shami-kebab",
@@ -488,6 +500,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-matar-nimona",
@@ -522,6 +535,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* =========================== HIMACHALI =========================== */
   {
@@ -553,6 +567,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 90,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chana-madra",
@@ -585,6 +600,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-tudkiya-bhath",
@@ -619,6 +635,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aktori",
@@ -648,6 +665,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ============================= DELHI ============================= */
   {
@@ -678,6 +696,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* =========================== GUJARATI =========================== */
   {
@@ -711,6 +730,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-vegetable-handvo",
@@ -745,6 +765,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-palak-thepla",
@@ -776,6 +797,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-undhiyu-style",
@@ -817,6 +839,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-sev-tameta",
@@ -850,6 +873,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-dal-dhokli",
@@ -887,6 +911,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-anda-ghotala",
@@ -921,6 +946,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ========================= MAHARASHTRIAN ========================= */
   {
@@ -953,6 +979,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-bharli-vangi",
@@ -990,6 +1017,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-thalipeeth",
@@ -1023,6 +1051,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kothimbir-vadi",
@@ -1056,6 +1085,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-malvani-chicken-curry",
@@ -1093,6 +1123,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-rava-mackerel-fry",
@@ -1124,6 +1155,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ============================== GOAN ============================== */
   {
@@ -1161,6 +1193,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-xacuti",
@@ -1198,6 +1231,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-vindaloo",
@@ -1234,6 +1268,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-prawn-balchao-style",
@@ -1269,6 +1304,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-recheado-mackerel",
@@ -1301,6 +1337,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ========================== RAJASTHANI ========================== */
   {
@@ -1337,6 +1374,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "oven"],
   },
   {
     id: "dish-gatte-ki-sabzi",
@@ -1371,6 +1409,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-laal-maas-style",
@@ -1407,6 +1446,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-bajra-roti",
@@ -1432,6 +1472,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ============================= SINDHI ============================= */
   {
@@ -1472,6 +1513,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sai-bhaji",
@@ -1506,6 +1548,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   /* ============================= PARSI ============================= */
   {
@@ -1548,6 +1591,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-patra-style-fish",
@@ -1580,6 +1624,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-sali-boti-style",
@@ -1617,6 +1662,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ============================ BENGALI ============================ */
   {
@@ -1646,6 +1692,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chingri-malakari",
@@ -1681,6 +1728,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kosha-lamb-style",
@@ -1719,6 +1767,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-posto",
@@ -1747,6 +1796,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shukto",
@@ -1783,6 +1833,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-begun-bhaja",
@@ -1810,6 +1861,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ghugni",
@@ -1845,6 +1897,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-macher-jhol",
@@ -1880,6 +1933,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-dimer-dalna",
@@ -1917,6 +1971,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ============================= ODIA ============================= */
   {
@@ -1952,6 +2007,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-pakhala-bhata",
@@ -1982,6 +2038,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-santula",
@@ -2017,6 +2074,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   /* =========================== ASSAMESE =========================== */
   {
@@ -2049,6 +2107,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-pitika",
@@ -2076,6 +2135,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ============================= BIHARI ============================= */
   {
@@ -2114,6 +2174,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-sattu-sharbat",
@@ -2141,6 +2202,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-dal-pithi",
@@ -2173,6 +2235,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-champaran-lamb-style",
@@ -2209,6 +2272,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 105,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ========================== NORTH-EAST ========================== */
   {
@@ -2241,6 +2305,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-thukpa-style",
@@ -2275,6 +2340,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-momos",
@@ -2306,6 +2372,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-momo-chutney",
@@ -2335,6 +2402,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ======================== MADHYA PRADESH ======================== */
   {
@@ -2370,6 +2438,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-bhopali-gosht-korma-style",
@@ -2406,6 +2475,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-khopra-patties",
@@ -2438,6 +2508,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* ========================= CHHATTISGARH ========================= */
   {
@@ -2468,6 +2539,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chila",
@@ -2499,6 +2571,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-bafauri-style",
@@ -2532,6 +2605,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-dubki-kadhi",
@@ -2567,6 +2641,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ============================= TAMIL ============================= */
   {
@@ -2607,6 +2682,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-vazhakkai-varuval",
@@ -2637,6 +2713,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kathirikai-kuzhambu",
@@ -2672,6 +2749,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mor-kuzhambu",
@@ -2706,6 +2784,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kuzhi-paniyaram",
@@ -2737,6 +2816,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-meen-kuzhambu",
@@ -2772,6 +2852,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-idli-podi-style",
@@ -2800,6 +2881,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ===================== ANDHRA / TELANGANA ===================== */
   {
@@ -2837,6 +2919,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mirchi-ka-salan",
@@ -2874,6 +2957,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-andhra-kodi-kura",
@@ -2912,6 +2996,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-gutti-vankaya",
@@ -2948,6 +3033,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pesarattu",
@@ -2977,6 +3063,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-royyala-vepudu",
@@ -3011,6 +3098,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-haleem-style",
@@ -3052,6 +3140,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 120,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-khatti-dal",
@@ -3085,6 +3174,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-chepala-pulusu",
@@ -3121,6 +3211,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* =========================== KARNATAKA =========================== */
   {
@@ -3164,6 +3255,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-neer-dosa",
@@ -3189,6 +3281,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kori-rotti-style",
@@ -3225,6 +3318,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-ghee-roast-style",
@@ -3259,6 +3353,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-rava-idli",
@@ -3292,6 +3387,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jolada-rotti",
@@ -3316,6 +3412,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ennegai",
@@ -3352,6 +3449,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-akki-rotti",
@@ -3383,6 +3481,7 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pineapple-gojju",
@@ -3415,5 +3514,6 @@ export const INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
 ];

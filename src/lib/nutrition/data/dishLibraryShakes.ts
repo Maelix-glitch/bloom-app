@@ -49,6 +49,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-mango",
@@ -71,6 +73,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-strawberry",
@@ -93,6 +97,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-strawberry-banana",
@@ -116,6 +122,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-orange-cardamom",
@@ -139,6 +147,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-apple-cinnamon",
@@ -162,6 +172,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-pear-ginger",
@@ -185,6 +197,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-watermelon-mint",
@@ -207,6 +221,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder", "fridge"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-jackfruit",
@@ -229,6 +245,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-cottage-cheese-banana",
@@ -250,6 +268,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-cottage-cheese-mango",
@@ -271,6 +291,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-cottage-cheese-strawberry",
@@ -292,6 +314,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-cottage-cheese-orange",
@@ -313,6 +337,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-cottage-cheese-oats-banana",
@@ -336,6 +362,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-shake-double-dairy-banana",
@@ -358,6 +385,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-cottage-cheese-oat",
@@ -380,6 +409,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-greek-yogurt-cottage-cheese-strawberry",
@@ -402,6 +433,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-milk-greek-yogurt-banana",
@@ -423,6 +456,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-milk-greek-yogurt-mango",
@@ -444,6 +479,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-turmeric-milk-greek-yogurt",
@@ -466,6 +503,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-ricotta-banana",
@@ -487,6 +526,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-ricotta-strawberry",
@@ -508,6 +549,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-overnight-oat-banana",
@@ -530,6 +573,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder", "fridge"],
+    noCook: true,
   },
   {
     id: "dish-shake-oat-apple-greek-yogurt",
@@ -553,6 +598,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-oat-mango-greek-yogurt",
@@ -574,6 +621,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-oat-peanut-banana",
@@ -596,6 +645,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-peanut-banana-greek-yogurt",
@@ -618,6 +669,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-peanut-strawberry-greek-yogurt",
@@ -639,6 +692,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-almond-banana-greek-yogurt",
@@ -660,6 +715,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-almond-cardamom",
@@ -682,6 +739,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-cashew-mango-greek-yogurt",
@@ -703,6 +762,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-walnut-banana-greek-yogurt",
@@ -724,6 +785,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-mixed-seed-banana",
@@ -747,6 +810,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-pumpkin-seed-mango",
@@ -768,6 +833,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sesame-banana-greek-yogurt",
@@ -789,6 +856,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sunflower-strawberry",
@@ -810,6 +879,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-boiled-egg-banana",
@@ -831,6 +902,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-shake-boiled-egg-mango",
@@ -852,6 +924,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-egg-oat-breakfast",
@@ -874,6 +947,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-shake-egg-cottage-cheese-banana",
@@ -896,6 +970,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-tofu-banana-peanut",
@@ -917,6 +992,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-tofu-mango-pumpkin-seed",
@@ -938,6 +1015,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-tofu-strawberry-almond",
@@ -959,6 +1038,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-tofu-pineapple-coconut",
@@ -981,6 +1062,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-tofu-oat-banana-peanut",
@@ -1003,6 +1086,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-tofu-spinach-mango",
@@ -1025,6 +1110,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-tempeh-banana-peanut",
@@ -1046,6 +1133,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-tempeh-mango-oat",
@@ -1067,6 +1155,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-tempeh-strawberry-oat",
@@ -1089,6 +1178,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-edamame-tofu-banana",
@@ -1110,6 +1200,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-edamame-tofu-mango-mint",
@@ -1132,6 +1223,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-edamame-peanut-oat-banana",
@@ -1154,6 +1246,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-soy-milk-banana",
@@ -1176,6 +1269,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-soy-milk-mango-pumpkin-seed",
@@ -1197,6 +1291,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-sattu-banana",
@@ -1218,6 +1313,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sattu-mango",
@@ -1239,6 +1336,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sattu-oat",
@@ -1260,6 +1359,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sattu-tofu-banana",
@@ -1281,6 +1382,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sattu-cottage-cheese-banana",
@@ -1303,6 +1406,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-quinoa-banana",
@@ -1324,6 +1429,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-shake-quinoa-mango",
@@ -1345,6 +1451,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shake-spinach-banana-greek-yogurt",
@@ -1366,6 +1473,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-avocado-greek-yogurt-lemon",
@@ -1388,6 +1497,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-sweet-potato-greek-yogurt",
@@ -1410,6 +1521,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-shake-carrot-orange-greek-yogurt",
@@ -1432,6 +1544,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-coconut-banana-greek-yogurt",
@@ -1454,6 +1568,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-whey-banana-milk",
@@ -1475,6 +1591,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 5,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-whey-mango-milk",
@@ -1496,6 +1614,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 5,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-whey-strawberry-greek-yogurt",
@@ -1518,6 +1638,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 5,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-whey-oat-banana",
@@ -1540,6 +1662,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-shake-whey-peanut-banana",
@@ -1562,6 +1685,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-whey-cottage-cheese-banana",
@@ -1584,6 +1709,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-soy-powder-banana-oat-peanut",
@@ -1606,6 +1733,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-soy-powder-mango-coconut",
@@ -1628,6 +1757,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-shake-soy-powder-strawberry-almond",
@@ -1650,5 +1781,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
 ];

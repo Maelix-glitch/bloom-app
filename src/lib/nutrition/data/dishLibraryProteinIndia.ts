@@ -81,6 +81,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ayala-mulakittathu",
@@ -114,6 +115,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-meen-mappas",
@@ -148,6 +150,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-muringakka-meen-curry",
@@ -182,6 +185,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mathi-pepper-fry",
@@ -214,6 +218,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-choora-curry",
@@ -248,6 +253,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chemmeen-thoran",
@@ -280,6 +286,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chemmeen-mulakittathu",
@@ -312,6 +319,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* --------------------- chicken & lamb --------------------- */
   {
@@ -348,6 +356,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kozhi-thoran",
@@ -380,6 +389,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kozhi-pepper-fry",
@@ -412,6 +422,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-erachi-varattiyathu",
@@ -446,6 +457,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-erachi-ishtu",
@@ -480,6 +492,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-kappa-erachi",
@@ -513,6 +526,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   /* ----------------- chickpea, soya, moong & egg ----------------- */
   {
@@ -548,6 +562,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-vella-kadala-curry",
@@ -578,6 +593,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-kadala-thoran",
@@ -607,6 +623,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-soya-varutharacha-curry",
@@ -640,6 +657,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-soya-pepper-fry-kerala",
@@ -672,6 +690,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-soya-thenga-pal-curry",
@@ -703,6 +722,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-cherupayar-puzhukku",
@@ -733,6 +753,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-mutta-thoran",
@@ -763,6 +784,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mutta-varutharacha-curry",
@@ -797,6 +819,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mutta-mappas",
@@ -831,6 +854,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kadala-mutta-curry",
@@ -865,6 +889,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   /* ============================= INDIA ============================ */
   /* ---------------------------- paneer ---------------------------- */
@@ -900,6 +925,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-paneer-jalfrezi",
@@ -934,6 +960,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-paneer-tikka",
@@ -968,6 +995,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven", "fridge"],
   },
   {
     id: "dish-paneer-chaman",
@@ -1000,6 +1028,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-paneer-chettinad",
@@ -1035,6 +1064,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-paneer-kadhi",
@@ -1068,6 +1098,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-paneer-makai-masala",
@@ -1102,6 +1133,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mushroom-paneer-masala",
@@ -1136,6 +1168,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ----------------------------- egg ------------------------------ */
   {
@@ -1169,6 +1202,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-egg-pepper-fry",
@@ -1202,6 +1236,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-egg-keema-masala",
@@ -1235,6 +1270,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-egg-poached-curry",
@@ -1267,6 +1303,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-egg-vindaloo",
@@ -1300,6 +1337,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-egg-pulusu",
@@ -1334,6 +1372,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-egg-masoor-dal",
@@ -1367,6 +1406,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-egg-tadka-dal",
@@ -1401,6 +1441,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-doi-dim",
@@ -1434,6 +1475,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-palak-egg-curry",
@@ -1467,6 +1509,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mushroom-egg-curry",
@@ -1499,6 +1542,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-paneer-egg-bhurji",
@@ -1533,6 +1577,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------- tofu, tempeh, edamame --------------------- */
   {
@@ -1567,6 +1612,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-tofu-bhurji",
@@ -1601,6 +1647,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-palak-tofu",
@@ -1634,6 +1681,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mushroom-tofu-masala",
@@ -1667,6 +1715,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tempeh-masala",
@@ -1700,6 +1749,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tempeh-pepper-fry",
@@ -1732,6 +1782,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tempeh-palak",
@@ -1763,6 +1814,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-edamame-masala",
@@ -1794,6 +1846,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-edamame-paneer-masala",
@@ -1826,6 +1879,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ---------------------- whole soybean dishes ---------------------- */
   {
@@ -1859,6 +1913,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-soya-chettinad",
@@ -1894,6 +1949,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-mushroom-soya-masala",
@@ -1926,6 +1982,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-soya-egg-curry",
@@ -1958,6 +2015,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-tofu-egg-bhurji",
@@ -1992,6 +2050,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-paneer-soya-masala",
@@ -2024,6 +2083,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   /* -------------------- dals, chickpeas & nuts -------------------- */
   {
@@ -2060,6 +2120,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-mangodi-ki-sabzi",
@@ -2093,6 +2154,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-chole-palak",
@@ -2126,6 +2188,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-chana-paneer",
@@ -2159,6 +2222,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-dal-paneer",
@@ -2192,6 +2256,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-peanut-amti",
@@ -2224,6 +2289,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kaju-masala",
@@ -2257,6 +2323,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-peanut-paneer",
@@ -2290,6 +2357,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-kaju-paneer",
@@ -2322,6 +2390,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chana-egg-curry",
@@ -2354,6 +2423,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   /* --------------------- chicken & fish --------------------- */
   {
@@ -2389,6 +2459,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-kolhapuri",
@@ -2423,6 +2494,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-rezala",
@@ -2456,6 +2528,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-fish-korma",
@@ -2489,6 +2562,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-doi-maach",
@@ -2522,5 +2596,6 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
 ];

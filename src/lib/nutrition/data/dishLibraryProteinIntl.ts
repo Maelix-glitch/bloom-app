@@ -60,6 +60,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ph-tinola",
@@ -91,6 +92,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ph-sinigang-shrimp",
@@ -120,6 +122,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ph-ginataang-manok",
@@ -150,6 +153,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ph-monggo",
@@ -179,6 +183,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ph-tortang-talong",
@@ -208,6 +213,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ph-pinakbet-style",
@@ -240,6 +246,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Japanese ------------------------------ */
   {
@@ -269,6 +276,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jp-chikuzenni",
@@ -299,6 +307,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jp-mabo-nasu",
@@ -329,6 +338,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jp-nikujaga-style",
@@ -358,6 +368,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-jp-teriyaki-style",
@@ -387,6 +398,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------------------- Thai -------------------------------- */
   {
@@ -416,6 +428,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-th-tom-yum-style",
@@ -445,6 +458,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-th-pad-kra-pao-style",
@@ -475,6 +489,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-th-gaeng-pa",
@@ -506,6 +521,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-th-pla-neung-manao-style",
@@ -535,6 +551,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Vietnamese ----------------------------- */
   {
@@ -565,6 +582,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Cambodian ------------------------------ */
   {
@@ -596,6 +614,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Korean ------------------------------- */
   {
@@ -627,6 +646,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kr-chicken-bulgogi-style",
@@ -657,6 +677,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* ------------------------------ Indonesian ----------------------------- */
   {
@@ -687,6 +708,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-id-ayam-betutu-style",
@@ -718,6 +740,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-id-pepes-tofu-tempeh",
@@ -748,6 +771,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-id-rendang-eggs",
@@ -779,6 +803,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-id-tempeh-bacem",
@@ -808,6 +833,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Chinese ------------------------------ */
   {
@@ -839,6 +865,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cn-lions-head-style",
@@ -868,6 +895,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cn-steamed-tofu-shrimp",
@@ -896,6 +924,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-cn-chicken-black-bean",
@@ -925,6 +954,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cn-salt-pepper-tofu",
@@ -954,6 +984,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tw-sesame-oil-chicken",
@@ -980,6 +1011,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ----------------------------- Sri Lankan ------------------------------ */
   {
@@ -1011,6 +1043,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Nepali -------------------------------- */
   {
@@ -1044,6 +1077,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Iberian ------------------------------- */
   {
@@ -1074,6 +1108,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-es-marmitako",
@@ -1104,6 +1139,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pt-arroz-de-marisco-style",
@@ -1135,6 +1171,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pt-cataplana-style",
@@ -1165,6 +1202,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Belgian ------------------------------- */
   {
@@ -1196,6 +1234,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Albanian ------------------------------ */
   {
@@ -1225,6 +1264,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-al-fergese-style",
@@ -1255,6 +1295,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   /* ------------------------------- Romanian ------------------------------ */
   {
@@ -1287,6 +1328,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Bosnian ------------------------------ */
   {
@@ -1319,6 +1361,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------------------- Greek ------------------------------- */
   {
@@ -1351,6 +1394,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Persian ------------------------------ */
   {
@@ -1381,6 +1425,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   /* -------------------------------- Yemeni ------------------------------- */
   {
@@ -1414,6 +1459,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Algerian ------------------------------ */
   {
@@ -1446,6 +1492,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Jewish ------------------------------- */
   {
@@ -1477,6 +1524,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* ------------------------------ Levantine ------------------------------ */
   {
@@ -1508,6 +1556,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Egyptian ------------------------------ */
   {
@@ -1540,6 +1589,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   /* ---------------------------- West African ----------------------------- */
   {
@@ -1571,6 +1621,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ng-efo-riro-style",
@@ -1601,6 +1652,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-cm-ndole-style",
@@ -1630,6 +1682,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-ci-kedjenou",
@@ -1660,6 +1713,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ---------------------------- East African ----------------------------- */
   {
@@ -1691,6 +1745,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ao-calulu-style",
@@ -1722,6 +1777,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ke-maharagwe",
@@ -1751,6 +1807,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ----------------------------- Mozambican ------------------------------ */
   {
@@ -1781,6 +1838,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* ----------------------------- Guatemalan ------------------------------ */
   {
@@ -1813,6 +1871,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-gt-jocon-style",
@@ -1843,6 +1902,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* -------------------------------- Mexican ------------------------------ */
   {
@@ -1876,6 +1936,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ------------------------------- Brazilian ----------------------------- */
   {
@@ -1908,6 +1969,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-br-xinxim-style",
@@ -1939,6 +2001,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-br-frango-quiabo",
@@ -1968,6 +2031,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Peruvian ----------------------------- */
   {
@@ -1999,6 +2063,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ------------------------------ Azerbaijani ---------------------------- */
   {
@@ -2030,6 +2095,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-az-dovga-style",
@@ -2059,6 +2125,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------------------- Iraqi ------------------------------- */
   {
@@ -2091,6 +2158,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- Georgian ------------------------------ */
   {
@@ -2120,6 +2188,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Lithuanian ----------------------------- */
   {
@@ -2150,6 +2219,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Cambodian ------------------------------ */
   {
@@ -2184,6 +2254,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Indonesian ----------------------------- */
   {
@@ -2217,6 +2288,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Chinese ------------------------------ */
   {
@@ -2247,6 +2319,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Persian ------------------------------ */
   {
@@ -2279,6 +2352,7 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* -------------------------------- Turkish ------------------------------ */
   {
@@ -2309,5 +2383,6 @@ export const PROTEIN_INTL_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
 ];

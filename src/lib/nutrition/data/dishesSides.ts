@@ -56,6 +56,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-baingan-masala",
@@ -90,6 +91,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-gajar-matar",
@@ -121,6 +123,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-beans-poriyal",
@@ -148,6 +151,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cabbage-poriyal",
@@ -176,6 +180,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-beans",
@@ -207,6 +212,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-karela-fry",
@@ -235,6 +241,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-palak-saag",
@@ -265,6 +272,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sookhi-gobi-masala",
@@ -297,6 +305,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-broccoli-masala",
@@ -326,6 +335,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mixed-veg-dry",
@@ -359,6 +369,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-aloo-fry",
@@ -388,6 +399,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-shakarkandi-masala",
@@ -417,6 +429,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mushroom-pepper-fry",
@@ -447,6 +460,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-lobia-usal",
@@ -481,6 +495,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-sookha-chana",
@@ -514,6 +529,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker", "mixer_grinder"],
   },
   {
     id: "dish-masala-corn",
@@ -542,6 +558,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-shimla-mirch-masala",
@@ -573,6 +590,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-onion-tomato-masala",
@@ -605,6 +623,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-soya-masala",
@@ -637,6 +656,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-corn-palak",
@@ -666,6 +686,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-vangi-masala",
@@ -699,6 +720,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shahi-mixed-veg",
@@ -739,6 +761,7 @@ export const DISHES_SIDES: Dish[] = [
     enriched: true,
     enrichment:
       "Cottage cheese and cashews folded through the vegetables, finished with ghee and a splash of milk — the shahi version of the everyday mixed veg.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-aloo-matar-dry",
@@ -772,6 +795,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
 
   /* ------------------------------ chutneys ------------------------------ */
@@ -801,6 +825,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-tomato-chutney",
@@ -831,6 +856,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-peanut-chutney",
@@ -860,6 +886,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-onion-chutney",
@@ -889,6 +916,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-lahsun-chutney",
@@ -916,6 +944,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-dhaniya-chutney",
@@ -945,6 +974,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pudina-dahi-dip",
@@ -972,6 +1002,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-til-chutney",
@@ -1000,6 +1031,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shahi-coconut-chutney",
@@ -1029,6 +1061,7 @@ export const DISHES_SIDES: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Cashews blended into the coconut make this richer and creamier than the everyday coconut chutney.",
+    equipment: ["stove", "mixer_grinder"],
   },
 
   /* ------------------------------- raitas ------------------------------- */
@@ -1060,6 +1093,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mixed-veg-raita",
@@ -1090,6 +1124,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-onion-tomato-raita",
@@ -1117,6 +1152,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-fruit-raita",
@@ -1145,6 +1181,8 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["fridge"],
+    noCook: true,
   },
   {
     id: "dish-palak-raita",
@@ -1172,6 +1210,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-aloo-raita",
@@ -1200,6 +1239,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-pineapple-raita",
@@ -1227,6 +1267,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-burhani-raita",
@@ -1255,6 +1296,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-gajar-raita",
@@ -1283,6 +1325,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-greek-yogurt-raita",
@@ -1311,6 +1354,7 @@ export const DISHES_SIDES: Dish[] = [
     budgetTier: 1,
     enriched: true,
     enrichment: "Greek yogurt instead of plain curd, finished with a drizzle of olive oil — a thicker, higher-protein raita.",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-corn-raita",
@@ -1338,6 +1382,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
 
   /* ------------------------------ desserts ------------------------------ */
@@ -1369,6 +1414,8 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["fridge"],
+    noCook: true,
   },
 
   /* ------------------------------- drinks ------------------------------- */
@@ -1398,6 +1445,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-sweet-lassi",
@@ -1422,6 +1470,8 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder", "fridge"],
+    noCook: true,
   },
   {
     id: "dish-namkeen-lassi",
@@ -1447,6 +1497,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-mango-lassi",
@@ -1472,6 +1523,8 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["mixer_grinder", "fridge"],
+    noCook: true,
   },
   {
     id: "dish-haldi-doodh",
@@ -1498,6 +1551,7 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-badam-doodh",
@@ -1527,6 +1581,7 @@ export const DISHES_SIDES: Dish[] = [
     enriched: true,
     enrichment:
       "Almonds and cashews blended into the milk make this the enriched, festive milk — richer than the everyday haldi doodh.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pudina-chaas",
@@ -1553,5 +1608,6 @@ export const DISHES_SIDES: Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
 ];
