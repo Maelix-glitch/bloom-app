@@ -5,7 +5,10 @@
  * expected — and in most places required. Two halves:
  *
  *   · **this device** — every `bloom.*` key in localStorage, so nothing is
- *     left behind on a shared laptop even when there is no account;
+ *     left behind on a shared laptop even when there is no account; plus
+ *     the Bloom keys that predate the `bloom.` prefix (the legacy cycle
+ *     log and the error log) and the Coach drafts held in sessionStorage,
+ *     which a localStorage wipe alone can never reach;
  *   · **the account** — an `erase_my_data()` RPC (security definer) that
  *     deletes every row keyed to the caller across the tables, and, if the
  *     project has been migrated to do so, the auth user itself.
@@ -44,23 +47,60 @@ export function bloomKeys(storage: Storage): string[] {
   return keys;
 }
 
+/**
+ * Bloom's own localStorage keys from before the `bloom.` prefix rule, which
+ * the prefix therefore never matched:
+ *   · `bloom_cycle_logs_advanced` — cycle day logs left by the predecessor
+ *     page. `usePeriodLog` still falls back to them when the current store
+ *     is empty, so leaving this key behind RESURRECTS erased cycle days on
+ *     the next mount. It is the one genuinely dangerous miss.
+ *   · `bloom:error-log:v1` — the client error log (lib/telemetry).
+ */
+export const LEGACY_DEVICE_KEYS = ["bloom_cycle_logs_advanced", "bloom:error-log:v1"] as const;
+
+/**
+ * Bloom's sessionStorage keys. The Coach composers keep the person's own
+ * typed drafts there (`bloom.coach.drafts.v2`, `bloom-coach-draft`) — a
+ * localStorage wipe cannot reach them, and they survive an erase in the
+ * same tab. Anything not Bloom's is left alone.
+ */
+export function bloomSessionKeys(storage: Storage): string[] {
+  const keys: string[] = [];
+  for (let i = 0; i < storage.length; i += 1) {
+    const key = storage.key(i);
+    if (key && (key.startsWith("bloom.") || key.startsWith("bloom-"))) keys.push(key);
+  }
+  return keys;
+}
+
 /** Wipes this device's copy. Returns how many keys were removed. */
-export function eraseDevice(storage?: Storage): number {
+export function eraseDevice(storage?: Storage, session?: Storage): number {
   const store = storage ?? (typeof window === "undefined" ? null : window.localStorage);
+  const sessionStore =
+    session ?? (typeof window === "undefined" ? null : window.sessionStorage);
   /* The profile snapshot keeps an in-memory copy so a route change doesn't
      re-read storage — that copy has to go too, or "erase everything" leaves the
      name and avatar on screen until a reload. */
   clearSnapshot();
-  if (!store) return 0;
-  const keys = bloomKeys(store);
-  for (const key of keys) {
-    try {
-      store.removeItem(key);
-    } catch {
-      /* a locked key must not stop the rest */
+  let removed = 0;
+  const wipe = (storeToWipe: Storage, keys: string[]): void => {
+    for (const key of keys) {
+      try {
+        storeToWipe.removeItem(key);
+        removed += 1;
+      } catch {
+        /* a locked key must not stop the rest */
+      }
     }
+  };
+  if (store) {
+    wipe(store, [
+      ...bloomKeys(store),
+      ...LEGACY_DEVICE_KEYS.filter((key) => store.getItem(key) !== null),
+    ]);
   }
-  return keys.length;
+  if (sessionStore) wipe(sessionStore, bloomSessionKeys(sessionStore));
+  return removed;
 }
 
 function missingRpc(error: unknown): boolean {
