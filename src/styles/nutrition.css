@@ -874,7 +874,7 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: flex-end;
@@ -909,6 +909,7 @@
 }
 .nut-dialog-scroll {
   overflow-y: auto;
+  overscroll-behavior: contain;
   min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, var(--gold) 35%, transparent) transparent;

@@ -373,9 +373,9 @@
   position: fixed;
   inset: 0;
   z-index: 80;
-  background: rgba(7, 8, 10, 0.55);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgba(7, 8, 10, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   animation: ssheet-fade 220ms var(--story-ease) both;
 }
 
@@ -399,12 +399,11 @@
   max-height: 82vh;
   display: flex;
   flex-direction: column;
-  /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel):
-     this route stylesheet gets no build-emitted fallback, so the mix
-     line alone would leave the sheet fully transparent on engines
-     without color-mix (sheet audit, production item #53) */
+  /* Solid slab (bleed-through fix, 2026-11-18): the 94% color-mix line
+     that once followed this declaration let the page ghost through
+     the sheet. One solid declaration is also the legacy-engine-safe
+     form — no color-mix to drop whole. Pinned by the sheet guard. */
   background: var(--surface);
-  background: color-mix(in oklab, var(--surface) 94%, transparent);
   border: 1px solid var(--border);
   border-bottom: none;
   border-radius: 24px 24px 0 0;

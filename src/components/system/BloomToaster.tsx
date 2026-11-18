@@ -14,7 +14,7 @@
  * The skin is an iOS-style banner, not a slab: the card hugs its content
  * (see the [data-sonner-toast] rules in styles.css — sonner fixes its own
  * width, so the fit has to be negotiated there), floats on a deep soft
- * shadow, and wears frosted glass with a hairline top highlight. There is
+ * shadow, and wears a solid surface with a hairline top highlight. There is
  * no close button: toasts leave on their own timer or with a swipe, the
  * way a banner should. Bespoke toast cards (the points award) wear the
  * same shared shell — see toastShell.ts.

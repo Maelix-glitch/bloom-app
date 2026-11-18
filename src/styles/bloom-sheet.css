@@ -136,29 +136,25 @@
    * the top curve the way a real bevel would.
    */
   border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
-  /* Reskin foundation: the glass light (white 5% -> 1.8%) over a solid
-     panel mix — the sheet keeps its PR #87 slab opacity, so nothing
-     bleeds through, while its surface joins the glass system. */
-  /* Legacy-engine fallback (pinned by the UI guard): an engine without
-     color-mix (Chrome <111 — older Android WebViews and stock browsers)
-     drops a declaration containing color-mix WHOLE. Simple two-colour
-     mixes are rescued by the build (Lightning emits a solid first-colour
-     rule), but a LAYERED background like this one — a var() gradient over
-     a color-mix layer — is emitted as-is, so on such an engine the sheet
-     panel would render fully transparent: washed out, blank. The solid
-     panel declaration first keeps the slab painted; supporting engines
-     override it with the layered glass version. */
+  /* The slab (PR #87 precedent, extended to the whole family
+     2026-11-18): a solid house surface, full stop. This panel once
+     wore the glass system — the white sheen over
+     color-mix(var(--surface) 88%, transparent) under a 24px backdrop
+     blur — and at 88% the page ghosted through every sheet in the
+     app, the paywall included: the owner's third raising of the
+     bleed-through class. The assessment and tracker panels were
+     slabbed after the first two raisings; the base panel now joins
+     them, and the sheet guard pins panel opacity for every family.
+     The glass light still lives on in-page cards, where translucency
+     sits over the app's own surfaces — a popup panel sits over the
+     PAGE, so it is opaque. A single solid declaration is also the
+     legacy-engine-safe form: no color-mix for an old engine to drop. */
   background: var(--surface);
-  background:
-    var(--glass-bg),
-    color-mix(in oklab, var(--surface) 88%, transparent);
   box-shadow:
     0 40px 90px -30px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent),
     inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
 }
 .bsheet.bsheet--phone .bsheet-panel {
   border-radius: 28px 28px 0 0;

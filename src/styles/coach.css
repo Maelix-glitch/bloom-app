@@ -2994,8 +2994,8 @@
   display: flex;
   justify-content: center;
   padding-top: min(16vh, 130px);
-  background: rgb(4 4 9 / 0.55);
-  backdrop-filter: blur(4px);
+  background: rgb(4 4 9 / 0.72);
+  backdrop-filter: blur(6px);
 }
 
 .coach-palette {
