@@ -63,6 +63,29 @@ describe("paywall layout guards", () => {
     expect(sheetTsx).toContain('className="bill-toggle-row"');
   });
 
+  it("the sheet carries a visible close, not just Escape and the backdrop", () => {
+    /* Audit slice A: sibling sheets render the family's round ×
+       (DataSheets' SheetClose); the paywall never did, so on desktop
+       nothing on screen said the sheet could be closed. */
+    expect(sheetTsx).toContain('aria-label="Close"');
+    expect(sheetTsx).toContain("bill-close");
+    const close = block(billingCss, ".bsheet-icon.bill-close");
+    expect(close).toMatch(/width:\s*44px/);
+    expect(close).toMatch(/height:\s*44px/);
+  });
+
+  it("plan states are status badges, not the gold action treatment", () => {
+    /* The gold gradient is the action language; a state that does
+       nothing must not wear it. The badge is pinned to the card foot
+       on the same margin rule as the real button. */
+    const status = block(billingCss, ".bill-card-status");
+    expect(status).not.toContain("gold-gradient");
+    expect(status).toMatch(/border:\s*1px solid/);
+    const pin = block(billingCss, ".bill-card .bill-card-status");
+    expect(pin).toMatch(/margin-top:\s*auto/);
+    expect(sheetTsx).toContain("bill-card-status");
+  });
+
   it("plan-card buttons pin to the card foot, aligned across the pair", () => {
     /* ".bill-card {" with its brace — ".bill-cards" precedes it in the
        file and would otherwise match the prefix. */

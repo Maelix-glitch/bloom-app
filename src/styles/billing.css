@@ -16,6 +16,14 @@
   padding: var(--space-6);
 }
 
+/* The sheet's visible close (the family's .bsheet-icon, placed by
+   PaywallSheet). The shared icon button is 38px — under the 44px
+   touch-target floor — so the paywall's own close grows to 44px. */
+.bsheet-icon.bill-close {
+  width: 44px;
+  height: 44px;
+}
+
 .bill-eyebrow {
   font-size: var(--text-meta);
   font-weight: 500;
@@ -110,6 +118,29 @@
    shorter card's button floating mid-air. The flex gap still guarantees
    the minimum breathing room above it. */
 .bill-card .bill-btn {
+  margin-top: auto;
+}
+/* The owned / included plan state: a status badge at the card foot,
+   sage-tinted and non-interactive, where the gold gradient is
+   reserved for actions that actually do something. */
+.bill-card-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in oklab, var(--sage) 45%, transparent);
+  background: color-mix(in oklab, var(--sage) 10%, transparent);
+  color: var(--sage);
+  font-size: var(--text-callout);
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+/* …and the same foot pin the real button rides on, so the pair of
+   cards still composes as one unit. */
+.bill-card .bill-card-status {
   margin-top: auto;
 }
 .bill-card--featured {

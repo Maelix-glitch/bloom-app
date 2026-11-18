@@ -225,6 +225,27 @@ const IMMERSIVE_FILES = new Map<string, string>([
   ["components/welcome/Welcome.tsx", "first-run onboarding — a page replacement"],
 ]);
 
+describe("sheet guard: the Vitalis orb stays under every sheet", () => {
+  it("the orb button's z-index is below the sheet backdrop's", () => {
+    /* The orb is a fixed gold button at the screen corner; if it ever
+       rose above a sheet's backdrop it would sit bright and tappable
+       over the dimmed page while a modal owns the screen (external
+       audit, 2026-11-18). Today it cannot: orb 60, backdrop 2000 —
+       an open sheet covers it whole. Pin the relationship so a future
+       z-index reshuffle cannot silently flip it. */
+    const zOf = (rel: string, sel: string): number => {
+      const hit = blocksFor(rel, sel)
+        .map((b) => /z-index:\s*(\d+)/.exec(b.body)?.[1])
+        .find((v) => v !== undefined);
+      expect(hit, `${sel} in ${rel} carries a z-index`).toBeTruthy();
+      return Number(hit);
+    };
+    const orb = zOf("styles/orb.css", ".coach-orb");
+    const backdrop = zOf("styles/bloom-sheet.css", ".bsheet-backdrop");
+    expect(orb).toBeLessThan(backdrop);
+  });
+});
+
 describe("sheet guard: dialog census", () => {
   it("every hand-rendered dialog is classified as a sheet family or a recorded immersive surface", () => {
     const files = [

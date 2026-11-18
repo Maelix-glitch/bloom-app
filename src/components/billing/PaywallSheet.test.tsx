@@ -15,10 +15,22 @@ vi.mock("@/lib/billing/checkout", () => ({
   startCheckout: vi.fn(async () => ({ state: "payments_not_configured" as const })),
 }));
 
-import { PaywallHost } from "./PaywallSheet";
+/* The entitlement the sheet sees, steered per test. The default is
+   "unavailable" — the signed-out state the original tests in this file
+   were written against (entitlement null, every card actionable). */
+const entitlementMock = vi.hoisted(() => ({
+  state: { kind: "unavailable" } as EntitlementState | { kind: "loading" },
+}));
+vi.mock("@/hooks/useEntitlement", () => ({
+  useEntitlement: () => entitlementMock.state,
+}));
+
+import { PaywallHost, PaywallSheet } from "./PaywallSheet";
 import { requestPaywall } from "@/lib/billing/paywall";
+import type { EntitlementState } from "@/lib/billing/entitlement";
 
 beforeEach(() => {
+  entitlementMock.state = { kind: "unavailable" };
   /* jsdom has no matchMedia; BloomSheet asks it about phone width
      (the same stub the CoachOrb tests use). */
   window.matchMedia = ((query: string) =>
@@ -118,5 +130,73 @@ describe("PaywallHost + PaywallSheet", () => {
       requestPaywall("assessment");
     });
     expect(screen.getByText("The Assessment is part of Premium")).toBeTruthy();
+  });
+});
+
+describe("audit slice A — close, current-plan emphasis, status badges", () => {
+  const plusMember = () => {
+    entitlementMock.state = {
+      kind: "ready",
+      entitlement: {
+        tier: "premium_plus",
+        status: "active",
+        currentPeriodEnd: "2027-01-01T00:00:00.000Z",
+        creditBalance: 800,
+        monthlyAllowance: 800,
+        periodStart: null,
+      },
+    };
+  };
+
+  it("carries a visible Close button that dismisses the sheet", async () => {
+    const onClose = vi.fn();
+    render(<PaywallSheet open onClose={onClose} context="profile" />);
+    const close = screen.getByRole("button", { name: "Close" });
+    fireEvent.click(close);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("a Premium Plus member's own card carries the featured border, not Premium's", async () => {
+    plusMember();
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    expect(screen.getByText(/You're on/)).toBeTruthy();
+    const cards = [...document.querySelectorAll(".bill-card")];
+    expect(cards.length).toBe(2);
+    /* Order is Premium then Premium Plus. The owned Plus card is the
+       featured one; the included Premium card is not. */
+    expect(cards[0]!.className).not.toContain("bill-card--featured");
+    expect(cards[1]!.className).toContain("bill-card--featured");
+  });
+
+  it("plan states render as badges, never as buttons", async () => {
+    plusMember();
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    for (const label of ["Your current plan", "Included in your plan"]) {
+      expect(screen.queryByRole("button", { name: label })).toBeNull();
+      const badge = screen.getByText(label);
+      expect(badge.tagName).not.toBe("BUTTON");
+      expect(badge.className).toContain("bill-card-status");
+    }
+    /* Nothing on either card is an action for a top-tier member. */
+    expect(screen.queryByRole("button", { name: "Go Premium" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Upgrade to Plus" })).toBeNull();
+  });
+
+  it("a visitor still meets Premium featured, with real action buttons", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    const cards = [...document.querySelectorAll(".bill-card")];
+    expect(cards[0]!.className).toContain("bill-card--featured");
+    expect(cards[1]!.className).not.toContain("bill-card--featured");
+    expect(screen.getByRole("button", { name: "Go Premium" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Upgrade to Plus" })).toBeTruthy();
   });
 });
