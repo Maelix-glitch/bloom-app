@@ -16,6 +16,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
 
+import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { startCheckout } from "@/lib/billing/checkout";
@@ -129,6 +130,19 @@ export function PaywallSheet({
 
   return (
     <BloomSheet open={open} onClose={onClose} title="Bloom Premium" size="lg">
+      {/* The family's visible way out, like the tracker and data sheets
+          carry: Escape and the backdrop already dismissed this sheet,
+          but nothing on screen said so. It only dismisses. The 44px
+          sizing rides in billing.css (.bill-close) — the shared
+          .bsheet-icon is 38px, under the touch-target floor. */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="bsheet-icon bill-close absolute right-4 top-4 z-10 sm:right-5"
+      >
+        <BloomIcon name="close" size={16} />
+      </button>
       {/* The shell's own scroll region, like every other sheet: the panel
           itself is overflow-hidden with a 28px radius, so content rendered
           flush inside it is clipped by the rounded corners and can never
@@ -190,10 +204,16 @@ export function PaywallSheet({
               const rank = TIER_ORDER.indexOf(tier);
               const isMine = rank === myRank && entitlement !== null;
               const included = rank < myRank;
+              /* The gold border belongs to the member's own plan — a
+                 Premium Plus member's Premium card used to out-glow the
+                 Plus card they actually own, because the featured class
+                 was hard-coded to Premium. A visitor with no paid plan
+                 still meets Premium featured, as the entry plan. */
+              const featured = isMine || (myTier === "free" && tier === "premium");
               return (
                 <article
                   key={tier}
-                  className={`bill-card${tier === "premium" ? " bill-card--featured" : ""}`}
+                  className={`bill-card${featured ? " bill-card--featured" : ""}`}
                 >
                   <p className="bill-card-name">{plan.name}</p>
                   <p className="bill-price">
@@ -210,22 +230,30 @@ export function PaywallSheet({
                       </li>
                     ))}
                   </ul>
-                  <button
-                    type="button"
-                    className="bill-btn bill-btn-gold"
-                    disabled={isMine || included || busyTier !== null}
-                    onClick={() => void go(tier)}
-                  >
-                    {isMine
-                      ? "Your current plan"
-                      : included
-                        ? "Included in your plan"
-                        : busyTier === tier
-                          ? "Opening checkout…"
-                          : tier === "premium"
-                            ? "Go Premium"
-                            : "Upgrade to Plus"}
-                  </button>
+                  {/* A plan state is a status, not an action: the owned
+                      and included cards get a non-interactive badge, so
+                      nothing on the card pretends to be a button that
+                      does nothing. Only a real next step — go / upgrade,
+                      including the tap that surfaces the honest
+                      payments-open-soon notice — stays a button. */}
+                  {isMine || included ? (
+                    <p className="bill-card-status">
+                      {isMine ? "Your current plan" : "Included in your plan"}
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      className="bill-btn bill-btn-gold"
+                      disabled={busyTier !== null}
+                      onClick={() => void go(tier)}
+                    >
+                      {busyTier === tier
+                        ? "Opening checkout…"
+                        : tier === "premium"
+                          ? "Go Premium"
+                          : "Upgrade to Plus"}
+                    </button>
+                  )}
                 </article>
               );
             })}
