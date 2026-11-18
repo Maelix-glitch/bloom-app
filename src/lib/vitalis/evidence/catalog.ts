@@ -25,14 +25,26 @@
  *     prior written permission. Not usable, and the IFCT dataset in particular
  *     must not be imported until that permission exists in writing.
  *
- * So the only claim that is product-ready today rests on the US public-domain
- * guidelines. That is the honest state of this registry, and the tests assert it
+ * So the only claims that are product-ready today rest on US public-domain
+ * sources. That is the honest state of this registry, and the tests assert it
  * rather than a more flattering picture.
+ *
+ * The 2026-11-18 registration (Evidence Registry v1) adds the rules the
+ * nutrition engine actually runs — its equations, factors, bands, floors and
+ * thresholds — each as a claim plus a recommendation link naming the code
+ * that implements it. A rule whose citation nobody has verified is recorded
+ * exactly the way the rate cap was: a draft claim with no source, grade
+ * `insufficient`, confidence 0. The registry would rather report a rule as
+ * untraceable than let it borrow a citation it has not earned.
  */
 
 import type { EvidenceRegistry } from "./types";
 
 const RETRIEVED = "2026-11-05";
+
+/** When the engine-rule registration (Evidence Registry v1) was checked
+ *  against the code it describes. */
+const REGISTERED_V1 = "2026-11-18";
 
 export const CATALOG: EvidenceRegistry = {
   sources: [
@@ -107,10 +119,10 @@ export const CATALOG: EvidenceRegistry = {
       reviewedOn: RETRIEVED,
       reviewIntervalMonths: 12,
       reviewStatus: "approved",
-      version: 1,
+      version: 2,
       supersededBy: null,
       notes:
-        "Composition dataset, registered for a later phase's food matching. No claim cites it yet, and none should until a specific food entry and data type (Foundation, FNDDS, SR Legacy, Branded) has been checked.",
+        "Composition dataset. The shipped reference set (src/lib/nutrition/data/usdaReferenceData.ts) has since been checked entry by entry: every food carries its FoodData Central id and data type, Foundation and SR Legacy only — Branded and FNDDS are not shipped. Claim usda-fdc-composition-source cites this source for the dataset's provenance and licence only, not for the accuracy of any individual value.",
     },
     {
       id: "fao-who-unu-2004-energy",
@@ -323,6 +335,407 @@ export const CATALOG: EvidenceRegistry = {
       reviewIntervalMonths: 12,
       supersededBy: null,
     },
+
+    /* ------------------------------------------------------------------ */
+    /* Evidence Registry v1 (2026-11-18): the rules the engine runs.       */
+    /* Every entry below was checked against the code named in its         */
+    /* recommendation link. Unverified citations stay drafts with no       */
+    /* source — see the file header.                                       */
+    /* ------------------------------------------------------------------ */
+
+    {
+      id: "usda-fdc-composition-source",
+      statement:
+        "Bloom's reference food values come from USDA FoodData Central — the Foundation and SR Legacy datasets, each food carrying its FoodData Central id and data type — published under CC0 1.0 (public domain).",
+      topic: "food_composition",
+      grade: "moderate",
+      confidence: 0.9,
+      population: "Anyone using Bloom's food search, dish library or meal plans",
+      uncertainty: [
+        "FoodData Central is a living dataset and values can change between releases, which is why every shipped food records the release its values came from.",
+      ],
+      limitations: [
+        "This entry covers the dataset's provenance and licence only. It does not certify any individual food value; each value's standing rests on the dataset and on the per-food provenance the app shows.",
+      ],
+      contraindications: [
+        "USDA values describe foods as analysed in the United States; a local variety or preparation can differ, so values are reference data, never a measurement of the food on a person's plate.",
+      ],
+      sources: [
+        {
+          sourceId: "usda-fooddata-central",
+          direction: "supports",
+          locator:
+            "FoodData Central (fdc.nal.usda.gov) — USDA publishes the data under CC0 1.0 and asks that FoodData Central be named as the source",
+        },
+      ],
+      reviewStatus: "approved",
+      version: 1,
+      reviewedOn: REGISTERED_V1,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "mifflin-st-jeor-bmr",
+      statement:
+        "Bloom estimates resting energy (BMR) with the Mifflin–St Jeor equation: 10 × weight in kg + 6.25 × height in cm − 5 × age, plus 5 for men or −161 for women (−78, the midpoint, when sex is not stated).",
+      topic: "energy_requirement",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's body targets and plan generation",
+      uncertainty: [
+        "The equation is named in the code (src/lib/health/body.ts, bmrOf), but its bibliographic citation has not been verified against the publication, so no source is linked.",
+        "Any predictive equation estimates a population average; an individual's measured expenditure can differ materially.",
+      ],
+      limitations: [
+        "An estimate, never a measurement: BMR and everything derived from it must be presented as estimated.",
+      ],
+      contraindications: [
+        "Not a clinical energy prescription; the safety classifier, not this equation, decides who should not receive a self-directed target.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "activity-factor-table",
+      statement:
+        "Bloom turns BMR into a daily energy estimate with activity factors: 1.2 (sedentary), 1.375 (light), 1.55 (moderate), 1.725 (active) and 1.9 (very active).",
+      topic: "energy_requirement",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's body targets and plan generation",
+      uncertainty: [
+        "No source is stated in the code for this factor table (src/lib/health/body.ts, ACTIVITY_FACTOR); the values are recorded as TO VERIFY rather than dressed up with a citation nobody checked.",
+      ],
+      limitations: [
+        "Five coarse bands cannot capture an individual's real activity; the engine's calibration from logged days and weigh-ins exists because this table is only a starting estimate.",
+      ],
+      contraindications: [
+        "A misclassified activity level moves the whole energy target, so the result is an estimate to be corrected by observed weight trend, not a fact.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "protein-recomp-2-2",
+      statement:
+        "For body recomposition — fat loss and muscle gain at the same weight — Bloom sets the protein target at 2.2 g per kg of body weight, the highest of its four goal bands.",
+      topic: "protein",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults with a recomposition goal who pass Bloom's safety screening",
+      uncertainty: [
+        "The figure's citations are recorded in the code comment (src/lib/health/body.ts) as Morton et al.'s 2018 meta-analysis of protein and lean mass (BJSM) and the ISSN position stand's range for maximising lean mass; they have not yet been verified against those publications, so no source is linked.",
+      ],
+      limitations: [
+        "The code describes 2.2 g/kg as the upper confidence bound in the cited meta-analysis — the top of a range, chosen deliberately for the most protein-demanding goal, not a typical requirement.",
+      ],
+      contraindications: [
+        "The safety classifier blocks this band from reaching anyone for whom a high-protein target needs a clinician (chronic kidney disease, pregnancy, eating-disorder history).",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "protein-bands-by-goal",
+      statement:
+        "Bloom's other protein bands are 1.8 g per kg of body weight for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance, applied to current body weight.",
+      topic: "protein",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's body targets who pass Bloom's safety screening",
+      uncertainty: [
+        "No source is stated in the code for these three bands (src/lib/health/body.ts, bodyTargetsOf); recorded as TO VERIFY.",
+      ],
+      limitations: [
+        "Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; the engine makes no adjustment for body composition today.",
+      ],
+      contraindications: [
+        "Planning targets for the classifier's cleared set, not therapeutic protein prescriptions.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "energy-per-kg-7700",
+      statement:
+        "Bloom's energy-balance maths treats a kilogram of body-mass change as about 7,700 kcal — in the goal delta (rate × 7,700 ÷ 7) and in the expenditure estimate that learns from a person's own weigh-ins and logged days.",
+      topic: "energy_balance",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's goal timelines, targets or expenditure estimate",
+      uncertainty: [
+        "The constant is a stated approximation in the code (src/lib/nutrition/expenditure.ts, ENERGY_KCAL_PER_KG); its formal citation is TO VERIFY.",
+        "The real energy density of weight change varies with body composition and over time; the figure is a modelling assumption, not a measured constant.",
+      ],
+      limitations: [
+        "Estimates built on it — maintenance calories, goal timelines — inherit the approximation and are labelled estimates wherever they are shown.",
+      ],
+      contraindications: [
+        "A projected weight or date is arithmetic on an approximation, never a promise.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "calorie-floors",
+      statement:
+        "Bloom never sets a daily calorie target below a floor: 1,500 kcal for men, 1,200 kcal for women and 1,350 kcal when sex is not stated. When the floor is what sets the target, the app says so.",
+      topic: "energy_requirement",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's body targets and plan generation",
+      uncertainty: [
+        "The code describes these as commonly used minimums (src/lib/health/body.ts, calorieFloor) with no source stated; recorded as TO VERIFY.",
+      ],
+      limitations: [
+        "A floor is a guardrail, not a finding that the resulting target is right for a given person.",
+      ],
+      contraindications: [
+        "The floor does not make a target safe for someone the safety classifier flags; those people are directed to professional assessment instead.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "spectrum-rda-2020-references",
+      statement:
+        "The Nutrition tab's micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 370 mg (310 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg, and sodium as a 2,000 mg ceiling rather than a goal.",
+      topic: "dietary_pattern",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults reading the Nutrition tab's daily micronutrient panel",
+      uncertainty: [
+        "The values are stated in the code (src/lib/nutrition/dayView.ts, spectrumReferences) with the ICMR-NIN RDA 2020 attribution, but the registry has not verified them against the publication, so no source is linked.",
+      ],
+      limitations: [
+        "OPEN OWNER DECISION: this registry permission-gates ICMR-NIN publications for reproduction in a product (see icmr-nin-dgi-2024 and icmr-nin-ifct-2017). Whether stating RDA numeric values as reference intakes falls under the written permission Bloom is seeking is unresolved. The values stay in the product while the owner decides; this entry records the question and does not settle it.",
+      ],
+      contraindications: [
+        "A day under a reference is a statement about the logged foods that report the nutrient — never a deficiency diagnosis, and no surface may word it as one.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "plan-composition-derivations",
+      statement:
+        "The plan composer's portion caps and day floors (for example 90 g dry grain and 60 g dry pulses per meal, and 120 g egg portions) are engine derivations recorded in the code from ICMR-NIN's My Plate framework, British Nutrition Foundation portion sizes and ISSN protein-distribution guidance — not reproduced guideline text.",
+      topic: "dietary_pattern",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults receiving a generated meal plan",
+      uncertainty: [
+        "The derivations are stated in src/lib/nutrition/plan.ts and in the composition research notes behind it; the BNF and ISSN citations are TO VERIFY against the publications, so no source is linked.",
+      ],
+      limitations: [
+        "ICMR-NIN's Dietary Guidelines are licence-blocked in this registry (icmr-nin-dgi-2024): the composer uses figures it derived and must not present them as ICMR-NIN's published guidance.",
+      ],
+      contraindications: [
+        "Caps are composition guardrails for plan realism, not intake recommendations to present to a person as health advice.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "water-35ml-per-kg",
+      statement:
+        "Bloom's hydration target is 35 ml per kg of body weight plus an activity allowance of 0 to 1,000 ml, capped between 1,500 and 4,500 ml a day.",
+      topic: "hydration",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's hydration tracker",
+      uncertainty: [
+        "The code calls 35 ml/kg the common adult maintenance estimate (src/lib/health/body.ts) with no source stated; recorded as TO VERIFY.",
+      ],
+      limitations: [
+        "A single per-kilogram figure ignores climate, illness and medication; heat alone can move real needs well past it.",
+      ],
+      contraindications: [
+        "People whose condition or medication restricts fluid must follow their clinician, not this target.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "who-healthy-diet-principles",
+      statement:
+        "Bloom's plan design follows the healthy-diet principles of adequacy, balance, moderation and diversity.",
+      topic: "dietary_pattern",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Everyone Bloom designs plans for",
+      uncertainty: [
+        "The principles are recorded from the World Health Organization's healthy-diet fact sheet as cited in the product vision; the registry has not verified the citation against the fact sheet, so no source is linked and the principles must not be presented as a verified WHO endorsement.",
+      ],
+      limitations: [
+        "Principles, not numeric rules: they shape design and review, and no plan figure is derived from them directly.",
+      ],
+      contraindications: [
+        "A design principle never overrides a person's recorded restrictions or the safety classifier.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "nice-ng246-individualisation",
+      statement:
+        "Bloom individualises plans around the person's cultural preferences, finances and recorded health circumstances, and it never generates a very-low-energy diet: its calorie floors and rate cap keep self-directed targets out of that territory.",
+      topic: "energy_requirement",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's plan generation",
+      uncertainty: [
+        "Recorded from NICE guideline NG246 as cited in the product vision; not verified against the guideline, and Bloom must not claim NICE conformance until it is.",
+      ],
+      limitations: [
+        "The engine's floors and classifier are consistent with the principle that very-low-energy diets belong in specialist programmes; consistency is not conformance, and this entry does not claim it.",
+      ],
+      contraindications: [
+        "People whose recorded circumstances trigger the safety classifier are directed to professional assessment instead of a plan; that pathway, not this entry, is the protection.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "budget-tier-cost-bands",
+      statement:
+        "Dish budget tiers are an engine derivation, labelled an estimate: ingredient costs from stated 2026 urban-Indian retail approximations (₹ per gram by food group) put a serving at tier 1 (up to ₹20), tier 2 (up to ₹45) or tier 3 (above).",
+      topic: "dietary_pattern",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults who state a meal budget in their Assessment",
+      uncertainty: [
+        "The prices are approximations recorded in src/lib/nutrition/dishes.ts, not a price survey; they drift with season and city and are re-stated, not verified, at each release.",
+      ],
+      limitations: [
+        "A tier is a planning filter the person chooses; it is not a claim about what a dish costs any particular household.",
+      ],
+      contraindications: [
+        "Never present a tier as a measured price, or as a judgement of what a person should spend.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "dish-region-markers",
+      statement:
+        "Whether a dish counts as North or South Indian for the cuisine preference is derived by Bloom's own curated marker tables over the dish library's cuisine tags, names and ids; a dish matching both regions, or neither, is recorded as neither.",
+      topic: "dietary_pattern",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults who state a North or South Indian preference in their Assessment",
+      uncertainty: [
+        "Curated data, not a citation: the tables in src/lib/nutrition/regions.ts are Bloom's own classification, maintained alongside the dish library.",
+      ],
+      limitations: [
+        "The preference only ranks dishes; it never filters one out, so a wrong marker costs variety, not access.",
+      ],
+      contraindications: [
+        "A regional label describes the kitchen tradition the library records for a dish; it is not a claim about authenticity.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "micro-gap-threshold",
+      statement:
+        "A nutrient counts as a gap when at least 4 of the last 7 logged days report it and those days average under 70% of its Spectrum reference; the plan then favours dishes whose computed panels are rich in that nutrient.",
+      topic: "dietary_pattern",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults whose food log the plan learns from",
+      uncertainty: [
+        "The 70% threshold and the 4-of-7-days minimum are engine constants (MICRO_GAP_RATIO and MICRO_MIN_DAYS in src/lib/nutrition/planAdaptation.ts) with no source stated in the code; recorded as TO VERIFY.",
+      ],
+      limitations: [
+        "Averages rest only on days whose logged foods report the nutrient, and sodium — a ceiling, not a goal — is never counted as a gap.",
+      ],
+      contraindications: [
+        "A gap is never a deficiency diagnosis, and no surface may word it as one or recommend a supplement from it.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
+    {
+      id: "adaptation-ratios",
+      statement:
+        "When the last two or three logged days average under 85% of the protein target, the plan leans protein-first; when they average over 110% of the energy target, energy top-ups are left out. The targets themselves never move.",
+      topic: "energy_balance",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults whose food log the plan learns from",
+      uncertainty: [
+        "The 85% and 110% thresholds are engine constants (PROTEIN_SHORTFALL_RATIO and ENERGY_OVERSHOOT_RATIO in src/lib/nutrition/planAdaptation.ts) with no source stated in the code; recorded as TO VERIFY.",
+      ],
+      limitations: [
+        "Two or three days is a small sample by design: the bias is a nudge inside the composer's own rules, and fewer than two logged days means no adaptation at all.",
+      ],
+      contraindications: [
+        "Adaptation describes the log, not the person's effort, and must never be worded as them falling short.",
+      ],
+      sources: [],
+      reviewStatus: "draft",
+      version: 1,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: null,
+    },
   ],
 
   recommendations: [
@@ -336,7 +749,103 @@ export const CATALOG: EvidenceRegistry = {
       recommendationId: "vitalis.safety.rate-cap",
       claimIds: ["rate-cap-1kg-per-week"],
       rationale:
-        "The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin.",
+        "The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin. Implemented in src/lib/vitalis/domain/safety.ts — MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK.",
+    },
+    {
+      recommendationId: "vitalis.nutrition.composition-source",
+      claimIds: ["usda-fdc-composition-source"],
+      rationale:
+        "Implemented in src/lib/nutrition/usdaReference.ts: its licence gate resolves the usda provenance kind to this registry's usda-fooddata-central source and fails closed for any source that is not product-allowed — which is what keeps IFCT and INDB values out of the product until written permission exists.",
+    },
+    {
+      recommendationId: "vitalis.body.bmr-equation",
+      claimIds: ["mifflin-st-jeor-bmr"],
+      rationale:
+        "Implemented in src/lib/health/body.ts — bmrOf (Mifflin–St Jeor; sex constants +5 / −161 / −78). The Vitalis calculation path consumes the same figures via src/lib/vitalis/calc/body.ts (targetsFor).",
+    },
+    {
+      recommendationId: "vitalis.body.activity-factors",
+      claimIds: ["activity-factor-table"],
+      rationale:
+        "Implemented in src/lib/health/body.ts — ACTIVITY_FACTOR, applied in bodyTargetsOf as TDEE = BMR × factor.",
+    },
+    {
+      recommendationId: "vitalis.body.protein-recomp",
+      claimIds: ["protein-recomp-2-2"],
+      rationale:
+        "Implemented in src/lib/health/body.ts — bodyTargetsOf sets proteinPerKg to 2.2 when the goal is recomp; the comment there carries the citations this claim records as unverified.",
+    },
+    {
+      recommendationId: "vitalis.body.protein-bands",
+      claimIds: ["protein-bands-by-goal"],
+      rationale:
+        "Implemented in src/lib/health/body.ts — bodyTargetsOf proteinPerKg: 1.8 (lose), 1.6 (gain), 1.4 (maintain).",
+    },
+    {
+      recommendationId: "vitalis.body.energy-per-kg",
+      claimIds: ["energy-per-kg-7700"],
+      rationale:
+        "Implemented in src/lib/nutrition/expenditure.ts — ENERGY_KCAL_PER_KG = 7700; the same figure appears as the 7700 literal in src/lib/health/body.ts, where bodyTargetsOf turns a weekly rate into a daily delta.",
+    },
+    {
+      recommendationId: "vitalis.body.calorie-floor",
+      claimIds: ["calorie-floors"],
+      rationale:
+        "Implemented in src/lib/health/body.ts — calorieFloor(sex) returns 1500 / 1200 / 1350; bodyTargetsOf clamps the target to at least the floor and records floorApplied so the surface can say the floor did the work.",
+    },
+    {
+      recommendationId: "vitalis.nutrition.spectrum-references",
+      claimIds: ["spectrum-rda-2020-references"],
+      rationale:
+        "Implemented in src/lib/nutrition/dayView.ts — spectrumReferences(sex) returns the seven reference rows the panel and the gap detection judge against.",
+    },
+    {
+      recommendationId: "vitalis.plan.composition-caps",
+      claimIds: ["plan-composition-derivations"],
+      rationale:
+        "Implemented in src/lib/nutrition/plan.ts — the portion-cap constants (CAP_GRAIN_DRY_G, CAP_DRY_PULSES_G, CAP_EGGS_G and their family) and the day-floor checks of the layered composer.",
+    },
+    {
+      recommendationId: "vitalis.body.hydration-target",
+      claimIds: ["water-35ml-per-kg"],
+      rationale:
+        "Implemented in src/lib/health/body.ts — bodyTargetsOf computes waterMl as weightKg × 35 plus the activity bonus, clamped to [1500, 4500] and rounded to 50 ml.",
+    },
+    {
+      recommendationId: "vitalis.guidance.healthy-diet-principles",
+      claimIds: ["who-healthy-diet-principles"],
+      rationale:
+        "Design principles for plan composition and review. Where they bite in code is the composer's variety and adequacy behaviour in src/lib/nutrition/plan.ts; no numeric target derives from them.",
+    },
+    {
+      recommendationId: "vitalis.safety.no-vlcd",
+      claimIds: ["nice-ng246-individualisation"],
+      rationale:
+        "Enforced by construction: calorieFloor in src/lib/health/body.ts plus the rate cap in src/lib/vitalis/domain/safety.ts (MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK) keep self-directed targets out of very-low-energy territory, and the safety classifier directs the people it flags to professional assessment.",
+    },
+    {
+      recommendationId: "vitalis.plan.budget-tiers",
+      claimIds: ["budget-tier-cost-bands"],
+      rationale:
+        "Implemented in src/lib/nutrition/dishes.ts — BUDGET_TIER_1_MAX_PER_SERVING = 20 and BUDGET_TIER_2_MAX_PER_SERVING = 45 (₹ per serving) over the stated ₹-per-gram group bands.",
+    },
+    {
+      recommendationId: "vitalis.plan.dish-regions",
+      claimIds: ["dish-region-markers"],
+      rationale:
+        "Implemented in src/lib/nutrition/regions.ts — the curated north/south marker tables; the plan composer applies the result as a ranking bonus, never a filter.",
+    },
+    {
+      recommendationId: "vitalis.plan.micro-gap-bias",
+      claimIds: ["micro-gap-threshold"],
+      rationale:
+        "Implemented in src/lib/nutrition/planAdaptation.ts — microGapsFor applies MICRO_GAP_RATIO = 0.7 with MICRO_MIN_DAYS = 4 reporting days inside MICRO_WINDOW_DAYS = 7, and the composer favours dishes rich in a gap nutrient (MICRO_RICH_SHARE).",
+    },
+    {
+      recommendationId: "vitalis.plan.log-adaptation",
+      claimIds: ["adaptation-ratios"],
+      rationale:
+        "Implemented in src/lib/nutrition/planAdaptation.ts — planAdaptationFor applies PROTEIN_SHORTFALL_RATIO = 0.85 and ENERGY_OVERSHOOT_RATIO = 1.1 over the last two to three logged days; targets are read, never written.",
     },
   ],
 
@@ -376,6 +885,159 @@ export const CATALOG: EvidenceRegistry = {
       changedBy: "vitalis-evidence-registry",
       summary:
         "Recorded the Phase 1 rate cap as an assumption with no verified source, so it cannot be presented as evidence-based until one is found.",
+    },
+    {
+      entityType: "source",
+      entityId: "usda-fooddata-central",
+      version: 2,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Notes updated: the shipped reference set has been checked entry by entry (FDC id and data type per food, Foundation and SR Legacy only), and claim usda-fdc-composition-source now cites this source for provenance and licence. Bibliographic details unchanged.",
+    },
+    {
+      entityType: "claim",
+      entityId: "usda-fdc-composition-source",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the engine's composition-source rule (Evidence Registry v1): approved against the CC0 dataset record after the shipped set's per-food FDC ids and data types were checked in code.",
+    },
+    {
+      entityType: "claim",
+      entityId: "mifflin-st-jeor-bmr",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the BMR equation as implemented in src/lib/health/body.ts (Evidence Registry v1). Draft with no source: the equation is named in code, its bibliographic citation is TO VERIFY.",
+    },
+    {
+      entityType: "claim",
+      entityId: "activity-factor-table",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the ACTIVITY_FACTOR table as implemented (Evidence Registry v1). Draft with no source: no citation is stated in the code.",
+    },
+    {
+      entityType: "claim",
+      entityId: "protein-recomp-2-2",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the 2.2 g/kg recomposition band (Evidence Registry v1). Draft: the Morton et al. 2018 (BJSM) and ISSN citations are recorded as they appear in the code comment, unverified against the publications.",
+    },
+    {
+      entityType: "claim",
+      entityId: "protein-bands-by-goal",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the 1.8 / 1.6 / 1.4 g/kg protein bands (Evidence Registry v1). Draft with no source: none is stated in the code.",
+    },
+    {
+      entityType: "claim",
+      entityId: "energy-per-kg-7700",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the 7,700 kcal/kg constant as a stated approximation (Evidence Registry v1). Draft: formal citation TO VERIFY.",
+    },
+    {
+      entityType: "claim",
+      entityId: "calorie-floors",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the 1500 / 1200 / 1350 kcal floors (Evidence Registry v1). Draft with no source: the code calls them commonly used minimums and cites nothing.",
+    },
+    {
+      entityType: "claim",
+      entityId: "spectrum-rda-2020-references",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the Spectrum reference intakes with their in-code ICMR-NIN RDA 2020 attribution (Evidence Registry v1). Draft with no source, and the ICMR licence question recorded in its limitations as an open owner decision.",
+    },
+    {
+      entityType: "claim",
+      entityId: "plan-composition-derivations",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the composer's portion caps and day floors as engine derivations from the My Plate framework, BNF portions and ISSN distribution guidance (Evidence Registry v1). Draft: derivations recorded, BNF/ISSN citations TO VERIFY, no guideline text reproduced.",
+    },
+    {
+      entityType: "claim",
+      entityId: "water-35ml-per-kg",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the 35 ml/kg hydration target (Evidence Registry v1). Draft with no source: none is stated in the code.",
+    },
+    {
+      entityType: "claim",
+      entityId: "who-healthy-diet-principles",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the WHO healthy-diet principles (adequacy, balance, moderation, diversity) as design principles (Evidence Registry v1). Draft: the fact-sheet citation is recorded as cited in the product vision, TO VERIFY / TO REGISTER as a source.",
+    },
+    {
+      entityType: "claim",
+      entityId: "nice-ng246-individualisation",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the individualisation and no-very-low-energy-diet rule (Evidence Registry v1). Draft: NICE NG246 recorded as cited in the product vision; no conformance claimed.",
+    },
+    {
+      entityType: "claim",
+      entityId: "budget-tier-cost-bands",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the dish budget tiers as an engine derivation from stated 2026 retail approximations, labelled an estimate (Evidence Registry v1). No external citation applies.",
+    },
+    {
+      entityType: "claim",
+      entityId: "dish-region-markers",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the North/South dish-region marker tables as curated engine data (Evidence Registry v1), so the absence of an external citation is deliberate and visible.",
+    },
+    {
+      entityType: "claim",
+      entityId: "micro-gap-threshold",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the micronutrient gap threshold (70% of reference, at least 4 of 7 logged days) (Evidence Registry v1). Draft with no source: none is stated in the code.",
+    },
+    {
+      entityType: "claim",
+      entityId: "adaptation-ratios",
+      version: 1,
+      changedOn: REGISTERED_V1,
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the log-adaptation ratios (protein under 85%, energy over 110% of target) (Evidence Registry v1). Draft with no source: none is stated in the code.",
     },
   ],
 };

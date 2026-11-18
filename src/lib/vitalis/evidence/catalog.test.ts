@@ -58,9 +58,14 @@ describe("the evidence catalogue", () => {
     }
   });
 
-  it("has exactly one claim that is ready to reach a person", () => {
+  it("has exactly two claims that are ready to reach a person", () => {
+    // The DGA claim, and (since Evidence Registry v1) the composition-source
+    // claim, whose CC0 dataset licence was verified and whose shipped set
+    // records the FDC id and data type of every food. Everything else the
+    // registry holds is blocked, superseded or an honest draft.
     expect(productReadyClaims(CATALOG, AS_OF).map((claim) => claim.id)).toEqual([
       "dga-whole-foods-emphasis",
+      "usda-fdc-composition-source",
     ]);
   });
 
@@ -75,12 +80,48 @@ describe("the evidence catalogue", () => {
   it("reports its own gaps rather than hiding them", () => {
     const report = traceability(CATALOG, AS_OF);
     expect(report.complete).toBe(false);
-    expect(report.untraceableClaims).toEqual(["rate-cap-1kg-per-week"]);
+    // Every engine rule whose citation is unverified is on this list: the
+    // rate cap, plus the fifteen drafts Evidence Registry v1 recorded.
+    expect(report.untraceableClaims).toEqual([
+      "rate-cap-1kg-per-week",
+      "mifflin-st-jeor-bmr",
+      "activity-factor-table",
+      "protein-recomp-2-2",
+      "protein-bands-by-goal",
+      "energy-per-kg-7700",
+      "calorie-floors",
+      "spectrum-rda-2020-references",
+      "plan-composition-derivations",
+      "water-35ml-per-kg",
+      "who-healthy-diet-principles",
+      "nice-ng246-individualisation",
+      "budget-tier-cost-bands",
+      "dish-region-markers",
+      "micro-gap-threshold",
+      "adaptation-ratios",
+    ]);
     expect(report.licenseBlockedClaims).toEqual([
       "fao-energy-requirement-components",
       "icmr-dgi-food-variety",
     ]);
-    expect(report.stalledRecommendations).toEqual(["vitalis.safety.rate-cap"]);
+    expect(report.stalledRecommendations).toEqual([
+      "vitalis.safety.rate-cap",
+      "vitalis.body.bmr-equation",
+      "vitalis.body.activity-factors",
+      "vitalis.body.protein-recomp",
+      "vitalis.body.protein-bands",
+      "vitalis.body.energy-per-kg",
+      "vitalis.body.calorie-floor",
+      "vitalis.nutrition.spectrum-references",
+      "vitalis.plan.composition-caps",
+      "vitalis.body.hydration-target",
+      "vitalis.guidance.healthy-diet-principles",
+      "vitalis.safety.no-vlcd",
+      "vitalis.plan.budget-tiers",
+      "vitalis.plan.dish-regions",
+      "vitalis.plan.micro-gap-bias",
+      "vitalis.plan.log-adaptation",
+    ]);
   });
 
   it("has nothing overdue today, and would notice if it did", () => {
