@@ -26,6 +26,7 @@ vi.mock("@/hooks/useSession", () => ({
   useSession: () => ({ userId: "user-1", ready: true }),
 }));
 
+import { fmtKcalApprox } from "@/lib/format";
 import { setPref } from "@/lib/prefs";
 import { resetPrefCache } from "@/lib/prefsStore";
 import { todayLocal } from "@/lib/localDay";
@@ -88,7 +89,7 @@ describe("NutritionTodayCard", () => {
     if (!targets) throw new Error("expected targets");
     render(<NutritionTodayCard />);
     expect(
-      screen.getByText(`380 of your ~${targets.calories} kcal target`),
+      screen.getByText(`380 of your ${fmtKcalApprox(targets.calories)} target`),
     ).toBeTruthy();
     expect(screen.getByRole("link", { name: "Open Nutrition" })).toBeTruthy();
   });

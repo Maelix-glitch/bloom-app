@@ -41,6 +41,27 @@ describe("recordGrid", () => {
     expect(days[days.length - 1]!.date).toBe(end);
   });
 
+  it("puts every cell in the row of its own weekday — a Wednesday today sits in the W row", () => {
+    /* 2026-11-18 is a Wednesday (verified). The grid renders columns as
+       weeks and rows as weekdays (Mon..Sun top to bottom, labelled
+       M/W/F/S), so alignment is a property of the computation: each
+       cell's index % 7 must be its weekday's row, and today must land
+       in the last column's Wednesday row — never in the Sunday row. */
+    expect(new Date("2026-11-18T12:00:00").getDay()).toBe(3); // Wednesday
+    const { days, start } = recordGrid({ ...empty, today: "2026-11-18" });
+    expect(start).toBe("2026-08-31"); // the Monday eleven weeks back
+    days.forEach((d, i) => {
+      const jsDay = new Date(`${d.date}T12:00:00`).getDay(); // Sun=0 … Sat=6
+      expect(jsDay).toBe(((i % 7) + 1) % 7); // row 0 = Monday … row 6 = Sunday
+    });
+    const idx = days.findIndex((d) => d.date === "2026-11-18");
+    expect(idx % 7).toBe(2); // third row — the row the "W" label marks
+    expect(Math.floor(idx / 7)).toBe(RECORD_WEEKS - 1); // the current week
+    // the four cells after today in its column are the future Thu–Sun
+    expect(days.slice(idx + 1)).toHaveLength(4);
+    expect(days[days.length - 1]!.date).toBe("2026-11-22"); // that Sunday
+  });
+
   it("counts each logged thing and remembers where it came from", () => {
     const { days } = recordGrid({
       ...empty,

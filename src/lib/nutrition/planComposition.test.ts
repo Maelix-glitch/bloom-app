@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { EMPTY_ANSWERS, toHealthProfile, type AssessmentState } from "@/lib/assessment/state";
+import { fmtCount } from "@/lib/format";
 import {
   EMPTY_CONSTRAINTS,
   EMPTY_DIETARY,
@@ -385,7 +386,7 @@ describe("plan · day floors", () => {
     });
     expect(plan.notes).toEqual([
       "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
-      "Today's suggestions reach about 2787 kcal — below your 3288 kcal guide. The portion caps bind before the target does.",
+      "Today's suggestions reach about 2,787 kcal — below your ~3,300 kcal guide. The portion caps bind before the target does.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -486,7 +487,7 @@ describe("plan · rotation", () => {
       "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     );
     expect(d16.notes).toContain(
-      "Today's suggestions reach about 1855 kcal — above your 1654 kcal guide. The day's guideline floors and layers add up past it.",
+      "Today's suggestions reach about 1,855 kcal — above your ~1,650 kcal guide. The day's guideline floors and layers add up past it.",
     );
     /* 2026-11-17 reaches every gram floor and the energy band; only
        the group-span aim is missed, and named. */
@@ -603,7 +604,8 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
       if (Math.abs(kcal - 3288) <= 0.05 * 3288) continue;
       const note = plan.notes.find((n) => n.includes("kcal guide"));
       expect(note, `${day}: ${Math.round(kcal)} kcal and no energy note`).toBeDefined();
-      expect(note).toContain(`about ${Math.round(kcal)} kcal`);
+      /* The true figure, in the house format (grouped — "2,747"). */
+      expect(note).toContain(`about ${fmtCount(kcal)} kcal`);
     }
   });
 

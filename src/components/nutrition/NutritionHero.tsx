@@ -20,6 +20,7 @@ import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
+import { fmtKcalApprox } from "@/lib/format";
 import { shiftDay } from "@/lib/localDay";
 import {
   eatingWindowOf,
@@ -246,7 +247,7 @@ export function NutritionHero({
               {Math.round(totals.kcal)}
             </span>
             <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
-              {targets ? `of ~${Math.round(targets.kcal)} kcal` : "kcal"}
+              {targets ? `of ${fmtKcalApprox(targets.kcal)}` : "kcal"}
             </span>
           </Rings>
         </div>
@@ -362,7 +363,7 @@ export function NutritionHero({
         <p className="nut-note">
           Targets are estimates from your body numbers (Mifflin–St Jeor
           {bmr !== null && tdee !== null
-            ? `, ${Math.round(bmr)} kcal at rest, ~${Math.round(tdee)} with activity`
+            ? `, ${Math.round(bmr)} kcal at rest, ${fmtKcalApprox(tdee)} with activity`
             : ""}
           ) — a guide for the day, not a prescription.
         </p>

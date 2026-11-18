@@ -52,6 +52,7 @@ import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
+import { fmtKcalApprox } from "@/lib/format";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
 import {
@@ -428,7 +429,7 @@ export function NutritionPlanSection() {
             This plan was made for {formatPlanDay(plan.day)}
           </h2>
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            It aimed at ~{Math.round(plan.targets.kcal)} kcal and{" "}
+            It aimed at {fmtKcalApprox(plan.targets.kcal)} and{" "}
             {formatGrams(plan.targets.proteinG)} g of protein for{" "}
             {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day — create today's
             to follow it now.
@@ -877,7 +878,7 @@ export function NutritionPlanSection() {
             <span className="font-semibold text-foreground">
               {formatGrams(plan.targets.proteinG)} g protein
             </span>{" "}
-            across the day — your guide is ~{Math.round(plan.targets.kcal)} kcal and ~
+            across the day — your guide is {fmtKcalApprox(plan.targets.kcal)} and ~
             {formatGrams(plan.targets.proteinG)} g.
           </p>
         </div>

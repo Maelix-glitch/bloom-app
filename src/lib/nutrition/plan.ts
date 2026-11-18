@@ -86,6 +86,7 @@
  * every relaxation is named in the plan's notes.
  */
 
+import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
 import { dishPassesModes, type ModeId } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
 import {
@@ -766,6 +767,10 @@ const MIN_PORTION_G = 5;
    eggs and oils, not to ever-larger vegetable piles. */
 const FLOOR_VEGETABLES_G = 400;
 const FLOOR_FRUIT_G = 100;
+/* The My Plate milk-and-curd serving is stated as 300 ml; the floor is
+   held in grams because that is how the food data portions milk and
+   curd (by weight), so the plan's gram total is judged against the
+   gram floor — never grams against millilitres. */
 const FLOOR_MILK_CURD_G = 300;
 /** Diversity aims (research §1, §7): at least 8 food groups a day is the
  *  ICMR floor; ≥3 distinct protein sources and the ≤40% single-source
@@ -1855,17 +1860,17 @@ function compositionNotes(
   const totals = floorTotalsOf(meals, byId, dishById);
   if (totals.vegG < FLOOR_VEGETABLES_G) {
     notes.push(
-      `Today's suggestions reach ${totals.vegG} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
+      `Today's suggestions reach ${fmtGrams(totals.vegG)} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
     );
   }
   if (totals.fruitG < FLOOR_FRUIT_G) {
     notes.push(
-      `Today's suggestions reach ${totals.fruitG} g of fruit — the ICMR-NIN guideline aims for at least 100 g across the day.`,
+      `Today's suggestions reach ${fmtGrams(totals.fruitG)} g of fruit — the ICMR-NIN guideline aims for at least 100 g across the day.`,
     );
   }
   if (totals.milkCurdG < FLOOR_MILK_CURD_G) {
     notes.push(
-      `Today's suggestions reach ${totals.milkCurdG} g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.`,
+      `Today's suggestions reach ${fmtGrams(totals.milkCurdG)} g of milk and curd — the ICMR-NIN guideline aims for at least 300 g across the day.`,
     );
   }
   const proteinSources = new Set<string>();
@@ -1923,11 +1928,11 @@ function compositionNotes(
   const kcal = dayKcalOf(meals);
   if (kcal > (1 + ENERGY_NOTE_BAND) * targets.kcal) {
     notes.push(
-      `Today's suggestions reach about ${Math.round(kcal)} kcal — above your ${Math.round(targets.kcal)} kcal guide. The day's guideline floors and layers add up past it.`,
+      `Today's suggestions reach about ${fmtCount(kcal)} kcal — above your ${fmtKcalApprox(targets.kcal)} guide. The day's guideline floors and layers add up past it.`,
     );
   } else if (kcal < (1 - ENERGY_NOTE_BAND) * targets.kcal) {
     notes.push(
-      `Today's suggestions reach about ${Math.round(kcal)} kcal — below your ${Math.round(targets.kcal)} kcal guide. The portion caps bind before the target does.`,
+      `Today's suggestions reach about ${fmtCount(kcal)} kcal — below your ${fmtKcalApprox(targets.kcal)} guide. The portion caps bind before the target does.`,
     );
   }
   return notes;

@@ -18,6 +18,7 @@ import { Link } from "@tanstack/react-router";
 
 import { useHousehold } from "@/hooks/useHousehold";
 import { DIETARY_LABEL, DIETARY_OPTIONS } from "@/lib/assessment/questions";
+import { fmtCount } from "@/lib/format";
 import { splitTerms } from "@/lib/household/household";
 import type { DietaryPattern } from "@/lib/vitalis/domain/profile";
 
@@ -35,6 +36,11 @@ export function HouseholdSection() {
 
   const owner = table[0];
   const preview = suitability.suiting.slice(0, PREVIEW_COUNT);
+  /* The count sentence below is state-aware (rulebook D-T7): "All …"
+     when nothing was filtered out, "you" when the table is the owner
+     alone — never "1,202 of 1,202 dishes suit everyone" for one person. */
+  const aloneAtTable = table.length <= 1;
+  const allSuit = suitability.suitingCount === suitability.totalDishes;
 
   const submit = () => {
     const trimmed = name.trim();
@@ -175,15 +181,18 @@ export function HouseholdSection() {
           </div>
         </div>
 
-        {/* Cooks for everyone — computed live from the dish library. */}
+        {/* Cooks for the table — computed live from the dish library. */}
         <div>
-          <p className="pf-eyebrow">Cooks for everyone</p>
+          <p className="pf-eyebrow">{aloneAtTable ? "Cooks for you" : "Cooks for everyone"}</p>
           <p className="hh-count" style={{ marginTop: "var(--space-2)" }}>
-            {suitability.suitingCount} of {suitability.totalDishes} dishes
+            {allSuit
+              ? `All ${fmtCount(suitability.totalDishes)} dishes`
+              : `${fmtCount(suitability.suitingCount)} of ${fmtCount(suitability.totalDishes)} dishes`}
           </p>
           <p className="hh-body">
-            suit everyone at your table — every member's pattern, and no ingredient anyone
-            here is allergic to.
+            {aloneAtTable
+              ? "suit you — your pattern from your Assessment, and no ingredient you are allergic to."
+              : "suit everyone at your table — every member's pattern, and no ingredient anyone here is allergic to."}
           </p>
         </div>
 
@@ -214,7 +223,7 @@ export function HouseholdSection() {
             </ul>
             <div>
               <Link to="/nutrition" className="hh-browse">
-                Browse all {suitability.totalDishes.toLocaleString("en-IN")} dishes
+                Browse all {fmtCount(suitability.totalDishes)} dishes
               </Link>
             </div>
           </>

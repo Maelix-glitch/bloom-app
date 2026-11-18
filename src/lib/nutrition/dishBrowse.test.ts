@@ -258,3 +258,24 @@ describe("dishIdeaFor — the plan's dish idea", () => {
 function findDishLineName(foodId: string): string {
   return USDA_REFERENCE_FOODS.find((f) => f.id === foodId)?.name.toLowerCase() ?? "";
 }
+
+describe("the omnivore shelf (the Dishes status line's claim)", () => {
+  /* The Dishes tab tells an omnivore "your pattern excludes nothing".
+     That sentence is only honest while the pattern filter really does
+     exclude nothing — pin it against the real library, so a future
+     dish with an unclassifiable ingredient (dishPatterns → []) fails
+     here instead of making the UI lie. */
+  it("browsing as non-vegetarian returns the whole library", () => {
+    const base = {
+      query: "",
+      category: null,
+      budgetTier: null,
+      enrichedOnly: false,
+      cuisine: null,
+    } as const;
+    expect(browseDishes({ ...base, pattern: null })).toHaveLength(DISH_LIBRARY.length);
+    expect(browseDishes({ ...base, pattern: "non_vegetarian" })).toHaveLength(
+      DISH_LIBRARY.length,
+    );
+  });
+});
