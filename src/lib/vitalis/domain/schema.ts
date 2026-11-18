@@ -15,12 +15,25 @@ import { z } from "zod";
 
 import { CONSENT_POLICY_VERSION, type ConsentRecord } from "./consent";
 import {
+  COOKING_ABILITIES,
+  CRAVING_KINDS,
   CUISINE_PREFERENCES,
   DIETARY_PATTERNS,
+  EATING_SETTINGS,
+  EQUIPMENT_ITEMS,
+  FAILURE_REASONS,
   HEALTH_PROFILE_VERSION,
+  HUNGER_PATTERNS,
   type ActivityLevel,
+  type CookingAbility,
+  type CravingKind,
   type CuisinePreference,
   type DietaryPattern,
+  type EatingSetting,
+  type EquipmentItem,
+  type FailureReason,
+  type HungerPattern,
+  type PrepTimeMaxMinutes,
   type HealthProfile,
   type Sex,
   type UnitSystem,
@@ -84,6 +97,35 @@ export const dietaryProfileSchema = z
   })
   .strict();
 
+const scale1to5 = z.number().int().min(1).max(5).nullable();
+
+export const pastAttemptSchema = z
+  .object({
+    approach: z.string().min(1).max(120),
+    failureReasons: z.array(enumOf<FailureReason>(FAILURE_REASONS)).max(FAILURE_REASONS.length),
+  })
+  .strict();
+
+export const behaviouralProfileSchema = z
+  .object({
+    cookingAbility: enumOf<CookingAbility>(COOKING_ABILITIES).nullable(),
+    equipment: z.array(enumOf<EquipmentItem>(EQUIPMENT_ITEMS)).max(EQUIPMENT_ITEMS.length),
+    /* The PREP_TIME_BANDS values, as literals — a stated number that is
+       not one of the offered bands does not exist in this vocabulary. */
+    prepTimeMaxMinutes: z
+      .union([z.literal(10), z.literal(20), z.literal(35), z.literal(60)])
+      .nullable() as z.ZodType<PrepTimeMaxMinutes | null>,
+    eatingSetting: enumOf<EatingSetting>(EATING_SETTINGS).nullable(),
+    hungerPattern: enumOf<HungerPattern>(HUNGER_PATTERNS).nullable(),
+    cravings: textList(5, 60),
+    cravingKinds: z.array(enumOf<CravingKind>(CRAVING_KINDS)).max(CRAVING_KINDS.length),
+    emotionalEating: scale1to5,
+    pastAttempts: z.array(pastAttemptSchema).max(3),
+    motivation: scale1to5,
+    confidence: scale1to5,
+  })
+  .strict();
+
 export const healthConstraintsSchema = z
   .object({
     conditions: textList(30, 80),
@@ -117,6 +159,7 @@ export const healthProfileSchema = z
     activity: enumOf<ActivityLevel>(["sedentary", "light", "moderate", "active", "very_active"]).nullable(),
     rateKgPerWeek: z.number().min(0).max(5),
     dietary: dietaryProfileSchema,
+    behavioural: behaviouralProfileSchema,
     constraints: healthConstraintsSchema,
     updatedAt: isoDateTime,
   })

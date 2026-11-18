@@ -73,19 +73,41 @@
  * plan is returned, every served dish is re-verified against the
  * person's pattern: the pool already guarantees it, and the plan
  * now proves it, meal by meal.
+ *
+ * Behavioural shaping (P10, spec §10): the Assessment's behavioural
+ * profile joins composition the same disciplined way — gates and
+ * ranking terms, never target changes. The kitchen answers gate the
+ * dish pool through the one preparation-needs function (equipment,
+ * no-cook) and a weekday prep-time cap that relaxes in stated
+ * stages rather than emptying the plan; the hunger pattern tilts
+ * the meal split; basic cooking experience and a low confidence
+ * reshape the pick cost; a sweet craving steers the snack. Every
+ * shaping is derived from an answer the person actually gave, and
+ * every relaxation is named in the plan's notes.
  */
 
 import { dishPassesModes, type ModeId } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
 import {
+  COOKING_ABILITIES,
   CUISINE_PREFERENCES,
+  EATING_SETTINGS,
+  HUNGER_PATTERNS,
+  PREP_TIME_BANDS,
   profileHeightCm,
   profileTargetWeightKg,
   profileWeightKg,
   type ActivityLevel,
+  type BehaviouralProfile,
+  type CookingAbility,
+  type CravingKind,
   type CuisinePreference,
   type DietaryPattern,
+  type EatingSetting,
+  type EquipmentItem,
   type HealthProfile,
+  type HungerPattern,
+  type PrepTimeMaxMinutes,
   type Sex,
   type VitalisGoal,
 } from "@/lib/vitalis/domain/profile";
@@ -100,6 +122,7 @@ import { missingBodyFields, type BodyTargetsOutcome } from "@/lib/vitalis/calc/b
 import {
   dishNutrients,
   dishPatterns,
+  dishPreparationNeeds,
   dishProvenance,
   type Dish,
   type DishCategory,
@@ -155,6 +178,19 @@ export interface PlanInputsSnapshot {
    *  adding it to the fingerprint would refuse every plan stored
    *  before the question existed). Absent on pre-P8 snapshots. */
   cuisinePreference?: CuisinePreference | null;
+  /** The composition-shaping behavioural answers (P10, spec §10),
+   *  recorded on the cuisine precedent exactly: selection-shaping
+   *  only, never target-bearing, deliberately NOT part of the
+   *  inputs fingerprint, and named by the staleness check when one
+   *  changes. Equipment is stored as a sorted comma-joined string
+   *  so the comparison is order-insensitive. Absent on pre-P10
+   *  snapshots. */
+  prepTimeMaxMinutes?: PrepTimeMaxMinutes | null;
+  kitchenEquipment?: string | null;
+  cookingAbility?: CookingAbility | null;
+  eatingSetting?: EatingSetting | null;
+  hungerPattern?: HungerPattern | null;
+  confidence?: number | null;
   safetyClassification: SafetyClass;
   targetsKcal: number;
   targetsProteinG: number;
@@ -294,8 +330,19 @@ export interface DailyPlan {
  *  unchanged in shape; only the layered fallback loses the dry
  *  staples it used to present raw, and says so in its notes.
  *  Yield-based cooked conversion is the documented next step,
- *  gated on source verification (spec §4.2). */
-export const PLAN_METHOD_VERSION = 9;
+ *  gated on source verification (spec §4.2).
+ *  10 = the behavioural pass (spec §10): the Assessment's kitchen
+ *  answers gate the dish pool (equipment and no-cook through the
+ *  one preparation-needs function; a prep-time cap on weekday
+ *  plans, relaxed in stated stages and named in the notes when it
+ *  is), basic cooking experience deprioritises long-method dishes
+ *  in the pick cost, the stated hunger pattern tilts the meal
+ *  split toward the hungry part of the day (totals unmoved), a
+ *  low stated confidence leans the picks toward familiar dishes
+ *  with less variety pressure, and a sweet craving makes the
+ *  snack's flexible item prefer fruit. Targets never move; with
+ *  no behavioural answers the output is the P9 composer's. */
+export const PLAN_METHOD_VERSION = 10;
 
 export type PlanRefusal =
   | {
@@ -337,6 +384,15 @@ export function planInputsSnapshotOf(
     mealsPerDay: profile.dietary.mealsPerDay,
     dietaryPattern: profile.dietary.pattern,
     cuisinePreference: profile.dietary.cuisinePreference,
+    prepTimeMaxMinutes: profile.behavioural.prepTimeMaxMinutes,
+    kitchenEquipment:
+      profile.behavioural.equipment.length > 0
+        ? [...profile.behavioural.equipment].sort().join(",")
+        : null,
+    cookingAbility: profile.behavioural.cookingAbility,
+    eatingSetting: profile.behavioural.eatingSetting,
+    hungerPattern: profile.behavioural.hungerPattern,
+    confidence: profile.behavioural.confidence,
     safetyClassification: safety.classification,
     targetsKcal: targets.kcal,
     targetsProteinG: targets.proteinG,
@@ -386,6 +442,12 @@ const CHANGED_LABELS: readonly (readonly [keyof PlanInputsSnapshot, string])[] =
   ["mealsPerDay", "your meals per day"],
   ["dietaryPattern", "your eating pattern"],
   ["cuisinePreference", "your cuisine preference"],
+  ["prepTimeMaxMinutes", "your prep-time limit"],
+  ["kitchenEquipment", "your kitchen equipment"],
+  ["cookingAbility", "your cooking experience"],
+  ["eatingSetting", "where you eat"],
+  ["hungerPattern", "your hunger pattern"],
+  ["confidence", "your confidence"],
   ["safetyClassification", "your safety answers"],
 ];
 
@@ -462,11 +524,48 @@ export interface MealSplit {
   proteinG: number;
 }
 
+/** The share of the day a stated hunger pattern may move toward the
+ *  hungry slot (spec §10.2: up to 5 percentage points). A derivation
+ *  at the spec's own ceiling: enough to feel, never enough to starve
+ *  the day's other meals. */
+const HUNGER_SHARE_SHIFT = 0.05;
+
+/** The slot a hunger pattern points at; "steady" points nowhere. */
+const HUNGER_SLOT: Record<Exclude<HungerPattern, "steady">, Meal> = {
+  mornings: "breakfast",
+  afternoons: "lunch",
+  evenings: "dinner",
+  nights: "snack",
+};
+
 /** Per-meal shares of the day's targets, reconciled to sum exactly —
- *  kcal in whole units, protein in tenths of a gram (the lib's rounding). */
-export function splitTargets(targets: NutritionTargets, slots: readonly Meal[]): MealSplit[] {
+ *  kcal in whole units, protein in tenths of a gram (the lib's rounding).
+ *  P10: a stated hunger pattern tilts the shares toward the hungry
+ *  part of the day before reconciliation — up to HUNGER_SHARE_SHIFT
+ *  of the day, taken from the other slots in proportion to their
+ *  shares. The day's totals never move (splitUnits still reconciles
+ *  exactly), and a pattern whose slot is not in the day — nights on
+ *  a day with no snack slot — changes nothing: there is nowhere
+ *  honest to put the weight. */
+export function splitTargets(
+  targets: NutritionTargets,
+  slots: readonly Meal[],
+  hungerPattern: HungerPattern | null = null,
+): MealSplit[] {
   const shareTotal = slots.reduce((sum, meal) => sum + MEAL_SHARE[meal], 0);
-  const shares = slots.map((meal) => MEAL_SHARE[meal] / shareTotal);
+  let shares = slots.map((meal) => MEAL_SHARE[meal] / shareTotal);
+  if (hungerPattern !== null && hungerPattern !== "steady") {
+    const idx = slots.indexOf(HUNGER_SLOT[hungerPattern]);
+    if (idx >= 0) {
+      const shift = Math.min(HUNGER_SHARE_SHIFT, 1 - shares[idx]!);
+      if (shift > 0) {
+        const othersTotal = 1 - shares[idx]!;
+        shares = shares.map((s, i) =>
+          i === idx ? s + shift : s - (shift * s) / othersTotal,
+        );
+      }
+    }
+  }
   const kcals = splitUnits(Math.round(targets.kcal), shares);
   const proteinTenths = splitUnits(Math.round(targets.proteinG * 10), shares);
   return slots.map((meal, i) => ({
@@ -759,6 +858,10 @@ interface ComposeContext {
    *  ranked by protein density first. Absent/false = the unbiased
    *  composer, exactly as before P6. */
   proteinFirst?: boolean;
+  /** The craving kinds the person stated (P10, spec §10): the snack
+   *  composition reads them — a stated sweet craving makes the
+   *  snack's flexible item prefer fruit. Empty = nothing stated. */
+  cravingKinds: readonly CravingKind[];
 }
 
 function recordSuggestion(
@@ -1115,8 +1218,16 @@ function composeSnack(ctx: ComposeContext, split: MealSplit): PlanSuggestion[] {
 
   const remaining = split.kcal - kcalTally;
   if (remaining >= 40) {
+    /* P10: a stated sweet craving keeps the fruit preference alive
+     *  even once the day's fruit floor is met — fruit is the snack
+     *  pool's sweet whole food, so the craving is answered with a
+     *  real food, not a confection. (Salty and fried cravings have
+     *  no honest signal in the food data — no taste or preparation
+     *  tags exist — so they are not shaped here rather than faked.) */
     const second =
       (ctx.fruitG < FLOOR_FRUIT_G && pickFood(ctx, inMeal, (f) => groupOf(f) === "fruits")) ||
+      (ctx.cravingKinds.includes("sweet") &&
+        pickFood(ctx, inMeal, (f) => groupOf(f) === "fruits")) ||
       pickFood(ctx, inMeal, isSnackFood);
     const portion = second && sizedPortion(second, { kcal: remaining }, snackCapG(second));
     if (second && portion) add(second, portion);
@@ -1882,6 +1993,121 @@ function dishPoolFor(
   return candidates.length > 0 ? { candidates, byId } : null;
 }
 
+/* --------------------- P10 behavioural kitchen gates ---------------------- */
+
+/** The equipment a shared hostel kitchen is assumed to offer when the
+ *  person stated the setting but not the equipment (spec §10.2's
+ *  hostel default): the basics a shared kitchen has — a stove and a
+ *  fridge. Anything more would invent facilities. An explicit
+ *  equipment answer always overrides this. */
+const HOSTEL_EQUIPMENT: readonly EquipmentItem[] = ["stove", "fridge"];
+
+/** The equipment the kitchen gates judge against: the stated list
+ *  (a stated "none" means the empty set), else the eating setting's
+ *  default, else null — no gate. */
+function effectiveEquipment(
+  behavioural: BehaviouralProfile,
+): ReadonlySet<EquipmentItem> | null {
+  if (behavioural.equipment.length > 0) {
+    return new Set(behavioural.equipment.filter((item) => item !== "none"));
+  }
+  if (behavioural.eatingSetting === "hostel") return new Set(HOSTEL_EQUIPMENT);
+  return null;
+}
+
+/** The prep-time cap for a plan: the stated band, else the hostel
+ *  default (the lowest offered band — a shared kitchen's reality),
+ *  else no cap. */
+function effectivePrepCapMinutes(behavioural: BehaviouralProfile): PrepTimeMaxMinutes | null {
+  if (behavioural.prepTimeMaxMinutes !== null) return behavioural.prepTimeMaxMinutes;
+  if (behavioural.eatingSetting === "hostel") return PREP_TIME_BANDS[0] ?? null;
+  return null;
+}
+
+/**
+ * The P10 kitchen gates over the dish pool (spec §10.2): the factual
+ * kitchen answers, applied after the pool's own pattern/budget/mode
+ * gates and before any pick — the pool the composer sees is the pool
+ * the person's kitchen allows.
+ *
+ *  · Equipment and cooking ability are hard gates, judged through
+ *    the ONE preparation-needs function (`dishPreparationNeeds`):
+ *    a dish whose needed equipment is not a subset of the person's
+ *    set is out, and a person who does not cook gets only no-cook
+ *    dishes. Until the §10.4 library pass pins real preparation
+ *    data, the needs function answers conservatively (a stove, and
+ *    cooking) for every dish — so these gates CAN empty the pool
+ *    today, and when they do, the plan falls back to layered foods
+ *    with a note naming why, never a silent downgrade.
+ *  · The prep-time cap binds WEEKDAY plans only (the answer speaks
+ *    about a typical day). It relaxes in the spec's stated order —
+ *    the cap rises through the offered bands, then lifts — but
+ *    only as far as the first stage that still offers a main-meal
+ *    dish, and a relaxation is named in the returned notes. A pool
+ *    with no main-meal dish at any stage is not the cap's doing
+ *    and is left exactly as it was.
+ */
+function gateDishPoolForKitchen(
+  data: DishPoolData,
+  behavioural: BehaviouralProfile,
+  day: string,
+): { data: DishPoolData | null; notes: string[] } {
+  const notes: string[] = [];
+  let candidates = data.candidates;
+
+  const equipment = effectiveEquipment(behavioural);
+  const noCookOnly = behavioural.cookingAbility === "none";
+  if (equipment !== null || noCookOnly) {
+    candidates = candidates.filter((c) => {
+      const needs = dishPreparationNeeds(c.dish);
+      if (noCookOnly && !needs.noCook) return false;
+      if (equipment !== null && !needs.equipment.every((item) => equipment.has(item))) {
+        return false;
+      }
+      return true;
+    });
+    if (candidates.length === 0) {
+      return {
+        data: null,
+        notes: [
+          "No dish in the library fits your kitchen answers yet — the library's preparation details are still being filled in — so today's plan is built from simple foods instead.",
+        ],
+      };
+    }
+  }
+
+  const cap = effectivePrepCapMinutes(behavioural);
+  const dayOfWeek = new Date(`${day}T12:00:00Z`).getUTCDay();
+  const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+  if (cap !== null && isWeekday) {
+    const mainCapable = (list: readonly DishCandidate[]): boolean =>
+      list.some(
+        (c) => MAIN_MEAL_CATEGORIES.includes(c.dish.category) || c.dish.category === "breakfast",
+      );
+    if (mainCapable(candidates)) {
+      const stages: readonly number[] = [...PREP_TIME_BANDS.filter((b) => b >= cap), Infinity];
+      for (const stage of stages) {
+        const within = candidates.filter((c) => c.dish.timeMinutes <= stage);
+        if (!mainCapable(within)) continue;
+        candidates = within;
+        if (stage !== cap) {
+          notes.push(
+            stage === Infinity
+              ? `Your kitchen answers aim for about ${cap} minutes to cook a main meal, and every main dish in the library takes longer — today uses the quickest there are rather than no plan at all.`
+              : `Your kitchen answers aim for about ${cap} minutes to cook a main meal; today's dishes take up to about ${stage} minutes — the closest fit, rather than no plan at all.`,
+          );
+        }
+        break;
+      }
+    }
+  }
+
+  return {
+    data: candidates === data.candidates ? data : { candidates, byId: data.byId },
+    notes,
+  };
+}
+
 /** The day's rotation order over dish candidates: FNV-1a over
  *  `day:dish:id` — the dish idea's discipline (D4), so the same day
  *  always orders the pool the same way and consecutive days differ. */
@@ -1988,6 +2214,13 @@ interface DishPickOpts {
    *  SERVED_YESTERDAY_PENALTY). Absent when there is no earlier
    *  stored plan to learn from. */
   servedYesterday?: ReadonlyMap<Meal, ReadonlySet<string>> | undefined;
+  /** P10: the person cooks at a basic level — dishes whose method
+   *  runs past BASIC_METHOD_STEP_CAP pay the complexity cost. */
+  basicCooking?: boolean | undefined;
+  /** P10: the person's stated confidence is low (1–2 of 5) — the
+   *  picks lean toward the dishes they already return to and the
+   *  variety pressure eases (see the LOW_CONFIDENCE constants). */
+  lowConfidence?: boolean | undefined;
 }
 
 /**
@@ -2020,6 +2253,26 @@ const BIAS_GROUP_COST: Readonly<Record<number, number>> = {
   2: 0,
   3: 0.12,
 };
+
+/** P10: the method length past which a dish counts as complex for a
+ *  basic cook. Measured on the shipped library, not guessed: method
+ *  lengths run 4–9 steps with the median at 6, so a cap of 6 keeps
+ *  the simpler half-plus of the library unpenalised and prices the
+ *  long tail. */
+const BASIC_METHOD_STEP_CAP = 6;
+
+/** P10: what a too-long method costs a basic cook's pick. Bounded
+ *  like the other ranking terms — it re-orders near-equals toward
+ *  simpler dishes; it cannot crown a dish that fits badly. */
+const BASIC_COMPLEXITY_COST = 0.15;
+
+/** P10: low stated confidence halves the variety pressure — the day
+ *  jitter and the served-yesterday penalty both scale by this, so
+ *  familiar dishes repeat more readily — while the favoured-dish
+ *  pull (the P7 bias group 0) doubles. Complexity is something a
+ *  person builds; the plan meets them where they said they are. */
+const LOW_CONFIDENCE_VARIETY_SCALE = 0.5;
+const LOW_CONFIDENCE_FAVOURED_FACTOR = 2;
 
 /** The day's variety jitter: a small deterministic per-(day, dish)
  *  cost in [0, 0.12), seeded from the day and the dish id. The fit
@@ -2109,7 +2362,9 @@ function dishPickCost(
   day: string,
 ): number {
   let cost = mealFitCost(scaled, split);
-  cost += dishDayJitter(day, candidate.dish.id);
+  /* P10: at low stated confidence the variety jitter eases — the
+   *  day reshuffles near-equals less, so familiar fits repeat. */
+  cost += dishDayJitter(day, candidate.dish.id) * (opts.lowConfidence ? LOW_CONFIDENCE_VARIETY_SCALE : 1);
   cost += scalePenalty(servings);
   /* Protein-first: the anchor criterion — the dish carries the
    *  slot's protein aim in a single serving (the protein waves'
@@ -2124,16 +2379,33 @@ function dishPickCost(
   /* P6: after a protein-shortfall log, density itself is worth
    *  paying fit for — bounded, so it stays a lean, not a takeover. */
   if (opts.proteinFirst) cost -= Math.min(density, 15) * 0.01;
-  /* P7: the learning bias, as costs in the groups' own order. */
-  cost += BIAS_GROUP_COST[dishBiasGroup(opts.bias, candidate.dish.id)] ?? 0;
+  /* P7: the learning bias, as costs in the groups' own order.
+   *  P10: at low stated confidence the favoured group's pull
+   *  doubles — the dishes the person already returns to lead
+   *  harder, because familiar is what low confidence can use. */
+  const biasGroup = dishBiasGroup(opts.bias, candidate.dish.id);
+  const biasCost = BIAS_GROUP_COST[biasGroup] ?? 0;
+  cost +=
+    opts.lowConfidence && biasGroup === 0
+      ? biasCost * LOW_CONFIDENCE_FAVOURED_FACTOR
+      : biasCost;
   /* The cuisine preference: a tie-breaker toward the person's
    *  region — never a filter, never worth a bad fit. */
   if (opts.cuisine !== null && dishRegion(candidate.dish) === opts.cuisine) cost -= 0.08;
   /* Served yesterday: the previous plan served this dish in this
    *  slot, so today it pays the penalty — the week's variety term,
-   *  and the only one that reads the stored plan. */
+   *  and the only one that reads the stored plan. P10: the penalty
+   *  eases at low stated confidence, like the jitter. */
   if (opts.servedYesterday?.get(split.meal)?.has(candidate.dish.id)) {
-    cost += SERVED_YESTERDAY_PENALTY;
+    cost += SERVED_YESTERDAY_PENALTY * (opts.lowConfidence ? LOW_CONFIDENCE_VARIETY_SCALE : 1);
+  }
+  /* P10: a basic cook's complexity price — a method longer than
+   *  the basic cap pays a bounded cost (see BASIC_METHOD_STEP_CAP). */
+  if (
+    opts.basicCooking &&
+    dishPreparationNeeds(candidate.dish).methodSteps > BASIC_METHOD_STEP_CAP
+  ) {
+    cost += BASIC_COMPLEXITY_COST;
   }
   /* A breakfast dish at breakfast fits the meal's idiom. */
   if (split.meal === "breakfast" && candidate.dish.category === "breakfast") cost -= 0.04;
@@ -2850,7 +3122,13 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
 
   const goal = profile.goal;
   const snapshot = planInputsSnapshotOf(profile, safety, targets);
-  const splits = splitTargets(targets, mealSlotsFor(profile.dietary.mealsPerDay));
+  /* P10: the stated hunger pattern tilts the split toward the hungry
+     part of the day — shares move, totals never do. */
+  const splits = splitTargets(
+    targets,
+    mealSlotsFor(profile.dietary.mealsPerDay),
+    profile.behavioural.hungerPattern,
+  );
   const pool = eligiblePool(profile, input.foods);
 
   /* P6+P7: the log-adaptive bias. The recent logged days are judged
@@ -2892,6 +3170,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     fruitG: 0,
     milkCurdG: 0,
     proteinFirst: adaptation?.proteinShortfall ?? false,
+    cravingKinds: profile.behavioural.cravingKinds,
   };
   const mainCount = splits.filter((s) => s.meal !== "snack").length;
   const hasSnack = splits.some((s) => s.meal === "snack");
@@ -2900,10 +3179,21 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      When it can fill a main meal's anchor slot the meal is composed
      of dishes; where it cannot, the layered food composition fills
      that meal — the two never mix within a meal's main structure. */
-  const dishData =
+  let dishData =
     input.dishes && input.dishes.length > 0
       ? dishPoolFor(profile, input.dishes, input.activeModes ?? [])
       : null;
+  /* P10: the behavioural kitchen gates narrow the pool further —
+     equipment, cooking ability and the weekday prep-time cap, all
+     read from the person's own Assessment answers (see
+     gateDishPoolForKitchen). A gate that empties the pool hands
+     the day to the layered food composition, with its note. */
+  const behaviourNotes: string[] = [];
+  if (dishData) {
+    const gated = gateDishPoolForKitchen(dishData, profile.behavioural, input.day);
+    dishData = gated.data;
+    behaviourNotes.push(...gated.notes);
+  }
   /* P7: the dish bias. Micro-richness is judged here, where the
      candidates' computed panels exist: a dish is rich in a gap
      nutrient when one serving carries at least MICRO_RICH_SHARE of
@@ -2967,6 +3257,11 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
         ? profile.dietary.cuisinePreference
         : null,
     ...(servedYesterday.size > 0 ? { servedYesterday } : {}),
+    /* P10: the behavioural pick shaping — basic cooking prices long
+     *  methods, low confidence leans on the familiar. */
+    basicCooking: profile.behavioural.cookingAbility === "basic",
+    lowConfidence:
+      profile.behavioural.confidence !== null && profile.behavioural.confidence <= 2,
   };
   const usedDishIds = new Set<string>();
   const meals: PlanMeal[] = splits.map((split) => {
@@ -3081,6 +3376,9 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const notes = [
     ...(adaptation?.notes ?? []),
     ...(learning?.notes ?? []),
+    /* P10: the behavioural gates' explanations — a relaxation or a
+       kitchen fallback is named before the notes judge the result. */
+    ...behaviourNotes,
     ...compositionNotes(meals, pool, targets, dishById),
   ];
 
@@ -3220,6 +3518,64 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   ) {
     return null;
   }
+  /* The behavioural snapshot fields (P10): absent on snapshots stored
+     before the questions existed — read as unanswered; present-but-
+     invalid is a tamper, exactly like the cuisine preference above. */
+  const prepBand = raw["prepTimeMaxMinutes"];
+  const prepTimeMaxMinutes: PrepTimeMaxMinutes | null =
+    prepBand === 10 || prepBand === 20 || prepBand === 35 || prepBand === 60 ? prepBand : null;
+  if (prepBand !== undefined && prepBand !== null && prepTimeMaxMinutes === null) return null;
+  const kitchenEquipment =
+    raw["kitchenEquipment"] === undefined || raw["kitchenEquipment"] === null
+      ? null
+      : text(raw["kitchenEquipment"], 120) || null;
+  if (
+    raw["kitchenEquipment"] !== undefined &&
+    raw["kitchenEquipment"] !== null &&
+    kitchenEquipment === null
+  ) {
+    return null;
+  }
+  const cookingAbility =
+    raw["cookingAbility"] === undefined || raw["cookingAbility"] === null
+      ? null
+      : oneOf(raw["cookingAbility"], COOKING_ABILITIES);
+  if (
+    raw["cookingAbility"] !== undefined &&
+    raw["cookingAbility"] !== null &&
+    cookingAbility === null
+  ) {
+    return null;
+  }
+  const eatingSetting =
+    raw["eatingSetting"] === undefined || raw["eatingSetting"] === null
+      ? null
+      : oneOf(raw["eatingSetting"], EATING_SETTINGS);
+  if (
+    raw["eatingSetting"] !== undefined &&
+    raw["eatingSetting"] !== null &&
+    eatingSetting === null
+  ) {
+    return null;
+  }
+  const hungerPattern =
+    raw["hungerPattern"] === undefined || raw["hungerPattern"] === null
+      ? null
+      : oneOf(raw["hungerPattern"], HUNGER_PATTERNS);
+  if (
+    raw["hungerPattern"] !== undefined &&
+    raw["hungerPattern"] !== null &&
+    hungerPattern === null
+  ) {
+    return null;
+  }
+  const confidence =
+    raw["confidence"] === undefined || raw["confidence"] === null
+      ? null
+      : numIn(raw["confidence"], 1, 5);
+  if (raw["confidence"] !== undefined && raw["confidence"] !== null && confidence === null) {
+    return null;
+  }
   const safetyClassification = oneOf(raw["safetyClassification"], SAFETY_CLASSES);
   if (!safetyClassification) return null;
   const targetsKcal = numIn(raw["targetsKcal"], 0.01, 10000);
@@ -3237,6 +3593,12 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
     mealsPerDay: mealsPerDay === null ? null : Math.round(mealsPerDay),
     dietaryPattern,
     cuisinePreference,
+    prepTimeMaxMinutes,
+    kitchenEquipment,
+    cookingAbility,
+    eatingSetting,
+    hungerPattern,
+    confidence: confidence === null ? null : Math.round(confidence),
     safetyClassification,
     targetsKcal,
     targetsProteinG,

@@ -9,12 +9,23 @@
  * `HealthProfile` has no fields for it, so those answers live in the
  * assessment state only and never enter the domain profile. Flagged for a
  * future domain revision; nothing downstream pretends otherwise.
+ * The behaviour step is the opposite case: the domain DOES carry it
+ * (`HealthProfile.behavioural`, spec §10) — the kitchen questions sit on
+ * the nutrition step with the rest of the food facts, and the reflective
+ * questions get their own step between preferences and sleep.
  */
 
 import type {
   ActivityLevel,
+  CookingAbility,
+  CravingKind,
   CuisinePreference,
   DietaryPattern,
+  EatingSetting,
+  EquipmentItem,
+  FailureReason,
+  HungerPattern,
+  PrepTimeMaxMinutes,
   VitalisGoal,
 } from "@/lib/vitalis/domain/profile";
 import {
@@ -36,6 +47,7 @@ export const ASSESSMENT_STEPS = [
   "safety",
   "nutrition",
   "preferences",
+  "behaviour",
   "sleep",
   "activity",
   "summary",
@@ -50,6 +62,7 @@ export const QUESTION_STEPS = [
   "safety",
   "nutrition",
   "preferences",
+  "behaviour",
   "sleep",
   "activity",
 ] as const;
@@ -63,18 +76,21 @@ export const STEP_TITLE: Record<AssessmentStep, string> = {
   safety: "Safety",
   nutrition: "How you eat",
   preferences: "Food preferences",
+  behaviour: "Habits and history",
   sleep: "Sleep and recovery",
   activity: "How you move",
   summary: "Your summary",
 };
 
 export const STEP_INTRO: Record<QuestionStep, string> = {
-  identity: "Three basics. Bloom uses them to work out what your body needs.",
+  identity: "Four basics. Bloom uses them to work out what your body needs.",
   goals: "What you want to change. You can change your mind at any time.",
   safety:
     "These answers decide what Bloom will and will not suggest. They are never used to judge you, and you can answer “prefer not to say”.",
   nutrition: "Your usual pattern, not a perfect week.",
   preferences: "Anything Bloom should keep off your plate, and what you enjoy.",
+  behaviour:
+    "How eating actually goes for you — cravings, hard moments, and what has or has not worked before. Bloom uses this to shape support, never to judge you.",
   sleep: "Sleep is where recovery happens. Answer for a typical week.",
   activity: "Your usual week, including work and walking — not just exercise sessions.",
 };
@@ -262,4 +278,167 @@ export const RESTEDNESS_LABEL: Record<number, string> = {
   3: "About half the time",
   4: "Most days",
   5: "Almost always",
+};
+
+/* ------------------- behavioural profile (spec §10) ------------------- */
+
+/**
+ * The kitchen questions live on the nutrition step, with the rest of
+ * the food facts; the reflective ones on the behaviour step. Every
+ * vocabulary here is the domain's own (vitalis/domain/profile.ts) —
+ * the labels are presentation only.
+ */
+
+export const COOKING_OPTIONS: readonly { value: CookingAbility; label: string; hint: string }[] = [
+  { value: "none", label: "I don't cook", hint: "Meals are made for me, or bought ready" },
+  { value: "basic", label: "Basic cooking", hint: "Simple things — eggs, rice, a curry base" },
+  { value: "confident", label: "Confident cooking", hint: "Most recipes are fine" },
+];
+
+export const COOKING_LABEL: Record<CookingAbility, string> = {
+  none: "No cooking",
+  basic: "Basic cooking",
+  confident: "Confident cooking",
+};
+
+export const EQUIPMENT_OPTIONS: readonly { value: EquipmentItem; label: string }[] = [
+  { value: "stove", label: "Stove" },
+  { value: "pressure_cooker", label: "Pressure cooker" },
+  { value: "oven", label: "Oven" },
+  { value: "microwave", label: "Microwave" },
+  { value: "mixer_grinder", label: "Mixer grinder" },
+  { value: "fridge", label: "Fridge" },
+  { value: "none", label: "None of these" },
+];
+
+export const EQUIPMENT_LABEL: Record<EquipmentItem, string> = {
+  stove: "Stove",
+  pressure_cooker: "Pressure cooker",
+  oven: "Oven",
+  microwave: "Microwave",
+  mixer_grinder: "Mixer grinder",
+  fridge: "Fridge",
+  none: "None of these",
+};
+
+export const PREP_TIME_OPTIONS: readonly { value: PrepTimeMaxMinutes; label: string }[] = [
+  { value: 10, label: "About 10 minutes" },
+  { value: 20, label: "About 20 minutes" },
+  { value: 35, label: "About 35 minutes" },
+  { value: 60, label: "Up to an hour" },
+];
+
+export const PREP_TIME_LABEL: Record<PrepTimeMaxMinutes, string> = {
+  10: "About 10 minutes",
+  20: "About 20 minutes",
+  35: "About 35 minutes",
+  60: "Up to an hour",
+};
+
+export const EATING_SETTING_OPTIONS: readonly {
+  value: EatingSetting;
+  label: string;
+  hint: string;
+}[] = [
+  { value: "home", label: "At home", hint: "Most meals are home-cooked" },
+  { value: "hostel", label: "Hostel or shared kitchen", hint: "Limited space and equipment" },
+  { value: "work_canteen", label: "Work canteen", hint: "Lunch comes from a canteen most days" },
+  {
+    value: "restaurant_mostly",
+    label: "Restaurants and takeaway",
+    hint: "Most meals are bought ready",
+  },
+  { value: "mixed", label: "A mix", hint: "Some home, some bought" },
+];
+
+export const EATING_SETTING_LABEL: Record<EatingSetting, string> = {
+  home: "At home",
+  hostel: "Hostel or shared kitchen",
+  work_canteen: "Work canteen",
+  restaurant_mostly: "Restaurants and takeaway",
+  mixed: "A mix",
+};
+
+export const HUNGER_OPTIONS: readonly { value: HungerPattern; label: string }[] = [
+  { value: "mornings", label: "Mornings" },
+  { value: "afternoons", label: "Afternoons" },
+  { value: "evenings", label: "Evenings" },
+  { value: "nights", label: "Late at night" },
+  { value: "steady", label: "Fairly steady all day" },
+];
+
+export const HUNGER_LABEL: Record<HungerPattern, string> = {
+  mornings: "Mornings",
+  afternoons: "Afternoons",
+  evenings: "Evenings",
+  nights: "Late at night",
+  steady: "Fairly steady all day",
+};
+
+export const CRAVING_KIND_OPTIONS: readonly { value: CravingKind; label: string }[] = [
+  { value: "sweet", label: "Sweet" },
+  { value: "salty", label: "Salty" },
+  { value: "fried", label: "Fried" },
+  { value: "none", label: "No particular cravings" },
+];
+
+export const CRAVING_KIND_LABEL: Record<CravingKind, string> = {
+  sweet: "Sweet",
+  salty: "Salty",
+  fried: "Fried",
+  none: "No particular cravings",
+};
+
+/** How often eating follows feelings — the emotional-eating scale. */
+export const EMOTIONAL_EATING_OPTIONS: readonly { value: number; label: string }[] = [
+  { value: 1, label: "Rarely" },
+  { value: 2, label: "Sometimes" },
+  { value: 3, label: "About half the time" },
+  { value: 4, label: "Often" },
+  { value: 5, label: "Very often" },
+];
+
+export const EMOTIONAL_EATING_LABEL: Record<number, string> = {
+  1: "Rarely",
+  2: "Sometimes",
+  3: "About half the time",
+  4: "Often",
+  5: "Very often",
+};
+
+/** The shared 1–5 scale for motivation and confidence. */
+export const READINESS_OPTIONS: readonly { value: number; label: string }[] = [
+  { value: 1, label: "Very low" },
+  { value: 2, label: "Low" },
+  { value: 3, label: "In the middle" },
+  { value: 4, label: "High" },
+  { value: 5, label: "Very high" },
+];
+
+export const READINESS_LABEL: Record<number, string> = {
+  1: "Very low",
+  2: "Low",
+  3: "In the middle",
+  4: "High",
+  5: "Very high",
+};
+
+export const FAILURE_REASON_OPTIONS: readonly { value: FailureReason; label: string }[] = [
+  { value: "cost", label: "Cost" },
+  { value: "time", label: "Time" },
+  { value: "hunger", label: "Hunger" },
+  { value: "taste", label: "Taste" },
+  { value: "complexity", label: "Too complicated" },
+  { value: "social", label: "Social pressure" },
+  { value: "other", label: "Something else" },
+];
+
+export const FAILURE_REASON_LABEL: Record<FailureReason, string> = {
+  cost: "Cost",
+  time: "Time",
+  hunger: "Hunger",
+  taste: "Taste",
+  complexity: "Too complicated",
+  social: "Social pressure",
+  other: "Something else",
 };

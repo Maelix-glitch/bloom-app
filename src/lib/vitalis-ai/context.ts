@@ -25,7 +25,7 @@
  * read — checks never parse the prose meant for the model.
  */
 
-import { GOAL_LABEL } from "@/lib/assessment/questions";
+import { FAILURE_REASON_LABEL, GOAL_LABEL } from "@/lib/assessment/questions";
 import type { AssessmentAnswers, AssessmentStatus } from "@/lib/assessment/state";
 import type { Nutrients, NutritionTargets } from "@/lib/nutrition";
 import {
@@ -203,6 +203,14 @@ const ACTIVITY_WORDS: Record<string, string> = {
   very_active: "very active",
 };
 
+const EMOTIONAL_EATING_WORDS: Record<number, string> = {
+  1: "rarely",
+  2: "sometimes",
+  3: "about half the time",
+  4: "often",
+  5: "very often",
+};
+
 /* ------------------------------------------------------------------ */
 /*  The builder                                                        */
 /* ------------------------------------------------------------------ */
@@ -247,6 +255,30 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   if (a.cuisines.length > 0) person.push(`Cuisines they enjoy: ${a.cuisines.join(", ")}.`);
   if (a.foodBudget !== null) person.push(`Meal budget preference: tier ${a.foodBudget} of 3 (1 is everyday, 3 is rich) — the plan and dishes already respect it.`);
   if (a.sleepHoursTypical !== null) person.push(`They say they typically sleep about ${a.sleepHoursTypical} hours (an Assessment answer, not a measurement).`);
+  /* The behavioural answers (spec §10) — the person's own words about
+   * how eating goes for them, stated factually so explanations can
+   * acknowledge them. Context for care, never a diagnosis. */
+  if (a.emotionalEating !== null) {
+    const words = EMOTIONAL_EATING_WORDS[a.emotionalEating];
+    if (words) {
+      person.push(
+        a.emotionalEating >= 4
+          ? `They told Bloom eating ${words} follows their feelings. Be gentle about it: never frame food as failure, and never treat a hard day as a broken plan.`
+          : `They told Bloom eating ${words} follows their feelings.`,
+      );
+    }
+  }
+  if (a.pastAttempts.length > 0) {
+    person.push(
+      `They have tried before: ${a.pastAttempts
+        .map((t) =>
+          t.failureReasons.length > 0
+            ? `${t.approach} (it came unstuck over: ${t.failureReasons.map((r) => (FAILURE_REASON_LABEL[r] ?? r).toLowerCase()).join(", ")})`
+            : t.approach,
+        )
+        .join("; ")}. Do not propose the same shape again without acknowledging why it came unstuck.`,
+    );
+  }
   /* Safety answers — stated factually, for care, never for diagnosis. */
   if (a.pregnantOrBreastfeeding === true) person.push("They told Bloom they are pregnant or breastfeeding. Be extra careful: no deficit framing, and anything beyond gentle general food guidance goes to their clinician.");
   if (a.eatingDisorderHistory === true) person.push("They told Bloom they have a history of disordered eating. Be especially gentle: never frame food as failure, never push targets or deficits, and let them lead.");

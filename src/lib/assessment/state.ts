@@ -11,7 +11,11 @@
  * is the bridge, and the domain's own completeness and safety modules judge
  * the result. The one deliberate extension is sleep and recovery — the domain
  * profile has no fields for them yet, so those answers live here only and are
- * labelled as such wherever they are read back.
+ * labelled as such wherever they are read back. The behavioural profile
+ * (spec §10) is the opposite case: the domain HAS the section
+ * (`HealthProfile.behavioural`), so those answers fold straight into it —
+ * and the waist answer finally feeds the domain's waist field, which sat
+ * hard-coded null here until this slice.
  *
  * Everything in this module is pure except the two thin pref wrappers at the
  * bottom (`readAssessmentState` / `saveAssessmentState`).
@@ -19,12 +23,27 @@
 
 import { getPref, setPref } from "@/lib/prefs";
 import {
+  COOKING_ABILITIES,
+  CRAVING_KINDS,
   CUISINE_PREFERENCES,
   DIETARY_PATTERNS,
+  EATING_SETTINGS,
+  EQUIPMENT_ITEMS,
+  FAILURE_REASONS,
+  HUNGER_PATTERNS,
+  PREP_TIME_BANDS,
   type ActivityLevel,
+  type CookingAbility,
+  type CravingKind,
   type CuisinePreference,
   type DietaryPattern,
+  type EatingSetting,
+  type EquipmentItem,
+  type FailureReason,
   type HealthProfile,
+  type HungerPattern,
+  type PastAttempt,
+  type PrepTimeMaxMinutes,
   type Sex,
   type VitalisGoal,
 } from "@/lib/vitalis/domain/profile";
@@ -46,6 +65,10 @@ export interface AssessmentAnswers {
   ageYears: number | null;
   heightCm: number | null;
   weightKg: number | null;
+  /** Waist in centimetres, measured at home. Optional and skippable;
+   *  null until stated. Feeds the domain's waist observation, which
+   *  toHealthProfile hard-coded to null before this answer existed. */
+  waistCm: number | null;
   sex: Sex;
   /* goals — domain: goal / targetWeight / rateKgPerWeek */
   goal: VitalisGoal | null;
@@ -81,6 +104,26 @@ export interface AssessmentAnswers {
   sleepHoursTypical: number | null;
   sleepQuality: SleepQuality | null;
   morningRestedness: number | null;
+  /* behavioural profile — domain: HealthProfile.behavioural (spec §10).
+     Asked here and nowhere else, exactly like pattern, budget and
+     cuisine. The factual kitchen four (cookingAbility, equipment,
+     prepTimeMaxMinutes, eatingSetting) may also move by Living
+     Assessment delta; the reflective six may not — see living.ts. */
+  cookingAbility: CookingAbility | null;
+  /** Stated equipment; [] = unanswered, ["none"] = "none of these". */
+  equipment: EquipmentItem[];
+  prepTimeMaxMinutes: PrepTimeMaxMinutes | null;
+  eatingSetting: EatingSetting | null;
+  hungerPattern: HungerPattern | null;
+  /** Foods they crave, in their own words (at most 5). */
+  cravings: string[];
+  cravingKinds: CravingKind[];
+  /** 1 (rarely) to 5 (very often); null = unanswered. */
+  emotionalEating: number | null;
+  pastAttempts: PastAttempt[];
+  /** 1 (very low) to 5 (very high); null = unanswered. */
+  motivation: number | null;
+  confidence: number | null;
 }
 
 export interface AssessmentState {
@@ -100,6 +143,7 @@ export const EMPTY_ANSWERS: AssessmentAnswers = {
   ageYears: null,
   heightCm: null,
   weightKg: null,
+  waistCm: null,
   sex: "unspecified",
   goal: null,
   targetWeightKg: null,
@@ -123,6 +167,17 @@ export const EMPTY_ANSWERS: AssessmentAnswers = {
   sleepHoursTypical: null,
   sleepQuality: null,
   morningRestedness: null,
+  cookingAbility: null,
+  equipment: [],
+  prepTimeMaxMinutes: null,
+  eatingSetting: null,
+  hungerPattern: null,
+  cravings: [],
+  cravingKinds: [],
+  emotionalEating: null,
+  pastAttempts: [],
+  motivation: null,
+  confidence: null,
 };
 
 export function emptyAssessmentState(now: string = ""): AssessmentState {
@@ -182,6 +237,58 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[]): T | nul
     : null;
 }
 
+/** Keep only values that exist in the vocabulary, de-duplicated, capped. */
+function enumList<T extends string>(value: unknown, allowed: readonly T[], max: number): T[] {
+  if (!Array.isArray(value)) return [];
+  const out: T[] = [];
+  for (const item of value) {
+    const v = oneOf(item, allowed);
+    if (v !== null && !out.includes(v)) out.push(v);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+/** An equipment list where "none" is exclusive: a stated none means
+ *  none of these, so it stands alone even if other items ride along. */
+function equipmentList(value: unknown): EquipmentItem[] {
+  const items = enumList(value, EQUIPMENT_ITEMS, EQUIPMENT_ITEMS.length);
+  return items.includes("none") ? ["none"] : items;
+}
+
+/** Craving kinds follow the same rule: a stated "none" stands alone. */
+function cravingKindList(value: unknown): CravingKind[] {
+  const items = enumList(value, CRAVING_KINDS, CRAVING_KINDS.length);
+  return items.includes("none") ? ["none"] : items;
+}
+
+/** A prep-time answer is one of the offered bands — anything else is not a band. */
+function prepBandOrNull(value: unknown): PrepTimeMaxMinutes | null {
+  return typeof value === "number" && (PREP_TIME_BANDS as readonly number[]).includes(value)
+    ? (value as PrepTimeMaxMinutes)
+    : null;
+}
+
+/** Past attempts: at most three, each an approach in the person's own
+ *  words plus the failure reasons that exist in the vocabulary. An
+ *  entry with no approach is not an attempt and is dropped. */
+function parsePastAttempts(value: unknown): PastAttempt[] {
+  if (!Array.isArray(value)) return [];
+  const out: PastAttempt[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const r = item as Record<string, unknown>;
+    const approach = typeof r["approach"] === "string" ? r["approach"].trim().slice(0, 120) : "";
+    if (!approach) continue;
+    out.push({
+      approach,
+      failureReasons: enumList(r["failureReasons"], FAILURE_REASONS, FAILURE_REASONS.length),
+    });
+    if (out.length >= 3) break;
+  }
+  return out;
+}
+
 const GOALS: readonly VitalisGoal[] = ["lose", "maintain", "gain", "recomp", "general_health"];
 const ACTIVITIES: readonly ActivityLevel[] = [
   "sedentary",
@@ -202,6 +309,7 @@ export function parseAnswers(raw: unknown): AssessmentAnswers {
     ageYears: intOrNull(r["ageYears"], 13, 110),
     heightCm: numOrNull(r["heightCm"], 100, 250),
     weightKg: numOrNull(r["weightKg"], 25, 350),
+    waistCm: numOrNull(r["waistCm"], 40, 250),
     sex: oneOf<Sex>(r["sex"], ["female", "male", "unspecified"]) ?? "unspecified",
     goal: oneOf(r["goal"], GOALS),
     targetWeightKg: numOrNull(r["targetWeightKg"], 25, 350),
@@ -225,6 +333,17 @@ export function parseAnswers(raw: unknown): AssessmentAnswers {
     sleepHoursTypical: numOrNull(r["sleepHoursTypical"], 3, 14),
     sleepQuality: oneOf(r["sleepQuality"], SLEEP_QUALITIES),
     morningRestedness: intOrNull(r["morningRestedness"], 1, 5),
+    cookingAbility: oneOf(r["cookingAbility"], COOKING_ABILITIES),
+    equipment: equipmentList(r["equipment"]),
+    prepTimeMaxMinutes: prepBandOrNull(r["prepTimeMaxMinutes"]),
+    eatingSetting: oneOf(r["eatingSetting"], EATING_SETTINGS),
+    hungerPattern: oneOf(r["hungerPattern"], HUNGER_PATTERNS),
+    cravings: textList(r["cravings"], 5, 60),
+    cravingKinds: cravingKindList(r["cravingKinds"]),
+    emotionalEating: intOrNull(r["emotionalEating"], 1, 5),
+    pastAttempts: parsePastAttempts(r["pastAttempts"]),
+    motivation: intOrNull(r["motivation"], 1, 5),
+    confidence: intOrNull(r["confidence"], 1, 5),
   };
 }
 
@@ -388,7 +507,7 @@ export function toHealthProfile(state: AssessmentState, userId: string): HealthP
     sex: a.sex,
     height: a.heightCm !== null ? observation(a.heightCm, "cm", recordedAt) : null,
     weight: a.weightKg !== null ? observation(a.weightKg, "kg", recordedAt) : null,
-    waist: null,
+    waist: a.waistCm !== null ? observation(a.waistCm, "cm", recordedAt) : null,
     targetWeight:
       a.targetWeightKg !== null ? observation(a.targetWeightKg, "kg", recordedAt) : null,
     goal: a.goal,
@@ -403,6 +522,19 @@ export function toHealthProfile(state: AssessmentState, userId: string): HealthP
       mealsPerDay: a.mealsPerDay,
       budgetTier: a.foodBudget,
       cuisinePreference: a.cuisinePreference,
+    },
+    behavioural: {
+      cookingAbility: a.cookingAbility,
+      equipment: a.equipment,
+      prepTimeMaxMinutes: a.prepTimeMaxMinutes,
+      eatingSetting: a.eatingSetting,
+      hungerPattern: a.hungerPattern,
+      cravings: a.cravings,
+      cravingKinds: a.cravingKinds,
+      emotionalEating: a.emotionalEating,
+      pastAttempts: a.pastAttempts,
+      motivation: a.motivation,
+      confidence: a.confidence,
     },
     constraints: {
       conditions: a.conditions,

@@ -93,6 +93,24 @@ describe("buildVitalisContext — the nutrition + assessment record", () => {
     expect(text).toContain("50% of the energy target");
     expect(text).toContain("50% of the protein target");
   });
+
+  it("carries the behavioural answers (§10) as facts the explanations can acknowledge", () => {
+    const input = fullInput();
+    input.assessment.answers = {
+      ...input.assessment.answers,
+      emotionalEating: 4,
+      pastAttempts: [{ approach: "a low-carb diet", failureReasons: ["hunger", "cost"] }],
+    };
+    const { text } = buildVitalisContext(input);
+    expect(text).toContain("eating often follows their feelings");
+    expect(text).toContain("never frame food as failure");
+    expect(text).toContain("They have tried before: a low-carb diet");
+    expect(text).toContain("it came unstuck over: hunger, cost");
+    /* Unanswered behavioural answers add no lines — nothing is inferred. */
+    const plain = buildVitalisContext(fullInput());
+    expect(plain.text).not.toContain("follows their feelings");
+    expect(plain.text).not.toContain("They have tried before");
+  });
 });
 
 describe("buildVitalisContext — nothing from other domains can appear", () => {

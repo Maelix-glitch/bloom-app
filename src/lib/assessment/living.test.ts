@@ -106,6 +106,58 @@ describe("parseDeltaChanges — the hard rule", () => {
     expect(parseDeltaChanges(null)).toBeNull();
     expect(parseDeltaChanges("weight")).toBeNull();
   });
+
+  it("accepts the factual kitchen fields — kitchens change (§10.5)", () => {
+    expect(
+      parseDeltaChanges({
+        cookingAbility: "basic",
+        equipment: ["stove", "fridge"],
+        prepTimeMaxMinutes: 20,
+        eatingSetting: "home",
+      }),
+    ).toEqual({
+      cookingAbility: "basic",
+      equipment: ["stove", "fridge"],
+      prepTimeMaxMinutes: 20,
+      eatingSetting: "home",
+    });
+    /* A stated "none of these" is a real equipment answer. */
+    expect(parseDeltaChanges({ equipment: ["none"] })).toEqual({ equipment: ["none"] });
+    /* An empty equipment list is not a statement — it changes nothing. */
+    expect(parseDeltaChanges({ equipment: [] })).toBeNull();
+    /* Values outside the vocabularies drop like any other field. */
+    expect(parseDeltaChanges({ cookingAbility: "expert" })).toBeNull();
+    expect(parseDeltaChanges({ prepTimeMaxMinutes: 25 })).toBeNull();
+    expect(parseDeltaChanges({ eatingSetting: "office" })).toBeNull();
+  });
+
+  it("drops forged reflective behavioural fields — they are Assessment-only (§10.5)", () => {
+    const forged = {
+      hungerPattern: "evenings",
+      cravings: ["chocolate"],
+      cravingKinds: ["sweet"],
+      emotionalEating: 4,
+      pastAttempts: [{ approach: "Keto", failureReasons: ["hunger"] }],
+      motivation: 5,
+      confidence: 1,
+    };
+    expect(parseDeltaChanges(forged)).toBeNull();
+    /* Riding alongside a permitted field, they are stripped, not carried. */
+    expect(parseDeltaChanges({ weightKg: 98, ...forged })).toEqual({ weightKg: 98 });
+    /* And a stored delta carrying them never reaches the effective
+       answers — the fold only ever applies permitted changes. */
+    const stored = parseAssessmentDeltaValue({
+      version: 1,
+      updates: [
+        {
+          recordedAt: "2026-10-21T08:00:00.000Z",
+          changes: { ...forged, cookingAbility: "confident" },
+        },
+      ],
+    });
+    expect(stored?.updates).toHaveLength(1);
+    expect(stored?.updates[0]?.changes).toEqual({ cookingAbility: "confident" });
+  });
 });
 
 describe("the delta value", () => {
@@ -168,6 +220,24 @@ describe("the merge — base + deltas", () => {
     const merged = effectiveAnswers(state.answers, value);
     expect(merged.dietaryPattern).toBe("eggetarian");
     expect(merged.foodBudget).toBe(2);
+  });
+
+  it("folds a kitchen update over the base, and leaves the reflective answers untouched", () => {
+    const state = completedState(100);
+    const value = appendDelta(
+      EMPTY_DELTA_VALUE,
+      { cookingAbility: "basic", equipment: ["stove"], eatingSetting: "home" },
+      "2026-10-10T08:00:00.000Z",
+    );
+    const merged = effectiveAnswers(state.answers, value);
+    expect(merged.cookingAbility).toBe("basic");
+    expect(merged.equipment).toEqual(["stove"]);
+    expect(merged.eatingSetting).toBe("home");
+    /* The base answers carry no reflective answers, and no delta can
+       have added any — they stay unanswered. */
+    expect(merged.hungerPattern).toBeNull();
+    expect(merged.emotionalEating).toBeNull();
+    expect(merged.confidence).toBeNull();
   });
 
   it("with no updates the effective state IS the stored state", () => {
@@ -233,6 +303,25 @@ describe("sinceLines — grounded or absent", () => {
     expect(lines[0]!.text).toContain("Updated on");
     expect(lines[0]!.text).toContain("activity — Active");
     expect(lines[0]!.text).toContain("sleep — about 7 hours");
+  });
+
+  it("a kitchen update is described in the same dated line", () => {
+    const value = appendDelta(
+      EMPTY_DELTA_VALUE,
+      {
+        cookingAbility: "basic",
+        equipment: ["stove", "fridge"],
+        prepTimeMaxMinutes: 20,
+        eatingSetting: "home",
+      },
+      "2026-11-03T08:00:00.000Z",
+    );
+    const lines = sinceLines(completedState(), [], [], value);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.text).toContain("cooking — basic cooking");
+    expect(lines[0]!.text).toContain("equipment — stove, fridge");
+    expect(lines[0]!.text).toContain("prep time — about 20 minutes");
+    expect(lines[0]!.text).toContain("eating — at home");
   });
 });
 

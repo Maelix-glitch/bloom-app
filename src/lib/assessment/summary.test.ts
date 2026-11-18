@@ -142,6 +142,76 @@ describe("summaryOf", () => {
     expect(summary?.bmi).toBeNull();
   });
 
+  it("reads back a stated waist in the identity section — and only then", () => {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(s, { waistCm: 88 }, "summary", T1);
+    s = completeAssessment(s, T2);
+    const identity = summaryOf(s)?.sections.find((sec) => sec.section === "identity");
+    expect(identity?.lines).toContain("Waist 88 cm.");
+    /* Unanswered → no waist line; it is never estimated from weight. */
+    const lines = summaryOf(completedFull())?.sections.find((sec) => sec.section === "identity")
+      ?.lines;
+    expect(lines?.some((l) => l.startsWith("Waist"))).toBe(false);
+  });
+
+  it("reads back the kitchen answers (§10) in the nutrition section", () => {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(
+      s,
+      {
+        eatingSetting: "hostel",
+        cookingAbility: "basic",
+        equipment: ["stove", "fridge"],
+        prepTimeMaxMinutes: 20,
+      },
+      "summary",
+      T1,
+    );
+    s = completeAssessment(s, T2);
+    const nutrition = summaryOf(s)?.sections.find((sec) => sec.section === "nutrition");
+    expect(nutrition?.lines).toContain("Meals: hostel or shared kitchen.");
+    expect(nutrition?.lines).toContain("Cooking: basic cooking.");
+    expect(nutrition?.lines).toContain("Equipment: stove, fridge.");
+    expect(nutrition?.lines).toContain("Time to cook a main meal: about 20 minutes.");
+  });
+
+  it("reads back the behavioural answers in their own section — and they never gate a plan", () => {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(
+      s,
+      {
+        hungerPattern: "evenings",
+        cravings: ["chocolate"],
+        cravingKinds: ["sweet"],
+        emotionalEating: 4,
+        pastAttempts: [{ approach: "a low-carb diet", failureReasons: ["hunger", "social"] }],
+        motivation: 3,
+        confidence: 2,
+      },
+      "summary",
+      T1,
+    );
+    s = completeAssessment(s, T2);
+    const behaviour = summaryOf(s)?.sections.find((sec) => sec.section === "behaviour");
+    expect(behaviour?.title).toBe("Habits and history");
+    expect(behaviour?.state).toBe("complete");
+    expect(behaviour?.lines).toContain("Your hunger is strongest in the evenings.");
+    expect(behaviour?.lines).toContain("Foods you crave: chocolate.");
+    expect(behaviour?.lines).toContain("Cravings: sweet.");
+    expect(behaviour?.lines).toContain("Eating follows your feelings: often.");
+    expect(behaviour?.lines).toContain(
+      "You've tried a low-carb diet before — it came unstuck over hunger, social pressure.",
+    );
+    expect(behaviour?.lines).toContain("Motivation right now: in the middle.");
+    expect(behaviour?.lines).toContain("Confidence you can keep this up: low.");
+    /* The full fixture answers nothing behavioural, yet is plan-ready:
+       these answers shape support, they are never a plan's gate. */
+    const full = summaryOf(completedFull());
+    expect(full?.plan.ready).toBe(true);
+    expect(full?.sections.find((sec) => sec.section === "behaviour")?.state).toBe("missing");
+    expect(full?.sections.find((sec) => sec.section === "behaviour")?.lines).toEqual([]);
+  });
+
   it("reads back a stated meal budget in the nutrition section — and only then", () => {
     let s = beginAssessment(emptyAssessmentState(T0), T0);
     s = saveStep(s, { dietaryPattern: "vegan", foodBudget: 2 }, "summary", T1);
