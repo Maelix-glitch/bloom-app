@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
+import { SleepRecoverySection } from "@/components/tk/SleepRecoverySection";
 import { StudyMap } from "@/components/tk/StudyMap";
 import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
@@ -558,6 +559,10 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                     caption="From your own logged days"
                   />
                 </section>
+
+                {store.active.includes("sleep") ? (
+                  <SleepRecoverySection days={store.days} today={today} />
+                ) : null}
 
                 {analysis.correlations.length > 0 ? (
                   <section className="at-section">

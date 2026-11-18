@@ -33,7 +33,22 @@ import { ClipboardCheck, ClipboardList, X } from "lucide-react";
 
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { setPref } from "@/lib/prefs";
+import { WEIGHINS_KEY, parseWeighIns, type WeighIn } from "@/lib/health/body";
+import { FOODLOG_KEY, parseFoodLogValue } from "@/lib/nutrition/store";
+import type { LogEntry } from "@/lib/nutrition/types";
+import type { ActivityLevel } from "@/lib/vitalis/domain/profile";
+import {
+  ASSESSMENT_DELTA_KEY,
+  EMPTY_DELTA_VALUE,
+  assessmentStaleness,
+  effectiveAnswers,
+  parseAssessmentDeltaValue,
+  recordAssessmentDelta,
+  sinceLines,
+  type AssessmentDeltaChanges,
+} from "@/lib/assessment/living";
 import { usePrefValue } from "@/lib/prefsStore";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useNutrition } from "@/hooks/useNutrition";
@@ -75,7 +90,14 @@ function assessmentGateOpen(): boolean {
   }
   return true;
 }
-import { GOAL_LABEL, QUESTION_STEPS } from "@/lib/assessment/questions";
+import {
+  ACTIVITY_OPTIONS,
+  GOAL_LABEL,
+  QUESTION_STEPS,
+  RESTEDNESS_OPTIONS,
+  SLEEP_QUALITY_OPTIONS,
+  type SleepQuality,
+} from "@/lib/assessment/questions";
 import { AssessmentFlow } from "./AssessmentFlow";
 import { AssessmentSummaryView } from "./AssessmentSummaryView";
 
@@ -443,6 +465,232 @@ export function AssessmentPromptCard() {
   );
 }
 
+/* --------------------------- Living Assessment ----------------------------- */
+
+const EMPTY_WEIGHINS: WeighIn[] = [];
+const EMPTY_FOODLOG: LogEntry[] = [];
+
+/** One pill row in the delta form — the flow's chip pattern, compact. */
+function DeltaChipRow<T extends string | number>({
+  options,
+  value,
+  onSelect,
+  ariaLabel,
+}: {
+  options: readonly { value: T; label: string }[];
+  value: T | null;
+  onSelect: (value: T) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={ariaLabel}>
+      {options.map((option) => {
+        const selected = value === option.value;
+        return (
+          <button
+            key={String(option.value)}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onSelect(option.value)}
+            className={`rounded-pill border px-3.5 py-2 text-[length:var(--text-support)] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo ${
+              selected
+                ? "border-gold/60 bg-gold/10 text-foreground"
+                : "border-border bg-surface-2 text-muted-foreground hover:border-border-strong hover:text-foreground"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * The Living Assessment section of the Profile card: what has
+ * changed since the assessment (read from the person's real
+ * weigh-ins and food log — never estimated), whether the snapshot
+ * is worth updating, and the small delta form that records an
+ * update WITHOUT a retake. The form can only touch weight,
+ * activity and sleep — dietary pattern and food budget are asked
+ * only inside the Assessment flow, so they are not fields here,
+ * and the delta parser would drop them even if they arrived.
+ * Saving writes a dated delta record; the stored assessment and
+ * its history are never mutated.
+ */
+function LivingAssessmentSection({ state }: { state: AssessmentState }) {
+  const weighIns = usePrefValue(WEIGHINS_KEY, parseWeighIns, EMPTY_WEIGHINS);
+  const foodLog = usePrefValue(FOODLOG_KEY, parseFoodLogValue, EMPTY_FOODLOG);
+  const deltaValue = usePrefValue(
+    ASSESSMENT_DELTA_KEY,
+    parseAssessmentDeltaValue,
+    EMPTY_DELTA_VALUE,
+  );
+  const [formOpen, setFormOpen] = useState(false);
+  const [weight, setWeight] = useState("");
+  const [activity, setActivity] = useState<ActivityLevel | null>(null);
+  const [sleepHours, setSleepHours] = useState("");
+  const [sleepQuality, setSleepQuality] = useState<SleepQuality | null>(null);
+  const [restedness, setRestedness] = useState<number | null>(null);
+
+  if (state.status !== "complete") return null;
+
+  const now = new Date().toISOString();
+  const lines = sinceLines(state, weighIns, foodLog, deltaValue);
+  const staleness = assessmentStaleness(state, weighIns, now);
+  const effective = effectiveAnswers(state.answers, deltaValue);
+
+  const openForm = () => {
+    setWeight(effective.weightKg !== null ? String(effective.weightKg) : "");
+    setActivity(effective.activity);
+    setSleepHours(effective.sleepHoursTypical !== null ? String(effective.sleepHoursTypical) : "");
+    setSleepQuality(effective.sleepQuality);
+    setRestedness(effective.morningRestedness);
+    setFormOpen(true);
+  };
+
+  const save = () => {
+    const changes: AssessmentDeltaChanges = {};
+    const w = Number(weight);
+    if (weight.trim() !== "" && Number.isFinite(w) && w !== effective.weightKg) {
+      changes.weightKg = w;
+    }
+    if (activity !== null && activity !== effective.activity) changes.activity = activity;
+    const sh = Number(sleepHours);
+    if (sleepHours.trim() !== "" && Number.isFinite(sh) && sh !== effective.sleepHoursTypical) {
+      changes.sleepHoursTypical = sh;
+    }
+    if (sleepQuality !== null && sleepQuality !== effective.sleepQuality) {
+      changes.sleepQuality = sleepQuality;
+    }
+    if (restedness !== null && restedness !== effective.morningRestedness) {
+      changes.morningRestedness = restedness;
+    }
+    if (Object.keys(changes).length > 0) {
+      recordAssessmentDelta(changes, new Date().toISOString());
+    }
+    setFormOpen(false);
+  };
+
+  const fieldLabel =
+    "text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground";
+
+  return (
+    <div className="mt-5 border-t border-border/60 pt-4">
+      <p className="pf-eyebrow">Since your assessment</p>
+      {lines.length > 0 ? (
+        <ul className="mt-2 space-y-1.5">
+          {lines.map((line) => (
+            <li
+              key={line.id}
+              className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
+            >
+              {line.text}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+          Nothing newer recorded yet — weigh-ins and logged days will appear here as they happen.
+        </p>
+      )}
+
+      {staleness.stale ? (
+        <div className="mt-3 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3">
+          <p className="text-[length:var(--text-support)] font-medium text-foreground">
+            Worth updating
+          </p>
+          {staleness.reasons.map((reason) => (
+            <p
+              key={reason}
+              className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
+            >
+              {reason}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {formOpen ? (
+        <div className="mt-4 space-y-4">
+          <div>
+            <p className={fieldLabel}>Weight (kg)</p>
+            <Input
+              className="mt-1.5 max-w-[12rem]"
+              inputMode="decimal"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              aria-label="Weight in kilograms"
+            />
+          </div>
+          <div>
+            <p className={fieldLabel}>Activity</p>
+            <div className="mt-1.5">
+              <DeltaChipRow
+                options={ACTIVITY_OPTIONS}
+                value={activity}
+                onSelect={setActivity}
+                ariaLabel="Activity level"
+              />
+            </div>
+          </div>
+          <div>
+            <p className={fieldLabel}>Sleep — typical hours</p>
+            <Input
+              className="mt-1.5 max-w-[12rem]"
+              inputMode="decimal"
+              value={sleepHours}
+              onChange={(e) => setSleepHours(e.target.value)}
+              aria-label="Typical sleep hours"
+            />
+          </div>
+          <div>
+            <p className={fieldLabel}>Sleep quality</p>
+            <div className="mt-1.5">
+              <DeltaChipRow
+                options={SLEEP_QUALITY_OPTIONS}
+                value={sleepQuality}
+                onSelect={setSleepQuality}
+                ariaLabel="Sleep quality"
+              />
+            </div>
+          </div>
+          <div>
+            <p className={fieldLabel}>Waking rested</p>
+            <div className="mt-1.5">
+              <DeltaChipRow
+                options={RESTEDNESS_OPTIONS}
+                value={restedness}
+                onSelect={setRestedness}
+                ariaLabel="Morning restedness"
+              />
+            </div>
+          </div>
+          <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            Your eating pattern and budget stay exactly as your assessment recorded them — those
+            change only in a retake.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" size="sm" onClick={save}>
+              Save update
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setFormOpen(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-3">
+          <Button type="button" size="sm" variant="ghost" onClick={openForm}>
+            Update weight, activity or sleep
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* --------------------------------- Profile --------------------------------- */
 
 export function AssessmentProfileCard() {
@@ -513,6 +761,8 @@ export function AssessmentProfileCard() {
           </Button>
         )}
       </div>
+
+      <LivingAssessmentSection state={state} />
 
       {history.length > 0 ? (
         <div className="mt-5 border-t border-border/60 pt-4">

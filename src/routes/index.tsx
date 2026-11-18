@@ -4,6 +4,7 @@ import { Leaf } from "lucide-react";
 
 import { useEverReady } from "@/hooks/useEverReady";
 import { HabitsSection } from "@/components/home/HabitsSection";
+import { VoiceMic } from "@/components/home/VoiceMic";
 import { HabitUndo } from "@/components/home/HabitUndo";
 import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
 import { NutritionTodayCard } from "@/components/nutrition/NutritionEntryCards";
@@ -13,11 +14,13 @@ import { MoodCard } from "@/components/home/MoodCard";
 import { TopBar } from "@/components/home/TopBar";
 import { WeekChart } from "@/components/home/WeekChart";
 import { ConnectionConstellation } from "@/components/home/ConnectionConstellation";
+import { WholeLifeInsights } from "@/components/home/WholeLifeInsights";
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
 import { summaryOf } from "@/lib/assessment/summary";
 import { overviewRecordsSettled, synthesizeOverview } from "@/lib/overview/synthesis";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
+import { NudgeCard } from "@/components/behaviour/NudgeCard";
 import { Composer } from "@/components/mood/Composer";
 import { AddHabitModal } from "@/components/tk/AddHabitModal";
 
@@ -37,6 +40,8 @@ import { componentsById } from "@/lib/rewards/catalog";
 import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
 import { genuineFirstDay, sublineFor } from "@/lib/home/subline";
 import { localDay } from "@/lib/localDay";
+import { offlineNotice } from "@/lib/offline/syncState";
+import { useConnectivity } from "@/lib/offline/useConnectivity";
 
 const TITLE = "Bloom — Today";
 const DESCRIPTION =
@@ -105,6 +110,10 @@ function WallpaperFigure() {
 function TodayPage() {
   const trackers = useTrackers();
   const habits = useHabits();
+  /* The browser's connectivity word: it downgrades the sync pill and
+     carries the one honest offline line — it never upgrades a claim. */
+  const online = useConnectivity();
+  const offlineLine = offlineNotice(online);
   const mood = useMoodSystem();
   const assessment = useAssessment();
   const space = useProfileSpace();
@@ -289,7 +298,17 @@ function TodayPage() {
           syncState={trackers.sync.state}
           syncLabel={syncLine}
           points={habits.points}
+          online={online}
         />
+        {offlineLine ? (
+          <p
+            role="status"
+            data-testid="today-offline-line"
+            className="mt-2 text-[length:var(--text-caption)] text-muted-foreground"
+          >
+            {offlineLine}
+          </p>
+        ) : null}
 
         {/* Hero — the slice-3 build, unchanged: greeting, the day's
             subline, the check-in chips (the mood chip settles sage once
@@ -389,6 +408,12 @@ function TodayPage() {
 
         <div className="home-hairline" aria-hidden />
 
+        {/* Voice-First India (System 11): speak a command, confirm the
+            chip, and only then does anything happen. Renders one honest
+            line instead of a button where the browser has no speech
+            recognition. */}
+        <VoiceMic />
+
         {/* The prototype stack, exactly (Reskin slice A): Focus + Level,
             StatTiles, WeekChart + Changes, Habits + Mood, and the small
             centred footer line. Everything else that used to live here —
@@ -432,6 +457,21 @@ function TodayPage() {
             </div>
           </div>
 
+          {/* Behaviour Change (System 8): the one gentle nudge, when the
+              record supports one — it sits directly above the habits and
+              mood rows it most often points at, and renders nothing at
+              all when no pattern is real enough to name. */}
+          <NudgeCard
+            habits={habits.habits}
+            habitLogs={habits.logs}
+            moodEntries={mood.entries}
+            today={habits.today}
+            now={now}
+            ready={overviewReady}
+            onToggleHabit={(id) => void habits.toggle(id)}
+            onOpenMood={() => setMoodOpen(true)}
+          />
+
           <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
             <div className="lg:col-span-7 [&>*]:h-full">
               <HabitsSection
@@ -467,6 +507,13 @@ function TodayPage() {
               target when food is logged, an invitation when it isn't,
               in the assessment card's language. */}
           <NutritionTodayCard />
+
+          {/* Whole-Life Insights (System 6) — the cross-source pattern
+              reader: grouped averages over the last 56 days across
+              mood, sleep, habits, food and weight, behind the same
+              latched settled gate. It sits before the constellation:
+              first the patterns in words, then the map. */}
+          <WholeLifeInsights ready={overviewReady} />
 
           {/* The connection constellation (overnight Slice 2) — a NEW
               design, closing the stack: it synthesises the very rows

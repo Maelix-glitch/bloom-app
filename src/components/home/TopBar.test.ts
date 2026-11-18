@@ -59,4 +59,39 @@ describe("syncPillModel", () => {
     expect(syncPillModel("saved", null)).toBeNull();
     expect(syncPillModel("saved", "")).toBeNull();
   });
+
+  /* Offline-First Bharat: the browser's offline word downgrades the
+     pill — connectivity only ever takes a claim away, never grants one. */
+  it("offline, a synced pill falls to the device truth — still muted, no pulse", () => {
+    expect(syncPillModel("saved", "Synced with your account.", false)).toEqual({
+      label: "On this device — will sync when you're back",
+      shortLabel: "Offline",
+      dot: "muted",
+      live: false,
+    });
+  });
+
+  it("offline, a saving pill is held on the device, not saving", () => {
+    expect(syncPillModel("pending", "Saving…", false)).toEqual({
+      label: "On this device — will sync when you're back",
+      shortLabel: "Offline",
+      dot: "muted",
+      live: false,
+    });
+  });
+
+  it("offline leaves the already-honest states in their own words", () => {
+    expect(syncPillModel("error", "Saved here — not on your account yet", false)?.dot).toBe("rose");
+    expect(syncPillModel("off", "Saved on this device", false)?.label).toBe("Saved on this device");
+    expect(
+      syncPillModel("signed-out", "Saved on this device — sign in to sync", false)?.label,
+    ).toBe("Saved on this device — sign in to sync");
+    expect(syncPillModel("loading", "Checking your account…", false)).toBeNull();
+  });
+
+  it("the two-argument form is unchanged — online is the default", () => {
+    expect(syncPillModel("saved", "Synced with your account.")).toEqual(
+      syncPillModel("saved", "Synced with your account.", true),
+    );
+  });
 });

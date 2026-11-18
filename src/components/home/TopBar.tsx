@@ -21,6 +21,13 @@
  * Wording: "Synced with your account" in full wherever it fits; the
  * compact short forms appear only below the sm breakpoint, where the
  * full sentence genuinely does not fit beside the date.
+ *
+ * Offline-First Bharat adds the browser's own word to the pill: while
+ * the device reports itself offline, a settled "saved"/"pending" may
+ * not stand — the pill falls to the device truth ("On this device —
+ * will sync when you're back", still muted dot, no pulse) through
+ * `effectiveSyncState`. The downgrade is the only move connectivity is
+ * allowed: it never upgrades a state and never widens the claim.
  */
 
 import { Link } from "@tanstack/react-router";
@@ -29,6 +36,11 @@ import { Gift } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import type { TrackerSyncState } from "@/hooks/useTrackers";
 import { longDate } from "@/lib/home/today";
+import {
+  OFFLINE_PILL_LABEL,
+  OFFLINE_PILL_SHORT_LABEL,
+  effectiveSyncState,
+} from "@/lib/offline/syncState";
 import { cn } from "@/lib/utils";
 
 export interface SyncPill {
@@ -53,9 +65,27 @@ const SHORT_LABEL: Record<Exclude<TrackerSyncState, "loading">, string> = {
  * The pill for a settled sync state — or null while the state is still
  * "loading" (the settled-states-only rule the sync line has always
  * kept). Pure; unit-tested.
+ *
+ * `online` is the browser's connectivity word (default true, so every
+ * existing caller keeps its exact behaviour): when the device reports
+ * offline, `effectiveSyncState` downgrades a settled "saved"/"pending"
+ * and the pill wears the device truth instead — still muted, never the
+ * sage pulse.
  */
-export function syncPillModel(state: TrackerSyncState, label: string | null): SyncPill | null {
+export function syncPillModel(
+  state: TrackerSyncState,
+  label: string | null,
+  online: boolean = true,
+): SyncPill | null {
   if (state === "loading" || !label) return null;
+  if (effectiveSyncState(state, online) === "offline") {
+    return {
+      label: OFFLINE_PILL_LABEL,
+      shortLabel: OFFLINE_PILL_SHORT_LABEL,
+      dot: "muted",
+      live: false,
+    };
+  }
   const dot: SyncPill["dot"] =
     state === "saved"
       ? "sage"
@@ -86,6 +116,7 @@ export function TopBar({
   syncState,
   syncLabel,
   points,
+  online = true,
 }: {
   now: Date;
   syncState: TrackerSyncState;
@@ -93,8 +124,11 @@ export function TopBar({
   syncLabel: string | null;
   /** Bloom Points balance, for the rewards pip; null while unknown. */
   points: number | null;
+  /** The browser's connectivity word; offline downgrades the pill to the device truth. */
+  online?: boolean;
 }) {
-  const pill = syncPillModel(syncState, syncLabel);
+  const pill = syncPillModel(syncState, syncLabel, online);
+  const effectiveState = effectiveSyncState(syncState, online);
   return (
     <div className="home-toolbar">
       <div className="flex items-center gap-3 text-[length:var(--text-support)]">
@@ -111,7 +145,7 @@ export function TopBar({
             className="home-sync-pill inline-flex items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[length:var(--text-caption)] text-muted-foreground"
             role="status"
             data-testid="home-sync-pill"
-            data-state={syncState}
+            data-state={effectiveState}
           >
             <span className="sr-only">{pill.label}</span>
             <span

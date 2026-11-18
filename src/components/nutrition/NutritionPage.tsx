@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Sparkles, Undo2, X } from "lucide-react";
+import { Camera, Plus, Sparkles, Undo2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
@@ -35,9 +35,14 @@ import {
 } from "@/lib/nutrition";
 import { AddFoodSheet } from "./AddFoodSheet";
 import { DateNav, NutritionHero } from "./NutritionHero";
+import { FoodCaptureSheet } from "./FoodCaptureSheet";
 import { DishesSection } from "./DishesSection";
 import { PatternLab, Spectrum, WeekPanel } from "./NutritionPanels";
+import { MetabolicTwinSection } from "./MetabolicTwinSection";
+import { GrocerySection } from "./GrocerySection";
+import { ModesSection } from "./ModesSection";
 import { NutritionPlanSection } from "./NutritionPlanSection";
+import { ProgrammesSection } from "./ProgrammesSection";
 import { NutritionTimeline } from "./NutritionTimeline";
 import { PhotoCreditsSheet } from "./PhotoCreditsSheet";
 
@@ -53,6 +58,7 @@ export function NutritionPage() {
   const { entries: moodEntries } = useMoodSystem();
   const [day, setDay] = useState(nutrition.today);
   const [sheet, setSheet] = useState<SheetState>({ open: false, meal: null, editing: null });
+  const [captureOpen, setCaptureOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [undoable, setUndoable] = useState<(Undoable & { entry: LogEntry }) | null>(null);
 
@@ -135,13 +141,20 @@ export function NutritionPage() {
           Every value carries its source — USDA reference data, your own packet labels, or a
           clearly marked estimate. Nothing is presented as more certain than it is.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
             className="nut-btn nut-btn-gold"
             onClick={() => setSheet({ open: true, meal: null, editing: null })}
           >
             <Plus className="size-4" aria-hidden /> Add food
+          </button>
+          <button
+            type="button"
+            className="nut-btn nut-btn-ghost"
+            onClick={() => setCaptureOpen(true)}
+          >
+            <Camera className="size-4" aria-hidden /> Photo estimate
           </button>
         </div>
       </header>
@@ -230,6 +243,22 @@ export function NutritionPage() {
           today view; other days are the record, not the plan. */}
       {isToday ? <NutritionPlanSection /> : null}
 
+      {/* The metabolic twin — a standing model of the person, computed
+          from the record as of today; it belongs to every day's view
+          because it describes the person, not the day being viewed. */}
+      <MetabolicTwinSection />
+      {/* The grocery list + pantry (System 5) — derived from the same
+          stored plan the section above renders, so it belongs to the
+          today view beside it. */}
+      {isToday ? <GrocerySection /> : null}
+      {/* Condition modes (System 14) — the person's own guardrails on
+          the plan above; they belong with the plan, on the today view. */}
+      {isToday ? <ModesSection /> : null}
+      {/* Programmes — a multi-week arc over the plan, the log and
+          the weigh-ins; like the plan, it belongs to the today
+          view, other days are the record. */}
+      {isToday ? <ProgrammesSection /> : null}
+
       {/* The dish library (D4) — browsing and logging a recipe belong
           to every day's view; a dish logged from here lands on the day
           being viewed. */}
@@ -259,6 +288,8 @@ export function NutritionPage() {
         editing={sheet.editing}
         initialMeal={sheet.meal}
       />
+
+      <FoodCaptureSheet open={captureOpen} onClose={() => setCaptureOpen(false)} day={day} />
 
       {undoable ? (
         <div

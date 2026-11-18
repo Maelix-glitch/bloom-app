@@ -7,7 +7,7 @@
  * their explanations cannot drift apart from each other.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { PhaseWave } from "./PhaseWave";
@@ -24,6 +24,8 @@ import { VitalDials } from "./VitalDials";
 import { DayLogInsights } from "./DayLogInsights";
 import { InsightsPanel } from "./InsightsPanel";
 import { TipsCard } from "./TipsCard";
+import { CycleContextCard } from "./CycleContextCard";
+import { buildCycleContext } from "@/lib/womens/context";
 import { HistoryTable } from "./HistoryTable";
 import { CheckIns } from "./CheckIns";
 import { CycleModeCard } from "./CycleModeCard";
@@ -77,6 +79,19 @@ export function CycleIntelligence({
 
   /* One engine result for the whole page — see src/lib/cycle/canonical.ts. */
   const intel = store.intel;
+
+  /* Women's Health (SYSTEM 16): today's cycle context, built from the same
+     logs + effective mode — the prediction module's values verbatim. */
+  const cycleContext = useMemo(
+    () =>
+      buildCycleContext({
+        logs,
+        today,
+        mode: store.mode,
+        personalMaxPlausible: store.settings.personalMaxPlausible,
+      }),
+    [logs, today, store.mode, store.settings.personalMaxPlausible],
+  );
 
   const focusDayLog = useCallback((date?: string) => {
     if (date) setLogDate(date);
@@ -323,6 +338,7 @@ export function CycleIntelligence({
                           onLogSymptoms={() => focusDayLog(today)}
                         />
                         <CycleBriefPanel intel={intel} />
+                        <CycleContextCard context={cycleContext} />
                         <Reveal delay={90}>
                           <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
                         </Reveal>
