@@ -256,3 +256,82 @@
   background-image: var(--gold-gradient);
   transition: width var(--motion-page) var(--ease-out-expo);
 }
+/* The meter's low states (rulebook PR3): a quarter left reads amber,
+   a tenth reads rose. Colour only — no message, because the product
+   has no top-up action to point at yet. */
+.bill-meter-fill[data-level="low"] {
+  background-image: none;
+  background-color: var(--warning);
+}
+.bill-meter-fill[data-level="empty"] {
+  background-image: none;
+  background-color: var(--danger);
+}
+
+/* Profile membership card — the status-card layout: identity → live
+   status → action. The chrome (solid surface, hairline, radius) is
+   the Profile family's .pf-card; this owns the inside: 24px padding
+   and a 20px grid rhythm, the rows stacked with room to land on. */
+.bill-plan {
+  padding: var(--space-6);
+  display: grid;
+  gap: var(--space-5);
+}
+.bill-plan-head,
+.bill-plan-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+/* Row 1's right-hand fact: the verb quiet, the date itself strong. */
+.bill-plan-renews {
+  font-size: var(--text-callout);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.bill-plan-renews strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+/* Row 2: the balance is the hero — display-sized, tabular so the
+   digits never jitter — with "of N" and the label riding its
+   baseline in the secondary tone. */
+.bill-plan-usage {
+  display: grid;
+  gap: var(--space-3);
+}
+.bill-plan-count {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.bill-plan-value {
+  font-size: var(--text-page);
+  line-height: var(--leading-page);
+  letter-spacing: var(--tracking-heading);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.bill-plan-of,
+.bill-plan-label {
+  font-size: var(--text-callout);
+  color: var(--text-secondary);
+}
+/* Row 3's single muted line, held to an editorial measure. */
+.bill-plan-desc {
+  font-size: var(--text-callout);
+  line-height: var(--leading-callout);
+  color: var(--text-secondary);
+  max-width: 46ch;
+}
+/* Narrow: the head and foot rows stack, fact and action under the
+   text they belong to (the owner's ≤560px pattern). */
+@media (max-width: 560px) {
+  .bill-plan-head,
+  .bill-plan-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
