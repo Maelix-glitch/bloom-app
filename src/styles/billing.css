@@ -7,7 +7,13 @@
 
 .bill-stack {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
+  /* The sheet panel carries no inset of its own — its content owns it.
+     Without this the stack sat flush on the panel's border: the panel is
+     overflow-hidden with a 28px radius, so the first line (the eyebrow)
+     began inside the corner curve and lost its first letter, and every
+     unpadded line read as broken alignment against the padded cards. */
+  padding: var(--space-6);
 }
 
 .bill-eyebrow {
@@ -31,6 +37,9 @@
   line-height: var(--leading-callout);
   color: var(--text-secondary);
   margin-top: var(--space-2);
+  /* An editorial measure — the full 632px measure ran to ~95 characters
+     a line and read as a wall against the cards below. */
+  max-width: 56ch;
 }
 
 .bill-status {
@@ -42,7 +51,12 @@
   line-height: var(--leading-callout);
 }
 
-/* Monthly / yearly switch — a quiet segmented control. */
+/* Monthly / yearly switch — a quiet segmented control, centred on the
+   sheet's axis rather than hugging the left edge. */
+.bill-toggle-row {
+  display: flex;
+  justify-content: center;
+}
 .bill-toggle {
   display: inline-flex;
   gap: 2px;
@@ -87,9 +101,16 @@
   background-image: var(--glass-bg);
   border-radius: var(--radius-card);
   padding: var(--space-5);
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  align-content: start;
+}
+/* The two cards share a row but not a feature count — the button pins to
+   the card's foot so the pair reads as one composed unit instead of the
+   shorter card's button floating mid-air. The flex gap still guarantees
+   the minimum breathing room above it. */
+.bill-card .bill-btn {
+  margin-top: auto;
 }
 .bill-card--featured {
   border-color: color-mix(in oklab, var(--gold) 45%, transparent);

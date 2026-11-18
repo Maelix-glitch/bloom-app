@@ -93,6 +93,25 @@ describe("PaywallHost + PaywallSheet", () => {
     expect(notice.textContent).toContain("Nothing has been charged.");
   });
 
+  it("renders its content inside the sheet's scroll region, never flush on the panel", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+
+    /* The panel is overflow-hidden with a 28px radius and no inset of its
+       own; content placed directly inside it is clipped by the rounded
+       corners (the eyebrow lost its first letter) and cannot scroll past
+       the panel cap. The stack must live inside .bsheet-scroll, inset by
+       its own padding — the layout the layout guard pins in the CSS. */
+    const stack = document.querySelector(".bill-stack");
+    expect(stack).toBeTruthy();
+    const scroll = stack!.closest(".bsheet-scroll");
+    expect(scroll).toBeTruthy();
+    expect(scroll!.closest(".bsheet-panel")).toBeTruthy();
+    expect(document.querySelector(".bill-toggle-row .bill-toggle")).toBeTruthy();
+  });
+
   it("different contexts open with their own headline", async () => {
     render(<PaywallHost />);
     await act(async () => {
