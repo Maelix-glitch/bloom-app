@@ -13,6 +13,11 @@
  *     fdc.nal.usda.gov. No API key, no credentials. The zips are cached under
  *     the OS temp dir (override with USDA_FDC_CACHE) and re-downloaded only
  *     when absent. Extraction shells out to `unzip`.
+ *   • **Version stamp (audit #29).** The output carries a
+ *     USDA_REFERENCE_VERSION record — dataset, licence, the two USDA
+ *     releases, the retrieval date and the set's fingerprint — so the exact
+ *     dataset behind the app's food values can always be named. `--check`
+ *     fails if the stamp and the shipped data disagree in any field.
  *   • **Licence.** FoodData Central is CC0 1.0 — registered in the evidence
  *     catalogue as source `usda-fooddata-central`, `productUseAllowed: true`.
  *     The licence-gate test (src/lib/nutrition/usdaReference.test.ts) re-checks
@@ -507,6 +512,19 @@ const DATASETS = [
   },
 ];
 
+/**
+ * The dataset version stamp's fixed facts (audit #29). The generated data
+ * file carries a USDA_REFERENCE_VERSION record built from these constants
+ * plus the two values generation itself derives — the retrieval date and
+ * the fingerprint — so a user or support can always name exactly which
+ * dataset the app's food values came from. `--check` re-derives the
+ * fingerprint from the shipped foods and fails if the stamp disagrees
+ * with the data in any field.
+ */
+const STAMP_DATASET = "USDA FoodData Central";
+const STAMP_LICENCE = "CC0 1.0";
+const STAMP_RELEASES = "Foundation Foods 2025-04-24 release · SR Legacy 2018-04 release";
+
 /** Nutrient ids in the FDC CSVs (nutrient.csv), the values Bloom ships.
  *  The micronutrient panel (N-UI) rides the same rule as fibre and
  *  sodium: shipped only where the source row publishes it, held to the
@@ -769,6 +787,18 @@ async function generate() {
     "/** SHA-256 over the canonicalised foods array (see the generator). */",
     `export const USDA_REFERENCE_FINGERPRINT = ${JSON.stringify(fingerprint)};`,
     "",
+    "/** The dataset version stamp (audit #29): which dataset this set came",
+    " *  from, under what licence, when Bloom retrieved it, and the fingerprint",
+    " *  of the exact set shipped. `seed:usda:check` fails if the stamp and",
+    " *  the data disagree. */",
+    "export const USDA_REFERENCE_VERSION = {",
+    `  dataset: ${JSON.stringify(STAMP_DATASET)},`,
+    `  licence: ${JSON.stringify(STAMP_LICENCE)},`,
+    `  releases: ${JSON.stringify(STAMP_RELEASES)},`,
+    `  retrievedOn: ${JSON.stringify(retrievedOn)},`,
+    `  fingerprint: ${JSON.stringify(fingerprint)},`,
+    "} as const;",
+    "",
     "/** The reference foods, raw — read them through `../usdaReference`,",
     " *  which parses every entry with the strict N1 parser. */",
     "export const USDA_REFERENCE_FOODS_RAW: readonly unknown[] = [",
@@ -846,7 +876,38 @@ async function check() {
     console.error(`  computed: ${fingerprint}`);
     process.exit(1);
   }
-  console.log(`check ok: ${raw.length} foods, fingerprint sha256:${fingerprint}`);
+  // The version stamp must agree with the data it names (audit #29): the
+  // dataset, licence and releases are the generator's own constants, the
+  // retrieval date is the file's own retrieved-on stamp, and the
+  // fingerprint is the one just recomputed from the shipped foods.
+  const stamp = data.USDA_REFERENCE_VERSION;
+  if (!stamp) {
+    console.error("check failed: USDA_REFERENCE_VERSION stamp is missing from the data file.");
+    process.exit(1);
+  }
+  if (
+    stamp.dataset !== STAMP_DATASET ||
+    stamp.licence !== STAMP_LICENCE ||
+    stamp.releases !== STAMP_RELEASES
+  ) {
+    console.error("check failed: version stamp names the wrong dataset, licence or releases.");
+    console.error(`  stamp: ${stamp.dataset} · ${stamp.licence} · ${stamp.releases}`);
+    process.exit(1);
+  }
+  if (stamp.retrievedOn !== data.USDA_REFERENCE_RETRIEVED_ON) {
+    console.error("check failed: version stamp retrievedOn disagrees with USDA_REFERENCE_RETRIEVED_ON.");
+    console.error(`  stamp: ${stamp.retrievedOn}  retrieved-on: ${data.USDA_REFERENCE_RETRIEVED_ON}`);
+    process.exit(1);
+  }
+  if (stamp.fingerprint !== fingerprint) {
+    console.error("check failed: version stamp fingerprint disagrees with the shipped foods.");
+    console.error(`  stamp:    ${stamp.fingerprint}`);
+    console.error(`  computed: ${fingerprint}`);
+    process.exit(1);
+  }
+  console.log(
+    `check ok: ${raw.length} foods, fingerprint sha256:${fingerprint}, stamp ${stamp.dataset} · retrieved ${stamp.retrievedOn}`,
+  );
 }
 
 if (CHECK) await check();

@@ -22,11 +22,12 @@ import {
   USDA_REFERENCE_FOODS_RAW,
   USDA_REFERENCE_FINGERPRINT,
   USDA_REFERENCE_RETRIEVED_ON,
+  USDA_REFERENCE_VERSION,
 } from "./data/usdaReferenceData";
 import { parseFoodList } from "./parse";
 import type { Food, FoodProvenance, FoodProvenanceKind } from "./types";
 
-export { USDA_REFERENCE_FINGERPRINT, USDA_REFERENCE_RETRIEVED_ON };
+export { USDA_REFERENCE_FINGERPRINT, USDA_REFERENCE_RETRIEVED_ON, USDA_REFERENCE_VERSION };
 
 /** The reference foods, parsed. Stable order: the generator's curation. */
 export const USDA_REFERENCE_FOODS: readonly Food[] = parseFoodList(USDA_REFERENCE_FOODS_RAW);
@@ -63,6 +64,25 @@ export function usdaDataStamp(food: Food): string | null {
     "USDA FoodData Central",
     ...(dataType ? [release ? `${dataType} · ${release}` : dataType] : []),
     `retrieved ${USDA_REFERENCE_RETRIEVED_ON}`,
+  ].join(" · ");
+}
+
+/**
+ * The dataset-level version line (audit #29): the one place a user or
+ * support can name exactly which dataset the app's reference food values
+ * came from — the dataset, its licence, when Bloom retrieved it, and the
+ * shipped set's fingerprint in short form (the full fingerprint is the
+ * USDA_REFERENCE_VERSION record, check-verified against the data by
+ * `seed:usda:check`). Built only from the generator-stamped record, so
+ * the line can never claim a version the data does not carry.
+ */
+export function usdaDatasetVersionLine(): string {
+  const v = USDA_REFERENCE_VERSION;
+  return [
+    `${v.dataset} reference set`,
+    v.licence,
+    `retrieved ${v.retrievedOn}`,
+    `fingerprint ${v.fingerprint.slice(0, 8)}`,
   ].join(" · ");
 }
 

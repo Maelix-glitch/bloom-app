@@ -49,6 +49,7 @@ import {
   saveCustomFood,
   searchUsdaReference,
   usdaDataStamp,
+  usdaDatasetVersionLine,
   type Food,
   type LogEntry,
 } from "@/lib/nutrition";
@@ -187,6 +188,18 @@ describe("NutritionPage — search & add flow", () => {
     /* An own food has no dataset version — no stamp, its badge already
        says whose value it is. */
     expect(within(sheet).queryByTestId("usda-data-stamp")).toBeNull();
+  });
+
+  it("shows the dataset version line in the picker search view (audit #29)", () => {
+    render(<NutritionPage />);
+    const sheet = openSheet();
+    /* One line naming the exact dataset behind the reference values:
+       dataset, licence, retrieval date and the short fingerprint. */
+    expect(within(sheet).getByTestId("usda-dataset-version").textContent).toBe(
+      usdaDatasetVersionLine(),
+    );
+    expect(usdaDatasetVersionLine()).toContain("USDA FoodData Central reference set");
+    expect(usdaDatasetVersionLine()).toContain("fingerprint 7760eaf6");
   });
 
   it("preselects a default portion, so logging never needs an amount decision first", () => {
