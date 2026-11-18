@@ -261,6 +261,32 @@ export interface PlanMeal {
   note: string | null;
 }
 
+/** The day's opening element (P11): what the plan asks first, before
+ *  breakfast — a glass of water on waking. The amount is the app's
+ *  own glass (250 ml — the measure the water tracker and the voice
+ *  commands both use), never a prescription invented for the plan. */
+export interface PlanMorning {
+  /** Water on waking, in ml. Part of the day's hydration total
+   *  whenever a hydration schedule exists. */
+  waterMl: number;
+}
+
+/** The day's water, scheduled (P11): the in-app water target — the
+ *  body-targets figure (35 ml/kg + activity, the number Trackers
+ *  shows) — split into the wake-up glass and a with-meals amount
+ *  per meal slot. `wakeMl + Σ perMeal.ml === targetMl === totalMl`
+ *  exactly; the parser refuses a schedule that does not sum. */
+export interface PlanHydration {
+  /** The day's water target in ml, from the targets' own source. */
+  targetMl: number;
+  /** Water on waking in ml — the morning element's glass. */
+  wakeMl: number;
+  /** Water with each of the day's meals, in day order. */
+  perMeal: { meal: Meal; ml: number }[];
+  /** wakeMl + Σ perMeal.ml — always equal to targetMl. */
+  totalMl: number;
+}
+
 export interface DailyPlan {
   id: string;
   /** The day this plan is for (a local day key). */
@@ -285,6 +311,13 @@ export interface DailyPlan {
   /** The composition method that built this plan. Plans from an older
    *  method read as stale — see `planStaleness`. */
   methodVersion: number;
+  /** The day's opening element (P11). Absent on plans stored before
+   *  P11 — those plans are stale by method and regenerate into it. */
+  morning?: PlanMorning;
+  /** The day's hydration schedule (P11), present when the day's
+   *  water target was known at generation time. Absent on pre-P11
+   *  plans and on plans whose targets carried no water figure. */
+  hydration?: PlanHydration;
   meals: PlanMeal[];
   inputs: PlanInputsSnapshot;
   fingerprint: string;
@@ -342,8 +375,19 @@ export interface DailyPlan {
  *  low stated confidence leans the picks toward familiar dishes
  *  with less variety pressure, and a sweet craving makes the
  *  snack's flexible item prefer fruit. Targets never move; with
- *  no behavioural answers the output is the P9 composer's. */
-export const PLAN_METHOD_VERSION = 10;
+ *  no behavioural answers the output is the P9 composer's.
+ *  11 = the day-completeness pass (P11, owner directive 2026-11-19):
+ *  every plan carries a snack slot (a stated meals-per-day below
+ *  four no longer drops it — the split renormalises and the notes
+ *  name the addition), every plan opens with a morning element
+ *  (a glass of water on waking) and, when the day's water target
+ *  is known, a hydration schedule that sums exactly to it; the
+ *  protein powders (PW-1) join the top-up pool, so a protein-short
+ *  day can be closed by the densest honest food Bloom carries;
+ *  and a final trim pulls a protein-overshooting day back toward
+ *  its band, with the notes naming any overshoot that remains —
+ *  before P11 an overshoot was not even named. */
+export const PLAN_METHOD_VERSION = 11;
 
 export type PlanRefusal =
   | {
@@ -958,6 +1002,29 @@ export const COOKED_SOY_FORM_IDS: ReadonlySet<string> = new Set([
   "usda-168410", // Edamame, frozen — FDC 168410
 ]);
 
+/** A protein powder (P11): a food whose whole purpose is protein —
+ *  in the reference set's classification it sits in the "other"
+ *  group, is neither flesh nor fish, and carries at least 40 g of
+ *  protein per 100 g. The threshold is a census fact about the
+ *  pinned set, not a guess: exactly two records meet it — the PW-1
+ *  whey isolate (58.14 g/100 g) and soy powder (55.56 g/100 g) —
+ *  and the next-densest "other" food sits at 26 g/100 g. Powders
+ *  are supplement foods: they never carry a meal's protein layer
+ *  and never compose a plate, but a top-up — a simple food that
+ *  closes a day's gap — is exactly what they are for. */
+export function isProteinPowder(food: Food): boolean {
+  const cls = food.classification;
+  if (!cls || cls.group !== "other" || cls.isFlesh || cls.isFish) return false;
+  return food.per100g.proteinG >= 40;
+}
+
+/** The top-up cap for a protein powder, in grams: one scoop of the
+ *  soy record (its own listed serving is 1 scoop = 45 g) and about
+ *  a scoop and a half of the whey record (3 scoops = 86 g). A
+ *  top-up is sized toward the day's gap inside this cap, exactly
+ *  as every other top-up is sized inside its own. */
+const CAP_PROTEIN_POWDER_G = 45;
+
 /** The protein-layer cap for one food. Dairy splits by the food's own
  *  energy density: at ≥350 kcal per 100 g a dairy food is a hard grating
  *  cheese (in this set, parmesan), portioned by BNF at 30 g — not a
@@ -1286,6 +1353,59 @@ function applyProteinDominanceCap(
         meal.suggestions[idx] = { ...suggestion, grams: newGrams, nutrients };
       }
     }
+  }
+}
+
+/**
+ * Protein-overshoot trim (P11): the mirror of the P3 closing pass.
+ * Closing only ever pushes protein UP, and the layered composer
+ * sizes each meal's protein layer against its split with capped,
+ * minimum-viable portions — on a small-protein day the floors and
+ * minimums add up past the guide (the 500-run matrix measured food-
+ * composed days at up to +56% protein, and the overshoot was not
+ * even named in the notes). This pass works an over-band day back
+ * toward the band's ceiling (110% of the guide): the largest
+ * protein-layer or top-up portion gives up grams in 5 g steps,
+ * never below a real 15 g portion, and never at the cost of the
+ * day's energy band — a cut stops where the energy floor begins.
+ * Dish scales are not touched (the day guard owns them); what this
+ * pass cannot land, the notes now name with the true figure.
+ */
+function trimProteinOvershoot(
+  meals: PlanMeal[],
+  byId: ReadonlyMap<string, Food>,
+  targets: NutritionTargets,
+): void {
+  const ceiling = DAY_PROTEIN_MAX * targets.proteinG;
+  if (dayProteinOf(meals) <= ceiling) return;
+  const kcalFloor = (1 - ENERGY_NOTE_BAND) * targets.kcal;
+  for (let round = 0; round < 40; round++) {
+    const over = dayProteinOf(meals) - ceiling;
+    if (over <= 0) return;
+    let best: { meal: PlanMeal; idx: number; s: PlanSuggestion } | null = null;
+    for (const meal of meals) {
+      meal.suggestions.forEach((s, idx) => {
+        if (s.layer !== "protein" && s.layer !== "topup") return;
+        if (s.grams <= 20) return;
+        if (!best || s.nutrients.proteinG > best.s.nutrients.proteinG) {
+          best = { meal, idx, s };
+        }
+      });
+    }
+    if (!best) return;
+    const chosen: { meal: PlanMeal; idx: number; s: PlanSuggestion } = best;
+    const food = byId.get(chosen.s.foodId);
+    if (!food || food.per100g.proteinG <= 0) return;
+    const wantG = Math.ceil(((over / food.per100g.proteinG) * 100) / 5) * 5;
+    let cutG = Math.min(wantG, chosen.s.grams - 15);
+    const kcalPerGram = food.per100g.kcal / 100;
+    if (kcalPerGram > 0) {
+      const kcalRoom = dayKcalOf(meals) - kcalFloor;
+      if (kcalRoom <= 0) return;
+      cutG = Math.min(cutG, Math.floor(kcalRoom / kcalPerGram / 5) * 5);
+    }
+    if (cutG < 5) return;
+    setPortion(chosen.meal, chosen.idx, food, chosen.s.grams - cutG);
   }
 }
 
@@ -1923,6 +2043,13 @@ function compositionNotes(
   if (protein < PROTEIN_CLOSE_FRACTION * targets.proteinG) {
     notes.push(
       `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the portion caps bind before the target does.`,
+    );
+  } else if (protein > DAY_PROTEIN_MAX * targets.proteinG) {
+    /* P11: an overshoot is named too — before this pass the notes
+       judged a day under its protein guide but said nothing about
+       a day over it, so the imbalance the owner saw had no words. */
+    notes.push(
+      `Today's suggestions reach about ${Math.round(protein)} g of protein — above your ${Math.round(targets.proteinG)} g protein guide. The day's protein foods add up past it.`,
     );
   }
   const kcal = dayKcalOf(meals);
@@ -2835,7 +2962,8 @@ const MAX_TOPUPS_PER_MEAL = 3;
  * as they bind composition — and inside the day's remaining energy
  * room: a top-up that would push the day past its guide is sized
  * down to the room or not added at all. Protein mode draws on the
- * protein-bearing dairy and egg foods, ranked by protein density
+ * protein-bearing dairy and egg foods and (P11) the protein
+ * powders, ranked by protein density
  * (the P3 band idiom: within 80% of the best density, the day's
  * rotation decides; beyond the band, density decides) — at a
  * high-protein guide, protein bought at 17 g/100 kcal and protein
@@ -2858,9 +2986,17 @@ function addOneTopUp(
     if (proteinMode) {
       /* Egg parts are excluded outright: a top-up is a food a person
          eats (a yogurt, an egg), never a separated component — the
-         P3 parts principle, held at the top-up layer too. */
+         P3 parts principle, held at the top-up layer too. P11: the
+         protein powders join this pool — a powder is a top-up food
+         by nature (it closes a protein gap; it is never a meal),
+         and at 0.14–0.16 g of protein per kcal it is the densest
+         honest closing the set offers. The pool's pattern gate has
+         already judged it (a vegan's pool holds no whey). */
       return (
-        (group === "dairy" || group === "eggs") && proteinKindOf(food) !== null && !isEggPart(food)
+        ((group === "dairy" || group === "eggs") &&
+          proteinKindOf(food) !== null &&
+          !isEggPart(food)) ||
+        isProteinPowder(food)
       );
     }
     return isMilkOrCurd(food) || group === "nuts_seeds";
@@ -2888,10 +3024,14 @@ function addOneTopUp(
   for (const food of candidates) {
     let portion: SizedPortion | null;
     if (proteinMode) {
-      const kind = proteinKindOf(food)!;
-      portion = sizedPortion(food, aim, proteinCapG(food, kind));
+      /* A powder's cap is its own (the scoop cap); every other
+         top-up food is capped by its protein kind as before. */
+      const cap = isProteinPowder(food)
+        ? CAP_PROTEIN_POWDER_G
+        : proteinCapG(food, proteinKindOf(food)!);
+      portion = sizedPortion(food, aim, cap);
       if (portion && portion.nutrients.kcal > roomKcal) {
-        portion = sizedPortion(food, { kcal: roomKcal }, proteinCapG(food, kind));
+        portion = sizedPortion(food, { kcal: roomKcal }, cap);
       }
       if (portion && portion.nutrients.proteinG < 3) continue;
     } else {
@@ -2980,6 +3120,53 @@ function addTopUps(
   }
 }
 
+/* ------------------------------ P11 day start ----------------------------- */
+
+/** One glass of water: 250 ml — the measure the whole app uses
+ *  (the water tracker's glass in `health/body.ts`, the voice
+ *  commands' `GLASS_ML`). The morning element pours one glass. */
+const WAKE_WATER_ML = 250;
+
+/** A water target is a target only as a sane, finite figure. The
+ *  body engine clamps its own to 1500–4500 ml; the band here is
+ *  wider so a caller-supplied figure is judged, not presumed. */
+function validWaterTargetMl(value: number | null | undefined): number | null {
+  if (value === null || value === undefined) return null;
+  if (!Number.isFinite(value) || value < 100 || value > 10000) return null;
+  return Math.round(value);
+}
+
+/**
+ * The day's start (P11): a glass of water on waking, and — when the
+ * day's water target is known — the rest of the target spread over
+ * the day's meals, summing EXACTLY to it (splitUnits reconciles the
+ * millilitres as it reconciles the kilocalories). Without a known
+ * target the morning glass still stands — it is one glass, the
+ * app's own measure — and no schedule is invented.
+ */
+function dayStartFor(
+  waterTargetMl: number | null,
+  meals: readonly PlanMeal[],
+): { morning: PlanMorning; hydration?: PlanHydration } {
+  const wakeMl = waterTargetMl !== null ? Math.min(WAKE_WATER_ML, waterTargetMl) : WAKE_WATER_ML;
+  const morning: PlanMorning = { waterMl: wakeMl };
+  if (waterTargetMl === null || waterTargetMl <= wakeMl || meals.length === 0) {
+    return { morning };
+  }
+  const rest = waterTargetMl - wakeMl;
+  const parts = splitUnits(
+    rest,
+    meals.map(() => 1 / meals.length),
+  );
+  const perMeal = meals
+    .map((m, i) => ({ meal: m.meal, ml: parts[i]! }))
+    .filter((p) => p.ml > 0);
+  return {
+    morning,
+    hydration: { targetMl: waterTargetMl, wakeMl, perMeal, totalMl: waterTargetMl },
+  };
+}
+
 /* ------------------------------- generation -------------------------------- */
 
 export interface PlanGenerationInput {
@@ -3024,6 +3211,14 @@ export interface PlanGenerationInput {
    *  pool is exactly what it was before modes existed. Like the
    *  recent log, modes shape selection only — never the targets. */
   activeModes?: readonly ModeId[];
+  /** The day's water target in ml from the FALLBACK targets' source
+   *  (the Trackers body profile — `bodyTargets().waterMl`), consulted
+   *  when the plan's targets come from that fallback. When the gated
+   *  Assessment path speaks, its own outcome carries the figure and
+   *  outranks this one: the plan's hydration always comes from the
+   *  same source as its targets. Absent or invalid, the plan still
+   *  opens with its morning glass; it simply carries no schedule. */
+  waterMl?: number | null;
   /** The day the plan is for. */
   day: string;
   now: string;
@@ -3127,13 +3322,27 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
 
   const goal = profile.goal;
   const snapshot = planInputsSnapshotOf(profile, safety, targets);
+  /* P11: the snack belongs to a complete day. A stated meals-per-day
+     below four used to drop the snack slot entirely — the owner's
+     own three-meal plan had no snack at all. The slot structure now
+     always carries the snack; splitTargets renormalises the shares
+     over it, so the day's totals never move, and the structure
+     notes name the addition when it goes beyond the stated count. */
+  const statedSlots = mealSlotsFor(profile.dietary.mealsPerDay);
+  const snackAdded = !statedSlots.includes("snack");
+  const slots = snackAdded
+    ? MEALS.filter((meal) => meal === "snack" || statedSlots.includes(meal))
+    : statedSlots;
+  const structureNotes: string[] = [];
+  if (snackAdded && profile.dietary.mealsPerDay !== null) {
+    const n = profile.dietary.mealsPerDay;
+    structureNotes.push(
+      `Your Assessment lists ${n} meal${n === 1 ? "" : "s"} a day; this plan adds a snack, so the day's food spreads across one more sitting.`,
+    );
+  }
   /* P10: the stated hunger pattern tilts the split toward the hungry
      part of the day — shares move, totals never do. */
-  const splits = splitTargets(
-    targets,
-    mealSlotsFor(profile.dietary.mealsPerDay),
-    profile.behavioural.hungerPattern,
-  );
+  const splits = splitTargets(targets, slots, profile.behavioural.hungerPattern);
   const pool = eligiblePool(profile, input.foods);
 
   /* P6+P7: the log-adaptive bias. The recent logged days are judged
@@ -3361,9 +3570,14 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      fine-tunes the whole. */
   applyItemCap(meals, byId, dishById);
   closeProteinGap(ctx, meals, byId, targets.proteinG);
-  if (meals.some((m) => m.dishes.length > 0)) {
-    addTopUps(ctx, meals, targets, adaptation?.energyOvershoot ?? false);
-  }
+  /* P11: the top-up pass used to run only when the day carried a
+   * dish. A food-composed day — the layered fallback, or a pool
+   * whose dishes are all gated out (vegan + no-cook is the sharp
+   * case) — stopped at its per-item caps and landed near half its
+   * guide with main meals skewed far under their shares. The same
+   * closing pass now completes both compositions: real foods,
+   * capped portions, the pattern judged at the pool. */
+  addTopUps(ctx, meals, targets, adaptation?.energyOvershoot ?? false);
   /* P8: the guard runs once more after the top-up rounds. The
    *  protein top-ups spend up to the +5% energy cap by design, and
    *  before them the dish scales often cannot move (protein sits at
@@ -3374,6 +3588,22 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   }
   reconcileEnergy(meals, byId, targets, dishById);
   applyProteinDominanceCap(meals, byId, targets.proteinG);
+  /* P11: the overshoot trim runs last among the portion passes —
+     it judges the day the closing, top-up, guard, reconciliation
+     and dominance passes together left, and pulls an over-band
+     protein total back toward its ceiling. */
+  trimProteinOvershoot(meals, byId, targets);
+  /* P11: the day's water, read from the same source as its targets —
+     the gated outcome carries its own figure; the fallback path
+     reads the caller's body-profile figure. Either way the number
+     is the body engine's, computed from the person's own metrics. */
+  const gatedWaterMl = input.gatedOutcome.ok ? input.gatedOutcome.targets.waterMl : null;
+  const waterTargetMl = validWaterTargetMl(
+    targetsSource === "assessment"
+      ? (gatedWaterMl ?? input.waterMl)
+      : (input.waterMl ?? gatedWaterMl),
+  );
+  const dayStart = dayStartFor(waterTargetMl, meals);
   /* The adaptation's explanations lead the notes: they say why this
      plan leans the way it does, before the notes judge the result.
      The P7 learning notes follow the P6 ones — what the log taught,
@@ -3384,6 +3614,9 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     /* P10: the behavioural gates' explanations — a relaxation or a
        kitchen fallback is named before the notes judge the result. */
     ...behaviourNotes,
+    /* P11: the day-structure note — a snack added beyond the stated
+       meal count is named, never silent. */
+    ...structureNotes,
     ...compositionNotes(meals, pool, targets, dishById),
   ];
 
@@ -3401,6 +3634,8 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       cautions: safety.findings.filter((f) => !f.blocking).map((f) => f.summary),
       notes,
       methodVersion: PLAN_METHOD_VERSION,
+      morning: dayStart.morning,
+      ...(dayStart.hydration ? { hydration: dayStart.hydration } : {}),
       meals,
       inputs: snapshot,
       fingerprint: fingerprintOfInputs(snapshot),
@@ -3702,6 +3937,48 @@ function parsePlan(raw: unknown): DailyPlan | null {
     if (parsed === null || Math.round(parsed) !== parsed) return null;
     methodVersion = parsed;
   }
+  /* The day start (P11): absent on pre-P11 plans, read as absent.
+     Present-but-invalid is a tamper and refuses the plan, exactly
+     as a forged method version does — and a hydration schedule
+     whose parts do not sum to its stated target is not a schedule
+     this engine wrote. */
+  let morning: PlanMorning | undefined;
+  if ("morning" in raw) {
+    if (!isRecord(raw["morning"])) return null;
+    const waterMl = numIn(raw["morning"]["waterMl"], 1, 1000);
+    if (waterMl === null) return null;
+    morning = { waterMl: Math.round(waterMl) };
+  }
+  let hydration: PlanHydration | undefined;
+  if ("hydration" in raw) {
+    if (!isRecord(raw["hydration"])) return null;
+    const targetMl = numIn(raw["hydration"]["targetMl"], 100, 10000);
+    const wakeMl = numIn(raw["hydration"]["wakeMl"], 1, 1000);
+    const totalMl = numIn(raw["hydration"]["totalMl"], 100, 10000);
+    if (targetMl === null || wakeMl === null || totalMl === null) return null;
+    const rawPerMeal: unknown = raw["hydration"]["perMeal"];
+    if (!Array.isArray(rawPerMeal) || rawPerMeal.length > MEALS.length) return null;
+    const perMeal: { meal: Meal; ml: number }[] = [];
+    const seenHydrationMeals = new Set<Meal>();
+    for (const item of rawPerMeal) {
+      if (!isRecord(item)) return null;
+      const meal = oneOf(item["meal"], MEALS);
+      const ml = numIn(item["ml"], 0, 5000);
+      if (!meal || ml === null || seenHydrationMeals.has(meal)) return null;
+      seenHydrationMeals.add(meal);
+      perMeal.push({ meal, ml: Math.round(ml) });
+    }
+    const summed = Math.round(wakeMl) + perMeal.reduce((a, p) => a + p.ml, 0);
+    if (summed !== Math.round(totalMl) || Math.round(totalMl) !== Math.round(targetMl)) {
+      return null;
+    }
+    hydration = {
+      targetMl: Math.round(targetMl),
+      wakeMl: Math.round(wakeMl),
+      perMeal,
+      totalMl: Math.round(totalMl),
+    };
+  }
   if (
     !Array.isArray(raw["meals"]) ||
     raw["meals"].length < 1 ||
@@ -3767,6 +4044,8 @@ function parsePlan(raw: unknown): DailyPlan | null {
     cautions,
     notes,
     methodVersion,
+    ...(morning ? { morning } : {}),
+    ...(hydration ? { hydration } : {}),
     meals,
     inputs,
     fingerprint,

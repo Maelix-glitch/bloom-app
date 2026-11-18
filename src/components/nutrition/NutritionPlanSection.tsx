@@ -919,6 +919,26 @@ export function NutritionPlanSection() {
           : ""}
       </p>
 
+      {plan.morning ? (
+        <div className="mt-5">
+          <p className="nut-group-label">Start of day</p>
+          <p className="nut-note">
+            On waking: a glass of water ({plan.morning.waterMl} ml), before anything else.
+            {plan.hydration ? (
+              <>
+                {" "}
+                Water through the day: {plan.hydration.targetMl.toLocaleString("en-IN")} ml in
+                all — {plan.hydration.wakeMl} ml on waking, then with your meals (
+                {plan.hydration.perMeal
+                  .map((p) => `${MEAL_LABEL[p.meal]} ${p.ml} ml`)
+                  .join(" · ")}
+                ).
+              </>
+            ) : null}
+          </p>
+        </div>
+      ) : null}
+
       <div className="mt-5 grid gap-4 md:grid-cols-2">{plan.meals.map(mealCard)}</div>
 
       {plan.cautions.length > 0 ? (

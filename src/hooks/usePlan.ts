@@ -174,6 +174,11 @@ export function usePlan(): PlanStore {
       /* System 14: the person's switched-on Condition Modes ride
        * along — the dish pool judges them beside pattern + budget. */
       ...(modes.active.length > 0 ? { activeModes: modes.active } : {}),
+      /* P11: the body profile's water target rides along for the
+         plan's hydration schedule — consulted only when the plan's
+         targets come from this same fallback source; the gated
+         outcome carries its own figure and outranks it. */
+      waterMl: body.targets?.waterMl ?? null,
       day: today,
       now,
     }),

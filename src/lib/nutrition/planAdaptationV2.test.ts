@@ -120,7 +120,7 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     expect(withEmpty).toEqual(base);
     /* Method 10 = the behavioural pass (spec §10): version pin
        moved; the inertness pinned here is unchanged. */
-    expect(base.methodVersion).toBe(10);
+    expect(base.methodVersion).toBe(11);
   });
 
   it("an on-target log with no dish history changes nothing", () => {
