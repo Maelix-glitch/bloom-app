@@ -54,6 +54,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-dal-fry",
@@ -89,6 +90,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-moong-dal-tadka",
@@ -122,6 +124,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-moong-khichdi",
@@ -153,6 +156,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-urad-dal",
@@ -187,6 +191,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-panchmel-dal",
@@ -227,6 +232,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-masoor-palak-dal",
@@ -262,6 +268,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-dal-makhani",
@@ -299,6 +306,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 90,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-rajma-masala",
@@ -334,6 +342,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-chole-masala",
@@ -372,6 +381,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-black-bean-masala",
@@ -407,6 +417,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-lobia-masala",
@@ -441,6 +452,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-pinto-bean-curry",
@@ -474,6 +486,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-white-bean-curry",
@@ -508,6 +521,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-sambar",
@@ -545,6 +559,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-soybean-curry",
@@ -579,6 +594,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-dal-palak",
@@ -613,6 +629,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-matar-masala",
@@ -647,6 +664,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sprouted-moong-curry",
@@ -681,6 +699,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sabut-masoor",
@@ -714,6 +733,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-coconut-lentil-curry",
@@ -748,6 +768,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-tomato-dal",
@@ -782,6 +803,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   /* --------------------------- paneer-style mains ------------------------
    * Paneer itself is not a reference food; the cottage-cheese line is the
@@ -821,6 +843,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-palak-paneer",
@@ -856,6 +879,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-paneer-bhurji",
@@ -891,6 +915,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kadai-paneer",
@@ -928,6 +953,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-paneer-butter-masala",
@@ -963,6 +989,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-paneer-tikka-masala",
@@ -1000,6 +1027,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-shahi-paneer",
@@ -1036,6 +1064,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-paneer-do-pyaza",
@@ -1073,6 +1102,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-achari-paneer",
@@ -1111,6 +1141,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------- egg mains ----------------------------- */
   {
@@ -1146,6 +1177,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-egg-masala",
@@ -1182,6 +1214,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-anda-bhurji",
@@ -1216,6 +1249,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-anda-matar-curry",
@@ -1251,6 +1285,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ----------------------------- chicken mains --------------------------- */
   {
@@ -1290,6 +1325,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-tikka-masala",
@@ -1326,6 +1362,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-keema-matar",
@@ -1363,6 +1400,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-kadai-chicken",
@@ -1399,6 +1437,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-chettinad",
@@ -1439,6 +1478,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-butter-chicken",
@@ -1474,6 +1514,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-korma",
@@ -1512,6 +1553,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-chicken-saag",
@@ -1548,6 +1590,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------ lamb & fish/seafood mains -------------------- */
   {
@@ -1586,6 +1629,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-goan-fish-curry",
@@ -1623,6 +1667,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-fish-moilee",
@@ -1658,6 +1703,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-salmon-masala-curry",
@@ -1693,6 +1739,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-prawn-masala",
@@ -1728,6 +1775,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tuna-potato-curry",
@@ -1763,6 +1811,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ---------------------------- vegetable mains -------------------------- */
   {
@@ -1800,6 +1849,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-bhindi-masala",
@@ -1836,6 +1886,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-matar",
@@ -1871,6 +1922,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gobi-masala",
@@ -1906,6 +1958,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mixed-veg-curry",
@@ -1944,6 +1997,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mushroom-masala",
@@ -1983,6 +2037,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-karela-aloo",
@@ -2020,6 +2075,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-baingan",
@@ -2055,6 +2111,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-band-gobhi-matar",
@@ -2090,6 +2147,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-beans-carrot-coconut-curry",
@@ -2124,6 +2182,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sweet-potato-coconut-curry",
@@ -2160,6 +2219,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-corn-capsicum-masala",
@@ -2196,6 +2256,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-palak",
@@ -2231,6 +2292,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mushroom-matar",
@@ -2266,6 +2328,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-soya-matar",
@@ -2301,6 +2364,7 @@ export const DISHES_MAINS: Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   /* ------------------------- enriched variants ---------------------------
    * Deliberately boosted versions of popular dishes above; the boost is
@@ -2344,6 +2408,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Finished with ghee instead of oil and folded with 150 g cottage cheese (paneer) cubes — extra protein and richness over the everyday chole.",
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-rajma-enriched",
@@ -2381,6 +2446,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "A butter tadka and 150 g Greek yogurt stirred in at the end — a creamier, higher-protein rajma than the everyday version.",
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-matar-paneer-enriched",
@@ -2420,6 +2486,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Extra 150 g cottage cheese (paneer), a butter finish and cashew paste in the gravy — richer and higher in protein than the everyday matar paneer.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-palak-paneer-enriched",
@@ -2458,6 +2525,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Extra 150 g cottage cheese (paneer) plus butter and Greek yogurt — a creamier, protein-boosted palak paneer.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-egg-curry-enriched",
@@ -2493,6 +2561,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Three extra eggs and a ghee tadka instead of oil — more protein and a richer gravy than the everyday egg curry.",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-curry-enriched",
@@ -2533,6 +2602,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 3,
     enriched: true,
     enrichment: "Extra 150 g chicken, a ghee finish and a cashew-yogurt gravy — richer and higher in protein than the everyday chicken curry.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-dal-makhani-enriched",
@@ -2572,6 +2642,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Double the butter of the everyday version, plus Greek yogurt and milk simmered in — a creamier, protein-boosted dal makhani.",
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-baingan-bharta-enriched",
@@ -2611,6 +2682,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Ghee instead of oil, crushed roasted peanuts and a yogurt swirl — a richer, nuttier bharta with more protein than the everyday version.",
+    equipment: ["stove"],
   },
   {
     id: "dish-khichdi-enriched",
@@ -2646,6 +2718,7 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Extra ghee, cottage cheese (paneer) cubes and cashews folded in — a protein- and energy-boosted khichdi.",
+    equipment: ["stove"],
   },
   {
     id: "dish-goan-fish-curry-enriched",
@@ -2684,5 +2757,6 @@ export const DISHES_MAINS: Dish[] = [
     budgetTier: 3,
     enriched: true,
     enrichment: "Extra 100 g fish and nearly double the coconut of the everyday version — a richer, higher-protein Goan-style curry.",
+    equipment: ["stove", "mixer_grinder"],
   },
 ];

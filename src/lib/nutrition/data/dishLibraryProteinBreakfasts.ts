@@ -56,6 +56,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-chicken-kothu-parotta",
@@ -89,6 +90,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-masala-egg-idli",
@@ -121,6 +123,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-mughlai-egg-paratha",
@@ -151,6 +154,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-egg-tadka",
@@ -183,6 +187,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-bombay-masala-toast",
@@ -212,6 +217,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-sali-par-eedu",
@@ -241,6 +247,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-egg-bread-upma",
@@ -272,6 +279,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-chicken-kari-dosa",
@@ -305,6 +313,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* --------------------------- Kerala breakfasts --------------------------- */
   {
@@ -339,6 +348,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-chemmeen-mutta-thoran",
@@ -370,6 +380,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-chakka-puzhukku-eggs",
@@ -400,6 +411,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* --------------------- International breakfasts --------------------- */
   {
@@ -431,6 +443,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-turkey-chorizo-eggs",
@@ -461,6 +474,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-cottage-blintzes",
@@ -488,6 +502,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-chicken-egg-drop-soup",
@@ -517,6 +532,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-xoi-xeo",
@@ -544,6 +560,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-tortang-talong",
@@ -573,6 +590,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-okonomiyaki",
@@ -603,6 +621,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-strammer-max",
@@ -631,6 +650,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-pw2-syrniki",
@@ -658,6 +678,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-tamago-sando",
@@ -686,6 +707,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven", "fridge"],
   },
   {
     id: "dish-pw2-gozleme",
@@ -713,6 +735,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-mamaliga",
@@ -739,6 +762,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-buckwheat-galette",
@@ -766,6 +790,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-croque-madame",
@@ -794,6 +819,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-huevos-rotos",
@@ -822,6 +848,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-turkey-biscuits-gravy",
@@ -850,6 +877,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-turkey-loco-moco",
@@ -881,6 +909,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-migas",
@@ -910,6 +939,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-cuscuz-nordestino",
@@ -937,6 +967,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-bolon-verde",
@@ -963,6 +994,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-nasi-uduk",
@@ -993,6 +1025,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-dan-bing",
@@ -1020,6 +1053,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-khao-tom",
@@ -1050,6 +1084,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-turkey-eggwhite-bake",
@@ -1080,6 +1115,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-soboro-bowl",
@@ -1108,6 +1144,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-tuna-egg-rice-bowl",
@@ -1137,6 +1174,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-banh-mi-sandwich",
@@ -1167,6 +1205,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-khai-yat-sai",
@@ -1197,6 +1236,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-roti-telur",
@@ -1224,6 +1264,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-kuku-sabzi",
@@ -1256,6 +1297,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-tofu-peanut-congee",
@@ -1285,6 +1327,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-grechka-tofu",
@@ -1313,6 +1356,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ Snacks ------------------------------ */
   {
@@ -1342,6 +1386,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven"],
   },
   {
     id: "dish-pw2-shrimp-cakes",
@@ -1371,6 +1416,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-pw2-soya-bean-kebabs",
@@ -1401,6 +1447,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-rajma-kebabs",
@@ -1431,6 +1478,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-masala-vada-patties",
@@ -1459,6 +1507,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-masala-edamame-chaat",
@@ -1488,6 +1537,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-devilled-eggs",
@@ -1515,6 +1565,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-pw2-salmon-crepe-rolls",
@@ -1543,6 +1594,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-tofu-satay",
@@ -1572,6 +1624,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-white-bean-dip-eggs",
@@ -1600,6 +1653,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-chicken-reshmi-kebabs",
@@ -1629,6 +1683,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pw2-chicken-kathi-roll",
@@ -1659,6 +1714,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-martabak-telur",
@@ -1688,6 +1744,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-roti-john",
@@ -1717,6 +1774,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-perkedel",
@@ -1746,6 +1804,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-dimer-chop",
@@ -1777,6 +1836,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-quinoa-black-bean-bites",
@@ -1807,6 +1867,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-turkey-pinwheels",
@@ -1835,6 +1896,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-paneer-pea-samosas",
@@ -1864,6 +1926,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-garlic-shrimp-skewers",
@@ -1891,6 +1954,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-sardine-egg-toasts",
@@ -1919,6 +1983,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-mackerel-pate-toasts",
@@ -1946,6 +2011,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-pw2-oats-cottage-patties",
@@ -1975,6 +2041,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-tuna-potato-kebabs",
@@ -2004,6 +2071,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-roasted-soya-nuts",
@@ -2030,6 +2098,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-mozzarella-sticks",
@@ -2057,6 +2126,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["oven", "fridge"],
   },
   {
     id: "dish-pw2-corn-cottage-fritters",
@@ -2085,6 +2155,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pw2-lentil-walnut-pate",
@@ -2115,6 +2186,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-pw2-stuffed-mushrooms",
@@ -2145,6 +2217,7 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-pw2-eggplant-cottage-rolls",
@@ -2174,5 +2247,6 @@ export const PW2_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
 ];

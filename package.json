@@ -21,6 +21,8 @@
     "seed:food-images:check": "node scripts/nutrition-food-images.mjs --check",
     "seed:dish-images": "node scripts/nutrition-dish-images.mjs",
     "seed:dish-images:check": "node scripts/nutrition-dish-images.mjs --check",
+    "seed:dish-tags": "node scripts/nutrition-dish-tags.mjs",
+    "seed:dish-tags:check": "node scripts/nutrition-dish-tags.mjs --check",
     "preview:prod": "npm run build && npx wrangler --cwd .output/server dev",
     "deploy": "npm run build:worker && npx wrangler deploy",
     "deploy:name": "npm run build && npx wrangler --cwd .output/server deploy --name bloom-app",

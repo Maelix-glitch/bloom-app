@@ -198,7 +198,16 @@ describe("P10 · method and record", () => {
 
 describe("P10 · kitchen gates", () => {
   it("dishPreparationNeeds answers conservatively until a dish is pinned (§10.4)", () => {
-    const unpinned = DISH_LIBRARY[0]!;
+    /* Reason for the fixture change (2026-11-18, §10.4 data pass):
+       this test used DISH_LIBRARY[0] as its unpinned dish, but the
+       pass pinned every shipped dish, so the library no longer
+       contains an unpinned one. The conservative default is now
+       exercised on a clone with the pins stripped — the property
+       under test (what an UNTAGGED dish, e.g. a stored user dish,
+       is assumed to need) is unchanged. */
+    const unpinned = cloneDish({ id: "test-unpinned" });
+    delete unpinned.equipment;
+    delete unpinned.noCook;
     expect(unpinned.equipment).toBeUndefined();
     expect(dishPreparationNeeds(unpinned)).toEqual({
       equipment: ["stove"],
@@ -252,22 +261,43 @@ describe("P10 · kitchen gates", () => {
     expect(ids).toEqual(["test-nocook"]);
   });
 
-  it("with today's unpinned library, 'no cooking' empties the pool — and the plan says why", () => {
+  it("after the §10.4 pass, 'no cooking' serves the library's no-cook dishes", () => {
+    /* Rewritten 2026-11-18 with the §10.4 data pass: this test
+       previously pinned the UNTAGGED library's behaviour — the pool
+       emptied and the plan said why — because every dish answered
+       the conservative default. The pass pinned real tags from each
+       dish's method, so the honest behaviour inverted: the pool now
+       holds the library's genuine no-cook dishes, only those are
+       served, and the empty-pool note no longer fires. The
+       full-library consequence is pinned in dishTags.test.ts; this
+       stays as the gate-level record of the change. */
     const plan = gen(profileWith({ cookingAbility: "none" }));
-    expect(servedDishes(plan)).toEqual([]);
+    const served = servedDishes(plan);
+    expect(served.length).toBeGreaterThan(0);
+    for (const s of served) {
+      expect(dishPreparationNeeds(findDish(s.dishId)!).noCook, s.dishId).toBe(true);
+    }
     expect(
       plan.notes.some((n) => n.startsWith("No dish in the library fits your kitchen answers yet")),
-    ).toBe(true);
-    /* The day is still composed — from simple foods, not left empty. */
-    expect(plan.meals.some((m) => m.suggestions.length > 0)).toBe(true);
+    ).toBe(false);
   });
 
-  it("an equipment answer without a stove empties the pool the same honest way", () => {
+  it("an equipment answer without a stove serves only what that kitchen covers", () => {
+    /* Rewritten 2026-11-18 with the §10.4 data pass, for the same
+       reason as the test above: a fridge-only kitchen previously
+       emptied the pool (every dish defaulted to needing a stove);
+       now it is served the dishes whose methods need no more than a
+       fridge — and nothing whose method needs more. */
     const plan = gen(profileWith({ equipment: ["fridge"] }));
-    expect(servedDishes(plan)).toEqual([]);
+    const served = servedDishes(plan);
+    expect(served.length).toBeGreaterThan(0);
+    for (const s of served) {
+      const needs = dishPreparationNeeds(findDish(s.dishId)!);
+      expect(needs.equipment.every((item) => item === "fridge"), s.dishId).toBe(true);
+    }
     expect(
       plan.notes.some((n) => n.startsWith("No dish in the library fits your kitchen answers yet")),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("an equipment answer with a stove keeps the dish pool, with no kitchen note", () => {
@@ -328,7 +358,12 @@ describe("P10 · prep-time cap", () => {
   });
 
   it("an explicit prep answer overrides the hostel default", () => {
-    const dish45 = cloneDish({ id: "test-45", timeMinutes: 45 });
+    /* The clone pins its own equipment (2026-11-18, §10.4 pass):
+       cloneDish's base is a real library dish whose method now
+       carries real pins (a pressure cooker), which the hostel
+       default kitchen honestly lacks — the equipment gate, not the
+       prep-time rule under test, would have excluded it. */
+    const dish45 = cloneDish({ id: "test-45", timeMinutes: 45, equipment: ["stove"] });
     const plan = gen(profileWith({ eatingSetting: "hostel", prepTimeMaxMinutes: 60 }), {
       dishes: [dish45],
     });

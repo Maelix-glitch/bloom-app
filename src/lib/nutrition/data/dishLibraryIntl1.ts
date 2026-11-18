@@ -47,6 +47,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-lemon-garlic-chicken",
@@ -75,6 +76,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chicken-fajitas",
@@ -105,6 +107,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-intl-jerk-chicken",
@@ -137,6 +140,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-intl-ginger-chicken-stir-fry",
@@ -168,6 +172,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chicken-quinoa-bowl",
@@ -198,6 +203,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: true,
     enrichment: "Quinoa, avocado and pumpkin seeds join the chicken — a boosted bowl, not a plain grilled-chicken plate.",
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chicken-caesar-salad",
@@ -227,6 +233,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chicken-vegetable-soup",
@@ -258,6 +265,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chicken-black-bean-chili",
@@ -289,6 +297,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-creamy-garlic-chicken",
@@ -319,6 +328,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-buffalo-chicken-strips",
@@ -346,6 +356,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chicken-satay",
@@ -378,6 +389,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-intl-chicken-schnitzel",
@@ -405,6 +417,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-roast-chicken-vegetables",
@@ -433,6 +446,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven"],
   },
   {
     id: "dish-intl-chicken-parmigiana",
@@ -464,6 +478,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-thai-green-chicken-curry",
@@ -497,6 +512,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-intl-chicken-enchilada-bake",
@@ -528,6 +544,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-greek-chicken-souvlaki",
@@ -556,6 +573,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   /* --------------------------- turkey & lamb --------------------------- */
   {
@@ -588,6 +606,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-turkey-burgers",
@@ -616,6 +635,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-turkey-kidney-bean-chili",
@@ -648,6 +668,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 80,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-garlic-herb-turkey-breast",
@@ -675,6 +696,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven", "fridge"],
   },
   {
     id: "dish-intl-turkey-vegetable-stir-fry",
@@ -705,6 +727,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-turkey-taco-cups",
@@ -737,6 +760,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-turkey-stuffed-peppers",
@@ -767,6 +791,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-lamb-kofta",
@@ -799,6 +824,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-intl-shepherds-pie",
@@ -831,6 +857,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 65,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   /* ---------------------------- fish & shrimp --------------------------- */
   {
@@ -860,6 +887,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-honey-garlic-salmon",
@@ -887,6 +915,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-salmon-green-beans-almonds",
@@ -914,6 +943,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-salmon-quinoa-bowl",
@@ -943,6 +973,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-blackened-salmon",
@@ -972,6 +1003,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-tuna-white-bean-salad",
@@ -1002,6 +1034,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 65,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tuna-melt",
@@ -1029,6 +1062,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-tuna-stuffed-peppers",
@@ -1058,6 +1092,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["oven"],
   },
   {
     id: "dish-intl-tuna-egg-salad",
@@ -1087,6 +1122,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-sardines-on-flatbread",
@@ -1116,6 +1152,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-intl-sardine-chickpea-salad",
@@ -1145,6 +1182,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-grilled-mackerel",
@@ -1172,6 +1210,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-mackerel-potato-salad",
@@ -1201,6 +1240,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-baked-cod-tomatoes",
@@ -1229,6 +1269,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-cod-corn-chowder",
@@ -1259,6 +1300,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-blackened-tilapia",
@@ -1287,6 +1329,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tilapia-tacos",
@@ -1316,6 +1359,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-oat-crusted-haddock",
@@ -1343,6 +1387,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-mediterranean-fish-stew",
@@ -1372,6 +1417,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-shrimp-scampi",
@@ -1400,6 +1446,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-garlic-shrimp-broccoli",
@@ -1430,6 +1477,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-shrimp-fajitas",
@@ -1459,6 +1507,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-shrimp-coconut-curry",
@@ -1490,6 +1539,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-shrimp-egg-fried-rice",
@@ -1520,6 +1570,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-mixed-seafood-stew",
@@ -1550,6 +1601,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tuna-quinoa-salad",
@@ -1579,6 +1631,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ egg mains ----------------------------- */
   {
@@ -1611,6 +1664,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-crustless-quiche",
@@ -1640,6 +1694,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-egg-quinoa-fried-rice",
@@ -1670,6 +1725,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-spanish-potato-tortilla",
@@ -1698,6 +1754,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-menemen",
@@ -1727,6 +1784,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: true,
     enrichment: "Mozzarella melted over the top — a boosted menemen, not the plain egg-and-tomato pan.",
+    equipment: ["stove"],
   },
   /* ------------------------- tofu, tempeh & soy ------------------------- */
   {
@@ -1759,6 +1817,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tofu-coconut-curry",
@@ -1789,6 +1848,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tempeh-green-bean-stir-fry",
@@ -1818,6 +1878,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tempeh-coconut-curry",
@@ -1849,6 +1910,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tempeh-taco-cups",
@@ -1878,6 +1940,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tempeh-bolognese",
@@ -1907,6 +1970,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-edamame-quinoa-bowl",
@@ -1936,6 +2000,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-soybean-tomato-chili",
@@ -1966,6 +2031,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 95,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tofu-oat-meatballs",
@@ -1996,6 +2062,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-mapo-style-tofu",
@@ -2024,6 +2091,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tempeh-burger-patties",
@@ -2052,6 +2120,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-tofu-cabbage-cups",
@@ -2082,6 +2151,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-pad-thai-style-tofu",
@@ -2114,6 +2184,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------- beans, lentils & grains ------------------------- */
   {
@@ -2144,6 +2215,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-lentil-bolognese",
@@ -2173,6 +2245,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-chickpea-spinach-stew",
@@ -2201,6 +2274,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 95,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-tuscan-white-bean-soup",
@@ -2230,6 +2304,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 80,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-three-bean-quinoa-chili",
@@ -2262,6 +2337,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 95,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-mediterranean-lentil-soup",
@@ -2291,6 +2367,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-black-eyed-pea-stew",
@@ -2320,6 +2397,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-falafel-plate",
@@ -2351,6 +2429,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-intl-hummus-egg-plate",
@@ -2380,6 +2459,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Hummus built on a double measure of sesame paste and topped with soft eggs — a boosted plate, not plain hummus.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-intl-warm-lentil-egg-salad",
@@ -2406,6 +2486,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-quinoa-black-bean-bowl",
@@ -2434,6 +2515,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 70,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-peanut-chickpea-stew",
@@ -2465,6 +2547,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 95,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   /* ------------------------- dairy-led & other mains ------------------------- */
   {
@@ -2494,6 +2577,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-spinach-ricotta-chicken",
@@ -2522,6 +2606,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 40,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-cheesy-bean-bake",
@@ -2551,6 +2636,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 95,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-broccoli-cheddar-soup",
@@ -2582,6 +2668,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "A double-cheese broccoli soup finished with Greek yogurt — richer and higher in protein than the standard bowl.",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-intl-cauliflower-cheese-bake",
@@ -2611,6 +2698,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-chicken-meatballs",
@@ -2641,6 +2729,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-chicken-pot-pie-stew",
@@ -2671,6 +2760,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-lentil-walnut-meatballs",
@@ -2702,6 +2792,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-black-bean-burgers",
@@ -2732,6 +2823,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 75,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-quinoa-chickpea-burgers",
@@ -2760,6 +2852,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 90,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-edamame-egg-fried-rice",
@@ -2788,6 +2881,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-turkey-rice-bowl",
@@ -2816,6 +2910,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   /* ------------------------------ breakfasts ------------------------------ */
   {
@@ -2845,6 +2940,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-veggie-omelette",
@@ -2873,6 +2969,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-cottage-spinach-omelette",
@@ -2899,6 +2996,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 12,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-egg-white-turkey-scramble",
@@ -2926,6 +3024,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: true,
     enrichment: "A lean egg-white scramble boosted with browned turkey — a deliberately protein-loaded breakfast.",
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-cheese-scrambled-eggs",
@@ -2952,6 +3051,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-eggs-benedict-style",
@@ -2979,6 +3079,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-french-cheese-omelette",
@@ -3004,6 +3105,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-turkey-sweet-potato-hash",
@@ -3032,6 +3134,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-protein-oatmeal",
@@ -3060,6 +3163,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: true,
     enrichment: "Oats enriched with an egg whisked in custard-style and a full Greek-yogurt topping — a protein-boosted bowl, not plain porridge.",
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-overnight-oats",
@@ -3087,6 +3191,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-greek-yogurt-power-bowl",
@@ -3113,6 +3218,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 12,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-cottage-egg-flatbread",
@@ -3138,6 +3244,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-intl-tempeh-potato-hash",
@@ -3165,6 +3272,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-baked-egg-muffins",
@@ -3192,6 +3300,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-quinoa-breakfast-bowl",
@@ -3218,6 +3327,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-salmon-egg-breakfast",
@@ -3243,6 +3353,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-breakfast-sandwich",
@@ -3270,6 +3381,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-oat-cottage-pancakes",
@@ -3297,6 +3409,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Pancakes built on cottage cheese and eggs instead of a plain flour batter — a protein-enriched stack.",
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-socca-egg-spinach",
@@ -3323,6 +3436,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 45,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-intl-tempeh-strips-eggs",
@@ -3348,6 +3462,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-savoury-oatmeal",
@@ -3374,6 +3489,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-quinoa-porridge",
@@ -3401,6 +3517,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 20,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-beans-eggs-skillet",
@@ -3429,6 +3546,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-salmon-spinach-omelette",
@@ -3454,6 +3572,7 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 18,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-intl-egg-avocado-flatbread",
@@ -3481,5 +3600,6 @@ export const INTL1_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
 ];

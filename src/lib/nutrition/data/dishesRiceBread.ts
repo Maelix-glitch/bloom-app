@@ -52,6 +52,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-matar-pulao",
@@ -79,6 +80,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mushroom-pulao",
@@ -111,6 +113,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-masala-khichdi",
@@ -149,6 +152,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-veg-biryani",
@@ -192,6 +196,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 60,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-egg-biryani",
@@ -230,6 +235,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 55,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-biryani",
@@ -271,6 +277,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 70,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-pulao",
@@ -305,6 +312,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 50,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-lemon-rice",
@@ -337,6 +345,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-tamarind-rice",
@@ -370,6 +379,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-curd-rice",
@@ -402,6 +412,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-tomato-rice",
@@ -435,6 +446,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-coconut-rice",
@@ -466,6 +478,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-ven-pongal",
@@ -495,6 +508,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-soya-pulao",
@@ -527,6 +541,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 50,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-millet-khichdi",
@@ -556,6 +571,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-egg-fried-rice",
@@ -588,6 +604,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cottage-cheese-pulao",
@@ -621,6 +638,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 1,
     enriched: true,
     enrichment: "Cottage cheese crumbled through the rice plus peas and carrot, over the plain jeera-style pulao",
+    equipment: ["stove"],
   },
   {
     id: "dish-enriched-veg-biryani",
@@ -662,6 +680,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Cashews and cottage cheese layered through, with extra ghee, over the standard vegetable biryani",
+    equipment: ["stove"],
   },
   /* ------------------------------ BREADS ------------------------------ */
   {
@@ -686,6 +705,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-whole-wheat-paratha",
@@ -709,6 +729,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-paratha",
@@ -740,6 +761,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-gobi-paratha",
@@ -769,6 +791,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-naan",
@@ -795,6 +818,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 150,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-garlic-naan",
@@ -822,6 +846,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 150,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cheese-naan",
@@ -850,6 +875,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 1,
     enriched: true,
     enrichment: "Mozzarella stuffed inside the naan, over the plain naan's yogurt-and-milk dough",
+    equipment: ["stove"],
   },
   {
     id: "dish-missi-roti",
@@ -880,6 +906,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-makki-di-roti",
@@ -903,6 +930,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-masala-paratha",
@@ -931,6 +959,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-palak-paratha",
@@ -958,6 +987,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-lachha-paratha",
@@ -981,6 +1011,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 45,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-pyaaz-paratha",
@@ -1009,6 +1040,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-cottage-cheese-paratha",
@@ -1038,6 +1070,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 1,
     enriched: true,
     enrichment: "A full cottage cheese filling with coriander, over the plain whole wheat paratha",
+    equipment: ["stove"],
   },
   /* ----------------------------- BREAKFAST ----------------------------- */
   {
@@ -1072,6 +1105,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-veg-upma",
@@ -1106,6 +1140,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-idli",
@@ -1130,6 +1165,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-dosa",
@@ -1156,6 +1192,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-masala-dosa",
@@ -1190,6 +1227,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-onion-uttapam",
@@ -1219,6 +1257,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-adai-dosa",
@@ -1248,6 +1287,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-besan-chilla",
@@ -1277,6 +1317,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-moong-dal-chilla",
@@ -1305,6 +1346,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-cottage-cheese-chilla",
@@ -1335,6 +1377,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 1,
     enriched: true,
     enrichment: "Cottage cheese and spinach folded into the batter, over the plain besan chilla",
+    equipment: ["stove"],
   },
   {
     id: "dish-oats-porridge",
@@ -1361,6 +1404,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-protein-oats",
@@ -1388,6 +1432,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Greek yogurt stirred through, plus almonds and pumpkin seeds on top, over the plain milk porridge",
+    equipment: ["stove"],
   },
   {
     id: "dish-masala-oats",
@@ -1420,6 +1465,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 20,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-overnight-oats",
@@ -1447,6 +1493,8 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["fridge"],
+    noCook: true,
   },
   {
     id: "dish-barley-porridge",
@@ -1472,6 +1520,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-quinoa-upma",
@@ -1504,6 +1553,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-boiled-egg-plate",
@@ -1529,6 +1579,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 12,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-masala-omelette",
@@ -1557,6 +1608,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 12,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-fruit-curd-bowl",
@@ -1583,6 +1635,8 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: ["fridge"],
+    noCook: true,
   },
   {
     id: "dish-enriched-fruit-curd-bowl",
@@ -1611,6 +1665,8 @@ export const DISHES_RICE_BREAD: Dish[] = [
     budgetTier: 2,
     enriched: true,
     enrichment: "Greek yogurt instead of plain curd, plus walnuts and pumpkin seeds, over the plain fruit and curd bowl",
+    equipment: ["fridge"],
+    noCook: true,
   },
   /* ------------------------------ SNACKS ------------------------------ */
   {
@@ -1636,6 +1692,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-sprouts-chaat",
@@ -1665,6 +1722,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 15,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-tikki",
@@ -1696,6 +1754,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 35,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-veg-cutlet",
@@ -1730,6 +1789,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 40,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-besan-dhokla",
@@ -1762,6 +1822,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 55,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-corn-chaat",
@@ -1792,6 +1853,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 12,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-peanut-chaat",
@@ -1821,6 +1883,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 3,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-fruit-chaat",
@@ -1848,6 +1911,8 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 10,
     budgetTier: 2,
     enriched: false,
+    equipment: [],
+    noCook: true,
   },
   {
     id: "dish-egg-chaat",
@@ -1877,6 +1942,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chana-chaat",
@@ -1907,6 +1973,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-lobia-chaat",
@@ -1936,6 +2003,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-moong-sundal",
@@ -1967,6 +2035,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 20,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-chana-sundal",
@@ -1998,6 +2067,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 25,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-aloo-chaat",
@@ -2028,6 +2098,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-shakarkandi-chaat",
@@ -2055,6 +2126,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-masala-seed-mix",
@@ -2084,5 +2156,6 @@ export const DISHES_RICE_BREAD: Dish[] = [
     timeMinutes: 15,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
 ];

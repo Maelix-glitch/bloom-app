@@ -44,6 +44,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-souvlaki",
@@ -72,6 +73,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-greek-lemon-chicken-potatoes",
@@ -98,6 +100,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["oven"],
   },
   {
     id: "dish-kotopoulo-kokkinisto",
@@ -125,6 +128,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-psari-plaki",
@@ -151,6 +155,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-grilled-sardines-lemon",
@@ -175,6 +180,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-baked-mackerel-greek",
@@ -201,6 +207,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["oven"],
   },
   {
     id: "dish-garides-kokkinistes",
@@ -228,6 +235,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-fakes-lentil-soup",
@@ -257,6 +265,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-fasolada",
@@ -284,6 +293,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-gigantes-plaki",
@@ -310,6 +320,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-strapatsada-style-eggs",
@@ -336,6 +347,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-greek-yogurt-power-bowl",
@@ -360,6 +372,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-greek-lemon-chicken-rice",
@@ -387,6 +400,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-turkey-souvlaki",
@@ -415,6 +429,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-greek-shrimp-quinoa",
@@ -443,6 +458,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-greek-baked-tilapia",
@@ -470,6 +486,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["oven"],
   },
   {
     id: "dish-greek-herb-omelette",
@@ -497,6 +514,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-gyro-plate",
@@ -527,6 +545,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-mavromatika-fasolia",
@@ -554,6 +573,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-kotopoulo-me-fasolia",
@@ -581,6 +601,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-greek-turkey-keftedes",
@@ -610,6 +631,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-greek-sardine-bake",
@@ -637,6 +659,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-chicken-piccata",
@@ -663,6 +686,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-cacciatore",
@@ -691,6 +715,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-pollo-sorrentina",
@@ -717,6 +742,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-polpette-tacchino",
@@ -745,6 +771,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-turkey-involtini",
@@ -772,6 +799,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-risotto-tonno",
@@ -799,6 +827,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-risotto-salmone",
@@ -826,6 +855,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-risotto-gamberi",
@@ -853,6 +883,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-orzotto",
@@ -880,6 +911,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-frittata-spinach-mozzarella",
@@ -907,6 +939,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-frittata-patate",
@@ -934,6 +967,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-uova-purgatorio",
@@ -962,6 +996,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-minestrone-fagioli",
@@ -992,6 +1027,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-ribollita",
@@ -1021,6 +1057,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-zuppa-lenticchie",
@@ -1048,6 +1085,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-pesce-acqua-pazza",
@@ -1074,6 +1112,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-insalata-di-mare",
@@ -1101,6 +1140,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-pollo-diavola",
@@ -1127,6 +1167,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-gnocchi-turkey-ragu",
@@ -1156,6 +1197,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-stracciatella-soup",
@@ -1182,6 +1224,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-tilapia-livornese",
@@ -1209,6 +1252,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-gambas-ajillo",
@@ -1234,6 +1278,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-pollo-ajillo",
@@ -1259,6 +1304,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-cod-galician",
@@ -1287,6 +1333,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-cod-tomato-spanish",
@@ -1314,6 +1361,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-lentejas-estofadas",
@@ -1343,6 +1391,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-garbanzos-espinacas",
@@ -1370,6 +1419,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-huevos-flamenca",
@@ -1398,6 +1448,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-atun-encebollado",
@@ -1424,6 +1475,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-pollo-pepitoria",
@@ -1451,6 +1503,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-garbanzos-gambas",
@@ -1479,6 +1532,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-albondigas-pavo-almendras",
@@ -1506,6 +1560,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-revuelto-setas",
@@ -1532,6 +1587,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-pisto-huevo",
@@ -1561,6 +1617,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-merluza-salsa-verde",
@@ -1588,6 +1645,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-pollo-chilindron",
@@ -1615,6 +1673,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-albondigas-cordero",
@@ -1643,6 +1702,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-salmon-pisto",
@@ -1671,6 +1731,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-poulet-basquaise",
@@ -1699,6 +1760,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-salade-nicoise",
@@ -1727,6 +1789,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-bouillabaisse-style",
@@ -1757,6 +1820,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-haddock-meuniere",
@@ -1782,6 +1846,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-fricassee",
@@ -1809,6 +1874,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-turkey-blanquette",
@@ -1838,6 +1904,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-salade-lentilles",
@@ -1866,6 +1933,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-mackerel-moutarde",
@@ -1892,6 +1960,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-oeufs-cocotte",
@@ -1919,6 +1988,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-omelette-mushroom-mozzarella",
@@ -1945,6 +2015,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-quiche-epinards",
@@ -1973,6 +2044,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven", "fridge"],
   },
   {
     id: "dish-chicken-provencal",
@@ -2000,6 +2072,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-brandade-style",
@@ -2026,6 +2099,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-soupe-de-poisson",
@@ -2054,6 +2128,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-turkey-escalope-lemon",
@@ -2080,6 +2155,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-salmon-herb-crust",
@@ -2107,6 +2183,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["oven", "mixer_grinder"],
   },
   {
     id: "dish-haricots-bretonne",
@@ -2135,6 +2212,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-poulet-chasseur",
@@ -2163,6 +2241,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-mercimek-corbasi",
@@ -2192,6 +2271,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-tavuk-sis",
@@ -2220,6 +2300,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-hindi-sis",
@@ -2247,6 +2328,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-kuzu-kofte",
@@ -2274,6 +2356,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-hindi-kofte",
@@ -2301,6 +2384,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-karniyarik",
@@ -2329,6 +2413,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-hunkar-begendi",
@@ -2358,6 +2443,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-menemen",
@@ -2385,6 +2471,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-cilbir",
@@ -2411,6 +2498,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-karides-guvec",
@@ -2439,6 +2527,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-tavuk-guvec",
@@ -2468,6 +2557,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-nohut-yemegi",
@@ -2495,6 +2585,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-kuru-fasulye",
@@ -2522,6 +2613,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-balik-bugulama",
@@ -2549,6 +2641,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-sardalya-tava",
@@ -2574,6 +2667,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-yogurtlu-tavuk",
@@ -2601,6 +2695,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-etli-nohut",
@@ -2629,6 +2724,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-mantarli-yumurta",
@@ -2655,6 +2751,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-hummus-meal",
@@ -2682,6 +2779,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-falafel-baked",
@@ -2710,6 +2808,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["oven"],
   },
   {
     id: "dish-shish-tawook",
@@ -2738,6 +2837,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-chicken-shawarma-plate",
@@ -2769,6 +2869,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-kofta-bi-tahini",
@@ -2797,6 +2898,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["oven", "mixer_grinder"],
   },
   {
     id: "dish-fatteh-hummus",
@@ -2825,6 +2927,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-mujadara",
@@ -2851,6 +2954,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-sayadieh",
@@ -2880,6 +2984,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven"],
   },
   {
     id: "dish-samkeh-harra",
@@ -2909,6 +3014,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-maghmour",
@@ -2937,6 +3043,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-dajaj-mashwi",
@@ -2964,6 +3071,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven", "mixer_grinder", "fridge"],
   },
   {
     id: "dish-foul-style-beans",
@@ -2992,6 +3100,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-qaridis-bi-thoom",
@@ -3019,6 +3128,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-shorbet-adas",
@@ -3046,6 +3156,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 1,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-samak-bi-tahini",
@@ -3073,6 +3184,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "oven", "mixer_grinder"],
   },
   {
     id: "dish-fatteh-batenjan",
@@ -3102,6 +3214,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-tagine-lemon-onion",
@@ -3130,6 +3243,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-lamb-tagine-chickpea",
@@ -3158,6 +3272,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-kefta-mkaouara",
@@ -3187,6 +3302,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-harira",
@@ -3218,6 +3334,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-fish-tagine-chermoula",
@@ -3248,6 +3365,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "mixer_grinder"],
   },
   {
     id: "dish-shrimp-tagine-moroccan",
@@ -3277,6 +3395,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-rfissa-style",
@@ -3306,6 +3425,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chickpea-tagine-spinach",
@@ -3335,6 +3455,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 2,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-sardine-kefta",
@@ -3365,6 +3486,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-turkey-tagine-quinoa",
@@ -3393,6 +3515,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chicken-almond-tagine",
@@ -3421,6 +3544,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-chickpea-egg-tagine",
@@ -3449,6 +3573,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-white-fish-tagine",
@@ -3478,6 +3603,7 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
   {
     id: "dish-lamb-quinoa-pilaf",
@@ -3506,5 +3632,6 @@ export const INTL2_DISHES: readonly Dish[] = [
     budgetTier: 3,
     enriched: false,
     cuisine: "international",
+    equipment: ["stove"],
   },
 ];

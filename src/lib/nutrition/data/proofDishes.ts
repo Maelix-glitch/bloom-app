@@ -47,6 +47,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     timeMinutes: 30,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "pressure_cooker"],
   },
   {
     id: "dish-jeera-rice",
@@ -72,6 +73,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     timeMinutes: 25,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove"],
   },
   {
     id: "dish-mint-coriander-chutney",
@@ -99,6 +101,8 @@ export const PROOF_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["mixer_grinder"],
+    noCook: true,
   },
   {
     id: "dish-cucumber-raita",
@@ -125,6 +129,7 @@ export const PROOF_DISHES: readonly Dish[] = [
     timeMinutes: 10,
     budgetTier: 1,
     enriched: false,
+    equipment: ["stove", "fridge"],
   },
   {
     id: "dish-aloo-gobi",
@@ -160,5 +165,6 @@ export const PROOF_DISHES: readonly Dish[] = [
     timeMinutes: 35,
     budgetTier: 2,
     enriched: false,
+    equipment: ["stove"],
   },
 ];

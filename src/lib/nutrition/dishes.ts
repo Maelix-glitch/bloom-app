@@ -91,27 +91,31 @@ export interface Dish {
    *  dishLibrary.test.ts); the field stays a free string so stored
    *  user dishes may name finer cuisines ("north-indian"). */
   cuisine?: string;
-  /** Kitchen equipment the method needs (spec §10.4). OPTIONAL and
-   *  mostly absent today: no shipped dish carries it yet — the
-   *  library-wide tagging pass is a named next step, and until a dish
-   *  is pinned, `dishPreparationNeeds` answers conservatively for it
-   *  rather than anyone guessing here. */
+  /** Kitchen equipment the method needs (spec §10.4). Every shipped
+   *  dish carries it, pinned by the §10.4 tagging pass: the value is
+   *  DERIVED from the dish's own method text by `deriveDishTags`
+   *  (./dishTags) and written by scripts/nutrition-dish-tags.mjs —
+   *  never hand-typed, and --check proves pin == derivation. The
+   *  field stays optional because a stored user dish may not carry
+   *  it; for those, `dishPreparationNeeds` answers conservatively. */
   equipment?: readonly EquipmentItem[];
   /** True when the dish needs no cooking at all. Same status as
-   *  `equipment`: pinned per dish by the §10.4 pass, absent until then. */
+   *  `equipment`: pinned per shipped dish by the §10.4 pass (present
+   *  only when true), absent on unpinned user dishes. */
   noCook?: boolean;
 }
 
 /** What making a dish actually takes, as the plan's kitchen gates
  *  (§10) need to know it: the equipment, whether it cooks at all, and
  *  how many method steps it runs. THE one function those gates read —
- *  so when the §10.4 data pass pins real values, the gates sharpen
- *  without changing shape.
+ *  the §10.4 pass pinned real values for every shipped dish (see
+ *  ./dishTags), so the gates judge the library by its methods.
  *
  *  The unpinned default is deliberately conservative, in the spec's
- *  stated direction: an untagged dish is assumed to need a stove and
- *  to need cooking, so a "no cooking" or "no stove" answer can
- *  exclude it — it can never be wrongly INCLUDED on a guess. */
+ *  stated direction: an untagged dish (a stored user dish) is assumed
+ *  to need a stove and to need cooking, so a "no cooking" or
+ *  "no stove" answer can exclude it — it can never be wrongly
+ *  INCLUDED on a guess. */
 export interface DishPreparationNeeds {
   readonly equipment: readonly EquipmentItem[];
   readonly noCook: boolean;
@@ -340,13 +344,17 @@ export function parseDish(raw: unknown): Dish | null {
   if (cuisine) dish.cuisine = cuisine;
   /* Preparation tags (§10.4) are optional the same way: preserved when
    *  a dish carries valid ones — equipment values must exist in the
-   *  vocabulary, noCook only when literally true — absent otherwise. */
+   *  vocabulary, noCook only when literally true — absent otherwise.
+   *  An explicitly EMPTY equipment list is a carried value, not an
+   *  absence: it is the §10.4 pin for a dish whose method needs no
+   *  equipment at all (dish-fruit-chaat), and dropping it would hand
+   *  the dish the conservative stove default on every round trip. */
   if (Array.isArray(raw["equipment"])) {
     const equipment = raw["equipment"].filter(
       (item): item is EquipmentItem =>
         typeof item === "string" && (EQUIPMENT_ITEMS as readonly string[]).includes(item),
     );
-    if (equipment.length > 0) dish.equipment = [...new Set(equipment)];
+    dish.equipment = [...new Set(equipment)];
   }
   if (raw["noCook"] === true) dish.noCook = true;
   return dish;
