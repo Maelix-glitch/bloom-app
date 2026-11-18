@@ -1,0 +1,2 @@
+src/hooks/useProgression.claim.test.tsx(82,33): error TS4111: Property 'p_goal_id' comes from an index signature, so it must be accessed with ['p_goal_id'].
+src/hooks/useProgression.claim.test.tsx(83,69): error TS4111: Property 'p_today' comes from an index signature, so it must be accessed with ['p_today'].
