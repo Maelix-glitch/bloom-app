@@ -577,6 +577,51 @@ button.pf-number:hover {
   color: var(--foreground);
 }
 
+/* ------------------------- account region nav --------------------------- */
+/* Plan A (senior audit slice C): the settings half of the page gets a local
+   nav under its "Account" heading. The chips are plain anchors — they move
+   the page, and read as navigation, not content. */
+.pf-account-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.pf-account-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bloom-touch-min);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--pf-line);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-support);
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-fast) var(--ease-out-expo),
+    border-color var(--motion-fast) var(--ease-out-expo);
+}
+.pf-account-chip:hover {
+  color: var(--foreground);
+  border-color: var(--pf-accent);
+}
+.pf-account-chip:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: 2px;
+  color: var(--foreground);
+}
+/* Jump targets land below the sticky tabs bar, never under it. The bar is
+   6px top padding + a tab (44px at the touch floor) + its 1px rule ≈ 51px;
+   at ≤1023px it sticks under the 60px phone brand bar (--bloom-header-h),
+   so the obstruction there is 60 + 51 = 111px. Each margin is the
+   obstruction + a 13px breath. */
+.pf-jump {
+  scroll-margin-top: 64px;
+}
+@media (max-width: 1023px) {
+  .pf-jump {
+    scroll-margin-top: 124px;
+  }
+}
+
 .pf-card {
   border-radius: var(--pf-radius);
   border: 1px solid var(--pf-line);

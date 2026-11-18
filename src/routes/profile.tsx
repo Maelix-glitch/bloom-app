@@ -121,6 +121,19 @@ const TABS: { id: ProfileTab; label: string }[] = [
   { id: "journey", label: "Journey" },
 ];
 
+/* Plan A (senior audit slice C): the settings half of the page, in its real
+   order, named as the sections name themselves. Each entry is a plain
+   anchor to the section's id — the sections carry .pf-jump, whose
+   scroll-margin clears the sticky tabs bar. Privacy has no section of its
+   own (it lives in Account & data's rows); security is Sessions & devices. */
+const ACCOUNT_NAV: { id: string; label: string }[] = [
+  { id: "pf-account-data", label: "Account & data" },
+  { id: "pf-membership", label: "Membership" },
+  { id: "pf-trainer", label: "Trainer & clinician" },
+  { id: "pf-household", label: "Household" },
+  { id: "pf-sessions", label: "Sessions & devices" },
+];
+
 function ProfilePage() {
   const { story: storyParam, view: viewParam } = Route.useSearch();
   const navigate = useNavigate();
@@ -938,15 +951,35 @@ function ProfilePage() {
                 </section>
               ) : null}
 
+              {/* account — the settings half of the page, set apart from
+                  the profile content above (Plan A, senior audit slice C):
+                  a region heading of its own plus a local nav, so the tabs
+                  no longer appear to govern settings they don't govern. */}
+              <section className="pf-section mt-10" aria-label="Account">
+                <div className="pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Settings</p>
+                    <h2 className="pf-title">Account</h2>
+                  </div>
+                </div>
+                <nav className="pf-account-nav" aria-label="Account sections">
+                  {ACCOUNT_NAV.map((item) => (
+                    <a key={item.id} className="pf-account-chip" href={`#${item.id}`}>
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </section>
+
               {/* account + data — settings rows */}
               <section
-               
-                className="pf-section mt-10"
+                id="pf-account-data"
+                className="pf-section pf-jump mt-10"
                 aria-label="Account and data"
               >
                 <div className="pf-section-head">
                   <div>
-                    <p className="pf-eyebrow">Settings</p>
+                    <p className="pf-eyebrow">Account</p>
                     <h2 className="pf-title">Account &amp; data</h2>
                   </div>
                 </div>
@@ -1008,23 +1041,31 @@ function ProfilePage() {
 
               {/* Money System: the membership card — plan, AI credits,
                   and the door to Premium. */}
-              <section className="pf-section mt-10" aria-label="Membership">
+              <section id="pf-membership" className="pf-section pf-jump mt-10" aria-label="Membership">
                 <PremiumSection />
               </section>
 
               {/* Trainer & Clinician Pro: referral code, the consent-gated
                   share summary, and trainer-proposed targets. */}
-              <section className="pf-section mt-10" aria-label="Trainer and clinician">
+              <section
+                id="pf-trainer"
+                className="pf-section pf-jump mt-10"
+                aria-label="Trainer and clinician"
+              >
                 <TrainerSection userId={userId} />
               </section>
               {/* One-Kitchen Family: the household the person cooks for,
                   and the dishes that suit everyone at the table. */}
-              <section className="pf-section mt-10" aria-label="Household">
+              <section id="pf-household" className="pf-section pf-jump mt-10" aria-label="Household">
                 <HouseholdSection />
               </section>
 
               {/* Launch compliance: where you're signed in, and how to end it. */}
-              <section className="pf-section mt-10" aria-label="Sessions and devices settings">
+              <section
+                id="pf-sessions"
+                className="pf-section pf-jump mt-10"
+                aria-label="Sessions and devices settings"
+              >
                 <div className="pf-section-head">
                   <div>
                     <p className="pf-eyebrow">Control</p>
