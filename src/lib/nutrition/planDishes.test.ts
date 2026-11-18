@@ -370,7 +370,13 @@ describe("plan · P8 single-dish composition", () => {
       }
     }
     expect(all.size).toBeGreaterThanOrEqual(12);
-    expect(bySlot.get("breakfast")!.size).toBeGreaterThanOrEqual(6);
+    /* P11 re-measured this pin: the guaranteed snack slot takes its
+       share of the day, so breakfast's split shrinks (27.8% → 25%)
+       and its standout fit (Tamago Sando) now leads 3 of the 7
+       unchained days — 5 distinct breakfasts, dinners still 6. The
+       mechanism is unchanged; the chained week below is where the
+       served-yesterday penalty does its work in the real app. */
+    expect(bySlot.get("breakfast")!.size).toBeGreaterThanOrEqual(5);
     expect(bySlot.get("dinner")!.size).toBeGreaterThanOrEqual(6);
   }, 60_000);
 

@@ -226,7 +226,10 @@ describe("plan · layered composition", () => {
        guarantees: protein, at least two vegetables, and a finishing
        layer carrying a measured fat. */
     const plan = gen(fullProfile("eggetarian"));
-    for (const meal of plan.meals) {
+    /* P11: the plan now always carries a snack meal; its layer shape
+       is the snacks pin below. This pin judges the MAIN meals, as its
+       title says. */
+    for (const meal of plan.meals.filter((m) => m.meal !== "snack")) {
       const layers = meal.suggestions.map((s) => s.layer);
       expect(layers).not.toContain("base");
       expect(layers).toContain("protein");
@@ -374,19 +377,26 @@ describe("plan · day floors", () => {
   /* History in brief: P3/P4 pinned this day reaching every ICMR gram
      floor with only the 8-group aim missed and named. Module 06
      (spec §4.4) changed the servable pool: the gram floors (vegetables,
-     fruit, milk/curd) are still all reached, but no cereal group can
-     be served (every classified cereal is a dry-basis record), so the
-     day spans 6 groups, and the capped servable pool lands under the
-     energy guide. Both remaining misses are named, with the true
-     figure — the honesty this suite exists to pin. */
+     fruit, milk/curd) were still all reached, but no cereal group
+     could be served (every classified cereal is a dry-basis record),
+     so the day spanned 6 groups and the capped servable pool landed
+     under the energy guide — both misses named with true figures.
+     P11's closing pass (top-ups on food-composed days too) closed
+     both: the day now spans 8 groups and lands in band. */
   it("the owner's day reaches the ICMR gram floors; the two remaining misses are named", () => {
     const plan = gen(ownerProfile(), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
       day: "2026-11-15",
     });
+    /* P11 closed the two misses this pin used to name: the closing
+       top-up pass now runs on food-composed days too, so the day
+       spans all 8 food groups and lands at 3,206 kcal / 230 g
+       protein — inside both bands. The only note left is the
+       day-structure note (the plan adds a snack beyond the stated
+       3 meals). The title keeps its history; the misses are gone,
+       and if they return, this exact-notes pin fails again. */
     expect(plan.notes).toEqual([
-      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
-      "Today's suggestions reach about 2,787 kcal — below your ~3,300 kcal guide. The portion caps bind before the target does.",
+      "Your Assessment lists 3 meals a day; this plan adds a snack, so the day's food spreads across one more sitting.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -397,7 +407,7 @@ describe("plan · day floors", () => {
       .reduce((sum, s) => sum + s.grams, 0);
     expect(fruit).toBeGreaterThanOrEqual(100);
     const groups = new Set(allSuggestions(plan).map((s) => groupOf(s)));
-    expect(groups.size).toBe(6);
+    expect(groups.size).toBe(8);
     const proteinSources = new Set(
       plan.meals.flatMap((m) =>
         m.suggestions.filter((s) => s.layer === "protein").map((s) => s.foodId),
@@ -552,8 +562,10 @@ describe("plan · the owner's day (worked example)", () => {
     /* Module 06: no meal carries a base layer — every classified
        cereal is a dry-basis record and is not served raw (the missing
        base is named in the day's composition, per the layers suite).
-       The protein depth and the two-vegetable rule are unchanged. */
-    for (const meal of plan.meals) {
+       The protein depth and the two-vegetable rule are unchanged.
+       P11: the layer counts judge the MAIN meals — the plan's snack
+       carries snack-layered items by design (the snacks pin). */
+    for (const meal of plan.meals.filter((m) => m.meal !== "snack")) {
       expect(meal.suggestions.some((s) => s.layer === "base")).toBe(false);
       expect(meal.suggestions.filter((s) => s.layer === "protein").length).toBeGreaterThanOrEqual(
         2,
@@ -619,11 +631,15 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
     }
   });
 
-  it("no main meal carries more than 8 suggestions", () => {
+  it("no main meal carries more than 10 suggestions", () => {
+    /* P11: a main meal is its layered items plus at most 3 closing
+       top-ups (MAX_TOPUPS_PER_MEAL, a designed cap) — measured max
+       across this week is 10. The pin still guards the pile: a meal
+       growing past the layered set + the capped closers fails. */
     for (const { plan } of week) {
       for (const meal of plan.meals) {
         if (meal.meal === "snack") continue;
-        expect(meal.suggestions.length).toBeLessThanOrEqual(8);
+        expect(meal.suggestions.length).toBeLessThanOrEqual(10);
       }
     }
   });
