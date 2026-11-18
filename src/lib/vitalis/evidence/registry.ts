@@ -335,6 +335,72 @@ export function traceability(
   };
 }
 
+/* -------------------------------------------------------------------------- */
+/* Coverage — what a surface may honestly say about each recommendation       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The evidence state of one recommendation, in the only three states a
+ * surface is allowed to present:
+ *
+ *   ready      — every claim behind it is product-ready (checked against
+ *                its source, licensed, in date). May be called
+ *                evidence-backed.
+ *   blocked    — every claim behind it is cited and checked, but a cited
+ *                source is not licensed for product use, so the backing
+ *                cannot ship yet.
+ *   unverified — anything else: a claim is a draft, or cites nothing.
+ *                The rule is recorded, and that is all a surface may say.
+ */
+export type RecommendationEvidenceState = "ready" | "blocked" | "unverified";
+
+export function recommendationEvidenceState(
+  registry: EvidenceRegistry,
+  recommendationId: string,
+  asOf: string = new Date().toISOString().slice(0, 10),
+): RecommendationEvidenceState {
+  const sourcesById = indexSources(registry.sources);
+  const claims = claimsForRecommendation(registry, recommendationId);
+  if (claims.length === 0) return "unverified";
+  if (claims.every((claim) => isProductReady(claim, sourcesById, asOf))) return "ready";
+  const everyClaimCited = claims.every((claim) => claim.sources.length > 0);
+  const someCitationBlocked = claims.some((claim) =>
+    claim.sources.some((link) => {
+      const source = sourcesById.get(link.sourceId);
+      return source !== undefined && !productUseAllowed(source.license);
+    }),
+  );
+  if (everyClaimCited && someCitationBlocked) return "blocked";
+  return "unverified";
+}
+
+export interface RecommendationEvidence {
+  readonly recommendationId: string;
+  readonly state: RecommendationEvidenceState;
+  /** The first claim's statement — the plain line a surface shows. */
+  readonly statement: string;
+  readonly claimIds: readonly string[];
+}
+
+/**
+ * One row per recommendation, in catalogue order, for surfaces that show
+ * which of the engine's rules are evidence-backed and which are still
+ * recorded drafts. Derived only from the registry: a surface renders
+ * these rows, it does not keep its own copy of the words or the states.
+ */
+export function evidenceCoverage(
+  registry: EvidenceRegistry,
+  asOf: string = new Date().toISOString().slice(0, 10),
+): RecommendationEvidence[] {
+  const claimsById = indexClaims(registry.claims);
+  return registry.recommendations.map((link) => ({
+    recommendationId: link.recommendationId,
+    state: recommendationEvidenceState(registry, link.recommendationId, asOf),
+    statement: claimsById.get(link.claimIds[0] ?? "")?.statement ?? "",
+    claimIds: link.claimIds,
+  }));
+}
+
 /**
  * Claims replaced by a newer version, and what replaced them.
  *
