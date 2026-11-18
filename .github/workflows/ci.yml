@@ -1,0 +1,83 @@
+# Bloom app — continuous integration.
+#
+# Mirrors the local sign-off gate exactly, so a red suite can never merge
+# unnoticed: the full test suite (in the same 10-chunk split the local
+# gate uses), a type check that fails on any error beyond a checked-in
+# baseline of known pre-existing errors, the worker build, and a smoke
+# check against the served build. A CI that checks different things than
+# a developer can run locally fails for reasons nobody can reproduce.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push supersedes an in-flight run on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only: nothing in this pipeline writes to the repository.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Test, typecheck, build, smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # Vitest workers and tsc are the memory-hungry steps; give V8 a
+      # sensible ceiling well inside the runner's RAM.
+      NODE_OPTIONS: --max-old-space-size=4096
+      WRANGLER_SEND_METRICS: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          # The repo declares no engines/.nvmrc; 24 is the version the
+          # local gates run on (and the repo's other workflow pins 24.x).
+          # Pinned to the major so a new Node release cannot turn a green
+          # branch red overnight.
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        # npm ci installs exactly the committed package-lock.json tree —
+        # a CI run that resolves a different tree is not verifying what
+        # will be deployed.
+        run: npm ci
+
+      - name: Full test suite
+        # The same 10-chunk split as the local gate (see the script for
+        # why a single run is not trusted). Excludes only the repo's own
+        # config exclusion: *.integration.test.ts, which needs a live
+        # PostgreSQL and runs via `npm run test:db`.
+        run: bash scripts/ci-test-chunks.sh
+
+      - name: Type check
+        # Baseline check: clean main carries 2 known pre-existing TS4111
+        # errors in src/hooks/useProgression.claim.test.tsx, recorded in
+        # .github/tsc-baseline.txt. CI fails on any error beyond that
+        # baseline — see scripts/ci-tsc-baseline.sh.
+        run: bash scripts/ci-tsc-baseline.sh
+
+      - name: Worker build
+        # NOT `npm run build:worker`: that first runs the prebuild:worker
+        # hook (scripts/fetch-fonts.mjs), which downloads Google Fonts
+        # CSS at build time — a rotated upstream font file has broken
+        # that step on fresh clones before, and CI must verify the app
+        # build, not a third-party font fetch. Calling vite directly
+        # skips npm lifecycle hooks; fix-worker-chunks.mjs is the same
+        # post-build step build:worker runs.
+        run: npx vite build && node scripts/fix-worker-chunks.mjs
+
+      - name: Smoke check
+        # Serves the built worker and expects 200 / 200 / 404 for
+        # / , /profile and a nonsense path. See scripts/ci-smoke.sh.
+        run: bash scripts/ci-smoke.sh
