@@ -129,103 +129,120 @@ export function PaywallSheet({
 
   return (
     <BloomSheet open={open} onClose={onClose} title="Bloom Premium" size="lg">
-      <div className="bill-stack">
-        <div>
-          <p className="bill-eyebrow">Bloom Premium</p>
-          <h3 className="bill-title">{headline.title}</h3>
-          <p className="bill-body">{headline.body}</p>
-        </div>
-
-        {entitlement ? (
-          <p className="bill-status" role="status">
-            You're on <strong>{PLANS[entitlement.tier].name}</strong>
-            {entitlement.tier === "free" ? (
-              <>
-                {" "}
-                — {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
-                this month.
-              </>
-            ) : (
-              <>
-                {" "}
-                — {entitlement.creditBalance} AI credits left this month
-                {formatDate(entitlement.currentPeriodEnd)
-                  ? ` · current period ends ${formatDate(entitlement.currentPeriodEnd)}`
-                  : ""}
-                .
-              </>
-            )}
-          </p>
-        ) : null}
-
-        <div>
-          <div className="bill-toggle" role="group" aria-label="Billing period">
-            <button type="button" aria-pressed={period === "monthly"} onClick={() => setPeriod("monthly")}>
-              Monthly
-            </button>
-            <button type="button" aria-pressed={period === "yearly"} onClick={() => setPeriod("yearly")}>
-              Yearly{yearlySaving > 0 ? <span className="bill-save"> · save {yearlySaving}%</span> : null}
-            </button>
+      {/* The shell's own scroll region, like every other sheet: the panel
+          itself is overflow-hidden with a 28px radius, so content rendered
+          flush inside it is clipped by the rounded corners and can never
+          scroll once it outgrows the panel cap. */}
+      <div className="bsheet-scroll">
+        <div className="bill-stack">
+          <div>
+            <p className="bill-eyebrow">Bloom Premium</p>
+            <h3 className="bill-title">{headline.title}</h3>
+            <p className="bill-body">{headline.body}</p>
           </div>
-        </div>
 
-        <div className="bill-cards">
-          {(["premium", "premium_plus"] as const).map((tier) => {
-            const plan = PLANS[tier];
-            const price = priceFor(tier, period, region);
-            const equivalent = monthlyEquivalent(tier, region);
-            const rank = TIER_ORDER.indexOf(tier);
-            const isMine = rank === myRank && entitlement !== null;
-            const included = rank < myRank;
-            return (
-              <article key={tier} className={`bill-card${tier === "premium" ? " bill-card--featured" : ""}`}>
-                <p className="bill-card-name">{plan.name}</p>
-                <p className="bill-price">
-                  {formatPrice(price)}
-                  <small> / {period === "monthly" ? "month" : "year"}</small>
-                </p>
-                {period === "yearly" ? (
-                  <p className="bill-equivalent">Works out to {formatPrice(equivalent)} a month.</p>
-                ) : null}
-                <ul className="bill-features">
-                  {FEATURE_BULLETS[tier].map((f) => (
-                    <li key={f}>
-                      <Check aria-hidden /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  type="button"
-                  className="bill-btn bill-btn-gold"
-                  disabled={isMine || included || busyTier !== null}
-                  onClick={() => void go(tier)}
+          {entitlement ? (
+            <p className="bill-status" role="status">
+              You're on <strong>{PLANS[entitlement.tier].name}</strong>
+              {entitlement.tier === "free" ? (
+                <>
+                  {" "}
+                  — {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
+                  this month.
+                </>
+              ) : (
+                <>
+                  {" "}
+                  — {entitlement.creditBalance} AI credits left this month
+                  {formatDate(entitlement.currentPeriodEnd)
+                    ? ` · current period ends ${formatDate(entitlement.currentPeriodEnd)}`
+                    : ""}
+                  .
+                </>
+              )}
+            </p>
+          ) : null}
+
+          <div className="bill-toggle-row">
+            <div className="bill-toggle" role="group" aria-label="Billing period">
+              <button
+                type="button"
+                aria-pressed={period === "monthly"}
+                onClick={() => setPeriod("monthly")}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                aria-pressed={period === "yearly"}
+                onClick={() => setPeriod("yearly")}
+              >
+                Yearly{yearlySaving > 0 ? <span className="bill-save"> · save {yearlySaving}%</span> : null}
+              </button>
+            </div>
+          </div>
+
+          <div className="bill-cards">
+            {(["premium", "premium_plus"] as const).map((tier) => {
+              const plan = PLANS[tier];
+              const price = priceFor(tier, period, region);
+              const equivalent = monthlyEquivalent(tier, region);
+              const rank = TIER_ORDER.indexOf(tier);
+              const isMine = rank === myRank && entitlement !== null;
+              const included = rank < myRank;
+              return (
+                <article
+                  key={tier}
+                  className={`bill-card${tier === "premium" ? " bill-card--featured" : ""}`}
                 >
-                  {isMine
-                    ? "Your current plan"
-                    : included
-                      ? "Included in your plan"
-                      : busyTier === tier
-                        ? "Opening checkout…"
-                        : tier === "premium"
-                          ? "Go Premium"
-                          : "Upgrade to Plus"}
-                </button>
-              </article>
-            );
-          })}
-        </div>
+                  <p className="bill-card-name">{plan.name}</p>
+                  <p className="bill-price">
+                    {formatPrice(price)}
+                    <small> / {period === "monthly" ? "month" : "year"}</small>
+                  </p>
+                  {period === "yearly" ? (
+                    <p className="bill-equivalent">Works out to {formatPrice(equivalent)} a month.</p>
+                  ) : null}
+                  <ul className="bill-features">
+                    {FEATURE_BULLETS[tier].map((f) => (
+                      <li key={f}>
+                        <Check aria-hidden /> {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    className="bill-btn bill-btn-gold"
+                    disabled={isMine || included || busyTier !== null}
+                    onClick={() => void go(tier)}
+                  >
+                    {isMine
+                      ? "Your current plan"
+                      : included
+                        ? "Included in your plan"
+                        : busyTier === tier
+                          ? "Opening checkout…"
+                          : tier === "premium"
+                            ? "Go Premium"
+                            : "Upgrade to Plus"}
+                  </button>
+                </article>
+              );
+            })}
+          </div>
 
-        {notice ? (
-          <p className="bill-note" role="status">
-            {notice}
+          {notice ? (
+            <p className="bill-note" role="status">
+              {notice}
+            </p>
+          ) : null}
+
+          <p className="bill-foot">
+            Free keeps working either way — trackers, habits, mood and your records are never held
+            hostage. AI credits refill monthly; when they run out, the AI pauses and everything
+            else carries on.
           </p>
-        ) : null}
-
-        <p className="bill-foot">
-          Free keeps working either way — trackers, habits, mood and your records are never held
-          hostage. AI credits refill monthly; when they run out, the AI pauses and everything
-          else carries on.
-        </p>
+        </div>
       </div>
     </BloomSheet>
   );
