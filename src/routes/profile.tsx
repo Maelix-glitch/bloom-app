@@ -58,6 +58,7 @@ import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
 import { RestoreSheet } from "@/components/profile/RestoreSheet";
 import { SessionsSection } from "@/components/profile/SessionsSection";
+import { PremiumSection } from "@/components/billing/PremiumSection";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
@@ -993,6 +994,12 @@ function ProfilePage() {
                     </button>
                   </div>
                 </section>
+              </section>
+
+              {/* Money System: the membership card — plan, AI credits,
+                  and the door to Premium. */}
+              <section className="pf-section mt-10" aria-label="Membership">
+                <PremiumSection />
               </section>
 
               {/* Launch compliance: where you're signed in, and how to end it. */}

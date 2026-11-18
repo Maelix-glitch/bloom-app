@@ -26,7 +26,8 @@ import {
   type CoachMode,
 } from "@/hooks/useCoachSystem";
 import { buildCoachContext } from "@/lib/coach/intelligence";
-import { answerLocally } from "@/lib/coach/engine";
+import { answerLocally, CoachUnavailable } from "@/lib/coach/engine";
+import { requestPaywall } from "@/lib/billing/paywall";
 import type { CoachMedia } from "@/lib/coach/edge";
 import { isVisionType, fileToCoachMedia } from "@/lib/coach/media";
 import type { CoachRecord } from "@/lib/coach/responder";
@@ -322,6 +323,17 @@ export function useCoachChat({
         console.error("Coach response failed:", error);
         if (!mountedRef.current || profileAtStart !== coach.profileId) return "answered";
         const userFacingError = coachErrorMessage(error);
+        /* Money System: a billing refusal is a state, not a failure —
+           open the Premium sheet, and never arm the retry (sending
+           the same words again cannot change a balance). */
+        const billingRefusal =
+          error instanceof CoachUnavailable &&
+          (error.reason === "insufficient_credits" || error.reason === "premium_required")
+            ? error.reason
+            : null;
+        if (billingRefusal) {
+          requestPaywall(billingRefusal === "premium_required" ? "coach_photo" : "coach_credits");
+        }
         const errorMessage: CoachMessage = {
           id: newMessageId("coach-error"),
           role: "coach",
@@ -340,6 +352,8 @@ export function useCoachChat({
         if (userFacingError === SESSION_NOTICE) {
           setSignInRequired(true);
           setNotice(SESSION_NOTICE);
+        } else if (billingRefusal) {
+          /* The paywall sheet is up; no retry is armed. */
         } else {
           lastFailedRef.current = {
             conversationId,

@@ -24,6 +24,9 @@ import {
   type HabitDraft,
   type HabitLog,
 } from "@/lib/home/habits";
+import { peekEntitlement } from "@/lib/billing/entitlement";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { habitLimitReached } from "@/lib/billing/plans";
 import { emptyDay, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { loadDays, loadGoals, saveDays, saveGoals } from "@/lib/trackers/store";
 import type { Goals } from "@/lib/trackers/core";
@@ -150,13 +153,33 @@ const ACTION: Record<string, Runner> = {
 
     /* The coach is idempotent too: asking for the same habit twice must not
        create a second row. Names are compared case- and space-insensitively. */
-    const existing = (await visibleHabits(profileId)).find(
+    const visible = await visibleHabits(profileId);
+    const existing = visible.find(
       (habit) => habitNameKey(habit.name) === habitNameKey(name),
     );
     if (existing) {
       return {
         ok: true,
         outcome: `“${existing.name}” is already one of your habits — I left it as it is.`,
+      };
+    }
+
+    /* Money System: the Free tier's habit ceiling applies to
+       Coach-created habits too. Only a KNOWN free entitlement
+       blocks; the outcome line is what the Coach relays. */
+    const entitlement = peekEntitlement();
+    if (
+      entitlement?.kind === "ready" &&
+      habitLimitReached(
+        entitlement.entitlement.tier,
+        visible.filter((h) => !h.archived).length,
+      )
+    ) {
+      requestPaywall("habits_limit");
+      return {
+        ok: false,
+        outcome:
+          "You're at the Free plan's limit of 5 habits, so I can't add another yet — archive one, or Premium makes habits unlimited. I've opened the Premium details for you.",
       };
     }
 

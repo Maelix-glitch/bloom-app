@@ -10,6 +10,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { watchAuth } from "@/lib/supabase";
+import { peekEntitlement } from "@/lib/billing/entitlement";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { habitLimitReached } from "@/lib/billing/plans";
 import { subscribeToHabitChanges } from "@/lib/home/habitRealtime";
 import {
   HABITS_CHANGED,
@@ -563,6 +566,26 @@ export function useHabits(): HabitsStore {
         (habit) => !habit.archived && habitNameKey(habit.name) === key,
       );
       if (existing) return;
+
+      /*
+       * Money System: the Free tier's habit ceiling, enforced here in
+       * the creation path. Only a KNOWN free entitlement blocks — an
+       * unread one never stands in the way of a free feature. (The
+       * local→cloud mirror is not a creation path and is untouched:
+       * habits made on this device always upload.)
+       */
+      const entitlement = peekEntitlement();
+      if (
+        entitlement?.kind === "ready" &&
+        habitLimitReached(
+          entitlement.entitlement.tier,
+          habitsRef.current.filter((h) => !h.archived).length,
+        )
+      ) {
+        setError("Free includes up to 5 habits — Premium removes the limit.");
+        requestPaywall("habits_limit");
+        return;
+      }
 
       if (auth === "signed-in" && profileId) {
         try {

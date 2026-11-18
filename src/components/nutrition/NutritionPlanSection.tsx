@@ -36,6 +36,9 @@ import { Check, ChevronDown, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAssessment } from "@/hooks/useAssessment";
+import { peekEntitlement } from "@/lib/billing/entitlement";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { canUse } from "@/lib/billing/plans";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
@@ -167,6 +170,22 @@ export function NutritionPlanSection() {
   } = usePlan();
   const assessment = useAssessment();
   const session = useSession();
+
+  /* Money System: composing an adaptive plan is a Premium feature.
+     A KNOWN free entitlement meets the paywall instead of a new
+     plan; an unread entitlement never blocks. The existing plan
+     stays fully usable either way — only composing is gated. */
+  const compose = () => {
+    const entitlement = peekEntitlement();
+    if (
+      entitlement?.kind === "ready" &&
+      !canUse(entitlement.entitlement.tier, "assessment_plan")
+    ) {
+      requestPaywall("nutrition_plan");
+      return;
+    }
+    generate();
+  };
   const nutrition = useNutrition();
   const body = useBodyProfile();
   const [logError, setLogError] = useState<string | null>(null);
@@ -312,7 +331,7 @@ export function NutritionPlanSection() {
           </p>
           <GoalChips currentGoal={chipGoal} onSelect={setGoal} />
           <div className="mt-4">
-            <Button type="button" onClick={() => generate()}>
+            <Button type="button" onClick={() => compose()}>
               Create my plan
             </Button>
           </div>
@@ -337,7 +356,7 @@ export function NutritionPlanSection() {
             to follow it now.
           </p>
           <div className="mt-4">
-            <Button type="button" onClick={() => generate()}>
+            <Button type="button" onClick={() => compose()}>
               Create today's plan
             </Button>
           </div>
@@ -787,7 +806,7 @@ export function NutritionPlanSection() {
         <button
           type="button"
           className="nut-btn nut-btn-ghost nut-btn-sm"
-          onClick={() => generate()}
+          onClick={() => compose()}
         >
           <RefreshCw className="size-3.5" aria-hidden /> Compose again
         </button>
