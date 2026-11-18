@@ -33,6 +33,7 @@ import { classifySafety } from "@/lib/vitalis/safety/classify";
 import {
   ACTIVITY_LABEL,
   BUDGET_LABEL,
+  CUISINE_PREFERENCE_LABEL,
   DIETARY_LABEL,
   GOAL_LABEL,
   RESTEDNESS_LABEL,
@@ -167,6 +168,11 @@ export function summaryOf(
   }
   if (a.foodBudget !== null) {
     nutritionLines.push(`Meal budget: ${BUDGET_LABEL[a.foodBudget].toLowerCase()}.`);
+  }
+  if (a.cuisinePreference !== null) {
+    nutritionLines.push(
+      `Cuisine preference: ${CUISINE_PREFERENCE_LABEL[a.cuisinePreference].toLowerCase()}.`,
+    );
   }
 
   const preferenceLines: string[] = [];

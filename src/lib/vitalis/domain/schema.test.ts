@@ -60,6 +60,22 @@ describe("health profile schema", () => {
     expect(bad.ok).toBe(false);
   });
 
+  it("carries a stated cuisine preference, and rejects one that does not exist", () => {
+    const stated = parseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, pattern: "omnivore", cuisinePreference: "south_indian" },
+    });
+    expect(stated.dietary.cuisinePreference).toBe("south_indian");
+    expect(parseHealthProfile(validProfile()).dietary.cuisinePreference).toBeNull();
+    /* "international" is deliberately not a preference (owner directive,
+       2026-11-18) — the schema must refuse it, not store it. */
+    const bad = safeParseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, cuisinePreference: "international" },
+    });
+    expect(bad.ok).toBe(false);
+  });
+
   it("rejects a measurement whose unit has the wrong dimension", () => {
     const result = safeParseHealthProfile({ ...validProfile(), weight: measurement(82, "cm") });
     expect(result.ok).toBe(false);

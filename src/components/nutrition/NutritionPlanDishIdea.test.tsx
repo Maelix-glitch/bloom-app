@@ -100,11 +100,19 @@ const COMPLETE = {
   unexplainedWeightChange: false,
 };
 
+/** P8: composing runs behind the loading sequence (~1.4 s) — tests
+ *  that need the plan await its arrival (the ready state's Compose
+ *  again button is the reveal signal). */
+async function createPlanAndAwait(): Promise<void> {
+  fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+  await screen.findByRole("button", { name: /Compose again/ }, { timeout: 4000 });
+}
+
 describe("NutritionPlanSection — dish-first meals (P5)", () => {
-  it("a main meal is its dishes: tapping the anchor unfolds its ingredients, and Log this dish writes the dish entry", () => {
+  it("a main meal is its dishes: tapping the anchor unfolds its ingredients, and Log this dish writes the dish entry", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
 
     const plan = readPlan();
     if (!plan) throw new Error("expected a stored plan");
@@ -131,15 +139,30 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     fireEvent.click(row);
 
     /* The raw things appear underneath: the first ingredient by its
-       display name, with its per-serving grams — the same figures
-       the dish detail sheet lists. */
+       display name, with its grams at the plan's servings — the
+       figures the dish detail sheet lists, scaled as the plan
+       serves them (P8: a plan dish's servings need not be 1).
+       The queries are scoped to the ingredients list itself: the
+       P8 composer may serve a dish whose own name carries the
+       ingredient's name (a cod dish, say), which made the unscoped
+       name query match the dish row as well. */
     expect(within(lunch).getByText("Ingredients · per serving")).toBeTruthy();
+    const ingredientsList = within(lunch)
+      .getByText("Ingredients · per serving")
+      .parentElement!.querySelector("ul");
+    if (!ingredientsList) throw new Error("ingredients list did not render");
     const firstLine = dish.lines[0]!;
     const firstFood = findUsdaReference(firstLine.foodId);
     if (!firstFood) throw new Error("ingredient not in the reference set");
-    expect(within(lunch).getByText(foodDisplayName(firstFood).en, { exact: false })).toBeTruthy();
     expect(
-      within(lunch).getByText(`${formatGrams(firstLine.grams / dish.servings)} g`),
+      within(ingredientsList as HTMLElement).getByText(foodDisplayName(firstFood).en, {
+        exact: false,
+      }),
+    ).toBeTruthy();
+    expect(
+      within(lunch).getByText(
+        `${formatGrams((firstLine.grams / dish.servings) * anchor.servings)} g`,
+      ),
     ).toBeTruthy();
 
     fireEvent.click(within(lunch).getByRole("button", { name: "Log this dish" }));
@@ -203,10 +226,10 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     expect(entries[0]!.provenance.kind).toBe("recipe");
   });
 
-  it("the snack card carries no dishes and no dish idea", () => {
+  it("the snack card carries no dishes and no dish idea", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
     const snack = screen.queryByLabelText("Snack plan");
     if (snack) {
       expect(within(snack).queryByText("Dish idea")).toBeNull();

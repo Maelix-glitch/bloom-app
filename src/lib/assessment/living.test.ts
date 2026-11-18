@@ -77,6 +77,26 @@ describe("parseDeltaChanges — the hard rule", () => {
     ).toEqual({ weightKg: 98 });
   });
 
+  it("drops a forged cuisine preference — it is Assessment-only, like pattern and budget", () => {
+    expect(parseDeltaChanges({ cuisinePreference: "south_indian" })).toBeNull();
+    expect(
+      parseDeltaChanges({ weightKg: 98, cuisinePreference: "north_indian" }),
+    ).toEqual({ weightKg: 98 });
+    /* And a stored delta carrying one never reaches the effective
+       answers: the fold only ever applies permitted changes. */
+    const forged = parseAssessmentDeltaValue({
+      version: 1,
+      updates: [
+        {
+          recordedAt: "2026-10-21T08:00:00.000Z",
+          changes: { cuisinePreference: "south_indian", weightKg: 97 },
+        },
+      ],
+    });
+    expect(forged?.updates).toHaveLength(1);
+    expect(forged?.updates[0]?.changes).toEqual({ weightKg: 97 });
+  });
+
   it("drops out-of-range and unknown values rather than clamping them", () => {
     expect(parseDeltaChanges({ weightKg: 900 })).toBeNull();
     expect(parseDeltaChanges({ sleepHoursTypical: 40 })).toBeNull();

@@ -11,7 +11,12 @@
  * future domain revision; nothing downstream pretends otherwise.
  */
 
-import type { ActivityLevel, DietaryPattern, VitalisGoal } from "@/lib/vitalis/domain/profile";
+import type {
+  ActivityLevel,
+  CuisinePreference,
+  DietaryPattern,
+  VitalisGoal,
+} from "@/lib/vitalis/domain/profile";
 import {
   BUDGET_TIER_1_MAX_PER_SERVING,
   BUDGET_TIER_2_MAX_PER_SERVING,
@@ -187,6 +192,27 @@ export const BUDGET_LABEL: Record<1 | 2 | 3, string> = {
   1: `Keep it light — about ₹${BUDGET_TIER_1_MAX_PER_SERVING} a serving`,
   2: `Moderate — about ₹${BUDGET_TIER_2_MAX_PER_SERVING} a serving`,
   3: "No limit",
+};
+
+/**
+ * The cuisine-preference question: North Indian or South Indian.
+ * There is deliberately no "international" answer — the preference
+ * is between the two Indian regions the dish library can actually
+ * tell apart (see lib/nutrition/regions.ts), and it shapes plan
+ * ranking only, never what a person may eat.
+ */
+export const CUISINE_PREFERENCE_OPTIONS: readonly { value: CuisinePreference; label: string }[] = [
+  { value: "north_indian", label: "North Indian" },
+  { value: "south_indian", label: "South Indian" },
+  { value: "both", label: "Both" },
+  { value: "no_preference", label: "No preference" },
+];
+
+export const CUISINE_PREFERENCE_LABEL: Record<CuisinePreference, string> = {
+  north_indian: "North Indian",
+  south_indian: "South Indian",
+  both: "Both North and South Indian",
+  no_preference: "No preference",
 };
 
 export const CONDITION_OPTIONS: readonly { value: string; label: string }[] =

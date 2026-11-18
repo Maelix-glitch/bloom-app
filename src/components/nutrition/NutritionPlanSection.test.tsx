@@ -7,7 +7,7 @@
  * with the food's provenance intact.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children, ...rest }: { to: string; children: React.ReactNode }) => (
@@ -75,6 +75,15 @@ function seedAssessment(answers: Partial<AssessmentState["answers"]>): void {
   setPref(ASSESSMENT_KEY, state);
 }
 
+/** P8: composing runs behind the loading sequence (~1.4 s) — the tap
+ *  shows the building steps first, then the plan. Tests that need the
+ *  plan await its arrival the way a person sees it: the ready state's
+ *  Compose again button is the reveal signal. */
+async function createPlanAndAwait(): Promise<void> {
+  fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+  await screen.findByRole("button", { name: /Compose again/ }, { timeout: 4000 });
+}
+
 const COMPLETE = {
   ageYears: 30,
   heightCm: 175,
@@ -111,11 +120,11 @@ describe("NutritionPlanSection", () => {
     expect(screen.queryByRole("button", { name: /Create my plan/ })).toBeNull();
   });
 
-  it("creates a plan on the explicit tap and logs a suggestion as a plan entry", () => {
+  it("creates a plan on the explicit tap and logs a suggestion as a plan entry", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
 
     /* The plan renders: the goal (title + the active goal chip), the
        day's targets, meal sections. The targets query names the header
@@ -154,10 +163,49 @@ describe("NutritionPlanSection", () => {
     expect(screen.getByText("Logged")).toBeTruthy();
   });
 
-  it("meal card headers show the composed sum of the listed dishes and foods, not the target split (P3, P5)", () => {
+  it("shows the building steps while a plan composes, then reveals the plan (P8)", () => {
+    vi.useFakeTimers();
+    try {
+      seedAssessment(COMPLETE);
+      render(<NutritionPlanSection />);
+      fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+
+      /* The loading state is up: the three honest steps, in order —
+         and no plan yet, because generation has not run. */
+      const steps = screen.getByRole("status", { name: "Building your plan" });
+      expect(within(steps).getByText("Reading your record")).toBeTruthy();
+      expect(within(steps).getByText("Choosing your dishes")).toBeTruthy();
+      expect(within(steps).getByText("Balancing your day")).toBeTruthy();
+      expect(screen.queryByText("Breakfast")).toBeNull();
+      expect(readPlan()).toBeNull();
+
+      /* The steps advance in order, one settling as the next starts. */
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      const items = within(steps).getAllByRole("listitem");
+      expect(items[0]!.getAttribute("data-state")).toBe("done");
+      expect(items[1]!.getAttribute("data-state")).toBe("active");
+      expect(items[2]!.getAttribute("data-state")).toBe("pending");
+      expect(readPlan()).toBeNull();
+
+      /* At the end of the sequence the loading state is gone and the
+         plan is revealed — stored, and rendered. */
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.queryByRole("status", { name: "Building your plan" })).toBeNull();
+      expect(screen.getByText("Breakfast")).toBeTruthy();
+      expect(readPlan()).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("meal card headers show the composed sum of the listed dishes and foods, not the target split (P3, P5)", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
 
     const plan = readPlan();
     if (!plan) throw new Error("expected a stored plan");
@@ -289,10 +337,10 @@ describe("NutritionPlanSection", () => {
 });
 
 describe("NutritionPlanSection — food photographs (P3-R)", () => {
-  it("shows the real photograph on exactly the photographed suggestions", () => {
+  it("shows the real photograph on exactly the photographed suggestions", async () => {
     seedAssessment(COMPLETE);
     const { container } = render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
 
     const plan = readPlan();
     if (!plan) throw new Error("expected a stored plan");
@@ -318,10 +366,10 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
 });
 
 describe("NutritionPlanSection — N-UI plan panel", () => {
-  it("goal chips write the goal the engine reads — the plan goes stale, never silently rebuilt", () => {
+  it("goal chips write the goal the engine reads — the plan goes stale, never silently rebuilt", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
     expect(screen.queryByText(/Since this plan was made/)).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Maintain my weight" }));
@@ -335,10 +383,10 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
     ).toBe("true");
   });
 
-  it("'Log this meal' bulk-logs the meal's dishes and foods once, then reads as logged", () => {
+  it("'Log this meal' bulk-logs the meal's dishes and foods once, then reads as logged", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await createPlanAndAwait();
 
     const plan = readPlan();
     if (!plan) throw new Error("plan was not created");

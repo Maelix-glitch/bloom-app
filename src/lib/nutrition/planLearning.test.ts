@@ -25,7 +25,7 @@ import { quantity } from "@/lib/vitalis/domain/units";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
-import type { Dish } from "./dishes";
+import { dishNutrients, type Dish } from "./dishes";
 import { generatePlan, type DailyPlan } from "./plan";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 import type { Food, LogEntry } from "./types";
@@ -117,6 +117,17 @@ const dayTotals = (plan: DailyPlan) => ({
 });
 const anchorIds = (plan: DailyPlan) =>
   plan.meals.map((m) => m.dishes.find((d) => d.role === "anchor")?.dishId ?? null);
+/** Mean protein density (g per 100 kcal, per serving) of the plan's
+ *  anchor dishes — the "denser anchors" the shortfall lean promises,
+ *  measured on the dishes' own library panels. */
+const meanAnchorDensity = (plan: DailyPlan) => {
+  const anchors = plan.meals.flatMap((m) => m.dishes).filter((d) => d.role === "anchor");
+  const densities = anchors.map((d) => {
+    const per = dishNutrients(findDish(d.dishId)!).nutrients;
+    return per.kcal > 0 ? (per.proteinG / per.kcal) * 100 : 0;
+  });
+  return densities.reduce((a, b) => a + b, 0) / densities.length;
+};
 const topUps = (plan: DailyPlan) =>
   plan.meals.flatMap((m) => m.suggestions.filter((s) => s.layer === "topup"));
 
@@ -133,7 +144,7 @@ describe("no usable log — the P5 plan, unchanged", () => {
   const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: OWNER_TARGETS });
 
   it("no recentLog field at all", () => {
-    expect(base.methodVersion).toBe(7);
+    expect(base.methodVersion).toBe(8);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
@@ -193,9 +204,16 @@ describe("a protein-shortfall log", () => {
 
   it("leans the composition measurably: denser anchors, protein met", () => {
     expect(anchorIds(biased)).not.toEqual(anchorIds(base));
-    expect(Math.round(dayTotals(base).proteinG)).toBe(201);
-    expect(Math.round(dayTotals(biased).proteinG)).toBe(220);
+    /* P8: the un-leaned composer already lands this day (220 g of
+       the 220 g guide — the P7 composer's 201 g shortfall is the
+       defect P8 fixed), so the lean is measured in WHAT is served,
+       not in a rescued total: denser anchor dishes, and more
+       protein on the day, still inside the 110% ceiling. */
+    expect(Math.round(dayTotals(base).proteinG)).toBe(220);
+    expect(Math.round(dayTotals(biased).proteinG)).toBe(235);
     expect(dayTotals(biased).proteinG).toBeGreaterThan(dayTotals(base).proteinG);
+    expect(dayTotals(biased).proteinG).toBeLessThanOrEqual(1.1 * 220);
+    expect(meanAnchorDensity(biased)).toBeGreaterThan(meanAnchorDensity(base));
   });
 });
 

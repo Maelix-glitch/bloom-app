@@ -56,15 +56,34 @@
  * that closes the day's remaining protein/energy gap, and the layered
  * food composition above survives as the per-meal fallback for a slot
  * no suitable dish can fill — never an empty meal while food fits.
+ *
+ * One dish per meal (P8, the quality rebuild): the P5 stack — an
+ * anchor plus a base plus a side, each at exactly one serving — put
+ * plates on the plan that no kitchen serves (a Japanese egg sandwich
+ * beside an Amritsari kulcha) and left the day's totals to whatever
+ * the stack happened to sum to, because nothing could trim a dish.
+ * The v8 composer serves ONE dish per main meal, portion-scaled in
+ * quarter-serving steps, chosen by an explicit fit cost against the
+ * meal's own share of the day (protein error weighted heaviest —
+ * protein-first), and then repairs the day's dish scales greedily
+ * until the day lands inside its bands (energy ±5%, protein
+ * 95–110%) or no honest step remains. The Assessment's cuisine
+ * preference joins as a ranking bonus only — it can break a tie
+ * toward the person's region, never exclude a dish. And before the
+ * plan is returned, every served dish is re-verified against the
+ * person's pattern: the pool already guarantees it, and the plan
+ * now proves it, meal by meal.
  */
 
 import { dishPassesModes, type ModeId } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
 import {
+  CUISINE_PREFERENCES,
   profileHeightCm,
   profileTargetWeightKg,
   profileWeightKg,
   type ActivityLevel,
+  type CuisinePreference,
   type DietaryPattern,
   type HealthProfile,
   type Sex,
@@ -87,6 +106,7 @@ import {
 } from "./dishes";
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
+import { dishRegion, type DishRegion } from "./regions";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
 import { MICRO_RICH_SHARE, planLearningFor, type PlanLearning } from "./planAdaptation";
 import { adjustedTargets } from "./targetAdjustment";
@@ -127,6 +147,13 @@ export interface PlanInputsSnapshot {
   rateKgPerWeek: number;
   mealsPerDay: number | null;
   dietaryPattern: DietaryPattern | null;
+  /** The Assessment's cuisine preference (P8): a ranking taste, not
+   *  a target-bearing input — recorded so a change names itself in
+   *  the staleness check, and deliberately NOT part of the inputs
+   *  fingerprint (like the recent log, it shapes selection only;
+   *  adding it to the fingerprint would refuse every plan stored
+   *  before the question existed). Absent on pre-P8 snapshots. */
+  cuisinePreference?: CuisinePreference | null;
   safetyClassification: SafetyClass;
   targetsKcal: number;
   targetsProteinG: number;
@@ -150,17 +177,21 @@ export interface PlanSuggestion {
   layer?: SuggestionLayer;
 }
 
-/** The role a dish plays in a dish-composed meal (P5): the anchor is
- *  the meal's protein centrepiece; a base (rice/bread) and a side join
- *  it where the meal's energy share calls for them. */
+/** The role a dish plays in a dish-composed meal. Since P8 the one
+ *  dish of a main meal is always the `anchor` — it IS the meal. The
+ *  `base` and `side` roles remain in the type because plans stored
+ *  by the P5–P7 composers carry them and must keep parsing and
+ *  rendering exactly as they were written. */
 export type PlanDishRole = "anchor" | "base" | "side";
 
 /**
- * One dish placed in a plan meal (P5). The dish is served whole — one
- * serving of the library recipe — and its nutrients are the dish's own
- * computed `dishNutrients` at generation time, under the recipe
- * provenance: the plan's numbers ARE the library's numbers for the
- * same dish, by construction.
+ * One dish placed in a plan meal. Its nutrients are the dish's own
+ * computed `dishNutrients` at generation time, scaled by `servings`,
+ * under the recipe provenance: the plan's numbers ARE the library's
+ * numbers for the same dish, by construction. The P5 composer served
+ * exactly 1 serving and stacked up to three dishes per meal; the P8
+ * composer serves ONE dish per main meal and scales its servings
+ * (0.5–2.0 in quarter steps) to fit the meal's share of the day.
  */
 export interface PlanDish {
   dishId: string;
@@ -169,7 +200,8 @@ export interface PlanDish {
   /** The dish's Hindi name, as the library states it. */
   hindi: string;
   role: PlanDishRole;
-  /** Servings of the dish in this meal. The P5 composer serves 1. */
+  /** Servings of the dish in this meal (P8: a quarter-step scale in
+   *  [0.5, 2.0]; P5–P7 plans always carry 1). */
   servings: number;
   /** `dishNutrients(dish)` for `servings` servings, computed at
    *  generation time — never stored on the dish itself. */
@@ -241,8 +273,18 @@ export interface DailyPlan {
  *  micronutrient the logged week runs short of are preferred — all
  *  still selection bias inside the same rules, targets moved only by
  *  a user-confirmed expenditure adjustment (see targetAdjustment),
- *  and with no usable log the output is the P6 composer's exactly). */
-export const PLAN_METHOD_VERSION = 7;
+ *  and with no usable log the output is the P6 composer's exactly),
+ *  8 = the quality rebuild (P8): ONE dish per main meal, portion-
+ *  scaled in quarter-serving steps to fit the meal's share, chosen
+ *  by a protein-weighted fit cost with the P6/P7 learning signals
+ *  and the Assessment's cuisine preference as ranking terms, then a
+ *  day-level scale repair that lands the day inside its bands
+ *  (energy ±5%, protein 95–110%) whenever the pool allows, and a
+ *  hard pattern post-condition re-verified before the plan is
+ *  returned. The P5 stack (anchor + base + side at one serving
+ *  each) is retired: it composed plates no kitchen serves and left
+ *  the day's totals unrepairable. */
+export const PLAN_METHOD_VERSION = 8;
 
 export type PlanRefusal =
   | {
@@ -283,6 +325,7 @@ export function planInputsSnapshotOf(
     rateKgPerWeek: Math.round(profile.rateKgPerWeek * 100) / 100,
     mealsPerDay: profile.dietary.mealsPerDay,
     dietaryPattern: profile.dietary.pattern,
+    cuisinePreference: profile.dietary.cuisinePreference,
     safetyClassification: safety.classification,
     targetsKcal: targets.kcal,
     targetsProteinG: targets.proteinG,
@@ -331,6 +374,7 @@ const CHANGED_LABELS: readonly (readonly [keyof PlanInputsSnapshot, string])[] =
   ["rateKgPerWeek", "your pace"],
   ["mealsPerDay", "your meals per day"],
   ["dietaryPattern", "your eating pattern"],
+  ["cuisinePreference", "your cuisine preference"],
   ["safetyClassification", "your safety answers"],
 ];
 
@@ -1825,40 +1869,29 @@ const ANCHOR_AIM_MAIN_G = 25;
 const ANCHOR_AIM_BREAKFAST_G = 20;
 
 /**
- * The anchor band for a slot: the dishes at or above the slot's
- * protein aim when the pool offers any; otherwise the pool's top band
- * (≥70% of its best) — the density-band discipline the P3 protein
- * closing uses, so a thin pool still anchors on its strongest dish
- * rather than a random one.
+ * The categories that can BE a main meal (P8): a main dish, and the
+ * one-pot rice dishes (biryani, pulao, khichdi, fried rice) that are
+ * complete meals in their own right. Bread, sides, raita, chutneys,
+ * snacks, drinks, desserts and shakes never headline a main meal —
+ * under P5 they joined as a meal's second and third dishes, which
+ * is exactly the stacking P8 retires.
  */
-function anchorBand(cands: readonly DishCandidate[], aim: number): DishCandidate[] {
-  if (cands.length === 0) return [];
-  const best = cands.reduce((max, c) => Math.max(max, c.nutrients.proteinG), 0);
-  const threshold = best >= aim ? Math.max(aim, 0.7 * best) : 0.7 * best;
-  return cands.filter((c) => c.nutrients.proteinG >= threshold);
-}
+const MAIN_MEAL_CATEGORIES: readonly DishCategory[] = ["main", "rice"];
 
-/** The slot's candidates in pick order: for breakfast, the breakfast
- *  category leads and mains are the overflow; lunch and dinner draw
- *  on mains alone. */
-function anchorCandidates(
+/** The slot's candidates: dishes not already served today that can
+ *  carry a main meal. Breakfast also draws on the breakfast category
+ *  (which the fit cost mildly prefers there); lunch and dinner draw
+ *  on mains and one-pot rice dishes. */
+function slotCandidates(
   ordered: readonly DishCandidate[],
   meal: Meal,
   used: ReadonlySet<string>,
 ): DishCandidate[] {
-  const free = ordered.filter((c) => !used.has(c.dish.id));
-  if (meal === "breakfast") {
-    const breakfast = free.filter((c) => c.dish.category === "breakfast");
-    const mains = free.filter((c) => c.dish.category === "main");
-    return [...breakfast, ...mains];
-  }
-  return free.filter((c) => c.dish.category === "main");
-}
-
-function prevDayKey(day: string): string {
-  const d = new Date(`${day}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
+  return ordered.filter((c) => {
+    if (used.has(c.dish.id)) return false;
+    if (MAIN_MEAL_CATEGORIES.includes(c.dish.category)) return true;
+    return meal === "breakfast" && c.dish.category === "breakfast";
+  });
 }
 
 /** Within the anchor band, dishes carrying at least this much protein
@@ -1898,66 +1931,271 @@ function orderByDishBias(list: readonly DishCandidate[], bias?: DishBias): DishC
   return [...list].sort((a, b) => dishBiasGroup(bias, a.dish.id) - dishBiasGroup(bias, b.dish.id));
 }
 
-/** The ordered preference list for a slot's anchor: the protein band,
- *  density-preferred inside it, in the day's rotation order. Shared by
- *  the composer and the pure pick so the two can never drift.
- *  Protein-first (P6, the log-adaptive bias): the same list, ordered
- *  by protein density — the band and its protein aim are never traded
- *  away; density only orders, now strictly, and the sort is stable so
- *  equal densities keep the day's rotation order. The P7 dish bias
- *  partitions the result last (see orderByDishBias), on both the
- *  composer's and the pure pick's path, so the two stay in step. */
-function anchorPickList(
-  cands: readonly DishCandidate[],
-  aim: number,
-  proteinFirst = false,
-  bias?: DishBias,
-): DishCandidate[] {
-  const band = anchorBand(cands, aim);
-  const pool = band.length > 0 ? band : [...cands];
-  const dense = pool.filter(
-    (c) =>
-      c.nutrients.kcal > 0 && (c.nutrients.proteinG / c.nutrients.kcal) * 100 >= ANCHOR_DENSITY_AIM,
-  );
-  const list = dense.length > 0 ? dense : pool;
-  if (!proteinFirst) return orderByDishBias(list, bias);
-  const density = (c: DishCandidate) =>
-    c.nutrients.kcal > 0 ? c.nutrients.proteinG / c.nutrients.kcal : 0;
-  return orderByDishBias(
-    [...list].sort((a, b) => density(b) - density(a)),
-    bias,
-  );
+/* --------------------- P8 single-dish selection ----------------------- */
+
+/** The servings a plan may scale one dish to: quarter steps from
+ *  half a serving to two. A person cooks a dish and eats a portion
+ *  of it; the scale is how the plan sizes that portion to the meal
+ *  it has to be. */
+const DISH_SCALE_STEPS: readonly number[] = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const DISH_SCALE_MIN = 0.5;
+const DISH_SCALE_MAX = 2;
+const DISH_SCALE_STEP = 0.25;
+
+/** The ranking terms a pick is judged under (P8): the P6 protein-
+ *  first lean, the P7 dish bias, the Assessment's cuisine
+ *  preference, and the previous plan's served dishes — every one
+ *  a ranking term, none a filter. */
+interface DishPickOpts {
+  proteinFirst: boolean;
+  bias?: DishBias | undefined;
+  /** The preferred region, or null when the preference does not
+   *  name one (both / no preference / unanswered). */
+  cuisine: DishRegion | null;
+  /** The dishes the previous day's plan served, by meal slot:
+   *  a dish the person was served yesterday in the same slot
+   *  carries the served-yesterday penalty in today's pick (see
+   *  SERVED_YESTERDAY_PENALTY). Absent when there is no earlier
+   *  stored plan to learn from. */
+  servedYesterday?: ReadonlyMap<Meal, ReadonlySet<string>> | undefined;
 }
 
 /**
- * The anchor a slot would get on a given day with nothing else known
- * — the pure pick. Today's composer sits yesterday's pure pick out
- * (when the band offers an alternative), so an anchor never repeats
- * on consecutive days by construction, not by luck. The simulation
- * runs under the same protein-first bias as today's composition, so
- * the sit-out names the anchor yesterday's biased composer would
- * actually have served.
+ * The served-yesterday penalty: what it costs a dish to be picked
+ * for the same slot on the day after the previous plan served it
+ * there. A pure fit argmin crowns a standout fit every day — at
+ * the owner fixture's 1,279 kcal lunch share one dish (632 kcal /
+ * 44 g a serving, doubled) beats the runner-up by ~0.45 cost, far
+ * outside the 0.2 near-tie band, so rotation and jitter never get
+ * a say and lunch is the same soup all week. The penalty is sized
+ * against that measured lock: margin (~0.45) + band (0.2) + ~0.1
+ * of headroom, so the day after it is served the standout sits
+ * outside the band and the credible cluster behind it (16 dishes
+ * within +0.65 of its fit at that share) rotates through the slot.
+ * It stays a finite cost, never an exclusion: a slot whose pool
+ * offers nothing else still serves yesterday's dish, and the day
+ * guard — which re-picks under these same costs, then repairs
+ * scales against the day bands, not the pick costs — can still
+ * land the day with it when nothing else lands. Two days later
+ * the dish is unpenalised again: the mechanism buys alternation
+ * and rotation, not banishment.
  */
-function pureAnchorId(
-  data: DishPoolData,
-  day: string,
-  meal: Meal,
-  proteinFirst = false,
-  bias?: DishBias,
-): string | null {
-  const aim = meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
-  const cands = anchorCandidates(orderDishesForDay(data.candidates, day), meal, new Set());
-  return anchorPickList(cands, aim, proteinFirst, bias)[0]?.dish.id ?? null;
+const SERVED_YESTERDAY_PENALTY = 0.75;
+
+/** The P7 bias groups as pick costs, in the groups' own order:
+ *  favoured, micro-rich, unmarked, deprioritised. */
+const BIAS_GROUP_COST: Readonly<Record<number, number>> = {
+  0: -0.08,
+  1: -0.05,
+  2: 0,
+  3: 0.12,
+};
+
+/** The day's variety jitter: a small deterministic per-(day, dish)
+ *  cost in [0, 0.12), seeded from the day and the dish id. The fit
+ *  cost's tie classes are wide (nutrients are rounded to 0.1), so
+ *  without a daily reshuffle the same best-fitting dish would win
+ *  every day of the week; the jitter is far smaller than a real fit
+ *  difference, so it only ever re-orders near-equals. It is a pure
+ *  function of the day and the dish — the pure-pick simulation
+ *  reproduces it exactly, which is what makes the sit-out honest. */
+function dishDayJitter(day: string, dishId: string): number {
+  let h = 2166136261;
+  const s = `${day}|${dishId}`;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ((h >>> 0) / 4294967296) * 0.12;
 }
 
-function toPlanDish(candidate: DishCandidate, role: PlanDishRole): PlanDish {
+/**
+ * How well a nutrient panel fits a meal's share of the day: the
+ * relative energy error, plus the protein error weighted double,
+ * plus a further weight on protein SHORTFALL — landing under the
+ * protein share is the failure worth paying to avoid (energy can
+ * be fed back at the margin; a thin dish cannot be made denser).
+ * Shared by the composer, the swap re-fit and the day repair, so
+ * the three can never judge a fit differently.
+ */
+/**
+ * The scale penalty: what it costs a pick to serve a dish at other
+ * than its natural serving. Convex on purpose — a quarter-step is a
+ * nudge (0.04), a half-step is a choice (0.13), and the bounds are
+ * genuinely expensive (×2 = 0.40, ×0.5 = 0.20): when a dish only
+ * fits at an extreme scale, a better-fitting dish at a natural
+ * scale should win, and the extreme survives only where the pool
+ * offers nothing closer (a 1,279 kcal lunch share, where every
+ * viable dish is a large one doubled). Shared by the composer and
+ * the swap re-fit so both judge a portion the same way.
+ */
+function scalePenalty(servings: number): number {
+  const d = Math.abs(servings - 1);
+  return 0.1 * d + 0.3 * d * d;
+}
+
+function mealFitCost(nutrients: Nutrients, split: MealSplit): number {
+  const kcalErr = Math.abs(nutrients.kcal - split.kcal) / split.kcal;
+  const proteinErr = Math.abs(nutrients.proteinG - split.proteinG) / split.proteinG;
+  const shortfall =
+    nutrients.proteinG < split.proteinG
+      ? (split.proteinG - nutrients.proteinG) / split.proteinG
+      : 0;
+  return kcalErr + 2 * proteinErr + shortfall;
+}
+
+/** A candidate's nutrient panel at every scale step, computed once
+ *  per candidate object — the pick search and its day simulations
+ *  re-judge the same panels hundreds of times per plan. */
+const scaledPanelCache = new WeakMap<DishCandidate, Nutrients[]>();
+
+function scaledPanels(candidate: DishCandidate): Nutrients[] {
+  let panels = scaledPanelCache.get(candidate);
+  if (!panels) {
+    panels = DISH_SCALE_STEPS.map((s) => scaleNutrientPanel(candidate.nutrients, s));
+    scaledPanelCache.set(candidate, panels);
+  }
+  return panels;
+}
+
+/** The full pick cost for one dish at one scale in one slot: the
+ *  fit, plus the ranking terms — a preference for the natural
+ *  serving, the protein-anchor bonus, the learning biases, the
+ *  cuisine bonus, and the breakfast-category fit. Every constant is
+ *  a derivation in the P2 spirit: each bonus is smaller than the
+ *  fit difference a quarter-step of scale usually makes, so a
+ *  ranking term can break a near-tie but never crown a dish that
+ *  fits badly. The one deliberate exception is the served-yesterday
+ *  penalty, which is sized to break a standout fit's lock on a
+ *  slot (see SERVED_YESTERDAY_PENALTY) — it re-orders a week, it
+ *  still cannot crown a dish that fits badly, because the day
+ *  guard judges the composed day, not the pick. */
+function dishPickCost(
+  candidate: DishCandidate,
+  scaled: Nutrients,
+  servings: number,
+  split: MealSplit,
+  opts: DishPickOpts,
+  day: string,
+): number {
+  let cost = mealFitCost(scaled, split);
+  cost += dishDayJitter(day, candidate.dish.id);
+  cost += scalePenalty(servings);
+  /* Protein-first: the anchor criterion — the dish carries the
+   *  slot's protein aim in a single serving (the protein waves'
+   *  own bar), or is dense enough that scaling it buys protein
+   *  cheaply in energy. */
+  const aim = split.meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
+  const density =
+    candidate.nutrients.kcal > 0
+      ? (candidate.nutrients.proteinG / candidate.nutrients.kcal) * 100
+      : 0;
+  if (candidate.nutrients.proteinG >= aim || density >= ANCHOR_DENSITY_AIM) cost -= 0.1;
+  /* P6: after a protein-shortfall log, density itself is worth
+   *  paying fit for — bounded, so it stays a lean, not a takeover. */
+  if (opts.proteinFirst) cost -= Math.min(density, 15) * 0.01;
+  /* P7: the learning bias, as costs in the groups' own order. */
+  cost += BIAS_GROUP_COST[dishBiasGroup(opts.bias, candidate.dish.id)] ?? 0;
+  /* The cuisine preference: a tie-breaker toward the person's
+   *  region — never a filter, never worth a bad fit. */
+  if (opts.cuisine !== null && dishRegion(candidate.dish) === opts.cuisine) cost -= 0.08;
+  /* Served yesterday: the previous plan served this dish in this
+   *  slot, so today it pays the penalty — the week's variety term,
+   *  and the only one that reads the stored plan. */
+  if (opts.servedYesterday?.get(split.meal)?.has(candidate.dish.id)) {
+    cost += SERVED_YESTERDAY_PENALTY;
+  }
+  /* A breakfast dish at breakfast fits the meal's idiom. */
+  if (split.meal === "breakfast" && candidate.dish.category === "breakfast") cost -= 0.04;
+  return cost;
+}
+
+interface DishPick {
+  candidate: DishCandidate;
+  servings: number;
+  cost: number;
+}
+
+/** The best (dish, scale) for a slot over the given candidates, in
+ *  the order given — ties keep the earlier candidate, which is how
+ *  the day's rotation order (already bias-partitioned) breaks them
+ *  deterministically. */
+/** The near-tie band: dishes whose best pick cost sits within this
+ *  distance of the slot's optimum are, for planning purposes,
+ *  equally good fits — the day's rotation chooses among them. The
+ *  width is a measured compromise: at 0.5 the rotation admitted
+ *  dishes half a cost away from the slot's best fit, and individual
+ *  meals went lopsided (a breakfast dish at 150% of its share, a
+ *  lunch dish covering 54%) even though the day guard landed the
+ *  totals — a plan is read meal by meal, not as a daily sum. At
+ *  0.2 the band holds genuine near-equals only; variety comes from
+ *  the rotation and the day jitter among them, and a standout fit
+ *  (the 1,279 kcal lunch share, where one dish beats the runner-up
+ *  by ~0.45) leads as often as it deserves to. */
+const DISH_PICK_BAND = 0.2;
+
+/**
+ * Pick a slot's dish: every candidate is judged at its best scale
+ * by the pick cost; the dishes within the near-tie band of the
+ * optimum are equally worthy, and the FIRST of them in the given
+ * order wins — the caller passes the day's rotation order (already
+ * bias-partitioned), so the week's plans vary among equals instead
+ * of crowning the same global optimum every day. A dish returns
+ * tomorrow only when it stands alone at the top of the band — and
+ * a standout that stands alone by more than the band (a fit the
+ * rotation cannot reach) is answered by the served-yesterday
+ * penalty in the pick cost, which reads the dish the previous
+ * plan ACTUALLY served from the stored plan. (The P5–P7 composers
+ * simulated yesterday's pick to sit it out; under a cost-argmin
+ * that simulation names the unconstrained winner, never the dish
+ * actually served, so the sit-out missed exactly the repeats it
+ * existed to prevent. The penalty needs no simulation: the stored
+ * plan is the record of what was served.)
+ */
+function bestDishPick(
+  cands: readonly DishCandidate[],
+  split: MealSplit,
+  opts: DishPickOpts,
+  day: string,
+  band: number = DISH_PICK_BAND,
+): DishPick | null {
+  let bestCost = Infinity;
+  const scored: DishPick[] = [];
+  for (const candidate of cands) {
+    const panels = scaledPanels(candidate);
+    let pick: DishPick | null = null;
+    for (let i = 0; i < DISH_SCALE_STEPS.length; i++) {
+      const servings = DISH_SCALE_STEPS[i]!;
+      const cost = dishPickCost(candidate, panels[i]!, servings, split, opts, day);
+      if (pick === null || cost < pick.cost - 1e-9) pick = { candidate, servings, cost };
+    }
+    if (pick !== null) {
+      scored.push(pick);
+      if (pick.cost < bestCost) bestCost = pick.cost;
+    }
+  }
+  if (scored.length === 0) return null;
+  const inBand = scored.filter((p) => p.cost <= bestCost + band);
+  /* The cuisine preference orders the band: when the person's
+   *  region has a dish among the near-equals, it leads — the
+   *  preference picks among equals, it never widens the band or
+   *  overrules the fit. (As a pure cost term it was inert here:
+   *  band membership, not cost order, decides the pick.) */
+  if (opts.cuisine !== null) {
+    const regional = inBand.find((p) => dishRegion(p.candidate.dish) === opts.cuisine);
+    if (regional) return regional;
+  }
+  return inBand[0] ?? scored[0]!;
+}
+
+function toPlanDish(candidate: DishCandidate, role: PlanDishRole, servings = 1): PlanDish {
   return {
     dishId: candidate.dish.id,
     name: candidate.dish.name.en,
     hindi: candidate.dish.name.hindi,
     role,
-    servings: 1,
-    nutrients: candidate.nutrients,
+    servings,
+    nutrients: scaleNutrientPanel(candidate.nutrients, servings),
     provenance: dishProvenance(candidate.dish),
   };
 }
@@ -1978,11 +2216,19 @@ function scaleNutrientPanel(perServing: Nutrients, servings: number): Nutrients 
  * plan with ONE dish in ONE meal replaced by another library dish —
  * the replacement the person confirmed on Vitalis's card. The new
  * PlanDish is built exactly as the composer builds one (computed
- * `dishNutrients`, recipe provenance, the old dish's role and
- * servings); targets, meal shares, inputs and the plan's fingerprint
- * are untouched — a swap changes what is on the plate, never what the
- * day aims for. Null when the meal or the from-dish is not in the
- * plan, or the replacement is already in that meal.
+ * `dishNutrients`, recipe provenance); targets, meal shares, inputs
+ * and the plan's fingerprint are untouched — a swap changes what is
+ * on the plate, never what the day aims for. Null when the meal or
+ * the from-dish is not in the plan, or the replacement is already in
+ * that meal.
+ *
+ * Servings (P8): in a single-dish meal — the shape the current
+ * composer writes — the replacement is RE-FIT to the meal's share:
+ * the scale whose computed panel best fits the meal's kcal/protein
+ * share, judged by the composer's own fit cost. In a legacy stacked
+ * meal (P5–P7 plans still in storage) the replacement keeps the old
+ * dish's role and servings exactly: a swap on an old plan changes
+ * the dish, never the plan's structure.
  */
 export function planWithDishSwapped(
   plan: DailyPlan,
@@ -1997,13 +2243,27 @@ export function planWithDishSwapped(
   if (dishIndex < 0) return null;
   if (target.dishes.some((d) => d.dishId === dish.id)) return null;
   const old = target.dishes[dishIndex]!;
+  const perServing = dishNutrients(dish).nutrients;
+  let servings = old.servings;
+  if (target.dishes.length === 1) {
+    const split: MealSplit = { meal: target.meal, kcal: target.kcal, proteinG: target.proteinG };
+    let bestCost = Infinity;
+    for (const step of DISH_SCALE_STEPS) {
+      const cost =
+        mealFitCost(scaleNutrientPanel(perServing, step), split) + scalePenalty(step);
+      if (cost < bestCost - 1e-9) {
+        bestCost = cost;
+        servings = step;
+      }
+    }
+  }
   const replacement: PlanDish = {
     dishId: dish.id,
     name: dish.name.en,
     hindi: dish.name.hindi,
     role: old.role,
-    servings: old.servings,
-    nutrients: scaleNutrientPanel(dishNutrients(dish).nutrients, old.servings),
+    servings,
+    nutrients: scaleNutrientPanel(perServing, servings),
     provenance: dishProvenance(dish),
   };
   const dishes = target.dishes.map((d, i) => (i === dishIndex ? replacement : d));
@@ -2011,80 +2271,249 @@ export function planWithDishSwapped(
   return { ...plan, meals };
 }
 
-/** A main meal's energy-share thresholds for joining dishes —
- *  derivations, in the P2 spirit: the anchor alone carries a meal
- *  whose share it nearly meets; below ~75% of the share a base joins,
- *  and below ~85% a side joins. A plate is anchor + base + side at
- *  most — three dishes, never a buffet. */
-const DISH_BASE_JOIN_SHARE = 0.75;
-const DISH_SIDE_JOIN_SHARE = 0.85;
-const BASE_CATEGORIES: readonly DishCategory[] = ["rice", "bread"];
-const SIDE_CATEGORIES: readonly DishCategory[] = ["side", "raita", "chutney"];
-
 /**
- * Compose one main meal from dishes: the protein anchor first, then
- * a rice/bread base and a side where the meal's energy share calls
- * for them. Null when no suitable anchor exists for the slot — the
- * caller falls back to the layered food composition for that meal,
- * so a slot the dish pool cannot fill is composed, never empty.
+ * Compose one main meal (P8): ONE dish, portion-scaled to the
+ * meal's share of the day. Null when no dish can carry the slot —
+ * the caller falls back to the layered food composition for that
+ * meal, so a slot the dish pool cannot fill is composed, never
+ * empty.
  */
-function composeDishMeal(
-  data: DishPoolData,
+function composeSingleDishMeal(
   ordered: readonly DishCandidate[],
   used: Set<string>,
   day: string,
   split: MealSplit,
-  proteinFirst = false,
-  bias?: DishBias,
-): PlanDish[] | null {
-  const aim = split.meal === "breakfast" ? ANCHOR_AIM_BREAKFAST_G : ANCHOR_AIM_MAIN_G;
-  const cands = anchorCandidates(ordered, split.meal, used);
-  let pickList = anchorPickList(cands, aim, proteinFirst, bias);
-  /* Yesterday's anchor sits this slot out when an alternative exists. */
-  const yesterday = pureAnchorId(data, prevDayKey(day), split.meal, proteinFirst, bias);
-  if (yesterday !== null && pickList.length > 1) {
-    const without = pickList.filter((c) => c.dish.id !== yesterday);
-    if (without.length > 0) pickList = without;
+  opts: DishPickOpts,
+): PlanDish | null {
+  const cands = slotCandidates(ordered, split.meal, used);
+  if (cands.length === 0) return null;
+  const pick = bestDishPick(cands, split, opts, day);
+  if (!pick) return null;
+  used.add(pick.candidate.dish.id);
+  return toPlanDish(pick.candidate, "anchor", pick.servings);
+}
+
+/** The day bands the repair aims at: energy within ±5% of the
+ *  guide (the band the day's notes judge at), protein within
+ *  [95%, 110%] — met, not merely approached, and never bought at
+ *  any overshoot. */
+const DAY_KCAL_BAND = 0.05;
+const DAY_PROTEIN_MIN = 0.95;
+const DAY_PROTEIN_MAX = 1.1;
+
+/** The repair's judgement of a day: how far its totals sit outside
+ *  the bands, protein weighted heaviest — the same priorities as
+ *  the meal fit, at day scale. Zero exactly when the day is in
+ *  band on both. */
+function dayBandCost(kcal: number, proteinG: number, targets: NutritionTargets): number {
+  const kcalErr = Math.max(0, Math.abs(kcal - targets.kcal) / targets.kcal - DAY_KCAL_BAND);
+  let proteinErr = 0;
+  if (proteinG < DAY_PROTEIN_MIN * targets.proteinG) {
+    proteinErr = (DAY_PROTEIN_MIN * targets.proteinG - proteinG) / targets.proteinG;
+  } else if (proteinG > DAY_PROTEIN_MAX * targets.proteinG) {
+    proteinErr = (proteinG - DAY_PROTEIN_MAX * targets.proteinG) / targets.proteinG;
   }
-  const anchor = pickList[0];
-  if (!anchor) return null;
-  const dishes: PlanDish[] = [toPlanDish(anchor, "anchor")];
-  used.add(anchor.dish.id);
-  let kcal = anchor.nutrients.kcal;
-  if (kcal < DISH_BASE_JOIN_SHARE * split.kcal) {
-    /* Bases join in the meal's own idiom — breads lead at breakfast,
-       rice at lunch and dinner — and a protein-carrying base (≥10 g)
-       is preferred where the pool offers one: the base is a third of
-       the plate, and its protein is not free. */
-    const bases = ordered.filter(
-      (c) => BASE_CATEGORIES.includes(c.dish.category) && !used.has(c.dish.id),
+  return kcalErr + 2.5 * proteinErr;
+}
+
+/**
+ * The meal-sanity term of the day cost: a single-dish meal whose
+ * dish lands far outside its share — under 60% (a garnish, not a
+ * meal) or over 130% (two bowls of soup where a plate belongs) —
+ * is a plan a person would not eat, however well the day sums.
+ * Weighted below the band terms (0.5 per unit of excess, against
+ * 1×/2.5× for the bands themselves): landing the day still wins
+ * when the pool truly offers no other way, but the repair and the
+ * guard prefer a better-proportioned dish over an extreme scale
+ * whenever one exists. Zero for food-composed meals — the layered
+ * composer has its own portion discipline.
+ */
+function mealSanityCost(meals: readonly PlanMeal[]): number {
+  let cost = 0;
+  for (const meal of meals) {
+    if (meal.dishes.length !== 1 || meal.kcal <= 0) continue;
+    const cov = meal.dishes[0]!.nutrients.kcal / meal.kcal;
+    if (cov > 1.3) cost += 0.5 * (cov - 1.3);
+    else if (cov < 0.6) cost += 0.5 * (0.6 - cov);
+  }
+  return cost;
+}
+
+/** The repair/guard objective: the day's band cost plus the
+ *  meal-sanity term, judged on the composed meals as they stand. */
+function dayCost(meals: readonly PlanMeal[], targets: NutritionTargets): number {
+  return (
+    dayBandCost(dayKcalOf(meals), dayProteinOf(meals), targets) + mealSanityCost(meals)
+  );
+}
+
+/**
+ * The day-total repair (P8): after every main meal has its dish,
+ * walk the dish scales in quarter steps — the move that most
+ * reduces the day's band cost — until the day sits inside its
+ * bands or no move improves it. Moves are single steps, plus PAIRS
+ * (one dish down a step, another up a step) when no single step
+ * improves: scaling preserves each dish's protein density, so a
+ * day that is energy-heavy but protein-tight has no improving
+ * single step — every step down breaks the protein floor, every
+ * step up worsens the energy — while a down/up pair trades energy
+ * for protein across dishes and lands it. Only dish scales move:
+ * food-composed meals and snack suggestions are constants the
+ * repair reads, never levers it pulls. What the pool cannot land,
+ * the repair leaves at its closest, and the plan's notes name the
+ * true figure — the P3 honesty, unchanged.
+ */
+function repairDishScales(
+  meals: PlanMeal[],
+  candidateById: ReadonlyMap<string, DishCandidate>,
+  targets: NutritionTargets,
+): void {
+  const dishMeals = meals.filter((m) => m.dishes.length === 1);
+  if (dishMeals.length === 0) return;
+  interface Move {
+    changes: { meal: PlanMeal; servings: number }[];
+    cost: number;
+  }
+  const measureWith = (changes: Move["changes"]): number => {
+    const saved = changes.map(({ meal }) => {
+      const planDish = meal.dishes[0]!;
+      return { planDish, nutrients: planDish.nutrients, servings: planDish.servings };
+    });
+    for (const { meal, servings } of changes) {
+      const planDish = meal.dishes[0]!;
+      const candidate = candidateById.get(planDish.dishId)!;
+      planDish.servings = servings;
+      planDish.nutrients = scaleNutrientPanel(candidate.nutrients, servings);
+    }
+    const next = dayCost(meals, targets);
+    for (const s of saved) {
+      s.planDish.nutrients = s.nutrients;
+      s.planDish.servings = s.servings;
+    }
+    return next;
+  };
+  const stepped = (meal: PlanMeal, delta: number): number | null => {
+    const servings = Math.round((meal.dishes[0]!.servings + delta) * 100) / 100;
+    return servings < DISH_SCALE_MIN || servings > DISH_SCALE_MAX ? null : servings;
+  };
+  let cost = dayCost(meals, targets);
+  for (let round = 0; round < 60 && cost > 0; round++) {
+    let best: Move | null = null;
+    const consider = (changes: Move["changes"]) => {
+      const next = measureWith(changes);
+      if (next < cost - 1e-9 && (best === null || next < best.cost)) {
+        best = { changes, cost: next };
+      }
+    };
+    for (const meal of dishMeals) {
+      if (!candidateById.has(meal.dishes[0]!.dishId)) continue;
+      for (const delta of [-DISH_SCALE_STEP, DISH_SCALE_STEP]) {
+        const servings = stepped(meal, delta);
+        if (servings !== null) consider([{ meal, servings }]);
+      }
+    }
+    if (best === null && dishMeals.length > 1) {
+      for (const down of dishMeals) {
+        for (const up of dishMeals) {
+          if (down === up) continue;
+          const downServings = stepped(down, -DISH_SCALE_STEP);
+          const upServings = stepped(up, DISH_SCALE_STEP);
+          if (downServings === null || upServings === null) continue;
+          consider([
+            { meal: down, servings: downServings },
+            { meal: up, servings: upServings },
+          ]);
+        }
+      }
+    }
+    if (best === null) break;
+    const move: Move = best;
+    for (const { meal, servings } of move.changes) {
+      const planDish = meal.dishes[0]!;
+      const candidate = candidateById.get(planDish.dishId)!;
+      planDish.servings = servings;
+      planDish.nutrients = scaleNutrientPanel(candidate.nutrients, servings);
+    }
+    cost = move.cost;
+  }
+}
+
+/**
+ * The day guard (P8): repair the scales; while the day still sits
+ * outside its bands and attempts remain, re-pick the worst-fitting
+ * dish meal at its slot's optimum (band 0 — no rotation), then
+ * repair again. This is what lets the pick band stay generous:
+ * variety is tried first, and the day's totals — the numbers the
+ * person actually judges the plan by — are enforced after, at the
+ * level where they are defined. Bounded at four attempts; a day
+ * the pool genuinely cannot land stays at its closest, and the
+ * plan's notes name the true figure.
+ */
+function enforceDayBands(
+  meals: PlanMeal[],
+  ordered: readonly DishCandidate[],
+  candidateById: ReadonlyMap<string, DishCandidate>,
+  targets: NutritionTargets,
+  day: string,
+  opts: DishPickOpts,
+): void {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    repairDishScales(meals, candidateById, targets);
+    if (dayCost(meals, targets) <= 0) return;
+    let worst: PlanMeal | null = null;
+    let worstCost = -Infinity;
+    for (const meal of meals) {
+      if (meal.dishes.length !== 1) continue;
+      const cost = mealFitCost(meal.dishes[0]!.nutrients, {
+        meal: meal.meal,
+        kcal: meal.kcal,
+        proteinG: meal.proteinG,
+      });
+      if (cost > worstCost) {
+        worstCost = cost;
+        worst = meal;
+      }
+    }
+    if (worst === null) return;
+    const target: PlanMeal = worst;
+    const split: MealSplit = { meal: target.meal, kcal: target.kcal, proteinG: target.proteinG };
+    const usedElsewhere = new Set(
+      meals.filter((m) => m !== target).flatMap((m) => m.dishes.map((d) => d.dishId)),
     );
-    const lead: DishCategory = split.meal === "breakfast" ? "bread" : "rice";
-    const base =
-      bases.find((c) => c.dish.category === lead && c.nutrients.proteinG >= 10) ??
-      bases.find((c) => c.nutrients.proteinG >= 10) ??
-      bases.find((c) => c.dish.category === lead) ??
-      bases[0];
-    if (base) {
-      dishes.push(toPlanDish(base, "base"));
-      used.add(base.dish.id);
-      kcal += base.nutrients.kcal;
+    const currentId = target.dishes[0]!.dishId;
+    const cands = slotCandidates(ordered, target.meal, usedElsewhere).filter(
+      (c) => c.dish.id !== currentId,
+    );
+    const pick = bestDishPick(cands, split, opts, day, 0);
+    if (!pick) return;
+    target.dishes = [toPlanDish(pick.candidate, "anchor", pick.servings)];
+  }
+}
+
+/**
+ * The hard pattern post-condition (P8): every dish the plan serves
+ * must suit the person's dietary pattern — re-verified here, on the
+ * composed meals, against `dishPatterns` itself, not trusted from
+ * the pool's construction. Returns the names of any meals whose
+ * dish violates the pattern; the caller replaces those meals with
+ * the layered food composition. With the pool's own gate upstream
+ * this cannot fire — it exists so that "cannot fire" is a checked
+ * property of every generated plan, not an assumption.
+ */
+function patternViolations(
+  meals: readonly PlanMeal[],
+  dishById: ReadonlyMap<string, Dish>,
+  pattern: PlanPattern | null,
+): string[] {
+  if (pattern === null) return [];
+  const bad: string[] = [];
+  for (const meal of meals) {
+    for (const planDish of meal.dishes) {
+      const dish = dishById.get(planDish.dishId);
+      if (!dish || !dishPatterns(dish).includes(pattern)) bad.push(meal.meal);
     }
   }
-  if (kcal < DISH_SIDE_JOIN_SHARE * split.kcal) {
-    /* A protein-carrying side (≥8 g — a soya or paneer side, not a
-       chutney) is preferred where the pool offers one. */
-    const sides = ordered.filter(
-      (c) => SIDE_CATEGORIES.includes(c.dish.category) && !used.has(c.dish.id),
-    );
-    const side = sides.find((c) => c.nutrients.proteinG >= 8) ?? sides[0];
-    if (side) {
-      dishes.push(toPlanDish(side, "side"));
-      used.add(side.dish.id);
-      kcal += side.nutrients.kcal;
-    }
-  }
-  return dishes;
+  return bad;
 }
 
 /* ------------------------------ P5 top-ups -------------------------------- */
@@ -2467,6 +2896,37 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const dishOrdered = dishData
     ? orderByDishBias(orderDishesForDay(dishData.candidates, input.day), dishBias)
     : [];
+  /* P8: the dishes the previous plan served, by slot — read from
+   *  the stored plan whenever it names an earlier day (the same
+   *  guard the learning pass puts on its stored-plan signals).
+   *  A same-day stored plan is this day's own earlier draft, not
+   *  yesterday: re-composing today must reproduce today's plan,
+   *  so the penalty stays silent for it. */
+  const servedYesterday = new Map<Meal, Set<string>>();
+  if (input.storedPlan && input.storedPlan.day < input.day) {
+    for (const meal of input.storedPlan.meals) {
+      if (meal.dishes.length === 0) continue;
+      let slot = servedYesterday.get(meal.meal);
+      if (!slot) {
+        slot = new Set<string>();
+        servedYesterday.set(meal.meal, slot);
+      }
+      for (const served of meal.dishes) slot.add(served.dishId);
+    }
+  }
+  /* P8: the pick's ranking terms — the P6 lean, the P7 bias, the
+   *  cuisine preference when it names a region, and the previous
+   *  plan's served dishes. */
+  const pickOpts: DishPickOpts = {
+    proteinFirst: adaptation?.proteinShortfall ?? false,
+    bias: dishBias,
+    cuisine:
+      profile.dietary.cuisinePreference === "north_indian" ||
+      profile.dietary.cuisinePreference === "south_indian"
+        ? profile.dietary.cuisinePreference
+        : null,
+    ...(servedYesterday.size > 0 ? { servedYesterday } : {}),
+  };
   const usedDishIds = new Set<string>();
   const meals: PlanMeal[] = splits.map((split) => {
     if (split.meal === "snack") {
@@ -2481,21 +2941,13 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       };
     }
     if (dishData) {
-      const dishes = composeDishMeal(
-        dishData,
-        dishOrdered,
-        usedDishIds,
-        input.day,
-        split,
-        adaptation?.proteinShortfall ?? false,
-        dishBias,
-      );
-      if (dishes) {
+      const dish = composeSingleDishMeal(dishOrdered, usedDishIds, input.day, split, pickOpts);
+      if (dish) {
         return {
           meal: split.meal,
           kcal: split.kcal,
           proteinG: split.proteinG,
-          dishes,
+          dishes: [dish],
           suggestions: [],
           note: null,
         };
@@ -2522,6 +2974,42 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   });
   const byId = new Map(pool.map((f) => [f.id, f]));
   const dishById = dishData?.byId ?? new Map<string, Dish>();
+  /* P8: the hard pattern post-condition — every served dish is
+   *  re-verified against the person's pattern on the composed
+   *  meals themselves. A violating meal (impossible by the pool's
+   *  construction) is recomposed from foods rather than served. */
+  for (const badMeal of patternViolations(meals, dishById, planPatternOf(profile.dietary.pattern))) {
+    const idx = meals.findIndex((m) => m.meal === badMeal);
+    const split = splits.find((s) => s.meal === badMeal);
+    if (idx < 0 || !split) continue;
+    const { suggestions, missingLayers } = composeMainMeal(ctx, split, {
+      vegTargetG,
+      fruitAtBreakfast: !hasSnack,
+      isBreakfast: split.meal === "breakfast",
+    });
+    meals[idx] = {
+      meal: split.meal,
+      kcal: split.kcal,
+      proteinG: split.proteinG,
+      dishes: [],
+      suggestions,
+      note:
+        suggestions.length === 0
+          ? EMPTY_MEAL_NOTE
+          : missingLayers.length > 0
+            ? `Part of this meal is missing: ${missingLayers.join(", ")} — no food with known values fits yet. Add a food you eat, then regenerate the plan.`
+            : null,
+    };
+  }
+  /* P8: the day guard — dish scales are repaired toward the day's
+   *  bands, and a day still outside them re-picks its worst meal
+   *  at the slot's optimum (see enforceDayBands). */
+  const candidateById = dishData
+    ? new Map(dishData.candidates.map((c) => [c.dish.id, c]))
+    : new Map<string, DishCandidate>();
+  if (dishData) {
+    enforceDayBands(meals, dishOrdered, candidateById, targets, input.day, pickOpts);
+  }
   /* P3 maturity: cap the plate, close the protein gap toward the
      target, reconcile the day's energy back to its guide, then hold
      the dominance line — in that order, so each pass judges the plan
@@ -2534,6 +3022,14 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   closeProteinGap(ctx, meals, byId, targets.proteinG);
   if (meals.some((m) => m.dishes.length > 0)) {
     addTopUps(ctx, meals, targets, adaptation?.energyOvershoot ?? false);
+  }
+  /* P8: the guard runs once more after the top-up rounds. The
+   *  protein top-ups spend up to the +5% energy cap by design, and
+   *  before them the dish scales often cannot move (protein sits at
+   *  its floor); with the top-ups in, the scales can re-centre the
+   *  day inside its bands instead of riding the cap's rounding. */
+  if (dishData) {
+    enforceDayBands(meals, dishOrdered, candidateById, targets, input.day, pickOpts);
   }
   reconcileEnergy(meals, byId, targets, dishById);
   applyProteinDominanceCap(meals, byId, targets.proteinG);
@@ -2669,6 +3165,20 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   const dietaryPattern =
     raw["dietaryPattern"] === null ? null : oneOf(raw["dietaryPattern"], PATTERNS);
   if (raw["dietaryPattern"] !== null && dietaryPattern === null) return null;
+  /* The cuisine preference (P8): absent on snapshots stored before
+     the question existed — read as unanswered; present-but-invalid
+     is a tamper, like any other malformed field. */
+  const cuisinePreference =
+    raw["cuisinePreference"] === undefined || raw["cuisinePreference"] === null
+      ? null
+      : oneOf(raw["cuisinePreference"], CUISINE_PREFERENCES);
+  if (
+    raw["cuisinePreference"] !== undefined &&
+    raw["cuisinePreference"] !== null &&
+    cuisinePreference === null
+  ) {
+    return null;
+  }
   const safetyClassification = oneOf(raw["safetyClassification"], SAFETY_CLASSES);
   if (!safetyClassification) return null;
   const targetsKcal = numIn(raw["targetsKcal"], 0.01, 10000);
@@ -2685,6 +3195,7 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
     rateKgPerWeek,
     mealsPerDay: mealsPerDay === null ? null : Math.round(mealsPerDay),
     dietaryPattern,
+    cuisinePreference,
     safetyClassification,
     targetsKcal,
     targetsProteinG,

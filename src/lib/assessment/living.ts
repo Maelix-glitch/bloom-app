@@ -65,9 +65,9 @@ export const ASSESSMENT_DELTA_CAP = 50;
 
 /**
  * The ONLY fields a delta update may change. Deliberately absent:
- * `dietaryPattern` and `foodBudget` (Assessment-only, see header),
- * and every safety answer — a change there deserves the full flow,
- * not a one-line edit.
+ * `dietaryPattern`, `foodBudget` and `cuisinePreference`
+ * (Assessment-only, see header), and every safety answer — a change
+ * there deserves the full flow, not a one-line edit.
  */
 export interface AssessmentDeltaChanges {
   weightKg?: number;

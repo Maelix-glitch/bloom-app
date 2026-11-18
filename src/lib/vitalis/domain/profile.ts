@@ -43,6 +43,22 @@ export const DIETARY_PATTERNS = [
 
 export type DietaryPattern = (typeof DIETARY_PATTERNS)[number];
 
+/**
+ * The cuisine preference the Assessment asks (and only the Assessment
+ * asks): whether the person's cooking leans North Indian or South
+ * Indian. `both` and `no_preference` are real answers, distinct from
+ * each other and from unanswered (null) — all three leave plan
+ * composition unshaped; only the two regional answers rank dishes.
+ */
+export const CUISINE_PREFERENCES = [
+  "north_indian",
+  "south_indian",
+  "both",
+  "no_preference",
+] as const;
+
+export type CuisinePreference = (typeof CUISINE_PREFERENCES)[number];
+
 export interface DietaryProfile {
   /** Null means not answered yet. */
   readonly pattern: DietaryPattern | null;
@@ -54,6 +70,9 @@ export interface DietaryProfile {
   /** Meal-suggestion budget tier (1–3, the dish heuristic's bands in
    *  `lib/nutrition/dishes.ts`); null means no preference stated. */
   readonly budgetTier: 1 | 2 | 3 | null;
+  /** The North/South Indian cuisine preference; null means the
+   *  Assessment question was never answered. */
+  readonly cuisinePreference: CuisinePreference | null;
 }
 
 export interface HealthConstraints {
@@ -94,6 +113,7 @@ export const EMPTY_DIETARY: DietaryProfile = {
   cuisines: [],
   mealsPerDay: null,
   budgetTier: null,
+  cuisinePreference: null,
 };
 
 export const EMPTY_CONSTRAINTS: HealthConstraints = {

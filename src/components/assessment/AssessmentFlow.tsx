@@ -25,6 +25,7 @@ import {
   ACTIVITY_OPTIONS,
   BUDGET_OPTIONS,
   CONDITION_OPTIONS,
+  CUISINE_PREFERENCE_OPTIONS,
   DIETARY_OPTIONS,
   GOAL_OPTIONS,
   MEALS_OPTIONS,
@@ -661,6 +662,19 @@ export function AssessmentFlow({
                     value={draft.mealsPerDay}
                     onSelect={(mealsPerDay) => patch({ mealsPerDay })}
                   />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>North Indian or South Indian food?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Cuisine preference"
+                    options={CUISINE_PREFERENCE_OPTIONS}
+                    value={draft.cuisinePreference}
+                    onSelect={(cuisinePreference) => patch({ cuisinePreference })}
+                  />
+                  <p className="text-[length:var(--text-support)] text-muted-foreground">
+                    Bloom leans your plan toward the cooking you prefer. It never rules
+                    anything out.
+                  </p>
                 </div>
               </SheetItem>
             ) : null}
