@@ -24,6 +24,7 @@ import {
   type DailyPlan,
   type PlanMeal,
 } from "./plan";
+import { isRawBasisFood } from "./preparation";
 import { dishRegion } from "./regions";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 import type { Food, Nutrients } from "./types";
@@ -471,14 +472,25 @@ describe("plan · P8 single-dish composition", () => {
       expect(meal.suggestions.length).toBeGreaterThan(0);
       expect(meal.suggestions.some((s) => s.layer === "protein")).toBe(true);
     }
-    /* And with no dishes supplied at all, composition is unchanged
-       from the pre-P5 engine. */
+    /* And with no dishes supplied at all, composition is the layered
+       food composition. Module 06 (spec §4.4) re-pins its shape: the
+       protein layer still composes, but no suggestion is a raw/dry-
+       basis food and no meal carries a grain base — every classified
+       cereal in the reference set is a dry-basis record, and serving
+       it raw was the defect this pass removes. */
     const plain = gen(ownerProfile(), {
       dishes: [],
       fallbackTargets: { kcal: 3288, proteinG: 220 },
     });
+    const foodById = new Map(USDA_REFERENCE_FOODS.map((f) => [f.id, f]));
     for (const meal of plain.meals) expect(meal.dishes).toEqual([]);
-    expect(plain.meals.some((m) => m.suggestions.some((s) => s.layer === "base"))).toBe(true);
+    expect(plain.meals.some((m) => m.suggestions.some((s) => s.layer === "protein"))).toBe(true);
+    expect(plain.meals.some((m) => m.suggestions.some((s) => s.layer === "base"))).toBe(false);
+    for (const meal of plain.meals) {
+      for (const s of meal.suggestions) {
+        expect(isRawBasisFood(foodById.get(s.foodId)!)).toBe(false);
+      }
+    }
   });
 
   it("dishes and top-up layers survive a storage round-trip", () => {

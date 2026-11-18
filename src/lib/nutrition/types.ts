@@ -106,6 +106,45 @@ export interface FoodClassification {
   isFish: boolean;
 }
 
+/**
+ * The preparation state a food record's per-100 g values describe
+ * (Nutrition Intelligence spec §3.3/§4, module 06). In the shipped
+ * reference set the pinning rule is: `raw` is reserved for the dry/raw
+ * STAPLE basis — dry pulses, dry grains and flours, whose values
+ * describe an ingredient that is cooked from dry before it is eaten,
+ * so grams of the record are not grams on the plate. Fresh foods
+ * portioned in the form they are bought (produce, eggs, flesh, fish,
+ * nuts, dairy, oils — several of whose USDA descriptions also say
+ * "raw", meaning fresh) are `as_purchased`: the gram quantity IS the
+ * portion quantity. Manufactured prepared foods (tofu, tempeh) are
+ * `cooked_unspecified`. The remaining states name cooked forms a
+ * future cooked-form record may carry.
+ */
+export type PreparationState =
+  | "raw"
+  | "boiled"
+  | "steamed"
+  | "roasted"
+  | "fried"
+  | "cooked_unspecified"
+  | "as_purchased";
+
+export interface PreparationProfile {
+  /** The state THIS record's per-100 g values describe. Absent on a
+   *  food = state unclaimed, and the food may not be presented as a
+   *  ready-to-eat portion where the basis matters (spec §4.4). */
+  state: PreparationState;
+  /** Cooked grams yielded by 100 g in this record's state, where a
+   *  yield relation is known from a registered source (e.g. dry
+   *  lentils → boiled). Absent = unknown, never defaulted to 100.
+   *  No shipped food carries this yet: the yield sources are still
+   *  TO VERIFY (spec §4.2), and an unsourced factor is not shipped. */
+  yieldToCookedPer100g?: number;
+  /** Edible fraction of the as-purchased weight, 0–1, where the source
+   *  states one (peel, bone, shell). Absent = unknown. */
+  ediblePortionShare?: number;
+}
+
 export interface Food {
   id: string;
   name: string;
@@ -119,6 +158,14 @@ export interface Food {
    * curate, and the plan composer treats an unclassified food accordingly.
    */
   classification?: FoodClassification;
+  /**
+   * Preparation basis of the record's values. Present on reference
+   * foods, pinned per FDC id in the generator like the classification;
+   * absent on user-entered foods — unclaimed, by the same design as
+   * the classification: Bloom does not invent a basis for a food it
+   * did not curate.
+   */
+  preparation?: PreparationProfile;
 }
 
 /**

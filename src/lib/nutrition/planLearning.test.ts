@@ -144,7 +144,10 @@ describe("no usable log — the P5 plan, unchanged", () => {
   const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: OWNER_TARGETS });
 
   it("no recentLog field at all", () => {
-    expect(base.methodVersion).toBe(8);
+    /* Method 9 = the preparation-basis pass (module 06): the pin moves
+       with the version; the behaviour pinned here — no log, no learning
+       notes — is unchanged. */
+    expect(base.methodVersion).toBe(9);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 

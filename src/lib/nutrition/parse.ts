@@ -8,6 +8,7 @@
  * they are genuinely present and valid; absent stays absent, never zero.
  */
 
+import { PREPARATION_STATES } from "./preparation";
 import {
   MEALS,
   type Amount,
@@ -24,6 +25,7 @@ import {
   type LogEntry,
   type Meal,
   type Nutrients,
+  type PreparationProfile,
 } from "./types";
 
 const FOOD_KINDS: readonly FoodProvenanceKind[] = ["usda", "user_entered", "off", "ifct", "recipe"];
@@ -246,6 +248,34 @@ export function parseFoodClassification(raw: unknown): FoodClassification | null
   };
 }
 
+/**
+ * A food's preparation basis (spec §3.3/§4). Like the classification,
+ * it is data-layer fact (the generator's pinned per-FDC-id table), so
+ * it is validated the same way: a state outside the vocabulary — or a
+ * yield/edible figure outside its sane range — drops the whole
+ * profile, and the food survives with its basis unclaimed rather than
+ * wearing a half-parsed basis a presentation rule might misread. The
+ * optional figures ride along only when present and valid; no shipped
+ * food carries them yet (the yield sources are TO VERIFY, spec §4.2).
+ */
+export function parseFoodPreparation(raw: unknown): PreparationProfile | null {
+  if (!isRecord(raw)) return null;
+  const state = oneOf(raw["state"], PREPARATION_STATES);
+  if (!state) return null;
+  const out: PreparationProfile = { state };
+  if (raw["yieldToCookedPer100g"] !== undefined) {
+    const yieldPer100g = numIn(raw["yieldToCookedPer100g"], 1, 1000);
+    if (yieldPer100g === null) return null;
+    out.yieldToCookedPer100g = yieldPer100g;
+  }
+  if (raw["ediblePortionShare"] !== undefined) {
+    const share = numIn(raw["ediblePortionShare"], 0, 1);
+    if (share === null) return null;
+    out.ediblePortionShare = share;
+  }
+  return out;
+}
+
 export function parseFood(raw: unknown): Food | null {
   if (!isRecord(raw)) return null;
   const id = text(raw["id"], 80);
@@ -258,6 +288,8 @@ export function parseFood(raw: unknown): Food | null {
   const food: Food = { id, name, per100g, servings: parseServings(raw["servings"]), provenance };
   const classification = parseFoodClassification(raw["classification"]);
   if (classification) food.classification = classification;
+  const preparation = parseFoodPreparation(raw["preparation"]);
+  if (preparation) food.preparation = preparation;
   return food;
 }
 
