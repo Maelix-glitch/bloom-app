@@ -38,19 +38,35 @@ function tone(
   duration: number,
   volume: number,
   type: OscillatorType = "sine",
+  glideTo?: number,
+  harmonic = 0,
 ) {
   try {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), start + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(start);
-    oscillator.stop(start + duration + 0.04);
+    const end = start + duration;
+    /* One voice with the house envelope (fast attack, exponential release —
+       gain steps are what make UI sounds click). Rendered twice when the
+       recipe asks for harmonic warmth: the fundamental, plus a quiet sine
+       an octave up, so chimes have body instead of a bare beeper tone. */
+    const voice = (freq: number, glide: number | undefined, peak: number, wave: OscillatorType) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = wave;
+      oscillator.frequency.setValueAtTime(freq, start);
+      if (glide !== undefined) {
+        oscillator.frequency.exponentialRampToValueAtTime(glide, end);
+      }
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, end);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(end + 0.04);
+    };
+    voice(frequency, glideTo, volume, type);
+    if (harmonic > 0) {
+      voice(frequency * 2, glideTo === undefined ? undefined : glideTo * 2, volume * harmonic, "sine");
+    }
   } catch {
     // Audio is best-effort.
   }
@@ -58,7 +74,11 @@ function tone(
 
 function noiseBurst(context: AudioContext, start: number) {
   try {
-    const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * 0.14)), context.sampleRate);
+    /* A sparkle, not a hiss: the old burst sat loud (0.06) on a fixed
+       1800 Hz band and read as a cheap "tss". Now quieter, shorter, and the
+       band sweeps down as it decays, so it shimmers behind the chime. */
+    const duration = 0.11;
+    const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * duration)), context.sampleRate);
     const data = buffer.getChannelData(0);
     for (let index = 0; index < data.length; index += 1) {
       data[index] = (Math.random() * 2 - 1) * (1 - index / data.length);
@@ -68,16 +88,17 @@ function noiseBurst(context: AudioContext, start: number) {
     const gain = context.createGain();
     source.buffer = buffer;
     filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1800, start);
+    filter.frequency.setValueAtTime(2400, start);
+    filter.frequency.exponentialRampToValueAtTime(1500, start + duration);
     filter.Q.setValueAtTime(1.2, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.06, start + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.13);
+    gain.gain.exponentialRampToValueAtTime(0.032, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
     source.connect(filter);
     filter.connect(gain);
     gain.connect(context.destination);
     source.start(start);
-    source.stop(start + 0.15);
+    source.stop(start + duration + 0.02);
   } catch {
     // Audio is best-effort.
   }
@@ -110,36 +131,36 @@ export function playRewardSound(name: SoundName) {
     const now = context.currentTime + 0.02;
 
     if (name === "hover") {
-      tone(context, 680, now, 0.08, 0.018, "sine");
+      tone(context, 660, now, 0.08, 0.018, "sine", 620, 0.2);
       return;
     }
 
     if (name === "open") {
-      tone(context, 330, now, 0.12, 0.035, "sine");
-      tone(context, 495, now + 0.06, 0.16, 0.024, "sine");
+      tone(context, 330, now, 0.12, 0.035, "sine", 350, 0.15);
+      tone(context, 495, now + 0.06, 0.16, 0.024, "sine", 520, 0.2);
       return;
     }
 
     if (name === "charge") {
-      tone(context, 160, now, 0.4, 0.035, "triangle");
-      tone(context, 240, now + 0.12, 0.46, 0.028, "sine");
-      tone(context, 380, now + 0.25, 0.5, 0.02, "sine");
+      tone(context, 160, now, 0.4, 0.035, "triangle", 175, 0.1);
+      tone(context, 240, now + 0.12, 0.46, 0.028, "sine", 255, 0.15);
+      tone(context, 380, now + 0.25, 0.5, 0.02, "sine", 400, 0.2);
       return;
     }
 
     if (name === "reveal") {
-      tone(context, 523.25, now, 0.6, 0.05, "sine");
-      tone(context, 659.25, now + 0.1, 0.68, 0.04, "sine");
-      tone(context, 783.99, now + 0.2, 0.82, 0.032, "sine");
-      tone(context, 1046.5, now + 0.34, 1.1, 0.02, "sine");
+      tone(context, 523.25, now, 0.6, 0.05, "sine", undefined, 0.2);
+      tone(context, 659.25, now + 0.1, 0.68, 0.04, "sine", undefined, 0.2);
+      tone(context, 783.99, now + 0.2, 0.82, 0.032, "sine", undefined, 0.25);
+      tone(context, 1046.5, now + 0.34, 1.1, 0.02, "sine", undefined, 0.25);
       noiseBurst(context, now + 0.31);
       return;
     }
 
-    tone(context, 392, now, 0.18, 0.05, "triangle");
-    tone(context, 587.33, now + 0.1, 0.32, 0.04, "sine");
-    tone(context, 783.99, now + 0.2, 0.48, 0.03, "sine");
-    tone(context, 1174.66, now + 0.35, 0.8, 0.02, "sine");
+    tone(context, 392, now, 0.18, 0.05, "triangle", 415, 0.15);
+    tone(context, 587.33, now + 0.1, 0.32, 0.04, "sine", undefined, 0.2);
+    tone(context, 783.99, now + 0.2, 0.48, 0.03, "sine", undefined, 0.25);
+    tone(context, 1174.66, now + 0.35, 0.8, 0.02, "sine", undefined, 0.25);
     noiseBurst(context, now + 0.18);
   } catch {
     // Never let audio break the claim flow.
