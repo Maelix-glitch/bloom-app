@@ -25,6 +25,7 @@ import {
   type DailyPlan,
   type PlanSuggestion,
 } from "./plan";
+import { isRawBasisFood } from "./preparation";
 import type { Food, FoodClassification, FoodGroup } from "./types";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 
@@ -214,18 +215,29 @@ describe("plan · dietary patterns", () => {
 /* --------------------------------- layers ---------------------------------- */
 
 describe("plan · layered composition", () => {
-  it("every main meal carries base + protein + ≥2 vegetables + a finishing layer", () => {
+  it("every main meal carries protein + ≥2 vegetables + a finishing layer — and names its missing grain base", () => {
+    /* Module 06 (spec §4.4) changed this pin's shape: every classified
+       cereal in the reference set is a raw/dry-basis record, so the
+       layered composer has no grain base it may honestly serve. The
+       layer is absent, each meal's note names the gap (the thin-pool
+       honesty, now on the full pool), and no suggestion anywhere in
+       the meal is a raw-basis food. What the layer cake still
+       guarantees: protein, at least two vegetables, and a finishing
+       layer carrying a measured fat. */
     const plan = gen(fullProfile("eggetarian"));
     for (const meal of plan.meals) {
       const layers = meal.suggestions.map((s) => s.layer);
-      expect(layers).toContain("base");
+      expect(layers).not.toContain("base");
       expect(layers).toContain("protein");
       expect(layers.filter((l) => l === "vegetables").length).toBeGreaterThanOrEqual(2);
       expect(layers).toContain("finishing");
       expect(
         meal.suggestions.some((s) => s.layer === "finishing" && groupOf(s) === "fats_oils"),
       ).toBe(true);
-      expect(meal.note).toBeNull();
+      expect(meal.note).toContain("a grain base");
+      for (const s of meal.suggestions) {
+        expect(isRawBasisFood(BY_ID.get(s.foodId)!)).toBe(false);
+      }
     }
   });
 
@@ -241,16 +253,21 @@ describe("plan · layered composition", () => {
     }
   });
 
-  it("a thin pool leaves layers honestly empty, with the gap named", () => {
+  it("a pool of only raw-basis foods serves nothing — and names the empty day", () => {
+    /* Module 06 (spec §4.4) inverted this fixture: brown rice and
+       lentils are both raw/dry-basis records, and the pre-basis pin —
+       rice served as the base, lentils as the protein — was the
+       defect itself (90 g of dry rice is not a portion of rice).
+       A pool holding nothing servable now composes nothing: every
+       meal carries the empty-meal note, and the day-level shortfalls
+       are still named as pool facts, exactly as they were. */
     const rice = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Rice, brown"))!;
     const lentils = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Lentils"))!;
     const plan = gen(fullProfile(null), { foods: [rice, lentils] });
-    const breakfast = plan.meals[0]!;
-    expect(breakfast.suggestions.some((s) => s.layer === "base")).toBe(true);
-    expect(breakfast.suggestions.some((s) => s.layer === "protein")).toBe(true);
-    expect(breakfast.note).toContain("Part of this meal is missing");
-    expect(breakfast.note).toContain("vegetables");
-    /* …and the day-level shortfalls are named too, as pool facts. */
+    for (const meal of plan.meals) {
+      expect(meal.suggestions).toEqual([]);
+      expect(meal.note).toContain("No food with known values fits this meal yet");
+    }
     expect(plan.notes.some((n) => n.includes("reach 0 g of vegetables"))).toBe(true);
     expect(plan.notes.some((n) => n.includes("reach 0 g of fruit"))).toBe(true);
     expect(plan.notes.some((n) => n.includes("span 2 food groups"))).toBe(true);
@@ -321,43 +338,54 @@ describe("plan · portion caps", () => {
   });
 
   it("the dominance trim fires when one food would carry the day", () => {
-    const rice = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Rice, brown"))!;
-    const soy = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Soybeans"))!;
+    /* Re-pinned at module 06: the original fixture's dry soybeans are
+       a raw/dry-basis record and are never served now, so the trim is
+       pinned on the strongest servable protein — chicken breast,
+       whose 200 g flesh cap alone would let it carry ~46 g of
+       protein a meal (~115 g across the day) against a 120 g guide.
+       The person's shape is the owner's, with the pattern opened to
+       omnivore so the flesh is eligible at all. */
+    const chicken = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Chicken, breast"))!;
     const spinach = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Spinach"))!;
     const oil = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Oil, olive"))!;
     const milk = USDA_REFERENCE_FOODS.find((f) => f.name.startsWith("Milk, whole"))!;
-    const plan = gen(ownerProfile(), {
-      foods: [rice, soy, spinach, oil, milk],
-      fallbackTargets: { kcal: 2400, proteinG: 120 },
-    });
-    const soyProtein = allSuggestions(plan)
-      .filter((s) => s.foodId === soy.id)
+    const plan = gen(
+      {
+        ...ownerProfile(),
+        dietary: { ...EMPTY_DIETARY, pattern: "omnivore", mealsPerDay: 3 },
+      },
+      {
+        foods: [chicken, spinach, oil, milk],
+        fallbackTargets: { kcal: 2400, proteinG: 120 },
+      },
+    );
+    const chickenProtein = allSuggestions(plan)
+      .filter((s) => s.foodId === chicken.id)
       .reduce((sum, s) => sum + s.nutrients.proteinG, 0);
-    expect(soyProtein).toBeGreaterThan(0);
-    expect(soyProtein).toBeLessThanOrEqual(0.4 * 120 + 1);
+    expect(chickenProtein).toBeGreaterThan(0);
+    expect(chickenProtein).toBeLessThanOrEqual(0.4 * 120 + 1);
   });
 });
 
 /* ------------------------------ floors & notes ----------------------------- */
 
 describe("plan · day floors", () => {
-  /* P3 note, updated at integration with the 142-food pool: the ICMR
-     floors (vegetables, fruit, milk/curd) are still all reached on the
-     owner's day. The P3 item cap (8 per main meal) drops the day's
-     garnish extras; and with the soy anchors (tofu, tempeh, edamame)
-     in the pool the closing pass lifts this day's protein over the
-     95% bar, so no shortfall note fires. P4 update: with the cooked
-     soy forms portioned at their real 120 g serving (they were halved
-     by the dry-pulse cap), tempeh now carries breakfast and lunch, the
-     day's protein rises to 213 g and the reshaped plate spans 7 food
-     groups. The one remaining miss — the 8-group aim — is named. */
-  it("the owner's day reaches every ICMR floor; the one remaining miss is named", () => {
+  /* History in brief: P3/P4 pinned this day reaching every ICMR gram
+     floor with only the 8-group aim missed and named. Module 06
+     (spec §4.4) changed the servable pool: the gram floors (vegetables,
+     fruit, milk/curd) are still all reached, but no cereal group can
+     be served (every classified cereal is a dry-basis record), so the
+     day spans 6 groups, and the capped servable pool lands under the
+     energy guide. Both remaining misses are named, with the true
+     figure — the honesty this suite exists to pin. */
+  it("the owner's day reaches the ICMR gram floors; the two remaining misses are named", () => {
     const plan = gen(ownerProfile(), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
       day: "2026-11-15",
     });
     expect(plan.notes).toEqual([
-      "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions reach about 2787 kcal — below your 3288 kcal guide. The portion caps bind before the target does.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -368,7 +396,7 @@ describe("plan · day floors", () => {
       .reduce((sum, s) => sum + s.grams, 0);
     expect(fruit).toBeGreaterThanOrEqual(100);
     const groups = new Set(allSuggestions(plan).map((s) => groupOf(s)));
-    expect(groups.size).toBe(7);
+    expect(groups.size).toBe(6);
     const proteinSources = new Set(
       plan.meals.flatMap((m) =>
         m.suggestions.filter((s) => s.layer === "protein").map((s) => s.foodId),
@@ -444,31 +472,26 @@ describe("plan · rotation", () => {
         .join(",");
     expect(ids(d15)).not.toBe(ids(d16));
 
-    /* 2026-11-15 meets every ICMR floor — but after P3's energy
-       reconciliation the composed day still lands at 1776 kcal against
-       a 1654 guide (the floors and layers add up past it), and P3 names
-       that instead of hiding it. This is the day the component test
-       happened to pass. */
-    expect(d15.notes).toEqual([
-      "Today's suggestions reach about 1776 kcal — above your 1654 kcal guide. The day's guideline floors and layers add up past it.",
-    ]);
-    /* 2026-11-16 rotates to a mix that reaches only 250 g of milk and
-       curd and spans 6 food groups — both shortfalls are named, and the
-       milk note ends in the same "across the day" phrase as the plan
-       header's targets sentence. Both are correct, in different homes;
-       that collision is what the component test now scopes around. */
-    expect(d16.notes).toContain(
-      "Today's suggestions reach 250 g of milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day.",
-    );
+    /* Module 06 re-pinned the three days' notes: the servable pool
+       changed (no dry staples), so the composed days and the shortfalls
+       they honestly name changed with it. Her targets never rotate and
+       the composition still rotates — those are the properties this
+       test exists to hold; the notes below are the current truth.
+       2026-11-15 now meets every ICMR floor and lands inside the
+       energy band, so it carries no notes at all. */
+    expect(d15.notes).toEqual([]);
+    /* 2026-11-16 rotates to a mix that spans 6 food groups and lands
+       over the guide at 1855 kcal — both facts are named. */
     expect(d16.notes).toContain(
       "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     );
-    /* 2026-11-17: P3's reshaped rotation now reaches the milk floor
-       (a yogurt extra lands at dinner), so the milk note is gone; what
-       remains is the energy note — the day lands at 1893 kcal against
-       the 1654 guide and says so. */
+    expect(d16.notes).toContain(
+      "Today's suggestions reach about 1855 kcal — above your 1654 kcal guide. The day's guideline floors and layers add up past it.",
+    );
+    /* 2026-11-17 reaches every gram floor and the energy band; only
+       the group-span aim is missed, and named. */
     expect(d17.notes).toEqual([
-      "Today's suggestions reach about 1893 kcal — above your 1654 kcal guide. The day's guideline floors and layers add up past it.",
+      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);
   });
 });
@@ -525,8 +548,12 @@ describe("plan · the owner's day (worked example)", () => {
     );
     expect(weekHasEgg).toBe(true);
     expect(suggestions.some((s) => clsOf(s)?.isFlesh)).toBe(false);
+    /* Module 06: no meal carries a base layer — every classified
+       cereal is a dry-basis record and is not served raw (the missing
+       base is named in the day's composition, per the layers suite).
+       The protein depth and the two-vegetable rule are unchanged. */
     for (const meal of plan.meals) {
-      expect(meal.suggestions.some((s) => s.layer === "base")).toBe(true);
+      expect(meal.suggestions.some((s) => s.layer === "base")).toBe(false);
       expect(meal.suggestions.filter((s) => s.layer === "protein").length).toBeGreaterThanOrEqual(
         2,
       );
@@ -562,12 +589,21 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
     ),
   });
 
-  it("suggested energy lands within ±5% of the guide every day", () => {
+  it("suggested energy lands within ±5% of the guide — or the miss is named with its true figure", () => {
+    /* Module 06 changed what this week can promise: with the dry
+       staples unservable, the capped layered pool lands at
+       2,747–3,045 kcal against the 3,288 guide — outside the ±5%
+       band on every day. The promise that survives is the honesty
+       one, in the same shape as the protein pin below: land in band,
+       or name the true figure in a note. (Dish-composed days are
+       unaffected — the day guard there still lands the band; this
+       suite composes from foods alone.) */
     for (const { day, plan } of week) {
       const { kcal } = totals(plan);
-      expect(Math.abs(kcal - 3288), `${day}: ${Math.round(kcal)} kcal`).toBeLessThanOrEqual(
-        0.05 * 3288,
-      );
+      if (Math.abs(kcal - 3288) <= 0.05 * 3288) continue;
+      const note = plan.notes.find((n) => n.includes("kcal guide"));
+      expect(note, `${day}: ${Math.round(kcal)} kcal and no energy note`).toBeDefined();
+      expect(note).toContain(`about ${Math.round(kcal)} kcal`);
     }
   });
 

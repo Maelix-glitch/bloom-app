@@ -118,7 +118,9 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     const base = gen({ day: OWNER_DAY });
     const withEmpty = gen({ day: OWNER_DAY, recentLog: [], storedPlan: null });
     expect(withEmpty).toEqual(base);
-    expect(base.methodVersion).toBe(8);
+    /* Method 9 = the preparation-basis pass (module 06): version pin
+       moved; the inertness pinned here is unchanged. */
+    expect(base.methodVersion).toBe(9);
   });
 
   it("an on-target log with no dish history changes nothing", () => {

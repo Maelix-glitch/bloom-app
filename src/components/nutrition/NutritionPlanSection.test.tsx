@@ -237,29 +237,34 @@ describe("NutritionPlanSection", () => {
     const profile = toHealthProfile(state, "user-1");
     const safety = classifySafety(toSafetyInput(profile));
     /* The fixture's composition is fixed by an explicit day string —
-       the 2026-11-16 rotation, whose milk-and-curd shortfall note is
-       the one that used to collide with the targets line. Only the day
-       label is re-stamped to today so the section shows it as today's
-       plan; the inputs snapshot carries no day, so nothing reads stale. */
+       the 2026-11-18 rotation, whose fruit shortfall note is the one
+       that collides with the targets line (both end a clause in
+       "across the day"). Only the day label is re-stamped to today so
+       the section shows it as today's plan; the inputs snapshot
+       carries no day, so nothing reads stale. (The fixture day moved
+       from 2026-11-16 at module 06: that rotation no longer misses
+       the milk floor — the basis pass changed the servable pool, so
+       its day notes are the group-span and energy ones now. The fruit
+       note on the 18th carries the same colliding phrase.) */
     const outcome = generatePlan({
       profile,
       safety,
-      gatedOutcome: targetsFor(profile, safety, "2026-11-16"),
+      gatedOutcome: targetsFor(profile, safety, "2026-11-18"),
       fallbackTargets: null,
       foods: USDA_REFERENCE_FOODS,
-      day: "2026-11-16",
-      now: "2026-11-16T03:00:00.000Z",
+      day: "2026-11-18",
+      now: "2026-11-18T03:00:00.000Z",
       id: "plan-mix-fixture",
     });
     if (!outcome.ok) throw new Error("expected a plan");
-    expect(outcome.plan.notes.some((n) => n.includes("milk and curd"))).toBe(true);
+    expect(outcome.plan.notes.some((n) => n.includes("of fruit"))).toBe(true);
     writePlan({ ...outcome.plan, day: todayLocal() });
 
     render(<NutritionPlanSection />);
     const mix = screen.getByText("Today's mix").parentElement!;
     expect(
       within(mix).getByText(
-        /milk and curd — the ICMR-NIN guideline aims for at least 300 ml across the day/,
+        /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
       ),
     ).toBeTruthy();
     /* The targets line still matches on its own sentence alone. */

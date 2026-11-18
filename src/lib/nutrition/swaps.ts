@@ -23,6 +23,7 @@
 import { entryNutrientsFor } from "./math";
 import { parseLogEntry } from "./parse";
 import { logEntry } from "./log";
+import { isRawBasisFood } from "./preparation";
 import type { Food, LogEntry, Nutrients } from "./types";
 import type { NutritionTargets } from "./targets";
 
@@ -84,6 +85,13 @@ export function swapsFor(
   for (const candidate of pool) {
     if (candidate.id === entryFood.id) continue;
     if (candidate.provenance.kind !== "usda") continue;
+    /* A swap presents the candidate's grams as the portion to eat, so
+       the preparation-basis rule binds here exactly as it binds the
+       plan composer (module 06, spec §4.4): a raw/dry-basis record —
+       dry lentils for cooked lentils — is never the suggestion. The
+       caller's pool is the identity pool (pattern, allergies), so the
+       basis judgement is made at this surface, not assumed of it. */
+    if (isRawBasisFood(candidate)) continue;
     if (candidate.classification?.group !== group) continue;
     if (candidate.per100g.kcal <= 0) continue;
     const rawGrams = entry.nutrients.kcal / (candidate.per100g.kcal / 100);

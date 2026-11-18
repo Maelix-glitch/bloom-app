@@ -56,6 +56,16 @@
  *     layer, so the plan composer filters patterns on ingredients and
  *     never guesses from a name at runtime. A pick with no classification
  *     entry fails generation loudly, exactly like a renamed pick.
+ *   • **Preparation basis (module 06).** Every pick also carries the
+ *     preparation state its per-100 g values describe, pinned per FDC
+ *     id in PREPARATION below (Nutrition Intelligence spec §3.3/§4):
+ *     `raw` for the dry/raw staple basis (dry grains, flours, dry
+ *     pulses — grams of the record are not grams on the plate),
+ *     `as_purchased` for foods portioned in the form they are bought,
+ *     `cooked_unspecified` for manufactured prepared foods. A pick with
+ *     no preparation entry fails generation loudly, like a missing
+ *     classification, and `--check` fails if a shipped food's basis
+ *     differs from its pin.
  *   • **Fingerprint.** The output carries a SHA-256 over the canonicalised
  *     foods array (the evidence seed's canonicalisation, reused), so any
  *     hand-edit of the generated file is detectable by `--check` and by the
@@ -412,6 +422,74 @@ const CLASSIFICATION = {
   173181: cls("other"),
 };
 
+/* ----------------- the pinned preparation basis (module 06) ------------ */
+
+/**
+ * The preparation state each pick's per-100 g values describe (Nutrition
+ * Intelligence spec §3.3/§4), pinned per FDC id like the classification —
+ * judged from the record's own description and form, never parsed from a
+ * name at runtime.
+ *
+ * `raw` is reserved for the dry/raw STAPLE basis: dry grains, flours and
+ * dry pulses — records whose values describe an ingredient that is
+ * cooked from dry before it is eaten, so grams of the record are not
+ * grams on the plate. A raw-basis food is never served as a plain-food
+ * portion (spec §4.4); it stays searchable, loggable and a dish
+ * ingredient. `as_purchased` covers the foods portioned in the form
+ * they are bought — fresh produce, eggs, flesh, fish, nuts, dairy,
+ * oils, pantry items — several of whose USDA descriptions also say
+ * "raw", meaning fresh: for those, the gram quantity IS the portion
+ * quantity. `cooked_unspecified` is the manufactured prepared foods
+ * (tofu, tempeh). Edamame sits in as_purchased: a hydrated fresh-form
+ * food portioned as bought (the plan composer's P4 cooked-soy
+ * judgement), not a dry seed.
+ */
+const PREPARATION = {
+// raw basis — dry cereals, millets, flours and semolina (cooked from dry)
+  2512381: "raw", 2512380: "raw", 2710825: "raw", 2346396: "raw",
+  2346397: "raw", 2512379: "raw", 2710842: "raw", 2512378: "raw",
+  168874: "raw", 170284: "raw", 168893: "raw", 168936: "raw",
+  168867: "raw", 168886: "raw", 174288: "raw", 169714: "raw",
+  168933: "raw",
+  // raw basis — dry pulses & legumes: mature seeds in their dry/raw form
+  2644283: "raw", 174284: "raw", 2644282: "raw", 173734: "raw",
+  175193: "raw", 173745: "raw", 175199: "raw", 174270: "raw",
+  172436: "raw", 174256: "raw", 174259: "raw", 170419: "raw",
+  173758: "raw",
+  // cooked, method unspecified — manufactured prepared foods
+  172448: "cooked_unspecified", 174272: "cooked_unspecified",
+  // as purchased — portioned in the form they are bought: fresh
+  // produce, eggs, flesh, fish, dairy, oils, nuts & seeds, pantry
+  322892: "as_purchased", 322559: "as_purchased", 2259793: "as_purchased", 330137: "as_purchased",
+  328637: "as_purchased", 329370: "as_purchased", 325036: "as_purchased", 328841: "as_purchased",
+  323444: "as_purchased", 173410: "as_purchased", 171314: "as_purchased", 171287: "as_purchased",
+  172183: "as_purchased", 172184: "as_purchased", 2646170: "as_purchased", 2646171: "as_purchased",
+  168608: "as_purchased", 2514745: "as_purchased", 2646168: "as_purchased", 174370: "as_purchased",
+  2514747: "as_purchased", 2684441: "as_purchased", 2684444: "as_purchased", 2684442: "as_purchased",
+  333374: "as_purchased", 334194: "as_purchased", 175179: "as_purchased", 171413: "as_purchased",
+  330458: "as_purchased", 172336: "as_purchased", 171411: "as_purchased", 171410: "as_purchased",
+  171025: "as_purchased", 171016: "as_purchased", 2346401: "as_purchased", 2346404: "as_purchased",
+  790646: "as_purchased", 170457: "as_purchased", 2258586: "as_purchased", 321900: "as_purchased",
+  2685573: "as_purchased", 2346407: "as_purchased", 2346406: "as_purchased", 2710826: "as_purchased",
+  168462: "as_purchased", 170427: "as_purchased", 170108: "as_purchased", 1750347: "as_purchased",
+  2346400: "as_purchased", 1104647: "as_purchased", 169231: "as_purchased", 2685577: "as_purchased",
+  173944: "as_purchased", 171688: "as_purchased", 746771: "as_purchased", 169910: "as_purchased",
+  327699: "as_purchased", 174683: "as_purchased", 171705: "as_purchased", 167746: "as_purchased",
+  167765: "as_purchased", 169124: "as_purchased", 746773: "as_purchased", 2346393: "as_purchased",
+  2346394: "as_purchased", 2515374: "as_purchased", 172430: "as_purchased", 2515381: "as_purchased",
+  2515380: "as_purchased", 169640: "as_purchased", 173468: "as_purchased", 334247: "as_purchased",
+  173469: "as_purchased", 172231: "as_purchased", 170923: "as_purchased", 170922: "as_purchased",
+  170929: "as_purchased", 170932: "as_purchased", 171319: "as_purchased", 170924: "as_purchased",
+  171324: "as_purchased", 170919: "as_purchased", 171321: "as_purchased", 171320: "as_purchased",
+  170917: "as_purchased", 171323: "as_purchased", 170931: "as_purchased", 171330: "as_purchased",
+  169997: "as_purchased", 173475: "as_purchased", 170497: "as_purchased", 170106: "as_purchased",
+  169260: "as_purchased", 168393: "as_purchased", 170150: "as_purchased", 170169: "as_purchased",
+  167763: "as_purchased", 172337: "as_purchased", 169985: "as_purchased", 2710818: "as_purchased",
+  174687: "as_purchased", 170172: "as_purchased", 169308: "as_purchased", 170069: "as_purchased",
+  170483: "as_purchased", 168416: "as_purchased", 168410: "as_purchased", 171098: "as_purchased",
+  175139: "as_purchased", 175119: "as_purchased", 173177: "as_purchased", 173181: "as_purchased",
+};
+
 /* ------------------------------ source data ------------------------------- */
 
 const DATASETS = [
@@ -608,6 +686,12 @@ function extractFood(pick, tables) {
       `pick ${pick.fdcId} (${pick.expect}): no pinned classification — classify it in CLASSIFICATION before shipping`,
     );
   }
+  const preparationState = PREPARATION[pick.fdcId];
+  if (!preparationState) {
+    throw new Error(
+      `pick ${pick.fdcId} (${pick.expect}): no pinned preparation basis — pin it in PREPARATION before shipping`,
+    );
+  }
   return {
     id: `usda-${pick.fdcId}`,
     name: row.description,
@@ -620,6 +704,7 @@ function extractFood(pick, tables) {
       label: "USDA FoodData Central",
     },
     classification,
+    preparation: { state: preparationState },
   };
 }
 
@@ -675,6 +760,8 @@ async function generate() {
     " * Each entry also carries a food group + dietary-pattern classification,",
     " * pinned per FDC id in the generator — identity facts about the curated",
     " * food, not values read from USDA's tables.",
+    " * Each entry also carries its preparation basis (the state its values",
+    " * describe), pinned per FDC id in the generator the same way.",
     " */",
     "",
     `export const USDA_REFERENCE_RETRIEVED_ON = ${JSON.stringify(retrievedOn)};`,
@@ -725,6 +812,30 @@ async function check() {
   for (const food of raw) {
     if (!food.classification || !food.classification.group) {
       console.error(`check failed: ${food.id} ships without a classification`);
+      process.exit(1);
+    }
+  }
+  // The preparation table must cover exactly the pick list, and every
+  // shipped food's basis must equal its pin (module 06, spec §3.4: the
+  // migration is complete by test, not by inspection).
+  for (const id of pickIds) {
+    if (!PREPARATION[Number(id)]) {
+      console.error(`check failed: pick ${id} has no pinned preparation basis`);
+      process.exit(1);
+    }
+  }
+  for (const id of Object.keys(PREPARATION)) {
+    if (!pickIds.has(id)) {
+      console.error(`check failed: preparation pinned for ${id}, which is not a pick`);
+      process.exit(1);
+    }
+  }
+  for (const food of raw) {
+    const fdcId = food.id.replace(/^usda-/, "");
+    if (!food.preparation || food.preparation.state !== PREPARATION[Number(fdcId)]) {
+      console.error(
+        `check failed: ${food.id} ships with preparation basis "${food.preparation?.state}", pinned as "${PREPARATION[Number(fdcId)]}"`,
+      );
       process.exit(1);
     }
   }

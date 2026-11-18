@@ -109,6 +109,7 @@ import { nutrientsForGrams } from "./math";
 import { dishRegion, type DishRegion } from "./regions";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
 import { MICRO_RICH_SHARE, planLearningFor, type PlanLearning } from "./planAdaptation";
+import { isRawBasisFood } from "./preparation";
 import { adjustedTargets } from "./targetAdjustment";
 import { nutritionTargetsFromOutcome, type NutritionTargets } from "./targets";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
@@ -283,8 +284,18 @@ export interface DailyPlan {
  *  hard pattern post-condition re-verified before the plan is
  *  returned. The P5 stack (anchor + base + side at one serving
  *  each) is retired: it composed plates no kitchen serves and left
- *  the day's totals unrepairable. */
-export const PLAN_METHOD_VERSION = 8;
+ *  the day's totals unrepairable.
+ *  9 = the preparation-basis pass (module 06, spec §4.4): a
+ *  raw/dry-basis reference food — dry pulses, dry grains, flours,
+ *  whose record grams are not plate grams — is never served as a
+ *  plain-food suggestion, top-up or fallback layer. It remains
+ *  searchable, loggable and a dish ingredient (recipe lines are
+ *  cooked by the method). Dish composition and the top-up set are
+ *  unchanged in shape; only the layered fallback loses the dry
+ *  staples it used to present raw, and says so in its notes.
+ *  Yield-based cooked conversion is the documented next step,
+ *  gated on source verification (spec §4.2). */
+export const PLAN_METHOD_VERSION = 9;
 
 export type PlanRefusal =
   | {
@@ -549,6 +560,15 @@ export function patternAllowsClassification(
  * Exported for the Nutrition tab's swap suggestions (N-UI): a swap is a
  * one-food plan decision, so it is held to exactly this filter — same
  * provenance gate, same pattern judgement, same name-matching.
+ *
+ * This is the IDENTITY gate — what a food is and whose values it
+ * carries. It is deliberately NOT the preparation-basis gate (module
+ * 06, spec §4.4): dish composition judges ingredient LINES through
+ * this pool, and a recipe's line quantities are cooked by the dish's
+ * method, so a dry pulse rightly passes here as an ingredient. The
+ * basis gate — a raw/dry-basis record is never SERVED as a portion —
+ * is applied where plain foods are presented as portions: the
+ * composition pool in `generatePlan` and the candidates in `swapsFor`.
  */
 export function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Food[] {
   const terms = [
@@ -607,6 +627,16 @@ function rotationOrder(day: string, pool: readonly Food[]): Food[] {
  * that forced this rebuild — 235 g of dry lentils and 400 g of one
  * vegetable in a single meal — are exactly what the pulse and vegetable
  * caps exist to refuse.
+ *
+ * Basis note (module 06, spec §4.4 rule 5): the grain and dry-pulse
+ * caps are stated in the DRY quantity, and that is still what they
+ * size — the raw quantity of a food in that group. Since the basis
+ * pass, the reference set's own dry records are not served at all
+ * (their grams are not plate grams), so in practice these caps now
+ * bind a person's own dry foods in those layers, and they are the
+ * quantities a yield conversion (§4.4 rule 2, when its sources are
+ * verified) will size in raw grams before stating the cooked plate
+ * quantity. The caps themselves did not move.
  */
 const CAP_GRAIN_DRY_G = 90; // dry cereals/millets per meal (brief; BNF dry rice portion 65 g, research flags >120 g)
 const CAP_UNCLASSIFIED_BASE_G = 200; // own foods: dry/cooked basis unknown — a middle bound, derivation
@@ -2842,9 +2872,20 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      per meal over shared day state — foods already suggested are
      deprioritised (variety), and the floor totals accumulate so later
      meals can react. The vegetable aim spreads the 400 g ICMR floor
-     across the main meals, held inside the per-meal caps. */
+     across the main meals, held inside the per-meal caps.
+     Module 06 (spec §4.4): the SUGGESTION pool loses the raw/dry-basis
+     foods — dry pulses, dry grains, flours — whose record grams are
+     not grams on a plate; they are never served as a composed
+     suggestion, a snack item or a top-up. The identity pool above
+     stays whole: the composition notes judge dish lines through it
+     (a recipe's dry-lentil line is an ingredient, cooked by the
+     method — not a portion anybody is handed), and a raw-basis food
+     remains the user's to search for and log. */
   const ctx: ComposeContext = {
-    ordered: rotationOrder(input.day, pool),
+    ordered: rotationOrder(
+      input.day,
+      pool.filter((food) => !isRawBasisFood(food)),
+    ),
     pattern: planPatternOf(profile.dietary.pattern),
     used: new Set<string>(),
     vegG: 0,
