@@ -59,6 +59,9 @@ import { PrivacySheet } from "@/components/profile/PrivacySheet";
 import { RestoreSheet } from "@/components/profile/RestoreSheet";
 import { SessionsSection } from "@/components/profile/SessionsSection";
 import { PremiumSection } from "@/components/billing/PremiumSection";
+import { TrainerSection } from "@/components/trainer/TrainerSection";
+import { LabReportsSection } from "@/components/profile/LabReportsSection";
+import { HouseholdSection } from "@/components/household/HouseholdSection";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
@@ -640,6 +643,13 @@ function ProfilePage() {
                 <NutritionProfileCard />
               </section>
 
+              {/* Lab reports: the values from the person's own printed
+                  reports, each shown only against the range printed on
+                  that report — a record, never an interpretation. */}
+              <section className="pf-section" aria-label="Lab reports">
+                <LabReportsSection />
+              </section>
+
               {/* the record: 12 weeks + what's being tracked */}
               <section
                
@@ -1000,6 +1010,17 @@ function ProfilePage() {
                   and the door to Premium. */}
               <section className="pf-section mt-10" aria-label="Membership">
                 <PremiumSection />
+              </section>
+
+              {/* Trainer & Clinician Pro: referral code, the consent-gated
+                  share summary, and trainer-proposed targets. */}
+              <section className="pf-section mt-10" aria-label="Trainer and clinician">
+                <TrainerSection userId={userId} />
+              </section>
+              {/* One-Kitchen Family: the household the person cooks for,
+                  and the dishes that suit everyone at the table. */}
+              <section className="pf-section mt-10" aria-label="Household">
+                <HouseholdSection />
               </section>
 
               {/* Launch compliance: where you're signed in, and how to end it. */}

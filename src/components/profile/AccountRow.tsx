@@ -49,6 +49,7 @@ import { SEX_LABEL } from "@/lib/onboarding/profileKind";
 import { VERIFIED_BLUE, type VerificationStatus } from "@/lib/profile/verification";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import { ConsentSection } from "@/components/profile/ConsentSection";
+import { TrustSection } from "@/components/profile/TrustSection";
 
 import type {
   AccountDetails,
@@ -504,6 +505,7 @@ export function AccountRow({
           testId="pf-row-privacy"
         />
         <ConsentSection />
+        <TrustSection />
         <Row
           icon={<Eye className="size-3.5" />}
           label="Preview as others see it"

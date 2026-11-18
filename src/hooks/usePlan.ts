@@ -19,6 +19,7 @@
 
 import { useCallback, useMemo } from "react";
 
+import { EMPTY_MODES_VALUE, MODES_KEY, parseModesValue } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
 import { usePrefValue } from "@/lib/prefsStore";
 import { useAssessment } from "@/hooks/useAssessment";
@@ -131,6 +132,7 @@ export function usePlan(): PlanStore {
   const plan = usePrefValue(PLAN_KEY, parsePlanValue, null);
   const planLog = usePrefValue(PLAN_LOG_KEY, parsePlanLogValue, NO_PLAN_LOG);
   const targetAdjustment = usePrefValue(TARGET_ADJUSTMENT_KEY, parseTargetAdjustment, null);
+  const modes = usePrefValue(MODES_KEY, parseModesValue, EMPTY_MODES_VALUE);
   const today = todayLocal();
 
   const assembled = useMemo<AssembledInputs>(() => {
@@ -169,10 +171,13 @@ export function usePlan(): PlanStore {
          targets inside the engine, never around it. */
       storedPlan: plan,
       ...(targetAdjustment ? { targetAdjustmentKcal: targetAdjustment.kcalDelta } : {}),
+      /* System 14: the person's switched-on Condition Modes ride
+       * along — the dish pool judges them beside pattern + budget. */
+      ...(modes.active.length > 0 ? { activeModes: modes.active } : {}),
       day: today,
       now,
     }),
-    [assembled, nutrition.foods, nutrition.entries, plan, targetAdjustment, today],
+    [assembled, nutrition.foods, nutrition.entries, plan, targetAdjustment, modes, today],
   );
 
   /* The preview runs the real generator and discards the plan — the

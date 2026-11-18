@@ -58,6 +58,7 @@
  * no suitable dish can fill — never an empty meal while food fits.
  */
 
+import { dishPassesModes, type ModeId } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
 import {
   profileHeightCm,
@@ -1777,7 +1778,11 @@ interface DishPoolData {
  * A dish Bloom cannot price — a line naming a food outside the
  * reference set — is skipped, never guessed at.
  */
-function dishPoolFor(profile: HealthProfile, dishes: readonly Dish[]): DishPoolData | null {
+function dishPoolFor(
+  profile: HealthProfile,
+  dishes: readonly Dish[],
+  activeModes: readonly ModeId[] = [],
+): DishPoolData | null {
   const pattern = planPatternOf(profile.dietary.pattern);
   const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
   const budgetTier = profile.dietary.budgetTier;
@@ -1788,7 +1793,12 @@ function dishPoolFor(profile: HealthProfile, dishes: readonly Dish[]): DishPoolD
     if (!dish.lines.every((line) => eligible.has(line.foodId))) continue;
     try {
       if (pattern !== null && !dishPatterns(dish).includes(pattern)) continue;
-      candidates.push({ dish, nutrients: dishNutrients(dish).nutrients });
+      const nutrients = dishNutrients(dish).nutrients;
+      /* System 14 (Condition Modes): the person's own switched-on
+       * modes judge the dish on its computed nutrients, on top of —
+       * never instead of — the pattern and budget gates above. */
+      if (activeModes.length > 0 && !dishPassesModes(dish, nutrients, activeModes)) continue;
+      candidates.push({ dish, nutrients });
       byId.set(dish.id, dish);
     } catch {
       /* An unresolvable line — the dish is not planned with. */
@@ -2272,6 +2282,12 @@ export interface PlanGenerationInput {
    *  plan stale by name ("your targets"). Protein is never adjusted.
    *  Out-of-range results are refused, never clamped silently. */
   targetAdjustmentKcal?: number;
+  /** The person's switched-on Condition Modes (System 14, see
+   *  lib/modes): user-chosen guardrails judged inside the dish pool,
+   *  on top of the pattern and budget gates. Absent or empty, the
+   *  pool is exactly what it was before modes existed. Like the
+   *  recent log, modes shape selection only — never the targets. */
+  activeModes?: readonly ModeId[];
   /** The day the plan is for. */
   day: string;
   now: string;
@@ -2415,7 +2431,9 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      of dishes; where it cannot, the layered food composition fills
      that meal — the two never mix within a meal's main structure. */
   const dishData =
-    input.dishes && input.dishes.length > 0 ? dishPoolFor(profile, input.dishes) : null;
+    input.dishes && input.dishes.length > 0
+      ? dishPoolFor(profile, input.dishes, input.activeModes ?? [])
+      : null;
   /* P7: the dish bias. Micro-richness is judged here, where the
      candidates' computed panels exist: a dish is rich in a gap
      nutrient when one serving carries at least MICRO_RICH_SHARE of
