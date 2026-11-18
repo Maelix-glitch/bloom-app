@@ -12,11 +12,13 @@ import type { Food, FoodProvenance } from "./types";
 import {
   USDA_REFERENCE_FOODS,
   USDA_REFERENCE_RETRIEVED_ON,
+  USDA_REFERENCE_VERSION,
   findUsdaReference,
   referenceProvenanceGate,
   registrySourceGate,
   searchUsdaReference,
   usdaDataStamp,
+  usdaDatasetVersionLine,
 } from "./usdaReference";
 
 /**
@@ -94,6 +96,40 @@ describe("the data-version stamp (audit #29)", () => {
       provenance: { kind: "user_entered", sourceId: "own-1", label: "Your value" },
     };
     expect(usdaDataStamp(own)).toBeNull();
+  });
+
+  it("the dataset version record names the dataset, licence, releases and retrieval date", () => {
+    expect(USDA_REFERENCE_VERSION.dataset).toBe("USDA FoodData Central");
+    expect(USDA_REFERENCE_VERSION.licence).toBe("CC0 1.0");
+    expect(USDA_REFERENCE_VERSION.releases).toBe(
+      "Foundation Foods 2025-04-24 release · SR Legacy 2018-04 release",
+    );
+    expect(USDA_REFERENCE_VERSION.retrievedOn).toBe(USDA_REFERENCE_RETRIEVED_ON);
+    expect(USDA_REFERENCE_VERSION.fingerprint).toBe(USDA_REFERENCE_FINGERPRINT);
+  });
+
+  it("the record's fingerprint is the fingerprint of exactly the data shipped", () => {
+    const fingerprint = createHash("sha256")
+      .update(canonicalise(USDA_REFERENCE_FOODS), "utf8")
+      .digest("hex");
+    expect(USDA_REFERENCE_VERSION.fingerprint).toBe(fingerprint);
+    /* A stamp claiming any other set disagrees with the data — the same
+       comparison `seed:usda:check` enforces on the generated file. */
+    const tamperedStamp = { ...USDA_REFERENCE_VERSION, fingerprint: "0".repeat(64) };
+    expect(tamperedStamp.fingerprint).not.toBe(fingerprint);
+    const tamperedData = USDA_REFERENCE_FOODS.map((f, i) =>
+      i === 0 ? { ...f, per100g: { ...f.per100g, kcal: f.per100g.kcal + 1 } } : f,
+    );
+    const tamperedFingerprint = createHash("sha256")
+      .update(canonicalise(tamperedData), "utf8")
+      .digest("hex");
+    expect(USDA_REFERENCE_VERSION.fingerprint).not.toBe(tamperedFingerprint);
+  });
+
+  it("the dataset version line renders the stamp with the short fingerprint", () => {
+    expect(usdaDatasetVersionLine()).toBe(
+      `USDA FoodData Central reference set · CC0 1.0 · retrieved ${USDA_REFERENCE_RETRIEVED_ON} · fingerprint ${USDA_REFERENCE_FINGERPRINT.slice(0, 8)}`,
+    );
   });
 });
 

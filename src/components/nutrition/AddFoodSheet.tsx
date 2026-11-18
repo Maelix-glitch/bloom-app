@@ -35,6 +35,7 @@ import {
   labelledFoodNutrients,
   searchUsdaReference,
   usdaDataStamp,
+  usdaDatasetVersionLine,
   type Amount,
   type EntrySource,
   type Food,
@@ -256,14 +257,22 @@ export function LogDialog({
 
         <div className="nut-dialog-scroll px-5 pb-6 pt-2 sm:px-7">
           {view === "search" ? (
-            <SearchStep
-              query={query}
-              onQuery={setQuery}
-              role={role}
-              onRole={setRole}
-              onChoose={chooseFood}
-              onCustom={() => setView("custom")}
-            />
+            <>
+              <SearchStep
+                query={query}
+                onQuery={setQuery}
+                role={role}
+                onRole={setRole}
+                onChoose={chooseFood}
+                onCustom={() => setView("custom")}
+              />
+              <p
+                className="mt-4 text-[length:var(--text-caption)] text-muted-foreground"
+                data-testid="usda-dataset-version"
+              >
+                {usdaDatasetVersionLine()}
+              </p>
+            </>
           ) : null}
 
           {view === "custom" ? (

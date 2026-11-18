@@ -21,6 +21,18 @@ export const USDA_REFERENCE_RETRIEVED_ON = "2026-11-17";
 /** SHA-256 over the canonicalised foods array (see the generator). */
 export const USDA_REFERENCE_FINGERPRINT = "7760eaf65652472e2cb761e0fef4e20b04ba1512c7d367abf8d775368a7c1e36";
 
+/** The dataset version stamp (audit #29): which dataset this set came
+ *  from, under what licence, when Bloom retrieved it, and the fingerprint
+ *  of the exact set shipped. `seed:usda:check` fails if the stamp and
+ *  the data disagree. */
+export const USDA_REFERENCE_VERSION = {
+  dataset: "USDA FoodData Central",
+  licence: "CC0 1.0",
+  releases: "Foundation Foods 2025-04-24 release · SR Legacy 2018-04 release",
+  retrievedOn: "2026-11-17",
+  fingerprint: "7760eaf65652472e2cb761e0fef4e20b04ba1512c7d367abf8d775368a7c1e36",
+} as const;
+
 /** The reference foods, raw — read them through `../usdaReference`,
  *  which parses every entry with the strict N1 parser. */
 export const USDA_REFERENCE_FOODS_RAW: readonly unknown[] = [
