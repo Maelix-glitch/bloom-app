@@ -14,18 +14,22 @@
   color: var(--text-secondary);
 }
 
-.hh-note {
-  font-size: var(--text-caption);
-  line-height: var(--leading-callout);
-  color: var(--muted-foreground);
-}
-
 .hh-member {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-control);
   padding: var(--space-3) var(--space-4);
   display: grid;
   gap: var(--space-2);
+}
+
+/* A member display row (owner + stored members): no box of its own —
+   a hairline divider and tighter padding keep the list compact. The
+   add form keeps the boxed .hh-member treatment. */
+.hh-member--row {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  padding: var(--space-3) 0;
 }
 
 .hh-member-head {
@@ -104,7 +108,32 @@
   font-size: var(--text-caption);
 }
 
-.hh-dish {
-  font-size: var(--text-callout);
+/* The "Cooks for everyone" sample: a few chips, not a list — the
+   full library is one tap away via .hh-browse. */
+.hh-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hh-chip {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.25rem 0.7rem;
+  font-size: var(--text-caption);
   line-height: var(--leading-callout);
+  color: var(--text-secondary);
+}
+
+.hh-browse {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--text-callout);
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: none;
 }

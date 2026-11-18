@@ -14,6 +14,7 @@
  */
 
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { useHousehold } from "@/hooks/useHousehold";
 import { DIETARY_LABEL, DIETARY_OPTIONS } from "@/lib/assessment/questions";
@@ -22,7 +23,7 @@ import type { DietaryPattern } from "@/lib/vitalis/domain/profile";
 
 import "@/styles/household.css";
 
-const PREVIEW_COUNT = 8;
+const PREVIEW_COUNT = 3;
 
 export function HouseholdSection() {
   const { members, table, suitability, caregiver, add, remove } = useHousehold();
@@ -70,13 +71,14 @@ export function HouseholdSection() {
       <div className="hh-stack" style={{ marginTop: "var(--space-4)" }}>
         <p className="hh-body">
           One kitchen cooks for everyone at your table. You are member #1 — your pattern and
-          allergies come from your Assessment and are never re-asked here. This list is only
-          for the other people you cook for.
+          allergies come from your Assessment and are never re-asked here. To change yours,
+          update your preferences in the Assessment. This list is only for the other people
+          you cook for.
         </p>
 
         {/* Member #1: the account holder, from their own record. */}
         {owner ? (
-          <div className="hh-member">
+          <div className="hh-member hh-member--row">
             <div className="hh-member-head">
               <span className="hh-member-name">You</span>
               <span className="hh-line">
@@ -99,7 +101,7 @@ export function HouseholdSection() {
         {members.map((member) => {
           const lines = caregiver.find((c) => c.member.id === member.id)?.lines ?? [];
           return (
-            <div key={member.id} className="hh-member">
+            <div key={member.id} className="hh-member hh-member--row">
               <div className="hh-member-head">
                 <span className="hh-member-name">{member.name}</span>
                 <button
@@ -202,25 +204,26 @@ export function HouseholdSection() {
         ) : null}
 
         {preview.length > 0 ? (
-          <ul className="hh-stack" style={{ gap: "var(--space-1)" }}>
-            {preview.map((dish) => (
-              <li key={dish.id} className="hh-dish">
-                {dish.name.en}
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="hh-chips">
+              {preview.map((dish) => (
+                <li key={dish.id} className="hh-chip">
+                  {dish.name.en}
+                </li>
+              ))}
+            </ul>
+            <div>
+              <Link to="/nutrition" className="hh-browse">
+                Browse all {suitability.totalDishes.toLocaleString("en-IN")} dishes
+              </Link>
+            </div>
+          </>
         ) : (
           <p className="hh-body">
             No dish in the library suits the whole table right now — try cooking in parts, or
             check whether a pattern above is stricter than the person really eats.
           </p>
         )}
-        {suitability.suitingCount > preview.length ? (
-          <p className="hh-note">
-            …and {suitability.suitingCount - preview.length} more. The Dishes tab shows the
-            full library.
-          </p>
-        ) : null}
       </div>
     </div>
   );
