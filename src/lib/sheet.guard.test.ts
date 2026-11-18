@@ -246,6 +246,248 @@ describe("sheet guard: the Vitalis orb stays under every sheet", () => {
   });
 });
 
+/* ------------------------------------------------------------------ */
+/* Panel opacity — the bleed-through pins (owner, 2026-11-18, the third
+ * raising of this class). The #171 audit pinned height caps and
+ * backdrops but never the PANEL's own fill, so .bsheet-panel could sit
+ * at 88% glass over a 24px backdrop blur and the page ghosted through
+ * the paywall — text legible through the modal body, the gold orb
+ * glowing through the panel as if it sat on top. The slab precedent
+ * (assess-panel, tk2 panels, PR #87) is now the rule for EVERY overlay
+ * family: the winning background's bottom layer must resolve fully
+ * opaque, and no panel may use backdrop-filter as its surface. A
+ * translucent sheen (var(--glass-bg)) may sit OVER a solid colour —
+ * the .bill-card pattern — never instead of one. Backdrops are the
+ * opposite contract: they are the dimming layer, pinned at the
+ * owner's .72 darkness so the page behind a modal is truly dimmed. */
+
+const declValues = (body: string, prop: string): string[] =>
+  body
+    .split(";")
+    .map((d) => d.trim())
+    .filter((d) => d.startsWith(`${prop}:`))
+    .map((d) => d.slice(prop.length + 1).trim());
+
+/* Blocks whose selector list names `sel` EXACTLY (a comma part equal to
+ * the selector) — ".bsheet-panel" must not inherit ".bsheet-panel.x"
+ * overrides or ".x .bsheet-panel" placements. */
+const exactBlocks = (rel: string, sel: string) =>
+  blocks(read(rel)).filter((b) =>
+    b.selector.split(",").some((part) => part.split("\n").pop()!.trim() === sel),
+  );
+
+/** The background a panel actually ends up with: the last `background`
+ *  shorthand across its exact blocks, else background-color under
+ *  background-image (the .bill-card composition). */
+function winningBackground(rel: string, sel: string): string {
+  const bs = exactBlocks(rel, sel);
+  expect(bs.length, `${rel} must define ${sel}`).toBeGreaterThan(0);
+  let win = "";
+  for (const b of bs) {
+    const shorts = declValues(b.body, "background");
+    if (shorts.length) win = shorts[shorts.length - 1]!;
+  }
+  if (win) return win;
+  let color = "";
+  let image = "";
+  for (const b of bs) {
+    const c = declValues(b.body, "background-color");
+    if (c.length) color = c[c.length - 1]!;
+    const i = declValues(b.body, "background-image");
+    if (i.length) image = i[i.length - 1]!;
+  }
+  return image ? `${image}, ${color}` : color;
+}
+
+/** Split a background value into layers on top-level commas. */
+function layersOf(value: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let cur = "";
+  for (const ch of value) {
+    if (ch === "(") depth++;
+    if (ch === ")") depth--;
+    if (ch === "," && depth === 0) {
+      out.push(cur.trim());
+      cur = "";
+    } else cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
+/** Alpha carried by one colour expression; 1 when fully opaque. */
+function alphaOf(expr: string): number {
+  const e = expr.replace(/\s+/g, " ").trim();
+  const fn = /(?:rgba|hsla)\(([^)]*)\)/.exec(e);
+  if (fn) {
+    const parts = fn[1]!.split(",").map((s) => s.trim());
+    if (parts.length === 4) return parseFloat(parts[3]!);
+  }
+  if (/\b(?:rgb|hsl|oklch|oklab)\(/.test(e)) {
+    const slash = /\/\s*([\d.]+)(%?)\s*\)/.exec(e);
+    if (slash) {
+      const v = parseFloat(slash[1]!);
+      return slash[2] === "%" ? v / 100 : v;
+    }
+  }
+  if (e.includes("color-mix(") && e.includes("transparent")) {
+    const m = /([\d.]+)%\s*,\s*transparent/.exec(e);
+    if (m) return parseFloat(m[1]!) / 100;
+    const m2 = /transparent\s+([\d.]+)%/.exec(e);
+    if (m2) return 1 - parseFloat(m2[1]!) / 100;
+    return 0;
+  }
+  return 1;
+}
+
+/** A background layer is opaque when it is a solid colour/token, a
+ *  colour-mix of opaque stops, or a gradient whose every stop is
+ *  opaque. The glass sheen alone is NOT a surface. */
+function layerOpaque(layer: string): boolean {
+  const l = layer.trim();
+  if (l === "var(--glass-bg)") return false;
+  if (l.startsWith("linear-gradient")) {
+    if (l.includes("transparent")) return false;
+    for (const m of l.matchAll(/(?:rgba|hsla)\(([^)]*)\)/g)) {
+      const p = m[1]!.split(",");
+      if (p.length === 4 && parseFloat(p[3]!.trim()) < 1) return false;
+    }
+    return true;
+  }
+  return alphaOf(l) >= 1;
+}
+
+const PANELS: [string, string][] = [
+  ["styles/bloom-sheet.css", ".bsheet-panel"],
+  ["styles/bloom-sheet.css", ".bsheet-panel.assess-panel"],
+  ["styles/trackers.css", ".bsheet-panel.tk2-log-panel"],
+  ["styles/trackers.css", ".bsheet-panel.tk2-snap-panel"],
+  ["styles/stories.css", ".ssheet"],
+  ["styles/admin-panel.css", ".adm-panel"],
+  ["styles/nutrition.css", ".nut-dialog-panel"],
+  ["styles/nutrition.css", ".nut-lightbox-panel"],
+  ["styles/orb.css", ".coach-orb-panel"],
+  ["styles/coach.css", ".coach-palette"],
+  ["styles/coach.css", ".coach-row-menu"],
+  ["styles/coach.css", ".coach-attach-menu"],
+  ["styles/rewards.css", ".reward-delivery-modal"],
+  ["styles/rewards.css", ".reward-toast"],
+  ["styles/add-habit-modal.css", ".bloom-add-habit .modal"],
+  ["styles/shell.css", ".conn-notice"],
+  ["styles/shell.css", ".conn-notice-chip"],
+  ["styles/progression.css", ".pg-toast"],
+  ["styles/billing.css", ".bill-card"],
+];
+
+describe("sheet guard: every overlay panel is fully opaque", () => {
+  it("each panel's winning background bottoms out on an opaque layer", () => {
+    for (const [rel, sel] of PANELS) {
+      const win = winningBackground(rel, sel);
+      const layers = layersOf(win);
+      const bottom = layers[layers.length - 1]!;
+      expect(
+        layerOpaque(bottom),
+        `${sel} in ${rel} must bottom out opaque — winning background: ${win}`,
+      ).toBe(true);
+    }
+  });
+
+  it("no panel uses backdrop-filter as its surface", () => {
+    for (const [rel, sel] of PANELS) {
+      for (const b of exactBlocks(rel, sel)) {
+        for (const prop of ["backdrop-filter", "-webkit-backdrop-filter"]) {
+          for (const v of declValues(b.body, prop)) {
+            expect(
+              v.startsWith("none"),
+              `${sel} in ${rel} must not blur the page through itself (${prop}: ${v})`,
+            ).toBe(true);
+          }
+        }
+      }
+    }
+  });
+
+  it("the Tailwind panels and the toast shell stay solid", () => {
+    const sheet = read("components/ui/sheet.tsx");
+    expect(sheet).toContain("bg-surface");
+    expect(sheet).not.toContain("bg-surface/");
+    const dialog = read("components/ui/dialog.tsx");
+    expect(dialog).toContain("bg-surface");
+    expect(dialog).not.toContain("bg-surface/");
+    expect(read("components/ui/dropdown-menu.tsx")).toContain("bg-popover");
+    const toastShell = read("components/system/toastShell.ts");
+    expect(toastShell).toContain('background: "var(--surface-2)"');
+    expect(toastShell).not.toMatch(/background:\s*"color-mix/);
+    expect(toastShell).not.toContain("backdropFilter");
+  });
+});
+
+describe("sheet guard: every dialog backdrop dims to the owner's .72", () => {
+  it("each family's backdrop bottoms out at alpha >= 0.72", () => {
+    const cases: [string, string][] = [
+      ["styles/bloom-sheet.css", ".bsheet-backdrop"],
+      ["styles/nutrition.css", ".nut-dialog-backdrop"],
+      ["styles/stories.css", ".ssheet-backdrop"],
+      ["styles/orb.css", ".coach-orb-backdrop"],
+      ["styles/coach.css", ".coach-palette-backdrop"],
+      ["styles/admin-panel.css", ".adm-scrim"],
+      ["styles/add-habit-modal.css", ".bloom-add-habit .backdrop"],
+      ["styles/rewards.css", ".reward-delivery-modal-backdrop"],
+    ];
+    for (const [rel, sel] of cases) {
+      const win = winningBackground(rel, sel);
+      const layers = layersOf(win);
+      const bottom = layers[layers.length - 1]!;
+      expect(
+        alphaOf(bottom),
+        `${sel} in ${rel} must dim to >= 0.72 — winning background: ${win}`,
+      ).toBeGreaterThanOrEqual(0.72);
+    }
+  });
+});
+
+describe("sheet guard: sheet content is clipped, the scroll is inside", () => {
+  it("each sheet panel clips at its radius and owns an inner scroll region", () => {
+    const families: [string, string, string, string][] = [
+      ["styles/bloom-sheet.css", ".bsheet-panel", "styles/bloom-sheet.css", ".bsheet-scroll"],
+      ["styles/nutrition.css", ".nut-dialog-panel", "styles/nutrition.css", ".nut-dialog-scroll"],
+      ["styles/stories.css", ".ssheet", "styles/stories.css", ".ssheet-scroll"],
+      ["styles/orb.css", ".coach-orb-panel", "styles/orb.css", ".coach-orb-thread"],
+      ["styles/admin-panel.css", ".adm-panel", "styles/admin-panel.css", ".adm-list"],
+    ];
+    for (const [prel, psel, srel, ssel] of families) {
+      expect(
+        exactBlocks(prel, psel).some((b) => b.body.includes("overflow: hidden")),
+        `${psel} in ${prel} must clip its content at the panel radius`,
+      ).toBe(true);
+      const scroll = exactBlocks(srel, ssel);
+      expect(scroll.length, `${ssel} in ${srel} must exist`).toBeGreaterThan(0);
+      expect(
+        scroll.some((b) => b.body.includes("overflow-y: auto")),
+        `${ssel} in ${srel} must be the inner scroll region`,
+      ).toBe(true);
+      expect(
+        scroll.some((b) => b.body.includes("overscroll-behavior: contain")),
+        `${ssel} in ${srel} must contain its overscroll`,
+      ).toBe(true);
+    }
+  });
+
+  it("the sheet stack stays above the floating orb", () => {
+    const zOf = (rel: string, sel: string): number => {
+      const hit = exactBlocks(rel, sel)
+        .map((b) => /z-index:\s*(\d+)/.exec(b.body)?.[1])
+        .find((v) => v !== undefined);
+      expect(hit, `${sel} in ${rel} carries a z-index`).toBeTruthy();
+      return Number(hit);
+    };
+    expect(zOf("styles/orb.css", ".coach-orb")).toBeLessThan(
+      zOf("styles/bloom-sheet.css", ".bsheet"),
+    );
+  });
+});
+
 describe("sheet guard: dialog census", () => {
   it("every hand-rendered dialog is classified as a sheet family or a recorded immersive surface", () => {
     const files = [

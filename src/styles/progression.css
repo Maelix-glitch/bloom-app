@@ -1367,8 +1367,9 @@
   padding: 0.7rem 1.15rem;
   border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--gold) 34%, transparent);
-  background: color-mix(in oklab, var(--background) 88%, transparent);
-  backdrop-filter: blur(14px);
+  /* Solid slab — a toast is an overlay panel (bleed-through fix,
+     2026-11-18; pinned by the sheet guard). */
+  background: var(--background);
   font-size: var(--text-caption);
   color: var(--foreground);
   box-shadow: var(--pg-shadow);

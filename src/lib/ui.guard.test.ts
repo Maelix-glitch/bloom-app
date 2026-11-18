@@ -1517,7 +1517,15 @@ describe("UI guard: legacy engines — layered surfaces carry a no-color-mix fal
     progression: "styles/progression.css",
   };
   const CRITICAL: [keyof typeof FILES, string][] = [
-    ["sheet", ".bsheet-panel"],
+    /* Bleed-through fix (2026-11-18): .bsheet-panel, .ssheet and
+       .adm-panel left this list — their backgrounds are no longer
+       layered color-mix at all. The paywall bled through the 88%
+       glass panel, so all three are now plain solid slabs outright
+       (background: var(--surface) / var(--ap-panel), no mix line for
+       a legacy engine to drop), and the sheet guard pins their
+       opacity. The invariant this list protects — a legacy engine
+       never faces a transparent structural panel — holds for them
+       by construction. */
     ["sheet", ".bsheet-backdrop"],
     ["coach", ".coach-composer"],
     ["coach", ".coach-composer:focus-within"],
@@ -1534,8 +1542,6 @@ describe("UI guard: legacy engines — layered surfaces carry a no-color-mix fal
        fallback rule at all, so their color-mix-only backgrounds left
        them fully transparent on legacy engines. They carry the plain
        declaration in source now, like the surfaces above. */
-    ["stories", ".ssheet"],
-    ["admin", ".adm-panel"],
     ["admin", ".adm-scrim"],
     ["admin", ".adm-bar"],
     ["progression", ".pg-ceremony"],

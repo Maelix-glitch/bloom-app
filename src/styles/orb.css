@@ -133,6 +133,10 @@
   bottom: 0;
   display: flex;
   flex-direction: column;
+  /* Clip at the radius — content never paints past the rounded top
+     corners (bleed-through fix, 2026-11-18; the thread inside is the
+     scroll region). */
+  overflow: hidden;
   /* Solid, opaque — the mobile-sheet rule: no bleed-through, ever. */
   background: var(--panel);
   border: 1px solid var(--border-strong);
