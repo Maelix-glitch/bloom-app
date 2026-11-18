@@ -15,6 +15,8 @@
  * recorded days, reported by the engine in programmes.ts.
  */
 
+import type { VitalisGoal } from "@/lib/vitalis/domain/profile";
+
 export type ProgrammeTargetKind =
   | "food_log_days"
   | "habit_tick_days"
@@ -39,6 +41,14 @@ export interface ProgrammeDefinition {
   /** Plain description — structure only, no outcome promises. */
   blurb: string;
   weeks: ProgrammeWeek[];
+  /**
+   * The assessment goals this programme is built for, when it is built
+   * for any in particular — data, declared next to the programme it
+   * describes, so the UI can mark a genuine match ("Matches your
+   * goal") from the person's own stated goal instead of guessing from
+   * the blurb's prose. Absent = a general structure for any goal.
+   */
+  goals?: readonly VitalisGoal[];
 }
 
 const t = (kind: ProgrammeTargetKind, count: number): ProgrammeTarget => ({ kind, count });
@@ -72,6 +82,9 @@ export const STRONG_START: ProgrammeDefinition = {
 export const BUILD_AND_FUEL: ProgrammeDefinition = {
   id: "build-and-fuel",
   name: "Build & Fuel",
+  /* The blurb's own words — "aligned to a build-strength goal" — as
+     data: the goal whose label is "Build strength and muscle". */
+  goals: ["recomp"],
   blurb:
     "Twelve weeks built around your plan: follow it on more days, log what you " +
     "actually ate, keep habits loading up, and weigh in weekly so the plan can " +
@@ -96,6 +109,18 @@ export const PROGRAMMES: ProgrammeDefinition[] = [STRONG_START, BUILD_AND_FUEL];
 
 export function programmeById(id: string): ProgrammeDefinition | null {
   return PROGRAMMES.find((p) => p.id === id) ?? null;
+}
+
+/**
+ * True when the programme declares the person's stated goal among the
+ * goals it is built for. A null goal (no assessment answer) matches
+ * nothing — the UI then recommends nothing, honestly.
+ */
+export function programmeMatchesGoal(
+  def: ProgrammeDefinition,
+  goal: VitalisGoal | null,
+): boolean {
+  return goal !== null && def.goals !== undefined && def.goals.includes(goal);
 }
 
 /** The plain-words label for a target kind — the record it counts. */

@@ -214,10 +214,11 @@ describe("AssessmentProfileCard — previous assessments", () => {
 
     render(<AssessmentProfileCard />);
     expect(screen.getByText("Previous assessments")).toBeTruthy();
-    /* formatDate is locale-shaped; pin the day, month and year either way. */
-    expect(screen.getByText(/1 September 2026|September 1, 2026/)).toBeTruthy();
+    /* The house date format (rulebook §17, src/lib/format.ts) — one
+       format everywhere: "1 Sep 2026", never a surface-local long form. */
+    expect(screen.getByText("1 Sept 2026")).toBeTruthy();
     expect(screen.getByText("Gain weight")).toBeTruthy();
-    expect(screen.getByText(/15 June 2026|June 15, 2026/)).toBeTruthy();
+    expect(screen.getByText("15 Jun 2026")).toBeTruthy();
     expect(screen.getByText("Maintain my weight")).toBeTruthy();
   });
 

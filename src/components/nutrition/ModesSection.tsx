@@ -61,19 +61,22 @@ export function ModesSection() {
       <h2 className="mt-2 font-display text-[length:var(--text-section)] text-foreground">
         Guardrails you choose for your plan
       </h2>
-      <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+      <p className="mt-2 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
         Modes are preferences you switch on — not a diagnosis, and not medical advice. They don&apos;t
         replace your doctor. A mode simply hides some dishes from your plan, by the plain rules
         listed under it.
       </p>
 
-      <div className="mt-4 flex flex-col gap-4">
+      <div className="mt-2">
         {MODE_DEFINITIONS.map((def) => {
           const on = active.includes(def.id);
           const hiddenCount = hidden.get(def.id);
           return (
-            <div key={def.id} className="border-t border-border-subtle pt-4">
-              <div className="flex items-start justify-between gap-3">
+            /* A bounded control row (system slice): the mode's text sits
+               in a measure-capped column and the switch right after it —
+               never at the far edge of the full-width card. */
+            <div key={def.id} className="kv-row kv-row--control">
+              <div className="min-w-0">
                 <h3 className="text-[length:var(--text-body)] font-medium text-foreground">
                   {def.name}
                   {def.informationOnly ? (
@@ -82,45 +85,45 @@ export function ModesSection() {
                     </span>
                   ) : null}
                 </h3>
-                {def.informationOnly ? (
-                  /* An information-only mode checks nothing — Bloom's food
-                     data carries none of the nutrients it would judge by —
-                     so it must not present a live switch. The control is
-                     disabled and off, the badge says why it is here at
-                     all, and the dataNote below names the missing data.
-                     Stored prefs are never rewritten by this rendering. */
-                  <Switch
-                    checked={false}
-                    disabled
-                    aria-label={`${def.name} mode — not available yet`}
-                  />
-                ) : (
-                  <Switch
-                    checked={on}
-                    onCheckedChange={(checked) => toggle(def.id, checked)}
-                    aria-label={`${def.name} mode`}
-                  />
-                )}
+                {def.ruleLines.map((line) => (
+                  <p
+                    key={line}
+                    className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
+                  >
+                    {line}
+                  </p>
+                ))}
+                {def.informationOnly && def.dataNote ? (
+                  <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                    {def.dataNote}
+                  </p>
+                ) : null}
+                {on && !def.informationOnly && hiddenCount !== undefined ? (
+                  <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+                    On now — hides {hiddenCount} of {library.length} dishes in the library from your
+                    plan.
+                  </p>
+                ) : null}
               </div>
-              {def.ruleLines.map((line) => (
-                <p
-                  key={line}
-                  className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
-                >
-                  {line}
-                </p>
-              ))}
-              {def.informationOnly && def.dataNote ? (
-                <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                  {def.dataNote}
-                </p>
-              ) : null}
-              {on && !def.informationOnly && hiddenCount !== undefined ? (
-                <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
-                  On now — hides {hiddenCount} of {library.length} dishes in the library from your
-                  plan.
-                </p>
-              ) : null}
+              {def.informationOnly ? (
+                /* An information-only mode checks nothing — Bloom's food
+                   data carries none of the nutrients it would judge by —
+                   so it must not present a live switch. The control is
+                   disabled and off, the badge says why it is here at
+                   all, and the dataNote below names the missing data.
+                   Stored prefs are never rewritten by this rendering. */
+                <Switch
+                  checked={false}
+                  disabled
+                  aria-label={`${def.name} mode — not available yet`}
+                />
+              ) : (
+                <Switch
+                  checked={on}
+                  onCheckedChange={(checked) => toggle(def.id, checked)}
+                  aria-label={`${def.name} mode`}
+                />
+              )}
             </div>
           );
         })}

@@ -32,8 +32,10 @@ import { Link } from "@tanstack/react-router";
 import { ClipboardCheck, ClipboardList, X } from "lucide-react";
 
 import { BloomSheet } from "@/components/ui/bloom-sheet";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fmtDate } from "@/lib/format";
 import { setPref } from "@/lib/prefs";
 import { WEIGHINS_KEY, parseWeighIns, type WeighIn } from "@/lib/health/body";
 import { FOODLOG_KEY, parseFoodLogValue } from "@/lib/nutrition/store";
@@ -118,9 +120,6 @@ function usePromptState(): [AssessmentPromptState, () => void] {
   };
   return [prompt, dismiss];
 }
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
 
 const prefersReducedMotion = (): boolean =>
   typeof window !== "undefined" &&
@@ -299,7 +298,7 @@ function AssessmentSettledCard({
             Your starting point
           </h2>
           <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            {state.completedAt ? <>Completed {formatDate(state.completedAt)}. </> : null}
+            {state.completedAt ? <>Completed {fmtDate(state.completedAt)}. </> : null}
             {goal ? <>Your goal: {GOAL_LABEL[goal].toLowerCase()}.</> : null}
           </p>
           {targetState.kind === "ready" ? (
@@ -662,7 +661,7 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
 
   return (
     <div className="mt-5 border-t border-border/60 pt-4">
-      <p className="pf-eyebrow">Since your assessment</p>
+      <h3 className="pf-subhead">Since your assessment</h3>
       {lines.length > 0 ? (
         <ul className="mt-2 space-y-1.5">
           {lines.map((line) => (
@@ -828,6 +827,7 @@ export function AssessmentProfileCard() {
     parseAssessmentHistoryEntries,
     EMPTY_HISTORY_ENTRIES,
   );
+  const weighIns = usePrefValue(WEIGHINS_KEY, parseWeighIns, EMPTY_WEIGHINS);
   const [flowOpen, setFlowOpen] = useState(false);
   /* Which door opened the flow: a retake of a completed assessment opens
      on the intro step (the flow's retake intent); take/continue opens at
@@ -839,70 +839,90 @@ export function AssessmentProfileCard() {
 
   const statusLine =
     state.status === "complete" && state.completedAt
-      ? `Completed ${formatDate(state.completedAt)}.`
+      ? `Completed ${fmtDate(state.completedAt)}.`
       : state.status === "in_progress"
         ? "Part-finished. Your answers so far are saved."
         : "Not taken yet.";
 
+  /* The aside's status badge, from the same staleness read the Living
+     section below makes — one source, so the two can never disagree. */
+  const stale =
+    state.status === "complete"
+      ? assessmentStaleness(state, weighIns, new Date().toISOString()).stale
+      : false;
+
   return (
     <div className="pf-card pf-card--pad assess-card">
-      <div className="pf-section-head">
+      {/* Split card (system slice): body = title + one line; aside =
+          status + actions. Neither half sits empty. */}
+      <div className="split-card">
         <div>
           <p className="pf-eyebrow">Assessment</p>
           <h2 className="pf-title">Your starting point</h2>
+          <p className="mt-3 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            How you eat, move, sleep and recover, what you want to change, and the safety answers
+            that decide what Bloom will suggest. {statusLine}
+          </p>
         </div>
-      </div>
-      <p className="max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-        How you eat, move, sleep and recover, what you want to change, and the safety answers that
-        decide what Bloom will suggest. {statusLine}
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {state.status === "complete" ? (
-          <>
-            <Button type="button" size="sm" onClick={() => setSummaryOpen(true)}>
-              View summary
-            </Button>
+        <div className="split-card-aside">
+          {state.status === "complete" ? (
+            stale ? (
+              /* Not "Worth updating" — the Living section's banner below
+                 already carries that heading; the badge is the short
+                 status, the banner is the explanation. */
+              <Badge variant="gold">Out of date</Badge>
+            ) : (
+              <Badge>Up to date</Badge>
+            )
+          ) : state.status === "in_progress" ? (
+            <Badge variant="secondary">Part-finished</Badge>
+          ) : null}
+          {state.status === "complete" ? (
+            <>
+              <Button type="button" size="sm" variant="secondary" onClick={() => setSummaryOpen(true)}>
+                View summary
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (!assessmentGateOpen()) return;
+                  setFlowRetake(true);
+                  setFlowOpen(true);
+                }}
+              >
+                Retake
+              </Button>
+            </>
+          ) : (
             <Button
               type="button"
               size="sm"
-              variant="ghost"
               onClick={() => {
                 if (!assessmentGateOpen()) return;
-                setFlowRetake(true);
+                setFlowRetake(false);
                 setFlowOpen(true);
               }}
             >
-              Retake
+              {state.status === "in_progress" ? "Continue assessment" : "Take the assessment"}
             </Button>
-          </>
-        ) : (
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => {
-              if (!assessmentGateOpen()) return;
-              setFlowRetake(false);
-              setFlowOpen(true);
-            }}
-          >
-            {state.status === "in_progress" ? "Continue assessment" : "Take the assessment"}
-          </Button>
-        )}
+          )}
+        </div>
       </div>
 
       <LivingAssessmentSection state={state} />
 
       {history.length > 0 ? (
         <div className="mt-5 border-t border-border/60 pt-4">
-          <p className="pf-eyebrow">Previous assessments</p>
-          <ul className="mt-2 space-y-1.5">
+          <h3 className="pf-subhead">Previous assessments</h3>
+          {/* Bounded kv rows (system slice): the goal sits in the column
+              next to its date — not at the card's far edge. */}
+          <ul className="mt-1">
             {history.map((entry) => (
-              <li
-                key={entry.completedAt}
-                className="flex flex-wrap items-baseline justify-between gap-x-3 text-[length:var(--text-support)] leading-[var(--leading-body)]"
-              >
-                <span className="text-foreground">{formatDate(entry.completedAt)}</span>
-                <span className="text-muted-foreground">
+              <li key={entry.completedAt} className="kv-row">
+                <span className="kv-k tabular-nums">{fmtDate(entry.completedAt)}</span>
+                <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
                   {entry.answers.goal ? GOAL_LABEL[entry.answers.goal] : "No goal stated"}
                 </span>
               </li>
