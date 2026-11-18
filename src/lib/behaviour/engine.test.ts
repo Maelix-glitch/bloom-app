@@ -234,6 +234,33 @@ describe("mood detector", () => {
     expect(selectNudges(base({ moodEntries: two }), state()).primary).toBeNull();
   });
 
+  it("three check-ins stay silent without the emotional-eating context (§10)", () => {
+    const three = daysBack(YESTERDAY, 3).map((d) => moodEntry(d, 9, 0));
+    expect(selectNudges(base({ moodEntries: three }), state()).primary).toBeNull();
+    expect(
+      selectNudges(base({ moodEntries: three, emotionalEating: null }), state()).primary,
+    ).toBeNull();
+    /* A low answer is context too — it changes nothing. */
+    expect(
+      selectNudges(base({ moodEntries: three, emotionalEating: 2 }), state()).primary,
+    ).toBeNull();
+  });
+
+  it("a high emotional-eating answer lowers the bar to three days, and the copy names it", () => {
+    const three = daysBack(YESTERDAY, 3).map((d) => moodEntry(d, 9, 0));
+    const { primary } = selectNudges(
+      base({ moodEntries: three, emotionalEating: 4 }),
+      state(),
+    );
+    expect(primary?.kind).toBe("mood");
+    expect(primary?.detail).toContain("3 of the last 7 days");
+    expect(primary?.detail).toContain("eating often follows your feelings");
+    /* "Very often" (5) behaves the same. */
+    expect(
+      selectNudges(base({ moodEntries: three, emotionalEating: 5 }), state()).primary?.kind,
+    ).toBe("mood");
+  });
+
   it("stays silent once checked in today", () => {
     const withToday = [...checkIns, moodEntry(TODAY, 8, 0)];
     expect(selectNudges(base({ moodEntries: withToday }), state()).primary).toBeNull();

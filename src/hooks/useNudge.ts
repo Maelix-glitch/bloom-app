@@ -34,6 +34,11 @@ import {
   writeNudgeState,
 } from "@/lib/behaviour/state";
 import { selectNudges, type Nudge, type NudgeSelection } from "@/lib/behaviour/engine";
+import {
+  ASSESSMENT_KEY,
+  EMPTY_ASSESSMENT_STATE,
+  parseAssessmentState,
+} from "@/lib/assessment/state";
 
 const EMPTY_ENTRIES: LogEntry[] = [];
 const EMPTY_WEIGH_INS: WeighIn[] = [];
@@ -62,6 +67,10 @@ export function useNudge(args: UseNudgeArgs): NudgeControls {
   const plan = usePrefValue(PLAN_KEY, parsePlanValue, null);
   const weighIns = usePrefValue(WEIGHINS_KEY, parseWeighIns, EMPTY_WEIGH_INS);
   const state = usePrefValue(NUDGES_KEY, parseNudgeState, EMPTY_NUDGE_STATE);
+  /* The Assessment's emotional-eating answer (§10) is the mood
+   * detector's context — read from the same pref the other sources
+   * use, never estimated from behaviour. */
+  const assessment = usePrefValue(ASSESSMENT_KEY, parseAssessmentState, EMPTY_ASSESSMENT_STATE);
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -77,10 +86,23 @@ export function useNudge(args: UseNudgeArgs): NudgeControls {
         plan,
         weighIns,
         moodEntries,
+        emotionalEating: assessment.answers.emotionalEating,
       },
       state,
     );
-  }, [ready, today, nowMinutes, habits, habitLogs, foodEntries, plan, weighIns, moodEntries, state]);
+  }, [
+    ready,
+    today,
+    nowMinutes,
+    habits,
+    habitLogs,
+    foodEntries,
+    plan,
+    weighIns,
+    moodEntries,
+    assessment,
+    state,
+  ]);
 
   const primaryKey = selection.primary?.key ?? null;
   const secondaryKey = selection.secondary?.key ?? null;

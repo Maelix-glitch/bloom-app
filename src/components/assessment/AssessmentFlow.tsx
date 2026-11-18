@@ -25,11 +25,20 @@ import {
   ACTIVITY_OPTIONS,
   BUDGET_OPTIONS,
   CONDITION_OPTIONS,
+  COOKING_OPTIONS,
+  CRAVING_KIND_OPTIONS,
   CUISINE_PREFERENCE_OPTIONS,
   DIETARY_OPTIONS,
+  EATING_SETTING_OPTIONS,
+  EMOTIONAL_EATING_OPTIONS,
+  EQUIPMENT_OPTIONS,
+  FAILURE_REASON_OPTIONS,
   GOAL_OPTIONS,
+  HUNGER_OPTIONS,
   MEALS_OPTIONS,
+  PREP_TIME_OPTIONS,
   RATE_OPTIONS,
+  READINESS_OPTIONS,
   RESTEDNESS_OPTIONS,
   SLEEP_HOURS_OPTIONS,
   SLEEP_QUALITY_OPTIONS,
@@ -37,6 +46,12 @@ import {
   type AssessmentStep,
 } from "@/lib/assessment/questions";
 import { EMPTY_ANSWERS, type AssessmentAnswers } from "@/lib/assessment/state";
+import type {
+  CravingKind,
+  EquipmentItem,
+  FailureReason,
+  PastAttempt,
+} from "@/lib/vitalis/domain/profile";
 import { summaryOf } from "@/lib/assessment/summary";
 import { AssessmentSummaryView } from "./AssessmentSummaryView";
 import {
@@ -273,6 +288,90 @@ const splitList = (text: string): string[] =>
     .filter(Boolean)
     .slice(0, 30);
 
+/**
+ * The past-attempts editor (spec §10): up to three things the person
+ * has tried before, each in their own words plus the reasons it came
+ * unstuck. An empty list is a complete answer — a first attempt is
+ * useful to know too. Rows with no approach text are dropped by the
+ * answers parser, so a half-started row never becomes a claim.
+ */
+function PastAttemptsField({
+  attempts,
+  onChange,
+}: {
+  attempts: readonly PastAttempt[];
+  onChange: (attempts: PastAttempt[]) => void;
+}) {
+  const toggleReason = (index: number, reason: FailureReason) =>
+    onChange(
+      attempts.map((a, j) =>
+        j === index
+          ? {
+              ...a,
+              failureReasons: a.failureReasons.includes(reason)
+                ? a.failureReasons.filter((r) => r !== reason)
+                : [...a.failureReasons, reason],
+            }
+          : a,
+      ),
+    );
+  return (
+    <div className="flex flex-col gap-3">
+      <FieldLabel>Have you tried to change how you eat before?</FieldLabel>
+      {attempts.map((attempt, i) => (
+        <div
+          key={i}
+          className="flex flex-col gap-2 rounded-2xl border border-border bg-surface-2 px-4 py-3.5"
+        >
+          <div className="flex items-center gap-2">
+            <Input
+              aria-label={`Past attempt ${i + 1}`}
+              placeholder="What did you try? For example: a low-carb diet"
+              value={attempt.approach}
+              onChange={(e) =>
+                onChange(attempts.map((a, j) => (j === i ? { ...a, approach: e.target.value } : a)))
+              }
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onChange(attempts.filter((_, j) => j !== i))}
+            >
+              Remove
+            </Button>
+          </div>
+          <p className="text-[length:var(--text-support)] text-muted-foreground">
+            Why did it come unstuck? Tap any that fit.
+          </p>
+          <MultiChoice
+            ariaLabel={`Why attempt ${i + 1} came unstuck`}
+            options={FAILURE_REASON_OPTIONS}
+            values={attempt.failureReasons}
+            onToggle={(v) => toggleReason(i, v as FailureReason)}
+          />
+        </div>
+      ))}
+      {attempts.length < 3 ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="self-start"
+          onClick={() => onChange([...attempts, { approach: "", failureReasons: [] }])}
+        >
+          Add something you've tried
+        </Button>
+      ) : null}
+      {attempts.length === 0 ? (
+        <p className="text-[length:var(--text-support)] text-muted-foreground">
+          Leave this empty if this is your first try — that is useful to know too.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 /* ---------------------------------- flow ----------------------------------- */
 
 export function AssessmentFlow({
@@ -406,6 +505,37 @@ export function AssessmentFlow({
     } as Partial<AssessmentAnswers>);
   };
 
+  /* "None of these" is an exclusive answer in both multi-selects: it
+     stands alone, and choosing anything real clears it. Toggling it
+     off returns the question to unanswered. */
+  const toggleEquipment = (value: string) => {
+    const item = value as EquipmentItem;
+    if (item === "none") {
+      patch({ equipment: draft.equipment.includes("none") ? [] : ["none"] });
+      return;
+    }
+    const without = draft.equipment.filter((e) => e !== "none");
+    patch({
+      equipment: without.includes(item)
+        ? without.filter((e) => e !== item)
+        : [...without, item],
+    });
+  };
+
+  const toggleCravingKind = (value: string) => {
+    const kind = value as CravingKind;
+    if (kind === "none") {
+      patch({ cravingKinds: draft.cravingKinds.includes("none") ? [] : ["none"] });
+      return;
+    }
+    const without = draft.cravingKinds.filter((k) => k !== "none");
+    patch({
+      cravingKinds: without.includes(kind)
+        ? without.filter((k) => k !== kind)
+        : [...without, kind],
+    });
+  };
+
   return (
     <BloomSheet
       open={open}
@@ -446,7 +576,7 @@ export function AssessmentFlow({
             {step === "intro" ? (
               <SheetItem className="mt-1 flex flex-col gap-5">
                 <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                  Seven short sections: how you eat, move, sleep and recover, what you want to
+                  Eight short sections: how you eat, move, sleep and recover, what you want to
                   change, and a few safety questions. Your answers become a summary you own — the
                   starting point for any plan Bloom suggests. Nothing is locked behind it, and you
                   can retake it at any time.
@@ -514,6 +644,21 @@ export function AssessmentFlow({
                   value={draft.weightKg}
                   onChange={(v) => patch({ weightKg: v })}
                 />
+                <div className="flex flex-col gap-2">
+                  <NumberField
+                    id="assess-waist"
+                    label="Waist, if you know it"
+                    unit="cm"
+                    min={40}
+                    max={250}
+                    value={draft.waistCm}
+                    onChange={(v) => patch({ waistCm: v })}
+                  />
+                  <p className="text-[length:var(--text-support)] text-muted-foreground">
+                    Optional — measured around your navel. Skip it if you don't know it; Bloom
+                    never guesses it.
+                  </p>
+                </div>
               </SheetItem>
             ) : null}
 
@@ -676,6 +821,47 @@ export function AssessmentFlow({
                     anything out.
                   </p>
                 </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>Where do most of your meals come from?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Where you eat"
+                    options={EATING_SETTING_OPTIONS}
+                    value={draft.eatingSetting}
+                    onSelect={(eatingSetting) => patch({ eatingSetting })}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>How much cooking do you do?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Cooking experience"
+                    options={COOKING_OPTIONS}
+                    value={draft.cookingAbility}
+                    onSelect={(cookingAbility) => patch({ cookingAbility })}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>What does your kitchen have?</FieldLabel>
+                  <MultiChoice
+                    ariaLabel="Kitchen equipment"
+                    options={EQUIPMENT_OPTIONS}
+                    values={draft.equipment}
+                    onToggle={toggleEquipment}
+                  />
+                  <p className="text-[length:var(--text-support)] text-muted-foreground">
+                    Tap everything you have. Choose "None of these" if none apply.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>
+                    How long can you spend cooking a main meal, on a typical day?
+                  </FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Time to cook a main meal"
+                    options={PREP_TIME_OPTIONS}
+                    value={draft.prepTimeMaxMinutes}
+                    onSelect={(prepTimeMaxMinutes) => patch({ prepTimeMaxMinutes })}
+                  />
+                </div>
               </SheetItem>
             ) : null}
 
@@ -711,6 +897,73 @@ export function AssessmentFlow({
                 />
                 <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                   Separate items with commas. Leave a field empty if nothing applies.
+                </p>
+              </SheetItem>
+            ) : null}
+
+            {step === "behaviour" ? (
+              <SheetItem className="mt-5 flex flex-col gap-5">
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>When is your hunger strongest?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="When hunger is strongest"
+                    options={HUNGER_OPTIONS}
+                    value={draft.hungerPattern}
+                    onSelect={(hungerPattern) => patch({ hungerPattern })}
+                  />
+                </div>
+                <TextListField
+                  id="assess-cravings"
+                  label="Foods you crave, if any"
+                  hint="For example: chocolate, chips, chai"
+                  values={draft.cravings}
+                  onChange={(cravings) => patch({ cravings: cravings.slice(0, 5) })}
+                />
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>What kind of cravings, mostly?</FieldLabel>
+                  <MultiChoice
+                    ariaLabel="Kinds of cravings"
+                    options={CRAVING_KIND_OPTIONS}
+                    values={draft.cravingKinds}
+                    onToggle={toggleCravingKind}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>
+                    How often does eating follow your feelings — stress, boredom, a hard day?
+                  </FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Eating and feelings"
+                    options={EMOTIONAL_EATING_OPTIONS}
+                    value={draft.emotionalEating}
+                    onSelect={(emotionalEating) => patch({ emotionalEating })}
+                  />
+                </div>
+                <PastAttemptsField
+                  attempts={draft.pastAttempts}
+                  onChange={(pastAttempts) => patch({ pastAttempts })}
+                />
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>How motivated do you feel right now?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Motivation"
+                    options={READINESS_OPTIONS}
+                    value={draft.motivation}
+                    onSelect={(motivation) => patch({ motivation })}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <FieldLabel>And how confident are you that you can keep changes up?</FieldLabel>
+                  <ChoiceGroup
+                    ariaLabel="Confidence"
+                    options={READINESS_OPTIONS}
+                    value={draft.confidence}
+                    onSelect={(confidence) => patch({ confidence })}
+                  />
+                </div>
+                <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                  Every question on this step can be skipped — leave anything you would rather
+                  not answer, and Bloom will simply not use it.
                 </p>
               </SheetItem>
             ) : null}

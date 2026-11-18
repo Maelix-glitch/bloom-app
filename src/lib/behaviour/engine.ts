@@ -19,7 +19,11 @@
  *   · meal     — breakfast/lunch/dinner logged ≥3 days in a row up to
  *                yesterday, not yet logged today, past its usual time.
  *   · mood     — checked in on ≥4 of the last 7 days, none today, past
- *                the usual check-in time.
+ *                the usual check-in time. A high stated emotional-
+ *                eating answer (the Assessment's §10 scale: "often"
+ *                or "very often") lowers the bar to 3 days and the
+ *                copy names the answer as its reason — the check-in
+ *                is the record that makes those days visible.
  *   · plan     — no plan for today although logging usually starts by
  *                now (≥3 logged days in the last 7, past the usual
  *                first-log time).
@@ -79,6 +83,10 @@ export interface NudgeInputs {
   plan: DailyPlan | null;
   weighIns: readonly WeighIn[];
   moodEntries: readonly MoodEntry[];
+  /** The Assessment's emotional-eating answer (1–5), when stated
+   *  (spec §10): context for the mood detector only. Absent or null
+   *  = never stated, and the mood detector runs exactly as before. */
+  emotionalEating?: number | null;
 }
 
 export interface NudgeSelection {
@@ -99,6 +107,12 @@ export const NUDGE_PRIORITY: Record<NudgeKind, number> = {
 export const MIN_PATTERN_DAYS = 3;
 /** A mood routine: checked in on at least this many of the last 7 days. */
 export const MOOD_MIN_DAYS_OF_7 = 4;
+/** The emotional-eating answer (1–5) at or above which the mood
+ *  detector's gentler bar applies — "often" and "very often". */
+export const EMOTIONAL_EATING_HIGH = 4;
+/** The mood routine's evidence bar when emotional eating is high:
+ *  one day less — the check-in matters more on exactly those days. */
+export const MOOD_MIN_DAYS_EMOTIONAL = 3;
 /** A weigh-in gap worth naming, in days. */
 export const WEIGH_IN_GAP_DAYS = 7;
 /** A weighing routine's typical gap must be at most this, in days. */
@@ -283,7 +297,16 @@ function moodCandidate(inp: NudgeInputs): Nudge | null {
     return day >= from && day < today;
   });
   const days = new Set(recent.map((e) => localDay(e.timestamp)));
-  if (days.size < MOOD_MIN_DAYS_OF_7) return null;
+  /* §10: a high stated emotional-eating answer is context, not a
+   *  diagnosis — it lowers the evidence bar by one day, because the
+   *  check-in is how those days stay visible, and the copy names
+   *  the person's own answer as the reason. */
+  const emotionalHigh =
+    inp.emotionalEating !== null &&
+    inp.emotionalEating !== undefined &&
+    inp.emotionalEating >= EMOTIONAL_EATING_HIGH;
+  const minDays = emotionalHigh ? MOOD_MIN_DAYS_EMOTIONAL : MOOD_MIN_DAYS_OF_7;
+  if (days.size < minDays) return null;
   const times = recent
     .map((e) => localMinutesOf(e.timestamp))
     .filter((v): v is number => v !== null);
@@ -294,7 +317,9 @@ function moodCandidate(inp: NudgeInputs): Nudge | null {
     kind: "mood",
     key: "mood:check-in",
     title: "No mood check-in yet today",
-    detail: `You've checked in on ${days.size} of the last 7 days, usually by ${formatClock(usual)}.`,
+    detail: emotionalHigh
+      ? `You've checked in on ${days.size} of the last 7 days, usually by ${formatClock(usual)}. You told Bloom eating often follows your feelings — checking in keeps days like that visible.`
+      : `You've checked in on ${days.size} of the last 7 days, usually by ${formatClock(usual)}.`,
     action: { kind: "open-mood" },
     actionLabel: "Check in",
   };

@@ -299,3 +299,116 @@ describe("AssessmentFlow — the meal budget question", () => {
     expect(readAssessmentState().answers.foodBudget).toBeNull();
   });
 });
+
+describe("AssessmentFlow — the kitchen questions (spec §10)", () => {
+  function seedAtNutrition(): void {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(s, { dietaryPattern: "eggetarian", mealsPerDay: 3 }, "nutrition", T1);
+    seed(s);
+  }
+
+  it("renders the four kitchen questions on the nutrition step and stores their answers", () => {
+    seedAtNutrition();
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    expect(screen.getByRole("heading", { name: "How you eat" })).toBeTruthy();
+
+    const setting = screen.getByRole("radiogroup", { name: "Where you eat" });
+    fireEvent.click(within(setting).getByRole("radio", { name: /Hostel/ }));
+    const cooking = screen.getByRole("radiogroup", { name: "Cooking experience" });
+    fireEvent.click(within(cooking).getByRole("radio", { name: /Basic cooking/ }));
+    const equipment = screen.getByRole("group", { name: "Kitchen equipment" });
+    fireEvent.click(within(equipment).getByRole("button", { name: "Stove" }));
+    fireEvent.click(within(equipment).getByRole("button", { name: "Fridge" }));
+    const prep = screen.getByRole("radiogroup", { name: "Time to cook a main meal" });
+    fireEvent.click(within(prep).getByRole("radio", { name: /About 20 minutes/ }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    const answers = readAssessmentState().answers;
+    expect(answers.eatingSetting).toBe("hostel");
+    expect(answers.cookingAbility).toBe("basic");
+    expect(answers.equipment).toEqual(["stove", "fridge"]);
+    expect(answers.prepTimeMaxMinutes).toBe(20);
+  });
+
+  it("“None of these” is exclusive in the equipment question", () => {
+    seedAtNutrition();
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    const equipment = screen.getByRole("group", { name: "Kitchen equipment" });
+    fireEvent.click(within(equipment).getByRole("button", { name: "Stove" }));
+    fireEvent.click(within(equipment).getByRole("button", { name: "None of these" }));
+    expect(
+      within(equipment).getByRole("button", { name: "Stove" }).getAttribute("aria-pressed"),
+    ).toBe("false");
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(readAssessmentState().answers.equipment).toEqual(["none"]);
+  });
+});
+
+describe("AssessmentFlow — the behaviour step (spec §10)", () => {
+  it("asks the reflective questions, stores the answers, and sits before sleep", () => {
+    let s = beginAssessment(emptyAssessmentState(T0), T0);
+    s = saveStep(s, { dietaryPattern: "eggetarian" }, "behaviour", T1);
+    seed(s);
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    expect(screen.getByRole("heading", { name: "Habits and history" })).toBeTruthy();
+
+    const hunger = screen.getByRole("radiogroup", { name: "When hunger is strongest" });
+    fireEvent.click(within(hunger).getByRole("radio", { name: "Evenings" }));
+    const kinds = screen.getByRole("group", { name: "Kinds of cravings" });
+    fireEvent.click(within(kinds).getByRole("button", { name: "Sweet" }));
+    const feelings = screen.getByRole("radiogroup", { name: "Eating and feelings" });
+    fireEvent.click(within(feelings).getByRole("radio", { name: "Often" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Add something you've tried" }));
+    fireEvent.change(screen.getByLabelText("Past attempt 1"), {
+      target: { value: "A low-carb diet" },
+    });
+    const reasons = screen.getByRole("group", { name: "Why attempt 1 came unstuck" });
+    fireEvent.click(within(reasons).getByRole("button", { name: "Hunger" }));
+
+    const motivation = screen.getByRole("radiogroup", { name: "Motivation" });
+    fireEvent.click(within(motivation).getByRole("radio", { name: "High" }));
+    const confidence = screen.getByRole("radiogroup", { name: "Confidence" });
+    fireEvent.click(within(confidence).getByRole("radio", { name: "Low" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Sleep and recovery" })).toBeTruthy();
+    const answers = readAssessmentState().answers;
+    expect(answers.hungerPattern).toBe("evenings");
+    expect(answers.cravingKinds).toEqual(["sweet"]);
+    expect(answers.emotionalEating).toBe(4);
+    expect(answers.pastAttempts).toEqual([
+      { approach: "A low-carb diet", failureReasons: ["hunger"] },
+    ]);
+    expect(answers.motivation).toBe(4);
+    expect(answers.confidence).toBe(2);
+  });
+});
+
+describe("AssessmentFlow — the waist question (spec §10)", () => {
+  function seedAtIdentity(): void {
+    const s = saveStep(beginAssessment(emptyAssessmentState(T0), T0), {}, "identity", T1);
+    seed(s);
+  }
+
+  it("asks optionally on About you and stores the answer", () => {
+    seedAtIdentity();
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    expect(screen.getByRole("heading", { name: "About you" })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/Waist/), { target: { value: "88" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(readAssessmentState().answers.waistCm).toBe(88);
+  });
+
+  it("leaving it blank stores nothing — the waist is never guessed", () => {
+    seedAtIdentity();
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue assessment" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(readAssessmentState().answers.waistCm).toBeNull();
+  });
+});

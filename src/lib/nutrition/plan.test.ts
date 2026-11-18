@@ -202,6 +202,40 @@ describe("plan · meal splits reconcile exactly", () => {
       }
     }
   });
+
+  it("a hunger pattern tilts the split toward the hungry slot — totals unmoved (P10)", () => {
+    const targets: NutritionTargets = { kcal: 2000, proteinG: 100 };
+    const slots = mealSlotsFor(4);
+    const base = splitTargets(targets, slots);
+    const evenings = splitTargets(targets, slots, "evenings");
+    const dinner = (s: typeof base) => s.find((m) => m.meal === "dinner")!;
+    /* Dinner gains about the 5-point shift of the day (2000 × 0.05 =
+       100 kcal, ± the largest-remainder rounding), every other slot
+       gives a little, and the day still reconciles exactly. */
+    expect(dinner(evenings).kcal).toBeGreaterThan(dinner(base).kcal);
+    expect(dinner(evenings).kcal - dinner(base).kcal).toBeGreaterThanOrEqual(95);
+    expect(dinner(evenings).kcal - dinner(base).kcal).toBeLessThanOrEqual(105);
+    for (const meal of ["breakfast", "lunch", "snack"] as const) {
+      expect(evenings.find((m) => m.meal === meal)!.kcal).toBeLessThan(
+        base.find((m) => m.meal === meal)!.kcal,
+      );
+    }
+    expect(evenings.reduce((s, m) => s + m.kcal, 0)).toBe(2000);
+    expect(evenings.reduce((s, m) => s + Math.round(m.proteinG * 10), 0)).toBe(1000);
+    /* Protein tilts with energy — the hungry slot's share of both. */
+    expect(dinner(evenings).proteinG).toBeGreaterThan(dinner(base).proteinG);
+  });
+
+  it("steady, absent and slot-less hunger patterns change nothing (P10)", () => {
+    const targets: NutritionTargets = { kcal: 2000, proteinG: 100 };
+    const slots = mealSlotsFor(4);
+    expect(splitTargets(targets, slots, "steady")).toEqual(splitTargets(targets, slots));
+    expect(splitTargets(targets, slots, null)).toEqual(splitTargets(targets, slots));
+    /* Nights hunger on a three-meal day has no snack slot to feed —
+       an honest no-op, not a silent redistribution. */
+    const three = mealSlotsFor(3);
+    expect(splitTargets(targets, three, "nights")).toEqual(splitTargets(targets, three));
+  });
 });
 
 /* ------------------------------ suggestions ------------------------------- */

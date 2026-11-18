@@ -109,7 +109,7 @@ describe("LivingAssessmentSection — the Profile card", () => {
   it("the delta form has no pattern or budget control — Assessment-only fields", () => {
     seed();
     render(<AssessmentProfileCard />);
-    fireEvent.click(screen.getByRole("button", { name: "Update weight, activity or sleep" }));
+    fireEvent.click(screen.getByRole("button", { name: "Update weight, activity, sleep or kitchen" }));
     expect(screen.queryByRole("radiogroup", { name: /pattern/i })).toBeNull();
     expect(screen.queryByRole("radiogroup", { name: /budget/i })).toBeNull();
     expect(screen.getByLabelText("Weight in kilograms")).toBeTruthy();
@@ -121,7 +121,7 @@ describe("LivingAssessmentSection — the Profile card", () => {
     seed();
     const before = readAssessmentState();
     render(<AssessmentProfileCard />);
-    fireEvent.click(screen.getByRole("button", { name: "Update weight, activity or sleep" }));
+    fireEvent.click(screen.getByRole("button", { name: "Update weight, activity, sleep or kitchen" }));
     fireEvent.change(screen.getByLabelText("Weight in kilograms"), { target: { value: "95.5" } });
     fireEvent.click(screen.getByRole("button", { name: "Save update" }));
 
@@ -133,5 +133,39 @@ describe("LivingAssessmentSection — the Profile card", () => {
     expect(readAssessmentState().answers.weightKg).toBe(100);
     /* The recorded update now reads back as a since-line. */
     expect(screen.getByText(/Updated on .*weight 95\.5 kg/)).toBeTruthy();
+  });
+
+  it("the kitchen facts can move by delta — and no reflective control exists (§10.5)", () => {
+    seed();
+    render(<AssessmentProfileCard />);
+    fireEvent.click(screen.getByRole("button", { name: "Update weight, activity, sleep or kitchen" }));
+    /* The reflective behavioural answers are Assessment-only: the
+       form offers no hunger, craving, motivation or confidence
+       control, exactly like pattern and budget. */
+    expect(screen.queryByRole("radiogroup", { name: /hunger/i })).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: /motivation/i })).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: /confidence/i })).toBeNull();
+
+    const cooking = screen.getByRole("radiogroup", { name: "Cooking experience" });
+    fireEvent.click(
+      Array.from(cooking.querySelectorAll("button")).find((b) =>
+        (b.textContent ?? "").startsWith("Basic cooking"),
+      )!,
+    );
+    const equipment = screen.getByRole("group", { name: "Kitchen equipment" });
+    fireEvent.click(
+      Array.from(equipment.querySelectorAll("button")).find((b) => b.textContent === "Stove")!,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Save update" }));
+
+    const doc = loadDoc();
+    const delta = parseAssessmentDeltaValue(doc[ASSESSMENT_DELTA_KEY]?.value)!;
+    expect(delta.updates).toHaveLength(1);
+    expect(delta.updates[0]!.changes).toEqual({
+      cookingAbility: "basic",
+      equipment: ["stove"],
+    });
+    /* And the update reads back as a since-line naming the kitchen. */
+    expect(screen.getByText(/Updated on .*cooking — basic cooking/)).toBeTruthy();
   });
 });

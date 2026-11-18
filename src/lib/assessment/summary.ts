@@ -33,17 +33,27 @@ import { classifySafety } from "@/lib/vitalis/safety/classify";
 import {
   ACTIVITY_LABEL,
   BUDGET_LABEL,
+  COOKING_LABEL,
+  CRAVING_KIND_LABEL,
   CUISINE_PREFERENCE_LABEL,
   DIETARY_LABEL,
+  EATING_SETTING_LABEL,
+  EMOTIONAL_EATING_LABEL,
+  EQUIPMENT_LABEL,
+  FAILURE_REASON_LABEL,
   GOAL_LABEL,
+  HUNGER_LABEL,
+  PREP_TIME_LABEL,
+  READINESS_LABEL,
   RESTEDNESS_LABEL,
   SLEEP_QUALITY_LABEL,
 } from "./questions";
 import { readAssessmentState, toHealthProfile, type AssessmentState } from "./state";
 
 export interface AssessmentSectionSummary {
-  /** A domain section id, or "sleep" for the extension step. */
-  section: AssessmentSection | "sleep";
+  /** A domain section id, "sleep" for the extension step, or
+   *  "behaviour" for the behavioural-profile step (spec §10). */
+  section: AssessmentSection | "sleep" | "behaviour";
   title: string;
   state: SectionState;
   lines: string[];
@@ -86,6 +96,24 @@ function sleepState(state: AssessmentState): SectionState {
   return answered === 3 ? "complete" : "partial";
 }
 
+/** The behaviour step's own completeness, like sleep's: the domain's
+ *  completeness has no behavioural section (behavioural answers never
+ *  gate a plan), so the count is over the step's own seven signals. */
+function behaviourState(state: AssessmentState): SectionState {
+  const a = state.answers;
+  const answered = [
+    a.hungerPattern !== null,
+    a.cravings.length > 0,
+    a.cravingKinds.length > 0,
+    a.emotionalEating !== null,
+    a.pastAttempts.length > 0,
+    a.motivation !== null,
+    a.confidence !== null,
+  ].filter(Boolean).length;
+  if (answered === 0) return "missing";
+  return answered === 7 ? "complete" : "partial";
+}
+
 /**
  * The summary for a state, or null when the assessment has never been
  * completed. A retake in progress keeps the last completed summary readable
@@ -107,6 +135,7 @@ export function summaryOf(
   if (a.ageYears !== null) identityLines.push(`Age ${a.ageYears}.`);
   if (a.heightCm !== null) identityLines.push(`Height ${a.heightCm} cm.`);
   if (a.weightKg !== null) identityLines.push(`Weight ${a.weightKg} kg.`);
+  if (a.waistCm !== null) identityLines.push(`Waist ${a.waistCm} cm.`);
   if (bmi !== null) {
     identityLines.push(`BMI ${bmi.toFixed(1)}, calculated from the height and weight you gave.`);
   }
@@ -174,6 +203,23 @@ export function summaryOf(
       `Cuisine preference: ${CUISINE_PREFERENCE_LABEL[a.cuisinePreference].toLowerCase()}.`,
     );
   }
+  /* The kitchen facts (§10) sit with the rest of the food facts. */
+  if (a.eatingSetting !== null) {
+    nutritionLines.push(`Meals: ${EATING_SETTING_LABEL[a.eatingSetting].toLowerCase()}.`);
+  }
+  if (a.cookingAbility !== null) {
+    nutritionLines.push(`Cooking: ${COOKING_LABEL[a.cookingAbility].toLowerCase()}.`);
+  }
+  if (a.equipment.length > 0) {
+    nutritionLines.push(
+      `Equipment: ${a.equipment.map((item) => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}.`,
+    );
+  }
+  if (a.prepTimeMaxMinutes !== null) {
+    nutritionLines.push(
+      `Time to cook a main meal: ${PREP_TIME_LABEL[a.prepTimeMaxMinutes].toLowerCase()}.`,
+    );
+  }
 
   const preferenceLines: string[] = [];
   const allergiesLine = listLine("Allergies", a.allergies);
@@ -186,6 +232,46 @@ export function summaryOf(
   if (cuisinesLine) preferenceLines.push(cuisinesLine);
   if (preferenceLines.length === 0) {
     preferenceLines.push("No allergies, intolerances or preferences recorded.");
+  }
+
+  const behaviourLines: string[] = [];
+  if (a.hungerPattern !== null) {
+    behaviourLines.push(
+      a.hungerPattern === "steady"
+        ? "Your hunger stays fairly steady through the day."
+        : a.hungerPattern === "nights"
+          ? "Your hunger is strongest late at night."
+          : `Your hunger is strongest in the ${HUNGER_LABEL[a.hungerPattern].toLowerCase()}.`,
+    );
+  }
+  const cravingsLine = listLine("Foods you crave", a.cravings);
+  if (cravingsLine) behaviourLines.push(cravingsLine);
+  if (a.cravingKinds.length > 0) {
+    behaviourLines.push(
+      `Cravings: ${a.cravingKinds.map((kind) => CRAVING_KIND_LABEL[kind].toLowerCase()).join(", ")}.`,
+    );
+  }
+  if (a.emotionalEating !== null) {
+    behaviourLines.push(
+      `Eating follows your feelings: ${(EMOTIONAL_EATING_LABEL[a.emotionalEating] ?? "").toLowerCase()}.`,
+    );
+  }
+  for (const attempt of a.pastAttempts) {
+    behaviourLines.push(
+      attempt.failureReasons.length > 0
+        ? `You've tried ${attempt.approach} before — it came unstuck over ${attempt.failureReasons.map((r) => FAILURE_REASON_LABEL[r].toLowerCase()).join(", ")}.`
+        : `You've tried ${attempt.approach} before.`,
+    );
+  }
+  if (a.motivation !== null) {
+    behaviourLines.push(
+      `Motivation right now: ${(READINESS_LABEL[a.motivation] ?? "").toLowerCase()}.`,
+    );
+  }
+  if (a.confidence !== null) {
+    behaviourLines.push(
+      `Confidence you can keep this up: ${(READINESS_LABEL[a.confidence] ?? "").toLowerCase()}.`,
+    );
   }
 
   const sleepLines: string[] = [];
@@ -240,6 +326,7 @@ export function summaryOf(
       completeness.sections.preferences,
       preferenceLines,
     ),
+    section("behaviour", "Habits and history", behaviourState(state), behaviourLines),
     section("sleep", "Sleep and recovery", sleepState(state), sleepLines),
     section(
       "activity",

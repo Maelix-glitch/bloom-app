@@ -75,6 +75,115 @@ export interface DietaryProfile {
   readonly cuisinePreference: CuisinePreference | null;
 }
 
+/* --------------------- behavioural profile (§10) --------------------- */
+
+/**
+ * The behavioural profile — vision system 1D, spec §10. How food
+ * actually happens in this person's life: their kitchen, their time,
+ * their hunger, and what has and has not worked before. Every field
+ * is nullable or an empty list — unanswered is a state, never a
+ * default — and every field names a consumer in the spec; a field
+ * whose consumer is removed is removed from here in the same change.
+ * Asked ONLY in the Assessment (the pattern/budget/cuisine rule);
+ * the factual kitchen fields may also move by Living Assessment
+ * delta, the reflective ones never do (see assessment/living.ts).
+ */
+
+export const COOKING_ABILITIES = ["none", "basic", "confident"] as const;
+
+export type CookingAbility = (typeof COOKING_ABILITIES)[number];
+
+/** Kitchen equipment a person may have. `none` is an explicit answer
+ *  ("none of these"), distinct from an unanswered empty list. */
+export const EQUIPMENT_ITEMS = [
+  "stove",
+  "pressure_cooker",
+  "oven",
+  "microwave",
+  "mixer_grinder",
+  "fridge",
+  "none",
+] as const;
+
+export type EquipmentItem = (typeof EQUIPMENT_ITEMS)[number];
+
+/** The prep-time bands the Assessment offers, in minutes per main meal. */
+export const PREP_TIME_BANDS = [10, 20, 35, 60] as const;
+
+export type PrepTimeMaxMinutes = (typeof PREP_TIME_BANDS)[number];
+
+export const EATING_SETTINGS = [
+  "home",
+  "hostel",
+  "work_canteen",
+  "restaurant_mostly",
+  "mixed",
+] as const;
+
+export type EatingSetting = (typeof EATING_SETTINGS)[number];
+
+export const HUNGER_PATTERNS = ["mornings", "afternoons", "evenings", "nights", "steady"] as const;
+
+export type HungerPattern = (typeof HUNGER_PATTERNS)[number];
+
+/** The craving kinds the Assessment offers as tags beside the
+ *  free-text list. `none` is an explicit "no particular cravings". */
+export const CRAVING_KINDS = ["sweet", "salty", "fried", "none"] as const;
+
+export type CravingKind = (typeof CRAVING_KINDS)[number];
+
+export const FAILURE_REASONS = [
+  "cost",
+  "time",
+  "hunger",
+  "taste",
+  "complexity",
+  "social",
+  "other",
+] as const;
+
+export type FailureReason = (typeof FAILURE_REASONS)[number];
+
+export interface PastAttempt {
+  /** What they tried, in their own words. */
+  readonly approach: string;
+  /** Why it came unstuck — the Diagnose priors of spec §11.3. */
+  readonly failureReasons: readonly FailureReason[];
+}
+
+export interface BehaviouralProfile {
+  /** Null means not answered yet. */
+  readonly cookingAbility: CookingAbility | null;
+  /** Empty means not answered; `["none"]` is the stated "none of these". */
+  readonly equipment: readonly EquipmentItem[];
+  readonly prepTimeMaxMinutes: PrepTimeMaxMinutes | null;
+  readonly eatingSetting: EatingSetting | null;
+  readonly hungerPattern: HungerPattern | null;
+  /** Foods they crave, in their own words (≤ 5). */
+  readonly cravings: readonly string[];
+  readonly cravingKinds: readonly CravingKind[];
+  /** 1 (rarely) to 5 (very often); null means not answered. */
+  readonly emotionalEating: number | null;
+  readonly pastAttempts: readonly PastAttempt[];
+  /** 1 (very low) to 5 (very high); null means not answered. */
+  readonly motivation: number | null;
+  readonly confidence: number | null;
+}
+
+export const EMPTY_BEHAVIOURAL: BehaviouralProfile = {
+  cookingAbility: null,
+  equipment: [],
+  prepTimeMaxMinutes: null,
+  eatingSetting: null,
+  hungerPattern: null,
+  cravings: [],
+  cravingKinds: [],
+  emotionalEating: null,
+  pastAttempts: [],
+  motivation: null,
+  confidence: null,
+};
+
 export interface HealthConstraints {
   /** Stable condition codes where known; free-text otherwise. */
   readonly conditions: readonly string[];
@@ -101,6 +210,7 @@ export interface HealthProfile {
   readonly activity: ActivityLevel | null;
   readonly rateKgPerWeek: number;
   readonly dietary: DietaryProfile;
+  readonly behavioural: BehaviouralProfile;
   readonly constraints: HealthConstraints;
   readonly updatedAt: string;
 }
@@ -140,6 +250,7 @@ export function emptyProfile(userId: string, updatedAt: string = new Date().toIS
     activity: null,
     rateKgPerWeek: 0.5,
     dietary: EMPTY_DIETARY,
+    behavioural: EMPTY_BEHAVIOURAL,
     constraints: EMPTY_CONSTRAINTS,
     updatedAt,
   };
@@ -152,6 +263,11 @@ export function profileHeightCm(profile: HealthProfile): number | null {
 
 export function profileWeightKg(profile: HealthProfile): number | null {
   return profile.weight ? convert(profile.weight.value.value, profile.weight.value.unit, "kg") : null;
+}
+
+/** Waist in centimetres, converted from whatever unit it was recorded in. */
+export function profileWaistCm(profile: HealthProfile): number | null {
+  return profile.waist ? convert(profile.waist.value.value, profile.waist.value.unit, "cm") : null;
 }
 
 export function profileTargetWeightKg(profile: HealthProfile): number | null {

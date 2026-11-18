@@ -76,6 +76,55 @@ describe("health profile schema", () => {
     expect(bad.ok).toBe(false);
   });
 
+  it("carries a stated behavioural profile (§10), and keeps unanswered empty", () => {
+    const stated = parseHealthProfile({
+      ...validProfile(),
+      behavioural: {
+        cookingAbility: "basic",
+        equipment: ["stove", "fridge"],
+        prepTimeMaxMinutes: 20,
+        eatingSetting: "hostel",
+        hungerPattern: "evenings",
+        cravings: ["chocolate"],
+        cravingKinds: ["sweet"],
+        emotionalEating: 4,
+        pastAttempts: [{ approach: "Keto", failureReasons: ["hunger", "cost"] }],
+        motivation: 3,
+        confidence: 2,
+      },
+    });
+    expect(stated.behavioural.cookingAbility).toBe("basic");
+    expect(stated.behavioural.equipment).toEqual(["stove", "fridge"]);
+    expect(stated.behavioural.prepTimeMaxMinutes).toBe(20);
+    expect(stated.behavioural.pastAttempts).toEqual([
+      { approach: "Keto", failureReasons: ["hunger", "cost"] },
+    ]);
+    const unanswered = parseHealthProfile(validProfile());
+    expect(unanswered.behavioural.cookingAbility).toBeNull();
+    expect(unanswered.behavioural.equipment).toEqual([]);
+    expect(unanswered.behavioural.confidence).toBeNull();
+  });
+
+  it("rejects behavioural values that do not exist — the v8 cuisine lesson", () => {
+    const base = validProfile().behavioural;
+    for (const bad of [
+      { ...base, cookingAbility: "expert" },
+      { ...base, equipment: ["air_fryer"] },
+      { ...base, prepTimeMaxMinutes: 25 },
+      { ...base, eatingSetting: "office" },
+      { ...base, hungerPattern: "all_day" },
+      { ...base, cravingKinds: ["crunchy"] },
+      { ...base, emotionalEating: 6 },
+      { ...base, motivation: 0 },
+      { ...base, pastAttempts: [{ approach: "Keto", failureReasons: ["magic"] }] },
+      /* Strict inside the section too: an unknown key is a refusal,
+         not a silent drop. */
+      { ...base, secretField: true },
+    ]) {
+      expect(safeParseHealthProfile({ ...validProfile(), behavioural: bad }).ok).toBe(false);
+    }
+  });
+
   it("rejects a measurement whose unit has the wrong dimension", () => {
     const result = safeParseHealthProfile({ ...validProfile(), weight: measurement(82, "cm") });
     expect(result.ok).toBe(false);

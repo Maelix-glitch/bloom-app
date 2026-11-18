@@ -38,7 +38,13 @@ import { setPref } from "@/lib/prefs";
 import { WEIGHINS_KEY, parseWeighIns, type WeighIn } from "@/lib/health/body";
 import { FOODLOG_KEY, parseFoodLogValue } from "@/lib/nutrition/store";
 import type { LogEntry } from "@/lib/nutrition/types";
-import type { ActivityLevel } from "@/lib/vitalis/domain/profile";
+import type {
+  ActivityLevel,
+  CookingAbility,
+  EatingSetting,
+  EquipmentItem,
+  PrepTimeMaxMinutes,
+} from "@/lib/vitalis/domain/profile";
 import {
   ASSESSMENT_DELTA_KEY,
   EMPTY_DELTA_VALUE,
@@ -92,7 +98,11 @@ function assessmentGateOpen(): boolean {
 }
 import {
   ACTIVITY_OPTIONS,
+  COOKING_OPTIONS,
+  EATING_SETTING_OPTIONS,
+  EQUIPMENT_OPTIONS,
   GOAL_LABEL,
+  PREP_TIME_OPTIONS,
   QUESTION_STEPS,
   RESTEDNESS_OPTIONS,
   SLEEP_QUALITY_OPTIONS,
@@ -507,17 +517,56 @@ function DeltaChipRow<T extends string | number>({
   );
 }
 
+/** A multi-select pill row in the delta form (the equipment list). */
+function DeltaMultiChipRow({
+  options,
+  values,
+  onToggle,
+  ariaLabel,
+}: {
+  options: readonly { value: string; label: string }[];
+  values: readonly string[];
+  onToggle: (value: string) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2" role="group" aria-label={ariaLabel}>
+      {options.map((option) => {
+        const selected = values.includes(option.value);
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onToggle(option.value)}
+            className={`rounded-pill border px-3.5 py-2 text-[length:var(--text-support)] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo ${
+              selected
+                ? "border-gold/60 bg-gold/10 text-foreground"
+                : "border-border bg-surface-2 text-muted-foreground hover:border-border-strong hover:text-foreground"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /**
  * The Living Assessment section of the Profile card: what has
  * changed since the assessment (read from the person's real
  * weigh-ins and food log — never estimated), whether the snapshot
  * is worth updating, and the small delta form that records an
  * update WITHOUT a retake. The form can only touch weight,
- * activity and sleep — dietary pattern and food budget are asked
- * only inside the Assessment flow, so they are not fields here,
- * and the delta parser would drop them even if they arrived.
- * Saving writes a dated delta record; the stored assessment and
- * its history are never mutated.
+ * activity, sleep and the factual kitchen fields (cooking,
+ * equipment, prep time, where you eat — spec §10.5: kitchens
+ * change, so those facts may move). Dietary pattern, food budget
+ * and the reflective behavioural answers are asked only inside
+ * the Assessment flow, so they are not fields here, and the delta
+ * parser would drop them even if they arrived. Saving writes a
+ * dated delta record; the stored assessment and its history are
+ * never mutated.
  */
 function LivingAssessmentSection({ state }: { state: AssessmentState }) {
   const weighIns = usePrefValue(WEIGHINS_KEY, parseWeighIns, EMPTY_WEIGHINS);
@@ -533,6 +582,10 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
   const [sleepHours, setSleepHours] = useState("");
   const [sleepQuality, setSleepQuality] = useState<SleepQuality | null>(null);
   const [restedness, setRestedness] = useState<number | null>(null);
+  const [cooking, setCooking] = useState<CookingAbility | null>(null);
+  const [eatingSetting, setEatingSetting] = useState<EatingSetting | null>(null);
+  const [prepTime, setPrepTime] = useState<PrepTimeMaxMinutes | null>(null);
+  const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
 
   if (state.status !== "complete") return null;
 
@@ -547,7 +600,22 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
     setSleepHours(effective.sleepHoursTypical !== null ? String(effective.sleepHoursTypical) : "");
     setSleepQuality(effective.sleepQuality);
     setRestedness(effective.morningRestedness);
+    setCooking(effective.cookingAbility);
+    setEatingSetting(effective.eatingSetting);
+    setPrepTime(effective.prepTimeMaxMinutes);
+    setEquipment(effective.equipment);
     setFormOpen(true);
+  };
+
+  /* "None of these" is exclusive, exactly as in the flow. */
+  const toggleEquipment = (value: string) => {
+    const item = value as EquipmentItem;
+    if (item === "none") {
+      setEquipment(equipment.includes("none") ? [] : ["none"]);
+      return;
+    }
+    const without = equipment.filter((e) => e !== "none");
+    setEquipment(without.includes(item) ? without.filter((e) => e !== item) : [...without, item]);
   };
 
   const save = () => {
@@ -566,6 +634,22 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
     }
     if (restedness !== null && restedness !== effective.morningRestedness) {
       changes.morningRestedness = restedness;
+    }
+    if (cooking !== null && cooking !== effective.cookingAbility) {
+      changes.cookingAbility = cooking;
+    }
+    if (eatingSetting !== null && eatingSetting !== effective.eatingSetting) {
+      changes.eatingSetting = eatingSetting;
+    }
+    if (prepTime !== null && prepTime !== effective.prepTimeMaxMinutes) {
+      changes.prepTimeMaxMinutes = prepTime;
+    }
+    /* An emptied equipment selection records nothing — a delta
+       cannot un-answer a question, like every other field here. */
+    const equipmentKey = [...equipment].sort().join(",");
+    const effectiveEquipmentKey = [...effective.equipment].sort().join(",");
+    if (equipment.length > 0 && equipmentKey !== effectiveEquipmentKey) {
+      changes.equipment = equipment;
     }
     if (Object.keys(changes).length > 0) {
       recordAssessmentDelta(changes, new Date().toISOString());
@@ -667,9 +751,53 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
               />
             </div>
           </div>
+          <div>
+            <p className={fieldLabel}>Where you eat</p>
+            <div className="mt-1.5">
+              <DeltaChipRow
+                options={EATING_SETTING_OPTIONS}
+                value={eatingSetting}
+                onSelect={setEatingSetting}
+                ariaLabel="Where you eat"
+              />
+            </div>
+          </div>
+          <div>
+            <p className={fieldLabel}>Cooking</p>
+            <div className="mt-1.5">
+              <DeltaChipRow
+                options={COOKING_OPTIONS}
+                value={cooking}
+                onSelect={setCooking}
+                ariaLabel="Cooking experience"
+              />
+            </div>
+          </div>
+          <div>
+            <p className={fieldLabel}>Kitchen equipment</p>
+            <div className="mt-1.5">
+              <DeltaMultiChipRow
+                options={EQUIPMENT_OPTIONS}
+                values={equipment}
+                onToggle={toggleEquipment}
+                ariaLabel="Kitchen equipment"
+              />
+            </div>
+          </div>
+          <div>
+            <p className={fieldLabel}>Time to cook a main meal</p>
+            <div className="mt-1.5">
+              <DeltaChipRow
+                options={PREP_TIME_OPTIONS}
+                value={prepTime}
+                onSelect={setPrepTime}
+                ariaLabel="Time to cook a main meal"
+              />
+            </div>
+          </div>
           <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            Your eating pattern and budget stay exactly as your assessment recorded them — those
-            change only in a retake.
+            Your eating pattern, budget and reflective answers stay exactly as your assessment
+            recorded them — those change only in a retake.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" onClick={save}>
@@ -683,7 +811,7 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
       ) : (
         <div className="mt-3">
           <Button type="button" size="sm" variant="ghost" onClick={openForm}>
-            Update weight, activity or sleep
+            Update weight, activity, sleep or kitchen
           </Button>
         </div>
       )}

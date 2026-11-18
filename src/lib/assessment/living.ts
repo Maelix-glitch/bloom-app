@@ -35,6 +35,12 @@
  * below copies only the permitted fields out of a stored value,
  * so even a forged or sync-merged delta document cannot smuggle
  * a pattern or a budget in. Changing either still means a retake.
+ * The behavioural profile (spec §10.5) splits the same way: the
+ * factual kitchen fields — cooking ability, equipment, prep time,
+ * eating setting — CAN move by delta, because kitchens and
+ * circumstances change; the reflective fields — hunger pattern,
+ * cravings, emotional eating, past attempts, motivation,
+ * confidence — are Assessment-only and are dropped here too.
  *
  * Storage follows the pattern the Assessment and its history set:
  * one versioned key in the shared preferences document, so the
@@ -47,9 +53,19 @@
 import { getPref, setPref } from "@/lib/prefs";
 import type { WeighIn } from "@/lib/health/body";
 import type { LogEntry } from "@/lib/nutrition/types";
-import type { ActivityLevel } from "@/lib/vitalis/domain/profile";
+import type {
+  ActivityLevel,
+  CookingAbility,
+  EatingSetting,
+  EquipmentItem,
+  PrepTimeMaxMinutes,
+} from "@/lib/vitalis/domain/profile";
 import {
   ACTIVITY_LABEL,
+  COOKING_LABEL,
+  EATING_SETTING_LABEL,
+  EQUIPMENT_LABEL,
+  PREP_TIME_LABEL,
   RESTEDNESS_LABEL,
   SLEEP_QUALITY_LABEL,
   type SleepQuality,
@@ -66,8 +82,14 @@ export const ASSESSMENT_DELTA_CAP = 50;
 /**
  * The ONLY fields a delta update may change. Deliberately absent:
  * `dietaryPattern`, `foodBudget` and `cuisinePreference`
- * (Assessment-only, see header), and every safety answer — a change
- * there deserves the full flow, not a one-line edit.
+ * (Assessment-only, see header), every safety answer — a change
+ * there deserves the full flow, not a one-line edit — and the
+ * reflective behavioural fields (`hungerPattern`, `cravings`,
+ * `cravingKinds`, `emotionalEating`, `pastAttempts`, `motivation`,
+ * `confidence`): spec §10.5 keeps those Assessment-only. The
+ * factual kitchen fields ARE here: a person who moves out of a
+ * hostel into a flat has a different kitchen, and that is a fact,
+ * not a reflection.
  */
 export interface AssessmentDeltaChanges {
   weightKg?: number;
@@ -75,6 +97,12 @@ export interface AssessmentDeltaChanges {
   sleepHoursTypical?: number;
   sleepQuality?: SleepQuality;
   morningRestedness?: number;
+  cookingAbility?: CookingAbility;
+  /** A stated list; `["none"]` is the explicit "none of these". An
+   *  empty list is not a change — it parses as "not stated". */
+  equipment?: EquipmentItem[];
+  prepTimeMaxMinutes?: PrepTimeMaxMinutes;
+  eatingSetting?: EatingSetting;
 }
 
 export type AssessmentDeltaField = keyof AssessmentDeltaChanges;
@@ -85,6 +113,10 @@ export const DELTA_FIELDS: readonly AssessmentDeltaField[] = [
   "sleepHoursTypical",
   "sleepQuality",
   "morningRestedness",
+  "cookingAbility",
+  "equipment",
+  "prepTimeMaxMinutes",
+  "eatingSetting",
 ];
 
 export interface AssessmentDeltaUpdate {
@@ -128,6 +160,18 @@ export function parseDeltaChanges(raw: unknown): AssessmentDeltaChanges | null {
   }
   if ("morningRestedness" in r && parsed.morningRestedness !== null) {
     changes.morningRestedness = parsed.morningRestedness;
+  }
+  if ("cookingAbility" in r && parsed.cookingAbility !== null) {
+    changes.cookingAbility = parsed.cookingAbility;
+  }
+  if ("equipment" in r && parsed.equipment.length > 0) {
+    changes.equipment = parsed.equipment;
+  }
+  if ("prepTimeMaxMinutes" in r && parsed.prepTimeMaxMinutes !== null) {
+    changes.prepTimeMaxMinutes = parsed.prepTimeMaxMinutes;
+  }
+  if ("eatingSetting" in r && parsed.eatingSetting !== null) {
+    changes.eatingSetting = parsed.eatingSetting;
   }
   return Object.keys(changes).length > 0 ? changes : null;
 }
@@ -249,6 +293,20 @@ function describeChanges(changes: AssessmentDeltaChanges): string[] {
     parts.push(
       `waking rested — ${RESTEDNESS_LABEL[changes.morningRestedness]?.toLowerCase() ?? changes.morningRestedness}`,
     );
+  }
+  if (changes.cookingAbility !== undefined) {
+    parts.push(`cooking — ${COOKING_LABEL[changes.cookingAbility].toLowerCase()}`);
+  }
+  if (changes.equipment !== undefined) {
+    parts.push(
+      `equipment — ${changes.equipment.map((item) => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}`,
+    );
+  }
+  if (changes.prepTimeMaxMinutes !== undefined) {
+    parts.push(`prep time — ${PREP_TIME_LABEL[changes.prepTimeMaxMinutes].toLowerCase()}`);
+  }
+  if (changes.eatingSetting !== undefined) {
+    parts.push(`eating — ${EATING_SETTING_LABEL[changes.eatingSetting].toLowerCase()}`);
   }
   return parts;
 }

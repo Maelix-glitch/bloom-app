@@ -183,6 +183,141 @@ describe("parseAssessmentState", () => {
       expect(parsed?.answers.cuisinePreference).toBeNull();
     }
   });
+
+  it("parses the behavioural answers (§10) exactly as stated", () => {
+    const parsed = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: {
+        waistCm: 88,
+        cookingAbility: "basic",
+        equipment: ["stove", "fridge"],
+        prepTimeMaxMinutes: 20,
+        eatingSetting: "hostel",
+        hungerPattern: "evenings",
+        cravings: ["chocolate", "chips"],
+        cravingKinds: ["sweet", "salty"],
+        emotionalEating: 4,
+        pastAttempts: [
+          { approach: "A low-carb diet", failureReasons: ["hunger", "social"] },
+          { approach: "Intermittent fasting", failureReasons: [] },
+        ],
+        motivation: 3,
+        confidence: 2,
+      },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(parsed?.answers.waistCm).toBe(88);
+    expect(parsed?.answers.cookingAbility).toBe("basic");
+    expect(parsed?.answers.equipment).toEqual(["stove", "fridge"]);
+    expect(parsed?.answers.prepTimeMaxMinutes).toBe(20);
+    expect(parsed?.answers.eatingSetting).toBe("hostel");
+    expect(parsed?.answers.hungerPattern).toBe("evenings");
+    expect(parsed?.answers.cravings).toEqual(["chocolate", "chips"]);
+    expect(parsed?.answers.cravingKinds).toEqual(["sweet", "salty"]);
+    expect(parsed?.answers.emotionalEating).toBe(4);
+    expect(parsed?.answers.pastAttempts).toEqual([
+      { approach: "A low-carb diet", failureReasons: ["hunger", "social"] },
+      { approach: "Intermittent fasting", failureReasons: [] },
+    ]);
+    expect(parsed?.answers.motivation).toBe(3);
+    expect(parsed?.answers.confidence).toBe(2);
+  });
+
+  it("a legacy state without behavioural answers reads them all as unanswered", () => {
+    const legacy = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { dietaryPattern: "eggetarian" },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(legacy?.answers.waistCm).toBeNull();
+    expect(legacy?.answers.cookingAbility).toBeNull();
+    expect(legacy?.answers.equipment).toEqual([]);
+    expect(legacy?.answers.prepTimeMaxMinutes).toBeNull();
+    expect(legacy?.answers.eatingSetting).toBeNull();
+    expect(legacy?.answers.hungerPattern).toBeNull();
+    expect(legacy?.answers.cravings).toEqual([]);
+    expect(legacy?.answers.cravingKinds).toEqual([]);
+    expect(legacy?.answers.emotionalEating).toBeNull();
+    expect(legacy?.answers.pastAttempts).toEqual([]);
+    expect(legacy?.answers.motivation).toBeNull();
+    expect(legacy?.answers.confidence).toBeNull();
+  });
+
+  it("drops behavioural values that do not exist instead of repairing them", () => {
+    const parsed = parseAssessmentState({
+      version: 1,
+      status: "in_progress",
+      step: "behaviour",
+      answers: {
+        waistCm: 500,
+        cookingAbility: "expert",
+        equipment: ["stove", "air_fryer", "stove"],
+        prepTimeMaxMinutes: 25,
+        eatingSetting: "office",
+        hungerPattern: "all_day",
+        cravings: ["ok"],
+        cravingKinds: ["sweet", "crunchy"],
+        emotionalEating: 6,
+        pastAttempts: [
+          { approach: "  ", failureReasons: ["cost"] },
+          { approach: "Keto", failureReasons: ["cost", "magic"] },
+          { approach: "Juice cleanse", failureReasons: [] },
+          { approach: "Fourth attempt — past the cap", failureReasons: [] },
+          { approach: "Fifth — never reached", failureReasons: [] },
+        ],
+        motivation: 0,
+        confidence: "high",
+      },
+      consents: [],
+      startedAt: T0,
+      completedAt: null,
+      updatedAt: T0,
+    });
+    expect(parsed?.answers.waistCm).toBeNull();
+    expect(parsed?.answers.cookingAbility).toBeNull();
+    /* Unknown equipment drops; the valid item survives, de-duplicated. */
+    expect(parsed?.answers.equipment).toEqual(["stove"]);
+    /* 25 minutes is not one of the offered bands. */
+    expect(parsed?.answers.prepTimeMaxMinutes).toBeNull();
+    expect(parsed?.answers.eatingSetting).toBeNull();
+    expect(parsed?.answers.hungerPattern).toBeNull();
+    expect(parsed?.answers.cravingKinds).toEqual(["sweet"]);
+    expect(parsed?.answers.emotionalEating).toBeNull();
+    /* The blank-approach attempt is not an attempt; unknown reasons
+       drop; the list caps at three. */
+    expect(parsed?.answers.pastAttempts).toEqual([
+      { approach: "Keto", failureReasons: ["cost"] },
+      { approach: "Juice cleanse", failureReasons: [] },
+      { approach: "Fourth attempt — past the cap", failureReasons: [] },
+    ]);
+    expect(parsed?.answers.motivation).toBeNull();
+    expect(parsed?.answers.confidence).toBeNull();
+  });
+
+  it("a stated 'none' stands alone in equipment and craving kinds", () => {
+    const parsed = parseAssessmentState({
+      version: 1,
+      status: "in_progress",
+      step: "nutrition",
+      answers: { equipment: ["none", "stove"], cravingKinds: ["none", "sweet"] },
+      consents: [],
+      startedAt: T0,
+      completedAt: null,
+      updatedAt: T0,
+    });
+    expect(parsed?.answers.equipment).toEqual(["none"]);
+    expect(parsed?.answers.cravingKinds).toEqual(["none"]);
+  });
 });
 
 describe("transitions", () => {
@@ -272,6 +407,63 @@ describe("toHealthProfile", () => {
     expect(toHealthProfile(s, "user-1").dietary.cuisinePreference).toBe("south_indian");
     const unanswered = toHealthProfile(emptyAssessmentState(T0), "user-1");
     expect(unanswered.dietary.cuisinePreference).toBeNull();
+  });
+
+  it("maps the waist answer onto the profile's waist — the field that sat null", () => {
+    const s = saveStep(answeredState(), { waistCm: 91 }, "summary", T1);
+    const profile = toHealthProfile(s, "user-1");
+    expect(profile.waist?.value).toEqual({ value: 91, unit: "cm" });
+    expect(profile.waist?.provenance.source).toBe("user_reported");
+    /* Unanswered stays null — the waist is never estimated. */
+    expect(toHealthProfile(answeredState(), "user-1").waist).toBeNull();
+  });
+
+  it("maps the behavioural answers onto the profile's behavioural section", () => {
+    const s = saveStep(
+      answeredState(),
+      {
+        cookingAbility: "confident",
+        equipment: ["stove", "pressure_cooker"],
+        prepTimeMaxMinutes: 35,
+        eatingSetting: "home",
+        hungerPattern: "mornings",
+        cravings: ["chai"],
+        cravingKinds: ["sweet"],
+        emotionalEating: 2,
+        pastAttempts: [{ approach: "Keto", failureReasons: ["taste"] }],
+        motivation: 4,
+        confidence: 5,
+      },
+      "summary",
+      T1,
+    );
+    expect(toHealthProfile(s, "user-1").behavioural).toEqual({
+      cookingAbility: "confident",
+      equipment: ["stove", "pressure_cooker"],
+      prepTimeMaxMinutes: 35,
+      eatingSetting: "home",
+      hungerPattern: "mornings",
+      cravings: ["chai"],
+      cravingKinds: ["sweet"],
+      emotionalEating: 2,
+      pastAttempts: [{ approach: "Keto", failureReasons: ["taste"] }],
+      motivation: 4,
+      confidence: 5,
+    });
+    /* Unanswered folds to the empty section — nulls and empty lists. */
+    expect(toHealthProfile(emptyAssessmentState(T0), "user-1").behavioural).toEqual({
+      cookingAbility: null,
+      equipment: [],
+      prepTimeMaxMinutes: null,
+      eatingSetting: null,
+      hungerPattern: null,
+      cravings: [],
+      cravingKinds: [],
+      emotionalEating: null,
+      pastAttempts: [],
+      motivation: null,
+      confidence: null,
+    });
   });
 
   it("maps the food budget onto the profile's dietary budget tier", () => {
