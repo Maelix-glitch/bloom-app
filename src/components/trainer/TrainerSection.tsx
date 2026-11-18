@@ -1,17 +1,23 @@
 /**
  * TrainerSection — the "Trainer & clinician" card on Profile.
  *
- * Three honest pieces, in the order a person meets them:
+ * Built as settings rows (owner spec, 2026-11-18): a title and ONE
+ * microcopy line per feature on the left, the control on the right,
+ * hairline dividers instead of stacked boxes. The section answers
+ * "what is this, what's my status, what can I do" in a scan — prose
+ * no longer does the layout's job, and nothing is explained twice.
  *
- *   · the referral code a trainer shares with clients (created once
- *     from the account id; the 30%-of-received, ₹1,000-threshold
- *     model is stated in plain words, not fine print);
- *   · the consent switch for the share summary — OFF by default, and
- *     while it is off the preview shows nothing of the record at all;
- *   · a trainer's target proposal, when one is waiting: labelled
- *     with its proposer, inert until the person confirms or
- *     dismisses it here. A confirmed proposal stays visible, labelled
- *     as trainer-proposed and confirmed by the person.
+ *   · Referral code — the code a trainer shares with clients,
+ *     created once from the account id; the 30%-of-received,
+ *     ₹1,000-threshold model stated in the row's one line.
+ *   · Share summary — the consent switch, OFF by default. Turning it
+ *     on reveals the exact summary (built locally, only ever shown
+ *     here); while it is off, no summary exists at all.
+ *   · Trainer-proposed targets, when one exists: its own block
+ *     below, labelled with its proposer, inert until the person
+ *     confirms or dismisses it here. A confirmed proposal stays
+ *     visible, labelled as trainer-proposed and confirmed by the
+ *     person.
  *
  * Nothing here invents a number: the preview renders exactly the
  * rows lib/trainer/summary composed from the real record.
@@ -24,6 +30,7 @@ import { useTrainerPro } from "@/hooks/useTrainerPro";
 import { formatReferralCode } from "@/lib/trainer/referral";
 
 import "@/styles/billing.css";
+import "@/styles/trainer.css";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -90,7 +97,7 @@ export function TrainerSection({ userId }: { userId: string | null }) {
   const confirmed = state.confirmedOverride;
 
   return (
-    <div className="pf-card pf-card--pad">
+    <div className="pf-card trn-card">
       <div className="pf-section-head">
         <div>
           <p className="pf-eyebrow">Work with a professional</p>
@@ -98,52 +105,53 @@ export function TrainerSection({ userId }: { userId: string | null }) {
         </div>
       </div>
 
-      <p className="text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
-        If a trainer or clinician helps you, Bloom can meet them halfway — a code that credits
-        them when their clients join, and a summary of your record that only exists while you
-        allow it.
-      </p>
+      <p className="trn-intro">Bring your professional into Bloom — on your terms.</p>
 
       {/* Referral code */}
-      <div className="mt-5">
-        <p className="pf-eyebrow">Your trainer referral code</p>
-        {code ? (
-          <div className="mt-1 flex flex-wrap items-center gap-3">
-            <p className="mono text-[length:var(--text-title)] tracking-[var(--tracking-meta)] text-foreground">
-              {formatReferralCode(code)}
+      <div className="trn-row">
+        <div className="trn-row-line">
+          <div className="trn-row-main">
+            <h3 className="trn-row-title">Referral code</h3>
+            <p className="trn-row-copy">
+              Your trainer earns 30% of what Bloom receives from clients who join with this
+              code, paid monthly once commission reaches ₹1,000.
             </p>
-            <button
-              type="button"
-              className="bill-btn shrink-0"
-              style={{ minHeight: 44 }}
-              onClick={() => void copyCode()}
-              aria-live="polite"
-            >
-              {copied ? "Copied" : "Copy"}
-            </button>
           </div>
-        ) : (
-          <p className="mt-1 text-[length:var(--text-callout)] text-muted-foreground">
-            {userId ? "Preparing your code…" : "Sign in to get your referral code."}
-          </p>
-        )}
-        <p className="mt-1 text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-          A trainer earns 30% of what Bloom actually receives from clients who join with their
-          code, paid monthly once a month&apos;s commission reaches ₹1,000.
-        </p>
+          <div className="trn-row-control">
+            {code ? (
+              <div className="trn-code-field">
+                <code className="trn-code">{formatReferralCode(code)}</code>
+                <button
+                  type="button"
+                  className="bill-btn shrink-0"
+                  style={{ minHeight: 44 }}
+                  onClick={() => void copyCode()}
+                  aria-live="polite"
+                >
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            ) : (
+              <p className="trn-row-copy">
+                {userId ? "Preparing your code…" : "Sign in to get your referral code."}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Consent + share summary preview */}
-      <div className="mt-6 border-t border-border-subtle pt-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="pf-eyebrow">Share summary</p>
-            <p className="mt-1 text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
-              A one-page summary of your record for your trainer or clinician.
+      {/* Share summary */}
+      <div className="trn-row">
+        <div className="trn-row-line">
+          <div className="trn-row-main">
+            <h3 className="trn-row-title">Share summary</h3>
+            <p className="trn-row-copy">
+              A one-page summary of your record for your trainer or clinician, visible only
+              while sharing is on.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="text-[length:var(--text-caption)] text-muted-foreground">
+          <div className="trn-row-control trn-switch-control">
+            <span className="trn-state">
               {state.consentToShare ? "Sharing on" : "Sharing off"}
             </span>
             <Switch
@@ -155,8 +163,8 @@ export function TrainerSection({ userId }: { userId: string | null }) {
         </div>
 
         {state.consentToShare && summary ? (
-          <>
-            <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3">
+          <div className="trn-preview">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
               {summary.rows.map((row) => (
                 <div key={row.label}>
                   <dt className="text-[length:var(--text-caption)] text-muted-foreground">
@@ -168,23 +176,17 @@ export function TrainerSection({ userId }: { userId: string | null }) {
                 </div>
               ))}
             </dl>
-            <p className="mt-3 text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-              This summary exists only while sharing is on, and only here on your Profile —
-              Bloom does not send it anywhere. You show it to your trainer or clinician
-              yourself.
+            <p className="mt-3 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+              Built here, shown only on your Profile — Bloom does not send it anywhere. You
+              show it to your trainer or clinician yourself.
             </p>
-          </>
-        ) : (
-          <p className="mt-3 text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-            Sharing is off. Nothing about your record is prepared or sent anywhere while this
-            stays off — turning it on shows you the exact summary first.
-          </p>
-        )}
+          </div>
+        ) : null}
       </div>
 
       {/* Trainer-proposed targets */}
       {pending ? (
-        <div className="mt-6 border-t border-border-subtle pt-5">
+        <div className="trn-row">
           <p className="pf-eyebrow">Proposed targets — waiting for you</p>
           <p className="mt-1 text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
             {pending.proposedBy} proposed ~{pending.kcal.toLocaleString("en-IN")} kcal and ~
@@ -202,7 +204,7 @@ export function TrainerSection({ userId }: { userId: string | null }) {
           </div>
         </div>
       ) : confirmed ? (
-        <div className="mt-6 border-t border-border-subtle pt-5">
+        <div className="trn-row">
           <p className="pf-eyebrow">Trainer-proposed targets</p>
           <p className="mt-1 text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
             ~{confirmed.kcal.toLocaleString("en-IN")} kcal and ~{confirmed.proteinG} g protein a
