@@ -741,7 +741,7 @@ a.ncenter-row:focus-visible {
   margin-top: 3px;
   font-size: var(--text-meta);
   line-height: var(--leading-meta);
-  color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -757,7 +757,7 @@ a.ncenter-row:focus-visible {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-body);
-  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
   white-space: nowrap;
 }
 .ncenter-row[data-unread="true"] .ncenter-time {
@@ -791,7 +791,7 @@ a.ncenter-row:hover .ncenter-go {
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .ncenter-day::after {
   content: "";
@@ -842,7 +842,7 @@ a.ncenter-row:hover .ncenter-go {
   text-align: center;
   font-size: var(--text-meta);
   line-height: var(--leading-support);
-  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
   text-wrap: pretty;
 }
 @media (max-width: 640px) {

@@ -133,7 +133,7 @@
   font-size: var(--text-support);
 }
 .adm-search input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 34%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
 .adm-kbd {
@@ -143,7 +143,7 @@
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
 /* ------------------------------------------------------------------ list */
@@ -165,7 +165,7 @@
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 40%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
 .adm-item {
@@ -198,11 +198,11 @@
   margin-top: 1px;
   font-size: var(--text-meta);
   line-height: var(--leading-meta);
-  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 .adm-item-route {
   font: var(--text-micro) var(--font-mono);
-  color: color-mix(in oklab, var(--foreground) 38%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
   white-space: nowrap;
 }
 .adm-item-arrow {
@@ -220,7 +220,7 @@
   padding: var(--space-6) var(--space-3);
   text-align: center;
   font-size: var(--text-caption);
-  color: color-mix(in oklab, var(--foreground) 50%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
 /* ------------------------------------------------------------------ foot */
@@ -258,7 +258,7 @@
   min-width: 0;
   font-size: var(--text-micro);
   line-height: var(--leading-micro);
-  color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  color: color-mix(in oklab, var(--foreground) 52%, transparent);
 }
 
 @media (max-width: 560px) {

@@ -582,7 +582,12 @@
   font-weight: 500;
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  /* WCAG AA floor (contrast audit, 2026-11-18): at 45% this mix measured
+     3.7–3.9:1 on the card grounds — below AA for 11px text. 55% measures
+     4.8:1 on the worst ground (glass over --surface-2) while staying
+     clearly below the --faint-strong meta step. Pinned by
+     src/lib/contrast.guard.test.ts. */
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
 }
 
 @utility numeric {

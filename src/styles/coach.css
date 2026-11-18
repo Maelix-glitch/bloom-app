@@ -23,9 +23,14 @@
   --coach-rose: #dda8ba;
   --coach-sky: #9cc3e6;
 
-  /* the violet action gradient (send, primary buttons) */
-  --coach-violet-a: #8f7cd8;
-  --coach-violet-b: #6d5ec2;
+  /* The violet action gradient (send, primary buttons). Both stops were
+     deepened by the 2026-11-18 contrast audit (oklab lightness x0.84,
+     spread preserved): --coach-on-violet text on stop a measured 3.10:1
+     — below WCAG AA for the button's support-size label. It now measures
+     4.75:1 on a and 6.80:1 on b. Pinned by
+     src/lib/contrast.guard.test.ts. */
+  --coach-violet-a: #715db6;
+  --coach-violet-b: #5544a5;
   --coach-on-violet: #f4f0ff;
 
   --coach-danger: #e08a80;

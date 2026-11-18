@@ -924,7 +924,7 @@
   color: var(--foreground);
 }
 .bedit-field-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 32%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .bedit-field-input--display {
   font-family: var(--font-display);
@@ -940,7 +940,7 @@ textarea.bedit-field-input {
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-label);
-  color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  color: color-mix(in oklab, var(--foreground) 53%, transparent);
   white-space: nowrap;
 }
 .bedit-field-note {

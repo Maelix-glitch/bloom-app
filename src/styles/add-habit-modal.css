@@ -29,7 +29,12 @@
   --ahm-border-hover: var(--border-strong);
   --ahm-text: var(--foreground);
   --ahm-text-muted: var(--muted-foreground);
-  --ahm-text-faint: #5a5d75; /* no house equal — the modal's deepest quiet text */
+  /* No house equal — the modal's deepest quiet text. Lightened by the
+     2026-11-18 contrast audit: the old value measured 2.4–3.1:1 on the
+     modal's surfaces (WCAG AA needs 4.5:1); this one measures 4.77:1 on
+     --surface-3 and 5.71:1 on --surface, same blue-grey family. Pinned
+     by src/lib/contrast.guard.test.ts. */
+  --ahm-text-faint: #8a8da7;
 
   --ahm-amber: var(--gold);
   --ahm-amber-dim: color-mix(in oklab, var(--gold) 14%, transparent);
