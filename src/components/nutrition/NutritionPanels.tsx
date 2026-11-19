@@ -9,7 +9,7 @@
 
 import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
-import { FileText } from "lucide-react";
+import { FileText, FlaskConical } from "lucide-react";
 
 import {
   type MoodPattern,
@@ -18,6 +18,7 @@ import {
   type SpectrumSex,
   type WeekAggregates,
 } from "@/lib/nutrition";
+import { fmtGrams } from "@/lib/format";
 import { formatGrams } from "./input";
 import { Bar, MiniBars } from "./NutritionPrimitives";
 
@@ -67,7 +68,7 @@ export function WeekPanel({
         </div>
         <div>
           <p className="font-display text-[24px] text-foreground tabular-nums">
-            {week.avgProteinG !== null ? formatGrams(week.avgProteinG) : "—"}
+            {week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "—"}
           </p>
           <p className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
             avg protein g
@@ -190,11 +191,17 @@ export function PatternLab({ patterns }: { patterns: MoodPattern[] }) {
         stand behind it.
       </p>
       {patterns.length === 0 ? (
-        <div className="mt-5 rounded-[var(--radius-control)] border border-dashed border-border-strong p-5">
-          <p className="text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
-            Patterns appear once you have at least two days on each side of a comparison.
-            Keep logging food and checking in on Mood.
+        <div className="empty-row mt-5">
+          <span className="empty-row-icon" aria-hidden>
+            <FlaskConical className="size-4" />
+          </span>
+          <p className="empty-row-text">
+            <strong>No patterns yet.</strong> Patterns appear once you have at least two
+            days on each side of a comparison — keep logging food and checking in on Mood.
           </p>
+          <Link to="/mood" className="nut-btn nut-btn-ghost nut-btn-sm empty-row-action">
+            Open Mood
+          </Link>
         </div>
       ) : (
         <div className="mt-5 grid gap-4 md:grid-cols-3">

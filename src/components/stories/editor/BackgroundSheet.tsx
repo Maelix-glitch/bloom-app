@@ -29,7 +29,7 @@ type Tab = "bloom" | "color" | "gradient" | "photo" | "texture";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "bloom", label: "Bloom" },
-  { id: "color", label: "Color" },
+  { id: "color", label: "Colour" },
   { id: "gradient", label: "Gradient" },
   { id: "photo", label: "Photo" },
   { id: "texture", label: "Texture" },
@@ -146,7 +146,7 @@ export function BackgroundSheet({
       {tab === "color" ? (
         <div className="se-panel">
           <ColorField
-            label="Solid color"
+            label="Solid colour"
             value={bg.color}
             onChange={(c) => {
               const color = c ?? bg.color;
@@ -188,7 +188,7 @@ export function BackgroundSheet({
 
       {tab === "gradient" ? (
         <div className="se-panel">
-          <FieldLabel hint="Two Bloom colors, one angle">Build your own</FieldLabel>
+          <FieldLabel hint="Two Bloom colours, one angle">Build your own</FieldLabel>
           <div className="flex items-center gap-3">
             <span className="se-grad-preview" style={paintStyle(bg.paint)} aria-hidden />
             <div className="flex-1">
@@ -453,7 +453,7 @@ export function BackgroundSheet({
                 onChange={(v) => patch({ overlay: { color: bg.overlay!.color, opacity: v / 100 } })}
               />
               <ColorField
-                label="Overlay color"
+                label="Overlay colour"
                 value={bg.overlay.color}
                 onChange={(c) =>
                   c && patch({ overlay: { color: c, opacity: bg.overlay!.opacity } })
@@ -467,7 +467,7 @@ export function BackgroundSheet({
             className="se-wide-btn se-wide-btn-ghost"
             onClick={() => patch({ ink: readableInk(bg.color) })}
           >
-            <Wand2 className="size-4" aria-hidden /> Suggest text color
+            <Wand2 className="size-4" aria-hidden /> Suggest text colour
           </button>
         </div>
       ) : null}

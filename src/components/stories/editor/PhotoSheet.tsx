@@ -153,7 +153,7 @@ export function PhotoSheet({
           />
 
           <ColorField
-            label="Frame color"
+            label="Frame colour"
             value={el.frameColor}
             onChange={(c) => onUpdate({ frameColor: c ?? "#FFFFFF" })}
           />

@@ -114,7 +114,7 @@ describe("NutritionPlanSection", () => {
   it("refuses on a substantive safety answer, in the classifier's words", () => {
     seedAssessment({ ...COMPLETE, eatingDisorderHistory: true });
     render(<NutritionPlanSection />);
-    expect(screen.getByText(/won't build a diet plan/)).toBeTruthy();
+    expect(screen.getByText(/won't build a plan/)).toBeTruthy();
     expect(screen.getByText(/history of disordered eating/)).toBeTruthy();
     expect(screen.getByText(/qualified professional/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Create my plan/ })).toBeNull();
@@ -137,7 +137,9 @@ describe("NutritionPlanSection", () => {
        is pinned in the "Today's mix" test below. */
     expect(screen.getAllByText("Lose weight").length).toBeGreaterThan(0);
     expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
-    expect(screen.getByText("Breakfast")).toBeTruthy();
+    /* P12: the day timeline names each meal too, so "Breakfast" appears
+       in the schedule summary as well as the meal card. */
+    expect(screen.getAllByText("Breakfast").length).toBeGreaterThan(0);
     expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
 
     /* P5: main meals are built from dishes — each carries dish rows
@@ -195,7 +197,9 @@ describe("NutritionPlanSection", () => {
         vi.advanceTimersByTime(1000);
       });
       expect(screen.queryByRole("status", { name: "Building your plan" })).toBeNull();
-      expect(screen.getByText("Breakfast")).toBeTruthy();
+      /* P12: the day timeline names each meal too, so "Breakfast" appears
+       in the schedule summary as well as the meal card. */
+    expect(screen.getAllByText("Breakfast").length).toBeGreaterThan(0);
       expect(readPlan()).not.toBeNull();
     } finally {
       vi.useRealTimers();

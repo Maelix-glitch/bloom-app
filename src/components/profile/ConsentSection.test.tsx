@@ -36,9 +36,12 @@ const GRANTED_AT = "2026-03-04T09:15:00.000Z";
 const SENSITIVE_AT = "2026-03-04T09:16:00.000Z";
 const WITHDRAWN_AT = "2026-06-20T18:45:00.000Z";
 
-/** The same format the settings list renders dates in. */
+/** The same format the settings list renders dates in — en-IN house
+ * format ("4 Mar 2026"); pinned to en-IN in the copy slice, where the
+ * component's locale was pinned too (it rendered "Mar 4, 2026" under a
+ * US-locale browser before). */
 function fmt(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",

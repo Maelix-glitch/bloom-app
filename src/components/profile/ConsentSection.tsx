@@ -33,7 +33,7 @@ const ASKED_PURPOSES: readonly ConsentPurpose[] = [
 
 /** The date format the settings list already uses ("Tracking since"). */
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",

@@ -36,7 +36,7 @@ const THING_COLOR: Record<TrackedThing["tone"], string> = {
 };
 
 function fmtDay(date: string): string {
-  return new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
+  return new Date(`${date}T12:00:00`).toLocaleDateString("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -81,8 +81,13 @@ export function RecordNumbers({
       key: "streak",
       value: totals?.streak ?? 0,
       label: "Day streak",
-      sub:
-        totals && totals.bestStreak > (totals.streak ?? 0)
+      /* No sub until the totals exist: "your best yet" is a claim about
+         the record, and the tile may not state it before the record has
+         settled — the week and points tiles already hold their subs
+         empty in that window; the streak tile now does the same. */
+      sub: !totals
+        ? ""
+        : totals.bestStreak > totals.streak
           ? `best ${totals.bestStreak}`
           : "your best yet",
       icon: Flame,
@@ -161,7 +166,7 @@ export function RecordGrid({
     if (i % 7 !== 0) return;
     const col = i / 7;
     const dt = new Date(`${d.date}T12:00:00`);
-    const label = dt.toLocaleDateString(undefined, { month: "short" });
+    const label = dt.toLocaleDateString("en-IN", { month: "short" });
     const prev = months[months.length - 1];
     if (!prev || prev.label !== label) months.push({ col, label });
   });

@@ -38,7 +38,7 @@ export function LegacyRewards() {
             <li key={item.id} className="pg-history-row" style={{ alignItems: "center" }}>
               <span className="pg-history-date">
                 {item.publish_at
-                  ? new Date(item.publish_at).toLocaleDateString(undefined, {
+                  ? new Date(item.publish_at).toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",
                     })

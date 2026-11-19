@@ -20,13 +20,13 @@ import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
 import { buildTwinSnapshot, type TwinField } from "@/lib/twin/twin";
-import { formatGrams } from "./input";
+import { fmtGrams } from "@/lib/format";
 
 const whole = (n: number) => Math.round(n).toLocaleString("en-US");
 const signed1 = (n: number) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`;
 
 function shortDay(dayKey: string): string {
-  return new Date(`${dayKey}T12:00:00`).toLocaleDateString(undefined, {
+  return new Date(`${dayKey}T12:00:00`).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
   });
@@ -169,7 +169,7 @@ export function MetabolicTwinSection() {
                 <>
                   {" "}
                   On those days you averaged {whole(twin.logCoverage.value.avgKcal)} kcal and{" "}
-                  {formatGrams(twin.logCoverage.value.avgProteinG)} g protein
+                  {fmtGrams(twin.logCoverage.value.avgProteinG)} g protein
                   {twin.logCoverage.value.kcalVsTarget !== null &&
                   twin.logCoverage.value.proteinVsTarget !== null
                     ? ` — ${Math.round(twin.logCoverage.value.kcalVsTarget * 100)}% of your energy target, ${Math.round(twin.logCoverage.value.proteinVsTarget * 100)}% of your protein target`

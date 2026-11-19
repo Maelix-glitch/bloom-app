@@ -348,7 +348,7 @@ export const STORY_FILTERS: StoryFilter[] = [
   {
     id: "mono",
     name: "Mono",
-    hint: "One color, softer",
+    hint: "One colour, softer",
     css: "grayscale(1) brightness(1.02) contrast(1.06)",
   },
   {

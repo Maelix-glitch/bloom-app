@@ -477,8 +477,8 @@ export function TemplatePreview({
               type="button"
               className="sv-icon-btn"
               onClick={onUse}
-              aria-label="Customize this template"
-              title="Customize"
+              aria-label="Customise this template"
+              title="Customise"
             >
               <SlidersHorizontal className="size-4" />
             </button>

@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { LayoutGrid, MoreHorizontal, RotateCcw, Rows3, Star } from "lucide-react";
+import { Filter, LayoutGrid, MoreHorizontal, RotateCcw, Rows3, Star } from "lucide-react";
 
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,7 @@ const FILTER_ORDER: { key: StoryKind | "all"; label: string }[] = [
 ];
 
 const dateLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  new Date(iso).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" });
 
 function MomentCard({
   story,
@@ -261,9 +261,14 @@ export function MomentsGrid({
       </div>
 
       {shown.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-[length:var(--text-caption)] text-muted-foreground">
-          Nothing under this filter yet.
-        </p>
+        /* A filtered list's empty state is a row, not a box
+           (empty-state slice, diagnosis §C). */
+        <div className="empty-row">
+          <span className="empty-row-icon" aria-hidden>
+            <Filter className="size-4" />
+          </span>
+          <p className="empty-row-text">Nothing under this filter yet.</p>
+        </div>
       ) : layout === "grid" ? (
         <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {shown.map((story) => (
