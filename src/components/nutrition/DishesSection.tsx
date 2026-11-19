@@ -17,7 +17,7 @@
  * ingredient-cost ESTIMATE and are labelled as one wherever they appear.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Clock, Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import {
   browseDishes,
   logDish,
   planPatternOf,
+  sortDishesForYou,
   type Dish,
   type DishBrowseFilters,
   type DishCategory,
@@ -42,7 +43,14 @@ import {
 } from "@/lib/nutrition";
 import { DishDetailSheet } from "./DishDetailSheet";
 import { DishPhoto } from "./DishPhoto";
+import { ProvenanceBadge } from "./ProvenanceBadge";
 import { formatGrams } from "./input";
+
+/** Cards per page of the shelf — the library is 1,200+ dishes, and
+ *  rendering all of them (a photo card each) is the cost §M names.
+ *  "Show more" pages through the rest; nothing is hidden, the full
+ *  count stays in the status line. */
+const DISH_PAGE_SIZE = 48;
 
 export function DishesSection({ day }: { day: string }) {
   const assessment = useAssessment();
@@ -63,6 +71,7 @@ export function DishesSection({ day }: { day: string }) {
   );
   const pattern = planPatternOf(profile.dietary.pattern);
   const budgetTier = profile.dietary.budgetTier;
+  const cuisinePreference = profile.dietary.cuisinePreference;
 
   /* The shelf is browsed with no cuisine chosen: the cuisine chips
      count from the shelf, so a chip's number is exactly the number of
@@ -91,10 +100,24 @@ export function DishesSection({ day }: { day: string }) {
     }
     return counts;
   }, [shelf]);
-  const rows = useMemo(
-    () => (cuisine === null ? shelf : shelf.filter((row) => row.dish.cuisine === cuisine)),
-    [shelf, cuisine],
-  );
+  const rows = useMemo(() => {
+    const filtered =
+      cuisine === null ? shelf : shelf.filter((row) => row.dish.cuisine === cuisine);
+    /* The default order is "Best for you" (§M): the lib's stable
+       re-ordering by the judgements the app already makes — pattern
+       suitability, then the person's cuisine region — over the
+       browse order. No other ranking exists here. */
+    return sortDishesForYou(filtered, { pattern, cuisinePreference });
+  }, [shelf, cuisine, pattern, cuisinePreference]);
+
+  /* Paged rendering: only the first page of cards mounts; "Show
+     more" extends it. Any filter change starts the shelf over at
+     page one, so a narrowed list never opens mid-way. */
+  const [shownCount, setShownCount] = useState(DISH_PAGE_SIZE);
+  useEffect(() => {
+    setShownCount(DISH_PAGE_SIZE);
+  }, [query, category, cuisine, enrichedOnly, pattern, budgetTier]);
+  const visibleRows = rows.slice(0, shownCount);
 
   const anyFilter = query.trim() !== "" || category !== null || cuisine !== null || enrichedOnly;
 
@@ -208,6 +231,14 @@ export function DishesSection({ day }: { day: string }) {
         {budgetTier === 1 ? <> · kept to an everyday ₹ budget</> : null}
         {budgetTier === 2 ? <> · kept to a moderate ₹₹ budget</> : null}
         {cuisine ? <> · {DISH_CUISINE_LABEL[cuisine]} dishes only</> : null}
+        {/* The sort's name, stated only when a personal judgement is
+            actually ordering the shelf — with no pattern and no
+            cuisine preference there is no "for you" to claim. */}
+        {pattern !== null ||
+        cuisinePreference === "north_indian" ||
+        cuisinePreference === "south_indian" ? (
+          <> · best for you first</>
+        ) : null}
       </p>
 
       {rows.length === 0 ? (
@@ -222,39 +253,61 @@ export function DishesSection({ day }: { day: string }) {
           ) : null}
         </div>
       ) : (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-          {rows.map(({ dish, labelled }) => (
-            <li key={dish.id}>
+        <>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {visibleRows.map(({ dish, labelled }) => (
+              <li key={dish.id}>
+                <button
+                  type="button"
+                  className="nut-dish-card"
+                  onClick={() => setSelected(dish)}
+                  aria-label={`${dish.name.en} — view recipe`}
+                >
+                  <DishPhoto dishId={dish.id} name={dish.name.en} lightbox={false} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
+                      {dish.name.en} <span className="nut-hindi">({dish.name.hindi})</span>
+                    </span>
+                    <span className="mt-0.5 block text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
+                      {Math.round(labelled.nutrients.kcal)} kcal ·{" "}
+                      {formatGrams(labelled.nutrients.proteinG)} g protein ·{" "}
+                      <Clock className="mb-0.5 inline size-3" aria-hidden /> {dish.timeMinutes} min
+                    </span>
+                    <span className="mt-0.5 block text-[length:var(--text-caption)] text-muted-foreground">
+                      {DISH_CATEGORY_LABEL[dish.category]} ·{" "}
+                      <span className="text-[var(--gold)]" aria-label={`Budget tier ${dish.budgetTier} of 3, estimated`}>
+                        {"₹".repeat(dish.budgetTier)}
+                      </span>
+                      {dish.enriched ? (
+                        <span className="font-medium text-[var(--sage)]"> · Enriched</span>
+                      ) : null}
+                    </span>
+                    {/* The card's numbers carry their provenance chip
+                        (§M/§N) — the same labelled bundle the detail
+                        sheet renders: recipe-computed from USDA
+                        ingredient data, solid outline (measured
+                        class), never an estimate. */}
+                    <span className="mt-1.5 block">
+                      <ProvenanceBadge kind="recipe" label={labelled.label} />
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {shownCount < rows.length ? (
+            <div className="mt-4 text-center">
               <button
                 type="button"
-                className="nut-dish-card"
-                onClick={() => setSelected(dish)}
-                aria-label={`${dish.name.en} — view recipe`}
+                className="nut-btn nut-btn-ghost nut-btn-sm"
+                onClick={() => setShownCount((n) => n + DISH_PAGE_SIZE)}
               >
-                <DishPhoto dishId={dish.id} name={dish.name.en} lightbox={false} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[length:var(--text-callout)] font-medium text-foreground">
-                    {dish.name.en} <span className="nut-hindi">({dish.name.hindi})</span>
-                  </span>
-                  <span className="mt-0.5 block text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
-                    {Math.round(labelled.nutrients.kcal)} kcal ·{" "}
-                    {formatGrams(labelled.nutrients.proteinG)} g protein ·{" "}
-                    <Clock className="mb-0.5 inline size-3" aria-hidden /> {dish.timeMinutes} min
-                  </span>
-                  <span className="mt-0.5 block text-[length:var(--text-caption)] text-muted-foreground">
-                    {DISH_CATEGORY_LABEL[dish.category]} ·{" "}
-                    <span className="text-[var(--gold)]" aria-label={`Budget tier ${dish.budgetTier} of 3, estimated`}>
-                      {"₹".repeat(dish.budgetTier)}
-                    </span>
-                    {dish.enriched ? (
-                      <span className="font-medium text-[var(--sage)]"> · Enriched</span>
-                    ) : null}
-                  </span>
-                </span>
+                Show more — {fmtCount(rows.length - shownCount)} more{" "}
+                {rows.length - shownCount === 1 ? "dish" : "dishes"}
               </button>
-            </li>
-          ))}
-        </ul>
+            </div>
+          ) : null}
+        </>
       )}
 
       <DishDetailSheet

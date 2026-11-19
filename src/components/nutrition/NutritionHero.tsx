@@ -20,7 +20,7 @@ import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
-import { fmtKcalApprox } from "@/lib/format";
+import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
 import { shiftDay } from "@/lib/localDay";
 import {
   eatingWindowOf,
@@ -31,7 +31,6 @@ import {
   type TotalsComparison,
 } from "@/lib/nutrition";
 import type { NutritionTargetState } from "@/hooks/useNutrition";
-import { formatGrams } from "./input";
 import { Bar, Rings } from "./NutritionPrimitives";
 import { EstimateChip } from "./ProvenanceBadge";
 
@@ -168,6 +167,9 @@ export function NutritionHero({
   const window = eatingWindowOf(log.entries);
   const empty = log.entries.length === 0;
 
+  /* The remaining figure is the ring centre's hero numeral now (§H),
+     so the headline no longer repeats it — it carries only the day's
+     posture, and the number lives in exactly one place on the card. */
   const headline = empty ? (
     <>
       A blank page, <em className="nut-gold-text">ready.</em>
@@ -175,16 +177,17 @@ export function NutritionHero({
   ) : targets && comparison.kcalRemaining !== null ? (
     comparison.kcalRemaining > 0 ? (
       <>
-        <span className="nut-gold-text">{comparison.kcalRemaining} kcal left</span> to enjoy
+        Still <em className="nut-gold-text">room</em> to enjoy
+      </>
+    ) : comparison.kcalRemaining === 0 ? (
+      <>
+        Right at your <em className="nut-gold-text">guide.</em>
       </>
     ) : (
-      <>
-        <span className="nut-gold-text">{Math.abs(comparison.kcalRemaining)} kcal</span> past
-        your guide
-      </>
+      <>Past your guide {day === today ? "today" : "that day"}</>
     )
   ) : (
-    <>{Math.round(totals.kcal)} kcal logged {day === today ? "today" : "that day"}</>
+    <>{fmtCount(totals.kcal)} kcal logged {day === today ? "today" : "that day"}</>
   );
 
   const macros: {
@@ -197,20 +200,23 @@ export function NutritionHero({
     {
       label: "Protein",
       color: "var(--sage)",
-      value: `${formatGrams(totals.proteinG)} g`,
-      ...(targets ? { targetText: ` / ~${formatGrams(targets.proteinG)} g` } : {}),
+      /* Computed day totals go through the shared display formatter
+         (whole, grouped) — the input module's formatGrams is for the
+         person's own entered amounts, where their decimal is theirs. */
+      value: `${fmtGrams(totals.proteinG)} g`,
+      ...(targets ? { targetText: ` / ~${fmtGrams(targets.proteinG)} g` } : {}),
       fraction: comparison.proteinFraction,
     },
     {
       label: "Carbs",
       color: "var(--sky)",
-      value: `${formatGrams(totals.carbsG)} g`,
+      value: `${fmtGrams(totals.carbsG)} g`,
       fraction: null,
     },
     {
       label: "Fat",
       color: "var(--amber)",
-      value: `${formatGrams(totals.fatG)} g`,
+      value: `${fmtGrams(totals.fatG)} g`,
       fraction: null,
     },
   ];
@@ -244,12 +250,34 @@ export function NutritionHero({
               { fraction: comparison.proteinFraction, color: "var(--sage)" },
             ]}
           >
-            <span className="font-display text-[44px] leading-none text-foreground tabular-nums">
-              {Math.round(totals.kcal)}
-            </span>
-            <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
-              {targets ? `of ${fmtKcalApprox(targets.kcal)}` : "kcal"}
-            </span>
+            {/* The centre answers "how much is left" (§H): with a
+                target, the hero numeral is the REMAINING figure and
+                the caption carries the consumed-vs-target pair; the
+                arc still draws the consumed fraction. Without a
+                target there is no remainder to state, so the centre
+                stays the day's logged total, plainly captioned. */}
+            {targets && comparison.kcalRemaining !== null ? (
+              <>
+                <span className="font-display text-[44px] leading-none text-foreground tabular-nums">
+                  {fmtCount(Math.abs(comparison.kcalRemaining))}
+                </span>
+                <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
+                  {comparison.kcalRemaining < 0 ? "kcal past your guide" : "kcal left"}
+                </span>
+                <span className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
+                  {fmtCount(totals.kcal)} of {fmtKcalApprox(targets.kcal)} eaten
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="font-display text-[44px] leading-none text-foreground tabular-nums">
+                  {fmtCount(totals.kcal)}
+                </span>
+                <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
+                  kcal
+                </span>
+              </>
+            )}
           </Rings>
         </div>
 
@@ -332,7 +360,7 @@ export function NutritionHero({
                     <span className="size-2 rounded-full" style={{ background: row.color }} aria-hidden />
                     {row.label}
                     <span className="ml-auto font-semibold text-foreground tabular-nums">
-                      {Math.round(row.kcal)} kcal
+                      {fmtCount(row.kcal)} kcal
                     </span>
                   </li>
                 ))}
@@ -364,7 +392,7 @@ export function NutritionHero({
         <p className="nut-note">
           <EstimateChip /> Targets are estimates from your body numbers (Mifflin–St Jeor
           {bmr !== null && tdee !== null
-            ? `, ${Math.round(bmr)} kcal at rest, ${fmtKcalApprox(tdee)} with activity`
+            ? `, ${fmtCount(bmr)} kcal at rest, ${fmtKcalApprox(tdee)} with activity`
             : ""}
           ) — a guide for the day, not a prescription.
         </p>

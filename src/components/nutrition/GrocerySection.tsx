@@ -21,6 +21,7 @@ import { useMemo, useState } from "react";
 import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePantry } from "@/hooks/usePantry";
@@ -30,6 +31,7 @@ import {
   DISH_LIBRARY,
   PLAN_KEY,
   USDA_REFERENCE_FOODS,
+  foodDisplayName,
   parsePlanValue,
 } from "@/lib/nutrition";
 import {
@@ -40,16 +42,39 @@ import {
 } from "@/lib/grocery";
 import { parseForgivingNumber } from "./input";
 
-function GroceryRow({ item }: { item: GroceryItem }) {
+function GroceryRow({
+  item,
+  bought,
+  onToggle,
+}: {
+  item: GroceryItem;
+  bought: boolean;
+  onToggle: (foodId: string, next: boolean) => void;
+}) {
   return (
     /* A bounded pair row (system slice): name and quantity stay next to
        each other inside the shop column — and the quantity is sans with
-       tabular numerals, never serif (serif marks meaning, not data). */
+       tabular numerals, never serif (serif marks meaning, not data).
+       The checkbox is the shopping state (§J): ticked as the item goes
+       in the basket, here in the shop, on this device. */
     <li className="kv-row kv-row--pair">
-      <div className="min-w-0">
-        <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
-          {item.name}
-        </p>
+      <div className="flex min-w-0 items-start gap-2.5">
+        <Checkbox
+          className="mt-0.5"
+          checked={bought}
+          onCheckedChange={(v) => onToggle(item.foodId, v === true)}
+          aria-label={`Mark ${item.name} as bought`}
+        />
+        <div className="min-w-0">
+          <p
+            className={
+              bought
+                ? "text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground line-through"
+                : "text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground"
+            }
+          >
+            {item.name}
+          </p>
         {item.pantryGrams > 0 ? (
           <p className="text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
             {formatGramAmount(item.pantryGrams)} already in your pantry —{" "}
@@ -62,7 +87,8 @@ function GroceryRow({ item }: { item: GroceryItem }) {
             In your pantry — amount not recorded, so nothing was deducted. Check before you
             shop.
           </p>
-        ) : null}
+          ) : null}
+        </div>
       </div>
       <p className="kv-qty">{formatGramAmount(item.neededGrams)}</p>
     </li>
@@ -76,6 +102,19 @@ export function GrocerySection() {
 
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
+  /* Shopping ticks (§J): which list items are already in the basket.
+     Session state only, deliberately — the list re-derives from the
+     plan on every visit, and a tick is about this shop, not a record
+     Bloom keeps. Nothing is written to storage. */
+  const [bought, setBought] = useState<ReadonlySet<string>>(new Set());
+  const toggleBought = (foodId: string, next: boolean) => {
+    setBought((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(foodId);
+      else copy.delete(foodId);
+      return copy;
+    });
+  };
 
   const foods = useMemo(
     () => [...nutrition.foods, ...USDA_REFERENCE_FOODS],
@@ -97,8 +136,12 @@ export function GrocerySection() {
     const trimmed = name.trim();
     if (!trimmed) return;
     const grams = quantity.trim() ? parseForgivingNumber(quantity) : null;
+    /* The name a person types is the name they read — the display
+       name — so match against it as well as the stored name. */
     const match = foods.find(
-      (food) => normalisePantryName(food.name) === normalisePantryName(trimmed),
+      (food) =>
+        normalisePantryName(food.name) === normalisePantryName(trimmed) ||
+        normalisePantryName(foodDisplayName(food).en) === normalisePantryName(trimmed),
     );
     pantry.add({
       name: trimmed,
@@ -143,7 +186,12 @@ export function GrocerySection() {
                 <h3 className="nut-group-title">{group.label}</h3>
                 <ul>
                   {group.items.map((item) => (
-                    <GroceryRow key={item.foodId} item={item} />
+                    <GroceryRow
+                      key={item.foodId}
+                      item={item}
+                      bought={bought.has(item.foodId)}
+                      onToggle={toggleBought}
+                    />
                   ))}
                 </ul>
               </div>

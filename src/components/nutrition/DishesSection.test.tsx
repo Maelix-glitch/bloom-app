@@ -26,11 +26,13 @@ import {
   type AssessmentState,
 } from "@/lib/assessment/state";
 import {
+  DISH_LIBRARY,
   dishNutrients,
   findDish,
   readFoodLog,
   type Dish,
 } from "@/lib/nutrition";
+import { dishRegion } from "@/lib/nutrition/regions";
 import { DishesSection } from "./DishesSection";
 
 afterEach(cleanup);
@@ -74,11 +76,26 @@ function cardOf(dish: Dish) {
   return screen.getByRole("button", { name: `${dish.name.en} — view recipe` });
 }
 
+/* The shelf renders in pages now (component slice §M — the whole
+   1,202-card library no longer mounts at once). Tests that assert a
+   specific dish's card page through "Show more" the way a person
+   would, instead of assuming every card is already in the DOM. */
+function revealCard(dish: Dish) {
+  for (let i = 0; i < 40; i += 1) {
+    const found = screen.queryByRole("button", { name: `${dish.name.en} — view recipe` });
+    if (found) return found;
+    const more = screen.queryByRole("button", { name: /Show more/ });
+    if (!more) break;
+    fireEvent.click(more);
+  }
+  return cardOf(dish);
+}
+
 describe("DishesSection — browsing", () => {
   it("renders the library with bilingual names and computed per-serving numbers", () => {
     render(<DishesSection day={todayLocal()} />);
     expect(screen.getByText(/1,202 dishes/)).toBeTruthy();
-    const card = cardOf(dal);
+    const card = revealCard(dal);
     expect(within(card).getByText(/मसूर दाल तड़का/)).toBeTruthy();
     const perServing = dishNutrients(dal).nutrients;
     expect(
@@ -120,7 +137,7 @@ describe("DishesSection — browsing", () => {
     fireEvent.click(screen.getByRole("button", { name: "Kerala · 125" }));
     expect(screen.getByText(/125 dishes/)).toBeTruthy();
     expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
-    expect(cardOf(avial)).toBeTruthy();
+    expect(revealCard(avial)).toBeTruthy();
     /* An Indian dish and an international dish both fall away. */
     expect(screen.queryByRole("button", { name: `${dal.name.en} — view recipe` })).toBeNull();
     expect(
@@ -233,8 +250,46 @@ describe("DishesSection — browsing", () => {
 
   it("with no budget stated, every tier is on the shelf", () => {
     render(<DishesSection day={todayLocal()} />);
-    expect(cardOf(chickenCurry)).toBeTruthy();
+    expect(revealCard(chickenCurry)).toBeTruthy();
     expect(screen.queryByText(/kept to an .* budget/)).toBeNull();
+  });
+
+  it("pages the shelf — one page of cards mounts, Show more extends it (§M)", () => {
+    render(<DishesSection day={todayLocal()} />);
+    const cards = () =>
+      screen.getAllByRole("button", { name: /— view recipe$/ });
+    /* The status line still counts the whole library… */
+    expect(screen.getByText(/1,202 dishes/)).toBeTruthy();
+    /* …but only the first page of cards is in the DOM. */
+    expect(cards().length).toBe(48);
+    expect(screen.getByRole("button", { name: /Show more/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Show more/ }));
+    expect(cards().length).toBe(96);
+  });
+
+  it("a dish card carries its provenance chip — the detail sheet's own bundle (§M)", () => {
+    render(<DishesSection day={todayLocal()} />);
+    const card = revealCard(dal);
+    expect(within(card).getByTestId("provenance-badge").textContent).toBe(
+      "Built from USDA ingredient data",
+    );
+  });
+
+  it("names the sort only when a personal judgement orders the shelf", () => {
+    seedAnswers({ cuisinePreference: "south_indian" });
+    render(<DishesSection day={todayLocal()} />);
+    expect(screen.getByText(/best for you first/)).toBeTruthy();
+    /* And the order is real: the library carries well over a page of
+       south-region dishes, so a south-preference shelf's first page
+       is entirely dishes of that region (the lib pins the full
+       ordering property; this pins that the section applies it). */
+    const cards = screen.getAllByRole("button", { name: /— view recipe$/ });
+    expect(cards.length).toBe(48);
+    for (const card of cards) {
+      const name = card.getAttribute("aria-label")!.replace(/ — view recipe$/, "");
+      const dish = DISH_LIBRARY.find((d) => d.name.en === name)!;
+      expect(dishRegion(dish)).toBe("south_indian");
+    }
   });
 });
 
@@ -242,7 +297,7 @@ describe("DishesSection — the detail sheet and logging", () => {
   it("shows the recipe under its provenance, and logs one serving as a dish entry", () => {
     const today = todayLocal();
     render(<DishesSection day={today} />);
-    fireEvent.click(cardOf(dal));
+    fireEvent.click(revealCard(dal));
 
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).getByText("Built from USDA ingredient data")).toBeTruthy();

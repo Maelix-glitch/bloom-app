@@ -67,6 +67,14 @@ export interface CrossLink {
   /** |r| 0–1 */
   weight: number;
   sentence: string;
+  /**
+   * Days where BOTH signals were logged — the sample behind the
+   * correlation, carried from the source correlation (both engines
+   * compute it as `n`). The constellation's rows show it as the
+   * link's day-count; it used to be dropped here and survive only
+   * inside the tracker sentence's prose.
+   */
+  days: number;
 }
 
 export interface FlowItem {
@@ -463,13 +471,19 @@ export function connections(input: {
     const a = TRACKER_TO_SIGNAL[c.a];
     const b = TRACKER_TO_SIGNAL[c.b];
     if (!a || !b || a === b) continue;
-    links.push({ from: a, to: b, weight: clamp01(Math.abs(c.r)), sentence: c.sentence });
+    links.push({ from: a, to: b, weight: clamp01(Math.abs(c.r)), sentence: c.sentence, days: c.n });
   }
   for (const c of moodCorrelations) {
     if (c.evidence === "insufficient") continue;
     const other = MOOD_KEY_TO_SIGNAL[c.key];
     if (!other) continue;
-    links.push({ from: "mood", to: other, weight: clamp01(Math.abs(c.r)), sentence: c.statement });
+    links.push({
+      from: "mood",
+      to: other,
+      weight: clamp01(Math.abs(c.r)),
+      sentence: c.statement,
+      days: c.n,
+    });
   }
   links.sort((x, y) => y.weight - x.weight);
 

@@ -235,6 +235,15 @@ export interface WholeLifeInsight {
   headline: string;
   /** The two group averages behind the headline, in plain words. */
   detail: string;
+  /**
+   * The same two group averages as structured figures — one row per
+   * compared group: the group's plain name (with its driver average)
+   * and the outcome average it carried. The Today card renders these
+   * rows instead of the prose `detail`, so the numbers stand as data
+   * rather than inside a sentence (diagnosis §G); both forms are built
+   * from the same GroupComparison, so they can never disagree.
+   */
+  figures: { label: string; value: string }[];
   /** Paired days (or weigh-ins, for the weight trend) behind this. */
   sampleDays: number;
   windowDays: number;
@@ -362,6 +371,9 @@ interface PairDef {
   outcome: (p: DayPoint) => number | null;
   headline: (higher: boolean) => string;
   detail: (c: GroupComparison) => string;
+  /** The comparison as two figure rows — upper group first, matching
+   *  the order `detail` states them in. */
+  figures: (c: GroupComparison) => { label: string; value: string }[];
 }
 
 const moodText = (v: number) => `${fmt1(v)}/10`;
@@ -379,6 +391,16 @@ const PAIRS: PairDef[] = [
         : "Mood tends to run lower after longer sleep",
     detail: (c) =>
       `After longer nights (about ${fmt1(c.upperDriverMean)} hours), your mood averaged ${moodText(c.upperMean)}. After shorter nights (about ${fmt1(c.lowerDriverMean)} hours), it averaged ${moodText(c.lowerMean)}.`,
+    figures: (c) => [
+      {
+        label: `Longer nights · about ${fmt1(c.upperDriverMean)} hours`,
+        value: `Mood ${moodText(c.upperMean)}`,
+      },
+      {
+        label: `Shorter nights · about ${fmt1(c.lowerDriverMean)} hours`,
+        value: `Mood ${moodText(c.lowerMean)}`,
+      },
+    ],
   },
   {
     kind: "sleep-energy",
@@ -391,6 +413,16 @@ const PAIRS: PairDef[] = [
         : "Energy tends to run lower after longer sleep",
     detail: (c) =>
       `After longer nights (about ${fmt1(c.upperDriverMean)} hours), your energy averaged ${energyText(c.upperMean)}. After shorter nights (about ${fmt1(c.lowerDriverMean)} hours), it averaged ${energyText(c.lowerMean)}.`,
+    figures: (c) => [
+      {
+        label: `Longer nights · about ${fmt1(c.upperDriverMean)} hours`,
+        value: `Energy ${energyText(c.upperMean)}`,
+      },
+      {
+        label: `Shorter nights · about ${fmt1(c.lowerDriverMean)} hours`,
+        value: `Energy ${energyText(c.lowerMean)}`,
+      },
+    ],
   },
   {
     kind: "habits-mood",
@@ -403,6 +435,16 @@ const PAIRS: PairDef[] = [
         : "Mood tends to run lower on days you tick more habits",
     detail: (c) =>
       `On days you ticked more habits (about ${fmt1(c.upperDriverMean)} a day), your mood averaged ${moodText(c.upperMean)}. On days you ticked fewer (about ${fmt1(c.lowerDriverMean)} a day), it averaged ${moodText(c.lowerMean)}.`,
+    figures: (c) => [
+      {
+        label: `More habit ticks · about ${fmt1(c.upperDriverMean)} a day`,
+        value: `Mood ${moodText(c.upperMean)}`,
+      },
+      {
+        label: `Fewer habit ticks · about ${fmt1(c.lowerDriverMean)} a day`,
+        value: `Mood ${moodText(c.lowerMean)}`,
+      },
+    ],
   },
   {
     kind: "movement-mood",
@@ -415,6 +457,16 @@ const PAIRS: PairDef[] = [
         : "Mood tends to run lower on days you move more",
     detail: (c) =>
       `On days you moved more (about ${fmtDuration(c.upperDriverMean)}), your mood averaged ${moodText(c.upperMean)}. On days you moved less (about ${fmtDuration(c.lowerDriverMean)}), it averaged ${moodText(c.lowerMean)}.`,
+    figures: (c) => [
+      {
+        label: `Moved more · about ${fmtDuration(c.upperDriverMean)}`,
+        value: `Mood ${moodText(c.upperMean)}`,
+      },
+      {
+        label: `Moved less · about ${fmtDuration(c.lowerDriverMean)}`,
+        value: `Mood ${moodText(c.lowerMean)}`,
+      },
+    ],
   },
   {
     kind: "movement-energy",
@@ -427,6 +479,16 @@ const PAIRS: PairDef[] = [
         : "Energy tends to run lower on days you move more",
     detail: (c) =>
       `On days you moved more (about ${fmtDuration(c.upperDriverMean)}), your energy averaged ${energyText(c.upperMean)}. On days you moved less (about ${fmtDuration(c.lowerDriverMean)}), it averaged ${energyText(c.lowerMean)}.`,
+    figures: (c) => [
+      {
+        label: `Moved more · about ${fmtDuration(c.upperDriverMean)}`,
+        value: `Energy ${energyText(c.upperMean)}`,
+      },
+      {
+        label: `Moved less · about ${fmtDuration(c.lowerDriverMean)}`,
+        value: `Energy ${energyText(c.lowerMean)}`,
+      },
+    ],
   },
   {
     kind: "screen-mood",
@@ -439,6 +501,16 @@ const PAIRS: PairDef[] = [
         : "Mood tends to run lower on days with more screen time",
     detail: (c) =>
       `On days with more screen time (about ${fmtHours(c.upperDriverMean)}), your mood averaged ${moodText(c.upperMean)}. On days with less (about ${fmtHours(c.lowerDriverMean)}), it averaged ${moodText(c.lowerMean)}.`,
+    figures: (c) => [
+      {
+        label: `More screen time · about ${fmtHours(c.upperDriverMean)}`,
+        value: `Mood ${moodText(c.upperMean)}`,
+      },
+      {
+        label: `Less screen time · about ${fmtHours(c.lowerDriverMean)}`,
+        value: `Mood ${moodText(c.lowerMean)}`,
+      },
+    ],
   },
 ];
 
@@ -477,6 +549,10 @@ function weightInsight(input: WholeLifeInput): WholeLifeInsight | null {
         ? "Your weight has been drifting down over recent weeks"
         : "Your weight has been drifting up over recent weeks",
     detail: `Across ${ins.length} weigh-ins, your weight averaged ${fmt1(earlierMean)} kg in the earlier half of the window and ${fmt1(laterMean)} kg in the later half.`,
+    figures: [
+      { label: "Earlier half", value: `${fmt1(earlierMean)} kg` },
+      { label: "Later half", value: `${fmt1(laterMean)} kg` },
+    ],
     sampleDays: ins.length,
     windowDays: WHOLE_LIFE_WINDOW_DAYS,
     strength: Math.round((shift / sd) * 100) / 100,
@@ -514,6 +590,7 @@ export function buildWholeLifeInsights(input: WholeLifeInput): WholeLifeResult {
       kind: def.kind,
       headline: def.headline(comparison.d > 0),
       detail: def.detail(comparison),
+      figures: def.figures(comparison),
       sampleDays: pairs.length,
       windowDays: WHOLE_LIFE_WINDOW_DAYS,
       strength: Math.round(comparison.d * 100) / 100,
@@ -545,6 +622,16 @@ export function buildWholeLifeInsights(input: WholeLifeInput): WholeLifeResult {
             ? "Mood tends to run higher on days you log your food"
             : "Mood tends to run lower on days you log your food",
         detail: `On the ${comparison.upperCount} days you logged food, your mood averaged ${moodText(comparison.upperMean)}. On the ${comparison.lowerCount} days you didn't, it averaged ${moodText(comparison.lowerMean)}.`,
+        figures: [
+          {
+            label: `Days you logged food · ${comparison.upperCount} ${comparison.upperCount === 1 ? "day" : "days"}`,
+            value: `Mood ${moodText(comparison.upperMean)}`,
+          },
+          {
+            label: `Days you didn't · ${comparison.lowerCount} ${comparison.lowerCount === 1 ? "day" : "days"}`,
+            value: `Mood ${moodText(comparison.lowerMean)}`,
+          },
+        ],
         sampleDays: foodTotal,
         windowDays: WHOLE_LIFE_WINDOW_DAYS,
         strength: Math.round(comparison.d * 100) / 100,

@@ -366,11 +366,35 @@ describe("buildGroceryList — real data: a library dish against the USDA pool",
 });
 
 describe("formatGramAmount", () => {
-  it("grams under a kilo, kilos at and above it", () => {
+  it("whole grams, grouped, at every size", () => {
+    /* Component slice (§J): quantities print as whole grams via the
+       shared formatter — the kilo conversion these pins used to read
+       ("1.25 kg") is retired, so a quantity is the same unit and the
+       same rounding everywhere on the list. Display only: the sums
+       underneath are untouched. */
     expect(formatGramAmount(250)).toBe("250 g");
     expect(formatGramAmount(999)).toBe("999 g");
-    expect(formatGramAmount(1000)).toBe("1 kg");
-    expect(formatGramAmount(1250)).toBe("1.25 kg");
-    expect(formatGramAmount(1500)).toBe("1.5 kg");
+    expect(formatGramAmount(1000)).toBe("1,000 g");
+    expect(formatGramAmount(1250)).toBe("1,250 g");
+    expect(formatGramAmount(1500)).toBe("1,500 g");
+    expect(formatGramAmount(206.25)).toBe("206 g");
+  });
+
+  it("a reference food is listed under its display name, not the raw USDA description", () => {
+    const atta = USDA_REFERENCE_FOODS.find((f) => f.id === "usda-168893")!;
+    const result = ok(
+      buildGroceryList({
+        plans: [
+          planOf("2026-11-18", [meal({ suggestions: [suggestion(atta.id, atta.name, 300)] })]),
+        ],
+        dishes: [],
+        foods: USDA_REFERENCE_FOODS,
+        pantry: [],
+      }),
+    );
+    const item = itemOf(result, atta.id);
+    expect(item.name).toBe("Whole wheat flour (atta)");
+    expect(item.name).not.toBe(atta.name);
+    expect(item.neededGrams).toBe(300);
   });
 });

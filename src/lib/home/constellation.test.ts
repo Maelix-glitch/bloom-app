@@ -30,6 +30,9 @@ const link = (from: CrossLink["from"], to: CrossLink["to"], weight: number): Cro
   to,
   weight,
   sentence: `${from} ↔ ${to}`,
+  /* Fixture completion (component slice): CrossLink now carries the
+     correlation's shared-days count; geometry tests don't read it. */
+  days: 12,
 });
 
 describe("arc geometry", () => {

@@ -78,9 +78,24 @@ export function WholeLifeInsights({ ready }: { ready: boolean }) {
                   <p className="text-[length:var(--text-body)] font-medium leading-snug text-foreground">
                     {insight.headline}
                   </p>
-                  <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                    {insight.detail}
-                  </p>
+                  {/* The numbers behind the statement, as rows — the
+                      lib's two group averages rendered as data (group
+                      · its average) instead of inside a prose sentence
+                      (diagnosis §G). Same figures as the lib's detail
+                      prose, from the same comparison; the day-count
+                      stays in the footer below. */}
+                  <dl className="mt-3 space-y-1.5">
+                    {insight.figures.map((f) => (
+                      <div key={f.label} className="flex items-baseline justify-between gap-3">
+                        <dt className="text-[length:var(--text-support)] text-muted-foreground">
+                          {f.label}
+                        </dt>
+                        <dd className="whitespace-nowrap font-medium tabular-nums text-foreground">
+                          {f.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
                   <p className="mt-2 text-[length:var(--text-caption)] text-muted-foreground">
                     Based on {insight.sampleDays}{" "}
                     {insight.kind === "weight-trend"

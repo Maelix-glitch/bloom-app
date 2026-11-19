@@ -14,8 +14,10 @@
  */
 
 import { useState } from "react";
-import { FileText, Info } from "lucide-react";
+import { FileText, Info, X } from "lucide-react";
 
+import { BloomSheet } from "@/components/ui/bloom-sheet";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
 import { usePrefValue } from "@/lib/prefsStore";
@@ -88,7 +90,13 @@ export function LabReportsSection() {
     setLabName("");
   };
 
+  const closeForm = () => {
+    setFormOpen(false);
+    setError(null);
+  };
+
   return (
+    <>
     <div className="pf-card pf-card--pad">
       <div className="pf-section-head">
         <div>
@@ -197,7 +205,35 @@ export function LabReportsSection() {
         </div>
       )}
 
-      {formOpen ? (
+      <div className="mt-4">
+        <button type="button" className="pf-btn h-10 px-4" onClick={() => setFormOpen(true)}>
+          Add a result
+        </button>
+      </div>
+    </div>
+
+    {/* The entry form is a sheet (diagnosis §I), not an inline block
+        that pushes the record down the page: the house BloomSheet —
+        opaque panel, real backdrop, its own scroll region — carrying
+        the same labelled fields and the same submit path. The flag a
+        saved result earns is still computed only against the range
+        entered here, from the person's own report. */}
+    <BloomSheet open={formOpen} onClose={closeForm} title="Add a lab result">
+      <div className="bsheet-scroll px-5 pb-6 pt-6 sm:px-7">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="font-display text-[length:var(--text-title)] leading-tight text-foreground">
+            Add a result
+          </h2>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={closeForm}
+            aria-label="Close"
+          >
+            <X className="size-4" aria-hidden />
+          </Button>
+        </div>
         <form
           className="mt-5 grid gap-3"
           onSubmit={(e) => {
@@ -304,22 +340,14 @@ export function LabReportsSection() {
             <button
               type="button"
               className="pf-btn pf-btn--ghost h-10 px-4"
-              onClick={() => {
-                setFormOpen(false);
-                setError(null);
-              }}
+              onClick={closeForm}
             >
               Cancel
             </button>
           </div>
         </form>
-      ) : (
-        <div className="mt-4">
-          <button type="button" className="pf-btn h-10 px-4" onClick={() => setFormOpen(true)}>
-            Add a result
-          </button>
-        </div>
-      )}
-    </div>
+      </div>
+    </BloomSheet>
+    </>
   );
 }
