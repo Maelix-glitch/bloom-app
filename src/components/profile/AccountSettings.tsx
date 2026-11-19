@@ -235,12 +235,12 @@ function AccountSettingsInner({
       .reverse()
       .map((e) => ({
         id: e.id,
-        title: `Reflection · ${new Date(e.timestamp).toLocaleDateString(undefined, {
+        title: `Reflection · ${new Date(e.timestamp).toLocaleDateString("en-IN", {
           day: "numeric",
           month: "short",
         })}`,
         body: e.note!.trim(),
-        date: new Date(e.timestamp).toLocaleDateString(undefined, {
+        date: new Date(e.timestamp).toLocaleDateString("en-IN", {
           day: "numeric",
           month: "short",
           year: "numeric",
@@ -251,7 +251,7 @@ function AccountSettingsInner({
       id: r.id,
       title: r.title,
       date: r.claimed_at
-        ? new Date(r.claimed_at).toLocaleDateString(undefined, {
+        ? new Date(r.claimed_at).toLocaleDateString("en-IN", {
             day: "numeric",
             month: "short",
             year: "numeric",

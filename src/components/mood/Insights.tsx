@@ -28,7 +28,7 @@ function InsightsImpl({
     <Panel className="p-6" glow="violet">
       <SectionHead
         eyebrow="Synthesis"
-        title="Insights center"
+        title="Insights centre"
         sub="Plain-language statements generated strictly from your recorded data."
         right={
           <span className="mono flex items-center gap-2 rounded-full border border-violet/40 bg-[var(--dim-violet)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-violet">

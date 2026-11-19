@@ -53,7 +53,7 @@ function timeAgo(iso: string): string {
   if (d === 1) return "yesterday";
   if (d < 7) return `${d}d ago`;
   if (d < 30) return `${Math.floor(d / 7)}w ago`;
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(iso));
+  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(new Date(iso));
 }
 
 /** "18:30" → "6:30 PM" for the due rows. */
@@ -71,15 +71,15 @@ function startOfDay(d: Date): Date {
   return c;
 }
 
-/** Today / Yesterday / Monday / March 4 — history groups by local day. */
+/** Today / Yesterday / Monday / 4 Mar — history groups by local day. */
 function dayLabel(iso: string, now = new Date()): string {
   const days = Math.round(
     (startOfDay(now).getTime() - startOfDay(new Date(iso)).getTime()) / 86_400_000,
   );
   if (days <= 0) return "Today";
   if (days === 1) return "Yesterday";
-  if (days < 7) return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(new Date(iso));
-  return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric" }).format(new Date(iso));
+  if (days < 7) return new Intl.DateTimeFormat("en-IN", { weekday: "long" }).format(new Date(iso));
+  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(new Date(iso));
 }
 
 /** Consecutive same-day buckets — the record arrives newest-first. */

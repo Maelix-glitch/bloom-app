@@ -8,6 +8,7 @@
 import { AlertTriangle, Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { fmtDate } from "@/lib/format";
 import type { AssessmentSummary } from "@/lib/assessment/summary";
 
 const STATE_LABEL = {
@@ -24,11 +25,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
     <div className="flex flex-col gap-5">
       <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
         Completed{" "}
-        {new Date(summary.completedAt).toLocaleDateString(undefined, {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })}
+        {fmtDate(summary.completedAt)}
         . This is what Bloom holds from your assessment. Retaking it updates the summary.
       </p>
 

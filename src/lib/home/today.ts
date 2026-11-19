@@ -159,9 +159,9 @@ export function greetingFor(hour: number): string {
 }
 
 export function longDate(d = new Date()): string {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-IN", {
     weekday: "short",
-    month: "long",
+    month: "short",
     day: "numeric",
   }).format(d);
 }

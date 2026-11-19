@@ -91,7 +91,7 @@ export function TextTool({
           {(
             [
               { id: "left", icon: AlignLeft, label: "Align left" },
-              { id: "center", icon: AlignCenter, label: "Align center" },
+              { id: "center", icon: AlignCenter, label: "Align centre" },
               { id: "right", icon: AlignRight, label: "Align right" },
             ] as const
           ).map((a) => (
@@ -201,7 +201,7 @@ export function TextTool({
         <div
           className="flex items-center gap-2.5 overflow-x-auto py-1"
           role="radiogroup"
-          aria-label="Text color"
+          aria-label="Text colour"
         >
           {STORY_PALETTE.map((s) => (
             <button
@@ -222,15 +222,15 @@ export function TextTool({
             style={{
               background: "conic-gradient(#e0a3b8, #eed9a4, #9db89a, #9fb6cf, #b7a6e8, #e0a3b8)",
             }}
-            title="Custom color"
+            title="Custom colour"
           >
-            <span className="sr-only">Custom color</span>
+            <span className="sr-only">Custom colour</span>
             <input
               type="color"
               value={/^#[0-9a-fA-F]{6}$/.test(value.color) ? value.color : "#f4efe4"}
               onChange={(e) => setValue((v) => ({ ...v, color: e.target.value }))}
               className="absolute inset-0 cursor-pointer opacity-0"
-              aria-label="Custom text color"
+              aria-label="Custom text colour"
             />
           </label>
         </div>

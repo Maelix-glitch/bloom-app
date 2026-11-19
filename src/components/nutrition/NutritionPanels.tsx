@@ -18,6 +18,7 @@ import {
   type SpectrumSex,
   type WeekAggregates,
 } from "@/lib/nutrition";
+import { fmtGrams } from "@/lib/format";
 import { formatGrams } from "./input";
 import { Bar, MiniBars } from "./NutritionPrimitives";
 
@@ -67,7 +68,7 @@ export function WeekPanel({
         </div>
         <div>
           <p className="font-display text-[24px] text-foreground tabular-nums">
-            {week.avgProteinG !== null ? formatGrams(week.avgProteinG) : "—"}
+            {week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "—"}
           </p>
           <p className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
             avg protein g

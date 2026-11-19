@@ -40,15 +40,15 @@ export function dayLabel(day: string, today: string): string {
   if (day === today) return "Today";
   if (day === shiftDay(today, -1)) return "Yesterday";
   if (day === shiftDay(today, 1)) return "Tomorrow";
-  return new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
+  return new Date(`${day}T12:00:00`).toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
-    month: "long",
+    month: "short",
   });
 }
 
 function weekdayShort(day: string): string {
-  return new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" });
+  return new Date(`${day}T12:00:00`).toLocaleDateString("en-IN", { weekday: "short" });
 }
 
 /* -------------------------------- DateNav ------------------------------- */

@@ -561,7 +561,7 @@ function HabitMenu({
   const label = (date: string, i: number) =>
     i === 0
       ? "Yesterday"
-      : new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
+      : new Date(`${date}T12:00:00`).toLocaleDateString("en-IN", {
           weekday: "short",
           day: "numeric",
           month: "short",

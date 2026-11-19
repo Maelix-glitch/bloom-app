@@ -36,7 +36,7 @@ const THING_COLOR: Record<TrackedThing["tone"], string> = {
 };
 
 function fmtDay(date: string): string {
-  return new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
+  return new Date(`${date}T12:00:00`).toLocaleDateString("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -166,7 +166,7 @@ export function RecordGrid({
     if (i % 7 !== 0) return;
     const col = i / 7;
     const dt = new Date(`${d.date}T12:00:00`);
-    const label = dt.toLocaleDateString(undefined, { month: "short" });
+    const label = dt.toLocaleDateString("en-IN", { month: "short" });
     const prev = months[months.length - 1];
     if (!prev || prev.label !== label) months.push({ col, label });
   });

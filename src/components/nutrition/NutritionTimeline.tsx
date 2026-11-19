@@ -25,6 +25,7 @@ import {
 } from "@/lib/nutrition";
 import { FoodPhoto } from "./FoodPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
+import { fmtGrams } from "@/lib/format";
 import { MEAL_LABEL, formatGrams, parseForgivingNumber } from "./input";
 
 function amountText(entry: LogEntry): string {
@@ -102,7 +103,7 @@ export function NutritionTimeline({
                     <span className="font-semibold text-foreground">
                       {Math.round(mealTotals.kcal)} kcal
                     </span>{" "}
-                    · {formatGrams(mealTotals.proteinG)} g protein
+                    · {fmtGrams(mealTotals.proteinG)} g protein
                   </p>
                 ) : null}
                 <button
@@ -250,11 +251,11 @@ export function NutritionTimeline({
                                           {optionName}
                                         </span>
                                         <span className="block text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
-                                          {formatGrams(option.grams)} g ·{" "}
+                                          {fmtGrams(option.grams)} g ·{" "}
                                           {Math.round(option.nutrients.kcal)} kcal ·{" "}
-                                          {formatGrams(option.nutrients.proteinG)} g protein{" "}
+                                          {fmtGrams(option.nutrients.proteinG)} g protein{" "}
                                           <span className="font-semibold text-[var(--sage)]">
-                                            +{formatGrams(option.delta)} g {focus}
+                                            +{fmtGrams(option.delta)} g {focus}
                                           </span>
                                         </span>
                                       </span>

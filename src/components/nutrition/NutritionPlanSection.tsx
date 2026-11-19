@@ -52,7 +52,7 @@ import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
-import { fmtKcalApprox } from "@/lib/format";
+import { fmtGrams, fmtKcalApprox } from "@/lib/format";
 import { formatClock } from "@/lib/smart/usual";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
@@ -116,7 +116,7 @@ const COMPOSE_MIN_MS = 1400;
 
 function formatPlanDay(day: string): string {
   const d = new Date(`${day}T12:00:00`);
-  return d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  return d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
 }
 
 function joinNames(names: string[]): string {
@@ -340,7 +340,7 @@ export function NutritionPlanSection() {
         {refusal.kind === "safety_blocked" ? (
           <div className="mt-2">
             <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-              Bloom won't build a diet plan from these answers
+              Bloom won't build a plan from these answers
             </h2>
             {refusal.findings.map((finding) => (
               <p
@@ -431,7 +431,7 @@ export function NutritionPlanSection() {
           </h2>
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             It aimed at {fmtKcalApprox(plan.targets.kcal)} and{" "}
-            {formatGrams(plan.targets.proteinG)} g of protein for{" "}
+            {fmtGrams(plan.targets.proteinG)} g of protein for{" "}
             {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day — create today's
             to follow it now.
           </p>
@@ -494,7 +494,7 @@ export function NutritionPlanSection() {
     });
   };
   const shortDay = (dayKey: string) =>
-    new Date(`${dayKey}T12:00:00`).toLocaleDateString(undefined, {
+    new Date(`${dayKey}T12:00:00`).toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
     });
@@ -548,8 +548,8 @@ export function NutritionPlanSection() {
             />
           </div>
           <p className="mt-0.5 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
-            {formatGrams(suggestion.grams)} g · {Math.round(suggestion.nutrients.kcal)} kcal ·{" "}
-            {formatGrams(suggestion.nutrients.proteinG)} g protein
+            {fmtGrams(suggestion.grams)} g · {Math.round(suggestion.nutrients.kcal)} kcal ·{" "}
+            {fmtGrams(suggestion.nutrients.proteinG)} g protein
           </p>
         </div>
         <div className="shrink-0">
@@ -600,7 +600,7 @@ export function NutritionPlanSection() {
             </span>
             <span className="mt-0.5 block text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
               {Math.round(planDish.nutrients.kcal)} kcal ·{" "}
-              {formatGrams(planDish.nutrients.proteinG)} g protein per serving
+              {fmtGrams(planDish.nutrients.proteinG)} g protein per serving
             </span>
           </span>
           {planDish.role !== "anchor" ? (
@@ -761,10 +761,10 @@ export function NutritionPlanSection() {
             <div className="mt-4 flex items-center justify-between gap-3 border-t border-border-subtle pt-3.5">
               <p className="text-[length:var(--text-callout)] text-muted-foreground tabular-nums">
                 <span className="font-semibold text-[var(--sage)]">
-                  {formatGrams(sums.proteinG)} g
+                  {fmtGrams(sums.proteinG)} g
                 </span>{" "}
                 protein
-                {sums.fibreG !== undefined ? <> · {formatGrams(sums.fibreG)} g fibre</> : null}
+                {sums.fibreG !== undefined ? <> · {fmtGrams(sums.fibreG)} g fibre</> : null}
               </p>
               {allLogged ? (
                 <span className="inline-flex items-center gap-1.5 text-[length:var(--text-callout)] font-medium text-[var(--sage)]">
@@ -816,7 +816,7 @@ export function NutritionPlanSection() {
               {idea.name.en} <span className="nut-hindi">({idea.name.hindi})</span>
             </p>
             <p className="mt-0.5 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
-              {Math.round(nutrients.kcal)} kcal · {formatGrams(nutrients.proteinG)} g protein per
+              {Math.round(nutrients.kcal)} kcal · {fmtGrams(nutrients.proteinG)} g protein per
               serving
             </p>
           </div>
@@ -877,10 +877,10 @@ export function NutritionPlanSection() {
             </span>{" "}
             and{" "}
             <span className="font-semibold text-foreground">
-              {formatGrams(plan.targets.proteinG)} g protein
+              {fmtGrams(plan.targets.proteinG)} g protein
             </span>{" "}
             across the day — your guide is {fmtKcalApprox(plan.targets.kcal)} and ~
-            {formatGrams(plan.targets.proteinG)} g.
+            {fmtGrams(plan.targets.proteinG)} g.
           </p>
         </div>
         <button
@@ -1063,7 +1063,7 @@ export function NutritionPlanSection() {
               {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")} kcal and{" "}
               {Math.round(learning.adherence.avgProteinG)} g protein a day, against targets of{" "}
               {Math.round(plan.targets.kcal).toLocaleString("en-US")} kcal and{" "}
-              {formatGrams(plan.targets.proteinG)} g.
+              {fmtGrams(plan.targets.proteinG)} g.
             </p>
           ) : null}
           {learning && learning.favouredDishes.length > 0 ? (

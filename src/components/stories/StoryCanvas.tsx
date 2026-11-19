@@ -1117,7 +1117,7 @@ function DatePiece({
   const at = el.at ?? fallback;
   const d = new Date(at);
   const label = Number.isFinite(d.getTime())
-    ? d.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })
+    ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
     : "";
   return (
     <span className="sx-date" data-style={el.style ?? "soft"}>

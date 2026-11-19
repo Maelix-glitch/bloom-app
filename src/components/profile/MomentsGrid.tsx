@@ -42,7 +42,7 @@ const FILTER_ORDER: { key: StoryKind | "all"; label: string }[] = [
 ];
 
 const dateLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  new Date(iso).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" });
 
 function MomentCard({
   story,
