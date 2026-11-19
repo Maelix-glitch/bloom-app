@@ -159,6 +159,11 @@ export interface GroceryItem {
   neededGrams: number;
   /** Grams the pantry covers (0 when no quantity was recorded). */
   pantryGrams: number;
+  /** Grams the pantry record itself holds for this food — the
+   *  on-hand total before the min(need) cap above is applied. The
+   *  "Covered by your pantry" block quotes the record, not the
+   *  deduction, so the two numbers are carried separately. */
+  pantryOnHandGrams: number;
   /** Grams left to buy: needed − pantry, never below zero. */
   toBuyGrams: number;
   /** The pantry holds this, but its amount was never recorded —
@@ -344,6 +349,7 @@ export function buildGroceryList(input: GroceryListInput): GroceryListResult {
       category: entry.category,
       neededGrams: Math.round(entry.neededRaw),
       pantryGrams: Math.round(deducted),
+      pantryOnHandGrams: stock ? Math.round(stock.grams) : 0,
       toBuyGrams: Math.max(0, Math.round(entry.neededRaw - deducted)),
       pantryUnrecorded: stock?.unrecorded ?? false,
     };

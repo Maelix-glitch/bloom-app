@@ -11,9 +11,18 @@
  *
  * Trends are per test name AND unit: the same test in a different
  * unit is listed as its own series, never converted or merged.
+ *
+ * Anti-document form (brief v3, Slice 5): each series leads with the
+ * latest value as the figure and the test name as its label
+ * (value-first, never a label-left/value-right row). When the person's
+ * own report printed BOTH range bounds, a meter shows where the value
+ * sits between them — pure arithmetic against that entered range,
+ * clamped to the track; one bound or none means no position exists
+ * and no meter is shown. The flag wording and the range line are
+ * unchanged, and "normal"/"abnormal" still never appear.
  */
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { FileText, Info, X } from "lucide-react";
 
 import { BloomSheet } from "@/components/ui/bloom-sheet";
@@ -100,7 +109,7 @@ export function LabReportsSection() {
     <div className="pf-card pf-card--pad">
       <div className="pf-section-head">
         <div>
-          <p className="pf-eyebrow">Health records</p>
+          <div className="pf-eyebrow">Health records</div>
           <h2 className="pf-title">Lab reports</h2>
         </div>
       </div>
@@ -132,33 +141,75 @@ export function LabReportsSection() {
           {groups.map((group) => {
             const label = flagLabel(group.latest);
             const latest = group.latest;
+            /* The range position exists only when the person's own
+               report printed BOTH bounds: where the value sits
+               between them, as a percentage, clamped to the track.
+               The aria value is clamped the same way; the valuetext
+               always states the real value. */
+            const range =
+              latest.refLow !== undefined &&
+              latest.refHigh !== undefined &&
+              latest.refHigh > latest.refLow
+                ? {
+                    low: latest.refLow,
+                    high: latest.refHigh,
+                    pct: Math.min(
+                      100,
+                      Math.max(
+                        0,
+                        ((latest.value - latest.refLow) / (latest.refHigh - latest.refLow)) *
+                          100,
+                      ),
+                    ),
+                  }
+                : null;
             return (
               <div key={`${group.testName}-${group.unit}`}>
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h3 className="text-[length:var(--text-callout)] font-semibold">
-                    {group.testName}
-                  </h3>
-                  <span className="text-[length:var(--text-callout)]">
-                    {fmtValue(latest.value)} {latest.unit}
-                  </span>
-                  <span className="text-[length:var(--text-caption)] text-faint">
-                    {fmtDate(latest.reportDate)}
-                    {latest.labName ? ` · ${latest.labName}` : ""}
-                  </span>
-                </div>
-                {label ? (
-                  <p className="mt-1">
-                    <span className="inline-block rounded-full border border-border px-2 py-0.5 text-[length:var(--text-caption)] text-[color:var(--text-secondary)]">
-                      {label}
+                {/* Value-first (Slice 5): the latest value is the
+                    figure, the test name its label; the date and the
+                    factual flag sit opposite as context. */}
+                <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+                  <div className="vstat">
+                    <b>
+                      {fmtValue(latest.value)} {latest.unit}
+                    </b>
+                    <span>{group.testName}</span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-[length:var(--text-caption)] text-faint">
+                      {fmtDate(latest.reportDate)}
+                      {latest.labName ? ` · ${latest.labName}` : ""}
                     </span>
-                  </p>
+                    {label ? (
+                      <span className="inline-block rounded-full border border-border px-2 py-0.5 text-[length:var(--text-caption)] text-[color:var(--text-secondary)]">
+                        {label}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                {range ? (
+                  <div className="mt-2.5 flex items-center gap-3">
+                    <div
+                      className="meter flex-1"
+                      role="progressbar"
+                      aria-label={`${group.testName} — position in the range on your report`}
+                      aria-valuemin={range.low}
+                      aria-valuemax={range.high}
+                      aria-valuenow={Math.min(range.high, Math.max(range.low, latest.value))}
+                      aria-valuetext={`${fmtValue(latest.value)} ${latest.unit}`}
+                      style={{ "--v": `${range.pct}%` } as CSSProperties}
+                    />
+                    <span className="text-[length:var(--text-caption)] tabular-nums text-faint">
+                      {fmtValue(range.low)}–{fmtValue(range.high)} {latest.unit}
+                    </span>
+                  </div>
                 ) : null}
                 {latest.refLow !== undefined || latest.refHigh !== undefined ? (
-                  <p className="mt-1 text-[length:var(--text-caption)] text-faint">
+                  <div className="mt-1.5 text-[length:var(--text-caption)] text-faint">
                     Range on your report:{" "}
                     {latest.refLow !== undefined ? fmtValue(latest.refLow) : "—"} to{" "}
                     {latest.refHigh !== undefined ? fmtValue(latest.refHigh) : "—"} {latest.unit}
-                  </p>
+                  </div>
                 ) : null}
                 {group.points.length > 1 ? (
                   <ul className="mt-2 grid gap-1">
@@ -188,7 +239,7 @@ export function LabReportsSection() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-1">
+                  <div className="mt-1">
                     <button
                       type="button"
                       className="text-[length:var(--text-caption)] text-faint underline underline-offset-2"
@@ -197,7 +248,7 @@ export function LabReportsSection() {
                     >
                       Remove
                     </button>
-                  </p>
+                  </div>
                 )}
               </div>
             );

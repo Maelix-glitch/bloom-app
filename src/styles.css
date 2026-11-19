@@ -619,6 +619,79 @@
   white-space: nowrap;
 }
 
+/* Value-first mini stats (the Apple Health pattern): the value on
+   top, the label beneath — never label-left / value-far-right. Born in
+   nutrition.css for the Metabolic Twin (anti-document Slice 3); moved
+   here in Slice 5 because the assessment summary and lab reports on
+   Profile use the same atom and never load the nutrition sheet. */
+.vstats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-4);
+}
+.vstat {
+  display: grid;
+  gap: 2px;
+}
+.vstat b {
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+.vstat span {
+  font-size: var(--text-caption);
+  color: var(--muted-foreground);
+}
+
+/* The meter (rulebook v2 §6): a 6px track whose fill is the `--v`
+   share. Always role="progressbar" with aria-valuemin/max/now at the
+   call site. Added for the lab range position (anti-document
+   Slice 5); the Twin's tile meters remain the nutrition sheet's own
+   .nut-track variant. The fill is gold — a position, never a
+   judgement colour. */
+.meter {
+  block-size: 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.meter::after {
+  content: "";
+  display: block;
+  block-size: 100%;
+  inline-size: var(--v, 0%);
+  background: var(--gold);
+  border-radius: inherit;
+}
+
+/* The summary box (anti-document Slice 5): the shared GEOMETRY of the
+   assessment summary's boxes — a 1px solid border, the 16px radius,
+   the 14/16 padding the boxes always carried as Tailwind utilities.
+   Colours deliberately stay with the utilities at the call site
+   (border-border / bg-surface-2, or the safety variant's rose pair),
+   so this class can never restyle a state it does not own. */
+.assess-box {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 1rem;
+  padding: 0.875rem 1rem;
+}
+
+/* The section state on the assessment summary, as a badge (the
+   anti-document conversion table: a status is a badge, never a
+   sentence). Chrome only — the complete/not-complete colour stays
+   with the call site's text colour utilities, as it was when this
+   was bare meta text. */
+.assess-state {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.125rem 0.5rem;
+}
+
 /* The note: safety and standing copy that must be READ. A visible
    component — surface-2 ground, a left rule, full-contrast 14px text —
    never the smallest, dimmest line on the card. */

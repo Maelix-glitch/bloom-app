@@ -29,7 +29,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
-import { ClipboardCheck, ClipboardList, X } from "lucide-react";
+import { ClipboardCheck, ClipboardList, Info, X } from "lucide-react";
 
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { Badge } from "@/components/ui/badge";
@@ -857,11 +857,18 @@ export function AssessmentProfileCard() {
           status + actions. Neither half sits empty. */}
       <div className="split-card">
         <div>
-          <p className="pf-eyebrow">Assessment</p>
+          <div className="pf-eyebrow">Assessment</div>
           <h2 className="pf-title">Your starting point</h2>
-          <p className="mt-3 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            How you eat, move, sleep and recover, what you want to change, and the safety answers
-            that decide what Bloom will suggest. {statusLine}
+          {/* The intro is standing copy, so it renders as a note
+              (anti-document Slice 5) — a visible component with an
+              icon, not a muted paragraph under the title. The status
+              line rides inside it, as it did in the paragraph. */}
+          <p className="note mt-3">
+            <Info className="size-4" aria-hidden />
+            <span>
+              How you eat, move, sleep and recover, what you want to change, and the safety
+              answers that decide what Bloom will suggest. {statusLine}
+            </span>
           </p>
         </div>
         <div className="split-card-aside">
