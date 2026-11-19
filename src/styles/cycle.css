@@ -243,26 +243,25 @@
 }
 
 /**
- * Full width, like Today and Mood: the shell's <main> already sits beside the
- * rail, so the page runs edge to edge inside it. Side padding mirrors the
- * app-shell contract (px-5 · sm:px-8 · lg:px-10); the bottom clears the
- * phone tab bar.
+ * The app-wide container (Brief v6 Slice 2: --container, 1120px, centred,
+ * 24px gutters) — this page previously ran uncapped edge to edge. The
+ * bottom padding still clears the phone tab bar.
  */
 .ci-shell {
   position: relative;
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 24px 20px 118px;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 24px 24px 118px;
 }
 @media (min-width: 640px) {
   .ci-shell {
-    padding: 28px 32px 118px;
+    padding: 28px 24px 118px;
   }
 }
 @media (min-width: 1024px) {
   .ci-shell {
-    padding: 28px 40px 104px;
+    padding: 28px 24px 104px;
   }
 }
 /* 320px phones: a narrower gutter keeps cards full-width and readable, and the

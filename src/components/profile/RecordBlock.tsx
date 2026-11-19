@@ -72,7 +72,7 @@ export function RecordNumbers({
     {
       key: "days",
       value: totals?.daysLogged ?? 0,
-      label: "Days logged",
+      label: "Days with any log",
       sub: totals?.firstDay ? `since ${fmtDate(totals.firstDay)}` : "anything counts",
       icon: CalendarDays,
       to: "/trackers",

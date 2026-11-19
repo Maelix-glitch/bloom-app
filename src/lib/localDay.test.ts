@@ -1,6 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { localDay, localTime, shiftDay, todayLocal } from "./localDay";
+import {
+  isAnyLogDay,
+  localDay,
+  localTime,
+  pairedDays,
+  shiftDay,
+  todayLocal,
+  unionDayCount,
+} from "./localDay";
 import { aggregateDays, currentStreak, dayKey } from "./mood/analytics";
 import { computeStats } from "./profile/journey";
 import type { MoodEntry } from "./mood/types";
@@ -91,5 +99,50 @@ describe("day arithmetic", () => {
       now.getDate(),
     ).padStart(2, "0")}`;
     expect(todayLocal(now)).toBe(expected);
+  });
+});
+
+/* Brief v6 §1.1/§1.2 — the one day-counting vocabulary. A paired day has
+   BOTH sides logged on that local date; an "any log day" appears in at
+   least one area's list. These functions are the only place either is
+   counted. */
+describe("pairedDays — set intersection of local day keys (M-112)", () => {
+  const a = ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13"];
+
+  it("is 0 with no overlap", () => {
+    expect(pairedDays(a, ["2026-11-01", "2026-11-02"])).toBe(0);
+    expect(pairedDays([], a)).toBe(0);
+    expect(pairedDays(a, [])).toBe(0);
+  });
+
+  it("counts only the shared days on partial overlap", () => {
+    expect(pairedDays(a, ["2026-11-12", "2026-11-13", "2026-11-14"])).toBe(2);
+  });
+
+  it("counts every day when the lists are identical", () => {
+    expect(pairedDays(a, [...a])).toBe(4);
+  });
+
+  it("does not care about input order", () => {
+    expect(pairedDays([...a].reverse(), ["2026-11-13", "2026-11-11"])).toBe(2);
+  });
+
+  it("counts a duplicated date once", () => {
+    expect(pairedDays(["2026-11-10", "2026-11-10", "2026-11-11"], ["2026-11-10", "2026-11-10"])).toBe(1);
+  });
+});
+
+describe("unionDayCount / isAnyLogDay — the one logged-day definition (M-113)", () => {
+  it("counts distinct days across every area's list, duplicates once", () => {
+    expect(
+      unionDayCount(["2026-11-10", "2026-11-11"], ["2026-11-11", "2026-11-12"], []),
+    ).toBe(3);
+    expect(unionDayCount()).toBe(0);
+  });
+
+  it("answers membership in any area", () => {
+    const areas = [["2026-11-10"], ["2026-11-12"]];
+    expect(isAnyLogDay("2026-11-12", ...areas)).toBe(true);
+    expect(isAnyLogDay("2026-11-11", ...areas)).toBe(false);
   });
 });

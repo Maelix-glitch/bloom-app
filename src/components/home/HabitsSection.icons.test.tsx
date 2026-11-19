@@ -78,16 +78,18 @@ describe("HabitsSection — habit icon rendering", () => {
     expect(tile.querySelector("svg")).toBeNull();
   });
 
-  it("falls back to the monogram for a word-like legacy value", () => {
+  it("falls back to a neutral dot for a word-like legacy value (M-120)", () => {
+    /* Brief v6 supersedes the U4 monogram on Today rows: a habit with no
+       usable icon of its own gets a neutral dot, never a letter or star. */
     const tile = tileOf(habit({ icon: "droplet", iconType: "emoji", name: "Water" }));
-    expect(tile.querySelector("svg")).toBeNull();
-    expect(tile.textContent).toBe("W");
+    expect(tile.querySelector(".habit-icon-dot")).not.toBeNull();
+    expect(tile.textContent).toBe("");
   });
 
   /* The flip-flop regression: a photo habit showed its photo on one load
-     and the "D" monogram on the next, because a single transient decode
+     and a fallback on the next, because a single transient decode
      error swapped the fallback in for the whole session. The photo must
-     own the tile through retries; the monogram is for terminal failure. */
+     own the tile through retries; the neutral dot is for terminal failure. */
   describe("photo icons are deterministic", () => {
     const photo = () =>
       habit({
@@ -113,13 +115,14 @@ describe("HabitsSection — habit icon rendering", () => {
       expect(tile.textContent).not.toContain("D");
     });
 
-    it("shows the monogram only once every attempt has failed", () => {
+    it("shows the neutral dot only once every attempt has failed (M-120)", () => {
       const tile = tileOf(photo());
       fireEvent.error(tile.querySelector("img")!);
       fireEvent.error(tile.querySelector("img")!);
       fireEvent.error(tile.querySelector("img")!);
       expect(tile.querySelector("img")).toBeNull();
-      expect(tile.textContent).toBe("D");
+      expect(tile.querySelector(".habit-icon-dot")).not.toBeNull();
+      expect(tile.textContent).toBe("");
     });
   });
 });

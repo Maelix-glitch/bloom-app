@@ -15,7 +15,9 @@ import {
 describe("programmeMatchesGoal", () => {
   it("matches Build & Fuel to the build-strength goal, and no other", () => {
     /* "recomp" is the goal whose label is "Build strength and muscle"
-       — the goal Build & Fuel's blurb says it is aligned to. */
+       — declared as data on the definition. The blurb deliberately
+       does NOT say it: prose alignment rendered for every reader read
+       as a claim about their goal (M-115). */
     expect(programmeMatchesGoal(BUILD_AND_FUEL, "recomp")).toBe(true);
     expect(programmeMatchesGoal(BUILD_AND_FUEL, "lose")).toBe(false);
     expect(programmeMatchesGoal(BUILD_AND_FUEL, "maintain")).toBe(false);

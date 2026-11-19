@@ -77,8 +77,13 @@ function habitHint(h: HabitToday, streak: number, unit: string): string | null {
  * HabitsCard: a glass card whose header carries the day's count as a
  * serif title and a segmented pill per habit (gold when done), then one
  * full-width row per habit divided by hairlines — a 40px icon tile, the
- * name, a hint line only when the habit has real meta, its real points
- * value, and the round gold medallion check. The whole row is the toggle.
+ * name, a hint line only when the habit has real meta, and the round
+ * gold medallion check. The whole row is the toggle.
+ *
+ * Points (brief v6 Slice 5, M-120): a row no longer advertises its own
+ * points value — the reward is not the reason. The day's earned total,
+ * summed from the completed rows' real `points`, sits in the header as
+ * "+N today" (only when something was earned).
  *
  * Bloom's own life stays in the card: the "…" menu (edit, pause, backfill,
  * archive, delete), the missed-yesterday tick, the paused/archived shelf,
@@ -128,6 +133,10 @@ export function HabitsSection({
 
   const done = habits.filter((h) => h.done).length;
   const due = habits.length;
+  /* The day's earned points: the completed rows' own values, summed —
+     the same `points` the toggle awards in useHabits. Shown once, in
+     the header, never per row (M-120). */
+  const earnedToday = habits.reduce((sum, h) => (h.done ? sum + h.points : sum), 0);
   /* While the account is still answering, the list is the skeleton — even
      if stale rows are sitting in state. (The hook holds the list empty on a
      signed-in cold load; this is the second line of defence.) */
@@ -196,6 +205,14 @@ export function HabitsSection({
           <h2 id="home-habits-title" className="home-band-title mt-1">
             {title}
           </h2>
+          {earnedToday > 0 && !showSkeleton ? (
+            <p
+              className="mt-1 text-[length:var(--text-support)] tabular-nums text-gold"
+              data-testid="home-habits-earned"
+            >
+              +{earnedToday} today
+            </p>
+          ) : null}
         </div>
         {/* Segmented pill progress — one segment per habit, gold when done. */}
         {due > 0 && !showSkeleton ? (
@@ -297,16 +314,6 @@ export function HabitsSection({
                       </span>
                     ) : null}
                   </span>
-                  {/* The habit's own points value — the same `h.points` the
-                      toggle awards in useHabits (awardHabitPoints). */}
-                  <span
-                    className={cn(
-                      "text-[length:var(--text-caption)] tabular-nums transition-colors",
-                      h.done ? "text-gold/80" : "text-muted-foreground",
-                    )}
-                  >
-                    +{h.points}
-                  </span>
                   <span
                     className={cn(
                       "grid size-6 shrink-0 place-items-center rounded-full border transition-all duration-[var(--motion-standard)]",
@@ -324,7 +331,7 @@ export function HabitsSection({
                   <button
                     type="button"
                     onClick={() => onToggle(h.id, h.missedYesterday!)}
-                    className="mb-2 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1.5 text-[length:var(--text-caption)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                    className="home-habit-yesterday-btn mb-2 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1.5 text-[length:var(--text-caption)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
                     data-testid={`home-habit-yesterday-${h.id}`}
                     title="Forgot to tick it before bed? Add yesterday's tick and keep the streak."
                   >
@@ -480,11 +487,11 @@ function HabitIcon({ habit }: { habit: Pick<Habit, "name" | "icon" | "iconType" 
   if (resolved.kind === "emoji") {
     return <>{resolved.value}</>;
   }
-  return (
-    <span aria-hidden="true" className="font-display text-base font-semibold leading-none">
-      {habitMonogram(habit.name)}
-    </span>
-  );
+  /* No usable icon of its own — an empty value, the picture placeholder,
+     or an unreadable legacy word: a neutral dot, never a forced star
+     (brief v6, M-120). This supersedes the U4 monogram fallback on
+     Today rows; the paused/archived shelf keeps its monogram. */
+  return <span aria-hidden="true" className="habit-icon-dot block size-2 rounded-full bg-white/25" />;
 }
 
 /** First letter of the habit's name — the premium fallback when its picture is missing. */
@@ -571,7 +578,7 @@ function HabitMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="absolute right-2 top-2 z-[1] grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+          className="home-habit-menu-btn absolute right-2 top-2 z-[1] grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
           aria-label={`More for ${habit.name}`}
           data-testid={`home-habit-menu-${habit.id}`}
         >

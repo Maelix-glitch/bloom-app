@@ -33,6 +33,15 @@ export interface RecordInput {
   habitLogs: readonly HabitLog[];
   cycleDays: readonly DayLog[];
   periods: readonly PeriodLog[];
+  /**
+   * Day keys carrying food entries / weigh-ins (v6 §1.2, M-113). The
+   * totals count them — a day the person logged food IS a logged day —
+   * so the Profile's any-log union covers the same areas as Today's.
+   * The twelve-week GRID does not draw them as sources (its per-source
+   * cells are a separate visual census); only the totals read these.
+   */
+  foodDays?: readonly string[];
+  weighInDays?: readonly string[];
   today?: string;
 }
 
@@ -134,6 +143,8 @@ export function recordTotals(input: RecordInput): RecordTotals {
   for (const d of input.trackerDays) add(d.date, trackerCount(d));
   for (const m of input.moodEntries) add(localDayOf(m.timestamp), 1);
   for (const h of input.habitLogs) add(h.date, 1);
+  for (const d of input.foodDays ?? []) add(d, 1);
+  for (const d of input.weighInDays ?? []) add(d, 1);
   for (const c of input.cycleDays) add(c.date, 1);
   for (const p of input.periods) {
     if (!p.start) continue;

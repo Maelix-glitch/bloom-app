@@ -12,7 +12,7 @@ export const Route = createFileRoute("/trackers")({
       {
         name: "description",
         content:
-          "Sleep, water, study, movement, energy and screen time — one day at a time, drawn as a map: a twenty-four hour compass, six territories, and a route through the last fortnight, all computed only from what you log.",
+          "Sleep, water, study, movement, energy and screen time — one day at a time, drawn as a map: a Bloom flower of today's targets, six territories, and a route through the last fortnight, all computed only from what you log.",
       },
     ],
     links: [{ rel: "stylesheet", href: trackersCss }],
@@ -30,7 +30,7 @@ function TrackersRoute() {
         </div>
         {/* Advanced tools live on the page, not behind a hidden menu: BMI,
             energy, protein, hydration and a goal timeline. */}
-        <div className="px-5 pb-16 sm:px-8">
+        <div className="page pb-16">
           <HealthTools />
         </div>
       </main>

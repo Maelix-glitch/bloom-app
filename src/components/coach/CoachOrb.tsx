@@ -43,7 +43,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useLocation } from "@tanstack/react-router";
-import { Check, Lock, Mic, Send, Volume2, VolumeX } from "lucide-react";
+import { Check, Lock, Mic, NotebookPen, Send, Volume2, VolumeX } from "lucide-react";
 
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomLogo } from "@/components/BloomLogo";
@@ -73,6 +73,7 @@ import {
 } from "@/lib/vitalis-ai/actions";
 import { askVitalis, VitalisUnavailable } from "@/lib/vitalis-ai/client";
 import { requestPaywall } from "@/lib/billing/paywall";
+import { requestMetricsEntry } from "@/lib/trackers/entrySheet";
 import { buildVitalisContext, type VitalisPlanSlice } from "@/lib/vitalis-ai/context";
 import { VitalisSpeaker } from "@/lib/vitalis-ai/voice";
 import {
@@ -702,6 +703,24 @@ export function CoachOrb() {
           keep their own stacking. */}
       <div className="dock">
         <BackToTop />
+        {pathname === "/trackers" ? (
+          /* The Trackers log action (Brief v6 Slice 2; M-130): the
+             "Reflect & log today" pill that floated over the page is
+             deleted; its action lives here, in the dock's 48px chrome,
+             on the one route whose sheet it opens. The click dispatches
+             the metrics-entry bus — TrackersPage opens its sheet with
+             the pill's own handler. */
+          <button
+            type="button"
+            className="dock__log"
+            onClick={requestMetricsEntry}
+            aria-label="Reflect & log today"
+            aria-haspopup="dialog"
+            title="Reflect & log today"
+          >
+            <NotebookPen size={20} aria-hidden="true" />
+          </button>
+        ) : null}
         <button
           ref={orbRef}
           type="button"

@@ -29,7 +29,7 @@
     filter 200ms ease;
 }
 .bm-press:active {
-  transform: scale(0.97);
+  transform: var(--press);
   transition-duration: 90ms;
 }
 /* larger targets need less scale, or they look like they're collapsing */
@@ -105,6 +105,78 @@
   animation: bm-shimmer 2.4s ease-in-out infinite;
 }
 
+/* ------------------------------------------------- 5. feel (v6 §3) */
+
+/*
+ * The scroll entrance for page sections (Brief v6 §3, the "feel layer").
+ * A section shell carrying .feel-in starts 12px low and transparent; the
+ * FeelIn component (components/system/FeelIn.tsx) flips [data-visible]
+ * when the house useInView reports it seen, and it rises once on the
+ * slow feel curve. This is the IO-gated sibling of .bm-arrive (which is
+ * for content arriving after paint, not content scrolled to) and of
+ * .ci-reveal (the same pattern, kept inside Cycle Intelligence).
+ *
+ * --feel-delay staggers; a parent carrying .feel-stagger assigns it to
+ * its direct .feel-in children in 60ms steps, capped at six steps —
+ * past the sixth child everything shares the cap, so a long page never
+ * turns into a waterfall.
+ */
+.feel-in {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+  transition-delay: var(--feel-delay, 0ms);
+}
+.feel-in[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+.feel-stagger > .feel-in:nth-child(2) {
+  --feel-delay: 60ms;
+}
+.feel-stagger > .feel-in:nth-child(3) {
+  --feel-delay: 120ms;
+}
+.feel-stagger > .feel-in:nth-child(4) {
+  --feel-delay: 180ms;
+}
+.feel-stagger > .feel-in:nth-child(5) {
+  --feel-delay: 240ms;
+}
+.feel-stagger > .feel-in:nth-child(6),
+.feel-stagger > .feel-in:nth-child(n + 7) {
+  --feel-delay: 300ms;
+}
+/* Tab switches are returns, not arrivals — the same rule .home-rise and
+   .mm-enter live by: after the first navigation the shell sets
+   html.bloom-navigated and entrances stop replaying. */
+html.bloom-navigated .feel-in {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/*
+ * Hover lift for interactive cards that have no treatment of their own:
+ * up 1px onto the lift shadow. (Cards that already lift — .at-territory,
+ * .bmoment-tile — keep theirs; it is equal or better.) Hover-capable
+ * devices only, and never under reduced motion.
+ */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .feel-lift {
+    transition:
+      transform var(--dur-med) var(--ease-out),
+      box-shadow var(--dur-med) var(--ease-out),
+      border-color var(--dur-med) var(--ease-out);
+  }
+  .feel-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--lift-shadow);
+  }
+}
+
 /* ------------------------------------------------------------ opt out */
 
 @media (prefers-reduced-motion: reduce) {
@@ -122,5 +194,15 @@
   /* still show the arrival, just without the movement */
   .bm-arrive {
     opacity: 1;
+  }
+  /* the feel utilities settle instantly, fully shown */
+  .feel-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .feel-lift:hover {
+    transform: none;
+    box-shadow: none;
   }
 }

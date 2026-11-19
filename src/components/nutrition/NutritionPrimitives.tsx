@@ -1,86 +1,16 @@
 /**
- * Nutrition — the prototype's visual primitives (N-UI): concentric
- * Rings, the growing Bar and the week's MiniBars, drawn with Bloom's
- * tokens. Pure presentation: callers pass fractions they computed from
- * the lib (or null, which draws the honest empty track — no arc, no
- * fill — for a value that has no target to be measured against).
+ * Nutrition — the prototype's visual primitives (N-UI): the growing
+ * Bar and the week's MiniBars, drawn with Bloom's tokens. Pure
+ * presentation: callers pass fractions they computed from the lib (or
+ * null, which draws the honest empty track — no fill — for a value
+ * that has no target to be measured against).
+ *
+ * The concentric Rings that used to live here are gone (brief v6,
+ * M-125): the day hero reads as house meters now, and nothing else
+ * consumed the rings.
  */
 
-import type { CSSProperties, ReactNode } from "react";
-
-export interface RingSpec {
-  /** 0..1 of the ring's guide; null draws the track only. */
-  fraction: number | null;
-  /** Stroke colour (a token reference, e.g. "var(--sage)"). */
-  color: string;
-}
-
-export function Rings({
-  rings,
-  size = 272,
-  stroke = 12,
-  gap = 8,
-  children,
-}: {
-  rings: readonly RingSpec[];
-  size?: number;
-  stroke?: number;
-  gap?: number;
-  children?: ReactNode;
-}) {
-  const centre = size / 2;
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-        {rings.map((ring, i) => {
-          const r = centre - stroke / 2 - i * (stroke + gap);
-          const circ = 2 * Math.PI * r;
-          const fraction =
-            ring.fraction === null ? null : Math.max(0, Math.min(1, ring.fraction));
-          return (
-            <g key={i}>
-              <circle
-                cx={centre}
-                cy={centre}
-                r={r}
-                fill="none"
-                strokeWidth={stroke}
-                style={{ stroke: "color-mix(in oklab, var(--foreground) 7%, transparent)" }}
-              />
-              {fraction !== null ? (
-                <circle
-                  cx={centre}
-                  cy={centre}
-                  r={r}
-                  fill="none"
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
-                  transform={`rotate(-90 ${centre} ${centre})`}
-                  strokeDasharray={circ}
-                  className="nut-ring-arc"
-                  style={
-                    {
-                      /* No glow (OTT pass): a permanent coloured
-                         drop-shadow is decoration, not depth — the
-                         arc reads by colour and width alone. */
-                      stroke: ring.color,
-                      "--circ": circ,
-                      "--len": circ * (1 - fraction),
-                      "--d": `${i * 140}ms`,
-                    } as CSSProperties
-                  }
-                />
-              ) : null}
-            </g>
-          );
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        {children}
-      </div>
-    </div>
-  );
-}
+import type { CSSProperties } from "react";
 
 /** A horizontal bar: track + a fill that grows in. Null fraction = the
  *  track alone (a total with no target is not drawn as 0% of one). */

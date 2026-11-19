@@ -77,7 +77,7 @@ function PointAuditPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto w-full max-w-[1100px] px-5 pb-24 pt-10 sm:px-8">
+      <main className="page pb-24 pt-10">
         <Link
           to="/admin/rewards"
           className="mb-6 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"

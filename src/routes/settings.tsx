@@ -85,7 +85,7 @@ function SettingsPage() {
 
       {/* The rulebook container (1040px, centred) since brief v4 (M-76),
           matching /profile; Today and Nutrition keep the wider measure. */}
-      <main className="relative mx-auto w-full max-w-[1040px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
+      <main className="page relative pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:pt-5 lg:pb-16">
         <ProfileSwap loading={settingsLoading}>
           {!identity ? (
             space.profileProblem || !hasSupabaseConfig ? (

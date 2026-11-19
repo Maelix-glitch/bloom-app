@@ -81,13 +81,15 @@ describe("HabitsSection — prototype HabitsCard", () => {
     expect(screen.getByText("All 2 habits are done.")).toBeTruthy();
   });
 
-  it("shows each habit's own real points value, not a hardcoded number", () => {
+  it("keeps points off the rows and totals the day's earned in the header (M-120)", () => {
     renderCard([
       habit({ id: "a", points: 10, done: true }),
       habit({ id: "b", name: "Read", points: 25, done: false }),
     ]);
-    expect(screen.getByText("+10")).toBeTruthy();
-    expect(screen.getByText("+25")).toBeTruthy();
+    /* No per-row point labels; only the completed row's value counts,
+       and it appears once — as the header's "+10 today". */
+    expect(screen.queryByText("+25")).toBeNull();
+    expect(screen.getByText("+10 today")).toBeTruthy();
   });
 
   it("shows a hint only from real meta — the stored note — and omits it otherwise", () => {
@@ -98,8 +100,8 @@ describe("HabitsSection — prototype HabitsCard", () => {
     expect(screen.getByText(/Two litres, through the day/)).toBeTruthy();
     const readRow = screen.getByTestId("home-habit-b");
     // No note, no week count, no reminder, no streak: the name stands
-    // alone next to its points — no hint line is rendered at all.
-    expect(readRow.textContent).toBe("Read+10");
+    // alone — no hint line is rendered at all.
+    expect(readRow.textContent).toBe("Read");
   });
 
   it("keeps Bloom's Add Habit pill in the card, opening the same flow", () => {

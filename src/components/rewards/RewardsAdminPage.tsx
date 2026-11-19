@@ -535,7 +535,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     <div className="rewards-admin-page relative min-h-screen bg-background text-foreground">
       <BloomHeader />
       <Atmosphere />
-      <main className="relative mx-auto w-full max-w-[1200px] px-5 pb-24 pt-12 sm:px-8 sm:pt-16">
+      <main className="page relative pb-24 pt-12 sm:pt-16">
         <div className="rewards-starfield" aria-hidden="true">
           {Array.from({ length: 14 }, (_, index) => (
             <span

@@ -23,24 +23,24 @@
   }
 }
 
-/* The tab page takes the wide desktop measure because its cards were
-   drawn wide: the rings hero spans the page and the timeline sits
-   beside the week and spectrum panels instead of crowding them. The
-   measure is the app-wide 1280px (20px gutters, 48px from lg) — the
-   owner's 2026-11-17 "cards are not wide enough" directive, applied
-   to every main tab page. A cap this wide can only bind at desktop
-   widths, so phone and tablet rendering is exactly as it was.
-   Scoped to .nut-page (the tab only): the clinician report shares
+/* The tab page takes the app-wide container (Brief v6 Slice 2:
+   --container, 1120px, 24px gutters at every width), superseding the
+   2026-11-17 "cards are not wide enough" 1280px measure (M-76, resolved
+   by v6). Scoped to .nut-page (the tab only): the clinician report shares
    .nut-wrap but keeps the 880px document measure above — a page to
    read and print, not a dashboard — and no other route loads this
    stylesheet at all. */
 .nut-wrap.nut-page {
-  max-width: 1280px;
-  padding-inline: var(--space-5);
+  max-width: var(--container);
+  padding-inline: 24px;
 }
-@media (min-width: 1024px) {
-  .nut-wrap.nut-page {
-    padding-inline: var(--space-12);
+
+/* Touch floor (Brief v6 Slice 2): Nutrition chips reach 44px on coarse
+   pointers (the sub-nav chips already hold --bloom-touch-min at every
+   width); desktop density is untouched. */
+@media (pointer: coarse) {
+  .nut-chip {
+    min-height: var(--bloom-touch-min);
   }
 }
 
@@ -1113,13 +1113,15 @@ a.nut-chip {
   font-weight: 600;
   white-space: nowrap;
   transition:
-    transform var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-micro) var(--ease-out-expo),
     background-color var(--motion-standard) var(--ease-out-expo),
     border-color var(--motion-standard) var(--ease-out-expo),
     color var(--motion-standard) var(--ease-out-expo);
 }
+/* Press (feel layer, v6 §3): the one press token, at press speed —
+   the transform transition above runs at --motion-micro for this. */
 .nut-btn:active {
-  transform: scale(0.98);
+  transform: var(--press);
 }
 .nut-btn:disabled {
   opacity: 0.55;
@@ -1133,6 +1135,10 @@ a.nut-chip {
 }
 .nut-btn-gold:hover {
   background: var(--gold-soft);
+  /* The lift its sheet sibling (.bsheet-primary) already has — the two
+     gold primaries move the same way (feel layer, v6 §3). No shadow:
+     the flat-gold rule (§9.1) stands. */
+  transform: translateY(-1px);
 }
 .nut-btn-ghost {
   border: 1px solid var(--border-strong);

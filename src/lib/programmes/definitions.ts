@@ -90,14 +90,19 @@ export const STRONG_START: ProgrammeDefinition = {
 export const BUILD_AND_FUEL: ProgrammeDefinition = {
   id: "build-and-fuel",
   name: "Build & Fuel",
-  /* The blurb's own words — "aligned to a build-strength goal" — as
-     data: the goal whose label is "Build strength and muscle". */
+  /* Goal affinity is DATA only: "recomp" is the goal whose label is
+     "Build strength and muscle", and the section's "Matches your goal"
+     badge — driven by the person's own stated goal — is the only place
+     that affinity is ever stated. The blurb/outcome must not assert an
+     alignment in prose: rendered for every user, "aligned to a
+     build-strength goal" read as a claim about the READER's goal next
+     to an Assessment that said "lose weight" (M-115). */
   goals: ["recomp"],
   blurb:
     "Twelve weeks built around your plan: follow it on more days, log what you " +
     "actually ate, keep habits loading up, and weigh in weekly so the plan can " +
-    "adapt. A structure for your next 12 weeks, aligned to a build-strength goal.",
-  outcome: "Aligned to a build-strength goal.",
+    "adapt. A structure for your next 12 weeks.",
+  outcome: "A structure for your next 12 weeks.",
   weeks: [
     { focus: "Set the base", targets: [t("plan_days", 3), t("food_log_days", 4), t("habit_tick_days", 4), t("weigh_in_count", 1)] },
     { focus: "Follow the plan", targets: [t("plan_days", 4), t("food_log_days", 5), t("habit_tick_days", 4), t("weigh_in_count", 1)] },

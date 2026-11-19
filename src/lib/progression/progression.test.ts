@@ -728,3 +728,20 @@ describe("cross-tab convergence", () => {
     off();
   });
 });
+
+/* Brief v6 §1.5 — level progress is single-sourced: rankFor IS the shared
+   derivation the sidebar card, the Today Level card and the Profile tile
+   all read. Pin the owner's real position so a threshold edit anywhere
+   shows up here: 965 points = First Bloom, 465 into a 700 span, 235 to
+   Sprout (the auditor's "35 points / Sprout at 1,000" was a placeholder). */
+describe("rankFor — the one level derivation (v6 §1.5)", () => {
+  it("resolves 965 points against the real ladder", () => {
+    const s = rankFor(965);
+    expect(s.rank.name).toBe("First Bloom");
+    expect(s.next.name).toBe("Sprout");
+    expect(s.intoRank).toBe(465);
+    expect(s.span).toBe(700);
+    expect(s.remaining).toBe(235);
+    expect(s.progress).toBeCloseTo(465 / 700, 10);
+  });
+});

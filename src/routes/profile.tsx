@@ -479,7 +479,7 @@ function ProfilePage() {
 
       {/* The rulebook container (1040px, centred) since brief v4 (M-76);
           Today and Nutrition keep the owner's wider measure. */}
-      <main className="relative mx-auto w-full max-w-[1040px] px-[var(--bloom-page-px)] pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:px-6 sm:pt-5 lg:px-8 lg:pb-16">
+      <main className="page relative pb-28 pt-[calc(var(--bloom-header-h)+8px)] sm:pt-5 lg:pb-16">
         {/*
           The wait and the page share one grid cell, so the swap between them
           has no layout shift: the skeleton stands in the page's own layout

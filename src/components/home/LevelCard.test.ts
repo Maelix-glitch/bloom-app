@@ -28,6 +28,17 @@ describe("levelModel", () => {
     expect(m.remaining).toBe(335);
   });
 
+  it("carries the within-level figures the card speaks in (M-118)", () => {
+    // The owner's real balance: 965 = First Bloom, 465 into the 700 span,
+    // 235 to Sprout — the figures the meter line reads, from rankFor.
+    const m = levelModel(965);
+    expect(m.rankName).toBe("First Bloom");
+    expect(m.nextName).toBe("Sprout");
+    expect(m.intoRank).toBe(465);
+    expect(m.span).toBe(700);
+    expect(m.remaining).toBe(235);
+  });
+
   it("rolls into the next rank exactly at its threshold", () => {
     const m = levelModel(1200);
     expect(m.rankName).toBe("Sprout");

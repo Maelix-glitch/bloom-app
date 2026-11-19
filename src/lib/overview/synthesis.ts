@@ -175,9 +175,14 @@ const inWindow = (day: string, w: Window) => day >= w.start && day <= w.end;
 /* ------------------------------ day counting ----------------------------- */
 
 /**
- * The distinct-day union — the same recipe the Today hero uses for its day
- * count (habit log days ∪ mood check-in days ∪ tracker days), computed in
- * this one place so the command centre and the hero can never disagree.
+ * The distinct-day union over the Overview's own three inputs (habit log
+ * days ∪ mood check-in days ∪ tracker days), computed in this one place
+ * so the command centre's facts can never disagree with each other.
+ * Scope note (v6 §1.2 census, M-113): this is an any-log union over the
+ * three sources this module is fed and settled-gated on — deliberately
+ * narrower than the Connections chip's union (which also counts food
+ * and weigh-in days) and the Profile record's. Widening it means
+ * widening OverviewInput and its settle contract together.
  */
 export function recordDayKeys(input: OverviewInput): Set<string> {
   const keys = new Set<string>();

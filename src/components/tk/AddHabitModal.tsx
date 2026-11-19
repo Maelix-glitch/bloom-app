@@ -28,6 +28,7 @@ import { createPortal } from "react-dom";
 
 import { BloomIcon, isBloomIconName } from "@/components/icons/BloomIcon";
 import { HABIT_ICON_CATALOGUE, twinGlyphFor } from "@/components/icons/habitIcons";
+import { validateHabitName } from "@/lib/home/habits";
 
 import "@/styles/add-habit-modal.css";
 
@@ -211,8 +212,10 @@ function initialState(prefill: AddHabitPrefill | undefined): State {
 function validate(state: State, step = state.step): Errors {
   const e: Errors = {};
   if (step === 0) {
-    if (!state.name.trim()) e.name = "Give your habit a name.";
-    else if (state.name.trim().length < 2) e.name = "Names need at least two characters.";
+    /* The name rule itself lives in the lib (validateHabitName) so the
+       form and any other create/edit surface share the one message. */
+    const nameError = validateHabitName(state.name);
+    if (nameError) e.name = nameError;
   }
   if (step === 1) {
     if (state.frequency === "custom" && state.days.length === 0) e.days = "Pick at least one day.";

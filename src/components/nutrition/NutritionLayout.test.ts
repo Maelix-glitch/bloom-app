@@ -4,19 +4,20 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Nutrition layout — the wide measure is the tab page's alone (N-WIDE).
+ * Nutrition layout — the tab page takes the app-wide container (N-WIDE,
+ * as superseded by Brief v6 Slice 2, 2026-11-19).
  *
- * The Nutrition cards were drawn wide, so the tab page takes a wider
- * measure than the 880px document measure the clinician report uses:
- * the app-wide 1280px desktop measure — the owner's 2026-11-17
- * directive ("the cards are not wide enough") raised every main tab
- * page from its old cap (1120px here) to 1280px. A cap that wide can
- * only bind at desktop widths, so phone and tablet rendering is
- * exactly as it was. The widening is scoped to a page class the tab's
- * root carries and the report does not: the base .nut-wrap measure
- * stays 880px, the 1280px value exists only under .nut-page, and the
- * stylesheet itself is loaded only by the /nutrition route — no other
- * tab can pick the width up.
+ * History: the tab page once held its own 1120px measure, then the
+ * owner's 2026-11-17 directive ("the cards are not wide enough") raised
+ * every main tab page to 1280px, scoped to the .nut-page class so the
+ * clinician report kept its 880px document measure. Brief v6 §2
+ * supersedes that directive: ONE container for every page —
+ * `--container: 1120px`, centred, 24px gutters (M-76, resolved by v6).
+ * The tab now consumes the token under the same .nut-page scope; the
+ * report's 880px document measure is unchanged, and the stylesheet is
+ * still loaded only by the /nutrition route. The app-wide pin lives in
+ * src/lib/shell.guard.test.ts; this file keeps the Nutrition-specific
+ * half: the scope split between tab and report.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -28,28 +29,22 @@ function block(selector: RegExp): string {
   return match[1];
 }
 
-describe("Nutrition layout: the wide measure is scoped to the tab page", () => {
+describe("Nutrition layout: the container is scoped to the tab page", () => {
   it("the base .nut-wrap keeps the 880px document measure", () => {
     const base = block(/\.nut-wrap\s*\{([^}]*)\}/);
     expect(base).toContain("max-width: 880px");
-    expect(base).not.toContain("1120px");
     expect(base).not.toContain("1280px");
+    expect(base).not.toContain("var(--container)");
   });
 
-  it("the wide measure lives only under .nut-page, at 1280px", () => {
+  it("the container lives only under .nut-page, from the shared token", () => {
     const wide = block(/\.nut-wrap\.nut-page\s*\{([^}]*)\}/);
-    expect(wide).toContain("max-width: 1280px");
-    expect(wide).not.toContain("1120px");
-    expect(wide).toContain("padding-inline: var(--space-5)");
-    const wideLg = block(
-      /@media \(min-width: 1024px\)\s*\{\s*\.nut-wrap\.nut-page\s*\{([^}]*)\}/,
-    );
-    expect(wideLg).toContain("padding-inline: var(--space-12)");
-    /* The wide declaration occurs once in the whole stylesheet —
-       under the page scope, nowhere else — and the old 1120px page
-       measure is gone entirely. */
-    expect(css.match(/max-width: 1280px/g)).toHaveLength(1);
-    expect(css.match(/max-width: 1120px/g)).toBeNull();
+    expect(wide).toContain("max-width: var(--container)");
+    expect(wide).toContain("padding-inline: 24px");
+    /* The superseded 1280px measure occurs nowhere in the stylesheet,
+       and the token is consumed exactly once — under the page scope. */
+    expect(css.match(/max-width: 1280px/g)).toBeNull();
+    expect(css.match(/max-width: var\(--container\)/g)).toHaveLength(1);
   });
 
   it("the tab page carries the scope and the report does not", () => {

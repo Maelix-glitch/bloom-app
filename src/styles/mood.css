@@ -883,15 +883,11 @@ select.bmood-input {
 .mood-page .mm-face-btn:hover:not(:disabled) .mm-face[data-active="true"] {
   transform: scale(1.08) translateY(-2px);
 }
-.mood-page [data-has-selection="true"] .mm-face[data-active="false"] {
-  opacity: 0.62;
-}
-.mood-page
-  [data-has-selection="true"]
-  .mm-face-btn:hover:not(:disabled)
-  .mm-face[data-active="false"] {
-  opacity: 0.9;
-}
+/* Unselected faces do NOT recede once a selection exists (M-136):
+   the faces are the page's primary interaction and render at full
+   strength, selected or not — the chosen face reads by its glow and
+   scale alone. The only dimmed state is a genuinely disabled button
+   (a save in flight), which carries no opacity treatment. */
 /* the face inside the blob cross-fades when the selection moves */
 .mood-page .mm-face svg path,
 .mood-page .mm-face svg circle,

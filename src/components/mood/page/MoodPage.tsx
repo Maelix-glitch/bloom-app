@@ -7,7 +7,8 @@
  *   • the six faces are quick check-ins — tapping one saves a MoodEntry
  *     (mood / energy / stress / emotion) through the same storage the
  *     Composer uses; the face lit up is today's latest entry;
- *   • "Log an entry" opens the full Composer (note, context signals, edits);
+ *   • the quiet "Log with a note" action opens the full Composer (note,
+ *     context signals, edits) — the faces are the one primary entry (M-135);
  *   • journey = the last 7 logged days, distribution = the real buckets over
  *     the selected range, insights = evidence-backed lines only, streak = the
  *     analytics layer's streak; the rest of Mood Intelligence (heatmap,
@@ -34,7 +35,6 @@ import {
   Gift,
   Leaf,
   Loader2,
-  Plus,
   Quote,
   Sparkles,
   Sun,
@@ -146,7 +146,7 @@ export function MoodPage({
   const graphReady = useEverReady(!loading);
 
   return (
-    <div className="w-full space-y-10 px-5 pt-6 sm:px-8 sm:pt-7 md:space-y-14 lg:px-10 lg:pt-7">
+    <div className="page space-y-10 pt-6 sm:pt-7 md:space-y-14 lg:pt-7">
       <div className="mm-enter" data-order="0">
         <TopBar identity={identity} />
       </div>
@@ -369,7 +369,7 @@ function Hero({
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/25" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
 
-      <div className="relative grid gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-12 lg:py-20">
+      <div className="relative px-6 py-12 sm:px-10 sm:py-16 lg:px-12 lg:py-20">
         <div className="mm-hero-copy max-w-xl">
           <p className="mp-eyebrow">Mood tracker · {dateLine}</p>
           <h1 className="mt-6 font-display text-3xl leading-[1.08] text-foreground sm:text-5xl lg:text-6xl">
@@ -390,6 +390,13 @@ function Hero({
               </>
             )}
           </h1>
+          {/* The pull quote sits in the copy column, under the H1 and
+              left-aligned with it (M-137) — it used to float in a
+              far-right auto column aligned to nothing. */}
+          <p className="mt-6 font-display text-lg italic leading-relaxed text-gold-soft/90 sm:text-2xl">
+            Noted honestly, understood over time.
+          </p>
+          <span className="mt-5 block h-px w-10 bg-gold/50" />
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground sm:text-base">
             {todays ? (
               <>
@@ -419,13 +426,6 @@ function Hero({
               "Nothing logged yet today — ten seconds now puts today on the record."
             )}
           </p>
-        </div>
-
-        <div className="lg:pb-2 lg:text-right">
-          <p className="font-display text-lg italic leading-relaxed text-gold-soft/90 sm:text-2xl">
-            Noted honestly, understood over time.
-          </p>
-          <span className="mt-5 block h-px w-10 bg-gold/50 lg:ml-auto" />
         </div>
       </div>
     </section>
@@ -490,24 +490,23 @@ function LogMood({
           title="Log your mood"
           subtitle="Take a moment. Be honest with yourself."
           action={
+            /* The faces below are the one primary entry point (M-135):
+               a tap saves the check-in. The full Composer (note,
+               context, edits) stays reachable as a quiet text action —
+               no gold fill competing with the faces. */
             <button
               type="button"
               onClick={onCompose}
-              className="mm-btn inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-primary-foreground sm:px-6"
-              style={{ backgroundImage: "var(--mp-gradient-gold)" }}
+              className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
             >
-              <Plus className="h-4 w-4" strokeWidth={2} />
-              <span className="hidden sm:inline">Log an entry</span>
+              Log with a note
             </button>
           }
         />
 
         <MoodSyncLine sync={sync} onRetry={onRetry} />
 
-        <div
-          className="mt-10 grid grid-cols-3 gap-x-4 gap-y-9 sm:grid-cols-6 sm:gap-x-6 lg:gap-x-8"
-          data-has-selection={selected !== null}
-        >
+        <div className="mt-10 grid grid-cols-3 gap-x-4 gap-y-9 sm:grid-cols-6 sm:gap-x-6 lg:gap-x-8">
           {PAGE_MOODS.map((mood) => {
             const active = selected === mood;
             const busy = saving === mood;
@@ -526,7 +525,7 @@ function LogMood({
                   className={`mm-face ${busy ? "animate-pulse" : ""} [&_svg]:h-[68px] [&_svg]:w-[68px] sm:[&_svg]:h-20 sm:[&_svg]:w-20`}
                   data-active={active}
                 >
-                  <MoodBlob mood={mood} active={active} size={80} />
+                  <MoodBlob mood={mood} active={active} size={80} fullOpacity />
                 </span>
                 <span
                   className={`mm-face-label text-sm ${

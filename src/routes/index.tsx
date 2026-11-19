@@ -12,9 +12,9 @@ import { ChangesCard, StatTiles } from "@/components/home/OverviewBand";
 import { LevelCard } from "@/components/home/LevelCard";
 import { MoodCard } from "@/components/home/MoodCard";
 import { TopBar } from "@/components/home/TopBar";
+import { FeelIn, useFeelIn } from "@/components/system/FeelIn";
 import { WeekChart } from "@/components/home/WeekChart";
 import { ConnectionConstellation } from "@/components/home/ConnectionConstellation";
-import { WholeLifeInsights } from "@/components/home/WholeLifeInsights";
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
 import { summaryOf } from "@/lib/assessment/summary";
@@ -91,15 +91,10 @@ function WallpaperFigure() {
     sync();
     return subscribeRewards(sync);
   }, []);
-  const isCustom = art !== null;
   return (
     <img
       src={art ?? windowDusk}
-      alt={
-        isCustom
-          ? "An equipped Bloom wallpaper brightening the day"
-          : "A journal open on a desk beside a window at dusk"
-      }
+      alt=""
       width={928}
       height={720}
       className="h-full w-full object-cover transition-transform duration-[2500ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]"
@@ -170,6 +165,12 @@ function TodayPage() {
     trackerSyncState: trackers.sync.state,
   });
   const recordReady = useEverReady(recordsSettled);
+  /* Feel layer (v6 §3): the stack's three grid rows carry .feel-in on
+     their own shells via the hook pattern; the single-component rows
+     below are wrapped in <FeelIn> instead. */
+  const rowFocus = useFeelIn<HTMLDivElement>();
+  const rowWeek = useFeelIn<HTMLDivElement>();
+  const rowHabits = useFeelIn<HTMLDivElement>();
   /* Day one is a property of the record, not of this device's onboarding
      answer — see genuineFirstDay. The stores on this page are the record:
      habit ticks, mood check-ins and tracker days, by distinct day. */
@@ -289,7 +290,7 @@ function TodayPage() {
 
   return (
     <div className="home-page app-shell min-h-screen bg-background text-foreground">
-      <main className="home-main min-w-0 px-5 pb-28 pt-5 sm:px-8 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-7">
+      <main className="home-main page min-w-0 pb-28 pt-5 sm:pt-6 lg:pb-16 lg:pt-7">
         {/* TopBar — the prototype's top row in Bloom's build: the live
             date, the honest sync pill ("Synced with your account" and
             its settled kin), the real notifications bell and rewards. */}
@@ -310,10 +311,12 @@ function TodayPage() {
           </p>
         ) : null}
 
-        {/* Hero — the slice-3 build, unchanged: greeting, the day's
-            subline, the check-in chips (the mood chip settles sage once
-            today's mood is logged), and the photo panel. */}
-        <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        {/* Hero (brief v6 Slice 5, M-116/M-117): greeting, the day's
+            subline as sans support text under the one serif H1, the
+            action cluster in ONE chip style (voice included), and the
+            photo panel demoted to quiet decoration — the product
+            tagline lives once, in the sidebar. */}
+        <header className="home-rise mt-5 grid gap-6 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_200px]">
           <div>
             {/* suppressHydrationWarning: the greeting is LOCAL time by
                 design, but the server renders on a UTC clock — its band can
@@ -333,7 +336,7 @@ function TodayPage() {
               )}
             </h1>
             <p
-              className="mt-1.5 flex min-h-[1.5em] items-center font-display text-xl text-muted-foreground sm:text-3xl"
+              className="mt-2 flex min-h-[1.5em] items-center text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground"
               aria-live="polite"
             >
               {/* While the record settles, the hero holds a shaped placeholder
@@ -350,19 +353,15 @@ function TodayPage() {
                 />
               )}
             </p>
+            {/* ONE action style (brief v6, M-117): every hero action —
+                mood, metrics, BMI, the weekly report, and voice — is
+                the same `.home-chip`. State lives in the label, never
+                in a second visual style. */}
             <div className="mt-5 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setMoodOpen(true)}
-                className={`home-chip ${moodEntry ? "home-chip--done" : "home-chip--primary"}`}
-              >
+              <button type="button" onClick={() => setMoodOpen(true)} className="home-chip">
                 {moodEntry ? `Mood ${Math.round(moodEntry.mood)}/10 logged` : "Log today's mood"}
               </button>
-              <button
-                type="button"
-                onClick={() => setMetricsOpen(true)}
-                className="home-chip home-chip--primary"
-              >
+              <button type="button" onClick={() => setMetricsOpen(true)} className="home-chip">
                 {trackers.analysis.goalsMetToday > 0
                   ? `${trackers.analysis.goalsMetToday} of 6 goals met`
                   : "Log today's metrics"}
@@ -370,9 +369,15 @@ function TodayPage() {
               <Link to="/trackers" hash="body-tools" className="home-chip">
                 BMI &amp; daily targets
               </Link>
-              <Link to="/report" className="home-chip home-chip--quiet">
+              <Link to="/report" className="home-chip">
                 Weekly report
               </Link>
+              {/* Voice-First India (System 11): speak a command, confirm
+                  the chip, and only then does anything happen. It sits
+                  in the cluster as the same-style chip; where the
+                  browser has no speech recognition it renders one
+                  honest line instead. */}
+              <VoiceMic presentation="chip" />
             </div>
             {space.authState === "signed-out" ? (
               <p className="mt-4 text-[length:var(--text-caption)] text-muted-foreground">
@@ -390,29 +395,23 @@ function TodayPage() {
             ) : null}
           </div>
 
-          <figure className="group relative hidden overflow-hidden rounded-card border border-white/[0.08] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:block">
+          {/* Decoration, at reduced prominence (brief v6, M-116): the
+              art is not a link and carries no caption — the tagline
+              lives once, in the sidebar — so the panel is smaller,
+              quieter, and hidden from assistive tech. */}
+          <figure
+            aria-hidden="true"
+            className="group relative hidden self-start overflow-hidden rounded-card border border-white/[0.08] opacity-80 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:block"
+          >
             <WallpaperFigure />
             <div
               className="pointer-events-none absolute inset-0 rounded-card ring-1 ring-inset ring-white/10"
               aria-hidden
             />
-            <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/20 to-black/10 p-5">
-              {/* One tagline for the whole product — the sidebar's line.
-                  This panel used to stack two competing slogans of its own. */}
-              <span className="font-display text-2xl leading-snug">
-                A calmer you, a brighter tomorrow.
-              </span>
-            </figcaption>
           </figure>
         </header>
 
         <div className="home-hairline" aria-hidden />
-
-        {/* Voice-First India (System 11): speak a command, confirm the
-            chip, and only then does anything happen. Renders one honest
-            line instead of a button where the browser has no speech
-            recognition. */}
-        <VoiceMic />
 
         {/* The prototype stack, exactly (Reskin slice A): Focus + Level,
             StatTiles, WeekChart + Changes, Habits + Mood, and the small
@@ -427,7 +426,11 @@ function TodayPage() {
             the stack's own --bloom-section-gap token, so the column
             gutter and the row rhythm can never drift apart. */}
         <div className="home-stack">
-          <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
+          <div
+            ref={rowFocus.ref}
+            data-visible={rowFocus.inView}
+            className="feel-in grid gap-[var(--bloom-section-gap)] lg:grid-cols-12"
+          >
             <div className="lg:col-span-7 [&>*]:h-full">
               {/* W4-1: the ASSESS step's door — the prototype's FocusCard
                   in Bloom's build: segmented gold progress, the existing
@@ -441,9 +444,15 @@ function TodayPage() {
             </div>
           </div>
 
-          <StatTiles overview={overview} ready={overviewReady} />
+          <FeelIn delay={60}>
+            <StatTiles overview={overview} ready={overviewReady} />
+          </FeelIn>
 
-          <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
+          <div
+            ref={rowWeek.ref}
+            data-visible={rowWeek.inView}
+            className="feel-in grid gap-[var(--bloom-section-gap)] lg:grid-cols-12"
+          >
             <div className="lg:col-span-7 [&>*]:h-full">
               {/* The week in ticks — real habit logs, this week vs the
                   week before, in the prototype's chart language. Gated
@@ -461,7 +470,8 @@ function TodayPage() {
               record supports one — it sits directly above the habits and
               mood rows it most often points at, and renders nothing at
               all when no pattern is real enough to name. */}
-          <NudgeCard
+          <FeelIn delay={180}>
+            <NudgeCard
             habits={habits.habits}
             habitLogs={habits.logs}
             moodEntries={mood.entries}
@@ -470,9 +480,14 @@ function TodayPage() {
             ready={overviewReady}
             onToggleHabit={(id) => void habits.toggle(id)}
             onOpenMood={() => setMoodOpen(true)}
-          />
+            />
+          </FeelIn>
 
-          <div className="grid gap-[var(--bloom-section-gap)] lg:grid-cols-12">
+          <div
+            ref={rowHabits.ref}
+            data-visible={rowHabits.inView}
+            className="feel-in grid gap-[var(--bloom-section-gap)] lg:grid-cols-12"
+          >
             <div className="lg:col-span-7 [&>*]:h-full">
               <HabitsSection
                 habits={habits.todayHabits}
@@ -494,7 +509,7 @@ function TodayPage() {
                 }}
               />
             </div>
-            <div id="mood" className="scroll-mt-20 lg:col-span-5 [&>*]:h-full">
+            <div id="mood" className="scroll-mt-20 lg:col-span-5">
               <MoodCard
                 entry={moodEntry}
                 onPick={pickMoodFace}
@@ -506,23 +521,22 @@ function TodayPage() {
           {/* W4-3: Nutrition's door on Today — today's kcal against the
               target when food is logged, an invitation when it isn't,
               in the assessment card's language. */}
-          <NutritionTodayCard />
+          <FeelIn delay={240}>
+            <NutritionTodayCard />
+          </FeelIn>
 
-          {/* Whole-Life Insights (System 6) — the cross-source pattern
-              reader: grouped averages over the last 56 days across
-              mood, sleep, habits, food and weight, behind the same
-              latched settled gate. It sits before the constellation:
-              first the patterns in words, then the map. */}
-          <WholeLifeInsights ready={overviewReady} />
-
-          {/* The connection constellation (overnight Slice 2) — a NEW
-              design, closing the stack: it synthesises the very rows
-              above it (habits, mood, the week) into the correlations
+          {/* Connections — the Orbit (Brief v6 Slice 4): the Whole-Life
+              Insights section is absorbed into it (M-111) — one section
+              holds the map, the headline finding, the spoken patterns
+              and the pairs still forming. It synthesises the very rows
+              above it (habits, mood, the week) into the connections
               between them, so it reads as the reflection after the
               actions. Full width, behind the same latched settled gate
               as the Overview pieces (overviewReady) plus its own cycle
               store's settling, folded in by the component itself. */}
-          <ConnectionConstellation ready={overviewReady} />
+          <FeelIn delay={300}>
+            <ConnectionConstellation ready={overviewReady} />
+          </FeelIn>
 
           <footer className="flex items-center justify-center gap-2 pt-2 text-[length:var(--text-caption)] text-muted-foreground">
             <Leaf className="size-3" aria-hidden />
