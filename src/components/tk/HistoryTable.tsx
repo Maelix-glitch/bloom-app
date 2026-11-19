@@ -49,7 +49,9 @@ export function HistoryTable({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="ci-eyebrow">Your record</p>
-          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+          {/* OTT pass: the scale's own steps via tokens (19/22 were invented
+              literal sizes; the ui guard bars literal sizes ≤18px here). */}
+          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[length:var(--text-title)]">
             Every day you've logged
           </h2>
           <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-soft">

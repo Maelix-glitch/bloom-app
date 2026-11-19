@@ -74,7 +74,7 @@
   border: 1px solid var(--border-subtle);
 }
 .bill-toggle button {
-  min-height: 32px;
+  min-height: 36px;
   padding: 0.3rem 0.95rem;
   border-radius: var(--radius-pill);
   font-size: var(--text-callout);
@@ -127,7 +127,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.55rem 1.1rem;
   border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--sage) 45%, transparent);
@@ -198,7 +198,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  min-height: 40px;
+  /* the house touch floor — the trainer card's Copy button already
+     forced 44px inline; the shared button now carries it itself */
+  min-height: 44px;
   padding: 0.55rem 1.1rem;
   border-radius: var(--radius-pill);
   font-size: var(--text-callout);

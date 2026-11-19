@@ -130,7 +130,7 @@ export function JourneyHero({
   earnedFromHabits?: number;
   onStartGoal?: (goalId: string) => void;
 }) {
-  const shown = useCountUp(points, 1100, loading ? "loading" : "settled");
+  const shown = useCountUp(points, 600, loading ? "loading" : "settled");
   const [bumped, setBumped] = useState(false);
   const lastPoints = useRef(points);
 

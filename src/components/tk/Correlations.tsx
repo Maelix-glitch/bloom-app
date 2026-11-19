@@ -46,11 +46,15 @@ export function Correlations({ items }: { items: Correlation[] }) {
                   height: "100%",
                   borderRadius: 999,
                   background: positive ? a.accent : b.accent,
-                  transition: "width 0.8s cubic-bezier(0.22,0.9,0.24,1)",
+                  /* OTT pass: the house curve + signature duration — this
+                     bar grew over 0.8s on a foreign cubic-bezier. */
+                  transition: "width var(--motion-signature) var(--ease-out-expo)",
                 }}
               />
             </div>
-            <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-soft">
+            {/* OTT pass: support (13px), matching the page's other insight
+                lines (at-finelist) — the sentence is the content here. */}
+            <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
               {c.sentence}
             </p>
           </li>

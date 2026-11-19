@@ -1332,6 +1332,10 @@
 .home-eyebrow {
   margin: 0;
   font-size: var(--text-meta);
+  /* The house eyebrow recipe (@utility eyebrow, pinned in ui.guard) is
+     weight 500: at meta size, 400 left the label small + muted + thin —
+     de-emphasised three ways at once. */
+  font-weight: 500;
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--muted-foreground);

@@ -80,7 +80,7 @@ export function StatTiles({
             {state.facts.map((fact) => {
               const unit = UNIT_FACT.exec(fact.value);
               return (
-                <div key={fact.id} className="home-panel flex flex-col p-5">
+                <div key={fact.id} className="home-panel flex flex-col p-5 sm:p-7">
                   <dt className="home-eyebrow">{fact.label}</dt>
                   <dd className="mt-auto whitespace-nowrap pt-3 font-display text-4xl font-light leading-none tracking-tight tabular-nums text-foreground">
                     {NUMERIC_FACT.test(fact.value) ? (

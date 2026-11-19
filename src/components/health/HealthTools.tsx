@@ -33,6 +33,7 @@ import {
   type BodySex,
 } from "@/lib/health/body";
 import { formatDate } from "@/lib/cycle/predict";
+import { fmtCount } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import "@/styles/health-tools.css";
@@ -332,7 +333,9 @@ export function HealthTools({ className }: { className?: string }) {
                 Daily energy
               </p>
               <p className="bt-value">
-                {targets.calories.toLocaleString()}
+                {/* OTT pass: shared fmtCount (en-IN grouping) — this was a
+                    bare .toLocaleString(), grouped by the browser's locale. */}
+                {fmtCount(targets.calories)}
                 <span className="bt-value__unit">kcal</span>
               </p>
               <p className="bt-card__sub">
@@ -345,11 +348,11 @@ export function HealthTools({ className }: { className?: string }) {
               <dl className="bt-mini">
                 <div>
                   <dt>Resting burn</dt>
-                  <dd>{targets.bmr.toLocaleString()} kcal</dd>
+                  <dd>{fmtCount(targets.bmr)} kcal</dd>
                 </div>
                 <div>
                   <dt>With activity</dt>
-                  <dd>{targets.tdee.toLocaleString()} kcal</dd>
+                  <dd>{fmtCount(targets.tdee)} kcal</dd>
                 </div>
                 <div>
                   <dt>Protein</dt>
@@ -370,13 +373,13 @@ export function HealthTools({ className }: { className?: string }) {
                 Water right now
               </p>
               <p className="bt-value">
-                {hydration!.remaining > 0 ? hydration!.remaining.toLocaleString() : "Done"}
+                {hydration!.remaining > 0 ? fmtCount(hydration!.remaining) : "Done"}
                 <span className="bt-value__unit">{hydration!.remaining > 0 ? "ml left" : ""}</span>
               </p>
               <p className="bt-card__sub">
                 {hydration!.met
-                  ? `${hydration!.drank} ml logged — target met.`
-                  : `You've logged ${hydration!.drank} ml of ${targets.waterMl} ml today.`}
+                  ? `${fmtCount(hydration!.drank)} ml logged — target met.`
+                  : `You've logged ${fmtCount(hydration!.drank)} ml of ${fmtCount(targets.waterMl)} ml today.`}
               </p>
               <div className="bt-bar" aria-hidden>
                 <span style={{ width: `${Math.round(hydration!.percent * 100)}%` }} />

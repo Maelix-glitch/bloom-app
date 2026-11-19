@@ -50,7 +50,7 @@ export function EmptyWelcome({
         <h1 className="coach-welcome-title">
           A second mind
           <br />
-          for your day.
+          <em>for your day.</em>
         </h1>
         {greeting ? (
           <motion.p

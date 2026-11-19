@@ -237,7 +237,7 @@ export function HabitsSection({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             <Plus className="size-4" /> Add your first habit
           </button>
@@ -324,7 +324,7 @@ export function HabitsSection({
                   <button
                     type="button"
                     onClick={() => onToggle(h.id, h.missedYesterday!)}
-                    className="mb-2 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-[length:var(--text-meta)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
+                    className="mb-2 inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1.5 text-[length:var(--text-caption)] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
                     data-testid={`home-habit-yesterday-${h.id}`}
                     title="Forgot to tick it before bed? Add yesterday's tick and keep the streak."
                   >
@@ -571,7 +571,7 @@ function HabitMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="absolute right-2 top-2 z-[1] grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+          className="absolute right-2 top-2 z-[1] grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
           aria-label={`More for ${habit.name}`}
           data-testid={`home-habit-menu-${habit.id}`}
         >

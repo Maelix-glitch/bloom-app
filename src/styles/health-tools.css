@@ -67,7 +67,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 40px;
+  /* OTT pass: 44px — this file's own header promises every control at
+     least 44px tall; the ghost, its small variant, the danger button and
+     the segmented buttons were the four that broke the promise. */
+  min-height: 44px;
   padding: 0 0.85rem;
   border: 1px solid var(--bt-line);
   border-radius: var(--radius-pill);
@@ -84,7 +87,7 @@
 }
 
 .bt-ghost--sm {
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 0.7rem;
   font-size: var(--text-meta);
 }
@@ -112,7 +115,9 @@
   padding: var(--space-4);
   border: 1px solid var(--bt-line);
   border-radius: 18px;
-  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  /* OTT pass: solid — the card was surface at 78% over the shell. One
+     step up the ladder (--surface-2 over the shell's --surface), opaque. */
+  background: var(--surface-2);
   overflow: hidden;
 }
 
@@ -175,7 +180,11 @@
 
 .bt-card__foot {
   margin: 0.7rem 0 0;
-  font-size: var(--text-meta);
+  /* OTT pass: caption, not meta — this line carries real data (the
+     healthy-weight range, glasses to go), and must-read text does not
+     sit at 11px. The same step was taken for .bt-note, .bt-delta,
+     .bt-field__label and .bt-inline-link below. */
+  font-size: var(--text-caption);
   line-height: var(--leading-support);
   color: var(--muted-foreground);
 }
@@ -257,8 +266,12 @@
 }
 
 .bt-inline-link {
+  /* OTT pass: caption size and a real 44px hit area (was an 11px line). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-top: 0.6rem;
-  font-size: var(--text-meta);
+  font-size: var(--text-caption);
   color: var(--primary);
   text-decoration: none;
   align-self: flex-start;
@@ -276,7 +289,8 @@
   padding: var(--space-4);
   border: 1px solid var(--bt-line);
   border-radius: 18px;
-  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  /* OTT pass: solid --surface-2, as the cards above (was surface at 70%). */
+  background: var(--surface-2);
 }
 
 .bt-goal__head,
@@ -317,7 +331,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  font-size: var(--text-meta);
+  font-size: var(--text-caption);
   font-variant-numeric: tabular-nums;
   color: var(--muted-foreground);
 }
@@ -364,7 +378,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 0.6rem;
   border: 1px solid color-mix(in oklab, var(--danger) 32%, transparent);
   border-radius: var(--radius-pill);
@@ -385,7 +399,8 @@
   padding: var(--space-4);
   border: 1px solid var(--bt-line);
   border-radius: 18px;
-  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  /* OTT pass: solid --surface-2, as the cards above (was surface at 70%). */
+  background: var(--surface-2);
 }
 
 .bt-form__grid {
@@ -415,7 +430,7 @@
 }
 
 .bt-seg button {
-  min-height: 34px;
+  min-height: 44px;
   padding: 0 0.85rem;
   border: 0;
   border-radius: var(--radius-pill);
@@ -438,7 +453,7 @@
 }
 
 .bt-field__label {
-  font-size: var(--text-meta);
+  font-size: var(--text-caption);
   letter-spacing: var(--tracking-label);
   color: var(--muted-foreground);
 }
@@ -533,7 +548,7 @@
 
 .bt-note {
   margin: 0.7rem 0 0;
-  font-size: var(--text-meta);
+  font-size: var(--text-caption);
   line-height: var(--leading-body);
   color: var(--muted-foreground);
 }

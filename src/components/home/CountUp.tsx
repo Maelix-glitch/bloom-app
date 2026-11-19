@@ -1,7 +1,8 @@
 /**
  * Today's count-up — the prototype's rising number, held to Bloom's rules.
  *
- * · Ease-out over ~1.1s, and the animation ENDS on the exact real value:
+ * · Ease-out over 600ms (the rulebook's number-count band), and the
+ *   animation ENDS on the exact real value:
  *   `countUpFrame` returns `to` untouched at progress 1, and the hook sets
  *   the target itself as its final state. Formatting (locale grouping) is
  *   applied only at render, never to the animated value.
@@ -27,7 +28,7 @@ export function countUpFrame(from: number, to: number, progress: number): number
   return from + (to - from) * eased;
 }
 
-export function useCountUp(target: number, id: string, durationMs = 1100): number {
+export function useCountUp(target: number, id: string, durationMs = 600): number {
   const [display, setDisplay] = useState(() => (played.has(id) ? target : 0));
   const current = useRef(display);
 

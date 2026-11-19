@@ -279,7 +279,7 @@ export function NutritionTimeline({
                           ) : null}
                         </div>
 
-                        <div className="flex shrink-0 items-center gap-1.5">
+                        <div className="flex shrink-0 items-center gap-2">
                           {swappable ? (
                             <button
                               type="button"

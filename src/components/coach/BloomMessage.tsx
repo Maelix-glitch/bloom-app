@@ -362,7 +362,7 @@ export function BloomMessage({
       className={cn("coach-msg coach-msg-bloom", fresh && "is-fresh")}
       initial={fresh ? { opacity: 0, y: 6 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
       aria-label={isError ? "Bloom message, needs attention" : "Bloom message"}
     >
       {isError ? (

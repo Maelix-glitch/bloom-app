@@ -111,7 +111,9 @@
   align-items: baseline;
   gap: var(--space-3);
   padding: var(--space-1) 0;
-  font-size: var(--text-caption);
+  /* The stops are core plan content, not a caption — they read at the
+     callout size the meal rows use (OTT pass). */
+  font-size: var(--text-callout);
   line-height: var(--leading-body);
   color: var(--foreground);
 }
@@ -362,7 +364,9 @@
   width: 100%;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-3);
+  /* Small-card padding is 16px (OTT pass; was 12px, under the scale's
+     card floor). */
+  padding: var(--space-4);
   text-align: left;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-control);
@@ -542,6 +546,13 @@
   background: color-mix(in oklab, var(--gold) 12%, transparent);
   color: var(--gold);
 }
+/* A chip that is a control (a filter, a goal, a serving, a nav anchor)
+   holds the touch floor; a chip that is only a label (a span: "Logged",
+   a week state, a dish role) keeps the compact 36px (OTT pass). */
+button.nut-chip,
+a.nut-chip {
+  min-height: var(--bloom-touch-min);
+}
 /* Sub-navigation (Plan B): anchor chips to the today view's named
    sections. The chips reuse .nut-chip; as navigation they hold the
    44px touch floor. Jump targets clear the fixed phone brand bar
@@ -680,7 +691,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  min-height: 40px;
+  /* The house touch floor (OTT pass): every button on the surface
+     holds --bloom-touch-min, the token the sub-nav already uses. */
+  min-height: var(--bloom-touch-min);
   padding: 0.55rem 1.1rem;
   border-radius: var(--radius-pill);
   font-size: var(--text-callout);
@@ -718,7 +731,9 @@
   border-color: color-mix(in oklab, var(--gold) 45%, transparent);
 }
 .nut-btn-sm {
-  min-height: 32px;
+  /* Small in type and padding only — the hit area keeps the touch
+     floor (OTT pass; was 32px). */
+  min-height: var(--bloom-touch-min);
   padding: 0.3rem 0.8rem;
   font-size: var(--text-caption);
 }
@@ -726,8 +741,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--icon-btn-sm);
-  height: var(--icon-btn-sm);
+  /* 44px hit area (OTT pass; the glyph stays 16px, the button was
+     36px — under the house touch floor). */
+  width: var(--bloom-touch-min);
+  height: var(--bloom-touch-min);
   flex-shrink: 0;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-subtle);

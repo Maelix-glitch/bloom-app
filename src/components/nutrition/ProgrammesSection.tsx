@@ -102,7 +102,7 @@ export function ProgrammesSection() {
   const pastRuns = history.filter((p) => !activeProgress || p.run.id !== activeProgress.run.id);
 
   return (
-    <section className="nut-card mt-4" aria-label="Programmes">
+    <section className="nut-card nut-rise mt-4" aria-label="Programmes">
       <p className="eyebrow">Programmes</p>
       <h2 className="font-display text-[length:var(--text-section)] text-foreground">
         A structure for the weeks ahead

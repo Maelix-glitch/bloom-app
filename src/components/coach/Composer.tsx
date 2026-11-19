@@ -398,6 +398,11 @@ export function Composer({
       {recording ? (
         <div className="coach-recording" role="status">
           <span className="coach-recording-live" aria-hidden="true" />
+          <span className="coach-recording-eq" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
           <span className="coach-recording-label">Recording</span>
           <span className="coach-recording-time">0:{String(seconds).padStart(2, "0")}</span>
           <span className="coach-recording-spacer" />

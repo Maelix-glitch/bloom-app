@@ -776,14 +776,14 @@ function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setArchiveOpen(true)}
-                        className="pf-btn pf-btn--ghost h-8 px-3 text-[length:var(--text-caption)]"
+                        className="pf-btn pf-btn--ghost h-9 px-3 text-[length:var(--text-caption)]"
                       >
                         <Archive className="size-3.5" aria-hidden /> Archive
                       </button>
                       <button
                         type="button"
                         onClick={() => setComposerOpen(true)}
-                        className="pf-btn h-8 px-3 text-[length:var(--text-caption)]"
+                        className="pf-btn h-9 px-3 text-[length:var(--text-caption)]"
                       >
                         <Plus className="size-3.5" aria-hidden /> New
                       </button>
@@ -840,7 +840,7 @@ function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setHighlightEditor({ id: null, preselect: null })}
-                        className="pf-btn h-8 px-3 text-[length:var(--text-caption)]"
+                        className="pf-btn h-9 px-3 text-[length:var(--text-caption)]"
                       >
                         <Plus className="size-3.5" aria-hidden /> New highlight
                       </button>
